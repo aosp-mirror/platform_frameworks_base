@@ -26,8 +26,7 @@ namespace renderscript {
 
 class ProgramStoreState;
 
-class ProgramStore : public Program
-{
+class ProgramStore : public Program {
 public:
     ProgramStore(Context *);
     virtual ~ProgramStore();
@@ -64,8 +63,7 @@ protected:
     bool mStencilTestEnable;
 };
 
-class ProgramStoreState
-{
+class ProgramStoreState {
 public:
     ProgramStoreState();
     ~ProgramStoreState();
@@ -78,7 +76,6 @@ public:
 
     ProgramStore *mPFS;
 };
-
 
 }
 }

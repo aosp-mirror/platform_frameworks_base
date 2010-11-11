@@ -46,7 +46,6 @@ static float SC_cospi(float v) {
 
 static float SC_exp10(float v) {
     return pow(10.f, v);
-
 }
 
 static float SC_fract(float v, int *iptr) {
@@ -122,53 +121,41 @@ static int8_t SC_min_i8(int8_t v, int8_t v2) {return rsMin(v, v2);}
 // Float util
 //////////////////////////////////////////////////////////////////////////////
 
-static float SC_clamp_f32(float amount, float low, float high)
-{
+static float SC_clamp_f32(float amount, float low, float high) {
     return amount < low ? low : (amount > high ? high : amount);
 }
 
-static float SC_degrees(float radians)
-{
+static float SC_degrees(float radians) {
     return radians * (180.f / M_PI);
 }
 
-static float SC_max_f32(float v, float v2)
-{
+static float SC_max_f32(float v, float v2) {
     return rsMax(v, v2);
 }
 
-static float SC_min_f32(float v, float v2)
-{
+static float SC_min_f32(float v, float v2) {
     return rsMin(v, v2);
 }
 
-static float SC_mix_f32(float start, float stop, float amount)
-{
+static float SC_mix_f32(float start, float stop, float amount) {
     //LOGE("lerpf %f  %f  %f", start, stop, amount);
     return start + (stop - start) * amount;
 }
 
-static float SC_radians(float degrees)
-{
+static float SC_radians(float degrees) {
     return degrees * (M_PI / 180.f);
 }
 
-static float SC_step_f32(float edge, float v)
-{
+static float SC_step_f32(float edge, float v) {
     if (v < edge) return 0.f;
     return 1.f;
 }
 
-static float SC_sign_f32(float value)
-{
+static float SC_sign_f32(float value) {
     if (value > 0) return 1.f;
     if (value < 0) return -1.f;
     return value;
 }
-
-
-
-
 
 //////////////////////////////////////////////////////////////////////////////
 // Class implementation
@@ -294,8 +281,7 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { NULL, NULL, false }
 };
 
-const ScriptCState::SymbolTable_t * ScriptCState::lookupSymbolCL(const char *sym)
-{
+const ScriptCState::SymbolTable_t * ScriptCState::lookupSymbolCL(const char *sym) {
     ScriptCState::SymbolTable_t *syms = gSyms;
 
     while (syms->mPtr) {

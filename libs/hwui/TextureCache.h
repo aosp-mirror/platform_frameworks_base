@@ -19,6 +19,7 @@
 
 #include <SkBitmap.h>
 
+#include "Debug.h"
 #include "Texture.h"
 #include "utils/GenerationCache.h"
 
@@ -28,9 +29,6 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
-
-// Debug
-#define DEBUG_TEXTURES 0
 
 // Debug
 #if DEBUG_TEXTURES
@@ -108,6 +106,8 @@ private:
     uint32_t mSize;
     uint32_t mMaxSize;
     GLint mMaxTextureSize;
+
+    bool mDebugEnabled;
 
     /**
      * Used to access mCache and mSize. All methods are accessed from a single

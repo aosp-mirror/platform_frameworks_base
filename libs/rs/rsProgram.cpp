@@ -29,17 +29,15 @@
 using namespace android;
 using namespace android::renderscript;
 
-Program::Program(Context *rsc) : ObjectBase(rsc)
-{
+Program::Program(Context *rsc) : ObjectBase(rsc) {
    initMemberVars();
 }
 
 Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
-                 const uint32_t * params, uint32_t paramLength) :
-    ObjectBase(rsc)
-{
-    initMemberVars();
+                 const uint32_t * params, uint32_t paramLength)
+    : ObjectBase(rsc) {
 
+    initMemberVars();
     for (uint32_t ct=0; ct < paramLength; ct+=2) {
         if (params[ct] == RS_PROGRAM_PARAM_INPUT) {
             mInputCount++;
@@ -78,7 +76,7 @@ Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
     }
     mIsInternal = false;
     uint32_t internalTokenLen = strlen(RS_SHADER_INTERNAL);
-    if(shaderLength > internalTokenLen &&
+    if (shaderLength > internalTokenLen &&
        strncmp(RS_SHADER_INTERNAL, shaderText, internalTokenLen) == 0) {
         mIsInternal = true;
         shaderText += internalTokenLen;
@@ -89,13 +87,12 @@ Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
     initAttribAndUniformArray();
 }
 
-Program::~Program()
-{
-    if(mRSC->props.mLogShaders) {
+Program::~Program() {
+    if (mRSC->props.mLogShaders) {
         LOGV("Program::~Program with shader id %u", mShaderID);
     }
 
-    if(mShaderID) {
+    if (mShaderID) {
         glDeleteShader(mShaderID);
     }
 
@@ -144,8 +141,7 @@ void Program::initMemberVars() {
     mIsInternal = false;
 }
 
-void Program::bindAllocation(Context *rsc, Allocation *alloc, uint32_t slot)
-{
+void Program::bindAllocation(Context *rsc, Allocation *alloc, uint32_t slot) {
     if (alloc != NULL) {
         if (slot >= mConstantCount) {
             LOGE("Attempt to bind alloc at slot %u, on shader id %u, but const count is %u",
@@ -173,8 +169,7 @@ void Program::bindAllocation(Context *rsc, Allocation *alloc, uint32_t slot)
     mDirty = true;
 }
 
-void Program::bindTexture(Context *rsc, uint32_t slot, Allocation *a)
-{
+void Program::bindTexture(Context *rsc, uint32_t slot, Allocation *a) {
     if (slot >= mTextureCount) {
         LOGE("Attempt to bind texture to slot %u but tex count is %u", slot, mTextureCount);
         rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind texture");
@@ -186,8 +181,7 @@ void Program::bindTexture(Context *rsc, uint32_t slot, Allocation *a)
     mDirty = true;
 }
 
-void Program::bindSampler(Context *rsc, uint32_t slot, Sampler *s)
-{
+void Program::bindSampler(Context *rsc, uint32_t slot, Sampler *s) {
     if (slot >= mTextureCount) {
         LOGE("Attempt to bind sampler to slot %u but tex count is %u", slot, mTextureCount);
         rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind sampler");
@@ -198,8 +192,7 @@ void Program::bindSampler(Context *rsc, uint32_t slot, Sampler *s)
     mDirty = true;
 }
 
-String8 Program::getGLSLInputString() const
-{
+String8 Program::getGLSLInputString() const {
     String8 s;
     for (uint32_t ct=0; ct < mInputCount; ct++) {
         const Element *e = mInputElements[ct].get();
@@ -208,7 +201,7 @@ String8 Program::getGLSLInputString() const
 
             // Cannot be complex
             rsAssert(!f->getFieldCount());
-            switch(f->getComponent().getVectorSize()) {
+            switch (f->getComponent().getVectorSize()) {
             case 1: s.append("attribute float ATTRIB_"); break;
             case 2: s.append("attribute vec2 ATTRIB_"); break;
             case 3: s.append("attribute vec3 ATTRIB_"); break;
@@ -224,23 +217,18 @@ String8 Program::getGLSLInputString() const
     return s;
 }
 
-String8 Program::getGLSLOutputString() const
-{
+String8 Program::getGLSLOutputString() const {
     return String8();
 }
 
-String8 Program::getGLSLConstantString() const
-{
+String8 Program::getGLSLConstantString() const {
     return String8();
 }
 
-
-void Program::createShader()
-{
+void Program::createShader() {
 }
 
-bool Program::loadShader(Context *rsc, uint32_t type)
-{
+bool Program::loadShader(Context *rsc, uint32_t type) {
     mShaderID = glCreateShader(type);
     rsAssert(mShaderID);
 
@@ -281,8 +269,7 @@ bool Program::loadShader(Context *rsc, uint32_t type)
     return true;
 }
 
-void Program::setShader(const char *txt, uint32_t len)
-{
+void Program::setShader(const char *txt, uint32_t len) {
     mUserShader.setTo(txt, len);
 }
 
@@ -299,17 +286,14 @@ void Program::appendUserConstants() {
 
             // Cannot be complex
             rsAssert(!f->getFieldCount());
-            if(f->getType() == RS_TYPE_MATRIX_4X4) {
+            if (f->getType() == RS_TYPE_MATRIX_4X4) {
                 mShader.append("uniform mat4 UNI_");
-            }
-            else if(f->getType() == RS_TYPE_MATRIX_3X3) {
+            } else if (f->getType() == RS_TYPE_MATRIX_3X3) {
                 mShader.append("uniform mat3 UNI_");
-            }
-            else if(f->getType() == RS_TYPE_MATRIX_2X2) {
+            } else if (f->getType() == RS_TYPE_MATRIX_2X2) {
                 mShader.append("uniform mat2 UNI_");
-            }
-            else {
-                switch(f->getComponent().getVectorSize()) {
+            } else {
+                switch (f->getComponent().getVectorSize()) {
                 case 1: mShader.append("uniform float UNI_"); break;
                 case 2: mShader.append("uniform vec2 UNI_"); break;
                 case 3: mShader.append("uniform vec3 UNI_"); break;
@@ -320,7 +304,7 @@ void Program::appendUserConstants() {
             }
 
             mShader.append(fn);
-            if(e->getFieldArraySize(field) > 1) {
+            if (e->getFieldArraySize(field) > 1) {
                 mShader.appendFormat("[%d]", e->getFieldArraySize(field));
             }
             mShader.append(";\n");
@@ -331,30 +315,27 @@ void Program::appendUserConstants() {
 void Program::logUniform(const Element *field, const float *fd, uint32_t arraySize ) {
     RsDataType dataType = field->getType();
     uint32_t elementSize = field->getSizeBytes() / sizeof(float);
-    for(uint32_t i = 0; i < arraySize; i ++) {
-        if(arraySize > 1) {
+    for (uint32_t i = 0; i < arraySize; i ++) {
+        if (arraySize > 1) {
             LOGV("Array Element [%u]", i);
         }
-        if(dataType == RS_TYPE_MATRIX_4X4) {
+        if (dataType == RS_TYPE_MATRIX_4X4) {
             LOGV("Matrix4x4");
             LOGV("{%f, %f, %f, %f",  fd[0], fd[4], fd[8], fd[12]);
             LOGV(" %f, %f, %f, %f",  fd[1], fd[5], fd[9], fd[13]);
             LOGV(" %f, %f, %f, %f",  fd[2], fd[6], fd[10], fd[14]);
             LOGV(" %f, %f, %f, %f}", fd[3], fd[7], fd[11], fd[15]);
-        }
-        else if(dataType == RS_TYPE_MATRIX_3X3) {
+        } else if (dataType == RS_TYPE_MATRIX_3X3) {
             LOGV("Matrix3x3");
             LOGV("{%f, %f, %f",  fd[0], fd[3], fd[6]);
             LOGV(" %f, %f, %f",  fd[1], fd[4], fd[7]);
             LOGV(" %f, %f, %f}", fd[2], fd[5], fd[8]);
-        }
-        else if(dataType == RS_TYPE_MATRIX_2X2) {
+        } else if (dataType == RS_TYPE_MATRIX_2X2) {
             LOGV("Matrix2x2");
             LOGV("{%f, %f",  fd[0], fd[2]);
             LOGV(" %f, %f}", fd[1], fd[3]);
-        }
-        else {
-            switch(field->getComponent().getVectorSize()) {
+        } else {
+            switch (field->getComponent().getVectorSize()) {
             case 1:
                 LOGV("Uniform 1 = %f", fd[0]);
                 break;
@@ -380,17 +361,14 @@ void Program::logUniform(const Element *field, const float *fd, uint32_t arraySi
 void Program::setUniform(Context *rsc, const Element *field, const float *fd,
                          int32_t slot, uint32_t arraySize ) {
     RsDataType dataType = field->getType();
-    if(dataType == RS_TYPE_MATRIX_4X4) {
+    if (dataType == RS_TYPE_MATRIX_4X4) {
         glUniformMatrix4fv(slot, arraySize, GL_FALSE, fd);
-    }
-    else if(dataType == RS_TYPE_MATRIX_3X3) {
+    } else if (dataType == RS_TYPE_MATRIX_3X3) {
         glUniformMatrix3fv(slot, arraySize, GL_FALSE, fd);
-    }
-    else if(dataType == RS_TYPE_MATRIX_2X2) {
+    } else if (dataType == RS_TYPE_MATRIX_2X2) {
         glUniformMatrix2fv(slot, arraySize, GL_FALSE, fd);
-    }
-    else {
-        switch(field->getComponent().getVectorSize()) {
+    } else {
+        switch (field->getComponent().getVectorSize()) {
         case 1:
             glUniform1fv(slot, arraySize, fd);
             break;
@@ -425,7 +403,7 @@ void Program::setupUserConstants(Context *rsc, ShaderCache *sc, bool isFragment)
             const Element *f = e->getField(field);
             const char *fieldName = e->getFieldName(field);
             // If this field is padding, skip it
-            if(fieldName[0] == '#') {
+            if (fieldName[0] == '#') {
                 continue;
             }
 
@@ -434,14 +412,14 @@ void Program::setupUserConstants(Context *rsc, ShaderCache *sc, bool isFragment)
 
             int32_t slot = -1;
             uint32_t arraySize = 1;
-            if(!isFragment) {
+            if (!isFragment) {
                 slot = sc->vtxUniformSlot(uidx);
                 arraySize = sc->vtxUniformSize(uidx);
             } else {
                 slot = sc->fragUniformSlot(uidx);
                 arraySize = sc->fragUniformSize(uidx);
             }
-            if(rsc->props.mLogShadersUniforms) {
+            if (rsc->props.mLogShadersUniforms) {
                 LOGV("Uniform  slot=%i, offset=%i, constant=%i, field=%i, uidx=%i, name=%s", slot, offset, ct, field, uidx, fieldName);
             }
             uidx ++;
@@ -449,7 +427,7 @@ void Program::setupUserConstants(Context *rsc, ShaderCache *sc, bool isFragment)
                 continue;
             }
 
-            if(rsc->props.mLogShadersUniforms) {
+            if (rsc->props.mLogShadersUniforms) {
                 logUniform(f, fd, arraySize);
             }
             setUniform(rsc, f, fd, slot, arraySize);
@@ -462,7 +440,7 @@ void Program::initAttribAndUniformArray() {
     for (uint32_t ct=0; ct < mInputCount; ct++) {
         const Element *elem = mInputElements[ct].get();
         for (uint32_t field=0; field < elem->getFieldCount(); field++) {
-            if(elem->getFieldName(field)[0] != '#') {
+            if (elem->getFieldName(field)[0] != '#') {
                 mAttribCount ++;
             }
         }
@@ -473,35 +451,33 @@ void Program::initAttribAndUniformArray() {
         const Element *elem = mConstantTypes[ct]->getElement();
 
         for (uint32_t field=0; field < elem->getFieldCount(); field++) {
-            if(elem->getFieldName(field)[0] != '#') {
+            if (elem->getFieldName(field)[0] != '#') {
                 mUniformCount ++;
             }
         }
     }
     mUniformCount += mTextureCount;
 
-    if(mAttribCount) {
+    if (mAttribCount) {
         mAttribNames = new String8[mAttribCount];
     }
-    if(mUniformCount) {
+    if (mUniformCount) {
         mUniformNames = new String8[mUniformCount];
         mUniformArraySizes = new uint32_t[mUniformCount];
     }
 }
 
-void Program::initAddUserElement(const Element *e, String8 *names, uint32_t *arrayLengths, uint32_t *count, const char *prefix)
-{
+void Program::initAddUserElement(const Element *e, String8 *names, uint32_t *arrayLengths, uint32_t *count, const char *prefix) {
     rsAssert(e->getFieldCount());
     for (uint32_t ct=0; ct < e->getFieldCount(); ct++) {
         const Element *ce = e->getField(ct);
         if (ce->getFieldCount()) {
             initAddUserElement(ce, names, arrayLengths, count, prefix);
-        }
-        else if(e->getFieldName(ct)[0] != '#') {
+        } else if (e->getFieldName(ct)[0] != '#') {
             String8 tmp(prefix);
             tmp.append(e->getFieldName(ct));
             names[*count].setTo(tmp.string());
-            if(arrayLengths) {
+            if (arrayLengths) {
                 arrayLengths[*count] = e->getFieldArraySize(ct);
             }
             (*count)++;
@@ -512,21 +488,17 @@ void Program::initAddUserElement(const Element *e, String8 *names, uint32_t *arr
 namespace android {
 namespace renderscript {
 
-
-void rsi_ProgramBindConstants(Context *rsc, RsProgram vp, uint32_t slot, RsAllocation constants)
-{
+void rsi_ProgramBindConstants(Context *rsc, RsProgram vp, uint32_t slot, RsAllocation constants) {
     Program *p = static_cast<Program *>(vp);
     p->bindAllocation(rsc, static_cast<Allocation *>(constants), slot);
 }
 
-void rsi_ProgramBindTexture(Context *rsc, RsProgram vpf, uint32_t slot, RsAllocation a)
-{
+void rsi_ProgramBindTexture(Context *rsc, RsProgram vpf, uint32_t slot, RsAllocation a) {
     Program *p = static_cast<Program *>(vpf);
     p->bindTexture(rsc, slot, static_cast<Allocation *>(a));
 }
 
-void rsi_ProgramBindSampler(Context *rsc, RsProgram vpf, uint32_t slot, RsSampler s)
-{
+void rsi_ProgramBindSampler(Context *rsc, RsProgram vpf, uint32_t slot, RsSampler s) {
     Program *p = static_cast<Program *>(vpf);
     p->bindSampler(rsc, slot, static_cast<Sampler *>(s));
 }

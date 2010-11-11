@@ -21,6 +21,7 @@
 #include <SkPaint.h>
 #include <SkPath.h>
 
+#include "Debug.h"
 #include "Texture.h"
 #include "utils/Compare.h"
 #include "utils/GenerationCache.h"
@@ -31,9 +32,6 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
-
-// Debug
-#define DEBUG_PATHS 0
 
 // Debug
 #if DEBUG_PATHS
@@ -177,6 +175,8 @@ private:
     uint32_t mSize;
     uint32_t mMaxSize;
     GLuint mMaxTextureSize;
+
+    bool mDebugEnabled;
 
     /**
      * Used to access mCache and mSize. All methods are accessed from a single

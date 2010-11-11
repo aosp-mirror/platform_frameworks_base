@@ -20,19 +20,16 @@ using namespace android;
 using namespace android::renderscript;
 
 
-Signal::Signal()
-{
+Signal::Signal() {
     mSet = true;
 }
 
-Signal::~Signal()
-{
+Signal::~Signal() {
     pthread_mutex_destroy(&mMutex);
     pthread_cond_destroy(&mCondition);
 }
 
-bool Signal::init()
-{
+bool Signal::init() {
     int status = pthread_mutex_init(&mMutex, NULL);
     if (status) {
         LOGE("LocklessFifo mutex init failure");
@@ -49,8 +46,7 @@ bool Signal::init()
     return true;
 }
 
-void Signal::set()
-{
+void Signal::set() {
     int status;
 
     status = pthread_mutex_lock(&mMutex);
@@ -72,8 +68,7 @@ void Signal::set()
     }
 }
 
-void Signal::wait()
-{
+void Signal::wait() {
     int status;
 
     status = pthread_mutex_lock(&mMutex);

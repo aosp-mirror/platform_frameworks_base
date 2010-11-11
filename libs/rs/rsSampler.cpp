@@ -31,8 +31,7 @@ using namespace android;
 using namespace android::renderscript;
 
 
-Sampler::Sampler(Context *rsc) : ObjectBase(rsc)
-{
+Sampler::Sampler(Context *rsc) : ObjectBase(rsc) {
     // Should not get called.
     rsAssert(0);
 }
@@ -43,8 +42,7 @@ Sampler::Sampler(Context *rsc,
                  RsSamplerValue wrapS,
                  RsSamplerValue wrapT,
                  RsSamplerValue wrapR,
-                 float aniso) : ObjectBase(rsc)
-{
+                 float aniso) : ObjectBase(rsc) {
     mMagFilter = magFilter;
     mMinFilter = minFilter;
     mWrapS = wrapS;
@@ -53,12 +51,10 @@ Sampler::Sampler(Context *rsc,
     mAniso = aniso;
 }
 
-Sampler::~Sampler()
-{
+Sampler::~Sampler() {
 }
 
-void Sampler::setupGL(const Context *rsc, const Allocation *tex)
-{
+void Sampler::setupGL(const Context *rsc, const Allocation *tex) {
     GLenum trans[] = {
         GL_NEAREST, //RS_SAMPLER_NEAREST,
         GL_LINEAR, //RS_SAMPLER_LINEAR,
@@ -96,48 +92,30 @@ void Sampler::setupGL(const Context *rsc, const Allocation *tex)
     }
 
     float anisoValue = rsMin(rsc->ext_texture_max_aniso(), mAniso);
-    if(rsc->ext_texture_max_aniso() > 1.0f) {
+    if (rsc->ext_texture_max_aniso() > 1.0f) {
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoValue);
     }
 
     rsc->checkError("Sampler::setupGL2 tex env");
 }
 
-void Sampler::bindToContext(SamplerState *ss, uint32_t slot)
-{
+void Sampler::bindToContext(SamplerState *ss, uint32_t slot) {
     ss->mSamplers[slot].set(this);
     mBoundSlot = slot;
 }
 
-void Sampler::unbindFromContext(SamplerState *ss)
-{
+void Sampler::unbindFromContext(SamplerState *ss) {
     int32_t slot = mBoundSlot;
     mBoundSlot = -1;
     ss->mSamplers[slot].clear();
 }
 
-void Sampler::serialize(OStream *stream) const
-{
-
+void Sampler::serialize(OStream *stream) const {
 }
 
-Sampler *Sampler::createFromStream(Context *rsc, IStream *stream)
-{
+Sampler *Sampler::createFromStream(Context *rsc, IStream *stream) {
     return NULL;
 }
-
-/*
-void SamplerState::setupGL()
-{
-    for (uint32_t ct=0; ct < RS_MAX_SAMPLER_SLOT; ct++) {
-        Sampler *s = mSamplers[ct].get();
-        if (s) {
-            s->setupGL(rsc);
-        } else {
-            glBindTexture(GL_TEXTURE_2D, 0);
-        }
-    }
-}*/
 
 ////////////////////////////////
 
@@ -145,8 +123,7 @@ namespace android {
 namespace renderscript {
 
 
-void rsi_SamplerBegin(Context *rsc)
-{
+void rsi_SamplerBegin(Context *rsc) {
     SamplerState * ss = &rsc->mStateSampler;
 
     ss->mMagFilter = RS_SAMPLER_LINEAR;
@@ -157,11 +134,10 @@ void rsi_SamplerBegin(Context *rsc)
     ss->mAniso = 1.0f;
 }
 
-void rsi_SamplerSet(Context *rsc, RsSamplerParam param, RsSamplerValue value)
-{
+void rsi_SamplerSet(Context *rsc, RsSamplerParam param, RsSamplerValue value) {
     SamplerState * ss = &rsc->mStateSampler;
 
-    switch(param) {
+    switch (param) {
     case RS_SAMPLER_MAG_FILTER:
         ss->mMagFilter = value;
         break;
@@ -183,11 +159,10 @@ void rsi_SamplerSet(Context *rsc, RsSamplerParam param, RsSamplerValue value)
     }
 }
 
-void rsi_SamplerSet2(Context *rsc, RsSamplerParam param, float value)
-{
+void rsi_SamplerSet2(Context *rsc, RsSamplerParam param, float value) {
     SamplerState * ss = &rsc->mStateSampler;
 
-    switch(param) {
+    switch (param) {
     case RS_SAMPLER_ANISO:
         ss->mAniso = value;
         break;
@@ -197,8 +172,7 @@ void rsi_SamplerSet2(Context *rsc, RsSamplerParam param, float value)
     }
 }
 
-RsSampler rsi_SamplerCreate(Context *rsc)
-{
+RsSampler rsi_SamplerCreate(Context *rsc) {
     SamplerState * ss = &rsc->mStateSampler;
 
     Sampler * s = new Sampler(rsc,
@@ -211,6 +185,5 @@ RsSampler rsi_SamplerCreate(Context *rsc)
     s->incUserRef();
     return s;
 }
-
 
 }}

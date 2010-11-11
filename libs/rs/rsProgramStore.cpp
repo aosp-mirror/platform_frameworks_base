@@ -30,9 +30,7 @@ using namespace android;
 using namespace android::renderscript;
 
 
-ProgramStore::ProgramStore(Context *rsc) :
-    Program(rsc)
-{
+ProgramStore::ProgramStore(Context *rsc) : Program(rsc) {
     mDitherEnable = true;
     mBlendEnable = false;
     mColorRWriteEnable = true;
@@ -42,20 +40,15 @@ ProgramStore::ProgramStore(Context *rsc) :
     mBlendSrc = GL_ONE;
     mBlendDst = GL_ZERO;
 
-
     mDepthTestEnable = false;
     mDepthWriteEnable = true;
     mDepthFunc = GL_LESS;
-
-
 }
 
-ProgramStore::~ProgramStore()
-{
+ProgramStore::~ProgramStore() {
 }
 
-void ProgramStore::setupGL2(const Context *rsc, ProgramStoreState *state)
-{
+void ProgramStore::setupGL2(const Context *rsc, ProgramStoreState *state) {
     if (state->mLast.get() == this) {
         return;
     }
@@ -76,7 +69,7 @@ void ProgramStore::setupGL2(const Context *rsc, ProgramStoreState *state)
 
     if (rsc->mUserSurfaceConfig.depthMin > 0) {
         glDepthMask(mDepthWriteEnable);
-        if(mDepthTestEnable || mDepthWriteEnable) {
+        if (mDepthTestEnable || mDepthWriteEnable) {
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(mDepthFunc);
         } else {
@@ -100,28 +93,21 @@ void ProgramStore::setupGL2(const Context *rsc, ProgramStoreState *state)
     }
 }
 
-
-void ProgramStore::setDitherEnable(bool enable)
-{
+void ProgramStore::setDitherEnable(bool enable) {
     mDitherEnable = enable;
 }
 
-void ProgramStore::serialize(OStream *stream) const
-{
-
+void ProgramStore::serialize(OStream *stream) const {
 }
 
-ProgramStore *ProgramStore::createFromStream(Context *rsc, IStream *stream)
-{
+ProgramStore *ProgramStore::createFromStream(Context *rsc, IStream *stream) {
     return NULL;
 }
 
-
-void ProgramStore::setDepthFunc(RsDepthFunc func)
-{
+void ProgramStore::setDepthFunc(RsDepthFunc func) {
     mDepthTestEnable = true;
 
-    switch(func) {
+    switch (func) {
     case RS_DEPTH_FUNC_ALWAYS:
         mDepthTestEnable = false;
         mDepthFunc = GL_ALWAYS;
@@ -147,20 +133,18 @@ void ProgramStore::setDepthFunc(RsDepthFunc func)
     }
 }
 
-void ProgramStore::setDepthMask(bool mask)
-{
+void ProgramStore::setDepthMask(bool mask) {
     mDepthWriteEnable = mask;
 }
 
-void ProgramStore::setBlendFunc(RsBlendSrcFunc src, RsBlendDstFunc dst)
-{
+void ProgramStore::setBlendFunc(RsBlendSrcFunc src, RsBlendDstFunc dst) {
     mBlendEnable = true;
     if ((src == RS_BLEND_SRC_ONE) &&
         (dst == RS_BLEND_DST_ZERO)) {
         mBlendEnable = false;
     }
 
-    switch(src) {
+    switch (src) {
     case RS_BLEND_SRC_ZERO:
         mBlendSrc = GL_ZERO;
         break;
@@ -190,7 +174,7 @@ void ProgramStore::setBlendFunc(RsBlendSrcFunc src, RsBlendDstFunc dst)
         break;
     }
 
-    switch(dst) {
+    switch (dst) {
     case RS_BLEND_DST_ZERO:
         mBlendDst = GL_ZERO;
         break;
@@ -218,81 +202,66 @@ void ProgramStore::setBlendFunc(RsBlendSrcFunc src, RsBlendDstFunc dst)
     }
 }
 
-void ProgramStore::setColorMask(bool r, bool g, bool b, bool a)
-{
+void ProgramStore::setColorMask(bool r, bool g, bool b, bool a) {
     mColorRWriteEnable = r;
     mColorGWriteEnable = g;
     mColorBWriteEnable = b;
     mColorAWriteEnable = a;
 }
 
-
-ProgramStoreState::ProgramStoreState()
-{
+ProgramStoreState::ProgramStoreState() {
     mPFS = NULL;
 }
 
-ProgramStoreState::~ProgramStoreState()
-{
+ProgramStoreState::~ProgramStoreState() {
     ObjectBase::checkDelete(mPFS);
     mPFS = NULL;
 }
 
-void ProgramStoreState::init(Context *rsc)
-{
+void ProgramStoreState::init(Context *rsc) {
     ProgramStore *pfs = new ProgramStore(rsc);
     mDefault.set(pfs);
 }
 
-void ProgramStoreState::deinit(Context *rsc)
-{
+void ProgramStoreState::deinit(Context *rsc) {
     mDefault.clear();
     mLast.clear();
 }
 
-
 namespace android {
 namespace renderscript {
 
-void rsi_ProgramStoreBegin(Context * rsc, RsElement in, RsElement out)
-{
+void rsi_ProgramStoreBegin(Context * rsc, RsElement in, RsElement out) {
     ObjectBase::checkDelete(rsc->mStateFragmentStore.mPFS);
     rsc->mStateFragmentStore.mPFS = new ProgramStore(rsc);
 }
 
-void rsi_ProgramStoreDepthFunc(Context *rsc, RsDepthFunc func)
-{
+void rsi_ProgramStoreDepthFunc(Context *rsc, RsDepthFunc func) {
     rsc->mStateFragmentStore.mPFS->setDepthFunc(func);
 }
 
-void rsi_ProgramStoreDepthMask(Context *rsc, bool mask)
-{
+void rsi_ProgramStoreDepthMask(Context *rsc, bool mask) {
     rsc->mStateFragmentStore.mPFS->setDepthMask(mask);
 }
 
-void rsi_ProgramStoreColorMask(Context *rsc, bool r, bool g, bool b, bool a)
-{
+void rsi_ProgramStoreColorMask(Context *rsc, bool r, bool g, bool b, bool a) {
     rsc->mStateFragmentStore.mPFS->setColorMask(r, g, b, a);
 }
 
-void rsi_ProgramStoreBlendFunc(Context *rsc, RsBlendSrcFunc src, RsBlendDstFunc dst)
-{
+void rsi_ProgramStoreBlendFunc(Context *rsc, RsBlendSrcFunc src, RsBlendDstFunc dst) {
     rsc->mStateFragmentStore.mPFS->setBlendFunc(src, dst);
 }
 
-RsProgramStore rsi_ProgramStoreCreate(Context *rsc)
-{
+RsProgramStore rsi_ProgramStoreCreate(Context *rsc) {
     ProgramStore *pfs = rsc->mStateFragmentStore.mPFS;
     pfs->incUserRef();
     rsc->mStateFragmentStore.mPFS = 0;
     return pfs;
 }
 
-void rsi_ProgramStoreDither(Context *rsc, bool enable)
-{
+void rsi_ProgramStoreDither(Context *rsc, bool enable) {
     rsc->mStateFragmentStore.mPFS->setDitherEnable(enable);
 }
-
 
 }
 }

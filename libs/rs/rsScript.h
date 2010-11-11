@@ -29,8 +29,7 @@ class ProgramFragment;
 class ProgramRaster;
 class ProgramStore;
 
-class Script : public ObjectBase
-{
+class Script : public ObjectBase {
 public:
     typedef void (* InvokeFunc_t)(void);
 
@@ -77,7 +76,6 @@ protected:
     ObjectBaseRef<const Type> *mTypes;
 
 };
-
 
 
 }

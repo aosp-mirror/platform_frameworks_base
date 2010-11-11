@@ -25,8 +25,7 @@ namespace android {
 namespace renderscript {
 
 
-class Animation : public ObjectBase
-{
+class Animation : public ObjectBase {
 public:
     ~Animation();
 
@@ -61,9 +60,6 @@ protected:
     float mInputMin;
     float mInputMax;
 };
-
-
-
 
 }
 }

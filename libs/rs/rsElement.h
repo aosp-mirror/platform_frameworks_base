@@ -25,10 +25,8 @@
 namespace android {
 namespace renderscript {
 
-
 // An element is a group of Components that occupies one cell in a structure.
-class Element : public ObjectBase
-{
+class Element : public ObjectBase {
 public:
     ~Element();
 

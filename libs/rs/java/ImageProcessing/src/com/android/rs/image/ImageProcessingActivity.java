@@ -141,7 +141,7 @@ public class ImageProcessingActivity extends Activity
         float coeff2 = - 1.0f / (2.0f * sigma * sigma);
         float normalizeFactor = 0.0f;
         float floatR = 0.0f;
-        for(r = -radius; r <= radius; r ++) {
+        for (r = -radius; r <= radius; r ++) {
             floatR = (float)r;
             gaussian[r + radius] = coeff1 * (float)Math.pow(e, floatR * floatR * coeff2);
             normalizeFactor += gaussian[r + radius];
@@ -149,7 +149,7 @@ public class ImageProcessingActivity extends Activity
 
         //Now we need to normalize the weights because all our coefficients need to add up to one
         normalizeFactor = 1.0f / normalizeFactor;
-        for(r = -radius; r <= radius; r ++) {
+        for (r = -radius; r <= radius; r ++) {
             floatR = (float)r;
             gaussian[r + radius] *= normalizeFactor;
         }
@@ -159,22 +159,22 @@ public class ImageProcessingActivity extends Activity
         float blurredPixelB = 0.0f;
         float blurredPixelA = 0.0f;
 
-        for(h = 0; h < height; h ++) {
-            for(w = 0; w < width; w ++) {
+        for (h = 0; h < height; h ++) {
+            for (w = 0; w < width; w ++) {
 
                 blurredPixelR = 0.0f;
                 blurredPixelG = 0.0f;
                 blurredPixelB = 0.0f;
                 blurredPixelA = 0.0f;
 
-                for(r = -radius; r <= radius; r ++) {
+                for (r = -radius; r <= radius; r ++) {
                     // Stepping left and right away from the pixel
                     int validW = w + r;
                     // Clamp to zero and width max() isn't exposed for ints yet
-                    if(validW < 0) {
+                    if (validW < 0) {
                         validW = 0;
                     }
-                    if(validW > width - 1) {
+                    if (validW > width - 1) {
                         validW = width - 1;
                     }
 
@@ -202,20 +202,20 @@ public class ImageProcessingActivity extends Activity
             }
         }
 
-        for(h = 0; h < height; h ++) {
-            for(w = 0; w < width; w ++) {
+        for (h = 0; h < height; h ++) {
+            for (w = 0; w < width; w ++) {
 
                 blurredPixelR = 0.0f;
                 blurredPixelG = 0.0f;
                 blurredPixelB = 0.0f;
                 blurredPixelA = 0.0f;
-                for(r = -radius; r <= radius; r ++) {
+                for (r = -radius; r <= radius; r ++) {
                     int validH = h + r;
                     // Clamp to zero and width
-                    if(validH < 0) {
+                    if (validH < 0) {
                         validH = 0;
                     }
-                    if(validH > height - 1) {
+                    if (validH > height - 1) {
                         validH = height - 1;
                     }
 
@@ -252,36 +252,30 @@ public class ImageProcessingActivity extends Activity
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         if (fromUser) {
 
-            if(seekBar == mRadiusSeekBar) {
+            if (seekBar == mRadiusSeekBar) {
                 float fRadius = progress / 100.0f;
                 fRadius *= (float)(MAX_RADIUS);
                 mRadius = (int)fRadius;
 
                 mScript.set_radius(mRadius);
-            }
-            else if(seekBar == mInBlackSeekBar) {
+            } else if (seekBar == mInBlackSeekBar) {
                 mInBlack = (float)progress;
                 mScriptVBlur.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
-            }
-            else if(seekBar == mOutBlackSeekBar) {
+            } else if (seekBar == mOutBlackSeekBar) {
                 mOutBlack = (float)progress;
                 mScriptVBlur.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
-            }
-            else if(seekBar == mInWhiteSeekBar) {
+            } else if (seekBar == mInWhiteSeekBar) {
                 mInWhite = (float)progress + 127.0f;
                 mScriptVBlur.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
-            }
-            else if(seekBar == mOutWhiteSeekBar) {
+            } else if (seekBar == mOutWhiteSeekBar) {
                 mOutWhite = (float)progress + 127.0f;
                 mScriptVBlur.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
-            }
-            else if(seekBar == mGammaSeekBar) {
+            } else if (seekBar == mGammaSeekBar) {
                 mGamma = (float)progress/100.0f;
                 mGamma = Math.max(mGamma, 0.1f);
                 mGamma = 1.0f / mGamma;
                 mScriptVBlur.invoke_setGamma(mGamma);
-            }
-            else if(seekBar == mSaturationSeekBar) {
+            } else if (seekBar == mSaturationSeekBar) {
                 mSaturation = (float)progress / 50.0f;
                 mScriptVBlur.invoke_setSaturation(mSaturation);
             }

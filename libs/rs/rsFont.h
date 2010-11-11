@@ -42,8 +42,7 @@ namespace renderscript {
 
 class FontState;
 
-class Font : public ObjectBase
-{
+class Font : public ObjectBase {
 public:
     enum RenderMode {
         FRAMEBUFFER,
@@ -134,8 +133,7 @@ protected:
                          uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH);
 };
 
-class FontState
-{
+class FontState {
 public:
     FontState();
     ~FontState();
@@ -161,29 +159,28 @@ protected:
 
     friend class Font;
 
-    struct CacheTextureLine
-    {
+    struct CacheTextureLine {
         uint32_t mMaxHeight;
         uint32_t mMaxWidth;
         uint32_t mCurrentRow;
         uint32_t mCurrentCol;
         bool mDirty;
 
-        CacheTextureLine(uint32_t maxHeight, uint32_t maxWidth, uint32_t currentRow, uint32_t currentCol) :
-            mMaxHeight(maxHeight), mMaxWidth(maxWidth), mCurrentRow(currentRow), mCurrentCol(currentCol),
-            mDirty(false)  {
+        CacheTextureLine(uint32_t maxHeight, uint32_t maxWidth, uint32_t currentRow, uint32_t currentCol)
+            : mMaxHeight(maxHeight), mMaxWidth(maxWidth), mCurrentRow(currentRow),
+              mCurrentCol(currentCol), mDirty(false)  {
         }
 
         bool fitBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *retOriginY) {
-            if((uint32_t)bitmap->rows > mMaxHeight) {
+            if ((uint32_t)bitmap->rows > mMaxHeight) {
                 return false;
             }
 
-            if(mCurrentCol + (uint32_t)bitmap->width < mMaxWidth) {
-               *retOriginX = mCurrentCol;
-               *retOriginY = mCurrentRow;
-               mCurrentCol += bitmap->width;
-               mDirty = true;
+            if (mCurrentCol + (uint32_t)bitmap->width < mMaxWidth) {
+                *retOriginX = mCurrentCol;
+                *retOriginY = mCurrentRow;
+                mCurrentCol += bitmap->width;
+                mDirty = true;
                return true;
             }
 
@@ -254,16 +251,14 @@ protected:
     void issueDrawCommand();
 
     void appendMeshQuad(float x1, float y1, float z1,
-                          float u1, float v1,
-                          float x2, float y2, float z2,
-                          float u2, float v2,
-                          float x3, float y3, float z3,
-                          float u3, float v3,
-                          float x4, float y4, float z4,
-                          float u4, float v4);
-
+                        float u1, float v1,
+                        float x2, float y2, float z2,
+                        float u2, float v2,
+                        float x3, float y3, float z3,
+                        float u3, float v3,
+                        float x4, float y4, float z4,
+                        float u4, float v4);
 };
-
 
 }
 }

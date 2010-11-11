@@ -803,6 +803,8 @@ class AppWidgetService extends IAppWidgetService.Stub
             info.icon = ri.getIconResource();
             info.previewImage = sa.getResourceId(
             		com.android.internal.R.styleable.AppWidgetProviderInfo_previewImage, 0);
+            info.autoAdvanceViewId = sa.getResourceId(
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_autoAdvanceViewId, -1);
 
             sa.recycle();
         } catch (Exception e) {

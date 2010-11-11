@@ -16,7 +16,10 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
+#include <utils/Log.h>
+
 #include "Caches.h"
+#include "Properties.h"
 
 namespace android {
 
@@ -47,10 +50,48 @@ Caches::Caches(): Singleton<Caches>(), blend(false), lastSrcMode(GL_ZERO),
 
     mCurrentBuffer = meshBuffer;
     mRegionMesh = NULL;
+
+    mDebugLevel = readDebugLevel();
+    LOGD("Enabling debug mode %d", mDebugLevel);
 }
 
 Caches::~Caches() {
     delete[] mRegionMesh;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Debug
+///////////////////////////////////////////////////////////////////////////////
+
+void Caches::dumpMemoryUsage() {
+    LOGD("Current memory usage / total memory usage (bytes):");
+    LOGD("  TextureCache         %8d / %8d", textureCache.getSize(), textureCache.getMaxSize());
+    LOGD("  LayerCache           %8d / %8d", layerCache.getSize(), layerCache.getMaxSize());
+    LOGD("  GradientCache        %8d / %8d", gradientCache.getSize(), gradientCache.getMaxSize());
+    LOGD("  PathCache            %8d / %8d", pathCache.getSize(), pathCache.getMaxSize());
+    LOGD("  TextDropShadowCache  %8d / %8d", dropShadowCache.getSize(),
+            dropShadowCache.getMaxSize());
+    for (uint32_t i = 0; i < fontRenderer.getFontRendererCount(); i++) {
+        const uint32_t size = fontRenderer.getFontRendererSize(i);
+        LOGD("  FontRenderer %d       %8d / %8d", i, size, size);
+    }
+    LOGD("Other:");
+    LOGD("  FboCache             %8d / %8d", fboCache.getSize(), fboCache.getMaxSize());
+    LOGD("  PatchCache           %8d / %8d", patchCache.getSize(), patchCache.getMaxSize());
+
+    uint32_t total = 0;
+    total += textureCache.getSize();
+    total += layerCache.getSize();
+    total += gradientCache.getSize();
+    total += pathCache.getSize();
+    total += dropShadowCache.getSize();
+    for (uint32_t i = 0; i < fontRenderer.getFontRendererCount(); i++) {
+        total += fontRenderer.getFontRendererSize(i);
+    }
+
+    LOGD("Total memory usage:");
+    LOGD("  %d bytes, %.2f MB", total, total / 1024.0f / 1024.0f);
+    LOGD("\n");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -456,11 +456,11 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         }
 
         if (fast) {
-            if (DEBUG_PROGRAM_CACHE) {
+#if DEBUG_PROGRAMS
                 PROGRAM_LOGD("*** Fast case:\n");
                 PROGRAM_LOGD("*** Generated fragment shader:\n\n");
                 printLongString(shader);
-            }
+#endif
 
             return shader;
         }
@@ -542,10 +542,10 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     // End the shader
     shader.append(gFS_Footer);
 
-    if (DEBUG_PROGRAM_CACHE) {
+#if DEBUG_PROGRAMS
         PROGRAM_LOGD("*** Generated fragment shader:\n\n");
         printLongString(shader);
-    }
+#endif
 
     return shader;
 }

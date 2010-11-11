@@ -169,6 +169,14 @@ public:
         return mTextureId;
     }
 
+    uint32_t getCacheWidth() const {
+        return mCacheWidth;
+    }
+
+    uint32_t getCacheHeight() const {
+        return mCacheHeight;
+    }
+
 protected:
     friend class Font;
 
@@ -206,14 +214,6 @@ protected:
             return false;
         }
     };
-
-    uint32_t getCacheWidth() const {
-        return mCacheWidth;
-    }
-
-    uint32_t getCacheHeight() const {
-        return mCacheHeight;
-    }
 
     void initTextTexture();
     bool cacheBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_t *retOriginY);

@@ -25,11 +25,9 @@ namespace android {
 namespace renderscript {
 
 
-class Type : public ObjectBase
-{
+class Type : public ObjectBase {
 public:
     Type * createTex2D(const Element *, size_t w, size_t h, bool mip);
-
 
     size_t getOffsetForFace(uint32_t face) const;
 

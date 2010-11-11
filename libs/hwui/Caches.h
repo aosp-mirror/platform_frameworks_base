@@ -83,7 +83,7 @@ class Caches: public Singleton<Caches> {
 
     friend class Singleton<Caches>;
 
-    CacheLogger mlogger;
+    CacheLogger mLogger;
 
     GLuint mCurrentBuffer;
 
@@ -92,6 +92,14 @@ class Caches: public Singleton<Caches> {
     GLuint mRegionMeshIndices;
 
 public:
+    /**
+     * Indicates whether the renderer is in debug mode.
+     * This debug mode provides limited information to app developers.
+     */
+    DebugLevel getDebugLevel() const {
+        return mDebugLevel;
+    }
+
     /**
      * Binds the VBO used to render simple textured quads.
      */
@@ -113,6 +121,11 @@ public:
      * indices for the region mesh.
      */
     TextureVertex* getRegionMesh();
+
+    /**
+     * Displays the memory usage of each cache and the total sum.
+     */
+    void dumpMemoryUsage();
 
     bool blend;
     GLenum lastSrcMode;
@@ -140,6 +153,9 @@ public:
     ResourceCache resourceCache;
 
     Line line;
+
+private:
+    DebugLevel mDebugLevel;
 }; // class Caches
 
 }; // namespace uirenderer

@@ -66,13 +66,13 @@ void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32
     const float *gPtr = fs->gaussian;
     if ((y > fs->radius) && (y < (fs->height - fs->radius))) {
         const float4 *i = input + ((y - fs->radius) * fs->width);
-        for(int r = -fs->radius; r <= fs->radius; r ++) {
+        for (int r = -fs->radius; r <= fs->radius; r ++) {
             blurredPixel += i->xyz * gPtr[0];
             gPtr++;
             i += fs->width;
         }
     } else {
-        for(int r = -fs->radius; r <= fs->radius; r ++) {
+        for (int r = -fs->radius; r <= fs->radius; r ++) {
             int validH = rsClamp(y + r, (uint)0, (uint)(fs->height - 1));
             const float4 *i = input + validH * fs->width;
             blurredPixel += i->xyz * gPtr[0];

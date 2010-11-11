@@ -25,8 +25,7 @@ namespace renderscript {
 
 class ProgramRasterState;
 
-class ProgramRaster : public Program
-{
+class ProgramRaster : public Program {
 public:
     ProgramRaster(Context *rsc,
                   bool pointSmooth,
@@ -50,8 +49,7 @@ protected:
     RsCullMode mCull;
 };
 
-class ProgramRasterState
-{
+class ProgramRasterState {
 public:
     ProgramRasterState();
     ~ProgramRasterState();

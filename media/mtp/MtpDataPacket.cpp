@@ -373,7 +373,6 @@ int MtpDataPacket::readDataHeader(int fd) {
 int MtpDataPacket::write(int fd) {
     MtpPacket::putUInt32(MTP_CONTAINER_LENGTH_OFFSET, mPacketSize);
     MtpPacket::putUInt16(MTP_CONTAINER_TYPE_OFFSET, MTP_CONTAINER_TYPE_DATA);
-    dump();
     // send header separately from data
     int ret = ::write(fd, mBuffer, MTP_CONTAINER_HEADER_SIZE);
     if (ret == MTP_CONTAINER_HEADER_SIZE)

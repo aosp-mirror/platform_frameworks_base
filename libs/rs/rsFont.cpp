@@ -34,16 +34,14 @@
 using namespace android;
 using namespace android::renderscript;
 
-Font::Font(Context *rsc) : ObjectBase(rsc), mCachedGlyphs(NULL)
-{
+Font::Font(Context *rsc) : ObjectBase(rsc), mCachedGlyphs(NULL) {
     mInitialized = false;
     mHasKerning = false;
     mFace = NULL;
 }
 
-bool Font::init(const char *name, uint32_t fontSize, uint32_t dpi)
-{
-    if(mInitialized) {
+bool Font::init(const char *name, uint32_t fontSize, uint32_t dpi) {
+    if (mInitialized) {
         LOGE("Reinitialization of fonts not supported");
         return false;
     }
@@ -54,7 +52,7 @@ bool Font::init(const char *name, uint32_t fontSize, uint32_t dpi)
     fullPath += name;
 
     FT_Error error = FT_New_Face(mRSC->mStateFont.getLib(), fullPath.string(), 0, &mFace);
-    if(error) {
+    if (error) {
         LOGE("Unable to initialize font %s", fullPath.string());
         return false;
     }
@@ -64,7 +62,7 @@ bool Font::init(const char *name, uint32_t fontSize, uint32_t dpi)
     mDpi = dpi;
 
     error = FT_Set_Char_Size(mFace, fontSize * 64, 0, dpi, 0);
-    if(error) {
+    if (error) {
         LOGE("Unable to set font size on %s", fullPath.string());
         return false;
     }
@@ -75,15 +73,13 @@ bool Font::init(const char *name, uint32_t fontSize, uint32_t dpi)
     return true;
 }
 
-void Font::invalidateTextureCache()
-{
-    for(uint32_t i = 0; i < mCachedGlyphs.size(); i ++) {
+void Font::invalidateTextureCache() {
+    for (uint32_t i = 0; i < mCachedGlyphs.size(); i ++) {
         mCachedGlyphs.valueAt(i)->mIsValid = false;
     }
 }
 
-void Font::drawCachedGlyph(CachedGlyphInfo *glyph, int32_t x, int32_t y)
-{
+void Font::drawCachedGlyph(CachedGlyphInfo *glyph, int32_t x, int32_t y) {
     FontState *state = &mRSC->mStateFont;
 
     int32_t nPenX = x + glyph->mBitmapLeft;
@@ -127,7 +123,6 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int32_t x, int32_t y,
             bitmap[bY * bitmapW + bX] = tempCol;
         }
     }
-
 }
 
 void Font::measureCachedGlyph(CachedGlyphInfo *glyph, int32_t x, int32_t y, Rect *bounds) {
@@ -154,13 +149,12 @@ void Font::measureCachedGlyph(CachedGlyphInfo *glyph, int32_t x, int32_t y, Rect
 void Font::renderUTF(const char *text, uint32_t len, int32_t x, int32_t y,
                      uint32_t start, int32_t numGlyphs,
                      RenderMode mode, Rect *bounds,
-                     uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH)
-{
-    if(!mInitialized || numGlyphs == 0 || text == NULL || len == 0) {
+                     uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH) {
+    if (!mInitialized || numGlyphs == 0 || text == NULL || len == 0) {
         return;
     }
 
-    if(mode == Font::MEASURE) {
+    if (mode == Font::MEASURE) {
         if (bounds == NULL) {
             LOGE("No return rectangle provided to measure text");
             return;
@@ -171,7 +165,7 @@ void Font::renderUTF(const char *text, uint32_t len, int32_t x, int32_t y,
 
     int32_t penX = x, penY = y;
     int32_t glyphsLeft = 1;
-    if(numGlyphs > 0) {
+    if (numGlyphs > 0) {
         glyphsLeft = numGlyphs;
     }
 
@@ -183,7 +177,7 @@ void Font::renderUTF(const char *text, uint32_t len, int32_t x, int32_t y,
         int32_t utfChar = utf32_at(text, len, index, &nextIndex);
 
         // Reached the end of the string or encountered
-        if(utfChar < 0) {
+        if (utfChar < 0) {
             break;
         }
 
@@ -193,8 +187,8 @@ void Font::renderUTF(const char *text, uint32_t len, int32_t x, int32_t y,
         CachedGlyphInfo *cachedGlyph = getCachedUTFChar(utfChar);
 
         // If it's still not valid, we couldn't cache it, so we shouldn't draw garbage
-        if(cachedGlyph->mIsValid) {
-            switch(mode) {
+        if (cachedGlyph->mIsValid) {
+            switch (mode) {
             case FRAMEBUFFER:
                 drawCachedGlyph(cachedGlyph, penX, penY);
                 break;
@@ -210,7 +204,7 @@ void Font::renderUTF(const char *text, uint32_t len, int32_t x, int32_t y,
         penX += (cachedGlyph->mAdvance.x >> 6);
 
         // If we were given a specific number of glyphs, decrement
-        if(numGlyphs > 0) {
+        if (numGlyphs > 0) {
             glyphsLeft --;
         }
     }
@@ -219,21 +213,20 @@ void Font::renderUTF(const char *text, uint32_t len, int32_t x, int32_t y,
 Font::CachedGlyphInfo* Font::getCachedUTFChar(int32_t utfChar) {
 
     CachedGlyphInfo *cachedGlyph = mCachedGlyphs.valueFor((uint32_t)utfChar);
-    if(cachedGlyph == NULL) {
+    if (cachedGlyph == NULL) {
         cachedGlyph = cacheGlyph((uint32_t)utfChar);
     }
     // Is the glyph still in texture cache?
-    if(!cachedGlyph->mIsValid) {
+    if (!cachedGlyph->mIsValid) {
         updateGlyphCache(cachedGlyph);
     }
 
     return cachedGlyph;
 }
 
-void Font::updateGlyphCache(CachedGlyphInfo *glyph)
-{
+void Font::updateGlyphCache(CachedGlyphInfo *glyph) {
     FT_Error error = FT_Load_Glyph( mFace, glyph->mGlyphIndex, FT_LOAD_RENDER );
-    if(error) {
+    if (error) {
         LOGE("Couldn't load glyph.");
         return;
     }
@@ -252,7 +245,7 @@ void Font::updateGlyphCache(CachedGlyphInfo *glyph)
     FontState *state = &mRSC->mStateFont;
     glyph->mIsValid = state->cacheBitmap(bitmap, &startX, &startY);
 
-    if(!glyph->mIsValid) {
+    if (!glyph->mIsValid) {
         return;
     }
 
@@ -273,8 +266,7 @@ void Font::updateGlyphCache(CachedGlyphInfo *glyph)
     glyph->mBitmapMaxV = (float)endY / (float)cacheHeight;
 }
 
-Font::CachedGlyphInfo *Font::cacheGlyph(uint32_t glyph)
-{
+Font::CachedGlyphInfo *Font::cacheGlyph(uint32_t glyph) {
     CachedGlyphInfo *newGlyph = new CachedGlyphInfo();
     mCachedGlyphs.add(glyph, newGlyph);
 
@@ -286,21 +278,20 @@ Font::CachedGlyphInfo *Font::cacheGlyph(uint32_t glyph)
     return newGlyph;
 }
 
-Font * Font::create(Context *rsc, const char *name, uint32_t fontSize, uint32_t dpi)
-{
+Font * Font::create(Context *rsc, const char *name, uint32_t fontSize, uint32_t dpi) {
     rsc->mStateFont.checkInit();
     Vector<Font*> &activeFonts = rsc->mStateFont.mActiveFonts;
 
-    for(uint32_t i = 0; i < activeFonts.size(); i ++) {
+    for (uint32_t i = 0; i < activeFonts.size(); i ++) {
         Font *ithFont = activeFonts[i];
-        if(ithFont->mFontName == name && ithFont->mFontSize == fontSize && ithFont->mDpi == dpi) {
+        if (ithFont->mFontName == name && ithFont->mFontSize == fontSize && ithFont->mDpi == dpi) {
             return ithFont;
         }
     }
 
     Font *newFont = new Font(rsc);
     bool isInitialized = newFont->init(name, fontSize, dpi);
-    if(isInitialized) {
+    if (isInitialized) {
         activeFonts.push(newFont);
         rsc->mStateFont.precacheLatin(newFont);
         return newFont;
@@ -308,12 +299,10 @@ Font * Font::create(Context *rsc, const char *name, uint32_t fontSize, uint32_t 
 
     ObjectBase::checkDelete(newFont);
     return NULL;
-
 }
 
-Font::~Font()
-{
-    if(mFace) {
+Font::~Font() {
+    if (mFace) {
         FT_Done_Face(mFace);
     }
 
@@ -324,14 +313,13 @@ Font::~Font()
         }
     }
 
-    for(uint32_t i = 0; i < mCachedGlyphs.size(); i ++) {
+    for (uint32_t i = 0; i < mCachedGlyphs.size(); i ++) {
         CachedGlyphInfo *glyph = mCachedGlyphs.valueAt(i);
         delete glyph;
     }
 }
 
-FontState::FontState()
-{
+FontState::FontState() {
     mInitialized = false;
     mMaxNumberOfQuads = 1024;
     mCurrentQuadIndex = 0;
@@ -379,20 +367,18 @@ FontState::FontState()
     setFontColor(0.1f, 0.1f, 0.1f, 1.0f);
 }
 
-FontState::~FontState()
-{
-    for(uint32_t i = 0; i < mCacheLines.size(); i ++) {
+FontState::~FontState() {
+    for (uint32_t i = 0; i < mCacheLines.size(); i ++) {
         delete mCacheLines[i];
     }
 
     rsAssert(!mActiveFonts.size());
 }
 
-FT_Library FontState::getLib()
-{
-    if(!mLibrary) {
+FT_Library FontState::getLib() {
+    if (!mLibrary) {
         FT_Error error = FT_Init_FreeType(&mLibrary);
-        if(error) {
+        if (error) {
             LOGE("Unable to initialize freetype");
             return NULL;
         }
@@ -401,29 +387,26 @@ FT_Library FontState::getLib()
     return mLibrary;
 }
 
-void FontState::init(Context *rsc)
-{
+void FontState::init(Context *rsc) {
     mRSC = rsc;
 }
 
-void FontState::flushAllAndInvalidate()
-{
-    if(mCurrentQuadIndex != 0) {
+void FontState::flushAllAndInvalidate() {
+    if (mCurrentQuadIndex != 0) {
         issueDrawCommand();
         mCurrentQuadIndex = 0;
     }
-    for(uint32_t i = 0; i < mActiveFonts.size(); i ++) {
+    for (uint32_t i = 0; i < mActiveFonts.size(); i ++) {
         mActiveFonts[i]->invalidateTextureCache();
     }
-    for(uint32_t i = 0; i < mCacheLines.size(); i ++) {
+    for (uint32_t i = 0; i < mCacheLines.size(); i ++) {
         mCacheLines[i]->mCurrentCol = 0;
     }
 }
 
-bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *retOriginY)
-{
+bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *retOriginY) {
     // If the glyph is too tall, don't cache it
-    if((uint32_t)bitmap->rows > mCacheLines[mCacheLines.size()-1]->mMaxHeight) {
+    if ((uint32_t)bitmap->rows > mCacheLines[mCacheLines.size()-1]->mMaxHeight) {
         LOGE("Font size to large to fit in cache. width, height = %i, %i", (int)bitmap->width, (int)bitmap->rows);
         return false;
     }
@@ -433,27 +416,27 @@ bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *r
     uint32_t startY = 0;
 
     bool bitmapFit = false;
-    for(uint32_t i = 0; i < mCacheLines.size(); i ++) {
+    for (uint32_t i = 0; i < mCacheLines.size(); i ++) {
         bitmapFit = mCacheLines[i]->fitBitmap(bitmap, &startX, &startY);
-        if(bitmapFit) {
+        if (bitmapFit) {
             break;
         }
     }
 
     // If the new glyph didn't fit, flush the state so far and invalidate everything
-    if(!bitmapFit) {
+    if (!bitmapFit) {
         flushAllAndInvalidate();
 
         // Try to fit it again
-        for(uint32_t i = 0; i < mCacheLines.size(); i ++) {
+        for (uint32_t i = 0; i < mCacheLines.size(); i ++) {
             bitmapFit = mCacheLines[i]->fitBitmap(bitmap, &startX, &startY);
-            if(bitmapFit) {
+            if (bitmapFit) {
                 break;
             }
         }
 
         // if we still don't fit, something is wrong and we shouldn't draw
-        if(!bitmapFit) {
+        if (!bitmapFit) {
             LOGE("Bitmap doesn't fit in cache. width, height = %i, %i", (int)bitmap->width, (int)bitmap->rows);
             return false;
         }
@@ -471,8 +454,8 @@ bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *r
     uint8_t *bitmapBuffer = bitmap->buffer;
 
     uint32_t cacheX = 0, bX = 0, cacheY = 0, bY = 0;
-    for(cacheX = startX, bX = 0; cacheX < endX; cacheX ++, bX ++) {
-        for(cacheY = startY, bY = 0; cacheY < endY; cacheY ++, bY ++) {
+    for (cacheX = startX, bX = 0; cacheX < endX; cacheX ++, bX ++) {
+        for (cacheY = startY, bY = 0; cacheY < endY; cacheY ++, bY ++) {
             uint8_t tempCol = bitmapBuffer[bY * bitmap->width + bX];
             cacheBuffer[cacheY*cacheWidth + cacheX] = tempCol;
         }
@@ -484,7 +467,7 @@ bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *r
     mFontShaderF->bindTexture(mRSC, 0, mTextTexture.get());
 
     // Some debug code
-    /*for(uint32_t i = 0; i < mCacheLines.size(); i ++) {
+    /*for (uint32_t i = 0; i < mCacheLines.size(); i ++) {
         LOGE("Cache Line: H: %u Empty Space: %f",
              mCacheLines[i]->mMaxHeight,
               (1.0f - (float)mCacheLines[i]->mCurrentCol/(float)mCacheLines[i]->mMaxWidth)*100.0f);
@@ -494,8 +477,7 @@ bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *r
     return true;
 }
 
-void FontState::initRenderState()
-{
+void FontState::initRenderState() {
     String8 shaderString("varying vec2 varTex0;\n");
     shaderString.append("void main() {\n");
     shaderString.append("  lowp vec4 col = UNI_Color;\n");
@@ -538,8 +520,7 @@ void FontState::initRenderState()
     mFontProgramStore->setDepthMask(false);
 }
 
-void FontState::initTextTexture()
-{
+void FontState::initTextTexture() {
     const Element *alphaElem = Element::create(mRSC, RS_TYPE_UNSIGNED_8, RS_KIND_PIXEL_A, true, 1);
 
     // We will allocate a texture to initially hold 32 character bitmaps
@@ -567,8 +548,7 @@ void FontState::initTextTexture()
 }
 
 // Avoid having to reallocate memory and render quad by quad
-void FontState::initVertexArrayBuffers()
-{
+void FontState::initVertexArrayBuffers() {
     // Now lets write index data
     const Element *indexElem = Element::create(mRSC, RS_TYPE_UNSIGNED_16, RS_KIND_USER, false, 1);
     uint32_t numIndicies = mMaxNumberOfQuads * 6;
@@ -578,7 +558,7 @@ void FontState::initVertexArrayBuffers()
     uint16_t *indexPtr = (uint16_t*)indexAlloc->getPtr();
 
     // Four verts, two triangles , six indices per quad
-    for(uint32_t i = 0; i < mMaxNumberOfQuads; i ++) {
+    for (uint32_t i = 0; i < mMaxNumberOfQuads; i ++) {
         int32_t i6 = i * 6;
         int32_t i4 = i * 4;
 
@@ -613,9 +593,8 @@ void FontState::initVertexArrayBuffers()
 }
 
 // We don't want to allocate anything unless we actually draw text
-void FontState::checkInit()
-{
-    if(mInitialized) {
+void FontState::checkInit() {
+    if (mInitialized) {
         return;
     }
 
@@ -647,7 +626,7 @@ void FontState::issueDrawCommand() {
     ObjectBaseRef<const ProgramStore> tmpPS(mRSC->getFragmentStore());
     mRSC->setFragmentStore(mFontProgramStore.get());
 
-    if(mConstantsDirty) {
+    if (mConstantsDirty) {
         mFontShaderFConstant->data(mRSC, &mConstants, sizeof(mConstants));
         mConstantsDirty = false;
     }
@@ -681,14 +660,13 @@ void FontState::issueDrawCommand() {
 }
 
 void FontState::appendMeshQuad(float x1, float y1, float z1,
-                                  float u1, float v1,
-                                  float x2, float y2, float z2,
-                                  float u2, float v2,
-                                  float x3, float y3, float z3,
-                                  float u3, float v3,
-                                  float x4, float y4, float z4,
-                                  float u4, float v4)
-{
+                               float u1, float v1,
+                               float x2, float y2, float z2,
+                               float u2, float v2,
+                               float x3, float y3, float z3,
+                               float u3, float v3,
+                               float x4, float y4, float z4,
+                               float u4, float v4) {
     const uint32_t vertsPerQuad = 4;
     const uint32_t floatsPerVert = 5;
     float *currentPos = mTextMeshPtr + mCurrentQuadIndex * vertsPerQuad * floatsPerVert;
@@ -697,7 +675,7 @@ void FontState::appendMeshQuad(float x1, float y1, float z1,
     float width = (float)mRSC->getWidth();
     float height = (float)mRSC->getHeight();
 
-    if(x1 > width || y1 < 0.0f || x2 < 0 || y4 > height) {
+    if (x1 > width || y1 < 0.0f || x2 < 0 || y4 > height) {
         return;
     }
 
@@ -732,7 +710,7 @@ void FontState::appendMeshQuad(float x1, float y1, float z1,
 
     mCurrentQuadIndex ++;
 
-    if(mCurrentQuadIndex == mMaxNumberOfQuads) {
+    if (mCurrentQuadIndex == mMaxNumberOfQuads) {
         issueDrawCommand();
         mCurrentQuadIndex = 0;
     }
@@ -741,7 +719,7 @@ void FontState::appendMeshQuad(float x1, float y1, float z1,
 uint32_t FontState::getRemainingCacheCapacity() {
     uint32_t remainingCapacity = 0;
     uint32_t totalPixels = 0;
-    for(uint32_t i = 0; i < mCacheLines.size(); i ++) {
+    for (uint32_t i = 0; i < mCacheLines.size(); i ++) {
          remainingCapacity += (mCacheLines[i]->mMaxWidth - mCacheLines[i]->mCurrentCol);
          totalPixels += mCacheLines[i]->mMaxWidth;
     }
@@ -753,7 +731,7 @@ void FontState::precacheLatin(Font *font) {
     // Remaining capacity is measured in %
     uint32_t remainingCapacity = getRemainingCacheCapacity();
     uint32_t precacheIdx = 0;
-    while(remainingCapacity > 25 && precacheIdx < mLatinPrecache.size()) {
+    while (remainingCapacity > 25 && precacheIdx < mLatinPrecache.size()) {
         font->getCachedUTFChar((int32_t)mLatinPrecache[precacheIdx]);
         remainingCapacity = getRemainingCacheCapacity();
         precacheIdx ++;
@@ -765,19 +743,18 @@ void FontState::renderText(const char *text, uint32_t len, int32_t x, int32_t y,
                            uint32_t startIndex, int32_t numGlyphs,
                            Font::RenderMode mode,
                            Font::Rect *bounds,
-                           uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH)
-{
+                           uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH) {
     checkInit();
 
     // Render code here
     Font *currentFont = mRSC->getFont();
-    if(!currentFont) {
-        if(!mDefault.get()) {
+    if (!currentFont) {
+        if (!mDefault.get()) {
             mDefault.set(Font::create(mRSC, "DroidSans.ttf", 16, 96));
         }
         currentFont = mDefault.get();
     }
-    if(!currentFont) {
+    if (!currentFont) {
         LOGE("Unable to initialize any fonts");
         return;
     }
@@ -785,7 +762,7 @@ void FontState::renderText(const char *text, uint32_t len, int32_t x, int32_t y,
     currentFont->renderUTF(text, len, x, y, startIndex, numGlyphs,
                            mode, bounds, bitmap, bitmapW, bitmapH);
 
-    if(mCurrentQuadIndex != 0) {
+    if (mCurrentQuadIndex != 0) {
         issueDrawCommand();
         mCurrentQuadIndex = 0;
     }
@@ -819,8 +796,7 @@ void FontState::getFontColor(float *r, float *g, float *b, float *a) const {
     *a = mConstants.mFontColor[3];
 }
 
-void FontState::deinit(Context *rsc)
-{
+void FontState::deinit(Context *rsc) {
     mInitialized = false;
 
     mFontShaderFConstant.clear();
@@ -833,7 +809,7 @@ void FontState::deinit(Context *rsc)
     mFontProgramStore.clear();
 
     mTextTexture.clear();
-    for(uint32_t i = 0; i < mCacheLines.size(); i ++) {
+    for (uint32_t i = 0; i < mCacheLines.size(); i ++) {
         delete mCacheLines[i];
     }
     mCacheLines.clear();
@@ -841,11 +817,11 @@ void FontState::deinit(Context *rsc)
     mDefault.clear();
 
     Vector<Font*> fontsToDereference = mActiveFonts;
-    for(uint32_t i = 0; i < fontsToDereference.size(); i ++) {
+    for (uint32_t i = 0; i < fontsToDereference.size(); i ++) {
         fontsToDereference[i]->zeroUserRef();
     }
 
-    if(mLibrary) {
+    if (mLibrary) {
         FT_Done_FreeType( mLibrary );
         mLibrary = NULL;
     }
@@ -854,10 +830,9 @@ void FontState::deinit(Context *rsc)
 namespace android {
 namespace renderscript {
 
-RsFont rsi_FontCreateFromFile(Context *rsc, char const *name, uint32_t fontSize, uint32_t dpi)
-{
+RsFont rsi_FontCreateFromFile(Context *rsc, char const *name, uint32_t fontSize, uint32_t dpi) {
     Font *newFont = Font::create(rsc, name, fontSize, dpi);
-    if(newFont) {
+    if (newFont) {
         newFont->incUserRef();
     }
     return newFont;

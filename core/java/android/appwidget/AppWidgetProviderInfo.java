@@ -98,8 +98,7 @@ public class AppWidgetProviderInfo implements Parcelable {
      * the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
      */
     public int icon;
-    
-    
+
     /**
      * The previous name, if any, of the app widget receiver. If not supplied, it will be
      * ignored.
@@ -110,7 +109,12 @@ public class AppWidgetProviderInfo implements Parcelable {
      * @hide Pending API approval
      */
     public String oldName;
-    
+
+    /**
+     * The view id of the AppWidget subview which should be auto-advanced by the widget's host.
+     */
+    public int autoAdvanceViewId;
+
     /**
      * A preview of what the AppWidget will look like after it's configured.
      * If not supplied, the AppWidget's icon will be used.
@@ -142,8 +146,8 @@ public class AppWidgetProviderInfo implements Parcelable {
         this.label = in.readString();
         this.icon = in.readInt();
         this.previewImage = in.readInt();
+        this.autoAdvanceViewId = in.readInt();
     }
-
 
     public void writeToParcel(android.os.Parcel out, int flags) {
         if (this.provider != null) {
@@ -165,6 +169,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         out.writeString(this.label);
         out.writeInt(this.icon);
         out.writeInt(this.previewImage);
+        out.writeInt(this.autoAdvanceViewId);
     }
 
     public int describeContents() {
@@ -192,5 +197,3 @@ public class AppWidgetProviderInfo implements Parcelable {
         return "AppWidgetProviderInfo(provider=" + this.provider + ")";
     }
 }
-
-

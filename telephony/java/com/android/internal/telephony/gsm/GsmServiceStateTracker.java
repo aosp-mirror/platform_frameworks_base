@@ -1033,8 +1033,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         }
 
         if (hasNetworkTypeChanged) {
-            // TODO - do we really want this?
-            phone.notifyDataConnection(null, null);
+            phone.notifyDataConnection();
         }
 
         if (hasRoamingOn) {

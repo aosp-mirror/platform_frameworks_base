@@ -42,8 +42,7 @@ using namespace android::renderscript;
 // Context
 //////////////////////////////////////////////////////////////////////////////
 
-static void SC_bindTexture(RsProgramFragment vpf, uint32_t slot, RsAllocation va)
-{
+static void SC_bindTexture(RsProgramFragment vpf, uint32_t slot, RsAllocation va) {
     CHECK_OBJ_OR_NULL(va);
     CHECK_OBJ(vpf);
     GET_TLS();
@@ -51,11 +50,9 @@ static void SC_bindTexture(RsProgramFragment vpf, uint32_t slot, RsAllocation va
                            static_cast<ProgramFragment *>(vpf),
                            slot,
                            static_cast<Allocation *>(va));
-
 }
 
-static void SC_bindSampler(RsProgramFragment vpf, uint32_t slot, RsSampler vs)
-{
+static void SC_bindSampler(RsProgramFragment vpf, uint32_t slot, RsSampler vs) {
     CHECK_OBJ_OR_NULL(vs);
     CHECK_OBJ(vpf);
     GET_TLS();
@@ -63,32 +60,27 @@ static void SC_bindSampler(RsProgramFragment vpf, uint32_t slot, RsSampler vs)
                            static_cast<ProgramFragment *>(vpf),
                            slot,
                            static_cast<Sampler *>(vs));
-
 }
 
-static void SC_bindProgramStore(RsProgramStore pfs)
-{
+static void SC_bindProgramStore(RsProgramStore pfs) {
     CHECK_OBJ_OR_NULL(pfs);
     GET_TLS();
     rsi_ContextBindProgramStore(rsc, pfs);
 }
 
-static void SC_bindProgramFragment(RsProgramFragment pf)
-{
+static void SC_bindProgramFragment(RsProgramFragment pf) {
     CHECK_OBJ_OR_NULL(pf);
     GET_TLS();
     rsi_ContextBindProgramFragment(rsc, pf);
 }
 
-static void SC_bindProgramVertex(RsProgramVertex pv)
-{
+static void SC_bindProgramVertex(RsProgramVertex pv) {
     CHECK_OBJ_OR_NULL(pv);
     GET_TLS();
     rsi_ContextBindProgramVertex(rsc, pv);
 }
 
-static void SC_bindProgramRaster(RsProgramRaster pv)
-{
+static void SC_bindProgramRaster(RsProgramRaster pv) {
     CHECK_OBJ_OR_NULL(pv);
     GET_TLS();
     rsi_ContextBindProgramRaster(rsc, pv);
@@ -98,39 +90,32 @@ static void SC_bindProgramRaster(RsProgramRaster pv)
 // VP
 //////////////////////////////////////////////////////////////////////////////
 
-static void SC_vpLoadProjectionMatrix(const rsc_Matrix *m)
-{
+static void SC_vpLoadProjectionMatrix(const rsc_Matrix *m) {
     GET_TLS();
     rsc->getVertex()->setProjectionMatrix(rsc, m);
 }
 
-static void SC_vpLoadModelMatrix(const rsc_Matrix *m)
-{
+static void SC_vpLoadModelMatrix(const rsc_Matrix *m) {
     GET_TLS();
     rsc->getVertex()->setModelviewMatrix(rsc, m);
 }
 
-static void SC_vpLoadTextureMatrix(const rsc_Matrix *m)
-{
+static void SC_vpLoadTextureMatrix(const rsc_Matrix *m) {
     GET_TLS();
     rsc->getVertex()->setTextureMatrix(rsc, m);
 }
 
-
-static void SC_pfConstantColor(RsProgramFragment vpf, float r, float g, float b, float a)
-{
+static void SC_pfConstantColor(RsProgramFragment vpf, float r, float g, float b, float a) {
     GET_TLS();
     CHECK_OBJ(vpf);
     ProgramFragment *pf = static_cast<ProgramFragment *>(vpf);
     pf->setConstantColor(rsc, r, g, b, a);
 }
 
-static void SC_vpGetProjectionMatrix(rsc_Matrix *m)
-{
+static void SC_vpGetProjectionMatrix(rsc_Matrix *m) {
     GET_TLS();
     rsc->getVertex()->getProjectionMatrix(rsc, m);
 }
-
 
 //////////////////////////////////////////////////////////////////////////////
 // Drawing
@@ -143,8 +128,7 @@ static void SC_drawQuadTexCoords(float x1, float y1, float z1,
                                  float x3, float y3, float z3,
                                  float u3, float v3,
                                  float x4, float y4, float z4,
-                                 float u4, float v4)
-{
+                                 float u4, float v4) {
     GET_TLS();
     if (!rsc->setupCheck()) {
         return;
@@ -172,16 +156,14 @@ static void SC_drawQuadTexCoords(float x1, float y1, float z1,
 static void SC_drawQuad(float x1, float y1, float z1,
                         float x2, float y2, float z2,
                         float x3, float y3, float z3,
-                        float x4, float y4, float z4)
-{
+                        float x4, float y4, float z4) {
     SC_drawQuadTexCoords(x1, y1, z1, 0, 1,
                          x2, y2, z2, 1, 1,
                          x3, y3, z3, 1, 0,
                          x4, y4, z4, 0, 0);
 }
 
-static void SC_drawSpriteScreenspace(float x, float y, float z, float w, float h)
-{
+static void SC_drawSpriteScreenspace(float x, float y, float z, float w, float h) {
     GET_TLS();
     ObjectBaseRef<const ProgramVertex> tmp(rsc->getVertex());
     rsc->setVertex(rsc->getDefaultProgramVertex());
@@ -228,8 +210,7 @@ static void SC_drawSprite(float x, float y, float z, float w, float h)
 */
 
 static void SC_drawRect(float x1, float y1,
-                        float x2, float y2, float z)
-{
+                        float x2, float y2, float z) {
     //LOGE("SC_drawRect %f,%f  %f,%f  %f", x1, y1, x2, y2, z);
     SC_drawQuad(x1, y2, z,
                 x2, y2, z,
@@ -237,8 +218,7 @@ static void SC_drawRect(float x1, float y1,
                 x1, y1, z);
 }
 
-static void SC_drawMesh(RsMesh vsm)
-{
+static void SC_drawMesh(RsMesh vsm) {
     CHECK_OBJ(vsm);
     GET_TLS();
     Mesh *sm = static_cast<Mesh *>(vsm);
@@ -248,8 +228,7 @@ static void SC_drawMesh(RsMesh vsm)
     sm->render(rsc);
 }
 
-static void SC_drawMeshPrimitive(RsMesh vsm, uint32_t primIndex)
-{
+static void SC_drawMeshPrimitive(RsMesh vsm, uint32_t primIndex) {
     CHECK_OBJ(vsm);
     GET_TLS();
     Mesh *sm = static_cast<Mesh *>(vsm);
@@ -259,8 +238,7 @@ static void SC_drawMeshPrimitive(RsMesh vsm, uint32_t primIndex)
     sm->renderPrimitive(rsc, primIndex);
 }
 
-static void SC_drawMeshPrimitiveRange(RsMesh vsm, uint32_t primIndex, uint32_t start, uint32_t len)
-{
+static void SC_drawMeshPrimitiveRange(RsMesh vsm, uint32_t primIndex, uint32_t start, uint32_t len) {
     CHECK_OBJ(vsm);
     GET_TLS();
     Mesh *sm = static_cast<Mesh *>(vsm);
@@ -270,9 +248,9 @@ static void SC_drawMeshPrimitiveRange(RsMesh vsm, uint32_t primIndex, uint32_t s
     sm->renderPrimitiveRange(rsc, primIndex, start, len);
 }
 
-static void SC_meshComputeBoundingBox(RsMesh vsm, float *minX, float *minY, float *minZ,
-                                                     float *maxX, float *maxY, float *maxZ)
-{
+static void SC_meshComputeBoundingBox(RsMesh vsm,
+                                      float *minX, float *minY, float *minZ,
+                                      float *maxX, float *maxY, float *maxZ) {
     CHECK_OBJ(vsm);
     GET_TLS();
     Mesh *sm = static_cast<Mesh *>(vsm);
@@ -291,35 +269,31 @@ static void SC_meshComputeBoundingBox(RsMesh vsm, float *minX, float *minY, floa
 //////////////////////////////////////////////////////////////////////////////
 
 
-static void SC_color(float r, float g, float b, float a)
-{
+static void SC_color(float r, float g, float b, float a) {
     GET_TLS();
     ProgramFragment *pf = (ProgramFragment *)rsc->getFragment();
     pf->setConstantColor(rsc, r, g, b, a);
 }
 
-static void SC_uploadToTexture2(RsAllocation va, uint32_t baseMipLevel)
-{
+static void SC_uploadToTexture2(RsAllocation va, uint32_t baseMipLevel) {
     CHECK_OBJ(va);
     GET_TLS();
     rsi_AllocationUploadToTexture(rsc, va, false, baseMipLevel);
 }
-static void SC_uploadToTexture(RsAllocation va)
-{
+
+static void SC_uploadToTexture(RsAllocation va) {
     CHECK_OBJ(va);
     GET_TLS();
     rsi_AllocationUploadToTexture(rsc, va, false, 0);
 }
 
-static void SC_uploadToBufferObject(RsAllocation va)
-{
+static void SC_uploadToBufferObject(RsAllocation va) {
     CHECK_OBJ(va);
     GET_TLS();
     rsi_AllocationUploadToBufferObject(rsc, va);
 }
 
-static void SC_ClearColor(float r, float g, float b, float a)
-{
+static void SC_ClearColor(float r, float g, float b, float a) {
     GET_TLS();
     rsc->setupProgramStore();
 
@@ -327,8 +301,7 @@ static void SC_ClearColor(float r, float g, float b, float a)
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-static void SC_ClearDepth(float v)
-{
+static void SC_ClearDepth(float v) {
     GET_TLS();
     rsc->setupProgramStore();
 
@@ -336,20 +309,17 @@ static void SC_ClearDepth(float v)
     glClear(GL_DEPTH_BUFFER_BIT);
 }
 
-static uint32_t SC_getWidth()
-{
+static uint32_t SC_getWidth() {
     GET_TLS();
     return rsc->getWidth();
 }
 
-static uint32_t SC_getHeight()
-{
+static uint32_t SC_getHeight() {
     GET_TLS();
     return rsc->getHeight();
 }
 
-static void SC_DrawTextAlloc(RsAllocation va, int x, int y)
-{
+static void SC_DrawTextAlloc(RsAllocation va, int x, int y) {
     CHECK_OBJ(va);
     GET_TLS();
     Allocation *alloc = static_cast<Allocation *>(va);
@@ -358,8 +328,7 @@ static void SC_DrawTextAlloc(RsAllocation va, int x, int y)
     rsc->mStateFont.renderText(text, allocSize, x, y);
 }
 
-static void SC_DrawText(const char *text, int x, int y)
-{
+static void SC_DrawText(const char *text, int x, int y) {
     GET_TLS();
     size_t textLen = strlen(text);
     rsc->mStateFont.renderText(text, textLen, x, y);
@@ -367,26 +336,24 @@ static void SC_DrawText(const char *text, int x, int y)
 
 static void SC_setMetrics(Font::Rect *metrics,
                           int32_t *left, int32_t *right,
-                          int32_t *top, int32_t *bottom)
-{
-    if(left) {
+                          int32_t *top, int32_t *bottom) {
+    if (left) {
         *left = metrics->left;
     }
-    if(right) {
+    if (right) {
         *right = metrics->right;
     }
-    if(top) {
+    if (top) {
         *top = metrics->top;
     }
-    if(bottom) {
+    if (bottom) {
         *bottom = metrics->bottom;
     }
 }
 
 static void SC_MeasureTextAlloc(RsAllocation va,
                                 int32_t *left, int32_t *right,
-                                int32_t *top, int32_t *bottom)
-{
+                                int32_t *top, int32_t *bottom) {
     CHECK_OBJ(va);
     GET_TLS();
     Allocation *alloc = static_cast<Allocation *>(va);
@@ -399,8 +366,7 @@ static void SC_MeasureTextAlloc(RsAllocation va,
 
 static void SC_MeasureText(const char *text,
                            int32_t *left, int32_t *right,
-                           int32_t *top, int32_t *bottom)
-{
+                           int32_t *top, int32_t *bottom) {
     GET_TLS();
     size_t textLen = strlen(text);
     Font::Rect metrics;
@@ -408,15 +374,13 @@ static void SC_MeasureText(const char *text,
     SC_setMetrics(&metrics, left, right, top, bottom);
 }
 
-static void SC_BindFont(RsFont font)
-{
+static void SC_BindFont(RsFont font) {
     CHECK_OBJ(font);
     GET_TLS();
     rsi_ContextBindFont(rsc, font);
 }
 
-static void SC_FontColor(float r, float g, float b, float a)
-{
+static void SC_FontColor(float r, float g, float b, float a) {
     GET_TLS();
     rsc->mStateFont.setFontColor(r, g, b, a);
 }
@@ -492,8 +456,7 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { NULL, NULL, false }
 };
 
-const ScriptCState::SymbolTable_t * ScriptCState::lookupSymbolGL(const char *sym)
-{
+const ScriptCState::SymbolTable_t * ScriptCState::lookupSymbolGL(const char *sym) {
     ScriptCState::SymbolTable_t *syms = gSyms;
 
     while (syms->mPtr) {

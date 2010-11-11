@@ -29,8 +29,7 @@ class ShaderCache;
 #define RS_SHADER_ATTR "ATTRIB_"
 #define RS_SHADER_UNI "UNI_"
 
-class Program : public ObjectBase
-{
+class Program : public ObjectBase {
 public:
 
     Program(Context *);
@@ -109,8 +108,6 @@ protected:
 
     bool loadShader(Context *, uint32_t type);
 };
-
-
 
 }
 }

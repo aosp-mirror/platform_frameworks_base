@@ -85,7 +85,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private int mDataActivity = TelephonyManager.DATA_ACTIVITY_NONE;
 
-    private int mDataConnectionState = TelephonyManager.DATA_CONNECTED;
+    private int mDataConnectionState = TelephonyManager.DATA_UNKNOWN;
 
     private boolean mDataConnectionPossible = false;
 
@@ -401,13 +401,14 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                 }
             } else {
-                mConnectedApns.remove(apnType);
-                if (mConnectedApns.isEmpty()) {
-                    mDataConnectionState = state;
-                    modified = true;
-                } else {
-                    // leave mDataConnectionState as is and
-                    // send out the new status for the APN in question.
+                if (mConnectedApns.remove(apnType)) {
+                    if (mConnectedApns.isEmpty()) {
+                        mDataConnectionState = state;
+                        modified = true;
+                    } else {
+                        // leave mDataConnectionState as is and
+                        // send out the new status for the APN in question.
+                    }
                 }
             }
             mDataConnectionPossible = isDataConnectivityPossible;
@@ -416,9 +417,11 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mDataConnectionLinkCapabilities = linkCapabilities;
             if (mDataConnectionNetworkType != networkType) {
                 mDataConnectionNetworkType = networkType;
+                // need to tell registered listeners about the new network type
                 modified = true;
             }
             if (modified) {
+                Slog.d(TAG, "onDataConnectionStateChanged(" + state + ", " + networkType + ")");
                 for (Record r : mRecords) {
                     if ((r.events & PhoneStateListener.LISTEN_DATA_CONNECTION_STATE) != 0) {
                         try {

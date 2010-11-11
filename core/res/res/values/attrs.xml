@@ -4048,6 +4048,9 @@
         <!-- A preview of what the AppWidget will look like after it's configured.
        	     If not supplied, the AppWidget's icon will be used. -->
         <attr name="previewImage" format="reference" />
+        <!-- The view id of the AppWidget subview which should be auto-advanced.
+             by the widget's host. -->
+        <attr name="autoAdvanceViewId" format="reference" />
     </declare-styleable>
 
     <!-- =============================== -->

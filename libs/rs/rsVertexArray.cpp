@@ -23,28 +23,22 @@
 #include <OpenGL/gl.h>
 #endif
 
-
 using namespace android;
 using namespace android::renderscript;
 
-
-VertexArray::VertexArray(const Attrib *attribs, uint32_t numAttribs)
-{
+VertexArray::VertexArray(const Attrib *attribs, uint32_t numAttribs) {
     mAttribs = attribs;
     mCount = numAttribs;
 }
 
-VertexArray::~VertexArray()
-{
+VertexArray::~VertexArray() {
 }
 
-VertexArray::Attrib::Attrib()
-{
+VertexArray::Attrib::Attrib() {
     clear();
 }
 
-void VertexArray::Attrib::clear()
-{
+void VertexArray::Attrib::clear() {
     buffer = 0;
     offset = 0;
     type = 0;
@@ -55,8 +49,9 @@ void VertexArray::Attrib::clear()
     name.setTo("");
 }
 
-void VertexArray::Attrib::set(uint32_t type, uint32_t size, uint32_t stride, bool normalized, uint32_t offset, const char *name)
-{
+void VertexArray::Attrib::set(uint32_t type, uint32_t size, uint32_t stride,
+                              bool normalized, uint32_t offset,
+                              const char *name) {
     clear();
     this->type = type;
     this->size = size;
@@ -67,7 +62,7 @@ void VertexArray::Attrib::set(uint32_t type, uint32_t size, uint32_t stride, boo
 }
 
 void VertexArray::logAttrib(uint32_t idx, uint32_t slot) const {
-    if(idx == 0) {
+    if (idx == 0) {
         LOGV("Starting vertex attribute binding");
     }
     LOGV("va %i: slot=%i name=%s buf=%i ptr=%p size=%i  type=0x%x  stride=0x%x  norm=%i  offset=0x%x",
@@ -82,8 +77,9 @@ void VertexArray::logAttrib(uint32_t idx, uint32_t slot) const {
          mAttribs[idx].offset);
 }
 
-void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, ShaderCache *sc) const
-{
+void VertexArray::setupGL2(const Context *rsc,
+                           class VertexArrayState *state,
+                           ShaderCache *sc) const {
     rsc->checkError("VertexArray::setupGL2 start");
     for (uint32_t ct=1; ct <= 0xf/*state->mLastEnableCount*/; ct++) {
         glDisableVertexAttribArray(ct);
@@ -92,10 +88,10 @@ void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, Sh
     rsc->checkError("VertexArray::setupGL2 disabled");
     for (uint32_t ct=0; ct < mCount; ct++) {
         int32_t slot = sc->vtxAttribSlot(mAttribs[ct].name);
-        if(rsc->props.mLogShadersAttr) {
+        if (rsc->props.mLogShadersAttr) {
             logAttrib(ct, slot);
         }
-        if(slot < 0) {
+        if (slot < 0) {
             continue;
         }
         glEnableVertexAttribArray(slot);

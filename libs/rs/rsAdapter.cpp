@@ -24,28 +24,23 @@
 using namespace android;
 using namespace android::renderscript;
 
-
-Adapter1D::Adapter1D(Context *rsc) : ObjectBase(rsc)
-{
+Adapter1D::Adapter1D(Context *rsc) : ObjectBase(rsc) {
     reset();
 }
 
-Adapter1D::Adapter1D(Context *rsc, Allocation *a) : ObjectBase(rsc)
-{
+Adapter1D::Adapter1D(Context *rsc, Allocation *a) : ObjectBase(rsc) {
     reset();
     setAllocation(a);
 }
 
-void Adapter1D::reset()
-{
+void Adapter1D::reset() {
     mY = 0;
     mZ = 0;
     mLOD = 0;
     mFace = 0;
 }
 
-void * Adapter1D::getElement(uint32_t x)
-{
+void * Adapter1D::getElement(uint32_t x) {
     rsAssert(mAllocation.get());
     rsAssert(mAllocation->getPtr());
     rsAssert(mAllocation->getType());
@@ -54,8 +49,7 @@ void * Adapter1D::getElement(uint32_t x)
     return ptr;
 }
 
-void Adapter1D::subData(uint32_t xoff, uint32_t count, const void *data)
-{
+void Adapter1D::subData(uint32_t xoff, uint32_t count, const void *data) {
     if (mAllocation.get() && mAllocation.get()->getType()) {
         void *ptr = getElement(xoff);
         count *= mAllocation.get()->getType()->getElementSizeBytes();
@@ -63,44 +57,37 @@ void Adapter1D::subData(uint32_t xoff, uint32_t count, const void *data)
     }
 }
 
-void Adapter1D::data(const void *data)
-{
+void Adapter1D::data(const void *data) {
     memcpy(getElement(0),
            data,
            mAllocation.get()->getType()->getSizeBytes());
 }
 
-void Adapter1D::serialize(OStream *stream) const
-{
-
+void Adapter1D::serialize(OStream *stream) const {
 }
 
-Adapter1D *Adapter1D::createFromStream(Context *rsc, IStream *stream)
-{
+Adapter1D *Adapter1D::createFromStream(Context *rsc, IStream *stream) {
     return NULL;
 }
 
 namespace android {
 namespace renderscript {
 
-RsAdapter1D rsi_Adapter1DCreate(Context *rsc)
-{
+RsAdapter1D rsi_Adapter1DCreate(Context *rsc) {
     Adapter1D *a = new Adapter1D(rsc);
     a->incUserRef();
     return a;
 }
 
-void rsi_Adapter1DBindAllocation(Context *rsc, RsAdapter1D va, RsAllocation valloc)
-{
+void rsi_Adapter1DBindAllocation(Context *rsc, RsAdapter1D va, RsAllocation valloc) {
     Adapter1D * a = static_cast<Adapter1D *>(va);
     Allocation * alloc = static_cast<Allocation *>(valloc);
     a->setAllocation(alloc);
 }
 
-void rsi_Adapter1DSetConstraint(Context *rsc, RsAdapter1D va, RsDimension dim, uint32_t value)
-{
+void rsi_Adapter1DSetConstraint(Context *rsc, RsAdapter1D va, RsDimension dim, uint32_t value) {
     Adapter1D * a = static_cast<Adapter1D *>(va);
-    switch(dim) {
+    switch (dim) {
     case RS_DIMENSION_X:
         rsAssert(!"Cannot contrain X in an 1D adapter");
         return;
@@ -122,14 +109,12 @@ void rsi_Adapter1DSetConstraint(Context *rsc, RsAdapter1D va, RsDimension dim, u
     }
 }
 
-void rsi_Adapter1DSubData(Context *rsc, RsAdapter1D va, uint32_t xoff, uint32_t count, const void *data)
-{
+void rsi_Adapter1DSubData(Context *rsc, RsAdapter1D va, uint32_t xoff, uint32_t count, const void *data) {
     Adapter1D * a = static_cast<Adapter1D *>(va);
     a->subData(xoff, count, data);
 }
 
-void rsi_Adapter1DData(Context *rsc, RsAdapter1D va, const void *data)
-{
+void rsi_Adapter1DData(Context *rsc, RsAdapter1D va, const void *data) {
     Adapter1D * a = static_cast<Adapter1D *>(va);
     a->data(data);
 }
@@ -139,26 +124,22 @@ void rsi_Adapter1DData(Context *rsc, RsAdapter1D va, const void *data)
 
 //////////////////////////
 
-Adapter2D::Adapter2D(Context *rsc) : ObjectBase(rsc)
-{
+Adapter2D::Adapter2D(Context *rsc) : ObjectBase(rsc) {
     reset();
 }
 
-Adapter2D::Adapter2D(Context *rsc, Allocation *a) : ObjectBase(rsc)
-{
+Adapter2D::Adapter2D(Context *rsc, Allocation *a) : ObjectBase(rsc) {
     reset();
     setAllocation(a);
 }
 
-void Adapter2D::reset()
-{
+void Adapter2D::reset() {
     mZ = 0;
     mLOD = 0;
     mFace = 0;
 }
 
-void * Adapter2D::getElement(uint32_t x, uint32_t y) const
-{
+void * Adapter2D::getElement(uint32_t x, uint32_t y) const {
     rsAssert(mAllocation.get());
     rsAssert(mAllocation->getPtr());
     rsAssert(mAllocation->getType());
@@ -167,8 +148,7 @@ void * Adapter2D::getElement(uint32_t x, uint32_t y) const
     return ptr;
 }
 
-void Adapter2D::subData(uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, const void *data)
-{
+void Adapter2D::subData(uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, const void *data) {
     rsAssert(mAllocation.get());
     rsAssert(mAllocation->getPtr());
     rsAssert(mAllocation->getType());
@@ -183,20 +163,16 @@ void Adapter2D::subData(uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, co
     }
 }
 
-void Adapter2D::data(const void *data)
-{
+void Adapter2D::data(const void *data) {
     memcpy(getElement(0,0),
            data,
            mAllocation.get()->getType()->getSizeBytes());
 }
 
-void Adapter2D::serialize(OStream *stream) const
-{
-
+void Adapter2D::serialize(OStream *stream) const {
 }
 
-Adapter2D *Adapter2D::createFromStream(Context *rsc, IStream *stream)
-{
+Adapter2D *Adapter2D::createFromStream(Context *rsc, IStream *stream) {
     return NULL;
 }
 
@@ -204,24 +180,21 @@ Adapter2D *Adapter2D::createFromStream(Context *rsc, IStream *stream)
 namespace android {
 namespace renderscript {
 
-RsAdapter2D rsi_Adapter2DCreate(Context *rsc)
-{
+RsAdapter2D rsi_Adapter2DCreate(Context *rsc) {
     Adapter2D *a = new Adapter2D(rsc);
     a->incUserRef();
     return a;
 }
 
-void rsi_Adapter2DBindAllocation(Context *rsc, RsAdapter2D va, RsAllocation valloc)
-{
+void rsi_Adapter2DBindAllocation(Context *rsc, RsAdapter2D va, RsAllocation valloc) {
     Adapter2D * a = static_cast<Adapter2D *>(va);
     Allocation * alloc = static_cast<Allocation *>(valloc);
     a->setAllocation(alloc);
 }
 
-void rsi_Adapter2DSetConstraint(Context *rsc, RsAdapter2D va, RsDimension dim, uint32_t value)
-{
+void rsi_Adapter2DSetConstraint(Context *rsc, RsAdapter2D va, RsDimension dim, uint32_t value) {
     Adapter2D * a = static_cast<Adapter2D *>(va);
-    switch(dim) {
+    switch (dim) {
     case RS_DIMENSION_X:
         rsAssert(!"Cannot contrain X in an 2D adapter");
         return;
@@ -243,14 +216,12 @@ void rsi_Adapter2DSetConstraint(Context *rsc, RsAdapter2D va, RsDimension dim, u
     }
 }
 
-void rsi_Adapter2DData(Context *rsc, RsAdapter2D va, const void *data)
-{
+void rsi_Adapter2DData(Context *rsc, RsAdapter2D va, const void *data) {
     Adapter2D * a = static_cast<Adapter2D *>(va);
     a->data(data);
 }
 
-void rsi_Adapter2DSubData(Context *rsc, RsAdapter2D va, uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, const void *data)
-{
+void rsi_Adapter2DSubData(Context *rsc, RsAdapter2D va, uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, const void *data) {
     Adapter2D * a = static_cast<Adapter2D *>(va);
     a->subData(xoff, yoff, w, h, data);
 }

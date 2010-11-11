@@ -951,8 +951,12 @@ public final class CookieManager {
                 }
                 equalIndex = cookieString.indexOf(EQUAL, index);
                 if (equalIndex > 0) {
-                    String name = cookieString.substring(index, equalIndex)
-                            .toLowerCase();
+                    String name = cookieString.substring(index, equalIndex).toLowerCase();
+                    int valueIndex = equalIndex + 1;
+                    while (valueIndex < length && cookieString.charAt(valueIndex) == WHITE_SPACE) {
+                        valueIndex++;
+                    }
+
                     if (name.equals(EXPIRES)) {
                         int comaIndex = cookieString.indexOf(COMMA, equalIndex);
 
@@ -960,7 +964,7 @@ public final class CookieManager {
                         // (Weekday, DD-Mon-YY HH:MM:SS GMT) if it applies.
                         // "Wednesday" is the longest Weekday which has length 9
                         if ((comaIndex != -1) &&
-                                (comaIndex - equalIndex <= 10)) {
+                                (comaIndex - valueIndex <= 10)) {
                             index = comaIndex + 1;
                         }
                     }
@@ -975,8 +979,7 @@ public final class CookieManager {
                     } else {
                         index = Math.min(semicolonIndex, commaIndex);
                     }
-                    String value =
-                            cookieString.substring(equalIndex + 1, index);
+                    String value = cookieString.substring(valueIndex, index);
                     
                     // Strip quotes if they exist
                     if (value.length() > 2 && value.charAt(0) == QUOTATION) {

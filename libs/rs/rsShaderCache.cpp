@@ -43,10 +43,10 @@ void ShaderCache::updateUniformArrayData(Context *rsc, Program *prog, uint32_t l
                                          UniformQueryData **uniformList, uint32_t uniListSize) {
 
     for (uint32_t ct=0; ct < prog->getUniformCount(); ct++) {
-        if(data[ct].slot >= 0 && data[ct].arraySize > 1) {
+        if (data[ct].slot >= 0 && data[ct].arraySize > 1) {
             //Iterate over the list of active GL uniforms and find highest array index
-            for(uint32_t ui = 0; ui < uniListSize; ui ++) {
-                if(prog->getUniformName(ct) == uniformList[ui]->name) {
+            for (uint32_t ui = 0; ui < uniListSize; ui ++) {
+                if (prog->getUniformName(ct) == uniformList[ui]->name) {
                     data[ct].arraySize = (uint32_t)uniformList[ui]->arraySize;
                     break;
                 }
@@ -70,21 +70,20 @@ void ShaderCache::populateUniformData(Program *prog, uint32_t linkedID, UniformD
 bool ShaderCache::hasArrayUniforms(ProgramVertex *vtx, ProgramFragment *frag) {
     UniformData *data = mCurrent->vtxUniforms;
     for (uint32_t ct=0; ct < vtx->getUniformCount(); ct++) {
-        if(data[ct].slot >= 0 && data[ct].arraySize > 1) {
+        if (data[ct].slot >= 0 && data[ct].arraySize > 1) {
             return true;
         }
     }
     data = mCurrent->fragUniforms;
     for (uint32_t ct=0; ct < frag->getUniformCount(); ct++) {
-        if(data[ct].slot >= 0 && data[ct].arraySize > 1) {
+        if (data[ct].slot >= 0 && data[ct].arraySize > 1) {
             return true;
         }
     }
     return false;
 }
 
-bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag)
-{
+bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag) {
     if (!vtx->getShaderID()) {
         vtx->loadShader(rsc);
     }
@@ -93,12 +92,12 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
     }
 
     // Don't try to cache if shaders failed to load
-    if(!vtx->getShaderID() || !frag->getShaderID()) {
+    if (!vtx->getShaderID() || !frag->getShaderID()) {
         return false;
     }
     //LOGV("ShaderCache lookup  vtx %i, frag %i", vtx->getShaderID(), frag->getShaderID());
     uint32_t entryCount = mEntries.size();
-    for(uint32_t ct = 0; ct < entryCount; ct ++) {
+    for (uint32_t ct = 0; ct < entryCount; ct ++) {
         if ((mEntries[ct]->vtx == vtx->getShaderID()) &&
             (mEntries[ct]->frag == frag->getShaderID())) {
 
@@ -170,16 +169,16 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
         UniformQueryData **uniformList = NULL;
         GLint numUniforms = 0;
         bool hasArrays = hasArrayUniforms(vtx, frag);
-        if(hasArrays) {
+        if (hasArrays) {
             // Get the number of active uniforms and the length of the longest name
             glGetProgramiv(pgm, GL_ACTIVE_UNIFORMS, &numUniforms);
             GLint maxNameLength = 0;
             glGetProgramiv(pgm, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLength);
-            if(numUniforms > 0 && maxNameLength > 0) {
+            if (numUniforms > 0 && maxNameLength > 0) {
                 uniformList = new UniformQueryData*[numUniforms];
                 // Iterate over all the uniforms and build the list we
                 // can later use to match our uniforms to
-                for(uint32_t ct = 0; ct < (uint32_t)numUniforms; ct++) {
+                for (uint32_t ct = 0; ct < (uint32_t)numUniforms; ct++) {
                     uniformList[ct] = new UniformQueryData(maxNameLength);
                     glGetActiveUniform(pgm, ct, maxNameLength, &uniformList[ct]->writtenLength,
                                        &uniformList[ct]->arraySize, &uniformList[ct]->type,
@@ -199,8 +198,8 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
                                uniformList, (uint32_t)numUniforms);
 
         // Clean up the uniform data from GL
-        if(uniformList != NULL) {
-            for(uint32_t ct = 0; ct < (uint32_t)numUniforms; ct++) {
+        if (uniformList != NULL) {
+            for (uint32_t ct = 0; ct < (uint32_t)numUniforms; ct++) {
                 delete uniformList[ct];
             }
             delete[] uniformList;
@@ -216,17 +215,16 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
 
 int32_t ShaderCache::vtxAttribSlot(const String8 &attrName) const {
     for (uint32_t ct=0; ct < mCurrent->vtxAttrCount; ct++) {
-        if(attrName == mCurrent->vtxAttrs[ct].name) {
+        if (attrName == mCurrent->vtxAttrs[ct].name) {
             return mCurrent->vtxAttrs[ct].slot;
         }
     }
     return -1;
 }
 
-void ShaderCache::cleanupVertex(uint32_t id)
-{
+void ShaderCache::cleanupVertex(uint32_t id) {
     int32_t numEntries = (int32_t)mEntries.size();
-    for(int32_t ct = 0; ct < numEntries; ct ++) {
+    for (int32_t ct = 0; ct < numEntries; ct ++) {
         if (mEntries[ct]->vtx == id) {
             glDeleteProgram(mEntries[ct]->program);
 
@@ -238,10 +236,9 @@ void ShaderCache::cleanupVertex(uint32_t id)
     }
 }
 
-void ShaderCache::cleanupFragment(uint32_t id)
-{
+void ShaderCache::cleanupFragment(uint32_t id) {
     int32_t numEntries = (int32_t)mEntries.size();
-    for(int32_t ct = 0; ct < numEntries; ct ++) {
+    for (int32_t ct = 0; ct < numEntries; ct ++) {
         if (mEntries[ct]->frag == id) {
             glDeleteProgram(mEntries[ct]->program);
 
@@ -253,7 +250,6 @@ void ShaderCache::cleanupFragment(uint32_t id)
     }
 }
 
-void ShaderCache::cleanupAll()
-{
+void ShaderCache::cleanupAll() {
 }
 

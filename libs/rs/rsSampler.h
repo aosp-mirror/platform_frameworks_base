@@ -28,8 +28,7 @@ const static uint32_t RS_MAX_SAMPLER_SLOT = 16;
 
 class SamplerState;
 
-class Sampler : public ObjectBase
-{
+class Sampler : public ObjectBase {
 public:
     Sampler(Context *,
             RsSamplerValue magFilter,
@@ -63,14 +62,11 @@ protected:
 
 private:
     Sampler(Context *);
-
 };
 
 
-class SamplerState
-{
+class SamplerState {
 public:
-
     RsSamplerValue mMagFilter;
     RsSamplerValue mMinFilter;
     RsSamplerValue mWrapS;
@@ -78,14 +74,8 @@ public:
     RsSamplerValue mWrapR;
     float mAniso;
 
-
     ObjectBaseRef<Sampler> mSamplers[RS_MAX_SAMPLER_SLOT];
-
-    //void setupGL();
-
 };
-
-
 
 }
 }
