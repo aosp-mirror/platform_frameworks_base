@@ -163,6 +163,10 @@ void OpenGLRenderer::finish() {
 #endif
 #if DEBUG_MEMORY_USAGE
     mCaches.dumpMemoryUsage();
+#else
+    if (mCaches.getDebugLevel() & kDebugMemory) {
+        mCaches.dumpMemoryUsage();
+    }
 #endif
 }
 

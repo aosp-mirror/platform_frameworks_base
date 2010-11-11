@@ -63,6 +63,8 @@ void PathCache::init() {
     GLint maxTextureSize;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
     mMaxTextureSize = maxTextureSize;
+
+    mDebugEnabled = readDebugLevel() & kDebugCaches;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -98,6 +100,9 @@ void PathCache::operator()(PathCacheEntry& path, PathTexture*& texture) {
 
         PATH_LOGD("PathCache::callback: delete path: name, size, mSize = %d, %d, %d",
                 texture->id, size, mSize);
+        if (mDebugEnabled) {
+            LOGD("Path deleted, size = %d", size);
+        }
 
         glDeleteTextures(1, &texture->id);
         delete texture;
@@ -199,6 +204,9 @@ PathTexture* PathCache::addTexture(const PathCacheEntry& entry,
         mSize += size;
         PATH_LOGD("PathCache::get: create path: name, size, mSize = %d, %d, %d",
                 texture->id, size, mSize);
+        if (mDebugEnabled) {
+            LOGD("Path created, size = %d", size);
+        }
         mCache.put(entry, texture);
         mLock.unlock();
     } else {
