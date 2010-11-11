@@ -961,7 +961,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // enabled.
         String id = Settings.Secure.getString(mContext.getContentResolver(),
                 Settings.Secure.DEFAULT_INPUT_METHOD);
-        if (id != null && id.length() > 0) {
+        // There is no input method selected, try to choose new applicable input method.
+        if (TextUtils.isEmpty(id) && chooseNewDefaultIMELocked()) {
+            id = Settings.Secure.getString(mContext.getContentResolver(),
+                    Settings.Secure.DEFAULT_INPUT_METHOD);
+        }
+        if (!TextUtils.isEmpty(id)) {
             try {
                 setInputMethodLocked(id, getSelectedInputMethodSubtypeId(id));
             } catch (IllegalArgumentException e) {
@@ -1497,6 +1502,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
             InputMethodInfo imi = enabled.get(i);
+            if (DEBUG) {
+                Slog.d(TAG, "New default IME was selected: " + imi.getId());
+            }
             resetSelectedInputMethodAndSubtypeLocked(imi.getId());
             return true;
         }
@@ -1800,9 +1808,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 // Disabled input method is currently selected, switch to another one.
                 String selId = Settings.Secure.getString(mContext.getContentResolver(),
                         Settings.Secure.DEFAULT_INPUT_METHOD);
-                if (id.equals(selId)) {
-                    resetSelectedInputMethodAndSubtypeLocked(enabledInputMethodsList.size() > 0
-                            ? enabledInputMethodsList.get(0).first : "");
+                if (id.equals(selId) && !chooseNewDefaultIMELocked()) {
+                    Slog.i(TAG, "Can't find new IME, unsetting the current input method.");
+                    resetSelectedInputMethodAndSubtypeLocked("");
                 }
                 // Previous state was enabled.
                 return true;
@@ -1926,7 +1934,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // The first subtype applicable to the system locale will be defined as the most applicable
         // subtype.
         if (DEBUG) {
-            Slog.d(TAG, "Applicable InputMethodSubtype was found: " + applicableSubtypeId
+            Slog.d(TAG, "Applicable InputMethodSubtype was found: " + applicableSubtypeId + ","
                     + subtypes.get(applicableSubtypeId).getLocale());
         }
         return applicableSubtypeId;
