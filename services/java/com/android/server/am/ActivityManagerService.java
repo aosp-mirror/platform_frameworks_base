@@ -6702,8 +6702,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (info.broadcastIntentAction != null) {
                 sb.append("Broadcast-Intent-Action: ").append(info.broadcastIntentAction).append("\n");
             }
-            if (info != null && info.durationMillis != -1) {
+            if (info.durationMillis != -1) {
                 sb.append("Duration-Millis: ").append(info.durationMillis).append("\n");
+            }
+            if (info.tags != null) {
+                for (String tag : info.tags) {
+                    sb.append("Span-Tag: ").append(tag).append("\n");
+                }
             }
             sb.append("\n");
             if (info.crashInfo != null && info.crashInfo.stackTrace != null) {
