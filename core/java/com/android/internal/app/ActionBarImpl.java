@@ -616,7 +616,7 @@ public class ActionBarImpl extends ActionBar {
     public int getSelectedNavigationIndex() {
         switch (mActionView.getNavigationMode()) {
             case NAVIGATION_MODE_TABS:
-                return mSelectedTab.getPosition();
+                return mSelectedTab != null ? mSelectedTab.getPosition() : -1;
             case NAVIGATION_MODE_LIST:
                 return mActionView.getDropdownSelectedPosition();
             default:
