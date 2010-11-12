@@ -63,6 +63,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Map.Entry;
@@ -81,6 +82,9 @@ public final class BridgeContext extends Activity {
     private final Map<String, Map<String, IResourceValue>> mProjectResources;
     private final Map<String, Map<String, IResourceValue>> mFrameworkResources;
     private final Map<IStyleResourceValue, IStyleResourceValue> mStyleInheritanceMap;
+
+    private final Map<Object, Map<String, String>> mDefaultPropMaps =
+        new IdentityHashMap<Object, Map<String,String>>();
 
     // maps for dynamically generated id representing style objects (IStyleResourceValue)
     private Map<Integer, IStyleResourceValue> mDynamicIdToStyleMap;
@@ -180,6 +184,9 @@ public final class BridgeContext extends Activity {
         return mLogger;
     }
 
+    public Map<String, String> getDefaultPropMap(Object key) {
+        return mDefaultPropMaps.get(key);
+    }
 
     // ------------- Activity Methods
 
@@ -285,13 +292,16 @@ public final class BridgeContext extends Activity {
             return null;
         }
 
-        Object key = null;
+        Map<String, String> defaultPropMap = null;
         if (parser != null) {
-            key = parser.getViewKey();
-        }
-        if (key != null) {
-            String attrs_name = Bridge.resolveResourceValue(attrs);
-            System.out.println("KEY: " + key.toString() + "(" + attrs_name + ")");
+            Object key = parser.getViewKey();
+            if (key != null) {
+                defaultPropMap = mDefaultPropMaps.get(key);
+                if (defaultPropMap == null) {
+                    defaultPropMap = new HashMap<String, String>();
+                    mDefaultPropMaps.put(key, defaultPropMap);
+                }
+            }
         }
 
         boolean[] frameworkAttributes = new boolean[1];
@@ -309,9 +319,6 @@ public final class BridgeContext extends Activity {
             customStyle = parser.getAttributeValue(null /* namespace*/, "style");
         }
         if (customStyle != null) {
-            if (key != null) {
-                print("style", customStyle, false);
-            }
             IResourceValue item = findResValue(customStyle, false /*forceFrameworkOnly*/);
 
             if (item instanceof IStyleResourceValue) {
@@ -323,8 +330,8 @@ public final class BridgeContext extends Activity {
             // get the name from the int.
             String defStyleName = searchAttr(defStyleAttr);
 
-            if (key != null) {
-                print("style", defStyleName, true);
+            if (defaultPropMap != null) {
+                defaultPropMap.put("style", defStyleName);
             }
 
             // look for the style in the current theme, and its parent:
@@ -385,20 +392,16 @@ public final class BridgeContext extends Activity {
                     // if we found a value, we make sure this doesn't reference another value.
                     // So we resolve it.
                     if (resValue != null) {
-                        if (key != null) {
-                            print(name, resValue.getValue(), true);
+                        // put the first default value, before the resolution.
+                        if (defaultPropMap != null) {
+                            defaultPropMap.put(name, resValue.getValue());
                         }
 
                         resValue = resolveResValue(resValue);
-                    } else if (key != null) {
-                        print(name, "<unknown>", true);
                     }
 
                     ta.bridgeSetValue(index, name, resValue);
                 } else {
-                    if (key != null) {
-                        print(name, value, false);
-                    }
                     // there is a value in the XML, but we need to resolve it in case it's
                     // referencing another resource or a theme value.
                     ta.bridgeSetValue(index, name, resolveValue(null, name, value));
@@ -409,15 +412,6 @@ public final class BridgeContext extends Activity {
         ta.sealArray();
 
         return ta;
-    }
-
-    private void print(String name, String value, boolean isDefault) {
-        System.out.print("\t" + name + " : " + value);
-        if (isDefault) {
-            System.out.println(" (default)");
-        } else {
-            System.out.println("");
-        }
     }
 
     @Override
