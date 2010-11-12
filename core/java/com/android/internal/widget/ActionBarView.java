@@ -330,6 +330,7 @@ public class ActionBarView extends ViewGroup {
         mSubtitle = subtitle;
         if (mSubtitleView != null) {
             mSubtitleView.setText(subtitle);
+            mSubtitleView.setVisibility(subtitle != null ? VISIBLE : GONE);
         }
     }
 

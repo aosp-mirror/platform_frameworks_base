@@ -24,6 +24,7 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.MeasureSpec;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ListPopupWindow;
 import android.widget.PopupWindow;
@@ -33,7 +34,8 @@ import java.lang.ref.WeakReference;
 /**
  * @hide
  */
-public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.OnKeyListener {
+public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.OnKeyListener,
+        ViewTreeObserver.OnGlobalLayoutListener {
     private static final String TAG = "MenuPopupHelper";
 
     private Context mContext;
@@ -42,6 +44,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     private int mPopupMaxWidth;
     private WeakReference<View> mAnchorView;
     private boolean mOverflowOnly;
+    private ViewTreeObserver mTreeObserver;
 
     private PopupWindow.OnDismissListener mDismissListener = new PopupWindow.OnDismissListener() {
         public void onDismiss() {
@@ -82,12 +85,18 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         mPopup.setAdapter(adapter);
         mPopup.setModal(true);
 
-        if (mAnchorView != null) {
-            mPopup.setAnchorView(mAnchorView.get());
-        } else if (mMenu instanceof SubMenuBuilder) {
+        View anchor = mAnchorView != null ? mAnchorView.get() : null;
+        if (anchor == null && mMenu instanceof SubMenuBuilder) {
             SubMenuBuilder subMenu = (SubMenuBuilder) mMenu;
             final MenuItemImpl itemImpl = (MenuItemImpl) subMenu.getItem();
-            mPopup.setAnchorView(itemImpl.getItemView(MenuBuilder.TYPE_ACTION_BUTTON, null));
+            anchor = itemImpl.getItemView(MenuBuilder.TYPE_ACTION_BUTTON, null);
+            mAnchorView = new WeakReference<View>(anchor);
+        }
+
+        if (anchor != null) {
+            mTreeObserver = anchor.getViewTreeObserver();
+            mTreeObserver.addOnGlobalLayoutListener(this);
+            mPopup.setAnchorView(anchor);
         } else {
             throw new IllegalStateException("MenuPopupHelper cannot be used without an anchor");
         }
@@ -101,6 +110,8 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         if (isShowing()) {
             mPopup.dismiss();
         }
+        mTreeObserver.removeGlobalOnLayoutListener(this);
+        mTreeObserver = null;
     }
 
     public boolean isShowing() {
@@ -115,7 +126,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
             item = mMenu.getItem(position);
         }
         mMenu.performItemAction(item, 0);
-        mPopup.dismiss();
+        dismiss();
     }
 
     public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -141,5 +152,18 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
             width = Math.max(width, itemView.getMeasuredWidth());
         }
         return width;
+    }
+
+    @Override
+    public void onGlobalLayout() {
+        if (!isShowing()) {
+            mTreeObserver.removeGlobalOnLayoutListener(this);
+            mTreeObserver = null;
+        } else {
+            final View anchor = mAnchorView != null ? mAnchorView.get() : null;
+            if (anchor != null && !anchor.isShown()) {
+                dismiss();
+            }
+        }
     }
 }
