@@ -56,6 +56,7 @@ function toggleDiv(link) {
     <li><a href="#InstallingADT">3. Installing the ADT Plugin for Eclipse</a></li>
     <li><a href="#components">4. Adding Platforms and Other Components</a>
       <ol>
+        <li><a href="#components">Available Components</a></li>
         <li><a href="#which">Recommended Components</a></li>
       </ol></li>
     <li><a href="#sdkContents">5. Exploring the SDK (Optional)</a></li>
@@ -119,51 +120,13 @@ href="{@docRoot}sdk/index.html">SDK download page</a>.</p>
 it to a safe location on your machine. By default, the SDK files are unpacked
 into a directory named <code>android-sdk-&lt;machine-platform&gt;</code>.</p>
 
-<p>Make a note of the name and
-location of the unpacked SDK directory on your system&mdash;you will need to
+<p>If you downloaded the Windows installer ({@code .exe} file), run it now and it will check
+whether the proper Java SE Development Kit (JDK) is installed (installing it, if necessary), then
+install the SDK Tools into a default location (which you can modify).</p>
+
+<p>Make a note of the name and location of the SDK directory on your system&mdash;you will need to
 refer to the SDK directory later, when setting up the ADT plugin and when using
 the SDK tools from command line.</p>
-
-<p>Optionally, you might want to add the location of the SDK's
-<code>tools/</code> directory and {@code platform-tools/} directory  to your system
-<code>PATH</code>. Both tool directories are located at the root of the SDK folder.
-
-
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
-width="9px" />
-        How to update your PATH</a>
-  <div class="toggleme">
-
-<p>Adding
-<code>tools/</code> and {@code platform-tools/} to your path lets you run Android Debug Bridge (adb)
-and the other command line <a
-href="{@docRoot}guide/developing/tools/index.html">tools</a> without needing to
-supply the full path to the tool directories. </p>
-
-<ul>
-    <li>On Linux, edit your <code>~/.bash_profile</code> or <code>~/.bashrc</code> file. Look
-    for a line that sets the PATH environment variable and add the
-    full path to the <code>tools/</code> and {@code platform-tools/} directories to it. If you don't
-    see a line setting the path, you can add one:
-
-    <pre>export PATH=${PATH}:&lt;your_sdk_dir&gt;/tools:&lt;your_sdk_dir&gt;/platform-tools</pre>
-    </li>
-
-    <li>On a Mac OS X, look in your home directory for <code>.bash_profile</code> and
-    proceed as for Linux. You can create the <code>.bash_profile</code> if
-    you haven't already set one up on your machine. </li>
-
-    <li>On Windows, right-click on My Computer, and select Properties.
-  Under the Advanced tab, hit the Environment Variables button, and in the
-  dialog that comes up, double-click on Path (under System Variables). Add the full path to the
-  <code>tools/</code> and {@code platform-tools/} directories to the path. </li>
-  </ul>
-
-</div><!-- end toggleme -->
-</div><!-- end toggleable -->
-
 
 
 <h2 id="InstallingADT">Step 3. Installing the ADT Plugin for Eclipse</h2>
@@ -204,28 +167,40 @@ application, you also need to download at least one Android platform and the SDK
 (tools that the latest platform depend upon). However, downloading
 additional components is highly recommended.</p>
 
+<p>If you used the Windows installer, when you complete the installation wizard, it will launch the
+Android SDK and AVD Manager with a default set of platforms and other components selected
+for you to install. Simply click <strong>Install</strong> to accept the recommended set of
+components and install them. You can then skip to <a href="#sdkContents">Step 5</a>, but we
+recommend you first read the section about the <a href="#components">Available Components</a> to
+better understand the components available from the Android SDK and AVD Manager.</p>
+
 <p>You can launch the Android SDK and AVD Manager in one of the following ways:</p>
 <ul>
   <li>From within Eclipse, select <strong>Window &gt; Android SDK and AVD Manager</strong>.</li>
   <li>On Windows, double-click the <code>SDK Manager.ext</code> file at the root of the Android
 SDK directory.</li>
   <li>On Mac or Linux, open a terminal and navigate to the <code>tools/</code> directory in the
-Android SDK, then execute: <pre>android update sdk</pre> <p>This will automatically select
-the required and recommended components for you to install.</p></li>
+Android SDK, then execute: <pre>android</pre> </li>
 </ul>
 
 <p>To download components, use the graphical UI of the Android SDK and AVD
 Manager, shown in Figure 1, to browse the SDK repository and select new or updated
 components. The Android SDK and AVD Manager will install the selected components in
 your SDK environment. For information about which components you should download, see the following
-section about <a href="#which">Recommended Components</a></p>
+section about <a href="#which">Recommended Components</a>.</p>
 
 <img src="/images/sdk_manager_packages.png" />
 <p class="img-caption"><strong>Figure 1.</strong> The Android SDK and AVD Manager's
 <strong>Available Packages</strong> panel, which shows the SDK components that are
 available for you to download into your environment.</p>
 
-<p>The SDK repository offers these types of components:</p>
+
+<h3 id="components">Available Components</h3>
+
+<p>By default, there are two repositories of components for your SDK: <em>Android
+Repository</em> and <em>Third party Add-ons</em>.</p>
+
+<p>The <em>Android Repository</em> offers these types of components:</p>
 
 <ul>
 <li><strong>SDK Tools</strong> (pre-installed in the Android SDK starter
@@ -249,20 +224,14 @@ system image, sample code, emulator skins, and any version specific tools. For
 detailed information about each platform, see the overview documents available
 under the section "Downloadable SDK Components," at left. </li>
 
-<li><strong>SDK Add-Ons</strong> &mdash; SDK add-ons provide a development
-environment for specific Android external
-library or a customized (but fully compliant) Android system image.  The Android
-SDK repository offers the Google APIs Add-On, which gives your application
-access to powerful mapping capabilities through the
-<code>com.google.android.maps</code> library. You can also add additional
-repositories, so that you can download other SDK add-ons, where available. </li>
-
-<li><strong>USB Driver for Windows</strong> &mdash; Contains driver files
+<li><strong>USB Driver for Windows</strong> (Windows only) &mdash; Contains driver files
 that you can install on your Windows computer, so that you can run and debug
 your applications on an actual device. You <em>do not</em> need the USB driver unless
 you plan to debug your application on an actual Android-powered device. If you
 develop on Mac OS X or Linux, you do not need a special driver to debug
-your application on an Android-powered device.</li>
+your application on an Android-powered device. (See <a
+href="{@docRoot}guide/developing/device.html">Developing on a Device</a> for more information
+about developing on a real device.)</li>
 
 <li><strong>Samples</strong> &mdash; Contains the sample code and apps available
 for each Android development platform. If you are just getting started with
@@ -274,6 +243,11 @@ tutorials. --></li>
 <li><strong>Documentation</strong> &mdash; Contains a local copy of the latest
 multiversion documentation for the Android framework API. </li>
 </ul>
+
+<p>The <em>Third party Add-ons</em> provide components that allow you to create a development
+environment using a specific Android external library (such as the Google Maps library) or a
+customized (but fully compliant) Android system image. You can add additional Add-on repositories,
+by clicking <strong>Add Add-on Site</strong>.</p>
 
 
 <h3 id="which">Recommended Components</h3>
@@ -495,6 +469,47 @@ documentation.</td>
 </tr>-->
 
 </table>
+
+
+<p>Optionally, you might want to add the location of the SDK's <code>tools/</code> and
+<code>platform-tools</code> to your <code>PATH</code> environment variable, to provide easy
+access to the tools.</p>
+
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
+width="9px" />
+        How to update your PATH</a>
+  <div class="toggleme">
+
+<p>Adding both <code>tools/</code> and <code>platform-tools/</code> to your PATH lets you run
+command line <a href="{@docRoot}guide/developing/tools/index.html">tools</a> without needing to
+supply the full path to the tool directories. Depending on your operating system, you can
+include these directories in your PATH in the following way:</p>
+
+<ul>
+
+  <li>On Windows, right-click on My Computer, and select Properties.
+  Under the Advanced tab, hit the Environment Variables button, and in the
+  dialog that comes up, double-click on Path (under System Variables). Add the full path to the
+  <code>tools/</code> and <code>platform-tools/</code> directories to the path. </li>
+
+  <li>On Linux, edit your <code>~/.bash_profile</code> or <code>~/.bashrc</code> file. Look
+  for a line that sets the PATH environment variable and add the
+  full path to the <code>tools/</code> and <code>platform-tools</code> directories to it. If you
+  don't see a line setting the path, you can add one:
+  <pre>export PATH=${PATH}:&lt;sdk&gt;/tools:&lt;sdk&gt;/platform-tools</pre>
+  </li>
+
+  <li>On a Mac OS X, look in your home directory for <code>.bash_profile</code> and
+  proceed as for Linux. You can create the <code>.bash_profile</code> if
+  you don't already have one. </li>
+</ul>
+
+</div><!-- end toggleme -->
+</div><!-- end toggleable -->
+
 
 <h2 id="NextSteps">Next Steps</h2>
 <p>Once you have completed installation, you are ready to

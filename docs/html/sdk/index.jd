@@ -23,7 +23,8 @@ sdk.linux_checksum=TODO
 
 <ol>
   <li>Prepare your development computer and ensure it meets the system requirements.</li>
-  <li>Install the SDK starter package from the table above.</li>
+  <li>Install the SDK starter package from the table above. (If you're on Windows, download the
+installer for help with the initial setup.)</li>
   <li>Install the ADT Plugin for Eclipse (if you'll be developing in Eclipse).</li>
   <li>Add Android platforms and other components to your SDK.</li>
   <li>Explore the contents of the Android SDK (optional).</li>
