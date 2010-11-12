@@ -2234,12 +2234,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // XXX Remove this once action bar supports these features.
             removeFeature(FEATURE_ACTION_BAR);
             // System.out.println("Title Icons!");
-        } else if ((features & ((1 << FEATURE_PROGRESS) | (1 << FEATURE_INDETERMINATE_PROGRESS))) != 0) {
+        } else if ((features & ((1 << FEATURE_PROGRESS) | (1 << FEATURE_INDETERMINATE_PROGRESS))) != 0
+                && (features & (1 << FEATURE_ACTION_BAR)) == 0) {
             // Special case for a window with only a progress bar (and title).
             // XXX Need to have a no-title version of embedded windows.
             layoutResource = com.android.internal.R.layout.screen_progress;
-            // XXX Remove this once action bar supports these features.
-            removeFeature(FEATURE_ACTION_BAR);
             // System.out.println("Progress!");
         } else if ((features & (1 << FEATURE_CUSTOM_TITLE)) != 0) {
             // Special case for a window with a custom title.
@@ -2351,6 +2350,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (mActionBar != null) {
                     if (mActionBar.getTitle() == null) {
                         mActionBar.setWindowTitle(mTitle);
+                    }
+                    final int localFeatures = getLocalFeatures();
+                    if ((localFeatures & (1 << FEATURE_PROGRESS)) != 0) {
+                        mActionBar.initProgress();
+                    }
+                    if ((localFeatures & (1 << FEATURE_INDETERMINATE_PROGRESS)) != 0) {
+                        mActionBar.initIndeterminateProgress();
                     }
                     // Post the panel invalidate for later; avoid application onCreateOptionsMenu
                     // being called in the middle of onCreate or similar.
@@ -2543,8 +2549,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mContentParent == null && shouldInstallDecor) {
             installDecor();
         }
-        mCircularProgressBar = (ProgressBar)findViewById(com.android.internal.R.id.progress_circular);
-        mCircularProgressBar.setVisibility(View.INVISIBLE);
+        mCircularProgressBar = (ProgressBar) findViewById(com.android.internal.R.id.progress_circular);
+        if (mCircularProgressBar != null) {
+            mCircularProgressBar.setVisibility(View.INVISIBLE);
+        }
         return mCircularProgressBar;
     }
 
@@ -2555,8 +2563,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mContentParent == null && shouldInstallDecor) {
             installDecor();
         }
-        mHorizontalProgressBar = (ProgressBar)findViewById(com.android.internal.R.id.progress_horizontal);
-        mHorizontalProgressBar.setVisibility(View.INVISIBLE);
+        mHorizontalProgressBar = (ProgressBar) findViewById(com.android.internal.R.id.progress_horizontal);
+        if (mHorizontalProgressBar != null) {
+            mHorizontalProgressBar.setVisibility(View.INVISIBLE);
+        }
         return mHorizontalProgressBar;
     }
 

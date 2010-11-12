@@ -1372,6 +1372,9 @@
   <public type="attr" name="textEditNoPasteWindowLayout" />
   <public type="attr" name="textIsSelectable" />
   <public type="attr" name="windowEnableSplitTouch" />
+  <public type="attr" name="indeterminateProgressStyle" />
+  <public type="attr" name="progressBarPadding" />
+  <public type="attr" name="animationResolution" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
