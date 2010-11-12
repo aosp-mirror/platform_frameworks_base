@@ -295,7 +295,7 @@ public class LayoutSceneImpl {
 
             if (mParams.isCustomBackgroundEnabled()) {
                 Graphics2D gc = mImage.createGraphics();
-                gc.setColor(new Color(mParams.getCustomBackgroundColor()));
+                gc.setColor(new Color(mParams.getCustomBackgroundColor(), true));
                 gc.fillRect(0, 0, renderScreenWidth, renderScreenHeight - mScreenOffset);
                 gc.dispose();
             }
