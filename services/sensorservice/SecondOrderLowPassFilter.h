@@ -54,6 +54,18 @@ public:
     float operator()(float in);
 };
 
+/*
+ * Two cascaded biquad IIR filters
+ * (4-poles IIR)
+ */
+class CascadedBiquadFilter {
+    BiquadFilter mA;
+    BiquadFilter mB;
+public:
+    CascadedBiquadFilter(const SecondOrderLowPassFilter& s);
+    float init(float in);
+    float operator()(float in);
+};
 
 // ---------------------------------------------------------------------------
 }; // namespace android
