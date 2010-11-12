@@ -58,7 +58,7 @@ private:
     enum {
         kPageSize            = 65536,
         kHighWaterThreshold  = 5 * 1024 * 1024,
-        kLowWaterThreshold   = 512 * 1024,
+        kLowWaterThreshold   = 1024 * 1024,
 
         // Read data after a 15 sec timeout whether we're actively
         // fetching or not.
