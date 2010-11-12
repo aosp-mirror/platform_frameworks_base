@@ -1078,7 +1078,7 @@ status_t StagefrightRecorder::setupCameraSource(
     if (mFrameRate == -1) {
         int32_t frameRate = 0;
         CHECK ((*cameraSource)->getFormat()->findInt32(
-                    kKeySampleRate, &frameRate));
+                    kKeyFrameRate, &frameRate));
         LOGI("Frame rate is not explicitly set. Use the current frame "
              "rate (%d fps)", frameRate);
         mFrameRate = frameRate;
@@ -1100,7 +1100,7 @@ status_t StagefrightRecorder::setupVideoEncoder(
 
     sp<MetaData> enc_meta = new MetaData;
     enc_meta->setInt32(kKeyBitRate, videoBitRate);
-    enc_meta->setInt32(kKeySampleRate, mFrameRate);
+    enc_meta->setInt32(kKeyFrameRate, mFrameRate);
 
     switch (mVideoEncoder) {
         case VIDEO_ENCODER_H263:
