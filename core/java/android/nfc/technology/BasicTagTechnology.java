@@ -14,31 +14,25 @@
  * limitations under the License.
  */
 
-package android.nfc;
+package android.nfc.technology;
 
 import java.io.IOException;
 
+import android.nfc.INfcAdapter;
+import android.nfc.INfcTag;
+import android.nfc.NfcAdapter;
+import android.nfc.Tag;
 import android.os.RemoteException;
 import android.util.Log;
 
 /**
- * A low-level connection to a {@link Tag} target.
- * <p>You can acquire this kind of connection with {@link NfcAdapter#createRawTagConnection
- * createRawTagConnection()}. Use the connection to send and receive data with {@link #transceive
- * transceive()}.
- * <p>
- * Applications must implement their own protocol stack on top of {@link #transceive transceive()}.
- *
- * <p class="note"><strong>Note:</strong>
- * Use of this class requires the {@link android.Manifest.permission#NFC}
- * permission.
- * @hide
+ * A base class for tag technologies that are built on top of transceive().
  */
-public class RawTagConnection {
+/* package */ abstract class BasicTagTechnology implements TagTechnology {
 
     /*package*/ final Tag mTag;
     /*package*/ boolean mIsConnected;
-    /*package*/ String mSelectedTarget;
+    /*package*/ int mSelectedTechnology;
     private final NfcAdapter mAdapter;
 
     // Following fields are final after construction, except for
@@ -49,30 +43,36 @@ public class RawTagConnection {
 
     private static final String TAG = "NFC";
 
-    /*package*/ RawTagConnection(NfcAdapter adapter, Tag tag, String target) throws RemoteException {
-        String[] targets = tag.getRawTargets();
+    /**
+     * @hide
+     */
+    public BasicTagTechnology(NfcAdapter adapter, Tag tag, int tech) throws RemoteException {
+        int[] techList = tag.getTechnologyList();
         int i;
 
         // Check target validity
-        for (i=0;i<targets.length;i++) {
-            if (target.equals(targets[i])) {
+        for (i = 0; i < techList.length; i++) {
+            if (tech == techList[i]) {
                 break;
             }
         }
-        if (i >= targets.length) {
-            // Target not found
-            throw new IllegalArgumentException();
+        if (i >= techList.length) {
+            // Technology not found
+            throw new IllegalArgumentException("Technology " + tech + " not present on tag " + tag);
         }
 
         mAdapter = adapter;
-        mService = mAdapter.mService;
+        mService = mAdapter.getService();
         mTagService = mService.getNfcTagInterface();
         mTag = tag;
-        mSelectedTarget = target;
+        mSelectedTechnology = tech;
     }
 
-    /*package*/ RawTagConnection(NfcAdapter adapter, Tag tag) throws RemoteException {
-        this(adapter, tag, tag.getRawTargets()[0]);
+    /**
+     * @hide
+     */
+    public BasicTagTechnology(NfcAdapter adapter, Tag tag) throws RemoteException {
+        this(adapter, tag, tag.getTechnologyList()[0]);
     }
 
     /** NFC service dead - attempt best effort recovery */
@@ -80,7 +80,7 @@ public class RawTagConnection {
         mAdapter.attemptDeadServiceRecovery(e);
         /* assigning to mService is not thread-safe, but this is best-effort code
          * and on a well-behaved system should never happen */
-        mService = mAdapter.mService;
+        mService = mAdapter.getService();
         try {
             mTagService = mService.getNfcTagInterface();
         } catch (RemoteException e2) {
@@ -92,6 +92,7 @@ public class RawTagConnection {
      * Get the {@link Tag} this connection is associated with.
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
      */
+    @Override
     public Tag getTag() {
         return mTag;
     }
@@ -99,8 +100,9 @@ public class RawTagConnection {
     /**
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
      */
-    public String getTagTarget() {
-        return mSelectedTarget;
+    @Override
+    public int getTechnologyId() {
+        return mSelectedTechnology;
     }
 
     /**
@@ -119,7 +121,7 @@ public class RawTagConnection {
         }
 
         try {
-            return mTagService.isPresent(mTag.mServiceHandle);
+            return mTagService.isPresent(mTag.getServiceHandle());
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return false;
@@ -136,6 +138,7 @@ public class RawTagConnection {
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
      * @throws IOException if the target is lost, or connect canceled
      */
+    @Override
     public void connect() throws IOException {
         //TODO(nxp): enforce exclusivity
         mIsConnected = true;
@@ -151,10 +154,11 @@ public class RawTagConnection {
      * calls to {@link #transceive transceive()} or {@link #connect} will fail.
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
      */
+    @Override
     public void close() {
         mIsConnected = false;
         try {
-            mTagService.close(mTag.mServiceHandle);
+            mTagService.close(mTag.getServiceHandle());
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
         }
@@ -173,7 +177,7 @@ public class RawTagConnection {
      */
     public byte[] transceive(byte[] data) throws IOException {
         try {
-            byte[] response = mTagService.transceive(mTag.mServiceHandle, data);
+            byte[] response = mTagService.transceive(mTag.getServiceHandle(), data);
             if (response == null) {
                 throw new IOException("transcieve failed");
             }

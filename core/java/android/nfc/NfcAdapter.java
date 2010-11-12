@@ -11,15 +11,11 @@
 
 package android.nfc;
 
-import java.lang.UnsupportedOperationException;
-
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.ActivityThread;
-import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.nfc.INfcAdapter;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -38,6 +34,12 @@ public final class NfcAdapter {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_TAG_DISCOVERED = "android.nfc.action.TAG_DISCOVERED";
+
+    /**
+     * Broadcast to only the activity that handles ACTION_TAG_DISCOVERED
+     * @hide
+     */
+    public static final String ACTION_TAG_LEFT_FIELD = "android.nfc.action.TAG_LOST";
 
     /**
      * Mandatory Tag extra for the ACTION_TAG intents.
@@ -170,6 +172,14 @@ public final class NfcAdapter {
     }
 
     /**
+     * Returns the binder interface to the service.
+     * @hide
+     */
+    public INfcAdapter getService() {
+        return mService;
+    }
+    
+    /**
      * Helper to check if this device has FEATURE_NFC, but without using
      * a context.
      * Equivalent to
@@ -230,8 +240,11 @@ public final class NfcAdapter {
         }
     }
 
-    /** NFC service dead - attempt best effort recovery */
-    /*package*/ void attemptDeadServiceRecovery(Exception e) {
+    /**
+     * NFC service dead - attempt best effort recovery
+     * @hide
+     */
+    public void attemptDeadServiceRecovery(Exception e) {
         Log.e(TAG, "NFC service dead - attempting to recover", e);
         INfcAdapter service = getServiceInterface();
         if (service == null) {
@@ -336,74 +349,6 @@ public final class NfcAdapter {
     public NdefMessage getLocalNdefMessage() {
         try {
             return mService.localGet();
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            return null;
-        }
-    }
-
-    /**
-     * Create a raw tag connection to the default Target
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     * @hide
-     */
-    public RawTagConnection createRawTagConnection(Tag tag) {
-        if (tag.mServiceHandle == 0) {
-            throw new IllegalArgumentException("mock tag cannot be used for connections");
-        }
-        try {
-            return new RawTagConnection(this, tag);
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            return null;
-        }
-    }
-
-    /**
-     * Create a raw tag connection to the specified Target
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     * @hide
-     */
-    public RawTagConnection createRawTagConnection(Tag tag, String target) {
-        if (tag.mServiceHandle == 0) {
-            throw new IllegalArgumentException("mock tag cannot be used for connections");
-        }
-        try {
-            return new RawTagConnection(this, tag, target);
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            return null;
-        }
-    }
-
-    /**
-     * Create an NDEF tag connection to the default Target
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     * @hide
-     */
-    public NdefTagConnection createNdefTagConnection(NdefTag tag) {
-        if (tag.mServiceHandle == 0) {
-            throw new IllegalArgumentException("mock tag cannot be used for connections");
-        }
-        try {
-            return new NdefTagConnection(this, tag);
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            return null;
-        }
-    }
-
-    /**
-     * Create an NDEF tag connection to the specified Target
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     * @hide
-     */
-    public NdefTagConnection createNdefTagConnection(NdefTag tag, String target) {
-        if (tag.mServiceHandle == 0) {
-            throw new IllegalArgumentException("mock tag cannot be used for connections");
-        }
-        try {
-            return new NdefTagConnection(this, tag, target);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return null;
