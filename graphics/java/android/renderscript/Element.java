@@ -22,6 +22,25 @@ import android.util.Log;
 /**
  * @hide
  *
+ * Element is the basic data type of RenderScript.  An element can be of 2
+ * forms.  Basic elements contain a single component of data.  This can be of
+ * any of the legal RS types.  Examples of basic element types.
+ * Single float value
+ * 4 element float vector
+ * single RGB-565 color
+ * single unsigned int 16
+ *
+ * Complex elements will contain a list of sub-elements and names.  This in
+ * effect represents a structure of data.  The fields can be accessed by name
+ * from a script or shader.  The memory layout is defined and ordered.  Data
+ * alignment is determinied by the most basic primitive type.  i.e. a float4
+ * vector will be alligned to sizeof(float) and not sizeof(float4).  The
+ * ordering of elements in memory will be the order in which they were added
+ * with each component aligned as necessary. No re-ordering will be done.
+ *
+ * The primary source of elements will be from scripts.  A script that exports a
+ * bind point for a data structure will generate a RS element to represent the
+ * data exported by the script.
  **/
 public class Element extends BaseObj {
     int mSize;
@@ -36,6 +55,21 @@ public class Element extends BaseObj {
 
     int getSizeBytes() {return mSize;}
 
+
+    /**
+     * DataType represents the basic type information for a basic element.  The
+     * naming convention follows.  For numeric types its FLOAT, SIGNED, UNSIGNED
+     * followed by the _BITS where BITS is the size of the data.  BOOLEAN is a
+     * true / false (1,0) represented in an 8 bit container.  The UNSIGNED
+     * variants with multiple bit definitions are for packed graphical data
+     * formats and represents vectors with per vector member sizes which are
+     * treated as a single unit for packing and alignment purposes.
+     *
+     * MATRIX the three matrix types contain FLOAT_32 elements and are treated
+     * as 32 bits for alignment purposes.
+     *
+     * RS_* objects.  32 bit opaque handles.
+     */
     public enum DataType {
         //FLOAT_16 (1, 2),
         FLOAT_32 (2, 4),
@@ -78,6 +112,12 @@ public class Element extends BaseObj {
         }
     }
 
+    /**
+     * The special interpretation of the data if required.  This is primarly
+     * useful for graphical data.  USER indicates no special interpretation is
+     * expected.  PIXEL is used in conjunction with the standard data types for
+     * representing texture formats.
+     */
     public enum DataKind {
         USER (0),
 
@@ -93,6 +133,12 @@ public class Element extends BaseObj {
         }
     }
 
+    /**
+     * Return if a element is too complex for use as a data source for a Mesh or
+     * a Program.
+     *
+     * @return boolean
+     */
     public boolean isComplex() {
         if (mElements == null) {
             return false;
@@ -105,6 +151,13 @@ public class Element extends BaseObj {
         return false;
     }
 
+    /**
+     * Utility function for returning an Element containing a single Boolean.
+     *
+     * @param rs Context to which the element will belong.
+     *
+     * @return Element
+     */
     public static Element BOOLEAN(RenderScript rs) {
         if(rs.mElement_BOOLEAN == null) {
             rs.mElement_BOOLEAN = createUser(rs, DataType.BOOLEAN);
@@ -112,6 +165,13 @@ public class Element extends BaseObj {
         return rs.mElement_BOOLEAN;
     }
 
+    /**
+     * Utility function for returning an Element containing a single UNSIGNED_8.
+     *
+     * @param rs Context to which the element will belong.
+     *
+     * @return Element
+     */
     public static Element U8(RenderScript rs) {
         if(rs.mElement_U8 == null) {
             rs.mElement_U8 = createUser(rs, DataType.UNSIGNED_8);
@@ -119,6 +179,13 @@ public class Element extends BaseObj {
         return rs.mElement_U8;
     }
 
+    /**
+     * Utility function for returning an Element containing a single SIGNED_8.
+     *
+     * @param rs Context to which the element will belong.
+     *
+     * @return Element
+     */
     public static Element I8(RenderScript rs) {
         if(rs.mElement_I8 == null) {
             rs.mElement_I8 = createUser(rs, DataType.SIGNED_8);
@@ -414,7 +481,14 @@ public class Element extends BaseObj {
         super.destroy();
     }
 
-    /////////////////////////////////////////
+    /**
+     * Create a custom Element of the specified DataType.  The DataKind will be
+     * set to USER and the vector size to 1 indicating non-vector.
+     *
+     * @param rs The context associated with the new Element.
+     * @param dt The DataType for the new element.
+     * @return Element
+     */
     public static Element createUser(RenderScript rs, DataType dt) {
         DataKind dk = DataKind.USER;
         boolean norm = false;
@@ -423,6 +497,17 @@ public class Element extends BaseObj {
         return new Element(id, rs, dt, dk, norm, vecSize);
     }
 
+    /**
+     * Create a custom vector element of the specified DataType and vector size.
+     *  DataKind will be set to USER.
+     *
+     * @param rs The context associated with the new Element.
+     * @param dt The DataType for the new element.
+     * @param size Vector size for the new Element.  Range 2-4 inclusive
+     *             supported.
+     *
+     * @return Element
+     */
     public static Element createVector(RenderScript rs, DataType dt, int size) {
         if (size < 2 || size > 4) {
             throw new RSIllegalArgumentException("Vector size out of rance 2-4.");
@@ -433,6 +518,18 @@ public class Element extends BaseObj {
         return new Element(id, rs, dt, dk, norm, size);
     }
 
+    /**
+     * Create a new pixel Element type.  A matching DataType and DataKind must
+     * be provided.  The DataType and DataKind must contain the same number of
+     * components.  Vector size will be set to 1.
+     *
+     * @param rs The context associated with the new Element.
+     * @param dt The DataType for the new element.
+     * @param dk The DataKind to specify the mapping of each component in the
+     *           DataType.
+     *
+     * @return Element
+     */
     public static Element createPixel(RenderScript rs, DataType dt, DataKind dk) {
         if (!(dk == DataKind.PIXEL_L ||
               dk == DataKind.PIXEL_A ||
@@ -473,6 +570,12 @@ public class Element extends BaseObj {
         return new Element(id, rs, dt, dk, norm, size);
     }
 
+    /**
+     * Builder class for producing complex elements with matching field and name
+     * pairs.  The builder starts empty.  The order in which elements are added
+     * is retained for the layout in memory.
+     *
+     */
     public static class Builder {
         RenderScript mRS;
         Element[] mElements;
@@ -480,6 +583,11 @@ public class Element extends BaseObj {
         int[] mArraySizes;
         int mCount;
 
+        /**
+         * Create a builder object.
+         *
+         * @param rs
+         */
         public Builder(RenderScript rs) {
             mRS = rs;
             mCount = 0;
@@ -488,6 +596,13 @@ public class Element extends BaseObj {
             mArraySizes = new int[8];
         }
 
+        /**
+         * Add an array of elements to this element.
+         *
+         * @param element
+         * @param name
+         * @param arraySize
+         */
         public void add(Element element, String name, int arraySize) {
             if (arraySize < 1) {
                 throw new RSIllegalArgumentException("Array size cannot be less than 1.");
@@ -509,10 +624,22 @@ public class Element extends BaseObj {
             mCount++;
         }
 
+        /**
+         * Add a single element to this Element.
+         *
+         * @param element
+         * @param name
+         */
         public void add(Element element, String name) {
             add(element, name, 1);
         }
 
+        /**
+         * Create the element from this builder.
+         *
+         *
+         * @return Element
+         */
         public Element create() {
             mRS.validate();
             Element[] ein = new Element[mCount];
