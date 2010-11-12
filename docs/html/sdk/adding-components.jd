@@ -98,20 +98,20 @@ complete.</p>
   This will reveal all of the components that are currently available for download
   from the SDK repository.</li>
   <li>Select the component(s) you'd like to install and click <strong>Install
-  Selected</strong>. If you aren't sure which packages to select, read <a
-  href="installing.html#which">Recommended Components</a>.</li>
-  <li>Verify and accept the components you want and click <strong>Install
-  Accepted</strong>. The components will now be installed into your existing
-  Android SDK directories.</li>
+  Selected</strong>. (If you aren't sure which packages to select, read <a
+  href="installing.html#which">Recommended Components</a>.)</li>
+  <li>Verify and accept the components you want (ensure each one is selected with a green
+checkmark) and click <strong>Install</strong>. The components will now be installed into
+your existing Android SDK directories.</li>
 </ol>
 
 <p>New platforms are automatically saved into the
-<code>&lt;<em>sdk</em>&gt;/platforms/</code> directory of your SDK;
-new add-ons are saved in the <code>&lt;<em>sdk</em>&gt;/add-ons/</code>
+<code>&lt;sdk&gt;/platforms/</code> directory of your SDK;
+new add-ons are saved in the <code>&lt;sdk&gt;/add-ons/</code>
 directory; samples are saved in the
-<code>&lt;<em>sdk</em>&gt;/samples/android-&lt;<em>level</em>&gt;/</code>;
+<code>&lt;sdk&gt;/samples/android-&lt;level&gt;/</code>;
 and new documentation is saved in the existing
-<code>&lt;<em>sdk</em>&gt;/docs/</code> directory (old docs are replaced).</p>
+<code>&lt;sdk&gt;/docs/</code> directory (old docs are replaced).</p>
 
 
 <h2 id="UpdatingComponents">Updating SDK Components</h2>
@@ -167,15 +167,15 @@ components that are needed by those you have selected.</p>
 
 <h2 id="AddingSites">Adding New Sites</h2>
 
-<p>By default, <strong>Available Packages</strong> only shows the default
-repository site, which offers platforms, SDK tools, documentation, the
-Google APIs Add-on, and other components. You can add other sites that host
+<p>By default, <strong>Available Packages</strong> displays components available from the
+<em>Android Repository</em> and <em>Third party Add-ons</em>. You can add other sites that host
 their own Android SDK add-ons, then download the SDK add-ons
 from those sites.</p>
 
 <p>For example, a mobile carrier or device manufacturer might offer additional
 API libraries that are supported by their own Android-powered devices. In order
-to develop using their libraries, you must install their Android SDK add-on. </p>
+to develop using their libraries, you must install their Android SDK add-on, if it's not already
+available under <em>Third party Add-ons</em>. </p>
 
 <p>If a carrier or device manufacturer has hosted an SDK add-on repository file
 on their web site, follow these steps to add their site to the SDK and AVD
@@ -183,11 +183,12 @@ Manager:</p>
 
 <ol>
   <li>Select <strong>Available Packages</strong> in the left panel.</li>
-  <li>Click <strong>Add Site</strong> and enter the URL of the
+  <li>Click <strong>Add Add-on Site</strong> and enter the URL of the
 {@code repository.xml} file. Click <strong>OK</strong>.</li>
 </ol>
-<p>Any SDK components available from the site will now be listed under
-<strong>Available Packages</strong>.</p>
+<p>Any SDK components available from the site will now be listed under a new item named
+<strong>User Add-ons</strong>.</p>
+
 
 <h2 id="troubleshooting">Troubleshooting</h2>
 
