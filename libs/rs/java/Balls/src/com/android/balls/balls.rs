@@ -6,7 +6,8 @@
 
 #pragma stateFragment(parent)
 
-rs_program_fragment gPF;
+rs_program_fragment gPFPoints;
+rs_program_fragment gPFLines;
 rs_program_vertex gPV;
 rs_program_raster gPR;
 rs_program_store gPS;
@@ -93,11 +94,12 @@ int root() {
     }
 
     frame++;
-    rsgBindProgramFragment(gPF);
+    rsgBindProgramFragment(gPFLines);
     rsgBindProgramVertex(gPV);
     rsgBindProgramRaster(gPR);
     rsgBindProgramStore(gPS);
     rsgDrawMesh(arcMesh, 0, 0, arcIdx);
+    rsgBindProgramFragment(gPFPoints);
     rsgDrawMesh(partMesh);
     rsClearObject(&bc.ain);
     rsClearObject(&bc.aout);
