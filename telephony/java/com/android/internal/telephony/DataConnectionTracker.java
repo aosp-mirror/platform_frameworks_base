@@ -478,7 +478,7 @@ public abstract class DataConnectionTracker extends Handler {
      *         {@code true} otherwise.
      */
     public synchronized boolean getDataEnabled() {
-        return dataEnabled[APN_DEFAULT_ID];
+        return (mMasterDataEnabled && dataEnabled[APN_DEFAULT_ID]);
     }
 
     /**
@@ -487,8 +487,8 @@ public abstract class DataConnectionTracker extends Handler {
      * @return {@code false} if data connectivity has been explicitly disabled,
      *         {@code true} otherwise.
      */
-    public boolean getAnyDataEnabled() {
-        return (enabledCount != 0);
+    public synchronized boolean getAnyDataEnabled() {
+        return (mMasterDataEnabled && (enabledCount != 0));
     }
 
     protected abstract void startNetStatPoll();
@@ -832,7 +832,9 @@ public abstract class DataConnectionTracker extends Handler {
 
     protected void onSetDataEnabled(boolean enable) {
         if (mMasterDataEnabled != enable) {
-            mMasterDataEnabled = enable;
+            synchronized (this) {
+                mMasterDataEnabled = enable;
+            }
             if (enable) {
                 mRetryMgr.resetRetryCount();
                 onTrySetupData(Phone.REASON_DATA_ENABLED);
