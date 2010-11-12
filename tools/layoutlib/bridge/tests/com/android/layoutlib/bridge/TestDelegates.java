@@ -37,9 +37,9 @@ import junit.framework.TestCase;
  * include the original class as first parameter (to access "this").
  *
  */
-public class TestNativeDelegate extends TestCase {
+public class TestDelegates extends TestCase {
 
-    public void  testNativeDelegates() {
+    public void testNativeDelegates() {
 
         final String[] classes = CreateInfo.DELEGATE_CLASS_NATIVES;
         final int count = classes.length;
@@ -48,10 +48,23 @@ public class TestNativeDelegate extends TestCase {
         }
     }
 
+    public void testMethodDelegates() {
+        final String[] methods = CreateInfo.DELEGATE_METHODS;
+        final int count = methods.length;
+        for (int i = 0 ; i < count ; i++) {
+            String methodName = methods[i];
+
+            // extract the class name
+            String className = methodName.substring(0, methodName.indexOf('#'));
+
+            loadAndCompareClasses(className, className + "_Delegate");
+        }
+    }
+
     private void loadAndCompareClasses(String originalClassName, String delegateClassName) {
         // load the classes
         try {
-            ClassLoader classLoader = TestNativeDelegate.class.getClassLoader();
+            ClassLoader classLoader = TestDelegates.class.getClassLoader();
             Class<?> originalClass = classLoader.loadClass(originalClassName);
             Class<?> delegateClass = classLoader.loadClass(delegateClassName);
 

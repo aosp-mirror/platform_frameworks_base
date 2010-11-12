@@ -1111,25 +1111,20 @@ public final class BridgeContext extends Activity {
 
     }
 
-    @SuppressWarnings("unused")
     @Override
-    public FileInputStream openFileInput(String arg0)
-            throws FileNotFoundException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @SuppressWarnings("unused")
-    @Override
-    public FileOutputStream openFileOutput(String arg0, int arg1)
-            throws FileNotFoundException {
+    public FileInputStream openFileInput(String arg0) throws FileNotFoundException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public SQLiteDatabase openOrCreateDatabase(String arg0, int arg1,
-            CursorFactory arg2) {
+    public FileOutputStream openFileOutput(String arg0, int arg1) throws FileNotFoundException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public SQLiteDatabase openOrCreateDatabase(String arg0, int arg1, CursorFactory arg2) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -1217,14 +1212,12 @@ public final class BridgeContext extends Activity {
 
     }
 
-    @SuppressWarnings("unused")
     @Override
     public void setWallpaper(Bitmap arg0) throws IOException {
         // TODO Auto-generated method stub
 
     }
 
-    @SuppressWarnings("unused")
     @Override
     public void setWallpaper(InputStream arg0) throws IOException {
         // TODO Auto-generated method stub
