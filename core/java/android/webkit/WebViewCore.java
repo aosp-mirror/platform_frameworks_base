@@ -1803,6 +1803,8 @@ final class WebViewCore {
                 } else {
                     width = Math.max(w, mViewportWidth);
                 }
+            } else if (mSettings.getUseFixedViewport()) {
+                width = mWebView.getViewWidth();
             } else {
                 width = textwrapWidth;
             }
