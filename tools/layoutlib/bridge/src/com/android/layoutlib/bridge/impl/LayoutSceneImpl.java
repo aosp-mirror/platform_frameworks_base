@@ -665,7 +665,8 @@ public class LayoutSceneImpl {
 
         ViewInfo result = new ViewInfo(view.getClass().getName(),
                 context.getViewKey(view),
-                view.getLeft(), view.getTop(), view.getRight(), view.getBottom());
+                view.getLeft(), view.getTop(), view.getRight(), view.getBottom(),
+                view, view.getLayoutParams());
 
         if (view instanceof ViewGroup) {
             ViewGroup group = ((ViewGroup) view);
@@ -685,5 +686,9 @@ public class LayoutSceneImpl {
 
     public ViewInfo getViewInfo() {
         return mViewInfo;
+    }
+
+    public Map<String, String> getDefaultViewPropertyValues(Object viewObject) {
+        return mContext.getDefaultPropMap(viewObject);
     }
 }
