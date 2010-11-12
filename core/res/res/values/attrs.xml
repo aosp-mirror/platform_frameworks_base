@@ -635,6 +635,10 @@
     <!-- Height of a line of text. -->
     <attr name="textLineHeight" format="dimension" />
 
+    <!-- Indicates that the content of a non-editable TextView can be selected.
+     Default value is false. EditText content is always selectable. -->
+    <attr name="textIsSelectable" format="boolean" />
+
     <!-- Where to ellipsize text. -->
     <attr name="ellipsize">
         <enum name="none" value="0" />
@@ -2477,6 +2481,9 @@
 
         <!-- Height of a line of text. -->
         <attr name="textLineHeight" />
+        <!-- Indicates that a non-editable text can be selected. -->
+        <attr name="textIsSelectable" />
+
     </declare-styleable>
     <!-- An <code>input-extras</code> is a container for extra data to supply to
          an input method.  Contains
