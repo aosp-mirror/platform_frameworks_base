@@ -705,6 +705,14 @@ public class SyncManager implements OnAccountsUpdateListener {
         }
     }
 
+    private void clearBackoffSetting(SyncOperation op) {
+        mSyncStorageEngine.setBackoff(op.account, op.authority,
+                SyncStorageEngine.NOT_IN_BACKOFF_MODE, SyncStorageEngine.NOT_IN_BACKOFF_MODE);
+        synchronized (mSyncQueue) {
+            mSyncQueue.onBackoffChanged(op.account, op.authority, 0);
+        }
+    }
+
     private void increaseBackoffSetting(SyncOperation op) {
         final long now = SystemClock.elapsedRealtime();
 
@@ -1854,6 +1862,7 @@ public class SyncManager implements OnAccountsUpdateListener {
                     // TODO: set these correctly when the SyncResult is extended to include it
                     downstreamActivity = 0;
                     upstreamActivity = 0;
+                    clearBackoffSetting(syncOperation);
                 } else {
                     Log.d(TAG, "failed sync operation " + syncOperation + ", " + syncResult);
                     // the operation failed so increase the backoff time
