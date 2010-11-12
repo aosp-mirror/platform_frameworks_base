@@ -44,6 +44,7 @@ struct UDPPusher;
 struct AwesomeRenderer : public RefBase {
     AwesomeRenderer() {}
 
+    virtual status_t initCheck() const = 0;
     virtual void render(MediaBuffer *buffer) = 0;
 
 private:
@@ -225,7 +226,7 @@ private:
     void partial_reset_l();
     status_t seekTo_l(int64_t timeUs);
     status_t pause_l(bool at_eos = false);
-    void initRenderer_l();
+    status_t initRenderer_l();
     void seekAudioIfNecessary_l();
 
     void cancelPlayerEvents(bool keepBufferingGoing = false);
