@@ -23,6 +23,20 @@ import android.util.Log;
 /**
  * @hide
  *
+ * Type is an allocation template.  It consists of an Element and one or more
+ * dimensions.  It describes only the layout of memory but does not allocate and
+ * storage for the data thus described.
+ *
+ * A Type consists of several dimensions.  Those are X, Y, Z, LOD (level of
+ * detail), Faces (faces of a cube map).  The X,Y,Z dimensions can be assigned
+ * any positive integral value within the constraints of available memory.  A
+ * single dimension allocation would have an X dimension of greater than zero
+ * while the Y and Z dimensions would be zero to indicate not present.  In this
+ * regard an allocation of x=10, y=1 would be considered 2 dimensionsal while
+ * x=10, y=0 would be considered 1 dimensional.
+ *
+ * The LOD and Faces dimensions are booleans to indicate present or not present.
+ *
  **/
 public class Type extends BaseObj {
     int mDimX;
@@ -33,25 +47,65 @@ public class Type extends BaseObj {
     int mElementCount;
     Element mElement;
 
+    /**
+     * Return the element associated with this Type.
+     *
+     * @return Element
+     */
     public Element getElement() {
         return mElement;
     }
 
+    /**
+     * Return the value of the X dimension.
+     *
+     * @return int
+     */
     public int getX() {
         return mDimX;
     }
+
+    /**
+     * Return the value of the Y dimension or 0 for a 1D allocation.
+     *
+     * @return int
+     */
     public int getY() {
         return mDimY;
     }
+
+    /**
+     * Return the value of the Z dimension or 0 for a 1D or 2D allocation.
+     *
+     * @return int
+     */
     public int getZ() {
         return mDimZ;
     }
+
+    /**
+     * Return if the Type has a mipmap chain.
+     *
+     * @return boolean
+     */
     public boolean getLOD() {
         return mDimLOD;
     }
+
+    /**
+     * Return if the Type is a cube map.
+     *
+     * @return boolean
+     */
     public boolean getFaces() {
         return mDimFaces;
     }
+
+    /**
+     * Return the total number of accessable cells in the Type.
+     *
+     * @return int
+     */
     public int getElementCount() {
         return mElementCount;
     }
@@ -122,6 +176,10 @@ public class Type extends BaseObj {
         calcElementCount();
     }
 
+    /**
+     * Builder class for Type.
+     *
+     */
     public static class Builder {
         RenderScript mRS;
         Dimension[] mDimensions;
@@ -134,6 +192,12 @@ public class Type extends BaseObj {
             int mValue;
         }
 
+        /**
+         * Create a new builder object.
+         *
+         * @param rs
+         * @param e The element for the type to be created.
+         */
         public Builder(RenderScript rs, Element e) {
             if(e.getID() == 0) {
                 throw new RSIllegalArgumentException("Invalid element.");
@@ -145,6 +209,13 @@ public class Type extends BaseObj {
             mElement = e;
         }
 
+        /**
+         * Add a dimension to the Type.
+         *
+         *
+         * @param d
+         * @param value
+         */
         public void add(Dimension d, int value) {
             if(value < 1) {
                 throw new RSIllegalArgumentException("Values of less than 1 for Dimensions are not valid.");
@@ -163,6 +234,11 @@ public class Type extends BaseObj {
             mEntryCount++;
         }
 
+        /**
+         * Validate structure and create a new type.
+         *
+         * @return Type
+         */
         public Type create() {
             int dims[] = new int[mEntryCount];
             for (int ct=0; ct < mEntryCount; ct++) {
@@ -190,6 +266,26 @@ public class Type extends BaseObj {
                     t.mDimFaces = mDimensionValues[ct] != 0;
                 }
             }
+
+            if (t.mDimZ > 0) {
+                if ((t.mDimX < 1) || (t.mDimY < 1)) {
+                    throw new RSInvalidStateException("Both X and Y dimension required when Z is present.");
+                }
+                if (t.mDimFaces) {
+                    throw new RSInvalidStateException("Cube maps not supported with 3D types.");
+                }
+            }
+            if (t.mDimY > 0) {
+                if (t.mDimX < 1) {
+                    throw new RSInvalidStateException("X dimension required when Y is present.");
+                }
+            }
+            if (t.mDimFaces) {
+                if (t.mDimY < 1) {
+                    throw new RSInvalidStateException("Cube maps require 2D Types.");
+                }
+            }
+
             t.calcElementCount();
             return t;
         }
