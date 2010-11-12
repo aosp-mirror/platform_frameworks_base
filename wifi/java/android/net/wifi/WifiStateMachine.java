@@ -49,8 +49,6 @@ import android.net.NetworkInfo.DetailedState;
 import android.net.LinkProperties;
 import android.os.Binder;
 import android.os.Message;
-import android.os.Parcelable;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.PowerManager;
@@ -93,8 +91,6 @@ import java.util.regex.Pattern;
  *
  * @hide
  */
-//TODO: we still need frequent scanning for the case when
-// we issue disconnect but need scan results for open network notification
 public class WifiStateMachine extends HierarchicalStateMachine {
 
     private static final String TAG = "WifiStateMachine";
@@ -120,9 +116,15 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private String mLastBssid;
     private int mLastNetworkId;
     private boolean mEnableRssiPolling = false;
-    private boolean mPasswordKeyMayBeIncorrect = false;
+    private int mRssiPollToken = 0;
     private int mReconnectCount = 0;
     private boolean mIsScanMode = false;
+
+    /**
+     * Interval in milliseconds between polling for RSSI
+     * and linkspeed information
+     */
+    private static final int POLL_RSSI_INTERVAL_MSECS = 3000;
 
     /**
      * Instance of the bluetooth headset helper. This needs to be created
@@ -148,9 +150,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /* Connection to a specific network involves disabling all networks,
      * this flag tracks if networks need to be re-enabled */
     private boolean mEnableAllNetworks = false;
-    /* Track if WPS was started since we need to re-enable networks
-     * and load configuration afterwards */
-    private boolean mWpsStarted = false;
 
     private AlarmManager mAlarmManager;
     private PendingIntent mScanIntent;
@@ -166,95 +165,95 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private static final int EVENTLOG_SUPPLICANT_STATE_CHANGED  = 50023;
 
     /* Load the driver */
-    private static final int CMD_LOAD_DRIVER                      = 1;
+    static final int CMD_LOAD_DRIVER                      = 1;
     /* Unload the driver */
-    private static final int CMD_UNLOAD_DRIVER                    = 2;
+    static final int CMD_UNLOAD_DRIVER                    = 2;
     /* Indicates driver load succeeded */
-    private static final int CMD_LOAD_DRIVER_SUCCESS              = 3;
+    static final int CMD_LOAD_DRIVER_SUCCESS              = 3;
     /* Indicates driver load failed */
-    private static final int CMD_LOAD_DRIVER_FAILURE              = 4;
+    static final int CMD_LOAD_DRIVER_FAILURE              = 4;
     /* Indicates driver unload succeeded */
-    private static final int CMD_UNLOAD_DRIVER_SUCCESS            = 5;
+    static final int CMD_UNLOAD_DRIVER_SUCCESS            = 5;
     /* Indicates driver unload failed */
-    private static final int CMD_UNLOAD_DRIVER_FAILURE            = 6;
+    static final int CMD_UNLOAD_DRIVER_FAILURE            = 6;
     /* Set bluetooth headset proxy */
-    private static final int CMD_SET_BLUETOOTH_HEADSET_PROXY      = 7;
+    static final int CMD_SET_BLUETOOTH_HEADSET_PROXY      = 7;
     /* Set bluetooth A2dp proxy */
-    private static final int CMD_SET_BLUETOOTH_A2DP_PROXY         = 8;
+    static final int CMD_SET_BLUETOOTH_A2DP_PROXY         = 8;
 
     /* Start the supplicant */
-    private static final int CMD_START_SUPPLICANT                 = 11;
+    static final int CMD_START_SUPPLICANT                 = 11;
     /* Stop the supplicant */
-    private static final int CMD_STOP_SUPPLICANT                  = 12;
+    static final int CMD_STOP_SUPPLICANT                  = 12;
     /* Start the driver */
-    private static final int CMD_START_DRIVER                     = 13;
+    static final int CMD_START_DRIVER                     = 13;
     /* Start the driver */
-    private static final int CMD_STOP_DRIVER                      = 14;
+    static final int CMD_STOP_DRIVER                      = 14;
     /* Indicates DHCP succeded */
-    private static final int CMD_IP_CONFIG_SUCCESS                = 15;
+    static final int CMD_IP_CONFIG_SUCCESS                = 15;
     /* Indicates DHCP failed */
-    private static final int CMD_IP_CONFIG_FAILURE                = 16;
+    static final int CMD_IP_CONFIG_FAILURE                = 16;
     /* Re-configure interface */
-    private static final int CMD_RECONFIGURE_IP                   = 17;
+    static final int CMD_RECONFIGURE_IP                   = 17;
 
 
     /* Start the soft access point */
-    private static final int CMD_START_AP                         = 21;
+    static final int CMD_START_AP                         = 21;
     /* Stop the soft access point */
-    private static final int CMD_STOP_AP                          = 22;
+    static final int CMD_STOP_AP                          = 22;
 
 
     /* Supplicant events */
     /* Connection to supplicant established */
-    private static final int SUP_CONNECTION_EVENT                 = 31;
+    static final int SUP_CONNECTION_EVENT                 = 31;
     /* Connection to supplicant lost */
-    private static final int SUP_DISCONNECTION_EVENT              = 32;
+    static final int SUP_DISCONNECTION_EVENT              = 32;
     /* Driver start completed */
-    private static final int DRIVER_START_EVENT                   = 33;
+    static final int DRIVER_START_EVENT                   = 33;
     /* Driver stop completed */
-    private static final int DRIVER_STOP_EVENT                    = 34;
+    static final int DRIVER_STOP_EVENT                    = 34;
     /* Network connection completed */
-    private static final int NETWORK_CONNECTION_EVENT             = 36;
+    static final int NETWORK_CONNECTION_EVENT             = 36;
     /* Network disconnection completed */
-    private static final int NETWORK_DISCONNECTION_EVENT          = 37;
+    static final int NETWORK_DISCONNECTION_EVENT          = 37;
     /* Scan results are available */
-    private static final int SCAN_RESULTS_EVENT                   = 38;
+    static final int SCAN_RESULTS_EVENT                   = 38;
     /* Supplicate state changed */
-    private static final int SUPPLICANT_STATE_CHANGE_EVENT        = 39;
+    static final int SUPPLICANT_STATE_CHANGE_EVENT        = 39;
     /* Password may be incorrect */
-    private static final int PASSWORD_MAY_BE_INCORRECT_EVENT      = 40;
+    static final int PASSWORD_MAY_BE_INCORRECT_EVENT      = 40;
 
     /* Supplicant commands */
     /* Is supplicant alive ? */
-    private static final int CMD_PING_SUPPLICANT                  = 51;
+    static final int CMD_PING_SUPPLICANT                  = 51;
     /* Add/update a network configuration */
-    private static final int CMD_ADD_OR_UPDATE_NETWORK            = 52;
+    static final int CMD_ADD_OR_UPDATE_NETWORK            = 52;
     /* Delete a network */
-    private static final int CMD_REMOVE_NETWORK                   = 53;
+    static final int CMD_REMOVE_NETWORK                   = 53;
     /* Enable a network. The device will attempt a connection to the given network. */
-    private static final int CMD_ENABLE_NETWORK                   = 54;
+    static final int CMD_ENABLE_NETWORK                   = 54;
     /* Disable a network. The device does not attempt a connection to the given network. */
-    private static final int CMD_DISABLE_NETWORK                  = 55;
+    static final int CMD_DISABLE_NETWORK                  = 55;
     /* Blacklist network. De-prioritizes the given BSSID for connection. */
-    private static final int CMD_BLACKLIST_NETWORK                = 56;
+    static final int CMD_BLACKLIST_NETWORK                = 56;
     /* Clear the blacklist network list */
-    private static final int CMD_CLEAR_BLACKLIST                  = 57;
+    static final int CMD_CLEAR_BLACKLIST                  = 57;
     /* Save configuration */
-    private static final int CMD_SAVE_CONFIG                      = 58;
+    static final int CMD_SAVE_CONFIG                      = 58;
 
     /* Supplicant commands after driver start*/
     /* Initiate a scan */
-    private static final int CMD_START_SCAN                       = 71;
+    static final int CMD_START_SCAN                       = 71;
     /* Set scan mode. CONNECT_MODE or SCAN_ONLY_MODE */
-    private static final int CMD_SET_SCAN_MODE                    = 72;
+    static final int CMD_SET_SCAN_MODE                    = 72;
     /* Set scan type. SCAN_ACTIVE or SCAN_PASSIVE */
-    private static final int CMD_SET_SCAN_TYPE                    = 73;
+    static final int CMD_SET_SCAN_TYPE                    = 73;
     /* Disconnect from a network */
-    private static final int CMD_DISCONNECT                       = 74;
+    static final int CMD_DISCONNECT                       = 74;
     /* Reconnect to a network */
-    private static final int CMD_RECONNECT                        = 75;
+    static final int CMD_RECONNECT                        = 75;
     /* Reassociate to a network */
-    private static final int CMD_REASSOCIATE                      = 76;
+    static final int CMD_REASSOCIATE                      = 76;
     /* Controls power mode and suspend mode optimizations
      *
      * When high perf mode is enabled, power mode is set to
@@ -268,30 +267,30 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * - turn off roaming
      * - DTIM wake up settings
      */
-    private static final int CMD_SET_HIGH_PERF_MODE               = 77;
+    static final int CMD_SET_HIGH_PERF_MODE               = 77;
     /* Set bluetooth co-existence
      * BLUETOOTH_COEXISTENCE_MODE_ENABLED
      * BLUETOOTH_COEXISTENCE_MODE_DISABLED
      * BLUETOOTH_COEXISTENCE_MODE_SENSE
      */
-    private static final int CMD_SET_BLUETOOTH_COEXISTENCE        = 78;
+    static final int CMD_SET_BLUETOOTH_COEXISTENCE        = 78;
     /* Enable/disable bluetooth scan mode
      * true(1)
      * false(0)
      */
-    private static final int CMD_SET_BLUETOOTH_SCAN_MODE          = 79;
+    static final int CMD_SET_BLUETOOTH_SCAN_MODE          = 79;
     /* Set the country code */
-    private static final int CMD_SET_COUNTRY_CODE                 = 80;
+    static final int CMD_SET_COUNTRY_CODE                 = 80;
     /* Request connectivity manager wake lock before driver stop */
-    private static final int CMD_REQUEST_CM_WAKELOCK              = 81;
+    static final int CMD_REQUEST_CM_WAKELOCK              = 81;
     /* Enables RSSI poll */
-    private static final int CMD_ENABLE_RSSI_POLL                 = 82;
+    static final int CMD_ENABLE_RSSI_POLL                 = 82;
     /* RSSI poll */
-    private static final int CMD_RSSI_POLL                        = 83;
+    static final int CMD_RSSI_POLL                        = 83;
     /* Set up packet filtering */
-    private static final int CMD_START_PACKET_FILTERING           = 84;
+    static final int CMD_START_PACKET_FILTERING           = 84;
     /* Clear packet filter */
-    private static final int CMD_STOP_PACKET_FILTERING            = 85;
+    static final int CMD_STOP_PACKET_FILTERING            = 85;
     /* Connect to a specified network (network id
      * or WifiConfiguration) This involves increasing
      * the priority of the network, enabling the network
@@ -300,32 +299,29 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * an existing network. All the networks get enabled
      * upon a successful connection or a failure.
      */
-    private static final int CMD_CONNECT_NETWORK                  = 86;
+    static final int CMD_CONNECT_NETWORK                  = 86;
     /* Save the specified network. This involves adding
      * an enabled network (if new) and updating the
      * config and issuing a save on supplicant config.
      */
-    private static final int CMD_SAVE_NETWORK                     = 87;
+    static final int CMD_SAVE_NETWORK                     = 87;
     /* Delete the specified network. This involves
      * removing the network and issuing a save on
      * supplicant config.
      */
-    private static final int CMD_FORGET_NETWORK                   = 88;
+    static final int CMD_FORGET_NETWORK                   = 88;
     /* Start Wi-Fi protected setup push button configuration */
-    private static final int CMD_START_WPS_PBC                    = 89;
+    static final int CMD_START_WPS_PBC                    = 89;
     /* Start Wi-Fi protected setup pin method configuration with pin obtained from AP */
-    private static final int CMD_START_WPS_PIN_FROM_AP            = 90;
+    static final int CMD_START_WPS_PIN_FROM_AP            = 90;
     /* Start Wi-Fi protected setup pin method configuration with pin obtained from device */
-    private static final int CMD_START_WPS_PIN_FROM_DEVICE        = 91;
+    static final int CMD_START_WPS_PIN_FROM_DEVICE        = 91;
     /* Set the frequency band */
-    private static final int CMD_SET_FREQUENCY_BAND               = 92;
+    static final int CMD_SET_FREQUENCY_BAND               = 92;
 
-    /**
-     * Interval in milliseconds between polling for connection
-     * status items that are not sent via asynchronous events.
-     * An example is RSSI (signal strength).
-     */
-    private static final int POLL_RSSI_INTERVAL_MSECS = 3000;
+    /* Commands from the SupplicantStateTracker */
+    /* Indicates whether a wifi network is available for connection */
+    static final int CMD_SET_NETWORK_AVAILABLE             = 111;
 
     private static final int CONNECT_MODE   = 1;
     private static final int SCAN_ONLY_MODE = 2;
@@ -463,7 +459,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         mDhcpInfo = new DhcpInfo();
         mWifiInfo = new WifiInfo();
         mInterfaceName = SystemProperties.get("wifi.interface", "tiwlan0");
-        mSupplicantStateTracker = new SupplicantStateTracker(context, getHandler());
+        mSupplicantStateTracker = new SupplicantStateTracker(context, this, getHandler());
 
         mLinkProperties = new LinkProperties();
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
@@ -985,8 +981,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         sb.append("mLastBssid ").append(mLastBssid).append(LS);
         sb.append("mLastNetworkId ").append(mLastNetworkId).append(LS);
         sb.append("mEnableAllNetworks ").append(mEnableAllNetworks).append(LS);
-        sb.append("mEnableRssiPolling ").append(mEnableRssiPolling).append(LS);
-        sb.append("mPasswordKeyMayBeIncorrect ").append(mPasswordKeyMayBeIncorrect).append(LS);
         sb.append("mReconnectCount ").append(mReconnectCount).append(LS);
         sb.append("mIsScanMode ").append(mIsScanMode).append(LS);
         sb.append("Supplicant status").append(LS)
@@ -1215,6 +1209,44 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         return null;
     }
 
+    /*
+     * Fetch RSSI and linkspeed on current connection
+     */
+    private void fetchRssiAndLinkSpeedNative() {
+        int newRssi = WifiNative.getRssiCommand();
+        if (newRssi != -1 && -200 < newRssi && newRssi < 256) { // screen out invalid values
+            /* some implementations avoid negative values by adding 256
+             * so we need to adjust for that here.
+             */
+            if (newRssi > 0) newRssi -= 256;
+            mWifiInfo.setRssi(newRssi);
+            /*
+             * Rather then sending the raw RSSI out every time it
+             * changes, we precalculate the signal level that would
+             * be displayed in the status bar, and only send the
+             * broadcast if that much more coarse-grained number
+             * changes. This cuts down greatly on the number of
+             * broadcasts, at the cost of not mWifiInforming others
+             * interested in RSSI of all the changes in signal
+             * level.
+             */
+            // TODO: The second arg to the call below needs to be a symbol somewhere, but
+            // it's actually the size of an array of icons that's private
+            // to StatusBar Policy.
+            int newSignalLevel = WifiManager.calculateSignalLevel(newRssi, 4);
+            if (newSignalLevel != mLastSignalLevel) {
+                sendRssiChangeBroadcast(newRssi);
+            }
+            mLastSignalLevel = newSignalLevel;
+        } else {
+            mWifiInfo.setRssi(-200);
+        }
+        int newLinkSpeed = WifiNative.getLinkSpeedCommand();
+        if (newLinkSpeed != -1) {
+            mWifiInfo.setLinkSpeed(newLinkSpeed);
+        }
+    }
+
     private void setHighPerfModeEnabledNative(boolean enable) {
         if(!WifiNative.setSuspendOptimizationsCommand(!enable)) {
             Log.e(TAG, "set suspend optimizations failed!");
@@ -1336,19 +1368,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         mContext.sendBroadcast(intent);
     }
 
-    private void sendSupplicantStateChangedBroadcast(StateChangeResult sc, boolean failedAuth) {
-        Intent intent = new Intent(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
-                | Intent.FLAG_RECEIVER_REPLACE_PENDING);
-        intent.putExtra(WifiManager.EXTRA_NEW_STATE, (Parcelable)sc.state);
-        if (failedAuth) {
-            intent.putExtra(
-                WifiManager.EXTRA_SUPPLICANT_ERROR,
-                WifiManager.ERROR_AUTHENTICATING);
-        }
-        mContext.sendStickyBroadcast(intent);
-    }
-
     private void sendSupplicantConnectionChangedBroadcast(boolean connected) {
         if (!ActivityManagerNative.isSystemReady()) return;
 
@@ -1366,45 +1385,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 + mNetworkInfo.getDetailedState() + " and new state=" + state);
         if (state != mNetworkInfo.getDetailedState()) {
             mNetworkInfo.setDetailedState(state, null, null);
-        }
-    }
-
-    /**
-     * Poll for info not reported via events
-     * RSSI & Linkspeed
-     */
-    private void requestPolledInfo() {
-        int newRssi = WifiNative.getRssiCommand();
-        if (newRssi != -1 && -200 < newRssi && newRssi < 256) { // screen out invalid values
-            /* some implementations avoid negative values by adding 256
-             * so we need to adjust for that here.
-             */
-            if (newRssi > 0) newRssi -= 256;
-            mWifiInfo.setRssi(newRssi);
-            /*
-             * Rather then sending the raw RSSI out every time it
-             * changes, we precalculate the signal level that would
-             * be displayed in the status bar, and only send the
-             * broadcast if that much more coarse-grained number
-             * changes. This cuts down greatly on the number of
-             * broadcasts, at the cost of not mWifiInforming others
-             * interested in RSSI of all the changes in signal
-             * level.
-             */
-            // TODO: The second arg to the call below needs to be a symbol somewhere, but
-            // it's actually the size of an array of icons that's private
-            // to StatusBar Policy.
-            int newSignalLevel = WifiManager.calculateSignalLevel(newRssi, 4);
-            if (newSignalLevel != mLastSignalLevel) {
-                sendRssiChangeBroadcast(newRssi);
-            }
-            mLastSignalLevel = newSignalLevel;
-        } else {
-            mWifiInfo.setRssi(-200);
-        }
-        int newLinkSpeed = WifiNative.getLinkSpeedCommand();
-        if (newLinkSpeed != -1) {
-            mWifiInfo.setLinkSpeed(newLinkSpeed);
         }
     }
 
@@ -1456,7 +1436,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * WifiMonitor
      * thread.
      */
-    private static class StateChangeResult {
+    static class StateChangeResult {
         StateChangeResult(int networkId, String BSSID, Object state) {
             this.state = state;
             this.BSSID = BSSID;
@@ -1548,6 +1528,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         setWifiEnabled(true);
     }
 
+    void setNetworkAvailable(boolean available) {
+        sendMessage(CMD_SET_NETWORK_AVAILABLE, available ? 1 : 0);
+    }
 
     /********************************************************
      * HSM states
@@ -1576,7 +1559,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     break;
                 case CMD_ENABLE_RSSI_POLL:
                     mEnableRssiPolling = (message.arg1 == 1);
-                    mSupplicantStateTracker.sendMessage(CMD_ENABLE_RSSI_POLL);
+                    break;
+                case CMD_SET_NETWORK_AVAILABLE:
+                    mNetworkInfo.setIsAvailable(message.arg1 == 1);
                     break;
                     /* Discard */
                 case CMD_LOAD_DRIVER:
@@ -1616,6 +1601,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_FORGET_NETWORK:
                 case CMD_START_WPS_PBC:
                 case CMD_START_WPS_PIN_FROM_AP:
+                case CMD_RSSI_POLL:
                     break;
                 default:
                     Log.e(TAG, "Error! unhandled message" + message);
@@ -2136,6 +2122,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         WifiNative.setScanModeCommand(false);
                     }
                     break;
+                case CMD_START_SCAN:
+                    WifiNative.scanCommand(message.arg1 == SCAN_ACTIVE);
+                    break;
                 case CMD_SET_HIGH_PERF_MODE:
                     setHighPerfModeEnabledNative(message.arg1 == 1);
                     break;
@@ -2278,9 +2267,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         transitionTo(mDisconnectedState);
                     }
                     break;
-                case CMD_START_SCAN:
-                    WifiNative.scanCommand(message.arg1 == SCAN_ACTIVE);
-                    break;
                     /* Ignore */
                 case CMD_DISCONNECT:
                 case CMD_RECONNECT:
@@ -2309,14 +2295,23 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             StateChangeResult stateChangeResult;
             switch(message.what) {
                 case PASSWORD_MAY_BE_INCORRECT_EVENT:
-                    mPasswordKeyMayBeIncorrect = true;
+                    mSupplicantStateTracker.sendMessage(PASSWORD_MAY_BE_INCORRECT_EVENT);
                     break;
                 case SUPPLICANT_STATE_CHANGE_EVENT:
                     stateChangeResult = (StateChangeResult) message.obj;
-                    mSupplicantStateTracker.handleEvent(stateChangeResult);
-                    break;
-                case CMD_START_SCAN:
-                    /* We need to set scan type in completed state */
+                    SupplicantState state = (SupplicantState) stateChangeResult.state;
+                    // Supplicant state change
+                    // [31-13] Reserved for future use
+                    // [8 - 0] Supplicant state (as defined in SupplicantState.java)
+                    // 50023 supplicant_state_changed (custom|1|5)
+                    EventLog.writeEvent(EVENTLOG_SUPPLICANT_STATE_CHANGED, state.ordinal());
+                    mWifiInfo.setSupplicantState(state);
+                    mWifiInfo.setNetworkId(stateChangeResult.networkId);
+                    if (state == SupplicantState.ASSOCIATING) {
+                        /* BSSID is valid only in ASSOCIATING state */
+                        mWifiInfo.setBSSID(stateChangeResult.BSSID);
+                    }
+
                     Message newMsg = obtainMessage();
                     newMsg.copyFrom(message);
                     mSupplicantStateTracker.sendMessage(newMsg);
@@ -2375,7 +2370,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                      * Upon success, the configuration list needs to be reloaded
                      */
                     if (success) {
-                        mWpsStarted = true;
+                        mSupplicantStateTracker.sendMessage(message.what);
                         /* Expect a disconnection from the old connection */
                         transitionTo(mDisconnectingState);
                     }
@@ -2388,7 +2383,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     success = WifiConfigStore.startWpsWithPinFromAccessPoint(bssid, apPin);
 
                     if (success) {
-                        mWpsStarted = true;
+                        mSupplicantStateTracker.sendMessage(message.what);
                         /* Expect a disconnection from the old connection */
                         transitionTo(mDisconnectingState);
                     }
@@ -2400,7 +2395,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     mReplyChannel.replyToMessage(message, CMD_START_WPS_PIN_FROM_DEVICE, pin);
 
                     if (success) {
-                        mWpsStarted = true;
+                        mSupplicantStateTracker.sendMessage(message.what);
                         /* Expect a disconnection from the old connection */
                         transitionTo(mDisconnectingState);
                     }
@@ -2583,6 +2578,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                       deferMessage(message);
                   }
                   break;
+                  /* Defer scan when IP is being fetched */
+              case CMD_START_SCAN:
+                  deferMessage(message);
+                  break;
               case CMD_RECONFIGURE_IP:
                   deferMessage(message);
                   break;
@@ -2619,13 +2618,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         @Override
         public void enter() {
             if (DBG) Log.d(TAG, getName() + "\n");
-            /* A successful WPS connection */
-            if (mWpsStarted) {
-                WifiConfigStore.enableAllNetworks();
-                WifiConfigStore.loadConfiguredNetworks();
-                mWpsStarted = false;
-            }
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+            mRssiPollToken++;
+            if (mEnableRssiPolling) {
+                sendMessage(obtainMessage(WifiStateMachine.CMD_RSSI_POLL, mRssiPollToken, 0));
+            }
         }
         @Override
         public boolean processMessage(Message message) {
@@ -2650,6 +2647,15 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         deferMessage(message);
                     }
                     break;
+                case CMD_START_SCAN:
+                    /* When the network is connected, re-scanning can trigger
+                     * a reconnection. Put it in scan-only mode during scan.
+                     * When scan results are received, the mode is switched
+                     * back to CONNECT_MODE.
+                     */
+                    WifiNative.setScanResultHandlingCommand(SCAN_ONLY_MODE);
+                    WifiNative.scanCommand(message.arg1 == SCAN_ACTIVE);
+                    break;
                     /* Ignore connection to same network */
                 case CMD_CONNECT_NETWORK:
                     int netId = message.arg1;
@@ -2659,6 +2665,26 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     return NOT_HANDLED;
                     /* Ignore */
                 case NETWORK_CONNECTION_EVENT:
+                    break;
+                case CMD_RSSI_POLL:
+                    if (message.arg1 == mRssiPollToken) {
+                        // Get Info and continue polling
+                        fetchRssiAndLinkSpeedNative();
+                        sendMessageDelayed(obtainMessage(WifiStateMachine.CMD_RSSI_POLL,
+                                mRssiPollToken, 0), POLL_RSSI_INTERVAL_MSECS);
+                    } else {
+                        // Polling has completed
+                    }
+                    break;
+                case CMD_ENABLE_RSSI_POLL:
+                    mEnableRssiPolling = (message.arg1 == 1);
+                    mRssiPollToken++;
+                    if (mEnableRssiPolling) {
+                        // first poll
+                        fetchRssiAndLinkSpeedNative();
+                        sendMessageDelayed(obtainMessage(WifiStateMachine.CMD_RSSI_POLL,
+                                mRssiPollToken, 0), POLL_RSSI_INTERVAL_MSECS);
+                    }
                     break;
                 default:
                     return NOT_HANDLED;
@@ -2685,6 +2711,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     if (message.arg1 == SCAN_ONLY_MODE) {
                         deferMessage(message);
                     }
+                    break;
+                    /* Handle in  DisconnectedState */
+                case SUPPLICANT_STATE_CHANGE_EVENT:
+                    deferMessage(message);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -2734,6 +2764,12 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     /* Ignore network disconnect */
                 case NETWORK_DISCONNECTION_EVENT:
                     break;
+                case SUPPLICANT_STATE_CHANGE_EVENT:
+                    StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
+                    SupplicantState state = (SupplicantState) stateChangeResult.state;
+                    setDetailedState(WifiInfo.getDetailedStateOf(state));
+                    /* DriverStartedState does the rest of the handling */
+                    return NOT_HANDLED;
                 default:
                     return NOT_HANDLED;
             }
@@ -2793,377 +2829,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             }
             EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
-        }
-    }
-
-
-    class SupplicantStateTracker extends HierarchicalStateMachine {
-
-        private int mRssiPollToken = 0;
-
-        /**
-         * The max number of the WPA supplicant loop iterations before we
-         * decide that the loop should be terminated:
-         */
-        private static final int MAX_SUPPLICANT_LOOP_ITERATIONS = 4;
-        private int mLoopDetectIndex = 0;
-        private int mLoopDetectCount = 0;
-
-        /**
-         *  Supplicant state change commands follow
-         *  the ordinal values defined in SupplicantState.java
-         */
-        private static final int DISCONNECTED           = 0;
-        private static final int INACTIVE               = 1;
-        private static final int SCANNING               = 2;
-        private static final int ASSOCIATING            = 3;
-        private static final int ASSOCIATED             = 4;
-        private static final int FOUR_WAY_HANDSHAKE     = 5;
-        private static final int GROUP_HANDSHAKE        = 6;
-        private static final int COMPLETED              = 7;
-        private static final int DORMANT                = 8;
-        private static final int UNINITIALIZED          = 9;
-        private static final int INVALID                = 10;
-
-        private HierarchicalState mUninitializedState = new UninitializedState();
-        private HierarchicalState mInitializedState = new InitializedState();;
-        private HierarchicalState mInactiveState = new InactiveState();
-        private HierarchicalState mDisconnectState = new DisconnectedState();
-        private HierarchicalState mScanState = new ScanState();
-        private HierarchicalState mConnectState = new ConnectState();
-        private HierarchicalState mHandshakeState = new HandshakeState();
-        private HierarchicalState mCompletedState = new CompletedState();
-        private HierarchicalState mDormantState = new DormantState();
-
-        public SupplicantStateTracker(Context context, Handler target) {
-            super(TAG, target.getLooper());
-
-            addState(mUninitializedState);
-            addState(mInitializedState);
-                addState(mInactiveState, mInitializedState);
-                addState(mDisconnectState, mInitializedState);
-                addState(mScanState, mInitializedState);
-                addState(mConnectState, mInitializedState);
-                    addState(mHandshakeState, mConnectState);
-                    addState(mCompletedState, mConnectState);
-                addState(mDormantState, mInitializedState);
-
-            setInitialState(mUninitializedState);
-
-            //start the state machine
-            start();
-        }
-
-        public void handleEvent(StateChangeResult stateChangeResult) {
-            SupplicantState newState = (SupplicantState) stateChangeResult.state;
-
-            // Supplicant state change
-            // [31-13] Reserved for future use
-            // [8 - 0] Supplicant state (as defined in SupplicantState.java)
-            // 50023 supplicant_state_changed (custom|1|5)
-            EventLog.writeEvent(EVENTLOG_SUPPLICANT_STATE_CHANGED, newState.ordinal());
-
-            sendMessage(obtainMessage(newState.ordinal(), stateChangeResult));
-        }
-
-        public void resetSupplicantState() {
-            transitionTo(mUninitializedState);
-        }
-
-        private void resetLoopDetection() {
-            mLoopDetectCount = 0;
-            mLoopDetectIndex = 0;
-        }
-
-        private boolean handleTransition(Message msg) {
-            if (DBG) Log.d(TAG, getName() + msg.toString() + "\n");
-            switch (msg.what) {
-                case DISCONNECTED:
-                    transitionTo(mDisconnectState);
-                    break;
-                case SCANNING:
-                    transitionTo(mScanState);
-                    break;
-                case ASSOCIATING:
-                    StateChangeResult stateChangeResult = (StateChangeResult) msg.obj;
-                    /* BSSID is valid only in ASSOCIATING state */
-                    mWifiInfo.setBSSID(stateChangeResult.BSSID);
-                    //$FALL-THROUGH$
-                case ASSOCIATED:
-                case FOUR_WAY_HANDSHAKE:
-                case GROUP_HANDSHAKE:
-                    transitionTo(mHandshakeState);
-                    break;
-                case COMPLETED:
-                    transitionTo(mCompletedState);
-                    break;
-                case DORMANT:
-                    transitionTo(mDormantState);
-                    break;
-                case INACTIVE:
-                    transitionTo(mInactiveState);
-                    break;
-                case UNINITIALIZED:
-                case INVALID:
-                    transitionTo(mUninitializedState);
-                    break;
-                default:
-                    return NOT_HANDLED;
-            }
-            StateChangeResult stateChangeResult = (StateChangeResult) msg.obj;
-            SupplicantState supState = (SupplicantState) stateChangeResult.state;
-            setDetailedState(WifiInfo.getDetailedStateOf(supState));
-            mWifiInfo.setSupplicantState(supState);
-            mWifiInfo.setNetworkId(stateChangeResult.networkId);
-            return HANDLED;
-        }
-
-        /********************************************************
-         * HSM states
-         *******************************************************/
-
-        class InitializedState extends HierarchicalState {
-            @Override
-             public void enter() {
-                 if (DBG) Log.d(TAG, getName() + "\n");
-             }
-            @Override
-            public boolean processMessage(Message message) {
-                if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
-                switch (message.what) {
-                    case CMD_START_SCAN:
-                        WifiNative.scanCommand(message.arg1 == SCAN_ACTIVE);
-                        break;
-                    default:
-                        if (DBG) Log.w(TAG, "Ignoring " + message);
-                        break;
-                }
-                return HANDLED;
-            }
-        }
-
-        class UninitializedState extends HierarchicalState {
-            @Override
-             public void enter() {
-                 if (DBG) Log.d(TAG, getName() + "\n");
-                 mNetworkInfo.setIsAvailable(false);
-                 resetLoopDetection();
-                 mPasswordKeyMayBeIncorrect = false;
-             }
-            @Override
-            public boolean processMessage(Message message) {
-                switch(message.what) {
-                    default:
-                        if (!handleTransition(message)) {
-                            if (DBG) Log.w(TAG, "Ignoring " + message);
-                        }
-                        break;
-                }
-                return HANDLED;
-            }
-            @Override
-            public void exit() {
-                mNetworkInfo.setIsAvailable(true);
-            }
-        }
-
-        class InactiveState extends HierarchicalState {
-            @Override
-             public void enter() {
-                 if (DBG) Log.d(TAG, getName() + "\n");
-
-                 /* A failed WPS connection */
-                 if (mWpsStarted) {
-                     Log.e(TAG, "WPS set up failed, enabling other networks");
-                     WifiConfigStore.enableAllNetworks();
-                     mWpsStarted = false;
-                 }
-
-                 Message message = getCurrentMessage();
-                 StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
-
-                 mNetworkInfo.setIsAvailable(false);
-                 resetLoopDetection();
-                 mPasswordKeyMayBeIncorrect = false;
-
-                 sendSupplicantStateChangedBroadcast(stateChangeResult, false);
-             }
-            @Override
-            public boolean processMessage(Message message) {
-                return handleTransition(message);
-            }
-            @Override
-            public void exit() {
-                mNetworkInfo.setIsAvailable(true);
-            }
-        }
-
-
-        class DisconnectedState extends HierarchicalState {
-            @Override
-             public void enter() {
-                 if (DBG) Log.d(TAG, getName() + "\n");
-                 Message message = getCurrentMessage();
-                 StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
-
-                 resetLoopDetection();
-
-                 /* If a disconnect event happens after a password key failure
-                  * event, disable the network
-                  */
-                 if (mPasswordKeyMayBeIncorrect) {
-                     Log.d(TAG, "Failed to authenticate, disabling network " +
-                             mWifiInfo.getNetworkId());
-                     WifiConfigStore.disableNetwork(mWifiInfo.getNetworkId());
-                     mPasswordKeyMayBeIncorrect = false;
-                     sendSupplicantStateChangedBroadcast(stateChangeResult, true);
-                 }
-                 else {
-                     sendSupplicantStateChangedBroadcast(stateChangeResult, false);
-                 }
-             }
-            @Override
-            public boolean processMessage(Message message) {
-                return handleTransition(message);
-            }
-        }
-
-        class ScanState extends HierarchicalState {
-            @Override
-             public void enter() {
-                 if (DBG) Log.d(TAG, getName() + "\n");
-                 Message message = getCurrentMessage();
-                 StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
-
-                 mPasswordKeyMayBeIncorrect = false;
-                 resetLoopDetection();
-                 sendSupplicantStateChangedBroadcast(stateChangeResult, false);
-             }
-            @Override
-            public boolean processMessage(Message message) {
-                return handleTransition(message);
-            }
-        }
-
-        class ConnectState extends HierarchicalState {
-            @Override
-             public void enter() {
-                 if (DBG) Log.d(TAG, getName() + "\n");
-             }
-            @Override
-            public boolean processMessage(Message message) {
-                switch (message.what) {
-                    case CMD_START_SCAN:
-                        WifiNative.setScanResultHandlingCommand(SCAN_ONLY_MODE);
-                        WifiNative.scanCommand(message.arg1 == SCAN_ACTIVE);
-                        break;
-                    default:
-                        return NOT_HANDLED;
-                }
-                return HANDLED;
-            }
-        }
-
-        class HandshakeState extends HierarchicalState {
-            @Override
-             public void enter() {
-                 if (DBG) Log.d(TAG, getName() + "\n");
-                 final Message message = getCurrentMessage();
-                 StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
-
-                 if (mLoopDetectIndex > message.what) {
-                     mLoopDetectCount++;
-                 }
-                 if (mLoopDetectCount > MAX_SUPPLICANT_LOOP_ITERATIONS) {
-                     WifiConfigStore.disableNetwork(stateChangeResult.networkId);
-                     mLoopDetectCount = 0;
-                 }
-
-                 mLoopDetectIndex = message.what;
-
-                 mPasswordKeyMayBeIncorrect = false;
-                 sendSupplicantStateChangedBroadcast(stateChangeResult, false);
-             }
-            @Override
-            public boolean processMessage(Message message) {
-                return handleTransition(message);
-            }
-        }
-
-        class CompletedState extends HierarchicalState {
-            @Override
-             public void enter() {
-                 if (DBG) Log.d(TAG, getName() + "\n");
-                 Message message = getCurrentMessage();
-                 StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
-
-                 mRssiPollToken++;
-                 if (mEnableRssiPolling) {
-                     sendMessageDelayed(obtainMessage(CMD_RSSI_POLL, mRssiPollToken, 0),
-                             POLL_RSSI_INTERVAL_MSECS);
-                 }
-
-                 resetLoopDetection();
-
-                 mPasswordKeyMayBeIncorrect = false;
-                 sendSupplicantStateChangedBroadcast(stateChangeResult, false);
-             }
-            @Override
-            public boolean processMessage(Message message) {
-                switch(message.what) {
-                    case ASSOCIATING:
-                    case ASSOCIATED:
-                    case FOUR_WAY_HANDSHAKE:
-                    case GROUP_HANDSHAKE:
-                    case COMPLETED:
-                        break;
-                    case CMD_RSSI_POLL:
-                        if (message.arg1 == mRssiPollToken) {
-                            // Get Info and continue polling
-                            requestPolledInfo();
-                            sendMessageDelayed(obtainMessage(CMD_RSSI_POLL, mRssiPollToken, 0),
-                                    POLL_RSSI_INTERVAL_MSECS);
-                        } else {
-                            // Polling has completed
-                        }
-                        break;
-                    case CMD_ENABLE_RSSI_POLL:
-                        mRssiPollToken++;
-                        if (mEnableRssiPolling) {
-                            // first poll
-                            requestPolledInfo();
-                            sendMessageDelayed(obtainMessage(CMD_RSSI_POLL, mRssiPollToken, 0),
-                                    POLL_RSSI_INTERVAL_MSECS);
-                        }
-                        break;
-                    default:
-                        return handleTransition(message);
-                }
-                return HANDLED;
-            }
-        }
-
-        class DormantState extends HierarchicalState {
-            @Override
-            public void enter() {
-                if (DBG) Log.d(TAG, getName() + "\n");
-                Message message = getCurrentMessage();
-                StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
-
-                resetLoopDetection();
-                mPasswordKeyMayBeIncorrect = false;
-
-                sendSupplicantStateChangedBroadcast(stateChangeResult, false);
-
-                /* TODO: reconnect is now being handled at DHCP failure handling
-                 * If we run into issues with staying in Dormant state, might
-                 * need a reconnect here
-                 */
-            }
-            @Override
-            public boolean processMessage(Message message) {
-                return handleTransition(message);
-            }
         }
     }
 }
