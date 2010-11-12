@@ -1170,6 +1170,28 @@
         <enum name="KEYCODE_NUMPAD_LEFT_PAREN" value="162" />
         <enum name="KEYCODE_NUMPAD_RIGHT_PAREN" value="163" />
         <enum name="KEYCODE_VOLUME_MUTE" value="164" />
+        <enum name="KEYCODE_INFO" value="165" />
+        <enum name="KEYCODE_CHANNEL_UP" value="166" />
+        <enum name="KEYCODE_CHANNEL_DOWN" value="167" />
+        <enum name="KEYCODE_ZOOM_IN" value="168" />
+        <enum name="KEYCODE_ZOOM_OUT" value="169" />
+        <enum name="KEYCODE_TV" value="170" />
+        <enum name="KEYCODE_WINDOW" value="171" />
+        <enum name="KEYCODE_GUIDE" value="172" />
+        <enum name="KEYCODE_DVR" value="173" />
+        <enum name="KEYCODE_BOOKMARK" value="174" />
+        <enum name="KEYCODE_CAPTIONS" value="175" />
+        <enum name="KEYCODE_SETTINGS" value="176" />
+        <enum name="KEYCODE_TV_POWER" value="177" />
+        <enum name="KEYCODE_TV_INPUT" value="178" />
+        <enum name="KEYCODE_STB_POWER" value="179" />
+        <enum name="KEYCODE_STB_INPUT" value="180" />
+        <enum name="KEYCODE_AVR_POWER" value="181" />
+        <enum name="KEYCODE_AVR_INPUT" value="182" />
+        <enum name="KEYCODE_PROG_GRED" value="183" />
+        <enum name="KEYCODE_PROG_GREEN" value="184" />
+        <enum name="KEYCODE_PROG_YELLOW" value="185" />
+        <enum name="KEYCODE_PROG_BLUE" value="186" />
     </attr>
 
     <!-- ***************************************************************** -->
