@@ -53,7 +53,10 @@ public class SamplingProfilerIntegration {
 
     static {
         samplingProfilerHz = SystemProperties.getInt("persist.sys.profiler_hz", 0);
-        if (samplingProfilerHz > 0) {
+        // Disabling this for now, as it crashes when enabled server-side.  So adding
+        // a new property ("REALLY") for those wanting to test and fix it.
+        boolean really = SystemProperties.getInt("persist.sys.profiler_hz_REALLY", 0) > 0;
+        if (samplingProfilerHz > 0 && really) {
             snapshotWriter = Executors.newSingleThreadExecutor();
             enabled = true;
             Log.i(TAG, "Profiler is enabled. Sampling Profiler Hz: " + samplingProfilerHz);
