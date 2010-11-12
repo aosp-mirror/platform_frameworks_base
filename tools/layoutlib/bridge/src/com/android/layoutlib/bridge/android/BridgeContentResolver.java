@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge;
+package com.android.layoutlib.bridge.android;
 
 import android.content.ContentResolver;
 import android.content.Context;

@@ -132,10 +132,7 @@ public class NinePatchDrawable extends Drawable {
      * @see android.graphics.Bitmap#getDensity()
      */
     public void setTargetDensity(DisplayMetrics metrics) {
-        mTargetDensity = metrics.densityDpi;
-        if (mNinePatch != null) {
-            computeBitmapSize();
-        }
+        setTargetDensity(metrics.densityDpi);
     }
 
     /**
@@ -147,9 +144,12 @@ public class NinePatchDrawable extends Drawable {
      * @see android.graphics.Bitmap#getDensity()
      */
     public void setTargetDensity(int density) {
-        mTargetDensity = density == 0 ? DisplayMetrics.DENSITY_DEFAULT : density;
-        if (mNinePatch != null) {
-            computeBitmapSize();
+        if (density != mTargetDensity) {
+            mTargetDensity = density == 0 ? DisplayMetrics.DENSITY_DEFAULT : density;
+            if (mNinePatch != null) {
+                computeBitmapSize();
+            }
+            invalidateSelf();
         }
     }
 
@@ -197,16 +197,19 @@ public class NinePatchDrawable extends Drawable {
     @Override
     public void setAlpha(int alpha) {
         getPaint().setAlpha(alpha);
+        invalidateSelf();
     }
     
     @Override
     public void setColorFilter(ColorFilter cf) {
         getPaint().setColorFilter(cf);
+        invalidateSelf();
     }
 
     @Override
     public void setDither(boolean dither) {
         getPaint().setDither(dither);
+        invalidateSelf();
     }
 
     @Override

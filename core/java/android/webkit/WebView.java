@@ -54,7 +54,6 @@ import android.text.Spannable;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -3585,7 +3584,17 @@ public class WebView extends AbsoluteLayout
      */
     private SelectActionModeCallback mSelectCallback;
 
-    private boolean didUpdateTextViewBounds(boolean allowIntersect) {
+    /**
+     * Check to see if the focused textfield/textarea is still on screen.  If it
+     * is, update the the dimensions and location of WebTextView.  Otherwise,
+     * remove the WebTextView.  Should be called when the zoom level changes.
+     * @param allowIntersect Whether to consider the textfield/textarea on
+     *         screen if it only intersects the screen (as opposed to being
+     *         completely on screen).
+     * @return boolean True if the textfield/textarea is still on screen and the
+     *         dimensions/location of WebTextView have been updated.
+     */
+    private boolean didUpdateWebTextViewDimensions(boolean allowIntersect) {
         Rect contentBounds = nativeFocusCandidateNodeBounds();
         Rect vBox = contentToViewRect(contentBounds);
         Rect visibleRect = new Rect();
@@ -3597,9 +3606,8 @@ public class WebView extends AbsoluteLayout
                 : visibleRect.contains(vBox)) {
             mWebTextView.setRect(vBox.left, vBox.top, vBox.width(),
                     vBox.height());
-            mWebTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                    contentToViewDimension(
-                    nativeFocusCandidateTextSize()));
+            mWebTextView.updateTextSize();
+            updateWebTextViewPadding();
             return true;
         } else {
             // The textfield is now off screen.  The user probably
@@ -3632,7 +3640,8 @@ public class WebView extends AbsoluteLayout
 
     private void onZoomAnimationEnd() {
         // adjust the edit text view if needed
-        if (inEditingMode() && didUpdateTextViewBounds(false) && nativeFocusCandidateIsPassword()) {
+        if (inEditingMode() && didUpdateWebTextViewDimensions(false)
+                && nativeFocusCandidateIsPassword()) {
             // If it is a password field, start drawing the WebTextView once
             // again.
             mWebTextView.setInPassword(true);
@@ -3765,7 +3774,7 @@ public class WebView extends AbsoluteLayout
             // finishes.  We also do not need to do this unless the WebTextView
             // is showing.
             if (!animateZoom && inEditingMode()) {
-                didUpdateTextViewBounds(true);
+                didUpdateWebTextViewDimensions(true);
             }
         }
     }
@@ -3870,7 +3879,7 @@ public class WebView extends AbsoluteLayout
             if (inEditingMode()) {
                 imm.showSoftInput(mWebTextView, 0);
                 if (zoom) {
-                    didUpdateTextViewBounds(true);
+                    didUpdateWebTextViewDimensions(true);
                 }
                 return;
             }
@@ -3918,8 +3927,7 @@ public class WebView extends AbsoluteLayout
             // Initialize our generation number.
             mTextGeneration = 0;
         }
-        mWebTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                contentToViewDimension(nativeFocusCandidateTextSize()));
+        mWebTextView.updateTextSize();
         Rect visibleRect = new Rect();
         calcOurContentVisibleRect(visibleRect);
         // Note that sendOurVisibleRect calls viewToContent, so the coordinates
@@ -3951,16 +3959,7 @@ public class WebView extends AbsoluteLayout
             // requestFormData, and it needs to have the correct nodePointer.
             mWebTextView.setNodePointer(nodePointer);
             mWebTextView.setType(nativeFocusCandidateType());
-            Rect paddingRect = nativeFocusCandidatePaddingRect();
-            if (paddingRect != null) {
-                // Use contentToViewDimension since these are the dimensions of
-                // the padding.
-                mWebTextView.setPadding(
-                        contentToViewDimension(paddingRect.left),
-                        contentToViewDimension(paddingRect.top),
-                        contentToViewDimension(paddingRect.right),
-                        contentToViewDimension(paddingRect.bottom));
-            }
+            updateWebTextViewPadding();
             if (null == text) {
                 if (DebugFlags.WEB_VIEW) {
                     Log.v(LOGTAG, "rebuildWebTextView null == text");
@@ -3975,6 +3974,22 @@ public class WebView extends AbsoluteLayout
         }
         if (isFocused()) {
             mWebTextView.requestFocus();
+        }
+    }
+
+    /**
+     * Update the padding of mWebTextView based on the native textfield/textarea
+     */
+    void updateWebTextViewPadding() {
+        Rect paddingRect = nativeFocusCandidatePaddingRect();
+        if (paddingRect != null) {
+            // Use contentToViewDimension since these are the dimensions of
+            // the padding.
+            mWebTextView.setPadding(
+                    contentToViewDimension(paddingRect.left),
+                    contentToViewDimension(paddingRect.top),
+                    contentToViewDimension(paddingRect.right),
+                    contentToViewDimension(paddingRect.bottom));
         }
     }
 
@@ -7466,7 +7481,7 @@ public class WebView extends AbsoluteLayout
     private native Rect     nativeFocusCandidatePaddingRect();
     /* package */ native int      nativeFocusCandidatePointer();
     private native String   nativeFocusCandidateText();
-    private native int      nativeFocusCandidateTextSize();
+    /* package */ native int      nativeFocusCandidateTextSize();
     /**
      * Returns an integer corresponding to WebView.cpp::type.
      * See WebTextView.setType()

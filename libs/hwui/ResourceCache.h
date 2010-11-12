@@ -70,6 +70,13 @@ private:
     void deleteResourceReference(void* resource, ResourceReference* ref);
     void incrementRefcount(void* resource, ResourceType resourceType);
     void logCache();
+
+    /**
+     * Used to increment, decrement, and destroy. Incrementing is generally accessed on the UI
+     * thread, but destroying resources may be called from the GC thread, the finalizer thread,
+     * or a reference queue finalization thread.
+     */
+    mutable Mutex mLock;
 };
 
 }; // namespace uirenderer

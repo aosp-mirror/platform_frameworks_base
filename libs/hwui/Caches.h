@@ -101,6 +101,12 @@ public:
     }
 
     /**
+     * Call this on each frame to ensure that garbage is deleted from
+     * GPU memory.
+     */
+    void clearGarbage();
+
+    /**
      * Binds the VBO used to render simple textured quads.
      */
     void bindMeshBuffer();

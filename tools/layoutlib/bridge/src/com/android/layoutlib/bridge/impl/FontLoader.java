@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge;
+package com.android.layoutlib.bridge.impl;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;

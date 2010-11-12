@@ -440,6 +440,7 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"このBluetooth端末の設定表示、および別の端末をペアとして設定し接続を承認することをアプリケーションに許可します。"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"NFCの管理"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"NFCタグ、カード、リーダーとの通信をアプリケーションに許可します。"</string>
+    <string name="permlab_disableKeyguard" msgid="4977406164311535092">"キーロックを無効にする"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"キーロックや関連するパスワードセキュリティを無効にすることをアプリケーションに許可します。正当な利用の例では、かかってきた電話を受信する際にキーロックを無効にし、通話の終了時にキーロックを有効にし直します。"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"同期設定の読み取り"</string>
     <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"連絡先の同期の有効/無効など、同期設定の読み取りをアプリケーションに許可します。"</string>

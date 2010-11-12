@@ -16,63 +16,26 @@
 
 package com.android.layoutlib.bridge;
 
-import com.android.internal.util.XmlUtils;
-import com.android.layoutlib.api.ILayoutBridge;
 import com.android.layoutlib.api.ILayoutLog;
-import com.android.layoutlib.api.ILayoutResult;
 import com.android.layoutlib.api.IProjectCallback;
 import com.android.layoutlib.api.IResourceValue;
-import com.android.layoutlib.api.IStyleResourceValue;
 import com.android.layoutlib.api.IXmlPullParser;
-import com.android.layoutlib.api.IDensityBasedResourceValue.Density;
-import com.android.layoutlib.api.ILayoutResult.ILayoutViewInfo;
-import com.android.layoutlib.bridge.LayoutResult.LayoutViewInfo;
+import com.android.layoutlib.api.LayoutBridge;
+import com.android.layoutlib.api.SceneParams;
+import com.android.layoutlib.api.SceneResult;
+import com.android.layoutlib.bridge.android.BridgeAssetManager;
+import com.android.layoutlib.bridge.impl.FontLoader;
+import com.android.layoutlib.bridge.impl.LayoutSceneImpl;
 import com.android.ninepatch.NinePatch;
 import com.android.tools.layoutlib.create.MethodAdapter;
 import com.android.tools.layoutlib.create.OverrideMethod;
 
-import android.app.Fragment_Delegate;
-import android.content.ClipData;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap_Delegate;
-import android.graphics.Canvas;
-import android.graphics.Canvas_Delegate;
-import android.graphics.Rect;
-import android.graphics.Region;
 import android.graphics.Typeface_Delegate;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Looper;
-import android.os.ParcelFileDescriptor;
-import android.os.RemoteException;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
-import android.view.BridgeInflater;
-import android.view.DragEvent;
-import android.view.IWindow;
-import android.view.IWindowSession;
-import android.view.InputChannel;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.Surface;
-import android.view.SurfaceView;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.View.AttachInfo;
-import android.view.View.MeasureSpec;
-import android.view.WindowManager.LayoutParams;
-import android.widget.FrameLayout;
-import android.widget.TabHost;
-import android.widget.TabWidget;
 
-import java.awt.image.BufferedImage;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,10 +44,7 @@ import java.util.Map;
  * <p/>To use this bridge, simply instantiate an object of type {@link Bridge} and call
  * {@link #computeLayout(IXmlPullParser, Object, int, int, String, boolean, Map, Map, IProjectCallback, ILayoutLog)}.
  */
-public final class Bridge implements ILayoutBridge {
-
-    private static final int DEFAULT_TITLE_BAR_HEIGHT = 25;
-    private static final int DEFAULT_STATUS_BAR_HEIGHT = 25;
+public final class Bridge extends LayoutBridge {
 
     public static class StaticMethodNotImplementedException extends RuntimeException {
         private static final long serialVersionUID = 1L;
@@ -143,32 +103,26 @@ public final class Bridge implements ILayoutBridge {
         }
     };
 
-    /**
-     * Logger defined during a compute layout operation.
-     * <p/>
-     * This logger is generally set to {@link #sDefaultLogger} except during rendering
-     * operations when it might be set to a specific provided logger.
-     * <p/>
-     * To change this value, use a block synchronized on {@link #sDefaultLogger}.
-     */
-    private static ILayoutLog sLogger = sDefaultLogger;
-
-    /*
-     * (non-Javadoc)
-     * @see com.android.layoutlib.api.ILayoutBridge#getApiLevel()
-     */
+    @Override
     public int getApiLevel() {
-        return API_CURRENT;
+        return LayoutBridge.API_CURRENT;
     }
 
     /*
      * (non-Javadoc)
      * @see com.android.layoutlib.api.ILayoutLibBridge#init(java.lang.String, java.util.Map)
      */
-    public boolean init(
-            String fontOsLocation, Map<String, Map<String, Integer>> enumValueMap) {
+    @Override
+    public boolean init(String fontOsLocation, Map<String, Map<String, Integer>> enumValueMap) {
+        BridgeAssetManager.initSystem();
 
         return sinit(fontOsLocation, enumValueMap);
+    }
+
+    @Override
+    public boolean dispose() {
+        BridgeAssetManager.clearSystem();
+        return true;
     }
 
     private static synchronized boolean sinit(String fontOsLocation,
@@ -189,12 +143,8 @@ public final class Bridge implements ILayoutBridge {
             OverrideMethod.setDefaultListener(new MethodAdapter() {
                 @Override
                 public void onInvokeV(String signature, boolean isNative, Object caller) {
-                    if (sLogger != null) {
-                        synchronized (sDefaultLogger) {
-                            sLogger.error("Missing Stub: " + signature +
-                                    (isNative ? " (native)" : ""));
-                        }
-                    }
+                    sDefaultLogger.error("Missing Stub: " + signature +
+                            (isNative ? " (native)" : ""));
 
                     if (debug.equalsIgnoreCase("throw")) {
                         // Throwing this exception doesn't seem that useful. It breaks
@@ -206,20 +156,6 @@ public final class Bridge implements ILayoutBridge {
                 }
             });
         }
-
-        // Override View.isInEditMode to return true.
-        //
-        // This allows custom views that are drawn in the Graphical Layout Editor to adapt their
-        // rendering for preview. Most important this let custom views know that they can't expect
-        // the rest of their activities to be alive.
-        OverrideMethod.setMethodListener("android.view.View#isInEditMode()Z",
-            new MethodAdapter() {
-                @Override
-                public int onInvokeI(String signature, boolean isNative, Object caller) {
-                    return 1;
-                }
-            }
-        );
 
         // load the fonts.
         FontLoader fontLoader = FontLoader.create(fontOsLocation);
@@ -278,236 +214,82 @@ public final class Bridge implements ILayoutBridge {
         return true;
     }
 
-    /*
-     * For compatilibty purposes, we implement the old deprecated version of computeLayout.
-     * (non-Javadoc)
-     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, java.lang.String, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
+    /**
+     * Sets a 9 patch in a project cache or in the framework cache.
+     * @param value the path of the 9 patch
+     * @param ninePatch the 9 patch object
+     * @param projectKey the key of the project, or null to put the bitmap in the framework cache.
      */
-    @Deprecated
-    public ILayoutResult computeLayout(IXmlPullParser layoutDescription,
-            Object projectKey,
-            int screenWidth, int screenHeight, String themeName,
-            Map<String, Map<String, IResourceValue>> projectResources,
-            Map<String, Map<String, IResourceValue>> frameworkResources,
-            IProjectCallback customViewLoader, ILayoutLog logger) {
-        boolean isProjectTheme = false;
-        if (themeName.charAt(0) == '*') {
-            themeName = themeName.substring(1);
-            isProjectTheme = true;
-        }
+    public static void setCached9Patch(String value, NinePatch ninePatch, Object projectKey) {
+        if (projectKey != null) {
+            Map<String, SoftReference<NinePatch>> map = sProject9PatchCache.get(projectKey);
 
-        return computeLayout(layoutDescription, projectKey,
-                screenWidth, screenHeight, DisplayMetrics.DENSITY_DEFAULT,
-                DisplayMetrics.DENSITY_DEFAULT, DisplayMetrics.DENSITY_DEFAULT,
-                themeName, isProjectTheme,
-                projectResources, frameworkResources, customViewLoader, logger);
+            if (map == null) {
+                map = new HashMap<String, SoftReference<NinePatch>>();
+                sProject9PatchCache.put(projectKey, map);
+            }
+
+            map.put(value, new SoftReference<NinePatch>(ninePatch));
+        } else {
+            sFramework9PatchCache.put(value, new SoftReference<NinePatch>(ninePatch));
+        }
     }
 
-    /*
-     * For compatilibty purposes, we implement the old deprecated version of computeLayout.
-     * (non-Javadoc)
-     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
+    /**
+     * Starts a layout session by inflating and rendering it. The method returns a
+     * {@link ILayoutScene} on which further actions can be taken.
+     *
+     * @param layoutDescription the {@link IXmlPullParser} letting the LayoutLib Bridge visit the
+     * layout file.
+     * @param projectKey An Object identifying the project. This is used for the cache mechanism.
+     * @param screenWidth the screen width
+     * @param screenHeight the screen height
+     * @param renderFullSize if true, the rendering will render the full size needed by the
+     * layout. This size is never smaller than <var>screenWidth</var> x <var>screenHeight</var>.
+     * @param density the density factor for the screen.
+     * @param xdpi the screen actual dpi in X
+     * @param ydpi the screen actual dpi in Y
+     * @param themeName The name of the theme to use.
+     * @param isProjectTheme true if the theme is a project theme, false if it is a framework theme.
+     * @param projectResources the resources of the project. The map contains (String, map) pairs
+     * where the string is the type of the resource reference used in the layout file, and the
+     * map contains (String, {@link IResourceValue}) pairs where the key is the resource name,
+     * and the value is the resource value.
+     * @param frameworkResources the framework resources. The map contains (String, map) pairs
+     * where the string is the type of the resource reference used in the layout file, and the map
+     * contains (String, {@link IResourceValue}) pairs where the key is the resource name, and the
+     * value is the resource value.
+     * @param projectCallback The {@link IProjectCallback} object to get information from
+     * the project.
+     * @param logger the object responsible for displaying warning/errors to the user.
+     * @return a new {@link ILayoutScene} object that contains the result of the layout.
+     * @since 5
      */
-    @Deprecated
-    public ILayoutResult computeLayout(IXmlPullParser layoutDescription, Object projectKey,
-            int screenWidth, int screenHeight, String themeName, boolean isProjectTheme,
-            Map<String, Map<String, IResourceValue>> projectResources,
-            Map<String, Map<String, IResourceValue>> frameworkResources,
-            IProjectCallback customViewLoader, ILayoutLog logger) {
-        return computeLayout(layoutDescription, projectKey,
-                screenWidth, screenHeight, DisplayMetrics.DENSITY_DEFAULT,
-                DisplayMetrics.DENSITY_DEFAULT, DisplayMetrics.DENSITY_DEFAULT,
-                themeName, isProjectTheme,
-                projectResources, frameworkResources, customViewLoader, logger);
-    }
-
-    /*
-     * For compatilibty purposes, we implement the old deprecated version of computeLayout.
-     * (non-Javadoc)
-     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, int, float, float, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
-     */
-    public ILayoutResult computeLayout(IXmlPullParser layoutDescription, Object projectKey,
-            int screenWidth, int screenHeight, int density, float xdpi, float ydpi,
-            String themeName, boolean isProjectTheme,
-            Map<String, Map<String, IResourceValue>> projectResources,
-            Map<String, Map<String, IResourceValue>> frameworkResources,
-            IProjectCallback customViewLoader, ILayoutLog logger) {
-        return computeLayout(layoutDescription, projectKey,
-                screenWidth, screenHeight, false /* renderFullSize */,
-                density, xdpi, ydpi, themeName, isProjectTheme,
-                projectResources, frameworkResources, customViewLoader, logger);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, boolean, int, float, float, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
-     */
-    public ILayoutResult computeLayout(IXmlPullParser layoutDescription, Object projectKey,
-            int screenWidth, int screenHeight, boolean renderFullSize,
-            int density, float xdpi, float ydpi,
-            String themeName, boolean isProjectTheme,
-            Map<String, Map<String, IResourceValue>> projectResources,
-            Map<String, Map<String, IResourceValue>> frameworkResources,
-            IProjectCallback customViewLoader, ILayoutLog logger) {
-        if (logger == null) {
-            logger = sDefaultLogger;
-        }
-
-        synchronized (sDefaultLogger) {
-            sLogger = logger;
-        }
-
-        // find the current theme and compute the style inheritance map
-        Map<IStyleResourceValue, IStyleResourceValue> styleParentMap =
-            new HashMap<IStyleResourceValue, IStyleResourceValue>();
-
-        IStyleResourceValue currentTheme = computeStyleMaps(themeName, isProjectTheme,
-                projectResources.get(BridgeConstants.RES_STYLE),
-                frameworkResources.get(BridgeConstants.RES_STYLE), styleParentMap);
-
-        BridgeContext context = null;
+    @Override
+    public BridgeLayoutScene createScene(SceneParams params) {
         try {
-            // we need to make sure the Looper has been initialized for this thread.
-            // this is required for View that creates Handler objects.
-            if (Looper.myLooper() == null) {
-                Looper.prepare();
-            }
+            SceneResult lastResult = SceneResult.SUCCESS;
+            LayoutSceneImpl scene = null;
+            synchronized (this) {
+                try {
+                    scene = new LayoutSceneImpl(params);
 
-            // setup the display Metrics.
-            DisplayMetrics metrics = new DisplayMetrics();
-            metrics.densityDpi = density;
-            metrics.density = density / (float) DisplayMetrics.DENSITY_DEFAULT;
-            metrics.scaledDensity = metrics.density;
-            metrics.widthPixels = screenWidth;
-            metrics.heightPixels = screenHeight;
-            metrics.xdpi = xdpi;
-            metrics.ydpi = ydpi;
-
-            context = new BridgeContext(projectKey, metrics, currentTheme, projectResources,
-                    frameworkResources, styleParentMap, customViewLoader, logger);
-            BridgeInflater inflater = new BridgeInflater(context, customViewLoader);
-            context.setBridgeInflater(inflater);
-            inflater.setFactory2(context);
-
-            IResourceValue windowBackground = null;
-            int screenOffset = 0;
-            if (currentTheme != null) {
-                windowBackground = context.findItemInStyle(currentTheme, "windowBackground");
-                windowBackground = context.resolveResValue(windowBackground);
-
-                screenOffset = getScreenOffset(frameworkResources, currentTheme, context);
-            }
-
-            BridgeXmlBlockParser parser = new BridgeXmlBlockParser(layoutDescription,
-                    context, false /* platformResourceFlag */);
-
-            ViewGroup root = new FrameLayout(context);
-
-            // Sets the project callback (custom view loader) to the fragment delegate so that
-            // it can instantiate the custom Fragment.
-            Fragment_Delegate.setProjectCallback(customViewLoader);
-
-            View view = inflater.inflate(parser, root);
-
-            // post-inflate process. For now this supports TabHost/TabWidget
-            postInflateProcess(view, customViewLoader);
-
-            Fragment_Delegate.setProjectCallback(null);
-
-            // set the AttachInfo on the root view.
-            AttachInfo info = new AttachInfo(new WindowSession(), new Window(),
-                    new Handler(), null);
-            info.mHasWindowFocus = true;
-            info.mWindowVisibility = View.VISIBLE;
-            info.mInTouchMode = false; // this is so that we can display selections.
-            root.dispatchAttachedToWindow(info, 0);
-
-            // get the background drawable
-            if (windowBackground != null) {
-                Drawable d = ResourceHelper.getDrawable(windowBackground,
-                        context, true /* isFramework */);
-                root.setBackgroundDrawable(d);
-            }
-
-            // measure the views
-            int w_spec, h_spec;
-
-            if (renderFullSize) {
-                // measure the full size needed by the layout.
-                w_spec = MeasureSpec.makeMeasureSpec(screenWidth,
-                        MeasureSpec.UNSPECIFIED); // this lets us know the actual needed size
-                h_spec = MeasureSpec.makeMeasureSpec(screenHeight - screenOffset,
-                        MeasureSpec.UNSPECIFIED); // this lets us know the actual needed size
-                root.measure(w_spec, h_spec);
-
-                int neededWidth = root.getChildAt(0).getMeasuredWidth();
-                if (neededWidth > screenWidth) {
-                    screenWidth = neededWidth;
-                }
-
-                int neededHeight = root.getChildAt(0).getMeasuredHeight();
-                if (neededHeight > screenHeight - screenOffset) {
-                    screenHeight = neededHeight + screenOffset;
+                    scene.prepare();
+                    lastResult = scene.inflate();
+                    if (lastResult == SceneResult.SUCCESS) {
+                        lastResult = scene.render();
+                    }
+                } finally {
+                    if (scene != null) {
+                        scene.cleanup();
+                    }
                 }
             }
 
-            // remeasure with only the size we need
-            // This must always be done before the call to layout
-            w_spec = MeasureSpec.makeMeasureSpec(screenWidth, MeasureSpec.EXACTLY);
-            h_spec = MeasureSpec.makeMeasureSpec(screenHeight - screenOffset,
-                    MeasureSpec.EXACTLY);
-            root.measure(w_spec, h_spec);
-
-            // now do the layout.
-            root.layout(0, screenOffset, screenWidth, screenHeight);
-
-            // draw the views
-            // create the BufferedImage into which the layout will be rendered.
-            BufferedImage image = new BufferedImage(screenWidth, screenHeight - screenOffset,
-                    BufferedImage.TYPE_INT_ARGB);
-
-            // create an Android bitmap around the BufferedImage
-            Bitmap bitmap = Bitmap_Delegate.createBitmap(image, Density.getEnum(density));
-
-            // create a Canvas around the Android bitmap
-            Canvas canvas = new Canvas(bitmap);
-
-            // to set the logger, get the native delegate
-            Canvas_Delegate canvasDelegate = Canvas_Delegate.getDelegate(canvas);
-            canvasDelegate.setLogger(logger);
-
-            root.draw(canvas);
-            canvasDelegate.dispose();
-
-            return new LayoutResult(
-                    visit(((ViewGroup)view).getChildAt(0), context),
-                    image);
-
-        } catch (PostInflateException e) {
-            return new LayoutResult(ILayoutResult.ERROR, "Error during post inflation process:\n"
-                    + e.getMessage());
-        } catch (Throwable e) {
-            // get the real cause of the exception.
-            Throwable t = e;
-            while (t.getCause() != null) {
-                t = t.getCause();
-            }
-
-            // log it
-            logger.error(t);
-
-            // then return with an ERROR status and the message from the real exception
-            return new LayoutResult(ILayoutResult.ERROR,
-                    t.getClass().getSimpleName() + ": " + t.getMessage());
-        } finally {
-            // Make sure to remove static references, otherwise we could not unload the lib
-            BridgeResources.clearSystem();
-            BridgeAssetManager.clearSystem();
-
-            // Remove the global logger
-            synchronized (sDefaultLogger) {
-                sLogger = sDefaultLogger;
-            }
+            return new BridgeLayoutScene(this, scene, lastResult);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return new BridgeLayoutScene(this, null, new SceneResult("error!", t));
         }
     }
 
@@ -515,6 +297,7 @@ public final class Bridge implements ILayoutBridge {
      * (non-Javadoc)
      * @see com.android.layoutlib.api.ILayoutLibBridge#clearCaches(java.lang.Object)
      */
+    @Override
     public void clearCaches(Object projectKey) {
         if (projectKey != null) {
             sProjectBitmapCache.remove(projectKey);
@@ -556,357 +339,15 @@ public final class Bridge implements ILayoutBridge {
         return null;
     }
 
-    static Map<String, Integer> getEnumValues(String attributeName) {
+    /**
+     * Returns the list of possible enums for a given attribute name.
+     */
+    public static Map<String, Integer> getEnumValues(String attributeName) {
         if (sEnumValueMap != null) {
             return sEnumValueMap.get(attributeName);
         }
 
         return null;
-    }
-
-    /**
-     * Visits a View and its children and generate a {@link ILayoutViewInfo} containing the
-     * bounds of all the views.
-     * @param view the root View
-     * @param context the context.
-     */
-    private ILayoutViewInfo visit(View view, BridgeContext context) {
-        if (view == null) {
-            return null;
-        }
-
-        LayoutViewInfo result = new LayoutViewInfo(view.getClass().getName(),
-                context.getViewKey(view),
-                view.getLeft(), view.getTop(), view.getRight(), view.getBottom());
-
-        if (view instanceof ViewGroup) {
-            ViewGroup group = ((ViewGroup) view);
-            int n = group.getChildCount();
-            ILayoutViewInfo[] children = new ILayoutViewInfo[n];
-            for (int i = 0; i < group.getChildCount(); i++) {
-                children[i] = visit(group.getChildAt(i), context);
-            }
-            result.setChildren(children);
-        }
-
-        return result;
-    }
-
-    /**
-     * Compute style information from the given list of style for the project and framework.
-     * @param themeName the name of the current theme.  In order to differentiate project and
-     * platform themes sharing the same name, all project themes must be prepended with
-     * a '*' character.
-     * @param isProjectTheme Is this a project theme
-     * @param inProjectStyleMap the project style map
-     * @param inFrameworkStyleMap the framework style map
-     * @param outInheritanceMap the map of style inheritance. This is filled by the method
-     * @return the {@link IStyleResourceValue} matching <var>themeName</var>
-     */
-    private IStyleResourceValue computeStyleMaps(
-            String themeName, boolean isProjectTheme, Map<String,
-            IResourceValue> inProjectStyleMap, Map<String, IResourceValue> inFrameworkStyleMap,
-            Map<IStyleResourceValue, IStyleResourceValue> outInheritanceMap) {
-
-        if (inProjectStyleMap != null && inFrameworkStyleMap != null) {
-            // first, get the theme
-            IResourceValue theme = null;
-
-            // project theme names have been prepended with a *
-            if (isProjectTheme) {
-                theme = inProjectStyleMap.get(themeName);
-            } else {
-                theme = inFrameworkStyleMap.get(themeName);
-            }
-
-            if (theme instanceof IStyleResourceValue) {
-                // compute the inheritance map for both the project and framework styles
-                computeStyleInheritance(inProjectStyleMap.values(), inProjectStyleMap,
-                        inFrameworkStyleMap, outInheritanceMap);
-
-                // Compute the style inheritance for the framework styles/themes.
-                // Since, for those, the style parent values do not contain 'android:'
-                // we want to force looking in the framework style only to avoid using
-                // similarly named styles from the project.
-                // To do this, we pass null in lieu of the project style map.
-                computeStyleInheritance(inFrameworkStyleMap.values(), null /*inProjectStyleMap */,
-                        inFrameworkStyleMap, outInheritanceMap);
-
-                return (IStyleResourceValue)theme;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Compute the parent style for all the styles in a given list.
-     * @param styles the styles for which we compute the parent.
-     * @param inProjectStyleMap the map of project styles.
-     * @param inFrameworkStyleMap the map of framework styles.
-     * @param outInheritanceMap the map of style inheritance. This is filled by the method.
-     */
-    private void computeStyleInheritance(Collection<IResourceValue> styles,
-            Map<String, IResourceValue> inProjectStyleMap,
-            Map<String, IResourceValue> inFrameworkStyleMap,
-            Map<IStyleResourceValue, IStyleResourceValue> outInheritanceMap) {
-        for (IResourceValue value : styles) {
-            if (value instanceof IStyleResourceValue) {
-                IStyleResourceValue style = (IStyleResourceValue)value;
-                IStyleResourceValue parentStyle = null;
-
-                // first look for a specified parent.
-                String parentName = style.getParentStyle();
-
-                // no specified parent? try to infer it from the name of the style.
-                if (parentName == null) {
-                    parentName = getParentName(value.getName());
-                }
-
-                if (parentName != null) {
-                    parentStyle = getStyle(parentName, inProjectStyleMap, inFrameworkStyleMap);
-
-                    if (parentStyle != null) {
-                        outInheritanceMap.put(style, parentStyle);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Searches for and returns the {@link IStyleResourceValue} from a given name.
-     * <p/>The format of the name can be:
-     * <ul>
-     * <li>[android:]&lt;name&gt;</li>
-     * <li>[android:]style/&lt;name&gt;</li>
-     * <li>@[android:]style/&lt;name&gt;</li>
-     * </ul>
-     * @param parentName the name of the style.
-     * @param inProjectStyleMap the project style map. Can be <code>null</code>
-     * @param inFrameworkStyleMap the framework style map.
-     * @return The matching {@link IStyleResourceValue} object or <code>null</code> if not found.
-     */
-    private IStyleResourceValue getStyle(String parentName,
-            Map<String, IResourceValue> inProjectStyleMap,
-            Map<String, IResourceValue> inFrameworkStyleMap) {
-        boolean frameworkOnly = false;
-
-        String name = parentName;
-
-        // remove the useless @ if it's there
-        if (name.startsWith(BridgeConstants.PREFIX_RESOURCE_REF)) {
-            name = name.substring(BridgeConstants.PREFIX_RESOURCE_REF.length());
-        }
-
-        // check for framework identifier.
-        if (name.startsWith(BridgeConstants.PREFIX_ANDROID)) {
-            frameworkOnly = true;
-            name = name.substring(BridgeConstants.PREFIX_ANDROID.length());
-        }
-
-        // at this point we could have the format <type>/<name>. we want only the name as long as
-        // the type is style.
-        if (name.startsWith(BridgeConstants.REFERENCE_STYLE)) {
-            name = name.substring(BridgeConstants.REFERENCE_STYLE.length());
-        } else if (name.indexOf('/') != -1) {
-            return null;
-        }
-
-        IResourceValue parent = null;
-
-        // if allowed, search in the project resources.
-        if (frameworkOnly == false && inProjectStyleMap != null) {
-            parent = inProjectStyleMap.get(name);
-        }
-
-        // if not found, then look in the framework resources.
-        if (parent == null) {
-            parent = inFrameworkStyleMap.get(name);
-        }
-
-        // make sure the result is the proper class type and return it.
-        if (parent instanceof IStyleResourceValue) {
-            return (IStyleResourceValue)parent;
-        }
-
-        sLogger.error(String.format("Unable to resolve parent style name: %s", parentName));
-
-        return null;
-    }
-
-    /**
-     * Computes the name of the parent style, or <code>null</code> if the style is a root style.
-     */
-    private String getParentName(String styleName) {
-        int index = styleName.lastIndexOf('.');
-        if (index != -1) {
-            return styleName.substring(0, index);
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns the top screen offset. This depends on whether the current theme defines the user
-     * of the title and status bars.
-     * @param frameworkResources The framework resources
-     * @param currentTheme The current theme
-     * @param context The context
-     * @return the pixel height offset
-     */
-    private int getScreenOffset(Map<String, Map<String, IResourceValue>> frameworkResources,
-            IStyleResourceValue currentTheme, BridgeContext context) {
-        int offset = 0;
-
-        // get the title bar flag from the current theme.
-        IResourceValue value = context.findItemInStyle(currentTheme, "windowNoTitle");
-
-        // because it may reference something else, we resolve it.
-        value = context.resolveResValue(value);
-
-        // if there's a value and it's true (default is false)
-        if (value == null || value.getValue() == null ||
-                XmlUtils.convertValueToBoolean(value.getValue(), false /* defValue */) == false) {
-            // default size of the window title bar
-            int defaultOffset = DEFAULT_TITLE_BAR_HEIGHT;
-
-            // get value from the theme.
-            value = context.findItemInStyle(currentTheme, "windowTitleSize");
-
-            // resolve it
-            value = context.resolveResValue(value);
-
-            if (value != null) {
-                // get the numerical value, if available
-                TypedValue typedValue = ResourceHelper.getValue(value.getValue());
-                if (typedValue != null) {
-                    // compute the pixel value based on the display metrics
-                    defaultOffset = (int)typedValue.getDimension(context.getResources().mMetrics);
-                }
-            }
-
-            offset += defaultOffset;
-        }
-
-        // get the fullscreen flag from the current theme.
-        value = context.findItemInStyle(currentTheme, "windowFullscreen");
-
-        // because it may reference something else, we resolve it.
-        value = context.resolveResValue(value);
-
-        if (value == null || value.getValue() == null ||
-                XmlUtils.convertValueToBoolean(value.getValue(), false /* defValue */) == false) {
-
-            // default value
-            int defaultOffset = DEFAULT_STATUS_BAR_HEIGHT;
-
-            // get the real value, first the list of Dimensions from the framework map
-            Map<String, IResourceValue> dimens = frameworkResources.get(BridgeConstants.RES_DIMEN);
-
-            // now get the value
-            value = dimens.get("status_bar_height");
-            if (value != null) {
-                TypedValue typedValue = ResourceHelper.getValue(value.getValue());
-                if (typedValue != null) {
-                    // compute the pixel value based on the display metrics
-                    defaultOffset = (int)typedValue.getDimension(context.getResources().mMetrics);
-                }
-            }
-
-            // add the computed offset.
-            offset += defaultOffset;
-        }
-
-        return offset;
-    }
-
-    /**
-     * Post process on a view hierachy that was just inflated.
-     * <p/>At the moment this only support TabHost: If {@link TabHost} is detected, look for the
-     * {@link TabWidget}, and the corresponding {@link FrameLayout} and make new tabs automatically
-     * based on the content of the {@link FrameLayout}.
-     * @param view the root view to process.
-     * @param projectCallback callback to the project.
-     */
-    private void postInflateProcess(View view, IProjectCallback projectCallback)
-            throws PostInflateException {
-        if (view instanceof TabHost) {
-            setupTabHost((TabHost)view, projectCallback);
-        } else if (view instanceof ViewGroup) {
-            ViewGroup group = (ViewGroup)view;
-            final int count = group.getChildCount();
-            for (int c = 0 ; c < count ; c++) {
-                View child = group.getChildAt(c);
-                postInflateProcess(child, projectCallback);
-            }
-        }
-    }
-
-    /**
-     * Sets up a {@link TabHost} object.
-     * @param tabHost the TabHost to setup.
-     * @param projectCallback The project callback object to access the project R class.
-     * @throws PostInflateException
-     */
-    private void setupTabHost(TabHost tabHost, IProjectCallback projectCallback)
-            throws PostInflateException {
-        // look for the TabWidget, and the FrameLayout. They have their own specific names
-        View v = tabHost.findViewById(android.R.id.tabs);
-
-        if (v == null) {
-            throw new PostInflateException(
-                    "TabHost requires a TabWidget with id \"android:id/tabs\".\n");
-        }
-
-        if ((v instanceof TabWidget) == false) {
-            throw new PostInflateException(String.format(
-                    "TabHost requires a TabWidget with id \"android:id/tabs\".\n" +
-                    "View found with id 'tabs' is '%s'", v.getClass().getCanonicalName()));
-        }
-
-        v = tabHost.findViewById(android.R.id.tabcontent);
-
-        if (v == null) {
-            // TODO: see if we can fake tabs even without the FrameLayout (same below when the framelayout is empty)
-            throw new PostInflateException(
-                    "TabHost requires a FrameLayout with id \"android:id/tabcontent\".");
-        }
-
-        if ((v instanceof FrameLayout) == false) {
-            throw new PostInflateException(String.format(
-                    "TabHost requires a FrameLayout with id \"android:id/tabcontent\".\n" +
-                    "View found with id 'tabcontent' is '%s'", v.getClass().getCanonicalName()));
-        }
-
-        FrameLayout content = (FrameLayout)v;
-
-        // now process the content of the framelayout and dynamically create tabs for it.
-        final int count = content.getChildCount();
-
-        if (count == 0) {
-            throw new PostInflateException(
-                    "The FrameLayout for the TabHost has no content. Rendering failed.\n");
-        }
-
-        // this must be called before addTab() so that the TabHost searches its TabWidget
-        // and FrameLayout.
-        tabHost.setup();
-
-        // for each child of the framelayout, add a new TabSpec
-        for (int i = 0 ; i < count ; i++) {
-            View child = content.getChildAt(i);
-            String tabSpec = String.format("tab_spec%d", i+1);
-            int id = child.getId();
-            String[] resource = projectCallback.resolveResourceValue(id);
-            String name;
-            if (resource != null) {
-                name = resource[0]; // 0 is resource name, 1 is resource type.
-            } else {
-                name = String.format("Tab %d", i+1); // default name if id is unresolved.
-            }
-            tabHost.addTab(tabHost.newTabSpec(tabSpec).setIndicator(name).setContent(id));
-        }
     }
 
     /**
@@ -916,7 +357,7 @@ public final class Bridge implements ILayoutBridge {
      * @param projectKey the key of the project, or null to query the framework cache.
      * @return the cached Bitmap or null if not found.
      */
-    static Bitmap getCachedBitmap(String value, Object projectKey) {
+    public static Bitmap getCachedBitmap(String value, Object projectKey) {
         if (projectKey != null) {
             Map<String, SoftReference<Bitmap>> map = sProjectBitmapCache.get(projectKey);
             if (map != null) {
@@ -941,7 +382,7 @@ public final class Bridge implements ILayoutBridge {
      * @param bmp the Bitmap object
      * @param projectKey the key of the project, or null to put the bitmap in the framework cache.
      */
-    static void setCachedBitmap(String value, Bitmap bmp, Object projectKey) {
+    public static void setCachedBitmap(String value, Bitmap bmp, Object projectKey) {
         if (projectKey != null) {
             Map<String, SoftReference<Bitmap>> map = sProjectBitmapCache.get(projectKey);
 
@@ -963,7 +404,7 @@ public final class Bridge implements ILayoutBridge {
      * @param projectKey the key of the project, or null to query the framework cache.
      * @return the cached 9 patch or null if not found.
      */
-    static NinePatch getCached9Patch(String value, Object projectKey) {
+    public static NinePatch getCached9Patch(String value, Object projectKey) {
         if (projectKey != null) {
             Map<String, SoftReference<NinePatch>> map = sProject9PatchCache.get(projectKey);
 
@@ -983,262 +424,69 @@ public final class Bridge implements ILayoutBridge {
         return null;
     }
 
-    /**
-     * Sets a 9 patch in a project cache or in the framework cache.
-     * @param value the path of the 9 patch
-     * @param ninePatch the 9 patch object
-     * @param projectKey the key of the project, or null to put the bitmap in the framework cache.
+
+    // ---------- OBSOLETE API METHODS ----------
+
+    /*
+     * For compatilibty purposes, we implement the old deprecated version of computeLayout.
+     * (non-Javadoc)
+     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, java.lang.String, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
      */
-    static void setCached9Patch(String value, NinePatch ninePatch, Object projectKey) {
-        if (projectKey != null) {
-            Map<String, SoftReference<NinePatch>> map = sProject9PatchCache.get(projectKey);
-
-            if (map == null) {
-                map = new HashMap<String, SoftReference<NinePatch>>();
-                sProject9PatchCache.put(projectKey, map);
-            }
-
-            map.put(value, new SoftReference<NinePatch>(ninePatch));
-        } else {
-            sFramework9PatchCache.put(value, new SoftReference<NinePatch>(ninePatch));
-        }
+    @Deprecated
+    public com.android.layoutlib.api.ILayoutResult computeLayout(IXmlPullParser layoutDescription,
+            Object projectKey,
+            int screenWidth, int screenHeight, String themeName,
+            Map<String, Map<String, IResourceValue>> projectResources,
+            Map<String, Map<String, IResourceValue>> frameworkResources,
+            IProjectCallback customViewLoader, ILayoutLog logger) {
+        throw new UnsupportedOperationException();
     }
 
-    private static final class PostInflateException extends Exception {
-        private static final long serialVersionUID = 1L;
-
-        public PostInflateException(String message) {
-            super(message);
-        }
+    /*
+     * For compatilibty purposes, we implement the old deprecated version of computeLayout.
+     * (non-Javadoc)
+     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
+     */
+    @Deprecated
+    public com.android.layoutlib.api.ILayoutResult computeLayout(IXmlPullParser layoutDescription,
+            Object projectKey,
+            int screenWidth, int screenHeight, String themeName, boolean isProjectTheme,
+            Map<String, Map<String, IResourceValue>> projectResources,
+            Map<String, Map<String, IResourceValue>> frameworkResources,
+            IProjectCallback customViewLoader, ILayoutLog logger) {
+        throw new UnsupportedOperationException();
     }
 
-    /**
-     * Implementation of {@link IWindowSession} so that mSession is not null in
-     * the {@link SurfaceView}.
+    /*
+     * For compatilibty purposes, we implement the old deprecated version of computeLayout.
+     * (non-Javadoc)
+     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, int, float, float, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
      */
-    private static final class WindowSession implements IWindowSession {
-
-        @SuppressWarnings("unused")
-        public int add(IWindow arg0, LayoutParams arg1, int arg2, Rect arg3,
-                InputChannel outInputchannel)
-                throws RemoteException {
-            // pass for now.
-            return 0;
-        }
-
-        @SuppressWarnings("unused")
-        public int addWithoutInputChannel(IWindow arg0, LayoutParams arg1, int arg2, Rect arg3)
-                throws RemoteException {
-            // pass for now.
-            return 0;
-        }
-
-        @SuppressWarnings("unused")
-        public void finishDrawing(IWindow arg0) throws RemoteException {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void finishKey(IWindow arg0) throws RemoteException {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public boolean getInTouchMode() throws RemoteException {
-            // pass for now.
-            return false;
-        }
-
-        @SuppressWarnings("unused")
-        public boolean performHapticFeedback(IWindow window, int effectId, boolean always) {
-            // pass for now.
-            return false;
-        }
-
-        @SuppressWarnings("unused")
-        public MotionEvent getPendingPointerMove(IWindow arg0) throws RemoteException {
-            // pass for now.
-            return null;
-        }
-
-        @SuppressWarnings("unused")
-        public MotionEvent getPendingTrackballMove(IWindow arg0) throws RemoteException {
-            // pass for now.
-            return null;
-        }
-
-        @SuppressWarnings("unused")
-        public int relayout(IWindow arg0, LayoutParams arg1, int arg2, int arg3, int arg4,
-                boolean arg4_5, Rect arg5, Rect arg6, Rect arg7, Configuration arg7b, Surface arg8)
-                throws RemoteException {
-            // pass for now.
-            return 0;
-        }
-
-        public void getDisplayFrame(IWindow window, Rect outDisplayFrame) {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void remove(IWindow arg0) throws RemoteException {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void setInTouchMode(boolean arg0) throws RemoteException {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void setTransparentRegion(IWindow arg0, Region arg1) throws RemoteException {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void setInsets(IWindow window, int touchable, Rect contentInsets,
-                Rect visibleInsets) {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public IBinder prepareDrag(IWindow window, boolean localOnly,
-                int thumbnailWidth, int thumbnailHeight, Surface outSurface)
-                throws RemoteException {
-            // pass for now
-            return null;
-        }
-
-        @SuppressWarnings("unused")
-        public boolean performDrag(IWindow window, IBinder dragToken,
-                float touchX, float touchY, float thumbCenterX, float thumbCenterY,
-                ClipData data)
-                throws RemoteException {
-            // pass for now
-            return false;
-        }
-
-        @SuppressWarnings("unused")
-        public void reportDropResult(IWindow window, boolean consumed) throws RemoteException {
-            // pass for now
-        }
-
-        @SuppressWarnings("unused")
-        public void dragRecipientEntered(IWindow window) throws RemoteException {
-            // pass for now
-        }
-
-        @SuppressWarnings("unused")
-        public void dragRecipientExited(IWindow window) throws RemoteException {
-            // pass for now
-        }
-
-        @SuppressWarnings("unused")
-        public void setWallpaperPosition(IBinder window, float x, float y,
-            float xStep, float yStep) {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void wallpaperOffsetsComplete(IBinder window) {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
-                int z, Bundle extras, boolean sync) {
-            // pass for now.
-            return null;
-        }
-
-        @SuppressWarnings("unused")
-        public void wallpaperCommandComplete(IBinder window, Bundle result) {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void closeSystemDialogs(String reason) {
-            // pass for now.
-        }
-
-        public IBinder asBinder() {
-            // pass for now.
-            return null;
-        }
+    @Deprecated
+    public com.android.layoutlib.api.ILayoutResult computeLayout(IXmlPullParser layoutDescription,
+            Object projectKey,
+            int screenWidth, int screenHeight, int density, float xdpi, float ydpi,
+            String themeName, boolean isProjectTheme,
+            Map<String, Map<String, IResourceValue>> projectResources,
+            Map<String, Map<String, IResourceValue>> frameworkResources,
+            IProjectCallback customViewLoader, ILayoutLog logger) {
+        throw new UnsupportedOperationException();
     }
 
-    /**
-     * Implementation of {@link IWindow} to pass to the {@link AttachInfo}.
+    /*
+     * (non-Javadoc)
+     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, boolean, int, float, float, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
      */
-    private static final class Window implements IWindow {
-
-        @SuppressWarnings("unused")
-        public void dispatchAppVisibility(boolean arg0) throws RemoteException {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void dispatchGetNewSurface() throws RemoteException {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void dispatchKey(KeyEvent arg0) throws RemoteException {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void dispatchPointer(MotionEvent arg0, long arg1, boolean arg2) throws RemoteException {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void dispatchTrackball(MotionEvent arg0, long arg1, boolean arg2) throws RemoteException {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void executeCommand(String arg0, String arg1, ParcelFileDescriptor arg2)
-                throws RemoteException {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void resized(int arg0, int arg1, Rect arg2, Rect arg3, boolean arg4, Configuration arg5)
-                throws RemoteException {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void windowFocusChanged(boolean arg0, boolean arg1) throws RemoteException {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep,
-                boolean sync) {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void dispatchWallpaperCommand(String action, int x, int y,
-                int z, Bundle extras, boolean sync) {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void closeSystemDialogs(String reason) {
-            // pass for now.
-        }
-
-        @SuppressWarnings("unused")
-        public void dispatchDragEvent(DragEvent event) {
-            // pass for now.
-        }
-
-        public IBinder asBinder() {
-            // pass for now.
-            return null;
-        }
+    @Deprecated
+    public com.android.layoutlib.api.ILayoutResult computeLayout(IXmlPullParser layoutDescription,
+            Object projectKey,
+            int screenWidth, int screenHeight, boolean renderFullSize,
+            int density, float xdpi, float ydpi,
+            String themeName, boolean isProjectTheme,
+            Map<String, Map<String, IResourceValue>> projectResources,
+            Map<String, Map<String, IResourceValue>> frameworkResources,
+            IProjectCallback customViewLoader, ILayoutLog logger) {
+        throw new UnsupportedOperationException();
     }
 
 }

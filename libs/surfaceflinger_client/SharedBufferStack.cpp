@@ -265,6 +265,14 @@ bool SharedBufferClient::LockCondition::operator()() const {
             (stack.queued > 0 && stack.inUse != buf));
 }
 
+SharedBufferServer::BuffersAvailableCondition::BuffersAvailableCondition(
+        SharedBufferServer* sbs, int numBuffers) : ConditionBase(sbs),
+        mNumBuffers(numBuffers) {
+}
+bool SharedBufferServer::BuffersAvailableCondition::operator()() const {
+    return stack.available == mNumBuffers;
+}
+
 // ----------------------------------------------------------------------------
 
 SharedBufferClient::QueueUpdate::QueueUpdate(SharedBufferBase* sbb)
@@ -448,6 +456,7 @@ status_t SharedBufferClient::queue(int buf)
 
     const nsecs_t now = systemTime(SYSTEM_TIME_THREAD);
     stack.stats.totalTime = ns2us(now - mDequeueTime[buf]);
+
     return err;
 }
 
@@ -492,6 +501,7 @@ status_t SharedBufferClient::setBufferCount(
     if (err == NO_ERROR) {
         mNumBuffers = bufferCount;
         queued_head = (stack.head + stack.queued) % mNumBuffers;
+        tail = computeTail();
     }
     return err;
 }
@@ -606,17 +616,24 @@ uint32_t SharedBufferServer::getTransform(int buf) const
  */
 status_t SharedBufferServer::resize(int newNumBuffers)
 {
-    if (uint32_t(newNumBuffers) >= SharedBufferStack::NUM_BUFFER_MAX)
+    if ((unsigned int)(newNumBuffers) < SharedBufferStack::NUM_BUFFER_MIN ||
+        (unsigned int)(newNumBuffers) > SharedBufferStack::NUM_BUFFER_MAX) {
         return BAD_VALUE;
+    }
 
     RWLock::AutoWLock _l(mLock);
 
-    // for now we're not supporting shrinking
-    const int numBuffers = mNumBuffers;
-    if (newNumBuffers < numBuffers)
-        return BAD_VALUE;
+    if (newNumBuffers < mNumBuffers) {
+        return shrink(newNumBuffers);
+    } else {
+        return grow(newNumBuffers);
+    }
+}
 
+status_t SharedBufferServer::grow(int newNumBuffers)
+{
     SharedBufferStack& stack( *mSharedStack );
+    const int numBuffers = mNumBuffers;
     const int extra = newNumBuffers - numBuffers;
 
     // read the head, make sure it's valid
@@ -647,6 +664,54 @@ status_t SharedBufferServer::resize(int newNumBuffers)
     }
 
     mNumBuffers = newNumBuffers;
+    return NO_ERROR;
+}
+
+status_t SharedBufferServer::shrink(int newNumBuffers)
+{
+    SharedBufferStack& stack( *mSharedStack );
+
+    // Shrinking is only supported if there are no buffers currently dequeued.
+    int32_t avail = stack.available;
+    int32_t queued = stack.queued;
+    if (avail + queued != mNumBuffers) {
+        return INVALID_OPERATION;
+    }
+
+    // Wait for any queued buffers to be displayed.
+    BuffersAvailableCondition condition(this, mNumBuffers);
+    status_t err = waitForCondition(condition);
+    if (err < 0) {
+        return err;
+    }
+
+    // Reset head to index 0 and make it refer to buffer 0.  The same renaming
+    // (head -> 0) is done in the BufferManager.
+    int32_t head = stack.head;
+    int8_t* index = const_cast<int8_t*>(stack.index);
+    for (int8_t i = 0; i < newNumBuffers; i++) {
+        index[i] = i;
+    }
+    stack.head = 0;
+    stack.headBuf = 0;
+
+    // If one of the buffers is in use it must be the head buffer, which we are
+    // renaming to buffer 0.
+    if (stack.inUse > 0) {
+        stack.inUse = 0;
+    }
+
+    // Free the buffers from the end of the list that are no longer needed.
+    for (int i = newNumBuffers; i < mNumBuffers; i++) {
+        mBufferList.remove(i);
+    }
+
+    // Tell the client to reallocate all the buffers.
+    reallocateAll();
+
+    mNumBuffers = newNumBuffers;
+    stack.available = newNumBuffers;
+
     return NO_ERROR;
 }
 

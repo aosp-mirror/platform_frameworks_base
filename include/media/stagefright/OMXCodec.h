@@ -293,6 +293,8 @@ private:
             uint32_t flags,
             Vector<String8> *matchingCodecs);
 
+    void restorePatchedDataPointer(BufferInfo *info);
+
     OMXCodec(const OMXCodec &);
     OMXCodec &operator=(const OMXCodec &);
 };
@@ -305,6 +307,7 @@ struct CodecProfileLevel {
 struct CodecCapabilities {
     String8 mComponentName;
     Vector<CodecProfileLevel> mProfileLevels;
+    Vector<OMX_U32> mColorFormats;
 };
 
 // Return a vector of componentNames with supported profile/level pairs

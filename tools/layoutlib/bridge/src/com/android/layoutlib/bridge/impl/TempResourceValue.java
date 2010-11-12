@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge;
+package com.android.layoutlib.bridge.impl;
 
 import com.android.layoutlib.api.IResourceValue;
+import com.android.layoutlib.api.LayoutBridge;
 
 /**
- * Basic implementation of IResourceValue.
+ * Basic implementation of IResourceValue for when it is needed to dynamically make a new
+ * {@link IResourceValue} object.
+ *
+ * Most of the time, implementations of IResourceValue come through the {@link LayoutBridge}
+ * API.
  */
-class ResourceValue implements IResourceValue {
+public class TempResourceValue implements IResourceValue {
     private final String mType;
     private final String mName;
     private String mValue = null;
-    
-    ResourceValue(String name) {
-        mType = null;
-        mName = name;
-    }
 
-    public ResourceValue(String type, String name, String value) {
+    public TempResourceValue(String type, String name, String value) {
         mType = type;
         mName = name;
         mValue = value;
@@ -44,16 +44,16 @@ class ResourceValue implements IResourceValue {
     public final String getName() {
         return mName;
     }
-    
+
     public final String getValue() {
         return mValue;
     }
-    
+
     public final void setValue(String value) {
         mValue = value;
     }
-    
-    public void replaceWith(ResourceValue value) {
+
+    public void replaceWith(TempResourceValue value) {
         mValue = value.mValue;
     }
 

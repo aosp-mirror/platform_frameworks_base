@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge;
+package com.android.layoutlib.bridge.android;
 
 import com.android.layoutlib.api.IResourceValue;
+import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.BridgeConstants;
 
 import org.xmlpull.v1.XmlPullParser;
 

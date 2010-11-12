@@ -340,8 +340,10 @@ status_t Layer::setBufferCount(int bufferCount)
 
     // NOTE: lcblk->resize() is protected by an internal lock
     status_t err = lcblk->resize(bufferCount);
-    if (err == NO_ERROR)
-        mBufferManager.resize(bufferCount);
+    if (err == NO_ERROR) {
+        EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
+        mBufferManager.resize(bufferCount, mFlinger, dpy);
+    }
 
     return err;
 }
@@ -774,9 +776,52 @@ Layer::BufferManager::~BufferManager()
 {
 }
 
-status_t Layer::BufferManager::resize(size_t size)
+status_t Layer::BufferManager::resize(size_t size,
+        const sp<SurfaceFlinger>& flinger, EGLDisplay dpy)
 {
     Mutex::Autolock _l(mLock);
+
+    if (size < mNumBuffers) {
+        // Move the active texture into slot 0
+        BufferData activeBufferData = mBufferData[mActiveBuffer];
+        mBufferData[mActiveBuffer] = mBufferData[0];
+        mBufferData[0] = activeBufferData;
+        mActiveBuffer = 0;
+
+        // Free the buffers that are no longer needed.
+        for (size_t i = size; i < mNumBuffers; i++) {
+            mBufferData[i].buffer = 0;
+
+            // Create a message to destroy the textures on SurfaceFlinger's GL
+            // thread.
+            class MessageDestroyTexture : public MessageBase {
+                Image mTexture;
+                EGLDisplay mDpy;
+             public:
+                MessageDestroyTexture(const Image& texture, EGLDisplay dpy)
+                    : mTexture(texture), mDpy(dpy) { }
+                virtual bool handler() {
+                    status_t err = Layer::BufferManager::destroyTexture(
+                            &mTexture, mDpy);
+                    LOGE_IF(err<0, "error destroying texture: %d (%s)",
+                            mTexture.name, strerror(-err));
+                    return true; // XXX: err == 0;  ????
+                }
+            };
+
+            MessageDestroyTexture *msg = new MessageDestroyTexture(
+                    mBufferData[i].texture, dpy);
+
+            // Don't allow this texture to be cleaned up by
+            // BufferManager::destroy.
+            mBufferData[i].texture.name = -1U;
+            mBufferData[i].texture.image = EGL_NO_IMAGE_KHR;
+
+            // Post the message to the SurfaceFlinger object.
+            flinger->postMessageAsync(msg);
+        }
+    }
+
     mNumBuffers = size;
     return NO_ERROR;
 }

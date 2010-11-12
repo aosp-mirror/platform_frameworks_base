@@ -53,7 +53,6 @@ TextureCache::TextureCache(uint32_t maxByteSize):
 }
 
 TextureCache::~TextureCache() {
-    Mutex::Autolock _l(mLock);
     mCache.clear();
 }
 
@@ -71,17 +70,14 @@ void TextureCache::init() {
 ///////////////////////////////////////////////////////////////////////////////
 
 uint32_t TextureCache::getSize() {
-    Mutex::Autolock _l(mLock);
     return mSize;
 }
 
 uint32_t TextureCache::getMaxSize() {
-    Mutex::Autolock _l(mLock);
     return mMaxSize;
 }
 
 void TextureCache::setMaxSize(uint32_t maxSize) {
-    Mutex::Autolock _l(mLock);
     mMaxSize = maxSize;
     while (mSize > mMaxSize) {
         mCache.removeOldest();
@@ -111,9 +107,7 @@ void TextureCache::operator()(SkBitmap*& bitmap, Texture*& texture) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Texture* TextureCache::get(SkBitmap* bitmap) {
-    mLock.lock();
     Texture* texture = mCache.get(bitmap);
-    mLock.unlock();
 
     if (!texture) {
         if (bitmap->width() > mMaxTextureSize || bitmap->height() > mMaxTextureSize) {
@@ -124,11 +118,9 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
         const uint32_t size = bitmap->rowBytes() * bitmap->height();
         // Don't even try to cache a bitmap that's bigger than the cache
         if (size < mMaxSize) {
-            mLock.lock();
             while (mSize + size > mMaxSize) {
                 mCache.removeOldest();
             }
-            mLock.unlock();
         }
 
         texture = new Texture;
@@ -136,7 +128,6 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
         generateTexture(bitmap, texture, false);
 
         if (size < mMaxSize) {
-            mLock.lock();
             mSize += size;
             TEXTURE_LOGD("TextureCache::get: create texture(%p): name, size, mSize = %d, %d, %d",
                      bitmap, texture->id, size, mSize);
@@ -144,7 +135,6 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
                 LOGD("Texture created, size = %d", size);
             }
             mCache.put(bitmap, texture);
-            mLock.unlock();
         } else {
             texture->cleanup = true;
         }
@@ -156,12 +146,24 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
 }
 
 void TextureCache::remove(SkBitmap* bitmap) {
-    Mutex::Autolock _l(mLock);
     mCache.remove(bitmap);
 }
 
-void TextureCache::clear() {
+void TextureCache::removeDeferred(SkBitmap* bitmap) {
     Mutex::Autolock _l(mLock);
+    mGarbage.push(bitmap);
+}
+
+void TextureCache::clearGarbage() {
+    Mutex::Autolock _l(mLock);
+    size_t count = mGarbage.size();
+    for (size_t i = 0; i < count; i++) {
+        mCache.remove(mGarbage.itemAt(i));
+    }
+    mGarbage.clear();
+}
+
+void TextureCache::clear() {
     mCache.clear();
     TEXTURE_LOGD("TextureCache:clear(), miSize = %d", mSize);
 }

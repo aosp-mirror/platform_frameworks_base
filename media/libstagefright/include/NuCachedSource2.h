@@ -47,6 +47,8 @@ struct NuCachedSource2 : public DataSource {
     void suspend();
     void clearCacheAndResume();
 
+    void resumeFetchingIfNecessary();
+
 protected:
     virtual ~NuCachedSource2();
 
@@ -56,7 +58,7 @@ private:
     enum {
         kPageSize            = 65536,
         kHighWaterThreshold  = 5 * 1024 * 1024,
-        kLowWaterThreshold   = 512 * 1024,
+        kLowWaterThreshold   = 1024 * 1024,
 
         // Read data after a 15 sec timeout whether we're actively
         // fetching or not.
@@ -96,7 +98,7 @@ private:
     status_t seekInternal_l(off_t offset);
 
     size_t approxDataRemaining_l(bool *eos);
-    void restartPrefetcherIfNecessary_l();
+    void restartPrefetcherIfNecessary_l(bool ignoreLowWaterThreshold = false);
 
     DISALLOW_EVIL_CONSTRUCTORS(NuCachedSource2);
 };

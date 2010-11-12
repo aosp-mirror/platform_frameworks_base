@@ -855,6 +855,12 @@ int Surface::setBufferCount(int bufferCount)
     status_t err = mSharedBufferClient->setBufferCount(bufferCount, ipc);
     LOGE_IF(err, "ISurface::setBufferCount(%d) returned %s",
             bufferCount, strerror(-err));
+
+    if (err == NO_ERROR) {
+        // Clear out any references to the old buffers.
+        mBuffers.clear();
+    }
+
     return err;
 }
 
@@ -1029,7 +1035,7 @@ int Surface::getBufferIndex(const sp<GraphicBuffer>& buffer) const
         // one of the buffers for which we do know the index.  This can happen
         // e.g. if GraphicBuffer is used to wrap an android_native_buffer_t that
         // was dequeued from an ANativeWindow.
-        for (int i = 0; i < mBuffers.size(); i++) {
+        for (size_t i = 0; i < mBuffers.size(); i++) {
             if (buffer->handle == mBuffers[i]->handle) {
                 idx = mBuffers[i]->getIndex();
                 break;

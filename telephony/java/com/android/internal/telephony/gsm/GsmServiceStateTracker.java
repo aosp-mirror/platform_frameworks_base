@@ -251,7 +251,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
     }
 
     @Override
-    public Phone getPhone() {
+    protected Phone getPhone() {
         return phone;
     }
 

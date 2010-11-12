@@ -440,6 +440,7 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Tillåter att ett program ser den lokala Bluetooth-telefonens konfiguration, och skapar och accepterar anslutningar med parkopplade enheter."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kontrollera närfältskommunikationen"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Tillåter att en app kommunicerar med taggar, kort och läsare för närfältskommunikation (NFC)."</string>
+    <string name="permlab_disableKeyguard" msgid="4977406164311535092">"inaktivera tangentlås"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Tillåter att ett program inaktiverar tangentlåset och tillhörande lösenordsskydd. Ett exempel på detta är att telefonen inaktiverar tangentlåset vid inkommande samtal och sedan aktiverar det igen när samtalet är avslutat."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"läsa synkroniseringsinställningar"</string>
     <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"Tillåter att ett program läser synkroniseringsinställningarna, till exempel om synkronisering har aktiverats för kontakter."</string>

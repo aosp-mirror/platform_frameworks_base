@@ -444,6 +444,7 @@
     <skip />
     <!-- no translation found for permdesc_nfc (9171401851954407226) -->
     <skip />
+    <string name="permlab_disableKeyguard" msgid="4977406164311535092">"deactivar la bloccaziun da la tastatura"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Permetta ad ina applicaziun da deactivar la bloccaziun da la tastatura e la protecziun cun il pled-clav associada. In exempel dad ina utilisaziun legitima: La bloccaziun da la tastatura vegn deactivada sche Vus retschavais in clom ed ella vegn reactivada sche Vus finis il telefon."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"leger ils parameters da sincronisaziun"</string>
     <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"Permetta ad ina applicaziun da leger ils parameters da sincronisaziun (per exempel per savair sche la sincronisaziun da contacts è activà u betg)."</string>

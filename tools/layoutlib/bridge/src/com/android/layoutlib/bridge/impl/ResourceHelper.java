@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge;
+package com.android.layoutlib.bridge.impl;
 
 import com.android.layoutlib.api.IDensityBasedResourceValue;
 import com.android.layoutlib.api.IDensityBasedResourceValue.Density;
 import com.android.layoutlib.api.IResourceValue;
+import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.android.BridgeContext;
+import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
+import com.android.layoutlib.bridge.android.NinePatchDrawable;
 import com.android.ninepatch.NinePatch;
 
 import org.kxml2.io.KXmlParser;
@@ -56,7 +60,7 @@ public final class ResourceHelper {
      * @return the color as an int
      * @throw NumberFormatException if the conversion failed.
      */
-    static int getColor(String value) {
+    public static int getColor(String value) {
         if (value != null) {
             if (value.startsWith("#") == false) {
                 throw new NumberFormatException();

@@ -17,7 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.api.ILayoutLog;
-import com.android.layoutlib.bridge.DelegateManager;
+import com.android.layoutlib.bridge.impl.DelegateManager;
 
 import android.graphics.Paint_Delegate.FontInfo;
 import android.text.TextUtils;

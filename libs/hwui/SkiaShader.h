@@ -97,7 +97,11 @@ struct SkiaShader {
     void computeScreenSpaceMatrix(mat4& screenSpace, const mat4& modelView);
 
 protected:
-    inline void bindTexture(Texture* texture, GLenum wrapS, GLenum wrapT, GLuint textureUnit);
+    /**
+     * The appropriate texture unit must have been activated prior to invoking
+     * this method.
+     */
+    inline void bindTexture(Texture* texture, GLenum wrapS, GLenum wrapT);
 
     Type mType;
     SkShader* mKey;

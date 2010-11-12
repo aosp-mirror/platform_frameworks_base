@@ -135,6 +135,8 @@ void OpenGLRenderer::setViewport(int width, int height) {
 }
 
 void OpenGLRenderer::prepare(bool opaque) {
+    mCaches.clearGarbage();
+
     mSnapshot = new Snapshot(mFirstSnapshot,
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     mSaveCount = 1;
@@ -1463,7 +1465,9 @@ void OpenGLRenderer::setupColorRect(float left, float top, float right, float bo
             dirtyLayer(left, top, right, bottom);
         }
     }
-    mCaches.currentProgram->setColor(r, g, b, a);
+    if (!mShader || (mShader && setColor)) {
+        mCaches.currentProgram->setColor(r, g, b, a);
+    }
 
     // Setup attributes and uniforms required by the shaders
     if (mShader) {

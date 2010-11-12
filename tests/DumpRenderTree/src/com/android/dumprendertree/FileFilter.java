@@ -89,7 +89,6 @@ public class FileFilter {
         // This first block of tests are for features for which Android
         // should pass all tests. They are skipped only temporarily.
         // TODO: Fix these failing tests and remove them from this list.
-        ignoreResultList.add("fast/encoding/char-encoding.html"); // fails in Java HTTP stack, see http://b/issue?id=3047156
         ignoreResultList.add("fast/encoding/char-decoding.html"); // fails in Java HTTP stack, see http://b/issue?id=3047156
         ignoreResultList.add("fast/encoding/hanarei-blog32-fc2-com.html"); // fails in Java HTTP stack, see http://b/issue?id=3046986
         ignoreResultList.add("fast/encoding/mailto-always-utf-8.html"); // Requires waitForPolicyDelegate(), see http://b/issue?id=3043468

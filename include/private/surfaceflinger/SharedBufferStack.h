@@ -285,6 +285,8 @@ public:
     uint32_t getTransform(int buffer) const;
 
     status_t resize(int newNumBuffers);
+    status_t grow(int newNumBuffers);
+    status_t shrink(int newNumBuffers);
 
     SharedBufferStack::Statistics getStats() const;
     
@@ -345,6 +347,14 @@ private:
     mutable RWLock mLock;
     int mNumBuffers;
     BufferList mBufferList;
+
+    struct BuffersAvailableCondition : public ConditionBase {
+        int mNumBuffers;
+        inline BuffersAvailableCondition(SharedBufferServer* sbs,
+                int numBuffers);
+        inline bool operator()() const;
+        inline const char* name() const { return "BuffersAvailableCondition"; }
+    };
 
     struct UnlockUpdate : public UpdateBase {
         const int lockedBuffer;

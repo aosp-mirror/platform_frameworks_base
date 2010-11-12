@@ -28,6 +28,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
@@ -37,10 +39,13 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.net.ConnectivityManager;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.PowerManager;
@@ -49,7 +54,6 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.net.Proxy;
 import android.provider.Settings;
 import android.util.Slog;
 import android.util.PrintWriterPrinter;
@@ -64,8 +68,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.InetSocketAddress;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -74,7 +79,19 @@ import java.util.Set;
  * Implementation of the device policy APIs.
  */
 public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
+    private static final int REQUEST_EXPIRE_PASSWORD = 5571;
+
     static final String TAG = "DevicePolicyManagerService";
+
+    private static final long EXPIRATION_GRACE_PERIOD_MS = 5 * 86400 * 1000; // 5 days, in ms
+
+    protected static final String ACTION_EXPIRED_PASSWORD_NOTIFICATION
+            = "com.android.server.ACTION_EXPIRED_PASSWORD_NOTIFICATION";
+
+    private static final long MS_PER_DAY = 86400 * 1000;
+    private static final long MS_PER_HOUR = 3600 * 1000;
+    private static final long MS_PER_MINUTE = 60 * 1000;
+    private static final long MIN_TIMEOUT = 86400 * 1000; // minimum expiration timeout is 1 day
 
     final Context mContext;
     final MyPackageMonitor mMonitor;
@@ -93,11 +110,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     int mFailedPasswordAttempts = 0;
 
     int mPasswordOwner = -1;
+    Handler mHandler = new Handler();
 
     final HashMap<ComponentName, ActiveAdmin> mAdminMap
             = new HashMap<ComponentName, ActiveAdmin>();
     final ArrayList<ActiveAdmin> mAdminList
             = new ArrayList<ActiveAdmin>();
+
+    BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (Intent.ACTION_BOOT_COMPLETED.equals(action)
+                    || ACTION_EXPIRED_PASSWORD_NOTIFICATION.equals(action)) {
+                Slog.v(TAG, "Sending password expiration notifications for action " + action);
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        handlePasswordExpirationNotification();
+                    }
+                });
+            }
+        }
+    };
 
     static class ActiveAdmin {
         final DeviceAdminInfo info;
@@ -113,6 +147,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int minimumPasswordNonLetter = 0;
         long maximumTimeToUnlock = 0;
         int maximumFailedPasswordsForWipe = 0;
+        long passwordExpirationTimeout = 0L;
+        long passwordExpirationDate = 0L;
 
         // TODO: review implementation decisions with frameworks team
         boolean specifiesGlobalProxy = false;
@@ -200,6 +236,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     out.endTag(null, "global-proxy-exclusion-list");
                 }
             }
+            if (passwordExpirationTimeout != 0L) {
+                out.startTag(null, "password-expiration-timeout");
+                out.attribute(null, "value", Long.toString(passwordExpirationTimeout));
+                out.endTag(null, "password-expiration-timeout");
+            }
+            if (passwordExpirationDate != 0L) {
+                out.startTag(null, "password-expiration-date");
+                out.attribute(null, "value", Long.toString(passwordExpirationDate));
+                out.endTag(null, "password-expiration-date");
+            }
         }
 
         void readFromXml(XmlPullParser parser)
@@ -256,6 +302,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if ("global-proxy-exclusion-list".equals(tag)) {
                     globalProxyExclusionList =
                         parser.getAttributeValue(null, "value");
+                } else if ("password-expiration-timeout".equals(tag)) {
+                    passwordExpirationTimeout = Long.parseLong(
+                            parser.getAttributeValue(null, "value"));
+                } else if ("password-expiration-date".equals(tag)) {
+                    passwordExpirationDate = Long.parseLong(
+                            parser.getAttributeValue(null, "value"));
                 } else {
                     Slog.w(TAG, "Unknown admin tag: " + tag);
                 }
@@ -296,6 +348,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     pw.println(maximumFailedPasswordsForWipe);
             pw.print(prefix); pw.print("specifiesGlobalProxy=");
                     pw.println(specifiesGlobalProxy);
+            pw.print(prefix); pw.print("passwordExpirationTimeout=");
+                    pw.println(passwordExpirationTimeout);
+            pw.print(prefix); pw.print("passwordExpirationDate=");
+                    pw.println(passwordExpirationDate);
             if (globalProxySpec != null) {
                 pw.print(prefix); pw.print("globalProxySpec=");
                         pw.println(globalProxySpec);
@@ -348,6 +404,38 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mMonitor.register(context, true);
         mWakeLock = ((PowerManager)context.getSystemService(Context.POWER_SERVICE))
                 .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DPM");
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_BOOT_COMPLETED);
+        filter.addAction(ACTION_EXPIRED_PASSWORD_NOTIFICATION);
+        context.registerReceiver(mReceiver, filter);
+    }
+
+    static String countdownString(long time) {
+        long days = time / MS_PER_DAY;
+        long hours = (time / MS_PER_HOUR) % 24;
+        long minutes = (time / MS_PER_MINUTE) % 60;
+        return days + "d" + hours + "h" + minutes + "m";
+    }
+
+    protected void setExpirationAlarmCheckLocked(Context context) {
+        final long expiration = getPasswordExpirationLocked(null);
+        final long now = System.currentTimeMillis();
+        final long timeToExpire = expiration - now;
+        final long alarmTime;
+        if (timeToExpire > 0L && timeToExpire < MS_PER_DAY) {
+            // Next expiration is less than a day, set alarm for exact expiration time
+            alarmTime = now + timeToExpire;
+        } else {
+            // Check again in 24 hours...
+            alarmTime = now + MS_PER_DAY;
+        }
+
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        PendingIntent pi = PendingIntent.getBroadcast(context, REQUEST_EXPIRE_PASSWORD,
+                new Intent(ACTION_EXPIRED_PASSWORD_NOTIFICATION),
+                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
+        am.cancel(pi);
+        am.set(AlarmManager.RTC, alarmTime, pi);
     }
 
     private IPowerManager getIPowerManager() {
@@ -402,6 +490,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     void sendAdminCommandLocked(ActiveAdmin admin, String action) {
         Intent intent = new Intent(action);
         intent.setComponent(admin.info.getComponent());
+        if (action.equals(DeviceAdminReceiver.ACTION_PASSWORD_EXPIRING)) {
+            intent.putExtra("expiration", admin.passwordExpirationDate);
+        }
         mContext.sendBroadcast(intent);
     }
 
@@ -696,6 +787,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    private void handlePasswordExpirationNotification() {
+        synchronized (this) {
+            final long now = System.currentTimeMillis();
+            final int N = mAdminList.size();
+            if (N <= 0) {
+                return;
+            }
+            for (int i=0; i < N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD)
+                        && admin.passwordExpirationTimeout > 0L
+                        && admin.passwordExpirationDate > 0L
+                        && now > admin.passwordExpirationDate - EXPIRATION_GRACE_PERIOD_MS) {
+                    sendAdminCommandLocked(admin, DeviceAdminReceiver.ACTION_PASSWORD_EXPIRING);
+                }
+            }
+            setExpirationAlarmCheckLocked(mContext);
+        }
+    }
+
     public void setActiveAdmin(ComponentName adminReceiver) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
@@ -874,6 +985,74 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
             return length;
+        }
+    }
+
+    public void setPasswordExpirationTimeout(ComponentName who, long timeout) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            if (timeout != 0L && timeout < MIN_TIMEOUT) {
+                throw new IllegalArgumentException("Timeout must be > " + MIN_TIMEOUT + "ms");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD);
+            // Calling this API automatically bumps the expiration date
+            final long expiration = timeout > 0L ? (timeout + System.currentTimeMillis()) : 0L;
+            ap.passwordExpirationDate = expiration;
+            ap.passwordExpirationTimeout = timeout;
+            if (timeout > 0L) {
+                Slog.w(TAG, "setPasswordExpiration(): password will expire on "
+                        + DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT)
+                        .format(new Date(expiration)));
+            }
+            saveSettingsLocked();
+            setExpirationAlarmCheckLocked(mContext); // in case this is the first one
+        }
+    }
+
+    public long getPasswordExpirationTimeout(ComponentName who) {
+        synchronized (this) {
+            long timeout = 0L;
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return admin != null ? admin.passwordExpirationTimeout : timeout;
+            }
+
+            final int N = mAdminList.size();
+            for (int i = 0; i < N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (timeout == 0L || (admin.passwordExpirationTimeout != 0L
+                        && timeout > admin.passwordExpirationTimeout)) {
+                    timeout = admin.passwordExpirationTimeout;
+                }
+            }
+            return timeout;
+        }
+    }
+
+    private long getPasswordExpirationLocked(ComponentName who) {
+        long timeout = 0L;
+        if (who != null) {
+            ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+            return admin != null ? admin.passwordExpirationDate : timeout;
+        }
+
+        final int N = mAdminList.size();
+        for (int i = 0; i < N; i++) {
+            ActiveAdmin admin = mAdminList.get(i);
+            if (timeout == 0L || (admin.passwordExpirationDate != 0
+                    && timeout > admin.passwordExpirationDate)) {
+                timeout = admin.passwordExpirationDate;
+            }
+        }
+        return timeout;
+    }
+
+    public long getPasswordExpiration(ComponentName who) {
+        synchronized (this) {
+            return getPasswordExpirationLocked(who);
         }
     }
 
@@ -1431,12 +1610,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     mActivePasswordNonLetter = nonletter;
                     mFailedPasswordAttempts = 0;
                     saveSettingsLocked();
+                    updatePasswordExpirationsLocked();
                     sendAdminCommandLocked(DeviceAdminReceiver.ACTION_PASSWORD_CHANGED,
                             DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
             }
+        }
+    }
+
+    private void updatePasswordExpirationsLocked() {
+        final int N = mAdminList.size();
+        if (N > 0) {
+            for (int i=0; i<N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD)) {
+                    admin.passwordExpirationDate = System.currentTimeMillis()
+                            + admin.passwordExpirationTimeout;
+                }
+            }
+            saveSettingsLocked();
         }
     }
 

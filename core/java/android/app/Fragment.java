@@ -21,6 +21,7 @@ import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -618,6 +619,46 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
         return mActivity;
     }
     
+    /**
+     * Return <code>getActivity().getResources()</code>.
+     */
+    final public Resources getResources() {
+        return mActivity.getResources();
+    }
+    
+    /**
+     * Return a localized, styled CharSequence from the application's package's
+     * default string table.
+     *
+     * @param resId Resource id for the CharSequence text
+     */
+    public final CharSequence getText(int resId) {
+        return getResources().getText(resId);
+    }
+
+    /**
+     * Return a localized string from the application's package's
+     * default string table.
+     *
+     * @param resId Resource id for the string
+     */
+    public final String getString(int resId) {
+        return getResources().getString(resId);
+    }
+
+    /**
+     * Return a localized formatted string from the application's package's
+     * default string table, substituting the format arguments as defined in
+     * {@link java.util.Formatter} and {@link java.lang.String#format}.
+     *
+     * @param resId Resource id for the format string
+     * @param formatArgs The format arguments that will be used for substitution.
+     */
+
+    public final String getString(int resId, Object... formatArgs) {
+        return getResources().getString(resId, formatArgs);
+    }
+
     /**
      * Return the FragmentManager for interacting with fragments associated
      * with this fragment's activity.  Note that this will be non-null slightly

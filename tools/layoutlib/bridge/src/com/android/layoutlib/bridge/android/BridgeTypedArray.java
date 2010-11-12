@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge;
+package com.android.layoutlib.bridge.android;
 
 import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.api.IResourceValue;
 import com.android.layoutlib.api.IStyleResourceValue;
+import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.BridgeConstants;
+import com.android.layoutlib.bridge.impl.ResourceHelper;
 
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
@@ -36,14 +39,12 @@ import java.io.FileReader;
 import java.util.Map;
 
 /**
- * TODO: describe.
+ * Custom implementation of TypedArray to handle non compiled resources.
  */
 public final class BridgeTypedArray extends TypedArray {
 
-    @SuppressWarnings("hiding")
     private BridgeResources mResources;
     private BridgeContext mContext;
-    @SuppressWarnings("hiding")
     private IResourceValue[] mData;
     private String[] mNames;
     private final boolean mPlatformFile;

@@ -564,6 +564,12 @@ bool AwesomePlayer::getCachedDuration_l(int64_t *durationUs, bool *eos) {
     return false;
 }
 
+void AwesomePlayer::ensureCacheIsFetching_l() {
+    if (mCachedSource != NULL) {
+        mCachedSource->resumeFetchingIfNecessary();
+    }
+}
+
 void AwesomePlayer::onBufferingUpdate() {
     Mutex::Autolock autoLock(mLock);
     if (!mBufferingEventPending) {
@@ -606,6 +612,7 @@ void AwesomePlayer::onBufferingUpdate() {
                          kLowWaterMarkBytes);
                     mFlags |= CACHE_UNDERRUN;
                     pause_l();
+                    ensureCacheIsFetching_l();
                     notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_START);
                 } else if (eos || cachedDataRemaining > kHighWaterMarkBytes) {
                     if (mFlags & CACHE_UNDERRUN) {
@@ -627,12 +634,16 @@ void AwesomePlayer::onBufferingUpdate() {
     int64_t cachedDurationUs;
     bool eos;
     if (getCachedDuration_l(&cachedDurationUs, &eos)) {
+        LOGV("cachedDurationUs = %.2f secs, eos=%d",
+             cachedDurationUs / 1E6, eos);
+
         if ((mFlags & PLAYING) && !eos
                 && (cachedDurationUs < kLowWaterMarkUs)) {
             LOGI("cache is running low (%.2f secs) , pausing.",
                  cachedDurationUs / 1E6);
             mFlags |= CACHE_UNDERRUN;
             pause_l();
+            ensureCacheIsFetching_l();
             notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_START);
         } else if (eos || cachedDurationUs > kHighWaterMarkUs) {
             if (mFlags & CACHE_UNDERRUN) {

@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge;
+package com.android.layoutlib.bridge.android;
 
 import com.android.layoutlib.api.ILayoutLog;
 import com.android.layoutlib.api.IProjectCallback;
 import com.android.layoutlib.api.IResourceValue;
 import com.android.layoutlib.api.IStyleResourceValue;
+import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.BridgeConstants;
+import com.android.layoutlib.bridge.impl.TempResourceValue;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -50,7 +53,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.view.BridgeInflater;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -66,15 +68,16 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 
 /**
- * Custom implementation of Context to handle non compiled resources.
+ * Custom implementation of Context/Activity to handle non compiled resources.
  */
 public final class BridgeContext extends Activity {
 
-    private final Resources mResources;
-    private final Theme mTheme;
+    private Resources mResources;
+    private Theme mTheme;
     private final HashMap<View, Object> mViewKeyMap = new HashMap<View, Object>();
     private final IStyleResourceValue mThemeValues;
     private final Object mProjectKey;
+    private final DisplayMetrics mMetrics;
     private final Map<String, Map<String, IResourceValue>> mProjectResources;
     private final Map<String, Map<String, IResourceValue>> mFrameworkResources;
     private final Map<IStyleResourceValue, IStyleResourceValue> mStyleInheritanceMap;
@@ -105,28 +108,18 @@ public final class BridgeContext extends Activity {
      * contains (String, {@link IResourceValue}) pairs where the key is the resource name, and the
      * value is the resource value.
      * @param styleInheritanceMap
-     * @param customViewLoader
+     * @param projectCallback
      */
     public BridgeContext(Object projectKey, DisplayMetrics metrics,
             IStyleResourceValue currentTheme,
             Map<String, Map<String, IResourceValue>> projectResources,
             Map<String, Map<String, IResourceValue>> frameworkResources,
             Map<IStyleResourceValue, IStyleResourceValue> styleInheritanceMap,
-            IProjectCallback customViewLoader, ILayoutLog logger) {
+            IProjectCallback projectCallback, ILayoutLog logger) {
         mProjectKey = projectKey;
-        mProjectCallback = customViewLoader;
+        mMetrics = metrics;
+        mProjectCallback = projectCallback;
         mLogger = logger;
-        Configuration config = new Configuration();
-
-        AssetManager assetManager = BridgeAssetManager.initSystem();
-        mResources = BridgeResources.initSystem(
-                this,
-                assetManager,
-                metrics,
-                config,
-                customViewLoader);
-
-        mTheme = mResources.newTheme();
 
         mThemeValues = currentTheme;
         mProjectResources = projectResources;
@@ -135,6 +128,32 @@ public final class BridgeContext extends Activity {
 
         mFragments.mCurState = Fragment.CREATED;
         mFragments.mActivity = this;
+    }
+
+    /**
+     * Initializes the {@link Resources} singleton to be linked to this {@link Context}, its
+     * {@link DisplayMetrics}, {@link Configuration}, and {@link IProjectCallback}.
+     *
+     * @see #disposeResources()
+     */
+    public void initResources() {
+        AssetManager assetManager = AssetManager.getSystem();
+        Configuration config = new Configuration();
+
+        mResources = BridgeResources.initSystem(
+                this,
+                assetManager,
+                mMetrics,
+                config,
+                mProjectCallback);
+        mTheme = mResources.newTheme();
+    }
+
+    /**
+     * Disposes the {@link Resources} singleton.
+     */
+    public void disposeResources() {
+        BridgeResources.disposeSystem();
     }
 
     public void setBridgeInflater(BridgeInflater inflater) {
@@ -266,6 +285,15 @@ public final class BridgeContext extends Activity {
             return null;
         }
 
+        Object key = null;
+        if (parser != null) {
+            key = parser.getViewKey();
+        }
+        if (key != null) {
+            String attrs_name = Bridge.resolveResourceValue(attrs);
+            System.out.println("KEY: " + key.toString() + "(" + attrs_name + ")");
+        }
+
         boolean[] frameworkAttributes = new boolean[1];
         TreeMap<Integer, String> styleNameMap = searchAttrs(attrs, frameworkAttributes);
 
@@ -281,6 +309,9 @@ public final class BridgeContext extends Activity {
             customStyle = parser.getAttributeValue(null /* namespace*/, "style");
         }
         if (customStyle != null) {
+            if (key != null) {
+                print("style", customStyle, false);
+            }
             IResourceValue item = findResValue(customStyle, false /*forceFrameworkOnly*/);
 
             if (item instanceof IStyleResourceValue) {
@@ -291,6 +322,10 @@ public final class BridgeContext extends Activity {
         if (defStyleValues == null && defStyleAttr != 0) {
             // get the name from the int.
             String defStyleName = searchAttr(defStyleAttr);
+
+            if (key != null) {
+                print("style", defStyleName, true);
+            }
 
             // look for the style in the current theme, and its parent:
             if (mThemeValues != null) {
@@ -350,11 +385,20 @@ public final class BridgeContext extends Activity {
                     // if we found a value, we make sure this doesn't reference another value.
                     // So we resolve it.
                     if (resValue != null) {
+                        if (key != null) {
+                            print(name, resValue.getValue(), true);
+                        }
+
                         resValue = resolveResValue(resValue);
+                    } else if (key != null) {
+                        print(name, "<unknown>", true);
                     }
 
                     ta.bridgeSetValue(index, name, resValue);
                 } else {
+                    if (key != null) {
+                        print(name, value, false);
+                    }
                     // there is a value in the XML, but we need to resolve it in case it's
                     // referencing another resource or a theme value.
                     ta.bridgeSetValue(index, name, resolveValue(null, name, value));
@@ -365,6 +409,15 @@ public final class BridgeContext extends Activity {
         ta.sealArray();
 
         return ta;
+    }
+
+    private void print(String name, String value, boolean isDefault) {
+        System.out.print("\t" + name + " : " + value);
+        if (isDefault) {
+            System.out.println(" (default)");
+        } else {
+            System.out.println("");
+        }
     }
 
     @Override
@@ -433,7 +486,7 @@ public final class BridgeContext extends Activity {
         // if resValue is null, but value is not null, this means it was not a reference.
         // we return the name/value wrapper in a IResourceValue
         if (resValue == null) {
-            return new ResourceValue(type, name, value);
+            return new TempResourceValue(type, name, value);
         }
 
         // we resolved a first reference, but we need to make sure this isn't a reference also.
@@ -453,7 +506,7 @@ public final class BridgeContext extends Activity {
      * @param value the value containing the reference to resolve.
      * @return a {@link IResourceValue} object or <code>null</code>
      */
-    IResourceValue resolveResValue(IResourceValue value) {
+    public IResourceValue resolveResValue(IResourceValue value) {
         if (value == null) {
             return null;
         }
@@ -661,7 +714,7 @@ public final class BridgeContext extends Activity {
      * @param itemName the name of the item to search for.
      * @return the {@link IResourceValue} object or <code>null</code>
      */
-    IResourceValue findItemInStyle(IStyleResourceValue style, String itemName) {
+    public IResourceValue findItemInStyle(IStyleResourceValue style, String itemName) {
         IResourceValue item = style.findItem(itemName);
 
         // if we didn't find it, we look in the parent style (if applicable)
@@ -1058,25 +1111,20 @@ public final class BridgeContext extends Activity {
 
     }
 
-    @SuppressWarnings("unused")
     @Override
-    public FileInputStream openFileInput(String arg0)
-            throws FileNotFoundException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @SuppressWarnings("unused")
-    @Override
-    public FileOutputStream openFileOutput(String arg0, int arg1)
-            throws FileNotFoundException {
+    public FileInputStream openFileInput(String arg0) throws FileNotFoundException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public SQLiteDatabase openOrCreateDatabase(String arg0, int arg1,
-            CursorFactory arg2) {
+    public FileOutputStream openFileOutput(String arg0, int arg1) throws FileNotFoundException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public SQLiteDatabase openOrCreateDatabase(String arg0, int arg1, CursorFactory arg2) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -1164,14 +1212,12 @@ public final class BridgeContext extends Activity {
 
     }
 
-    @SuppressWarnings("unused")
     @Override
     public void setWallpaper(Bitmap arg0) throws IOException {
         // TODO Auto-generated method stub
 
     }
 
-    @SuppressWarnings("unused")
     @Override
     public void setWallpaper(InputStream arg0) throws IOException {
         // TODO Auto-generated method stub

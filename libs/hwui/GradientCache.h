@@ -19,6 +19,8 @@
 
 #include <SkShader.h>
 
+#include <utils/Vector.h>
+
 #include "Texture.h"
 #include "utils/GenerationCache.h"
 
@@ -53,10 +55,19 @@ public:
      */
     Texture* get(SkShader* shader);
     /**
-     * Removes the texture associated with the specified shader. Returns NULL
-     * if the texture cannot be found. Upon remove the texture is freed.
+     * Removes the texture associated with the specified shader.
+     * Upon remove the texture is freed.
      */
     void remove(SkShader* shader);
+    /**
+     * Removes the texture associated with the specified shader. This is meant
+     * to be called from threads that are not the EGL context thread.
+     */
+    void removeDeferred(SkShader* shader);
+    /**
+     * Process deferred removals.
+     */
+    void clearGarbage();
     /**
      * Clears the cache. This causes all textures to be deleted.
      */
@@ -83,10 +94,7 @@ private:
     uint32_t mSize;
     uint32_t mMaxSize;
 
-    /**
-     * Used to access mCache and mSize. All methods are accessed from a single
-     * thread except for remove().
-     */
+    Vector<SkShader*> mGarbage;
     mutable Mutex mLock;
 }; // class GradientCache
 

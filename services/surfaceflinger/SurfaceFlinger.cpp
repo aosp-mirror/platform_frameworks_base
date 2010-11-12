@@ -786,10 +786,6 @@ void SurfaceFlinger::handleRepaint()
 {
     // compute the invalid region
     mInvalidRegion.orSelf(mDirtyRegion);
-    if (mInvalidRegion.isEmpty()) {
-        // nothing to do
-        return;
-    }
 
     if (UNLIKELY(mDebugRegion)) {
         debugFlashRegions();

@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge;
+package com.android.layoutlib.bridge.android;
 
 import com.android.layoutlib.api.IProjectCallback;
 import com.android.layoutlib.api.IResourceValue;
+import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.BridgeConstants;
+import com.android.layoutlib.bridge.impl.ResourceHelper;
 
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
@@ -64,21 +67,18 @@ public final class BridgeResources extends Resources {
             DisplayMetrics metrics,
             Configuration config,
             IProjectCallback projectCallback) {
-        if (!(Resources.mSystem instanceof BridgeResources)) {
-            Resources.mSystem = new BridgeResources(context,
-                    assets,
-                    metrics,
-                    config,
-                    projectCallback);
-        }
-        return Resources.mSystem;
+        return Resources.mSystem = new BridgeResources(context,
+                assets,
+                metrics,
+                config,
+                projectCallback);
     }
 
     /**
-     * Clears the static {@link Resources#mSystem} to make sure we don't leave objects
+     * Disposes the static {@link Resources#mSystem} to make sure we don't leave objects
      * around that would prevent us from unloading the library.
      */
-    /*package*/ static void clearSystem() {
+    /*package*/ static void disposeSystem() {
         if (Resources.mSystem instanceof BridgeResources) {
             ((BridgeResources)(Resources.mSystem)).mContext = null;
             ((BridgeResources)(Resources.mSystem)).mProjectCallback = null;

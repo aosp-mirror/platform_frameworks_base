@@ -463,8 +463,73 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * This key should normally be implemented as a toggle such that the first press
      * mutes the speaker and the second press restores the original volume. */
     public static final int KEYCODE_VOLUME_MUTE     = 164;
+    /** Key code constant: Info key.
+     * Common on TV remotes to show additional information related to what is
+     * currently being viewed. */
+    public static final int KEYCODE_INFO            = 165;
+    /** Key code constant: Channel up key.
+     * On TV remotes, increments the television channel. */
+    public static final int KEYCODE_CHANNEL_UP      = 166;
+    /** Key code constant: Channel down key.
+     * On TV remotes, decrements the television channel. */
+    public static final int KEYCODE_CHANNEL_DOWN    = 167;
+    /** Key code constant: Zoom in key. */
+    public static final int KEYCODE_ZOOM_IN         = 168;
+    /** Key code constant: Zoom out key. */
+    public static final int KEYCODE_ZOOM_OUT        = 169;
+    /** Key code constant: TV key.
+     * On TV remotes, switches to viewing live TV. */
+    public static final int KEYCODE_TV              = 170;
+    /** Key code constant: Window key.
+     * On TV remotes, toggles picture-in-picture mode or other windowing functions. */
+    public static final int KEYCODE_WINDOW          = 171;
+    /** Key code constant: Guide key.
+     * On TV remotes, shows a programming guide. */
+    public static final int KEYCODE_GUIDE           = 172;
+    /** Key code constant: DVR key.
+     * On some TV remotes, switches to a DVR mode for recorded shows. */
+    public static final int KEYCODE_DVR             = 173;
+    /** Key code constant: Bookmark key.
+     * On some TV remotes, bookmarks content or web pages. */
+    public static final int KEYCODE_BOOKMARK        = 174;
+    /** Key code constant: Toggle captions key.
+     * Switches the mode for closed-captioning text, for example during television shows. */
+    public static final int KEYCODE_CAPTIONS        = 175;
+    /** Key code constant: Settings key.
+     * Starts the system settings activity. */
+    public static final int KEYCODE_SETTINGS        = 176;
+    /** Key code constant: TV power key.
+     * On TV remotes, toggles the power on a television screen. */
+    public static final int KEYCODE_TV_POWER        = 177;
+    /** Key code constant: TV input key.
+     * On TV remotes, switches the input on a television screen. */
+    public static final int KEYCODE_TV_INPUT        = 178;
+    /** Key code constant: Set-top-box power key.
+     * On TV remotes, toggles the power on an external Set-top-box. */
+    public static final int KEYCODE_STB_POWER       = 179;
+    /** Key code constant: Set-top-box input key.
+     * On TV remotes, switches the input mode on an external Set-top-box. */
+    public static final int KEYCODE_STB_INPUT       = 180;
+    /** Key code constant: A/V Receiver power key.
+     * On TV remotes, toggles the power on an external A/V Receiver. */
+    public static final int KEYCODE_AVR_POWER       = 181;
+    /** Key code constant: A/V Receiver input key.
+     * On TV remotes, switches the input mode on an external A/V Receiver. */
+    public static final int KEYCODE_AVR_INPUT       = 182;
+    /** Key code constant: Red "programmable" key.
+     * On TV remotes, acts as a contextual/programmable key. */
+    public static final int KEYCODE_PROG_RED        = 183;
+    /** Key code constant: Green "programmable" key.
+     * On TV remotes, actsas a contextual/programmable key. */
+    public static final int KEYCODE_PROG_GREEN      = 184;
+    /** Key code constant: Yellow "programmable" key.
+     * On TV remotes, acts as a contextual/programmable key. */
+    public static final int KEYCODE_PROG_YELLOW     = 185;
+    /** Key code constant: Blue "programmable" key.
+     * On TV remotes, acts as a contextual/programmable key. */
+    public static final int KEYCODE_PROG_BLUE       = 186;
 
-    private static final int LAST_KEYCODE           = KEYCODE_VOLUME_MUTE;
+    private static final int LAST_KEYCODE           = KEYCODE_PROG_BLUE;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -649,6 +714,28 @@ public class KeyEvent extends InputEvent implements Parcelable {
         "KEYCODE_NUMPAD_LEFT_PAREN",
         "KEYCODE_NUMPAD_RIGHT_PAREN",
         "KEYCODE_VOLUME_MUTE",
+        "KEYCODE_INFO",
+        "KEYCODE_CHANNEL_UP",
+        "KEYCODE_CHANNEL_DOWN",
+        "KEYCODE_ZOOM_IN",
+        "KEYCODE_ZOOM_OUT",
+        "KEYCODE_TV",
+        "KEYCODE_WINDOW",
+        "KEYCODE_GUIDE",
+        "KEYCODE_DVR",
+        "KEYCODE_BOOKMARK",
+        "KEYCODE_CAPTIONS",
+        "KEYCODE_SETTINGS",
+        "KEYCODE_TV_POWER",
+        "KEYCODE_TV_INPUT",
+        "KEYCODE_STB_INPUT",
+        "KEYCODE_STB_POWER",
+        "KEYCODE_AVR_POWER",
+        "KEYCODE_AVR_INPUT",
+        "KEYCODE_PROG_RED",
+        "KEYCODE_PROG_GREEN",
+        "KEYCODE_PROG_YELLOW",
+        "KEYCODE_PROG_BLUE",
     };
 
     // Symbolic names of all metakeys in bit order from least significant to most significant.

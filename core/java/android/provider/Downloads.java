@@ -375,6 +375,13 @@ public final class Downloads {
          */
         public static final String COLUMN_MEDIA_SCANNED = "scanned";
 
+        /**
+         * The column with errorMsg for a failed downloaded.
+         * Used only for debugging purposes.
+         * <P>Type: TEXT</P>
+         */
+        public static final String COLUMN_ERROR_MSG = "errorMsg";
+
         /*
          * Lists the destinations that an application can specify for a download.
          */

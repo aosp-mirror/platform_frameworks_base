@@ -1187,6 +1187,12 @@
         <item name="windowContentOverlay">@null</item>
     </style>
 
+    <!-- Theme for a window that will be displayed either full-screen on
+         smaller screens (small, normal) or as a dialog on larger screens
+         (large, xlarge) -->
+    <style name="Theme.Holo.DialogWhenLarge" parent="@android:style/Theme.Holo">
+    </style>
+    
     <!-- Light holo dialog themes -->
 
     <!-- Holo light theme for dialog windows and activities, which is used by the
