@@ -37,14 +37,17 @@ void ResourceCache::logCache() {
 }
 
 ResourceCache::ResourceCache() {
+    Mutex::Autolock _l(mLock);
     mCache = new KeyedVector<void *, ResourceReference *>();
 }
 
 ResourceCache::~ResourceCache() {
+    Mutex::Autolock _l(mLock);
     delete mCache;
 }
 
 void ResourceCache::incrementRefcount(void* resource, ResourceType resourceType) {
+    Mutex::Autolock _l(mLock);
     for (size_t i = 0; i < mCache->size(); ++i) {
         void* ref = mCache->valueAt(i);
     }
@@ -73,6 +76,7 @@ void ResourceCache::incrementRefcount(SkiaColorFilter* filterResource) {
 }
 
 void ResourceCache::decrementRefcount(void* resource) {
+    Mutex::Autolock _l(mLock);
     ResourceReference* ref = mCache->indexOfKey(resource) >= 0 ? mCache->valueFor(resource) : NULL;
     if (ref == NULL) {
         // Should not get here - shouldn't get a call to decrement if we're not yet tracking it
@@ -101,6 +105,7 @@ void ResourceCache::decrementRefcount(SkiaColorFilter* filterResource) {
 }
 
 void ResourceCache::recycle(SkBitmap* resource) {
+    Mutex::Autolock _l(mLock);
     if (mCache->indexOfKey(resource) < 0) {
         // not tracking this resource; just recycle the pixel data
         resource->setPixels(NULL, NULL);
@@ -110,6 +115,7 @@ void ResourceCache::recycle(SkBitmap* resource) {
 }
 
 void ResourceCache::recycle(void* resource) {
+    Mutex::Autolock _l(mLock);
     ResourceReference* ref = mCache->indexOfKey(resource) >= 0 ? mCache->valueFor(resource) : NULL;
     if (ref == NULL) {
         // Should not get here - shouldn't get a call to recycle if we're not yet tracking it
@@ -122,6 +128,7 @@ void ResourceCache::recycle(void* resource) {
 }
 
 void ResourceCache::destructor(SkBitmap* resource) {
+    Mutex::Autolock _l(mLock);
     ResourceReference* ref = mCache->indexOfKey(resource) >= 0 ? mCache->valueFor(resource) : NULL;
     if (ref == NULL) {
         // If we're not tracking this resource, just delete it
@@ -139,6 +146,7 @@ void ResourceCache::destructor(SkBitmap* resource) {
 }
 
 void ResourceCache::destructor(SkiaShader* resource) {
+    Mutex::Autolock _l(mLock);
     ResourceReference* ref = mCache->indexOfKey(resource) >= 0 ? mCache->valueFor(resource) : NULL;
     if (ref == NULL) {
         // If we're not tracking this resource, just delete it
@@ -156,6 +164,7 @@ void ResourceCache::destructor(SkiaShader* resource) {
 }
 
 void ResourceCache::destructor(SkiaColorFilter* resource) {
+    Mutex::Autolock _l(mLock);
     ResourceReference* ref = mCache->indexOfKey(resource) >= 0 ? mCache->valueFor(resource) : NULL;
     if (ref == NULL) {
         // If we're not tracking this resource, just delete it
@@ -169,6 +178,10 @@ void ResourceCache::destructor(SkiaColorFilter* resource) {
     }
 }
 
+/**
+ * This method should only be called while the mLock mutex is held (that mutex is grabbed
+ * by the various destructor() and recycle() methods which call this method).
+ */
 void ResourceCache::deleteResourceReference(void* resource, ResourceReference* ref) {
     if (ref->recycled && ref->resourceType == kBitmap) {
         ((SkBitmap*) resource)->setPixels(NULL, NULL);
