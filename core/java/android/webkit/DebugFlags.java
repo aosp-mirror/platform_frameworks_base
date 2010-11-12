@@ -45,5 +45,9 @@ class DebugFlags {
     public static final boolean WEB_TEXT_VIEW = false;
     public static final boolean WEB_VIEW = false;
     public static final boolean WEB_VIEW_CORE = false;
-
+    /*
+     * Set to true to allow the WebTextView to draw on top of the web page in a
+     * different color so that you can see how the two line up.
+     */
+    public static final boolean DRAW_WEBTEXTVIEW = false;
 }
