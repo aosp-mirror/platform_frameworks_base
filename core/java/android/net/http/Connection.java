@@ -437,8 +437,7 @@ abstract class Connection {
             ret = false;
             String error;
             if (errorId < 0) {
-                error = mContext.getText(
-                        EventHandler.errorStringResources[-errorId]).toString();
+                error = ErrorStrings.getString(errorId, mContext);
             } else {
                 Throwable cause = e.getCause();
                 error = cause != null ? cause.toString() : e.getMessage();

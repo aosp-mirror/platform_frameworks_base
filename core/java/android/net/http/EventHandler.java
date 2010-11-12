@@ -68,25 +68,6 @@ public interface EventHandler {
     /** Too many requests queued */
     public static final int TOO_MANY_REQUESTS_ERROR = -15;
 
-    final static int[] errorStringResources = {
-        com.android.internal.R.string.httpErrorOk,
-        com.android.internal.R.string.httpError,
-        com.android.internal.R.string.httpErrorLookup,
-        com.android.internal.R.string.httpErrorUnsupportedAuthScheme,
-        com.android.internal.R.string.httpErrorAuth,
-        com.android.internal.R.string.httpErrorProxyAuth,
-        com.android.internal.R.string.httpErrorConnect,
-        com.android.internal.R.string.httpErrorIO,
-        com.android.internal.R.string.httpErrorTimeout,
-        com.android.internal.R.string.httpErrorRedirectLoop,
-        com.android.internal.R.string.httpErrorUnsupportedScheme,
-        com.android.internal.R.string.httpErrorFailedSslHandshake,
-        com.android.internal.R.string.httpErrorBadUrl,
-        com.android.internal.R.string.httpErrorFile,
-        com.android.internal.R.string.httpErrorFileNotFound,
-        com.android.internal.R.string.httpErrorTooManyRequests
-    };
-
     /**
      * Called after status line has been sucessfully processed.
      * @param major_version HTTP version advertised by server.  major

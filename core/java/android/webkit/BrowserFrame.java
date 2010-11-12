@@ -26,6 +26,7 @@ import android.graphics.Bitmap;
 import android.net.ParseException;
 import android.net.Uri;
 import android.net.WebAddress;
+import android.net.http.ErrorStrings;
 import android.net.http.SslCertificate;
 import android.os.Handler;
 import android.os.Message;
@@ -323,16 +324,20 @@ class BrowserFrame extends Handler {
      * native callback
      * Report an error to an activity.
      * @param errorCode The HTTP error code.
-     * @param description A String description.
+     * @param description Optional human-readable description. If no description
+     *     is given, we'll use a standard localized error message.
+     * @param failingUrl The URL that was being loaded when the error occurred.
      * TODO: Report all errors including resource errors but include some kind
      * of domain identifier. Change errorCode to an enum for a cleaner
      * interface.
      */
-    private void reportError(final int errorCode, final String description,
-            final String failingUrl) {
+    private void reportError(int errorCode, String description, String failingUrl) {
         // As this is called for the main resource and loading will be stopped
         // after, reset the state variables.
         resetLoadingStates();
+        if (description == null || description.isEmpty()) {
+            description = ErrorStrings.getString(errorCode, mContext);
+        }
         mCallbackProxy.onReceivedError(errorCode, description, failingUrl);
     }
 

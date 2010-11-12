@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.net.http.ErrorStrings;
 import android.net.http.EventHandler;
 import android.net.http.RequestHandle;
 import android.os.Build;
@@ -247,8 +248,7 @@ class FrameLoader {
             error = EventHandler.ERROR_BAD_URL;
         }
         if (!ret) {
-            mListener.error(error, mListener.getContext().getText(
-                    EventHandler.errorStringResources[Math.abs(error)]).toString());
+            mListener.error(error, ErrorStrings.getString(error, mListener.getContext()));
             return false;
         }
         return true;
@@ -303,9 +303,8 @@ class FrameLoader {
                     // it has gone.
                     // Generate a file not found error
                     int err = EventHandler.FILE_NOT_FOUND_ERROR;
-                    mListener.error(err, mListener.getContext().getText(
-                            EventHandler.errorStringResources[Math.abs(err)])
-                            .toString());
+                    mListener.error(err,
+                            ErrorStrings.getString(err, mListener.getContext()));
                 }
                 return true;
             }
