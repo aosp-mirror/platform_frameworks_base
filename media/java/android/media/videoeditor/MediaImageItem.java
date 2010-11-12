@@ -162,62 +162,41 @@ public class MediaImageItem extends MediaItem {
      * @param durationMs The duration of the image in the storyboard timeline
      */
     public void setDuration(long durationMs) {
-        // Invalidate the beginning and end transitions if necessary
-        if (mBeginTransition != null) {
-            final long transitionDurationMs = mBeginTransition.getDuration();
-
-            // The begin transition must be invalidated if it overlaps with
-            // an effect. To optimize this code we could invalidate the
-            // begin transition only for a Ken Burns effect (color effects
-            // should not affect the begin transition) however when new effects
-            // will be added this code would have to be modified... so we
-            // opted to always invalidate the transition if there is an
-            // overlap.
-            final List<Effect> effects = getAllEffects();
-            for (Effect effect : effects) {
-                // Check if the effect overlaps with the begin transition
-                if (effect.getStartTime() < transitionDurationMs) {
-                    mBeginTransition.invalidate();
-                    break;
-                }
-            }
+        if (durationMs == mDurationMs) {
+            return;
         }
 
-        if (mEndTransition != null) {
-            final long transitionDurationMs = mEndTransition.getDuration();
+        // Invalidate the end transitions if necessary.
+        // This invalidation is necessary for the case in which an effect or
+        // an overlay is overlapping with the end transition
+        // (before the duration is changed) and it no longer overlaps with the
+        // transition after the duration is increased.
 
-            // The end transition must be invalidated if it overlaps with
-            // an effect
-            final List<Effect> effects = getAllEffects();
-            for (Effect effect : effects) {
-                // Check if the effect overlaps with the end transition
-                if (effect.getStartTime() + effect.getDuration() >
-                            mDurationMs - transitionDurationMs) {
-                    mEndTransition.invalidate();
-                    break;
-                }
-            }
+        // The beginning transition does not need to be invalidated at this time
+        // because an effect or an overlay overlaps with the beginning
+        // transition, the begin transition is unaffected by a media item
+        // duration change.
+        invalidateEndTransition();
 
-            if (mEndTransition.isGenerated()) {
-                // The end transition must be invalidated if it overlaps with
-                // an overlay
-                final List<Overlay> overlays = getAllOverlays();
-                for (Overlay overlay : overlays) {
-                    // Check if the overlay overlaps with the end transition
-                    if (overlay.getStartTime() + overlay.getDuration() >
-                                mDurationMs - transitionDurationMs) {
-                        mEndTransition.invalidate();
-                        break;
-                    }
-                }
-            }
-        }
-
+        final long oldDurationMs = mDurationMs;
         mDurationMs = durationMs;
 
         adjustTransitions();
         adjustOverlays();
         adjustEffects();
+
+        // Invalidate the beginning and end transitions after adjustments.
+        // This invalidation is necessary for the case in which an effect or
+        // an overlay was not overlapping with the beginning or end transitions
+        // before the setDuration reduces the duration of the media item and
+        // causes an overlap of the beginning and/or end transition with the
+        // effect.
+        // If the duration is growing, the begin transition does not need to
+        // be invalidated since the effects, overlays are not adjusted.
+        if (mDurationMs < oldDurationMs) {
+            invalidateBeginTransition();
+        }
+        invalidateEndTransition();
     }
 
     /*
@@ -273,6 +252,76 @@ public class MediaImageItem extends MediaItem {
         if (mEndTransition != null) {
             if (startTimeMs + durationMs > mDurationMs - mEndTransition.getDuration()) {
                 mEndTransition.invalidate();
+            }
+        }
+    }
+
+    /**
+     * Invalidate the begin transition if any effects and overlays overlap
+     * with the begin transition.
+     */
+    private void invalidateBeginTransition() {
+        if (mBeginTransition != null && mBeginTransition.isGenerated()) {
+            final long transitionDurationMs = mBeginTransition.getDuration();
+
+            // The begin transition must be invalidated if it overlaps with
+            // an effect.
+            final List<Effect> effects = getAllEffects();
+            for (Effect effect : effects) {
+                // Check if the effect overlaps with the begin transition
+                if (effect.getStartTime() < transitionDurationMs) {
+                    mBeginTransition.invalidate();
+                    break;
+                }
+            }
+
+            if (mBeginTransition.isGenerated()) {
+                // The end transition must be invalidated if it overlaps with
+                // an overlay.
+                final List<Overlay> overlays = getAllOverlays();
+                for (Overlay overlay : overlays) {
+                    // Check if the overlay overlaps with the end transition
+                    if (overlay.getStartTime() < transitionDurationMs) {
+                        mBeginTransition.invalidate();
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Invalidate the end transition if any effects and overlays overlap
+     * with the end transition.
+     */
+    private void invalidateEndTransition() {
+        if (mEndTransition != null && mEndTransition.isGenerated()) {
+            final long transitionDurationMs = mEndTransition.getDuration();
+
+            // The end transition must be invalidated if it overlaps with
+            // an effect.
+            final List<Effect> effects = getAllEffects();
+            for (Effect effect : effects) {
+                // Check if the effect overlaps with the end transition
+                if (effect.getStartTime() + effect.getDuration() >
+                            mDurationMs - transitionDurationMs) {
+                    mEndTransition.invalidate();
+                    break;
+                }
+            }
+
+            if (mEndTransition.isGenerated()) {
+                // The end transition must be invalidated if it overlaps with
+                // an overlay.
+                final List<Overlay> overlays = getAllOverlays();
+                for (Overlay overlay : overlays) {
+                    // Check if the overlay overlaps with the end transition
+                    if (overlay.getStartTime() + overlay.getDuration() >
+                                mDurationMs - transitionDurationMs) {
+                        mEndTransition.invalidate();
+                        break;
+                    }
+                }
             }
         }
     }
