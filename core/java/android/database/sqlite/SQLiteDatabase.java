@@ -1081,7 +1081,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                 mConnectionPool.close();
             }
         } finally {
-            unlock();            
+            unlock();
         }
     }
 
@@ -1772,8 +1772,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public int updateWithOnConflict(String table, ContentValues values,
             String whereClause, String[] whereArgs, int conflictAlgorithm) {
-        int setValuesSize = values.size();
-        if (values == null || setValuesSize == 0) {
+        if (values == null || values.size() == 0) {
             throw new IllegalArgumentException("Empty values");
         }
 
@@ -1784,6 +1783,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         sql.append(" SET ");
 
         // move all bind args to one array
+        int setValuesSize = values.size();
         int bindArgsSize = (whereArgs == null) ? setValuesSize : (setValuesSize + whereArgs.length);
         Object[] bindArgs = new Object[bindArgsSize];
         int i = 0;
@@ -2118,7 +2118,7 @@ public class SQLiteDatabase extends SQLiteClosable {
 
             int maxCacheSz = (mConnectionNum == 0) ? mMaxSqlCacheSize :
                     mParentConnObj.mMaxSqlCacheSize;
-            
+
             if (SQLiteDebug.DEBUG_SQL_CACHE) {
                 boolean printWarning = (mConnectionNum == 0)
                         ? (!mCacheFullWarning && mCompiledQueries.size() == maxCacheSz)
