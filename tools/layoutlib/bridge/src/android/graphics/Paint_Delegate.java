@@ -114,10 +114,6 @@ public class Paint_Delegate {
         return mColor;
     }
 
-    public int getAlpha() {
-        return mColor >>> 24;
-    }
-
     public int getTextAlign() {
         return mTextAlign;
     }
@@ -260,7 +256,7 @@ public class Paint_Delegate {
             return 0;
         }
 
-        return delegate.getAlpha();
+        return delegate.mColor >>> 24;
     }
 
     /*package*/ static void setAlpha(Paint thisPaint, int a) {
