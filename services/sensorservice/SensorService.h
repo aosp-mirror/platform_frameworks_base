@@ -111,6 +111,8 @@ class SensorService :
     String8 getSensorName(int handle) const;
     status_t recomputeEventsPeriodLocked(int32_t handle);
 
+    void recordLastValue(sensors_event_t const * buffer, size_t count);
+
     // constants
     Vector<Sensor> mSensorList;
     struct sensors_poll_device_t* mSensorDevice;

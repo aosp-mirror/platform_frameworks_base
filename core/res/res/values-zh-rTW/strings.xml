@@ -599,7 +599,7 @@
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"寫入瀏覽器的記錄與書籤"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"允許應用程式修改儲存在電話上的瀏覽記錄或書籤。請注意：惡意應用程式可能會使用此選項來清除或修改您瀏覽器的資料。"</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"在鬧鐘應用程式中設定鬧鈴"</string>
-    <string name="permdesc_setAlarm" msgid="5966966598149875082">"允許應用程式設定您所安裝的鬧鐘應用程式執行鬧鈴功能 (有些鬧鐘應用程式並不支援此功能)。"</string>
+    <string name="permdesc_setAlarm" msgid="5966966598149875082">"允許應用程式在安裝的鬧鐘應用程式中設定鬧鐘，某些鬧鐘應用程式可能無法執行這項功能。"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"修改瀏覽器地理資訊的權限"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"允許應用程式修改瀏覽器的地理位置權限，惡意應用程式可能會透過此方式允許將您的位置資訊任意傳送給某些網站。"</string>
     <string name="save_password_message" msgid="767344687139195790">"是否記住此密碼？"</string>
