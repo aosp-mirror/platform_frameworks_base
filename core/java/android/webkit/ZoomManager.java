@@ -510,6 +510,11 @@ class ZoomManager {
         }
     }
 
+    public boolean isDoubleTapEnabled() {
+        WebSettings settings = mWebView.getSettings();
+        return settings != null && settings.getUseWideViewPort();
+    }
+
     /**
      * The double tap gesture can result in different behaviors depending on the
      * content that is tapped.
@@ -528,7 +533,7 @@ class ZoomManager {
      */
     public void handleDoubleTap(float lastTouchX, float lastTouchY) {
         WebSettings settings = mWebView.getSettings();
-        if (settings == null || settings.getUseWideViewPort() == false) {
+        if (!isDoubleTapEnabled()) {
             return;
         }
 
