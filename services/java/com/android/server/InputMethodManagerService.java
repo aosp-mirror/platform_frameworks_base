@@ -1279,6 +1279,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         setInputMethodWithSubtype(token, id, NOT_A_SUBTYPE_ID);
     }
 
+    public boolean switchToLastInputMethod(IBinder token) {
+        synchronized (mMethodMap) {
+            Pair<String, String> lastIme = mSettings.getLastInputMethodAndSubtypeLocked();
+            if (lastIme != null) {
+                InputMethodInfo imi = mMethodMap.get(lastIme.first);
+                if (imi != null) {
+                    setInputMethodWithSubtype(token, lastIme.first, getSubtypeIdFromHashCode(
+                            imi, Integer.valueOf(lastIme.second)));
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     private void setInputMethodWithSubtype(IBinder token, String id, int subtypeId) {
         synchronized (mMethodMap) {
             if (token == null) {
