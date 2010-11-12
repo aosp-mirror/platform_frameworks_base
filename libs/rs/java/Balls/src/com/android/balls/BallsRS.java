@@ -30,7 +30,8 @@ public class BallsRS {
     private RenderScriptGL mRS;
     private ScriptC_balls mScript;
     private ScriptC_ball_physics mPhysicsScript;
-    private ProgramFragment mPF;
+    private ProgramFragment mPFLines;
+    private ProgramFragment mPFPoints;
     private ProgramVertex mPV;
     private ProgramRaster mPR;
     private ProgramStore mPS;
@@ -89,10 +90,13 @@ public class BallsRS {
         pfb.setTexture(ProgramFragment.Builder.EnvMode.MODULATE,
                            ProgramFragment.Builder.Format.RGBA, 0);
         pfb.setVaryingColor(true);
-        mPF = pfb.create();
-        rs.contextBindProgramFragment(mPF);
+        mPFPoints = pfb.create();
 
-        mPF.bindTexture(loadTexture(R.drawable.flares), 0);
+        pfb = new ProgramFragment.Builder(rs);
+        pfb.setVaryingColor(true);
+        mPFLines = pfb.create();
+
+        mPFPoints.bindTexture(loadTexture(R.drawable.flares), 0);
 
         mPoints = new ScriptField_Point(mRS, PART_COUNT);
         mArcs = new ScriptField_Point(mRS, PART_COUNT * 2);
@@ -118,7 +122,8 @@ public class BallsRS {
         mScript.bind_balls1(new ScriptField_Ball(mRS, PART_COUNT));
         mScript.bind_balls2(new ScriptField_Ball(mRS, PART_COUNT));
 
-        mScript.set_gPF(mPF);
+        mScript.set_gPFLines(mPFLines);
+        mScript.set_gPFPoints(mPFPoints);
         createProgramVertex();
         createProgramRaster();
 
