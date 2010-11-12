@@ -5015,7 +5015,7 @@ public class WebView extends AbsoluteLayout
 
         final ScaleGestureDetector detector =
                 mZoomManager.getMultiTouchGestureDetector();
-        boolean skipScaleGesture = false;
+        boolean isScrollGesture = false;
         // Set to the mid-point of a two-finger gesture used to detect if the
         // user has touched a layer.
         float gestureX = x;
@@ -5043,7 +5043,7 @@ public class WebView extends AbsoluteLayout
                 }
                 action = ev.getActionMasked();
                 if (dist < DRAG_LAYER_FINGER_DISTANCE) {
-                    skipScaleGesture = true;
+                    isScrollGesture = true;
                 } else if (mTouchMode == TOUCH_DRAG_LAYER_MODE) {
                     // Fingers moved too far apart while dragging, the user
                     // might be trying to zoom.
@@ -5052,9 +5052,13 @@ public class WebView extends AbsoluteLayout
             }
         }
 
-        // If the page disallows zoom, pass multi-pointer events to webkit.
-        if (!skipScaleGesture && ev.getPointerCount() > 1
-            && (mZoomManager.isZoomScaleFixed() || mDeferMultitouch)) {
+        // If the page disallows zoom, pass multi-touch events to webkit.
+        // mDeferMultitouch is a hack for layout tests, where it is used to
+        // force passing multi-touch events to webkit.
+        // FIXME: always pass multi-touch events to webkit and remove everything
+        // related to mDeferMultitouch.
+        if (ev.getPointerCount() > 1 &&
+                (mDeferMultitouch || (!isScrollGesture && mZoomManager.isZoomScaleFixed()))) {
             if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "passing " + ev.getPointerCount() + " points to webkit");
             }
@@ -5063,7 +5067,7 @@ public class WebView extends AbsoluteLayout
         }
 
         if (mZoomManager.supportsMultiTouchZoom() && ev.getPointerCount() > 1 &&
-                mTouchMode != TOUCH_DRAG_LAYER_MODE && !skipScaleGesture) {
+                mTouchMode != TOUCH_DRAG_LAYER_MODE && !isScrollGesture) {
             if (!detector.isInProgress() &&
                     ev.getActionMasked() != MotionEvent.ACTION_POINTER_DOWN) {
                 // Insert a fake pointer down event in order to start
@@ -5336,7 +5340,7 @@ public class WebView extends AbsoluteLayout
                     deltaX = 0;
                     deltaY = 0;
 
-                    if (skipScaleGesture) {
+                    if (isScrollGesture) {
                         startScrollingLayer(gestureX, gestureY);
                     }
                     startDrag();
