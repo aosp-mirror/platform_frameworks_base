@@ -58,6 +58,9 @@ href="{@docRoot}resources/samples/get.html">Getting the Samples</a>.</p>
   <dd>A sample application that shows how to use resource directory qualifiers to
   provide different resources for different screen configurations.</dd>
 
+ <dt><a href="NFCDemo/index.html">NFCDemo</a></dt>
+  <dd>An application for reading NFC Forum Type 2 Tags using platform NFC apis.</a>.</dd>
+
  <dt><a href="NotePad/index.html">Note Pad</a></dt>
   <dd>An application for saving notes. Similar (but not identical) to the 
     <a href="{@docRoot}resources/tutorials/notepad/index.html">Notepad tutorial</a>.</dd>
