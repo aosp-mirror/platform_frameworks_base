@@ -33,7 +33,7 @@
         android:paddingBottom="10dip">
 
         <ProgressBar android:id="@android:id/progress"
-            style="@android:style/Widget.ProgressBar"
+            style="?android:attr/progressBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:max="10000"

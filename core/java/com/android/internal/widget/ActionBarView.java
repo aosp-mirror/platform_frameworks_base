@@ -26,7 +26,6 @@ import android.app.ActionBar.NavigationCallback;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.TypedArray;
@@ -45,6 +44,7 @@ import android.widget.AdapterView;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
@@ -94,9 +94,15 @@ public class ActionBarView extends ViewGroup {
     private HorizontalScrollView mTabScrollView;
     private LinearLayout mTabLayout;
     private View mCustomNavView;
+    private ProgressBar mProgressView;
+    private ProgressBar mIndeterminateProgressView;
+
+    private int mProgressBarPadding;
     
     private int mTitleStyleRes;
     private int mSubtitleStyleRes;
+    private int mProgressStyle;
+    private int mIndeterminateProgressStyle;
 
     private boolean mShowMenu;
     private boolean mUserTitle;
@@ -185,6 +191,11 @@ public class ActionBarView extends ViewGroup {
         
         mTitleStyleRes = a.getResourceId(R.styleable.ActionBar_titleTextStyle, 0);
         mSubtitleStyleRes = a.getResourceId(R.styleable.ActionBar_subtitleTextStyle, 0);
+        mProgressStyle = a.getResourceId(R.styleable.ActionBar_progressBarStyle, 0);
+        mIndeterminateProgressStyle = a.getResourceId(
+                R.styleable.ActionBar_indeterminateProgressStyle, 0);
+
+        mProgressBarPadding = a.getDimensionPixelOffset(R.styleable.ActionBar_progressBarPadding, 0);
 
         setDisplayOptions(a.getInt(R.styleable.ActionBar_displayOptions, DISPLAY_DEFAULT));
 
@@ -214,6 +225,20 @@ public class ActionBarView extends ViewGroup {
         });
         mHomeLayout.setClickable(true);
         mHomeLayout.setFocusable(true);
+    }
+
+    public void initProgress() {
+        mProgressView = new ProgressBar(mContext, null, 0, mProgressStyle);
+        mProgressView.setId(R.id.progress_horizontal);
+        mProgressView.setMax(10000);
+        addView(mProgressView);
+    }
+
+    public void initIndeterminateProgress() {
+        mIndeterminateProgressView = new ProgressBar(mContext, null, 0,
+                mIndeterminateProgressStyle);
+        mIndeterminateProgressView.setId(R.id.progress_circular);
+        addView(mIndeterminateProgressView);
     }
 
     @Override
@@ -665,6 +690,13 @@ public class ActionBarView extends ViewGroup {
             break;
         }
 
+        if (mIndeterminateProgressView != null &&
+                mIndeterminateProgressView.getVisibility() != GONE) {
+            availableWidth = measureChildView(mIndeterminateProgressView, availableWidth,
+                    childSpecHeight, 0);
+            rightOfCenter -= mIndeterminateProgressView.getMeasuredWidth();
+        }
+
         if ((mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0 && mCustomNavView != null) {
             final LayoutParams lp = generateLayoutParams(mCustomNavView.getLayoutParams());
             final ActionBar.LayoutParams ablp = lp instanceof ActionBar.LayoutParams ?
@@ -726,6 +758,12 @@ public class ActionBarView extends ViewGroup {
         if (mContextView != null) {
             mContextView.setHeight(getMeasuredHeight());
         }
+
+        if (mProgressView != null && mProgressView.getVisibility() != GONE) {
+            mProgressView.measure(MeasureSpec.makeMeasureSpec(
+                    contentWidth - mProgressBarPadding * 2, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.AT_MOST));
+        }
     }
 
     private int measureChildView(View child, int availableWidth, int childSpecHeight, int spacing) {
@@ -764,12 +802,19 @@ public class ActionBarView extends ViewGroup {
             if (mTabScrollView != null) {
                 x += positionChild(mTabScrollView, x, y, contentHeight);
             }
+            break;
         }
 
         int menuLeft = r - l - getPaddingRight();
         if (mMenuView != null) {
             positionChildInverse(mMenuView, menuLeft, y, contentHeight);
             menuLeft -= mMenuView.getMeasuredWidth();
+        }
+
+        if (mIndeterminateProgressView != null &&
+                mIndeterminateProgressView.getVisibility() != GONE) {
+            positionChildInverse(mIndeterminateProgressView, menuLeft, y, contentHeight);
+            menuLeft -= mIndeterminateProgressView.getMeasuredWidth();
         }
 
         if (mCustomNavView != null && (mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0) {
@@ -829,6 +874,13 @@ public class ActionBarView extends ViewGroup {
                     break;
             }
             x += positionChild(mCustomNavView, xpos, ypos, contentHeight);
+        }
+
+        if (mProgressView != null) {
+            mProgressView.bringToFront();
+            final int halfProgressHeight = mProgressView.getMeasuredHeight() / 2;
+            mProgressView.layout(mProgressBarPadding, -halfProgressHeight,
+                    mProgressBarPadding + mProgressView.getMeasuredWidth(), halfProgressHeight);
         }
     }
 

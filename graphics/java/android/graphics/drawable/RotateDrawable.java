@@ -232,8 +232,6 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
         float toDegrees = a.getFloat(
                 com.android.internal.R.styleable.RotateDrawable_toDegrees, 360.0f);
 
-        toDegrees = Math.max(fromDegrees, toDegrees);
-
         int res = a.getResourceId(
                 com.android.internal.R.styleable.RotateDrawable_drawable, 0);
         Drawable drawable = null;

@@ -920,6 +920,8 @@
         <item name="android:paddingBottom">0dip</item>
         <item name="android:titleTextStyle">@android:style/TextAppearance.Widget.ActionBar.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Widget.ActionBar.Subtitle</item>
+        <item name="android:progressBarStyle">@android:style/Widget.ProgressBar.Horizontal</item>
+        <item name="android:indeterminateProgressStyle">@android:style/Widget.ProgressBar.Small</item>
     </style>
 
     <style name="Widget.ActionMode">
@@ -1356,30 +1358,34 @@
     </style>
 
     <style name="Widget.Holo.ProgressBar" parent="Widget.ProgressBar">
+        <item name="android:indeterminateDrawable">@android:drawable/progress_medium_holo</item>
+        <item name="android:animationResolution">33</item>
     </style>
 
     <style name="Widget.Holo.ProgressBar.Horizontal" parent="Widget.ProgressBar.Horizontal">
         <item name="android:progressDrawable">@android:drawable/progress_horizontal_holo_dark</item>
-        <item name="android:minHeight">16dip</item>
-        <item name="android:maxHeight">16dip</item>
+        <item name="android:minHeight">24dip</item>
+        <item name="android:maxHeight">24dip</item>
     </style>
 
-    <style name="Widget.Holo.ProgressBar.Small" parent="Widget.ProgressBar.Horizontal">
+    <style name="Widget.Holo.ProgressBar.Small" parent="Widget.ProgressBar.Small">
+        <item name="android:indeterminateDrawable">@android:drawable/progress_small_holo</item>
     </style>
 
-    <style name="Widget.Holo.ProgressBar.Small.Title" parent="Widget.ProgressBar.Small.Title">
+    <style name="Widget.Holo.ProgressBar.Small.Title">
     </style>
 
     <style name="Widget.Holo.ProgressBar.Large" parent="Widget.ProgressBar.Large">
+        <item name="android:indeterminateDrawable">@android:drawable/progress_large_holo</item>
     </style>
 
-    <style name="Widget.Holo.ProgressBar.Inverse" parent="Widget.ProgressBar.Inverse">
+    <style name="Widget.Holo.ProgressBar.Inverse">
     </style>
 
-    <style name="Widget.Holo.ProgressBar.Small.Inverse" parent="Widget.ProgressBar.Small.Inverse">
+    <style name="Widget.Holo.ProgressBar.Small.Inverse">
     </style>
 
-    <style name="Widget.Holo.ProgressBar.Large.Inverse" parent="Widget.ProgressBar.Large.Inverse">
+    <style name="Widget.Holo.ProgressBar.Large.Inverse">
     </style>
 
     <style name="Widget.Holo.SeekBar">
@@ -1540,6 +1546,9 @@
         <item name="android:background">@null</item>
         <item name="android:divider">?android:attr/dividerVertical</item>
         <item name="android:homeAsUpIndicator">@android:drawable/ic_ab_back_holo_dark</item>
+        <item name="android:progressBarStyle">@android:style/Widget.Holo.ProgressBar.Horizontal</item>
+        <item name="android:indeterminateProgressStyle">@android:style/Widget.Holo.ProgressBar</item>
+        <item name="android:progressBarPadding">32dip</item>
     </style>
 
     <!-- Light widget styles -->
@@ -1645,29 +1654,29 @@
     <style name="Widget.Holo.Light.PopupWindow" parent="Widget.PopupWindow">
     </style>
 
-    <style name="Widget.Holo.Light.ProgressBar" parent="Widget.ProgressBar">
+    <style name="Widget.Holo.Light.ProgressBar" parent="Widget.Holo.ProgressBar">
     </style>
 
-    <style name="Widget.Holo.Light.ProgressBar.Horizontal" parent="Widget.ProgressBar.Horizontal">
+    <style name="Widget.Holo.Light.ProgressBar.Horizontal" parent="Widget.Holo.ProgressBar.Horizontal">
         <item name="android:progressDrawable">@android:drawable/progress_horizontal_holo_light</item>
     </style>
 
-    <style name="Widget.Holo.Light.ProgressBar.Small" parent="Widget.ProgressBar.Small">
+    <style name="Widget.Holo.Light.ProgressBar.Small" parent="Widget.Holo.ProgressBar.Small">
     </style>
 
-    <style name="Widget.Holo.Light.ProgressBar.Small.Title" parent="Widget.ProgressBar.Small.Title">
+    <style name="Widget.Holo.Light.ProgressBar.Small.Title" parent="Widget.Holo.ProgressBar.Small.Title">
     </style>
 
-    <style name="Widget.Holo.Light.ProgressBar.Large" parent="Widget.ProgressBar.Large">
+    <style name="Widget.Holo.Light.ProgressBar.Large" parent="Widget.Holo.ProgressBar.Large">
     </style>
 
-    <style name="Widget.Holo.Light.ProgressBar.Inverse" parent="Widget.ProgressBar.Inverse">
+    <style name="Widget.Holo.Light.ProgressBar.Inverse" parent="Widget.Holo.ProgressBar.Inverse">
     </style>
 
-    <style name="Widget.Holo.Light.ProgressBar.Small.Inverse" parent="Widget.ProgressBar.Small.Inverse">
+    <style name="Widget.Holo.Light.ProgressBar.Small.Inverse" parent="Widget.Holo.ProgressBar.Small.Inverse">
     </style>
 
-    <style name="Widget.Holo.Light.ProgressBar.Large.Inverse" parent="Widget.ProgressBar.Large.Inverse">
+    <style name="Widget.Holo.Light.ProgressBar.Large.Inverse" parent="Widget.Holo.ProgressBar.Large.Inverse">
     </style>
 
     <style name="Widget.Holo.Light.SeekBar" parent="Widget.Holo.SeekBar">
@@ -1794,6 +1803,8 @@
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle</item>
         <item name="android:background">@null</item>
         <item name="android:homeAsUpIndicator">@android:drawable/ic_ab_back_holo_light</item>
+        <item name="android:progressBarStyle">@android:style/Widget.Holo.Light.ProgressBar.Horizontal</item>
+        <item name="android:indeterminateProgressStyle">@android:style/Widget.Holo.Light.ProgressBar.Small</item>
     </style>
 
     <!-- Animation Styles -->
