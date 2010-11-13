@@ -435,7 +435,7 @@ web_docs_sample_code_flags := \
 		-samplecode $(sample_dir)/WiktionarySimple \
 		            resources/samples/WiktionarySimple "Wiktionary (Simplified)" \
 		-samplecode $(sample_dir)/VoiceRecognitionService \
-		            resources/samples/VoiceRecognitionService "Voice Recognition Service"
+		            resources/samples/VoiceRecognitionService "Voice Recognition Service" \
 		-samplecode $(sample_dir)/NFCDemo \
 		            resources/samples/NFCDemo "NFC Demo"
 
