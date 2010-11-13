@@ -467,19 +467,25 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     }
 
     private void enableHardwareAcceleration(WindowManager.LayoutParams attrs) {
-        // Only enable hardware acceleration if we are not in the system process
-        // The window manager creates ViewRoots to display animated preview windows
-        // of launching apps and we don't want those to be hardware accelerated
-        if (!HardwareRenderer.sRendererDisabled) {
-            // Try to enable hardware acceleration if requested
-            if (attrs != null &&
-                    (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0) {
+        mAttachInfo.mHardwareAccelerated = false;
+        mAttachInfo.mHardwareAccelerationRequested = false;
+        
+        // Try to enable hardware acceleration if requested
+        if (attrs != null &&
+                (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0) {
+            // Only enable hardware acceleration if we are not in the system process
+            // The window manager creates ViewRoots to display animated preview windows
+            // of launching apps and we don't want those to be hardware accelerated
+            if (!HardwareRenderer.sRendererDisabled) {
                 final boolean translucent = attrs.format != PixelFormat.OPAQUE;
                 if (mAttachInfo.mHardwareRenderer != null) {
                     mAttachInfo.mHardwareRenderer.destroy(true);
                 }                
                 mAttachInfo.mHardwareRenderer = HardwareRenderer.createGlRenderer(2, translucent);
-                mAttachInfo.mHardwareAccelerated = mAttachInfo.mHardwareRenderer != null;
+                mAttachInfo.mHardwareAccelerated = mAttachInfo.mHardwareAccelerationRequested
+                        = mAttachInfo.mHardwareRenderer != null;
+            } else if (HardwareRenderer.isAvailable()) {
+                mAttachInfo.mHardwareAccelerationRequested = true;
             }
         }
     }

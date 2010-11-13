@@ -473,6 +473,7 @@ public interface WindowManagerPolicy {
      *        no data is found in the resource.
      * @param labelRes The resource ID the application would like to use as its name.
      * @param icon The resource ID the application would like to use as its icon.
+     * @param windowFlags Window layout flags.
      * 
      * @return Optionally you can return the View that was used to create the
      *         window, for easy removal in removeStartingWindow.
@@ -481,7 +482,7 @@ public interface WindowManagerPolicy {
      */
     public View addStartingWindow(IBinder appToken, String packageName,
             int theme, CharSequence nonLocalizedLabel,
-            int labelRes, int icon);
+            int labelRes, int icon, int windowFlags);
 
     /**
      * Called when the first window of an application has been displayed, while

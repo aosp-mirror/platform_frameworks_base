@@ -19,4 +19,6 @@
 <resources>
     <style name="Theme.Holo.DialogWhenLarge" parent="@android:style/Theme.Holo.Dialog">
     </style>
+    <style name="Theme.Holo.Light.DialogWhenLarge" parent="@android:style/Theme.Holo.Light.Dialog">
+    </style>
 </resources>

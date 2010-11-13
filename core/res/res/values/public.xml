@@ -1375,6 +1375,7 @@
   <public type="attr" name="indeterminateProgressStyle" />
   <public type="attr" name="progressBarPadding" />
   <public type="attr" name="animationResolution" />
+  <public type="attr" name="state_accelerated" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
@@ -1442,6 +1443,7 @@
   <public type="style" name="Widget.FragmentBreadCrumbs" />
 
   <public type="style" name="Theme.Holo.DialogWhenLarge" />
+  <public type="style" name="Theme.Holo.Light.DialogWhenLarge" />
   
   <public type="string" name="selectTextMode" />
 </resources>

@@ -123,7 +123,7 @@
         <item name="galleryItemBackground">@android:drawable/gallery_item_background</item>
         
         <!-- Window attributes -->
-        <item name="windowBackground">@android:drawable/screen_background_dark</item>
+        <item name="windowBackground">@android:drawable/screen_background_selector_dark</item>
         <item name="windowFrame">@null</item>
         <item name="windowNoTitle">false</item>
         <item name="windowFullscreen">false</item>
@@ -279,7 +279,7 @@
          default theme, you should try to assume little more than that the
          background will be a light color. -->
     <style name="Theme.Light">
-        <item name="windowBackground">@drawable/screen_background_light</item>
+        <item name="windowBackground">@android:drawable/screen_background_selector_light</item>
         <item name="colorBackground">@android:color/background_light</item>
         <item name="colorForeground">@color/bright_foreground_light</item>
         <item name="colorForegroundInverse">@android:color/bright_foreground_light_inverse</item>
@@ -736,7 +736,6 @@
         <item name="galleryItemBackground">@android:drawable/gallery_item_background</item>
         
         <!-- Window attributes -->
-        <item name="windowBackground">?android:attr/colorBackground</item>
         <item name="windowFrame">@null</item>
         <item name="windowNoTitle">false</item>
         <item name="windowFullscreen">false</item>
@@ -972,7 +971,6 @@
         <item name="galleryItemBackground">@android:drawable/gallery_item_background</item>
         
         <!-- Window attributes -->
-        <item name="windowBackground">?android:attr/colorBackground</item>
         <item name="windowFrame">@null</item>
         <item name="windowNoTitle">false</item>
         <item name="windowFullscreen">false</item>
@@ -1218,6 +1216,12 @@
 
         <item name="textAppearance">@android:style/TextAppearance.Holo.Light</item>
         <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Light.Inverse</item>
+    </style>
+
+    <!-- Theme for a window that will be displayed either full-screen on
+         smaller screens (small, normal) or as a dialog on larger screens
+         (large, xlarge) -->
+    <style name="Theme.Holo.Light.DialogWhenLarge" parent="@android:style/Theme.Holo.Light">
     </style>
 
     <!-- Holo light theme for alert dialog windows, which is used by the

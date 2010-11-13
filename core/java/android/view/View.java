@@ -1258,6 +1258,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     static final int VIEW_STATE_ENABLED = 1 << 3;
     static final int VIEW_STATE_PRESSED = 1 << 4;
     static final int VIEW_STATE_ACTIVATED = 1 << 5;
+    static final int VIEW_STATE_ACCELERATED = 1 << 6;
 
     static final int[] VIEW_STATE_IDS = new int[] {
         R.attr.state_window_focused,    VIEW_STATE_WINDOW_FOCUSED,
@@ -1266,9 +1267,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         R.attr.state_enabled,           VIEW_STATE_ENABLED,
         R.attr.state_pressed,           VIEW_STATE_PRESSED,
         R.attr.state_activated,         VIEW_STATE_ACTIVATED,
+        R.attr.state_accelerated,       VIEW_STATE_ACCELERATED,
     };
 
     static {
+        if ((VIEW_STATE_IDS.length/2) != R.styleable.ViewDrawableStates.length) {
+            throw new IllegalStateException(
+                    "VIEW_STATE_IDs array length does not match ViewDrawableStates style array");
+        }
         int[] orderedIds = new int[VIEW_STATE_IDS.length];
         for (int i = 0; i < R.styleable.ViewDrawableStates.length; i++) {
             int viewState = R.styleable.ViewDrawableStates[i];
@@ -7176,6 +7182,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         //System.out.println("Attached! " + this);
         mAttachInfo = info;
         mWindowAttachCount++;
+        // We will need to evaluate the drawable state at least once.
+        mPrivateFlags |= DRAWABLE_STATE_DIRTY;
         if (mFloatingTreeObserver != null) {
             info.mTreeObserver.merge(mFloatingTreeObserver);
             mFloatingTreeObserver = null;
@@ -7189,6 +7197,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         int vis = info.mWindowVisibility;
         if (vis != GONE) {
             onWindowVisibilityChanged(vis);
+        }
+        if ((mPrivateFlags&DRAWABLE_STATE_DIRTY) != 0) {
+            // If nobody has evaluated the drawable state yet, then do it now.
+            refreshDrawableState();
         }
     }
 
@@ -8562,6 +8574,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if ((privateFlags & SELECTED) != 0) viewStateIndex |= VIEW_STATE_SELECTED;
         if (hasWindowFocus()) viewStateIndex |= VIEW_STATE_WINDOW_FOCUSED;
         if ((privateFlags & ACTIVATED) != 0) viewStateIndex |= VIEW_STATE_ACTIVATED;
+        if (mAttachInfo != null && mAttachInfo.mHardwareAccelerationRequested) {
+            // This is set if HW acceleration is requested, even if the current
+            // process doesn't allow it.  This is just to allow app preview
+            // windows to better match their app.
+            viewStateIndex |= VIEW_STATE_ACCELERATED;
+        }
 
         drawableState = VIEW_STATE_SETS[viewStateIndex];
 
@@ -10503,6 +10521,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         Surface mSurface;
 
         boolean mHardwareAccelerated;
+        boolean mHardwareAccelerationRequested;
         HardwareRenderer mHardwareRenderer;
         
         /**

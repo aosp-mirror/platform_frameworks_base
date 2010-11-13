@@ -3729,7 +3729,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void setAppStartingWindow(IBinder token, String pkg,
             int theme, CharSequence nonLocalizedLabel, int labelRes, int icon,
-            IBinder transferFrom, boolean createIfNeeded) {
+            int windowFlags, IBinder transferFrom, boolean createIfNeeded) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppStartingIcon()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3877,7 +3877,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mStartingIconInTransition = true;
             wtoken.startingData = new StartingData(
                     pkg, theme, nonLocalizedLabel,
-                    labelRes, icon);
+                    labelRes, icon, windowFlags);
             Message m = mH.obtainMessage(H.ADD_STARTING, wtoken);
             // Note: we really want to do sendMessageAtFrontOfQueue() because we
             // want to process the message ASAP, before any other queued
@@ -8440,14 +8440,16 @@ public class WindowManagerService extends IWindowManager.Stub
         final CharSequence nonLocalizedLabel;
         final int labelRes;
         final int icon;
+        final int windowFlags;
 
         StartingData(String _pkg, int _theme, CharSequence _nonLocalizedLabel,
-                int _labelRes, int _icon) {
+                int _labelRes, int _icon, int _windowFlags) {
             pkg = _pkg;
             theme = _theme;
             nonLocalizedLabel = _nonLocalizedLabel;
             labelRes = _labelRes;
             icon = _icon;
+            windowFlags = _windowFlags;
         }
     }
 
@@ -8568,7 +8570,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         view = mPolicy.addStartingWindow(
                             wtoken.token, sd.pkg,
                             sd.theme, sd.nonLocalizedLabel, sd.labelRes,
-                            sd.icon);
+                            sd.icon, sd.windowFlags);
                     } catch (Exception e) {
                         Slog.w(TAG, "Exception when adding starting window", e);
                     }
