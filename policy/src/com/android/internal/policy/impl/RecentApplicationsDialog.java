@@ -17,7 +17,9 @@
 package com.android.internal.policy.impl;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.app.Dialog;
+import android.app.IActivityManager;
 import android.app.StatusBarManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -30,6 +32,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -52,6 +56,22 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
     final TextView[] mIcons = new TextView[NUM_BUTTONS];
     View mNoAppsText;
     IntentFilter mBroadcastIntentFilter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+
+    class RecentTag {
+        ActivityManager.RecentTaskInfo info;
+        Intent intent;
+    }
+
+    Handler mHandler = new Handler();
+    Runnable mCleanup = new Runnable() {
+        public void run() {
+            // dump extra memory we're hanging on to
+            for (TextView icon: mIcons) {
+                icon.setCompoundDrawables(null, null, null, null);
+                icon.setTag(null);
+            }
+        }
+    };
 
     private int mIconSize;
 
@@ -115,12 +135,18 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
 
         for (TextView b: mIcons) {
             if (b == v) {
-                // prepare a launch intent and send it
-                Intent intent = (Intent)b.getTag();
-                if (intent != null) {
-                    intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
+                RecentTag tag = (RecentTag)b.getTag();
+                if (tag.info.id >= 0) {
+                    // This is an active task; it should just go to the foreground.
+                    IActivityManager am = ActivityManagerNative.getDefault();
                     try {
-                        getContext().startActivity(intent);
+                        am.moveTaskToFront(tag.info.id);
+                    } catch (RemoteException e) {
+                    }
+                } else if (tag.intent != null) {
+                    tag.intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
+                    try {
+                        getContext().startActivity(tag.intent);
                     } catch (ActivityNotFoundException e) {
                         Log.w("Recent", "Unable to launch recent task", e);
                     }
@@ -144,6 +170,8 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
 
         // receive broadcasts
         getContext().registerReceiver(mBroadcastReceiver, mBroadcastIntentFilter);
+
+        mHandler.removeCallbacks(mCleanup);
     }
 
     /**
@@ -153,18 +181,14 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
     public void onStop() {
         super.onStop();
 
-        // dump extra memory we're hanging on to
-        for (TextView icon: mIcons) {
-            icon.setCompoundDrawables(null, null, null, null);
-            icon.setTag(null);
-        }
-
         if (sStatusBar != null) {
             sStatusBar.disable(StatusBarManager.DISABLE_NONE);
         }
 
         // stop receiving broadcasts
         getContext().unregisterReceiver(mBroadcastReceiver);
+
+        mHandler.postDelayed(mCleanup, 100);
      }
 
     /**
@@ -224,7 +248,10 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
                     tv.setText(title);
                     icon = iconUtilities.createIconDrawable(icon);
                     tv.setCompoundDrawables(null, icon, null, null);
-                    tv.setTag(intent);
+                    RecentTag tag = new RecentTag();
+                    tag.info = info;
+                    tag.intent = intent;
+                    tv.setTag(tag);
                     tv.setVisibility(View.VISIBLE);
                     tv.setPressed(false);
                     tv.clearFocus();

@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
+import android.app.IActivityManager;
 import android.app.IThumbnailReceiver;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
@@ -236,7 +238,7 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
             appIcon.setImageDrawable(activityDescription.icon);
             appDescription.setText(activityDescription.label);
             view.setOnClickListener(this);
-            view.setTag(activityDescription.intent);
+            view.setTag(activityDescription);
             Log.v(TAG, "Adding task: " + activityDescription.label);
             mRecentsContainer.addView(view);
         }
@@ -247,9 +249,19 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
     }
 
     public void onClick(View v) {
-        Intent intent = (Intent) v.getTag();
-        if (DEBUG) Log.v(TAG, "Starting activity " + intent);
-        getContext().startActivity(intent);
+        ActivityDescription ad = (ActivityDescription)v.getTag();
+        if (ad.id >= 0) {
+            // This is an active task; it should just go to the foreground.
+            IActivityManager am = ActivityManagerNative.getDefault();
+            try {
+                am.moveTaskToFront(ad.id);
+            } catch (RemoteException e) {
+            }
+        } else {
+            Intent intent = ad.intent;
+            if (DEBUG) Log.v(TAG, "Starting activity " + intent);
+            getContext().startActivity(intent);
+        }
         mBar.animateCollapse();
     }
 }
