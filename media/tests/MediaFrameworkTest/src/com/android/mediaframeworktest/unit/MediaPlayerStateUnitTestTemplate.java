@@ -39,7 +39,7 @@ import com.android.mediaframeworktest.MediaNames;
  */
 class MediaPlayerStateUnitTestTemplate extends AndroidTestCase {
     private static final String TEST_PATH = MediaNames.TEST_PATH_1;
-    private static final String TAG = "MediaPlayerSeekToStateUnitTest";
+    private static final String TAG = "MediaPlayerStateUnitTestTemplate";
     private static final int SEEK_TO_END  = 135110;  // Milliseconds.
     private static int WAIT_FOR_COMMAND_TO_COMPLETE = 1000;  // Milliseconds.
     
