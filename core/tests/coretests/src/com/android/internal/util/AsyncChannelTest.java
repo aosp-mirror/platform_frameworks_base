@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package android.os;
+package com.android.internal.util;
 
+import android.os.Debug;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
@@ -26,13 +27,17 @@ import junit.framework.TestCase;
  */
 public class AsyncChannelTest extends TestCase {
     private static final boolean DBG = true;
-    private static final boolean WAIT_FOR_DEBUGGER = true;
+    private static final boolean WAIT_FOR_DEBUGGER = false;
     private static final String TAG = "AsyncChannelTest";
 
     @SmallTest
     public void test1() throws Exception {
+        if (DBG) log("test1");
         if (WAIT_FOR_DEBUGGER) Debug.waitForDebugger();
-        Log.d(TAG, "test1");
         assertTrue(1 == 1);
+    }
+
+    protected void log(String s) {
+        Log.d(TAG, s);
     }
 }
