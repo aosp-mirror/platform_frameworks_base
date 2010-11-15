@@ -54,6 +54,7 @@
 #include <OMX_Component.h>
 
 #include "include/ThreadedSource.h"
+#include "include/avc_utils.h"
 
 namespace android {
 
@@ -262,39 +263,6 @@ static const char *GetCodec(const CodecInfo *info, size_t numInfos,
     }
 
     return NULL;
-}
-
-enum {
-    kAVCProfileBaseline      = 0x42,
-    kAVCProfileMain          = 0x4d,
-    kAVCProfileExtended      = 0x58,
-    kAVCProfileHigh          = 0x64,
-    kAVCProfileHigh10        = 0x6e,
-    kAVCProfileHigh422       = 0x7a,
-    kAVCProfileHigh444       = 0xf4,
-    kAVCProfileCAVLC444Intra = 0x2c
-};
-
-static const char *AVCProfileToString(uint8_t profile) {
-    switch (profile) {
-        case kAVCProfileBaseline:
-            return "Baseline";
-        case kAVCProfileMain:
-            return "Main";
-        case kAVCProfileExtended:
-            return "Extended";
-        case kAVCProfileHigh:
-            return "High";
-        case kAVCProfileHigh10:
-            return "High 10";
-        case kAVCProfileHigh422:
-            return "High 422";
-        case kAVCProfileHigh444:
-            return "High 444";
-        case kAVCProfileCAVLC444Intra:
-            return "CAVLC 444 Intra";
-        default:   return "Unknown";
-    }
 }
 
 template<class T>
