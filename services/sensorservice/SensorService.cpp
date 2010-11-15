@@ -464,6 +464,7 @@ void SensorService::SensorEventConnection::onFirstRef()
 }
 
 bool SensorService::SensorEventConnection::addSensor(int32_t handle) {
+    Mutex::Autolock _l(mConnectionLock);
     if (mSensorInfo.indexOfKey(handle) <= 0) {
         SensorInfo info;
         mSensorInfo.add(handle, info);
@@ -473,6 +474,7 @@ bool SensorService::SensorEventConnection::addSensor(int32_t handle) {
 }
 
 bool SensorService::SensorEventConnection::removeSensor(int32_t handle) {
+    Mutex::Autolock _l(mConnectionLock);
     if (mSensorInfo.removeItem(handle) >= 0) {
         return true;
     }
@@ -480,16 +482,19 @@ bool SensorService::SensorEventConnection::removeSensor(int32_t handle) {
 }
 
 bool SensorService::SensorEventConnection::hasSensor(int32_t handle) const {
+    Mutex::Autolock _l(mConnectionLock);
     return mSensorInfo.indexOfKey(handle) >= 0;
 }
 
 bool SensorService::SensorEventConnection::hasAnySensor() const {
+    Mutex::Autolock _l(mConnectionLock);
     return mSensorInfo.size() ? true : false;
 }
 
 status_t SensorService::SensorEventConnection::setEventRateLocked(
         int handle, nsecs_t ns)
 {
+    Mutex::Autolock _l(mConnectionLock);
     ssize_t index = mSensorInfo.indexOfKey(handle);
     if (index >= 0) {
         SensorInfo& info = mSensorInfo.editValueFor(handle);
@@ -506,6 +511,7 @@ status_t SensorService::SensorEventConnection::sendEvents(
     // filter out events not for this connection
     size_t count = 0;
     if (scratch) {
+        Mutex::Autolock _l(mConnectionLock);
         size_t i=0;
         while (i<numEvents) {
             const int32_t curr = buffer[i].sensor;
