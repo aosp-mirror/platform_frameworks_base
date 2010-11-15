@@ -40,13 +40,15 @@ class ZoomControlEmbedded implements ZoomControlBase {
 
             mZoomButtonsController.setVisible(true);
 
-            WebSettings settings = mWebView.getSettings();
-            int count = settings.getDoubleTapToastCount();
-            if (mZoomManager.isInZoomOverview() && count > 0) {
-                settings.setDoubleTapToastCount(--count);
-                Toast.makeText(mWebView.getContext(),
-                        com.android.internal.R.string.double_tap_toast,
-                        Toast.LENGTH_LONG).show();
+            if (mZoomManager.isDoubleTapEnabled()) {
+                WebSettings settings = mWebView.getSettings();
+                int count = settings.getDoubleTapToastCount();
+                if (mZoomManager.isInZoomOverview() && count > 0) {
+                    settings.setDoubleTapToastCount(--count);
+                    Toast.makeText(mWebView.getContext(),
+                            com.android.internal.R.string.double_tap_toast,
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
     }
