@@ -372,6 +372,9 @@ void Camera::dataCallbackTimestamp(nsecs_t timestamp, int32_t msgType, const sp<
     }
     if (listener != NULL) {
         listener->postDataTimestamp(timestamp, msgType, dataPtr);
+    } else {
+        LOGW("No listener was set. Drop a recording frame.");
+        releaseRecordingFrame(dataPtr);
     }
 }
 
