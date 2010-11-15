@@ -36,6 +36,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.view.IApplicationToken;
+import android.view.WindowManager;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -68,6 +69,7 @@ class ActivityRecord extends IApplicationToken.Stub {
     int labelRes;           // the label information from the package mgr.
     int icon;               // resource identifier of activity's icon.
     int theme;              // resource identifier of activity's theme.
+    int windowFlags;        // custom window flags for preview window.
     TaskRecord task;        // the task this is in.
     long launchTime;        // when we starting launching this activity
     long startTime;         // last time this activity was started
@@ -244,6 +246,9 @@ class ActivityRecord extends IApplicationToken.Stub {
             }
             icon = aInfo.getIconResource();
             theme = aInfo.getThemeResource();
+            if ((aInfo.flags&ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
+                windowFlags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+            }
             if ((aInfo.flags&ActivityInfo.FLAG_MULTIPROCESS) != 0
                     && _caller != null
                     && (aInfo.applicationInfo.uid == Process.SYSTEM_UID

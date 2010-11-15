@@ -29,6 +29,8 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
+import android.app.IActivityManager;
 import android.app.IThumbnailReceiver;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ActivityNotFoundException;
@@ -189,8 +191,15 @@ public class RecentApplicationsActivity extends Activity {
         public void onCardSelected(int n) {
             if (n < mActivityDescriptions.size()) {
                 ActivityDescription item = mActivityDescriptions.get(n);
-                // prepare a launch intent and send it
-                if (item.intent != null) {
+                if (item.id >= 0) {
+                    // This is an active task; it should just go to the foreground.
+                    IActivityManager am = ActivityManagerNative.getDefault();
+                    try {
+                        am.moveTaskToFront(item.id);
+                    } catch (RemoteException e) {
+                    }
+                } else if (item.intent != null) {
+                    // prepare a launch intent and send it
                     item.intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
                     try {
                         if (DBG) Log.v(TAG, "Starting intent " + item.intent);

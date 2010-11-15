@@ -80,6 +80,10 @@ public class WindowManagerImpl implements WindowManager {
         return mWindowManager;
     }
     
+    public boolean isHardwareAccelerated() {
+        return false;
+    }
+    
     public void addView(View view)
     {
         addView(view, new WindowManager.LayoutParams(

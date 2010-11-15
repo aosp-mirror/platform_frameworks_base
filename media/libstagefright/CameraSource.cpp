@@ -531,7 +531,7 @@ status_t CameraSource::init(
     mMeta->setInt32(kKeyHeight,      mVideoSize.height);
     mMeta->setInt32(kKeyStride,      mVideoSize.width);
     mMeta->setInt32(kKeySliceHeight, mVideoSize.height);
-    mMeta->setInt32(kKeySampleRate,  mVideoFrameRate);
+    mMeta->setInt32(kKeyFrameRate,   mVideoFrameRate);
     return OK;
 }
 

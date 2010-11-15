@@ -1365,12 +1365,17 @@
   <public type="attr" name="selectableItemBackground" />
   <public type="attr" name="autoAdvanceViewId" />
   <public type="attr" name="useIntrinsicSizeAsMinimum" />
-
   <public type="attr" name="actionModeCutDrawable" />
   <public type="attr" name="actionModeCopyDrawable" />
   <public type="attr" name="actionModePasteDrawable" />
   <public type="attr" name="textEditPasteWindowLayout" />
   <public type="attr" name="textEditNoPasteWindowLayout" />
+  <public type="attr" name="textIsSelectable" />
+  <public type="attr" name="windowEnableSplitTouch" />
+  <public type="attr" name="indeterminateProgressStyle" />
+  <public type="attr" name="progressBarPadding" />
+  <public type="attr" name="animationResolution" />
+  <public type="attr" name="state_accelerated" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
@@ -1438,6 +1443,7 @@
   <public type="style" name="Widget.FragmentBreadCrumbs" />
 
   <public type="style" name="Theme.Holo.DialogWhenLarge" />
+  <public type="style" name="Theme.Holo.Light.DialogWhenLarge" />
   
   <public type="string" name="selectTextMode" />
 </resources>

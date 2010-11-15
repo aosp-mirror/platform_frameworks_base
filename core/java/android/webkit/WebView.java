@@ -7481,7 +7481,7 @@ public class WebView extends AbsoluteLayout
     private native Rect     nativeFocusCandidatePaddingRect();
     /* package */ native int      nativeFocusCandidatePointer();
     private native String   nativeFocusCandidateText();
-    /* package */ native int      nativeFocusCandidateTextSize();
+    /* package */ native float    nativeFocusCandidateTextSize();
     /**
      * Returns an integer corresponding to WebView.cpp::type.
      * See WebTextView.setType()

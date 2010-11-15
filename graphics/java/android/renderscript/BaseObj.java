@@ -41,6 +41,13 @@ class BaseObj {
         mID = id;
     }
 
+    /**
+     * Lookup the native object ID for this object.  Primarily used by the
+     * generated reflected code.
+     *
+     *
+     * @return int
+     */
     public int getID() {
         if (mDestroyed) {
             throw new RSInvalidStateException("using a destroyed object.");
@@ -53,8 +60,15 @@ class BaseObj {
     private String mName;
     RenderScript mRS;
 
-    public void setName(String s) {
-        if(s.length() < 1) {
+    /**
+     * setName assigns a name to an object.  This object can later be looked up
+     * by this name.  This name will also be retained if the object is written
+     * to an A3D file.
+     *
+     * @param name The name to assign to the object.
+     */
+    public void setName(String name) {
+        if(name.length() < 1) {
             throw new RSIllegalArgumentException("setName does not accept a zero length string.");
         }
         if(mName != null) {
@@ -62,9 +76,9 @@ class BaseObj {
         }
 
         try {
-            byte[] bytes = s.getBytes("UTF-8");
+            byte[] bytes = name.getBytes("UTF-8");
             mRS.nAssignName(mID, bytes);
-            mName = s;
+            mName = name;
         } catch (java.io.UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -84,6 +98,12 @@ class BaseObj {
         super.finalize();
     }
 
+    /**
+     * destroy disconnects the object from the native object effectivly
+     * rendering this java object dead.  The primary use is to force immediate
+     * cleanup of resources when its believed the GC will not respond quickly
+     * enough.
+     */
     synchronized public void destroy() {
         if(mDestroyed) {
             throw new RSInvalidStateException("Object already destroyed.");
@@ -92,8 +112,10 @@ class BaseObj {
         mRS.nObjDestroy(mID);
     }
 
-    // If an object came from an a3d file, java fields need to be
-    // created with objects from the native layer
+    /**
+     * If an object came from an a3d file, java fields need to be
+     * created with objects from the native layer
+     */
     void updateFromNative() {
         mRS.validate();
         mName = mRS.nGetName(getID());

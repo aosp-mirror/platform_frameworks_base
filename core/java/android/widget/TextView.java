@@ -66,6 +66,7 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.method.ArrowKeyMovementMethod;
 import android.text.method.DateKeyListener;
 import android.text.method.DateTimeKeyListener;
 import android.text.method.DialerKeyListener;
@@ -755,6 +756,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (lineHeight != 0) {
                     setLineHeight(lineHeight);
                 }
+                break;
+
+            case com.android.internal.R.styleable.TextView_textIsSelectable:
+                mTextIsSelectable = a.getBoolean(attr, false);
+                break;
             }
         }
         a.recycle();
@@ -844,6 +850,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             mInput = TextKeyListener.getInstance(autotext, cap);
             mInputType = inputType;
+        } else if (mTextIsSelectable) {
+            // Prevent text changes from keyboard.
+            mInputType = EditorInfo.TYPE_NULL;
+            mInput = null;
+            bufferType = BufferType.SPANNABLE;
+            setFocusableInTouchMode(true);
+            // So that selection can be changed using arrow keys and touch is handled.
+            setMovementMethod(ArrowKeyMovementMethod.getInstance());
         } else if (editable) {
             mInput = TextKeyListener.getInstance();
             mInputType = EditorInfo.TYPE_CLASS_TEXT;
@@ -1098,6 +1112,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * within the text can cause individual lines to be taller or shorter
      * than this height, and the layout may contain additional first-
      * or last-line padding.
+     *
+     * @attr ref android.R.styleable#TextView_textLineHeight
      */
     public int getLineHeight() {
         if (mLineHeight != 0) {
@@ -4028,6 +4044,71 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return false;
     }
 
+    /**
+     * When a TextView is used to display a useful piece of information to the user (such as a
+     * contact's address), it should be made selectable, so that the user can select and copy this
+     * content.
+     *
+     * Use {@link #setTextIsSelectable(boolean)} or the
+     * {@link android.R.styleable#TextView_textIsSelectable} XML attribute to make this TextView
+     * selectable (the text is not selectable by default). Note that the content of an EditText is
+     * always selectable.
+     *
+     * @return True if the text displayed in this TextView can be selected by the user.
+     *
+     * @attr ref android.R.styleable#TextView_textIsSelectable
+     */
+    public boolean isTextSelectable() {
+        return mTextIsSelectable;
+    }
+
+    /**
+     * Sets whether or not (default) the content of this view is selectable by the user.
+     *
+     * See {@link #isTextSelectable} for details.
+     *
+     * @param selectable Whether or not the content of this TextView should be selectable.
+     */
+    public void setTextIsSelectable(boolean selectable) {
+        if (mTextIsSelectable == selectable) return;
+
+        mTextIsSelectable = selectable;
+
+        setFocusableInTouchMode(selectable);
+        setFocusable(selectable);
+        setClickable(selectable);
+        setLongClickable(selectable);
+
+        // mInputType is already EditorInfo.TYPE_NULL and mInput is null;
+
+        setMovementMethod(selectable ? ArrowKeyMovementMethod.getInstance() : null);
+        setText(getText(), selectable ? BufferType.SPANNABLE : BufferType.NORMAL);
+
+        // Called by setText above, but safer in case of future code changes
+        prepareCursorControllers();
+    }
+
+    @Override
+    protected int[] onCreateDrawableState(int extraSpace) {
+        final int[] drawableState = super.onCreateDrawableState(extraSpace);
+        if (mTextIsSelectable) {
+            // Disable pressed state, which was introduced when TextView was made clickable.
+            // Prevents text color change.
+            // setClickable(false) would have a similar effect, but it also disables focus changes
+            // and long press actions, which are both needed by text selection.
+            final int length = drawableState.length;
+            for (int i = 0; i < length; i++) {
+                if (drawableState[i] == R.attr.state_pressed) {
+                    final int[] nonPressedState = new int[length - 1];
+                    System.arraycopy(drawableState, 0, nonPressedState, 0, i);
+                    System.arraycopy(drawableState, i + 1, nonPressedState, i, length - i - 1);
+                    return nonPressedState;
+                }
+            }
+        }
+        return drawableState;
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         if (mCurrentAlpha <= ViewConfiguration.ALPHA_THRESHOLD_INT) return;
@@ -4190,12 +4271,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             selStart = getSelectionStart();
             selEnd = getSelectionEnd();
 
-            if (mCursorVisible && selStart >= 0 && isEnabled()) {
+            if ((mCursorVisible || mTextIsSelectable) && selStart >= 0 && isEnabled()) {
                 if (mHighlightPath == null)
                     mHighlightPath = new Path();
 
                 if (selStart == selEnd) {
-                    if ((SystemClock.uptimeMillis() - mShowCursor) % (2 * BLINK) < BLINK) {
+                    if (!mTextIsSelectable &&
+                            (SystemClock.uptimeMillis() - mShowCursor) % (2 * BLINK) < BLINK) {
                         if (mHighlightPathBogus) {
                             mHighlightPath.reset();
                             mLayout.getCursorPath(selStart, mHighlightPath, mText);
@@ -7011,9 +7093,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         mSelectionModifierCursorController.updatePosition();
                     }
                 }
-                if (action == MotionEvent.ACTION_UP && isFocused() && !mScrolled) {
+                if (action == MotionEvent.ACTION_UP && !mScrolled && isFocused()) {
                     InputMethodManager imm = (InputMethodManager)
-                          getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
                     CommitSelectionReceiver csr = null;
                     if (getSelectionStart() != oldSelStart || getSelectionEnd() != oldSelEnd ||
@@ -7047,7 +7129,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     || windowParams.type > WindowManager.LayoutParams.LAST_SUB_WINDOW;
         }
 
-        if (windowSupportsHandles && isTextEditable() && mCursorVisible && mLayout != null) {
+        if (windowSupportsHandles && isTextEditable() && mCursorVisible && mLayout != null &&
+                !mTextIsSelectable) {
             if (mInsertionPointCursorController == null) {
                 mInsertionPointCursorController = new InsertionPointCursorController();
             }
@@ -7070,10 +7153,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return True iff this TextView contains a text that can be edited.
+     * @return True iff this TextView contains a text that can be edited, or if this is
+     * a selectable TextView.
      */
     private boolean isTextEditable() {
-        return mText instanceof Editable && onCheckIsTextEditor() && isEnabled();
+        return (mText instanceof Editable && onCheckIsTextEditor() && isEnabled())
+                || mTextIsSelectable;
     }
 
     /**
@@ -7320,9 +7405,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // prepareCursorController() relies on this method.
         // If you change this condition, make sure prepareCursorController is called anywhere
         // the value of this condition might be changed.
-        return (mText instanceof Spannable &&
-                mMovement != null &&
-                mMovement.canSelectArbitrarily());
+        return (mText instanceof Spannable && mMovement != null && mMovement.canSelectArbitrarily());
     }
 
     private boolean canCut() {
@@ -8883,6 +8966,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private float                   mSpacingMult = 1;
     private float                   mSpacingAdd = 0;
     private int                     mLineHeight = 0;
+    private boolean                 mTextIsSelectable = false;
 
     private static final int        LINES = 1;
     private static final int        EMS = LINES;

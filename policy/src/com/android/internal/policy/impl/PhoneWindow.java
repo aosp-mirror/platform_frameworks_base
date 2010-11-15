@@ -22,6 +22,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY;
+import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
@@ -36,9 +37,7 @@ import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarView;
 
 import android.app.KeyguardManager;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -50,7 +49,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemClock;
 import android.util.AndroidRuntimeException;
 import android.util.Config;
 import android.util.EventLog;
@@ -59,6 +57,7 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.Gravity;
+import android.view.HardwareRenderer;
 import android.view.InputQueue;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -71,14 +70,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewManager;
 import android.view.ViewStub;
-import android.view.VolumePanel;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -165,7 +162,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private MenuDialogHelper mContextMenuHelper;
 
     private int mVolumeControlStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
-    private long mVolumeKeyUpTime;
 
     private AudioManager mAudioManager;
     private KeyguardManager mKeyguardManager;
@@ -497,7 +493,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 WRAP_CONTENT, WRAP_CONTENT,
                 st.x, st.y, WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG,
                 WindowManager.LayoutParams.FLAG_DITHER
-                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 st.decorView.mDefaultOpacity);
 
         lp.gravity = st.gravity;
@@ -2164,6 +2161,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             setFlags(FLAG_SHOW_WALLPAPER, FLAG_SHOW_WALLPAPER&(~getForcedWindowFlags()));
         }
 
+        if (a.getBoolean(com.android.internal.R.styleable.Window_windowEnableSplitTouch,
+                getContext().getApplicationInfo().targetSdkVersion
+                        >= android.os.Build.VERSION_CODES.HONEYCOMB)) {
+            setFlags(FLAG_SPLIT_TOUCH, FLAG_SPLIT_TOUCH&(~getForcedWindowFlags()));
+        }
+
         if (getContext().getApplicationInfo().targetSdkVersion
                 < android.os.Build.VERSION_CODES.HONEYCOMB) {
             addFlags(WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY);
@@ -2226,12 +2229,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // XXX Remove this once action bar supports these features.
             removeFeature(FEATURE_ACTION_BAR);
             // System.out.println("Title Icons!");
-        } else if ((features & ((1 << FEATURE_PROGRESS) | (1 << FEATURE_INDETERMINATE_PROGRESS))) != 0) {
+        } else if ((features & ((1 << FEATURE_PROGRESS) | (1 << FEATURE_INDETERMINATE_PROGRESS))) != 0
+                && (features & (1 << FEATURE_ACTION_BAR)) == 0) {
             // Special case for a window with only a progress bar (and title).
             // XXX Need to have a no-title version of embedded windows.
             layoutResource = com.android.internal.R.layout.screen_progress;
-            // XXX Remove this once action bar supports these features.
-            removeFeature(FEATURE_ACTION_BAR);
             // System.out.println("Progress!");
         } else if ((features & (1 << FEATURE_CUSTOM_TITLE)) != 0) {
             // Special case for a window with a custom title.
@@ -2343,6 +2345,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (mActionBar != null) {
                     if (mActionBar.getTitle() == null) {
                         mActionBar.setWindowTitle(mTitle);
+                    }
+                    final int localFeatures = getLocalFeatures();
+                    if ((localFeatures & (1 << FEATURE_PROGRESS)) != 0) {
+                        mActionBar.initProgress();
+                    }
+                    if ((localFeatures & (1 << FEATURE_INDETERMINATE_PROGRESS)) != 0) {
+                        mActionBar.initIndeterminateProgress();
                     }
                     // Post the panel invalidate for later; avoid application onCreateOptionsMenu
                     // being called in the middle of onCreate or similar.
@@ -2535,8 +2544,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mContentParent == null && shouldInstallDecor) {
             installDecor();
         }
-        mCircularProgressBar = (ProgressBar)findViewById(com.android.internal.R.id.progress_circular);
-        mCircularProgressBar.setVisibility(View.INVISIBLE);
+        mCircularProgressBar = (ProgressBar) findViewById(com.android.internal.R.id.progress_circular);
+        if (mCircularProgressBar != null) {
+            mCircularProgressBar.setVisibility(View.INVISIBLE);
+        }
         return mCircularProgressBar;
     }
 
@@ -2547,8 +2558,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mContentParent == null && shouldInstallDecor) {
             installDecor();
         }
-        mHorizontalProgressBar = (ProgressBar)findViewById(com.android.internal.R.id.progress_horizontal);
-        mHorizontalProgressBar.setVisibility(View.INVISIBLE);
+        mHorizontalProgressBar = (ProgressBar) findViewById(com.android.internal.R.id.progress_horizontal);
+        if (mHorizontalProgressBar != null) {
+            mHorizontalProgressBar.setVisibility(View.INVISIBLE);
+        }
         return mHorizontalProgressBar;
     }
 

@@ -157,7 +157,7 @@ import junit.framework.Assert;
         // Set the text color to black, regardless of the theme.  This ensures
         // that other applications that use embedded WebViews will properly
         // display the text in password textfields.
-        setTextColor(Color.BLACK);
+        setTextColor(DebugFlags.DRAW_WEBTEXTVIEW ? Color.RED : Color.BLACK);
         // This helps to align the text better with the text in the web page.
         setIncludeFontPadding(false);
     }
@@ -404,8 +404,9 @@ import junit.framework.Assert;
         // onDraw should only be called for password fields.  If WebTextView is
         // still drawing, but is no longer corresponding to a password field,
         // remove it.
-        if (mWebView == null || !mWebView.nativeFocusCandidateIsPassword()
-                || !isSameTextField(mWebView.nativeFocusCandidatePointer())) {
+        if (!DebugFlags.DRAW_WEBTEXTVIEW && (mWebView == null
+                || !mWebView.nativeFocusCandidateIsPassword()
+                || !isSameTextField(mWebView.nativeFocusCandidatePointer()))) {
             // Although calling remove() would seem to make more sense here,
             // changing it to not be a password field will make it not draw.
             // Other code will make sure that it is removed completely, but this
@@ -819,7 +820,9 @@ import junit.framework.Assert;
         }
         // For password fields, draw the WebTextView.  For others, just show
         // webkit's drawing.
-        setWillNotDraw(!inPassword);
+        if (!DebugFlags.DRAW_WEBTEXTVIEW) {
+            setWillNotDraw(!inPassword);
+        }
         setBackgroundDrawable(inPassword ? mBackground : null);
     }
 

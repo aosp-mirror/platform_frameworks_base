@@ -428,6 +428,10 @@ public abstract class Window {
             mHardwareAccelerated = hardwareAccelerated;
         }
 
+        public boolean isHardwareAccelerated() {
+            return mHardwareAccelerated;
+        }
+        
         public final void addView(View view, ViewGroup.LayoutParams params) {
             // Let this throw an exception on a bad params.
             WindowManager.LayoutParams wp = (WindowManager.LayoutParams)params;

@@ -22,6 +22,7 @@ import com.android.layoutlib.api.ViewInfo;
 import com.android.layoutlib.bridge.impl.LayoutSceneImpl;
 
 import java.awt.image.BufferedImage;
+import java.util.Map;
 
 /**
  * An implementation of {@link LayoutScene}.
@@ -49,6 +50,11 @@ public class BridgeLayoutScene extends LayoutScene {
     @Override
     public ViewInfo getRootView() {
         return mScene.getViewInfo();
+    }
+
+    @Override
+    public Map<String, String> getDefaultViewPropertyValues(Object viewObject) {
+        return mScene.getDefaultViewPropertyValues(viewObject);
     }
 
     @Override

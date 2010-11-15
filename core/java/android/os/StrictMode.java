@@ -605,7 +605,7 @@ public final class StrictMode {
 
     // Sets up CloseGuard in Dalvik/libcore
     private static void setCloseGuardEnabled(boolean enabled) {
-        if (!(CloseGuard.getReporter() instanceof AndroidBlockGuardPolicy)) {
+        if (!(CloseGuard.getReporter() instanceof AndroidCloseGuardReporter)) {
             CloseGuard.setReporter(new AndroidCloseGuardReporter());
         }
         CloseGuard.setEnabled(enabled);
@@ -694,6 +694,7 @@ public final class StrictMode {
         // For debug builds, log event loop stalls to dropbox for analysis.
         // Similar logic also appears in ActivityThread.java for system apps.
         if ("user".equals(Build.TYPE)) {
+            setCloseGuardEnabled(false);
             return false;
         }
         StrictMode.setThreadPolicyMask(
@@ -705,6 +706,7 @@ public final class StrictMode {
                 StrictMode.DETECT_VM_CLOSABLE_LEAKS |
                 StrictMode.PENALTY_DROPBOX |
                 StrictMode.PENALTY_LOG;
+        setCloseGuardEnabled(vmClosableObjectLeaksEnabled());
         return true;
     }
 

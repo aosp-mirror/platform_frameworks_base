@@ -1301,7 +1301,8 @@ public class ActivityStack {
                         mService.mWindowManager.setAppStartingWindow(
                                 next, next.packageName, next.theme,
                                 next.nonLocalizedLabel,
-                                next.labelRes, next.icon, null, true);
+                                next.labelRes, next.icon, next.windowFlags,
+                                null, true);
                     }
                 }
                 startSpecificActivityLocked(next, true, false);
@@ -1336,7 +1337,8 @@ public class ActivityStack {
                     mService.mWindowManager.setAppStartingWindow(
                             next, next.packageName, next.theme,
                             next.nonLocalizedLabel,
-                            next.labelRes, next.icon, null, true);
+                            next.labelRes, next.icon, next.windowFlags,
+                            null, true);
                 }
                 if (DEBUG_SWITCH) Slog.v(TAG, "Restarting: " + next);
             }
@@ -1460,7 +1462,7 @@ public class ActivityStack {
                 }
                 mService.mWindowManager.setAppStartingWindow(
                         r, r.packageName, r.theme, r.nonLocalizedLabel,
-                        r.labelRes, r.icon, prev, showStartingIcon);
+                        r.labelRes, r.icon, r.windowFlags, prev, showStartingIcon);
             }
         } else {
             // If this is the first activity, don't do any fancy animations,

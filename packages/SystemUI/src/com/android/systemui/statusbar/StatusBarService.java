@@ -109,7 +109,8 @@ public abstract class StatusBarService extends SystemUI implements CommandQueue.
                 height,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING,
+                    | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
+                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.RGBX_8888);
         lp.gravity = getStatusBarGravity();
         lp.setTitle("StatusBar");

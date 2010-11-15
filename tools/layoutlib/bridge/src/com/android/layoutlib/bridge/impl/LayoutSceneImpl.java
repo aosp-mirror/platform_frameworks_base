@@ -295,7 +295,7 @@ public class LayoutSceneImpl {
 
             if (mParams.isCustomBackgroundEnabled()) {
                 Graphics2D gc = mImage.createGraphics();
-                gc.setColor(new Color(mParams.getCustomBackgroundColor()));
+                gc.setColor(new Color(mParams.getCustomBackgroundColor(), true));
                 gc.fillRect(0, 0, renderScreenWidth, renderScreenHeight - mScreenOffset);
                 gc.dispose();
             }
@@ -665,7 +665,8 @@ public class LayoutSceneImpl {
 
         ViewInfo result = new ViewInfo(view.getClass().getName(),
                 context.getViewKey(view),
-                view.getLeft(), view.getTop(), view.getRight(), view.getBottom());
+                view.getLeft(), view.getTop(), view.getRight(), view.getBottom(),
+                view, view.getLayoutParams());
 
         if (view instanceof ViewGroup) {
             ViewGroup group = ((ViewGroup) view);
@@ -685,5 +686,9 @@ public class LayoutSceneImpl {
 
     public ViewInfo getViewInfo() {
         return mViewInfo;
+    }
+
+    public Map<String, String> getDefaultViewPropertyValues(Object viewObject) {
+        return mContext.getDefaultPropMap(viewObject);
     }
 }

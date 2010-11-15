@@ -480,13 +480,9 @@ public class Canvas_Delegate {
             graphics.setTransform(new AffineTransform());
 
             // set the color
-            graphics.setColor(new Color(color));
+            graphics.setColor(new Color(color, true /*alpha*/));
 
-            // set the mode and alpha.
-            int alpha = color >>> 24;
-            float falpha = alpha / 255.f;
-
-            setModeInGraphics(graphics, mode, falpha);
+            setModeInGraphics(graphics, mode);
 
             graphics.fillRect(0, 0, canvasDelegate.mBufferedImage.getWidth(),
                     canvasDelegate.mBufferedImage.getHeight());
@@ -996,15 +992,8 @@ public class Canvas_Delegate {
             }
         }
 
-        // need to get the alpha to set it in the composite.
-        float falpha = 1.f;
-
         if (useColorPaint) {
-            g.setColor(new Color(paint.getColor()));
-
-            // the alpha is taken from the alpha channel of the color
-            int alpha = paint.getAlpha();
-            falpha = alpha / 255.f;
+            g.setColor(new Color(paint.getColor(), true /*hasAlpha*/));
         }
 
         int style = paint.getStyle();
@@ -1036,10 +1025,10 @@ public class Canvas_Delegate {
         if (xfermodeDelegate instanceof PorterDuffXfermode_Delegate) {
             int mode = ((PorterDuffXfermode_Delegate)xfermodeDelegate).getMode();
 
-            setModeInGraphics(g, mode, falpha);
+            setModeInGraphics(g, mode);
         } else {
             // default mode is src_over
-            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, falpha));
+            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
 
             // if xfermode wasn't null, then it's something we don't support. log it.
             if (mLogger != null && xfermodeDelegate != null) {
@@ -1052,36 +1041,36 @@ public class Canvas_Delegate {
         return g;
     }
 
-    private static void setModeInGraphics(Graphics2D g, int mode, float falpha) {
+    private static void setModeInGraphics(Graphics2D g, int mode) {
         for (PorterDuff.Mode m : PorterDuff.Mode.values()) {
             if (m.nativeInt == mode) {
-                setModeInGraphics(g, m, falpha);
+                setModeInGraphics(g, m);
                 return;
             }
         }
     }
 
-    private static void setModeInGraphics(Graphics2D g, PorterDuff.Mode mode, float falpha) {
+    private static void setModeInGraphics(Graphics2D g, PorterDuff.Mode mode) {
         switch (mode) {
             case CLEAR:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, falpha));
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 1.0f /*alpha*/));
                 break;
             case DARKEN:
                 break;
             case DST:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST, falpha));
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST, 1.0f /*alpha*/));
                 break;
             case DST_ATOP:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_ATOP, falpha));
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_ATOP, 1.0f /*alpha*/));
                 break;
             case DST_IN:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_IN, falpha));
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_IN, 1.0f /*alpha*/));
                 break;
             case DST_OUT:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OUT, falpha));
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OUT, 1.0f /*alpha*/));
                 break;
             case DST_OVER:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OVER, falpha));
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OVER, 1.0f /*alpha*/));
                 break;
             case LIGHTEN:
                 break;
@@ -1090,22 +1079,22 @@ public class Canvas_Delegate {
             case SCREEN:
                 break;
             case SRC:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, falpha));
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, 1.0f /*alpha*/));
                 break;
             case SRC_ATOP:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, falpha));
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 1.0f /*alpha*/));
                 break;
             case SRC_IN:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_IN, falpha));
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_IN, 1.0f /*alpha*/));
                 break;
             case SRC_OUT:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OUT, falpha));
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OUT, 1.0f /*alpha*/));
                 break;
             case SRC_OVER:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, falpha));
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f /*alpha*/));
                 break;
             case XOR:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.XOR, falpha));
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.XOR, 1.0f /*alpha*/));
                 break;
         }
     }
@@ -1155,12 +1144,6 @@ public class Canvas_Delegate {
                 g = (Graphics2D)g.create();
                 g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
                         RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            }
-
-            if (paintDelegate.getAlpha() != 0xFF) {
-                c = g.getComposite();
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-                        paintDelegate.getAlpha()/255.f));
             }
         }
 

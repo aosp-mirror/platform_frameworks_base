@@ -42,7 +42,7 @@ import java.text.NumberFormat;
  */
 public class ProgressDialog extends AlertDialog {
     
-    /** Creates a ProgressDialog with a ciruclar, spinning progress
+    /** Creates a ProgressDialog with a circular, spinning progress
      * bar. This is the default.
      */
     public static final int STYLE_SPINNER = 0;

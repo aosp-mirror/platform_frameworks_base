@@ -28,6 +28,13 @@ import android.view.Surface;
 /**
  * @hide
  *
+ * RenderScript base master class.  An instance of this class creates native
+ * worker threads for processing commands from this object.  This base class
+ * does not provide any extended capabilities beyond simple data processing.
+ * For extended capabilities use derived classes such as RenderScriptGL.
+ *
+ *
+ *
  **/
 public class RenderScript {
     static final String LOG_TAG = "RenderScript_jni";
@@ -581,6 +588,14 @@ public class RenderScript {
     ///////////////////////////////////////////////////////////////////////////////////
     //
 
+    /**
+     * Base class application should derive from for handling RS messages
+     * comming from their scripts.  When a script calls sendToClient the data
+     * fields will be filled in and then the run method called by a message
+     * handling thread.  This will occur some time after sendToClient completes
+     * in the script.
+     *
+     */
     public static class RSMessage implements Runnable {
         protected int[] mData;
         protected int mID;
@@ -588,16 +603,42 @@ public class RenderScript {
         public void run() {
         }
     }
+    /**
+     * If an application is expecting messages it should set this field to an
+     * instance of RSMessage.  This instance will receive all the user messages
+     * sent from sendToClient by scripts from this context.
+     *
+     */
     public RSMessage mMessageCallback = null;
 
+    /**
+     * Runtime error base class.  An application should derive from this class
+     * if it wishes to install an error handler.  When errors occur at runtime
+     * the fields in this class will be filled and the run method called.
+     *
+     */
     public static class RSAsyncError implements Runnable {
         protected String mErrorMessage;
         protected int mErrorNum;
         public void run() {
         }
     }
+
+    /**
+     * Application Error handler.  All runtime errors will be dispatched to the
+     * instance of RSAsyncError set here.  If this field is null a
+     * RSRuntimeException will instead be thrown with details about the error.
+     * This will cause program termaination.
+     *
+     */
     public RSAsyncError mErrorCallback = null;
 
+    /**
+     * RenderScript worker threads priority enumeration.  The default value is
+     * NORMAL.  Applications wishing to do background processing such as
+     * wallpapers should set their priority to LOW to avoid starving forground
+     * processes.
+     */
     public enum Priority {
         LOW (5),     //ANDROID_PRIORITY_BACKGROUND + 5
         NORMAL (-4);  //ANDROID_PRIORITY_DISPLAY
@@ -614,6 +655,12 @@ public class RenderScript {
         }
     }
 
+
+    /**
+     * Change the priority of the worker threads for this context.
+     *
+     * @param p New priority to be set.
+     */
     public void contextSetPriority(Priority p) {
         validate();
         nContextSetPriority(p.mID);
@@ -690,9 +737,15 @@ public class RenderScript {
         }
     }
 
-    protected RenderScript() {
+    RenderScript() {
     }
 
+    /**
+     * Create a basic RenderScript context.
+     *
+     *
+     * @return RenderScript
+     */
     public static RenderScript create() {
         RenderScript rs = new RenderScript();
 
@@ -704,15 +757,32 @@ public class RenderScript {
         return rs;
     }
 
+    /**
+     * Print the currently available debugging information about the state of
+     * the RS context to the log.
+     *
+     *
+     * @param bits Currently ignored.
+     */
     public void contextDump(int bits) {
         validate();
         nContextDump(bits);
     }
 
+    /**
+     * Wait for any commands in the fifo between the java bindings and native to
+     * be processed.
+     *
+     */
     public void finish() {
         nContextFinish();
     }
 
+    /**
+     * Destroy this renderscript context.  Once this function is called its no
+     * longer legal to use this or any objects created by this context.
+     *
+     */
     public void destroy() {
         validate();
         nContextDeinitToClient(mContext);
@@ -732,9 +802,6 @@ public class RenderScript {
     boolean isAlive() {
         return mContext != 0;
     }
-
-    ///////////////////////////////////////////////////////////////////////////////////
-    // Root state
 
     protected int safeID(BaseObj o) {
         if(o != null) {

@@ -760,10 +760,8 @@ status_t AudioPolicyManagerBase::startInput(audio_io_handle_t input)
     AudioParameter param = AudioParameter();
     param.addInt(String8(AudioParameter::keyRouting), (int)inputDesc->mDevice);
 
-    // use Voice Recognition mode or not for this input based on input source
-    int vr_enabled = inputDesc->mInputSource == AUDIO_SOURCE_VOICE_RECOGNITION ? 1 : 0;
-    param.addInt(String8("vr_mode"), vr_enabled);
-    LOGV("AudioPolicyManager::startInput(%d), setting vr_mode to %d", inputDesc->mInputSource, vr_enabled);
+    param.addInt(String8(AudioParameter::keyInputSource), (int)inputDesc->mInputSource);
+    LOGV("AudioPolicyManager::startInput() input source = %d", inputDesc->mInputSource);
 
     mpClientInterface->setParameters(input, param.toString());
 

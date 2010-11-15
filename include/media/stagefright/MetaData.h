@@ -37,7 +37,8 @@ enum {
     kKeyStride            = 'strd',  // int32_t
     kKeySliceHeight       = 'slht',  // int32_t
     kKeyChannelCount      = '#chn',  // int32_t
-    kKeySampleRate        = 'srte',  // int32_t (also video frame rate)
+    kKeySampleRate        = 'srte',  // int32_t (audio sampling rate Hz)
+    kKeyFrameRate         = 'frmR',  // int32_t (video frame rate fps)
     kKeyBitRate           = 'brte',  // int32_t (bps)
     kKeyESDS              = 'esds',  // raw data
     kKeyAVCC              = 'avcc',  // raw data

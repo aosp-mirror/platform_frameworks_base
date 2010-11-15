@@ -34,9 +34,11 @@
         <!-- Color that matches (as closely as possible) the window background. -->
         <attr name="colorBackground" format="color" />
         <!-- This is a hint for a solid color that can be used for caching
-             rendered views.  This will be the color of the background when
-             there is a solid background color; it will be null when the
-             background is a texture or translucent. -->
+             rendered views.  This should be the color of the background when
+             there is a solid background color; it should be null when the
+             background is a texture or translucent.  When a device is able
+             to use accelerated drawing (thus setting state_accelerated), the
+             cache hint is ignored and always assumed to be transparent. -->
         <attr name="colorBackgroundCacheHint" format="color" />
         <!-- Default disabled alpha for widgets that set enabled/disabled alpha programmatically. -->
         <attr name="disabledAlpha" format="float" />
@@ -227,8 +229,13 @@
         <!-- ============= -->
         <eat-comment />
 
-        <!-- Drawable to use as the overall window background.  There are a
-             few special considerations you should use when settings this
+        <!-- Drawable to use as the overall window background.  As of
+             {@link android.os.Build.VERSION_CODES#HONEYCOMB}, this may
+             be a selector that uses state_accelerated to pick a non-solid
+             color when running on devices that can draw such a bitmap
+             with complex compositing on top at 60fps.
+             
+             <p>There are a few special considerations to use when setting this
              drawable:
              <ul>
              <li> This information will be used to infer the pixel format
@@ -344,6 +351,18 @@
              must immediately quit without waiting for user interaction,
              because there will be no such interaction coming. -->
         <attr name="windowNoDisplay" format="boolean" />
+
+        <!-- Flag indicating that this window should allow touches to be split
+             across other windows that also support split touch.
+             The default value is true for applications with a targetSdkVersion
+             of Honeycomb or newer; false otherwise.
+             When this flag is false, the first pointer that goes down determines
+             the window to which all subsequent touches go until all pointers go up.
+             When this flag is true, each pointer (not necessarily the first) that
+             goes down determines the window to which all subsequent touches of that
+             pointer will go until that pointers go up thereby enabling touches
+             with multiple pointers to be split across multiple windows. -->
+        <attr name="windowEnableSplitTouch" format="boolean" />
 
         <!-- ============ -->
         <!-- Alert Dialog styles -->
@@ -634,6 +653,10 @@
 
     <!-- Height of a line of text. -->
     <attr name="textLineHeight" format="dimension" />
+
+    <!-- Indicates that the content of a non-editable TextView can be selected.
+     Default value is false. EditText content is always selectable. -->
+    <attr name="textIsSelectable" format="boolean" />
 
     <!-- Where to ellipsize text. -->
     <attr name="ellipsize">
@@ -1223,6 +1246,7 @@
         <attr name="windowActionBar" />
         <attr name="windowActionModeOverlay" />
         <attr name="windowActionBarOverlay" />
+        <attr name="windowEnableSplitTouch" />
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
@@ -2148,6 +2172,8 @@
         <attr name="minHeight" format="dimension" />
         <attr name="maxHeight" />
         <attr name="interpolator" format="reference" />
+        <!-- Timeout between frames of animation in milliseconds -->
+        <attr name="animationResolution" format="integer" />
     </declare-styleable>
 
     <declare-styleable name="SeekBar">
@@ -2477,6 +2503,9 @@
 
         <!-- Height of a line of text. -->
         <attr name="textLineHeight" />
+        <!-- Indicates that a non-editable text can be selected. -->
+        <attr name="textIsSelectable" />
+
     </declare-styleable>
     <!-- An <code>input-extras</code> is a container for extra data to supply to
          an input method.  Contains
@@ -3374,16 +3403,24 @@
              marked it as being of interest.  This is an alternative representation of
              state_checked for when the state should be propagated down the view hierarchy. -->
         <attr name="state_activated" format="boolean" />
-        <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
         <attr name="state_active" format="boolean" />
-        <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
         <attr name="state_single" format="boolean" />
-        <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
         <attr name="state_first" format="boolean" />
-        <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
         <attr name="state_middle" format="boolean" />
-        <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
         <attr name="state_last" format="boolean" />
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             indicating that the Drawable is in a view that is hardware accelerated.
+             This means that the device can at least render a full-screen scaled
+             bitmap with one layer of text and bitmaps composited on top of it
+             at 60fps.  When this is set, the colorBackgroundCacheHint will be
+             ignored even if it specifies a solid color, since that optimization
+             is not needed. -->
+        <attr name="state_accelerated" format="boolean" />
     </declare-styleable>
     <declare-styleable name="ViewDrawableStates">
         <attr name="state_pressed" />
@@ -3392,6 +3429,7 @@
         <attr name="state_window_focused" />
         <attr name="state_enabled" />
         <attr name="state_activated" />
+        <attr name="state_accelerated" />
     </declare-styleable>
     <!-- State array representing a menu item that is currently checked. -->
     <declare-styleable name="MenuItemCheckedState">
@@ -4359,6 +4397,12 @@
         <attr name="height" />
         <!-- Specifies a drawable to use for the 'home as up' indicator. -->
         <attr name="homeAsUpIndicator" format="reference" />
+        <!-- Specifies a style resource to use for an embedded progress bar. -->
+        <attr name="progressBarStyle" />
+        <!-- Specifies a style resource to use for an indeterminate progress spinner. -->
+        <attr name="indeterminateProgressStyle" format="reference" />
+        <!-- Specifies the horizontal padding on either end for an embedded progress bar. -->
+        <attr name="progressBarPadding" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="ActionMode">

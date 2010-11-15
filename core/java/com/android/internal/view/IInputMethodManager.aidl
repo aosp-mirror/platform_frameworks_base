@@ -57,7 +57,7 @@ interface IInputMethodManager {
     void updateStatusIcon(in IBinder token, String packageName, int iconId);
     void setIMEButtonVisible(in IBinder token, boolean visible);
     InputMethodSubtype getCurrentInputMethodSubtype();
-    
+    boolean setCurrentInputMethodSubtype(in InputMethodSubtype subtype);
+    boolean switchToLastInputMethod(in IBinder token);
     boolean setInputMethodEnabled(String id, boolean enabled);
 }
-

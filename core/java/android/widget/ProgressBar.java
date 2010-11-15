@@ -154,6 +154,8 @@ public class ProgressBar extends View {
 
     private boolean mInDrawing;
 
+    private int mAnimationResolution;
+
     /**
      * Create a new progress bar with range 0...100 and initial progress of 0.
      * @param context the application environment
@@ -167,12 +169,19 @@ public class ProgressBar extends View {
     }
 
     public ProgressBar(Context context, AttributeSet attrs, int defStyle) {
+        this(context, attrs, defStyle, 0);
+    }
+
+    /**
+     * @hide
+     */
+    public ProgressBar(Context context, AttributeSet attrs, int defStyle, int styleRes) {
         super(context, attrs, defStyle);
         mUiThreadId = Thread.currentThread().getId();
         initProgressBar();
 
         TypedArray a =
-            context.obtainStyledAttributes(attrs, R.styleable.ProgressBar, defStyle, 0);
+            context.obtainStyledAttributes(attrs, R.styleable.ProgressBar, defStyle, styleRes);
         
         mNoInvalidate = true;
         
@@ -221,6 +230,9 @@ public class ProgressBar extends View {
 
         setIndeterminate(mOnlyIndeterminate || a.getBoolean(
                 R.styleable.ProgressBar_indeterminate, mIndeterminate));
+
+        mAnimationResolution = a.getInteger(R.styleable.ProgressBar_animationResolution,
+                ANIMATION_RESOLUTION);
 
         a.recycle();
     }
@@ -852,9 +864,9 @@ public class ProgressBar extends View {
                 } finally {
                     mInDrawing = false;
                 }
-                if (SystemClock.uptimeMillis() - mLastDrawTime >= ANIMATION_RESOLUTION) {
+                if (SystemClock.uptimeMillis() - mLastDrawTime >= mAnimationResolution) {
                     mLastDrawTime = SystemClock.uptimeMillis();
-                    postInvalidateDelayed(ANIMATION_RESOLUTION);
+                    postInvalidateDelayed(mAnimationResolution);
                 }
             }
             d.draw(canvas);

@@ -961,7 +961,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // enabled.
         String id = Settings.Secure.getString(mContext.getContentResolver(),
                 Settings.Secure.DEFAULT_INPUT_METHOD);
-        if (id != null && id.length() > 0) {
+        // There is no input method selected, try to choose new applicable input method.
+        if (TextUtils.isEmpty(id) && chooseNewDefaultIMELocked()) {
+            id = Settings.Secure.getString(mContext.getContentResolver(),
+                    Settings.Secure.DEFAULT_INPUT_METHOD);
+        }
+        if (!TextUtils.isEmpty(id)) {
             try {
                 setInputMethodLocked(id, getSelectedInputMethodSubtypeId(id));
             } catch (IllegalArgumentException e) {
@@ -983,8 +988,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         if (id.equals(mCurMethodId)) {
-            if (subtypeId != NOT_A_SUBTYPE_ID) {
-                InputMethodSubtype subtype = info.getSubtypes().get(subtypeId);
+            ArrayList<InputMethodSubtype> subtypes = info.getSubtypes();
+            if (subtypeId >= 0 && subtypeId < subtypes.size()) {
+                InputMethodSubtype subtype = subtypes.get(subtypeId);
                 if (subtype != mCurrentSubtype) {
                     synchronized (mMethodMap) {
                         if (mCurMethod != null) {
@@ -1279,6 +1285,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         setInputMethodWithSubtype(token, id, NOT_A_SUBTYPE_ID);
     }
 
+    public boolean switchToLastInputMethod(IBinder token) {
+        synchronized (mMethodMap) {
+            Pair<String, String> lastIme = mSettings.getLastInputMethodAndSubtypeLocked();
+            if (lastIme != null) {
+                InputMethodInfo imi = mMethodMap.get(lastIme.first);
+                if (imi != null) {
+                    setInputMethodWithSubtype(token, lastIme.first, getSubtypeIdFromHashCode(
+                            imi, Integer.valueOf(lastIme.second)));
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     private void setInputMethodWithSubtype(IBinder token, String id, int subtypeId) {
         synchronized (mMethodMap) {
             if (token == null) {
@@ -1482,6 +1503,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
             InputMethodInfo imi = enabled.get(i);
+            if (DEBUG) {
+                Slog.d(TAG, "New default IME was selected: " + imi.getId());
+            }
             resetSelectedInputMethodAndSubtypeLocked(imi.getId());
             return true;
         }
@@ -1785,9 +1809,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 // Disabled input method is currently selected, switch to another one.
                 String selId = Settings.Secure.getString(mContext.getContentResolver(),
                         Settings.Secure.DEFAULT_INPUT_METHOD);
-                if (id.equals(selId)) {
-                    resetSelectedInputMethodAndSubtypeLocked(enabledInputMethodsList.size() > 0
-                            ? enabledInputMethodsList.get(0).first : "");
+                if (id.equals(selId) && !chooseNewDefaultIMELocked()) {
+                    Slog.i(TAG, "Can't find new IME, unsetting the current input method.");
+                    resetSelectedInputMethodAndSubtypeLocked("");
                 }
                 // Previous state was enabled.
                 return true;
@@ -1911,7 +1935,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // The first subtype applicable to the system locale will be defined as the most applicable
         // subtype.
         if (DEBUG) {
-            Slog.d(TAG, "Applicable InputMethodSubtype was found: " + applicableSubtypeId
+            Slog.d(TAG, "Applicable InputMethodSubtype was found: " + applicableSubtypeId + ","
                     + subtypes.get(applicableSubtypeId).getLocale());
         }
         return applicableSubtypeId;
@@ -1939,6 +1963,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         return mCurrentSubtype;
+    }
+
+    public boolean setCurrentInputMethodSubtype(InputMethodSubtype subtype) {
+        synchronized (mMethodMap) {
+            if (subtype != null && mCurMethodId != null) {
+                InputMethodInfo imi = mMethodMap.get(mCurMethodId);
+                int subtypeId = getSubtypeIdFromHashCode(imi, subtype.hashCode());
+                if (subtypeId != NOT_A_SUBTYPE_ID) {
+                    setInputMethodLocked(mCurMethodId, subtypeId);
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     /**
