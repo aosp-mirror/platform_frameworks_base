@@ -100,18 +100,20 @@ public class KeyButtonView extends ImageView {
                 if (mSending) {
                     x = (int)ev.getX();
                     y = (int)ev.getY();
-                    if (x < 0 || x >= getWidth() || y < 0 || y >= getHeight()) {
-                        mSending = false;
-                        sendEvent(KeyEvent.ACTION_UP,
-                                KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY
-                                        | KeyEvent.FLAG_CANCELED);
-                        setPressed(false);
-                        removeCallbacks(mCheckLongPress);
-                    }
+                    setPressed(x >= 0 && x < getWidth() && y >= 0 &&  y < getHeight());
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                setPressed(false);
+                if (mSending && !mLongPressed) {
+                    mSending = false;
+                    sendEvent(KeyEvent.ACTION_UP,
+                            KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY
+                                | KeyEvent.FLAG_CANCELED);
+                    removeCallbacks(mCheckLongPress);
                 }
                 break;
             case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:
                 setPressed(false);
                 if (mSending && !mLongPressed) {
                     mSending = false;
