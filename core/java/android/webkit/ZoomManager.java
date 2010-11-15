@@ -813,7 +813,9 @@ class ZoomManager {
                 setZoomOverviewWidth(Math.min(WebView.sMaxViewportWidth,
                     Math.max((int) (viewWidth * mInvDefaultScale),
                             Math.max(drawData.mMinPrefWidth, drawData.mViewSize.x))));
-            } else {
+            } else if (drawData.mContentSize.x > 0) {
+                // The webkitDraw for layers will not populate contentSize, and it'll be
+                // ignored for zoom overview width update.
                 final int contentWidth = Math.max(drawData.mContentSize.x, drawData.mMinPrefWidth);
                 final int newZoomOverviewWidth = Math.min(WebView.sMaxViewportWidth, contentWidth);
                 if (newZoomOverviewWidth != mZoomOverviewWidth) {
