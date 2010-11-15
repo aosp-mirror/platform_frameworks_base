@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-package android.os;
+package com.android.internal.util;
+
+import android.os.Debug;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
+import android.os.SystemClock;
 
 import com.android.internal.util.HierarchicalState;
 import com.android.internal.util.HierarchicalStateMachine;
@@ -28,8 +34,6 @@ import junit.framework.TestCase;
 
 /**
  * Test for HierarchicalStateMachine.
- *
- * @author wink@google.com (Wink Saville)
  */
 public class HierarchicalStateMachineTest extends TestCase {
     private static final int TEST_CMD_1 = 1;
@@ -40,7 +44,7 @@ public class HierarchicalStateMachineTest extends TestCase {
     private static final int TEST_CMD_6 = 6;
 
     private static final boolean DBG = true;
-    private static final boolean WAIT_FOR_DEBUGGER = true;
+    private static final boolean WAIT_FOR_DEBUGGER = false;
     private static final String TAG = "HierarchicalStateMachineTest";
 
     /**
@@ -92,7 +96,7 @@ public class HierarchicalStateMachineTest extends TestCase {
 
     @SmallTest
     public void testStateMachineQuitTest() throws Exception {
-        //if (WAIT_FOR_DEBUGGER) Debug.waitForDebugger();
+        if (WAIT_FOR_DEBUGGER) Debug.waitForDebugger();
 
         StateMachineQuitTest smQuitTest = new StateMachineQuitTest("smQuitTest");
         smQuitTest.start();
