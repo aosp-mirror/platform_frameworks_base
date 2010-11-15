@@ -321,7 +321,9 @@ public class NetworkController extends BroadcastReceiver {
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
             }
         } else {
-            if (isCdma()) {
+            if (mSignalStrength == null) {
+                mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
+            } else if (isCdma()) {
                 // If 3G(EV) and 1x network are available than 3G should be
                 // displayed, displayed RSSI should be from the EV side.
                 // If a voice call is made then RSSI should switch to 1x.
