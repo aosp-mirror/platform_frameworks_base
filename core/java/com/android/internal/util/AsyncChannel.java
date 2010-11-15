@@ -32,51 +32,51 @@ import android.util.Slog;
 import java.util.Stack;
 
 /**
- * An asynchronous channel between two handlers.
+ * <p>An asynchronous channel between two handlers.</p>
  *
- * The handlers maybe in the same process or in another process. There
+ * <p>The handlers maybe in the same process or in another process. There
  * are two protocol styles that can be used with an AysncChannel. The
  * first is a simple request/reply protocol where the server does
- * not need to know which client is issuing the request.
+ * not need to know which client is issuing the request.</p>
  *
- * In a simple request/reply protocol the client/source sends requests to the
+ * <p>In a simple request/reply protocol the client/source sends requests to the
  * server/destination. And the server uses the replyToMessage methods.
  * In this usage model there is no need for the destination to
- * use the connect methods. The typical sequence of operations is:
- *
- *   1) Client calls AsyncChannel#connect
- *   2) Client receives CMD_CHANNEL_HALF_CONNECTED from AsyncChannel
-
- *   3) Client calls AsyncChannel#sendMessage(msgX)
- *   4) Server receives and processes msgX
- *   5) Server optionally calls AsyncChannel#replyToMessage(msgY)
- *      and if sent Client receives and processes msgY
- *   6) Loop to step 3 until done
- *
- *   7) When done Client calls {@link AsyncChannel#disconnect(int)}
- *   8) Client receives CMD_CHANNEL_DISCONNECTED from AsyncChannel
- *
- * A second usage model is where the server/destination needs to know
+ * use the connect methods. The typical sequence of operations is:</p>
+ *<ol>
+ *   <li>Client calls AsyncChannel#connect</li>
+ *   <li>Client receives CMD_CHANNEL_HALF_CONNECTED from AsyncChannel</li>
+ *   <li><code>comm-loop:</code></li>
+ *   <li>Client calls AsyncChannel#sendMessage(msgX)</li>
+ *   <li>Server receives and processes msgX</li>
+ *   <li>Server optionally calls AsyncChannel#replyToMessage(msgY)
+ *       and if sent Client receives and processes msgY</li>
+ *   <li>Loop to <code>comm-loop</code> until done</li>
+ *   <li>When done Client calls {@link AsyncChannel#disconnect(int)}</li>
+ *   <li>Client receives CMD_CHANNEL_DISCONNECTED from AsyncChannel</li>
+ *</ol>
+ *<br/>
+ * <p>A second usage model is where the server/destination needs to know
  * which client it's connected too. For example the server needs to
  * send unsolicited messages back to the client. Or the server keeps
  * different state for each client. In this model the server will also
- * use the connect methods. The typical sequence of operation is:
- *
- *   1)  Client calls AsyncChannel#connect
- *   2)  Client receives CMD_CHANNEL_HALF_CONNECTED from AsyncChannel
- *   3)  Client calls AsyncChannel#sendMessage(CMD_CHANNEL_FULL_CONNECTION)
- *   4)  Server receives CMD_CHANNEL_FULL_CONNECTION
- *   5)  Server calls AsyncChannel#connect
- *   6)  Server receives CMD_CHANNEL_HALF_CONNECTED from AsyncChannel
- *   7)  Server sends AsyncChannel#sendMessage(CMD_CHANNEL_FULLY_CONNECTED)
- *   8)  Client receives CMD_CHANNEL_FULLY_CONNECTED
- *
- *   9)  Client/Server uses AsyncChannel#sendMessage/replyToMessage
- *       to communicate and perform work
- *   10) Loop to step 9 until done
- *
- *   11) When done Client/Server calls {@link AsyncChannel#disconnect(int)}
- *   12) Client/Server receives CMD_CHANNEL_DISCONNECTED from AsyncChannel
+ * use the connect methods. The typical sequence of operation is:</p>
+ *<ol>
+ *   <li>Client calls AsyncChannel#connect</li>
+ *   <li>Client receives CMD_CHANNEL_HALF_CONNECTED from AsyncChannel</li>
+ *   <li>Client calls AsyncChannel#sendMessage(CMD_CHANNEL_FULL_CONNECTION)</li>
+ *   <li>Server receives CMD_CHANNEL_FULL_CONNECTION</li>
+ *   <li>Server calls AsyncChannel#connect</li>
+ *   <li>Server receives CMD_CHANNEL_HALF_CONNECTED from AsyncChannel</li>
+ *   <li>Server sends AsyncChannel#sendMessage(CMD_CHANNEL_FULLY_CONNECTED)</li>
+ *   <li>Client receives CMD_CHANNEL_FULLY_CONNECTED</li>
+ *   <li><code>comm-loop:</code></li>
+ *   <li>Client/Server uses AsyncChannel#sendMessage/replyToMessage
+ *       to communicate and perform work</li>
+ *   <li>Loop to <code>comm-loop</code> until done</li>
+ *   <li>When done Client/Server calls {@link AsyncChannel#disconnect(int)}</li>
+ *   <li>Client/Server receives CMD_CHANNEL_DISCONNECTED from AsyncChannel</li>
+ *</ol>
  */
 public class AsyncChannel {
     /** Log tag */
