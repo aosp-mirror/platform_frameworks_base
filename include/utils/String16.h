@@ -19,38 +19,11 @@
 
 #include <utils/Errors.h>
 #include <utils/SharedBuffer.h>
-
-#include <stdint.h>
-#include <sys/types.h>
+#include <utils/Unicode.h>
 
 // ---------------------------------------------------------------------------
 
 extern "C" {
-
-typedef uint16_t char16_t;
-
-// Standard string functions on char16 strings.
-int strcmp16(const char16_t *, const char16_t *);
-int strncmp16(const char16_t *s1, const char16_t *s2, size_t n);
-size_t strlen16(const char16_t *);
-size_t strnlen16(const char16_t *, size_t);
-char16_t *strcpy16(char16_t *, const char16_t *);
-char16_t *strncpy16(char16_t *, const char16_t *, size_t);
-
-// Version of comparison that supports embedded nulls.
-// This is different than strncmp() because we don't stop
-// at a nul character and consider the strings to be different
-// if the lengths are different (thus we need to supply the
-// lengths of both strings).  This can also be used when
-// your string is not nul-terminated as it will have the
-// equivalent result as strcmp16 (unlike strncmp16).
-int strzcmp16(const char16_t *s1, size_t n1, const char16_t *s2, size_t n2);
-
-// Version of strzcmp16 for comparing strings in different endianness.
-int strzcmp16_h_n(const char16_t *s1H, size_t n1, const char16_t *s2N, size_t n2);
-
-// Convert UTF-8 to UTF-16 including surrogate pairs
-void utf8_to_utf16(const uint8_t *src, size_t srcLen, char16_t* dst, const size_t dstLen);
 
 }
 

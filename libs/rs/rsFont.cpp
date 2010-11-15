@@ -174,7 +174,7 @@ void Font::renderUTF(const char *text, uint32_t len, int32_t x, int32_t y,
 
     while (glyphsLeft > 0) {
 
-        int32_t utfChar = utf32_at(text, len, index, &nextIndex);
+        int32_t utfChar = utf32_from_utf8_at(text, len, index, &nextIndex);
 
         // Reached the end of the string or encountered
         if (utfChar < 0) {
