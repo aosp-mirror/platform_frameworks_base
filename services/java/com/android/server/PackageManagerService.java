@@ -7334,6 +7334,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     byte[] data = new byte[avail];
                     in.read(data);
                     pw.print(new String(data));
+                    in.close();
                 } catch (FileNotFoundException e) {
                 } catch (IOException e) {
                 }
