@@ -53,7 +53,7 @@ MtpProperty::MtpProperty(MtpPropertyCode propCode,
         mDefaultArrayValues(NULL),
         mCurrentArrayLength(0),
         mCurrentArrayValues(NULL),
-        mGroupCode(0),
+        mGroupCode(-1), // disable multiple properties in GetObjectPropList for now
         mFormFlag(kFormNone),
         mEnumLength(0),
         mEnumValues(NULL)

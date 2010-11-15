@@ -37,7 +37,7 @@
 #define MTP_CONTAINER_PARAMETER_OFFSET          12
 #define MTP_CONTAINER_HEADER_SIZE               12
 
-// MTP Types
+// MTP Data Types
 #define MTP_TYPE_UNDEFINED      0x0000          // Undefined
 #define MTP_TYPE_INT8           0x0001          // Signed 8-bit integer
 #define MTP_TYPE_UINT8          0x0002          // Unsigned 8-bit integer
@@ -383,6 +383,10 @@
 #define MTP_OPERATION_GET_OBJECT_PROP_DESC                  0x9802
 #define MTP_OPERATION_GET_OBJECT_PROP_VALUE                 0x9803
 #define MTP_OPERATION_SET_OBJECT_PROP_VALUE                 0x9804
+#define MTP_OPERATION_GET_OBJECT_PROP_LIST                  0x9805
+#define MTP_OPERATION_SET_OBJECT_PROP_LIST                  0x9806
+#define MTP_OPERATION_GET_INTERDEPENDENT_PROP_DESC          0x9807
+#define MTP_OPERATION_SEND_OBJECT_PROP_LIST                 0x9808
 #define MTP_OPERATION_GET_OBJECT_REFERENCES                 0x9810
 #define MTP_OPERATION_SET_OBJECT_REFERENCES                 0x9811
 #define MTP_OPERATION_SKIP                                  0x9820

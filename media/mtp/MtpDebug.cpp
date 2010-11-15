@@ -56,6 +56,10 @@ static const CodeEntry sOperationCodes[] = {
     { "MTP_OPERATION_GET_OBJECT_PROP_DESC",         0x9802 },
     { "MTP_OPERATION_GET_OBJECT_PROP_VALUE",        0x9803 },
     { "MTP_OPERATION_SET_OBJECT_PROP_VALUE",        0x9804 },
+    { "MTP_OPERATION_GET_OBJECT_PROP_LIST",         0x9805 },
+    { "MTP_OPERATION_SET_OBJECT_PROP_LIST",         0x9806 },
+    { "MTP_OPERATION_GET_INTERDEPENDENT_PROP_DESC", 0x9807 },
+    { "MTP_OPERATION_SEND_OBJECT_PROP_LIST",        0x9808 },
     { "MTP_OPERATION_GET_OBJECT_REFERENCES",        0x9810 },
     { "MTP_OPERATION_SET_OBJECT_REFERENCES",        0x9811 },
     { "MTP_OPERATION_SKIP",                         0x9820 },
@@ -371,15 +375,21 @@ const char* MtpDebug::getOperationCodeName(MtpOperationCode code) {
     return getCodeName(code, sOperationCodes);
 }
 
-const char* MtpDebug::getFormatCodeName(MtpOperationCode code) {
+const char* MtpDebug::getFormatCodeName(MtpObjectFormat code) {
+    if (code == 0)
+        return "NONE";
     return getCodeName(code, sFormatCodes);
 }
 
 const char* MtpDebug::getObjectPropCodeName(MtpPropertyCode code) {
+    if (code == 0)
+        return "NONE";
     return getCodeName(code, sObjectPropCodes);
 }
 
 const char* MtpDebug::getDevicePropCodeName(MtpPropertyCode code) {
+    if (code == 0)
+        return "NONE";
     return getCodeName(code, sDevicePropCodes);
 }
 

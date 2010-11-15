@@ -72,6 +72,10 @@ static const MtpOperationCode kSupportedOperationCodes[] = {
     MTP_OPERATION_GET_OBJECT_PROP_DESC,
     MTP_OPERATION_GET_OBJECT_PROP_VALUE,
     MTP_OPERATION_SET_OBJECT_PROP_VALUE,
+    MTP_OPERATION_GET_OBJECT_PROP_LIST,
+//    MTP_OPERATION_SET_OBJECT_PROP_LIST,
+//    MTP_OPERATION_GET_INTERDEPENDENT_PROP_DESC,
+//    MTP_OPERATION_SEND_OBJECT_PROP_LIST,
     MTP_OPERATION_GET_OBJECT_REFERENCES,
     MTP_OPERATION_SET_OBJECT_REFERENCES,
 //    MTP_OPERATION_SKIP,
@@ -275,6 +279,9 @@ bool MtpServer::handleRequest() {
             break;
         case MTP_OPERATION_RESET_DEVICE_PROP_VALUE:
             response = doResetDevicePropValue();
+            break;
+        case MTP_OPERATION_GET_OBJECT_PROP_LIST:
+            response = doGetObjectPropList();
             break;
         case MTP_OPERATION_GET_OBJECT_INFO:
             response = doGetObjectInfo();
@@ -521,6 +528,20 @@ MtpResponseCode MtpServer::doResetDevicePropValue() {
             MtpDebug::getDevicePropCodeName(property));
 
     return mDatabase->resetDeviceProperty(property);
+}
+
+MtpResponseCode MtpServer::doGetObjectPropList() {
+
+    MtpObjectHandle handle = mRequest.getParameter(1);
+    MtpObjectFormat format = mRequest.getParameter(2);
+    MtpDeviceProperty property = mRequest.getParameter(3);
+    int groupCode = mRequest.getParameter(4);
+    int depth = mRequest.getParameter(4);
+   LOGD("GetObjectPropList %d format: %s property: %s group: %d depth: %d\n",
+            handle, MtpDebug::getFormatCodeName(format),
+            MtpDebug::getObjectPropCodeName(property), groupCode, depth);
+
+    return mDatabase->getObjectPropertyList(handle, format, property, groupCode, depth, mData);
 }
 
 MtpResponseCode MtpServer::doGetObjectInfo() {
