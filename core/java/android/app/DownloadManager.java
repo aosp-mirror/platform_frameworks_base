@@ -284,7 +284,7 @@ public class DownloadManager {
      */
     public static final String[] UNDERLYING_COLUMNS = new String[] {
         Downloads.Impl._ID,
-        Downloads.Impl._DATA,
+        Downloads.Impl._DATA + " AS " + COLUMN_LOCAL_FILENAME,
         Downloads.Impl.COLUMN_MEDIAPROVIDER_URI,
         Downloads.Impl.COLUMN_DESTINATION,
         Downloads.Impl.COLUMN_TITLE,
