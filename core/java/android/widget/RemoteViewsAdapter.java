@@ -664,7 +664,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
                 itemId = factory.getItemId(position);
             } catch (Exception e) {
                 // Print the error
-                Log.e(TAG, "Error in updateRemoteViewsInfo(" + position + "): " +
+                Log.e(TAG, "Error in updateRemoteViews(" + position + "): " +
                         e.getMessage());
                 e.printStackTrace();
 
@@ -673,6 +673,14 @@ public class RemoteViewsAdapter extends BaseAdapter {
                 return;
             }
 
+            if (remoteViews == null) {
+                // If a null view was returned, we break early to prevent it from getting
+                // into our cache and causing problems later. The effect is that the child  at this
+                // position will remain as a loading view until it is updated.
+                Log.e(TAG, "Error in updateRemoteViews(" + position + "): " + " null RemoteViews " +
+                        "returned from RemoteViewsFactory.");
+                return;
+            }
             synchronized (mCache) {
                 // Cache the RemoteViews we loaded
                 mCache.insert(position, remoteViews, itemId);
