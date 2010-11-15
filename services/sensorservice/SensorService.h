@@ -75,8 +75,9 @@ class SensorService :
 
         sp<SensorService> const mService;
         sp<SensorChannel> const mChannel;
+        mutable Mutex mConnectionLock;
 
-        // protected by SensorService::mLock
+        // protected mConnectionLock
         struct SensorInfo {
             SensorInfo() : ns(DEFAULT_EVENTS_PERIOD) { }
             nsecs_t ns;
