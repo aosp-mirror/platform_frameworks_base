@@ -77,11 +77,13 @@ public class MediaFile {
     private static final int LAST_IMAGE_FILE_TYPE = FILE_TYPE_WBMP;
    
     // Playlist file types
-    public static final int FILE_TYPE_M3U     = 41;
-    public static final int FILE_TYPE_PLS     = 42;
-    public static final int FILE_TYPE_WPL     = 43;
+    public static final int FILE_TYPE_M3U      = 41;
+    public static final int FILE_TYPE_PLS      = 42;
+    public static final int FILE_TYPE_WPL      = 43;
+    public static final int FILE_TYPE_HTTPLIVE = 44;
+
     private static final int FIRST_PLAYLIST_FILE_TYPE = FILE_TYPE_M3U;
-    private static final int LAST_PLAYLIST_FILE_TYPE = FILE_TYPE_WPL;
+    private static final int LAST_PLAYLIST_FILE_TYPE = FILE_TYPE_HTTPLIVE;
 
     // Drm file types
     public static final int FILE_TYPE_FL      = 51;
@@ -194,6 +196,9 @@ public class MediaFile {
         addFileType("M3U", FILE_TYPE_M3U, "audio/x-mpegurl", MtpConstants.FORMAT_M3U_PLAYLIST);
         addFileType("PLS", FILE_TYPE_PLS, "audio/x-scpls", MtpConstants.FORMAT_PLS_PLAYLIST);
         addFileType("WPL", FILE_TYPE_WPL, "application/vnd.ms-wpl", MtpConstants.FORMAT_WPL_PLAYLIST);
+        addFileType("M3U8", FILE_TYPE_HTTPLIVE, "application/vnd.apple.mpegurl");
+        addFileType("M3U8", FILE_TYPE_HTTPLIVE, "audio/mpegurl");
+        addFileType("M3U8", FILE_TYPE_HTTPLIVE, "audio/x-mpegurl");
 
         addFileType("FL", FILE_TYPE_FL, "application/x-android-drm-fl");
 
