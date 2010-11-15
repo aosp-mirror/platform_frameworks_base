@@ -36,6 +36,7 @@ AACEncoder::AACEncoder(const sp<MediaSource> &source, const sp<MetaData> &meta)
       mStarted(false),
       mBufferGroup(NULL),
       mInputBuffer(NULL),
+      mInputFrame(NULL),
       mEncoderHandle(NULL),
       mApiHandle(NULL),
       mMemOperator(NULL) {
@@ -45,6 +46,7 @@ status_t AACEncoder::initCheck() {
     CHECK(mApiHandle == NULL && mEncoderHandle == NULL);
     CHECK(mMeta->findInt32(kKeySampleRate, &mSampleRate));
     CHECK(mMeta->findInt32(kKeyChannelCount, &mChannels));
+    CHECK(mChannels <= 2 && mChannels >= 1);
     CHECK(mMeta->findInt32(kKeyBitRate, &mBitRate));
 
     mApiHandle = new VO_AUDIO_CODECAPI;
@@ -145,6 +147,10 @@ status_t AACEncoder::start(MetaData *params) {
     mNumInputSamples = 0;
     mAnchorTimeUs = 0;
     mFrameCount = 0;
+
+    mInputFrame = new int16_t[mChannels * kNumSamplesPerFrame];
+    CHECK(mInputFrame != NULL);
+
     mSource->start(params);
 
     mStarted = true;
@@ -176,6 +182,10 @@ status_t AACEncoder::stop() {
     mApiHandle = NULL;
 
     mStarted = false;
+    if (mInputFrame) {
+        delete[] mInputFrame;
+        mInputFrame = NULL;
+    }
 
     return OK;
 }
@@ -222,7 +232,8 @@ status_t AACEncoder::read(
         buffer->meta_data()->setInt32(kKeyIsCodecConfig, false);
     }
 
-    while (mNumInputSamples < kNumSamplesPerFrame) {
+    const int32_t nSamples = mChannels * kNumSamplesPerFrame;
+    while (mNumInputSamples < nSamples) {
         if (mInputBuffer == NULL) {
             if (mSource->read(&mInputBuffer, options) != OK) {
                 if (mNumInputSamples == 0) {
@@ -231,7 +242,7 @@ status_t AACEncoder::read(
                 }
                 memset(&mInputFrame[mNumInputSamples],
                        0,
-                       sizeof(int16_t) * (kNumSamplesPerFrame - mNumInputSamples));
+                       sizeof(int16_t) * (nSamples - mNumInputSamples));
                 mNumInputSamples = 0;
                 break;
             }
@@ -250,8 +261,7 @@ status_t AACEncoder::read(
         } else {
             readFromSource = false;
         }
-        size_t copy =
-            (kNumSamplesPerFrame - mNumInputSamples) * sizeof(int16_t);
+        size_t copy = (nSamples - mNumInputSamples) * sizeof(int16_t);
 
         if (copy > mInputBuffer->range_length()) {
             copy = mInputBuffer->range_length();
@@ -271,8 +281,8 @@ status_t AACEncoder::read(
             mInputBuffer = NULL;
         }
         mNumInputSamples += copy / sizeof(int16_t);
-        if (mNumInputSamples >= kNumSamplesPerFrame) {
-            mNumInputSamples %= kNumSamplesPerFrame;
+        if (mNumInputSamples >= nSamples) {
+            mNumInputSamples %= nSamples;
             break;
         }
     }
@@ -280,7 +290,7 @@ status_t AACEncoder::read(
     VO_CODECBUFFER inputData;
     memset(&inputData, 0, sizeof(inputData));
     inputData.Buffer = (unsigned char*) mInputFrame;
-    inputData.Length = kNumSamplesPerFrame * sizeof(int16_t);
+    inputData.Length = nSamples * sizeof(int16_t);
     CHECK(VO_ERR_NONE == mApiHandle->SetInputData(mEncoderHandle,&inputData));
 
     VO_CODECBUFFER outputData;
@@ -289,15 +299,21 @@ status_t AACEncoder::read(
     memset(&outputInfo, 0, sizeof(outputInfo));
 
     VO_U32 ret = VO_ERR_NONE;
-    outputData.Buffer = outPtr;
-    outputData.Length = buffer->size();
-    ret = mApiHandle->GetOutputData(mEncoderHandle, &outputData, &outputInfo);
-    CHECK(ret == VO_ERR_NONE || ret == VO_ERR_INPUT_BUFFER_SMALL);
-    CHECK(outputData.Length != 0);
-    buffer->set_range(0, outputData.Length);
+    size_t nOutputBytes = 0;
+    do {
+        outputData.Buffer = outPtr;
+        outputData.Length = buffer->size() - nOutputBytes;
+        ret = mApiHandle->GetOutputData(mEncoderHandle, &outputData, &outputInfo);
+        if (ret == VO_ERR_NONE) {
+            outPtr += outputData.Length;
+            nOutputBytes += outputData.Length;
+        }
+    } while (ret != VO_ERR_INPUT_BUFFER_SMALL);
+    buffer->set_range(0, nOutputBytes);
 
     int64_t mediaTimeUs =
         ((mFrameCount - 1) * 1000000LL * kNumSamplesPerFrame) / mSampleRate;
+
     buffer->meta_data()->setInt64(kKeyTime, mAnchorTimeUs + mediaTimeUs);
     if (readFromSource && wallClockTimeUs != -1) {
         buffer->meta_data()->setInt64(kKeyDriftTime, mediaTimeUs - wallClockTimeUs);
