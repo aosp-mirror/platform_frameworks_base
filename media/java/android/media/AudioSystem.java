@@ -106,7 +106,8 @@ public class AudioSystem
     public static final int MODE_NORMAL             = 0;
     public static final int MODE_RINGTONE           = 1;
     public static final int MODE_IN_CALL            = 2;
-    public static final int NUM_MODES               = 3;
+    public static final int MODE_IN_COMMUNICATION   = 3;
+    public static final int NUM_MODES               = 4;
 
 
     /* Routing bits for setRouting/getRouting API */

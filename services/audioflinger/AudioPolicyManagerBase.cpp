@@ -235,7 +235,7 @@ void AudioPolicyManagerBase::setPhoneState(int state)
 
     // if leaving call state, handle special case of active streams
     // pertaining to sonification strategy see handleIncallSonification()
-    if (mPhoneState == AudioSystem::MODE_IN_CALL) {
+    if (isInCall()) {
         LOGV("setPhoneState() in call state management: new state is %d", state);
         for (int stream = 0; stream < AudioSystem::NUM_STREAM_TYPES; stream++) {
             handleIncallSonification(stream, false, true);
@@ -248,14 +248,19 @@ void AudioPolicyManagerBase::setPhoneState(int state)
     bool force = false;
 
     // are we entering or starting a call
-    if ((oldState != AudioSystem::MODE_IN_CALL) && (state == AudioSystem::MODE_IN_CALL)) {
+    if (!isStateInCall(oldState) && isStateInCall(state)) {
         LOGV("  Entering call in setPhoneState()");
         // force routing command to audio hardware when starting a call
         // even if no device change is needed
         force = true;
-    } else if ((oldState == AudioSystem::MODE_IN_CALL) && (state != AudioSystem::MODE_IN_CALL)) {
+    } else if (isStateInCall(oldState) && !isStateInCall(state)) {
         LOGV("  Exiting call in setPhoneState()");
         // force routing command to audio hardware when exiting a call
+        // even if no device change is needed
+        force = true;
+    } else if (isStateInCall(state) && (state != oldState)) {
+        LOGV("  Switching between telephony and VoIP in setPhoneState()");
+        // force routing command to audio hardware when switching between telephony and VoIP
         // even if no device change is needed
         force = true;
     }
@@ -272,7 +277,7 @@ void AudioPolicyManagerBase::setPhoneState(int state)
 
     // force routing command to audio hardware when ending call
     // even if no device change is needed
-    if (oldState == AudioSystem::MODE_IN_CALL && newDevice == 0) {
+    if (isStateInCall(oldState) && newDevice == 0) {
         newDevice = hwOutputDesc->device();
     }
 
@@ -280,7 +285,7 @@ void AudioPolicyManagerBase::setPhoneState(int state)
     // immediately and delay the route change to avoid sending the ring tone
     // tail into the earpiece or headset.
     int delayMs = 0;
-    if (state == AudioSystem::MODE_IN_CALL && oldState == AudioSystem::MODE_RINGTONE) {
+    if (isStateInCall(state) && oldState == AudioSystem::MODE_RINGTONE) {
         // delay the device change command by twice the output latency to have some margin
         // and be sure that audio buffers not yet affected by the mute are out when
         // we actually apply the route change
@@ -293,7 +298,7 @@ void AudioPolicyManagerBase::setPhoneState(int state)
 
     // if entering in call state, handle special case of active streams
     // pertaining to sonification strategy see handleIncallSonification()
-    if (state == AudioSystem::MODE_IN_CALL) {
+    if (isStateInCall(state)) {
         LOGV("setPhoneState() in call state management: new state is %d", state);
         // unmute the ringing tone after a sufficient delay if it was muted before
         // setting output device above
@@ -564,7 +569,7 @@ status_t AudioPolicyManagerBase::startOutput(audio_io_handle_t output,
     setOutputDevice(output, getNewDevice(output));
 
     // handle special case for sonification while in call
-    if (mPhoneState == AudioSystem::MODE_IN_CALL) {
+    if (isInCall()) {
         handleIncallSonification(stream, true, false);
     }
 
@@ -589,7 +594,7 @@ status_t AudioPolicyManagerBase::stopOutput(audio_io_handle_t output,
     routing_strategy strategy = getStrategy((AudioSystem::stream_type)stream);
 
     // handle special case for sonification while in call
-    if (mPhoneState == AudioSystem::MODE_IN_CALL) {
+    if (isInCall()) {
         handleIncallSonification(stream, false, false);
     }
 
@@ -738,10 +743,8 @@ status_t AudioPolicyManagerBase::startInput(audio_io_handle_t input)
     AudioParameter param = AudioParameter();
     param.addInt(String8(AudioParameter::keyRouting), (int)inputDesc->mDevice);
 
-    // use Voice Recognition mode or not for this input based on input source
-    int vr_enabled = inputDesc->mInputSource == AUDIO_SOURCE_VOICE_RECOGNITION ? 1 : 0;
-    param.addInt(String8("vr_mode"), vr_enabled);
-    LOGV("AudioPolicyManager::startInput(%d), setting vr_mode to %d", inputDesc->mInputSource, vr_enabled);
+    param.addInt(String8(AudioParameter::keyInputSource), (int)inputDesc->mInputSource);
+    LOGV("AudioPolicyManager::startInput() input source = %d", inputDesc->mInputSource);
 
     mpClientInterface->setParameters(input, param.toString());
 
@@ -1494,7 +1497,7 @@ uint32_t AudioPolicyManagerBase::getNewDevice(audio_io_handle_t output, bool fro
     //      use device for strategy media
     // 4: the strategy DTMF is active on the hardware output:
     //      use device for strategy DTMF
-    if (mPhoneState == AudioSystem::MODE_IN_CALL ||
+    if (isInCall() ||
         outputDesc->isUsedByStrategy(STRATEGY_PHONE)) {
         device = getDeviceForStrategy(STRATEGY_PHONE, fromCache);
     } else if (outputDesc->isUsedByStrategy(STRATEGY_SONIFICATION)) {
@@ -1549,7 +1552,7 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
 
     switch (strategy) {
     case STRATEGY_DTMF:
-        if (mPhoneState != AudioSystem::MODE_IN_CALL) {
+        if (!isInCall()) {
             // when off call, DTMF strategy follows the same rules as MEDIA strategy
             device = getDeviceForStrategy(STRATEGY_MEDIA, false);
             break;
@@ -1562,7 +1565,7 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
         // of priority
         switch (mForceUse[AudioSystem::FOR_COMMUNICATION]) {
         case AudioSystem::FORCE_BT_SCO:
-            if (mPhoneState != AudioSystem::MODE_IN_CALL || strategy != STRATEGY_DTMF) {
+            if (!isInCall() || strategy != STRATEGY_DTMF) {
                 device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
                 if (device) break;
             }
@@ -1580,7 +1583,7 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
             if (device) break;
 #ifdef WITH_A2DP
             // when not in a phone call, phone strategy should route STREAM_VOICE_CALL to A2DP
-            if (mPhoneState != AudioSystem::MODE_IN_CALL) {
+            if (!isInCall()) {
                 device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP;
                 if (device) break;
                 device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES;
@@ -1594,14 +1597,14 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
             break;
 
         case AudioSystem::FORCE_SPEAKER:
-            if (mPhoneState != AudioSystem::MODE_IN_CALL || strategy != STRATEGY_DTMF) {
+            if (!isInCall() || strategy != STRATEGY_DTMF) {
                 device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
                 if (device) break;
             }
 #ifdef WITH_A2DP
             // when not in a phone call, phone strategy should route STREAM_VOICE_CALL to
             // A2DP speaker when forcing to speaker output
-            if (mPhoneState != AudioSystem::MODE_IN_CALL) {
+            if (!isInCall()) {
                 device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER;
                 if (device) break;
             }
@@ -1618,7 +1621,7 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
 
         // If incall, just select the STRATEGY_PHONE device: The rest of the behavior is handled by
         // handleIncallSonification().
-        if (mPhoneState == AudioSystem::MODE_IN_CALL) {
+        if (isInCall()) {
             device = getDeviceForStrategy(STRATEGY_PHONE, false);
             break;
         }
@@ -1739,6 +1742,7 @@ uint32_t AudioPolicyManagerBase::getDeviceForInputSource(int inputSource)
     case AUDIO_SOURCE_DEFAULT:
     case AUDIO_SOURCE_MIC:
     case AUDIO_SOURCE_VOICE_RECOGNITION:
+    case AUDIO_SOURCE_VOICE_COMMUNICATION:
         if (mForceUse[AudioSystem::FOR_RECORD] == AudioSystem::FORCE_BT_SCO &&
             mAvailableInputDevices & AudioSystem::DEVICE_IN_BLUETOOTH_SCO_HEADSET) {
             device = AudioSystem::DEVICE_IN_BLUETOOTH_SCO_HEADSET;
@@ -1958,6 +1962,16 @@ void AudioPolicyManagerBase::handleIncallSonification(int stream, bool starting,
             }
         }
     }
+}
+
+bool AudioPolicyManagerBase::isInCall()
+{
+    return isStateInCall(mPhoneState);
+}
+
+bool AudioPolicyManagerBase::isStateInCall(int state) {
+    return ((state == AudioSystem::MODE_IN_CALL) ||
+            (state == AudioSystem::MODE_IN_COMMUNICATION));
 }
 
 bool AudioPolicyManagerBase::needsDirectOuput(AudioSystem::stream_type stream,

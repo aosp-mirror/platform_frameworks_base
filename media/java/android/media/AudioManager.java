@@ -966,9 +966,14 @@ public class AudioManager {
      */
     public static final int MODE_RINGTONE           = AudioSystem.MODE_RINGTONE;
     /**
-     * In call audio mode. A call is established.
+     * In call audio mode. A telephony call is established.
      */
     public static final int MODE_IN_CALL            = AudioSystem.MODE_IN_CALL;
+    /**
+     * @hide
+     * In communication audio mode. An audio/video chat or VoIP call is established.
+     */
+    public static final int MODE_IN_COMMUNICATION   = AudioSystem.MODE_IN_COMMUNICATION;
 
     /* Routing bits for setRouting/getRouting API */
     /**

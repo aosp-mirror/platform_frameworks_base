@@ -252,7 +252,8 @@ public class AudioRecord
         //--------------
         // audio source
         if ( (audioSource < MediaRecorder.AudioSource.DEFAULT) ||
-             (audioSource > MediaRecorder.getAudioSourceMax()) )  {
+                (audioSource > MediaRecorder.AudioSource.VOICE_COMMUNICATION) )  {
+                //(audioSource > MediaRecorder.getAudioSourceMax()) )  {
             throw (new IllegalArgumentException("Invalid audio source."));
         } else {
             mRecordSource = audioSource;
