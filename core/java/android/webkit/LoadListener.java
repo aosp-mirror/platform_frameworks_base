@@ -836,8 +836,7 @@ class LoadListener extends Handler implements EventHandler {
             mRequestHandle.handleSslErrorResponse(proceed);
         }
         if (!proceed) {
-            // Commit whatever data we have and tear down the loader.
-            commitLoad();
+            mBrowserFrame.stopLoading();
             tearDown();
         }
     }
