@@ -68,7 +68,8 @@ LOCAL_SHARED_LIBRARIES := \
         libsurfaceflinger_client \
         libstagefright_yuv \
         libcamera_client \
-        libdrmframework
+        libdrmframework  \
+        libcrypto
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_aacdec \

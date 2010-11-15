@@ -21,6 +21,7 @@
 #include <media/stagefright/foundation/ABase.h>
 #include <media/stagefright/foundation/AString.h>
 #include <media/stagefright/DataSource.h>
+#include <utils/KeyedVector.h>
 #include <utils/Vector.h>
 
 namespace android {
@@ -72,13 +73,22 @@ private:
     bool mSignalDiscontinuity;
     ssize_t mPrevBandwidthIndex;
 
+    void *mAESKey;
+    unsigned char mAESIVec[16];
+    bool mStreamEncrypted;
+
+    KeyedVector<AString, sp<ABuffer> > mAESKeyForURI;
+
     status_t fetchM3U(const char *url, sp<ABuffer> *buffer);
 
     static int SortByBandwidth(const BandwidthItem *a, const BandwidthItem *b);
 
     bool switchToNext();
-    bool loadPlaylist(bool fetchMaster);
+    bool loadPlaylist(bool fetchMaster, size_t bandwidthIndex);
     void determineSeekability();
+
+    size_t getBandwidthIndex();
+    bool setupCipher();
 
     DISALLOW_EVIL_CONSTRUCTORS(LiveSource);
 };

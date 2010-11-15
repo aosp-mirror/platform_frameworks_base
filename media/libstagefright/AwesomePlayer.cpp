@@ -49,6 +49,8 @@
 
 #include <media/stagefright/foundation/ALooper.h>
 
+#define USE_SURFACE_ALLOC 1
+
 namespace android {
 
 static int64_t kLowWaterMarkUs = 2000000ll;  // 2secs
@@ -293,6 +295,16 @@ status_t AwesomePlayer::setDataSource_l(
     reset_l();
 
     mUri = uri;
+
+    if (!strncmp("http://", uri, 7)) {
+        // Hack to support http live.
+
+        size_t len = strlen(uri);
+        if (!strcasecmp(&uri[len - 5], ".m3u8")) {
+            mUri = "httplive://";
+            mUri.append(&uri[7]);
+        }
+    }
 
     if (headers) {
         mUriHeaders = *headers;
@@ -873,7 +885,7 @@ void AwesomePlayer::initRenderer_l() {
         IPCThreadState::self()->flushCommands();
 
         if (mSurface != NULL) {
-            if (strncmp(component, "OMX.", 4) == 0) {
+            if (USE_SURFACE_ALLOC && strncmp(component, "OMX.", 4) == 0) {
                 // Hardware decoders avoid the CPU color conversion by decoding
                 // directly to ANativeBuffers, so we must use a renderer that
                 // just pushes those buffers to the ANativeWindow.
@@ -1143,7 +1155,7 @@ status_t AwesomePlayer::initVideoDecoder(uint32_t flags) {
             mClient.interface(), mVideoTrack->getFormat(),
             false, // createEncoder
             mVideoTrack,
-            NULL, flags, mSurface);
+            NULL, flags, USE_SURFACE_ALLOC ? mSurface : NULL);
 
     if (mVideoSource != NULL) {
         int64_t durationUs;
