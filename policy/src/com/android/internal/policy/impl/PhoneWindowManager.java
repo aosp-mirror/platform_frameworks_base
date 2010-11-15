@@ -117,7 +117,6 @@ import android.view.animation.AnimationUtils;
 import android.media.IAudioService;
 import android.media.AudioManager;
 
-import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -2306,12 +2305,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return getCurrentPortraitRotation(lastRotation);
             }
 
-            if (new File("/system/etc/allow_all_orientations").exists()) {
-                mOrientationListener.setAllow180Rotation(true);
-            } else {
-                mOrientationListener.setAllow180Rotation(
-                        orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
-            }
+            mOrientationListener.setAllow180Rotation(
+                    orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
 
             // case for nosensor meaning ignore sensor and consider only lid
             // or orientation sensor disabled
