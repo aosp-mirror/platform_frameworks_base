@@ -118,6 +118,8 @@ public class StackView extends AdapterViewAnimator {
 
     private static HolographicHelper sHolographicHelper;
     private ImageView mHighlight;
+    private ImageView mClickFeedback;
+    private boolean mClickFeedbackIsValid = false;
     private StackSlider mStackSlider;
     private boolean mFirstLayoutHappened = false;
     private int mStackMode;
@@ -145,6 +147,12 @@ public class StackView extends AdapterViewAnimator {
         mHighlight = new ImageView(getContext());
         mHighlight.setLayoutParams(new LayoutParams(mHighlight));
         addViewInLayout(mHighlight, -1, new LayoutParams(mHighlight));
+
+        mClickFeedback = new ImageView(getContext());
+        mClickFeedback.setLayoutParams(new LayoutParams(mClickFeedback));
+        addViewInLayout(mClickFeedback, -1, new LayoutParams(mClickFeedback));
+        mClickFeedback.setVisibility(INVISIBLE);
+
         mStackSlider = new StackSlider();
 
         if (sHolographicHelper == null) {
@@ -310,6 +318,34 @@ public class StackView extends AdapterViewAnimator {
             }
         }
         mTransitionIsSetup = false;
+        mClickFeedbackIsValid = false;
+    }
+
+    void updateClickFeedback() {
+        if (!mClickFeedbackIsValid) {
+            View v = getViewAtRelativeIndex(0);
+            if (v != null) {
+                mClickFeedback.setImageBitmap(sHolographicHelper.createOutline(v,
+                        HolographicHelper.CLICK_FEEDBACK));
+                mClickFeedback.setTranslationX(v.getTranslationX());
+                mClickFeedback.setTranslationY(v.getTranslationY());
+            }
+            mClickFeedbackIsValid = true;
+        }
+    }
+
+    @Override
+    void showTapFeedback(View v) {
+        updateClickFeedback();
+        mClickFeedback.setVisibility(VISIBLE);
+        mClickFeedback.bringToFront();
+        invalidate();
+    }
+
+    @Override
+    void hideTapFeedback(View v) {
+        mClickFeedback.setVisibility(INVISIBLE);
+        invalidate();
     }
 
     private void updateChildTransforms() {
@@ -1010,23 +1046,36 @@ public class StackView extends AdapterViewAnimator {
         private final Paint mHolographicPaint = new Paint();
         private final Paint mErasePaint = new Paint();
         private final Paint mBlurPaint = new Paint();
+        private static final int RES_OUT = 0;
+        private static final int CLICK_FEEDBACK = 1;
+        private float mDensity;
 
         HolographicHelper(Context context) {
             initializePaints(context);
         }
 
         void initializePaints(Context context) {
-            final float density = context.getResources().getDisplayMetrics().density;
+            mDensity = context.getResources().getDisplayMetrics().density;
 
-            mHolographicPaint.setColor(0xff6699ff);
             mHolographicPaint.setFilterBitmap(true);
             mHolographicPaint.setMaskFilter(TableMaskFilter.CreateClipTable(0, 30));
             mErasePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
             mErasePaint.setFilterBitmap(true);
-            mBlurPaint.setMaskFilter(new BlurMaskFilter(2*density, BlurMaskFilter.Blur.NORMAL));
         }
 
         Bitmap createOutline(View v) {
+            return createOutline(v, RES_OUT);
+        }
+
+        Bitmap createOutline(View v, int type) {
+            if (type == RES_OUT) {
+                mHolographicPaint.setColor(0xff6699ff);
+                mBlurPaint.setMaskFilter(new BlurMaskFilter(2*mDensity, BlurMaskFilter.Blur.NORMAL));
+            } else if (type == CLICK_FEEDBACK) {
+                mHolographicPaint.setColor(0x886699ff);
+                mBlurPaint.setMaskFilter(new BlurMaskFilter(4*mDensity, BlurMaskFilter.Blur.NORMAL));
+            }
+
             if (v.getMeasuredWidth() == 0 || v.getMeasuredHeight() == 0) {
                 return null;
             }
