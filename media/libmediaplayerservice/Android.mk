@@ -38,14 +38,6 @@ LOCAL_SHARED_LIBRARIES :=     		\
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_rtsp
 
-ifneq ($(BUILD_WITHOUT_PV),true)
-LOCAL_SHARED_LIBRARIES += \
-	libopencore_player    \
-	libopencore_author
-else
-LOCAL_CFLAGS += -DNO_OPENCORE
-endif
-
 ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SHARED_LIBRARIES += libdl
 endif
