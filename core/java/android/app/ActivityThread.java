@@ -95,6 +95,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
+import dalvik.system.CloseGuard;
 import dalvik.system.SamplingProfiler;
 
 final class SuperNotCalledException extends AndroidRuntimeException {
@@ -3725,6 +3726,11 @@ public final class ActivityThread {
 
     public static final void main(String[] args) {
         SamplingProfilerIntegration.start();
+
+        // CloseGuard defaults to true and can be quite spammy.  We
+        // disable it here, but selectively enable it later (via
+        // StrictMode) on debug builds, but using DropBox, not logs.
+        CloseGuard.setEnabled(false);
 
         Process.setArgV0("<pre-initialized>");
 
