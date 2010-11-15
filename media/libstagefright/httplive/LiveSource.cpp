@@ -22,9 +22,14 @@
 #include "include/M3UParser.h"
 #include "include/NuHTTPDataSource.h"
 
+#include <cutils/properties.h>
+#include <media/stagefright/foundation/hexdump.h>
 #include <media/stagefright/foundation/ABuffer.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/FileSource.h>
-#include <media/stagefright/MediaDebug.h>
+
+#include <ctype.h>
+#include <openssl/aes.h>
 
 namespace android {
 
@@ -38,7 +43,9 @@ LiveSource::LiveSource(const char *url)
       mSourceSize(0),
       mOffsetBias(0),
       mSignalDiscontinuity(false),
-      mPrevBandwidthIndex(-1) {
+      mPrevBandwidthIndex(-1),
+      mAESKey((AES_KEY *)malloc(sizeof(AES_KEY))),
+      mStreamEncrypted(false) {
     if (switchToNext()) {
         mInitCheck = OK;
 
@@ -47,6 +54,8 @@ LiveSource::LiveSource(const char *url)
 }
 
 LiveSource::~LiveSource() {
+    free(mAESKey);
+    mAESKey = NULL;
 }
 
 status_t LiveSource::initCheck() const {
@@ -68,7 +77,77 @@ static double uniformRand() {
     return (double)rand() / RAND_MAX;
 }
 
-bool LiveSource::loadPlaylist(bool fetchMaster) {
+size_t LiveSource::getBandwidthIndex() {
+    if (mBandwidthItems.size() == 0) {
+        return 0;
+    }
+
+#if 1
+    int32_t bandwidthBps;
+    if (mSource != NULL && mSource->estimateBandwidth(&bandwidthBps)) {
+        LOGI("bandwidth estimated at %.2f kbps", bandwidthBps / 1024.0f);
+    } else {
+        LOGI("no bandwidth estimate.");
+        return 0;  // Pick the lowest bandwidth stream by default.
+    }
+
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.httplive.max-bw", value, NULL)) {
+        char *end;
+        long maxBw = strtoul(value, &end, 10);
+        if (end > value && *end == '\0') {
+            if (maxBw > 0 && bandwidthBps > maxBw) {
+                LOGV("bandwidth capped to %ld bps", maxBw);
+                bandwidthBps = maxBw;
+            }
+        }
+    }
+
+    // Consider only 80% of the available bandwidth usable.
+    bandwidthBps = (bandwidthBps * 8) / 10;
+
+    // Pick the highest bandwidth stream below or equal to estimated bandwidth.
+
+    size_t index = mBandwidthItems.size() - 1;
+    while (index > 0 && mBandwidthItems.itemAt(index).mBandwidth
+                            > (size_t)bandwidthBps) {
+        --index;
+    }
+#elif 0
+    // Change bandwidth at random()
+    size_t index = uniformRand() * mBandwidthItems.size();
+#elif 0
+    // There's a 50% chance to stay on the current bandwidth and
+    // a 50% chance to switch to the next higher bandwidth (wrapping around
+    // to lowest)
+    const size_t kMinIndex = 0;
+
+    size_t index;
+    if (mPrevBandwidthIndex < 0) {
+        index = kMinIndex;
+    } else if (uniformRand() < 0.5) {
+        index = (size_t)mPrevBandwidthIndex;
+    } else {
+        index = mPrevBandwidthIndex + 1;
+        if (index == mBandwidthItems.size()) {
+            index = kMinIndex;
+        }
+    }
+#elif 0
+    // Pick the highest bandwidth stream below or equal to 1.2 Mbit/sec
+
+    size_t index = mBandwidthItems.size() - 1;
+    while (index > 0 && mBandwidthItems.itemAt(index).mBandwidth > 1200000) {
+        --index;
+    }
+#else
+    size_t index = mBandwidthItems.size() - 1;  // Highest bandwidth stream
+#endif
+
+    return index;
+}
+
+bool LiveSource::loadPlaylist(bool fetchMaster, size_t bandwidthIndex) {
     mSignalDiscontinuity = false;
 
     mPlaylist.clear();
@@ -112,49 +191,35 @@ bool LiveSource::loadPlaylist(bool fetchMaster) {
 
             mBandwidthItems.sort(SortByBandwidth);
 
+#if 1  // XXX
+            if (mBandwidthItems.size() > 1) {
+                // Remove the lowest bandwidth stream, this is sometimes
+                // an AAC program stream, which we don't support at this point.
+                mBandwidthItems.removeItemsAt(0);
+            }
+#endif
+
             for (size_t i = 0; i < mBandwidthItems.size(); ++i) {
                 const BandwidthItem &item = mBandwidthItems.itemAt(i);
                 LOGV("item #%d: %s", i, item.mURI.c_str());
             }
+
+            bandwidthIndex = getBandwidthIndex();
         }
     }
 
     if (mBandwidthItems.size() > 0) {
-#if 0
-        // Change bandwidth at random()
-        size_t index = uniformRand() * mBandwidthItems.size();
-#elif 0
-        // There's a 50% chance to stay on the current bandwidth and
-        // a 50% chance to switch to the next higher bandwidth (wrapping around
-        // to lowest)
-        size_t index;
-        if (uniformRand() < 0.5) {
-            index = mPrevBandwidthIndex < 0 ? 0 : (size_t)mPrevBandwidthIndex;
-        } else {
-            if (mPrevBandwidthIndex < 0) {
-                index = 0;
-            } else {
-                index = mPrevBandwidthIndex + 1;
-                if (index == mBandwidthItems.size()) {
-                    index = 0;
-                }
-            }
-        }
-#else
-        // Stay on the lowest bandwidth available.
-        size_t index = mBandwidthItems.size() - 1;  // Highest bandwidth stream
-#endif
+        mURL = mBandwidthItems.editItemAt(bandwidthIndex).mURI;
 
-        mURL = mBandwidthItems.editItemAt(index).mURI;
-
-        if (mPrevBandwidthIndex >= 0 && (size_t)mPrevBandwidthIndex != index) {
+        if (mPrevBandwidthIndex >= 0
+                && (size_t)mPrevBandwidthIndex != bandwidthIndex) {
             // If we switched streams because of bandwidth changes,
             // we'll signal this discontinuity by inserting a
             // special transport stream packet into the stream.
             mSignalDiscontinuity = true;
         }
 
-        mPrevBandwidthIndex = index;
+        mPrevBandwidthIndex = bandwidthIndex;
     } else {
         mURL = mMasterURL;
     }
@@ -199,12 +264,15 @@ bool LiveSource::switchToNext() {
     mOffsetBias += mSourceSize;
     mSourceSize = 0;
 
+    size_t bandwidthIndex = getBandwidthIndex();
+
     if (mLastFetchTimeUs < 0 || getNowUs() >= mLastFetchTimeUs + 15000000ll
-        || mPlaylistIndex == mPlaylist->size()) {
+        || mPlaylistIndex == mPlaylist->size()
+        || (ssize_t)bandwidthIndex != mPrevBandwidthIndex) {
         int32_t nextSequenceNumber =
             mPlaylistIndex + mFirstItemSequenceNumber;
 
-        if (!loadPlaylist(mLastFetchTimeUs < 0)) {
+        if (!loadPlaylist(mLastFetchTimeUs < 0, bandwidthIndex)) {
             LOGE("failed to reload playlist");
             return false;
         }
@@ -227,6 +295,10 @@ bool LiveSource::switchToNext() {
         mLastFetchTimeUs = getNowUs();
     }
 
+    if (!setupCipher()) {
+        return false;
+    }
+
     AString uri;
     sp<AMessage> itemMeta;
     CHECK(mPlaylist->itemAt(mPlaylistIndex, &uri, &itemMeta));
@@ -243,6 +315,121 @@ bool LiveSource::switchToNext() {
     }
 
     mPlaylistIndex++;
+
+    return true;
+}
+
+bool LiveSource::setupCipher() {
+    sp<AMessage> itemMeta;
+    bool found = false;
+    AString method;
+
+    for (ssize_t i = mPlaylistIndex; i >= 0; --i) {
+        AString uri;
+        CHECK(mPlaylist->itemAt(i, &uri, &itemMeta));
+
+        if (itemMeta->findString("cipher-method", &method)) {
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        method = "NONE";
+    }
+
+    mStreamEncrypted = false;
+
+    if (method == "AES-128") {
+        AString keyURI;
+        if (!itemMeta->findString("cipher-uri", &keyURI)) {
+            LOGE("Missing key uri");
+            return false;
+        }
+
+        if (keyURI.size() >= 2
+                && keyURI.c_str()[0] == '"'
+                && keyURI.c_str()[keyURI.size() - 1] == '"') {
+            // Remove surrounding quotes.
+            AString tmp(keyURI, 1, keyURI.size() - 2);
+            keyURI = tmp;
+        }
+
+        ssize_t index = mAESKeyForURI.indexOfKey(keyURI);
+
+        sp<ABuffer> key;
+        if (index >= 0) {
+            key = mAESKeyForURI.valueAt(index);
+        } else {
+            key = new ABuffer(16);
+
+            sp<NuHTTPDataSource> keySource = new NuHTTPDataSource;
+            status_t err = keySource->connect(keyURI.c_str());
+
+            if (err == OK) {
+                size_t offset = 0;
+                while (offset < 16) {
+                    ssize_t n = keySource->readAt(
+                            offset, key->data() + offset, 16 - offset);
+                    if (n <= 0) {
+                        err = ERROR_IO;
+                        break;
+                    }
+
+                    offset += n;
+                }
+            }
+
+            if (err != OK) {
+                LOGE("failed to fetch cipher key from '%s'.", keyURI.c_str());
+                return false;
+            }
+
+            mAESKeyForURI.add(keyURI, key);
+        }
+
+        if (AES_set_decrypt_key(key->data(), 128, (AES_KEY *)mAESKey) != 0) {
+            LOGE("failed to set AES decryption key.");
+            return false;
+        }
+
+        AString iv;
+        if (itemMeta->findString("cipher-iv", &iv)) {
+            if ((!iv.startsWith("0x") && !iv.startsWith("0X"))
+                    || iv.size() != 16 * 2 + 2) {
+                LOGE("malformed cipher IV '%s'.", iv.c_str());
+                return false;
+            }
+
+            memset(mAESIVec, 0, sizeof(mAESIVec));
+            for (size_t i = 0; i < 16; ++i) {
+                char c1 = tolower(iv.c_str()[2 + 2 * i]);
+                char c2 = tolower(iv.c_str()[3 + 2 * i]);
+                if (!isxdigit(c1) || !isxdigit(c2)) {
+                    LOGE("malformed cipher IV '%s'.", iv.c_str());
+                    return false;
+                }
+                uint8_t nibble1 = isdigit(c1) ? c1 - '0' : c1 - 'a' + 10;
+                uint8_t nibble2 = isdigit(c2) ? c2 - '0' : c2 - 'a' + 10;
+
+                mAESIVec[i] = nibble1 << 4 | nibble2;
+            }
+        } else {
+            size_t seqNum = mPlaylistIndex + mFirstItemSequenceNumber;
+
+            memset(mAESIVec, 0, sizeof(mAESIVec));
+            mAESIVec[15] = seqNum & 0xff;
+            mAESIVec[14] = (seqNum >> 8) & 0xff;
+            mAESIVec[13] = (seqNum >> 16) & 0xff;
+            mAESIVec[12] = (seqNum >> 24) & 0xff;
+        }
+
+        mStreamEncrypted = true;
+    } else if (!(method == "NONE")) {
+        LOGE("Unsupported cipher method '%s'", method.c_str());
+        return false;
+    }
+
     return true;
 }
 
@@ -279,6 +466,7 @@ ssize_t LiveSource::readAt(off_t offset, void *data, size_t size) {
         return avail;
     }
 
+    bool done = false;
     size_t numRead = 0;
     while (numRead < size) {
         ssize_t n = mSource->readAt(
@@ -289,7 +477,44 @@ ssize_t LiveSource::readAt(off_t offset, void *data, size_t size) {
             break;
         }
 
+        if (mStreamEncrypted) {
+            size_t nmod = n % 16;
+            CHECK(nmod == 0);
+
+            sp<ABuffer> tmp = new ABuffer(n);
+
+            AES_cbc_encrypt((const unsigned char *)data + numRead,
+                            tmp->data(),
+                            n,
+                            (const AES_KEY *)mAESKey,
+                            mAESIVec,
+                            AES_DECRYPT);
+
+            if (mSourceSize == (off_t)(offset + numRead - delta + n)) {
+                // check for padding at the end of the file.
+
+                size_t pad = tmp->data()[n - 1];
+                CHECK_GT(pad, 0u);
+                CHECK_LE(pad, 16u);
+                CHECK_GE((size_t)n, pad);
+                for (size_t i = 0; i < pad; ++i) {
+                    CHECK_EQ((unsigned)tmp->data()[n - 1 - i], pad);
+                }
+
+                n -= pad;
+                mSourceSize -= pad;
+
+                done = true;
+            }
+
+            memcpy((uint8_t *)data + numRead, tmp->data(), n);
+        }
+
         numRead += n;
+
+        if (done) {
+            break;
+        }
     }
 
     return numRead;
@@ -359,18 +584,16 @@ bool LiveSource::seekTo(int64_t seekTimeUs) {
         return false;
     }
 
-    size_t newPlaylistIndex = mFirstItemSequenceNumber + index;
-
-    if (newPlaylistIndex == mPlaylistIndex) {
+    if (index == mPlaylistIndex) {
         return false;
     }
 
-    mPlaylistIndex = newPlaylistIndex;
+    mPlaylistIndex = index;
+
+    LOGV("seeking to index %lld", index);
 
     switchToNext();
     mOffsetBias = 0;
-
-    LOGV("seeking to index %lld", index);
 
     return true;
 }

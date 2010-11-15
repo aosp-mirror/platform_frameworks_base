@@ -66,6 +66,9 @@ private:
     static status_t parseStreamInf(
             const AString &line, sp<AMessage> *meta);
 
+    static status_t parseCipherInfo(
+            const AString &line, sp<AMessage> *meta);
+
     static status_t ParseInt32(const char *s, int32_t *x);
 
     DISALLOW_EVIL_CONSTRUCTORS(M3UParser);

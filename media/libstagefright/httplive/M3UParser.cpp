@@ -158,6 +158,11 @@ status_t M3UParser::parse(const void *_data, size_t size) {
                     return ERROR_MALFORMED;
                 }
                 err = parseMetaData(line, &mMeta, "media-sequence");
+            } else if (line.startsWith("#EXT-X-KEY")) {
+                if (mIsVariantPlaylist) {
+                    return ERROR_MALFORMED;
+                }
+                err = parseCipherInfo(line, &itemMeta);
             } else if (line.startsWith("#EXT-X-ENDLIST")) {
                 mIsComplete = true;
             } else if (line.startsWith("#EXTINF")) {
@@ -285,6 +290,57 @@ status_t M3UParser::parseStreamInf(
                 *meta = new AMessage;
             }
             (*meta)->setInt32("bandwidth", x);
+        }
+    }
+
+    return OK;
+}
+
+// static
+status_t M3UParser::parseCipherInfo(
+        const AString &line, sp<AMessage> *meta) {
+    ssize_t colonPos = line.find(":");
+
+    if (colonPos < 0) {
+        return ERROR_MALFORMED;
+    }
+
+    size_t offset = colonPos + 1;
+
+    while (offset < line.size()) {
+        ssize_t end = line.find(",", offset);
+        if (end < 0) {
+            end = line.size();
+        }
+
+        AString attr(line, offset, end - offset);
+        attr.trim();
+
+        offset = end + 1;
+
+        ssize_t equalPos = attr.find("=");
+        if (equalPos < 0) {
+            continue;
+        }
+
+        AString key(attr, 0, equalPos);
+        key.trim();
+
+        AString val(attr, equalPos + 1, attr.size() - equalPos - 1);
+        val.trim();
+
+        LOGV("key=%s value=%s", key.c_str(), val.c_str());
+
+        key.tolower();
+
+        if (key == "method" || key == "uri" || key == "iv") {
+            if (meta->get() == NULL) {
+                *meta = new AMessage;
+            }
+
+            key.insert(AString("cipher-"), 0);
+
+            (*meta)->setString(key.c_str(), val.c_str(), val.size());
         }
     }
 

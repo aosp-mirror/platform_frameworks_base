@@ -274,6 +274,8 @@ ATSParser::Stream::Stream(
       mQueue(streamType == 0x1b
               ? ElementaryStreamQueue::H264 : ElementaryStreamQueue::AAC) {
     mBuffer->setRange(0, 0);
+
+    LOGV("new stream PID 0x%02x, type 0x%02x", elementaryPID, streamType);
 }
 
 ATSParser::Stream::~Stream() {
@@ -307,7 +309,8 @@ void ATSParser::Stream::parse(
 }
 
 void ATSParser::Stream::signalDiscontinuity(bool isASeek) {
-    LOGV("Stream discontinuity");
+    isASeek = false;  // Always signal a "real" discontinuity
+
     mPayloadStarted = false;
     mBuffer->setRange(0, 0);
 
@@ -317,7 +320,9 @@ void ATSParser::Stream::signalDiscontinuity(bool isASeek) {
         // This is only a "minor" discontinuity, we stay within the same
         // bitstream.
 
-        mSource->clear();
+        if (mSource != NULL) {
+            mSource->clear();
+        }
         return;
     }
 
