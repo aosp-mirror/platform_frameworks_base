@@ -1037,11 +1037,25 @@ android_media_MtpDatabase_finalize(JNIEnv *env, jobject thiz)
 #endif
 }
 
+static jstring
+android_media_MtpDatabase_format_date_time(JNIEnv *env, jobject thiz, jlong seconds)
+{
+#ifdef HAVE_ANDROID_OS
+    char    date[20];
+    formatDateTime(seconds, date, sizeof(date));
+    return env->NewStringUTF(date);
+#else
+    return NULL;
+#endif
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
     {"native_setup",            "()V",  (void *)android_media_MtpDatabase_setup},
     {"native_finalize",         "()V",  (void *)android_media_MtpDatabase_finalize},
+    {"format_date_time",        "(J)Ljava/lang/String;",
+                                        (void *)android_media_MtpDatabase_format_date_time},
 };
 
 static const char* const kClassPathName = "android/media/MtpDatabase";
