@@ -264,7 +264,7 @@ int main(int argc, char **argv) {
     }
     enc_meta->setInt32(kKeyWidth, width);
     enc_meta->setInt32(kKeyHeight, height);
-    enc_meta->setInt32(kKeySampleRate, frameRateFps);
+    enc_meta->setInt32(kKeyFrameRate, frameRateFps);
     enc_meta->setInt32(kKeyBitRate, bitRateBps);
     enc_meta->setInt32(kKeyStride, width);
     enc_meta->setInt32(kKeySliceHeight, height);
