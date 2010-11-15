@@ -106,9 +106,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
 
 class ReceiverRestrictedContext extends ContextWrapper {
     ReceiverRestrictedContext(Context base) {
@@ -149,18 +146,9 @@ class ContextImpl extends Context {
     private final static String TAG = "ApplicationContext";
     private final static boolean DEBUG = false;
 
-    private static final Object sSync = new Object();
-    private static AlarmManager sAlarmManager;
-    private static PowerManager sPowerManager;
-    private static ConnectivityManager sConnectivityManager;
-    private static ThrottleManager sThrottleManager;
-    private static WifiManager sWifiManager;
-    private static LocationManager sLocationManager;
-    private static CountryDetector sCountryDetector;
     private static final HashMap<String, SharedPreferencesImpl> sSharedPrefs =
             new HashMap<String, SharedPreferencesImpl>();
 
-    private AudioManager mAudioManager;
     /*package*/ LoadedApk mPackageInfo;
     private Resources mResources;
     /*package*/ ActivityThread mMainThread;
@@ -170,24 +158,8 @@ class ContextImpl extends Context {
     private int mThemeResource = 0;
     private Resources.Theme mTheme = null;
     private PackageManager mPackageManager;
-    private NotificationManager mNotificationManager = null;
-    private ActivityManager mActivityManager = null;
-    private WallpaperManager mWallpaperManager = null;
     private Context mReceiverRestrictedContext = null;
-    private SearchManager mSearchManager = null;
-    private SensorManager mSensorManager = null;
-    private StorageManager mStorageManager = null;
-    private Vibrator mVibrator = null;
-    private LayoutInflater mLayoutInflater = null;
-    private StatusBarManager mStatusBarManager = null;
-    private TelephonyManager mTelephonyManager = null;
-    private ClipboardManager mClipboardManager = null;
     private boolean mRestricted;
-    private AccountManager mAccountManager; // protected by mSync
-    private DropBoxManager mDropBoxManager = null;
-    private DevicePolicyManager mDevicePolicyManager = null;
-    private UiModeManager mUiModeManager = null;
-    private DownloadManager mDownloadManager = null;
 
     private final Object mSync = new Object();
 
@@ -199,6 +171,266 @@ class ContextImpl extends Context {
     private File mExternalCacheDir;
 
     private static final String[] EMPTY_FILE_LIST = {};
+
+    /**
+     * Override this class when the system service constructor needs a
+     * ContextImpl.  Else, use StaticServiceFetcher below.
+     */
+    /*package*/ static class ServiceFetcher {
+        int mContextCacheIndex = -1;
+
+        /**
+         * Main entrypoint; only override if you don't need caching.
+         */
+        public Object getService(ContextImpl ctx) {
+            ArrayList<Object> cache = ctx.mServiceCache;
+            Object service;
+            synchronized (cache) {
+                if (cache.size() == 0) {
+                    // Initialize the cache vector on first access.
+                    // At this point sNextPerContextServiceCacheIndex
+                    // is the number of potential services that are
+                    // cached per-Context.
+                    for (int i = 0; i < sNextPerContextServiceCacheIndex; i++) {
+                        cache.add(null);
+                    }
+                } else {
+                    service = cache.get(mContextCacheIndex);
+                    if (service != null) {
+                        return service;
+                    }
+                }
+                service = createService(ctx);
+                cache.set(mContextCacheIndex, service);
+                return service;
+            }
+        }
+
+        /**
+         * Override this to create a new per-Context instance of the
+         * service.  getService() will handle locking and caching.
+         */
+        public Object createService(ContextImpl ctx) {
+            throw new RuntimeException("Not implemented");
+        }
+    }
+
+    /**
+     * Override this class for services to be cached process-wide.
+     */
+    abstract static class StaticServiceFetcher extends ServiceFetcher {
+        private Object mCachedInstance;
+
+        @Override
+        public final Object getService(ContextImpl unused) {
+            synchronized (StaticServiceFetcher.this) {
+                Object service = mCachedInstance;
+                if (service != null) {
+                    return service;
+                }
+                return mCachedInstance = createStaticService();
+            }
+        }
+
+        public abstract Object createStaticService();
+    }
+
+    private static final HashMap<String, ServiceFetcher> SYSTEM_SERVICE_MAP =
+            new HashMap<String, ServiceFetcher>();
+
+    private static int sNextPerContextServiceCacheIndex = 0;
+    private static void registerService(String serviceName, ServiceFetcher fetcher) {
+        if (!(fetcher instanceof StaticServiceFetcher)) {
+            fetcher.mContextCacheIndex = sNextPerContextServiceCacheIndex++;
+        }
+        SYSTEM_SERVICE_MAP.put(serviceName, fetcher);
+    }
+
+    // This one's defined separately and given a variable name so it
+    // can be re-used by getWallpaperManager(), avoiding a HashMap
+    // lookup.
+    private static ServiceFetcher WALLPAPER_FETCHER = new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                return new WallpaperManager(ctx.getOuterContext(),
+                        ctx.mMainThread.getHandler());
+            }};
+
+    static {
+        registerService(ACCESSIBILITY_SERVICE, new ServiceFetcher() {
+                public Object getService(ContextImpl ctx) {
+                    return AccessibilityManager.getInstance(ctx);
+                }});
+
+        registerService(ACCOUNT_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    IBinder b = ServiceManager.getService(ACCOUNT_SERVICE);
+                    IAccountManager service = IAccountManager.Stub.asInterface(b);
+                    return new AccountManager(ctx, service);
+                }});
+
+        registerService(ACTIVITY_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return new ActivityManager(ctx.getOuterContext(), ctx.mMainThread.getHandler());
+                }});
+
+        registerService(ALARM_SERVICE, new StaticServiceFetcher() {
+                public Object createStaticService() {
+                    IBinder b = ServiceManager.getService(ALARM_SERVICE);
+                    IAlarmManager service = IAlarmManager.Stub.asInterface(b);
+                    return new AlarmManager(service);
+                }});
+
+        registerService(AUDIO_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return new AudioManager(ctx);
+                }});
+
+        registerService(CLIPBOARD_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return new ClipboardManager(ctx.getOuterContext(),
+                            ctx.mMainThread.getHandler());
+                }});
+
+        registerService(CONNECTIVITY_SERVICE, new StaticServiceFetcher() {
+                public Object createStaticService() {
+                    IBinder b = ServiceManager.getService(CONNECTIVITY_SERVICE);
+                    return new ConnectivityManager(IConnectivityManager.Stub.asInterface(b));
+                }});
+
+        registerService(COUNTRY_DETECTOR, new StaticServiceFetcher() {
+                public Object createStaticService() {
+                    IBinder b = ServiceManager.getService(COUNTRY_DETECTOR);
+                    return new CountryDetector(ICountryDetector.Stub.asInterface(b));
+                }});
+
+        registerService(DEVICE_POLICY_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return DevicePolicyManager.create(ctx, ctx.mMainThread.getHandler());
+                }});
+
+        registerService(DOWNLOAD_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return new DownloadManager(ctx.getContentResolver(), ctx.getPackageName());
+                }});
+
+        registerService(DROPBOX_SERVICE, new StaticServiceFetcher() {
+                public Object createStaticService() {
+                    return createDropBoxManager();
+                }});
+
+        registerService(INPUT_METHOD_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return InputMethodManager.getInstance(ctx);
+                }});
+
+        registerService(KEYGUARD_SERVICE, new ServiceFetcher() {
+                public Object getService(ContextImpl ctx) {
+                    // TODO: why isn't this caching it?  It wasn't
+                    // before, so I'm preserving the old behavior and
+                    // using getService(), instead of createService()
+                    // which would do the caching.
+                    return new KeyguardManager();
+                }});
+
+        registerService(LAYOUT_INFLATER_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return PolicyManager.makeNewLayoutInflater(ctx.getOuterContext());
+                }});
+
+        registerService(LOCATION_SERVICE, new StaticServiceFetcher() {
+                public Object createStaticService() {
+                    IBinder b = ServiceManager.getService(LOCATION_SERVICE);
+                    return new LocationManager(ILocationManager.Stub.asInterface(b));
+                }});
+
+        registerService(NOTIFICATION_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    final Context outerContext = ctx.getOuterContext();
+                    return new NotificationManager(
+                        new ContextThemeWrapper(outerContext,
+                                outerContext.getApplicationInfo().targetSdkVersion >=
+                                    Build.VERSION_CODES.HONEYCOMB
+                                ? com.android.internal.R.style.Theme_Holo_Dialog
+                                : com.android.internal.R.style.Theme_Dialog),
+                        ctx.mMainThread.getHandler());
+                }});
+
+        // Note: this was previously cached in a static variable, but
+        // constructed using mMainThread.getHandler(), so converting
+        // it to be a regular Context-cached service...
+        registerService(POWER_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    IBinder b = ServiceManager.getService(POWER_SERVICE);
+                    IPowerManager service = IPowerManager.Stub.asInterface(b);
+                    return new PowerManager(service, ctx.mMainThread.getHandler());
+                }});
+
+        registerService(SEARCH_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return new SearchManager(ctx.getOuterContext(),
+                            ctx.mMainThread.getHandler());
+                }});
+
+        registerService(SENSOR_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return new SensorManager(ctx.mMainThread.getHandler().getLooper());
+                }});
+
+        registerService(STATUS_BAR_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return new StatusBarManager(ctx.getOuterContext());
+                }});
+
+        registerService(STORAGE_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    try {
+                        return new StorageManager(ctx.mMainThread.getHandler().getLooper());
+                    } catch (RemoteException rex) {
+                        Log.e(TAG, "Failed to create StorageManager", rex);
+                        return null;
+                    }
+                }});
+
+        registerService(TELEPHONY_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return new TelephonyManager(ctx.getOuterContext());
+                }});
+
+        registerService(THROTTLE_SERVICE, new StaticServiceFetcher() {
+                public Object createStaticService() {
+                    IBinder b = ServiceManager.getService(THROTTLE_SERVICE);
+                    return new ThrottleManager(IThrottleManager.Stub.asInterface(b));
+                }});
+
+        registerService(UI_MODE_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return new UiModeManager();
+                }});
+
+        registerService(VIBRATOR_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return new Vibrator();
+                }});
+
+        registerService(WALLPAPER_SERVICE, WALLPAPER_FETCHER);
+
+        registerService(WIFI_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    IBinder b = ServiceManager.getService(WIFI_SERVICE);
+                    IWifiManager service = IWifiManager.Stub.asInterface(b);
+                    return new WifiManager(service, ctx.mMainThread.getHandler());
+                }});
+
+        registerService(WINDOW_SERVICE, new ServiceFetcher() {
+                public Object getService(ContextImpl ctx) {
+                    return WindowManagerImpl.getDefault();
+                }});
+    }
+
+    // The system service cache for the system services that are
+    // cached per-ContextImpl.  Package-scoped to avoid accessor
+    // methods.
+    final ArrayList<Object> mServiceCache = new ArrayList<Object>();
 
     @Override
     public AssetManager getAssets() {
@@ -895,273 +1127,12 @@ class ContextImpl extends Context {
 
     @Override
     public Object getSystemService(String name) {
-        if (WINDOW_SERVICE.equals(name)) {
-            return WindowManagerImpl.getDefault();
-        } else if (LAYOUT_INFLATER_SERVICE.equals(name)) {
-            synchronized (mSync) {
-                LayoutInflater inflater = mLayoutInflater;
-                if (inflater != null) {
-                    return inflater;
-                }
-                mLayoutInflater = inflater =
-                    PolicyManager.makeNewLayoutInflater(getOuterContext());
-                return inflater;
-            }
-        } else if (ACTIVITY_SERVICE.equals(name)) {
-            return getActivityManager();
-        } else if (INPUT_METHOD_SERVICE.equals(name)) {
-            return InputMethodManager.getInstance(this);
-        } else if (ALARM_SERVICE.equals(name)) {
-            return getAlarmManager();
-        } else if (ACCOUNT_SERVICE.equals(name)) {
-            return getAccountManager();
-        } else if (POWER_SERVICE.equals(name)) {
-            return getPowerManager();
-        } else if (CONNECTIVITY_SERVICE.equals(name)) {
-            return getConnectivityManager();
-        } else if (THROTTLE_SERVICE.equals(name)) {
-            return getThrottleManager();
-        } else if (WIFI_SERVICE.equals(name)) {
-            return getWifiManager();
-        } else if (NOTIFICATION_SERVICE.equals(name)) {
-            return getNotificationManager();
-        } else if (KEYGUARD_SERVICE.equals(name)) {
-            return new KeyguardManager();
-        } else if (ACCESSIBILITY_SERVICE.equals(name)) {
-            return AccessibilityManager.getInstance(this);
-        } else if (LOCATION_SERVICE.equals(name)) {
-            return getLocationManager();
-        } else if (COUNTRY_DETECTOR.equals(name)) {
-            return getCountryDetector();
-        } else if (SEARCH_SERVICE.equals(name)) {
-            return getSearchManager();
-        } else if (SENSOR_SERVICE.equals(name)) {
-            return getSensorManager();
-        } else if (STORAGE_SERVICE.equals(name)) {
-            return getStorageManager();
-        } else if (VIBRATOR_SERVICE.equals(name)) {
-            return getVibrator();
-        } else if (STATUS_BAR_SERVICE.equals(name)) {
-            synchronized (mSync) {
-                if (mStatusBarManager == null) {
-                    mStatusBarManager = new StatusBarManager(getOuterContext());
-                }
-                return mStatusBarManager;
-            }
-        } else if (AUDIO_SERVICE.equals(name)) {
-            return getAudioManager();
-        } else if (TELEPHONY_SERVICE.equals(name)) {
-            return getTelephonyManager();
-        } else if (CLIPBOARD_SERVICE.equals(name)) {
-            return getClipboardManager();
-        } else if (WALLPAPER_SERVICE.equals(name)) {
-            return getWallpaperManager();
-        } else if (DROPBOX_SERVICE.equals(name)) {
-            return getDropBoxManager();
-        } else if (DEVICE_POLICY_SERVICE.equals(name)) {
-            return getDevicePolicyManager();
-        } else if (UI_MODE_SERVICE.equals(name)) {
-            return getUiModeManager();
-        } else if (DOWNLOAD_SERVICE.equals(name)) {
-            return getDownloadManager();
-        }
-
-        return null;
-    }
-
-    private AccountManager getAccountManager() {
-        synchronized (mSync) {
-            if (mAccountManager == null) {
-                IBinder b = ServiceManager.getService(ACCOUNT_SERVICE);
-                IAccountManager service = IAccountManager.Stub.asInterface(b);
-                mAccountManager = new AccountManager(this, service);
-            }
-            return mAccountManager;
-        }
-    }
-
-    private ActivityManager getActivityManager() {
-        synchronized (mSync) {
-            if (mActivityManager == null) {
-                mActivityManager = new ActivityManager(getOuterContext(),
-                        mMainThread.getHandler());
-            }
-        }
-        return mActivityManager;
-    }
-
-    private AlarmManager getAlarmManager() {
-        synchronized (sSync) {
-            if (sAlarmManager == null) {
-                IBinder b = ServiceManager.getService(ALARM_SERVICE);
-                IAlarmManager service = IAlarmManager.Stub.asInterface(b);
-                sAlarmManager = new AlarmManager(service);
-            }
-        }
-        return sAlarmManager;
-    }
-
-    private PowerManager getPowerManager() {
-        synchronized (sSync) {
-            if (sPowerManager == null) {
-                IBinder b = ServiceManager.getService(POWER_SERVICE);
-                IPowerManager service = IPowerManager.Stub.asInterface(b);
-                sPowerManager = new PowerManager(service, mMainThread.getHandler());
-            }
-        }
-        return sPowerManager;
-    }
-
-    private ConnectivityManager getConnectivityManager()
-    {
-        synchronized (sSync) {
-            if (sConnectivityManager == null) {
-                IBinder b = ServiceManager.getService(CONNECTIVITY_SERVICE);
-                IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
-                sConnectivityManager = new ConnectivityManager(service);
-            }
-        }
-        return sConnectivityManager;
-    }
-
-    private ThrottleManager getThrottleManager()
-    {
-        synchronized (sSync) {
-            if (sThrottleManager == null) {
-                IBinder b = ServiceManager.getService(THROTTLE_SERVICE);
-                IThrottleManager service = IThrottleManager.Stub.asInterface(b);
-                sThrottleManager = new ThrottleManager(service);
-            }
-        }
-        return sThrottleManager;
-    }
-
-    private WifiManager getWifiManager()
-    {
-        synchronized (sSync) {
-            if (sWifiManager == null) {
-                IBinder b = ServiceManager.getService(WIFI_SERVICE);
-                IWifiManager service = IWifiManager.Stub.asInterface(b);
-                sWifiManager = new WifiManager(service, mMainThread.getHandler());
-            }
-        }
-        return sWifiManager;
-    }
-
-    private NotificationManager getNotificationManager() {
-        synchronized (mSync) {
-            if (mNotificationManager == null) {
-                final Context outerContext = getOuterContext();
-                mNotificationManager = new NotificationManager(
-                        new ContextThemeWrapper(outerContext,
-                                outerContext.getApplicationInfo().targetSdkVersion >=
-                                    Build.VERSION_CODES.HONEYCOMB
-                                ? com.android.internal.R.style.Theme_Holo_Dialog
-                                : com.android.internal.R.style.Theme_Dialog),
-                        mMainThread.getHandler());
-            }
-        }
-        return mNotificationManager;
+        ServiceFetcher fetcher = SYSTEM_SERVICE_MAP.get(name);
+        return fetcher == null ? null : fetcher.getService(this);
     }
 
     private WallpaperManager getWallpaperManager() {
-        synchronized (mSync) {
-            if (mWallpaperManager == null) {
-                mWallpaperManager = new WallpaperManager(getOuterContext(),
-                        mMainThread.getHandler());
-            }
-        }
-        return mWallpaperManager;
-    }
-
-    private TelephonyManager getTelephonyManager() {
-        synchronized (mSync) {
-            if (mTelephonyManager == null) {
-                mTelephonyManager = new TelephonyManager(getOuterContext());
-            }
-        }
-        return mTelephonyManager;
-    }
-
-    private ClipboardManager getClipboardManager() {
-        synchronized (mSync) {
-            if (mClipboardManager == null) {
-                mClipboardManager = new ClipboardManager(getOuterContext(),
-                        mMainThread.getHandler());
-            }
-        }
-        return mClipboardManager;
-    }
-
-    private LocationManager getLocationManager() {
-        synchronized (sSync) {
-            if (sLocationManager == null) {
-                IBinder b = ServiceManager.getService(LOCATION_SERVICE);
-                ILocationManager service = ILocationManager.Stub.asInterface(b);
-                sLocationManager = new LocationManager(service);
-            }
-        }
-        return sLocationManager;
-    }
-
-    private CountryDetector getCountryDetector() {
-        synchronized (sSync) {
-            if (sCountryDetector == null) {
-                IBinder b = ServiceManager.getService(COUNTRY_DETECTOR);
-                ICountryDetector service = ICountryDetector.Stub.asInterface(b);
-                sCountryDetector = new CountryDetector(service);
-            }
-        }
-        return sCountryDetector;
-    }
-
-    private SearchManager getSearchManager() {
-        synchronized (mSync) {
-            if (mSearchManager == null) {
-                mSearchManager = new SearchManager(getOuterContext(), mMainThread.getHandler());
-            }
-        }
-        return mSearchManager;
-    }
-
-    private SensorManager getSensorManager() {
-        synchronized (mSync) {
-            if (mSensorManager == null) {
-                mSensorManager = new SensorManager(mMainThread.getHandler().getLooper());
-            }
-        }
-        return mSensorManager;
-    }
-
-    private StorageManager getStorageManager() {
-        synchronized (mSync) {
-            if (mStorageManager == null) {
-                try {
-                    mStorageManager = new StorageManager(mMainThread.getHandler().getLooper());
-                } catch (RemoteException rex) {
-                    Log.e(TAG, "Failed to create StorageManager", rex);
-                    mStorageManager = null;
-                }
-            }
-        }
-        return mStorageManager;
-    }
-
-    private Vibrator getVibrator() {
-        synchronized (mSync) {
-            if (mVibrator == null) {
-                mVibrator = new Vibrator();
-            }
-        }
-        return mVibrator;
-    }
-
-    private AudioManager getAudioManager()
-    {
-        if (mAudioManager == null) {
-            mAudioManager = new AudioManager(this);
-        }
-        return mAudioManager;
+        return (WallpaperManager) WALLPAPER_FETCHER.getService(this);
     }
 
     /* package */ static DropBoxManager createDropBoxManager() {
@@ -1175,43 +1146,6 @@ class ContextImpl extends Context {
             return null;
         }
         return new DropBoxManager(service);
-    }
-
-    private DropBoxManager getDropBoxManager() {
-        synchronized (mSync) {
-            if (mDropBoxManager == null) {
-                mDropBoxManager = createDropBoxManager();
-            }
-        }
-        return mDropBoxManager;
-    }
-
-    private DevicePolicyManager getDevicePolicyManager() {
-        synchronized (mSync) {
-            if (mDevicePolicyManager == null) {
-                mDevicePolicyManager = DevicePolicyManager.create(this,
-                        mMainThread.getHandler());
-            }
-        }
-        return mDevicePolicyManager;
-    }
-
-    private UiModeManager getUiModeManager() {
-        synchronized (mSync) {
-            if (mUiModeManager == null) {
-                mUiModeManager = new UiModeManager();
-            }
-        }
-        return mUiModeManager;
-    }
-
-    private DownloadManager getDownloadManager() {
-        synchronized (mSync) {
-            if (mDownloadManager == null) {
-                mDownloadManager = new DownloadManager(getContentResolver(), getPackageName());
-            }
-        }
-        return mDownloadManager;
     }
 
     @Override
