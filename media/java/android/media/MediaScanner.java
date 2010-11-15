@@ -1194,18 +1194,37 @@ public class MediaScanner
         }
 
         mMtpObjectHandle = objectHandle;
+        initialize(volumeName);
         try {
-            initialize(volumeName);
-            // MTP will create a file entry for us so we don't want to do it in prescan
-            prescan(path, false);
+            if (MediaFile.isPlayListFileType(fileType)) {
+                // build file cache so we can look up tracks in the playlist
+                prescan(null, true);
 
-            File file = new File(path);
+                String key = path;
+                if (mMediaStoragePath != null && key.startsWith(mMediaStoragePath)) {
+                    // MediaProvider uses external variant of path for _data, so we need to match
+                    // against that path instead.
+                    key = mExternalStoragePath + key.substring(mMediaStoragePath.length());
+                }
+                if (mCaseInsensitivePaths) {
+                    key = path.toLowerCase();
+                }
+                FileCacheEntry entry = mFileCache.get(key);
+                if (entry != null) {
+                    processPlayList(entry);
+                }
+            } else {
+                // MTP will create a file entry for us so we don't want to do it in prescan
+                prescan(path, false);
 
-            // lastModified is in milliseconds on Files.
-            long lastModifiedSeconds = file.lastModified() / 1000;
+                File file = new File(path);
 
-            // always scan the file, so we can return the content://media Uri for existing files
-            mClient.doScanFile(path, mediaFileType.mimeType, lastModifiedSeconds, file.length(), true);
+                // lastModified is in milliseconds on Files.
+                long lastModifiedSeconds = file.lastModified() / 1000;
+
+                // always scan the file, so we can return the content://media Uri for existing files
+                mClient.doScanFile(path, mediaFileType.mimeType, lastModifiedSeconds, file.length(), true);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in MediaScanner.scanFile()", e);
         } finally {
@@ -1285,8 +1304,7 @@ public class MediaScanner
             }
         }
 
-        // if the match is not for an audio file, bail out
-        if (bestMatch == null || ! mAudioUri.equals(bestMatch.mTableUri)) {
+        if (bestMatch == null) {
             return false;
         }
 
@@ -1431,63 +1449,67 @@ public class MediaScanner
         }
     }
 
+    private void processPlayList(FileCacheEntry entry) throws RemoteException {
+        String path = entry.mPath;
+        ContentValues values = new ContentValues();
+        int lastSlash = path.lastIndexOf('/');
+        if (lastSlash < 0) throw new IllegalArgumentException("bad path " + path);
+        Uri uri, membersUri;
+        long rowId = entry.mRowId;
+        if (rowId == 0) {
+            // Create a new playlist
+
+            int lastDot = path.lastIndexOf('.');
+            String name = (lastDot < 0 ? path.substring(lastSlash + 1) : path.substring(lastSlash + 1, lastDot));
+            values.put(MediaStore.Audio.Playlists.NAME, name);
+            values.put(MediaStore.Audio.Playlists.DATA, path);
+            values.put(MediaStore.Audio.Playlists.DATE_MODIFIED, entry.mLastModified);
+            uri = mMediaProvider.insert(mPlaylistsUri, values);
+            rowId = ContentUris.parseId(uri);
+            membersUri = Uri.withAppendedPath(uri, Playlists.Members.CONTENT_DIRECTORY);
+        } else {
+            uri = ContentUris.withAppendedId(mPlaylistsUri, rowId);
+
+            // update lastModified value of existing playlist
+            values.put(MediaStore.Audio.Playlists.DATE_MODIFIED, entry.mLastModified);
+            mMediaProvider.update(uri, values, null, null);
+
+            // delete members of existing playlist
+            membersUri = Uri.withAppendedPath(uri, Playlists.Members.CONTENT_DIRECTORY);
+            mMediaProvider.delete(membersUri, null, null);
+        }
+
+        String playListDirectory = path.substring(0, lastSlash + 1);
+        MediaFile.MediaFileType mediaFileType = MediaFile.getFileType(path);
+        int fileType = (mediaFileType == null ? 0 : mediaFileType.fileType);
+
+        if (fileType == MediaFile.FILE_TYPE_M3U) {
+            processM3uPlayList(path, playListDirectory, membersUri, values);
+        } else if (fileType == MediaFile.FILE_TYPE_PLS) {
+            processPlsPlayList(path, playListDirectory, membersUri, values);
+        } else if (fileType == MediaFile.FILE_TYPE_WPL) {
+            processWplPlayList(path, playListDirectory, membersUri);
+        }
+
+        Cursor cursor = mMediaProvider.query(membersUri, PLAYLIST_MEMBERS_PROJECTION, null,
+                null, null);
+        try {
+            if (cursor == null || cursor.getCount() == 0) {
+                Log.d(TAG, "playlist is empty - deleting");
+                mMediaProvider.delete(uri, null, null);
+            }
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+    }
+
     private void processPlayLists() throws RemoteException {
         Iterator<FileCacheEntry> iterator = mPlayLists.iterator();
         while (iterator.hasNext()) {
             FileCacheEntry entry = iterator.next();
-            String path = entry.mPath;
-
             // only process playlist files if they are new or have been modified since the last scan
             if (entry.mLastModifiedChanged) {
-                ContentValues values = new ContentValues();
-                int lastSlash = path.lastIndexOf('/');
-                if (lastSlash < 0) throw new IllegalArgumentException("bad path " + path);
-                Uri uri, membersUri;
-                long rowId = entry.mRowId;
-                if (rowId == 0) {
-                    // Create a new playlist
-
-                    int lastDot = path.lastIndexOf('.');
-                    String name = (lastDot < 0 ? path.substring(lastSlash + 1) : path.substring(lastSlash + 1, lastDot));
-                    values.put(MediaStore.Audio.Playlists.NAME, name);
-                    values.put(MediaStore.Audio.Playlists.DATA, path);
-                    values.put(MediaStore.Audio.Playlists.DATE_MODIFIED, entry.mLastModified);
-                    uri = mMediaProvider.insert(mPlaylistsUri, values);
-                    rowId = ContentUris.parseId(uri);
-                    membersUri = Uri.withAppendedPath(uri, Playlists.Members.CONTENT_DIRECTORY);
-                } else {
-                    uri = ContentUris.withAppendedId(mPlaylistsUri, rowId);
-
-                    // update lastModified value of existing playlist
-                    values.put(MediaStore.Audio.Playlists.DATE_MODIFIED, entry.mLastModified);
-                    mMediaProvider.update(uri, values, null, null);
-
-                    // delete members of existing playlist
-                    membersUri = Uri.withAppendedPath(uri, Playlists.Members.CONTENT_DIRECTORY);
-                    mMediaProvider.delete(membersUri, null, null);
-                }
-
-                String playListDirectory = path.substring(0, lastSlash + 1);
-                MediaFile.MediaFileType mediaFileType = MediaFile.getFileType(path);
-                int fileType = (mediaFileType == null ? 0 : mediaFileType.fileType);
-
-                if (fileType == MediaFile.FILE_TYPE_M3U)
-                    processM3uPlayList(path, playListDirectory, membersUri, values);
-                else if (fileType == MediaFile.FILE_TYPE_PLS)
-                    processPlsPlayList(path, playListDirectory, membersUri, values);
-                else if (fileType == MediaFile.FILE_TYPE_WPL)
-                    processWplPlayList(path, playListDirectory, membersUri);
-
-                Cursor cursor = mMediaProvider.query(membersUri, PLAYLIST_MEMBERS_PROJECTION, null,
-                        null, null);
-                try {
-                    if (cursor == null || cursor.getCount() == 0) {
-                        Log.d(TAG, "playlist is empty - deleting");
-                        mMediaProvider.delete(uri, null, null);
-                    }
-                } finally {
-                    if (cursor != null) cursor.close();
-                }
+                processPlayList(entry);
             }
         }
     }
