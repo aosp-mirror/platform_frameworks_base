@@ -30,7 +30,6 @@ import android.provider.MediaStore.Files;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.MediaColumns;
 import android.provider.Mtp;
-import android.text.format.Time;
 import android.util.Log;
 
 import java.io.File;
@@ -504,14 +503,6 @@ public class MtpDatabase {
         return path.substring(start, end);
     }
 
-    private String formatDateTime(long seconds) {
-        Time time = new Time(Time.TIMEZONE_UTC);
-        time.set(seconds * 1000);
-        String result = time.format("%Y-%m-%dT%H:%M:%SZ");
-        Log.d(TAG, "formatDateTime returning " + result);
-        return result;
-    }
-
     private MtpPropertyList getObjectPropertyList(int handle, int format, int property,
                         int groupCode, int depth) {
         // FIXME - implement group support
@@ -683,7 +674,7 @@ public class MtpDatabase {
                     case MtpConstants.PROPERTY_DATE_MODIFIED:
                     case MtpConstants.PROPERTY_DATE_ADDED:
                         // convert from seconds to DateTime
-                        result.setProperty(index, handle, property, formatDateTime(c.getInt(1)));
+                        result.setProperty(index, handle, property, format_date_time(c.getInt(1)));
                         break;
                     case MtpConstants.PROPERTY_ORIGINAL_RELEASE_DATE:
                         // release date is stored internally as just the year
@@ -1029,4 +1020,5 @@ public class MtpDatabase {
 
     private native final void native_setup();
     private native final void native_finalize();
+    private native String format_date_time(long seconds);
 }
