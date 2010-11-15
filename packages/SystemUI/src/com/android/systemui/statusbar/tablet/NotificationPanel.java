@@ -17,11 +17,14 @@
 package com.android.systemui.statusbar.tablet;
 
 import android.content.Context;
-import android.widget.LinearLayout;
 import android.util.AttributeSet;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
-public class NotificationPanel extends LinearLayout implements StatusBarPanel {
+import com.android.systemui.R;
 
+public class NotificationPanel extends RelativeLayout implements StatusBarPanel {
     public NotificationPanel(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }

@@ -28,11 +28,76 @@
     android:animateLayoutChanges="true"
     >
 
+    <com.android.systemui.statusbar.policy.Clock
+        android:id="@+id/clock"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_alignParentTop="true"
+        android:gravity="right"
+        />
+
+    <com.android.systemui.statusbar.policy.DateView
+        android:id="@+id/date"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_below="@id/clock"
+        android:gravity="right"
+        />
+
+    <Button
+        android:id="@+id/settings_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/date"
+        android:layout_alignParentRight="true"
+        android:text="@string/system_panel_settings_button"
+        />
+
+    <ImageView
+        android:id="@+id/battery"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignBaseline="@id/settings_button"
+        android:src="@drawable/ic_sysbar_battery_mini"
+        android:baseline="17dp"
+        />
+
+    <TextView
+        android:id="@+id/battery_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/battery"
+        android:layout_alignBaseline="@id/settings_button"
+        android:singleLine="true"
+        android:text="@string/system_panel_settings_button"
+        />
+
+    <ImageView
+        android:id="@+id/network"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_toRightOf="@id/battery_text"
+        android:layout_alignBaseline="@id/settings_button"
+        android:src="@drawable/ic_sysbar_wifi_mini"
+        android:baseline="21dp"
+        />
+
+    <TextView
+        android:id="@+id/network_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/network"
+        android:layout_alignBaseline="@id/settings_button"
+        android:singleLine="true"
+        android:text="@string/system_panel_settings_button"
+        />
+
     <ScrollView
         android:id="@+id/notificationScroller"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:animateLayoutChanges="true"
+        android:layout_below="@id/settings_button"
         >
         <LinearLayout 
             android:id="@+id/content"

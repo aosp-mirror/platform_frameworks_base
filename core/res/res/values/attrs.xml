@@ -2055,6 +2055,9 @@
         <attr name="baselineAlignBottom" format="boolean" />
          <!-- If true, the image will be cropped to fit within its padding. -->
         <attr name="cropToPadding" format="boolean" />
+        <!-- The offset of the baseline within this view. See {see android.view.View#getBaseline}
+             for details -->
+        <attr name="baseline" format="dimension" />
     </declare-styleable>
     <declare-styleable name="ToggleButton">
         <!-- The text for the button when it is checked. -->

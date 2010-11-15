@@ -40,12 +40,10 @@ public class TabletStatusBarView extends FrameLayout {
 
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            mHandler.removeMessages(TabletStatusBarService.MSG_CLOSE_NOTIFICATION_PANEL);
-            mHandler.sendEmptyMessage(TabletStatusBarService.MSG_CLOSE_NOTIFICATION_PANEL);
-            mHandler.removeMessages(TabletStatusBarService.MSG_CLOSE_SYSTEM_PANEL);
-            mHandler.sendEmptyMessage(TabletStatusBarService.MSG_CLOSE_SYSTEM_PANEL);
-            mHandler.removeMessages(TabletStatusBarService.MSG_CLOSE_RECENTS_PANEL);
-            mHandler.sendEmptyMessage(TabletStatusBarService.MSG_CLOSE_RECENTS_PANEL);
+            mHandler.removeMessages(TabletStatusBar.MSG_CLOSE_NOTIFICATION_PANEL);
+            mHandler.sendEmptyMessage(TabletStatusBar.MSG_CLOSE_NOTIFICATION_PANEL);
+            mHandler.removeMessages(TabletStatusBar.MSG_CLOSE_RECENTS_PANEL);
+            mHandler.sendEmptyMessage(TabletStatusBar.MSG_CLOSE_RECENTS_PANEL);
 
             for (int i=0; i < mPanels.length; i++) {
                 if (mPanels[i] != null && mPanels[i].getVisibility() == View.VISIBLE) {
