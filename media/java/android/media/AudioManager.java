@@ -984,7 +984,7 @@ public class AudioManager {
      * application when it places a phone call, as it will cause signals from the radio layer
      * to feed the platform mixer.
      *
-     * @param mode  the requested audio mode (NORMAL, RINGTONE, or IN_CALL).
+     * @param mode  the requested audio mode (NORMAL, RINGTONE, IN_CALL or IN_COMMUNICATION).
      *              Informs the HAL about the current audio state so that
      *              it can route the audio appropriately.
      */
@@ -1000,7 +1000,7 @@ public class AudioManager {
     /**
      * Returns the current audio mode.
      *
-     * @return      the current audio mode (NORMAL, RINGTONE, or IN_CALL).
+     * @return      the current audio mode (NORMAL, RINGTONE, IN_CALL or IN_COMMUNICATION).
      *              Returns the current current audio state from the HAL.
      */
     public int getMode() {
@@ -1034,9 +1034,14 @@ public class AudioManager {
      */
     public static final int MODE_RINGTONE           = AudioSystem.MODE_RINGTONE;
     /**
-     * In call audio mode. A call is established.
+     * In call audio mode. A telephony call is established.
      */
     public static final int MODE_IN_CALL            = AudioSystem.MODE_IN_CALL;
+    /**
+     * @hide
+     * In communication audio mode. An audio/video chat or VoIP call is established.
+     */
+    public static final int MODE_IN_COMMUNICATION   = AudioSystem.MODE_IN_COMMUNICATION;
 
     /* Routing bits for setRouting/getRouting API */
     /**
