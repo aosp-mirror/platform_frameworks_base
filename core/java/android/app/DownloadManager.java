@@ -1036,7 +1036,7 @@ public class DownloadManager {
             long destinationType = getLong(getColumnIndex(Downloads.Impl.COLUMN_DESTINATION));
             if (destinationType == Downloads.Impl.DESTINATION_FILE_URI ||
                     destinationType == Downloads.Impl.DESTINATION_EXTERNAL) {
-                String localPath = getString(getColumnIndex(Downloads.Impl._DATA));
+                String localPath = getString(getColumnIndex(COLUMN_LOCAL_FILENAME));
                 if (localPath == null) {
                     return null;
                 }
