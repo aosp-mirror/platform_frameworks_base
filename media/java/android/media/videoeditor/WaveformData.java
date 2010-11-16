@@ -16,6 +16,8 @@
 
 package android.media.videoeditor;
 
+import java.io.IOException;
+
 /**
  * Class which describes the waveform data of an audio track. The gain values
  * represent the average gain for an audio frame. For audio codecs which do
@@ -33,7 +35,7 @@ public class WaveformData {
      * This constructor shall not be used
      */
     @SuppressWarnings("unused")
-    private WaveformData() {
+    private WaveformData() throws IOException {
         mFrameDurationMs = 0;
         mFramesCount = 0;
         mGains = null;
