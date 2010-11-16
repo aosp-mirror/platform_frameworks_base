@@ -55,6 +55,9 @@ public class ConnectivityManagerTestActivity extends Activity {
     public static final int WIFI_SCAN_TIMEOUT = 20 * 1000;
     public static final int SHORT_TIMEOUT = 5 * 1000;
     public static final long LONG_TIMEOUT = 50 * 1000;
+    public static final int SUCCESS = 0;  // for Wifi tethering state change
+    public static final int FAILURE = 1;
+    public static final int INIT = -1;
     private static final String ACCESS_POINT_FILE = "accesspoints.xml";
     public ConnectivityReceiver mConnectivityReceiver = null;
     public WifiReceiver mWifiReceiver = null;
@@ -86,6 +89,10 @@ public class ConnectivityManagerTestActivity extends Activity {
      */
     public static final int NUM_NETWORK_TYPES = ConnectivityManager.MAX_NETWORK_TYPE + 1;
     NetworkState[] connectivityState = new NetworkState[NUM_NETWORK_TYPES];
+
+    // For wifi tethering tests
+    private String[] mWifiRegexs;
+    public int mWifiTetherResult = INIT;    // -1 is initialization state
 
     /**
      * A wrapper of a broadcast receiver which provides network connectivity information
@@ -150,6 +157,16 @@ public class ConnectivityManagerTestActivity extends Activity {
                 mWifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
                                                 WifiManager.WIFI_STATE_UNKNOWN);
                 notifyWifiState();
+            } else if (action.equals(WifiManager.WIFI_AP_STATE_CHANGED_ACTION)) {
+                notifyWifiAPState();
+            } else if (action.equals(ConnectivityManager.ACTION_TETHER_STATE_CHANGED)) {
+                ArrayList<String> available = intent.getStringArrayListExtra(
+                        ConnectivityManager.EXTRA_AVAILABLE_TETHER);
+                ArrayList<String> active = intent.getStringArrayListExtra(
+                        ConnectivityManager.EXTRA_ACTIVE_TETHER);
+                ArrayList<String> errored = intent.getStringArrayListExtra(
+                        ConnectivityManager.EXTRA_ERRORED_TETHER);
+                updateTetherState(available.toArray(), active.toArray(), errored.toArray());
             }
             else {
                 return;
@@ -184,6 +201,8 @@ public class ConnectivityManagerTestActivity extends Activity {
         mIntentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         mIntentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         mIntentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+        mIntentFilter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
+        mIntentFilter.addAction(ConnectivityManager.ACTION_TETHER_STATE_CHANGED);
         registerReceiver(mWifiReceiver, mIntentFilter);
 
         // Get an instance of ConnectivityManager
@@ -196,6 +215,7 @@ public class ConnectivityManagerTestActivity extends Activity {
             Log.v(LOG_TAG, "Clear Wifi before we start the test.");
             removeConfiguredNetworksAndDisableWifi();
         }
+        mWifiRegexs = mCM.getTetherableWifiRegexs();
      }
 
     public List<WifiConfiguration> loadNetworkConfigurations() throws Exception {
@@ -263,12 +283,56 @@ public class ConnectivityManagerTestActivity extends Activity {
         }
     }
 
-    public void notifyWifiState() {
+    private void notifyWifiState() {
         synchronized (wifiObject) {
             Log.v(LOG_TAG, "notify wifi state changed");
             wifiObject.notify();
         }
     }
+
+    private void notifyWifiAPState() {
+        synchronized (this) {
+            Log.v(LOG_TAG, "notify wifi AP state changed");
+            this.notify();
+        }
+    }
+
+    // Update wifi tethering state
+    private void updateTetherState(Object[] available, Object[] tethered, Object[] errored) {
+        boolean wifiTethered = false;
+        boolean wifiErrored = false;
+
+        synchronized (this) {
+            for (Object obj: tethered) {
+                String str = (String)obj;
+                for (String tethRex: mWifiRegexs) {
+                    Log.v(LOG_TAG, "str: " + str +"tethRex: " + tethRex);
+                    if (str.matches(tethRex)) {
+                        wifiTethered = true;
+                    }
+                }
+            }
+
+            for (Object obj: errored) {
+                String str = (String)obj;
+                for (String tethRex: mWifiRegexs) {
+                    Log.v(LOG_TAG, "error: str: " + str +"tethRex: " + tethRex);
+                    if (str.matches(tethRex)) {
+                        wifiErrored = true;
+                    }
+                }
+            }
+
+            if (wifiTethered) {
+                mWifiTetherResult = SUCCESS;   // wifi tethering is successful
+            } else if (wifiErrored) {
+                mWifiTetherResult = FAILURE;   // wifi tethering failed
+            }
+            Log.v(LOG_TAG, "mWifiTetherResult: " + mWifiTetherResult);
+            this.notify();
+        }
+    }
+
 
     // Wait for network connectivity state: CONNECTING, CONNECTED, SUSPENDED,
     //                                      DISCONNECTING, DISCONNECTED, UNKNOWN
@@ -328,6 +392,62 @@ public class ConnectivityManagerTestActivity extends Activity {
                     continue;
                 }
                 return true;
+            }
+        }
+    }
+
+    // Wait for Wifi AP state: WIFI_AP_STATE_DISABLED, WIFI_AP_STATE_DISABLING,
+    //                         WIFI_AP_STATE_ENABLED, WIFI_STATE_ENALBING, WIFI_STATE_UNKNOWN
+    public boolean waitForWifiAPState(int expectedState, long timeout) {
+        long startTime = System.currentTimeMillis();
+        while (true) {
+            if ((System.currentTimeMillis() - startTime) > timeout) {
+                if (mWifiManager.getWifiApState() != expectedState) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+            Log.v(LOG_TAG, "Wait for wifi AP state to be: " + expectedState);
+            synchronized (wifiObject) {
+                try {
+                    wifiObject.wait(SHORT_TIMEOUT);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (mWifiManager.getWifiApState() != expectedState) {
+                    Log.v(LOG_TAG, "Wifi state is: " + mWifiManager.getWifiApState());
+                    continue;
+                }
+                return true;
+            }
+        }
+    }
+
+    /**
+     * Wait for the wifi tethering result:
+     * @param timeout is the maximum waiting time
+     * @return SUCCESS if tethering result is successful
+     *         FAILURE if tethering result returns error.
+     */
+    public int waitForTetherStateChange(long timeout) {
+        long startTime = System.currentTimeMillis();
+        while (true) {
+            if ((System.currentTimeMillis() - startTime) > timeout) {
+                return mWifiTetherResult;
+            }
+            Log.v(LOG_TAG, "Wait for wifi tethering result.");
+            synchronized (this) {
+                try {
+                    this.wait(SHORT_TIMEOUT);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (mWifiTetherResult == INIT ) {
+                    continue;
+                } else {
+                    return mWifiTetherResult;
+                }
             }
         }
     }
