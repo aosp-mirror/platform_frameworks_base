@@ -22,6 +22,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -99,6 +100,20 @@ public abstract class FragmentManager {
     public abstract FragmentTransaction openTransaction();
 
     /**
+     * After a {@link FragmentTransaction} is committed with
+     * {@link FragmentTransaction#commit FragmentTransaction.commit()}, it
+     * is scheduled to be executed asynchronously on the process's main thread.
+     * If you want to immediately executing any such pending operations, you
+     * can call this function (only from the main thread) to do so.  Note that
+     * all callbacks and other related behavior will be done from within this
+     * call, so be careful about where this is called from.
+     *
+     * @return Returns true if there were any pending transactions to be
+     * executed.
+     */
+    public abstract boolean executePendingTransactions();
+
+    /**
      * Finds a fragment that was identified by the given id either when inflated
      * from XML or as the container ID when added in a transaction.  This first
      * searches through fragments that are currently added to the manager's
@@ -132,7 +147,15 @@ public abstract class FragmentManager {
      * Pop the top state off the back stack.  Returns true if there was one
      * to pop, else false.
      */
-    public abstract boolean popBackStack();
+    public abstract void popBackStack();
+
+    /**
+     * Like {@link #popBackStack()}, but performs the operation immediately
+     * inside of the call.  This is like calling {@link #executePendingTransactions()}
+     * afterwards.
+     * @return Returns true if there was something popped, else false.
+     */
+    public abstract boolean popBackStackImmediate();
 
     /**
      * Pop the last fragment transition from the manager's fragment
@@ -143,7 +166,15 @@ public abstract class FragmentManager {
      * the named state itself is popped. If null, only the top state is popped.
      * @param flags Either 0 or {@link #POP_BACK_STACK_INCLUSIVE}.
      */
-    public abstract boolean popBackStack(String name, int flags);
+    public abstract void popBackStack(String name, int flags);
+
+    /**
+     * Like {@link #popBackStack(String, int)}, but performs the operation immediately
+     * inside of the call.  This is like calling {@link #executePendingTransactions()}
+     * afterwards.
+     * @return Returns true if there was something popped, else false.
+     */
+    public abstract boolean popBackStackImmediate(String name, int flags);
 
     /**
      * Pop all back stack states up to the one with the given identifier.
@@ -155,7 +186,15 @@ public abstract class FragmentManager {
      * the named state itself is popped.
      * @param flags Either 0 or {@link #POP_BACK_STACK_INCLUSIVE}.
      */
-    public abstract boolean popBackStack(int id, int flags);
+    public abstract void popBackStack(int id, int flags);
+
+    /**
+     * Like {@link #popBackStack(int, int)}, but performs the operation immediately
+     * inside of the call.  This is like calling {@link #executePendingTransactions()}
+     * afterwards.
+     * @return Returns true if there was something popped, else false.
+     */
+    public abstract boolean popBackStackImmediate(int id, int flags);
 
     /**
      * Return the number of entries currently in the back stack.
@@ -300,17 +339,58 @@ final class FragmentManagerImpl extends FragmentManager {
     }
 
     @Override
-    public boolean popBackStack() {
+    public boolean executePendingTransactions() {
+        return execPendingActions();
+    }
+
+    @Override
+    public void popBackStack() {
+        enqueueAction(new Runnable() {
+            @Override public void run() {
+                popBackStackState(mActivity.mHandler, null, -1, 0);
+            }
+        }, false);
+    }
+
+    @Override
+    public boolean popBackStackImmediate() {
+        checkStateLoss();
+        executePendingTransactions();
         return popBackStackState(mActivity.mHandler, null, -1, 0);
     }
 
     @Override
-    public boolean popBackStack(String name, int flags) {
+    public void popBackStack(final String name, final int flags) {
+        enqueueAction(new Runnable() {
+            @Override public void run() {
+                popBackStackState(mActivity.mHandler, name, -1, flags);
+            }
+        }, false);
+    }
+
+    @Override
+    public boolean popBackStackImmediate(String name, int flags) {
+        checkStateLoss();
+        executePendingTransactions();
         return popBackStackState(mActivity.mHandler, name, -1, flags);
     }
 
     @Override
-    public boolean popBackStack(int id, int flags) {
+    public void popBackStack(final int id, final int flags) {
+        if (id < 0) {
+            throw new IllegalArgumentException("Bad id: " + id);
+        }
+        enqueueAction(new Runnable() {
+            @Override public void run() {
+                popBackStackState(mActivity.mHandler, null, id, flags);
+            }
+        }, false);
+    }
+
+    @Override
+    public boolean popBackStackImmediate(int id, int flags) {
+        checkStateLoss();
+        executePendingTransactions();
         if (id < 0) {
             throw new IllegalArgumentException("Bad id: " + id);
         }
@@ -849,16 +929,20 @@ final class FragmentManagerImpl extends FragmentManager {
         return null;
     }
     
+    private void checkStateLoss() {
+        if (mStateSaved) {
+            throw new IllegalStateException(
+                    "Can not perform this action after onSaveInstanceState");
+        }
+        if (mNoTransactionsBecause != null) {
+            throw new IllegalStateException(
+                    "Can not perform this action inside of " + mNoTransactionsBecause);
+        }
+    }
+
     public void enqueueAction(Runnable action, boolean allowStateLoss) {
         if (!allowStateLoss) {
-            if (mStateSaved) {
-                throw new IllegalStateException(
-                        "Can not perform this action after onSaveInstanceState");
-            }
-            if (mNoTransactionsBecause != null) {
-                throw new IllegalStateException(
-                        "Can not perform this action inside of " + mNoTransactionsBecause);
-            }
+            checkStateLoss();
         }
         synchronized (this) {
             if (mActivity == null) {
@@ -934,17 +1018,23 @@ final class FragmentManagerImpl extends FragmentManager {
     /**
      * Only call from main thread!
      */
-    public void execPendingActions() {
+    public boolean execPendingActions() {
         if (mExecutingActions) {
-            throw new IllegalStateException("Recursive entry to execPendingActions");
+            throw new IllegalStateException("Recursive entry to executePendingTransactions");
         }
         
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            throw new IllegalStateException("Must be called from main thread of process");
+        }
+
+        boolean didSomething = false;
+
         while (true) {
             int numActions;
             
             synchronized (this) {
                 if (mPendingActions == null || mPendingActions.size() == 0) {
-                    return;
+                    return didSomething;
                 }
                 
                 numActions = mPendingActions.size();
@@ -961,6 +1051,7 @@ final class FragmentManagerImpl extends FragmentManager {
                 mTmpActions[i].run();
             }
             mExecutingActions = false;
+            didSomething = true;
         }
     }
     
@@ -984,19 +1075,14 @@ final class FragmentManagerImpl extends FragmentManager {
         if (mBackStack == null) {
             return false;
         }
-        if (name == null && id < 0 && (flags&Activity.POP_BACK_STACK_INCLUSIVE) == 0) {
+        if (name == null && id < 0 && (flags&POP_BACK_STACK_INCLUSIVE) == 0) {
             int last = mBackStack.size()-1;
             if (last < 0) {
                 return false;
             }
             final BackStackRecord bss = mBackStack.remove(last);
-            enqueueAction(new Runnable() {
-                public void run() {
-                    if (DEBUG) Log.v(TAG, "Popping back stack state: " + bss);
-                    bss.popFromBackStack(true);
-                    reportBackStackChanged();
-                }
-            }, false);
+            bss.popFromBackStack(true);
+            reportBackStackChanged();
         } else {
             int index = -1;
             if (name != null || id >= 0) {
@@ -1016,7 +1102,7 @@ final class FragmentManagerImpl extends FragmentManager {
                 if (index < 0) {
                     return false;
                 }
-                if ((flags&Activity.POP_BACK_STACK_INCLUSIVE) != 0) {
+                if ((flags&POP_BACK_STACK_INCLUSIVE) != 0) {
                     index--;
                     // Consume all following entries that match.
                     while (index >= 0) {
@@ -1038,16 +1124,12 @@ final class FragmentManagerImpl extends FragmentManager {
             for (int i=mBackStack.size()-1; i>index; i--) {
                 states.add(mBackStack.remove(i));
             }
-            enqueueAction(new Runnable() {
-                public void run() {
-                    final int LAST = states.size()-1;
-                    for (int i=0; i<=LAST; i++) {
-                        if (DEBUG) Log.v(TAG, "Popping back stack state: " + states.get(i));
-                        states.get(i).popFromBackStack(i == LAST);
-                    }
-                    reportBackStackChanged();
-                }
-            }, false);
+            final int LAST = states.size()-1;
+            for (int i=0; i<=LAST; i++) {
+                if (DEBUG) Log.v(TAG, "Popping back stack state: " + states.get(i));
+                states.get(i).popFromBackStack(i == LAST);
+            }
+            reportBackStackChanged();
         }
         return true;
     }
@@ -1084,6 +1166,10 @@ final class FragmentManagerImpl extends FragmentManager {
     }
     
     Parcelable saveAllState() {
+        // Make sure all pending operations have now been executed to get
+        // our state update-to-date.
+        execPendingActions();
+
         mStateSaved = true;
 
         if (mActive == null || mActive.size() <= 0) {
