@@ -29,4 +29,6 @@ class WifiIcons {
               R.drawable.stat_sys_wifi_signal_3_fully,
               R.drawable.stat_sys_wifi_signal_4_fully }
         };
+
+    static final int WIFI_LEVEL_COUNT = WIFI_SIGNAL_STRENGTH[0].length;
 }
