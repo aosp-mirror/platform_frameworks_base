@@ -44,13 +44,27 @@
         android:gravity="right"
         />
 
-    <Button
+    <ImageView
         android:id="@+id/settings_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/date"
         android:layout_alignParentRight="true"
-        android:text="@string/system_panel_settings_button"
+        android:paddingRight="10dp"
+        android:src="@drawable/ic_sysbar_quicksettings"
+        android:baseline="17dp"
+        />
+
+    <ImageView
+        android:id="@+id/notification_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/settings_button"
+        android:layout_alignParentRight="true"
+        android:paddingRight="10dp"
+        android:visibility="invisible"
+        android:src="@drawable/status_bar_veto"
+        android:baseline="17dp"
         />
 
     <ImageView
@@ -91,6 +105,13 @@
         android:layout_alignBaseline="@id/settings_button"
         android:singleLine="true"
         android:text="@string/system_panel_settings_button"
+        />
+
+    <FrameLayout
+        android:id="@+id/settings_frame"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_below="@id/settings_button"
         />
 
     <ScrollView
