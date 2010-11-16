@@ -110,8 +110,10 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         if (isShowing()) {
             mPopup.dismiss();
         }
-        mTreeObserver.removeGlobalOnLayoutListener(this);
-        mTreeObserver = null;
+        if (mTreeObserver != null) {
+            mTreeObserver.removeGlobalOnLayoutListener(this);
+            mTreeObserver = null;
+        }
     }
 
     public boolean isShowing() {
