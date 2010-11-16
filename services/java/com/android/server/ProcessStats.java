@@ -799,8 +799,9 @@ public class ProcessStats {
     }
     
     private String readFile(String file, char endChar) {
+        FileInputStream is = null;
         try {
-            FileInputStream is = new FileInputStream(file);
+            is = new FileInputStream(file);
             int len = is.read(mBuffer);
             is.close();
 
@@ -815,6 +816,13 @@ public class ProcessStats {
             }
         } catch (java.io.FileNotFoundException e) {
         } catch (java.io.IOException e) {
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (java.io.IOException e) {
+                }
+            }
         }
         return null;
     }
@@ -841,4 +849,3 @@ public class ProcessStats {
         }
     }
 }
-
