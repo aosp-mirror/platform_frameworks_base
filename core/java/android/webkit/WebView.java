@@ -893,6 +893,9 @@ public class WebView extends AbsoluteLayout
             Map<String, Object> javascriptInterfaces, boolean privateBrowsing) {
         super(context, attrs, defStyle);
 
+        // Used by the chrome stack to find application paths
+        JniUtil.setContext(context);
+
         if (AccessibilityManager.getInstance(context).isEnabled()) {
             if (javascriptInterfaces == null) {
                 javascriptInterfaces = new HashMap<String, Object>();
