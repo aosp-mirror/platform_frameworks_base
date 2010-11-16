@@ -100,6 +100,8 @@ public class StackView extends AdapterViewAnimator {
 
     private static final int FRAME_PADDING = 4;
 
+    private final Rect mTouchRect = new Rect();
+
     /**
      * These variables are all related to the current state of touch interaction
      * with the stack
@@ -531,7 +533,6 @@ public class StackView extends AdapterViewAnimator {
         return true;
     }
 
-    private final Rect touchRect = new Rect();
     private void onSecondaryPointerUp(MotionEvent ev) {
         final int activePointerIndex = ev.getActionIndex();
         final int pointerId = ev.getPointerId(activePointerIndex);
@@ -552,8 +553,8 @@ public class StackView extends AdapterViewAnimator {
                     float x = ev.getX(index);
                     float y = ev.getY(index);
 
-                    touchRect.set(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
-                    if (touchRect.contains(Math.round(x), Math.round(y))) {
+                    mTouchRect.set(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
+                    if (mTouchRect.contains(Math.round(x), Math.round(y))) {
                         float oldX = ev.getX(activePointerIndex);
                         float oldY = ev.getY(activePointerIndex);
 
@@ -1049,18 +1050,23 @@ public class StackView extends AdapterViewAnimator {
         private static final int RES_OUT = 0;
         private static final int CLICK_FEEDBACK = 1;
         private float mDensity;
+        private BlurMaskFilter mSmallBlurMaskFilter;
+        private BlurMaskFilter mLargeBlurMaskFilter;
+        private final Canvas mCanvas = new Canvas();
+        private final Canvas mMaskCanvas = new Canvas();
+        private final int[] mTmpXY = new int[2];
+        private final Matrix mIdentityMatrix = new Matrix();
 
         HolographicHelper(Context context) {
-            initializePaints(context);
-        }
-
-        void initializePaints(Context context) {
             mDensity = context.getResources().getDisplayMetrics().density;
 
             mHolographicPaint.setFilterBitmap(true);
             mHolographicPaint.setMaskFilter(TableMaskFilter.CreateClipTable(0, 30));
             mErasePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
             mErasePaint.setFilterBitmap(true);
+
+            mSmallBlurMaskFilter = new BlurMaskFilter(2 * mDensity, BlurMaskFilter.Blur.NORMAL);
+            mLargeBlurMaskFilter = new BlurMaskFilter(4 * mDensity, BlurMaskFilter.Blur.NORMAL);
         }
 
         Bitmap createOutline(View v) {
@@ -1070,10 +1076,10 @@ public class StackView extends AdapterViewAnimator {
         Bitmap createOutline(View v, int type) {
             if (type == RES_OUT) {
                 mHolographicPaint.setColor(0xff6699ff);
-                mBlurPaint.setMaskFilter(new BlurMaskFilter(2*mDensity, BlurMaskFilter.Blur.NORMAL));
+                mBlurPaint.setMaskFilter(mSmallBlurMaskFilter);
             } else if (type == CLICK_FEEDBACK) {
                 mHolographicPaint.setColor(0x886699ff);
-                mBlurPaint.setMaskFilter(new BlurMaskFilter(4*mDensity, BlurMaskFilter.Blur.NORMAL));
+                mBlurPaint.setMaskFilter(mLargeBlurMaskFilter);
             }
 
             if (v.getMeasuredWidth() == 0 || v.getMeasuredHeight() == 0) {
@@ -1082,7 +1088,7 @@ public class StackView extends AdapterViewAnimator {
 
             Bitmap bitmap = Bitmap.createBitmap(v.getMeasuredWidth(), v.getMeasuredHeight(),
                     Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
+            mCanvas.setBitmap(bitmap);
 
             float rotationX = v.getRotationX();
             float rotation = v.getRotation();
@@ -1090,23 +1096,22 @@ public class StackView extends AdapterViewAnimator {
             v.setRotationX(0);
             v.setRotation(0);
             v.setTranslationY(0);
-            v.draw(canvas);
+            v.draw(mCanvas);
             v.setRotationX(rotationX);
             v.setRotation(rotation);
             v.setTranslationY(translationY);
 
-            drawOutline(canvas, bitmap);
+            drawOutline(mCanvas, bitmap);
             return bitmap;
         }
 
-        final Matrix id = new Matrix();
         void drawOutline(Canvas dest, Bitmap src) {
-            int[] xy = new int[2];
+            final int[] xy = mTmpXY;
             Bitmap mask = src.extractAlpha(mBlurPaint, xy);
-            Canvas maskCanvas = new Canvas(mask);
-            maskCanvas.drawBitmap(src, -xy[0], -xy[1], mErasePaint);
+            mMaskCanvas.setBitmap(mask);
+            mMaskCanvas.drawBitmap(src, -xy[0], -xy[1], mErasePaint);
             dest.drawColor(0, PorterDuff.Mode.CLEAR);
-            dest.setMatrix(id);
+            dest.setMatrix(mIdentityMatrix);
             dest.drawBitmap(mask, xy[0], xy[1], mHolographicPaint);
             mask.recycle();
         }
