@@ -169,7 +169,12 @@ public class DropBoxManager {
                 is = getInputStream();
                 if (is == null) return null;
                 byte[] buf = new byte[maxBytes];
-                return new String(buf, 0, Math.max(0, is.read(buf)));
+                int readBytes = 0;
+                int n = 0;
+                while (n >= 0 && (readBytes += n) < maxBytes) {
+                    n = is.read(buf, readBytes, maxBytes - readBytes);
+                }
+                return new String(buf, 0, readBytes);
             } catch (IOException e) {
                 return null;
             } finally {
