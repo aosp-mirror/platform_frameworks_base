@@ -106,6 +106,8 @@ public final class StrictMode {
     private static final String TAG = "StrictMode";
     private static final boolean LOG_V = false;
 
+    private static final boolean IS_USER_BUILD = "user".equals(Build.TYPE);
+
     // Only log a duplicate stack trace to the logs every second.
     private static final long MIN_LOG_INTERVAL_MS = 1000;
 
@@ -693,7 +695,7 @@ public final class StrictMode {
     public static boolean conditionallyEnableDebugLogging() {
         // For debug builds, log event loop stalls to dropbox for analysis.
         // Similar logic also appears in ActivityThread.java for system apps.
-        if ("user".equals(Build.TYPE)) {
+        if (IS_USER_BUILD) {
             setCloseGuardEnabled(false);
             return false;
         }
@@ -1240,6 +1242,11 @@ public final class StrictMode {
             mContainerState = threadState;
         }
 
+        // Empty constructor for the NO_OP_SPAN
+        protected Span() {
+            mContainerState = null;
+        }
+
         /**
          * To be called when the critical span is complete (i.e. the
          * animation is done animating).  This can be called on any
@@ -1286,6 +1293,13 @@ public final class StrictMode {
         }
     }
 
+    // The no-op span that's used in user builds.
+    private static final Span NO_OP_SPAN = new Span() {
+            public void finish() {
+                // Do nothing.
+            }
+        };
+
     /**
      * Linked lists of active spans and a freelist.
      *
@@ -1327,6 +1341,9 @@ public final class StrictMode {
      * @hide
      */
     public static Span enterCriticalSpan(String name) {
+        if (IS_USER_BUILD) {
+            return NO_OP_SPAN;
+        }
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("name must be non-null and non-empty");
         }
