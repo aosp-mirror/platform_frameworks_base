@@ -499,7 +499,8 @@ public class NetworkController extends BroadcastReceiver {
             if (mWifiConnected && !wasConnected) {
                 WifiInfo info = mWifiManager.getConnectionInfo();
                 if (info != null) {
-                    mWifiLevel = WifiManager.calculateSignalLevel(info.getRssi(), 101);
+                    mWifiLevel = WifiManager.calculateSignalLevel(info.getRssi(),
+                            WifiIcons.WIFI_LEVEL_COUNT);
                     mWifiSsid = huntForSsid(info);
                 } else {
                     mWifiLevel = 0;
@@ -513,7 +514,7 @@ public class NetworkController extends BroadcastReceiver {
         } else if (action.equals(WifiManager.RSSI_CHANGED_ACTION)) {
             if (mWifiConnected) {
                 final int newRssi = intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200);
-                mWifiLevel = WifiManager.calculateSignalLevel(newRssi, 101);
+                mWifiLevel = WifiManager.calculateSignalLevel(newRssi, WifiIcons.WIFI_LEVEL_COUNT);
             }
         }
 
