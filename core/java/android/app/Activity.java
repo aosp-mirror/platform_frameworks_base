@@ -4174,7 +4174,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Start a context mode.
+     * Start an action mode.
      *
      * @param callback Callback that will manage lifecycle events for this context mode
      * @return The ContextMode that was started, or null if it was canceled
@@ -4185,12 +4185,41 @@ public class Activity extends ContextThemeWrapper
         return mWindow.getDecorView().startActionMode(callback);
     }
 
-    public ActionMode onStartActionMode(ActionMode.Callback callback) {
+    /**
+     * Give the Activity a chance to control the UI for an action mode requested
+     * by the system.
+     *
+     * <p>Note: If you are looking for a notification callback that an action mode
+     * has been started for this activity, see {@link #onActionModeStarted(ActionMode)}.</p>
+     *
+     * @param callback The callback that should control the new action mode
+     * @return The new action mode, or <code>null</code> if the activity does not want to
+     *         provide special handling for this action mode. (It will be handled by the system.)
+     */
+    public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
         initActionBar();
         if (mActionBar != null) {
             return mActionBar.startActionMode(callback);
         }
         return null;
+    }
+
+    /**
+     * Notifies the Activity that an action mode has been started.
+     * Activity subclasses overriding this method should call the superclass implementation.
+     *
+     * @param mode The new action mode.
+     */
+    public void onActionModeStarted(ActionMode mode) {
+    }
+
+    /**
+     * Notifies the activity that an action mode has finished.
+     * Activity subclasses overriding this method should call the superclass implementation.
+     *
+     * @param mode The action mode that just finished.
+     */
+    public void onActionModeFinished(ActionMode mode) {
     }
 
     // ------------------ Internal API ------------------

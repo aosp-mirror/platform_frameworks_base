@@ -313,12 +313,31 @@ public abstract class Window {
         public boolean onSearchRequested();
 
         /**
-         * Called when an action mode is being started.
+         * Called when an action mode is being started for this window. Gives the
+         * callback an opportunity to handle the action mode in its own unique and
+         * beautiful way. If this method returns null the system can choose a way
+         * to present the mode or choose not to start the mode at all.
          *
          * @param callback Callback to control the lifecycle of this action mode
-         * @return The ActionMode that was started, or null if it was canceled
+         * @return The ActionMode that was started, or null if the system should present it
          */
-        public ActionMode onStartActionMode(ActionMode.Callback callback);
+        public ActionMode onWindowStartingActionMode(ActionMode.Callback callback);
+
+        /**
+         * Called when an action mode has been started. The appropriate mode callback
+         * method will have already been invoked.
+         *
+         * @param mode The new mode that has just been started.
+         */
+        public void onActionModeStarted(ActionMode mode);
+
+        /**
+         * Called when an action mode has been finished. The appropriate mode callback
+         * method will have already been invoked.
+         *
+         * @param mode The mode that was just finished.
+         */
+        public void onActionModeFinished(ActionMode mode);
     }
 
     public Window(Context context) {

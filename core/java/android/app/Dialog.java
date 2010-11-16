@@ -867,11 +867,17 @@ public class Dialog implements DialogInterface, Window.Callback,
         }
     }
 
-    public ActionMode onStartActionMode(ActionMode.Callback callback) {
+    public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
         if (mActionBar != null) {
             return mActionBar.startActionMode(callback);
         }
         return null;
+    }
+
+    public void onActionModeStarted(ActionMode mode) {
+    }
+
+    public void onActionModeFinished(ActionMode mode) {
     }
 
     /**
