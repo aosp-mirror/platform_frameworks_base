@@ -62,19 +62,20 @@ private:
     class Track;
 
     FILE *mFile;
+    int  mFd;
     bool mUse4ByteNalLength;
     bool mUse32BitOffset;
     bool mIsFileSizeLimitExplicitlyRequested;
     bool mPaused;
     bool mStarted;
-    off_t mOffset;
+    off64_t mOffset;
     off_t mMdatOffset;
     uint8_t *mMoovBoxBuffer;
-    off_t mMoovBoxBufferOffset;
+    off64_t mMoovBoxBufferOffset;
     bool  mWriteMoovBoxToMemory;
-    off_t mFreeBoxOffset;
+    off64_t mFreeBoxOffset;
     bool mStreamableFile;
-    off_t mEstimatedMoovBoxSize;
+    off64_t mEstimatedMoovBoxSize;
     uint32_t mInterleaveDurationUs;
     int32_t mTimeScale;
     int64_t mStartTimestampUs;
@@ -83,7 +84,7 @@ private:
 
     List<Track *> mTracks;
 
-    List<off_t> mBoxes;
+    List<off64_t> mBoxes;
 
     void setStartTimestampUs(int64_t timeUs);
     int64_t getStartTimestampUs();  // Not const
@@ -145,8 +146,8 @@ private:
     void unlock();
 
     // Acquire lock before calling these methods
-    off_t addSample_l(MediaBuffer *buffer);
-    off_t addLengthPrefixedSample_l(MediaBuffer *buffer);
+    off64_t addSample_l(MediaBuffer *buffer);
+    off64_t addLengthPrefixedSample_l(MediaBuffer *buffer);
 
     inline size_t write(const void *ptr, size_t size, size_t nmemb, FILE* stream);
     bool exceedsFileSizeLimit();

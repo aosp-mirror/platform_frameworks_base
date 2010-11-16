@@ -51,7 +51,7 @@ struct WAVSource : public MediaSource {
             const sp<MetaData> &meta,
             uint16_t waveFormat,
             int32_t bitsPerSample,
-            off_t offset, size_t size);
+            off64_t offset, size_t size);
 
     virtual status_t start(MetaData *params = NULL);
     virtual status_t stop();
@@ -72,11 +72,11 @@ private:
     int32_t mSampleRate;
     int32_t mNumChannels;
     int32_t mBitsPerSample;
-    off_t mOffset;
+    off64_t mOffset;
     size_t mSize;
     bool mStarted;
     MediaBufferGroup *mGroup;
-    off_t mCurrentPos;
+    off64_t mCurrentPos;
 
     WAVSource(const WAVSource &);
     WAVSource &operator=(const WAVSource &);
@@ -139,7 +139,7 @@ status_t WAVExtractor::init() {
 
     size_t totalSize = U32_LE_AT(&header[4]);
 
-    off_t offset = 12;
+    off64_t offset = 12;
     size_t remainingSize = totalSize;
     while (remainingSize >= 8) {
         uint8_t chunkHeader[8];
@@ -251,7 +251,7 @@ WAVSource::WAVSource(
         const sp<MetaData> &meta,
         uint16_t waveFormat,
         int32_t bitsPerSample,
-        off_t offset, size_t size)
+        off64_t offset, size_t size)
     : mDataSource(dataSource),
       mMeta(meta),
       mWaveFormat(waveFormat),
@@ -335,7 +335,7 @@ status_t WAVSource::read(
         mBitsPerSample == 8 ? kMaxFrameSize / 2 : kMaxFrameSize;
 
     size_t maxBytesAvailable =
-        (mCurrentPos - mOffset >= (off_t)mSize)
+        (mCurrentPos - mOffset >= (off64_t)mSize)
             ? 0 : mSize - (mCurrentPos - mOffset);
 
     if (maxBytesToRead > maxBytesAvailable) {

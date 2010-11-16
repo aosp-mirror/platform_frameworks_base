@@ -16,6 +16,8 @@
 
 #include <media/stagefright/FileSource.h>
 #include <media/stagefright/MediaDebug.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 namespace android {
 
@@ -61,7 +63,7 @@ status_t FileSource::initCheck() const {
     return mFile != NULL ? OK : NO_INIT;
 }
 
-ssize_t FileSource::readAt(off_t offset, void *data, size_t size) {
+ssize_t FileSource::readAt(off64_t offset, void *data, size_t size) {
     if (mFile == NULL) {
         return NO_INIT;
     }
@@ -82,17 +84,17 @@ ssize_t FileSource::readAt(off_t offset, void *data, size_t size) {
             == mDecryptHandle->decryptApiType) {
         return readAtDRM(offset, data, size);
    } else {
-        int err = fseeko(mFile, offset + mOffset, SEEK_SET);
-        if (err < 0) {
+        off64_t result = lseek64(mFd, offset + mOffset, SEEK_SET);
+        if (result == -1) {
             LOGE("seek to %lld failed", offset + mOffset);
             return UNKNOWN_ERROR;
         }
 
-        return fread(data, 1, size, mFile);
+        return ::read(mFd, data, size);
     }
 }
 
-status_t FileSource::getSize(off_t *size) {
+status_t FileSource::getSize(off64_t *size) {
     if (mFile == NULL) {
         return NO_INIT;
     }
@@ -103,8 +105,7 @@ status_t FileSource::getSize(off_t *size) {
         return OK;
     }
 
-    fseek(mFile, 0, SEEK_END);
-    *size = ftello(mFile);
+    *size = lseek64(mFd, 0, SEEK_END);
 
     return OK;
 }
@@ -133,7 +134,7 @@ void FileSource::getDrmInfo(DecryptHandle **handle, DrmManagerClient **client) {
     *client = mDrmManagerClient;
 }
 
-ssize_t FileSource::readAtDRM(off_t offset, void *data, size_t size) {
+ssize_t FileSource::readAtDRM(off64_t offset, void *data, size_t size) {
     size_t DRM_CACHE_SIZE = 1024;
     if (mDrmBuf == NULL) {
         mDrmBuf = new unsigned char[DRM_CACHE_SIZE];

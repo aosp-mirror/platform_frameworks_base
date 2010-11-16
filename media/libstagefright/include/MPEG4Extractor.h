@@ -67,8 +67,8 @@ private:
     Vector<uint32_t> mPath;
 
     status_t readMetaData();
-    status_t parseChunk(off_t *offset, int depth);
-    status_t parseMetaData(off_t offset, size_t size);
+    status_t parseChunk(off64_t *offset, int depth);
+    status_t parseMetaData(off64_t offset, size_t size);
 
     status_t updateAudioTrackInfoFromESDS_MPEG4Audio(
             const void *esds_data, size_t esds_size);
@@ -86,9 +86,9 @@ private:
     SINF *mFirstSINF;
 
     bool mIsDrm;
-    status_t parseDrmSINF(off_t *offset, off_t data_offset);
+    status_t parseDrmSINF(off64_t *offset, off64_t data_offset);
 
-    status_t parseTrackHeader(off_t data_offset, off_t data_size);
+    status_t parseTrackHeader(off64_t data_offset, off64_t data_size);
 
     MPEG4Extractor(const MPEG4Extractor &);
     MPEG4Extractor &operator=(const MPEG4Extractor &);

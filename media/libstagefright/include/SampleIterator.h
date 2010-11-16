@@ -27,7 +27,7 @@ struct SampleIterator {
 
     uint32_t getChunkIndex() const { return mCurrentChunkIndex; }
     uint32_t getDescIndex() const { return mChunkDesc; }
-    off_t getSampleOffset() const { return mCurrentSampleOffset; }
+    off64_t getSampleOffset() const { return mCurrentSampleOffset; }
     size_t getSampleSize() const { return mCurrentSampleSize; }
     uint32_t getSampleTime() const { return mCurrentSampleTime; }
 
@@ -48,7 +48,7 @@ private:
     uint32_t mChunkDesc;
 
     uint32_t mCurrentChunkIndex;
-    off_t mCurrentChunkOffset;
+    off64_t mCurrentChunkOffset;
     Vector<size_t> mCurrentChunkSampleSizes;
 
     uint32_t mTimeToSampleIndex;
@@ -58,13 +58,13 @@ private:
     uint32_t mTTSDuration;
 
     uint32_t mCurrentSampleIndex;
-    off_t mCurrentSampleOffset;
+    off64_t mCurrentSampleOffset;
     size_t mCurrentSampleSize;
     uint32_t mCurrentSampleTime;
 
     void reset();
     status_t findChunkRange(uint32_t sampleIndex);
-    status_t getChunkOffset(uint32_t chunk, off_t *offset);
+    status_t getChunkOffset(uint32_t chunk, off64_t *offset);
     status_t findSampleTime(uint32_t sampleIndex, uint32_t *time);
 
     SampleIterator(const SampleIterator &);

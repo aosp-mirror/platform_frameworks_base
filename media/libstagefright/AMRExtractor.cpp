@@ -55,7 +55,7 @@ private:
     size_t mFrameSize;
     bool mIsWide;
 
-    off_t mOffset;
+    off64_t mOffset;
     int64_t mCurrentTimeUs;
     bool mStarted;
     MediaBufferGroup *mGroup;
@@ -115,9 +115,9 @@ AMRExtractor::AMRExtractor(const sp<DataSource> &source)
 
     mFrameSize = getFrameSize(mIsWide, FT);
 
-    off_t streamSize;
+    off64_t streamSize;
     if (mDataSource->getSize(&streamSize) == OK) {
-        off_t numFrames = streamSize / mFrameSize;
+        off64_t numFrames = streamSize / mFrameSize;
 
         mMeta->setInt64(kKeyDuration, 20000ll * numFrames);
     }

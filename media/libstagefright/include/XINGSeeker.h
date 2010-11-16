@@ -26,10 +26,10 @@ struct DataSource;
 
 struct XINGSeeker : public MP3Seeker {
     static sp<XINGSeeker> CreateFromSource(
-            const sp<DataSource> &source, off_t first_frame_pos);
+            const sp<DataSource> &source, off64_t first_frame_pos);
 
     virtual bool getDuration(int64_t *durationUs);
-    virtual bool getOffsetForTime(int64_t *timeUs, off_t *pos);
+    virtual bool getOffsetForTime(int64_t *timeUs, off64_t *pos);
 
 private:
     int64_t mFirstFramePos;
