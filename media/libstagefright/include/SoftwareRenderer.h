@@ -31,7 +31,8 @@ public:
             OMX_COLOR_FORMATTYPE colorFormat,
             const sp<Surface> &surface,
             size_t displayWidth, size_t displayHeight,
-            size_t decodedWidth, size_t decodedHeight);
+            size_t decodedWidth, size_t decodedHeight,
+            int32_t rotationDegrees);
 
     ~SoftwareRenderer();
 

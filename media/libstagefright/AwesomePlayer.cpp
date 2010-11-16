@@ -84,11 +84,13 @@ struct AwesomeLocalRenderer : public AwesomeRenderer {
             OMX_COLOR_FORMATTYPE colorFormat,
             const sp<Surface> &surface,
             size_t displayWidth, size_t displayHeight,
-            size_t decodedWidth, size_t decodedHeight)
+            size_t decodedWidth, size_t decodedHeight,
+            int32_t rotationDegrees)
         : mTarget(NULL) {
             init(colorFormat, surface,
                  displayWidth, displayHeight,
-                 decodedWidth, decodedHeight);
+                 decodedWidth, decodedHeight,
+                 rotationDegrees);
     }
 
     virtual void render(MediaBuffer *buffer) {
@@ -113,7 +115,8 @@ private:
             OMX_COLOR_FORMATTYPE colorFormat,
             const sp<Surface> &surface,
             size_t displayWidth, size_t displayHeight,
-            size_t decodedWidth, size_t decodedHeight);
+            size_t decodedWidth, size_t decodedHeight,
+            int32_t rotationDegrees);
 
     AwesomeLocalRenderer(const AwesomeLocalRenderer &);
     AwesomeLocalRenderer &operator=(const AwesomeLocalRenderer &);;
@@ -123,15 +126,19 @@ void AwesomeLocalRenderer::init(
         OMX_COLOR_FORMATTYPE colorFormat,
         const sp<Surface> &surface,
         size_t displayWidth, size_t displayHeight,
-        size_t decodedWidth, size_t decodedHeight) {
+        size_t decodedWidth, size_t decodedHeight,
+        int32_t rotationDegrees) {
     mTarget = new SoftwareRenderer(
             colorFormat, surface, displayWidth, displayHeight,
-            decodedWidth, decodedHeight);
+            decodedWidth, decodedHeight, rotationDegrees);
 }
 
 struct AwesomeNativeWindowRenderer : public AwesomeRenderer {
-    AwesomeNativeWindowRenderer(const sp<ANativeWindow> &nativeWindow)
+    AwesomeNativeWindowRenderer(
+            const sp<ANativeWindow> &nativeWindow,
+            int32_t rotationDegrees)
         : mNativeWindow(nativeWindow) {
+        applyRotation(rotationDegrees);
     }
 
     virtual void render(MediaBuffer *buffer) {
@@ -152,6 +159,22 @@ protected:
 
 private:
     sp<ANativeWindow> mNativeWindow;
+
+    void applyRotation(int32_t rotationDegrees) {
+        uint32_t transform;
+        switch (rotationDegrees) {
+            case 0: transform = 0; break;
+            case 90: transform = HAL_TRANSFORM_ROT_90; break;
+            case 180: transform = HAL_TRANSFORM_ROT_180; break;
+            case 270: transform = HAL_TRANSFORM_ROT_270; break;
+            default: transform = 0; break;
+        }
+
+        if (transform) {
+            CHECK_EQ(0, native_window_set_buffers_transform(
+                        mNativeWindow.get(), transform));
+        }
+    }
 
     AwesomeNativeWindowRenderer(const AwesomeNativeWindowRenderer &);
     AwesomeNativeWindowRenderer &operator=(
@@ -796,7 +819,19 @@ void AwesomePlayer::notifyVideoSize_l() {
     CHECK(meta->findInt32(kKeyWidth, &decodedWidth));
     CHECK(meta->findInt32(kKeyHeight, &decodedHeight));
 
-    notifyListener_l(MEDIA_SET_VIDEO_SIZE, decodedWidth, decodedHeight);
+    int32_t rotationDegrees;
+    if (!mVideoTrack->getFormat()->findInt32(
+                kKeyRotation, &rotationDegrees)) {
+        rotationDegrees = 0;
+    }
+
+    if (rotationDegrees == 90 || rotationDegrees == 270) {
+        notifyListener_l(
+                MEDIA_SET_VIDEO_SIZE, decodedHeight, decodedWidth);
+    } else {
+        notifyListener_l(
+                MEDIA_SET_VIDEO_SIZE, decodedWidth, decodedHeight);
+    }
 }
 
 void AwesomePlayer::initRenderer_l() {
@@ -814,6 +849,12 @@ void AwesomePlayer::initRenderer_l() {
     CHECK(meta->findInt32(kKeyWidth, &decodedWidth));
     CHECK(meta->findInt32(kKeyHeight, &decodedHeight));
 
+    int32_t rotationDegrees;
+    if (!mVideoTrack->getFormat()->findInt32(
+                kKeyRotation, &rotationDegrees)) {
+        rotationDegrees = 0;
+    }
+
     mVideoRenderer.clear();
 
     // Must ensure that mVideoRenderer's destructor is actually executed
@@ -824,7 +865,8 @@ void AwesomePlayer::initRenderer_l() {
         // Hardware decoders avoid the CPU color conversion by decoding
         // directly to ANativeBuffers, so we must use a renderer that
         // just pushes those buffers to the ANativeWindow.
-        mVideoRenderer = new AwesomeNativeWindowRenderer(mSurface);
+        mVideoRenderer =
+            new AwesomeNativeWindowRenderer(mSurface, rotationDegrees);
     } else {
         // Other decoders are instantiated locally and as a consequence
         // allocate their buffers in local address space.  This renderer
@@ -834,7 +876,8 @@ void AwesomePlayer::initRenderer_l() {
             (OMX_COLOR_FORMATTYPE)format,
             mSurface,
             mVideoWidth, mVideoHeight,
-            decodedWidth, decodedHeight);
+            decodedWidth, decodedHeight,
+            rotationDegrees);
     }
 }
 
@@ -1819,7 +1862,8 @@ status_t AwesomePlayer::resume() {
                     state->mVideoWidth,
                     state->mVideoHeight,
                     state->mDecodedWidth,
-                    state->mDecodedHeight);
+                    state->mDecodedHeight,
+                    0);
 
         mVideoRendererIsPreview = true;
 
