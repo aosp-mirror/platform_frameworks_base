@@ -24,14 +24,11 @@
 #include <sys/resource.h>
 
 #include "../include/OMX.h"
-#include "OMXRenderer.h"
 
 #include "../include/OMXNodeInstance.h"
-#include "../include/SoftwareRenderer.h"
 
 #include <binder/IMemory.h>
 #include <media/stagefright/MediaDebug.h>
-#include <media/stagefright/VideoRenderer.h>
 #include <utils/threads.h>
 
 #include "OMXMaster.h"
@@ -440,112 +437,6 @@ void OMX::invalidateNodeID(node_id node) {
 void OMX::invalidateNodeID_l(node_id node) {
     // mLock is held.
     mNodeIDToInstance.removeItem(node);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-struct SharedVideoRenderer : public VideoRenderer {
-    SharedVideoRenderer(void *libHandle, VideoRenderer *obj)
-        : mLibHandle(libHandle),
-          mObj(obj) {
-    }
-
-    virtual ~SharedVideoRenderer() {
-        delete mObj;
-        mObj = NULL;
-
-        dlclose(mLibHandle);
-        mLibHandle = NULL;
-    }
-
-    virtual void render(
-            const void *data, size_t size, void *platformPrivate) {
-        return mObj->render(data, size, platformPrivate);
-    }
-
-private:
-    void *mLibHandle;
-    VideoRenderer *mObj;
-
-    SharedVideoRenderer(const SharedVideoRenderer &);
-    SharedVideoRenderer &operator=(const SharedVideoRenderer &);
-};
-
-sp<IOMXRenderer> OMX::createRenderer(
-        const sp<ISurface> &surface,
-        const char *componentName,
-        OMX_COLOR_FORMATTYPE colorFormat,
-        size_t encodedWidth, size_t encodedHeight,
-        size_t displayWidth, size_t displayHeight) {
-    Mutex::Autolock autoLock(mLock);
-
-    VideoRenderer *impl = NULL;
-
-    void *libHandle = dlopen("libstagefrighthw.so", RTLD_NOW);
-
-    if (libHandle) {
-        typedef VideoRenderer *(*CreateRendererFunc)(
-                const sp<ISurface> &surface,
-                const char *componentName,
-                OMX_COLOR_FORMATTYPE colorFormat,
-                size_t displayWidth, size_t displayHeight,
-                size_t decodedWidth, size_t decodedHeight);
-
-        CreateRendererFunc func =
-            (CreateRendererFunc)dlsym(
-                    libHandle,
-                    "_Z14createRendererRKN7android2spINS_8ISurfaceEEEPKc20"
-                    "OMX_COLOR_FORMATTYPEjjjj");
-
-        if (func) {
-            impl = (*func)(surface, componentName, colorFormat,
-                    displayWidth, displayHeight, encodedWidth, encodedHeight);
-
-            if (impl) {
-                impl = new SharedVideoRenderer(libHandle, impl);
-                libHandle = NULL;
-            }
-        }
-
-        if (libHandle) {
-            dlclose(libHandle);
-            libHandle = NULL;
-        }
-    }
-
-    if (!impl) {
-#if 0
-        LOGW("Using software renderer.");
-        impl = new SoftwareRenderer(
-                colorFormat,
-                surface,
-                displayWidth, displayHeight,
-                encodedWidth, encodedHeight);
-#else
-        CHECK(!"Should not be here.");
-        return NULL;
-#endif
-    }
-
-    return new OMXRenderer(impl);
-}
-
-OMXRenderer::OMXRenderer(VideoRenderer *impl)
-    : mImpl(impl) {
-}
-
-OMXRenderer::~OMXRenderer() {
-    delete mImpl;
-    mImpl = NULL;
-}
-
-void OMXRenderer::render(IOMX::buffer_id buffer) {
-    OMX_BUFFERHEADERTYPE *header = (OMX_BUFFERHEADERTYPE *)buffer;
-
-    mImpl->render(
-            header->pBuffer + header->nOffset,
-            header->nFilledLen,
-            header->pPlatformPrivate);
 }
 
 }  // namespace android

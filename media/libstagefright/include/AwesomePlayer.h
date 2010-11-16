@@ -79,7 +79,6 @@ struct AwesomePlayer {
 
     bool isPlaying() const;
 
-    void setISurface(const sp<ISurface> &isurface);
     void setSurface(const sp<Surface> &surface);
     void setAudioSink(const sp<MediaPlayerBase::AudioSink> &audioSink);
     status_t setLooping(bool shouldLoop);
@@ -130,7 +129,6 @@ private:
     bool mQueueStarted;
     wp<MediaPlayerBase> mListener;
 
-    sp<ISurface> mISurface;
     sp<Surface> mSurface;
     sp<MediaPlayerBase::AudioSink> mAudioSink;
 

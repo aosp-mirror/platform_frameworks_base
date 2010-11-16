@@ -19,8 +19,6 @@
 #define HARDWARE_API_H_
 
 #include <media/stagefright/OMXPluginBase.h>
-#include <media/stagefright/VideoRenderer.h>
-#include <surfaceflinger/ISurface.h>
 #include <ui/android_native_buffer.h>
 #include <utils/RefBase.h>
 
@@ -90,13 +88,6 @@ struct UseAndroidNativeBufferParams {
 };
 
 }  // namespace android
-
-extern android::VideoRenderer *createRenderer(
-        const android::sp<android::ISurface> &surface,
-        const char *componentName,
-        OMX_COLOR_FORMATTYPE colorFormat,
-        size_t displayWidth, size_t displayHeight,
-        size_t decodedWidth, size_t decodedHeight);
 
 extern android::OMXPluginBase *createOMXPlugin();
 
