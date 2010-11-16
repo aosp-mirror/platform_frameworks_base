@@ -41,8 +41,6 @@ public class ConnectivityManagerMobileTest
     extends ActivityInstrumentationTestCase2<ConnectivityManagerTestActivity> {
     private static final String LOG_TAG = "ConnectivityManagerMobileTest";
     private static final String PKG_NAME = "com.android.connectivitymanagertest";
-    private static final long STATE_TRANSITION_SHORT_TIMEOUT = 5 * 1000;
-    private static final long STATE_TRANSITION_LONG_TIMEOUT = 30 * 1000;
 
     private String TEST_ACCESS_POINT;
     private ConnectivityManagerTestActivity cmActivity;
@@ -64,9 +62,14 @@ public class ConnectivityManagerMobileTest
         wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "CMWakeLock");
         wl.acquire();
         // Each test case will start with cellular connection
-        waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.CONNECTED,
-                STATE_TRANSITION_LONG_TIMEOUT);
-        verifyCellularConnection();
+        if (!cmActivity.waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.CONNECTED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT)) {
+            // Note: When the test fails in setUp(), tearDown is not called. In that case,
+            // the activity is destroyed which blocks the next test at "getActivity()".
+            // tearDown() is called hear to avoid that situation.
+            tearDown();
+            fail("Device is not connected to Mobile, setUp failed");
+        }
     }
 
     @Override
@@ -74,77 +77,17 @@ public class ConnectivityManagerMobileTest
         cmActivity.finish();
         Log.v(LOG_TAG, "tear down ConnectivityManagerTestActivity");
         wl.release();
-        cmActivity.clearWifi();
+        cmActivity.removeConfiguredNetworksAndDisableWifi();
         super.tearDown();
     }
 
     // help function to verify 3G connection
     public void verifyCellularConnection() {
-        NetworkInfo extraNetInfo = cmActivity.mNetworkInfo;
+        NetworkInfo extraNetInfo = cmActivity.mCM.getActiveNetworkInfo();
         assertEquals("network type is not MOBILE", ConnectivityManager.TYPE_MOBILE,
-            extraNetInfo.getType());
+                extraNetInfo.getType());
         assertTrue("not connected to cellular network", extraNetInfo.isConnected());
         assertTrue("no data connection", cmActivity.mState.equals(State.CONNECTED));
-    }
-
-    // Wait for network connectivity state: CONNECTING, CONNECTED, SUSPENDED,
-    //                                      DISCONNECTING, DISCONNECTED, UNKNOWN
-    private void waitForNetworkState(int networkType, State expectedState, long timeout) {
-        long startTime = System.currentTimeMillis();
-        while (true) {
-            if ((System.currentTimeMillis() - startTime) > timeout) {
-                if (cmActivity.mCM.getNetworkInfo(networkType).getState() != expectedState) {
-                    assertFalse("Wait for network state timeout", true);
-                } else {
-                    // the broadcast has been sent out. the state has been changed.
-                    return;
-                }
-            }
-            Log.v(LOG_TAG, "Wait for the connectivity state for network: " + networkType +
-                    " to be " + expectedState.toString());
-            synchronized (cmActivity.connectivityObject) {
-                try {
-                    cmActivity.connectivityObject.wait(STATE_TRANSITION_SHORT_TIMEOUT);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                if ((cmActivity.mNetworkInfo.getType() != networkType) ||
-                    (cmActivity.mNetworkInfo.getState() != expectedState)) {
-                    Log.v(LOG_TAG, "network state for " + cmActivity.mNetworkInfo.getType() +
-                            "is: " + cmActivity.mNetworkInfo.getState());
-                    continue;
-                }
-                break;
-            }
-        }
-    }
-
-    // Wait for Wifi state: WIFI_STATE_DISABLED, WIFI_STATE_DISABLING, WIFI_STATE_ENABLED,
-    //                      WIFI_STATE_ENALBING, WIFI_STATE_UNKNOWN
-    private void waitForWifiState(int expectedState, long timeout) {
-        long startTime = System.currentTimeMillis();
-        while (true) {
-            if ((System.currentTimeMillis() - startTime) > timeout) {
-                if (cmActivity.mWifiState != expectedState) {
-                    assertFalse("Wait for Wifi state timeout", true);
-                } else {
-                    return;
-                }
-            }
-            Log.v(LOG_TAG, "Wait for wifi state to be: " + expectedState);
-            synchronized (cmActivity.wifiObject) {
-                try {
-                    cmActivity.wifiObject.wait(5*1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                if (cmActivity.mWifiState != expectedState) {
-                    Log.v(LOG_TAG, "Wifi state is: " + cmActivity.mWifiNetworkInfo.getState());
-                    continue;
-                }
-                break;
-            }
-        }
     }
 
     // Test case 1: Test enabling Wifi without associating with any AP
@@ -153,7 +96,7 @@ public class ConnectivityManagerMobileTest
         // To avoid UNKNOWN state when device boots up
         cmActivity.enableWifi();
         try {
-            Thread.sleep(2 * STATE_TRANSITION_SHORT_TIMEOUT);
+            Thread.sleep(2 * ConnectivityManagerTestActivity.SHORT_TIMEOUT);
         } catch (Exception e) {
             Log.v(LOG_TAG, "exception: " + e.toString());
         }
@@ -170,7 +113,7 @@ public class ConnectivityManagerMobileTest
         // Eanble Wifi
         cmActivity.enableWifi();
         try {
-            Thread.sleep(2 * STATE_TRANSITION_SHORT_TIMEOUT);
+            Thread.sleep(2 * ConnectivityManagerTestActivity.SHORT_TIMEOUT);
         } catch (Exception e) {
             Log.v(LOG_TAG, "exception: " + e.toString());
         }
@@ -208,12 +151,13 @@ public class ConnectivityManagerMobileTest
         assertTrue("failed to connect to " + TEST_ACCESS_POINT,
                 cmActivity.connectToWifi(TEST_ACCESS_POINT));
 
-        waitForWifiState(WifiManager.WIFI_STATE_ENABLED, STATE_TRANSITION_LONG_TIMEOUT);
+        assertTrue(cmActivity.waitForWifiState(WifiManager.WIFI_STATE_ENABLED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
         Log.v(LOG_TAG, "wifi state is enabled");
-        waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                STATE_TRANSITION_LONG_TIMEOUT);
-        waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.DISCONNECTED,
-                STATE_TRANSITION_LONG_TIMEOUT);
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.DISCONNECTED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
 
         // validate states
         if (!cmActivity.validateNetworkStates(ConnectivityManager.TYPE_WIFI)) {
@@ -237,12 +181,13 @@ public class ConnectivityManagerMobileTest
         // Connect to TEST_ACCESS_POINT
         assertTrue("failed to connect to " + TEST_ACCESS_POINT,
                 cmActivity.connectToWifi(TEST_ACCESS_POINT));
-        waitForWifiState(WifiManager.WIFI_STATE_ENABLED, STATE_TRANSITION_LONG_TIMEOUT);
-        waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                STATE_TRANSITION_LONG_TIMEOUT);
+        assertTrue(cmActivity.waitForWifiState(WifiManager.WIFI_STATE_ENABLED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
 
         try {
-            Thread.sleep(STATE_TRANSITION_SHORT_TIMEOUT);
+            Thread.sleep(ConnectivityManagerTestActivity.SHORT_TIMEOUT);
         } catch (Exception e) {
             Log.v(LOG_TAG, "exception: " + e.toString());
         }
@@ -255,11 +200,12 @@ public class ConnectivityManagerMobileTest
         }
 
         // Wait for the Wifi state to be DISABLED
-        waitForWifiState(WifiManager.WIFI_STATE_DISABLED, STATE_TRANSITION_LONG_TIMEOUT);
-        waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.DISCONNECTED,
-                STATE_TRANSITION_LONG_TIMEOUT);
-        waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.CONNECTED,
-                STATE_TRANSITION_LONG_TIMEOUT);
+        assertTrue(cmActivity.waitForWifiState(WifiManager.WIFI_STATE_DISABLED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.DISCONNECTED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.CONNECTED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
 
         //Prepare for connectivity state verification
         NetworkInfo networkInfo = cmActivity.mCM.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
@@ -275,10 +221,10 @@ public class ConnectivityManagerMobileTest
         cmActivity.enableWifi();
 
         // Wait for Wifi to be connected and mobile to be disconnected
-        waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                STATE_TRANSITION_LONG_TIMEOUT);
-        waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.DISCONNECTED,
-                STATE_TRANSITION_LONG_TIMEOUT);
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.DISCONNECTED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
 
         // validate wifi states
         if (!cmActivity.validateNetworkStates(ConnectivityManager.TYPE_WIFI)) {
@@ -298,12 +244,12 @@ public class ConnectivityManagerMobileTest
         assertTrue("failed to connect to " + TEST_ACCESS_POINT,
                    cmActivity.connectToWifi(TEST_ACCESS_POINT));
 
-        waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-            STATE_TRANSITION_LONG_TIMEOUT);
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
+            ConnectivityManagerTestActivity.LONG_TIMEOUT));
 
         // Wait for a few seconds to avoid the state that both Mobile and Wifi is connected
         try {
-            Thread.sleep(STATE_TRANSITION_SHORT_TIMEOUT);
+            Thread.sleep(ConnectivityManagerTestActivity.SHORT_TIMEOUT);
         } catch (Exception e) {
             Log.v(LOG_TAG, "exception: " + e.toString());
         }
@@ -318,12 +264,12 @@ public class ConnectivityManagerMobileTest
                 NetworkState.TO_DISCONNECTION, State.DISCONNECTED);
 
         // clear Wifi
-        cmActivity.clearWifi();
+        cmActivity.removeConfiguredNetworksAndDisableWifi();
 
-        waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.DISCONNECTED,
-                STATE_TRANSITION_LONG_TIMEOUT);
-        waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.CONNECTED,
-                STATE_TRANSITION_LONG_TIMEOUT);
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.DISCONNECTED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.CONNECTED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
 
         // validate states
         if (!cmActivity.validateNetworkStates(ConnectivityManager.TYPE_WIFI)) {
@@ -357,7 +303,7 @@ public class ConnectivityManagerMobileTest
         // Enable airplane mode
         cmActivity.setAirplaneMode(getInstrumentation().getContext(), true);
         try {
-            Thread.sleep(STATE_TRANSITION_SHORT_TIMEOUT);
+            Thread.sleep(ConnectivityManagerTestActivity.SHORT_TIMEOUT);
         } catch (Exception e) {
             Log.v(LOG_TAG, "exception: " + e.toString());
         }
@@ -389,8 +335,8 @@ public class ConnectivityManagerMobileTest
         // disable airplane mode
         cmActivity.setAirplaneMode(getInstrumentation().getContext(), false);
 
-        waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.CONNECTED,
-                STATE_TRANSITION_LONG_TIMEOUT);
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.CONNECTED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
 
         // Validate the state transition
         if (!cmActivity.validateNetworkStates(ConnectivityManager.TYPE_MOBILE)) {
@@ -414,8 +360,8 @@ public class ConnectivityManagerMobileTest
         // Eanble airplane mode
         cmActivity.setAirplaneMode(getInstrumentation().getContext(), true);
 
-        waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.DISCONNECTED,
-                STATE_TRANSITION_LONG_TIMEOUT);
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.DISCONNECTED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
 
         NetworkInfo networkInfo = cmActivity.mCM.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
         cmActivity.setStateTransitionCriteria(ConnectivityManager.TYPE_MOBILE,
@@ -429,8 +375,8 @@ public class ConnectivityManagerMobileTest
         // Connect to Wifi
         assertTrue("failed to connect to " + TEST_ACCESS_POINT,
                    cmActivity.connectToWifi(TEST_ACCESS_POINT));
-        waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                            STATE_TRANSITION_LONG_TIMEOUT);
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
+                            ConnectivityManagerTestActivity.LONG_TIMEOUT));
 
         // validate state and broadcast
         if (!cmActivity.validateNetworkStates(ConnectivityManager.TYPE_WIFI)) {
@@ -457,11 +403,11 @@ public class ConnectivityManagerMobileTest
         assertTrue("failed to connect to " + TEST_ACCESS_POINT,
                 cmActivity.connectToWifi(TEST_ACCESS_POINT));
 
-        waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                STATE_TRANSITION_LONG_TIMEOUT);
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
 
         try {
-            Thread.sleep(STATE_TRANSITION_SHORT_TIMEOUT);
+            Thread.sleep(ConnectivityManagerTestActivity.SHORT_TIMEOUT);
         } catch (Exception e) {
             Log.v(LOG_TAG, "exception: " + e.toString());
         }
@@ -469,11 +415,11 @@ public class ConnectivityManagerMobileTest
         // Enable airplane mode without clearing Wifi
         cmActivity.setAirplaneMode(getInstrumentation().getContext(), true);
 
-        waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.DISCONNECTED,
-                STATE_TRANSITION_LONG_TIMEOUT);
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.DISCONNECTED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
 
         try {
-            Thread.sleep(STATE_TRANSITION_SHORT_TIMEOUT);
+            Thread.sleep(ConnectivityManagerTestActivity.SHORT_TIMEOUT);
         } catch (Exception e) {
             Log.v(LOG_TAG, "exception: " + e.toString());
         }
@@ -487,10 +433,10 @@ public class ConnectivityManagerMobileTest
         // Disable airplane mode
         cmActivity.setAirplaneMode(getInstrumentation().getContext(), false);
 
-        waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                            STATE_TRANSITION_LONG_TIMEOUT);
-        waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.DISCONNECTED,
-                            STATE_TRANSITION_LONG_TIMEOUT);
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
+                            ConnectivityManagerTestActivity.LONG_TIMEOUT));
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.DISCONNECTED,
+                            ConnectivityManagerTestActivity.LONG_TIMEOUT));
 
         // validate the state transition
         if (!cmActivity.validateNetworkStates(ConnectivityManager.TYPE_WIFI)) {
@@ -508,14 +454,15 @@ public class ConnectivityManagerMobileTest
         //Connect to TEST_ACCESS_POINT
         assertTrue("failed to connect to " + TEST_ACCESS_POINT,
                    cmActivity.connectToWifi(TEST_ACCESS_POINT));
-        waitForWifiState(WifiManager.WIFI_STATE_ENABLED, STATE_TRANSITION_LONG_TIMEOUT);
-        waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                            STATE_TRANSITION_LONG_TIMEOUT);
+        assertTrue(cmActivity.waitForWifiState(WifiManager.WIFI_STATE_ENABLED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
+                            ConnectivityManagerTestActivity.LONG_TIMEOUT));
         assertNotNull("Not associated with any AP",
                       cmActivity.mWifiManager.getConnectionInfo().getBSSID());
 
         try {
-            Thread.sleep(STATE_TRANSITION_SHORT_TIMEOUT);
+            Thread.sleep(ConnectivityManagerTestActivity.SHORT_TIMEOUT);
         } catch (Exception e) {
             Log.v(LOG_TAG, "exception: " + e.toString());
         }
@@ -527,13 +474,14 @@ public class ConnectivityManagerMobileTest
         }
 
         // Verify the connectivity state for Wifi is DISCONNECTED
-        waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.DISCONNECTED,
-                STATE_TRANSITION_LONG_TIMEOUT);
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.DISCONNECTED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
 
         if (!cmActivity.disableWifi()) {
             Log.v(LOG_TAG, "disable Wifi failed");
             return;
         }
-        waitForWifiState(WifiManager.WIFI_STATE_DISABLED, STATE_TRANSITION_LONG_TIMEOUT);
+        assertTrue(cmActivity.waitForWifiState(WifiManager.WIFI_STATE_DISABLED,
+                ConnectivityManagerTestActivity.LONG_TIMEOUT));
     }
 }

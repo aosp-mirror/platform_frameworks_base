@@ -21,6 +21,7 @@ import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
 import android.util.Log;
 import com.android.connectivitymanagertest.functional.ConnectivityManagerMobileTest;
+import com.android.connectivitymanagertest.functional.WifiConnectionTest;
 
 import junit.framework.TestSuite;
 
@@ -38,6 +39,7 @@ public class ConnectivityManagerTestRunner extends InstrumentationTestRunner {
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
         suite.addTestSuite(ConnectivityManagerMobileTest.class);
+        suite.addTestSuite(WifiConnectionTest.class);
         return suite;
     }
 
