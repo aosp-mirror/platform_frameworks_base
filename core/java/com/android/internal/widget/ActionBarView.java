@@ -40,6 +40,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -219,7 +220,7 @@ public class ActionBarView extends ViewGroup {
             Context context = getContext();
             if (context instanceof Activity) {
               Activity activity = (Activity) context;
-              activity.onOptionsItemSelected(mLogoNavItem);
+              activity.onMenuItemSelected(Window.FEATURE_OPTIONS_PANEL, mLogoNavItem);
             }
           }
         });
