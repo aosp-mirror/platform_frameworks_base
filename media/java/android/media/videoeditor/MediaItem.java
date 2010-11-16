@@ -455,6 +455,40 @@ public abstract class MediaItem {
     abstract void invalidateTransitions(long startTimeMs, long durationMs);
 
     /**
+     * Invalidate the start and end transitions if necessary. This method is
+     * typically called when the start time and/or duration of an overlay or
+     * effect is changing.
+     *
+     * @param oldStartTimeMs The old start time of the effect or overlay
+     * @param oldDurationMs The old duration of the effect or overlay
+     * @param newStartTimeMs The new start time of the effect or overlay
+     * @param newDurationMs The new duration of the effect or overlay
+     */
+    abstract void invalidateTransitions(long oldStartTimeMs, long oldDurationMs,
+            long newStartTimeMs, long newDurationMs);
+
+    /**
+     * Check if two items overlap in time
+     *
+     * @param startTimeMs1 Item 1 start time
+     * @param durationMs1 Item 1 duration
+     * @param startTimeMs2 Item 2 start time
+     * @param durationMs2 Item 2 end time
+     *
+     * @return true if the two items overlap
+     */
+    protected boolean isOverlapping(long startTimeMs1, long durationMs1,
+            long startTimeMs2, long durationMs2) {
+       if (startTimeMs1 + durationMs1 <= startTimeMs2) {
+           return false;
+       } else if (startTimeMs1 >= startTimeMs2 + durationMs2) {
+           return false;
+       }
+
+       return true;
+    }
+
+    /**
      * Adjust the duration transitions.
      */
     protected void adjustTransitions() {

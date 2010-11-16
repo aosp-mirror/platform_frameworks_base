@@ -96,9 +96,10 @@ public abstract class Overlay {
             throw new IllegalArgumentException("Duration is too large");
         }
 
+        final long oldDurationMs = mDurationMs;
         mDurationMs = durationMs;
 
-        mMediaItem.invalidateTransitions(mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(mStartTimeMs, oldDurationMs, mStartTimeMs, mDurationMs);
     }
 
     /**
@@ -120,9 +121,10 @@ public abstract class Overlay {
             throw new IllegalArgumentException("Start time is too large");
         }
 
+        final long oldStartTimeMs = mStartTimeMs;
         mStartTimeMs = startTimeMs;
 
-        mMediaItem.invalidateTransitions(mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(oldStartTimeMs, mDurationMs, mStartTimeMs, mDurationMs);
     }
 
     /**
@@ -136,10 +138,13 @@ public abstract class Overlay {
             throw new IllegalArgumentException("Invalid start time or duration");
         }
 
+        final long oldStartTimeMs = mStartTimeMs;
+        final long oldDurationMs = mDurationMs;
+
         mStartTimeMs = startTimeMs;
         mDurationMs = durationMs;
 
-        mMediaItem.invalidateTransitions(mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(oldStartTimeMs, oldDurationMs, mStartTimeMs, mDurationMs);
     }
 
     /**
