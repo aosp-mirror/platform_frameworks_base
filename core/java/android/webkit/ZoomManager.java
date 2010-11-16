@@ -510,6 +510,11 @@ class ZoomManager {
         }
     }
 
+    public boolean isDoubleTapEnabled() {
+        WebSettings settings = mWebView.getSettings();
+        return settings != null && settings.getUseWideViewPort();
+    }
+
     /**
      * The double tap gesture can result in different behaviors depending on the
      * content that is tapped.
@@ -528,7 +533,7 @@ class ZoomManager {
      */
     public void handleDoubleTap(float lastTouchX, float lastTouchY) {
         WebSettings settings = mWebView.getSettings();
-        if (settings == null || settings.getUseWideViewPort() == false) {
+        if (!isDoubleTapEnabled()) {
             return;
         }
 
@@ -808,7 +813,9 @@ class ZoomManager {
                 setZoomOverviewWidth(Math.min(WebView.sMaxViewportWidth,
                     Math.max((int) (viewWidth * mInvDefaultScale),
                             Math.max(drawData.mMinPrefWidth, drawData.mViewSize.x))));
-            } else {
+            } else if (drawData.mContentSize.x > 0) {
+                // The webkitDraw for layers will not populate contentSize, and it'll be
+                // ignored for zoom overview width update.
                 final int contentWidth = Math.max(drawData.mContentSize.x, drawData.mMinPrefWidth);
                 final int newZoomOverviewWidth = Math.min(WebView.sMaxViewportWidth, contentWidth);
                 if (newZoomOverviewWidth != mZoomOverviewWidth) {

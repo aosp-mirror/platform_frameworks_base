@@ -17,10 +17,25 @@
 package com.android.systemui.statusbar.tablet;
 
 import android.content.Context;
-import android.widget.LinearLayout;
 import android.util.AttributeSet;
+import android.util.Slog;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.view.View;
+import android.widget.FrameLayout;
 
-public class NotificationPanel extends LinearLayout implements StatusBarPanel {
+import com.android.systemui.R;
+
+public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
+        View.OnClickListener {
+    static final String TAG = "NotificationPanel";
+
+    View mSettingsButton;
+    View mNotificationButton;
+    View mNotificationScroller;
+    FrameLayout mSettingsFrame;
+    View mSettingsPanel;
 
     public NotificationPanel(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -30,12 +45,68 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel {
         super(context, attrs, defStyle);
     }
 
+    @Override
+    public void onFinishInflate() {
+        super.onFinishInflate();
+
+        mSettingsButton = (ImageView)findViewById(R.id.settings_button);
+        mSettingsButton.setOnClickListener(this);
+        mNotificationButton = (ImageView)findViewById(R.id.notification_button);
+        mNotificationButton.setOnClickListener(this);
+
+        mNotificationScroller = findViewById(R.id.notificationScroller);
+        mSettingsFrame = (FrameLayout)findViewById(R.id.settings_frame);
+    }
+
+    @Override
+    public void onVisibilityChanged(View v, int vis) {
+        super.onVisibilityChanged(v, vis);
+        // when we hide, put back the notifications
+        if (!isShown()) {
+            switchToNotificationMode();
+        }
+    }
+
+    public void onClick(View v) {
+        if (v == mSettingsButton) {
+            switchToSettingsMode();
+        } else if (v == mNotificationButton) {
+            switchToNotificationMode();
+        }
+    }
+
+    public void switchToSettingsMode() {
+        removeSettingsPanel();
+        addSettingsPanel();
+        mSettingsButton.setVisibility(View.INVISIBLE);
+        mNotificationScroller.setVisibility(View.GONE);
+        mNotificationButton.setVisibility(View.VISIBLE);
+    }
+
+    public void switchToNotificationMode() {
+        removeSettingsPanel();
+        mSettingsButton.setVisibility(View.VISIBLE);
+        mNotificationScroller.setVisibility(View.VISIBLE);
+        mNotificationButton.setVisibility(View.INVISIBLE);
+    }
+
     public boolean isInContentArea(int x, int y) {
         final int l = getPaddingLeft();
         final int r = getWidth() - getPaddingRight();
         final int t = getPaddingTop();
         final int b = getHeight() - getPaddingBottom();
         return x >= l && x < r && y >= t && y < b;
+    }
+
+    void removeSettingsPanel() {
+        if (mSettingsPanel != null) {
+            mSettingsFrame.removeViewAt(0);
+            mSettingsPanel = null;
+        }
+    }
+
+    void addSettingsPanel() {
+        mSettingsPanel = View.inflate(getContext(), R.layout.sysbar_panel_settings, mSettingsFrame);
     }
 }
 

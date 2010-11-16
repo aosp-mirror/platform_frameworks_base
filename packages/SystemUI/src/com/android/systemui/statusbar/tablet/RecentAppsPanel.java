@@ -45,11 +45,11 @@ import com.android.systemui.R;
 
 public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnClickListener {
     private static final String TAG = "RecentAppsPanel";
-    private static final boolean DEBUG = TabletStatusBarService.DEBUG;
+    private static final boolean DEBUG = TabletStatusBar.DEBUG;
     private static final int DISPLAY_TASKS = 4; // number of recent tasks to display
     private static final int MAX_TASKS = 2 * DISPLAY_TASKS; // give some slack for non-apps
     private static final boolean DBG = true;
-    private TabletStatusBarService mBar;
+    private TabletStatusBar mBar;
     private TextView mNoRecents;
     private LinearLayout mRecentsContainer;
     private ArrayList<ActivityDescription> mActivityDescriptions;
@@ -100,7 +100,7 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         return x >= l && x < r && y >= t && y < b;
     }
 
-    public void setBar(TabletStatusBarService bar) {
+    public void setBar(TabletStatusBar bar) {
         mBar = bar;
     }
 

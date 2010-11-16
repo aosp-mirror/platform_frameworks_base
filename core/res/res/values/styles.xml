@@ -155,12 +155,6 @@
         <item name="windowExitAnimation">@anim/shrink_fade_out_from_bottom</item>
     </style>
 
-    <!-- {@hide} -->
-    <style name="Animation.SlidingCard">
-        <item name="windowEnterAnimation">@anim/slide_in_up</item>
-        <item name="windowExitAnimation">@anim/slide_out_down</item>
-    </style>
-
     <!-- Window animations that are applied to input method overlay windows. -->
     <style name="Animation.InputMethod">
         <item name="windowEnterAnimation">@anim/input_method_enter</item>

@@ -60,7 +60,7 @@ class AACEncoder: public MediaSource {
             kNumSamplesPerFrame = 1024,
         };
 
-        int16_t           mInputFrame[kNumSamplesPerFrame];
+        int16_t           *mInputFrame;
 
         uint8_t           mAudioSpecificConfigData[2]; // auido specific data
         void             *mEncoderHandle;

@@ -15,7 +15,7 @@
     limitations under the License.
 -->
 
-<com.android.systemui.statusbar.TrackingView
+<com.android.systemui.statusbar.phone.TrackingView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:visibility="gone"
@@ -26,13 +26,13 @@
     android:paddingRight="0px"
     >
 
-    <com.android.systemui.statusbar.TrackingPatternView
+    <com.android.systemui.statusbar.phone.TrackingPatternView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         />
 
-    <com.android.systemui.statusbar.CloseDragHandle android:id="@+id/close"
+    <com.android.systemui.statusbar.phone.CloseDragHandle android:id="@+id/close"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -45,6 +45,6 @@
             android:src="@drawable/shade_handlebar"
             />
 
-    </com.android.systemui.statusbar.CloseDragHandle>
+    </com.android.systemui.statusbar.phone.CloseDragHandle>
 
-</com.android.systemui.statusbar.TrackingView>
+</com.android.systemui.statusbar.phone.TrackingView>

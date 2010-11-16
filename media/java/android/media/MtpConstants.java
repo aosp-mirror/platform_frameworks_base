@@ -21,6 +21,30 @@ package android.media;
  */
 public final class MtpConstants {
 
+// MTP Data Types
+    public static final int TYPE_UNDEFINED = 0x0000;
+    public static final int TYPE_INT8 = 0x0001;
+    public static final int TYPE_UINT8 = 0x0002;
+    public static final int TYPE_INT16 = 0x0003;
+    public static final int TYPE_UINT16 = 0x0004;
+    public static final int TYPE_INT32 = 0x0005;
+    public static final int TYPE_UINT32 = 0x0006;
+    public static final int TYPE_INT64 = 0x0007;
+    public static final int TYPE_UINT64 = 0x0008;
+    public static final int TYPE_INT128 = 0x0009;
+    public static final int TYPE_UINT128 = 0x000A;
+    public static final int TYPE_AINT8 = 0x4001;
+    public static final int TYPE_AUINT8 = 0x4002;
+    public static final int TYPE_AINT16 = 0x4003;
+    public static final int TYPE_AUINT16 = 0x4004;
+    public static final int TYPE_AINT32 = 0x4005;
+    public static final int TYPE_AUINT32 = 0x4006;
+    public static final int TYPE_AINT64 = 0x4007;
+    public static final int TYPE_AUINT64 = 0x4008;
+    public static final int TYPE_AINT128 = 0x4009;
+    public static final int TYPE_AUINT128 = 0x400A;
+    public static final int TYPE_STR = 0xFFFF;
+
 // MTP Response Codes
     public static final int RESPONSE_UNDEFINED = 0x2000;
     public static final int RESPONSE_OK = 0x2001;

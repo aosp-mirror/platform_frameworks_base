@@ -283,7 +283,9 @@ final class WebViewCore {
      */
     /* package */ static boolean isSupportedMediaMimeType(String mimeType) {
         int fileType = MediaFile.getFileTypeForMimeType(mimeType);
-        return MediaFile.isAudioFileType(fileType) || MediaFile.isVideoFileType(fileType);
+        return MediaFile.isAudioFileType(fileType)
+            || MediaFile.isVideoFileType(fileType)
+            || MediaFile.isPlayListFileType(fileType);
     }
 
     /**

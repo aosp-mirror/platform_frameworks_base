@@ -444,15 +444,51 @@ void ResStringPool::uninit()
     }
 }
 
-#define DECODE_LENGTH(str, chrsz, len) \
-    len = *(str); \
-    if (*(str)&(1<<(chrsz*8-1))) { \
-        (str)++; \
-        len = (((len)&((1<<(chrsz*8-1))-1))<<(chrsz*8)) + *(str); \
-    } \
-    (str)++;
+/**
+ * Strings in UTF-16 format have length indicated by a length encoded in the
+ * stored data. It is either 1 or 2 characters of length data. This allows a
+ * maximum length of 0x7FFFFFF (2147483647 bytes), but if you're storing that
+ * much data in a string, you're abusing them.
+ *
+ * If the high bit is set, then there are two characters or 4 bytes of length
+ * data encoded. In that case, drop the high bit of the first character and
+ * add it together with the next character.
+ */
+static inline size_t
+decodeLength(const char16_t** str)
+{
+    size_t len = **str;
+    if ((len & 0x8000) != 0) {
+        (*str)++;
+        len = ((len & 0x7FFF) << 16) | **str;
+    }
+    (*str)++;
+    return len;
+}
 
-const uint16_t* ResStringPool::stringAt(size_t idx, size_t* outLen) const
+/**
+ * Strings in UTF-8 format have length indicated by a length encoded in the
+ * stored data. It is either 1 or 2 characters of length data. This allows a
+ * maximum length of 0x7FFF (32767 bytes), but you should consider storing
+ * text in another way if you're using that much data in a single string.
+ *
+ * If the high bit is set, then there are two characters or 2 bytes of length
+ * data encoded. In that case, drop the high bit of the first character and
+ * add it together with the next character.
+ */
+static inline size_t
+decodeLength(const uint8_t** str)
+{
+    size_t len = **str;
+    if ((len & 0x80) != 0) {
+        (*str)++;
+        len = ((len & 0x7F) << 8) | **str;
+    }
+    (*str)++;
+    return len;
+}
+
+const uint16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
 {
     if (mError == NO_ERROR && idx < mHeader->stringCount) {
         const bool isUTF8 = (mHeader->flags&ResStringPool_header::UTF8_FLAG) != 0;
@@ -461,37 +497,51 @@ const uint16_t* ResStringPool::stringAt(size_t idx, size_t* outLen) const
             if (!isUTF8) {
                 const char16_t* strings = (char16_t*)mStrings;
                 const char16_t* str = strings+off;
-                DECODE_LENGTH(str, sizeof(char16_t), *outLen)
-                if ((uint32_t)(str+*outLen-strings) < mStringPoolSize) {
+
+                *u16len = decodeLength(&str);
+                if ((uint32_t)(str+*u16len-strings) < mStringPoolSize) {
                     return str;
                 } else {
                     LOGW("Bad string block: string #%d extends to %d, past end at %d\n",
-                            (int)idx, (int)(str+*outLen-strings), (int)mStringPoolSize);
+                            (int)idx, (int)(str+*u16len-strings), (int)mStringPoolSize);
                 }
             } else {
                 const uint8_t* strings = (uint8_t*)mStrings;
-                const uint8_t* str = strings+off;
-                DECODE_LENGTH(str, sizeof(uint8_t), *outLen)
-                size_t encLen;
-                DECODE_LENGTH(str, sizeof(uint8_t), encLen)
-                if ((uint32_t)(str+encLen-strings) < mStringPoolSize) {
+                const uint8_t* u8str = strings+off;
+
+                *u16len = decodeLength(&u8str);
+                size_t u8len = decodeLength(&u8str);
+
+                // encLen must be less than 0x7FFF due to encoding.
+                if ((uint32_t)(u8str+u8len-strings) < mStringPoolSize) {
                     AutoMutex lock(mDecodeLock);
+
                     if (mCache[idx] != NULL) {
                         return mCache[idx];
                     }
-                    char16_t *u16str = (char16_t *)calloc(*outLen+1, sizeof(char16_t));
+
+                    ssize_t actualLen = utf8_to_utf16_length(u8str, u8len);
+                    if (actualLen < 0 || (size_t)actualLen != *u16len) {
+                        LOGW("Bad string block: string #%lld decoded length is not correct "
+                                "%lld vs %llu\n",
+                                (long long)idx, (long long)actualLen, (long long)*u16len);
+                        return NULL;
+                    }
+
+                    char16_t *u16str = (char16_t *)calloc(*u16len+1, sizeof(char16_t));
                     if (!u16str) {
                         LOGW("No memory when trying to allocate decode cache for string #%d\n",
                                 (int)idx);
                         return NULL;
                     }
-                    const unsigned char *u8src = reinterpret_cast<const unsigned char *>(str);
-                    utf8_to_utf16(u8src, encLen, u16str, *outLen);
+
+                    utf8_to_utf16(u8str, u8len, u16str);
                     mCache[idx] = u16str;
                     return u16str;
                 } else {
-                    LOGW("Bad string block: string #%d extends to %d, past end at %d\n",
-                            (int)idx, (int)(str+encLen-strings), (int)mStringPoolSize);
+                    LOGW("Bad string block: string #%lld extends to %lld, past end at %lld\n",
+                            (long long)idx, (long long)(u8str+u8len-strings),
+                            (long long)mStringPoolSize);
                 }
             }
         } else {
@@ -512,9 +562,8 @@ const char* ResStringPool::string8At(size_t idx, size_t* outLen) const
             if (isUTF8) {
                 const uint8_t* strings = (uint8_t*)mStrings;
                 const uint8_t* str = strings+off;
-                DECODE_LENGTH(str, sizeof(uint8_t), *outLen)
-                size_t encLen;
-                DECODE_LENGTH(str, sizeof(uint8_t), encLen)
+                *outLen = decodeLength(&str);
+                size_t encLen = decodeLength(&str);
                 if ((uint32_t)(str+encLen-strings) < mStringPoolSize) {
                     return (const char*)str;
                 } else {

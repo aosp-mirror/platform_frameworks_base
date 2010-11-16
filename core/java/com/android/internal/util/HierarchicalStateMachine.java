@@ -28,64 +28,66 @@ import java.util.HashMap;
 /**
  * {@hide}
  *
- * A hierarchical state machine is a state machine which processes messages
- * and can have states arranged hierarchically. A state is a <code>HierarchicalState</code>
- * object and must implement <code>processMessage</code> and optionally <code>enter/exit/getName</code>.
+ * <p>A hierarchical state machine is a state machine which processes messages
+ * and can have states arranged hierarchically.</p>
+ * 
+ * <p>A state is a <code>HierarchicalState</code> object and must implement
+ * <code>processMessage</code> and optionally <code>enter/exit/getName</code>.
  * The enter/exit methods are equivalent to the construction and destruction
  * in Object Oriented programming and are used to perform initialization and
  * cleanup of the state respectively. The <code>getName</code> method returns the
  * name of the state the default implementation returns the class name it may be
  * desirable to have this return the name of the state instance name instead.
- * In particular if a particular state class has multiple instances.
+ * In particular if a particular state class has multiple instances.</p>
  *
- * When a state machine is created <code>addState</code> is used to build the
+ * <p>When a state machine is created <code>addState</code> is used to build the
  * hierarchy and <code>setInitialState</code> is used to identify which of these
  * is the initial state. After construction the programmer calls <code>start</code>
  * which initializes the state machine and calls <code>enter</code> for all of the initial
  * state's hierarchy, starting at its eldest parent. For example given the simple
  * state machine below after start is called mP1.enter will have been called and
- * then mS1.enter.
+ * then mS1.enter.</p>
 <code>
         mP1
        /   \
       mS2   mS1 ----> initial state
 </code>
- * After the state machine is created and started, messages are sent to a state
+ * <p>After the state machine is created and started, messages are sent to a state
  * machine using <code>sendMessage</code> and the messages are created using
  * <code>obtainMessage</code>. When the state machine receives a message the
  * current state's <code>processMessage</code> is invoked. In the above example
  * mS1.processMessage will be invoked first. The state may use <code>transitionTo</code>
- * to change the current state to a new state
+ * to change the current state to a new state</p>
  *
- * Each state in the state machine may have a zero or one parent states and if
+ * <p>Each state in the state machine may have a zero or one parent states and if
  * a child state is unable to handle a message it may have the message processed
  * by its parent by returning false or NOT_HANDLED. If a message is never processed
  * <code>unhandledMessage</code> will be invoked to give one last chance for the state machine
- * to process the message.
+ * to process the message.</p>
  *
- * When all processing is completed a state machine may choose to call
+ * <p>When all processing is completed a state machine may choose to call
  * <code>transitionToHaltingState</code>. When the current <code>processingMessage</code>
  * returns the state machine will transfer to an internal <code>HaltingState</code>
  * and invoke <code>halting</code>. Any message subsequently received by the state
- * machine will cause <code>haltedProcessMessage</code> to be invoked.
+ * machine will cause <code>haltedProcessMessage</code> to be invoked.</p>
  *
- * If it is desirable to completely stop the state machine call <code>quit</code>. This
+ * <p>If it is desirable to completely stop the state machine call <code>quit</code>. This
  * will exit the current state and its parent and then exit from the controlling thread
- * and no further messages will be processed.
+ * and no further messages will be processed.</p>
  *
- * In addition to <code>processMessage</code> each <code>HierarchicalState</code> has
- * an <code>enter</code> method and <code>exit</exit> method which may be overridden.
+ * <p>In addition to <code>processMessage</code> each <code>HierarchicalState</code> has
+ * an <code>enter</code> method and <code>exit</exit> method which may be overridden.</p>
  *
- * Since the states are arranged in a hierarchy transitioning to a new state
+ * <p>Since the states are arranged in a hierarchy transitioning to a new state
  * causes current states to be exited and new states to be entered. To determine
  * the list of states to be entered/exited the common parent closest to
  * the current state is found. We then exit from the current state and its
  * parent's up to but not including the common parent state and then enter all
  * of the new states below the common parent down to the destination state.
  * If there is no common parent all states are exited and then the new states
- * are entered.
+ * are entered.</p>
  *
- * Two other methods that states can use are <code>deferMessage</code> and
+ * <p>Two other methods that states can use are <code>deferMessage</code> and
  * <code>sendMessageAtFrontOfQueue</code>. The <code>sendMessageAtFrontOfQueue</code> sends
  * a message but places it on the front of the queue rather than the back. The
  * <code>deferMessage</code> causes the message to be saved on a list until a
@@ -93,10 +95,10 @@ import java.util.HashMap;
  * will be put on the front of the state machine queue with the oldest message
  * at the front. These will then be processed by the new current state before
  * any other messages that are on the queue or might be added later. Both of
- * these are protected and may only be invoked from within a state machine.
+ * these are protected and may only be invoked from within a state machine.</p>
  *
- * To illustrate some of these properties we'll use state machine with an 8
- * state hierarchy:
+ * <p>To illustrate some of these properties we'll use state machine with an 8
+ * state hierarchy:</p>
 <code>
           mP0
          /   \
@@ -106,22 +108,21 @@ import java.util.HashMap;
      /  \    \
     mS3  mS4  mS5  ---> initial state
 </code>
- *
- * After starting mS5 the list of active states is mP0, mP1, mS1 and mS5.
+ * <p>After starting mS5 the list of active states is mP0, mP1, mS1 and mS5.
  * So the order of calling processMessage when a message is received is mS5,
  * mS1, mP1, mP0 assuming each processMessage indicates it can't handle this
- * message by returning false or NOT_HANDLED.
+ * message by returning false or NOT_HANDLED.</p>
  *
- * Now assume mS5.processMessage receives a message it can handle, and during
+ * <p>Now assume mS5.processMessage receives a message it can handle, and during
  * the handling determines the machine should change states. It could call
  * transitionTo(mS4) and return true or HANDLED. Immediately after returning from
  * processMessage the state machine runtime will find the common parent,
  * which is mP1. It will then call mS5.exit, mS1.exit, mS2.enter and then
  * mS4.enter. The new list of active states is mP0, mP1, mS2 and mS4. So
- * when the next message is received mS4.processMessage will be invoked.
+ * when the next message is received mS4.processMessage will be invoked.</p>
  *
- * Now for some concrete examples, here is the canonical HelloWorld as an HSM.
- * It responds with "Hello World" being printed to the log for every message.
+ * <p>Now for some concrete examples, here is the canonical HelloWorld as an HSM.
+ * It responds with "Hello World" being printed to the log for every message.</p>
 <code>
 class HelloWorld extends HierarchicalStateMachine {
     Hsm1(String name) {
@@ -150,79 +151,76 @@ void testHelloWorld() {
     hw.sendMessage(hw.obtainMessage());
 }
 </code>
- *
- * A more interesting state machine is one with four states
- * with two independent parent states.
+ * <p>A more interesting state machine is one with four states
+ * with two independent parent states.</p>
 <code>
         mP1      mP2
        /   \
       mS2   mS1
 </code>
- *
- * Here is a description of this state machine using pseudo code.
- *
- *
- * state mP1 {
- *      enter { log("mP1.enter"); }
- *      exit { log("mP1.exit");  }
- *      on msg {
- *          CMD_2 {
- *              send(CMD_3);
- *              defer(msg);
- *              transitonTo(mS2);
- *              return HANDLED;
- *          }
- *          return NOT_HANDLED;
- *      }
- * }
- *
- * INITIAL
- * state mS1 parent mP1 {
- *      enter { log("mS1.enter"); }
- *      exit  { log("mS1.exit");  }
- *      on msg {
- *          CMD_1 {
- *              transitionTo(mS1);
- *              return HANDLED;
- *          }
- *          return NOT_HANDLED;
- *      }
- * }
- *
- * state mS2 parent mP1 {
- *      enter { log("mS2.enter"); }
- *      exit  { log("mS2.exit");  }
- *      on msg {
- *          CMD_2 {
- *              send(CMD_4);
- *              return HANDLED;
- *          }
- *          CMD_3 {
- *              defer(msg);
- *              transitionTo(mP2);
- *              return HANDLED;
- *          }
- *          return NOT_HANDLED;
- *      }
- * }
- *
- * state mP2 {
- *      enter {
- *          log("mP2.enter");
- *          send(CMD_5);
- *      }
- *      exit { log("mP2.exit"); }
- *      on msg {
- *          CMD_3, CMD_4 { return HANDLED; }
- *          CMD_5 {
- *              transitionTo(HaltingState);
- *              return HANDLED;
- *          }
- *          return NOT_HANDLED;
- *      }
- * }
- *
- * The implementation is below and also in HierarchicalStateMachineTest:
+ * <p>Here is a description of this state machine using pseudo code.</p>
+ <code>
+state mP1 {
+     enter { log("mP1.enter"); }
+     exit { log("mP1.exit");  }
+     on msg {
+         CMD_2 {
+             send(CMD_3);
+             defer(msg);
+             transitonTo(mS2);
+             return HANDLED;
+         }
+         return NOT_HANDLED;
+     }
+}
+
+INITIAL
+state mS1 parent mP1 {
+     enter { log("mS1.enter"); }
+     exit  { log("mS1.exit");  }
+     on msg {
+         CMD_1 {
+             transitionTo(mS1);
+             return HANDLED;
+         }
+         return NOT_HANDLED;
+     }
+}
+
+state mS2 parent mP1 {
+     enter { log("mS2.enter"); }
+     exit  { log("mS2.exit");  }
+     on msg {
+         CMD_2 {
+             send(CMD_4);
+             return HANDLED;
+         }
+         CMD_3 {
+             defer(msg);
+             transitionTo(mP2);
+             return HANDLED;
+         }
+         return NOT_HANDLED;
+     }
+}
+
+state mP2 {
+     enter {
+         log("mP2.enter");
+         send(CMD_5);
+     }
+     exit { log("mP2.exit"); }
+     on msg {
+         CMD_3, CMD_4 { return HANDLED; }
+         CMD_5 {
+             transitionTo(HaltingState);
+             return HANDLED;
+         }
+         return NOT_HANDLED;
+     }
+}
+</code>
+ * <p>The implementation is below and also in HierarchicalStateMachineTest:</p>
 <code>
 class Hsm1 extends HierarchicalStateMachine {
     private static final String TAG = "hsm1";
@@ -368,49 +366,47 @@ class Hsm1 extends HierarchicalStateMachine {
     P2 mP2 = new P2();
 }
 </code>
- *
- * If this is executed by sending two messages CMD_1 and CMD_2
- * (Note the synchronize is only needed because we use hsm.wait())
- *
- * Hsm1 hsm = makeHsm1();
- * synchronize(hsm) {
- *      hsm.sendMessage(obtainMessage(hsm.CMD_1));
- *      hsm.sendMessage(obtainMessage(hsm.CMD_2));
- *      try {
- *           // wait for the messages to be handled
- *           hsm.wait();
- *      } catch (InterruptedException e) {
- *           Log.e(TAG, "exception while waiting " + e.getMessage());
- *      }
- * }
- *
- *
- * The output is:
- *
- * D/hsm1    ( 1999): makeHsm1 E
- * D/hsm1    ( 1999): ctor E
- * D/hsm1    ( 1999): ctor X
- * D/hsm1    ( 1999): mP1.enter
- * D/hsm1    ( 1999): mS1.enter
- * D/hsm1    ( 1999): makeHsm1 X
- * D/hsm1    ( 1999): mS1.processMessage what=1
- * D/hsm1    ( 1999): mS1.exit
- * D/hsm1    ( 1999): mS1.enter
- * D/hsm1    ( 1999): mS1.processMessage what=2
- * D/hsm1    ( 1999): mP1.processMessage what=2
- * D/hsm1    ( 1999): mS1.exit
- * D/hsm1    ( 1999): mS2.enter
- * D/hsm1    ( 1999): mS2.processMessage what=2
- * D/hsm1    ( 1999): mS2.processMessage what=3
- * D/hsm1    ( 1999): mS2.exit
- * D/hsm1    ( 1999): mP1.exit
- * D/hsm1    ( 1999): mP2.enter
- * D/hsm1    ( 1999): mP2.processMessage what=3
- * D/hsm1    ( 1999): mP2.processMessage what=4
- * D/hsm1    ( 1999): mP2.processMessage what=5
- * D/hsm1    ( 1999): mP2.exit
- * D/hsm1    ( 1999): halting
- *
+ * <p>If this is executed by sending two messages CMD_1 and CMD_2
+ * (Note the synchronize is only needed because we use hsm.wait())</p>
+<code>
+Hsm1 hsm = makeHsm1();
+synchronize(hsm) {
+     hsm.sendMessage(obtainMessage(hsm.CMD_1));
+     hsm.sendMessage(obtainMessage(hsm.CMD_2));
+     try {
+          // wait for the messages to be handled
+          hsm.wait();
+     } catch (InterruptedException e) {
+          Log.e(TAG, "exception while waiting " + e.getMessage());
+     }
+}
+</code>
+ * <p>The output is:</p>
+<code>
+D/hsm1    ( 1999): makeHsm1 E
+D/hsm1    ( 1999): ctor E
+D/hsm1    ( 1999): ctor X
+D/hsm1    ( 1999): mP1.enter
+D/hsm1    ( 1999): mS1.enter
+D/hsm1    ( 1999): makeHsm1 X
+D/hsm1    ( 1999): mS1.processMessage what=1
+D/hsm1    ( 1999): mS1.exit
+D/hsm1    ( 1999): mS1.enter
+D/hsm1    ( 1999): mS1.processMessage what=2
+D/hsm1    ( 1999): mP1.processMessage what=2
+D/hsm1    ( 1999): mS1.exit
+D/hsm1    ( 1999): mS2.enter
+D/hsm1    ( 1999): mS2.processMessage what=2
+D/hsm1    ( 1999): mS2.processMessage what=3
+D/hsm1    ( 1999): mS2.exit
+D/hsm1    ( 1999): mP1.exit
+D/hsm1    ( 1999): mP2.enter
+D/hsm1    ( 1999): mP2.processMessage what=3
+D/hsm1    ( 1999): mP2.processMessage what=4
+D/hsm1    ( 1999): mP2.processMessage what=5
+D/hsm1    ( 1999): mP2.exit
+D/hsm1    ( 1999): halting
+</code>
  */
 public class HierarchicalStateMachine {
 

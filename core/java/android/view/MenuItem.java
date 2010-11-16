@@ -405,6 +405,11 @@ public interface MenuItem {
     
     /**
      * Sets how this item should display in the presence of an Action Bar.
+     * The parameter actionEnum is a flag set. One of {@link #SHOW_AS_ACTION_ALWAYS},
+     * {@link #SHOW_AS_ACTION_IF_ROOM}, or {@link #SHOW_AS_ACTION_NEVER} should
+     * be used, and you may optionally OR the value with {@link #SHOW_AS_ACTION_WITH_TEXT}.
+     * SHOW_AS_ACTION_WITH_TEXT requests that when the item is shown as an action,
+     * it should be shown with a text label.
      *
      * @param actionEnum How the item should display. One of
      * {@link #SHOW_AS_ACTION_ALWAYS}, {@link #SHOW_AS_ACTION_IF_ROOM}, or

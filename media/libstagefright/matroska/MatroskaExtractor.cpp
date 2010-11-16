@@ -22,13 +22,15 @@
 
 #include "mkvparser.hpp"
 
+#include <media/stagefright/foundation/ADebug.h>
+#include <media/stagefright/foundation/hexdump.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaBuffer.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
+#include <media/stagefright/Utils.h>
 #include <utils/String8.h>
 
 namespace android {
@@ -81,46 +83,6 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <ctype.h>
-static void hexdump(const void *_data, size_t size) {
-    const uint8_t *data = (const uint8_t *)_data;
-    size_t offset = 0;
-    while (offset < size) {
-        printf("0x%04x  ", offset);
-
-        size_t n = size - offset;
-        if (n > 16) {
-            n = 16;
-        }
-
-        for (size_t i = 0; i < 16; ++i) {
-            if (i == 8) {
-                printf(" ");
-            }
-
-            if (offset + i < size) {
-                printf("%02x ", data[offset + i]);
-            } else {
-                printf("   ");
-            }
-        }
-
-        printf(" ");
-
-        for (size_t i = 0; i < n; ++i) {
-            if (isprint(data[offset + i])) {
-                printf("%c", data[offset + i]);
-            } else {
-                printf(".");
-            }
-        }
-
-        printf("\n");
-
-        offset += 16;
-    }
-}
-
 struct BlockIterator {
     BlockIterator(mkvparser::Segment *segment, unsigned long trackNum);
 
@@ -167,6 +129,7 @@ private:
     size_t mTrackIndex;
     Type mType;
     BlockIterator mBlockIter;
+    size_t mNALSizeLen;  // for type AVC
 
     status_t advance();
 
@@ -180,13 +143,26 @@ MatroskaSource::MatroskaSource(
       mTrackIndex(index),
       mType(OTHER),
       mBlockIter(mExtractor->mSegment,
-                 mExtractor->mTracks.itemAt(index).mTrackNum) {
+                 mExtractor->mTracks.itemAt(index).mTrackNum),
+      mNALSizeLen(0) {
+    sp<MetaData> meta = mExtractor->mTracks.itemAt(index).mMeta;
+
     const char *mime;
-    CHECK(mExtractor->mTracks.itemAt(index).mMeta->
-            findCString(kKeyMIMEType, &mime));
+    CHECK(meta->findCString(kKeyMIMEType, &mime));
 
     if (!strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC)) {
         mType = AVC;
+
+        uint32_t dummy;
+        const uint8_t *avcc;
+        size_t avccSize;
+        CHECK(meta->findData(
+                    kKeyAVCC, &dummy, (const void **)&avcc, &avccSize));
+
+        CHECK_GE(avccSize, 5u);
+
+        mNALSizeLen = 1 + (avcc[4] & 3);
+        LOGV("mNALSizeLen = %d", mNALSizeLen);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC)) {
         mType = AAC;
     }
@@ -276,6 +252,10 @@ int64_t BlockIterator::blockTimeUs() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+static unsigned U24_AT(const uint8_t *ptr) {
+    return ptr[0] << 16 | ptr[1] << 8 | ptr[2];
+}
+
 status_t MatroskaSource::read(
         MediaBuffer **out, const ReadOptions *options) {
     *out = NULL;
@@ -286,6 +266,7 @@ status_t MatroskaSource::read(
         mBlockIter.seek(seekTimeUs);
     }
 
+again:
     if (mBlockIter.eos()) {
         return ERROR_END_OF_STREAM;
     }
@@ -294,38 +275,70 @@ status_t MatroskaSource::read(
     size_t size = block->GetSize();
     int64_t timeUs = mBlockIter.blockTimeUs();
 
-    MediaBuffer *buffer = new MediaBuffer(size + 2);
+    // In the case of AVC content, each NAL unit is prefixed by
+    // mNALSizeLen bytes of length. We want to prefix the data with
+    // a four-byte 0x00000001 startcode instead of the length prefix.
+    // mNALSizeLen ranges from 1 through 4 bytes, so add an extra
+    // 3 bytes of padding to the buffer start.
+    static const size_t kPadding = 3;
+
+    MediaBuffer *buffer = new MediaBuffer(size + kPadding);
     buffer->meta_data()->setInt64(kKeyTime, timeUs);
     buffer->meta_data()->setInt32(kKeyIsSyncFrame, block->IsKey());
 
     long res = block->Read(
-            mExtractor->mReader, (unsigned char *)buffer->data() + 2);
+            mExtractor->mReader, (unsigned char *)buffer->data() + kPadding);
 
     if (res != 0) {
         return ERROR_END_OF_STREAM;
     }
 
-    buffer->set_range(2, size);
+    buffer->set_range(kPadding, size);
 
     if (mType == AVC) {
-        CHECK(size >= 2);
+        CHECK_GE(size, mNALSizeLen);
 
         uint8_t *data = (uint8_t *)buffer->data();
 
-        unsigned NALsize = data[2] << 8 | data[3];
-        CHECK_EQ(size, NALsize + 2);
+        size_t NALsize;
+        switch (mNALSizeLen) {
+            case 1: NALsize = data[kPadding]; break;
+            case 2: NALsize = U16_AT(&data[kPadding]); break;
+            case 3: NALsize = U24_AT(&data[kPadding]); break;
+            case 4: NALsize = U32_AT(&data[kPadding]); break;
+            default:
+                TRESPASS();
+        }
 
-        memcpy(data, "\x00\x00\x00\x01", 4);
-        buffer->set_range(0, size + 2);
+        CHECK_GE(size, NALsize + mNALSizeLen);
+        if (size > NALsize + mNALSizeLen) {
+            LOGW("discarding %d bytes of data.", size - NALsize - mNALSizeLen);
+        }
+
+        // actual data starts at &data[kPadding + mNALSizeLen]
+
+        memcpy(&data[mNALSizeLen - 1], "\x00\x00\x00\x01", 4);
+        buffer->set_range(mNALSizeLen - 1, NALsize + 4);
     } else if (mType == AAC) {
         // There's strange junk at the beginning...
 
-        const uint8_t *data = (const uint8_t *)buffer->data() + 2;
+        const uint8_t *data = (const uint8_t *)buffer->data() + kPadding;
+
+        // hexdump(data, size);
+
         size_t offset = 0;
         while (offset < size && data[offset] != 0x21) {
             ++offset;
         }
-        buffer->set_range(2 + offset, size - offset);
+
+        if (size == offset) {
+            buffer->release();
+
+            mBlockIter.advance();
+            goto again;
+        }
+
+        buffer->set_range(kPadding + offset, size - offset);
     }
 
     *out = buffer;

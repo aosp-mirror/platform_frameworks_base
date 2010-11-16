@@ -5,6 +5,7 @@
 #include "include/NuHTTPDataSource.h"
 
 #include <cutils/properties.h>
+#include <media/stagefright/foundation/ALooper.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaErrors.h>
 
@@ -68,6 +69,9 @@ NuHTTPDataSource::NuHTTPDataSource()
       mOffset(0),
       mContentLength(0),
       mContentLengthValid(false),
+      mNumBandwidthHistoryItems(0),
+      mTotalTransferTimeUs(0),
+      mTotalTransferBytes(0),
       mDecryptHandle(NULL),
       mDrmManagerClient(NULL) {
 }
@@ -189,6 +193,20 @@ status_t NuHTTPDataSource::connect(
             return ERROR_IO;
         }
 
+        {
+            string value;
+            if (mHTTP.find_header_value("Transfer-Encoding", &value)) {
+                // We don't currently support any transfer encodings.
+
+                mState = DISCONNECTED;
+                mHTTP.disconnect();
+
+                LOGE("We don't support '%s' transfer encoding.", value.c_str());
+
+                return ERROR_UNSUPPORTED;
+            }
+        }
+
         applyTimeoutResponse();
 
         if (offset == 0) {
@@ -254,12 +272,17 @@ ssize_t NuHTTPDataSource::readAt(off_t offset, void *data, size_t size) {
 
     size_t numBytesRead = 0;
     while (numBytesRead < size) {
+        int64_t startTimeUs = ALooper::GetNowUs();
+
         ssize_t n =
             mHTTP.receive((uint8_t *)data + numBytesRead, size - numBytesRead);
 
         if (n < 0) {
             return n;
         }
+
+        int64_t delayUs = ALooper::GetNowUs() - startTimeUs;
+        addBandwidthMeasurement_l(n, delayUs);
 
         numBytesRead += (size_t)n;
 
@@ -342,6 +365,36 @@ void NuHTTPDataSource::applyTimeoutResponse() {
 
         LOGI("overriding default timeout, new timeout is %ld seconds", tmp);
         mHTTP.setReceiveTimeout(tmp);
+    }
+}
+
+bool NuHTTPDataSource::estimateBandwidth(int32_t *bandwidth_bps) {
+    Mutex::Autolock autoLock(mLock);
+
+    if (mNumBandwidthHistoryItems < 10) {
+        return false;
+    }
+
+    *bandwidth_bps = ((double)mTotalTransferBytes * 8E6 / mTotalTransferTimeUs);
+
+    return true;
+}
+
+void NuHTTPDataSource::addBandwidthMeasurement_l(
+        size_t numBytes, int64_t delayUs) {
+    BandwidthEntry entry;
+    entry.mDelayUs = delayUs;
+    entry.mNumBytes = numBytes;
+    mTotalTransferTimeUs += delayUs;
+    mTotalTransferBytes += numBytes;
+
+    mBandwidthHistory.push_back(entry);
+    if (++mNumBandwidthHistoryItems > 100) {
+        BandwidthEntry *entry = &*mBandwidthHistory.begin();
+        mTotalTransferTimeUs -= entry->mDelayUs;
+        mTotalTransferBytes -= entry->mNumBytes;
+        mBandwidthHistory.erase(mBandwidthHistory.begin());
+        --mNumBandwidthHistoryItems;
     }
 }
 

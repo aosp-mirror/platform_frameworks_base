@@ -2384,7 +2384,6 @@ public class WebView extends AbsoluteLayout
 
     Rect sendOurVisibleRect() {
         if (mZoomManager.isPreventingWebkitUpdates()) return mLastVisibleRectSent;
-
         Rect rect = new Rect();
         calcOurContentVisibleRect(rect);
         // Rect.equals() checks for null input.
@@ -2937,7 +2936,8 @@ public class WebView extends AbsoluteLayout
             postInvalidate();  // So we draw again
             if (oldX != mScrollX || oldY != mScrollY) {
                 onScrollChanged(mScrollX, mScrollY, oldX, oldY);
-            } else {
+            } else if (mScroller.getStartX() != mScrollX
+                    || mScroller.getStartY() != mScrollY) {
                 abortAnimation();
                 mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
                 WebViewCore.resumePriority();
@@ -2970,6 +2970,7 @@ public class WebView extends AbsoluteLayout
         if ((dx | dy) == 0) {
             return false;
         }
+        abortAnimation();
         if (animate) {
             //        Log.d(LOGTAG, "startScroll: " + dx + " " + dy);
             mScroller.startScroll(mScrollX, mScrollY, dx, dy,
@@ -2977,7 +2978,6 @@ public class WebView extends AbsoluteLayout
             awakenScrollBars(mScroller.getDuration());
             invalidate();
         } else {
-            abortAnimation(); // just in case
             scrollTo(x, y);
         }
         return true;

@@ -23,13 +23,6 @@
 
     <!-- System panel ("Quick Settings") -->
 
-    <!-- Text to display underneath the graphical battery meter. Should
-         include the word for "battery" and a place for the percentage charge
-         available. [CHAR LIMIT=20] -->
-    <string name="system_panel_battery_meter_format">
-        Battery: <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g>
-    </string>
-
     <!-- Text to display underneath the graphical signal strength meter when
          no connection is available. [CHAR LIMIT=20] -->
     <string name="system_panel_signal_meter_disconnected">
@@ -38,10 +31,9 @@
 
     <!-- Text to display underneath the graphical signal strength meter when
          it is displaying information about a connected, named Wi-Fi network.
-         Should include the word for "Wi-Fi" and a placeholder for the
-         wireless network's SSID. [CHAR LIMIT=20] -->
+         [CHAR LIMIT=20] -->
     <string name="system_panel_signal_meter_wifi_ssid_format">
-        Wi-Fi: <xliff:g id="ssid">%s</xliff:g>
+        <xliff:g id="ssid">%s</xliff:g>
     </string>
 
     <!-- Text to display underneath the graphical signal strength meter when

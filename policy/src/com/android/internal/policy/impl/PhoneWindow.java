@@ -411,6 +411,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     public final void openPanel(int featureId, KeyEvent event) {
         if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null &&
                 mActionBar.isOverflowReserved()) {
+            // Invalidate the options menu, we want a prepare event that the app can respond to.
+            invalidatePanelMenu(FEATURE_OPTIONS_PANEL);
             mActionBar.showOverflowMenu();
         } else {
             openPanel(getPanelState(featureId, true), event);
@@ -1830,7 +1832,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             final ActionMode.Callback wrappedCallback = new ActionModeCallbackWrapper(callback);
-            ActionMode mode = getCallback().onStartActionMode(wrappedCallback);
+            ActionMode mode = getCallback().onWindowStartingActionMode(wrappedCallback);
             if (mode != null) {
                 mActionMode = mode;
             } else {
@@ -1873,6 +1875,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         mActionMode = null;
                     }
                 }
+            }
+            if (mActionMode != null) {
+                getCallback().onActionModeStarted(mActionMode);
             }
             return mActionMode;
         }
@@ -2089,6 +2094,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (mActionModeView != null) {
                     mActionModeView.removeAllViews();
                 }
+                getCallback().onActionModeFinished(mActionMode);
                 mActionMode = null;
             }
         }

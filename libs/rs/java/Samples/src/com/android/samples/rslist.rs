@@ -46,7 +46,7 @@ int root(int launchID) {
     rsgBindFont(gItalic);
     color(0.2, 0.2, 0.2, 0);
 
-    rs_allocation listAlloc = {0};
+    rs_allocation listAlloc;
     rsSetObject(&listAlloc, rsGetAllocation(gList));
     int allocSize = rsAllocationGetDimX(listAlloc);
 
@@ -67,7 +67,6 @@ int root(int launchID) {
         }
         currentYPos += itemHeight;
     }
-    rsClearObject(&listAlloc);
 
     return 10;
 }

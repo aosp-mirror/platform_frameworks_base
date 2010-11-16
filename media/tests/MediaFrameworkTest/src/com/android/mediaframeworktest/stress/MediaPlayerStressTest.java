@@ -64,7 +64,7 @@ public class MediaPlayerStressTest extends ActivityInstrumentationTestCase2<Medi
 
         mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
         try {
-            assertTrue(MediaFrameworkTest.checkStreamingServer());
+            //assertTrue(MediaFrameworkTest.checkStreamingServer());
             for (int i = 0; i < NUMBER_OF_STRESS_LOOPS; i++) {
                 MediaPlayer mp = new MediaPlayer();
                 mp.setDataSource(MediaNames.STREAM_H264_480_360_1411k);

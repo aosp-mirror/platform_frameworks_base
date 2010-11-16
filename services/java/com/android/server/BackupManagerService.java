@@ -585,6 +585,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     }
                 }
             }
+            tf.close();
         } catch (FileNotFoundException fnf) {
             // Probably innocuous
             Slog.v(TAG, "No ancestral data");

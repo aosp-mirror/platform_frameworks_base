@@ -18,7 +18,7 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Name of the status bar as seen in the applications info settings page. [CHAR LIMIT=12] -->
-    <string name="app_label">Status Bar</string>
+    <string name="app_label">System UI</string>
 
     <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
@@ -74,6 +74,10 @@
     <!-- Name of the button that links to the Settings app. [CHAR LIMIT=NONE] -->
     <string name="system_panel_settings_button">Settings</string>
 
+    <!-- Text to display next to the graphical battery meter.  [CHAR LIMIT=3] -->
+    <string name="system_panel_battery_meter_format" translatable="false">
+        <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g>
+    </string>
 
     <!-- Recent Tasks dialog: title [CHAR LIMIT=30] -->
     <string name="recent_tasks_title">Recent</string>

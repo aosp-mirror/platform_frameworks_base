@@ -18,7 +18,7 @@
 */
 -->
 
-<com.android.systemui.statusbar.ExpandedView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.systemui.statusbar.phone.ExpandedView xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:focusable="true"
     android:descendantFocusability="afterDescendants"
@@ -33,7 +33,7 @@
         android:paddingRight="3dp"
         android:background="@drawable/shade_header_background"
         >
-        <com.android.systemui.statusbar.CarrierLabel
+        <com.android.systemui.statusbar.phone.CarrierLabel
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -72,7 +72,7 @@
             android:layout_height="match_parent"
             android:fadingEdge="none"
             >
-            <com.android.systemui.statusbar.NotificationLinearLayout
+            <LinearLayout
                 android:id="@+id/notificationLinearLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -115,7 +115,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     />
-            </com.android.systemui.statusbar.NotificationLinearLayout>
+            </LinearLayout>
         </ScrollView>
 
         <ImageView
@@ -126,4 +126,4 @@
         />
 
     </FrameLayout>
-</com.android.systemui.statusbar.ExpandedView>
+</com.android.systemui.statusbar.phone.ExpandedView>
