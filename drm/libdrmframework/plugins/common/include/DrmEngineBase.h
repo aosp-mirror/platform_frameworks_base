@@ -36,6 +36,8 @@ public:
 public:
     DrmConstraints* getConstraints(int uniqueId, const String8* path, int action);
 
+    DrmMetadata* getMetadata(int uniqueId, const String8* path);
+
     status_t initialize(int uniqueId);
 
     status_t setOnInfoListener(int uniqueId, const IDrmEngine::OnInfoListener* infoListener);
@@ -115,6 +117,18 @@ protected:
      */
     virtual DrmConstraints* onGetConstraints(
             int uniqueId, const String8* path, int action) = 0;
+
+    /**
+     * Get metadata information associated with input content
+     *
+     * @param[in] uniqueId Unique identifier for a session
+     * @param[in] path Path of the protected content
+     * @return DrmMetadata
+     *         key-value pairs of metadata
+     * @note
+     *     In case of error, return NULL
+     */
+    virtual DrmMetadata* onGetMetadata(int uniqueId, const String8* path) = 0;
 
     /**
      * Initialize plug-in

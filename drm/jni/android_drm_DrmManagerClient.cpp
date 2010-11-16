@@ -29,6 +29,7 @@
 #include <drm/DrmInfoRequest.h>
 #include <drm/DrmSupportInfo.h>
 #include <drm/DrmConstraints.h>
+#include <drm/DrmMetadata.h>
 #include <drm/DrmConvertedStatus.h>
 #include <drm/drm_framework_common.h>
 
@@ -296,6 +297,43 @@ static jobject android_drm_DrmManagerClient_getConstraintsFromContent(
     delete pConstraints; pConstraints = NULL;
     LOGV("GetConstraints - Exit");
     return constraints;
+}
+
+static jobject android_drm_DrmManagerClient_getMetadataFromContent(
+            JNIEnv* env, jobject thiz, jint uniqueId, jstring jpath) {
+    LOGV("GetMetadata - Enter");
+    const String8 pathString = Utility::getStringValue(env, jpath);
+    DrmMetadata* pMetadata =
+            getDrmManagerClientImpl(env, thiz)->getMetadata(uniqueId, &pathString);
+
+    jobject metadata = NULL;
+
+    jclass localRef = NULL;
+    localRef = env->FindClass("android/content/ContentValues");
+    if (NULL != localRef && NULL != pMetadata) {
+        // Get the constructor id
+        jmethodID constructorId = NULL;
+        constructorId = env->GetMethodID(localRef, "<init>", "()V");
+        if (NULL != constructorId) {
+            // create the java DrmMetadata object
+            metadata = env->NewObject(localRef, constructorId);
+            if (NULL != metadata) {
+                DrmMetadata::KeyIterator keyIt = pMetadata->keyIterator();
+                while (keyIt.hasNext()) {
+                    String8 key = keyIt.next();
+                    // insert the entry<constraintKey, constraintValue>
+                    // to newly created java object
+                    String8 value = pMetadata->get(key);
+                    env->CallVoidMethod(metadata, env->GetMethodID(localRef, "put",
+                            "(Ljava/lang/String;Ljava/lang/String;)V"),
+                    env->NewStringUTF(key.string()), env->NewStringUTF(value.string()));
+                }
+            }
+        }
+    }
+    delete pMetadata; pMetadata = NULL;
+    LOGV("GetMetadata - Exit");
+    return metadata;
 }
 
 static jobjectArray android_drm_DrmManagerClient_getAllSupportInfo(
@@ -681,6 +719,9 @@ static JNINativeMethod nativeMethods[] = {
 
     {"_getConstraints", "(ILjava/lang/String;I)Landroid/content/ContentValues;",
                                     (void*)android_drm_DrmManagerClient_getConstraintsFromContent},
+
+    {"_getMetadata", "(ILjava/lang/String;)Landroid/content/ContentValues;",
+                                    (void*)android_drm_DrmManagerClient_getMetadataFromContent},
 
     {"_getAllSupportInfo", "(I)[Landroid/drm/DrmSupportInfo;",
                                     (void*)android_drm_DrmManagerClient_getAllSupportInfo},

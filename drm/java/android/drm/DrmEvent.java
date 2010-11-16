@@ -31,14 +31,8 @@ public class DrmEvent {
      * Constant field signifies that given information is processed successfully
      */
     public static final int TYPE_DRM_INFO_PROCESSED = 1002;
-    /**
-     * Constant field signifies that the required information to communicate with
-     * the service is acquired sucessfully
-     */
-    public static final int TYPE_DRM_INFO_ACQUIRED = 1003;
 
     public static final String DRM_INFO_STATUS_OBJECT = "drm_info_status_object";
-    public static final String DRM_INFO_OBJECT = "drm_info_object";
 
     private final int mUniqueId;
     private final int mType;
