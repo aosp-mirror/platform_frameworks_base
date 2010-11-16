@@ -352,7 +352,7 @@ public class Allocation extends BaseObj {
         if (bc == Bitmap.Config.RGB_565) {
             return Element.RGB_565(rs);
         }
-        throw new RSInvalidStateException("Bad bitmap type.");
+        throw new RSInvalidStateException("Bad bitmap type: " + bc);
     }
 
     static private Type typeFromBitmap(RenderScript rs, Bitmap b) {
