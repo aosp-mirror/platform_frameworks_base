@@ -1626,6 +1626,13 @@ public class WebSettings {
         }
     }
 
+    /**
+     * @hide
+     */
+    public synchronized AutoFillProfile getAutoFillProfile() {
+        return mAutoFillProfile;
+    }
+
     int getDoubleTapToastCount() {
         return mDoubleTapToastCount;
     }
