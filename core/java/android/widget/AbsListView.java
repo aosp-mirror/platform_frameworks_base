@@ -2893,8 +2893,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     void reportScrollStateChange(int newState) {
         if (newState != mLastScrollState) {
             if (mOnScrollListener != null) {
-                mOnScrollListener.onScrollStateChanged(this, newState);
                 mLastScrollState = newState;
+                mOnScrollListener.onScrollStateChanged(this, newState);
             }
         }
     }
@@ -3431,12 +3431,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public void smoothScrollBy(int distance, int duration) {
         if (mFlingRunnable == null) {
             mFlingRunnable = new FlingRunnable();
-        } else {
-            mFlingRunnable.endFling();
         }
         // No sense starting to scroll if we're not going anywhere
         if (distance != 0) {
+            reportScrollStateChange(OnScrollListener.SCROLL_STATE_FLING);
             mFlingRunnable.startScroll(distance, duration);
+        } else {
+            mFlingRunnable.endFling();
         }
     }
 
