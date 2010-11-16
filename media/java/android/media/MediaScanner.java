@@ -434,24 +434,23 @@ public class MediaScanner
                 }
             }
 
-            mMimeType = null;
+            mMimeType = mimeType;
             mFileType = 0;
             mFileSize = fileSize;
 
             // try mimeType first, if it is specified
             if (mimeType != null) {
                 mFileType = MediaFile.getFileTypeForMimeType(mimeType);
-                if (mFileType != 0) {
-                    mMimeType = mimeType;
-                }
             }
 
             // if mimeType was not specified, compute file type based on file extension.
-            if (mMimeType == null) {
+            if (mFileType == 0) {
                 MediaFile.MediaFileType mediaFileType = MediaFile.getFileType(path);
                 if (mediaFileType != null) {
                     mFileType = mediaFileType.fileType;
-                    mMimeType = mediaFileType.mimeType;
+                    if (mMimeType == null) {
+                        mMimeType = mediaFileType.mimeType;
+                    }
                 }
             }
 
