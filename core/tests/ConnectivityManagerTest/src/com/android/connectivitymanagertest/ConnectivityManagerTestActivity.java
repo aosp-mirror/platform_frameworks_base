@@ -16,8 +16,10 @@
 
 package com.android.connectivitymanagertest;
 
+import com.android.connectivitymanagertest.R;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -25,18 +27,21 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
+
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import android.widget.LinearLayout;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 
+import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
-
 
 /**
  * An activity registered with connectivity manager broadcast
@@ -46,8 +51,11 @@ import android.net.wifi.WifiConfiguration.KeyMgmt;
 public class ConnectivityManagerTestActivity extends Activity {
 
     public static final String LOG_TAG = "ConnectivityManagerTestActivity";
-    public static final int WAIT_FOR_SCAN_RESULT = 5 * 1000; //5 seconds
+    public static final int WAIT_FOR_SCAN_RESULT = 10 * 1000; //10 seconds
     public static final int WIFI_SCAN_TIMEOUT = 20 * 1000;
+    public static final int SHORT_TIMEOUT = 5 * 1000;
+    public static final long LONG_TIMEOUT = 50 * 1000;
+    private static final String ACCESS_POINT_FILE = "accesspoints.xml";
     public ConnectivityReceiver mConnectivityReceiver = null;
     public WifiReceiver mWifiReceiver = null;
     /*
@@ -175,6 +183,7 @@ public class ConnectivityManagerTestActivity extends Activity {
         mIntentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         mIntentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         mIntentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        mIntentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
         registerReceiver(mWifiReceiver, mIntentFilter);
 
         // Get an instance of ConnectivityManager
@@ -185,9 +194,25 @@ public class ConnectivityManagerTestActivity extends Activity {
 
         if (mWifiManager.isWifiEnabled()) {
             Log.v(LOG_TAG, "Clear Wifi before we start the test.");
-            clearWifi();
+            removeConfiguredNetworksAndDisableWifi();
         }
      }
+
+    public List<WifiConfiguration> loadNetworkConfigurations() throws Exception {
+        InputStream in = getAssets().open(ACCESS_POINT_FILE);
+        AccessPointParserHelper parseHelper = new AccessPointParserHelper();
+        return parseHelper.processAccessPoint(in);
+    }
+
+    private void printNetConfig(String[] configuration) {
+        for (int i = 0; i < configuration.length; i++) {
+            if (i == 0) {
+                Log.v(LOG_TAG, "SSID: " + configuration[0]);
+            } else {
+                Log.v(LOG_TAG, "      " + configuration[i]);
+            }
+        }
+    }
 
     // for each network type, initialize network states to UNKNOWN, and no verification flag is set
     public void initializeNetworkStates() {
@@ -245,6 +270,68 @@ public class ConnectivityManagerTestActivity extends Activity {
         }
     }
 
+    // Wait for network connectivity state: CONNECTING, CONNECTED, SUSPENDED,
+    //                                      DISCONNECTING, DISCONNECTED, UNKNOWN
+    public boolean waitForNetworkState(int networkType, State expectedState, long timeout) {
+        long startTime = System.currentTimeMillis();
+        while (true) {
+            if ((System.currentTimeMillis() - startTime) > timeout) {
+                if (mCM.getNetworkInfo(networkType).getState() != expectedState) {
+                    return false;
+                } else {
+                    // the broadcast has been sent out. the state has been changed.
+                    Log.v(LOG_TAG, "networktype: " + networkType + " state: " +
+                            mCM.getNetworkInfo(networkType));
+                    return true;
+                }
+            }
+            Log.v(LOG_TAG, "Wait for the connectivity state for network: " + networkType +
+                    " to be " + expectedState.toString());
+            synchronized (connectivityObject) {
+                try {
+                    connectivityObject.wait(SHORT_TIMEOUT);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if ((mNetworkInfo.getType() != networkType) ||
+                    (mNetworkInfo.getState() != expectedState)) {
+                    Log.v(LOG_TAG, "network state for " + mNetworkInfo.getType() +
+                            "is: " + mNetworkInfo.getState());
+                    continue;
+                }
+                return true;
+            }
+        }
+    }
+
+    // Wait for Wifi state: WIFI_STATE_DISABLED, WIFI_STATE_DISABLING, WIFI_STATE_ENABLED,
+    //                      WIFI_STATE_ENALBING, WIFI_STATE_UNKNOWN
+    public boolean waitForWifiState(int expectedState, long timeout) {
+        long startTime = System.currentTimeMillis();
+        while (true) {
+            if ((System.currentTimeMillis() - startTime) > timeout) {
+                if (mWifiState != expectedState) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+            Log.v(LOG_TAG, "Wait for wifi state to be: " + expectedState);
+            synchronized (wifiObject) {
+                try {
+                    wifiObject.wait(SHORT_TIMEOUT);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (mWifiState != expectedState) {
+                    Log.v(LOG_TAG, "Wifi state is: " + mWifiNetworkInfo.getState());
+                    continue;
+                }
+                return true;
+            }
+        }
+    }
+
     // Return true if device is currently connected to mobile network
     public boolean isConnectedToMobile() {
         return (mNetworkInfo.getType() == ConnectivityManager.TYPE_MOBILE);
@@ -265,6 +352,22 @@ public class ConnectivityManagerTestActivity extends Activity {
      * We don't verify whether the connection is successful or not, leave this to the test
      */
     public boolean connectToWifi(String knownSSID) {
+        WifiConfiguration config = new WifiConfiguration();
+        config.SSID = knownSSID;
+        config.allowedKeyManagement.set(KeyMgmt.NONE);
+        return connectToWifiWithConfiguration(config);
+    }
+
+    /**
+     * Connect to Wi-Fi with the given configuration. Note the SSID in the configuration
+     * is pure string, we need to convert it to quoted string.
+     * @param config
+     * @return
+     */
+    public boolean connectToWifiWithConfiguration(WifiConfiguration config) {
+        String ssid = config.SSID;
+        config.SSID = convertToQuotedString(ssid);
+
         //If Wifi is not enabled, enable it
         if (!mWifiManager.isWifiEnabled()) {
             Log.v(LOG_TAG, "Wifi is not enabled, enable it");
@@ -273,6 +376,7 @@ public class ConnectivityManagerTestActivity extends Activity {
 
         List<ScanResult> netList = mWifiManager.getScanResults();
         if (netList == null) {
+            Log.v(LOG_TAG, "scan results are null");
             // if no scan results are available, start active scan
             mWifiManager.startScanActive();
             mScanResultIsAvailable = false;
@@ -299,17 +403,20 @@ public class ConnectivityManagerTestActivity extends Activity {
         }
 
         netList = mWifiManager.getScanResults();
+
         for (int i = 0; i < netList.size(); i++) {
             ScanResult sr= netList.get(i);
-            if (sr.SSID.equals(knownSSID)) {
-                Log.v(LOG_TAG, "found " + knownSSID + " in the scan result list");
-                WifiConfiguration config = new WifiConfiguration();
-                config.SSID = convertToQuotedString(sr.SSID);
-                config.allowedKeyManagement.set(KeyMgmt.NONE);
+            if (sr.SSID.equals(ssid)) {
+                Log.v(LOG_TAG, "found " + ssid + " in the scan result list");
                 int networkId = mWifiManager.addNetwork(config);
                 // Connect to network by disabling others.
                 mWifiManager.enableNetwork(networkId, true);
                 mWifiManager.saveConfiguration();
+                List<WifiConfiguration> wifiNetworks = mWifiManager.getConfiguredNetworks();
+                for (WifiConfiguration netConfig : wifiNetworks) {
+                    Log.v(LOG_TAG, netConfig.toString());
+                }
+
                 mWifiManager.reconnect();
                 break;
            }
@@ -317,14 +424,14 @@ public class ConnectivityManagerTestActivity extends Activity {
 
         List<WifiConfiguration> netConfList = mWifiManager.getConfiguredNetworks();
         if (netConfList.size() <= 0) {
-            Log.v(LOG_TAG, knownSSID + " is not available");
+            Log.v(LOG_TAG, ssid + " is not available");
             return false;
         }
         return true;
     }
 
     /*
-     * Disconnect from the current AP
+     * Disconnect from the current AP and remove configured networks.
      */
     public boolean disconnectAP() {
         if (mWifiManager.isWifiEnabled()) {
@@ -360,9 +467,9 @@ public class ConnectivityManagerTestActivity extends Activity {
     }
 
     /**
-     * Disconnect from the current Wifi and clear the configuration list
+     * Remove configured networks and disable wifi
      */
-    public boolean clearWifi() {
+    public boolean removeConfiguredNetworksAndDisableWifi() {
             if (!disconnectAP()) {
                 return false;
             }
