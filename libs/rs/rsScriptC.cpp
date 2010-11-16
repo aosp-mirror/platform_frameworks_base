@@ -65,12 +65,11 @@ void ScriptC::setupScript(Context *rsc) {
         void **dest = ((void ***)mEnviroment.mFieldAddress)[ct];
 
         if (rsc->props.mLogScripts) {
-            LOGV("%p ScriptC::setupScript slot=%i  dst=%p  src=%p  type=%p", rsc, ct, dest, ptr, mSlots[ct]->getType());
-
-            //const uint32_t *p32 = (const uint32_t *)ptr;
-            //for (uint32_t ct2=0; ct2 < mSlots[ct]->getType()->getDimX(); ct2++) {
-                //LOGE("  %i = 0x%08x ", ct2, p32[ct2]);
-            //}
+            if (mSlots[ct].get() != NULL) {
+                LOGV("%p ScriptC::setupScript slot=%i  dst=%p  src=%p  type=%p", rsc, ct, dest, ptr, mSlots[ct]->getType());
+            } else {
+                LOGV("%p ScriptC::setupScript slot=%i  dst=%p  src=%p  type=null", rsc, ct, dest, ptr);
+            }
         }
 
         if (dest) {
