@@ -6443,7 +6443,8 @@ public class WebView extends AbsoluteLayout
                         mUserScroll = false;
                         break;
                     }
-                    // fall through
+                    setContentScrollTo(msg.arg1, msg.arg2);
+                    break;
                 case SCROLL_TO_MSG_ID:
                     if (setContentScrollTo(msg.arg1, msg.arg2)) {
                         // if we can't scroll to the exact position due to pin,
