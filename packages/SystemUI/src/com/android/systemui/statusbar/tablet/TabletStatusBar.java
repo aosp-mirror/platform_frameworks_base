@@ -99,7 +99,7 @@ public class TabletStatusBar extends StatusBar {
     InputMethodButton mInputMethodButton;
 
     NotificationPanel mNotificationPanel;
-    NotificationPanel mNotificationPeekWindow;
+    NotificationPeekPanel mNotificationPeekWindow;
     ViewGroup mNotificationPeekRow;
     int mNotificationPeekIndex;
     LayoutTransition mNotificationPeekScrubLeft, mNotificationPeekScrubRight;
@@ -166,7 +166,7 @@ public class TabletStatusBar extends StatusBar {
         WindowManagerImpl.getDefault().addView(mNotificationPanel, lp);
 
         // Notification preview window
-        mNotificationPeekWindow = (NotificationPanel) View.inflate(context,
+        mNotificationPeekWindow = (NotificationPeekPanel) View.inflate(context,
                 R.layout.sysbar_panel_notification_peek, null);
         mNotificationPeekRow = (ViewGroup) mNotificationPeekWindow.findViewById(R.id.content);
         mNotificationPeekWindow.setVisibility(View.GONE);

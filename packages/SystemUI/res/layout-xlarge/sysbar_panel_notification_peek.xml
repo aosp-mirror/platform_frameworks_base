@@ -19,7 +19,7 @@
 -->
 
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
-<com.android.systemui.statusbar.tablet.NotificationPanel
+<com.android.systemui.statusbar.tablet.NotificationPeekPanel
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
@@ -40,4 +40,4 @@
         android:descendantFocusability="afterDescendants"
         >
     </FrameLayout>
-</com.android.systemui.statusbar.tablet.NotificationPanel>
+</com.android.systemui.statusbar.tablet.NotificationPeekPanel>
