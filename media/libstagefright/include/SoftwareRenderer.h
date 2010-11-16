@@ -19,15 +19,13 @@
 #define SOFTWARE_RENDERER_H_
 
 #include <media/stagefright/ColorConverter.h>
-#include <media/stagefright/VideoRenderer.h>
 #include <utils/RefBase.h>
 
 namespace android {
 
 class Surface;
-class MemoryHeapBase;
 
-class SoftwareRenderer : public VideoRenderer {
+class SoftwareRenderer {
 public:
     SoftwareRenderer(
             OMX_COLOR_FORMATTYPE colorFormat,
@@ -35,9 +33,9 @@ public:
             size_t displayWidth, size_t displayHeight,
             size_t decodedWidth, size_t decodedHeight);
 
-    virtual ~SoftwareRenderer();
+    ~SoftwareRenderer();
 
-    virtual void render(
+    void render(
             const void *data, size_t size, void *platformPrivate);
 
 private:
