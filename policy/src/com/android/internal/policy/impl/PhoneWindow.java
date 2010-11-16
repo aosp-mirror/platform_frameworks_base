@@ -411,6 +411,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     public final void openPanel(int featureId, KeyEvent event) {
         if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null &&
                 mActionBar.isOverflowReserved()) {
+            // Invalidate the options menu, we want a prepare event that the app can respond to.
+            invalidatePanelMenu(FEATURE_OPTIONS_PANEL);
             mActionBar.showOverflowMenu();
         } else {
             openPanel(getPanelState(featureId, true), event);
