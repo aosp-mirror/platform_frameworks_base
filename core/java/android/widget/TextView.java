@@ -305,6 +305,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     int mTextSelectHandleRes;
     int mTextEditPasteWindowLayout;
     int mTextEditNoPasteWindowLayout;
+    Drawable mEditTextMultilineBackground;
+    Drawable mEditTextSingleLineBackground;
 
     Drawable mSelectHandleLeft;
     Drawable mSelectHandleRight;
@@ -751,6 +753,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mTextEditNoPasteWindowLayout = a.getResourceId(attr, 0);
                 break;
 
+            case com.android.internal.R.styleable.TextView_multilineBackground:
+                mEditTextMultilineBackground = a.getDrawable(attr);
+                break;
+
             case com.android.internal.R.styleable.TextView_textLineHeight:
                 int lineHeight = a.getDimensionPixelSize(attr, 0);
                 if (lineHeight != 0) {
@@ -765,6 +771,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         a.recycle();
 
+        mEditTextSingleLineBackground = getBackground();
         BufferType bufferType = BufferType.EDITABLE;
 
         final int variation =
@@ -6192,12 +6199,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (applyTransformation) {
                 setTransformationMethod(SingleLineTransformationMethod.getInstance());
             }
+            setBackgroundDrawable(mEditTextSingleLineBackground);
         } else {
             setMaxLines(Integer.MAX_VALUE);
             setHorizontallyScrolling(false);
             if (applyTransformation) {
                 setTransformationMethod(null);
             }
+            setBackgroundDrawable(mEditTextMultilineBackground);
         }
     }
     
