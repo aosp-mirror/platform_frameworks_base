@@ -16,6 +16,7 @@
 
 package com.android.providers.settings;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -27,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.zip.CRC32;
 
@@ -352,10 +354,11 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     }
 
     private byte[] getWifiSupplicant(String filename) {
+        BufferedReader br = null;
         try {
             File file = new File(filename);
             if (file.exists()) {
-                BufferedReader br = new BufferedReader(new FileReader(file));
+                br = new BufferedReader(new FileReader(file));
                 StringBuffer relevantLines = new StringBuffer();
                 boolean started = false;
                 String line;
@@ -378,6 +381,13 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         } catch (IOException ioe) {
             Log.w(TAG, "Couldn't backup " + filename);
             return EMPTY_DATA;
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                }
+            }
         }
     }
 
@@ -390,9 +400,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             if (supplicantFile.exists()) supplicantFile.delete();
             copyWifiSupplicantTemplate();
 
-            FileOutputStream fos = new FileOutputStream(filename, true);
-            fos.write("\n".getBytes());
-            fos.write(bytes);
+            OutputStream os = new BufferedOutputStream(new FileOutputStream(filename, true));
+            os.write("\n".getBytes());
+            os.write(bytes);
+            os.close();
         } catch (IOException ioe) {
             Log.w(TAG, "Couldn't restore " + filename);
         }
