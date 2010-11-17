@@ -33,8 +33,6 @@ public class BallsRS {
     private ProgramFragment mPFLines;
     private ProgramFragment mPFPoints;
     private ProgramVertex mPV;
-    private ProgramRaster mPR;
-    private ProgramStore mPS;
     private ScriptField_Point mPoints;
     private ScriptField_Point mArcs;
     private ScriptField_VpConsts mVpConsts;
@@ -46,12 +44,6 @@ public class BallsRS {
         mvp.loadOrtho(0, mRS.getWidth(), mRS.getHeight(), 0, -1, 1);
         i.MVP = mvp;
         mVpConsts.set(i, 0, true);
-    }
-
-    private void createProgramRaster() {
-        ProgramRaster.Builder b = new ProgramRaster.Builder(mRS);
-        mPR = b.create();
-        mScript.set_gPR(mPR);
     }
 
     private void createProgramVertex() {
@@ -71,7 +63,7 @@ public class BallsRS {
         sb.addInput(mPoints.getElement());
         ProgramVertex pvs = sb.create();
         pvs.bindConstants(mVpConsts.getAllocation(), 0);
-        mScript.set_gPV(pvs);
+        mRS.contextBindProgramVertex(pvs);
     }
 
     private Allocation loadTexture(int id) {
@@ -125,10 +117,8 @@ public class BallsRS {
         mScript.set_gPFLines(mPFLines);
         mScript.set_gPFPoints(mPFPoints);
         createProgramVertex();
-        createProgramRaster();
 
-        mPS = ProgramStore.BLEND_ADD_DEPTH_NO_DEPTH(mRS);
-        mScript.set_gPS(mPS);
+        mRS.contextBindProgramStore(ProgramStore.BLEND_ADD_DEPTH_NO_DEPTH(mRS));
 
         mPhysicsScript.set_gMinPos(new Float2(5, 5));
         mPhysicsScript.set_gMaxPos(new Float2(width - 5, height - 5));

@@ -262,21 +262,27 @@ void Context::deinitEGL() {
     }
 }
 
+Context::PushState::PushState(Context *con) {
+    mRsc = con;
+    mFragment.set(con->getProgramFragment());
+    mVertex.set(con->getProgramVertex());
+    mStore.set(con->getProgramStore());
+    mRaster.set(con->getProgramRaster());
+}
+
+Context::PushState::~PushState() {
+    mRsc->setProgramFragment(mFragment.get());
+    mRsc->setProgramVertex(mVertex.get());
+    mRsc->setProgramStore(mStore.get());
+    mRsc->setProgramRaster(mRaster.get());
+    mRsc->setFont(mFont.get());
+}
+
 
 uint32_t Context::runScript(Script *s) {
-    ObjectBaseRef<ProgramFragment> frag(mFragment);
-    ObjectBaseRef<ProgramVertex> vtx(mVertex);
-    ObjectBaseRef<ProgramStore> store(mFragmentStore);
-    ObjectBaseRef<ProgramRaster> raster(mRaster);
-    ObjectBaseRef<Font> font(mFont);
+    PushState(this);
 
     uint32_t ret = s->run(this);
-
-    mFragment.set(frag);
-    mVertex.set(vtx);
-    mFragmentStore.set(store);
-    mRaster.set(raster);
-    mFont.set(font);
     return ret;
 }
 
@@ -441,13 +447,13 @@ void * Context::threadProc(void *vrsc) {
      rsc->mScriptC.init(rsc);
      if (rsc->mIsGraphicsContext) {
          rsc->mStateRaster.init(rsc);
-         rsc->setRaster(NULL);
+         rsc->setProgramRaster(NULL);
          rsc->mStateVertex.init(rsc);
-         rsc->setVertex(NULL);
+         rsc->setProgramVertex(NULL);
          rsc->mStateFragment.init(rsc);
-         rsc->setFragment(NULL);
+         rsc->setProgramFragment(NULL);
          rsc->mStateFragmentStore.init(rsc);
-         rsc->setFragmentStore(NULL);
+         rsc->setProgramStore(NULL);
          rsc->mStateFont.init(rsc);
          rsc->setFont(NULL);
          rsc->mStateVertexArray.init(rsc);
@@ -753,7 +759,7 @@ void Context::setRootScript(Script *s) {
     mRootScript.set(s);
 }
 
-void Context::setFragmentStore(ProgramStore *pfs) {
+void Context::setProgramStore(ProgramStore *pfs) {
     rsAssert(mIsGraphicsContext);
     if (pfs == NULL) {
         mFragmentStore.set(mStateFragmentStore.mDefault);
@@ -762,7 +768,7 @@ void Context::setFragmentStore(ProgramStore *pfs) {
     }
 }
 
-void Context::setFragment(ProgramFragment *pf) {
+void Context::setProgramFragment(ProgramFragment *pf) {
     rsAssert(mIsGraphicsContext);
     if (pf == NULL) {
         mFragment.set(mStateFragment.mDefault);
@@ -771,7 +777,7 @@ void Context::setFragment(ProgramFragment *pf) {
     }
 }
 
-void Context::setRaster(ProgramRaster *pr) {
+void Context::setProgramRaster(ProgramRaster *pr) {
     rsAssert(mIsGraphicsContext);
     if (pr == NULL) {
         mRaster.set(mStateRaster.mDefault);
@@ -780,7 +786,7 @@ void Context::setRaster(ProgramRaster *pr) {
     }
 }
 
-void Context::setVertex(ProgramVertex *pv) {
+void Context::setProgramVertex(ProgramVertex *pv) {
     rsAssert(mIsGraphicsContext);
     if (pv == NULL) {
         mVertex.set(mStateVertex.mDefault);
@@ -951,22 +957,22 @@ void rsi_ContextBindSampler(Context *rsc, uint32_t slot, RsSampler vs) {
 
 void rsi_ContextBindProgramStore(Context *rsc, RsProgramStore vpfs) {
     ProgramStore *pfs = static_cast<ProgramStore *>(vpfs);
-    rsc->setFragmentStore(pfs);
+    rsc->setProgramStore(pfs);
 }
 
 void rsi_ContextBindProgramFragment(Context *rsc, RsProgramFragment vpf) {
     ProgramFragment *pf = static_cast<ProgramFragment *>(vpf);
-    rsc->setFragment(pf);
+    rsc->setProgramFragment(pf);
 }
 
 void rsi_ContextBindProgramRaster(Context *rsc, RsProgramRaster vpr) {
     ProgramRaster *pr = static_cast<ProgramRaster *>(vpr);
-    rsc->setRaster(pr);
+    rsc->setProgramRaster(pr);
 }
 
 void rsi_ContextBindProgramVertex(Context *rsc, RsProgramVertex vpv) {
     ProgramVertex *pv = static_cast<ProgramVertex *>(vpv);
-    rsc->setVertex(pv);
+    rsc->setProgramVertex(pv);
 }
 
 void rsi_ContextBindFont(Context *rsc, RsFont vfont) {
