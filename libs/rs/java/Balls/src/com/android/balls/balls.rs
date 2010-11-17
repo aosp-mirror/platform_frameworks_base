@@ -4,13 +4,11 @@
 
 #include "balls.rsh"
 
-#pragma stateFragment(parent)
+#pragma stateVertex(parent)
+#pragma stateStore(parent)
 
 rs_program_fragment gPFPoints;
 rs_program_fragment gPFLines;
-rs_program_vertex gPV;
-rs_program_raster gPR;
-rs_program_store gPS;
 rs_mesh partMesh;
 rs_mesh arcMesh;
 
@@ -95,9 +93,6 @@ int root() {
 
     frame++;
     rsgBindProgramFragment(gPFLines);
-    rsgBindProgramVertex(gPV);
-    rsgBindProgramRaster(gPR);
-    rsgBindProgramStore(gPS);
     rsgDrawMesh(arcMesh, 0, 0, arcIdx);
     rsgBindProgramFragment(gPFPoints);
     rsgDrawMesh(partMesh);

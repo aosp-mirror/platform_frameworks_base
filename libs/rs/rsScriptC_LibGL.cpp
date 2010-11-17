@@ -92,17 +92,17 @@ static void SC_bindProgramRaster(RsProgramRaster pv) {
 
 static void SC_vpLoadProjectionMatrix(const rsc_Matrix *m) {
     GET_TLS();
-    rsc->getVertex()->setProjectionMatrix(rsc, m);
+    rsc->getProgramVertex()->setProjectionMatrix(rsc, m);
 }
 
 static void SC_vpLoadModelMatrix(const rsc_Matrix *m) {
     GET_TLS();
-    rsc->getVertex()->setModelviewMatrix(rsc, m);
+    rsc->getProgramVertex()->setModelviewMatrix(rsc, m);
 }
 
 static void SC_vpLoadTextureMatrix(const rsc_Matrix *m) {
     GET_TLS();
-    rsc->getVertex()->setTextureMatrix(rsc, m);
+    rsc->getProgramVertex()->setTextureMatrix(rsc, m);
 }
 
 static void SC_pfConstantColor(RsProgramFragment vpf, float r, float g, float b, float a) {
@@ -114,7 +114,7 @@ static void SC_pfConstantColor(RsProgramFragment vpf, float r, float g, float b,
 
 static void SC_vpGetProjectionMatrix(rsc_Matrix *m) {
     GET_TLS();
-    rsc->getVertex()->getProjectionMatrix(rsc, m);
+    rsc->getProgramVertex()->getProjectionMatrix(rsc, m);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -165,8 +165,8 @@ static void SC_drawQuad(float x1, float y1, float z1,
 
 static void SC_drawSpriteScreenspace(float x, float y, float z, float w, float h) {
     GET_TLS();
-    ObjectBaseRef<const ProgramVertex> tmp(rsc->getVertex());
-    rsc->setVertex(rsc->getDefaultProgramVertex());
+    ObjectBaseRef<const ProgramVertex> tmp(rsc->getProgramVertex());
+    rsc->setProgramVertex(rsc->getDefaultProgramVertex());
     //rsc->setupCheck();
 
     //GLint crop[4] = {0, h, w, -h};
@@ -177,7 +177,7 @@ static void SC_drawSpriteScreenspace(float x, float y, float z, float w, float h
                 x+w, sh - y,     z,
                 x+w, sh - (y+h), z,
                 x,   sh - (y+h), z);
-    rsc->setVertex((ProgramVertex *)tmp.get());
+    rsc->setProgramVertex((ProgramVertex *)tmp.get());
 }
 /*
 static void SC_drawSprite(float x, float y, float z, float w, float h)
@@ -271,7 +271,7 @@ static void SC_meshComputeBoundingBox(RsMesh vsm,
 
 static void SC_color(float r, float g, float b, float a) {
     GET_TLS();
-    ProgramFragment *pf = (ProgramFragment *)rsc->getFragment();
+    ProgramFragment *pf = (ProgramFragment *)rsc->getProgramFragment();
     pf->setConstantColor(rsc, r, g, b, a);
 }
 

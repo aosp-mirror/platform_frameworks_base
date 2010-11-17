@@ -80,6 +80,21 @@ public:
         Context * mContext;
         Script * mScript;
     };
+
+    class PushState {
+    public:
+        PushState(Context *);
+        ~PushState();
+
+    private:
+        ObjectBaseRef<ProgramFragment> mFragment;
+        ObjectBaseRef<ProgramVertex> mVertex;
+        ObjectBaseRef<ProgramStore> mStore;
+        ObjectBaseRef<ProgramRaster> mRaster;
+        ObjectBaseRef<Font> mFont;
+        Context *mRsc;
+    };
+
     ScriptTLSStruct *mTlsStruct;
     RsSurfaceConfig mUserSurfaceConfig;
 
@@ -101,18 +116,18 @@ public:
 
     void swapBuffers();
     void setRootScript(Script *);
-    void setRaster(ProgramRaster *);
-    void setVertex(ProgramVertex *);
-    void setFragment(ProgramFragment *);
-    void setFragmentStore(ProgramStore *);
+    void setProgramRaster(ProgramRaster *);
+    void setProgramVertex(ProgramVertex *);
+    void setProgramFragment(ProgramFragment *);
+    void setProgramStore(ProgramStore *);
     void setFont(Font *);
 
     void updateSurface(void *sur);
 
-    const ProgramFragment * getFragment() {return mFragment.get();}
-    const ProgramStore * getFragmentStore() {return mFragmentStore.get();}
-    const ProgramRaster * getRaster() {return mRaster.get();}
-    const ProgramVertex * getVertex() {return mVertex.get();}
+    ProgramFragment * getProgramFragment() {return mFragment.get();}
+    ProgramStore * getProgramStore() {return mFragmentStore.get();}
+    ProgramRaster * getProgramRaster() {return mRaster.get();}
+    ProgramVertex * getProgramVertex() {return mVertex.get();}
     Font * getFont() {return mFont.get();}
 
     bool setupCheck();

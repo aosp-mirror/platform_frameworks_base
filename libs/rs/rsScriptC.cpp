@@ -104,16 +104,16 @@ Script * ScriptC::setTLS(Script *sc) {
 
 void ScriptC::setupGLState(Context *rsc) {
     if (mEnviroment.mFragmentStore.get()) {
-        rsc->setFragmentStore(mEnviroment.mFragmentStore.get());
+        rsc->setProgramStore(mEnviroment.mFragmentStore.get());
     }
     if (mEnviroment.mFragment.get()) {
-        rsc->setFragment(mEnviroment.mFragment.get());
+        rsc->setProgramFragment(mEnviroment.mFragment.get());
     }
     if (mEnviroment.mVertex.get()) {
-        rsc->setVertex(mEnviroment.mVertex.get());
+        rsc->setProgramVertex(mEnviroment.mVertex.get());
     }
     if (mEnviroment.mRaster.get()) {
-        rsc->setRaster(mEnviroment.mRaster.get());
+        rsc->setProgramRaster(mEnviroment.mRaster.get());
     }
 }
 
@@ -232,6 +232,7 @@ void ScriptC::runForEach(Context *rsc,
                          const RsScriptCall *sc) {
     MTLaunchStruct mtls;
     memset(&mtls, 0, sizeof(mtls));
+    Context::PushState ps(rsc);
 
     if (ain) {
         mtls.dimX = ain->getType()->getDimX();
