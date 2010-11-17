@@ -1447,4 +1447,7 @@
   <public type="style" name="Theme.Holo.Light.DialogWhenLarge" />
   
   <public type="string" name="selectTextMode" />
+
+  <public type="style" name="Theme.Holo.Wallpaper" />
+  <public type="style" name="Theme.Holo.Wallpaper.NoTitleBar" />
 </resources>
