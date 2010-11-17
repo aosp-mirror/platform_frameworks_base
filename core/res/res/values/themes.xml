@@ -367,7 +367,7 @@
     </style>
     
     <!-- Default theme for windows that want to have the user's selected
-    	 wallpaper appear behind them.  -->
+         wallpaper appear behind them.  -->
     <style name="Theme.Wallpaper">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
@@ -1236,6 +1236,19 @@
         <item name="windowBackground">@android:color/transparent</item>
         <item name="windowTitleStyle">@android:style/DialogWindowTitle.Holo.Light</item>
         <item name="windowContentOverlay">@null</item>
+    </style>
+
+    <!-- Default holographic (dark) for windows that want to have the user's selected
+         wallpaper appear behind them.  -->
+    <style name="Theme.Holo.Wallpaper">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowShowWallpaper">true</item>
+    </style>
+
+    <!-- Variant of the holographic (dark) theme with no title bar -->
+    <style name="Theme.Holo.Wallpaper.NoTitleBar">
+        <item name="android:windowNoTitle">true</item>
     </style>
 
 </resources>
