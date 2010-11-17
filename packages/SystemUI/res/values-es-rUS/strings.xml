@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_label (4489004083283879149) -->
+    <!-- no translation found for app_label (7164937344850004466) -->
     <skip />
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Borrar"</string>
     <!-- no translation found for status_bar_do_not_disturb_button (5812628897510997853) -->
@@ -35,8 +35,7 @@
     <!-- no translation found for invalid_charger (4549105996740522523) -->
     <skip />
     <string name="battery_low_why" msgid="7279169609518386372">"Uso de la batería"</string>
-    <!-- no translation found for system_panel_settings_button (7832600575390861653) -->
-    <skip />
+    <string name="system_panel_settings_button" msgid="7832600575390861653">"Configuración"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Reciente"</string>
     <!-- no translation found for recent_tasks_empty (1905484479067697884) -->
     <skip />
