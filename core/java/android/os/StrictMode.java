@@ -1276,11 +1276,14 @@ public final class StrictMode {
                     state.mActiveHead = mNext;
                 }
 
+                state.mActiveSize--;
+
+                if (LOG_V) Log.d(TAG, "Span finished=" + mName + "; size=" + state.mActiveSize);
+
                 this.mCreateMillis = -1;
                 this.mName = null;
                 this.mPrev = null;
                 this.mNext = null;
-                state.mActiveSize--;
 
                 // Add ourselves to the freeList, if it's not already
                 // too big.
@@ -1367,6 +1370,7 @@ public final class StrictMode {
             if (span.mNext != null) {
                 span.mNext.mPrev = span;
             }
+            if (LOG_V) Log.d(TAG, "Span enter=" + name + "; size=" + state.mActiveSize);
         }
         return span;
     }

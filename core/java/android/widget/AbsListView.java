@@ -29,6 +29,7 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.StrictMode;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -458,6 +459,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     private static final boolean PROFILE_FLINGING = false;
     private boolean mFlingProfilingStarted = false;
+
+    /**
+     * The StrictMode "critical time span" objects to catch animation
+     * stutters.  Non-null when a time-sensitive animation is
+     * in-flight.  Must call finish() on them when done animating.
+     * These are no-ops on user builds.
+     */
+    private StrictMode.Span mScrollStrictSpan = null;
+    private StrictMode.Span mFlingStrictSpan = null;
 
     /**
      * The last CheckForLongPress runnable we posted, if any
@@ -2089,6 +2099,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mAdapter.unregisterDataSetObserver(mDataSetObserver);
             mDataSetObserver = null;
         }
+
+        if (mScrollStrictSpan != null) {
+            mScrollStrictSpan.finish();
+            mScrollStrictSpan = null;
+        }
+
+        if (mFlingStrictSpan != null) {
+            mFlingStrictSpan.finish();
+            mFlingStrictSpan = null;
+        }
     }
 
     @Override
@@ -2559,6 +2579,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     }
                 }
 
+                if (mScrollStrictSpan == null) {
+                    // If it's non-null, we're already in a scroll.
+                    mScrollStrictSpan = StrictMode.enterCriticalSpan("AbsListView-scroll");
+                }
+
                 if (y != mLastY) {
                     // We may be here after stopping a fling and continuing to scroll.
                     // If so, we haven't disallowed intercepting touch events yet.
@@ -2721,6 +2746,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     Debug.stopMethodTracing();
                     mScrollProfilingStarted = false;
                 }
+            }
+
+            if (mScrollStrictSpan != null) {
+                mScrollStrictSpan.finish();
+                mScrollStrictSpan = null;
             }
             break;
         }
@@ -2934,6 +2964,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mFlingProfilingStarted = true;
                 }
             }
+
+            if (mFlingStrictSpan == null) {
+                mFlingStrictSpan = StrictMode.enterCriticalSpan("AbsListView-fling");
+            }
         }
 
         void startScroll(int distance, int duration) {
@@ -3011,6 +3045,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             Debug.stopMethodTracing();
                             mFlingProfilingStarted = false;
                         }
+                    }
+
+                    if (mFlingStrictSpan != null) {
+                        mFlingStrictSpan.finish();
+                        mFlingStrictSpan = null;
                     }
                 }
                 break;
