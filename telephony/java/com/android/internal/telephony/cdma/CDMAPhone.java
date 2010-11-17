@@ -934,13 +934,13 @@ public class CDMAPhone extends PhoneBase {
         switch(action) {
         case CANCEL_ECM_TIMER:
             removeCallbacks(mExitEcmRunnable);
-            mEcmTimerResetRegistrants.notifyResult(new Boolean(true));
+            mEcmTimerResetRegistrants.notifyResult(Boolean.TRUE);
             break;
         case RESTART_ECM_TIMER:
             long delayInMillis = SystemProperties.getLong(
                     TelephonyProperties.PROPERTY_ECM_EXIT_TIMER, DEFAULT_ECM_EXIT_TIMER_VALUE);
             postDelayed(mExitEcmRunnable, delayInMillis);
-            mEcmTimerResetRegistrants.notifyResult(new Boolean(false));
+            mEcmTimerResetRegistrants.notifyResult(Boolean.FALSE);
             break;
         default:
             Log.e(LOG_TAG, "handleTimerInEmergencyCallbackMode, unsupported action " + action);
