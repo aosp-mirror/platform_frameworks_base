@@ -595,13 +595,21 @@ public class ListView extends AbsListView {
     void fillGap(boolean down) {
         final int count = getChildCount();
         if (down) {
+            int paddingTop = 0;
+            if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
+                paddingTop = getListPaddingTop();
+            }
             final int startOffset = count > 0 ? getChildAt(count - 1).getBottom() + mDividerHeight :
-                    getListPaddingTop();
+                    paddingTop;
             fillDown(mFirstPosition + count, startOffset);
             correctTooHigh(getChildCount());
         } else {
+            int paddingBottom = 0;
+            if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
+                paddingBottom = getListPaddingBottom();
+            }
             final int startOffset = count > 0 ? getChildAt(0).getTop() - mDividerHeight :
-                    getHeight() - getListPaddingBottom();
+                    getHeight() - paddingBottom;
             fillUp(mFirstPosition - 1, startOffset);
             correctTooLow(getChildCount());
         }
@@ -621,7 +629,10 @@ public class ListView extends AbsListView {
     private View fillDown(int pos, int nextTop) {
         View selectedView = null;
 
-        int end = (mBottom - mTop) - mListPadding.bottom;
+        int end = (mBottom - mTop);
+        if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
+            end -= mListPadding.bottom;
+        }
 
         while (nextTop < end && pos < mItemCount) {
             // is this the selected item?
@@ -651,7 +662,10 @@ public class ListView extends AbsListView {
     private View fillUp(int pos, int nextBottom) {
         View selectedView = null;
 
-        int end = mListPadding.top;
+        int end = 0;
+        if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
+            end = mListPadding.top;
+        }
 
         while (nextBottom > end && pos >= 0) {
             // is this the selected item?
