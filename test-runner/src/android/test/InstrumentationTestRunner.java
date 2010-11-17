@@ -785,7 +785,7 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             mIncludeDetailedStats = false;
             try {
                 // Look for TimedTest annotation on both test class and test method
-                if (testMethod.isAnnotationPresent(TimedTest.class)) {
+                if (testMethod != null && testMethod.isAnnotationPresent(TimedTest.class)) {
                     mIsTimedTest = true;
                     mIncludeDetailedStats = testMethod.getAnnotation(
                             TimedTest.class).includeDetailedStats();
