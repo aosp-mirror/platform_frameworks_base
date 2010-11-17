@@ -67,6 +67,22 @@ void Script::setVar(uint32_t slot, const void *val, uint32_t len) {
     }
 }
 
+void Script::setVarObj(uint32_t slot, ObjectBase *val) {
+    ObjectBase **destPtr = ((ObjectBase ***)mEnviroment.mFieldAddress)[slot];
+
+    if (destPtr) {
+        if (val != NULL) {
+            val->incSysRef();
+        }
+        if (*destPtr) {
+            (*destPtr)->decSysRef();
+        }
+        *destPtr = val;
+    } else {
+        LOGV("Calling setVarObj on slot = %i which is null.  This is dangerous because the script will not hold a ref count on the object.", slot);
+    }
+}
+
 namespace android {
 namespace renderscript {
 
@@ -101,6 +117,12 @@ void rsi_ScriptInvokeV(Context *rsc, RsScript vs, uint32_t slot, const void *dat
 void rsi_ScriptSetVarI(Context *rsc, RsScript vs, uint32_t slot, int value) {
     Script *s = static_cast<Script *>(vs);
     s->setVar(slot, &value, sizeof(value));
+}
+
+void rsi_ScriptSetVarObj(Context *rsc, RsScript vs, uint32_t slot, RsObjectBase value) {
+    Script *s = static_cast<Script *>(vs);
+    ObjectBase *o = static_cast<ObjectBase *>(value);
+    s->setVarObj(slot, o);
 }
 
 void rsi_ScriptSetVarJ(Context *rsc, RsScript vs, uint32_t slot, long long value) {
