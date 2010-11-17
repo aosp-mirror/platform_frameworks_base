@@ -624,6 +624,7 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
     mData.getString(modified);     // date modified
     // keywords follow
 
+    LOGD("name: %s format: %04X\n", (const char *)name, format);
     time_t modifiedTime;
     if (!parseDateTime(modified, modifiedTime))
         modifiedTime = 0;
@@ -692,6 +693,7 @@ MtpResponseCode MtpServer::doSendObject() {
     mfr.offset = 0;
     mfr.length = mSendObjectFileSize;
 
+    LOGD("receiving %s\n", (const char *)mSendObjectFilePath);
     // transfer the file
     ret = ioctl(mFD, MTP_RECEIVE_FILE, (unsigned long)&mfr);
     close(mfr.fd);
