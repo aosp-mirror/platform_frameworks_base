@@ -3558,6 +3558,7 @@ public class WebView extends AbsoluteLayout
         if (inEditingMode()) {
             return mWebTextView.performLongClick();
         }
+        if (mSelectingText) return false; // long click does nothing on selection
         /* if long click brings up a context menu, the super function
          * returns true and we're done. Otherwise, nothing happened when
          * the user clicked. */
@@ -3568,7 +3569,6 @@ public class WebView extends AbsoluteLayout
          * click action, look for a word under the  click. If one is found,
          * animate the text selection into view.
          * FIXME: no animation code yet */
-        if (mSelectingText) return false; // long click does nothing on selection
         int x = viewToContentX((int) mLastTouchX + mScrollX);
         int y = viewToContentY((int) mLastTouchY + mScrollY);
         setUpSelect();
