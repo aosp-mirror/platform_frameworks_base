@@ -438,9 +438,9 @@ public class ServiceState implements Parcelable {
                 + " " + (mCssIndicator ? "CSS supported" : "CSS not supported")
                 + " " + mNetworkId
                 + " " + mSystemId
-                + "RoamInd: " + mCdmaRoamingIndicator
-                + "DefRoamInd: " + mCdmaDefaultRoamingIndicator
-                + "EmergOnly: " + mIsEmergencyOnly);
+                + " RoamInd=" + mCdmaRoamingIndicator
+                + " DefRoamInd=" + mCdmaDefaultRoamingIndicator
+                + " EmergOnly=" + mIsEmergencyOnly);
     }
 
     public void setStateOutOfService() {

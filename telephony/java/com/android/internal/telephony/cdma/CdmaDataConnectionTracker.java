@@ -240,8 +240,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                     mCdmaPhone.mRuimRecords.getRecordsLoaded())) {
                 reason += " - radioState= " + mPhone.mCM.getRadioState() + " - RUIM not loaded";
             }
-            if (mPhone.getState() != Phone.State.IDLE &&
-                    mCdmaPhone.mSST.isConcurrentVoiceAndData()) {
+            if (!(mCdmaPhone.mSST.isConcurrentVoiceAndData() ||
+                    mPhone.getState() == Phone.State.IDLE)) {
                 reason += " - concurrentVoiceAndData not allowed and state= " + mPhone.getState();
             }
             if (roaming) reason += " - Roaming";

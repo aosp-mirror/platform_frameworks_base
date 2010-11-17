@@ -328,8 +328,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 reason += " - PhoneState= " + mPhone.getState();
             }
             if (!mMasterDataEnabled) reason += " - mMasterDataEnabled= false";
-            if (mPhone.getServiceState().getRoaming() && getDataOnRoamingEnabled()) {
-                reason += " - Roaming";
+            if (mPhone.getServiceState().getRoaming() && !getDataOnRoamingEnabled()) {
+                reason += " - Roaming and data roaming not enabled";
             }
             if (mIsPsRestricted) reason += " - mIsPsRestricted= true";
             if (!desiredPowerState) reason += " - desiredPowerState= false";
@@ -1037,8 +1037,15 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         } else {
             GsmDataConnection.FailCause cause;
             cause = (GsmDataConnection.FailCause) (ar.result);
-            if(DBG) log("PDP setup failed " + cause);
-                    // Log this failure to the Event Logs.
+            if (DBG) {
+                String apnString;
+                try {
+                    apnString = mWaitingApns.get(0).apn;
+                } catch (Exception e) {
+                    apnString = "<unknown>";
+                }
+                log(String.format("onDataSetupComplete: error apn=%s cause=%s", apnString, cause));
+            }
             if (cause.isEventLoggable()) {
                 GsmCellLocation loc = ((GsmCellLocation)mPhone.getCellLocation());
                 EventLog.writeEvent(EventLogTags.PDP_SETUP_FAIL,
