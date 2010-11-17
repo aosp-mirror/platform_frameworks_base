@@ -6206,7 +6206,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (applyTransformation) {
                 setTransformationMethod(null);
             }
-            setBackgroundDrawable(mEditTextMultilineBackground);
+            // mEditTextMultilineBackground is defined and used only in EditText
+            if (mEditTextMultilineBackground != null) {
+                setBackgroundDrawable(mEditTextMultilineBackground);
+            }
         }
     }
     
