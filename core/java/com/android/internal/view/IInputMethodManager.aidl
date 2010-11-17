@@ -31,7 +31,7 @@ import com.android.internal.view.IInputMethodClient;
 interface IInputMethodManager {
     List<InputMethodInfo> getInputMethodList();
     List<InputMethodInfo> getEnabledInputMethodList();
-    
+    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in InputMethodInfo imi);
     void addClient(in IInputMethodClient client,
             in IInputContext inputContext, int uid, int pid);
     void removeClient(in IInputMethodClient client);
