@@ -59,7 +59,7 @@ sp<MediaExtractor> MediaExtractor::Create(
     }
 
     if (!strncmp(mime, "drm", 3)) {
-        char *originalMime = strrchr(mime, '+') + 1;
+        const char *originalMime = strrchr(mime, '+') + 1;
 
         if (!strncmp(mime, "drm+es_based", 12)) {
             return new DRMExtractor(source, originalMime);
