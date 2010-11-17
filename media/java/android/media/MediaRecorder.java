@@ -149,12 +149,10 @@ public class MediaRecorder
          *  {@link #DEFAULT} otherwise. */
         public static final int VOICE_RECOGNITION = 6;
 
-        /**
-         * @hide
-         * Microphone audio source tuned for voice communications such as VoIP. It
-         * will for instance take advantage of echo cancellation or automatic gain control
-         * if available. It otherwise behaves like {@link #DEFAULT} if no voice processing
-         * is available.
+        /** Microphone audio source tuned for voice communications such as VoIP. It
+         *  will for instance take advantage of echo cancellation or automatic gain control
+         *  if available. It otherwise behaves like {@link #DEFAULT} if no voice processing
+         *  is applied.
          */
         public static final int VOICE_COMMUNICATION = 7;
     }
