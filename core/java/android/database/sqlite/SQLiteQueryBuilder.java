@@ -321,7 +321,7 @@ public class SQLiteQueryBuilder
         }
 
         String sql = buildQuery(
-                projectionIn, selection, selectionArgs, groupBy, having,
+                projectionIn, selection, groupBy, having,
                 sortOrder, limit);
 
         if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -345,10 +345,6 @@ public class SQLiteQueryBuilder
      *   formatted as an SQL WHERE clause (excluding the WHERE
      *   itself).  Passing null will return all rows for the given
      *   URL.
-     * @param selectionArgs You may include ?s in selection, which
-     *   will be replaced by the values from selectionArgs, in order
-     *   that they appear in the selection.  The values will be bound
-     *   as Strings.
      * @param groupBy A filter declaring how to group rows, formatted
      *   as an SQL GROUP BY clause (excluding the GROUP BY itself).
      *   Passing null will cause the rows to not be grouped.
@@ -365,8 +361,8 @@ public class SQLiteQueryBuilder
      * @return the resulting SQL SELECT statement
      */
     public String buildQuery(
-            String[] projectionIn, String selection, String[] selectionArgs,
-            String groupBy, String having, String sortOrder, String limit) {
+            String[] projectionIn, String selection, String groupBy,
+            String having, String sortOrder, String limit) {
         String[] projection = computeProjection(projectionIn);
 
         StringBuilder where = new StringBuilder();
@@ -391,6 +387,19 @@ public class SQLiteQueryBuilder
         return buildQueryString(
                 mDistinct, mTables, projection, where.toString(),
                 groupBy, having, sortOrder, limit);
+    }
+
+    /**
+     * @deprecated This method's signature is misleading since no SQL parameter
+     * substitution is carried out.  The selection arguments parameter does not get
+     * used at all.  To avoid confusion, call
+     * {@link #buildQuery(String[], String, String, String, String, String)} instead.
+     */
+    @Deprecated
+    public String buildQuery(
+            String[] projectionIn, String selection, String[] selectionArgs,
+            String groupBy, String having, String sortOrder, String limit) {
+        return buildQuery(projectionIn, selection, groupBy, having, sortOrder, limit);
     }
 
     /**
@@ -422,10 +431,6 @@ public class SQLiteQueryBuilder
      *   formatted as an SQL WHERE clause (excluding the WHERE
      *   itself).  Passing null will return all rows for the given
      *   URL.
-     * @param selectionArgs You may include ?s in selection, which
-     *   will be replaced by the values from selectionArgs, in order
-     *   that they appear in the selection.  The values will be bound
-     *   as Strings.
      * @param groupBy A filter declaring how to group rows, formatted
      *   as an SQL GROUP BY clause (excluding the GROUP BY itself).
      *   Passing null will cause the rows to not be grouped.
@@ -443,7 +448,6 @@ public class SQLiteQueryBuilder
             int computedColumnsOffset,
             String typeDiscriminatorValue,
             String selection,
-            String[] selectionArgs,
             String groupBy,
             String having) {
         int unionColumnsCount = unionColumns.length;
@@ -463,9 +467,33 @@ public class SQLiteQueryBuilder
             }
         }
         return buildQuery(
-                projectionIn, selection, selectionArgs, groupBy, having,
+                projectionIn, selection, groupBy, having,
                 null /* sortOrder */,
                 null /* limit */);
+    }
+
+    /**
+     * @deprecated This method's signature is misleading since no SQL parameter
+     * substitution is carried out.  The selection arguments parameter does not get
+     * used at all.  To avoid confusion, call
+     * {@link #buildUnionSubQuery(String, String[], Set<String>, int, String, String, String, String)}
+     * instead.
+     */
+    @Deprecated
+    public String buildUnionSubQuery(
+            String typeDiscriminatorColumn,
+            String[] unionColumns,
+            Set<String> columnsPresentInTable,
+            int computedColumnsOffset,
+            String typeDiscriminatorValue,
+            String selection,
+            String[] selectionArgs,
+            String groupBy,
+            String having) {
+        return buildUnionSubQuery(
+                typeDiscriminatorColumn, unionColumns, columnsPresentInTable,
+                computedColumnsOffset, typeDiscriminatorValue, selection,
+                groupBy, having);
     }
 
     /**
