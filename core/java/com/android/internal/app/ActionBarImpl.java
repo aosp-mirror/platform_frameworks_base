@@ -212,6 +212,10 @@ public class ActionBarImpl extends ActionBar {
     }
 
     public View getCustomNavigationView() {
+        return getCustomView();
+    }
+
+    public View getCustomView() {
         return mActionView.getCustomNavigationView();
     }
 

@@ -7327,16 +7327,22 @@ class PackageManagerService extends IPackageManager.Stub {
                 pw.println(" ");
                 pw.println("Package warning messages:");
                 File fname = getSettingsProblemFile();
-                FileInputStream in;
+                FileInputStream in = null;
                 try {
                     in = new FileInputStream(fname);
                     int avail = in.available();
                     byte[] data = new byte[avail];
                     in.read(data);
                     pw.print(new String(data));
-                    in.close();
                 } catch (FileNotFoundException e) {
                 } catch (IOException e) {
+                } finally {
+                    if (in != null) {
+                        try {
+                            in.close();
+                        } catch (IOException e)  {
+                        }
+                    }
                 }
             }
         }

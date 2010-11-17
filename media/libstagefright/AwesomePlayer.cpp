@@ -79,39 +79,18 @@ private:
     AwesomeEvent &operator=(const AwesomeEvent &);
 };
 
-struct AwesomeRemoteRenderer : public AwesomeRenderer {
-    AwesomeRemoteRenderer(const sp<IOMXRenderer> &target)
-        : mTarget(target) {
-    }
-
-    virtual void render(MediaBuffer *buffer) {
-        void *id;
-        if (buffer->meta_data()->findPointer(kKeyBufferID, &id)) {
-            mTarget->render((IOMX::buffer_id)id);
-        }
-    }
-
-private:
-    sp<IOMXRenderer> mTarget;
-
-    AwesomeRemoteRenderer(const AwesomeRemoteRenderer &);
-    AwesomeRemoteRenderer &operator=(const AwesomeRemoteRenderer &);
-};
-
 struct AwesomeLocalRenderer : public AwesomeRenderer {
     AwesomeLocalRenderer(
-            bool previewOnly,
-            const char *componentName,
             OMX_COLOR_FORMATTYPE colorFormat,
-            const sp<ISurface> &isurface,
             const sp<Surface> &surface,
             size_t displayWidth, size_t displayHeight,
-            size_t decodedWidth, size_t decodedHeight)
-        : mTarget(NULL),
-          mLibHandle(NULL) {
-            init(previewOnly, componentName,
-                 colorFormat, isurface, surface, displayWidth,
-                 displayHeight, decodedWidth, decodedHeight);
+            size_t decodedWidth, size_t decodedHeight,
+            int32_t rotationDegrees)
+        : mTarget(NULL) {
+            init(colorFormat, surface,
+                 displayWidth, displayHeight,
+                 decodedWidth, decodedHeight,
+                 rotationDegrees);
     }
 
     virtual void render(MediaBuffer *buffer) {
@@ -127,78 +106,39 @@ protected:
     virtual ~AwesomeLocalRenderer() {
         delete mTarget;
         mTarget = NULL;
-
-        if (mLibHandle) {
-            dlclose(mLibHandle);
-            mLibHandle = NULL;
-        }
     }
 
 private:
-    VideoRenderer *mTarget;
-    void *mLibHandle;
+    SoftwareRenderer *mTarget;
 
     void init(
-            bool previewOnly,
-            const char *componentName,
             OMX_COLOR_FORMATTYPE colorFormat,
-            const sp<ISurface> &isurface,
             const sp<Surface> &surface,
             size_t displayWidth, size_t displayHeight,
-            size_t decodedWidth, size_t decodedHeight);
+            size_t decodedWidth, size_t decodedHeight,
+            int32_t rotationDegrees);
 
     AwesomeLocalRenderer(const AwesomeLocalRenderer &);
     AwesomeLocalRenderer &operator=(const AwesomeLocalRenderer &);;
 };
 
 void AwesomeLocalRenderer::init(
-        bool previewOnly,
-        const char *componentName,
         OMX_COLOR_FORMATTYPE colorFormat,
-        const sp<ISurface> &isurface,
         const sp<Surface> &surface,
         size_t displayWidth, size_t displayHeight,
-        size_t decodedWidth, size_t decodedHeight) {
-    if (!previewOnly) {
-        // We will stick to the vanilla software-color-converting renderer
-        // for "previewOnly" mode, to avoid unneccessarily switching overlays
-        // more often than necessary.
-
-        mLibHandle = dlopen("libstagefrighthw.so", RTLD_NOW);
-
-        if (mLibHandle) {
-            typedef VideoRenderer *(*CreateRendererFunc)(
-                    const sp<ISurface> &surface,
-                    const char *componentName,
-                    OMX_COLOR_FORMATTYPE colorFormat,
-                    size_t displayWidth, size_t displayHeight,
-                    size_t decodedWidth, size_t decodedHeight);
-
-            CreateRendererFunc func =
-                (CreateRendererFunc)dlsym(
-                        mLibHandle,
-                        "_Z14createRendererRKN7android2spINS_8ISurfaceEEEPKc20"
-                        "OMX_COLOR_FORMATTYPEjjjj");
-
-            if (func) {
-                mTarget =
-                    (*func)(isurface, componentName, colorFormat,
-                        displayWidth, displayHeight,
-                        decodedWidth, decodedHeight);
-            }
-        }
-    }
-
-    if (mTarget == NULL) {
-        mTarget = new SoftwareRenderer(
-                colorFormat, surface, displayWidth, displayHeight,
-                decodedWidth, decodedHeight);
-    }
+        size_t decodedWidth, size_t decodedHeight,
+        int32_t rotationDegrees) {
+    mTarget = new SoftwareRenderer(
+            colorFormat, surface, displayWidth, displayHeight,
+            decodedWidth, decodedHeight, rotationDegrees);
 }
 
 struct AwesomeNativeWindowRenderer : public AwesomeRenderer {
-    AwesomeNativeWindowRenderer(const sp<ANativeWindow> &nativeWindow)
+    AwesomeNativeWindowRenderer(
+            const sp<ANativeWindow> &nativeWindow,
+            int32_t rotationDegrees)
         : mNativeWindow(nativeWindow) {
+        applyRotation(rotationDegrees);
     }
 
     virtual void render(MediaBuffer *buffer) {
@@ -219,6 +159,22 @@ protected:
 
 private:
     sp<ANativeWindow> mNativeWindow;
+
+    void applyRotation(int32_t rotationDegrees) {
+        uint32_t transform;
+        switch (rotationDegrees) {
+            case 0: transform = 0; break;
+            case 90: transform = HAL_TRANSFORM_ROT_90; break;
+            case 180: transform = HAL_TRANSFORM_ROT_180; break;
+            case 270: transform = HAL_TRANSFORM_ROT_270; break;
+            default: transform = 0; break;
+        }
+
+        if (transform) {
+            CHECK_EQ(0, native_window_set_buffers_transform(
+                        mNativeWindow.get(), transform));
+        }
+    }
 
     AwesomeNativeWindowRenderer(const AwesomeNativeWindowRenderer &);
     AwesomeNativeWindowRenderer &operator=(
@@ -863,58 +819,65 @@ void AwesomePlayer::notifyVideoSize_l() {
     CHECK(meta->findInt32(kKeyWidth, &decodedWidth));
     CHECK(meta->findInt32(kKeyHeight, &decodedHeight));
 
-    notifyListener_l(MEDIA_SET_VIDEO_SIZE, decodedWidth, decodedHeight);
+    int32_t rotationDegrees;
+    if (!mVideoTrack->getFormat()->findInt32(
+                kKeyRotation, &rotationDegrees)) {
+        rotationDegrees = 0;
+    }
+
+    if (rotationDegrees == 90 || rotationDegrees == 270) {
+        notifyListener_l(
+                MEDIA_SET_VIDEO_SIZE, decodedHeight, decodedWidth);
+    } else {
+        notifyListener_l(
+                MEDIA_SET_VIDEO_SIZE, decodedWidth, decodedHeight);
+    }
 }
 
 void AwesomePlayer::initRenderer_l() {
-    if (mSurface != NULL || mISurface != NULL) {
-        sp<MetaData> meta = mVideoSource->getFormat();
+    if (mSurface == NULL) {
+        return;
+    }
 
-        int32_t format;
-        const char *component;
-        int32_t decodedWidth, decodedHeight;
-        CHECK(meta->findInt32(kKeyColorFormat, &format));
-        CHECK(meta->findCString(kKeyDecoderComponent, &component));
-        CHECK(meta->findInt32(kKeyWidth, &decodedWidth));
-        CHECK(meta->findInt32(kKeyHeight, &decodedHeight));
+    sp<MetaData> meta = mVideoSource->getFormat();
 
-        mVideoRenderer.clear();
+    int32_t format;
+    const char *component;
+    int32_t decodedWidth, decodedHeight;
+    CHECK(meta->findInt32(kKeyColorFormat, &format));
+    CHECK(meta->findCString(kKeyDecoderComponent, &component));
+    CHECK(meta->findInt32(kKeyWidth, &decodedWidth));
+    CHECK(meta->findInt32(kKeyHeight, &decodedHeight));
 
-        // Must ensure that mVideoRenderer's destructor is actually executed
-        // before creating a new one.
-        IPCThreadState::self()->flushCommands();
+    int32_t rotationDegrees;
+    if (!mVideoTrack->getFormat()->findInt32(
+                kKeyRotation, &rotationDegrees)) {
+        rotationDegrees = 0;
+    }
 
-        if (mSurface != NULL) {
-            if (USE_SURFACE_ALLOC && strncmp(component, "OMX.", 4) == 0) {
-                // Hardware decoders avoid the CPU color conversion by decoding
-                // directly to ANativeBuffers, so we must use a renderer that
-                // just pushes those buffers to the ANativeWindow.
-                mVideoRenderer = new AwesomeNativeWindowRenderer(mSurface);
-            } else {
-                // Other decoders are instantiated locally and as a consequence
-                // allocate their buffers in local address space.  This renderer
-                // then performs a color conversion and copy to get the data
-                // into the ANativeBuffer.
-                mVideoRenderer = new AwesomeLocalRenderer(
-                    false,  // previewOnly
-                    component,
-                    (OMX_COLOR_FORMATTYPE)format,
-                    mISurface,
-                    mSurface,
-                    mVideoWidth, mVideoHeight,
-                    decodedWidth, decodedHeight);
-            }
-        } else {
-            // Our OMX codecs allocate buffers on the media_server side
-            // therefore they require a remote IOMXRenderer that knows how
-            // to display them.
-            mVideoRenderer = new AwesomeRemoteRenderer(
-                mClient.interface()->createRenderer(
-                        mISurface, component,
-                        (OMX_COLOR_FORMATTYPE)format,
-                        decodedWidth, decodedHeight,
-                        mVideoWidth, mVideoHeight));
-        }
+    mVideoRenderer.clear();
+
+    // Must ensure that mVideoRenderer's destructor is actually executed
+    // before creating a new one.
+    IPCThreadState::self()->flushCommands();
+
+    if (USE_SURFACE_ALLOC && strncmp(component, "OMX.", 4) == 0) {
+        // Hardware decoders avoid the CPU color conversion by decoding
+        // directly to ANativeBuffers, so we must use a renderer that
+        // just pushes those buffers to the ANativeWindow.
+        mVideoRenderer =
+            new AwesomeNativeWindowRenderer(mSurface, rotationDegrees);
+    } else {
+        // Other decoders are instantiated locally and as a consequence
+        // allocate their buffers in local address space.  This renderer
+        // then performs a color conversion and copy to get the data
+        // into the ANativeBuffer.
+        mVideoRenderer = new AwesomeLocalRenderer(
+            (OMX_COLOR_FORMATTYPE)format,
+            mSurface,
+            mVideoWidth, mVideoHeight,
+            decodedWidth, decodedHeight,
+            rotationDegrees);
     }
 }
 
@@ -956,12 +919,6 @@ status_t AwesomePlayer::pause_l(bool at_eos) {
 
 bool AwesomePlayer::isPlaying() const {
     return (mFlags & PLAYING) || (mFlags & CACHE_UNDERRUN);
-}
-
-void AwesomePlayer::setISurface(const sp<ISurface> &isurface) {
-    Mutex::Autolock autoLock(mLock);
-
-    mISurface = isurface;
 }
 
 void AwesomePlayer::setSurface(const sp<Surface> &surface) {
@@ -1897,18 +1854,16 @@ status_t AwesomePlayer::resume() {
 
     mFlags = state->mFlags & (AUTO_LOOPING | LOOPING | AT_EOS);
 
-    if (state->mLastVideoFrame && (mSurface != NULL || mISurface != NULL)) {
+    if (state->mLastVideoFrame && mSurface != NULL) {
         mVideoRenderer =
             new AwesomeLocalRenderer(
-                    true,  // previewOnly
-                    "",
                     (OMX_COLOR_FORMATTYPE)state->mColorFormat,
-                    mISurface,
                     mSurface,
                     state->mVideoWidth,
                     state->mVideoHeight,
                     state->mDecodedWidth,
-                    state->mDecodedHeight);
+                    state->mDecodedHeight,
+                    0);
 
         mVideoRendererIsPreview = true;
 

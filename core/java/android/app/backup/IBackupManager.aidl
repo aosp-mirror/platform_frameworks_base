@@ -144,13 +144,25 @@ interface IBackupManager {
     String selectBackupTransport(String transport);
 
     /**
-     * Begin a restore session with the given transport (which may differ from the
-     * currently-active backup transport).
+     * Begin a restore session.  Either or both of packageName and transportID
+     * may be null.  If packageName is non-null, then only the given package will be
+     * considered for restore.  If transportID is null, then the restore will use
+     * the current active transport.
+     * <p>
+     * This method requires the android.permission.BACKUP permission <i>except</i>
+     * when transportID is null and packageName is the name of the caller's own
+     * package.  In that case, the restore session returned is suitable for supporting
+     * the BackupManager.requestRestore() functionality via RestoreSession.restorePackage()
+     * without requiring the app to hold any special permission.
      *
-     * @param transport The name of the transport to use for the restore operation.
+     * @param packageName The name of the single package for which a restore will
+     *        be requested.  May be null, in which case all packages in the restore
+     *        set can be restored.
+     * @param transportID The name of the transport to use for the restore operation.
+     *        May be null, in which case the current active transport is used.
      * @return An interface to the restore session, or null on error.
      */
-    IRestoreSession beginRestoreSession(String transportID);
+    IRestoreSession beginRestoreSession(String packageName, String transportID);
 
     /**
      * Notify the backup manager that a BackupAgent has completed the operation

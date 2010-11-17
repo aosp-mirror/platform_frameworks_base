@@ -278,7 +278,19 @@ bool LiveSource::switchToNext() {
         }
 
         if (mLastFetchTimeUs < 0) {
-            mPlaylistIndex = 0;
+            if (isSeekable()) {
+                mPlaylistIndex = 0;
+            } else {
+                // This is live streamed content, the first seqnum in the
+                // various bandwidth' streams may be slightly off, so don't
+                // start at the very first entry.
+                // With a segment duration of 6-10secs, this really only
+                // delays playback up to 30secs compared to real time.
+                mPlaylistIndex = 3;
+                if (mPlaylistIndex >= mPlaylist->size()) {
+                    mPlaylistIndex = mPlaylist->size() - 1;
+                }
+            }
         } else {
             if (nextSequenceNumber < mFirstItemSequenceNumber
                     || nextSequenceNumber

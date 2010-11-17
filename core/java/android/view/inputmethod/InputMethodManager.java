@@ -27,6 +27,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.view.KeyEvent;
@@ -497,6 +498,14 @@ public final class InputMethodManager {
     public List<InputMethodInfo> getEnabledInputMethodList() {
         try {
             return mService.getEnabledInputMethodList();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(InputMethodInfo imi) {
+        try {
+            return mService.getEnabledInputMethodSubtypeList(imi);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }

@@ -280,6 +280,12 @@ ScriptSetVarI {
 	param int value
 	}
 
+ScriptSetVarObj {
+	param RsScript s
+	param uint32_t slot
+	param RsObjectBase value
+	}
+
 ScriptSetVarJ {
 	param RsScript s
 	param uint32_t slot

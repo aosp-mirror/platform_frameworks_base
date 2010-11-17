@@ -555,6 +555,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(InputMethodInfo imi) {
+        synchronized (mMethodMap) {
+            return mSettings.getEnabledInputMethodSubtypeListLocked(imi);
+        }
+    }
+
     public void addClient(IInputMethodClient client,
             IInputContext inputContext, int uid, int pid) {
         synchronized (mMethodMap) {
@@ -1607,7 +1613,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         synchronized (mMethodMap) {
             final List<Pair<InputMethodInfo, ArrayList<String>>> immis =
-                    mSettings.getEnabledInputMethodAndSubtypeListLocked();
+                    mSettings.getEnabledInputMethodAndSubtypeHashCodeListLocked();
             ArrayList<Integer> subtypeIds = new ArrayList<Integer>();
 
             if (immis == null || immis.size() == 0) {
@@ -2026,9 +2032,32 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         public List<Pair<InputMethodInfo, ArrayList<String>>>
-                getEnabledInputMethodAndSubtypeListLocked() {
-            return createEnabledInputMethodAndSubtypeListLocked(
+                getEnabledInputMethodAndSubtypeHashCodeListLocked() {
+            return createEnabledInputMethodAndSubtypeHashCodeListLocked(
                     getEnabledInputMethodsAndSubtypeListLocked());
+        }
+
+        public List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(
+                InputMethodInfo imi) {
+            List<Pair<String, ArrayList<String>>> imsList =
+                    getEnabledInputMethodsAndSubtypeListLocked();
+            ArrayList<InputMethodSubtype> enabledSubtypes =
+                    new ArrayList<InputMethodSubtype>();
+            for (Pair<String, ArrayList<String>> imsPair : imsList) {
+                InputMethodInfo info = mMethodMap.get(imsPair.first);
+                if (info != null && info.getId().equals(imi.getId())) {
+                    ArrayList<InputMethodSubtype> subtypes = info.getSubtypes();
+                    for (InputMethodSubtype ims: subtypes) {
+                        for (String s: imsPair.second) {
+                            if (String.valueOf(ims.hashCode()).equals(s)) {
+                                enabledSubtypes.add(ims);
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            return enabledSubtypes;
         }
 
         // At the initial boot, the settings for input methods are not set,
@@ -2128,7 +2157,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         private List<Pair<InputMethodInfo, ArrayList<String>>>
-                createEnabledInputMethodAndSubtypeListLocked(
+                createEnabledInputMethodAndSubtypeHashCodeListLocked(
                         List<Pair<String, ArrayList<String>>> imsList) {
             final ArrayList<Pair<InputMethodInfo, ArrayList<String>>> res
                     = new ArrayList<Pair<InputMethodInfo, ArrayList<String>>>();

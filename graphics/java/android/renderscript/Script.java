@@ -88,6 +88,10 @@ public class Script extends BaseObj {
         mRS.nScriptSetVarI(getID(), index, v ? 1 : 0);
     }
 
+    public void setVar(int index, BaseObj o) {
+        mRS.nScriptSetVarObj(getID(), index, (o == null) ? 0 : o.getID());
+    }
+
     public void setVar(int index, FieldPacker v) {
         mRS.nScriptSetVarV(getID(), index, v.getData());
     }

@@ -198,13 +198,6 @@ status_t MediaPlayer::setVideoSurface(const sp<Surface>& surface)
     Mutex::Autolock _l(mLock);
     if (mPlayer == 0) return NO_INIT;
 
-    status_t err = mPlayer->setVideoISurface(
-            surface == NULL ? NULL : surface->getISurface());
-
-    if (err != OK) {
-        return err;
-    }
-
     return mPlayer->setVideoSurface(surface);
 }
 

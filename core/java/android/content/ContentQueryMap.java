@@ -33,7 +33,7 @@ import java.util.Observable;
  * The cursor data is accessed by row key and column name via getValue().
  */
 public class ContentQueryMap extends Observable {
-    private Cursor mCursor;
+    private volatile Cursor mCursor;
     private String[] mColumnNames;
     private int mKeyColumn;
 
@@ -71,7 +71,7 @@ public class ContentQueryMap extends Observable {
         // ContentProvider then read it once into the cache. Otherwise the cache will be filled 
         // automatically.
         if (!keepUpdated) {
-            readCursorIntoCache();
+            readCursorIntoCache(cursor);
         }
     }
 
@@ -128,27 +128,35 @@ public class ContentQueryMap extends Observable {
 
     /** Requeries the cursor and reads the contents into the cache */
     public void requery() {
-        mDirty = false;
-        if (!mCursor.requery()) {
-            throw new IllegalStateException("trying to requery an already closed cursor");
+        final Cursor cursor = mCursor;
+        if (cursor == null) {
+            // If mCursor is null then it means there was a requery() in flight
+            // while another thread called close(), which nulls out mCursor.
+            // If this happens ignore the requery() since we are closed anyways.
+            return;
         }
-        readCursorIntoCache();
+        mDirty = false;
+        if (!cursor.requery()) {
+            // again, don't do anything if the cursor is already closed
+            return;
+        }
+        readCursorIntoCache(cursor);
         setChanged();
         notifyObservers();
     }
 
-    private synchronized void readCursorIntoCache() {
+    private synchronized void readCursorIntoCache(Cursor cursor) {
         // Make a new map so old values returned by getRows() are undisturbed.
         int capacity = mValues != null ? mValues.size() : 0;
         mValues = new HashMap<String, ContentValues>(capacity);
-        while (mCursor.moveToNext()) {
+        while (cursor.moveToNext()) {
             ContentValues values = new ContentValues();
             for (int i = 0; i < mColumnNames.length; i++) {
                 if (i != mKeyColumn) {
-                    values.put(mColumnNames[i], mCursor.getString(i));
+                    values.put(mColumnNames[i], cursor.getString(i));
                 }
             }
-            mValues.put(mCursor.getString(mKeyColumn), values);
+            mValues.put(cursor.getString(mKeyColumn), values);
         }
     }
 

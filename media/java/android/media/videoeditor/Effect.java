@@ -76,7 +76,7 @@ public abstract class Effect {
 
     /**
      * Set the duration of the effect. If a preview or export is in progress,
-     * then this change is effective for next preview or export session. s
+     * then this change is effective for next preview or export session.
      *
      * @param durationMs of the effect in milliseconds
      */
@@ -85,9 +85,10 @@ public abstract class Effect {
             throw new IllegalArgumentException("Duration is too large");
         }
 
+        final long oldDurationMs = mDurationMs;
         mDurationMs = durationMs;
 
-        mMediaItem.invalidateTransitions(mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(mStartTimeMs, oldDurationMs, mStartTimeMs, mDurationMs);
     }
 
     /**
@@ -111,9 +112,10 @@ public abstract class Effect {
             throw new IllegalArgumentException("Start time is too large");
         }
 
+        final long oldStartTimeMs = mStartTimeMs;
         mStartTimeMs = startTimeMs;
 
-        mMediaItem.invalidateTransitions(mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(oldStartTimeMs, mDurationMs, mStartTimeMs, mDurationMs);
     }
 
     /**
@@ -134,10 +136,13 @@ public abstract class Effect {
             throw new IllegalArgumentException("Invalid start time or duration");
         }
 
+        final long oldStartTimeMs = mStartTimeMs;
+        final long oldDurationMs = mDurationMs;
+
         mStartTimeMs = startTimeMs;
         mDurationMs = durationMs;
 
-        mMediaItem.invalidateTransitions(mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(oldStartTimeMs, oldDurationMs, mStartTimeMs, mDurationMs);
     }
 
     /**

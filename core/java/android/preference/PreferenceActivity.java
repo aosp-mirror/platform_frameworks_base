@@ -23,6 +23,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.Fragment;
 import android.app.FragmentBreadCrumbs;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ListActivity;
 import android.content.Context;
@@ -902,7 +903,8 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     private void switchToHeaderInner(String fragmentName, Bundle args, int direction) {
-        getFragmentManager().popBackStack(BACK_STACK_PREFS, POP_BACK_STACK_INCLUSIVE);
+        getFragmentManager().popBackStack(BACK_STACK_PREFS,
+                FragmentManager.POP_BACK_STACK_INCLUSIVE);
         Fragment f = Fragment.instantiate(this, fragmentName, args);
         FragmentTransaction transaction = getFragmentManager().openTransaction();
         transaction.setTransition(direction == 0 ? FragmentTransaction.TRANSIT_NONE
@@ -934,7 +936,8 @@ public abstract class PreferenceActivity extends ListActivity implements
         if (mCurHeader == header) {
             // This is the header we are currently displaying.  Just make sure
             // to pop the stack up to its root state.
-            getFragmentManager().popBackStack(BACK_STACK_PREFS, POP_BACK_STACK_INCLUSIVE);
+            getFragmentManager().popBackStack(BACK_STACK_PREFS,
+                    FragmentManager.POP_BACK_STACK_INCLUSIVE);
         } else {
             int direction = mHeaders.indexOf(header) - mHeaders.indexOf(mCurHeader);
             switchToHeaderInner(header.fragment, header.fragmentArguments, direction);
@@ -1061,14 +1064,14 @@ public abstract class PreferenceActivity extends ListActivity implements
             setResult(resultCode, resultData);
             finish();
         } else {
+            // XXX be smarter about popping the stack.
+            onBackPressed();
             if (caller != null) {
                 if (caller.getTargetFragment() != null) {
                     caller.getTargetFragment().onActivityResult(caller.getTargetRequestCode(),
                             resultCode, resultData);
                 }
             }
-            // XXX be smarter about popping the stack.
-            onBackPressed();
         }
     }
     

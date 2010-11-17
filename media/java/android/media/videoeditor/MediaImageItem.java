@@ -242,15 +242,49 @@ public class MediaImageItem extends MediaItem {
      */
     @Override
     void invalidateTransitions(long startTimeMs, long durationMs) {
-        // Check if the effect overlaps with the beginning and end transitions
+        // Check if the item overlaps with the beginning and end transitions
         if (mBeginTransition != null) {
-            if (startTimeMs < mBeginTransition.getDuration()) {
+            if (isOverlapping(startTimeMs, durationMs, 0, mBeginTransition.getDuration())) {
                 mBeginTransition.invalidate();
             }
         }
 
         if (mEndTransition != null) {
-            if (startTimeMs + durationMs > mDurationMs - mEndTransition.getDuration()) {
+            final long transitionDurationMs = mEndTransition.getDuration();
+            if (isOverlapping(startTimeMs, durationMs,
+                    getDuration() - transitionDurationMs, transitionDurationMs)) {
+                mEndTransition.invalidate();
+            }
+        }
+    }
+
+    /*
+     * {@inheritDoc}
+     */
+    @Override
+    void invalidateTransitions(long oldStartTimeMs, long oldDurationMs, long newStartTimeMs,
+            long newDurationMs) {
+        // Check if the item overlaps with the beginning and end transitions
+        if (mBeginTransition != null) {
+            final long transitionDurationMs = mBeginTransition.getDuration();
+            // If the start time has changed and if the old or the new item
+            // overlaps with the begin transition, invalidate the transition.
+            if (oldStartTimeMs != newStartTimeMs &&
+                    (isOverlapping(oldStartTimeMs, oldDurationMs, 0, transitionDurationMs) ||
+                    isOverlapping(newStartTimeMs, newDurationMs, 0, transitionDurationMs))) {
+                mBeginTransition.invalidate();
+            }
+        }
+
+        if (mEndTransition != null) {
+            final long transitionDurationMs = mEndTransition.getDuration();
+            // If the start time + duration has changed and if the old or the new
+            // item overlaps the end transition, invalidate the transition/
+            if (oldStartTimeMs + oldDurationMs != newStartTimeMs + newDurationMs &&
+                    (isOverlapping(oldStartTimeMs, oldDurationMs,
+                            mDurationMs - transitionDurationMs, transitionDurationMs) ||
+                    isOverlapping(newStartTimeMs, newDurationMs,
+                            mDurationMs - transitionDurationMs, transitionDurationMs))) {
                 mEndTransition.invalidate();
             }
         }

@@ -886,8 +886,8 @@ public class DownloadManager {
      * downloaded successfully. otherwise, null is returned.
      *<p>
      * If the specified downloaded file is in external storage (for example, /sdcard dir),
-     * then it is assumed to be safe for anyone to read and the returned {@link Uri} can be used
-     * by any app to access the downloaded file.
+     * then it is assumed to be safe for anyone to read and the returned {@link Uri} corresponds
+     * to the filepath on sdcard.
      *
      * @param id the id of the downloaded file.
      * @return the {@link Uri} for the given downloaded file id, if download was successful. null
@@ -903,8 +903,7 @@ public class DownloadManager {
                 return null;
             }
             while (cursor.moveToFirst()) {
-                int status = cursor.getInt(cursor.getColumnIndexOrThrow(
-                        DownloadManager.COLUMN_STATUS));
+                int status = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_STATUS));
                 if (DownloadManager.STATUS_SUCCESSFUL == status) {
                     int indx = cursor.getColumnIndexOrThrow(
                             Downloads.Impl.COLUMN_DESTINATION);
@@ -919,10 +918,43 @@ public class DownloadManager {
                         return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, id);
                     } else {
                         // return public uri
-                        return ContentUris.withAppendedId(
-                                Downloads.Impl.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI, id);
+                        String path = cursor.getString(
+                                cursor.getColumnIndexOrThrow(COLUMN_LOCAL_FILENAME));
+                        return Uri.fromFile(new File(path));
                     }
                 }
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        // downloaded file not found or its status is not 'successfully completed'
+        return null;
+    }
+
+    /**
+     * Returns {@link Uri} for the given downloaded file id, if the file is
+     * downloaded successfully. otherwise, null is returned.
+     *<p>
+     * If the specified downloaded file is in external storage (for example, /sdcard dir),
+     * then it is assumed to be safe for anyone to read and the returned {@link Uri} corresponds
+     * to the filepath on sdcard.
+     *
+     * @param id the id of the downloaded file.
+     * @return the {@link Uri} for the given downloaded file id, if download was successful. null
+     * otherwise.
+     */
+    public String getMimeTypeForDownloadedFile(long id) {
+        Query query = new Query().setFilterById(id);
+        Cursor cursor = null;
+        try {
+            cursor = query(query);
+            if (cursor == null) {
+                return null;
+            }
+            while (cursor.moveToFirst()) {
+                return cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MEDIA_TYPE));
             }
         } finally {
             if (cursor != null) {

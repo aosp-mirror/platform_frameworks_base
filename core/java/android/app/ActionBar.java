@@ -138,14 +138,19 @@ public abstract class ActionBar {
      * Set the action bar into custom navigation mode, supplying a view
      * for custom navigation.
      * 
-     * Custom navigation views appear between the application icon and
+     * <p>Custom navigation views appear between the application icon and
      * any action buttons and may use any space available there. Common
      * use cases for custom navigation views might include an auto-suggesting
      * address bar for a browser or other navigation mechanisms that do not
-     * translate well to provided navigation modes.
+     * translate well to provided navigation modes.</p>
+     *
+     * <p>The display option {@link #DISPLAY_SHOW_CUSTOM} must be set for
+     * the custom view to be displayed.</p>
      * 
      * @param view Custom navigation view to place in the ActionBar.
      * @param layoutParams How this custom view should layout in the bar.
+     *
+     * @see #setDisplayOptions(int, int)
      */
     public abstract void setCustomView(View view, LayoutParams layoutParams);
 
@@ -248,39 +253,47 @@ public abstract class ActionBar {
     public abstract void setStandardNavigationMode();
 
     /**
-     * Set the action bar's title. This will only be displayed in standard navigation mode.
+     * Set the action bar's title. This will only be displayed if
+     * {@link #DISPLAY_SHOW_TITLE} is set.
      *
      * @param title Title to set
      *
      * @see #setTitle(int)
+     * @see #setDisplayOptions(int, int)
      */
     public abstract void setTitle(CharSequence title);
 
     /**
-     * Set the action bar's title. This will only be displayed in standard navigation mode.
+     * Set the action bar's title. This will only be displayed if
+     * {@link #DISPLAY_SHOW_TITLE} is set.
      *
      * @param resId Resource ID of title string to set
      *
      * @see #setTitle(CharSequence)
+     * @see #setDisplayOptions(int, int)
      */
     public abstract void setTitle(int resId);
 
     /**
-     * Set the action bar's subtitle. This will only be displayed in standard navigation mode.
-     * Set to null to disable the subtitle entirely.
+     * Set the action bar's subtitle. This will only be displayed if
+     * {@link #DISPLAY_SHOW_TITLE} is set. Set to null to disable the
+     * subtitle entirely.
      *
      * @param subtitle Subtitle to set
      *
      * @see #setSubtitle(int)
+     * @see #setDisplayOptions(int, int)
      */
     public abstract void setSubtitle(CharSequence subtitle);
 
     /**
-     * Set the action bar's subtitle. This will only be displayed in standard navigation mode.
+     * Set the action bar's subtitle. This will only be displayed if
+     * {@link #DISPLAY_SHOW_TITLE} is set.
      *
      * @param resId Resource ID of subtitle string to set
      *
      * @see #setSubtitle(CharSequence)
+     * @see #setDisplayOptions(int, int)
      */
     public abstract void setSubtitle(int resId);
 
@@ -317,9 +330,16 @@ public abstract class ActionBar {
     
     /**
      * @return The current custom navigation view.
+     * @deprecated Method has been renamed. Use {@link #getCustomView()}.
      */
+    @Deprecated
     public abstract View getCustomNavigationView();
-    
+
+    /**
+     * @return The current custom view.
+     */
+    public abstract View getCustomView();
+
     /**
      * Returns the current ActionBar title in standard mode.
      * Returns null if {@link #getNavigationMode()} would not return

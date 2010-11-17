@@ -153,8 +153,8 @@ public class TabletStatusBar extends StatusBar {
         mStatusBarView.setIgnoreChildren(0, mNotificationTrigger, mNotificationPanel);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                512, // ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
@@ -434,7 +434,7 @@ public class TabletStatusBar extends StatusBar {
             Slog.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
         } catch (RemoteException ex) {
         }
-        if (immersive) {
+        if (false && immersive) {
             // TODO: immersive mode popups for tablet
         } else if (notification.notification.fullScreenIntent != null) {
             // not immersive & a full-screen alert should be shown

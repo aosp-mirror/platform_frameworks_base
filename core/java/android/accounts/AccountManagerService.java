@@ -520,6 +520,18 @@ public class AccountManagerService
         if (account == null) throw new IllegalArgumentException("account is null");
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
+
+        cancelNotification(getSigninRequiredNotificationId(account));
+        synchronized(mCredentialsPermissionNotificationIds) {
+            for (Pair<Pair<Account, String>, Integer> pair:
+                mCredentialsPermissionNotificationIds.keySet()) {
+                if (account.equals(pair.first.first)) {
+                    int id = mCredentialsPermissionNotificationIds.get(pair);
+                    cancelNotification(id);
+                }
+            }
+        }
+
         try {
             new RemoveAccountSession(response, account).bind();
         } finally {

@@ -26,12 +26,11 @@ import android.graphics.Rect;
 import android.text.method.TextKeyListener;
 import android.text.style.AlignmentSpan;
 import android.text.style.LeadingMarginSpan;
+import android.text.style.LeadingMarginSpan.LeadingMarginSpan2;
 import android.text.style.LineBackgroundSpan;
 import android.text.style.ParagraphStyle;
 import android.text.style.ReplacementSpan;
 import android.text.style.TabStopSpan;
-import android.text.style.LeadingMarginSpan.LeadingMarginSpan2;
-import android.view.KeyEvent;
 
 import java.util.Arrays;
 
@@ -1056,23 +1055,30 @@ public abstract class Layout {
         int lineEnd = getLineEnd(line);
         int lineDir = getParagraphDirection(line);
 
+        boolean lineChanged = false;
         boolean advance = toLeft == (lineDir == DIR_RIGHT_TO_LEFT);
-        if (caret == (advance ? lineEnd : lineStart)) {
-            // walking off line, so look at the line we're headed to
-            if (caret == lineStart) {
-                if (line > 0) {
-                    --line;
-                } else {
-                    return caret; // at very start, don't move
-                }
-            } else {
+        // if walking off line, look at the line we're headed to
+        if (advance) {
+            if (caret == lineEnd) {
                 if (line < getLineCount() - 1) {
+                    lineChanged = true;
                     ++line;
                 } else {
                     return caret; // at very end, don't move
                 }
             }
+        } else {
+            if (caret == lineStart) {
+                if (line > 0) {
+                    lineChanged = true;
+                    --line;
+                } else {
+                    return caret; // at very start, don't move
+                }
+            }
+        }
 
+        if (lineChanged) {
             lineStart = getLineStart(line);
             lineEnd = getLineEnd(line);
             int newDir = getParagraphDirection(line);
@@ -1672,6 +1678,7 @@ public abstract class Layout {
             return new String(s);
         }
 
+        @Override
         public String toString() {
             char[] s = new char[length()];
             getChars(0, length(), s, 0);
@@ -1709,6 +1716,7 @@ public abstract class Layout {
             return mSpanned.nextSpanTransition(start, limit, type);
         }
 
+        @Override
         public CharSequence subSequence(int start, int end) {
             char[] s = new char[end - start];
             getChars(start, end, s, 0);

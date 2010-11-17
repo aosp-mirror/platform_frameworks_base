@@ -65,18 +65,21 @@
             <LinearLayout
                 android:id="@+id/notificationTrigger"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 >
+                <!-- paddingLeft: 24 dips = 32dp (total space to icon) - 8dp in the icon.
+                TODO: Make sure the font has a small enough leading that we don't need this
+                negative margin business. -->
                 <com.android.systemui.statusbar.policy.Clock
                     style="@*android:style/TextAppearance.StatusBar.Icon"
                     android:id="@+id/clock"
-                    android:layout_width="64dip"
-                    android:layout_height="48dip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="65dp"
+                    android:layout_marginTop="-17dp"
                     android:singleLine="true"
-                    android:gravity="center"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:padding="2dip"
+                    android:textSize="60sp"
+                    android:paddingLeft="24dip"
+                    android:textColor="#2e2e2e"
                     />
                 <ImageView
                     android:id="@+id/battery"

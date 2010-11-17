@@ -1832,7 +1832,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             final ActionMode.Callback wrappedCallback = new ActionModeCallbackWrapper(callback);
-            ActionMode mode = getCallback().onWindowStartingActionMode(wrappedCallback);
+            ActionMode mode = null;
+            try {
+                mode = getCallback().onWindowStartingActionMode(wrappedCallback);
+            } catch (AbstractMethodError ame) {
+                // Older apps might not implement this callback method.
+            }
             if (mode != null) {
                 mActionMode = mode;
             } else {
@@ -1877,7 +1882,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
             }
             if (mActionMode != null) {
-                getCallback().onActionModeStarted(mActionMode);
+                try {
+                    getCallback().onActionModeStarted(mActionMode);
+                } catch (AbstractMethodError ame) {
+                    // Older apps might not implement this callback method.
+                }
             }
             return mActionMode;
         }
@@ -2094,7 +2103,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (mActionModeView != null) {
                     mActionModeView.removeAllViews();
                 }
-                getCallback().onActionModeFinished(mActionMode);
+                try {
+                    getCallback().onActionModeFinished(mActionMode);
+                } catch (AbstractMethodError ame) {
+                    // Older apps might not implement this callback method.
+                }
                 mActionMode = null;
             }
         }
