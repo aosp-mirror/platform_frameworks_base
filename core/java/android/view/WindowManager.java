@@ -628,10 +628,18 @@ public interface WindowManager extends ViewManager {
          * to which all subsequent touches of that pointer will go until that
          * pointer goes up thereby enabling touches with multiple pointers
          * to be split across multiple windows.
-         * 
-         * {@hide} */
+         */
         public static final int FLAG_SPLIT_TOUCH = 0x00800000;
+        
+        /**
+         * Indicates whether this window should be hardware accelerated.
+         * Requesting hardware acceleration does not guarantee it will happen.
+         */
+        public static final int FLAG_HARDWARE_ACCELERATED = 0x01000000;
 
+        // ----- HIDDEN FLAGS.
+        // These start at the high bit and go down.
+        
         /**
          * Flag for a window belonging to an activity that responds to {@link KeyEvent#KEYCODE_MENU}
          * and therefore needs a Menu key. For devices where Menu is a physical button this flag is
@@ -643,7 +651,7 @@ public interface WindowManager extends ViewManager {
          *
          * {@hide}
          */
-        public static final int FLAG_NEEDS_MENU_KEY = 0x01000000;
+        public static final int FLAG_NEEDS_MENU_KEY = 0x08000000;
 
         /** Window flag: *sigh* The lock screen wants to continue running its
          * animation while it is fading.  A kind-of hack to allow this.  Maybe
@@ -664,12 +672,6 @@ public interface WindowManager extends ViewManager {
          * it is created.
          * {@hide} */
         public static final int FLAG_SYSTEM_ERROR = 0x40000000;
-        
-        /**
-         * Indicates whether this window should be hardware accelerated.
-         * Requesting hardware acceleration does not guarantee it will happen.
-         */
-        public static final int FLAG_HARDWARE_ACCELERATED = 0x80000000;        
 
         /**
          * Given a particular set of window manager flags, determine whether
