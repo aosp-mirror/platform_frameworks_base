@@ -590,6 +590,14 @@ public abstract class ActionBar {
         public abstract Tab setIcon(Drawable icon);
 
         /**
+         * Set the icon displayed on this tab.
+         *
+         * @param resId Resource ID referring to the drawable to use as an icon
+         * @return The current instance for call chaining
+         */
+        public abstract Tab setIcon(int resId);
+
+        /**
          * Set the text displayed on this tab. Text may be truncated if there is not
          * room to display the entire string.
          *
@@ -599,6 +607,15 @@ public abstract class ActionBar {
         public abstract Tab setText(CharSequence text);
 
         /**
+         * Set the text displayed on this tab. Text may be truncated if there is not
+         * room to display the entire string.
+         *
+         * @param resId A resource ID referring to the text that should be displayed
+         * @return The current instance for call chaining
+         */
+        public abstract Tab setText(int resId);
+
+        /**
          * Set a custom view to be used for this tab. This overrides values set by
          * {@link #setText(CharSequence)} and {@link #setIcon(Drawable)}.
          *
@@ -606,6 +623,15 @@ public abstract class ActionBar {
          * @return The current instance for call chaining
          */
         public abstract Tab setCustomView(View view);
+
+        /**
+         * Set a custom view to be used for this tab. This overrides values set by
+         * {@link #setText(CharSequence)} and {@link #setIcon(Drawable)}.
+         *
+         * @param layoutResId A layout resource to inflate and use as a custom tab view
+         * @return The current instance for call chaining
+         */
+        public abstract Tab setCustomView(int layoutResId);
 
         /**
          * Retrieve a previously set custom view for this tab.
