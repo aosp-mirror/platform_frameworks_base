@@ -42,6 +42,7 @@ public:
     virtual void                    endSendObject(const char* path,
                                             MtpObjectHandle handle,
                                             MtpObjectFormat format,
+                                            int64_t size,
                                             bool succeeded) = 0;
 
     virtual MtpObjectHandleList*    getObjectList(MtpStorageID storageID,
