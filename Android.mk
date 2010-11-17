@@ -123,6 +123,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/nfc/INfcTag.aidl \
 	core/java/android/nfc/IP2pInitiator.aidl \
 	core/java/android/nfc/IP2pTarget.aidl \
+    core/java/android/nfc/INfcSecureElement.aidl \
 	core/java/android/os/IHardwareService.aidl \
 	core/java/android/os/IMessenger.aidl \
 	core/java/android/os/INetworkManagementService.aidl \

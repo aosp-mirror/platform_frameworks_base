@@ -24,6 +24,7 @@ import android.nfc.ILlcpConnectionlessSocket;
 import android.nfc.INfcTag;
 import android.nfc.IP2pTarget;
 import android.nfc.IP2pInitiator;
+import android.nfc.INfcSecureElement;
 
 /**
  * @hide
@@ -36,6 +37,7 @@ interface INfcAdapter
     INfcTag getNfcTagInterface();
     IP2pTarget getP2pTargetInterface();
     IP2pInitiator getP2pInitiatorInterface();
+    INfcSecureElement getNfcSecureElementInterface();
 
     // NfcAdapter-class related methods
     boolean isEnabled();
