@@ -6720,7 +6720,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     + " before=" + before + " after=" + after + ": " + buffer);
 
             if (AccessibilityManager.getInstance(mContext).isEnabled()
-                    && !isPasswordInputType(mInputType)) {
+                    && !isPasswordInputType(mInputType)
+                    && !hasPasswordTransformationMethod()) {
                 mBeforeText = buffer.toString();
             }
 
@@ -7599,7 +7600,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return false;
         }
 
-        final boolean isPassword = isPasswordInputType(mInputType);
+        final boolean isPassword = hasPasswordTransformationMethod();
 
         if (!isPassword) {
             CharSequence text = getText();
