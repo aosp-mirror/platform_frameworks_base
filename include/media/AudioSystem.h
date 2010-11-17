@@ -156,6 +156,7 @@ public:
         MODE_NORMAL = 0,
         MODE_RINGTONE,
         MODE_IN_CALL,
+        MODE_IN_COMMUNICATION,
         NUM_MODES  // not a valid entry, denotes end-of-list
     };
 
