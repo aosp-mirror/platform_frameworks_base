@@ -35,7 +35,8 @@ SoftwareRenderer::SoftwareRenderer(
         OMX_COLOR_FORMATTYPE colorFormat,
         const sp<Surface> &surface,
         size_t displayWidth, size_t displayHeight,
-        size_t decodedWidth, size_t decodedHeight)
+        size_t decodedWidth, size_t decodedHeight,
+        int32_t rotationDegrees)
     : mColorFormat(colorFormat),
       mConverter(NULL),
       mYUVMode(None),
@@ -95,6 +96,20 @@ SoftwareRenderer::SoftwareRenderer(
     CHECK_EQ(0, native_window_set_buffers_geometry(
                 mSurface.get(), mDecodedWidth, mDecodedHeight,
                 halFormat));
+
+    uint32_t transform;
+    switch (rotationDegrees) {
+        case 0: transform = 0; break;
+        case 90: transform = HAL_TRANSFORM_ROT_90; break;
+        case 180: transform = HAL_TRANSFORM_ROT_180; break;
+        case 270: transform = HAL_TRANSFORM_ROT_270; break;
+        default: transform = 0; break;
+    }
+
+    if (transform) {
+        CHECK_EQ(0, native_window_set_buffers_transform(
+                    mSurface.get(), transform));
+    }
 }
 
 SoftwareRenderer::~SoftwareRenderer() {
