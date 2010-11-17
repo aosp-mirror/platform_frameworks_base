@@ -21,23 +21,22 @@
   state of the device, as well as instructions on how to get past it
   depending on the state of the device.  It is the same for landscape
   and portrait.-->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tabunlock="http://schemas.android.com/apk/res/com.android.tabunlock"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#70000000"
-    android:gravity="center_horizontal"
-    android:id="@+id/root">
+    android:orientation="vertical"
+    android:id="@+id/root"
+    android:background="#70000000">
 
     <!-- left side: status and emergency call button -->
     <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dip"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center_vertical"
-                >
-        <include layout="@layout/keyguard_screen_status_land" />
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+        <include layout="@layout/keyguard_screen_status_port" />
     </LinearLayout>
 
     <LinearLayout
@@ -61,6 +60,7 @@
             android:id="@+id/wave_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             />
 
         <!-- "emergency calls only" shown when sim is missing or PUKd -->
@@ -93,5 +93,5 @@
             />
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>
 
