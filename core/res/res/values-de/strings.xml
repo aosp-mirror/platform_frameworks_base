@@ -482,6 +482,10 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Auf Werkseinstellungen zurücksetzen und Daten auf dem Telefon ohne Warnung löschen"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Den globalen Proxy des Geräts festlegen"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Den globalen Proxy des Geräts zur Verwendung während der Aktivierung der Richtlinie festlegen. Nur der erste Geräteadministrator kann den gültigen globalen Proxy festlegen."</string>
+    <!-- no translation found for policylab_expirePassword (2314569545488269564) -->
+    <skip />
+    <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Privat"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -546,11 +550,10 @@
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Pager (geschäftl.)"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Zweite Nummer"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <!-- no translation found for eventTypeCustom (7837586198458073404) -->
-    <skip />
+    <string name="eventTypeCustom" msgid="7837586198458073404">"Benutzerdefiniert"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Geburtstag"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Jahrestag"</string>
-    <!-- outdated translation 5834288791948564594 -->     <string name="eventTypeOther" msgid="7388178939010143077">"Termin"</string>
+    <string name="eventTypeOther" msgid="7388178939010143077">"Sonstige"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Benutzerdefiniert"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Privat"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Geschäftlich"</string>
@@ -577,36 +580,21 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Geschäftlich"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Sonstige"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Benutzerdefiniert"</string>
-    <!-- no translation found for relationTypeCustom (3542403679827297300) -->
-    <skip />
-    <!-- no translation found for relationTypeAssistant (6274334825195379076) -->
-    <skip />
-    <!-- no translation found for relationTypeBrother (8757913506784067713) -->
-    <skip />
-    <!-- no translation found for relationTypeChild (1890746277276881626) -->
-    <skip />
-    <!-- no translation found for relationTypeDomesticPartner (6904807112121122133) -->
-    <skip />
-    <!-- no translation found for relationTypeFather (5228034687082050725) -->
-    <skip />
-    <!-- no translation found for relationTypeFriend (7313106762483391262) -->
-    <skip />
-    <!-- no translation found for relationTypeManager (6365677861610137895) -->
-    <skip />
-    <!-- no translation found for relationTypeMother (4578571352962758304) -->
-    <skip />
-    <!-- no translation found for relationTypeParent (4755635567562925226) -->
-    <skip />
-    <!-- no translation found for relationTypePartner (7266490285120262781) -->
-    <skip />
-    <!-- no translation found for relationTypeReferredBy (101573059844135524) -->
-    <skip />
-    <!-- no translation found for relationTypeRelative (1799819930085610271) -->
-    <skip />
-    <!-- no translation found for relationTypeSister (1735983554479076481) -->
-    <skip />
-    <!-- no translation found for relationTypeSpouse (394136939428698117) -->
-    <skip />
+    <string name="relationTypeCustom" msgid="3542403679827297300">"Benutzerdefiniert"</string>
+    <string name="relationTypeAssistant" msgid="6274334825195379076">"Assistent"</string>
+    <string name="relationTypeBrother" msgid="8757913506784067713">"Bruder"</string>
+    <string name="relationTypeChild" msgid="1890746277276881626">"Kind"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Lebenspartner"</string>
+    <string name="relationTypeFather" msgid="5228034687082050725">"Vater"</string>
+    <string name="relationTypeFriend" msgid="7313106762483391262">"Freund"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"Vorgesetzter"</string>
+    <string name="relationTypeMother" msgid="4578571352962758304">"Mutter"</string>
+    <string name="relationTypeParent" msgid="4755635567562925226">"Elternteil"</string>
+    <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Weitergeleitet von"</string>
+    <string name="relationTypeRelative" msgid="1799819930085610271">"Verwandter"</string>
+    <string name="relationTypeSister" msgid="1735983554479076481">"Schwester"</string>
+    <string name="relationTypeSpouse" msgid="394136939428698117">"Gatte/Gattin"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Benutzerdefiniert"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Privat"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Geschäftlich"</string>
@@ -674,8 +662,7 @@
     <string name="save_password_label" msgid="6860261758665825069">"Bestätigen"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Tipp: Zum Heranzoomen und Vergrößern zweimal tippen"</string>
     <!-- outdated translation 8940110866775097494 -->     <string name="autofill_this_form" msgid="1272247532604569872">"Dieses Formular automatisch ausfüllen"</string>
-    <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
-    <skip />
+    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />
     <!-- no translation found for autofill_address_summary_separator (7483307893170324129) -->
@@ -804,8 +791,7 @@
     <string name="cut" msgid="3092569408438626261">"Ausschneiden"</string>
     <string name="copy" msgid="2681946229533511987">"Kopieren"</string>
     <string name="paste" msgid="5629880836805036433">"Einfügen"</string>
-    <!-- no translation found for pasteDisabled (7259254654641456570) -->
-    <skip />
+    <string name="pasteDisabled" msgid="7259254654641456570">"Nichts zum Einfügen"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL kopieren"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Text auswählen..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Textauswahl"</string>
@@ -951,8 +937,7 @@
     <string name="ime_action_send" msgid="2316166556349314424">"Senden"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Weiter"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Fertig"</string>
-    <!-- no translation found for ime_action_previous (1443550039250105948) -->
-    <skip />
+    <string name="ime_action_previous" msgid="1443550039250105948">"Zurück"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Ausführen"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Nummer"\n"mit <xliff:g id="NUMBER">%s</xliff:g> wählen"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Neuer Kontakt"\n"mit <xliff:g id="NUMBER">%s</xliff:g> erstellen"</string>

@@ -488,6 +488,10 @@
     <!-- outdated translation 2314060933796396205 -->     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Restaurar ils parameters originals dal telefonin. Qua tras vegnan tut Vossas datas stizzadas senza dumonda da conferma."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Definir il proxy global da l\'apparat"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Definir il proxy global da l\'apparat che duai vegnir utilisà sche la directiva è activada. Mo l\'emprim administratur dad apparats definescha il vair proxy global."</string>
+    <!-- no translation found for policylab_expirePassword (2314569545488269564) -->
+    <skip />
+    <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Privat"</item>
     <item msgid="869923650527136615">"Telefonin"</item>

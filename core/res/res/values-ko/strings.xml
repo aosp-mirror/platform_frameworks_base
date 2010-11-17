@@ -482,6 +482,10 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"초기화를 수행하여 경고 없이 휴대전화 데이터를 지웁니다."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"기기 전체 프록시 설정"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"정책이 사용 설정되어 있는 동안 사용될 기기 전체 프록시를 설정합니다. 첫 번째 기기 관리자가 설정한 전체 프록시만 유효합니다."</string>
+    <!-- no translation found for policylab_expirePassword (2314569545488269564) -->
+    <skip />
+    <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"집"</item>
     <item msgid="869923650527136615">"모바일"</item>
@@ -546,11 +550,10 @@
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"직장 호출기"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"비서"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <!-- no translation found for eventTypeCustom (7837586198458073404) -->
-    <skip />
+    <string name="eventTypeCustom" msgid="7837586198458073404">"맞춤설정"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"생일"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"기념일"</string>
-    <!-- outdated translation 5834288791948564594 -->     <string name="eventTypeOther" msgid="7388178939010143077">"일정"</string>
+    <string name="eventTypeOther" msgid="7388178939010143077">"기타"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"맞춤설정"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"집"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"직장"</string>
@@ -577,36 +580,21 @@
     <string name="orgTypeWork" msgid="29268870505363872">"직장"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"기타"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"맞춤설정"</string>
-    <!-- no translation found for relationTypeCustom (3542403679827297300) -->
-    <skip />
-    <!-- no translation found for relationTypeAssistant (6274334825195379076) -->
-    <skip />
-    <!-- no translation found for relationTypeBrother (8757913506784067713) -->
-    <skip />
-    <!-- no translation found for relationTypeChild (1890746277276881626) -->
-    <skip />
-    <!-- no translation found for relationTypeDomesticPartner (6904807112121122133) -->
-    <skip />
-    <!-- no translation found for relationTypeFather (5228034687082050725) -->
-    <skip />
-    <!-- no translation found for relationTypeFriend (7313106762483391262) -->
-    <skip />
-    <!-- no translation found for relationTypeManager (6365677861610137895) -->
-    <skip />
-    <!-- no translation found for relationTypeMother (4578571352962758304) -->
-    <skip />
-    <!-- no translation found for relationTypeParent (4755635567562925226) -->
-    <skip />
-    <!-- no translation found for relationTypePartner (7266490285120262781) -->
-    <skip />
-    <!-- no translation found for relationTypeReferredBy (101573059844135524) -->
-    <skip />
-    <!-- no translation found for relationTypeRelative (1799819930085610271) -->
-    <skip />
-    <!-- no translation found for relationTypeSister (1735983554479076481) -->
-    <skip />
-    <!-- no translation found for relationTypeSpouse (394136939428698117) -->
-    <skip />
+    <string name="relationTypeCustom" msgid="3542403679827297300">"맞춤설정"</string>
+    <string name="relationTypeAssistant" msgid="6274334825195379076">"비서"</string>
+    <string name="relationTypeBrother" msgid="8757913506784067713">"남자 형제"</string>
+    <string name="relationTypeChild" msgid="1890746277276881626">"자녀"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"동거인"</string>
+    <string name="relationTypeFather" msgid="5228034687082050725">"아버지"</string>
+    <string name="relationTypeFriend" msgid="7313106762483391262">"친구"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"상사"</string>
+    <string name="relationTypeMother" msgid="4578571352962758304">"어머니"</string>
+    <string name="relationTypeParent" msgid="4755635567562925226">"부모"</string>
+    <string name="relationTypePartner" msgid="7266490285120262781">"파트너"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"추천인"</string>
+    <string name="relationTypeRelative" msgid="1799819930085610271">"친척"</string>
+    <string name="relationTypeSister" msgid="1735983554479076481">"여자 형제"</string>
+    <string name="relationTypeSpouse" msgid="394136939428698117">"배우자"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"맞춤설정"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"홈"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"직장"</string>
@@ -674,8 +662,7 @@
     <string name="save_password_label" msgid="6860261758665825069">"확인"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"도움말: 축소/확대하려면 두 번 누릅니다."</string>
     <!-- outdated translation 8940110866775097494 -->     <string name="autofill_this_form" msgid="1272247532604569872">"양식 자동완성"</string>
-    <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
-    <skip />
+    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />
     <!-- no translation found for autofill_address_summary_separator (7483307893170324129) -->
@@ -804,8 +791,7 @@
     <string name="cut" msgid="3092569408438626261">"잘라내기"</string>
     <string name="copy" msgid="2681946229533511987">"복사"</string>
     <string name="paste" msgid="5629880836805036433">"붙여넣기"</string>
-    <!-- no translation found for pasteDisabled (7259254654641456570) -->
-    <skip />
+    <string name="pasteDisabled" msgid="7259254654641456570">"붙여넣을 내용이 없습니다."</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL 복사"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"텍스트 선택..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"텍스트 선택"</string>
@@ -951,8 +937,7 @@
     <string name="ime_action_send" msgid="2316166556349314424">"전송"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"다음"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"완료"</string>
-    <!-- no translation found for ime_action_previous (1443550039250105948) -->
-    <skip />
+    <string name="ime_action_previous" msgid="1443550039250105948">"이전"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"실행"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"전화하기 "\n"<xliff:g id="NUMBER">%s</xliff:g>에 연결"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"전화번호부에"\n"<xliff:g id="NUMBER">%s</xliff:g> 추가"</string>

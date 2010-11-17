@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_label (4489004083283879149) -->
+    <!-- no translation found for app_label (7164937344850004466) -->
     <skip />
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Limpar"</string>
     <!-- no translation found for status_bar_do_not_disturb_button (5812628897510997853) -->
