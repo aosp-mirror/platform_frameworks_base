@@ -22,6 +22,7 @@ import android.util.Slog;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -31,10 +32,11 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         View.OnClickListener {
     static final String TAG = "NotificationPanel";
 
+    View mTitleArea;
     View mSettingsButton;
     View mNotificationButton;
     View mNotificationScroller;
-    FrameLayout mSettingsFrame;
+    FrameLayout mContentFrame;
     View mSettingsPanel;
 
     public NotificationPanel(Context context, AttributeSet attrs) {
@@ -49,13 +51,15 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     public void onFinishInflate() {
         super.onFinishInflate();
 
+        mTitleArea = findViewById(R.id.title_area);
+
         mSettingsButton = (ImageView)findViewById(R.id.settings_button);
         mSettingsButton.setOnClickListener(this);
         mNotificationButton = (ImageView)findViewById(R.id.notification_button);
         mNotificationButton.setOnClickListener(this);
 
         mNotificationScroller = findViewById(R.id.notificationScroller);
-        mSettingsFrame = (FrameLayout)findViewById(R.id.settings_frame);
+        mContentFrame = (FrameLayout)findViewById(R.id.content_frame);
     }
 
     @Override
@@ -91,22 +95,24 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     }
 
     public boolean isInContentArea(int x, int y) {
-        final int l = getPaddingLeft();
-        final int r = getWidth() - getPaddingRight();
-        final int t = getPaddingTop();
-        final int b = getHeight() - getPaddingBottom();
+        final int l = mContentFrame.getLeft();
+        final int r = mContentFrame.getRight();
+        final int t = mTitleArea.getTop();
+        final int b = mContentFrame.getBottom();
         return x >= l && x < r && y >= t && y < b;
     }
 
     void removeSettingsPanel() {
         if (mSettingsPanel != null) {
-            mSettingsFrame.removeViewAt(0);
+            mContentFrame.removeView(mSettingsPanel);
             mSettingsPanel = null;
         }
     }
 
     void addSettingsPanel() {
-        mSettingsPanel = View.inflate(getContext(), R.layout.sysbar_panel_settings, mSettingsFrame);
+        LayoutInflater infl = LayoutInflater.from(getContext());
+        mSettingsPanel = infl.inflate(R.layout.sysbar_panel_settings, mContentFrame, false);
+        mContentFrame.addView(mSettingsPanel);
     }
 }
 
