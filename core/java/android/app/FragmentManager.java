@@ -1023,7 +1023,7 @@ final class FragmentManagerImpl extends FragmentManager {
             throw new IllegalStateException("Recursive entry to executePendingTransactions");
         }
         
-        if (Looper.myLooper() != Looper.getMainLooper()) {
+        if (Looper.myLooper() != mActivity.mHandler.getLooper()) {
             throw new IllegalStateException("Must be called from main thread of process");
         }
 
