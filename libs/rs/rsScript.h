@@ -61,6 +61,7 @@ public:
     void initSlots();
     void setSlot(uint32_t slot, Allocation *a);
     void setVar(uint32_t slot, const void *val, uint32_t len);
+    void setVarObj(uint32_t slot, ObjectBase *val);
 
     virtual void runForEach(Context *rsc,
                             const Allocation * ain,
