@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -31,6 +32,7 @@ import android.view.AbsSavedState;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -52,6 +54,7 @@ import java.util.Set;
  * {@link SharedPreferences}. It is up to the subclass to decide how to store
  * the value.
  * 
+ * @attr ref android.R.styleable#Preference_icon
  * @attr ref android.R.styleable#Preference_key
  * @attr ref android.R.styleable#Preference_title
  * @attr ref android.R.styleable#Preference_summary
@@ -87,6 +90,11 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
     private int mOrder = DEFAULT_ORDER;
     private CharSequence mTitle;
     private CharSequence mSummary;
+    /**
+     * mIconResId is overridden by mIcon, if mIcon is specified.
+     */
+    private int mIconResId;
+    private Drawable mIcon;
     private String mKey;
     private Intent mIntent;
     private String mFragment;
@@ -197,6 +205,10 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
         for (int i = a.getIndexCount(); i >= 0; i--) {
             int attr = a.getIndex(i); 
             switch (attr) {
+                case com.android.internal.R.styleable.Preference_icon:
+                    mIconResId = a.getResourceId(attr, 0);
+                    break;
+
                 case com.android.internal.R.styleable.Preference_key:
                     mKey = a.getString(attr);
                     break;
@@ -499,11 +511,20 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
             }
         }
         
+        ImageView imageView = (ImageView) view.findViewById(com.android.internal.R.id.icon);
+        if (imageView != null && (mIconResId != 0 || mIcon != null)) {
+            if (mIcon == null) {
+                mIcon = getContext().getResources().getDrawable(mIconResId);
+            }
+            if (mIcon != null) {
+                imageView.setImageDrawable(mIcon);
+            }
+        }
         if (mShouldDisableView) {
             setEnabledStateOnViews(view, isEnabled());
         }
     }
-    
+
     /**
      * Makes sure the view (and any children) get the enabled state changed.
      */
@@ -584,6 +605,42 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      */
     public CharSequence getTitle() {
         return mTitle;
+    }
+
+    /**
+     * Sets the icon for this Preference with a Drawable. 
+     * This icon will be placed into the ID
+     * {@link android.R.id#icon} within the View created by
+     * {@link #onCreateView(ViewGroup)}.
+     * 
+     * @param icon The optional icon for this Preference.
+     */
+    public void setIcon(Drawable icon) {
+        if ((icon == null && mIcon != null) || (icon != null && mIcon != icon)) {
+            mIcon = icon;
+            notifyChanged();
+        }
+    }
+
+    /**
+     * Sets the icon for this Preference with a resource ID. 
+     * 
+     * @see #setIcon(Drawable)
+     * @param iconResId The icon as a resource ID.
+     */
+    public void setIcon(int iconResId) {
+        mIconResId = iconResId;
+        setIcon(mContext.getResources().getDrawable(iconResId));
+    }
+
+    /**
+     * Returns the icon of this Preference.
+     * 
+     * @return The icon.
+     * @see #setIcon(Drawable)
+     */
+    public Drawable getIcon() {
+        return mIcon;
     }
 
     /**

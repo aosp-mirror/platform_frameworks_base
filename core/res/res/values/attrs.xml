@@ -3854,6 +3854,8 @@
 
     <!-- Base attributes available to Preference. -->
     <declare-styleable name="Preference">
+        <!-- The optional icon for the preference -->
+        <attr name="icon" />
         <!-- The key to store the Preference value. -->
         <attr name="key" format="string" />
         <!-- The title for the Preference in a PreferenceActivity screen. -->
