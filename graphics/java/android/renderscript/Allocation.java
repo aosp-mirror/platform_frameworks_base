@@ -34,6 +34,18 @@ public class Allocation extends BaseObj {
     Type mType;
     Bitmap mBitmap;
 
+    public enum CubemapLayout {
+        VERTICAL_FACE_LIST (0),
+        HORIZONTAL_FACE_LIST (1),
+        VERTICAL_CROSS (2),
+        HORIZONTAL_CROSS (3);
+
+        int mID;
+        CubemapLayout(int id) {
+            mID = id;
+        }
+    }
+
     Allocation(int id, RenderScript rs, Type t) {
         super(id, rs);
         mType = t;
@@ -355,18 +367,21 @@ public class Allocation extends BaseObj {
         throw new RSInvalidStateException("Bad bitmap type: " + bc);
     }
 
-    static private Type typeFromBitmap(RenderScript rs, Bitmap b) {
+    static private Type typeFromBitmap(RenderScript rs, Bitmap b, boolean mip) {
         Element e = elementFromBitmap(rs, b);
         Type.Builder tb = new Type.Builder(rs, e);
         tb.add(Dimension.X, b.getWidth());
         tb.add(Dimension.Y, b.getHeight());
+        if (mip) {
+            tb.add(Dimension.LOD, 1);
+        }
         return tb.create();
     }
 
-    static public Allocation createFromBitmap(RenderScript rs, Bitmap b, Element dstFmt, boolean genMips) {
-
+    static public Allocation createFromBitmap(RenderScript rs, Bitmap b,
+                                              Element dstFmt, boolean genMips) {
         rs.validate();
-        Type t = typeFromBitmap(rs, b);
+        Type t = typeFromBitmap(rs, b, genMips);
 
         int id = rs.nAllocationCreateFromBitmap(dstFmt.getID(), genMips, b);
         if(id == 0) {
@@ -375,10 +390,49 @@ public class Allocation extends BaseObj {
         return new Allocation(id, rs, t);
     }
 
+    static public Allocation createCubemapFromBitmap(RenderScript rs, Bitmap b,
+                                                     Element dstFmt,
+                                                     boolean genMips,
+                                                     CubemapLayout layout) {
+        rs.validate();
+        int height = b.getHeight();
+        int width = b.getWidth();
+
+        if (layout != CubemapLayout.VERTICAL_FACE_LIST) {
+            throw new RSIllegalArgumentException("Only vertical face list supported");
+        }
+        if (height % 6 != 0) {
+            throw new RSIllegalArgumentException("Cubemap height must be multiple of 6");
+        }
+        if (height / 6 != width) {
+            throw new RSIllegalArgumentException("Only square cobe map faces supported");
+        }
+        boolean isPow2 = (width & (width - 1)) == 0;
+        if (!isPow2) {
+            throw new RSIllegalArgumentException("Only power of 2 cube faces supported");
+        }
+
+        Element e = elementFromBitmap(rs, b);
+        Type.Builder tb = new Type.Builder(rs, e);
+        tb.add(Dimension.X, width);
+        tb.add(Dimension.Y, width);
+        tb.add(Dimension.FACE, 1);
+        if (genMips) {
+            tb.add(Dimension.LOD, 1);
+        }
+        Type t = tb.create();
+
+        int id = rs.nAllocationCubeCreateFromBitmap(dstFmt.getID(), genMips, b);
+        if(id == 0) {
+            throw new RSRuntimeException("Load failed for bitmap " + b + " element " + e);
+        }
+        return new Allocation(id, rs, t);
+    }
+
     static public Allocation createBitmapRef(RenderScript rs, Bitmap b) {
 
         rs.validate();
-        Type t = typeFromBitmap(rs, b);
+        Type t = typeFromBitmap(rs, b, false);
 
         int id = rs.nAllocationCreateBitmapRef(t.getID(), b);
         if(id == 0) {
@@ -404,7 +458,9 @@ public class Allocation extends BaseObj {
             if (aId == 0) {
                 throw new RSRuntimeException("Load failed.");
             }
-            return new Allocation(aId, rs, null);
+            Allocation alloc = new Allocation(aId, rs, null);
+            alloc.updateFromNative();
+            return alloc;
         } finally {
             if (is != null) {
                 try {

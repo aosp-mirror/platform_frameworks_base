@@ -48,13 +48,14 @@ Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
         if (params[ct] == RS_PROGRAM_PARAM_CONSTANT) {
             mConstantCount++;
         }
-        if (params[ct] == RS_PROGRAM_PARAM_TEXTURE_COUNT) {
-            mTextureCount = params[ct+1];
+        if (params[ct] == RS_PROGRAM_PARAM_TEXTURE_TYPE) {
+            mTextureCount++;
         }
     }
 
     mTextures = new ObjectBaseRef<Allocation>[mTextureCount];
     mSamplers = new ObjectBaseRef<Sampler>[mTextureCount];
+    mTextureTargets = new RsTextureTarget[mTextureCount];
     mInputElements = new ObjectBaseRef<Element>[mInputCount];
     mOutputElements = new ObjectBaseRef<Element>[mOutputCount];
     mConstantTypes = new ObjectBaseRef<Type>[mConstantCount];
@@ -63,6 +64,7 @@ Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
     uint32_t input = 0;
     uint32_t output = 0;
     uint32_t constant = 0;
+    uint32_t texture = 0;
     for (uint32_t ct=0; ct < paramLength; ct+=2) {
         if (params[ct] == RS_PROGRAM_PARAM_INPUT) {
             mInputElements[input++].set(reinterpret_cast<Element *>(params[ct+1]));
@@ -72,6 +74,9 @@ Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
         }
         if (params[ct] == RS_PROGRAM_PARAM_CONSTANT) {
             mConstantTypes[constant++].set(reinterpret_cast<Type *>(params[ct+1]));
+        }
+        if (params[ct] == RS_PROGRAM_PARAM_TEXTURE_TYPE) {
+            mTextureTargets[texture++] = (RsTextureTarget)params[ct+1];
         }
     }
     mIsInternal = false;
@@ -106,6 +111,7 @@ Program::~Program() {
     }
     delete[] mTextures;
     delete[] mSamplers;
+    delete[] mTextureTargets;
     delete[] mInputElements;
     delete[] mOutputElements;
     delete[] mConstantTypes;
@@ -127,6 +133,7 @@ void Program::initMemberVars() {
 
     mTextures = NULL;
     mSamplers = NULL;
+    mTextureTargets = NULL;
     mInputElements = NULL;
     mOutputElements = NULL;
     mConstantTypes = NULL;
@@ -173,6 +180,12 @@ void Program::bindTexture(Context *rsc, uint32_t slot, Allocation *a) {
     if (slot >= mTextureCount) {
         LOGE("Attempt to bind texture to slot %u but tex count is %u", slot, mTextureCount);
         rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind texture");
+        return;
+    }
+
+    if (a && a->getType()->getDimFaces() && mTextureTargets[slot] != RS_TEXTURE_CUBE) {
+        LOGE("Attempt to bind cubemap to slot %u but 2d texture needed", slot);
+        rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind cubemap to 2d texture slot");
         return;
     }
 

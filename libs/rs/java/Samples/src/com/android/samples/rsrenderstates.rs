@@ -19,7 +19,7 @@
 #include "rs_graphics.rsh"
 #include "shader_def.rsh"
 
-const int gMaxModes = 10;
+const int gMaxModes = 11;
 
 rs_program_vertex gProgVertex;
 rs_program_fragment gProgFragmentColor;
@@ -34,6 +34,7 @@ rs_allocation gTexOpaque;
 rs_allocation gTexTorus;
 rs_allocation gTexTransparent;
 rs_allocation gTexChecker;
+rs_allocation gTexCube;
 
 rs_mesh gMbyNMesh;
 rs_mesh gTorusMesh;
@@ -71,6 +72,8 @@ rs_program_vertex gProgVertexCustom;
 rs_program_fragment gProgFragmentCustom;
 rs_program_vertex gProgVertexCustom2;
 rs_program_fragment gProgFragmentCustom2;
+rs_program_vertex gProgVertexCube;
+rs_program_fragment gProgFragmentCube;
 rs_program_fragment gProgFragmentMultitex;
 
 float gDt = 0;
@@ -506,6 +509,42 @@ void displayCustomShaderSamples2() {
     rsgDrawText("Custom shader sample with array uniforms", 10, rsgGetHeight() - 10);
 }
 
+void displayCubemapShaderSample() {
+    // Update vertex shader constants
+    // Load model matrix
+    // Aplly a rotation to our mesh
+    gTorusRotation += 50.0f * gDt;
+    if (gTorusRotation > 360.0f) {
+        gTorusRotation -= 360.0f;
+    }
+
+    // Position our model on the screen
+    // Position our model on the screen
+    rsMatrixLoadTranslate(&gVSConstants->model, 0.0f, 0.0f, -10.0f);
+    rsMatrixRotate(&gVSConstants->model, gTorusRotation, 1.0f, 0.0f, 0.0f);
+    rsMatrixRotate(&gVSConstants->model, gTorusRotation, 0.0f, 0.0f, 1.0f);
+    // Setup the projectioni matrix
+    float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
+    rsMatrixLoadPerspective(&gVSConstants->proj, 30.0f, aspect, 0.1f, 100.0f);
+    rsAllocationMarkDirty(rsGetAllocation(gFSConstants));
+
+    rsgBindProgramVertex(gProgVertexCube);
+
+    // Fragment shader with texture
+    rsgBindProgramStore(gProgStoreBlendNoneDepth);
+    rsgBindProgramFragment(gProgFragmentCube);
+    rsgBindSampler(gProgFragmentCube, 0, gLinearClamp);
+    rsgBindTexture(gProgFragmentCube, 0, gTexCube);
+
+    // Use back face culling
+    rsgBindProgramRaster(gCullBack);
+    rsgDrawMesh(gTorusMesh);
+
+    rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
+    rsgBindFont(gFontMono);
+    rsgDrawText("Cubemap shader sample", 10, rsgGetHeight() - 10);
+}
+
 void displayMultitextureSample() {
     bindProgramVertexOrtho();
     rs_matrix4x4 matrix;
@@ -631,6 +670,9 @@ int root(int launchID) {
         break;
     case 9:
         displayCustomShaderSamples2();
+        break;
+    case 10:
+        displayCubemapShaderSample();
         break;
     }
 

@@ -105,7 +105,7 @@ protected:
     // Constants are strictly accessed by programetic loads.
     ObjectBaseRef<Allocation> *mTextures;
     ObjectBaseRef<Sampler> *mSamplers;
-
+    RsTextureTarget *mTextureTargets;
     bool loadShader(Context *, uint32_t type);
 };
 

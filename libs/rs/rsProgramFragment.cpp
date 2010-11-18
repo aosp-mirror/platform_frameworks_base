@@ -99,15 +99,20 @@ void ProgramFragment::setupGL2(Context *rsc, ProgramFragmentState *state, Shader
         }
 
         mTextures[ct]->uploadCheck(rsc);
-        glBindTexture(GL_TEXTURE_2D, mTextures[ct]->getTextureID());
+        GLenum target = (GLenum)mTextures[ct]->getGLTarget();
+        if (target != GL_TEXTURE_2D && target != GL_TEXTURE_CUBE_MAP) {
+            LOGE("Attempting to bind unknown texture to shader id %u, texture unit %u", (uint)this, ct);
+            rsc->setError(RS_ERROR_BAD_SHADER, "Non-texture allocation bound to a shader");
+        }
+        glBindTexture(target, mTextures[ct]->getTextureID());
         rsc->checkError("ProgramFragment::setupGL2 tex bind");
         if (mSamplers[ct].get()) {
             mSamplers[ct]->setupGL(rsc, mTextures[ct].get());
         } else {
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             rsc->checkError("ProgramFragment::setupGL2 tex env");
         }
 
@@ -130,7 +135,11 @@ void ProgramFragment::createShader() {
         appendUserConstants();
         char buf[256];
         for (uint32_t ct=0; ct < mTextureCount; ct++) {
-            sprintf(buf, "uniform sampler2D UNI_Tex%i;\n", ct);
+            if (mTextureTargets[ct] == RS_TEXTURE_2D) {
+                sprintf(buf, "uniform sampler2D UNI_Tex%i;\n", ct);
+            } else {
+                sprintf(buf, "uniform samplerCube UNI_Tex%i;\n", ct);
+            }
             mShader.append(buf);
         }
         mShader.append(mUserShader);
@@ -191,15 +200,13 @@ void ProgramFragmentState::init(Context *rsc) {
 
     Type *inputType = Type::getType(rsc, constInput, 1, 0, 0, false, false);
 
-    uint32_t tmp[4];
+    uint32_t tmp[2];
     tmp[0] = RS_PROGRAM_PARAM_CONSTANT;
     tmp[1] = (uint32_t)inputType;
-    tmp[2] = RS_PROGRAM_PARAM_TEXTURE_COUNT;
-    tmp[3] = 0;
 
     Allocation *constAlloc = new Allocation(rsc, inputType);
     ProgramFragment *pf = new ProgramFragment(rsc, shaderString.string(),
-                                              shaderString.length(), tmp, 4);
+                                              shaderString.length(), tmp, 2);
     pf->bindAllocation(rsc, constAlloc, 0);
     pf->setConstantColor(rsc, 1.0f, 1.0f, 1.0f, 1.0f);
 

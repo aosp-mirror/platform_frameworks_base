@@ -498,8 +498,8 @@ void FontState::initRenderState() {
     uint32_t tmp[4];
     tmp[0] = RS_PROGRAM_PARAM_CONSTANT;
     tmp[1] = (uint32_t)inputType;
-    tmp[2] = RS_PROGRAM_PARAM_TEXTURE_COUNT;
-    tmp[3] = 1;
+    tmp[2] = RS_PROGRAM_PARAM_TEXTURE_TYPE;
+    tmp[3] = RS_TEXTURE_2D;
 
     mFontShaderFConstant.set(new Allocation(mRSC, inputType));
     ProgramFragment *pf = new ProgramFragment(mRSC, shaderString.string(),

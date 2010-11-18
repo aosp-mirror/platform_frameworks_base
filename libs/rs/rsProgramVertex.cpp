@@ -253,16 +253,14 @@ void ProgramVertexState::init(Context *rsc) {
     shaderString.append("  varTex0 = ATTRIB_texture0;\n");
     shaderString.append("}\n");
 
-    uint32_t tmp[6];
+    uint32_t tmp[4];
     tmp[0] = RS_PROGRAM_PARAM_CONSTANT;
     tmp[1] = (uint32_t)inputType;
     tmp[2] = RS_PROGRAM_PARAM_INPUT;
     tmp[3] = (uint32_t)attrElem;
-    tmp[4] = RS_PROGRAM_PARAM_TEXTURE_COUNT;
-    tmp[5] = 0;
 
     ProgramVertex *pv = new ProgramVertex(rsc, shaderString.string(),
-                                          shaderString.length(), tmp, 6);
+                                          shaderString.length(), tmp, 4);
     Allocation *alloc = new Allocation(rsc, inputType);
     pv->bindAllocation(rsc, alloc, 0);
 
