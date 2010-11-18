@@ -599,16 +599,21 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         if (mEmergencyOnly && cm.getRadioState().isOn()) {
             plmn = Resources.getSystem().
                 getText(com.android.internal.R.string.emergency_calls_only).toString();
+            Log.d(LOG_TAG, "updateSpnDisplay: emergency only and radio is on plmn='" + plmn + "'");
         }
 
         if (rule != curSpnRule
                 || !TextUtils.equals(spn, curSpn)
                 || !TextUtils.equals(plmn, curPlmn)) {
-            boolean showSpn = !mEmergencyOnly
+            boolean showSpn = !mEmergencyOnly && !TextUtils.isEmpty(spn)
                 && (rule & SIMRecords.SPN_RULE_SHOW_SPN) == SIMRecords.SPN_RULE_SHOW_SPN;
-            boolean showPlmn =
+            boolean showPlmn = !TextUtils.isEmpty(plmn) &&
                 (rule & SIMRecords.SPN_RULE_SHOW_PLMN) == SIMRecords.SPN_RULE_SHOW_PLMN;
 
+            Log.d(LOG_TAG,
+                    String.format("updateSpnDisplay: changed sending intent" + " rule=" + rule +
+                            " showPlmn='%b' plmn='%s' showSpn='%b' spn='%s'",
+                            showPlmn, plmn, showSpn, spn));
             Intent intent = new Intent(Intents.SPN_STRINGS_UPDATED_ACTION);
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
             intent.putExtra(Intents.EXTRA_SHOW_SPN, showSpn);
