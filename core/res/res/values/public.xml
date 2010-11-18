@@ -1377,6 +1377,7 @@
   <public type="attr" name="animationResolution" />
   <public type="attr" name="state_accelerated" />
   <public type="attr" name="baseline" />
+  <public type="attr" name="homeLayout" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
@@ -1394,6 +1395,7 @@
   <!-- Context menu ID for the "Select text..." menu item to switch to text
        selection context mode in text views. -->
   <public type="id" name="selectTextMode" />
+  <public type="id" name="up" />
 
   <!-- Standard content view for a {@link android.app.ListFragment}.
        If you are implementing a subclass of ListFragment with your

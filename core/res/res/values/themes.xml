@@ -706,6 +706,7 @@
 
         <item name="groupButtonBackground">@android:drawable/group_button_background_holo_dark</item>
         <item name="selectableItemBackground">@android:drawable/item_background_holo_dark</item>
+        <item name="homeAsUpIndicator">@android:drawable/ic_ab_back_holo_dark</item>
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
@@ -942,6 +943,7 @@
 
         <item name="groupButtonBackground">@android:drawable/group_button_background_holo_light</item>
         <item name="selectableItemBackground">@android:drawable/item_background_holo_light</item>
+        <item name="homeAsUpIndicator">@android:drawable/ic_ab_back_holo_light</item>
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
