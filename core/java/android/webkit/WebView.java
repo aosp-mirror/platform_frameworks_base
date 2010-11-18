@@ -7461,6 +7461,7 @@ public class WebView extends AbsoluteLayout
     /* package */ native int      nativeFocusCandidatePointer();
     private native String   nativeFocusCandidateText();
     /* package */ native float    nativeFocusCandidateTextSize();
+    /* package */ native int nativeFocusCandidateLineHeight();
     /**
      * Returns an integer corresponding to WebView.cpp::type.
      * See WebTextView.setType()

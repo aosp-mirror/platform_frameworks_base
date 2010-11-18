@@ -26,9 +26,12 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.text.BoringLayout.Metrics;
+import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Layout;
+import android.text.Layout.Alignment;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextPaint;
@@ -356,6 +359,68 @@ import junit.framework.Assert;
             }
             mWebView.scrollFocusedTextInput(maxScrollX > 0 ?
                     mScrollX / maxScrollX : 0, mScrollY);
+        }
+    }
+
+    @Override
+    protected void makeNewLayout(int w, int hintWidth, Metrics boring,
+            Metrics hintBoring, int ellipsisWidth, boolean bringIntoView) {
+        // Necessary to get a Layout to work with, and to do the other work that
+        // makeNewLayout does.
+        super.makeNewLayout(w, hintWidth, boring, hintBoring, ellipsisWidth,
+                bringIntoView);
+
+        // For fields that do not draw, create a layout which is altered so that
+        // the text lines up.
+        if (DebugFlags.DRAW_WEBTEXTVIEW || willNotDraw()) {
+            float lineHeight = -1;
+            if (mWebView != null) {
+                float height = mWebView.nativeFocusCandidateLineHeight();
+                if (height != -1) {
+                    lineHeight = height * mWebView.getScale();
+                }
+            }
+            CharSequence text = getText();
+            // Copy from the existing Layout.
+            mLayout = new WebTextViewLayout(text, text, getPaint(), w,
+                    mLayout.getAlignment(), mLayout.getSpacingMultiplier(),
+                    mLayout.getSpacingAdd(), false, null, ellipsisWidth,
+                    lineHeight);
+        }
+    }
+
+    /**
+     * Custom layout which figures out its line spacing.  If -1 is passed in for
+     * the height, it will use the ascent and descent from the paint to
+     * determine the line spacing.  Otherwise it will use the spacing provided.
+     */
+    private static class WebTextViewLayout extends DynamicLayout {
+        private float mLineHeight;
+        private float mDifference;
+        public WebTextViewLayout(CharSequence base, CharSequence display,
+                TextPaint paint,
+                int width, Alignment align,
+                float spacingMult, float spacingAdd,
+                boolean includepad,
+                TextUtils.TruncateAt ellipsize, int ellipsizedWidth,
+                float lineHeight) {
+            super(base, display, paint, width, align, spacingMult, spacingAdd,
+                    includepad, ellipsize, ellipsizedWidth);
+            float paintLineHeight = paint.descent() - paint.ascent();
+            if (lineHeight == -1f) {
+                mLineHeight = paintLineHeight;
+                mDifference = 0f;
+            } else {
+                mLineHeight = lineHeight;
+                // Through trial and error, I found this calculation to improve
+                // the accuracy of line placement.
+                mDifference = (lineHeight - paintLineHeight) / 2;
+            }
+        }
+
+        @Override
+        public int getLineTop(int line) {
+            return Math.round(mLineHeight * line - mDifference);
         }
     }
 
