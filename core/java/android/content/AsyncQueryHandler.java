@@ -85,7 +85,7 @@ public abstract class AsyncQueryHandler extends Handler {
                             cursor.getCount();
                         }
                     } catch (Exception e) {
-                        Log.w(TAG, e.toString());
+                        Log.w(TAG, "Exception thrown during handling EVENT_ARG_QUERY", e);
                         cursor = null;
                     }
 
