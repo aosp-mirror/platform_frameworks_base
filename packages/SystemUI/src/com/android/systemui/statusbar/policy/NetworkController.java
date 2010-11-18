@@ -116,7 +116,6 @@ public class NetworkController extends BroadcastReceiver {
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         context.registerReceiver(this, filter);
@@ -141,7 +140,6 @@ public class NetworkController extends BroadcastReceiver {
         final String action = intent.getAction();
         if (action.equals(WifiManager.RSSI_CHANGED_ACTION)
                 || action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)
-                || action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)
                 || action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
             updateWifiState(intent);
             refreshViews();
@@ -489,8 +487,7 @@ public class NetworkController extends BroadcastReceiver {
             mWifiEnabled = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
                     WifiManager.WIFI_STATE_UNKNOWN) == WifiManager.WIFI_STATE_ENABLED;
 
-        } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)
-                || action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
+        } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
             final NetworkInfo networkInfo = (NetworkInfo)
                     intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
             boolean wasConnected = mWifiConnected;
