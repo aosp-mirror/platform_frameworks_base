@@ -557,6 +557,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(InputMethodInfo imi) {
         synchronized (mMethodMap) {
+            if (imi == null && mCurMethodId != null) {
+                imi = mMethodMap.get(mCurMethodId);
+            }
             return mSettings.getEnabledInputMethodSubtypeListLocked(imi);
         }
     }
@@ -2043,18 +2046,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     getEnabledInputMethodsAndSubtypeListLocked();
             ArrayList<InputMethodSubtype> enabledSubtypes =
                     new ArrayList<InputMethodSubtype>();
-            for (Pair<String, ArrayList<String>> imsPair : imsList) {
-                InputMethodInfo info = mMethodMap.get(imsPair.first);
-                if (info != null && info.getId().equals(imi.getId())) {
-                    ArrayList<InputMethodSubtype> subtypes = info.getSubtypes();
-                    for (InputMethodSubtype ims: subtypes) {
-                        for (String s: imsPair.second) {
-                            if (String.valueOf(ims.hashCode()).equals(s)) {
-                                enabledSubtypes.add(ims);
+            if (imi != null) {
+                for (Pair<String, ArrayList<String>> imsPair : imsList) {
+                    InputMethodInfo info = mMethodMap.get(imsPair.first);
+                    if (info != null && info.getId().equals(imi.getId())) {
+                        ArrayList<InputMethodSubtype> subtypes = info.getSubtypes();
+                        for (InputMethodSubtype ims: subtypes) {
+                            for (String s: imsPair.second) {
+                                if (String.valueOf(ims.hashCode()).equals(s)) {
+                                    enabledSubtypes.add(ims);
+                                }
                             }
                         }
+                        break;
                     }
-                    break;
                 }
             }
             return enabledSubtypes;
