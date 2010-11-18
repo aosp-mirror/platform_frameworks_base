@@ -917,6 +917,7 @@
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Widget.ActionBar.Subtitle</item>
         <item name="android:progressBarStyle">@android:style/Widget.ProgressBar.Horizontal</item>
         <item name="android:indeterminateProgressStyle">@android:style/Widget.ProgressBar.Small</item>
+        <item name="android:homeLayout">@android:layout/action_bar_home</item>
     </style>
 
     <style name="Widget.ActionMode">
@@ -1508,6 +1509,8 @@
     <style name="Widget.Holo.ActionButton.Overflow">
         <item name="android:src">@android:drawable/ic_menu_moreoverflow_holo_dark</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:paddingLeft">16dip</item>
+        <item name="android:paddingRight">16dip</item>
     </style>
 
     <style name="Widget.Holo.ActionButton.TextButton" parent="Widget.Holo.ButtonBar.Button">
@@ -1540,7 +1543,6 @@
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle</item>
         <item name="android:background">@null</item>
         <item name="android:divider">?android:attr/dividerVertical</item>
-        <item name="android:homeAsUpIndicator">@android:drawable/ic_ab_back_holo_dark</item>
         <item name="android:progressBarStyle">@android:style/Widget.Holo.ProgressBar.Horizontal</item>
         <item name="android:indeterminateProgressStyle">@android:style/Widget.Holo.ProgressBar</item>
         <item name="android:progressBarPadding">32dip</item>
@@ -1773,6 +1775,8 @@
     <style name="Widget.Holo.Light.ActionButton.Overflow">
         <item name="android:src">@android:drawable/ic_menu_moreoverflow_holo_light</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:paddingLeft">16dip</item>
+        <item name="android:paddingRight">16dip</item>
     </style>
 
     <style name="Widget.Holo.Light.ActionBarView_TabView" parent="Widget.ActionBarView_TabView">

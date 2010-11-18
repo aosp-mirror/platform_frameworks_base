@@ -82,12 +82,10 @@ public class ActionBarView extends ViewGroup {
     private Drawable mIcon;
     private Drawable mLogo;
     private Drawable mDivider;
-    private Drawable mHomeAsUpIndicator;
 
-    private LinearLayout mHomeLayout;
-    private ImageView mHomeAsUpView;
+    private View mHomeLayout;
+    private View mHomeAsUpView;
     private ImageView mIconView;
-    private ImageView mLogoView;
     private LinearLayout mTitleLayout;
     private TextView mTitleView;
     private TextView mSubtitleView;
@@ -172,18 +170,16 @@ public class ActionBarView extends ViewGroup {
             }
         }
 
-        mHomeLayout = new LinearLayout(context, null,
-                com.android.internal.R.attr.actionButtonStyle);
-        mHomeLayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-                LayoutParams.MATCH_PARENT));
+        final LayoutInflater inflater = LayoutInflater.from(context);
 
-        mHomeAsUpIndicator = a.getDrawable(R.styleable.ActionBar_homeAsUpIndicator);
+        final int homeResId = a.getResourceId(
+                com.android.internal.R.styleable.ActionBar_homeLayout,
+                com.android.internal.R.layout.action_bar_home);
 
-        mHomeAsUpView = new ImageView(context);
-        mHomeAsUpView.setImageDrawable(mHomeAsUpIndicator);
-        mHomeAsUpView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-                LayoutParams.MATCH_PARENT));
-        mHomeLayout.addView(mHomeAsUpView);
+        mHomeLayout = inflater.inflate(homeResId, this, false);
+
+        mHomeAsUpView = mHomeLayout.findViewById(com.android.internal.R.id.up);
+        mIconView = (ImageView) mHomeLayout.findViewById(com.android.internal.R.id.home);
         
         Drawable background = a.getDrawable(R.styleable.ActionBar_background);
         if (background != null) {
@@ -202,8 +198,7 @@ public class ActionBarView extends ViewGroup {
 
         final int customNavId = a.getResourceId(R.styleable.ActionBar_customNavigationLayout, 0);
         if (customNavId != 0) {
-            LayoutInflater inflater = LayoutInflater.from(context);
-            mCustomNavView = (View) inflater.inflate(customNavId, null);
+            mCustomNavView = (View) inflater.inflate(customNavId, this, false);
             mNavigationMode = ActionBar.NAVIGATION_MODE_STANDARD;
             setDisplayOptions(mDisplayOptions | ActionBar.DISPLAY_SHOW_CUSTOM);
         }
@@ -216,13 +211,13 @@ public class ActionBarView extends ViewGroup {
         
         mLogoNavItem = new ActionMenuItem(context, 0, android.R.id.home, 0, 0, mTitle);
         mHomeLayout.setOnClickListener(new OnClickListener() {
-          public void onClick(View v) {
-            Context context = getContext();
-            if (context instanceof Activity) {
-              Activity activity = (Activity) context;
-              activity.onMenuItemSelected(Window.FEATURE_OPTIONS_PANEL, mLogoNavItem);
+            public void onClick(View v) {
+                Context context = getContext();
+                if (context instanceof Activity) {
+                    Activity activity = (Activity) context;
+                    activity.onMenuItemSelected(Window.FEATURE_OPTIONS_PANEL, mLogoNavItem);
+                }
             }
-          }
         });
         mHomeLayout.setClickable(true);
         mHomeLayout.setFocusable(true);
@@ -375,13 +370,12 @@ public class ActionBarView extends ViewGroup {
 
             if ((flagsChanged & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
                 mHomeAsUpView.setVisibility((options & ActionBar.DISPLAY_HOME_AS_UP) != 0
-                        ? VISIBLE : GONE);
+                        ? VISIBLE : INVISIBLE);
             }
 
-            if (mLogoView != null && (flagsChanged & ActionBar.DISPLAY_USE_LOGO) != 0) {
-                final boolean logoVis = (options & ActionBar.DISPLAY_USE_LOGO) != 0;
-                mLogoView.setVisibility(logoVis ? VISIBLE : GONE);
-                mIconView.setVisibility(logoVis ? GONE : VISIBLE);
+            if ((flagsChanged & ActionBar.DISPLAY_USE_LOGO) != 0) {
+                final boolean logoVis = mLogo != null && (options & ActionBar.DISPLAY_USE_LOGO) != 0;
+                mIconView.setImageDrawable(logoVis ? mLogo : mIcon);
             }
 
             if ((flagsChanged & ActionBar.DISPLAY_SHOW_TITLE) != 0) {
@@ -531,49 +525,7 @@ public class ActionBarView extends ViewGroup {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        final Context context = getContext();
-
-        if (mLogo != null) {
-            mLogoView = new ImageView(context);
-            mLogoView.setScaleType(ImageView.ScaleType.CENTER);
-            mLogoView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-                    LayoutParams.MATCH_PARENT));
-            mLogoView.setImageDrawable(mLogo);
-            mLogoView.setVisibility((mDisplayOptions & ActionBar.DISPLAY_USE_LOGO) != 0
-                    ? VISIBLE : GONE);
-            mHomeLayout.addView(mLogoView);
-        }
-
-        if (mIcon != null) {
-            mIconView = new ImageView(context, null,
-                    com.android.internal.R.attr.actionButtonStyle);
-            mIconView.setScaleType(ImageView.ScaleType.CENTER);
-            mIconView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-                    LayoutParams.MATCH_PARENT));
-            mIconView.setImageDrawable(mIcon);
-            mIconView.setVisibility(
-                    (mDisplayOptions & ActionBar.DISPLAY_USE_LOGO) == 0 || mLogo == null
-                    ? VISIBLE : GONE);
-            mHomeLayout.addView(mIconView);
-        }
-
         addView(mHomeLayout);
-
-        switch (mNavigationMode) {
-        case ActionBar.NAVIGATION_MODE_STANDARD:
-            if (mLogoView == null) {
-                initTitle();
-            }
-            break;
-            
-        case ActionBar.NAVIGATION_MODE_LIST:
-            throw new UnsupportedOperationException(
-                    "Inflating list navigation isn't supported yet!");
-            
-        case ActionBar.NAVIGATION_MODE_TABS:
-            throw new UnsupportedOperationException(
-                    "Inflating tab navigation isn't supported yet!");
-        }
 
         if (mCustomNavView != null && (mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0) {
             final ViewParent parent = mCustomNavView.getParent();
@@ -653,8 +605,11 @@ public class ActionBarView extends ViewGroup {
         int rightOfCenter = leftOfCenter;
 
         if (mHomeLayout.getVisibility() != GONE) {
-            availableWidth = measureChildView(mHomeLayout, availableWidth, childSpecHeight, 0);
-            leftOfCenter -= mHomeLayout.getMeasuredWidth();
+            mHomeLayout.measure(MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
+                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+            final int homeWidth = mHomeLayout.getMeasuredWidth();
+            availableWidth -= homeWidth;
+            leftOfCenter -= homeWidth;
         }
         
         if (mMenuView != null) {

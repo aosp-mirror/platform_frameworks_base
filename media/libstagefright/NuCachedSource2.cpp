@@ -526,5 +526,8 @@ void NuCachedSource2::getDrmInfo(DecryptHandle **handle, DrmManagerClient **clie
     mSource->getDrmInfo(handle, client);
 }
 
+String8 NuCachedSource2::getUri() {
+    return mSource->getUri();
+}
 }  // namespace android
 

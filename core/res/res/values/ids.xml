@@ -72,4 +72,5 @@
   <item type="id" name="home" />
   <item type="id" name="fillInIntent" />
   <item type="id" name="rowTypeId" />
+  <item type="id" name="up" />
 </resources>
