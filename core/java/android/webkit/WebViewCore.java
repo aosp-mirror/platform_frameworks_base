@@ -2054,7 +2054,7 @@ final class WebViewCore {
         }
         if (mWebView != null) {
             Message msg = Message.obtain(mWebView.mPrivateHandler,
-                    WebView.SCROLL_BY_MSG_ID, dx, dy, new Boolean(animate));
+                    WebView.SCROLL_BY_MSG_ID, dx, dy, Boolean.valueOf(animate));
             if (mDrawIsScheduled) {
                 mEventHub.sendMessage(Message.obtain(null,
                         EventHub.MESSAGE_RELAY, msg));
