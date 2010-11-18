@@ -49,7 +49,6 @@
              window is floating. -->
         <attr name="backgroundDimEnabled" format="boolean" />
         
-
         <!-- =========== -->
         <!-- Text styles -->
         <!-- =========== -->
@@ -2941,6 +2940,14 @@
         <attr name="top" format="dimension" />
         <attr name="right" format="dimension" />
         <attr name="bottom" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="LayerDrawable">
+        <attr name="opacity">
+            <enum name="opaque" value="-1" />
+            <enum name="transparent" value="-2" />
+            <enum name="translucent" value="-3" />
+        </attr>
     </declare-styleable>
 
     <declare-styleable name="LayerDrawableItem">

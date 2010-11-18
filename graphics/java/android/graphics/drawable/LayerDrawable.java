@@ -26,6 +26,7 @@ import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Slog;
 import android.view.View;
 
 import java.io.IOException;
@@ -49,6 +50,7 @@ import java.io.IOException;
 public class LayerDrawable extends Drawable implements Drawable.Callback {
     LayerState mLayerState;
 
+    private int mOpacityOverride = PixelFormat.UNKNOWN;
     private int[] mPaddingL;
     private int[] mPaddingT;
     private int[] mPaddingR;
@@ -113,6 +115,13 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
         int type;
 
+        TypedArray a = r.obtainAttributes(attrs, com.android.internal.R.styleable.LayerDrawable);
+
+        mOpacityOverride = a.getInt(com.android.internal.R.styleable.LayerDrawable_opacity,
+                PixelFormat.UNKNOWN);
+
+        a.recycle();
+
         final int innerDepth = parser.getDepth() + 1;
         int depth;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -125,7 +134,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                 continue;
             }
 
-            TypedArray a = r.obtainAttributes(attrs,
+            a = r.obtainAttributes(attrs,
                     com.android.internal.R.styleable.LayerDrawableItem);
 
             int left = a.getDimensionPixelOffset(
@@ -391,9 +400,28 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             array[i].mDrawable.setColorFilter(cf);
         }
     }
+
+    /**
+     * Sets the opacity of this drawable directly, instead of collecting the states from
+     * the layers
+     *
+     * @param opacity The opacity to use, or {@link PixelFormat#UNKNOWN PixelFormat.UNKNOWN}
+     * for the default behavior
+     *
+     * @see PixelFormat#UNKNOWN
+     * @see PixelFormat#TRANSLUCENT
+     * @see PixelFormat#TRANSPARENT
+     * @see PixelFormat#OPAQUE
+     */
+    public void setOpacity(int opacity) {
+        mOpacityOverride = opacity;
+    }
     
     @Override
     public int getOpacity() {
+        if (mOpacityOverride != PixelFormat.UNKNOWN) {
+            return mOpacityOverride;
+        }
         return mLayerState.getOpacity();
     }
 

@@ -1378,6 +1378,7 @@
   <public type="attr" name="state_accelerated" />
   <public type="attr" name="baseline" />
   <public type="attr" name="homeLayout" />
+  <public type="attr" name="opacity" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
