@@ -480,6 +480,7 @@ private:
     uint32_t                mFlags;
     int                     mSessionId;
     int                     mAuxEffectId;
+    Mutex                   mLock;
 };
 
 

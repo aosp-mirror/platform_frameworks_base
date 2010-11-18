@@ -356,7 +356,7 @@ private:
     sp<IAudioRecord>        mAudioRecord;
     sp<IMemory>             mCblkMemory;
     sp<ClientRecordThread>  mClientRecordThread;
-    Mutex                   mRecordThreadLock;
+    Mutex                   mLock;
 
     uint32_t                mFrameCount;
 
