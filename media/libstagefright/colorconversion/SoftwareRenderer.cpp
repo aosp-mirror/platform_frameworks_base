@@ -88,7 +88,7 @@ SoftwareRenderer::SoftwareRenderer(
             native_window_set_usage(
             mSurface.get(),
             GRALLOC_USAGE_SW_READ_NEVER | GRALLOC_USAGE_SW_WRITE_OFTEN
-            | GRALLOC_USAGE_HW_TEXTURE));
+            | GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_EXTERNAL_DISP));
 
     CHECK_EQ(0, native_window_set_buffer_count(mSurface.get(), 2));
 
