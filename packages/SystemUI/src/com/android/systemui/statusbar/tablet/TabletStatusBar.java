@@ -77,7 +77,7 @@ public class TabletStatusBar extends StatusBar {
     public static final int MSG_CLOSE_RECENTS_PANEL = 1021;
     public static final int MSG_HIDE_SHADOWS = 1030;
     public static final int MSG_SHOW_SHADOWS = 1031;
-    public static final int MSG_SHOW_SHADOWS_NO_COLLAPSE = 1032;
+    public static final int MSG_RESTORE_SHADOWS = 1032;
 
     private static final int MAX_IMAGE_LEVEL = 10000;
     private static final boolean USE_2D_RECENTS = true;
@@ -406,13 +406,17 @@ public class TabletStatusBar extends StatusBar {
                     if (mRecentsPanel != null) mRecentsPanel.setVisibility(View.GONE);
                     break;
                 case MSG_HIDE_SHADOWS:
+                    if (DEBUG) Slog.d(TAG, "hiding shadows (lights on)");
                     mShadowController.hideAllShadows();
                     break;
                 case MSG_SHOW_SHADOWS:
+                    if (DEBUG) Slog.d(TAG, "showing shadows (lights out)");
                     animateCollapse();
-                    // fall through
-                case MSG_SHOW_SHADOWS_NO_COLLAPSE:
                     mShadowController.showAllShadows();
+                    break;
+                case MSG_RESTORE_SHADOWS:
+                    if (DEBUG) Slog.d(TAG, "quickly re-showing shadows if appropriate");
+                    mShadowController.refresh();
                     break;
             }
         }
@@ -1071,15 +1075,15 @@ public class TabletStatusBar extends StatusBar {
                         switch (action) {
                             case MotionEvent.ACTION_CANCEL:
                             case MotionEvent.ACTION_UP:
-                                mHandler.removeMessages(MSG_SHOW_SHADOWS_NO_COLLAPSE);
+                                mHandler.removeMessages(MSG_RESTORE_SHADOWS);
                                 if (mShowShadows) {
-                                    mHandler.sendEmptyMessageDelayed(MSG_SHOW_SHADOWS_NO_COLLAPSE, 
+                                    mHandler.sendEmptyMessageDelayed(MSG_RESTORE_SHADOWS, 
                                             v == mNotificationShadow ? 5000 : 500);
                                 }
                                 last = true;
                                 break;
                             case MotionEvent.ACTION_DOWN:
-                                mHandler.removeMessages(MSG_SHOW_SHADOWS_NO_COLLAPSE);
+                                mHandler.removeMessages(MSG_RESTORE_SHADOWS);
                                 setShadowForButton(mTouchTarget, false);
                                 break;
                         }
@@ -1093,22 +1097,22 @@ public class TabletStatusBar extends StatusBar {
             };
         }
 
+        public void refresh() {
+            setShadowForButton(mBackButton, mShowShadows);
+            setShadowForButton(mHomeButton, mShowShadows);
+            setShadowForButton(mRecentButton, mShowShadows);
+            setShadowForButton(mMenuButton, mShowShadows);
+            setShadowForButton(mNotificationArea, mShowShadows);
+        }
+
         public void showAllShadows() {
             mShowShadows = true;
-            setShadowForButton(mBackButton, true);
-            setShadowForButton(mHomeButton, true);
-            setShadowForButton(mRecentButton, true);
-            setShadowForButton(mMenuButton, true);
-            setShadowForButton(mNotificationArea, true);
+            refresh();
         }
 
         public void hideAllShadows() {
             mShowShadows = false;
-            setShadowForButton(mBackButton, false);
-            setShadowForButton(mHomeButton, false);
-            setShadowForButton(mRecentButton, false);
-            setShadowForButton(mMenuButton, false);
-            setShadowForButton(mNotificationArea, false);
+            refresh();
         }
 
         // Use View.INVISIBLE for things hidden due to shadowing, and View.GONE for things that are
