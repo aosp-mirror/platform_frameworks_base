@@ -1075,6 +1075,18 @@ class BrowserFrame extends Handler {
      */
     private void downloadStart(String url, String userAgent,
             String contentDisposition, String mimeType, long contentLength) {
+        // This will only work if the url ends with the filename
+        if (mimeType.isEmpty()) {
+            try {
+                String extension = url.substring(url.lastIndexOf('.') + 1);
+                mimeType = libcore.net.MimeUtils.guessMimeTypeFromExtension(extension);
+                // MimeUtils might return null, not sure if downloadmanager is happy with that
+                if (mimeType == null)
+                    mimeType = "";
+            } catch(IndexOutOfBoundsException exception) {
+                // mimeType string end with a '.', not much to do
+            }
+        }
         mimeType = MimeTypeMap.getSingleton().remapGenericMimeType(
                 mimeType, url, contentDisposition);
         mCallbackProxy.onDownloadStart(url, userAgent,
