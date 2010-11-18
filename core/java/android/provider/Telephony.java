@@ -90,10 +90,16 @@ public final class Telephony {
         public static final String PERSON_ID = "person";
 
         /**
-         * The date the message was sent
+         * The date the message was received
          * <P>Type: INTEGER (long)</P>
          */
         public static final String DATE = "date";
+
+        /**
+         * The date the message was sent
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String DATE_SENT = "date_sent";
 
         /**
          * Has the message been read
@@ -650,10 +656,16 @@ public final class Telephony {
         public static final int MESSAGE_BOX_OUTBOX = 4;
 
         /**
-         * The date the message was sent.
+         * The date the message was received.
          * <P>Type: INTEGER (long)</P>
          */
         public static final String DATE = "date";
+
+        /**
+         * The date the message was sent.
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String DATE_SENT = "date_sent";
 
         /**
          * The box which the message belong to, for example, MESSAGE_BOX_INBOX.
