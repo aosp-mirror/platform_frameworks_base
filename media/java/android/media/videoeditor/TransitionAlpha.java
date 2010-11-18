@@ -16,6 +16,9 @@
 
 package android.media.videoeditor;
 
+import java.io.File;
+
+
 
 /**
  * This class allows to render an "alpha blending" transition according to a
@@ -71,6 +74,7 @@ public class TransitionAlpha extends Transition {
      *           projects folder (the parent folder for all projects).
      * @param blendingPercent The blending percent applied
      * @param invert true to invert the direction of the alpha blending
+     *
      * @throws IllegalArgumentException if behavior is not supported, or if
      *             direction are not supported.
      */
@@ -78,6 +82,10 @@ public class TransitionAlpha extends Transition {
             MediaItem beforeMediaItem, long durationMs, int behavior, String maskFilename,
             int blendingPercent, boolean invert) {
         super(transitionId, afterMediaItem, beforeMediaItem, durationMs, behavior);
+
+        if (!new File(maskFilename).exists()) {
+            throw new IllegalArgumentException("Invalid mask file name: " + maskFilename);
+        }
 
         mMaskFilename = maskFilename;
         mBlendingPercent = blendingPercent;

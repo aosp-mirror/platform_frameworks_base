@@ -46,7 +46,7 @@ public class WaveformData {
      *
      * @param audioWaveformFilename The name of the audio waveform file
      */
-    WaveformData(String audioWaveformFilename) {
+    WaveformData(String audioWaveformFilename) throws IOException {
         // TODO: Read these values from the file
         mFrameDurationMs = 20;
         mFramesCount = 300000 / mFrameDurationMs;

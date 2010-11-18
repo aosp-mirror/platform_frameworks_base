@@ -450,7 +450,7 @@ public class AudioTrack {
     /**
      * @return The waveform data
      */
-    public WaveformData getWaveformData() {
+    public WaveformData getWaveformData() throws IOException {
         if (mWaveformData == null) {
             return null;
         }

@@ -372,7 +372,7 @@ public class MediaVideoItem extends MediaItem {
     /**
      * @return The waveform data
      */
-    public WaveformData getWaveformData() {
+    public WaveformData getWaveformData() throws IOException {
         if (mWaveformData == null) {
             return null;
         }
