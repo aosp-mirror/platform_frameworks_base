@@ -102,7 +102,7 @@ public class AudioTrack {
         // Ducking is enabled by default
         mDuckingThreshold = 0;
         mDuckedTrackVolume = 0;
-        mIsDuckingEnabled = true;
+        mIsDuckingEnabled = false;
 
         // The audio waveform file is generated later
         mAudioWaveformFilename = null;
@@ -369,14 +369,15 @@ public class AudioTrack {
     /**
      * Enable ducking by specifying the required parameters
      *
-     * @param threshold Ducking will be activated when the relative energy in
+     * @param threshold Ducking will be activated when the energy in
      *      the media items audio signal goes above this value. The valid
-     *      range of values is 0 to 100.
+     *      range of values is 0db to 90dB. 0dB is equivalent to disabling
+     *      ducking.
      * @param duckedTrackVolume The relative volume of the audio track when ducking
      *      is active. The valid range of values is 0 to 100.
      */
     public void enableDucking(int threshold, int duckedTrackVolume) {
-        if (threshold < 0 || threshold > 100) {
+        if (threshold < 0 || threshold > 90) {
             throw new IllegalArgumentException("Invalid threshold value: " + threshold);
         }
 
