@@ -146,7 +146,7 @@ public final class GeolocationPermissions {
                             boolean allowed = nativeGetAllowed(origin);
                             Map retValues = new HashMap<String, Object>();
                             retValues.put(CALLBACK, callback);
-                            retValues.put(ALLOWED, new Boolean(allowed));
+                            retValues.put(ALLOWED, Boolean.valueOf(allowed));
                             postUIMessage(Message.obtain(null, RETURN_ALLOWED, retValues));
                             } break;
                         case CLEAR:
