@@ -3646,7 +3646,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         int count = 0;
 
         if (down) {
-            final int top = listPadding.top - incrementalDeltaY;
+            int top = -incrementalDeltaY;
+            if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
+                top += listPadding.top;
+            }
             for (int i = 0; i < childCount; i++) {
                 final View child = getChildAt(i);
                 if (child.getBottom() >= top) {
@@ -3666,7 +3669,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
             }
         } else {
-            final int bottom = getHeight() - listPadding.bottom - incrementalDeltaY;
+            int bottom = getHeight() - incrementalDeltaY;
+            if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
+                bottom -= listPadding.bottom;
+            }
             for (int i = childCount - 1; i >= 0; i--) {
                 final View child = getChildAt(i);
                 if (child.getTop() <= bottom) {
