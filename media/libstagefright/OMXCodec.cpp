@@ -595,7 +595,7 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta, uint32_t flags) {
                 size -= length;
             }
 
-            CODEC_LOGV(
+            CODEC_LOGI(
                     "AVC profile = %d (%s), level = %d",
                     (int)profile, AVCProfileToString(profile), level);
 
