@@ -706,8 +706,7 @@ public final class StrictMode {
             StrictMode.PENALTY_DROPBOX);
         sVmPolicyMask = StrictMode.DETECT_VM_CURSOR_LEAKS |
                 StrictMode.DETECT_VM_CLOSABLE_LEAKS |
-                StrictMode.PENALTY_DROPBOX |
-                StrictMode.PENALTY_LOG;
+                StrictMode.PENALTY_DROPBOX;
         setCloseGuardEnabled(vmClosableObjectLeaksEnabled());
         return true;
     }
