@@ -143,8 +143,19 @@ void * Adapter2D::getElement(uint32_t x, uint32_t y) const {
     rsAssert(mAllocation.get());
     rsAssert(mAllocation->getPtr());
     rsAssert(mAllocation->getType());
+    if (mFace != 0 && !mAllocation->getType()->getDimFaces()) {
+        LOGE("Adapter wants cubemap face, but allocation has none");
+        return NULL;
+    }
+
     uint8_t * ptr = static_cast<uint8_t *>(mAllocation->getPtr());
     ptr += mAllocation->getType()->getLODOffset(mLOD, x, y);
+
+    if (mFace != 0) {
+        uint32_t totalSizeBytes = mAllocation->getType()->getSizeBytes();
+        uint32_t faceOffset = totalSizeBytes / 6;
+        ptr += faceOffset * mFace;
+    }
     return ptr;
 }
 

@@ -37,23 +37,25 @@ public class ProgramFragment extends Program {
 
         public ProgramFragment create() {
             mRS.validate();
-            int[] tmp = new int[(mInputCount + mOutputCount + mConstantCount + 1) * 2];
+            int[] tmp = new int[(mInputCount + mOutputCount + mConstantCount + mTextureCount) * 2];
             int idx = 0;
 
             for (int i=0; i < mInputCount; i++) {
-                tmp[idx++] = 0;
+                tmp[idx++] = ProgramParam.INPUT.mID;
                 tmp[idx++] = mInputs[i].getID();
             }
             for (int i=0; i < mOutputCount; i++) {
-                tmp[idx++] = 1;
+                tmp[idx++] = ProgramParam.OUTPUT.mID;
                 tmp[idx++] = mOutputs[i].getID();
             }
             for (int i=0; i < mConstantCount; i++) {
-                tmp[idx++] = 2;
+                tmp[idx++] = ProgramParam.CONSTANT.mID;
                 tmp[idx++] = mConstants[i].getID();
             }
-            tmp[idx++] = 3;
-            tmp[idx++] = mTextureCount;
+            for (int i=0; i < mTextureCount; i++) {
+                tmp[idx++] = ProgramParam.TEXTURE_TYPE.mID;
+                tmp[idx++] = mTextureTypes[i].mID;
+            }
 
             int id = mRS.nProgramFragmentCreate(mShader, tmp);
             ProgramFragment pf = new ProgramFragment(id, mRS);

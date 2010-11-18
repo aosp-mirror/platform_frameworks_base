@@ -22,6 +22,8 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.renderscript.*;
+import android.renderscript.Allocation.CubemapLayout;
+import android.renderscript.Program.TextureType;
 import android.renderscript.ProgramStore.DepthFunc;
 import android.renderscript.Sampler.Value;
 import android.util.Log;
@@ -80,6 +82,9 @@ public class RsRenderStatesRS {
     private ProgramVertex mProgVertexCustom2;
     private ProgramFragment mProgFragmentCustom2;
 
+    private ProgramVertex mProgVertexCube;
+    private ProgramFragment mProgFragmentCube;
+
     private ProgramRaster mCullBack;
     private ProgramRaster mCullFront;
     private ProgramRaster mCullNone;
@@ -88,6 +93,7 @@ public class RsRenderStatesRS {
     private Allocation mTexOpaque;
     private Allocation mTexTransparent;
     private Allocation mTexChecker;
+    private Allocation mTexCube;
 
     private Mesh mMbyNMesh;
     private Mesh mTorus;
@@ -240,6 +246,19 @@ public class RsRenderStatesRS {
         mProgFragmentCustom2 = pfbCustom.create();
         mProgFragmentCustom2.bindConstants(mFSConst2.getAllocation(), 0);
 
+        // Cubemap test shaders
+        pvbCustom = new ProgramVertex.ShaderBuilder(mRS);
+        pvbCustom.setShader(mRes, R.raw.shadercubev);
+        pvbCustom.addInput(ScriptField_VertexShaderInputs_s.createElement(mRS));
+        pvbCustom.addConstant(mVSConst.getAllocation().getType());
+        mProgVertexCube = pvbCustom.create();
+        mProgVertexCube.bindConstants(mVSConst.getAllocation(), 0);
+
+        pfbCustom = new ProgramFragment.ShaderBuilder(mRS);
+        pfbCustom.setShader(mRes, R.raw.shadercubef);
+        pfbCustom.addTexture(Program.TextureType.TEXTURE_CUBE);
+        mProgFragmentCube = pfbCustom.create();
+
         pfbCustom = new ProgramFragment.ShaderBuilder(mRS);
         pfbCustom.setShader(mRes, R.raw.multitexf);
         pfbCustom.setTextureCount(3);
@@ -247,10 +266,11 @@ public class RsRenderStatesRS {
 
         mScript.set_gProgVertexCustom(mProgVertexCustom);
         mScript.set_gProgFragmentCustom(mProgFragmentCustom);
-        mScript.set_gProgFragmentMultitex(mProgFragmentMultitex);
-
         mScript.set_gProgVertexCustom2(mProgVertexCustom2);
         mScript.set_gProgFragmentCustom2(mProgFragmentCustom2);
+        mScript.set_gProgVertexCube(mProgVertexCube);
+        mScript.set_gProgFragmentCube(mProgFragmentCube);
+        mScript.set_gProgFragmentMultitex(mProgFragmentMultitex);
     }
 
     private Allocation loadTextureRGB(int id) {
@@ -272,11 +292,16 @@ public class RsRenderStatesRS {
         mTexOpaque = loadTextureRGB(R.drawable.data);
         mTexTransparent = loadTextureARGB(R.drawable.leaf);
         mTexChecker = loadTextureRGB(R.drawable.checker);
+        Bitmap b = BitmapFactory.decodeResource(mRes, R.drawable.cubemap_test);
+        mTexCube = Allocation.createCubemapFromBitmap(mRS, b, Element.RGB_565(mRS), false,
+                                                      Allocation.CubemapLayout.VERTICAL_FACE_LIST);
+        mTexCube.uploadToTexture(0);
 
         mScript.set_gTexTorus(mTexTorus);
         mScript.set_gTexOpaque(mTexOpaque);
         mScript.set_gTexTransparent(mTexTransparent);
         mScript.set_gTexChecker(mTexChecker);
+        mScript.set_gTexCube(mTexCube);
     }
 
     private void initFonts() {

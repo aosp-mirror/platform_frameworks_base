@@ -36,9 +36,32 @@ public class Program extends BaseObj {
     public static final int MAX_CONSTANT = 8;
     public static final int MAX_TEXTURE = 8;
 
+    public enum TextureType {
+        TEXTURE_2D (0),
+        TEXTURE_CUBE (1);
+
+        int mID;
+        TextureType(int id) {
+            mID = id;
+        }
+    }
+
+    enum ProgramParam {
+        INPUT (0),
+        OUTPUT (1),
+        CONSTANT (2),
+        TEXTURE_TYPE (3);
+
+        int mID;
+        ProgramParam(int id) {
+            mID = id;
+        }
+    };
+
     Element mInputs[];
     Element mOutputs[];
     Type mConstants[];
+    TextureType mTextures[];
     int mTextureCount;
     String mShader;
 
@@ -54,27 +77,34 @@ public class Program extends BaseObj {
             a.getType().getID() != mConstants[slot].getID()) {
             throw new IllegalArgumentException("Allocation type does not match slot type.");
         }
-        mRS.nProgramBindConstants(getID(), slot, a.getID());
+        int id = a != null ? a.getID() : 0;
+        mRS.nProgramBindConstants(getID(), slot, id);
     }
 
     public void bindTexture(Allocation va, int slot)
         throws IllegalArgumentException {
         mRS.validate();
-        if((slot < 0) || (slot >= mTextureCount)) {
+        if ((slot < 0) || (slot >= mTextureCount)) {
             throw new IllegalArgumentException("Slot ID out of range.");
         }
+        if (va != null && va.getType().getFaces() &&
+            mTextures[slot] != TextureType.TEXTURE_CUBE) {
+            throw new IllegalArgumentException("Cannot bind cubemap to 2d texture slot");
+        }
 
-        mRS.nProgramBindTexture(getID(), slot, va.getID());
+        int id = va != null ? va.getID() : 0;
+        mRS.nProgramBindTexture(getID(), slot, id);
     }
 
     public void bindSampler(Sampler vs, int slot)
         throws IllegalArgumentException {
         mRS.validate();
-        if((slot < 0) || (slot >= mTextureCount)) {
+        if ((slot < 0) || (slot >= mTextureCount)) {
             throw new IllegalArgumentException("Slot ID out of range.");
         }
 
-        mRS.nProgramBindSampler(getID(), slot, vs.getID());
+        int id = vs != null ? vs.getID() : 0;
+        mRS.nProgramBindSampler(getID(), slot, id);
     }
 
 
@@ -84,6 +114,7 @@ public class Program extends BaseObj {
         Element mOutputs[];
         Type mConstants[];
         Type mTextures[];
+        TextureType mTextureTypes[];
         int mInputCount;
         int mOutputCount;
         int mConstantCount;
@@ -100,6 +131,7 @@ public class Program extends BaseObj {
             mOutputCount = 0;
             mConstantCount = 0;
             mTextureCount = 0;
+            mTextureTypes = new TextureType[MAX_TEXTURE];
         }
 
         public BaseProgramBuilder setShader(String s) {
@@ -192,6 +224,17 @@ public class Program extends BaseObj {
                 throw new IllegalArgumentException("Max texture count exceeded.");
             }
             mTextureCount = count;
+            for (int i = 0; i < mTextureCount; i ++) {
+                mTextureTypes[i] = TextureType.TEXTURE_2D;
+            }
+            return this;
+        }
+
+        public BaseProgramBuilder addTexture(TextureType texType) throws IllegalArgumentException {
+            if(mTextureCount >= MAX_TEXTURE) {
+                throw new IllegalArgumentException("Max texture count exceeded.");
+            }
+            mTextureTypes[mTextureCount ++] = texType;
             return this;
         }
 
@@ -203,6 +246,8 @@ public class Program extends BaseObj {
             p.mConstants = new Type[mConstantCount];
             System.arraycopy(mConstants, 0, p.mConstants, 0, mConstantCount);
             p.mTextureCount = mTextureCount;
+            p.mTextures = new TextureType[mTextureCount];
+            System.arraycopy(mTextureTypes, 0, p.mTextures, 0, mTextureCount);
         }
     }
 
