@@ -92,6 +92,7 @@
 
         <item name="groupButtonBackground">@null</item>
         <item name="selectableItemBackground">@android:drawable/item_background</item>
+        <item name="homeAsUpIndicator">@android:drawable/ic_ab_back_holo_dark</item>
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>

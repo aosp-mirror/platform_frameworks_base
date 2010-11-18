@@ -173,7 +173,8 @@ public class ActionBarView extends ViewGroup {
         final LayoutInflater inflater = LayoutInflater.from(context);
 
         final int homeResId = a.getResourceId(
-                com.android.internal.R.styleable.ActionBar_homeLayout, 0);
+                com.android.internal.R.styleable.ActionBar_homeLayout,
+                com.android.internal.R.layout.action_bar_home);
 
         mHomeLayout = inflater.inflate(homeResId, this, false);
 
@@ -210,13 +211,13 @@ public class ActionBarView extends ViewGroup {
         
         mLogoNavItem = new ActionMenuItem(context, 0, android.R.id.home, 0, 0, mTitle);
         mHomeLayout.setOnClickListener(new OnClickListener() {
-          public void onClick(View v) {
-            Context context = getContext();
-            if (context instanceof Activity) {
-              Activity activity = (Activity) context;
-              activity.onMenuItemSelected(Window.FEATURE_OPTIONS_PANEL, mLogoNavItem);
+            public void onClick(View v) {
+                Context context = getContext();
+                if (context instanceof Activity) {
+                    Activity activity = (Activity) context;
+                    activity.onMenuItemSelected(Window.FEATURE_OPTIONS_PANEL, mLogoNavItem);
+                }
             }
-          }
         });
         mHomeLayout.setClickable(true);
         mHomeLayout.setFocusable(true);
