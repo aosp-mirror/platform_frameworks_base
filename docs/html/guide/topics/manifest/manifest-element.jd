@@ -159,6 +159,9 @@ multiple SD cards can be used with the same device.</li>
 storage. However, the system will not allow the user to move the application to external storage if
 this attribute is set to {@code internalOnly}, which is the default setting.</p>
 
+<p>Read <a href="{@docRoot}guide/appendix/install-location.html">App Install Location</a> for
+more information about using this attribute (including how to maintain backward compatibility).</p>
+
 <p>Introduced in: API Level 8.</p>
 
 
@@ -173,7 +176,7 @@ this attribute is set to {@code internalOnly}, which is the default setting.</p>
 
 <p>
 <dt>see also:</dt>
-<dd><a href="{@docRoot}guide/appendix/install-location.html">App Install Location</a><br/>
+<dd>
 <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code></dd>
 
 </dl>

@@ -30,9 +30,9 @@
     </style>
     <style name="TextAppearance.StatusBar.EventContent">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">16sp</item>
     </style>
     <style name="TextAppearance.StatusBar.EventContent.Title">
-        <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 </resources>

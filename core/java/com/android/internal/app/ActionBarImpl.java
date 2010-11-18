@@ -31,6 +31,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.view.ActionMode;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -563,6 +564,11 @@ public class ActionBarImpl extends ActionBar {
         }
 
         @Override
+        public Tab setCustomView(int layoutResId) {
+            return setCustomView(LayoutInflater.from(mContext).inflate(layoutResId, null));
+        }
+
+        @Override
         public Drawable getIcon() {
             return mIcon;
         }
@@ -588,9 +594,19 @@ public class ActionBarImpl extends ActionBar {
         }
 
         @Override
+        public Tab setIcon(int resId) {
+            return setIcon(mContext.getResources().getDrawable(resId));
+        }
+
+        @Override
         public Tab setText(CharSequence text) {
             mText = text;
             return this;
+        }
+
+        @Override
+        public Tab setText(int resId) {
+            return setText(mContext.getResources().getText(resId));
         }
 
         @Override

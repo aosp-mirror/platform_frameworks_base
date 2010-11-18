@@ -482,6 +482,10 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek telefondaki verileri uyarıda bulunmadan silin"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Cihaz genelinde geçerli proxy\'i ayarla"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Politika etkin olduğunda kullanılacak cihaz genelinde geçerli proxy\'yi ayarlayın. Etkin genel proxy\'yi yalnızca ilk cihaz yöneticisi ayarlar."</string>
+    <!-- no translation found for policylab_expirePassword (2314569545488269564) -->
+    <skip />
+    <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Ev"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -546,11 +550,10 @@
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"İş Yeri Çağrı Cihazı"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Yardımcı"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <!-- no translation found for eventTypeCustom (7837586198458073404) -->
-    <skip />
+    <string name="eventTypeCustom" msgid="7837586198458073404">"Özel"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Doğum günü"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Yıldönümü"</string>
-    <!-- outdated translation 5834288791948564594 -->     <string name="eventTypeOther" msgid="7388178939010143077">"Etkinlik"</string>
+    <string name="eventTypeOther" msgid="7388178939010143077">"Diğer"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Özel"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Ev"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"İş"</string>
@@ -577,36 +580,21 @@
     <string name="orgTypeWork" msgid="29268870505363872">"İş"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Diğer"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Özel"</string>
-    <!-- no translation found for relationTypeCustom (3542403679827297300) -->
-    <skip />
-    <!-- no translation found for relationTypeAssistant (6274334825195379076) -->
-    <skip />
-    <!-- no translation found for relationTypeBrother (8757913506784067713) -->
-    <skip />
-    <!-- no translation found for relationTypeChild (1890746277276881626) -->
-    <skip />
-    <!-- no translation found for relationTypeDomesticPartner (6904807112121122133) -->
-    <skip />
-    <!-- no translation found for relationTypeFather (5228034687082050725) -->
-    <skip />
-    <!-- no translation found for relationTypeFriend (7313106762483391262) -->
-    <skip />
-    <!-- no translation found for relationTypeManager (6365677861610137895) -->
-    <skip />
-    <!-- no translation found for relationTypeMother (4578571352962758304) -->
-    <skip />
-    <!-- no translation found for relationTypeParent (4755635567562925226) -->
-    <skip />
-    <!-- no translation found for relationTypePartner (7266490285120262781) -->
-    <skip />
-    <!-- no translation found for relationTypeReferredBy (101573059844135524) -->
-    <skip />
-    <!-- no translation found for relationTypeRelative (1799819930085610271) -->
-    <skip />
-    <!-- no translation found for relationTypeSister (1735983554479076481) -->
-    <skip />
-    <!-- no translation found for relationTypeSpouse (394136939428698117) -->
-    <skip />
+    <string name="relationTypeCustom" msgid="3542403679827297300">"Özel"</string>
+    <string name="relationTypeAssistant" msgid="6274334825195379076">"Yardımcı"</string>
+    <string name="relationTypeBrother" msgid="8757913506784067713">"Erkek Kardeş"</string>
+    <string name="relationTypeChild" msgid="1890746277276881626">"Çocuk"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Hayat Arkadaşı"</string>
+    <string name="relationTypeFather" msgid="5228034687082050725">"Baba"</string>
+    <string name="relationTypeFriend" msgid="7313106762483391262">"Arkadaş"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"Yönetici"</string>
+    <string name="relationTypeMother" msgid="4578571352962758304">"Anne"</string>
+    <string name="relationTypeParent" msgid="4755635567562925226">"Ebeveyn"</string>
+    <string name="relationTypePartner" msgid="7266490285120262781">"Hayat Arkadaşı"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Öneren"</string>
+    <string name="relationTypeRelative" msgid="1799819930085610271">"Akraba"</string>
+    <string name="relationTypeSister" msgid="1735983554479076481">"Kız Kardeş"</string>
+    <string name="relationTypeSpouse" msgid="394136939428698117">"Eş"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Özel"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Ev"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"İş"</string>
@@ -674,8 +662,7 @@
     <string name="save_password_label" msgid="6860261758665825069">"Onayla"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"İpucu: Yakınlaştırmak ve uzaklaştırmak için iki kez hafifçe vurun."</string>
     <!-- outdated translation 8940110866775097494 -->     <string name="autofill_this_form" msgid="1272247532604569872">"Bu formu otomatik doldur"</string>
-    <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
-    <skip />
+    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />
     <!-- no translation found for autofill_address_summary_separator (7483307893170324129) -->
@@ -804,8 +791,7 @@
     <string name="cut" msgid="3092569408438626261">"Kes"</string>
     <string name="copy" msgid="2681946229533511987">"Kopyala"</string>
     <string name="paste" msgid="5629880836805036433">"Yapıştır"</string>
-    <!-- no translation found for pasteDisabled (7259254654641456570) -->
-    <skip />
+    <string name="pasteDisabled" msgid="7259254654641456570">"Yapştrlck bir şy yok"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL\'yi kopyala"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Metin seç..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Metin seçimi"</string>
@@ -951,8 +937,7 @@
     <string name="ime_action_send" msgid="2316166556349314424">"Gönder"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"İleri"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Bitti"</string>
-    <!-- no translation found for ime_action_previous (1443550039250105948) -->
-    <skip />
+    <string name="ime_action_previous" msgid="1443550039250105948">"Önceki"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Çalıştır"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Numarayı çevir:"\n"<xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"<xliff:g id="NUMBER">%s</xliff:g>"\n" ile kişi oluştur"</string>

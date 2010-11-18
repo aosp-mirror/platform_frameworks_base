@@ -1377,6 +1377,8 @@
   <public type="attr" name="animationResolution" />
   <public type="attr" name="state_accelerated" />
   <public type="attr" name="baseline" />
+  <public type="attr" name="homeLayout" />
+  <public type="attr" name="opacity" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
@@ -1394,6 +1396,7 @@
   <!-- Context menu ID for the "Select text..." menu item to switch to text
        selection context mode in text views. -->
   <public type="id" name="selectTextMode" />
+  <public type="id" name="up" />
 
   <!-- Standard content view for a {@link android.app.ListFragment}.
        If you are implementing a subclass of ListFragment with your
@@ -1447,4 +1450,7 @@
   <public type="style" name="Theme.Holo.Light.DialogWhenLarge" />
   
   <public type="string" name="selectTextMode" />
+
+  <public type="style" name="Theme.Holo.Wallpaper" />
+  <public type="style" name="Theme.Holo.Wallpaper.NoTitleBar" />
 </resources>

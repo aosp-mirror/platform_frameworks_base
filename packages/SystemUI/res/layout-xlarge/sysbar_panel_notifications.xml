@@ -22,10 +22,9 @@
 <com.android.systemui.statusbar.tablet.NotificationPanel
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
-    android:layout_width="wrap_content"
+    android:layout_width="540dp"
     android:animateLayoutChanges="true"
     android:background="@drawable/bg_scrim_notification"
-    android:paddingLeft="140dp"
     android:paddingBottom="32dp"
     >
 
@@ -34,10 +33,11 @@
         android:layout_height="wrap_content"
         android:layout_width="384dp"
         android:layout_above="@+id/content_frame"
-        android:layout_marginLeft="16dp"
+        android:layout_marginLeft="24dp"
         android:paddingBottom="16dp"
         android:orientation="vertical"
         android:animateLayoutChanges="true"
+        android:layout_alignParentRight="true"
         >
 
         <com.android.systemui.statusbar.policy.Clock
@@ -108,7 +108,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignBaseline="@id/battery"
             android:paddingRight="16dp"
-            android:src="@drawable/ic_sysbar_quicksettings"
+            android:src="@drawable/ic_notification_open"
             android:baseline="17dp"
             />
 
@@ -128,8 +128,9 @@
     <FrameLayout
         android:id="@+id/content_frame"
         android:layout_height="wrap_content"
-        android:layout_width="400dp"
+        android:layout_width="408dp"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
         >
         <ScrollView
             android:id="@+id/notificationScroller"
@@ -144,7 +145,6 @@
                 android:animateLayoutChanges="true"
                 android:animationCache="false"
                 android:orientation="vertical"
-                android:background="@drawable/status_bar_background"
                 android:clickable="true"
                 android:focusable="true"
                 android:descendantFocusability="afterDescendants"

@@ -613,18 +613,12 @@ void FontState::checkInit() {
 }
 
 void FontState::issueDrawCommand() {
+    Context::PushState ps(mRSC);
 
-    ObjectBaseRef<const ProgramVertex> tmpV(mRSC->getVertex());
-    mRSC->setVertex(mRSC->getDefaultProgramVertex());
-
-    ObjectBaseRef<const ProgramRaster> tmpR(mRSC->getRaster());
-    mRSC->setRaster(mRSC->getDefaultProgramRaster());
-
-    ObjectBaseRef<const ProgramFragment> tmpF(mRSC->getFragment());
-    mRSC->setFragment(mFontShaderF.get());
-
-    ObjectBaseRef<const ProgramStore> tmpPS(mRSC->getFragmentStore());
-    mRSC->setFragmentStore(mFontProgramStore.get());
+    mRSC->setProgramVertex(mRSC->getDefaultProgramVertex());
+    mRSC->setProgramRaster(mRSC->getDefaultProgramRaster());
+    mRSC->setProgramFragment(mFontShaderF.get());
+    mRSC->setProgramStore(mFontProgramStore.get());
 
     if (mConstantsDirty) {
         mFontShaderFConstant->data(mRSC, &mConstants, sizeof(mConstants));
@@ -632,10 +626,6 @@ void FontState::issueDrawCommand() {
     }
 
     if (!mRSC->setupCheck()) {
-        mRSC->setVertex((ProgramVertex *)tmpV.get());
-        mRSC->setRaster((ProgramRaster *)tmpR.get());
-        mRSC->setFragment((ProgramFragment *)tmpF.get());
-        mRSC->setFragmentStore((ProgramStore *)tmpPS.get());
         return;
     }
 
@@ -651,12 +641,6 @@ void FontState::issueDrawCommand() {
     mIndexBuffer->uploadCheck(mRSC);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer->getBufferObjectID());
     glDrawElements(GL_TRIANGLES, mCurrentQuadIndex * 6, GL_UNSIGNED_SHORT, (uint16_t *)(0));
-
-    // Reset the state
-    mRSC->setVertex((ProgramVertex *)tmpV.get());
-    mRSC->setRaster((ProgramRaster *)tmpR.get());
-    mRSC->setFragment((ProgramFragment *)tmpF.get());
-    mRSC->setFragmentStore((ProgramStore *)tmpPS.get());
 }
 
 void FontState::appendMeshQuad(float x1, float y1, float z1,

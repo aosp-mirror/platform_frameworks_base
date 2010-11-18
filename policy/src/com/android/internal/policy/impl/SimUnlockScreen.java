@@ -130,9 +130,10 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
 
     /** {@inheritDoc} */
     public void cleanUp() {
-        // hide the dialog.
+        // dismiss the dialog.
         if (mSimUnlockProgressDialog != null) {
-            mSimUnlockProgressDialog.hide();
+            mSimUnlockProgressDialog.dismiss();
+            mSimUnlockProgressDialog = null;
         }
         mUpdateMonitor.removeCallback(this);
     }

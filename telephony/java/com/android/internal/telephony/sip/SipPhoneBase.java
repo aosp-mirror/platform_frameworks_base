@@ -101,12 +101,12 @@ abstract class SipPhoneBase extends PhoneBase {
     }
 
     protected void startRingbackTone() {
-        AsyncResult result = new AsyncResult(null, new Boolean(true), null);
+        AsyncResult result = new AsyncResult(null, Boolean.TRUE, null);
         mRingbackRegistrants.notifyRegistrants(result);
     }
 
     protected void stopRingbackTone() {
-        AsyncResult result = new AsyncResult(null, new Boolean(false), null);
+        AsyncResult result = new AsyncResult(null, Boolean.FALSE, null);
         mRingbackRegistrants.notifyRegistrants(result);
     }
 

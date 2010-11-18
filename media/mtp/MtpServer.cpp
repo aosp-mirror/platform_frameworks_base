@@ -624,6 +624,7 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
     mData.getString(modified);     // date modified
     // keywords follow
 
+    LOGD("name: %s format: %04X\n", (const char *)name, format);
     time_t modifiedTime;
     if (!parseDateTime(modified, modifiedTime))
         modifiedTime = 0;
@@ -663,6 +664,7 @@ MtpResponseCode MtpServer::doSendObject() {
     MtpResponseCode result = MTP_RESPONSE_OK;
     mode_t mask;
     int ret;
+    uint64_t actualSize = -1;
 
     if (mSendObjectHandle == kInvalidObjectHandle) {
         LOGE("Expected SendObjectInfo before SendObject");
@@ -692,6 +694,7 @@ MtpResponseCode MtpServer::doSendObject() {
     mfr.offset = 0;
     mfr.length = mSendObjectFileSize;
 
+    LOGD("receiving %s\n", (const char *)mSendObjectFilePath);
     // transfer the file
     ret = ioctl(mFD, MTP_RECEIVE_FILE, (unsigned long)&mfr);
     close(mfr.fd);
@@ -704,11 +707,18 @@ MtpResponseCode MtpServer::doSendObject() {
             result = MTP_RESPONSE_TRANSACTION_CANCELLED;
         else
             result = MTP_RESPONSE_GENERAL_ERROR;
+    } else if (mSendObjectFileSize == 0xFFFFFFFF) {
+        // actual size is likely > 4 gig so stat the file to compute actual length
+        struct stat s;
+        if (lstat(mSendObjectFilePath, &s) == 0) {
+            actualSize = s.st_size;
+            LOGD("actualSize: %lld\n", actualSize);
+        }
     }
 
 done:
     mDatabase->endSendObject(mSendObjectFilePath, mSendObjectHandle, mSendObjectFormat,
-            result == MTP_RESPONSE_OK);
+            actualSize, result == MTP_RESPONSE_OK);
     mSendObjectHandle = kInvalidObjectHandle;
     mSendObjectFormat = 0;
     return result;

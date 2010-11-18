@@ -81,7 +81,7 @@ public:
     void init(Context *rsc);
 
     void clear(Context *rsc);
-    void runCompiler(Context *rsc, ScriptC *s);
+    void runCompiler(Context *rsc, ScriptC *s, const char *resName);
 
     struct SymbolTable_t {
         const char * mName;
@@ -98,6 +98,3 @@ public:
 }
 }
 #endif
-
-
-

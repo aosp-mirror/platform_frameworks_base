@@ -99,6 +99,7 @@ public:
     virtual void                    endSendObject(const char* path,
                                             MtpObjectHandle handle,
                                             MtpObjectFormat format,
+                                            int64_t actualSize,
                                             bool succeeded);
 
     virtual MtpObjectHandleList*    getObjectList(MtpStorageID storageID,
@@ -235,11 +236,11 @@ MtpObjectHandle MyMtpDatabase::beginSendObject(const char* path,
 }
 
 void MyMtpDatabase::endSendObject(const char* path, MtpObjectHandle handle,
-                                MtpObjectFormat format, bool succeeded) {
+                                MtpObjectFormat format, int64_t actualSize, bool succeeded) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     jstring pathStr = env->NewStringUTF(path);
     env->CallVoidMethod(mDatabase, method_endSendObject, pathStr,
-                        (jint)handle, (jint)format, (jboolean)succeeded);
+                        (jint)handle, (jint)format, (jlong)actualSize, (jboolean)succeeded);
 
     if (pathStr)
         env->DeleteLocalRef(pathStr);
@@ -1076,7 +1077,7 @@ int register_android_media_MtpDatabase(JNIEnv *env)
         LOGE("Can't find beginSendObject");
         return -1;
     }
-    method_endSendObject = env->GetMethodID(clazz, "endSendObject", "(Ljava/lang/String;IIZ)V");
+    method_endSendObject = env->GetMethodID(clazz, "endSendObject", "(Ljava/lang/String;IIJZ)V");
     if (method_endSendObject == NULL) {
         LOGE("Can't find endSendObject");
         return -1;

@@ -6127,6 +6127,14 @@ public final class ContactsContract {
         public static final int STATUS_CHANGING_LOCALE = 3;
 
         /**
+         * The status that indicates that there are no accounts and no contacts
+         * on the device.
+         *
+         * @hide
+         */
+        public static final int STATUS_NO_ACCOUNTS_NO_CONTACTS = 4;
+
+        /**
          * Additional data associated with the status.
          *
          * @hide

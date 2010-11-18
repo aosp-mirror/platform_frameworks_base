@@ -164,7 +164,7 @@ public class MtpDatabase {
         }
     }
 
-    private void endSendObject(String path, int handle, int format, boolean succeeded) {
+    private void endSendObject(String path, int handle, int format, long actualSize, boolean succeeded) {
         if (succeeded) {
             // handle abstract playlists separately
             // they do not exist in the file system so don't use the media scanner here
@@ -184,6 +184,7 @@ public class MtpDatabase {
                 ContentValues values = new ContentValues(1);
                 values.put(Audio.Playlists.DATA, path);
                 values.put(Audio.Playlists.NAME, name);
+                values.put(Files.FileColumns.FORMAT, format);
                 values.put(MediaColumns.MEDIA_SCANNER_NEW_OBJECT_ID, handle);
                 try {
                     Uri uri = mMediaProvider.insert(Audio.Playlists.EXTERNAL_CONTENT_URI, values);
@@ -191,6 +192,18 @@ public class MtpDatabase {
                     Log.e(TAG, "RemoteException in endSendObject", e);
                 }
             } else {
+                if (actualSize >= 0) {
+                    // update size if necessary
+                    ContentValues values = new ContentValues();
+                    values.put(Files.FileColumns.SIZE, actualSize);
+                    try {
+                        String[] whereArgs = new String[] {  Integer.toString(handle) };
+                        mMediaProvider.update(mObjectsUri, values, ID_WHERE, whereArgs);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "RemoteException in mMediaProvider.update", e);
+                    }
+                }
+
                 mMediaScanner.scanMtpFile(path, mVolumeName, handle, format);
             }
         } else {

@@ -196,8 +196,12 @@ public class GridView extends AbsListView {
         final int count = getChildCount();
 
         if (down) {
+            int paddingTop = 0;
+            if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
+                paddingTop = getListPaddingTop();
+            }
             final int startOffset = count > 0 ?
-                    getChildAt(count - 1).getBottom() + verticalSpacing : getListPaddingTop();
+                    getChildAt(count - 1).getBottom() + verticalSpacing : paddingTop;
             int position = mFirstPosition + count;
             if (mStackFromBottom) {
                 position += numColumns - 1;
@@ -205,8 +209,12 @@ public class GridView extends AbsListView {
             fillDown(position, startOffset);
             correctTooHigh(numColumns, verticalSpacing, getChildCount());
         } else {
+            int paddingBottom = 0;
+            if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
+                paddingBottom = getListPaddingBottom();
+            }
             final int startOffset = count > 0 ?
-                    getChildAt(0).getTop() - verticalSpacing : getHeight() - getListPaddingBottom();
+                    getChildAt(0).getTop() - verticalSpacing : getHeight() - paddingBottom;
             int position = mFirstPosition;
             if (!mStackFromBottom) {
                 position -= numColumns;
@@ -232,7 +240,10 @@ public class GridView extends AbsListView {
     private View fillDown(int pos, int nextTop) {
         View selectedView = null;
 
-        final int end = (mBottom - mTop) - mListPadding.bottom;
+        int end = (mBottom - mTop);
+        if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
+            end -= mListPadding.bottom;
+        }
 
         while (nextTop < end && pos < mItemCount) {
             View temp = makeRow(pos, nextTop, true);
@@ -316,7 +327,10 @@ public class GridView extends AbsListView {
     private View fillUp(int pos, int nextBottom) {
         View selectedView = null;
 
-        final int end = mListPadding.top;
+        int end = 0;
+        if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
+            end = mListPadding.top;
+        }
 
         while (nextBottom > end && pos >= 0) {
 

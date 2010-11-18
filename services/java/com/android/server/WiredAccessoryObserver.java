@@ -86,31 +86,38 @@ class WiredAccessoryObserver extends UEventObserver {
         if (LOG) Slog.v(TAG, "Headset UEVENT: " + event.toString());
 
         try {
-            if ((event.get("SWITCH_NAME")).equals("usb_audio")) {
-                if (Integer.parseInt(event.get("SWITCH_STATE")) == 1) {
-                    switchState = ((mHeadsetState & (BIT_HEADSET|BIT_HEADSET_NO_MIC|
-                                                     BIT_USB_HEADSET_DGTL)) |
-                                   (Integer.parseInt(event.get("SWITCH_STATE")) << 2));
-                } else if (Integer.parseInt(event.get("SWITCH_STATE")) == 2) {
-                    switchState = ((mHeadsetState & (BIT_HEADSET|BIT_HEADSET_NO_MIC|
-                                                     BIT_USB_HEADSET_ANLG)) |
-                                   (Integer.parseInt(event.get("SWITCH_STATE")) << 3));
-                }
-                else switchState = (mHeadsetState & (BIT_HEADSET|BIT_HEADSET_NO_MIC));
-            }
-            else if ((event.get("SWITCH_NAME")).equals("hdmi")) {
-                switchState = ((mHeadsetState & (BIT_HEADSET|BIT_HEADSET_NO_MIC|
-                                                 BIT_USB_HEADSET_DGTL|BIT_USB_HEADSET_ANLG)) |
-                               (Integer.parseInt(event.get("SWITCH_STATE")) << 4));
-            }
-            else {
-                switchState = ((mHeadsetState & (BIT_USB_HEADSET_ANLG|BIT_USB_HEADSET_DGTL)) |
-                              (Integer.parseInt(event.get("SWITCH_STATE"))));
-            }
-            update(event.get("SWITCH_NAME"), switchState);
+            String name = event.get("SWITCH_NAME");
+            int state = Integer.parseInt(event.get("SWITCH_STATE"));
+            updateState(name, state);
         } catch (NumberFormatException e) {
             Slog.e(TAG, "Could not parse switch state from event " + event);
         }
+    }
+
+    private synchronized final void updateState(String name, int state)
+    {
+        if (name.equals("usb_audio")) {
+            if (state == 1) {
+                switchState = ((mHeadsetState & (BIT_HEADSET|BIT_HEADSET_NO_MIC|
+                                                 BIT_USB_HEADSET_DGTL|BIT_HDMI_AUDIO)) |
+                               (state << 2));
+            } else if (state == 2) {
+                switchState = ((mHeadsetState & (BIT_HEADSET|BIT_HEADSET_NO_MIC|
+                                                 BIT_USB_HEADSET_ANLG|BIT_HDMI_AUDIO)) |
+                               (state << 3));
+            } else switchState = (mHeadsetState & (BIT_HEADSET|BIT_HEADSET_NO_MIC|BIT_HDMI_AUDIO));
+        }
+        else if (name.equals("hdmi")) {
+            switchState = ((mHeadsetState & (BIT_HEADSET|BIT_HEADSET_NO_MIC|
+                                             BIT_USB_HEADSET_DGTL|BIT_USB_HEADSET_ANLG)) |
+                           (state << 4));
+        }
+        else {
+            switchState = ((mHeadsetState & (BIT_HDMI_AUDIO|BIT_USB_HEADSET_ANLG|
+                                             BIT_USB_HEADSET_DGTL)) |
+                           state);
+        }
+        update(name, switchState);
     }
 
     private synchronized final void init() {
@@ -132,13 +139,15 @@ class WiredAccessoryObserver extends UEventObserver {
                 file.close();
                 newName = new String(buffer, 0, len).trim();
 
+                if (newState > 0) {
+                    updateState(newName, newState);
+                }
+
             } catch (FileNotFoundException e) {
                 Slog.w(TAG, "This kernel does not have wired headset support");
             } catch (Exception e) {
                 Slog.e(TAG, "" , e);
             }
-
-            update(newName, newState);
         }
     }
 

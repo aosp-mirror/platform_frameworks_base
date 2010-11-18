@@ -2543,6 +2543,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         mMotionCorrection = 0;
                         motionPosition = findMotionRow(y);
                         reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
+                        mFlingRunnable.flywheelTouch();
                     }
                 }
             }
@@ -2715,6 +2716,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         } else {
                             mTouchMode = TOUCH_MODE_REST;
                             reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
+                            if (mFlingRunnable != null) {
+                                mFlingRunnable.endFling();
+                            }
                         }
                     }
                 } else {
@@ -2758,7 +2762,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         case MotionEvent.ACTION_CANCEL: {
             mTouchMode = TOUCH_MODE_REST;
             setPressed(false);
-            View motionView = this.getChildAt(mMotionPosition - mFirstPosition);
+            View motionView = getChildAt(mMotionPosition - mFirstPosition);
             if (motionView != null) {
                 motionView.setPressed(false);
             }
@@ -2946,6 +2950,30 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
          */
         private int mLastFlingY;
 
+        private final Runnable mCheckFlywheel = new Runnable() {
+            public void run() {
+                final int activeId = mActivePointerId;
+                final VelocityTracker vt = mVelocityTracker;
+                final Scroller scroller = mScroller;
+                if (vt == null || activeId == INVALID_POINTER) {
+                    return;
+                }
+
+                vt.computeCurrentVelocity(1000, mMaximumVelocity);
+                final float yvel = -vt.getYVelocity(activeId);
+
+                if (scroller.isScrollingInDirection(0, yvel)) {
+                    // Keep the fling alive a little longer
+                    postDelayed(this, FLYWHEEL_TIMEOUT);
+                } else {
+                    endFling();
+                    mTouchMode = TOUCH_MODE_SCROLL;
+                }
+            }
+        };
+
+        private static final int FLYWHEEL_TIMEOUT = 40; // milliseconds
+
         FlingRunnable() {
             mScroller = new Scroller(getContext());
         }
@@ -2978,73 +3006,85 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             post(this);
         }
 
-        private void endFling() {
+        void endFling() {
             mTouchMode = TOUCH_MODE_REST;
 
             removeCallbacks(this);
+            removeCallbacks(mCheckFlywheel);
             if (mPositionScroller != null) {
                 removeCallbacks(mPositionScroller);
             }
 
             reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
             clearScrollingCache();
+            mScroller.abortAnimation();
+        }
+
+        void flywheelTouch() {
+            postDelayed(mCheckFlywheel, FLYWHEEL_TIMEOUT);
         }
 
         public void run() {
             switch (mTouchMode) {
             default:
+                endFling();
                 return;
                 
-            case TOUCH_MODE_FLING: {
+            case TOUCH_MODE_SCROLL:
+                if (mScroller.isFinished()) {
+                    return;
+                }
+                // Fall through
+            case TOUCH_MODE_FLING:
                 if (mItemCount == 0 || getChildCount() == 0) {
                     endFling();
                     return;
                 }
+                break;
+            }
+            final Scroller scroller = mScroller;
+            boolean more = scroller.computeScrollOffset();
+            final int y = scroller.getCurrY();
 
-                final Scroller scroller = mScroller;
-                boolean more = scroller.computeScrollOffset();
-                final int y = scroller.getCurrY();
+            // Flip sign to convert finger direction to list items direction
+            // (e.g. finger moving down means list is moving towards the top)
+            int delta = mLastFlingY - y;
 
-                // Flip sign to convert finger direction to list items direction
-                // (e.g. finger moving down means list is moving towards the top)
-                int delta = mLastFlingY - y;
+            // Pretend that each frame of a fling scroll is a touch scroll
+            if (delta > 0) {
+                // List is moving towards the top. Use first view as mMotionPosition
+                mMotionPosition = mFirstPosition;
+                final View firstView = getChildAt(0);
+                mMotionViewOriginalTop = firstView.getTop();
 
-                // Pretend that each frame of a fling scroll is a touch scroll
-                if (delta > 0) {
-                    // List is moving towards the top. Use first view as mMotionPosition
-                    mMotionPosition = mFirstPosition;
-                    final View firstView = getChildAt(0);
-                    mMotionViewOriginalTop = firstView.getTop();
+                // Don't fling more than 1 screen
+                delta = Math.min(getHeight() - mPaddingBottom - mPaddingTop - 1, delta);
+            } else {
+                // List is moving towards the bottom. Use last view as mMotionPosition
+                int offsetToLast = getChildCount() - 1;
+                mMotionPosition = mFirstPosition + offsetToLast;
 
-                    // Don't fling more than 1 screen
-                    delta = Math.min(getHeight() - mPaddingBottom - mPaddingTop - 1, delta);
-                } else {
-                    // List is moving towards the bottom. Use last view as mMotionPosition
-                    int offsetToLast = getChildCount() - 1;
-                    mMotionPosition = mFirstPosition + offsetToLast;
+                final View lastView = getChildAt(offsetToLast);
+                mMotionViewOriginalTop = lastView.getTop();
 
-                    final View lastView = getChildAt(offsetToLast);
-                    mMotionViewOriginalTop = lastView.getTop();
+                // Don't fling more than 1 screen
+                delta = Math.max(-(getHeight() - mPaddingBottom - mPaddingTop - 1), delta);
+            }
 
-                    // Don't fling more than 1 screen
-                    delta = Math.max(-(getHeight() - mPaddingBottom - mPaddingTop - 1), delta);
-                }
+            // Don't stop just because delta is zero (it could have been rounded)
+            final boolean atEnd = trackMotionScroll(delta, delta) && (delta != 0);
 
-                // Don't stop just because delta is zero (it could have been rounded)
-                final boolean atEnd = trackMotionScroll(delta, delta) && (delta != 0);
+            if (more && !atEnd) {
+                invalidate();
+                mLastFlingY = y;
+                post(this);
+            } else {
+                endFling();
 
-                if (more && !atEnd) {
-                    invalidate();
-                    mLastFlingY = y;
-                    post(this);
-                } else {
-                    endFling();
-                    
-                    if (PROFILE_FLINGING) {
-                        if (mFlingProfilingStarted) {
-                            Debug.stopMethodTracing();
-                            mFlingProfilingStarted = false;
-                        }
+                if (PROFILE_FLINGING) {
+                    if (mFlingProfilingStarted) {
+                        Debug.stopMethodTracing();
+                        mFlingProfilingStarted = false;
                     }
 
                     if (mFlingStrictSpan != null) {
@@ -3052,10 +3092,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         mFlingStrictSpan = null;
                     }
                 }
-                break;
             }
-            }
-
         }
     }
     
@@ -3609,7 +3646,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         int count = 0;
 
         if (down) {
-            final int top = listPadding.top - incrementalDeltaY;
+            int top = -incrementalDeltaY;
+            if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
+                top += listPadding.top;
+            }
             for (int i = 0; i < childCount; i++) {
                 final View child = getChildAt(i);
                 if (child.getBottom() >= top) {
@@ -3629,7 +3669,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
             }
         } else {
-            final int bottom = getHeight() - listPadding.bottom - incrementalDeltaY;
+            int bottom = getHeight() - incrementalDeltaY;
+            if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
+                bottom -= listPadding.bottom;
+            }
             for (int i = childCount - 1; i >= 0; i--) {
                 final View child = getChildAt(i);
                 if (child.getTop() <= bottom) {

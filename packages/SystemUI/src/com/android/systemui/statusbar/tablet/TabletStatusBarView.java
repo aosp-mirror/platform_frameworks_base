@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.tablet;
 import android.content.Context;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Slog;
 import android.view.View;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
@@ -40,6 +41,9 @@ public class TabletStatusBarView extends FrameLayout {
 
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            if (TabletStatusBar.DEBUG) {
+                Slog.d(TabletStatusBar.TAG, "TabletStatusBarView intercepting touch event: " + ev);
+            }
             mHandler.removeMessages(TabletStatusBar.MSG_CLOSE_NOTIFICATION_PANEL);
             mHandler.sendEmptyMessage(TabletStatusBar.MSG_CLOSE_NOTIFICATION_PANEL);
             mHandler.removeMessages(TabletStatusBar.MSG_CLOSE_RECENTS_PANEL);
@@ -48,6 +52,9 @@ public class TabletStatusBarView extends FrameLayout {
             for (int i=0; i < mPanels.length; i++) {
                 if (mPanels[i] != null && mPanels[i].getVisibility() == View.VISIBLE) {
                     if (eventInside(mIgnoreChildren[i], ev)) {
+                        if (TabletStatusBar.DEBUG) {
+                            Slog.d(TabletStatusBar.TAG, "TabletStatusBarView eating event for view: " + mIgnoreChildren[i]);
+                        }
                         return true;
                     }
                 }
