@@ -81,18 +81,6 @@ public class DialerFilter extends RelativeLayout
         // Setup focus & highlight for this view
         setFocusable(true);
 
-        // Default the mode based on the keyboard
-        KeyCharacterMap kmap
-                = KeyCharacterMap.load(KeyCharacterMap.BUILT_IN_KEYBOARD);
-        mIsQwerty = kmap.getKeyboardType() != KeyCharacterMap.NUMERIC;
-        if (mIsQwerty) {
-            Log.i("DialerFilter", "This device looks to be QWERTY");
-//            setMode(DIGITS_AND_LETTERS);
-        } else {
-            Log.i("DialerFilter", "This device looks to be 12-KEY");
-//            setMode(DIGITS_ONLY);
-        }
-
         // XXX Force the mode to QWERTY for now, since 12-key isn't supported
         mIsQwerty = true;
         setMode(DIGITS_AND_LETTERS);

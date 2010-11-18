@@ -91,7 +91,7 @@ public class Input {
         char[] chars = buff.toString().toCharArray();
 
         KeyCharacterMap mKeyCharacterMap = KeyCharacterMap.
-            load(KeyCharacterMap.BUILT_IN_KEYBOARD);
+            load(KeyCharacterMap.VIRTUAL_KEYBOARD);
 
         KeyEvent[] events = mKeyCharacterMap.getEvents(chars);
 

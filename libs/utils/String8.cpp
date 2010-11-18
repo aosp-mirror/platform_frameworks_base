@@ -282,22 +282,28 @@ status_t String8::append(const char* other, size_t otherLen)
 
 status_t String8::appendFormat(const char* fmt, ...)
 {
-    va_list ap;
-    va_start(ap, fmt);
+    va_list args;
+    va_start(args, fmt);
 
+    status_t result = appendFormatV(fmt, args);
+
+    va_end(args);
+    return result;
+}
+
+status_t String8::appendFormatV(const char* fmt, va_list args)
+{
     int result = NO_ERROR;
-    int n = vsnprintf(NULL, 0, fmt, ap);
+    int n = vsnprintf(NULL, 0, fmt, args);
     if (n != 0) {
         size_t oldLength = length();
         char* buf = lockBuffer(oldLength + n);
         if (buf) {
-            vsnprintf(buf + oldLength, n + 1, fmt, ap);
+            vsnprintf(buf + oldLength, n + 1, fmt, args);
         } else {
             result = NO_MEMORY;
         }
     }
-
-    va_end(ap);
     return result;
 }
 

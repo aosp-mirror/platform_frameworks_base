@@ -17,34 +17,84 @@
 package android.view;
 
 import android.text.method.MetaKeyKeyListener;
+import android.util.AndroidRuntimeException;
 import android.util.SparseIntArray;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemClock;
 import android.util.SparseArray;
 
 import java.lang.Character;
-import java.lang.ref.WeakReference;
 
 /**
- * Describes the keys provided by a device and their associated labels.
+ * Describes the keys provided by a keyboard device and their associated labels.
  */
-public class KeyCharacterMap
-{
+public class KeyCharacterMap {
     /**
      * The id of the device's primary built in keyboard is always 0.
      */
     public static final int BUILT_IN_KEYBOARD = 0;
 
-    /** A numeric (12-key) keyboard. */
+    /**
+     * The id of a generic virtual keyboard with a full layout that can be used to
+     * synthesize key events.  Typically used with {@link #getEvents}.
+     */
+    public static final int VIRTUAL_KEYBOARD = -1;
+
+    /**
+     * A numeric (12-key) keyboard.
+     * <p>
+     * A numeric keyboard supports text entry using a multi-tap approach.
+     * It may be necessary to tap a key multiple times to generate the desired letter
+     * or symbol.
+     * </p><p>
+     * This type of keyboard is generally designed for thumb typing.
+     * </p>
+     */
     public static final int NUMERIC = 1;
 
-    /** A keyboard with all the letters, but with more than one letter
-     *  per key. */
+    /**
+     * A keyboard with all the letters, but with more than one letter per key.
+     * <p>
+     * This type of keyboard is generally designed for thumb typing.
+     * </p>
+     */
     public static final int PREDICTIVE = 2;
 
-    /** A keyboard with all the letters, and maybe some numbers. */
+    /**
+     * A keyboard with all the letters, and maybe some numbers.
+     * <p>
+     * An alphabetic keyboard supports text entry directly but may have a condensed
+     * layout with a small form factor.  In contrast to a {@link #FULL full keyboard}, some
+     * symbols may only be accessible using special on-screen character pickers.
+     * In addition, to improve typing speed and accuracy, the framework provides
+     * special affordances for alphabetic keyboards such as auto-capitalization
+     * and toggled / locked shift and alt keys.
+     * </p><p>
+     * This type of keyboard is generally designed for thumb typing.
+     * </p>
+     */
     public static final int ALPHA = 3;
+
+    /**
+     * A full PC-style keyboard.
+     * <p>
+     * A full keyboard behaves like a PC keyboard.  All symbols are accessed directly
+     * by pressing keys on the keyboard without on-screen support or affordances such
+     * as auto-capitalization.
+     * </p><p>
+     * This type of keyboard is generally designed for full two hand typing.
+     * </p>
+     */
+    public static final int FULL = 4;
+
+    /**
+     * A keyboard that is only used to control special functions rather than for typing.
+     * <p>
+     * A special function keyboard consists only of non-printing keys such as
+     * HOME and POWER that are not actually used for typing.
+     * </p>
+     */
+    public static final int SPECIAL_FUNCTION = 5;
 
     /**
      * This private-use character is used to trigger Unicode character
@@ -58,39 +108,73 @@ public class KeyCharacterMap
      */
     public static final char PICKER_DIALOG_INPUT = '\uEF01';
 
-    private static Object sLock = new Object();
-    private static SparseArray<WeakReference<KeyCharacterMap>> sInstances 
-        = new SparseArray<WeakReference<KeyCharacterMap>>();
+    /**
+     * Modifier keys may be chorded with character keys.
+     *
+     * @see {#link #getModifierBehavior()} for more details.
+     */
+    public static final int MODIFIER_BEHAVIOR_CHORDED = 0;
 
     /**
-     * Loads the key character maps for the keyboard with the specified device id.
-     * @param keyboard The device id of the keyboard.
-     * @return The associated key character map.
+     * Modifier keys may be chorded with character keys or they may toggle
+     * into latched or locked states when pressed independently.
+     *
+     * @see {#link #getModifierBehavior()} for more details.
      */
-    public static KeyCharacterMap load(int keyboard)
-    {
-        synchronized (sLock) {
-            KeyCharacterMap result;
-            WeakReference<KeyCharacterMap> ref = sInstances.get(keyboard);
-            if (ref != null) {
-                result = ref.get();
-                if (result != null) {
-                    return result;
-                }
-            }
-            result = new KeyCharacterMap(keyboard);
-            sInstances.put(keyboard, new WeakReference<KeyCharacterMap>(result));
-            return result;
+    public static final int MODIFIER_BEHAVIOR_CHORDED_OR_TOGGLED = 1;
+
+    private static SparseArray<KeyCharacterMap> sInstances = new SparseArray<KeyCharacterMap>();
+
+    private final int mDeviceId;
+    private int mPtr;
+
+    private static native int nativeLoad(int id);
+    private static native void nativeDispose(int ptr);
+
+    private static native char nativeGetCharacter(int ptr, int keyCode, int metaState);
+    private static native char nativeGetNumber(int ptr, int keyCode);
+    private static native char nativeGetMatch(int ptr, int keyCode, char[] chars, int metaState);
+    private static native char nativeGetDisplayLabel(int ptr, int keyCode);
+    private static native int nativeGetKeyboardType(int ptr);
+    private static native KeyEvent[] nativeGetEvents(int ptr, int deviceId, char[] chars);
+
+    private KeyCharacterMap(int deviceId, int ptr) {
+        mDeviceId = deviceId;
+        mPtr = ptr;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        if (mPtr != 0) {
+            nativeDispose(mPtr);
+            mPtr = 0;
         }
     }
 
-    private KeyCharacterMap(int keyboardDevice)
-    {
-        mKeyboardDevice = keyboardDevice;
-        mPointer = ctor_native(keyboardDevice);
+    /**
+     * Loads the key character maps for the keyboard with the specified device id.
+     *
+     * @param deviceId The device id of the keyboard.
+     * @return The associated key character map.
+     * @throws {@link KeyCharacterMapUnavailableException} if the key character map
+     * could not be loaded because it was malformed or the default key character map
+     * is missing from the system.
+     */
+    public static KeyCharacterMap load(int deviceId) {
+        synchronized (sInstances) {
+            KeyCharacterMap map = sInstances.get(deviceId);
+            if (map == null) {
+                int ptr = nativeLoad(deviceId); // might throw
+                map = new KeyCharacterMap(deviceId, ptr);
+                sInstances.put(deviceId, map);
+            }
+            return map;
+        }
     }
 
     /**
+     * Gets the Unicode character generated by the specified key and meta
+     * key state combination.
      * <p>
      * Returns the Unicode character that the specified key would produce
      * when the specified meta bits (see {@link MetaKeyKeyListener})
@@ -104,89 +188,116 @@ public class KeyCharacterMap
      * actually produce a character -- see {@link #getDeadChar} --
      * after masking with {@link #COMBINING_ACCENT_MASK}.
      * </p>
+     *
+     * @param keyCode The key code.
+     * @param metaState The meta key modifier state.
+     * @return The associated character or combining accent, or 0 if none.
      */
-    public int get(int keyCode, int meta)
-    {
-        if ((meta & MetaKeyKeyListener.META_CAP_LOCKED) != 0) {
-            meta |= KeyEvent.META_SHIFT_ON;
+    public int get(int keyCode, int metaState) {
+        if ((metaState & MetaKeyKeyListener.META_CAP_LOCKED) != 0) {
+            metaState |= KeyEvent.META_CAPS_LOCK_ON;
         }
-        if ((meta & MetaKeyKeyListener.META_ALT_LOCKED) != 0) {
-            meta |= KeyEvent.META_ALT_ON;
-        }
-
-        // Ignore caps lock on keys where alt and shift have the same effect.
-        if ((meta & MetaKeyKeyListener.META_CAP_LOCKED) != 0) {
-            if (get_native(mPointer, keyCode, KeyEvent.META_SHIFT_ON) ==
-                get_native(mPointer, keyCode, KeyEvent.META_ALT_ON)) {
-                meta &= ~KeyEvent.META_SHIFT_ON;
-            }
+        if ((metaState & MetaKeyKeyListener.META_ALT_LOCKED) != 0) {
+            metaState |= KeyEvent.META_ALT_ON;
         }
 
-        int ret = get_native(mPointer, keyCode, meta);
-        int map = COMBINING.get(ret);
-
+        char ch = nativeGetCharacter(mPtr, keyCode, metaState);
+        int map = COMBINING.get(ch);
         if (map != 0) {
             return map;
         } else {
-            return ret;
+            return ch;
         }
     }
 
     /**
-     * Gets the number or symbol associated with the key.  The character value
-     * is returned, not the numeric value.  If the key is not a number, but is
-     * a symbol, the symbol is retuned.
+     * Gets the number or symbol associated with the key.
+     * <p>
+     * The character value is returned, not the numeric value.
+     * If the key is not a number, but is a symbol, the symbol is retuned.
+     * </p><p>
+     * This method is intended to to support dial pads and other numeric or
+     * symbolic entry on keyboards where certain keys serve dual function
+     * as alphabetic and symbolic keys.  This method returns the number
+     * or symbol associated with the key independent of whether the user
+     * has pressed the required modifier.
+     * </p><p>
+     * For example, on one particular keyboard the keys on the top QWERTY row generate
+     * numbers when ALT is pressed such that ALT-Q maps to '1'.  So for that keyboard
+     * when {@link #getNumber} is called with {@link KeyEvent#KEYCODE_Q} it returns '1'
+     * so that the user can type numbers without pressing ALT when it makes sense.
+     * </p>
+     *
+     * @param keyCode The key code.
+     * @return The associated numeric or symbolic character, or 0 if none.
      */
-    public char getNumber(int keyCode)
-    {
-        return getNumber_native(mPointer, keyCode);
+    public char getNumber(int keyCode) {
+        return nativeGetNumber(mPtr, keyCode);
     }
 
     /**
-     * The same as {@link #getMatch(int,char[],int) getMatch(keyCode, chars, 0)}.
+     * Gets the first character in the character array that can be generated
+     * by the specified key code.
+     * <p>
+     * This is a convenience function that returns the same value as
+     * {@link #getMatch(int,char[],int) getMatch(keyCode, chars, 0)}.
+     * </p>
+     *
+     * @param keyCode The keycode.
+     * @param chars The array of matching characters to consider.
+     * @return The matching associated character, or 0 if none.
      */
-    public char getMatch(int keyCode, char[] chars)
-    {
+    public char getMatch(int keyCode, char[] chars) {
         return getMatch(keyCode, chars, 0);
     }
 
     /**
-     * If one of the chars in the array can be generated by keyCode,
-     * return the char; otherwise return '\0'.
-     * @param keyCode the key code to look at
-     * @param chars the characters to try to find
-     * @param modifiers the modifier bits to prefer.  If any of these bits
-     *                  are set, if there are multiple choices, that could
-     *                  work, the one for this modifier will be set.
+     * Gets the first character in the character array that can be generated
+     * by the specified key code.  If there are multiple choices, prefers
+     * the one that would be generated with the specified meta key modifier state.
+     *
+     * @param keyCode The key code.
+     * @param chars The array of matching characters to consider.
+     * @param metaState The preferred meta key modifier state.
+     * @return The matching associated character, or 0 if none.
      */
-    public char getMatch(int keyCode, char[] chars, int modifiers)
-    {
+    public char getMatch(int keyCode, char[] chars, int metaState) {
         if (chars == null) {
-            // catch it here instead of in native
-            throw new NullPointerException();
+            throw new IllegalArgumentException("chars must not be null.");
         }
-        return getMatch_native(mPointer, keyCode, chars, modifiers);
+        return nativeGetMatch(mPtr, keyCode, chars, metaState);
     }
 
     /**
-     * Get the primary character for this key.  In other words, the label
-     * that is physically printed on it.
+     * Gets the primary character for this key.
+     * In other words, the label that is physically printed on it.
+     *
+     * @param keyCode The key code.
+     * @return The display label character, or 0 if none (eg. for non-printing keys).
      */
-    public char getDisplayLabel(int keyCode)
-    {
-        return getDisplayLabel_native(mPointer, keyCode);
+    public char getDisplayLabel(int keyCode) {
+        return nativeGetDisplayLabel(mPtr, keyCode);
     }
 
     /**
-     * Get the character that is produced by putting accent on the character
-     * c.
+     * Get the character that is produced by putting accent on the character c.
      * For example, getDeadChar('`', 'e') returns &egrave;.
+     *
+     * @param accent The accent character.  eg. '`'
+     * @param c The basic character.
+     * @return The combined character, or 0 if the characters cannot be combined.
      */
-    public static int getDeadChar(int accent, int c)
-    {
+    public static int getDeadChar(int accent, int c) {
         return DEAD.get((accent << 16) | c);
     }
 
+    /**
+     * Describes the character mappings associated with a key.
+     *
+     * @deprecated instead use {@link KeyCharacterMap#getDisplayLabel(int)},
+     * {@link KeyCharacterMap#getNumber(int)} and {@link KeyCharacterMap#get(int, int)}.
+     */
+    @Deprecated
     public static class KeyData {
         public static final int META_LENGTH = 4;
 
@@ -212,24 +323,37 @@ public class KeyCharacterMap
          */
         public char[] meta = new char[META_LENGTH];
     }
-    
+
     /**
-     * Get the characters conversion data for a given keyCode.
+     * Get the character conversion data for a given key code.
      *
-     * @param keyCode the keyCode to look for
-     * @param results a {@link KeyData} that will be filled with the results.
+     * @param keyCode The keyCode to query.
+     * @param results A {@link KeyData} instance that will be filled with the results.
+     * @return True if the key was mapped.  If the key was not mapped, results is not modified.
      *
-     * @return whether the key was mapped or not.  If the key was not mapped,
-     *         results is not modified.
+     * @deprecated instead use {@link KeyCharacterMap#getDisplayLabel(int)},
+     * {@link KeyCharacterMap#getNumber(int)} or {@link KeyCharacterMap#get(int, int)}.
      */
-    public boolean getKeyData(int keyCode, KeyData results)
-    {
-        if (results.meta.length >= KeyData.META_LENGTH) {
-            return getKeyData_native(mPointer, keyCode, results);
-        } else {
-            throw new IndexOutOfBoundsException("results.meta.length must be >= " +
-                                                KeyData.META_LENGTH);
+    @Deprecated
+    public boolean getKeyData(int keyCode, KeyData results) {
+        if (results.meta.length < KeyData.META_LENGTH) {
+            throw new IndexOutOfBoundsException(
+                    "results.meta.length must be >= " + KeyData.META_LENGTH);
         }
+
+        char displayLabel = nativeGetDisplayLabel(mPtr, keyCode);
+        if (displayLabel == 0) {
+            return false;
+        }
+
+        results.displayLabel = displayLabel;
+        results.number = nativeGetNumber(mPtr, keyCode);
+        results.meta[0] = nativeGetCharacter(mPtr, keyCode, 0);
+        results.meta[1] = nativeGetCharacter(mPtr, keyCode, KeyEvent.META_SHIFT_ON);
+        results.meta[2] = nativeGetCharacter(mPtr, keyCode, KeyEvent.META_ALT_ON);
+        results.meta[3] = nativeGetCharacter(mPtr, keyCode,
+                KeyEvent.META_ALT_ON | KeyEvent.META_SHIFT_ON);
+        return true;
     }
 
     /**
@@ -237,102 +361,37 @@ public class KeyCharacterMap
      * could plausibly generate the provided sequence of characters.  It is
      * not guaranteed that the sequence is the only way to generate these
      * events or that it is optimal.
-     * 
-     * @return an array of KeyEvent objects, or null if the given char array
+     * <p>
+     * This function is primarily offered for instrumentation and testing purposes.
+     * It may fail to map characters to key codes.  In particular, the key character
+     * map for the {@link #BUILT_IN_KEYBOARD built-in keyboard} device id may be empty.
+     * Consider using the key character map associated with the
+     * {@link #VIRTUAL_KEYBOARD virtual keyboard} device id instead.
+     * </p><p>
+     * For robust text entry, do not use this function.  Instead construct a
+     * {@link KeyEvent} with action code {@link KeyEvent#ACTION_MULTIPLE} that contains
+     * the desired string using {@link KeyEvent#KeyEvent(long, String, int, int)}.
+     * </p>
+     *
+     * @param chars The sequence of characters to generate.
+     * @return An array of {@link KeyEvent} objects, or null if the given char array
      *         can not be generated using the current key character map.
      */
-    public KeyEvent[] getEvents(char[] chars)
-    {
+    public KeyEvent[] getEvents(char[] chars) {
         if (chars == null) {
-            throw new NullPointerException();
+            throw new IllegalArgumentException("chars must not be null.");
         }
-
-        long[] keys = getEvents_native(mPointer, chars);
-        if (keys == null) {
-            return null;
-        }
-
-        // how big should the array be
-        int len = keys.length*2;
-        int N = keys.length;
-        for (int i=0; i<N; i++) {
-            int mods = (int)(keys[i] >> 32);
-            if ((mods & KeyEvent.META_ALT_ON) != 0) {
-                len += 2;
-            }
-            if ((mods & KeyEvent.META_SHIFT_ON) != 0) {
-                len += 2;
-            }
-            if ((mods & KeyEvent.META_SYM_ON) != 0) {
-                len += 2;
-            }
-        }
-
-        // create the events
-        KeyEvent[] rv = new KeyEvent[len];
-        int index = 0;
-        long now = SystemClock.uptimeMillis();
-        int device = mKeyboardDevice;
-        for (int i=0; i<N; i++) {
-            int mods = (int)(keys[i] >> 32);
-            int meta = 0;
-
-            if ((mods & KeyEvent.META_ALT_ON) != 0) {
-                meta |= KeyEvent.META_ALT_ON;
-                rv[index] = new KeyEvent(now, now, KeyEvent.ACTION_DOWN,
-                        KeyEvent.KEYCODE_ALT_LEFT, 0, meta, device, 0);
-                index++;
-            }
-            if ((mods & KeyEvent.META_SHIFT_ON) != 0) {
-                meta |= KeyEvent.META_SHIFT_ON;
-                rv[index] = new KeyEvent(now, now, KeyEvent.ACTION_DOWN,
-                        KeyEvent.KEYCODE_SHIFT_LEFT, 0, meta, device, 0);
-                index++;
-            }
-            if ((mods & KeyEvent.META_SYM_ON) != 0) {
-                meta |= KeyEvent.META_SYM_ON;
-                rv[index] = new KeyEvent(now, now, KeyEvent.ACTION_DOWN,
-                        KeyEvent.KEYCODE_SYM, 0, meta, device, 0);
-                index++;
-            }
-
-            int key = (int)(keys[i]);
-            rv[index] = new KeyEvent(now, now, KeyEvent.ACTION_DOWN,
-                    key, 0, meta, device, 0);
-            index++;
-            rv[index] = new KeyEvent(now, now, KeyEvent.ACTION_UP,
-                    key, 0, meta, device, 0);
-            index++;
-
-            if ((mods & KeyEvent.META_ALT_ON) != 0) {
-                meta &= ~KeyEvent.META_ALT_ON;
-                rv[index] = new KeyEvent(now, now, KeyEvent.ACTION_UP,
-                        KeyEvent.KEYCODE_ALT_LEFT, 0, meta, device, 0);
-                index++;
-            }
-            if ((mods & KeyEvent.META_SHIFT_ON) != 0) {
-                meta &= ~KeyEvent.META_SHIFT_ON;
-                rv[index] = new KeyEvent(now, now, KeyEvent.ACTION_UP,
-                        KeyEvent.KEYCODE_SHIFT_LEFT, 0, meta, device, 0);
-                index++;
-            }
-            if ((mods & KeyEvent.META_SYM_ON) != 0) {
-                meta &= ~KeyEvent.META_SYM_ON;
-                rv[index] = new KeyEvent(now, now, KeyEvent.ACTION_UP,
-                        KeyEvent.KEYCODE_SYM, 0, meta, device, 0);
-                index++;
-            }
-        }
-
-        return rv;
+        return nativeGetEvents(mPtr, mDeviceId, chars);
     }
 
     /**
-     * Does this character key produce a glyph?
+     * Returns true if the specified key produces a glyph.
+     *
+     * @param keyCode The key code.
+     * @return True if the key is a printing key.
      */
-    public boolean isPrintingKey(int keyCode)
-    {
-        int type = Character.getType(get(keyCode, 0));
+    public boolean isPrintingKey(int keyCode) {
+        int type = Character.getType(nativeGetDisplayLabel(mPtr, keyCode));
 
         switch (type)
         {
@@ -347,22 +406,68 @@ public class KeyCharacterMap
         }
     }
 
-    protected void finalize() throws Throwable
-    {
-        dtor_native(mPointer);
+    /**
+     * Gets the keyboard type.
+     * Returns {@link #NUMERIC}, {@link #PREDICTIVE}, {@link #ALPHA} or {@link #FULL}.
+     * <p>
+     * Different keyboard types have different semantics.  Refer to the documentation
+     * associated with the keyboard type constants for details.
+     * </p>
+     *
+     * @return The keyboard type.
+     */
+    public int getKeyboardType() {
+        return nativeGetKeyboardType(mPtr);
     }
 
     /**
-     * Returns {@link #NUMERIC}, {@link #PREDICTIVE} or {@link #ALPHA}.
+     * Gets a constant that describes the behavior of this keyboard's modifier keys
+     * such as {@link KeyEvent#KEYCODE_SHIFT_LEFT}.
+     * <p>
+     * Currently there are two behaviors that may be combined:
+     * </p>
+     * <ul>
+     * <li>Chorded behavior: When the modifier key is pressed together with one or more
+     * character keys, the keyboard inserts the modified keys and
+     * then resets the modifier state when the modifier key is released.</li>
+     * <li>Toggled behavior: When the modifier key is pressed and released on its own
+     * it first toggles into a latched state.  When latched, the modifier will apply
+     * to next character key that is pressed and will then reset itself to the initial state.
+     * If the modifier is already latched and the modifier key is pressed and release on
+     * its own again, then it toggles into a locked state.  When locked, the modifier will
+     * apply to all subsequent character keys that are pressed until unlocked by pressing
+     * the modifier key on its own one more time to reset it to the initial state.
+     * Toggled behavior is useful for small profile keyboards designed for thumb typing.
+     * </ul>
+     * <p>
+     * This function currently returns {@link #MODIFIER_BEHAVIOR_CHORDED} when the
+     * {@link #getKeyboardType() keyboard type} is {@link #FULL} or {@link #SPECIAL_FUNCTION} and
+     * {@link #MODIFIER_BEHAVIOR_CHORDED_OR_TOGGLED} otherwise.
+     * In the future, the function may also take into account global keyboard
+     * accessibility settings, other user preferences, or new device capabilities.
+     * </p>
+     *
+     * @return The modifier behavior for this keyboard.
+     *
+     * @see {@link #MODIFIER_BEHAVIOR_CHORDED}
+     * @see {@link #MODIFIER_BEHAVIOR_CHORDED_OR_TOGGLED}
      */
-    public int getKeyboardType()
-    {
-        return getKeyboardType_native(mPointer);
+    public int getModifierBehavior() {
+        switch (getKeyboardType()) {
+            case FULL:
+            case SPECIAL_FUNCTION:
+                return MODIFIER_BEHAVIOR_CHORDED;
+            default:
+                return MODIFIER_BEHAVIOR_CHORDED_OR_TOGGLED;
+        }
     }
 
     /**
      * Queries the framework about whether any physical keys exist on the
-     * device that are capable of producing the given key codes.
+     * any keyboard attached to the device that are capable of producing the given key code.
+     *
+     * @param keyCode The key code to query.
+     * @return True if at least one attached keyboard supports the specified key code.
      */
     public static boolean deviceHasKey(int keyCode) {
         int[] codeArray = new int[1];
@@ -370,7 +475,17 @@ public class KeyCharacterMap
         boolean[] ret = deviceHasKeys(codeArray);
         return ret[0];
     }
-    
+
+    /**
+     * Queries the framework about whether any physical keys exist on the
+     * any keyboard attached to the device that are capable of producing the given
+     * array of key codes.
+     *
+     * @param keyCodes The array of key codes to query.
+     * @return A new array of the same size as the key codes array whose elements
+     * are set to true if at least one attached keyboard supports the corresponding key code
+     * at the same index in the key codes array.
+     */
     public static boolean[] deviceHasKeys(int[] keyCodes) {
         boolean[] ret = new boolean[keyCodes.length];
         IWindowManager wm = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
@@ -381,22 +496,6 @@ public class KeyCharacterMap
         }
         return ret;
     }
-
-    private int mPointer;
-    private int mKeyboardDevice;
-
-    private static native int ctor_native(int id);
-    private static native void dtor_native(int ptr);
-    private static native char get_native(int ptr, int keycode,
-                                    int meta);
-    private static native char getNumber_native(int ptr, int keycode);
-    private static native char getMatch_native(int ptr, int keycode,
-                                    char[] chars, int modifiers);
-    private static native char getDisplayLabel_native(int ptr, int keycode);
-    private static native boolean getKeyData_native(int ptr, int keycode,
-                                    KeyData results);
-    private static native int getKeyboardType_native(int ptr);
-    private static native long[] getEvents_native(int ptr, char[] str);
 
     /**
      * Maps Unicode combining diacritical to display-form dead key
@@ -412,7 +511,7 @@ public class KeyCharacterMap
 
     /*
      * TODO: Change the table format to support full 21-bit-wide
-     * accent characters and combined characters if ever necessary.    
+     * accent characters and combined characters if ever necessary.
      */
     private static final int ACUTE = '\u00B4' << 16;
     private static final int GRAVE = '`' << 16;
@@ -549,5 +648,14 @@ public class KeyCharacterMap
         DEAD.put(UMLAUT | 'w', '\u1E85');
         DEAD.put(UMLAUT | 'x', '\u1E8D');
         DEAD.put(UMLAUT | 'y', '\u00FF');
+    }
+
+    /**
+     * Thrown by {@link KeyCharacterMap#load} when a key character map could not be loaded.
+     */
+    public static class KeyCharacterMapUnavailableException extends AndroidRuntimeException {
+        public KeyCharacterMapUnavailableException(String msg) {
+            super(msg);
+        }
     }
 }

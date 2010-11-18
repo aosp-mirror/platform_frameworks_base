@@ -528,8 +528,7 @@ import junit.framework.Assert;
         // Otherwise, replace the text being changed (including the last
         // character) in the textfield.
         TextUtils.getChars(s, start + count - 1, start + count, mCharacter, 0);
-        KeyCharacterMap kmap =
-                KeyCharacterMap.load(KeyCharacterMap.BUILT_IN_KEYBOARD);
+        KeyCharacterMap kmap = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
         KeyEvent[] events = kmap.getEvents(mCharacter);
         boolean cannotUseKeyEvents = null == events;
         int charactersFromKeyEvents = cannotUseKeyEvents ? 0 : 1;
