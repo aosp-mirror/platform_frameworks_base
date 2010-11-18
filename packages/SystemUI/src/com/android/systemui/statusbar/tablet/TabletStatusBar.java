@@ -31,6 +31,8 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -968,6 +970,13 @@ public class TabletStatusBar extends StatusBar {
         }
     }
 
+    void workAroundBadLayerDrawableOpacity(View v) {
+        LayerDrawable d = (LayerDrawable)v.getBackground();
+        v.setBackgroundDrawable(null);
+        d.setOpacity(PixelFormat.TRANSLUCENT);
+        v.setBackgroundDrawable(d);
+    }
+
     private boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
         StatusBarNotification sbn = entry.notification;
         RemoteViews remoteViews = sbn.notification.contentView;
@@ -979,6 +988,7 @@ public class TabletStatusBar extends StatusBar {
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         View row = inflater.inflate(R.layout.status_bar_latest_event, parent, false);
+        workAroundBadLayerDrawableOpacity(row);
         View vetoButton = row.findViewById(R.id.veto);
         if (entry.notification.isClearable()) {
             final String _pkg = sbn.pkg;

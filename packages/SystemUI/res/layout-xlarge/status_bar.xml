@@ -28,18 +28,6 @@
         android:animateLayoutChanges="false"
         >
 
-        <!-- ticker: transient incoming notification information -->
-        <FrameLayout
-            android:id="@+id/ticker"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:layout_toRightOf="@+id/systemInfo"
-            android:paddingLeft="6dip"
-            android:gravity="center_vertical"
-            android:animateLayoutChanges="true"
-            />
-
         <!-- notification icons & panel access -->
         <LinearLayout
             android:id="@+id/notificationArea"
@@ -242,5 +230,17 @@
             android:visibility="gone"
             />
 
+        <!-- ticker: transient incoming notification information -->
+        <FrameLayout
+            android:id="@+id/ticker"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/systemInfo"
+            android:paddingLeft="6dip"
+            android:gravity="center_vertical"
+            android:animateLayoutChanges="true"
+            />
+            
     </RelativeLayout>
 </com.android.systemui.statusbar.tablet.TabletStatusBarView>
