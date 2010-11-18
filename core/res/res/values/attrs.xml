@@ -607,9 +607,6 @@
 
         <!-- SearchView dropdown background -->
         <attr name="searchDropdownBackground" format="reference" />
-
-        <!-- Specifies a drawable to use for the 'home as up' indicator. -->
-        <attr name="homeAsUpIndicator" format="reference" />
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -4413,8 +4410,8 @@
         <attr name="customNavigationLayout" format="reference" />
         <!-- Specifies a fixed height. -->
         <attr name="height" />
-        <!-- Specifies a layout to use for the "home" section of the action bar. -->
-        <attr name="homeLayout" format="reference" />
+        <!-- Specifies a drawable to use for the 'home as up' indicator. -->
+        <attr name="homeAsUpIndicator" format="reference" />
         <!-- Specifies a style resource to use for an embedded progress bar. -->
         <attr name="progressBarStyle" />
         <!-- Specifies a style resource to use for an indeterminate progress spinner. -->
