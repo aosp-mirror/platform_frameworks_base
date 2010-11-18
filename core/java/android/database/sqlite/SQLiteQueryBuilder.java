@@ -476,7 +476,7 @@ public class SQLiteQueryBuilder
      * @deprecated This method's signature is misleading since no SQL parameter
      * substitution is carried out.  The selection arguments parameter does not get
      * used at all.  To avoid confusion, call
-     * {@link #buildUnionSubQuery(String, String[], Set<String>, int, String, String, String, String)}
+     * {@link #buildUnionSubQuery}
      * instead.
      */
     @Deprecated
