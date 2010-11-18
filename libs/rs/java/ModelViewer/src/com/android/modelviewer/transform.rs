@@ -25,7 +25,7 @@ typedef struct {
     rs_matrix4x4 *mat;
 } ParentData;
 
-void appendTransformation(int type, float4 data, rs_matrix4x4 *mat) {
+static void appendTransformation(int type, float4 data, rs_matrix4x4 *mat) {
     rs_matrix4x4 temp;
 
     switch (type) {
