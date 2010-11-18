@@ -934,7 +934,7 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
             ssize_t keyDownIndex = findKeyDownLocked(scanCode);
             if (keyDownIndex >= 0) {
                 // key repeat, be sure to use same keycode as before in case of rotation
-                keyCode = mLocked.keyDowns.top().keyCode;
+                keyCode = mLocked.keyDowns.itemAt(keyDownIndex).keyCode;
             } else {
                 // key down
                 mLocked.keyDowns.push();
@@ -949,7 +949,7 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
             ssize_t keyDownIndex = findKeyDownLocked(scanCode);
             if (keyDownIndex >= 0) {
                 // key up, be sure to use same keycode as before in case of rotation
-                keyCode = mLocked.keyDowns.top().keyCode;
+                keyCode = mLocked.keyDowns.itemAt(keyDownIndex).keyCode;
                 mLocked.keyDowns.removeAt(size_t(keyDownIndex));
             } else {
                 // key was not actually down
