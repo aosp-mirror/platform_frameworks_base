@@ -424,4 +424,8 @@ void NuHTTPDataSource::getDrmInfo(DecryptHandle **handle, DrmManagerClient **cli
     *client = mDrmManagerClient;
 }
 
+String8 NuHTTPDataSource::getUri() {
+    return mUri;
+}
+
 }  // namespace android

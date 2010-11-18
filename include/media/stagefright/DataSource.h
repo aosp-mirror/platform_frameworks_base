@@ -80,6 +80,9 @@ public:
     }
     virtual void getDrmInfo(DecryptHandle **handle, DrmManagerClient **client) {};
 
+    virtual String8 getUri() {
+        return String8();
+    }
 
 protected:
     virtual ~DataSource() {}
