@@ -132,11 +132,11 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             // the cursor's state doesn't change
             while (true) {
                 mLock.lock();
-                if (mCursorState != mThreadState) {
-                    mLock.unlock();
-                    break;
-                }
                 try {
+                    if (mCursorState != mThreadState) {
+                        break;
+                    }
+
                     int count = mQuery.fillWindow(cw, mMaxRead, mCount);
                     // return -1 means not finished
                     if (count != 0) {
@@ -218,9 +218,8 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         mColumnNameMap = null;
         mQuery = query;
 
+        db.lock();
         try {
-            db.lock();
-
             // Setup the list of columns
             int columnCount = mQuery.columnCountLocked();
             mColumns = new String[columnCount];
