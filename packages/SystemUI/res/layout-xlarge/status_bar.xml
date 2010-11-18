@@ -57,20 +57,25 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 >
-                <!-- paddingLeft: 24 dips = 32dp (total space to icon) - 8dp in the icon.
-                TODO: Make sure the font has a small enough leading that we don't need this
-                negative margin business. -->
-                <com.android.systemui.statusbar.policy.Clock
-                    style="@*android:style/TextAppearance.StatusBar.Icon"
+                <com.android.systemui.statusbar.tablet.HoloClock
                     android:id="@+id/clock"
                     android:layout_width="wrap_content"
-                    android:layout_height="65dp"
-                    android:layout_marginTop="-17dp"
-                    android:singleLine="true"
-                    android:textSize="60sp"
-                    android:paddingLeft="24dip"
-                    android:textColor="#2e2e2e"
-                    />
+                    android:layout_height="match_parent"
+                    >
+                    <TextView android:id="@+id/time_bg"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:singleLine="true"
+                        android:textSize="72dip"
+                        android:textColor="#1f1f1f" />
+                    <TextView android:id="@+id/time_fg"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:singleLine="true"
+                        android:textSize="72dip"
+                        android:textColor="#2e2e2e" />
+                </com.android.systemui.statusbar.tablet.HoloClock>
+
                 <LinearLayout
                     android:layout_width="48dip"
                     android:layout_height="match_parent"
