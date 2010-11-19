@@ -182,7 +182,7 @@ status_t DrmPassthruPlugIn::onConsumeRights(int uniqueId, DecryptHandle* decrypt
 }
 
 status_t DrmPassthruPlugIn::onSetPlaybackStatus(int uniqueId, DecryptHandle* decryptHandle,
-            int playbackStatus, int position) {
+            int playbackStatus, int64_t position) {
     LOGD("DrmPassthruPlugIn::onSetPlaybackStatus() : %d", uniqueId);
     return DRM_NO_ERROR;
 }
@@ -229,7 +229,7 @@ DrmConvertedStatus* DrmPassthruPlugIn::onCloseConvertSession(int uniqueId, int c
 }
 
 status_t DrmPassthruPlugIn::onOpenDecryptSession(
-            int uniqueId, DecryptHandle* decryptHandle, int fd, int offset, int length) {
+            int uniqueId, DecryptHandle* decryptHandle, int fd, off64_t offset, off64_t length) {
     LOGD("DrmPassthruPlugIn::onOpenDecryptSession() : %d", uniqueId);
 
 #ifdef ENABLE_PASSTHRU_DECRYPTION
@@ -287,7 +287,7 @@ status_t DrmPassthruPlugIn::onFinalizeDecryptUnit(
 }
 
 ssize_t DrmPassthruPlugIn::onPread(int uniqueId, DecryptHandle* decryptHandle,
-            void* buffer, ssize_t numBytes, off_t offset) {
+            void* buffer, ssize_t numBytes, off64_t offset) {
     LOGD("DrmPassthruPlugIn::onPread() : %d", uniqueId);
     return 0;
 }

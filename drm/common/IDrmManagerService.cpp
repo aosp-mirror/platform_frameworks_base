@@ -333,7 +333,7 @@ status_t BpDrmManagerService::consumeRights(
 }
 
 status_t BpDrmManagerService::setPlaybackStatus(
-            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int position) {
+            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int64_t position) {
     LOGV("setPlaybackStatus");
     Parcel data, reply;
 
@@ -429,7 +429,7 @@ DrmConvertedStatus* BpDrmManagerService::convertData(
     if (0 != reply.dataAvail()) {
         //Filling DRM Converted Status
         const int statusCode = reply.readInt32();
-        const int offset = reply.readInt32();
+        const off64_t offset = reply.readInt64();
 
         DrmBuffer* convertedData = NULL;
         if (0 != reply.dataAvail()) {
@@ -461,7 +461,7 @@ DrmConvertedStatus* BpDrmManagerService::closeConvertSession(int uniqueId, int c
     if (0 != reply.dataAvail()) {
         //Filling DRM Converted Status
         const int statusCode = reply.readInt32();
-        const int offset = reply.readInt32();
+        const off64_t offset = reply.readInt64();
 
         DrmBuffer* convertedData = NULL;
         if (0 != reply.dataAvail()) {
@@ -515,15 +515,15 @@ status_t BpDrmManagerService::getAllSupportInfo(
 }
 
 DecryptHandle* BpDrmManagerService::openDecryptSession(
-            int uniqueId, int fd, int offset, int length) {
+            int uniqueId, int fd, off64_t offset, off64_t length) {
     LOGV("Entering BpDrmManagerService::openDecryptSession");
     Parcel data, reply;
 
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
     data.writeFileDescriptor(fd);
-    data.writeInt32(offset);
-    data.writeInt32(length);
+    data.writeInt64(offset);
+    data.writeInt64(length);
 
     remote()->transact(OPEN_DECRYPT_SESSION, data, &reply);
 
@@ -697,7 +697,7 @@ status_t BpDrmManagerService::finalizeDecryptUnit(
 
 ssize_t BpDrmManagerService::pread(
             int uniqueId, DecryptHandle* decryptHandle, void* buffer,
-            ssize_t numBytes, off_t offset) {
+            ssize_t numBytes, off64_t offset) {
     LOGV("read");
     Parcel data, reply;
     int result;
@@ -717,7 +717,7 @@ ssize_t BpDrmManagerService::pread(
     }
 
     data.writeInt32(numBytes);
-    data.writeInt32(offset);
+    data.writeInt64(offset);
 
     remote()->transact(PREAD, data, &reply);
     result = reply.readInt32();
@@ -1121,7 +1121,7 @@ status_t BnDrmManagerService::onTransact(
         if (NULL != drmConvertedStatus) {
             //Filling Drm Converted Ststus
             reply->writeInt32(drmConvertedStatus->statusCode);
-            reply->writeInt32(drmConvertedStatus->offset);
+            reply->writeInt64(drmConvertedStatus->offset);
 
             if (NULL != drmConvertedStatus->convertedData) {
                 const DrmBuffer* convertedData = drmConvertedStatus->convertedData;
@@ -1150,7 +1150,7 @@ status_t BnDrmManagerService::onTransact(
         if (NULL != drmConvertedStatus) {
             //Filling Drm Converted Ststus
             reply->writeInt32(drmConvertedStatus->statusCode);
-            reply->writeInt32(drmConvertedStatus->offset);
+            reply->writeInt64(drmConvertedStatus->offset);
 
             if (NULL != drmConvertedStatus->convertedData) {
                 const DrmBuffer* convertedData = drmConvertedStatus->convertedData;
@@ -1210,7 +1210,7 @@ status_t BnDrmManagerService::onTransact(
         const int fd = data.readFileDescriptor();
 
         DecryptHandle* handle
-            = openDecryptSession(uniqueId, fd, data.readInt32(), data.readInt32());
+            = openDecryptSession(uniqueId, fd, data.readInt64(), data.readInt64());
 
         if (NULL != handle) {
             reply->writeInt32(handle->decryptId);
@@ -1415,7 +1415,7 @@ status_t BnDrmManagerService::onTransact(
         const int numBytes = data.readInt32();
         char* buffer = new char[numBytes];
 
-        const off_t offset = data.readInt32();
+        const off64_t offset = data.readInt64();
 
         ssize_t result = pread(uniqueId, &handle, buffer, numBytes, offset);
         reply->writeInt32(result);

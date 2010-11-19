@@ -170,7 +170,7 @@ status_t DrmManagerClientImpl::consumeRights(
 }
 
 status_t DrmManagerClientImpl::setPlaybackStatus(
-            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int position) {
+            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int64_t position) {
     status_t status = DRM_ERROR_UNKNOWN;
     if (NULL != decryptHandle) {
         status = getDrmManagerService()->setPlaybackStatus(
@@ -231,7 +231,7 @@ status_t DrmManagerClientImpl::getAllSupportInfo(
 }
 
 DecryptHandle* DrmManagerClientImpl::openDecryptSession(
-            int uniqueId, int fd, int offset, int length) {
+            int uniqueId, int fd, off64_t offset, off64_t length) {
     return getDrmManagerService()->openDecryptSession(uniqueId, fd, offset, length);
 }
 
@@ -283,7 +283,7 @@ status_t DrmManagerClientImpl::finalizeDecryptUnit(
 }
 
 ssize_t DrmManagerClientImpl::pread(int uniqueId, DecryptHandle* decryptHandle,
-            void* buffer, ssize_t numBytes, off_t offset) {
+            void* buffer, ssize_t numBytes, off64_t offset) {
     ssize_t retCode = INVALID_VALUE;
     if ((NULL != decryptHandle) && (NULL != buffer) && (0 < numBytes)) {
         retCode = getDrmManagerService()->pread(uniqueId, decryptHandle, buffer, numBytes, offset);

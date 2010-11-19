@@ -191,7 +191,7 @@ public:
      *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
     status_t setPlaybackStatus(
-            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int position);
+            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int64_t position);
 
     /**
      * Validates whether an action on the DRM content is allowed or not.
@@ -291,7 +291,7 @@ public:
      * @return
      *     Handle for the decryption session
      */
-    DecryptHandle* openDecryptSession(int uniqueId, int fd, int offset, int length);
+    DecryptHandle* openDecryptSession(int uniqueId, int fd, off64_t offset, off64_t length);
 
     /**
      * Open the decrypt session to decrypt the given protected content
@@ -369,7 +369,7 @@ public:
      * @return Number of bytes read. Returns -1 for Failure.
      */
     ssize_t pread(int uniqueId, DecryptHandle* decryptHandle,
-            void* buffer, ssize_t numBytes, off_t offset);
+            void* buffer, ssize_t numBytes, off64_t offset);
 
     /**
      * Notify the event to the registered listener
