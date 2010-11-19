@@ -34,6 +34,8 @@
 #include <gui/ISensorServer.h>
 #include <gui/ISensorEventConnection.h>
 
+#include "SensorInterface.h"
+
 // ---------------------------------------------------------------------------
 
 struct sensors_poll_device_t;
@@ -50,7 +52,6 @@ class SensorService :
    friend class BinderService<SensorService>;
 
    static const nsecs_t MINIMUM_EVENTS_PERIOD =   1000000; // 1000 Hz
-   static const nsecs_t DEFAULT_EVENTS_PERIOD = 200000000; //    5 Hz
 
             SensorService();
     virtual ~SensorService();
@@ -77,12 +78,8 @@ class SensorService :
         sp<SensorChannel> const mChannel;
         mutable Mutex mConnectionLock;
 
-        // protected mConnectionLock
-        struct SensorInfo {
-            SensorInfo() : ns(DEFAULT_EVENTS_PERIOD) { }
-            nsecs_t ns;
-        };
-        DefaultKeyedVector<int32_t, SensorInfo> mSensorInfo;
+        // protected by SensorService::mLock
+        SortedVector<int> mSensorInfo;
 
     public:
         SensorEventConnection(const sp<SensorService>& service);
@@ -93,10 +90,6 @@ class SensorService :
         bool hasAnySensor() const;
         bool addSensor(int32_t handle);
         bool removeSensor(int32_t handle);
-        status_t setEventRateLocked(int handle, nsecs_t ns);
-        nsecs_t getEventRateForSensor(int32_t handle) const {
-            return mSensorInfo.valueFor(handle).ns;
-        }
     };
 
     class SensorRecord {
@@ -109,21 +102,25 @@ class SensorService :
     };
 
     SortedVector< wp<SensorEventConnection> > getActiveConnections() const;
-    String8 getSensorName(int handle) const;
-    status_t recomputeEventsPeriodLocked(int32_t handle);
+    DefaultKeyedVector<int, SensorInterface*> getActiveVirtualSensors() const;
 
+    String8 getSensorName(int handle) const;
     void recordLastValue(sensors_event_t const * buffer, size_t count);
+    static void sortEventBuffer(sensors_event_t* buffer, size_t count);
+    void registerSensor(SensorInterface* sensor);
+    void registerVirtualSensor(SensorInterface* sensor);
 
     // constants
     Vector<Sensor> mSensorList;
-    struct sensors_poll_device_t* mSensorDevice;
-    struct sensors_module_t* mSensorModule;
+    DefaultKeyedVector<int, SensorInterface*> mSensorMap;
+    Vector<SensorInterface *> mVirtualSensorList;
     Permission mDump;
     status_t mInitCheck;
 
     // protected by mLock
     mutable Mutex mLock;
     DefaultKeyedVector<int, SensorRecord*> mActiveSensors;
+    DefaultKeyedVector<int, SensorInterface*> mActiveVirtualSensors;
     SortedVector< wp<SensorEventConnection> > mActiveConnections;
 
     // The size of this vector is constant, only the items are mutable
