@@ -43,7 +43,7 @@ private:
 
     Vector<sp<AnotherPacketSource> > mSourceImpls;
 
-    off_t mOffset;
+    off64_t mOffset;
 
     void init();
     status_t feedMore();

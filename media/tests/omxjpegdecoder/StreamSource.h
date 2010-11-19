@@ -32,8 +32,8 @@ public:
     // Pass the ownership of SkStream to StreamSource.
     StreamSource(SkStream *SkStream);
     virtual status_t initCheck() const;
-    virtual ssize_t readAt(off_t offset, void *data, size_t size);
-    virtual status_t getSize(off_t *size);
+    virtual ssize_t readAt(off64_t offset, void *data, size_t size);
+    virtual status_t getSize(off64_t *size);
 
 protected:
     virtual ~StreamSource();

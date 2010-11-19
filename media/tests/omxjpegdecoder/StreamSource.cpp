@@ -35,7 +35,7 @@ status_t StreamSource::initCheck() const {
     return mStream != NULL ? OK : NO_INIT;
 }
 
-ssize_t StreamSource::readAt(off_t offset, void *data, size_t size) {
+ssize_t StreamSource::readAt(off64_t offset, void *data, size_t size) {
     Mutex::Autolock autoLock(mLock);
 
     mStream->rewind();
@@ -45,7 +45,7 @@ ssize_t StreamSource::readAt(off_t offset, void *data, size_t size) {
     return result;
 }
 
-status_t StreamSource::getSize(off_t *size) {
+status_t StreamSource::getSize(off64_t *size) {
       *size = mSize;
       return OK;
 }

@@ -35,7 +35,7 @@ struct LiveSource : public DataSource {
 
     virtual status_t initCheck() const;
 
-    virtual ssize_t readAt(off_t offset, void *data, size_t size);
+    virtual ssize_t readAt(off64_t offset, void *data, size_t size);
 
     virtual uint32_t flags() {
         return kWantsPrefetching;
@@ -67,8 +67,8 @@ private:
     int64_t mLastFetchTimeUs;
 
     sp<NuHTTPDataSource> mSource;
-    off_t mSourceSize;
-    off_t mOffsetBias;
+    off64_t mSourceSize;
+    off64_t mOffsetBias;
 
     bool mSignalDiscontinuity;
     ssize_t mPrevBandwidthIndex;

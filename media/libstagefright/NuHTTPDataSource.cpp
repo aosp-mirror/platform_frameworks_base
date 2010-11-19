@@ -84,7 +84,7 @@ NuHTTPDataSource::~NuHTTPDataSource() {
 status_t NuHTTPDataSource::connect(
         const char *uri,
         const KeyedVector<String8, String8> *overrides,
-        off_t offset) {
+        off64_t offset) {
     String8 headers;
     MakeFullHeaders(overrides, &headers);
 
@@ -94,7 +94,7 @@ status_t NuHTTPDataSource::connect(
 status_t NuHTTPDataSource::connect(
         const char *uri,
         const String8 &headers,
-        off_t offset) {
+        off64_t offset) {
     String8 host, path;
     unsigned port;
 
@@ -115,8 +115,8 @@ static bool IsRedirectStatusCode(int httpStatus) {
 status_t NuHTTPDataSource::connect(
         const char *host, unsigned port, const char *path,
         const String8 &headers,
-        off_t offset) {
-    LOGI("connect to %s:%u%s @%ld", host, port, path, offset);
+        off64_t offset) {
+    LOGI("connect to %s:%u%s @%lld", host, port, path, offset);
 
     bool needsToReconnect = true;
 
@@ -162,7 +162,7 @@ status_t NuHTTPDataSource::connect(
 
         if (offset != 0) {
             char rangeHeader[128];
-            sprintf(rangeHeader, "Range: bytes=%ld-\r\n", offset);
+            sprintf(rangeHeader, "Range: bytes=%lld-\r\n", offset);
             request.append(rangeHeader);
         }
 
@@ -226,7 +226,7 @@ status_t NuHTTPDataSource::connect(
             unsigned long x;
             if (mHTTP.find_header_value(string("Content-Length"), &value)
                     && ParseSingleUnsignedLong(value.c_str(), &x)) {
-                mContentLength = (off_t)x;
+                mContentLength = (off64_t)x;
                 mContentLengthValid = true;
             } else {
                 LOGW("Server did not give us the content length!");
@@ -331,7 +331,7 @@ ssize_t NuHTTPDataSource::internalRead(void *data, size_t size) {
     return n;
 }
 
-ssize_t NuHTTPDataSource::readAt(off_t offset, void *data, size_t size) {
+ssize_t NuHTTPDataSource::readAt(off64_t offset, void *data, size_t size) {
     LOGV("readAt offset %ld, size %d", offset, size);
 
     Mutex::Autolock autoLock(mLock);
@@ -388,7 +388,7 @@ ssize_t NuHTTPDataSource::readAt(off_t offset, void *data, size_t size) {
     return numBytesRead;
 }
 
-status_t NuHTTPDataSource::getSize(off_t *size) {
+status_t NuHTTPDataSource::getSize(off64_t *size) {
     *size = 0;
 
     if (mState != CONNECTED) {

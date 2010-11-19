@@ -447,11 +447,11 @@ bool LiveSource::setupCipher() {
 
 static const ssize_t kHeaderSize = 188;
 
-ssize_t LiveSource::readAt(off_t offset, void *data, size_t size) {
+ssize_t LiveSource::readAt(off64_t offset, void *data, size_t size) {
     CHECK(offset >= mOffsetBias);
     offset -= mOffsetBias;
 
-    off_t delta = mSignalDiscontinuity ? kHeaderSize : 0;
+    off64_t delta = mSignalDiscontinuity ? kHeaderSize : 0;
 
     if (offset >= mSourceSize + delta) {
         CHECK_EQ(offset, mSourceSize + delta);
@@ -502,7 +502,7 @@ ssize_t LiveSource::readAt(off_t offset, void *data, size_t size) {
                             mAESIVec,
                             AES_DECRYPT);
 
-            if (mSourceSize == (off_t)(offset + numRead - delta + n)) {
+            if (mSourceSize == (off64_t)(offset + numRead - delta + n)) {
                 // check for padding at the end of the file.
 
                 size_t pad = tmp->data()[n - 1];
@@ -551,7 +551,7 @@ status_t LiveSource::fetchM3U(const char *url, sp<ABuffer> *out) {
         source = mSource;
     }
 
-    off_t size;
+    off64_t size;
     status_t err = source->getSize(&size);
 
     if (err != OK) {

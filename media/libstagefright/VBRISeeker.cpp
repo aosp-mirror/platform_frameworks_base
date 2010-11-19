@@ -34,8 +34,8 @@ static uint32_t U24_AT(const uint8_t *ptr) {
 
 // static
 sp<VBRISeeker> VBRISeeker::CreateFromSource(
-        const sp<DataSource> &source, off_t post_id3_pos) {
-    off_t pos = post_id3_pos;
+        const sp<DataSource> &source, off64_t post_id3_pos) {
+    off64_t pos = post_id3_pos;
 
     uint8_t header[4];
     ssize_t n = source->readAt(pos, header, sizeof(header));
@@ -94,7 +94,7 @@ sp<VBRISeeker> VBRISeeker::CreateFromSource(
     seeker->mBasePos = post_id3_pos;
     seeker->mDurationUs = durationUs;
 
-    off_t offset = post_id3_pos;
+    off64_t offset = post_id3_pos;
     for (size_t i = 0; i < numEntries; ++i) {
         uint32_t numBytes;
         switch (entrySize) {
@@ -138,7 +138,7 @@ bool VBRISeeker::getDuration(int64_t *durationUs) {
     return true;
 }
 
-bool VBRISeeker::getOffsetForTime(int64_t *timeUs, off_t *pos) {
+bool VBRISeeker::getOffsetForTime(int64_t *timeUs, off64_t *pos) {
     if (mDurationUs < 0) {
         return false;
     }

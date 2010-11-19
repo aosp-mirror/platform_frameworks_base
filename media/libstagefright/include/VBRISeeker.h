@@ -28,13 +28,13 @@ struct DataSource;
 
 struct VBRISeeker : public MP3Seeker {
     static sp<VBRISeeker> CreateFromSource(
-            const sp<DataSource> &source, off_t post_id3_pos);
+            const sp<DataSource> &source, off64_t post_id3_pos);
 
     virtual bool getDuration(int64_t *durationUs);
-    virtual bool getOffsetForTime(int64_t *timeUs, off_t *pos);
+    virtual bool getOffsetForTime(int64_t *timeUs, off64_t *pos);
 
 private:
-    off_t mBasePos;
+    off64_t mBasePos;
     int64_t mDurationUs;
     Vector<uint32_t> mSegments;
 

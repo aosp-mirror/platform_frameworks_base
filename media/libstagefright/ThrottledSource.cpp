@@ -41,7 +41,7 @@ status_t ThrottledSource::initCheck() const {
     return mSource->initCheck();
 }
 
-ssize_t ThrottledSource::readAt(off_t offset, void *data, size_t size) {
+ssize_t ThrottledSource::readAt(off64_t offset, void *data, size_t size) {
     Mutex::Autolock autoLock(mLock);
 
     ssize_t n = mSource->readAt(offset, data, size);
@@ -72,7 +72,7 @@ ssize_t ThrottledSource::readAt(off_t offset, void *data, size_t size) {
     return n;
 }
 
-status_t ThrottledSource::getSize(off_t *size) {
+status_t ThrottledSource::getSize(off64_t *size) {
     return mSource->getSize(size);
 }
 

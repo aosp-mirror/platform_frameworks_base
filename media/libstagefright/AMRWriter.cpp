@@ -29,6 +29,7 @@ namespace android {
 
 AMRWriter::AMRWriter(const char *filename)
     : mFile(fopen(filename, "wb")),
+      mFd(mFile == NULL? -1: fileno(mFile)),
       mInitCheck(mFile != NULL ? OK : NO_INIT),
       mStarted(false),
       mPaused(false),
@@ -37,6 +38,7 @@ AMRWriter::AMRWriter(const char *filename)
 
 AMRWriter::AMRWriter(int fd)
     : mFile(fdopen(fd, "wb")),
+      mFd(mFile == NULL? -1: fileno(mFile)),
       mInitCheck(mFile != NULL ? OK : NO_INIT),
       mStarted(false),
       mPaused(false),
@@ -91,7 +93,7 @@ status_t AMRWriter::addSource(const sp<MediaSource> &source) {
 
     const char *kHeader = isWide ? "#!AMR-WB\n" : "#!AMR\n";
     size_t n = strlen(kHeader);
-    if (fwrite(kHeader, 1, n, mFile) != n) {
+    if (write(mFd, kHeader, n) != n) {
         return ERROR_IO;
     }
 
@@ -240,11 +242,9 @@ status_t AMRWriter::threadFunc() {
             notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_MAX_DURATION_REACHED, 0);
             break;
         }
-        ssize_t n = fwrite(
-                (const uint8_t *)buffer->data() + buffer->range_offset(),
-                1,
-                buffer->range_length(),
-                mFile);
+        ssize_t n = write(mFd,
+                        (const uint8_t *)buffer->data() + buffer->range_offset(),
+                        buffer->range_length());
 
         if (n < (ssize_t)buffer->range_length()) {
             buffer->release();

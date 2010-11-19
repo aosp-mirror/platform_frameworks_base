@@ -32,9 +32,9 @@ struct NuCachedSource2 : public DataSource {
 
     virtual status_t initCheck() const;
 
-    virtual ssize_t readAt(off_t offset, void *data, size_t size);
+    virtual ssize_t readAt(off64_t offset, void *data, size_t size);
 
-    virtual status_t getSize(off_t *size);
+    virtual status_t getSize(off64_t *size);
     virtual uint32_t flags();
 
     virtual DecryptHandle* DrmInitialization(DrmManagerClient *client);
@@ -81,9 +81,9 @@ private:
     Condition mCondition;
 
     PageCache *mCache;
-    off_t mCacheOffset;
+    off64_t mCacheOffset;
     status_t mFinalStatus;
-    off_t mLastAccessPos;
+    off64_t mLastAccessPos;
     sp<AMessage> mAsyncResult;
     bool mFetching;
     int64_t mLastFetchTimeUs;
@@ -95,8 +95,8 @@ private:
     void onSuspend();
 
     void fetchInternal();
-    ssize_t readInternal(off_t offset, void *data, size_t size);
-    status_t seekInternal_l(off_t offset);
+    ssize_t readInternal(off64_t offset, void *data, size_t size);
+    status_t seekInternal_l(off64_t offset);
 
     size_t approxDataRemaining_l(bool *eos);
     void restartPrefetcherIfNecessary_l(bool ignoreLowWaterThreshold = false);
