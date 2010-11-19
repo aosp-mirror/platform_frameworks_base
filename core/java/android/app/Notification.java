@@ -29,6 +29,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
+import android.util.Slog;
 import android.widget.RemoteViews;
 
 /**
@@ -41,6 +42,8 @@ import android.widget.RemoteViews;
  */
 public class Notification implements Parcelable
 {
+    private static final String TAG = "Notification";
+
     /**
      * Use all default values (where applicable).
      */
@@ -82,6 +85,15 @@ public class Notification implements Parcelable
      * The resource id of a drawable to use as the icon in the status bar.
      */
     public int icon;
+
+    /**
+     * If the icon in the status bar is to have more than one level, you can set this.  Otherwise,
+     * leave it at its default value of 0.
+     *
+     * @see android.widget.ImageView#setImageLevel
+     * @see android.graphics.drawable#setLevel
+     */
+    public int iconLevel;
 
     /**
      * The number of events that this notification represents.  For example, in a new mail
@@ -132,38 +144,15 @@ public class Notification implements Parcelable
      * text for when the text scrolls in and when it is displayed all at once
      * in conjunction with one or more icons.
      *
-     * @see #tickerTitle
-     * @see #tickerSubtitle
-     * @see #tickerIcons
+     * @see #tickerView
      */
     public CharSequence tickerText;
 
     /**
-     * The title line for the ticker over a the fat status bar on xlarge devices.
-     *
-     * @see #tickerText
-     * @see #tickerSubtitle
-     * @see #tickerIcons
+     * The view to show as the ticker in the status bar when the notification
+     * is posted.
      */
-    public CharSequence tickerTitle;
-
-    /**
-     * The subtitle line for the ticker over a the fat status bar on xlarge devices.
-     *
-     * @see #tickerText
-     * @see #tickerTitle
-     * @see #tickerIcons
-     */
-    public CharSequence tickerSubtitle;
-
-    /**
-     * The icons to show to the left of the other ticker fields.
-     *
-     * @see #tickerText
-     * @see #tickerTitle
-     * @see #tickerSubtitle
-     */
-    public Bitmap[] tickerIcons;
+    public RemoteViews tickerView;
 
     /**
      * The view that will represent this notification in the expanded status bar.
@@ -171,13 +160,9 @@ public class Notification implements Parcelable
     public RemoteViews contentView;
 
     /**
-     * If the icon in the status bar is to have more than one level, you can set this.  Otherwise,
-     * leave it at its default value of 0.
-     *
-     * @see android.widget.ImageView#setImageLevel
-     * @see android.graphics.drawable#setLevel
+     * The bitmap that may escape the bounds of the panel and bar.
      */
-    public int iconLevel;
+    public Bitmap largeIcon;
 
     /**
      * The sound to play.
@@ -327,6 +312,7 @@ public class Notification implements Parcelable
 
     /**
      * Constructs a Notification object with everything set to 0.
+     * You might want to consider using {@link Builder} instead.
      */
     public Notification()
     {
@@ -334,7 +320,6 @@ public class Notification implements Parcelable
     }
 
     /**
-     * @deprecated use {@link #Notification(int,CharSequence,long)} and {@link #setLatestEventInfo}.
      * @hide
      */
     public Notification(Context context, int icon, CharSequence tickerText, long when,
@@ -356,7 +341,10 @@ public class Notification implements Parcelable
      *                      activates.
      * @param when          The time to show in the time field.  In the System.currentTimeMillis
      *                      timebase.
+     *
+     * @deprecated Use {@link Builder} instead.
      */
+    @Deprecated
     public Notification(int icon, CharSequence tickerText, long when)
     {
         this.icon = icon;
@@ -384,19 +372,7 @@ public class Notification implements Parcelable
             tickerText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
         }
         if (parcel.readInt() != 0) {
-            tickerTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
-        }
-        if (parcel.readInt() != 0) {
-            tickerSubtitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
-        }
-        final int tickerIconCount = parcel.readInt();
-        if (tickerIconCount >= 0) {
-            tickerIcons = new Bitmap[tickerIconCount];
-            for (int i=0; i<tickerIconCount; i++) {
-                if (parcel.readInt() != 0) {
-                    tickerIcons[i] = Bitmap.CREATOR.createFromParcel(parcel);
-                }
-            }
+            tickerView = RemoteViews.CREATOR.createFromParcel(parcel);
         }
         if (parcel.readInt() != 0) {
             contentView = RemoteViews.CREATOR.createFromParcel(parcel);
@@ -434,18 +410,8 @@ public class Notification implements Parcelable
         if (this.tickerText != null) {
             that.tickerText = this.tickerText.toString();
         }
-        if (this.tickerTitle != null) {
-            that.tickerTitle = this.tickerTitle.toString();
-        }
-        if (this.tickerSubtitle != null) {
-            that.tickerSubtitle = this.tickerSubtitle.toString();
-        }
-        if (this.tickerIcons != null) {
-            final int N = this.tickerIcons.length;
-            that.tickerIcons = new Bitmap[N];
-            for (int i=0; i<N; i++) {
-                that.tickerIcons[i] = Bitmap.createBitmap(this.tickerIcons[i]);
-            }
+        if (this.tickerView != null) {
+            that.tickerView = this.tickerView.clone();
         }
         if (this.contentView != null) {
             that.contentView = this.contentView.clone();
@@ -503,31 +469,11 @@ public class Notification implements Parcelable
         } else {
             parcel.writeInt(0);
         }
-        if (tickerTitle != null) {
+        if (tickerView != null) {
             parcel.writeInt(1);
-            TextUtils.writeToParcel(tickerTitle, parcel, flags);
+            tickerView.writeToParcel(parcel, 0);
         } else {
             parcel.writeInt(0);
-        }
-        if (tickerSubtitle != null) {
-            parcel.writeInt(1);
-            TextUtils.writeToParcel(tickerSubtitle, parcel, flags);
-        } else {
-            parcel.writeInt(0);
-        }
-        if (tickerIcons != null) {
-            final int N = tickerIcons.length;
-            parcel.writeInt(N);
-            for (int i=0; i<N; i++) {
-                if (tickerIcons[i] != null) {
-                    parcel.writeInt(1);
-                    tickerIcons[i].writeToParcel(parcel, flags);
-                } else {
-                    parcel.writeInt(0);
-                }
-            }
-        } else {
-            parcel.writeInt(-1);
         }
         if (contentView != null) {
             parcel.writeInt(1);
@@ -591,7 +537,10 @@ public class Notification implements Parcelable
      * {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK} flag, which requires
      * that you take care of task management as described in 
      * <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">Application Fundamentals: Activities and Tasks</a>.
+     * 
+     * @deprecated Use {@link Builder} instead.
      */
+    @Deprecated
     public void setLatestEventInfo(Context context,
             CharSequence contentTitle, CharSequence contentText, PendingIntent contentIntent) {
         RemoteViews contentView = new RemoteViews(context.getPackageName(),
@@ -650,5 +599,215 @@ public class Notification implements Parcelable
         }
         sb.append(")");
         return sb.toString();
+    }
+
+    public static class Builder {
+        private Context mContext;
+
+        private long mWhen;
+        private int mSmallIcon;
+        private int mSmallIconLevel;
+        private int mSmallIconNumber;
+        private CharSequence mContentTitle;
+        private CharSequence mContentText;
+        private CharSequence mContentInfo;
+        private PendingIntent mContentIntent;
+        private RemoteViews mContentView;
+        private PendingIntent mDeleteIntent;
+        private PendingIntent mFullScreenIntent;
+        private CharSequence mTickerText;
+        private RemoteViews mTickerView;
+        private Bitmap mLargeIcon;
+        private Uri mSound;
+        private int mAudioStreamType;
+        private long[] mVibrate;
+        private int mLedArgb;
+        private int mLedOnMs;
+        private int mLedOffMs;
+        private int mDefaults;
+        private int mFlags;
+
+        public Builder(Context context) {
+            mContext = context;
+            mWhen = System.currentTimeMillis();
+        }
+
+        public Builder setWhen(long when) {
+            mWhen = when;
+            return this;
+        }
+
+        public Builder setSmallIcon(int icon) {
+            mSmallIcon = icon;
+            return this;
+        }
+
+        public Builder setSmallIcon(int icon, int level) {
+            mSmallIcon = icon;
+            mSmallIconLevel = level;
+            return this;
+        }
+
+        public Builder setSmallIconNumber(int number) {
+            mSmallIconNumber = number;
+            return this;
+        }
+
+        public Builder setContentTitle(CharSequence title) {
+            mContentTitle = title;
+            return this;
+        }
+
+        public Builder setContentText(CharSequence text) {
+            mContentText = text;
+            return this;
+        }
+
+        public Builder setContentInfo(CharSequence info) {
+            mContentInfo = info;
+            return this;
+        }
+
+        public Builder setContent(RemoteViews views) {
+            mContentView = views;
+            return this;
+        }
+
+        public Builder setContentIntent(PendingIntent intent) {
+            mContentIntent = intent;
+            return this;
+        }
+
+        public Builder setDeleteIntent(PendingIntent intent) {
+            mDeleteIntent = intent;
+            return this;
+        }
+
+        public Builder setFullScreenIntent(PendingIntent intent, boolean highPriority) {
+            mFullScreenIntent = intent;
+            setFlag(FLAG_HIGH_PRIORITY, highPriority);
+            return this;
+        }
+
+        public Builder setTicker(CharSequence tickerText) {
+            mTickerText = tickerText;
+            return this;
+        }
+
+        public Builder setTicker(CharSequence tickerText, RemoteViews views) {
+            mTickerText = tickerText;
+            mTickerView = views;
+            return this;
+        }
+
+        public Builder setLargeIcon(Bitmap icon) {
+            mLargeIcon = icon;
+            return this;
+        }
+
+        public Builder setSound(Uri sound, int streamType) {
+            mSound = sound;
+            mAudioStreamType = streamType;
+            return this;
+        }
+
+        public Builder setVibrate(long[] pattern) {
+            mVibrate = pattern;
+            return this;
+        }
+
+        public Builder setLights(int argb, int onMs, int offMs) {
+            mLedArgb = argb;
+            mLedOnMs = onMs;
+            mLedOffMs = offMs;
+            mFlags |= FLAG_SHOW_LIGHTS;
+            return this;
+        }
+
+        public Builder setOngoing(boolean ongoing) {
+            setFlag(FLAG_ONGOING_EVENT, ongoing);
+            return this;
+        }
+
+        public Builder setOnlyAlertOnce(boolean onlyAlertOnce) {
+            setFlag(FLAG_ONLY_ALERT_ONCE, onlyAlertOnce);
+            return this;
+        }
+
+        public Builder setAutoCancel(boolean autoCancel) {
+            setFlag(FLAG_ONLY_ALERT_ONCE, autoCancel);
+            return this;
+        }
+
+        public Builder setDefaults(int defaults) {
+            mDefaults = defaults;
+            return this;
+        }
+
+        private void setFlag(int mask, boolean value) {
+            if (value) {
+                mFlags |= mask;
+            } else {
+                mFlags &= ~mask;
+            }
+        }
+
+        private RemoteViews makeContentView() {
+            if (mContentView != null) {
+                return mContentView;
+            } else {
+                RemoteViews contentView = new RemoteViews(mContext.getPackageName(),
+                        com.android.internal.R.layout.status_bar_latest_event_content);
+                if (mSmallIcon != 0) {
+                    contentView.setImageViewResource(com.android.internal.R.id.icon, mSmallIcon);
+                }
+                if (mContentTitle != null) {
+                    contentView.setTextViewText(com.android.internal.R.id.title, mContentTitle);
+                }
+                if (mContentText != null) {
+                    contentView.setTextViewText(com.android.internal.R.id.text, mContentText);
+                }
+                //TODO
+                //if (mContentInfo) {
+                //    contentVeiw.setTextViewText(com.android.internal.R.id.info, mContentInfo);
+                //}
+                if (mWhen != 0) {
+                    contentView.setLong(com.android.internal.R.id.time, "setTime", mWhen);
+                }
+                return contentView;
+            }
+        }
+
+        private RemoteViews makeTickerView() {
+            if (mTickerView != null) {
+                return mTickerView;
+            } else {
+                return makeContentView();
+            }
+        }
+
+        public Notification getNotification() {
+            Notification n = new Notification();
+            n.when = mWhen;
+            n.icon = mSmallIcon;
+            n.iconLevel = mSmallIconLevel;
+            n.number = mSmallIconNumber;
+            n.contentView = makeContentView();
+            n.contentIntent = mContentIntent;
+            n.deleteIntent = mDeleteIntent;
+            n.fullScreenIntent = mFullScreenIntent;
+            n.tickerText = mTickerText;
+            n.tickerView = makeTickerView();
+            n.largeIcon = mLargeIcon;
+            n.sound = mSound;
+            n.audioStreamType = mAudioStreamType;
+            n.vibrate = mVibrate;
+            n.ledARGB = mLedArgb;
+            n.ledOnMS = mLedOnMs;
+            n.ledOffMS = mLedOffMs;
+            n.defaults = mDefaults;
+            n.flags = mFlags;
+            return n;
+        }
     }
 }

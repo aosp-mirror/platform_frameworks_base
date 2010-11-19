@@ -108,12 +108,16 @@ public class TabletTicker extends Handler {
         }
 
         // In with the new...
-        final StatusBarNotification next = dequeue();
-        if (next != null) {
+        StatusBarNotification next = dequeue();
+        while (next != null) {
             mCurrentNotification = next;
             mCurrentView = makeTickerView(next);
-            mParent.addView(mCurrentView);
-            sendEmptyMessageDelayed(MSG_ADVANCE, ADVANCE_DELAY);
+            if (mCurrentView != null) {
+                mParent.addView(mCurrentView);
+                sendEmptyMessageDelayed(MSG_ADVANCE, ADVANCE_DELAY);
+                break;
+            }
+            next = dequeue();
         }
     }
 
@@ -139,40 +143,36 @@ public class TabletTicker extends Handler {
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
 
-        int layoutId;
         ViewGroup group;
-        if (n.tickerTitle != null || n.tickerSubtitle != null) {
-            group = (ViewGroup)inflater.inflate(R.layout.ticker, mParent, false);
-            if (n.tickerTitle != null) {
-                final TextView title = (TextView)group.findViewById(R.id.title);
-                title.setText(n.tickerTitle);
+        int layoutId;
+        if (n.tickerView != null) {
+            group = (ViewGroup)inflater.inflate(R.layout.ticker, null, false);
+            View expanded = null;
+            Exception exception = null;
+            try {
+                expanded = n.tickerView.apply(mContext, group);
             }
-            if (n.tickerSubtitle != null) {
-                final TextView subtitle = (TextView)group.findViewById(R.id.subtitle);
-                subtitle.setText(n.tickerSubtitle);
+            catch (RuntimeException e) {
+                exception = e;
             }
-        } else {
+            if (expanded == null) {
+                final String ident = notification.pkg
+                        + "/0x" + Integer.toHexString(notification.id);
+                Slog.e(TAG, "couldn't inflate view for notification " + ident, exception);
+                return null;
+            }
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
+            lp.gravity = Gravity.BOTTOM;
+            group.addView(expanded, lp);
+        } else if (n.tickerText != null) {
             group = (ViewGroup)inflater.inflate(R.layout.ticker_compat, mParent, false);
             TextView tv = (TextView)group.findViewById(R.id.text);
             tv.setText(n.tickerText);
+        } else {
+            throw new RuntimeException("tickerView==null && tickerText==null");
         }
-
-        // No more than 2 icons.
-        if (n.tickerIcons != null) {
-            int N = n.tickerIcons.length;
-            if (N > 2) {
-                N = 2;
-            }
-            for (int i=N-1; i>= 0; i--) {
-                Bitmap b = n.tickerIcons[i];
-                if (b != null) {
-                    ImageView iv = (ImageView)inflater.inflate(R.layout.ticker_icon, group, false);
-                    iv.setImageBitmap(b);
-                    group.addView(iv, 0);
-                }
-            }
-        }
-
+        // TODO: Add Large icon
         return group;
     }
 }

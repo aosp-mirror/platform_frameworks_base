@@ -272,11 +272,13 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         public void onNotificationClick(String pkg, String tag, int id) {
             cancelNotification(pkg, tag, id, Notification.FLAG_AUTO_CANCEL,
-                    Notification.FLAG_FOREGROUND_SERVICE);
+                    Notification.FLAG_FOREGROUND_SERVICE, true);
         }
 
         public void onNotificationClear(String pkg, String tag, int id) {
-            cancelNotification(pkg, tag, id, 0, 0); // maybe add some flags?
+            cancelNotification(pkg, tag, id, 0,
+                Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE,
+                true);
         }
 
         public void onPanelRevealed() {
@@ -312,7 +314,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 int uid, int initialPid, String message) {
             Slog.d(TAG, "onNotification error pkg=" + pkg + " tag=" + tag + " id=" + id
                     + "; will crashApplication(uid=" + uid + ", pid=" + initialPid + ")");
-            cancelNotification(pkg, tag, id, 0, 0);
+            cancelNotification(pkg, tag, id, 0, 0, false);
             long ident = Binder.clearCallingIdentity();
             try {
                 ActivityManagerNative.getDefault().crashApplication(uid, initialPid, pkg,
@@ -855,7 +857,20 @@ public class NotificationManagerService extends INotificationManager.Stub
         manager.sendAccessibilityEvent(event);
     }
 
-    private void cancelNotificationLocked(NotificationRecord r) {
+    private void cancelNotificationLocked(NotificationRecord r, boolean sendDelete) {
+        // tell the app
+        if (sendDelete) {
+            if (r.notification.deleteIntent != null) {
+                try {
+                    r.notification.deleteIntent.send();
+                } catch (PendingIntent.CanceledException ex) {
+                    // do nothing - there's no relevant way to recover, and
+                    //     no reason to let this propagate
+                    Slog.w(TAG, "canceled PendingIntent for " + r.pkg, ex);
+                }
+            }
+        }
+
         // status bar
         if (r.notification.icon != 0) {
             long identity = Binder.clearCallingIdentity();
@@ -904,7 +919,7 @@ public class NotificationManagerService extends INotificationManager.Stub
      * and none of the {@code mustNotHaveFlags}.
      */
     private void cancelNotification(String pkg, String tag, int id, int mustHaveFlags,
-            int mustNotHaveFlags) {
+            int mustNotHaveFlags, boolean sendDelete) {
         EventLog.writeEvent(EventLogTags.NOTIFICATION_CANCEL, pkg, id, mustHaveFlags);
 
         synchronized (mNotificationList) {
@@ -921,7 +936,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
                 mNotificationList.remove(index);
 
-                cancelNotificationLocked(r);
+                cancelNotificationLocked(r, sendDelete);
                 updateLightsLocked();
             }
         }
@@ -954,7 +969,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                     return true;
                 }
                 mNotificationList.remove(i);
-                cancelNotificationLocked(r);
+                cancelNotificationLocked(r, false);
             }
             if (canceledSomething) {
                 updateLightsLocked();
@@ -973,7 +988,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         // Don't allow client applications to cancel foreground service notis.
         cancelNotification(pkg, tag, id, 0,
                 Binder.getCallingUid() == Process.SYSTEM_UID
-                ? 0 : Notification.FLAG_FOREGROUND_SERVICE);
+                ? 0 : Notification.FLAG_FOREGROUND_SERVICE, false);
     }
 
     public void cancelAllNotifications(String pkg) {
@@ -1009,17 +1024,8 @@ public class NotificationManagerService extends INotificationManager.Stub
 
                 if ((r.notification.flags & (Notification.FLAG_ONGOING_EVENT
                                 | Notification.FLAG_NO_CLEAR)) == 0) {
-                    if (r.notification.deleteIntent != null) {
-                        try {
-                            r.notification.deleteIntent.send();
-                        } catch (PendingIntent.CanceledException ex) {
-                            // do nothing - there's no relevant way to recover, and
-                            //     no reason to let this propagate
-                            Slog.w(TAG, "canceled PendingIntent for " + r.pkg, ex);
-                        }
-                    }
                     mNotificationList.remove(i);
-                    cancelNotificationLocked(r);
+                    cancelNotificationLocked(r, true);
                 }
             }
 

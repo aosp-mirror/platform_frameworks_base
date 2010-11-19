@@ -21,6 +21,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="NotificationBuilderTest" android:label="_Notify Builder">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name="ToastTest" android:label="_Toasts">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,6 +41,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name="ConfirmationActivity" android:theme="@android:style/Theme.Dialog">
         </activity>
         <activity android:name="TestAlertActivity" android:theme="@android:style/Theme.Dialog">
         </activity>

@@ -464,7 +464,7 @@ public class TabletStatusBar extends StatusBar {
         boolean immersive = false;
         try {
             immersive = ActivityManagerNative.getDefault().isTopActivityImmersive();
-            Slog.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
+            //Slog.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
         } catch (RemoteException ex) {
         }
         if (false && immersive) {
@@ -603,9 +603,7 @@ public class TabletStatusBar extends StatusBar {
     }
 
     private boolean hasTicker(Notification n) {
-        return !TextUtils.isEmpty(n.tickerText)
-                || !TextUtils.isEmpty(n.tickerTitle)
-                || !TextUtils.isEmpty(n.tickerSubtitle);
+        return n.tickerView != null || !TextUtils.isEmpty(n.tickerText);
     }
 
     private void tick(StatusBarNotification n) {
@@ -1005,7 +1003,6 @@ public class TabletStatusBar extends StatusBar {
                         } catch (RemoteException ex) {
                             // system process is dead if we're here.
                         }
-    //                    animateCollapse();
                     }
                 });
         } else {
@@ -1034,7 +1031,7 @@ public class TabletStatusBar extends StatusBar {
             exception = e;
         }
         if (expanded == null) {
-            String ident = sbn.pkg + "/0x" + Integer.toHexString(sbn.id);
+            final String ident = sbn.pkg + "/0x" + Integer.toHexString(sbn.id);
             Slog.e(TAG, "couldn't inflate view for notification " + ident, exception);
             return false;
         } else {
