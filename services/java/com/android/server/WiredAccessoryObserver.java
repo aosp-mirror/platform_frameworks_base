@@ -17,8 +17,10 @@
 package com.android.server;
 
 import android.app.ActivityManagerNative;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
@@ -72,14 +74,22 @@ class WiredAccessoryObserver extends UEventObserver {
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WiredAccessoryObserver");
         mWakeLock.setReferenceCounted(false);
 
-        // At any given time both headsets could be inserted
-        // one on the board and one on the dock
-        // observe two UEVENTs
+        context.registerReceiver(new BootCompletedReceiver(),
+            new IntentFilter(Intent.ACTION_BOOT_COMPLETED), null, null);
+    }
+
+    private final class BootCompletedReceiver extends BroadcastReceiver {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+        // At any given time accessories could be inserted
+        // one on the board, one on the dock and one on HDMI:
+        // observe three UEVENTs
+        init();  // set initial status
         for (int i = 0; i < MAX_AUDIO_PORTS; i++) {
             startObserving(uEventInfo[i][0]);
         }
-        init();  // set initial status
-    }
+      }
+  }
 
     @Override
     public void onUEvent(UEventObserver.UEvent event) {
@@ -127,6 +137,8 @@ class WiredAccessoryObserver extends UEventObserver {
         int newState = mHeadsetState;
         mPrevHeadsetState = mHeadsetState;
 
+        if (LOG) Slog.v(TAG, "init()");
+
         for (int i = 0; i < MAX_AUDIO_PORTS; i++) {
             try {
                 FileReader file = new FileReader(uEventInfo[i][1]);
@@ -164,7 +176,8 @@ class WiredAccessoryObserver extends UEventObserver {
         // reject all suspect transitions: only accept state changes from:
         // - a: 0 heaset to 1 headset
         // - b: 1 headset to 0 headset
-        Log.v(TAG, "newState = "+newState+", headsetState = "+headsetState+", mHeadsetState = "+mHeadsetState);
+        if (LOG) Slog.v(TAG, "newState = "+newState+", headsetState = "+headsetState+","
+            + "mHeadsetState = "+mHeadsetState);
         if (mHeadsetState == headsetState || ((h2w_headset & (h2w_headset - 1)) != 0)) {
             Log.e(TAG, "unsetting h2w flag");
             h2wStateChange = false;
