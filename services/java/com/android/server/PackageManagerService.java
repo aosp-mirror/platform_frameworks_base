@@ -102,6 +102,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -4577,16 +4578,52 @@ class PackageManagerService extends IPackageManager.Stub {
         mHandler.sendMessage(msg);
     }
 
-    public void setPackageObbPath(String packageName, String path) {
+    public void setPackageObbPaths(String packageName, String[] paths) {
         if (DEBUG_OBB)
-            Log.v(TAG, "Setting .obb path for " + packageName + " to: " + path);
-        PackageSetting pkgSetting;
+            Log.v(TAG, "Setting .obb paths for " + packageName + " to: " + Arrays.toString(paths));
+        final int uid = Binder.getCallingUid();
+        final int permission = mContext.checkCallingPermission(
+                android.Manifest.permission.INSTALL_PACKAGES);
+        final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);
+        if (!allowedByPermission) {
+            throw new SecurityException("Permission denial: attempt to set .obb file from pid="
+                    + Binder.getCallingPid());
+        }
+        synchronized (mPackages) {
+            final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+            if (pkgSetting == null) {
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
+
+            if (paths != null) {
+                if (paths.length == 0) {
+                    // Don't bother storing an empty array.
+                    paths = null;
+                } else {
+                    // Don't allow the caller to manipulate our copy of the
+                    // list.
+                    paths = paths.clone();
+                }
+            }
+
+            // Only write settings file if the new and old settings are not the
+            // same.
+            if (!Arrays.equals(paths, pkgSetting.obbPathStrings)) {
+                pkgSetting.obbPathStrings = paths;
+                mSettings.writeLP();
+            }
+        }
+    }
+
+    public String[] getPackageObbPaths(String packageName) {
+        if (DEBUG_OBB)
+            Log.v(TAG, "Getting .obb paths for " + packageName);
         final int uid = Binder.getCallingUid();
         final int permission = mContext.checkCallingPermission(
                 android.Manifest.permission.INSTALL_PACKAGES);
         final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);
         synchronized (mPackages) {
-            pkgSetting = mSettings.mPackages.get(packageName);
+            final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
             if (pkgSetting == null) {
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
@@ -4595,8 +4632,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         + Binder.getCallingPid() + ", uid=" + uid + ", package uid="
                         + pkgSetting.userId);
             }
-            pkgSetting.obbPathString = path;
-            mSettings.writeLP();
+            return pkgSetting.obbPathStrings;
         }
     }
 
@@ -7165,7 +7201,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     pw.print("    codePath="); pw.println(ps.codePathString);
                     pw.print("    resourcePath="); pw.println(ps.resourcePathString);
                     pw.print("    nativeLibraryPath="); pw.println(ps.nativeLibraryPathString);
-                    pw.print("    obbPath="); pw.println(ps.obbPathString);
+                    pw.print("    obbPaths="); pw.println(Arrays.toString(ps.obbPathStrings));
                     pw.print("    versionCode="); pw.println(ps.versionCode);
                     if (ps.pkg != null) {
                         pw.print("    versionName="); pw.println(ps.pkg.mVersionName);
@@ -7728,7 +7764,7 @@ class PackageManagerService extends IPackageManager.Stub {
         File resourcePath;
         String resourcePathString;
         String nativeLibraryPathString;
-        String obbPathString;
+        String[] obbPathStrings;
         long timeStamp;
         long firstInstallTime;
         long lastUpdateTime;
@@ -8749,8 +8785,15 @@ class PackageManagerService extends IPackageManager.Stub {
             if (pkg.installerPackageName != null) {
                 serializer.attribute(null, "installer", pkg.installerPackageName);
             }
-            if (pkg.obbPathString != null) {
-                serializer.attribute(null, "obbPath", pkg.obbPathString);
+            if (pkg.obbPathStrings != null && pkg.obbPathStrings.length > 0) {
+                int N = pkg.obbPathStrings.length;
+                serializer.startTag(null, "obbs");
+                for (int i = 0; i < N; i++) {
+                    serializer.startTag(null, "obb");
+                    serializer.attribute(null, "path", pkg.obbPathStrings[i]);
+                    serializer.endTag(null, "obb");
+                }
+                serializer.endTag(null, "obbs");
             }
             pkg.signatures.writeXml(serializer, "sigs", mPastSignatures);
             if ((pkg.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0) {
@@ -9154,7 +9197,6 @@ class PackageManagerService extends IPackageManager.Stub {
             String codePathStr = null;
             String resourcePathStr = null;
             String nativeLibraryPathStr = null;
-            String obbPathStr = null;
             String systemStr = null;
             String installerPackageName = null;
             String uidError = null;
@@ -9174,7 +9216,6 @@ class PackageManagerService extends IPackageManager.Stub {
                 codePathStr = parser.getAttributeValue(null, "codePath");
                 resourcePathStr = parser.getAttributeValue(null, "resourcePath");
                 nativeLibraryPathStr = parser.getAttributeValue(null, "nativeLibraryPath");
-                obbPathStr = parser.getAttributeValue(null, "obbPath");
                 version = parser.getAttributeValue(null, "version");
                 if (version != null) {
                     try {
@@ -9299,7 +9340,6 @@ class PackageManagerService extends IPackageManager.Stub {
                 packageSetting.uidError = "true".equals(uidError);
                 packageSetting.installerPackageName = installerPackageName;
                 packageSetting.nativeLibraryPathString = nativeLibraryPathStr;
-                packageSetting.obbPathString = obbPathStr;
                 final String enabledStr = parser.getAttributeValue(null, "enabled");
                 if (enabledStr != null) {
                     if (enabledStr.equalsIgnoreCase("true")) {
@@ -9347,6 +9387,8 @@ class PackageManagerService extends IPackageManager.Stub {
                         readGrantedPermissionsLP(parser,
                                 packageSetting.grantedPermissions);
                         packageSetting.permissionsFixed = true;
+                    } else if (tagName.equals("obbs")) {
+                        readObbPathsLP(packageSetting, parser);
                     } else {
                         reportSettingsProblem(Log.WARN,
                                 "Unknown element under <package>: "
@@ -9548,6 +9590,34 @@ class PackageManagerService extends IPackageManager.Stub {
                             + parser.getName());
                     XmlUtils.skipCurrentTag(parser);
                 }
+            }
+        }
+
+        private void readObbPathsLP(PackageSettingBase packageSetting, XmlPullParser parser)
+                throws XmlPullParserException, IOException {
+            final List<String> obbPaths = new ArrayList<String>();
+            final int outerDepth = parser.getDepth();
+            int type;
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                    continue;
+                }
+
+                final String tagName = parser.getName();
+                if (tagName.equals("obb")) {
+                    final String path = parser.getAttributeValue(null, "path");
+                    obbPaths.add(path);
+                } else {
+                    reportSettingsProblem(Log.WARN, "Unknown element under <obbs>: "
+                            + parser.getName());
+                }
+                XmlUtils.skipCurrentTag(parser);
+            }
+            if (obbPaths.size() == 0) {
+                return;
+            } else {
+                packageSetting.obbPathStrings = obbPaths.toArray(new String[obbPaths.size()]);
             }
         }
 
