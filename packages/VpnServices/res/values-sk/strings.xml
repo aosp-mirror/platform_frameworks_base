@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="4589592829302498102">"Služby VPN"</string>
+    <string name="vpn_notification_title_connected" msgid="8598654486956133580">"Sieť VPN <xliff:g id="PROFILENAME">%s</xliff:g> je pripojená"</string>
+    <string name="vpn_notification_title_disconnected" msgid="6216572264382192027">"Sieť VPN <xliff:g id="PROFILENAME">%s</xliff:g> odpojená"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="1952209867082269429">"Dotykom sa znova pripojíte k sieti VPN."</string>
+</resources>
