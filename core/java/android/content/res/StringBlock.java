@@ -87,21 +87,48 @@ final class StringBlock {
             if (style != null) {
                 if (mStyleIDs == null) {
                     mStyleIDs = new StyleIDs();
-                    mStyleIDs.boldId = nativeIndexOfString(mNative, "b");
-                    mStyleIDs.italicId = nativeIndexOfString(mNative, "i");
-                    mStyleIDs.underlineId = nativeIndexOfString(mNative, "u");
-                    mStyleIDs.ttId = nativeIndexOfString(mNative, "tt");
-                    mStyleIDs.bigId = nativeIndexOfString(mNative, "big");
-                    mStyleIDs.smallId = nativeIndexOfString(mNative, "small");
-                    mStyleIDs.supId = nativeIndexOfString(mNative, "sup");
-                    mStyleIDs.subId = nativeIndexOfString(mNative, "sub");
-                    mStyleIDs.strikeId = nativeIndexOfString(mNative, "strike");
-                    mStyleIDs.listItemId = nativeIndexOfString(mNative, "li");
-                    mStyleIDs.marqueeId = nativeIndexOfString(mNative, "marquee");
+                }
 
-                    if (localLOGV) Log.v(TAG, "BoldId=" + mStyleIDs.boldId
-                            + ", ItalicId=" + mStyleIDs.italicId
-                            + ", UnderlineId=" + mStyleIDs.underlineId);
+                // the style array is a flat array of <type, start, end> hence
+                // the magic constant 3.
+                for (int styleIndex = 0; styleIndex < style.length; styleIndex += 3) {
+                    int styleId = style[styleIndex];
+
+                    if (styleId == mStyleIDs.boldId || styleId == mStyleIDs.italicId
+                            || styleId == mStyleIDs.underlineId || styleId == mStyleIDs.ttId
+                            || styleId == mStyleIDs.bigId || styleId == mStyleIDs.smallId
+                            || styleId == mStyleIDs.subId || styleId == mStyleIDs.supId
+                            || styleId == mStyleIDs.strikeId || styleId == mStyleIDs.listItemId
+                            || styleId == mStyleIDs.marqueeId) {
+                        // id already found skip to next style
+                        continue;
+                    }
+
+                    String styleTag = nativeGetString(mNative, styleId);
+
+                    if (styleTag.equals("b")) {
+                        mStyleIDs.boldId = styleId;
+                    } else if (styleTag.equals("i")) {
+                        mStyleIDs.italicId = styleId;
+                    } else if (styleTag.equals("u")) {
+                        mStyleIDs.underlineId = styleId;
+                    } else if (styleTag.equals("tt")) {
+                        mStyleIDs.ttId = styleId;
+                    } else if (styleTag.equals("big")) {
+                        mStyleIDs.bigId = styleId;
+                    } else if (styleTag.equals("small")) {
+                        mStyleIDs.smallId = styleId;
+                    } else if (styleTag.equals("sup")) {
+                        mStyleIDs.supId = styleId;
+                    } else if (styleTag.equals("sub")) {
+                        mStyleIDs.subId = styleId;
+                    } else if (styleTag.equals("strike")) {
+                        mStyleIDs.strikeId = styleId;
+                    } else if (styleTag.equals("li")) {
+                        mStyleIDs.listItemId = styleId;
+                    } else if (styleTag.equals("marquee")) {
+                        mStyleIDs.marqueeId = styleId;
+                    }
                 }
 
                 res = applyStyles(str, style, mStyleIDs);
@@ -119,17 +146,17 @@ final class StringBlock {
     }
 
     static final class StyleIDs {
-        private int boldId;
-        private int italicId;
-        private int underlineId;
-        private int ttId;
-        private int bigId;
-        private int smallId;
-        private int subId;
-        private int supId;
-        private int strikeId;
-        private int listItemId;
-        private int marqueeId;
+        private int boldId = -1;
+        private int italicId = -1;
+        private int underlineId = -1;
+        private int ttId = -1;
+        private int bigId = -1;
+        private int smallId = -1;
+        private int subId = -1;
+        private int supId = -1;
+        private int strikeId = -1;
+        private int listItemId = -1;
+        private int marqueeId = -1;
     }
 
     private CharSequence applyStyles(String str, int[] style, StyleIDs ids) {
@@ -403,6 +430,5 @@ final class StringBlock {
     private static final native int nativeGetSize(int obj);
     private static final native String nativeGetString(int obj, int idx);
     private static final native int[] nativeGetStyle(int obj, int idx);
-    private static final native int nativeIndexOfString(int obj, String str);
     private static final native void nativeDestroy(int obj);
 }
