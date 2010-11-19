@@ -32,6 +32,9 @@ interface IInputMethodManager {
     List<InputMethodInfo> getInputMethodList();
     List<InputMethodInfo> getEnabledInputMethodList();
     List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in InputMethodInfo imi);
+    // TODO: We should change the return type from List to List<Parcelable>
+    // Currently there is a bug that aidl doesn't accept List<Parcelable>
+    List getShortcutInputMethodsAndSubtypes();
     void addClient(in IInputMethodClient client,
             in IInputContext inputContext, int uid, int pid);
     void removeClient(in IInputMethodClient client);
