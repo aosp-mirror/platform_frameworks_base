@@ -37,6 +37,7 @@ public class StorageBrowser extends ListActivity {
 
     private ListAdapter mAdapter;
     private int mDeviceID;
+    private DeviceDisconnectedReceiver mDisconnectedReceiver;
 
     private static final String[] STORAGE_COLUMNS =
         new String[] { Mtp.Storage._ID, Mtp.Storage.DESCRIPTION };
@@ -44,13 +45,14 @@ public class StorageBrowser extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mDeviceID = getIntent().getIntExtra("device", 0);
+        mDisconnectedReceiver = new DeviceDisconnectedReceiver(this, mDeviceID);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        mDeviceID = getIntent().getIntExtra("device", 0);
         if (mDeviceID != 0) {
             Cursor c = getContentResolver().query(Mtp.Storage.getContentUri(mDeviceID),
                     STORAGE_COLUMNS, null, null, null);
@@ -64,6 +66,12 @@ public class StorageBrowser extends ListActivity {
                             new int[] { android.R.id.text1, android.R.id.text2 });
             setListAdapter(mAdapter);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(mDisconnectedReceiver);
+        super.onDestroy();
     }
 
     @Override
