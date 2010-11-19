@@ -626,7 +626,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         // mOperatorAlphaLong contains the ERI text
         String plmn = ss.getOperatorAlphaLong();
         if (!TextUtils.equals(plmn, curPlmn)) {
-            boolean showPlmn = (plmn != null) && !TextUtils.equals(plmn, "");
+            boolean showPlmn = !TextUtils.isEmpty(plmn);
             Log.d(LOG_TAG,
                     String.format("updateSpnDisplay: changed sending intent" +
                             " showPlmn='%b' plmn='%s'", showPlmn, plmn));
