@@ -496,7 +496,7 @@ public class TtsService extends Service implements OnCompletionListener {
      *            engines.
      */
     private int speak(String callingApp, String text, int queueMode, ArrayList<String> params) {
-        Log.v(SERVICE_TAG, "TTS service received " + text);
+        // Log.v(SERVICE_TAG, "TTS service received " + text);
         if (queueMode == TextToSpeech.QUEUE_FLUSH) {
             stop(callingApp);
         } else if (queueMode == 2) {
@@ -1064,7 +1064,7 @@ public class TtsService extends Service implements OnCompletionListener {
             SoundResource sr = getSoundResource(mCurrentSpeechItem);
             // Synth speech as needed - synthesizer should call
             // processSpeechQueue to continue running the queue
-            Log.v(SERVICE_TAG, "TTS processing: " + mCurrentSpeechItem.mText);
+            // Log.v(SERVICE_TAG, "TTS processing: " + mCurrentSpeechItem.mText);
             if (sr == null) {
                 if (mCurrentSpeechItem.mType == SpeechItem.TEXT) {
                     mCurrentSpeechItem = splitCurrentTextIfNeeded(mCurrentSpeechItem);
