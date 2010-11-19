@@ -325,7 +325,7 @@ public class StackView extends AdapterViewAnimator {
 
     void updateClickFeedback() {
         if (!mClickFeedbackIsValid) {
-            View v = getViewAtRelativeIndex(0);
+            View v = getViewAtRelativeIndex(1);
             if (v != null) {
                 mClickFeedback.setImageBitmap(sHolographicHelper.createOutline(v,
                         HolographicHelper.CLICK_FEEDBACK));
