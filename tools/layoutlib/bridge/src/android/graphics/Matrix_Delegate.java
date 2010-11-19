@@ -813,6 +813,10 @@ public final class Matrix_Delegate {
         return mask;
     }
 
+    private Matrix_Delegate() {
+        reset();
+    }
+
     /**
      * Adds the given transformation to the current Matrix
      * <p/>This in effect does this = this*matrix
