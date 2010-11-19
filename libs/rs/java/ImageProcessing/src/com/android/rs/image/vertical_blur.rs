@@ -14,8 +14,6 @@ static float outWMinOutB;
 static float overInWMinInB;
 static rs_matrix3x3 colorMat;
 
-#pragma rs export_func(setLevels, setSaturation, setGamma);
-
 void setLevels(float iBlk, float oBlk, float iWht, float oWht) {
     inBlack = iBlk;
     outBlack = oBlk;

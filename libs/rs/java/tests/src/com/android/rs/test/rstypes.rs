@@ -1,8 +1,6 @@
 #include "shared.rsh"
 #include "rs_graphics.rsh"
 
-#pragma rs export_func(test_rstypes)
-
 rs_element elementTest;
 rs_type typeTest;
 rs_allocation allocationTest;
