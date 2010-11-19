@@ -283,7 +283,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // the same as mCur*, but may be larger if the screen decor has supplied
     // content insets.
     int mContentLeft, mContentTop, mContentRight, mContentBottom;
-    // During layout, the current screen borders along with input method
+    // During layout, the current screen borders along which input method
     // windows are placed.
     int mDockLeft, mDockTop, mDockRight, mDockBottom;
     // During layout, the layer at which the doc window is placed.
@@ -1510,13 +1510,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return;
         }
 
-        if (false) {
-            if ("com.google.android.youtube".equals(attrs.packageName)
-                    && attrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
-                Log.i(TAG, "GOTCHA!");
-            }
-        }
-        
         final int fl = attrs.flags;
         final int sim = attrs.softInputMode;
         
@@ -1628,16 +1621,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + ": sim=#" + Integer.toHexString(sim)
                 + " pf=" + pf.toShortString() + " df=" + df.toShortString()
                 + " cf=" + cf.toShortString() + " vf=" + vf.toShortString());
-        
-        if (false) {
-            if ("com.google.android.youtube".equals(attrs.packageName)
-                    && attrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
-                if (true || localLOGV) Log.v(TAG, "Computing frame of " + win +
-                        ": sim=#" + Integer.toHexString(sim)
-                        + " pf=" + pf.toShortString() + " df=" + df.toShortString()
-                        + " cf=" + cf.toShortString() + " vf=" + vf.toShortString());
-            }
-        }
         
         win.computeFrameLw(pf, df, cf, vf);
         
