@@ -503,6 +503,15 @@
         <attr name="listPopupWindowStyle" format="reference" />
         <!-- Default PopupMenu style. -->
         <attr name="popupMenuStyle" format="reference" />
+        <!-- NumberPicker up button style -->
+        <attr name="numberPickerUpButtonStyle" format="reference" />
+        <!-- NumberPicker down button style -->
+        <attr name="numberPickerDownButtonStyle" format="reference" />
+        <!-- NumberPicker input text style -->
+        <attr name="numberPickerInputTextStyle" format="reference" />
+
+        <!-- NumberPicker the fading edge length of the selector wheel -->
+        <attr name="numberPickerStyle" format="reference" />
 
         <!-- =================== -->
         <!-- Action bar styles   -->
@@ -2854,6 +2863,12 @@
         <attr name="minorWeightMin" format="float" />
         <attr name="majorWeightMax" format="float" />
         <attr name="minorWeightMax" format="float" />
+    </declare-styleable>
+
+    <!-- @hide -->
+    <declare-styleable name="NumberPicker">
+        <attr name="orientation" />
+        <attr name="solidColor" format="color|reference" />
     </declare-styleable>
 
     <!-- ========================= -->

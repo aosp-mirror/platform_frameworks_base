@@ -267,8 +267,16 @@
         <item name="searchViewGoIcon">@android:drawable/ic_go</item>
         <item name="searchViewVoiceIcon">@android:drawable/ic_voice_search</item>
 
+
         <!-- PreferenceFrameLayout attributes -->
         <item name="preferenceFrameLayoutStyle">@android:style/Widget.PreferenceFrameLayout</item>
+
+        <!-- NumberPicker styles-->
+        <item name="numberPickerUpButtonStyle">@style/Widget.ImageButton.NumberPickerUpButton</item>
+        <item name="numberPickerDownButtonStyle">@style/Widget.ImageButton.NumberPickerDownButton</item>
+        <item name="numberPickerInputTextStyle">@style/Widget.EditText.NumberPickerInputText</item>
+        <item name="numberPickerStyle">@style/Widget.NumberPicker</item>
+
     </style>
 
     <!-- Variant of the default (dark) theme with no title bar -->
@@ -881,6 +889,12 @@
 
         <!-- PreferenceFrameLayout attributes -->
         <item name="preferenceFrameLayoutStyle">@android:style/Widget.Holo.PreferenceFrameLayout</item>
+
+        <!-- NumberPicker styles-->
+        <item name="numberPickerUpButtonStyle">@style/Widget.Holo.ImageButton.NumberPickerUpButton</item>
+        <item name="numberPickerDownButtonStyle">@style/Widget.Holo.ImageButton.NumberPickerDownButton</item>
+        <item name="numberPickerInputTextStyle">@style/Widget.Holo.EditText.NumberPickerInputText</item>
+
     </style>
 
     <!-- New Honeycomb holographic theme. Light version.  The widgets in the
@@ -1117,6 +1131,12 @@
 
         <!-- SearchView attributes -->
         <item name="searchDropdownBackground">@android:drawable/search_dropdown_light</item>
+
+        <!-- NumberPicker attributes and styles-->
+        <item name="numberPickerUpButtonStyle">@style/Widget.Holo.Light.ImageButton.NumberPickerUpButton</item>
+        <item name="numberPickerDownButtonStyle">@style/Widget.Holo.Light.ImageButton.NumberPickerDownButton</item>
+        <item name="numberPickerInputTextStyle">@style/Widget.Holo.Light.EditText.NumberPickerInputText</item>
+
     </style>
 
     <!-- Development legacy name; if you're using this, switch. -->

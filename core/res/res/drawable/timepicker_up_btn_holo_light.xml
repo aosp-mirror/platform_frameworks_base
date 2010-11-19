@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2008 The Android Open Source Project
+<!-- Copyright (C) 2010 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -19,25 +19,25 @@
     <item android:state_pressed="false"
           android:state_enabled="true"
           android:state_focused="false"
-          android:drawable="@drawable/timepicker_input_normal" />
+          android:drawable="@drawable/timepicker_up_normal_holo_light" />
 
     <item android:state_pressed="true"
           android:state_enabled="true"
-          android:drawable="@drawable/timepicker_input_pressed" />
+          android:drawable="@drawable/timepicker_up_pressed_holo_light" />
 
     <item android:state_pressed="false"
           android:state_enabled="true"
           android:state_focused="true"
-          android:drawable="@drawable/timepicker_input_selected" />
+          android:drawable="@drawable/timepicker_up_focused_holo_light" />
 
     <item android:state_pressed="false"
           android:state_enabled="false"
           android:state_focused="false"
-          android:drawable="@drawable/timepicker_input_disabled" />
+          android:drawable="@drawable/timepicker_up_focused_holo_light" />
 
     <item android:state_pressed="false"
           android:state_enabled="false"
           android:state_focused="true"
-          android:drawable="@drawable/timepicker_input_normal" />
+          android:drawable="@drawable/timepicker_up_disabled_focused_holo_light" />
 
 </selector>

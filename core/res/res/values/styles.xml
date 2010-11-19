@@ -460,6 +460,28 @@
         <item name="android:background">@android:drawable/btn_default</item>
     </style>
 
+    <style name="Widget.NumberPicker">
+        <item name="android:orientation">vertical</item>
+        <item name="android:fadingEdge">vertical</item>
+        <item name="android:fadingEdgeLength">50dip</item>
+        <item name="android:solidColor">?android:attr/colorBackground</item>
+    </style>
+
+    <style name="Widget.ImageButton.NumberPickerUpButton">
+        <item name="android:background">@android:drawable/timepicker_up_btn</item>
+    </style>
+
+    <style name="Widget.ImageButton.NumberPickerDownButton">
+        <item name="android:background">@android:drawable/timepicker_down_btn</item>
+    </style>
+
+    <style name="Widget.EditText.NumberPickerInputText">
+        <item name="android:textAppearance">@style/TextAppearance.Large.Inverse.NumberPickerInputText</item>
+        <item name="android:gravity">center</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:background">@drawable/timepicker_input</item>
+    </style>
+
     <style name="Widget.AutoCompleteTextView" parent="Widget.EditText">
         <item name="android:completionHintView">@android:layout/simple_dropdown_hint</item>
         <item name="android:completionThreshold">2</item>
@@ -761,7 +783,7 @@
     <style name="TextAppearance.Widget.TextView.SpinnerItem">
         <item name="android:textColor">@android:color/primary_text_light_disable_only</item>
     </style>
-    
+
     <!-- @hide -->
     <style name="TextAppearance.SlidingTabNormal" 
         parent="@android:attr/textAppearanceMedium">
@@ -802,6 +824,11 @@
         <item name="android:textColor">#fff</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearance.Large.Inverse.NumberPickerInputText">
+        <item name="android:textColor">@android:color/primary_text_light</item>
+        <item name="android:textSize">30sp</item>
     </style>
 
     <!-- Preference Styles -->
@@ -1353,6 +1380,27 @@
     <style name="Widget.Holo.ImageButton" parent="Widget.ImageButton">
     </style>
 
+    <style name="Widget.Holo.ImageButton.NumberPickerUpButton">
+        <item name="android:background">@null</item>
+        <item name="android:paddingBottom">26sp</item>
+        <item name="android:src">@android:drawable/timepicker_up_btn_holo_dark</item>
+    </style>
+
+    <style name="Widget.Holo.ImageButton.NumberPickerDownButton">
+        <item name="android:background">@null</item>
+        <item name="android:paddingTop">26sp</item>
+        <item name="android:src">@android:drawable/timepicker_down_btn_holo_dark</item>
+    </style>
+
+    <style name="Widget.Holo.EditText.NumberPickerInputText">
+        <item name="android:paddingTop">13sp</item>
+        <item name="android:paddingBottom">13sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:background">@null</item>
+    </style>
+
     <style name="Widget.Holo.ImageWell" parent="Widget.ImageWell">
     </style>
 
@@ -1653,6 +1701,17 @@
     </style>
 
     <style name="Widget.Holo.Light.ImageButton" parent="Widget.ImageButton">
+    </style>
+
+    <style name="Widget.Holo.Light.ImageButton.NumberPickerUpButton" parent="Widget.Holo.Light.ImageButton.NumberPickerUpButton">
+        <item name="android:background">@android:drawable/timepicker_up_btn_holo_light</item>
+    </style>
+
+    <style name="Widget.Holo.Light.ImageButton.NumberPickerDownButton" parent="Widget.Holo.ImageButton.NumberPickerDownButton">
+        <item name="android:background">@android:drawable/timepicker_down_btn_holo_light</item>
+    </style>
+
+    <style name="Widget.Holo.Light.EditText.NumberPickerInputText" parent="Widget.Holo.EditText.NumberPickerInputText">
     </style>
 
     <style name="Widget.Holo.Light.ImageWell" parent="Widget.ImageWell">
