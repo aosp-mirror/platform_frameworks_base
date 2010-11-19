@@ -104,7 +104,7 @@ import java.util.HashMap;
  */
 public final class StrictMode {
     private static final String TAG = "StrictMode";
-    private static final boolean LOG_V = false;
+    private static final boolean LOG_V = Log.isLoggable(TAG, Log.VERBOSE);
 
     private static final boolean IS_USER_BUILD = "user".equals(Build.TYPE);
 
