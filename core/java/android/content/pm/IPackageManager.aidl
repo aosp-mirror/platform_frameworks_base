@@ -158,6 +158,8 @@ interface IPackageManager {
 
     void finishPackageInstall(int token);
 
+    void setInstallerPackageName(in String targetPackage, in String installerPackageName);
+
     /**
      * Delete a package.
      *

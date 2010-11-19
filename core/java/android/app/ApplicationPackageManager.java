@@ -914,6 +914,16 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public void setInstallerPackageName(String targetPackage,
+            String installerPackageName) {
+        try {
+            mPM.setInstallerPackageName(targetPackage, installerPackageName);
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+    }
+
+    @Override
     public void movePackage(String packageName, IPackageMoveObserver observer, int flags) {
         try {
             mPM.movePackage(packageName, observer, flags);
