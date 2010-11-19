@@ -55,6 +55,7 @@ import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -7296,7 +7297,7 @@ public class WebView extends AbsoluteLayout
                 1, (metaState & KeyEvent.META_SHIFT_ON)
                 | (metaState & KeyEvent.META_ALT_ON)
                 | (metaState & KeyEvent.META_SYM_ON)
-                , 0, 0, 0);
+                , KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0);
         mWebViewCore.sendMessage(eventHubAction, event);
     }
 

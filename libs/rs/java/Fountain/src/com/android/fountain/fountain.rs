@@ -17,8 +17,6 @@ typedef struct __attribute__((packed, aligned(4))) Point {
 } Point_t;
 Point_t *point;
 
-#pragma rs export_func(addParticles)
-
 int root() {
     float dt = min(rsGetDt(), 0.1f);
     rsgClearColor(0.f, 0.f, 0.f, 1.f);

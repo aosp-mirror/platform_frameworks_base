@@ -67,6 +67,7 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputQueue;
 import android.view.InputHandler;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowOrientationListener;
@@ -282,7 +283,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // the same as mCur*, but may be larger if the screen decor has supplied
     // content insets.
     int mContentLeft, mContentTop, mContentRight, mContentBottom;
-    // During layout, the current screen borders along with input method
+    // During layout, the current screen borders along which input method
     // windows are placed.
     int mDockLeft, mDockTop, mDockRight, mDockBottom;
     // During layout, the layer at which the doc window is placed.
@@ -1509,13 +1510,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return;
         }
 
-        if (false) {
-            if ("com.google.android.youtube".equals(attrs.packageName)
-                    && attrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
-                Log.i(TAG, "GOTCHA!");
-            }
-        }
-        
         final int fl = attrs.flags;
         final int sim = attrs.softInputMode;
         
@@ -1627,16 +1621,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + ": sim=#" + Integer.toHexString(sim)
                 + " pf=" + pf.toShortString() + " df=" + df.toShortString()
                 + " cf=" + cf.toShortString() + " vf=" + vf.toShortString());
-        
-        if (false) {
-            if ("com.google.android.youtube".equals(attrs.packageName)
-                    && attrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
-                if (true || localLOGV) Log.v(TAG, "Computing frame of " + win +
-                        ": sim=#" + Integer.toHexString(sim)
-                        + " pf=" + pf.toShortString() + " df=" + df.toShortString()
-                        + " cf=" + cf.toShortString() + " vf=" + vf.toShortString());
-            }
-        }
         
         win.computeFrameLw(pf, df, cf, vf);
         
@@ -2126,7 +2110,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // only do it if the showing app doesn't process the key on its own.
                     long when = whenNanos / 1000000;
                     KeyEvent keyEvent = new KeyEvent(when, when, action, keyCode, 0, 0,
-                            0, scanCode, flags, InputDevice.SOURCE_KEYBOARD);
+                            KeyCharacterMap.VIRTUAL_KEYBOARD, scanCode, flags,
+                            InputDevice.SOURCE_KEYBOARD);
                     mBroadcastWakeLock.acquire();
                     mHandler.post(new PassHeadsetKey(keyEvent));
                 }

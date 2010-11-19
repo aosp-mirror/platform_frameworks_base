@@ -83,7 +83,7 @@ public class QwertyKeyListener extends BaseKeyListener {
 
         // QWERTY keyboard normal case
 
-        int i = event.getUnicodeChar(getMetaState(content));
+        int i = event.getUnicodeChar(event.getMetaState() | getMetaState(content));
 
         int count = event.getRepeatCount();
         if (count > 0 && selStart == selEnd && selStart > 0) {

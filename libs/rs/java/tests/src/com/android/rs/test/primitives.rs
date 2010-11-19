@@ -1,7 +1,5 @@
 #include "shared.rsh"
 
-#pragma rs export_func(primitives_test)
-
 // Testing primitive types
 float floatTest = 1.99f;
 double doubleTest = 2.05;

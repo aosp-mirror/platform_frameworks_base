@@ -123,8 +123,22 @@ void Allocation::deferedUploadToTexture(const Context *rsc, bool genMipmap, uint
     mTextureGenMipmap = !mType->getDimLOD() && genMipmap;
 }
 
+uint32_t Allocation::getGLTarget() const {
+    if (mIsTexture) {
+        if (mType->getDimFaces()) {
+            return GL_TEXTURE_CUBE_MAP;
+        } else {
+            return GL_TEXTURE_2D;
+        }
+    }
+    if (mIsVertexBuffer) {
+        return GL_ARRAY_BUFFER;
+    }
+    return 0;
+}
+
+
 void Allocation::uploadToTexture(const Context *rsc) {
-    //rsAssert(!mTextureId);
 
     mIsTexture = true;
     if (!rsc->checkDriver()) {
@@ -155,8 +169,29 @@ void Allocation::uploadToTexture(const Context *rsc) {
         }
         isFirstUpload = true;
     }
-    glBindTexture(GL_TEXTURE_2D, mTextureID);
+
+    GLenum target = (GLenum)getGLTarget();
+    glBindTexture(target, mTextureID);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    if (target == GL_TEXTURE_2D) {
+        upload2DTexture(isFirstUpload);
+    } else if (target == GL_TEXTURE_CUBE_MAP) {
+        uploadCubeTexture(isFirstUpload);
+    }
+
+    if (mTextureGenMipmap) {
+#ifndef ANDROID_RS_BUILD_FOR_HOST
+        glGenerateMipmap(target);
+#endif //ANDROID_RS_BUILD_FOR_HOST
+    }
+
+    rsc->checkError("Allocation::uploadToTexture");
+}
+
+void Allocation::upload2DTexture(bool isFirstUpload) {
+    GLenum type = mType->getElement()->getComponent().getGLType();
+    GLenum format = mType->getElement()->getComponent().getGLFormat();
 
     Adapter2D adapt(getContext(), this);
     for (uint32_t lod = 0; (lod + mTextureLOD) < mType->getLODCount(); lod++) {
@@ -169,17 +204,45 @@ void Allocation::uploadToTexture(const Context *rsc) {
                          0, format, type, ptr);
         } else {
             glTexSubImage2D(GL_TEXTURE_2D, lod, 0, 0,
-                         adapt.getDimX(), adapt.getDimY(),
-                         format, type, ptr);
+                            adapt.getDimX(), adapt.getDimY(),
+                            format, type, ptr);
         }
     }
-    if (mTextureGenMipmap) {
-#ifndef ANDROID_RS_BUILD_FOR_HOST
-        glGenerateMipmap(GL_TEXTURE_2D);
-#endif //ANDROID_RS_BUILD_FOR_HOST
-    }
+}
 
-    rsc->checkError("Allocation::uploadToTexture");
+void Allocation::uploadCubeTexture(bool isFirstUpload) {
+    GLenum type = mType->getElement()->getComponent().getGLType();
+    GLenum format = mType->getElement()->getComponent().getGLFormat();
+
+    GLenum faceOrder[] = {
+        GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+        GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+        GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+        GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+        GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+        GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+    };
+
+    Adapter2D adapt(getContext(), this);
+    for (uint32_t face = 0; face < 6; face ++) {
+        adapt.setFace(face);
+
+        for (uint32_t lod = 0; (lod + mTextureLOD) < mType->getLODCount(); lod++) {
+            adapt.setLOD(lod+mTextureLOD);
+
+            uint16_t * ptr = static_cast<uint16_t *>(adapt.getElement(0,0));
+
+            if (isFirstUpload) {
+                glTexImage2D(faceOrder[face], lod, format,
+                             adapt.getDimX(), adapt.getDimY(),
+                             0, format, type, ptr);
+            } else {
+                glTexSubImage2D(faceOrder[face], lod, 0, 0,
+                                adapt.getDimX(), adapt.getDimY(),
+                                format, type, ptr);
+            }
+        }
+    }
 }
 
 void Allocation::deferedUploadToBufferObject(const Context *rsc) {
@@ -205,10 +268,10 @@ void Allocation::uploadToBufferObject(const Context *rsc) {
         mUploadDefered = true;
         return;
     }
-
-    glBindBuffer(GL_ARRAY_BUFFER, mBufferID);
-    glBufferData(GL_ARRAY_BUFFER, mType->getSizeBytes(), getPtr(), GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    GLenum target = (GLenum)getGLTarget();
+    glBindBuffer(target, mBufferID);
+    glBufferData(target, mType->getSizeBytes(), getPtr(), GL_DYNAMIC_DRAW);
+    glBindBuffer(target, 0);
     rsc->checkError("Allocation::uploadToBufferObject");
 }
 
@@ -806,6 +869,58 @@ RsAllocation rsaAllocationCreateFromBitmap(RsContext con, uint32_t w, uint32_t h
                 adapt.setLOD(lod);
                 adapt2.setLOD(lod + 1);
                 mip(adapt2, adapt);
+            }
+        }
+    } else {
+        rsc->setError(RS_ERROR_BAD_VALUE, "Unsupported bitmap format");
+        delete texAlloc;
+        return NULL;
+    }
+
+    return texAlloc;
+}
+
+RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, uint32_t w, uint32_t h, RsElement _dst, RsElement _src,  bool genMips, const void *data) {
+    Context *rsc = static_cast<Context *>(con);
+    const Element *src = static_cast<const Element *>(_src);
+    const Element *dst = static_cast<const Element *>(_dst);
+
+    // Cubemap allocation's faces should be Width by Width each.
+    // Source data should have 6 * Width by Width pixels
+    // Error checking is done in the java layer
+    RsDimension dims[] = {RS_DIMENSION_X, RS_DIMENSION_Y, RS_DIMENSION_LOD, RS_DIMENSION_FACE};
+    uint32_t dimValues[] = {w, w, genMips, true};
+    RsType type = rsaTypeCreate(rsc, _dst, 4, dims, dimValues);
+
+    RsAllocation vTexAlloc = rsaAllocationCreateTyped(rsc, type);
+    Allocation *texAlloc = static_cast<Allocation *>(vTexAlloc);
+    if (texAlloc == NULL) {
+        LOGE("Memory allocation failure");
+        return NULL;
+    }
+
+    uint8_t *sourcePtr = (uint8_t*)data;
+    ElementConverter_t cvt = pickConverter(dst, src);
+    if (cvt) {
+        for (uint32_t face = 0; face < 6; face ++) {
+            Adapter2D faceAdapter(rsc, texAlloc);
+            faceAdapter.setFace(face);
+
+            cvt(faceAdapter.getElement(0, 0), sourcePtr, w * w);
+
+            // Move the data pointer to the next cube face
+            sourcePtr += w * w * src->getSizeBytes();
+
+            if (genMips) {
+                Adapter2D adapt(rsc, texAlloc);
+                Adapter2D adapt2(rsc, texAlloc);
+                adapt.setFace(face);
+                adapt2.setFace(face);
+                for (uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
+                    adapt.setLOD(lod);
+                    adapt2.setLOD(lod + 1);
+                    mip(adapt2, adapt);
+                }
             }
         }
     } else {

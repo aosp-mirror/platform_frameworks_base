@@ -43,6 +43,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -155,14 +156,40 @@ public final class BridgeResources extends Resources {
 
     @Override
     public ColorStateList getColorStateList(int id) throws NotFoundException {
-        IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        IResourceValue resValue = getResourceValue(id, mPlatformResourceFlag);
 
-        if (value != null) {
-            try {
-                int color = ResourceHelper.getColor(value.getValue());
-                return ColorStateList.valueOf(color);
-            } catch (NumberFormatException e) {
-                return null;
+        if (resValue != null) {
+            String value = resValue.getValue();
+            if (value != null) {
+                // first check if the value is a file (xml most likely)
+                File f = new File(value);
+                if (f.isFile()) {
+                    try {
+                        // let the framework inflate the ColorStateList from the XML file, by
+                        // providing an XmlPullParser
+                        KXmlParser parser = new KXmlParser();
+                        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
+                        parser.setInput(new FileReader(f));
+
+                        return ColorStateList.createFromXml(this,
+                                new BridgeXmlBlockParser(parser, mContext, resValue.isFramework()));
+                    } catch (XmlPullParserException e) {
+                        mContext.getLogger().error(e);
+                    } catch (FileNotFoundException e) {
+                        // will not happen, since we pre-check
+                    } catch (IOException e) {
+                        mContext.getLogger().error(e);
+                    }
+
+                } else {
+                    // try to load the color state list from an int
+                    try {
+                        int color = ResourceHelper.getColor(value);
+                        return ColorStateList.valueOf(color);
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                }
             }
         }
 

@@ -141,7 +141,7 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
 
     private void sendKeyEventsToTarget(int character) {
         Handler handler = mTargetView.getHandler();
-        KeyEvent[] events = KeyCharacterMap.load(KeyCharacterMap.ALPHA).getEvents(
+        KeyEvent[] events = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD).getEvents(
                 new char[] { (char) character });
         if (events != null) {
             final int N = events.length;
@@ -158,10 +158,12 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
         long eventTime = SystemClock.uptimeMillis();
         Handler handler = mTargetView.getHandler();
         handler.sendMessage(handler.obtainMessage(ViewRoot.DISPATCH_KEY_FROM_IME,
-                new KeyEvent(eventTime, eventTime, KeyEvent.ACTION_DOWN, keyEventCode, 0, 0, 0, 0,
+                new KeyEvent(eventTime, eventTime, KeyEvent.ACTION_DOWN, keyEventCode, 0, 0,
+                        KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
                     KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE)));
         handler.sendMessage(handler.obtainMessage(ViewRoot.DISPATCH_KEY_FROM_IME,
-                new KeyEvent(eventTime, eventTime, KeyEvent.ACTION_UP, keyEventCode, 0, 0, 0, 0,
+                new KeyEvent(eventTime, eventTime, KeyEvent.ACTION_UP, keyEventCode, 0, 0,
+                        KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
                         KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE)));
     }
 

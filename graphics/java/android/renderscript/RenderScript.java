@@ -204,6 +204,10 @@ public class RenderScript {
     synchronized int nAllocationCreateFromBitmap(int dstFmt, boolean genMips, Bitmap bmp) {
         return rsnAllocationCreateFromBitmap(mContext, dstFmt, genMips, bmp);
     }
+    native int  rsnAllocationCubeCreateFromBitmap(int con, int dstFmt, boolean genMips, Bitmap bmp);
+    synchronized int nAllocationCubeCreateFromBitmap(int dstFmt, boolean genMips, Bitmap bmp) {
+        return rsnAllocationCubeCreateFromBitmap(mContext, dstFmt, genMips, bmp);
+    }
     native int  rsnAllocationCreateBitmapRef(int con, int type, Bitmap bmp);
     synchronized int nAllocationCreateBitmapRef(int type, Bitmap bmp) {
         return rsnAllocationCreateBitmapRef(mContext, type, bmp);

@@ -160,6 +160,11 @@ enum RsSamplerValue {
     RS_SAMPLER_CLAMP
 };
 
+enum RsTextureTarget {
+    RS_TEXTURE_2D,
+    RS_TEXTURE_CUBE
+};
+
 enum RsDimension {
     RS_DIMENSION_X,
     RS_DIMENSION_Y,
@@ -218,7 +223,7 @@ enum RsProgramParam {
     RS_PROGRAM_PARAM_INPUT,
     RS_PROGRAM_PARAM_OUTPUT,
     RS_PROGRAM_PARAM_CONSTANT,
-    RS_PROGRAM_PARAM_TEXTURE_COUNT,
+    RS_PROGRAM_PARAM_TEXTURE_TYPE,
 };
 
 enum RsPrimitive {
@@ -322,6 +327,7 @@ RsType rsaTypeCreate(RsContext, RsElement, uint32_t dimCount,
                      const RsDimension *dims, const uint32_t *vals);
 RsAllocation rsaAllocationCreateTyped(RsContext rsc, RsType vtype);
 RsAllocation rsaAllocationCreateFromBitmap(RsContext con, uint32_t w, uint32_t h, RsElement _dst, RsElement _src,  bool genMips, const void *data);
+RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, uint32_t w, uint32_t h, RsElement _dst, RsElement _src,  bool genMips, const void *data);
 
 #ifndef NO_RS_FUNCS
 #include "rsgApiFuncDecl.h"

@@ -1449,8 +1449,99 @@
   <public type="style" name="Theme.Holo.DialogWhenLarge" />
   <public type="style" name="Theme.Holo.Light.DialogWhenLarge" />
   
-  <public type="string" name="selectTextMode" />
-
   <public type="style" name="Theme.Holo.Wallpaper" />
   <public type="style" name="Theme.Holo.Wallpaper.NoTitleBar" />
+
+  <public type="style" name="Widget.ActionBar" />
+
+  <public type="style" name="Widget.Holo" />
+  <public type="style" name="Widget.Holo.Button" />
+  <public type="style" name="Widget.Holo.Button.Small" />
+  <public type="style" name="Widget.Holo.Button.Inset" />
+  <public type="style" name="Widget.Holo.Button.Toggle" />
+  <public type="style" name="Widget.Holo.TextView" />
+  <public type="style" name="Widget.Holo.AutoCompleteTextView" />
+  <public type="style" name="Widget.Holo.CompoundButton.CheckBox" />
+  <public type="style" name="Widget.Holo.ListView.DropDown" />
+  <public type="style" name="Widget.Holo.EditText" />
+  <public type="style" name="Widget.Holo.ExpandableListView" />
+  <public type="style" name="Widget.Holo.GridView" />
+  <public type="style" name="Widget.Holo.ImageButton" />
+  <public type="style" name="Widget.Holo.ListView" />
+  <public type="style" name="Widget.Holo.PopupWindow" />
+  <public type="style" name="Widget.Holo.ProgressBar" />
+  <public type="style" name="Widget.Holo.ProgressBar.Horizontal" />
+  <public type="style" name="Widget.Holo.ProgressBar.Small" />
+  <public type="style" name="Widget.Holo.ProgressBar.Small.Title" />
+  <public type="style" name="Widget.Holo.ProgressBar.Large" />
+  <public type="style" name="Widget.Holo.SeekBar" />
+  <public type="style" name="Widget.Holo.RatingBar" />
+  <public type="style" name="Widget.Holo.RatingBar.Indicator" />
+  <public type="style" name="Widget.Holo.RatingBar.Small" />
+  <public type="style" name="Widget.Holo.CompoundButton.RadioButton" />
+  <public type="style" name="Widget.Holo.ScrollView" />
+  <public type="style" name="Widget.Holo.HorizontalScrollView" />
+  <public type="style" name="Widget.Holo.Spinner" />
+  <public type="style" name="Widget.Holo.CompoundButton.Star" />
+  <public type="style" name="Widget.Holo.TabWidget" />
+  <public type="style" name="Widget.Holo.WebTextView" />
+  <public type="style" name="Widget.Holo.WebView" />
+  <public type="style" name="Widget.Holo.DropDownItem" />
+  <public type="style" name="Widget.Holo.DropDownItem.Spinner" />
+  <public type="style" name="Widget.Holo.TextView.SpinnerItem" />
+  <public type="style" name="Widget.Holo.ListPopupWindow" />
+  <public type="style" name="Widget.Holo.PopupMenu" />
+  <public type="style" name="Widget.Holo.ActionButton" />
+  <public type="style" name="Widget.Holo.ActionButton.Overflow" />
+  <public type="style" name="Widget.Holo.ActionButton.TextButton" />
+  <public type="style" name="Widget.Holo.ActionMode" />
+  <public type="style" name="Widget.Holo.ActionButton.CloseMode" />
+  <public type="style" name="Widget.Holo.ActionBar" />
+  <public type="style" name="Widget.Holo.Light" />
+  <public type="style" name="Widget.Holo.Light.Button" />
+  <public type="style" name="Widget.Holo.Light.Button.Small" />
+  <public type="style" name="Widget.Holo.Light.Button.Inset" />
+  <public type="style" name="Widget.Holo.Light.Button.Toggle" />
+  <public type="style" name="Widget.Holo.Light.TextView" />
+  <public type="style" name="Widget.Holo.Light.AutoCompleteTextView" />
+  <public type="style" name="Widget.Holo.Light.CompoundButton.CheckBox" />
+  <public type="style" name="Widget.Holo.Light.ListView.DropDown" />
+  <public type="style" name="Widget.Holo.Light.EditText" />
+  <public type="style" name="Widget.Holo.Light.ExpandableListView" />
+  <public type="style" name="Widget.Holo.Light.GridView" />
+  <public type="style" name="Widget.Holo.Light.ImageButton" />
+  <public type="style" name="Widget.Holo.Light.ListView" />
+  <public type="style" name="Widget.Holo.Light.PopupWindow" />
+  <public type="style" name="Widget.Holo.Light.ProgressBar" />
+  <public type="style" name="Widget.Holo.Light.ProgressBar.Horizontal" />
+  <public type="style" name="Widget.Holo.Light.ProgressBar.Small" />
+  <public type="style" name="Widget.Holo.Light.ProgressBar.Small.Title" />
+  <public type="style" name="Widget.Holo.Light.ProgressBar.Large" />
+  <public type="style" name="Widget.Holo.Light.ProgressBar.Inverse" />
+  <public type="style" name="Widget.Holo.Light.ProgressBar.Small.Inverse" />
+  <public type="style" name="Widget.Holo.Light.ProgressBar.Large.Inverse" />
+  <public type="style" name="Widget.Holo.Light.SeekBar" />
+  <public type="style" name="Widget.Holo.Light.RatingBar" />
+  <public type="style" name="Widget.Holo.Light.RatingBar.Indicator" />
+  <public type="style" name="Widget.Holo.Light.RatingBar.Small" />
+  <public type="style" name="Widget.Holo.Light.CompoundButton.RadioButton" />
+  <public type="style" name="Widget.Holo.Light.ScrollView" />
+  <public type="style" name="Widget.Holo.Light.HorizontalScrollView" />
+  <public type="style" name="Widget.Holo.Light.Spinner" />
+  <public type="style" name="Widget.Holo.Light.CompoundButton.Star" />
+  <public type="style" name="Widget.Holo.Light.TabWidget" />
+  <public type="style" name="Widget.Holo.Light.WebTextView" />
+  <public type="style" name="Widget.Holo.Light.WebView" />
+  <public type="style" name="Widget.Holo.Light.DropDownItem" />
+  <public type="style" name="Widget.Holo.Light.DropDownItem.Spinner" />
+  <public type="style" name="Widget.Holo.Light.TextView.SpinnerItem" />
+  <public type="style" name="Widget.Holo.Light.ListPopupWindow" />
+  <public type="style" name="Widget.Holo.Light.PopupMenu" />
+  <public type="style" name="Widget.Holo.Light.ActionButton" />
+  <public type="style" name="Widget.Holo.Light.ActionButton.Overflow" />
+  <public type="style" name="Widget.Holo.Light.ActionMode" />
+  <public type="style" name="Widget.Holo.Light.ActionButton.CloseMode" />
+  <public type="style" name="Widget.Holo.Light.ActionBar" />
+
+  <public type="string" name="selectTextMode" />
 </resources>

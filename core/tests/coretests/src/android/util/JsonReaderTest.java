@@ -16,12 +16,15 @@
 
 package android.util;
 
+import java.util.Arrays;
 import junit.framework.TestCase;
 
 import java.io.IOException;
 import java.io.StringReader;
 
 public final class JsonReaderTest extends TestCase {
+
+    private static final int READER_BUFFER_SIZE = 1024;
 
     public void testReadArray() throws IOException {
         JsonReader reader = new JsonReader(new StringReader("[true, true]"));
@@ -178,7 +181,13 @@ public final class JsonReaderTest extends TestCase {
                 + "-0.5,"
                 + "2.2250738585072014E-308,"
                 + "3.141592653589793,"
-                + "2.718281828459045]";
+                + "2.718281828459045,"
+                + "\"1.0\","
+                + "\"011.0\","
+                + "\"NaN\","
+                + "\"Infinity\","
+                + "\"-Infinity\""
+                + "]";
         JsonReader reader = new JsonReader(new StringReader(json));
         reader.beginArray();
         assertEquals(-0.0, reader.nextDouble());
@@ -190,19 +199,98 @@ public final class JsonReaderTest extends TestCase {
         assertEquals(2.2250738585072014E-308, reader.nextDouble());
         assertEquals(3.141592653589793, reader.nextDouble());
         assertEquals(2.718281828459045, reader.nextDouble());
+        assertEquals(1,0, reader.nextDouble());
+        assertEquals(11.0, reader.nextDouble());
+        assertTrue(Double.isNaN(reader.nextDouble()));
+        assertEquals(Double.POSITIVE_INFINITY, reader.nextDouble());
+        assertEquals(Double.NEGATIVE_INFINITY, reader.nextDouble());
         reader.endArray();
         assertEquals(JsonToken.END_DOCUMENT, reader.peek());
     }
 
-    public void testNonFiniteDoubles() throws IOException {
-        String json = "[NaN]";
+    public void testLenientDoubles() throws IOException {
+        String json = "["
+                + "011.0,"
+                + "NaN,"
+                + "NAN,"
+                + "Infinity,"
+                + "INFINITY,"
+                + "-Infinity"
+                + "]";
         JsonReader reader = new JsonReader(new StringReader(json));
+        reader.setLenient(true);
         reader.beginArray();
+        assertEquals(11.0, reader.nextDouble());
+        assertTrue(Double.isNaN(reader.nextDouble()));
         try {
             reader.nextDouble();
             fail();
         } catch (NumberFormatException expected) {
         }
+        assertEquals("NAN", reader.nextString());
+        assertEquals(Double.POSITIVE_INFINITY, reader.nextDouble());
+        try {
+            reader.nextDouble();
+            fail();
+        } catch (NumberFormatException expected) {
+        }
+        assertEquals("INFINITY", reader.nextString());
+        assertEquals(Double.NEGATIVE_INFINITY, reader.nextDouble());
+        reader.endArray();
+        assertEquals(JsonToken.END_DOCUMENT, reader.peek());
+    }
+
+    public void testBufferBoundary() throws IOException {
+        char[] pad = new char[READER_BUFFER_SIZE - 8];
+        Arrays.fill(pad, '5');
+        String json = "[\"" + new String(pad) + "\",33333]";
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.beginArray();
+        assertEquals(JsonToken.STRING, reader.peek());
+        assertEquals(new String(pad), reader.nextString());
+        assertEquals(JsonToken.NUMBER, reader.peek());
+        assertEquals(33333, reader.nextInt());
+    }
+
+    public void testTruncatedBufferBoundary() throws IOException {
+        char[] pad = new char[READER_BUFFER_SIZE - 8];
+        Arrays.fill(pad, '5');
+        String json = "[\"" + new String(pad) + "\",33333";
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.setLenient(true);
+        reader.beginArray();
+        assertEquals(JsonToken.STRING, reader.peek());
+        assertEquals(new String(pad), reader.nextString());
+        assertEquals(JsonToken.NUMBER, reader.peek());
+        assertEquals(33333, reader.nextInt());
+        try {
+            reader.endArray();
+            fail();
+        } catch (IOException e) {
+        }
+    }
+
+    public void testLongestSupportedNumericLiterals() throws IOException {
+        testLongNumericLiterals(READER_BUFFER_SIZE - 1, JsonToken.NUMBER);
+    }
+
+    public void testLongerNumericLiterals() throws IOException {
+        testLongNumericLiterals(READER_BUFFER_SIZE, JsonToken.STRING);
+    }
+
+    private void testLongNumericLiterals(int length, JsonToken expectedToken) throws IOException {
+        char[] longNumber = new char[length];
+        Arrays.fill(longNumber, '9');
+        longNumber[0] = '1';
+        longNumber[1] = '.';
+
+        String json = "[" + new String(longNumber) + "]";
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.setLenient(true);
+        reader.beginArray();
+        assertEquals(expectedToken, reader.peek());
+        assertEquals(2.0d, reader.nextDouble());
+        reader.endArray();
     }
 
     public void testLongs() throws IOException {
@@ -210,7 +298,13 @@ public final class JsonReaderTest extends TestCase {
                 + "1,1,1,"
                 + "-1,-1,-1,"
                 + "-9223372036854775808,"
-                + "9223372036854775807]";
+                + "9223372036854775807,"
+                + "5.0,"
+                + "1.0e2,"
+                + "\"011\","
+                + "\"5.0\","
+                + "\"1.0e2\""
+                + "]";
         JsonReader reader = new JsonReader(new StringReader(json));
         reader.beginArray();
         assertEquals(0L, reader.nextLong());
@@ -234,6 +328,11 @@ public final class JsonReaderTest extends TestCase {
         } catch (NumberFormatException expected) {
         }
         assertEquals(Long.MAX_VALUE, reader.nextLong());
+        assertEquals(5, reader.nextLong());
+        assertEquals(100, reader.nextLong());
+        assertEquals(11, reader.nextLong());
+        assertEquals(5, reader.nextLong());
+        assertEquals(100, reader.nextLong());
         reader.endArray();
         assertEquals(JsonToken.END_DOCUMENT, reader.peek());
     }
@@ -250,6 +349,51 @@ public final class JsonReaderTest extends TestCase {
         reader.endArray();
     }
 
+    public void testMatchingValidNumbers() throws IOException {
+        String json = "[-1,99,-0,0,0e1,0e+1,0e-1,0E1,0E+1,0E-1,0.0,1.0,-1.0,1.0e0,1.0e+1,1.0e-1]";
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.beginArray();
+        for (int i = 0; i < 16; i++) {
+            assertEquals(JsonToken.NUMBER, reader.peek());
+            reader.nextDouble();
+        }
+        reader.endArray();
+    }
+
+    public void testRecognizingInvalidNumbers() throws IOException {
+        String json = "[-00,00,001,+1,1f,0x,0xf,0x0,0f1,0ee1,1..0,1e0.1,1.-01,1.+1,1.0x,1.0+]";
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.setLenient(true);
+        reader.beginArray();
+        for (int i = 0; i < 16; i++) {
+            assertEquals(JsonToken.STRING, reader.peek());
+            reader.nextString();
+        }
+        reader.endArray();
+    }
+
+    public void testNonFiniteDouble() throws IOException {
+        String json = "[NaN]";
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.beginArray();
+        try {
+            reader.nextDouble();
+            fail();
+        } catch (IOException expected) {
+        }
+    }
+
+    public void testNumberWithHexPrefix() throws IOException {
+        String json = "[0x11]";
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.beginArray();
+        try {
+            reader.nextLong();
+            fail();
+        } catch (IOException expected) {
+        }
+    }
+
     public void testNumberWithOctalPrefix() throws IOException {
         String json = "[01]";
         JsonReader reader = new JsonReader(new StringReader(json));
@@ -257,21 +401,8 @@ public final class JsonReaderTest extends TestCase {
         try {
             reader.nextInt();
             fail();
-        } catch (NumberFormatException expected) {
+        } catch (IOException expected) {
         }
-        try {
-            reader.nextLong();
-            fail();
-        } catch (NumberFormatException expected) {
-        }
-        try {
-            reader.nextDouble();
-            fail();
-        } catch (NumberFormatException expected) {
-        }
-        assertEquals("01", reader.nextString());
-        reader.endArray();
-        assertEquals(JsonToken.END_DOCUMENT, reader.peek());
     }
 
     public void testBooleans() throws IOException {

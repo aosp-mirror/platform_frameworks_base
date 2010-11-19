@@ -39,19 +39,6 @@ static jmethodID method_deviceAdded;
 static jmethodID method_deviceRemoved;
 static jfieldID field_context;
 
-static struct file_descriptor_offsets_t
-{
-    jclass mClass;
-    jmethodID mConstructor;
-    jfieldID mDescriptor;
-} gFileDescriptorOffsets;
-
-static struct parcel_file_descriptor_offsets_t
-{
-    jclass mClass;
-    jmethodID mConstructor;
-} gParcelFileDescriptorOffsets;
-
 #ifdef HAVE_ANDROID_OS
 
 static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
@@ -201,34 +188,19 @@ android_media_MtpClient_get_storage_id(JNIEnv *env, jobject thiz,
         return -1;
 }
 
-static jobject
-android_media_MtpClient_open_file(JNIEnv *env, jobject thiz,
-        jint device_id, jlong object_id)
+static jboolean
+android_media_MtpClient_import_file(JNIEnv *env, jobject thiz,
+        jint device_id, jlong object_id, jstring dest_path)
 {
 #ifdef HAVE_ANDROID_OS
     MyClient *client = (MyClient *)env->GetIntField(thiz, field_context);
     MtpDevice* device = client->getDevice(device_id);
-    if (!device)
-        return NULL;
-
-    MtpObjectInfo* info = device->getObjectInfo(object_id);
-    if (!info)
-        return NULL;
-    int object_size = info->mCompressedSize;
-    delete info;
-    int fd = device->readObject(object_id, object_size);
-    if (fd < 0)
-        return NULL;
-
-    jobject fileDescriptor = env->NewObject(gFileDescriptorOffsets.mClass,
-        gFileDescriptorOffsets.mConstructor);
-    if (fileDescriptor != NULL) {
-        env->SetIntField(fileDescriptor, gFileDescriptorOffsets.mDescriptor, fd);
-    } else {
-        return NULL;
+    if (device) {
+        const char *destPathStr = env->GetStringUTFChars(dest_path, NULL);
+        bool result = device->readObject(object_id, destPathStr);
+        env->ReleaseStringUTFChars(dest_path, destPathStr);
+        return result;
     }
-    return env->NewObject(gParcelFileDescriptorOffsets.mClass,
-        gParcelFileDescriptorOffsets.mConstructor, fileDescriptor);
 #endif
     return NULL;
 }
@@ -243,8 +215,8 @@ static JNINativeMethod gMethods[] = {
     {"native_delete_object",   "(IJ)Z", (void *)android_media_MtpClient_delete_object},
     {"native_get_parent",      "(IJ)J", (void *)android_media_MtpClient_get_parent},
     {"native_get_storage_id",  "(IJ)J", (void *)android_media_MtpClient_get_storage_id},
-    {"native_open_file",       "(IJ)Landroid/os/ParcelFileDescriptor;",
-                                        (void *)android_media_MtpClient_open_file},
+    {"native_import_file",     "(IJLjava/lang/String;)Z",
+                                        (void *)android_media_MtpClient_import_file},
 };
 
 static const char* const kClassPathName = "android/media/MtpClient";
@@ -275,21 +247,6 @@ int register_android_media_MtpClient(JNIEnv *env)
         LOGE("Can't find MtpClient.mNativeContext");
         return -1;
     }
-
-   clazz = env->FindClass("java/io/FileDescriptor");
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class java.io.FileDescriptor");
-    gFileDescriptorOffsets.mClass = (jclass) env->NewGlobalRef(clazz);
-    gFileDescriptorOffsets.mConstructor = env->GetMethodID(clazz, "<init>", "()V");
-    gFileDescriptorOffsets.mDescriptor = env->GetFieldID(clazz, "descriptor", "I");
-    LOG_FATAL_IF(gFileDescriptorOffsets.mDescriptor == NULL,
-                 "Unable to find descriptor field in java.io.FileDescriptor");
-
-   clazz = env->FindClass("android/os/ParcelFileDescriptor");
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class android.os.ParcelFileDescriptor");
-    gParcelFileDescriptorOffsets.mClass = (jclass) env->NewGlobalRef(clazz);
-    gParcelFileDescriptorOffsets.mConstructor = env->GetMethodID(clazz, "<init>", "(Ljava/io/FileDescriptor;)V");
-    LOG_FATAL_IF(gParcelFileDescriptorOffsets.mConstructor == NULL,
-                 "Unable to find constructor for android.os.ParcelFileDescriptor");
 
     return AndroidRuntime::registerNativeMethods(env,
                 "android/media/MtpClient", gMethods, NELEM(gMethods));

@@ -49,7 +49,7 @@ public class DialerKeyListener extends NumberKeyListener
      * from the KeyEvent.
      */
     protected int lookup(KeyEvent event, Spannable content) {
-        int meta = getMetaState(content);
+        int meta = event.getMetaState() | getMetaState(content);
         int number = event.getNumber();
 
         /*

@@ -76,7 +76,7 @@ SampleTable::~SampleTable() {
 }
 
 status_t SampleTable::setChunkOffsetParams(
-        uint32_t type, off_t data_offset, size_t data_size) {
+        uint32_t type, off64_t data_offset, size_t data_size) {
     if (mChunkOffsetOffset >= 0) {
         return ERROR_MALFORMED;
     }
@@ -117,7 +117,7 @@ status_t SampleTable::setChunkOffsetParams(
 }
 
 status_t SampleTable::setSampleToChunkParams(
-        off_t data_offset, size_t data_size) {
+        off64_t data_offset, size_t data_size) {
     if (mSampleToChunkOffset >= 0) {
         return ERROR_MALFORMED;
     }
@@ -168,7 +168,7 @@ status_t SampleTable::setSampleToChunkParams(
 }
 
 status_t SampleTable::setSampleSizeParams(
-        uint32_t type, off_t data_offset, size_t data_size) {
+        uint32_t type, off64_t data_offset, size_t data_size) {
     if (mSampleSizeOffset >= 0) {
         return ERROR_MALFORMED;
     }
@@ -228,7 +228,7 @@ status_t SampleTable::setSampleSizeParams(
 }
 
 status_t SampleTable::setTimeToSampleParams(
-        off_t data_offset, size_t data_size) {
+        off64_t data_offset, size_t data_size) {
     if (mTimeToSample != NULL || data_size < 8) {
         return ERROR_MALFORMED;
     }
@@ -260,7 +260,7 @@ status_t SampleTable::setTimeToSampleParams(
     return OK;
 }
 
-status_t SampleTable::setSyncSampleParams(off_t data_offset, size_t data_size) {
+status_t SampleTable::setSyncSampleParams(off64_t data_offset, size_t data_size) {
     if (mSyncSampleOffset >= 0 || data_size < 8) {
         return ERROR_MALFORMED;
     }
@@ -557,7 +557,7 @@ status_t SampleTable::getSampleSize_l(
 
 status_t SampleTable::getMetaDataForSample(
         uint32_t sampleIndex,
-        off_t *offset,
+        off64_t *offset,
         size_t *size,
         uint32_t *decodingTime,
         bool *isSyncSample) {

@@ -36,17 +36,17 @@ public:
 
     // type can be 'stco' or 'co64'.
     status_t setChunkOffsetParams(
-            uint32_t type, off_t data_offset, size_t data_size);
+            uint32_t type, off64_t data_offset, size_t data_size);
 
-    status_t setSampleToChunkParams(off_t data_offset, size_t data_size);
+    status_t setSampleToChunkParams(off64_t data_offset, size_t data_size);
 
     // type can be 'stsz' or 'stz2'.
     status_t setSampleSizeParams(
-            uint32_t type, off_t data_offset, size_t data_size);
+            uint32_t type, off64_t data_offset, size_t data_size);
 
-    status_t setTimeToSampleParams(off_t data_offset, size_t data_size);
+    status_t setTimeToSampleParams(off64_t data_offset, size_t data_size);
 
-    status_t setSyncSampleParams(off_t data_offset, size_t data_size);
+    status_t setSyncSampleParams(off64_t data_offset, size_t data_size);
 
     ////////////////////////////////////////////////////////////////////////////
 
@@ -58,7 +58,7 @@ public:
 
     status_t getMetaDataForSample(
             uint32_t sampleIndex,
-            off_t *offset,
+            off64_t *offset,
             size_t *size,
             uint32_t *decodingTime,
             bool *isSyncSample = NULL);
@@ -89,14 +89,14 @@ private:
     sp<DataSource> mDataSource;
     Mutex mLock;
 
-    off_t mChunkOffsetOffset;
+    off64_t mChunkOffsetOffset;
     uint32_t mChunkOffsetType;
     uint32_t mNumChunkOffsets;
 
-    off_t mSampleToChunkOffset;
+    off64_t mSampleToChunkOffset;
     uint32_t mNumSampleToChunkOffsets;
 
-    off_t mSampleSizeOffset;
+    off64_t mSampleSizeOffset;
     uint32_t mSampleSizeFieldSize;
     uint32_t mDefaultSampleSize;
     uint32_t mNumSampleSizes;
@@ -104,7 +104,7 @@ private:
     uint32_t mTimeToSampleCount;
     uint32_t *mTimeToSample;
 
-    off_t mSyncSampleOffset;
+    off64_t mSyncSampleOffset;
     uint32_t mNumSyncSamples;
     uint32_t *mSyncSamples;
     size_t mLastSyncSampleIndex;

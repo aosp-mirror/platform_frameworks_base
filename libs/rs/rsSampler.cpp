@@ -71,29 +71,32 @@ void Sampler::setupGL(const Context *rsc, const Allocation *tex) {
         GL_CLAMP_TO_EDGE, //RS_SAMPLER_CLAMP
     };
 
+    // This tells us the correct texture type
+    GLenum target = (GLenum)tex->getGLTarget();
+
     if (!rsc->ext_OES_texture_npot() && tex->getType()->getIsNp2()) {
         if (tex->getHasGraphicsMipmaps() && rsc->ext_GL_NV_texture_npot_2D_mipmap()) {
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
+            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
         } else {
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, transNP[mMinFilter]);
+            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, transNP[mMinFilter]);
         }
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, transNP[mMagFilter]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, transNP[mWrapS]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, transNP[mWrapT]);
+        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, transNP[mMagFilter]);
+        glTexParameteri(target, GL_TEXTURE_WRAP_S, transNP[mWrapS]);
+        glTexParameteri(target, GL_TEXTURE_WRAP_T, transNP[mWrapT]);
     } else {
         if (tex->getHasGraphicsMipmaps()) {
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
+            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
         } else {
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, transNP[mMinFilter]);
+            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, transNP[mMinFilter]);
         }
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, trans[mMagFilter]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, trans[mWrapS]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, trans[mWrapT]);
+        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, trans[mMagFilter]);
+        glTexParameteri(target, GL_TEXTURE_WRAP_S, trans[mWrapS]);
+        glTexParameteri(target, GL_TEXTURE_WRAP_T, trans[mWrapT]);
     }
 
     float anisoValue = rsMin(rsc->ext_texture_max_aniso(), mAniso);
     if (rsc->ext_texture_max_aniso() > 1.0f) {
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoValue);
+        glTexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoValue);
     }
 
     rsc->checkError("Sampler::setupGL2 tex env");

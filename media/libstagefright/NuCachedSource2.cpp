@@ -201,7 +201,7 @@ status_t NuCachedSource2::initCheck() const {
     return mSource->initCheck();
 }
 
-status_t NuCachedSource2::getSize(off_t *size) {
+status_t NuCachedSource2::getSize(off64_t *size) {
     return mSource->getSize(size);
 }
 
@@ -353,7 +353,7 @@ void NuCachedSource2::restartPrefetcherIfNecessary_l(
     mFetching = true;
 }
 
-ssize_t NuCachedSource2::readAt(off_t offset, void *data, size_t size) {
+ssize_t NuCachedSource2::readAt(off64_t offset, void *data, size_t size) {
     Mutex::Autolock autoSerializer(mSerializer);
 
     LOGV("readAt offset %ld, size %d", offset, size);
@@ -408,27 +408,27 @@ size_t NuCachedSource2::approxDataRemaining(bool *eos) {
 
 size_t NuCachedSource2::approxDataRemaining_l(bool *eos) {
     *eos = (mFinalStatus != OK);
-    off_t lastBytePosCached = mCacheOffset + mCache->totalSize();
+    off64_t lastBytePosCached = mCacheOffset + mCache->totalSize();
     if (mLastAccessPos < lastBytePosCached) {
         return lastBytePosCached - mLastAccessPos;
     }
     return 0;
 }
 
-ssize_t NuCachedSource2::readInternal(off_t offset, void *data, size_t size) {
+ssize_t NuCachedSource2::readInternal(off64_t offset, void *data, size_t size) {
     LOGV("readInternal offset %ld size %d", offset, size);
 
     Mutex::Autolock autoLock(mLock);
 
     if (offset < mCacheOffset
-            || offset >= (off_t)(mCacheOffset + mCache->totalSize())) {
-        static const off_t kPadding = 32768;
+            || offset >= (off64_t)(mCacheOffset + mCache->totalSize())) {
+        static const off64_t kPadding = 32768;
 
         // In the presence of multiple decoded streams, once of them will
         // trigger this seek request, the other one will request data "nearby"
         // soon, adjust the seek position so that that subsequent request
         // does not trigger another seek.
-        off_t seekOffset = (offset > kPadding) ? offset - kPadding : 0;
+        off64_t seekOffset = (offset > kPadding) ? offset - kPadding : 0;
 
         seekInternal_l(seekOffset);
     }
@@ -457,11 +457,11 @@ ssize_t NuCachedSource2::readInternal(off_t offset, void *data, size_t size) {
     return -EAGAIN;
 }
 
-status_t NuCachedSource2::seekInternal_l(off_t offset) {
+status_t NuCachedSource2::seekInternal_l(off64_t offset) {
     mLastAccessPos = offset;
 
     if (offset >= mCacheOffset
-            && offset <= (off_t)(mCacheOffset + mCache->totalSize())) {
+            && offset <= (off64_t)(mCacheOffset + mCache->totalSize())) {
         return OK;
     }
 

@@ -180,13 +180,16 @@ public class TextKeyListener extends BaseKeyListener implements SpanWatcher {
     }
 
     private KeyListener getKeyListener(KeyEvent event) {
-        KeyCharacterMap kmap = KeyCharacterMap.load(event.getKeyboardDevice());
+        KeyCharacterMap kmap = event.getKeyCharacterMap();
         int kind = kmap.getKeyboardType();
 
         if (kind == KeyCharacterMap.ALPHA) {
             return QwertyKeyListener.getInstance(mAutoText, mAutoCap);
         } else if (kind == KeyCharacterMap.NUMERIC) {
             return MultiTapKeyListener.getInstance(mAutoText, mAutoCap);
+        } else if (kind == KeyCharacterMap.FULL
+                || kind == KeyCharacterMap.SPECIAL_FUNCTION) {
+            return QwertyKeyListener.getInstance(false, Capitalize.NONE);
         }
 
         return NullKeyListener.getInstance();

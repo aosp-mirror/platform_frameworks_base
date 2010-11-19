@@ -595,7 +595,7 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta, uint32_t flags) {
                 size -= length;
             }
 
-            CODEC_LOGV(
+            CODEC_LOGI(
                     "AVC profile = %d (%s), level = %d",
                     (int)profile, AVCProfileToString(profile), level);
 
@@ -1714,7 +1714,7 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
     // Set up the native window.
     // XXX TODO: Get the gralloc usage flags from the OMX plugin!
     err = native_window_set_usage(
-            mNativeWindow.get(), GRALLOC_USAGE_HW_TEXTURE);
+            mNativeWindow.get(), GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_EXTERNAL_DISP);
     if (err != 0) {
         LOGE("native_window_set_usage failed: %s (%d)", strerror(-err), -err);
         return err;

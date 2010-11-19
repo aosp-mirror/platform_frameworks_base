@@ -47,7 +47,7 @@ private:
     status_t mInitCheck;
 
     sp<DataSource> mDataSource;
-    off_t mFirstFramePos;
+    off64_t mFirstFramePos;
     sp<MetaData> mMeta;
     uint32_t mFixedHeader;
     sp<MP3Seeker> mSeeker;

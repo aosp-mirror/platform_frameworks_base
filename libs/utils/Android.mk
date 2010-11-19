@@ -41,6 +41,7 @@ commonSources:= \
 	TextOutput.cpp \
 	Threads.cpp \
 	Timers.cpp \
+	Tokenizer.cpp \
 	Unicode.cpp \
 	VectorImpl.cpp \
 	ZipFileCRO.cpp \

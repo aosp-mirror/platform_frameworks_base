@@ -40,6 +40,7 @@ public final class MtpCursor extends AbstractWindowedCursor {
     public static final int OBJECT_ID           = 6;
     public static final int STORAGE_CHILDREN    = 7;
     public static final int OBJECT_CHILDREN     = 8;
+    public static final int OBJECT_IMPORT       = 9;
 
     /** The names of the columns in the projection */
     private String[] mColumns;

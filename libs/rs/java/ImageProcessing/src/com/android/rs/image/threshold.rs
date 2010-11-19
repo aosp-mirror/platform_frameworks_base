@@ -11,8 +11,6 @@ uchar4 * OutPixel;
 float4 * ScratchPixel1;
 float4 * ScratchPixel2;
 
-#pragma rs export_func(filter);
-
 rs_script vBlurScript;
 rs_script hBlurScript;
 

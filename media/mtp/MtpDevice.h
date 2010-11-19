@@ -86,12 +86,9 @@ public:
 
     MtpProperty*            getDevicePropDesc(MtpDeviceProperty code);
 
-    // returns the file descriptor for a pipe to read the object's data
-    int                     readObject(MtpObjectHandle handle, int objectSize);
+    bool                   readObject(MtpObjectHandle handle, const char* destPath);
 
 private:
-    friend class ReadObjectThread;
-
     bool                    sendRequest(MtpOperationCode operation);
     bool                    sendData();
     bool                    readData();

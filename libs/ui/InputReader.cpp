@@ -24,6 +24,7 @@
 
 #include <cutils/log.h>
 #include <ui/InputReader.h>
+#include <ui/Keyboard.h>
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -68,75 +69,6 @@ inline static float pythag(float x, float y) {
 
 static inline const char* toString(bool value) {
     return value ? "true" : "false";
-}
-
-int32_t setEphemeralMetaState(int32_t mask, bool down, int32_t oldMetaState) {
-    int32_t newMetaState;
-    if (down) {
-        newMetaState = oldMetaState | mask;
-    } else {
-        newMetaState = oldMetaState &
-                ~(mask | AMETA_ALT_ON | AMETA_SHIFT_ON | AMETA_CTRL_ON | AMETA_META_ON);
-    }
-
-    if (newMetaState & (AMETA_ALT_LEFT_ON | AMETA_ALT_RIGHT_ON)) {
-        newMetaState |= AMETA_ALT_ON;
-    }
-
-    if (newMetaState & (AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_RIGHT_ON)) {
-        newMetaState |= AMETA_SHIFT_ON;
-    }
-
-    if (newMetaState & (AMETA_CTRL_LEFT_ON | AMETA_CTRL_RIGHT_ON)) {
-        newMetaState |= AMETA_CTRL_ON;
-    }
-
-    if (newMetaState & (AMETA_META_LEFT_ON | AMETA_META_RIGHT_ON)) {
-        newMetaState |= AMETA_META_ON;
-    }
-    return newMetaState;
-}
-
-int32_t toggleLockedMetaState(int32_t mask, bool down, int32_t oldMetaState) {
-    if (down) {
-        return oldMetaState;
-    } else {
-        return oldMetaState ^ mask;
-    }
-}
-
-int32_t updateMetaState(int32_t keyCode, bool down, int32_t oldMetaState) {
-    int32_t mask;
-    switch (keyCode) {
-    case AKEYCODE_ALT_LEFT:
-        return setEphemeralMetaState(AMETA_ALT_LEFT_ON, down, oldMetaState);
-    case AKEYCODE_ALT_RIGHT:
-        return setEphemeralMetaState(AMETA_ALT_RIGHT_ON, down, oldMetaState);
-    case AKEYCODE_SHIFT_LEFT:
-        return setEphemeralMetaState(AMETA_SHIFT_LEFT_ON, down, oldMetaState);
-    case AKEYCODE_SHIFT_RIGHT:
-        return setEphemeralMetaState(AMETA_SHIFT_RIGHT_ON, down, oldMetaState);
-    case AKEYCODE_SYM:
-        return setEphemeralMetaState(AMETA_SYM_ON, down, oldMetaState);
-    case AKEYCODE_FUNCTION:
-        return setEphemeralMetaState(AMETA_FUNCTION_ON, down, oldMetaState);
-    case AKEYCODE_CTRL_LEFT:
-        return setEphemeralMetaState(AMETA_CTRL_LEFT_ON, down, oldMetaState);
-    case AKEYCODE_CTRL_RIGHT:
-        return setEphemeralMetaState(AMETA_CTRL_RIGHT_ON, down, oldMetaState);
-    case AKEYCODE_META_LEFT:
-        return setEphemeralMetaState(AMETA_META_LEFT_ON, down, oldMetaState);
-    case AKEYCODE_META_RIGHT:
-        return setEphemeralMetaState(AMETA_META_RIGHT_ON, down, oldMetaState);
-    case AKEYCODE_CAPS_LOCK:
-        return toggleLockedMetaState(AMETA_CAPS_LOCK_ON, down, oldMetaState);
-    case AKEYCODE_NUM_LOCK:
-        return toggleLockedMetaState(AMETA_NUM_LOCK_ON, down, oldMetaState);
-    case AKEYCODE_SCROLL_LOCK:
-        return toggleLockedMetaState(AMETA_SCROLL_LOCK_ON, down, oldMetaState);
-    default:
-        return oldMetaState;
-    }
 }
 
 static const int32_t keyCodeRotationMap[][4] = {
@@ -977,7 +909,7 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
             ssize_t keyDownIndex = findKeyDownLocked(scanCode);
             if (keyDownIndex >= 0) {
                 // key repeat, be sure to use same keycode as before in case of rotation
-                keyCode = mLocked.keyDowns.top().keyCode;
+                keyCode = mLocked.keyDowns.itemAt(keyDownIndex).keyCode;
             } else {
                 // key down
                 mLocked.keyDowns.push();
@@ -992,7 +924,7 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
             ssize_t keyDownIndex = findKeyDownLocked(scanCode);
             if (keyDownIndex >= 0) {
                 // key up, be sure to use same keycode as before in case of rotation
-                keyCode = mLocked.keyDowns.top().keyCode;
+                keyCode = mLocked.keyDowns.itemAt(keyDownIndex).keyCode;
                 mLocked.keyDowns.removeAt(size_t(keyDownIndex));
             } else {
                 // key was not actually down

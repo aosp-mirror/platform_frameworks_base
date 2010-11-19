@@ -14,8 +14,6 @@
 
 #include "shared.rsh"
 
-#pragma rs export_func(vector_array_test)
-
 typedef struct {
     float3 arr[2];
 } float3Struct;

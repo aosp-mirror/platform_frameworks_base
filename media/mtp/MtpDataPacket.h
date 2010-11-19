@@ -102,6 +102,8 @@ public:
 #ifdef MTP_HOST
     int                 read(struct usb_endpoint *ep);
     int                 readData(struct usb_endpoint *ep, void* buffer, int length);
+    int                 readDataAsync(struct usb_endpoint *ep, void* buffer, int length);
+    int                 readDataWait(struct usb_endpoint *ep);
     int                 readDataHeader(struct usb_endpoint *ep);
 
     int                 writeDataHeader(struct usb_endpoint *ep, uint32_t length);
@@ -110,6 +112,7 @@ public:
 #endif
 
     inline bool         hasData() const { return mPacketSize > MTP_CONTAINER_HEADER_SIZE; }
+    inline uint32_t     getContainerLength() const { return MtpPacket::getUInt32(MTP_CONTAINER_LENGTH_OFFSET); }
     void*               getData(int& outLength) const;
 };
 

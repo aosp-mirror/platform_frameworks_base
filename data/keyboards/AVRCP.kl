@@ -1,4 +1,3 @@
-#
 # Copyright (C) 2010 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
-# This makefile builds the key character map binary files.  (*.kcm.bin)
+# Key layout used for Bluetooth AVRCP support.
 
-LOCAL_PATH := $(call my-dir)
-include $(LOCAL_PATH)/common.mk
-
-$(foreach file,$(keycharmaps), \
-    $(eval include $(CLEAR_VARS)) \
-    $(eval LOCAL_SRC_FILES := $(file)) \
-    $(eval LOCAL_MODULE_TAGS := optional) \
-    $(eval include $(BUILD_KEY_CHAR_MAP)) \
-)
+key 200   MEDIA_PLAY_PAUSE    WAKE
+key 201   MEDIA_PLAY_PAUSE    WAKE
+key 166   MEDIA_STOP          WAKE
+key 163   MEDIA_NEXT          WAKE
+key 165   MEDIA_PREVIOUS      WAKE
+key 168   MEDIA_REWIND        WAKE
+key 208   MEDIA_FAST_FORWARD  WAKE

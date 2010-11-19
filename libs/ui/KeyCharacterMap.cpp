@@ -1,275 +1,807 @@
+/*
+ * Copyright (C) 2008 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #define LOG_TAG "KeyCharacterMap"
 
-#include <ui/KeyCharacterMap.h>
-#include <cutils/properties.h>
-
-#include <utils/Log.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <limits.h>
 #include <string.h>
+#include <android/keycodes.h>
+#include <ui/Keyboard.h>
+#include <ui/KeyCharacterMap.h>
+#include <utils/Log.h>
+#include <utils/Errors.h>
+#include <utils/Tokenizer.h>
+#include <utils/Timers.h>
 
-struct Header
-{
-    char magic[8];
-    unsigned int endian;
-    unsigned int version;
-    unsigned int keycount;
-    unsigned char kbdtype;
-    char padding[11];
+// Enables debug output for the parser.
+#define DEBUG_PARSER 0
+
+// Enables debug output for parser performance.
+#define DEBUG_PARSER_PERFORMANCE 0
+
+// Enables debug output for mapping.
+#define DEBUG_MAPPING 0
+
+
+namespace android {
+
+static const char* WHITESPACE = " \t\r";
+static const char* WHITESPACE_OR_PROPERTY_DELIMITER = " \t\r,:";
+
+struct Modifier {
+    const char* label;
+    int32_t metaState;
+};
+static const Modifier modifiers[] = {
+        { "shift", AMETA_SHIFT_ON },
+        { "lshift", AMETA_SHIFT_LEFT_ON },
+        { "rshift", AMETA_SHIFT_RIGHT_ON },
+        { "alt", AMETA_ALT_ON },
+        { "lalt", AMETA_ALT_LEFT_ON },
+        { "ralt", AMETA_ALT_RIGHT_ON },
+        { "ctrl", AMETA_CTRL_ON },
+        { "lctrl", AMETA_CTRL_LEFT_ON },
+        { "rctrl", AMETA_CTRL_RIGHT_ON },
+        { "meta", AMETA_META_ON },
+        { "lmeta", AMETA_META_LEFT_ON },
+        { "rmeta", AMETA_META_RIGHT_ON },
+        { "sym", AMETA_SYM_ON },
+        { "fn", AMETA_FUNCTION_ON },
+        { "capslock", AMETA_CAPS_LOCK_ON },
+        { "numlock", AMETA_NUM_LOCK_ON },
+        { "scrolllock", AMETA_SCROLL_LOCK_ON },
 };
 
-KeyCharacterMap::KeyCharacterMap()
-{
-}
-
-KeyCharacterMap::~KeyCharacterMap()
-{
-    free(m_keys);
-}
-
-unsigned short
-KeyCharacterMap::get(int keycode, int meta)
-{
-    Key* k = find_key(keycode);
-    if (k != NULL) {
-        return k->data[meta & META_MASK];
+#if DEBUG_MAPPING
+static String8 toString(const char16_t* chars, size_t numChars) {
+    String8 result;
+    for (size_t i = 0; i < numChars; i++) {
+        result.appendFormat(i == 0 ? "%d" : ", %d", chars[i]);
     }
-    return 0;
+    return result;
+}
+#endif
+
+
+// --- KeyCharacterMap ---
+
+KeyCharacterMap::KeyCharacterMap() :
+    mType(KEYBOARD_TYPE_UNKNOWN) {
 }
 
-unsigned short
-KeyCharacterMap::getNumber(int keycode)
-{
-    Key* k = find_key(keycode);
-    if (k != NULL) {
-        return k->number;
+KeyCharacterMap::~KeyCharacterMap() {
+    for (size_t i = 0; i < mKeys.size(); i++) {
+        Key* key = mKeys.editValueAt(i);
+        delete key;
     }
-    return 0;
 }
 
-unsigned short
-KeyCharacterMap::getMatch(int keycode, const unsigned short* chars,
-                          int charsize, uint32_t modifiers)
-{
-    Key* k = find_key(keycode);
-    modifiers &= 3; // ignore the SYM key because we don't have keymap entries for it
-    if (k != NULL) {
-        const uint16_t* data = k->data;
-        for (int j=0; j<charsize; j++) {
-            uint16_t c = chars[j];
-            for (int i=0; i<(META_MASK + 1); i++) {
-                if ((modifiers == 0) || ((modifiers & i) != 0)) {
-                    if (c == data[i]) {
-                        return c;
+status_t KeyCharacterMap::load(const String8& filename, KeyCharacterMap** outMap) {
+    *outMap = NULL;
+
+    Tokenizer* tokenizer;
+    status_t status = Tokenizer::open(filename, &tokenizer);
+    if (status) {
+        LOGE("Error %d opening key character map file %s.", status, filename.string());
+    } else {
+        KeyCharacterMap* map = new KeyCharacterMap();
+        if (!map) {
+            LOGE("Error allocating key character map.");
+            status = NO_MEMORY;
+        } else {
+#if DEBUG_PARSER_PERFORMANCE
+            nsecs_t startTime = systemTime(SYSTEM_TIME_MONOTONIC);
+#endif
+            Parser parser(map, tokenizer);
+            status = parser.parse();
+#if DEBUG_PARSER_PERFORMANCE
+            nsecs_t elapsedTime = systemTime(SYSTEM_TIME_MONOTONIC) - startTime;
+            LOGD("Parsed key character map file '%s' %d lines in %0.3fms.",
+                    tokenizer->getFilename().string(), tokenizer->getLineNumber(),
+                    elapsedTime / 1000000.0);
+#endif
+            if (status) {
+                delete map;
+            } else {
+                *outMap = map;
+            }
+        }
+        delete tokenizer;
+    }
+    return status;
+}
+
+status_t KeyCharacterMap::loadByDeviceId(int32_t deviceId, KeyCharacterMap** outMap) {
+    *outMap = NULL;
+
+    String8 filename;
+    status_t result = getKeyCharacterMapFile(deviceId, filename);
+    if (!result) {
+        result = load(filename, outMap);
+    }
+    return result;
+}
+
+int32_t KeyCharacterMap::getKeyboardType() const {
+    return mType;
+}
+
+char16_t KeyCharacterMap::getDisplayLabel(int32_t keyCode) const {
+    char16_t result = 0;
+    ssize_t index = mKeys.indexOfKey(keyCode);
+    if (index >= 0) {
+        const Key* key = mKeys.valueAt(index);
+        result = key->label;
+    }
+#if DEBUG_MAPPING
+    LOGD("getDisplayLabel: keyCode=%d ~ Result %d.", keyCode, result);
+#endif
+    return result;
+}
+
+char16_t KeyCharacterMap::getNumber(int32_t keyCode) const {
+    char16_t result = 0;
+    ssize_t index = mKeys.indexOfKey(keyCode);
+    if (index >= 0) {
+        const Key* key = mKeys.valueAt(index);
+        result = key->number;
+    }
+#if DEBUG_MAPPING
+    LOGD("getNumber: keyCode=%d ~ Result %d.", keyCode, result);
+#endif
+    return result;
+}
+
+char16_t KeyCharacterMap::getCharacter(int32_t keyCode, int32_t metaState) const {
+    char16_t result = 0;
+    ssize_t index = mKeys.indexOfKey(keyCode);
+    if (index >= 0) {
+        const Key* key = mKeys.valueAt(index);
+        for (const Behavior* behavior = key->firstBehavior; behavior; behavior = behavior->next) {
+            if ((behavior->metaState & metaState) == behavior->metaState) {
+                result = behavior->character;
+                break;
+            }
+        }
+    }
+#if DEBUG_MAPPING
+    LOGD("getCharacter: keyCode=%d, metaState=0x%08x ~ Result %d.", keyCode, metaState, result);
+#endif
+    return result;
+}
+
+char16_t KeyCharacterMap::getMatch(int32_t keyCode, const char16_t* chars, size_t numChars,
+        int32_t metaState) const {
+    char16_t result = 0;
+    ssize_t index = mKeys.indexOfKey(keyCode);
+    if (index >= 0) {
+        const Key* key = mKeys.valueAt(index);
+
+        // Try to find the most general behavior that maps to this character.
+        // For example, the base key behavior will usually be last in the list.
+        // However, if we find a perfect meta state match for one behavior then use that one.
+        for (const Behavior* behavior = key->firstBehavior; behavior; behavior = behavior->next) {
+            if (behavior->character) {
+                for (size_t i = 0; i < numChars; i++) {
+                    if (behavior->character == chars[i]) {
+                        result = behavior->character;
+                        if ((behavior->metaState & metaState) == behavior->metaState) {
+                            goto ExactMatch;
+                        }
+                        break;
                     }
                 }
             }
         }
+    ExactMatch: ;
     }
-    return 0;
+#if DEBUG_MAPPING
+    LOGD("getMatch: keyCode=%d, chars=[%s], metaState=0x%08x ~ Result %d.",
+            keyCode, toString(chars, numChars).string(), metaState, result);
+#endif
+    return result;
 }
 
-unsigned short
-KeyCharacterMap::getDisplayLabel(int keycode)
-{
-    Key* k = find_key(keycode);
-    if (k != NULL) {
-        return k->display_label;
+bool KeyCharacterMap::getEvents(int32_t deviceId, const char16_t* chars, size_t numChars,
+        Vector<KeyEvent>& outEvents) const {
+    nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
+
+    for (size_t i = 0; i < numChars; i++) {
+        int32_t keyCode, metaState;
+        char16_t ch = chars[i];
+        if (!findKey(ch, &keyCode, &metaState)) {
+#if DEBUG_MAPPING
+            LOGD("getEvents: deviceId=%d, chars=[%s] ~ Failed to find mapping for character %d.",
+                    deviceId, toString(chars, numChars).string(), ch);
+#endif
+            return false;
+        }
+
+        int32_t currentMetaState = 0;
+        addMetaKeys(outEvents, deviceId, metaState, true, now, &currentMetaState);
+        addKey(outEvents, deviceId, keyCode, currentMetaState, true, now);
+        addKey(outEvents, deviceId, keyCode, currentMetaState, false, now);
+        addMetaKeys(outEvents, deviceId, metaState, false, now, &currentMetaState);
     }
-    return 0;
+#if DEBUG_MAPPING
+    LOGD("getEvents: deviceId=%d, chars=[%s] ~ Generated %d events.",
+            deviceId, toString(chars, numChars).string(), outEvents.size());
+    for (size_t i = 0; i < outEvents.size(); i++) {
+        LOGD("  Key: keyCode=%d, metaState=0x%08x, %s.",
+                outEvents[i].getKeyCode(), outEvents[i].getMetaState(),
+                outEvents[i].getAction() == AKEY_EVENT_ACTION_DOWN ? "down" : "up");
+    }
+#endif
+    return true;
 }
 
-bool
-KeyCharacterMap::getKeyData(int keycode, unsigned short *displayLabel,
-                            unsigned short *number, unsigned short* results)
-{
-    Key* k = find_key(keycode);
-    if (k != NULL) {
-        memcpy(results, k->data, sizeof(short)*(META_MASK + 1));
-        *number = k->number;
-        *displayLabel = k->display_label;
-        return true;
-    } else {
+bool KeyCharacterMap::findKey(char16_t ch, int32_t* outKeyCode, int32_t* outMetaState) const {
+    if (!ch) {
         return false;
     }
-}
 
-bool
-KeyCharacterMap::find_char(uint16_t c, uint32_t* key, uint32_t* mods)
-{
-    uint32_t N = m_keyCount;
-    for (int j=0; j<(META_MASK + 1); j++) {
-        Key const* keys = m_keys;
-        for (uint32_t i=0; i<N; i++) {
-            if (keys->data[j] == c) {
-                *key = keys->keycode;
-                *mods = j;
-                return true;
+    for (size_t i = 0; i < mKeys.size(); i++) {
+        const Key* key = mKeys.valueAt(i);
+
+        // Try to find the most general behavior that maps to this character.
+        // For example, the base key behavior will usually be last in the list.
+        const Behavior* found = NULL;
+        for (const Behavior* behavior = key->firstBehavior; behavior; behavior = behavior->next) {
+            if (behavior->character == ch) {
+                found = behavior;
             }
-            keys++;
+        }
+        if (found) {
+            *outKeyCode = mKeys.keyAt(i);
+            *outMetaState = found->metaState;
+            return true;
         }
     }
     return false;
 }
 
-bool
-KeyCharacterMap::getEvents(uint16_t* chars, size_t len,
-                           Vector<int32_t>* keys, Vector<uint32_t>* modifiers)
-{
-    for (size_t i=0; i<len; i++) {
-        uint32_t k, mods;
-        if (find_char(chars[i], &k, &mods)) {
-            keys->add(k);
-            modifiers->add(mods);
-        } else {
-            return false;
-        }
-    }
-    return true;
+void KeyCharacterMap::addKey(Vector<KeyEvent>& outEvents,
+        int32_t deviceId, int32_t keyCode, int32_t metaState, bool down, nsecs_t time) {
+    outEvents.push();
+    KeyEvent& event = outEvents.editTop();
+    event.initialize(deviceId, AINPUT_SOURCE_KEYBOARD,
+            down ? AKEY_EVENT_ACTION_DOWN : AKEY_EVENT_ACTION_UP,
+            0, keyCode, 0, metaState, 0, time, time);
 }
 
-KeyCharacterMap::Key*
-KeyCharacterMap::find_key(int keycode)
-{
-    Key* keys = m_keys;
-    int low = 0;
-    int high = m_keyCount - 1;
-    int mid;
-    int n;
-    while (low <= high) {
-        mid = (low + high) / 2;
-        n = keys[mid].keycode;
-        if (keycode < n) {
-            high = mid - 1;
-        } else if (keycode > n) {
-            low = mid + 1;
-        } else {
-            return keys + mid;
-        }
-    }
-    return NULL;
-}
+void KeyCharacterMap::addMetaKeys(Vector<KeyEvent>& outEvents,
+        int32_t deviceId, int32_t metaState, bool down, nsecs_t time,
+        int32_t* currentMetaState) {
+    // Add and remove meta keys symmetrically.
+    if (down) {
+        addLockedMetaKey(outEvents, deviceId, metaState, time,
+                AKEYCODE_CAPS_LOCK, AMETA_CAPS_LOCK_ON, currentMetaState);
+        addLockedMetaKey(outEvents, deviceId, metaState, time,
+                AKEYCODE_NUM_LOCK, AMETA_NUM_LOCK_ON, currentMetaState);
+        addLockedMetaKey(outEvents, deviceId, metaState, time,
+                AKEYCODE_SCROLL_LOCK, AMETA_SCROLL_LOCK_ON, currentMetaState);
 
-KeyCharacterMap*
-KeyCharacterMap::load(int id)
-{
-    KeyCharacterMap* map;
-    char path[PATH_MAX];
-    char propName[100];
-    char dev[PROPERTY_VALUE_MAX];
-    char fn[PROPERTY_VALUE_MAX];
-    int err;
+        addDoubleEphemeralMetaKey(outEvents, deviceId, metaState, true, time,
+                AKEYCODE_SHIFT_LEFT, AMETA_SHIFT_LEFT_ON,
+                AKEYCODE_SHIFT_RIGHT, AMETA_SHIFT_RIGHT_ON,
+                AMETA_SHIFT_ON, currentMetaState);
+        addDoubleEphemeralMetaKey(outEvents, deviceId, metaState, true, time,
+                AKEYCODE_ALT_LEFT, AMETA_ALT_LEFT_ON,
+                AKEYCODE_ALT_RIGHT, AMETA_ALT_RIGHT_ON,
+                AMETA_ALT_ON, currentMetaState);
+        addDoubleEphemeralMetaKey(outEvents, deviceId, metaState, true, time,
+                AKEYCODE_CTRL_LEFT, AMETA_CTRL_LEFT_ON,
+                AKEYCODE_CTRL_RIGHT, AMETA_CTRL_RIGHT_ON,
+                AMETA_CTRL_ON, currentMetaState);
+        addDoubleEphemeralMetaKey(outEvents, deviceId, metaState, true, time,
+                AKEYCODE_META_LEFT, AMETA_META_LEFT_ON,
+                AKEYCODE_META_RIGHT, AMETA_META_RIGHT_ON,
+                AMETA_META_ON, currentMetaState);
 
-    // Check whether the EventHub has set a key character map filename for us already.
-    sprintf(propName, "hw.keyboards.%u.kcmfile", id);
-    err = property_get(propName, fn, "");
-    if (err > 0) {
-        map = try_file(fn);
-        if (map) {
-            return map;
-        }
-        LOGW("Error loading keycharmap file '%s'. %s='%s'", path, propName, fn);
-    }
-
-    // Try using the device name.
-    const char* root = getenv("ANDROID_ROOT");
-
-    sprintf(propName, "hw.keyboards.%u.devname", id);
-    err = property_get(propName, dev, "");
-    if (err > 0) {
-        // replace all the spaces with underscores
-        strcpy(fn, dev);
-        for (char *p = strchr(fn, ' '); p && *p; p = strchr(p + 1, ' '))
-            *p = '_';
-        snprintf(path, sizeof(path), "%s/usr/keychars/%s.kcm.bin", root, fn);
-        map = try_file(path);
-        if (map) {
-            return map;
-        }
-        LOGW("Error loading keycharmap file '%s'. %s='%s'", path, propName, dev);
+        addSingleEphemeralMetaKey(outEvents, deviceId, metaState, true, time,
+                AKEYCODE_SYM, AMETA_SYM_ON, currentMetaState);
+        addSingleEphemeralMetaKey(outEvents, deviceId, metaState, true, time,
+                AKEYCODE_FUNCTION, AMETA_FUNCTION_ON, currentMetaState);
     } else {
-        LOGW("No keyboard for id %d", id);
-    }
+        addSingleEphemeralMetaKey(outEvents, deviceId, metaState, false, time,
+                AKEYCODE_FUNCTION, AMETA_FUNCTION_ON, currentMetaState);
+        addSingleEphemeralMetaKey(outEvents, deviceId, metaState, false, time,
+                AKEYCODE_SYM, AMETA_SYM_ON, currentMetaState);
 
-    snprintf(path, sizeof(path), "%s/usr/keychars/qwerty.kcm.bin", root);
-    map = try_file(path);
-    if (map) {
-        LOGW("Using default keymap: %s", path);
-        return map;
-    }
+        addDoubleEphemeralMetaKey(outEvents, deviceId, metaState, false, time,
+                AKEYCODE_META_LEFT, AMETA_META_LEFT_ON,
+                AKEYCODE_META_RIGHT, AMETA_META_RIGHT_ON,
+                AMETA_META_ON, currentMetaState);
+        addDoubleEphemeralMetaKey(outEvents, deviceId, metaState, false, time,
+                AKEYCODE_CTRL_LEFT, AMETA_CTRL_LEFT_ON,
+                AKEYCODE_CTRL_RIGHT, AMETA_CTRL_RIGHT_ON,
+                AMETA_CTRL_ON, currentMetaState);
+        addDoubleEphemeralMetaKey(outEvents, deviceId, metaState, false, time,
+                AKEYCODE_ALT_LEFT, AMETA_ALT_LEFT_ON,
+                AKEYCODE_ALT_RIGHT, AMETA_ALT_RIGHT_ON,
+                AMETA_ALT_ON, currentMetaState);
+        addDoubleEphemeralMetaKey(outEvents, deviceId, metaState, false, time,
+                AKEYCODE_SHIFT_LEFT, AMETA_SHIFT_LEFT_ON,
+                AKEYCODE_SHIFT_RIGHT, AMETA_SHIFT_RIGHT_ON,
+                AMETA_SHIFT_ON, currentMetaState);
 
-    LOGE("Can't find any keycharmaps (also tried %s)", path);
-    return NULL;
+        addLockedMetaKey(outEvents, deviceId, metaState, time,
+                AKEYCODE_SCROLL_LOCK, AMETA_SCROLL_LOCK_ON, currentMetaState);
+        addLockedMetaKey(outEvents, deviceId, metaState, time,
+                AKEYCODE_NUM_LOCK, AMETA_NUM_LOCK_ON, currentMetaState);
+        addLockedMetaKey(outEvents, deviceId, metaState, time,
+                AKEYCODE_CAPS_LOCK, AMETA_CAPS_LOCK_ON, currentMetaState);
+    }
 }
 
-KeyCharacterMap*
-KeyCharacterMap::try_file(const char* filename)
-{
-    KeyCharacterMap* rv = NULL;
-    Key* keys;
-    int fd;
-    off_t filesize;
-    Header header;
-    int err;
-    
-    fd = open(filename, O_RDONLY);
-    if (fd == -1) {
-        LOGW("Can't open keycharmap file");
-        return NULL;
+bool KeyCharacterMap::addSingleEphemeralMetaKey(Vector<KeyEvent>& outEvents,
+        int32_t deviceId, int32_t metaState, bool down, nsecs_t time,
+        int32_t keyCode, int32_t keyMetaState,
+        int32_t* currentMetaState) {
+    if ((metaState & keyMetaState) == keyMetaState) {
+        *currentMetaState = updateMetaState(keyCode, down, *currentMetaState);
+        addKey(outEvents, deviceId, keyCode, *currentMetaState, down, time);
+        return true;
     }
-
-    filesize = lseek(fd, 0, SEEK_END);
-    lseek(fd, 0, SEEK_SET);
-
-    // validate the header
-    if (filesize <= (off_t)sizeof(header)) {
-        LOGW("Bad keycharmap - filesize=%d\n", (int)filesize);
-        goto cleanup1;
-    }
-
-    err = read(fd, &header, sizeof(header));
-    if (err == -1) {
-        LOGW("Error reading keycharmap file");
-        goto cleanup1;
-    }
-
-    if (0 != memcmp(header.magic, "keychar", 8)) {
-        LOGW("Bad keycharmap magic token");
-        goto cleanup1;
-    }
-    if (header.endian != 0x12345678) {
-        LOGW("Bad keycharmap endians");
-        goto cleanup1;
-    }
-    if ((header.version & 0xff) != 2) {
-        LOGW("Only support keycharmap version 2 (got 0x%08x)", header.version);
-        goto cleanup1;
-    }
-    if (filesize < (off_t)(sizeof(Header)+(sizeof(Key)*header.keycount))) {
-        LOGW("Bad keycharmap file size\n");
-        goto cleanup1;
-    }
-
-    // read the key data
-    keys = (Key*)malloc(sizeof(Key)*header.keycount);
-    err = read(fd, keys, sizeof(Key)*header.keycount);
-    if (err == -1) {
-        LOGW("Error reading keycharmap file");
-        free(keys);
-        goto cleanup1;
-    }
-
-    // return the object
-    rv = new KeyCharacterMap;
-    rv->m_keyCount = header.keycount;
-    rv->m_keys = keys;
-    rv->m_type = header.kbdtype;
-
-cleanup1:
-    close(fd);
-
-    return rv;
+    return false;
 }
+
+void KeyCharacterMap::addDoubleEphemeralMetaKey(Vector<KeyEvent>& outEvents,
+        int32_t deviceId, int32_t metaState, bool down, nsecs_t time,
+        int32_t leftKeyCode, int32_t leftKeyMetaState,
+        int32_t rightKeyCode, int32_t rightKeyMetaState,
+        int32_t eitherKeyMetaState,
+        int32_t* currentMetaState) {
+    bool specific = false;
+    specific |= addSingleEphemeralMetaKey(outEvents, deviceId, metaState, down, time,
+            leftKeyCode, leftKeyMetaState, currentMetaState);
+    specific |= addSingleEphemeralMetaKey(outEvents, deviceId, metaState, down, time,
+            rightKeyCode, rightKeyMetaState, currentMetaState);
+
+    if (!specific) {
+        addSingleEphemeralMetaKey(outEvents, deviceId, metaState, down, time,
+                leftKeyCode, eitherKeyMetaState, currentMetaState);
+    }
+}
+
+void KeyCharacterMap::addLockedMetaKey(Vector<KeyEvent>& outEvents,
+        int32_t deviceId, int32_t metaState, nsecs_t time,
+        int32_t keyCode, int32_t keyMetaState,
+        int32_t* currentMetaState) {
+    if ((metaState & keyMetaState) == keyMetaState) {
+        *currentMetaState = updateMetaState(keyCode, true, *currentMetaState);
+        addKey(outEvents, deviceId, keyCode, *currentMetaState, true, time);
+        *currentMetaState = updateMetaState(keyCode, false, *currentMetaState);
+        addKey(outEvents, deviceId, keyCode, *currentMetaState, false, time);
+    }
+}
+
+
+// --- KeyCharacterMap::Key ---
+
+KeyCharacterMap::Key::Key() :
+        label(0), number(0), firstBehavior(NULL) {
+}
+
+KeyCharacterMap::Key::~Key() {
+    Behavior* behavior = firstBehavior;
+    while (behavior) {
+        Behavior* next = behavior->next;
+        delete behavior;
+        behavior = next;
+    }
+}
+
+
+// --- KeyCharacterMap::Behavior ---
+
+KeyCharacterMap::Behavior::Behavior() :
+        next(NULL), metaState(0), character(0), fallbackKeyCode(0) {
+}
+
+
+// --- KeyCharacterMap::Parser ---
+
+KeyCharacterMap::Parser::Parser(KeyCharacterMap* map, Tokenizer* tokenizer) :
+        mMap(map), mTokenizer(tokenizer), mState(STATE_TOP) {
+}
+
+KeyCharacterMap::Parser::~Parser() {
+}
+
+status_t KeyCharacterMap::Parser::parse() {
+    while (!mTokenizer->isEof()) {
+#if DEBUG_PARSER
+        LOGD("Parsing %s: '%s'.", mTokenizer->getLocation().string(),
+                mTokenizer->peekRemainderOfLine().string());
+#endif
+
+        mTokenizer->skipDelimiters(WHITESPACE);
+
+        if (!mTokenizer->isEol() && mTokenizer->peekChar() != '#') {
+            switch (mState) {
+            case STATE_TOP: {
+                String8 keywordToken = mTokenizer->nextToken(WHITESPACE);
+                if (keywordToken == "type") {
+                    mTokenizer->skipDelimiters(WHITESPACE);
+                    status_t status = parseType();
+                    if (status) return status;
+                } else if (keywordToken == "key") {
+                    mTokenizer->skipDelimiters(WHITESPACE);
+                    status_t status = parseKey();
+                    if (status) return status;
+                } else {
+                    LOGE("%s: Expected keyword, got '%s'.", mTokenizer->getLocation().string(),
+                            keywordToken.string());
+                    return BAD_VALUE;
+                }
+                break;
+            }
+
+            case STATE_KEY: {
+                status_t status = parseKeyProperty();
+                if (status) return status;
+                break;
+            }
+            }
+
+            mTokenizer->skipDelimiters(WHITESPACE);
+            if (!mTokenizer->isEol()) {
+                LOGE("%s: Expected end of line, got '%s'.",
+                        mTokenizer->getLocation().string(),
+                        mTokenizer->peekRemainderOfLine().string());
+                return BAD_VALUE;
+            }
+        }
+
+        mTokenizer->nextLine();
+    }
+
+    if (mState != STATE_TOP) {
+        LOGE("%s: Unterminated key description at end of file.",
+                mTokenizer->getLocation().string());
+        return BAD_VALUE;
+    }
+
+    if (mMap->mType == KEYBOARD_TYPE_UNKNOWN) {
+        LOGE("%s: Missing required keyboard 'type' declaration.",
+                mTokenizer->getLocation().string());
+        return BAD_VALUE;
+    }
+
+    return NO_ERROR;
+}
+
+status_t KeyCharacterMap::Parser::parseType() {
+    if (mMap->mType != KEYBOARD_TYPE_UNKNOWN) {
+        LOGE("%s: Duplicate keyboard 'type' declaration.",
+                mTokenizer->getLocation().string());
+        return BAD_VALUE;
+    }
+
+    KeyboardType type;
+    String8 typeToken = mTokenizer->nextToken(WHITESPACE);
+    if (typeToken == "NUMERIC") {
+        type = KEYBOARD_TYPE_NUMERIC;
+    } else if (typeToken == "PREDICTIVE") {
+        type = KEYBOARD_TYPE_PREDICTIVE;
+    } else if (typeToken == "ALPHA") {
+        type = KEYBOARD_TYPE_ALPHA;
+    } else if (typeToken == "FULL") {
+        type = KEYBOARD_TYPE_FULL;
+    } else if (typeToken == "SPECIAL_FUNCTION") {
+        type = KEYBOARD_TYPE_SPECIAL_FUNCTION;
+    } else {
+        LOGE("%s: Expected keyboard type label, got '%s'.", mTokenizer->getLocation().string(),
+                typeToken.string());
+        return BAD_VALUE;
+    }
+
+#if DEBUG_PARSER
+    LOGD("Parsed type: type=%d.", type);
+#endif
+    mMap->mType = type;
+    return NO_ERROR;
+}
+
+status_t KeyCharacterMap::Parser::parseKey() {
+    String8 keyCodeToken = mTokenizer->nextToken(WHITESPACE);
+    int32_t keyCode = getKeyCodeByLabel(keyCodeToken.string());
+    if (!keyCode) {
+        LOGE("%s: Expected key code label, got '%s'.", mTokenizer->getLocation().string(),
+                keyCodeToken.string());
+        return BAD_VALUE;
+    }
+    if (mMap->mKeys.indexOfKey(keyCode) >= 0) {
+        LOGE("%s: Duplicate entry for key code '%s'.", mTokenizer->getLocation().string(),
+                keyCodeToken.string());
+        return BAD_VALUE;
+    }
+
+    mTokenizer->skipDelimiters(WHITESPACE);
+    String8 openBraceToken = mTokenizer->nextToken(WHITESPACE);
+    if (openBraceToken != "{") {
+        LOGE("%s: Expected '{' after key code label, got '%s'.",
+                mTokenizer->getLocation().string(), openBraceToken.string());
+        return BAD_VALUE;
+    }
+
+#if DEBUG_PARSER
+    LOGD("Parsed beginning of key: keyCode=%d.", keyCode);
+#endif
+    mKeyCode = keyCode;
+    mMap->mKeys.add(keyCode, new Key());
+    mState = STATE_KEY;
+    return NO_ERROR;
+}
+
+status_t KeyCharacterMap::Parser::parseKeyProperty() {
+    String8 token = mTokenizer->nextToken(WHITESPACE_OR_PROPERTY_DELIMITER);
+    if (token == "}") {
+        mState = STATE_TOP;
+        return NO_ERROR;
+    }
+
+    Vector<Property> properties;
+
+    // Parse all comma-delimited property names up to the first colon.
+    for (;;) {
+        if (token == "label") {
+            properties.add(Property(PROPERTY_LABEL));
+        } else if (token == "number") {
+            properties.add(Property(PROPERTY_NUMBER));
+        } else {
+            int32_t metaState;
+            status_t status = parseModifier(token, &metaState);
+            if (status) {
+                LOGE("%s: Expected a property name or modifier, got '%s'.",
+                        mTokenizer->getLocation().string(), token.string());
+                return status;
+            }
+            properties.add(Property(PROPERTY_META, metaState));
+        }
+
+        mTokenizer->skipDelimiters(WHITESPACE);
+        if (!mTokenizer->isEol()) {
+            char ch = mTokenizer->nextChar();
+            if (ch == ':') {
+                break;
+            } else if (ch == ',') {
+                mTokenizer->skipDelimiters(WHITESPACE);
+                token = mTokenizer->nextToken(WHITESPACE_OR_PROPERTY_DELIMITER);
+                continue;
+            }
+        }
+
+        LOGE("%s: Expected ',' or ':' after property name.",
+                mTokenizer->getLocation().string());
+        return BAD_VALUE;
+    }
+
+    // Parse behavior after the colon.
+    mTokenizer->skipDelimiters(WHITESPACE);
+
+    Behavior behavior;
+    bool haveCharacter = false;
+    bool haveFallback = false;
+
+    do {
+        char ch = mTokenizer->peekChar();
+        if (ch == '\'') {
+            char16_t character;
+            status_t status = parseCharacterLiteral(&character);
+            if (status || !character) {
+                LOGE("%s: Invalid character literal for key.",
+                        mTokenizer->getLocation().string());
+                return BAD_VALUE;
+            }
+            if (haveCharacter) {
+                LOGE("%s: Cannot combine multiple character literals or 'none'.",
+                        mTokenizer->getLocation().string());
+                return BAD_VALUE;
+            }
+            behavior.character = character;
+            haveCharacter = true;
+        } else {
+            token = mTokenizer->nextToken(WHITESPACE);
+            if (token == "none") {
+                if (haveCharacter) {
+                    LOGE("%s: Cannot combine multiple character literals or 'none'.",
+                            mTokenizer->getLocation().string());
+                    return BAD_VALUE;
+                }
+                haveCharacter = true;
+            } else if (token == "fallback") {
+                mTokenizer->skipDelimiters(WHITESPACE);
+                token = mTokenizer->nextToken(WHITESPACE);
+                int32_t keyCode = getKeyCodeByLabel(token.string());
+                if (!keyCode) {
+                    LOGE("%s: Invalid key code label for fallback behavior, got '%s'.",
+                            mTokenizer->getLocation().string(),
+                            token.string());
+                    return BAD_VALUE;
+                }
+                if (haveFallback) {
+                    LOGE("%s: Cannot combine multiple fallback key codes.",
+                            mTokenizer->getLocation().string());
+                    return BAD_VALUE;
+                }
+                behavior.fallbackKeyCode = keyCode;
+                haveFallback = true;
+            } else {
+                LOGE("%s: Expected a key behavior after ':'.",
+                        mTokenizer->getLocation().string());
+                return BAD_VALUE;
+            }
+        }
+
+        mTokenizer->skipDelimiters(WHITESPACE);
+    } while (!mTokenizer->isEol());
+
+    // Add the behavior.
+    Key* key = mMap->mKeys.valueFor(mKeyCode);
+    for (size_t i = 0; i < properties.size(); i++) {
+        const Property& property = properties.itemAt(i);
+        switch (property.property) {
+        case PROPERTY_LABEL:
+            if (key->label) {
+                LOGE("%s: Duplicate label for key.",
+                        mTokenizer->getLocation().string());
+                return BAD_VALUE;
+            }
+            key->label = behavior.character;
+#if DEBUG_PARSER
+            LOGD("Parsed key label: keyCode=%d, label=%d.", mKeyCode, key->label);
+#endif
+            break;
+        case PROPERTY_NUMBER:
+            if (key->number) {
+                LOGE("%s: Duplicate number for key.",
+                        mTokenizer->getLocation().string());
+                return BAD_VALUE;
+            }
+            key->number = behavior.character;
+#if DEBUG_PARSER
+            LOGD("Parsed key number: keyCode=%d, number=%d.", mKeyCode, key->number);
+#endif
+            break;
+        case PROPERTY_META: {
+            for (Behavior* b = key->firstBehavior; b; b = b->next) {
+                if (b->metaState == property.metaState) {
+                    LOGE("%s: Duplicate key behavior for modifier.",
+                            mTokenizer->getLocation().string());
+                    return BAD_VALUE;
+                }
+            }
+            Behavior* newBehavior = new Behavior(behavior);
+            newBehavior->metaState = property.metaState;
+            newBehavior->next = key->firstBehavior;
+            key->firstBehavior = newBehavior;
+#if DEBUG_PARSER
+            LOGD("Parsed key meta: keyCode=%d, meta=0x%x, char=%d, fallback=%d.", mKeyCode,
+                    newBehavior->metaState, newBehavior->character, newBehavior->fallbackKeyCode);
+#endif
+            break;
+        }
+        }
+    }
+    return NO_ERROR;
+}
+
+status_t KeyCharacterMap::Parser::parseModifier(const String8& token, int32_t* outMetaState) {
+    if (token == "base") {
+        *outMetaState = 0;
+        return NO_ERROR;
+    }
+
+    int32_t combinedMeta = 0;
+
+    const char* str = token.string();
+    const char* start = str;
+    for (const char* cur = str; ; cur++) {
+        char ch = *cur;
+        if (ch == '+' || ch == '\0') {
+            size_t len = cur - start;
+            int32_t metaState = 0;
+            for (size_t i = 0; i < sizeof(modifiers) / sizeof(Modifier); i++) {
+                if (strlen(modifiers[i].label) == len
+                        && strncmp(modifiers[i].label, start, len) == 0) {
+                    metaState = modifiers[i].metaState;
+                    break;
+                }
+            }
+            if (!metaState) {
+                return BAD_VALUE;
+            }
+            if (combinedMeta & metaState) {
+                LOGE("%s: Duplicate modifier combination '%s'.",
+                        mTokenizer->getLocation().string(), token.string());
+                return BAD_VALUE;
+            }
+
+            combinedMeta |= metaState;
+
+            if (ch == '\0') {
+                break;
+            }
+        }
+    }
+    *outMetaState = combinedMeta;
+    return NO_ERROR;
+}
+
+status_t KeyCharacterMap::Parser::parseCharacterLiteral(char16_t* outCharacter) {
+    char ch = mTokenizer->nextChar();
+    if (ch != '\'') {
+        goto Error;
+    }
+
+    ch = mTokenizer->nextChar();
+    if (ch == '\\') {
+        // Escape sequence.
+        ch = mTokenizer->nextChar();
+        if (ch == 'n') {
+            *outCharacter = '\n';
+        } else if (ch == 't') {
+            *outCharacter = '\t';
+        } else if (ch == '\\') {
+            *outCharacter = '\\';
+        } else if (ch == '\'') {
+            *outCharacter = '\'';
+        } else if (ch == '"') {
+            *outCharacter = '"';
+        } else if (ch == 'u') {
+            *outCharacter = 0;
+            for (int i = 0; i < 4; i++) {
+                ch = mTokenizer->nextChar();
+                int digit;
+                if (ch >= '0' && ch <= '9') {
+                    digit = ch - '0';
+                } else if (ch >= 'A' && ch <= 'F') {
+                    digit = ch - 'A' + 10;
+                } else if (ch >= 'a' && ch <= 'f') {
+                    digit = ch - 'a' + 10;
+                } else {
+                    goto Error;
+                }
+                *outCharacter = (*outCharacter << 4) | digit;
+            }
+        } else {
+            goto Error;
+        }
+    } else if (ch >= 32 && ch <= 126 && ch != '\'') {
+        // ASCII literal character.
+        *outCharacter = ch;
+    } else {
+        goto Error;
+    }
+
+    ch = mTokenizer->nextChar();
+    if (ch != '\'') {
+        goto Error;
+    }
+
+    // Ensure that we consumed the entire token.
+    if (mTokenizer->nextToken(WHITESPACE).isEmpty()) {
+        return NO_ERROR;
+    }
+
+Error:
+    LOGE("%s: Malformed character literal.", mTokenizer->getLocation().string());
+    return BAD_VALUE;
+}
+
+} // namespace android

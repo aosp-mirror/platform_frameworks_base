@@ -28,6 +28,7 @@ import android.util.Slog;
 import android.view.HapticFeedbackConstants;
 import android.view.IWindowManager;
 import android.view.InputDevice;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -133,7 +134,7 @@ public class KeyButtonView extends ImageView {
 
     void sendEvent(int action, int flags, long when) {
         final KeyEvent ev = new KeyEvent(mDownTime, when, action, mCode, mRepeat,
-                0, 0, 0, flags, InputDevice.SOURCE_KEYBOARD);
+                0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0, flags, InputDevice.SOURCE_KEYBOARD);
         try {
             //Slog.d(TAG, "injecting event " + ev);
             mWindowManager.injectInputEventNoWait(ev);

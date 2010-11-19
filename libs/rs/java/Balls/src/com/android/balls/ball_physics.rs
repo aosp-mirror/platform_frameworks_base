@@ -5,8 +5,6 @@
 
 float2 gGravityVector = {0.f, 9.8f};
 
-#pragma rs export_func(setGamma);
-
 float2 gMinPos = {0.f, 0.f};
 float2 gMaxPos = {1280.f, 700.f};
 

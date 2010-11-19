@@ -128,10 +128,6 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     private PowerManager.WakeLock mWakeLock;
     private static final String WAKELOCK_TAG = "ServiceStateTracker";
 
-    /** Track of SPN display rules, so we only broadcast intent if something changes. */
-    private String curSpn = null;
-    private int curSpnRule = 0;
-
     /** Contains the name of the registered network in CDMA (either ONS or ERI text). */
     private String curPlmn = null;
 
@@ -620,40 +616,29 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
     @Override
     protected void updateSpnDisplay() {
-        String spn = "";
-        boolean showSpn = false;
-        String plmn = "";
-        boolean showPlmn = false;
-        int rule = 0;
-        if (cm.getRadioState().isRUIMReady()) {
-            // TODO RUIM SPN is not implemented, EF_SPN has to be read and Display Condition
-            //   Character Encoding, Language Indicator and SPN has to be set
-            // rule = phone.mRuimRecords.getDisplayRule(ss.getOperatorNumeric());
-            // spn = phone.mSIMRecords.getServiceProvideName();
-            plmn = ss.getOperatorAlphaLong(); // mOperatorAlphaLong contains the ONS
-            // showSpn = (rule & ...
-            showPlmn = true; // showPlmn = (rule & ...
+        // TODO RUIM SPN is not implemented, EF_SPN has to be read and Display Condition
+        //   Character Encoding, Language Indicator and SPN has to be set, something like below:
+        // if (cm.getRadioState().isRUIMReady()) {
+        //     rule = phone.mRuimRecords.getDisplayRule(ss.getOperatorNumeric());
+        //     spn = phone.mSIMRecords.getServiceProvideName();
+        // }
 
-        } else {
-            // In this case there is no SPN available from RUIM, we show the ERI text
-            plmn = ss.getOperatorAlphaLong(); // mOperatorAlphaLong contains the ERI text
-            showPlmn = true;
-        }
-
-        if (rule != curSpnRule
-                || !TextUtils.equals(spn, curSpn)
-                || !TextUtils.equals(plmn, curPlmn)) {
+        // mOperatorAlphaLong contains the ERI text
+        String plmn = ss.getOperatorAlphaLong();
+        if (!TextUtils.equals(plmn, curPlmn)) {
+            boolean showPlmn = !TextUtils.isEmpty(plmn);
+            Log.d(LOG_TAG,
+                    String.format("updateSpnDisplay: changed sending intent" +
+                            " showPlmn='%b' plmn='%s'", showPlmn, plmn));
             Intent intent = new Intent(Intents.SPN_STRINGS_UPDATED_ACTION);
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-            intent.putExtra(Intents.EXTRA_SHOW_SPN, showSpn);
-            intent.putExtra(Intents.EXTRA_SPN, spn);
+            intent.putExtra(Intents.EXTRA_SHOW_SPN, false);
+            intent.putExtra(Intents.EXTRA_SPN, "");
             intent.putExtra(Intents.EXTRA_SHOW_PLMN, showPlmn);
             intent.putExtra(Intents.EXTRA_PLMN, plmn);
             phone.getContext().sendStickyBroadcast(intent);
         }
 
-        curSpnRule = rule;
-        curSpn = spn;
         curPlmn = plmn;
     }
 

@@ -48,6 +48,8 @@ public:
     void uploadToTexture(const Context *rsc);
     uint32_t getTextureID() const {return mTextureID;}
 
+    uint32_t getGLTarget() const;
+
     void deferedUploadToBufferObject(const Context *rsc);
     void uploadToBufferObject(const Context *rsc);
     uint32_t getBufferObjectID() const {return mBufferID;}
@@ -134,7 +136,8 @@ protected:
 
 private:
     void init(Context *rsc, const Type *);
-
+    void upload2DTexture(bool isFirstUpload);
+    void uploadCubeTexture(bool isFirstUpload);
 };
 
 }
