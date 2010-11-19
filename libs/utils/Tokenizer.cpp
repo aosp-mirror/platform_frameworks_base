@@ -22,7 +22,6 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/mman.h>
 #include <utils/Log.h>
 #include <utils/Tokenizer.h>
 
@@ -37,13 +36,16 @@ static inline bool isDelimiter(char ch, const char* delimiters) {
 }
 
 
-Tokenizer::Tokenizer(const String8& filename, const char* buffer, size_t length) :
-        mFilename(filename), mBuffer(buffer), mLength(length),
+Tokenizer::Tokenizer(const String8& filename, FileMap* fileMap,
+        const char* buffer, size_t length) :
+        mFilename(filename), mFileMap(fileMap), mBuffer(buffer), mLength(length),
         mCurrent(buffer), mLineNumber(1) {
 }
 
 Tokenizer::~Tokenizer() {
-    munmap((void*)mBuffer, mLength);
+    if (mFileMap) {
+        mFileMap->release();
+    }
 }
 
 status_t Tokenizer::open(const String8& filename, Tokenizer** outTokenizer) {
@@ -55,28 +57,28 @@ status_t Tokenizer::open(const String8& filename, Tokenizer** outTokenizer) {
         result = -errno;
         LOGE("Error opening file '%s', %s.", filename.string(), strerror(errno));
     } else {
-        struct stat64 stat;
-        if (fstat64(fd, &stat)) {
+        struct stat stat;
+        if (fstat(fd, &stat)) {
             result = -errno;
             LOGE("Error getting size of file '%s', %s.", filename.string(), strerror(errno));
         } else {
             size_t length = size_t(stat.st_size);
-            void* buffer = mmap(NULL, length, PROT_READ, MAP_FILE | MAP_PRIVATE, fd, 0);
-            if (buffer == MAP_FAILED) {
-                result = -errno;
+            FileMap* fileMap = new FileMap();
+            if (!fileMap->create(NULL, fd, 0, length, true)) {
+                result = NO_MEMORY;
                 LOGE("Error mapping file '%s', %s.", filename.string(), strerror(errno));
             } else {
-                if (madvise(buffer, length, MADV_SEQUENTIAL)) {
-                    LOGW("Error calling madvise for mmapped file '%s', %s.", filename.string(),
-                            strerror(errno));
-                }
+                fileMap->advise(FileMap::SEQUENTIAL);
 
-                *outTokenizer = new Tokenizer(filename, static_cast<const char*>(buffer), length);
+                *outTokenizer = new Tokenizer(filename, fileMap,
+                        static_cast<const char*>(fileMap->getDataPtr()), length);
                 if (!*outTokenizer) {
                     result = NO_MEMORY;
                     LOGE("Error allocating tokenizer for file=%s.", filename.string());
-                    munmap(buffer, length);
                 }
+            }
+            if (result) {
+                fileMap->release();
             }
         }
         close(fd);
