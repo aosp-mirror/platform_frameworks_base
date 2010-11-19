@@ -26,22 +26,19 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Mtp;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.util.Calendar;
 import java.util.Date;
 
 /**
  * A view to display the properties of an object.
  */
-public class ObjectViewer extends Activity {
+public class ObjectViewer extends Activity implements View.OnClickListener {
 
     private static final String TAG = "ObjectViewer";
 
@@ -49,6 +46,9 @@ public class ObjectViewer extends Activity {
     private long mStorageID;
     private long mObjectID;
     private String mFileName;
+    private Button mImportButton;
+    private Button mDeleteButton;
+    private DeviceDisconnectedReceiver mDisconnectedReceiver;
 
     private static final String[] OBJECT_COLUMNS =
         new String[] {  Mtp.Object._ID,
@@ -73,15 +73,21 @@ public class ObjectViewer extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.object_info);
+
+        mImportButton = (Button)findViewById(R.id.import_button);
+        mImportButton.setOnClickListener(this);
+        mDeleteButton = (Button)findViewById(R.id.delete_button);
+        mDeleteButton.setOnClickListener(this);
+
+        mDeviceID = getIntent().getIntExtra("device", 0);
+        mStorageID = getIntent().getLongExtra("storage", 0);
+        mObjectID = getIntent().getLongExtra("object", 0);
+        mDisconnectedReceiver = new DeviceDisconnectedReceiver(this, mDeviceID);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        mDeviceID = getIntent().getIntExtra("device", 0);
-        mStorageID = getIntent().getLongExtra("storage", 0);
-        mObjectID = getIntent().getLongExtra("object", 0);
 
         if (mDeviceID != 0 && mObjectID != 0) {
         Cursor c = getContentResolver().query(
@@ -129,41 +135,12 @@ public class ObjectViewer extends Activity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.object_menu, menu);
-        return true;
+    protected void onDestroy() {
+        unregisterReceiver(mDisconnectedReceiver);
+        super.onDestroy();
     }
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem item = menu.findItem(R.id.save);
-        item.setEnabled(true);
-        item = menu.findItem(R.id.delete);
-        item.setEnabled(true);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.save:
-                save();
-                return true;
-            case R.id.delete:
-                delete();
-                return true;
-        }
-        return false;
-    }
-
-    private static String getTimestamp() {
-        Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(System.currentTimeMillis());
-        return String.format("%tY-%tm-%td-%tH-%tM-%tS", c, c, c, c, c, c);
-    }
-
-    private void save() {
+    private void importObject() {
         // copy file to /mnt/sdcard/imported/<filename>
         File dest = Environment.getExternalStorageDirectory();
         dest = new File(dest, "imported");
@@ -177,12 +154,14 @@ public class ObjectViewer extends Activity {
 
         if (resultUri != null) {
             Toast.makeText(this, R.string.object_saved_message, Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(Intent.ACTION_VIEW, resultUri);
+            startActivity(intent);
         } else {
             Toast.makeText(this, R.string.save_failed_message, Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void delete() {
+    private void deleteObject() {
         Uri uri = Mtp.Object.getContentUri(mDeviceID, mObjectID);
 
         Log.d(TAG, "deleting " + uri);
@@ -193,6 +172,14 @@ public class ObjectViewer extends Activity {
             finish();
         } else {
             Toast.makeText(this, R.string.delete_failed_message, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void onClick(View v) {
+        if (v == mImportButton) {
+            importObject();
+        } else if (v == mDeleteButton) {
+            deleteObject();
         }
     }
 }
