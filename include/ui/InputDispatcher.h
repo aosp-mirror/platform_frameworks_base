@@ -291,9 +291,7 @@ public:
      * This method is expected to set the POLICY_FLAG_PASS_TO_USER policy flag if the event
      * should be dispatched to applications.
      */
-    virtual void interceptKeyBeforeQueueing(nsecs_t when, int32_t deviceId,
-            int32_t action, int32_t& flags, int32_t keyCode, int32_t scanCode,
-            uint32_t& policyFlags) = 0;
+    virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags) = 0;
 
     /* Intercepts a generic touch, trackball or other event before queueing it.
      * The policy can use this method as an opportunity to perform power management functions
@@ -893,9 +891,6 @@ private:
 
     // Input channels that will receive a copy of all input events.
     Vector<sp<InputChannel> > mMonitoringChannels;
-
-    // Preallocated key event object used for policy inquiries.
-    KeyEvent mReusableKeyEvent;
 
     // Event injection and synchronization.
     Condition mInjectionResultAvailableCondition;

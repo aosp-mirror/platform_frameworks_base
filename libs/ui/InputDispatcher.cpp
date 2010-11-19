@@ -2081,9 +2081,22 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t sou
         return;
     }
 
+    if ((policyFlags & POLICY_FLAG_VIRTUAL) || (flags & AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY)) {
+        policyFlags |= POLICY_FLAG_VIRTUAL;
+        flags |= AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY;
+    }
+
     policyFlags |= POLICY_FLAG_TRUSTED;
-    mPolicy->interceptKeyBeforeQueueing(eventTime, deviceId, action, /*byref*/ flags,
-            keyCode, scanCode, /*byref*/ policyFlags);
+
+    KeyEvent event;
+    event.initialize(deviceId, source, action, flags, keyCode, scanCode,
+            metaState, 0, downTime, eventTime);
+
+    mPolicy->interceptKeyBeforeQueueing(&event, /*byref*/ policyFlags);
+
+    if (policyFlags & POLICY_FLAG_WOKE_HERE) {
+        flags |= AKEY_EVENT_FLAG_WOKE_HERE;
+    }
 
     bool needWake;
     { // acquire lock
@@ -2289,17 +2302,22 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
             return INPUT_EVENT_INJECTION_FAILED;
         }
 
-        nsecs_t eventTime = keyEvent->getEventTime();
-        int32_t deviceId = keyEvent->getDeviceId();
         int32_t flags = keyEvent->getFlags();
-        int32_t keyCode = keyEvent->getKeyCode();
-        int32_t scanCode = keyEvent->getScanCode();
-        mPolicy->interceptKeyBeforeQueueing(eventTime, deviceId, action, /*byref*/ flags,
-                keyCode, scanCode, /*byref*/ policyFlags);
+        if (flags & AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY) {
+            policyFlags |= POLICY_FLAG_VIRTUAL;
+        }
+
+        mPolicy->interceptKeyBeforeQueueing(keyEvent, /*byref*/ policyFlags);
+
+        if (policyFlags & POLICY_FLAG_WOKE_HERE) {
+            flags |= AKEY_EVENT_FLAG_WOKE_HERE;
+        }
 
         mLock.lock();
-        injectedEntry = mAllocator.obtainKeyEntry(eventTime, deviceId, keyEvent->getSource(),
-                policyFlags, action, flags, keyCode, scanCode, keyEvent->getMetaState(),
+        injectedEntry = mAllocator.obtainKeyEntry(keyEvent->getEventTime(),
+                keyEvent->getDeviceId(), keyEvent->getSource(),
+                policyFlags, action, flags,
+                keyEvent->getKeyCode(), keyEvent->getScanCode(), keyEvent->getMetaState(),
                 keyEvent->getRepeatCount(), keyEvent->getDownTime());
         break;
     }
@@ -2999,12 +3017,14 @@ void InputDispatcher::doNotifyANRLockedInterruptible(
 void InputDispatcher::doInterceptKeyBeforeDispatchingLockedInterruptible(
         CommandEntry* commandEntry) {
     KeyEntry* entry = commandEntry->keyEntry;
-    initializeKeyEvent(&mReusableKeyEvent, entry);
+
+    KeyEvent event;
+    initializeKeyEvent(&event, entry);
 
     mLock.unlock();
 
     bool consumed = mPolicy->interceptKeyBeforeDispatching(commandEntry->inputChannel,
-            & mReusableKeyEvent, entry->policyFlags);
+            &event, entry->policyFlags);
 
     mLock.lock();
 
@@ -3025,12 +3045,13 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
                 && dispatchEntry->hasForegroundTarget()
                 && dispatchEntry->eventEntry->type == EventEntry::TYPE_KEY) {
             KeyEntry* keyEntry = static_cast<KeyEntry*>(dispatchEntry->eventEntry);
-            initializeKeyEvent(&mReusableKeyEvent, keyEntry);
+            KeyEvent event;
+            initializeKeyEvent(&event, keyEntry);
 
             mLock.unlock();
 
             mPolicy->dispatchUnhandledKey(connection->inputChannel,
-                    & mReusableKeyEvent, keyEntry->policyFlags);
+                    &event, keyEntry->policyFlags);
 
             mLock.lock();
         }

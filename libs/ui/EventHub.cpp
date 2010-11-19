@@ -146,12 +146,12 @@ uint32_t EventHub::getDeviceClasses(int32_t deviceId) const
 }
 
 void EventHub::getConfiguration(int32_t deviceId, PropertyMap* outConfiguration) const {
-    outConfiguration->clear();
-
     AutoMutex _l(mLock);
     device_t* device = getDeviceLocked(deviceId);
     if (device && device->configuration) {
         *outConfiguration = *device->configuration;
+    } else {
+        outConfiguration->clear();
     }
 }
 

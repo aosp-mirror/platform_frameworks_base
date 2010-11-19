@@ -191,9 +191,7 @@ public:
     virtual nsecs_t getKeyRepeatTimeout();
     virtual nsecs_t getKeyRepeatDelay();
     virtual int32_t getMaxEventsPerSecond();
-    virtual void interceptKeyBeforeQueueing(nsecs_t when, int32_t deviceId,
-            int32_t action, int32_t& flags, int32_t keyCode, int32_t scanCode,
-            uint32_t& policyFlags);
+    virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags);
     virtual void interceptGenericBeforeQueueing(nsecs_t when, uint32_t& policyFlags);
     virtual bool interceptKeyBeforeDispatching(const sp<InputChannel>& inputChannel,
             const KeyEvent* keyEvent, uint32_t policyFlags);
@@ -718,6 +716,7 @@ bool NativeInputManager::populateWindow(JNIEnv* env, jobject windowObj,
             outWindow.ownerUid = ownerUid;
 
             env->ReleaseStringUTFChars(name, nameStr);
+            env->DeleteLocalRef(name);
             valid = true;
         } else {
             LOGW("Dropping input target because its input channel is not initialized.");
@@ -779,20 +778,8 @@ bool NativeInputManager::isScreenBright() {
     return android_server_PowerManagerService_isScreenBright();
 }
 
-void NativeInputManager::interceptKeyBeforeQueueing(nsecs_t when,
-        int32_t deviceId, int32_t action, int32_t &flags,
-        int32_t keyCode, int32_t scanCode, uint32_t& policyFlags) {
-#if DEBUG_INPUT_DISPATCHER_POLICY
-    LOGD("interceptKeyBeforeQueueing - when=%lld, deviceId=%d, action=%d, flags=%d, "
-            "keyCode=%d, scanCode=%d, policyFlags=0x%x",
-            when, deviceId, action, flags, keyCode, scanCode, policyFlags);
-#endif
-
-    if ((policyFlags & POLICY_FLAG_VIRTUAL) || (flags & AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY)) {
-        policyFlags |= POLICY_FLAG_VIRTUAL;
-        flags |= AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY;
-    }
-
+void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent* keyEvent,
+        uint32_t& policyFlags) {
     // Policy:
     // - Ignore untrusted events and pass them along.
     // - Ask the window manager what to do with normal events and trusted injected events.
@@ -802,21 +789,30 @@ void NativeInputManager::interceptKeyBeforeQueueing(nsecs_t when,
         const int32_t WM_ACTION_POKE_USER_ACTIVITY = 2;
         const int32_t WM_ACTION_GO_TO_SLEEP = 4;
 
+        nsecs_t when = keyEvent->getEventTime();
         bool isScreenOn = this->isScreenOn();
         bool isScreenBright = this->isScreenBright();
 
         JNIEnv* env = jniEnv();
-        jint wmActions = env->CallIntMethod(mCallbacksObj,
-                gCallbacksClassInfo.interceptKeyBeforeQueueing,
-                when, action, flags, keyCode, scanCode, policyFlags, isScreenOn);
-        if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeQueueing")) {
+        jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
+        jint wmActions;
+        if (keyEventObj) {
+            wmActions = env->CallIntMethod(mCallbacksObj,
+                    gCallbacksClassInfo.interceptKeyBeforeQueueing,
+                    keyEventObj, policyFlags, isScreenOn);
+            if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeQueueing")) {
+                wmActions = 0;
+            }
+            android_view_KeyEvent_recycle(env, keyEventObj);
+            env->DeleteLocalRef(keyEventObj);
+        } else {
+            LOGE("Failed to obtain key event object for interceptKeyBeforeQueueing.");
             wmActions = 0;
         }
 
-        if (!(flags & POLICY_FLAG_INJECTED)) {
+        if (!(policyFlags & POLICY_FLAG_INJECTED)) {
             if (!isScreenOn) {
                 policyFlags |= POLICY_FLAG_WOKE_HERE;
-                flags |= AKEY_EVENT_FLAG_WOKE_HERE;
             }
 
             if (!isScreenBright) {
@@ -841,10 +837,6 @@ void NativeInputManager::interceptKeyBeforeQueueing(nsecs_t when,
 }
 
 void NativeInputManager::interceptGenericBeforeQueueing(nsecs_t when, uint32_t& policyFlags) {
-#if DEBUG_INPUT_DISPATCHER_POLICY
-    LOGD("interceptGenericBeforeQueueing - when=%lld, policyFlags=0x%x", when, policyFlags);
-#endif
-
     // Policy:
     // - Ignore untrusted events and pass them along.
     // - No special filtering for injected events required at this time.
@@ -869,46 +861,62 @@ bool NativeInputManager::interceptKeyBeforeDispatching(const sp<InputChannel>& i
     // - Ignore untrusted events and pass them along.
     // - Filter normal events and trusted injected events through the window manager policy to
     //   handle the HOME key and the like.
+    bool result;
     if (policyFlags & POLICY_FLAG_TRUSTED) {
         JNIEnv* env = jniEnv();
 
         // Note: inputChannel may be null.
         jobject inputChannelObj = getInputChannelObjLocal(env, inputChannel);
-        jboolean consumed = env->CallBooleanMethod(mCallbacksObj,
-                gCallbacksClassInfo.interceptKeyBeforeDispatching,
-                inputChannelObj, keyEvent->getAction(), keyEvent->getFlags(),
-                keyEvent->getKeyCode(), keyEvent->getScanCode(), keyEvent->getMetaState(),
-                keyEvent->getRepeatCount(), policyFlags);
-        bool error = checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching");
+        jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
+        if (keyEventObj) {
+            jboolean consumed = env->CallBooleanMethod(mCallbacksObj,
+                    gCallbacksClassInfo.interceptKeyBeforeDispatching,
+                    inputChannelObj, keyEventObj, policyFlags);
+            bool error = checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching");
+            android_view_KeyEvent_recycle(env, keyEventObj);
+            env->DeleteLocalRef(keyEventObj);
+            result = consumed && !error;
+        } else {
+            LOGE("Failed to obtain key event object for interceptKeyBeforeDispatching.");
+            result = false;
+        }
 
         env->DeleteLocalRef(inputChannelObj);
-        return consumed && ! error;
     } else {
-        return false;
+        result = false;
     }
+    return result;
 }
 
 bool NativeInputManager::dispatchUnhandledKey(const sp<InputChannel>& inputChannel,
         const KeyEvent* keyEvent, uint32_t policyFlags) {
     // Policy:
     // - Ignore untrusted events and do not perform default handling.
+    bool result;
     if (policyFlags & POLICY_FLAG_TRUSTED) {
         JNIEnv* env = jniEnv();
 
         // Note: inputChannel may be null.
         jobject inputChannelObj = getInputChannelObjLocal(env, inputChannel);
-        jboolean handled = env->CallBooleanMethod(mCallbacksObj,
-                gCallbacksClassInfo.dispatchUnhandledKey,
-                inputChannelObj, keyEvent->getAction(), keyEvent->getFlags(),
-                keyEvent->getKeyCode(), keyEvent->getScanCode(), keyEvent->getMetaState(),
-                keyEvent->getRepeatCount(), policyFlags);
-        bool error = checkAndClearExceptionFromCallback(env, "dispatchUnhandledKey");
+        jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
+        if (keyEventObj) {
+            jboolean handled = env->CallBooleanMethod(mCallbacksObj,
+                    gCallbacksClassInfo.dispatchUnhandledKey,
+                    inputChannelObj, keyEventObj, policyFlags);
+            bool error = checkAndClearExceptionFromCallback(env, "dispatchUnhandledKey");
+            android_view_KeyEvent_recycle(env, keyEventObj);
+            env->DeleteLocalRef(keyEventObj);
+            result = handled && !error;
+        } else {
+            LOGE("Failed to obtain key event object for dispatchUnhandledKey.");
+            result = false;
+        }
 
         env->DeleteLocalRef(inputChannelObj);
-        return handled && ! error;
     } else {
-        return false;
+        result = false;
     }
+    return result;
 }
 
 void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t eventType) {
@@ -1107,13 +1115,21 @@ static jint android_server_InputManager_nativeInjectInputEvent(JNIEnv* env, jcla
 
     if (env->IsInstanceOf(inputEventObj, gKeyEventClassInfo.clazz)) {
         KeyEvent keyEvent;
-        android_view_KeyEvent_toNative(env, inputEventObj, & keyEvent);
+        status_t status = android_view_KeyEvent_toNative(env, inputEventObj, & keyEvent);
+        if (status) {
+            jniThrowRuntimeException(env, "Could not read contents of KeyEvent object.");
+            return INPUT_EVENT_INJECTION_FAILED;
+        }
 
         return gNativeInputManager->getInputManager()->getDispatcher()->injectInputEvent(
                 & keyEvent, injectorPid, injectorUid, syncMode, timeoutMillis);
     } else if (env->IsInstanceOf(inputEventObj, gMotionEventClassInfo.clazz)) {
         MotionEvent motionEvent;
-        android_view_MotionEvent_toNative(env, inputEventObj, & motionEvent);
+        status_t status = android_view_MotionEvent_toNative(env, inputEventObj, & motionEvent);
+        if (status) {
+            jniThrowRuntimeException(env, "Could not read contents of MotionEvent object.");
+            return INPUT_EVENT_INJECTION_FAILED;
+        }
 
         return gNativeInputManager->getInputManager()->getDispatcher()->injectInputEvent(
                 & motionEvent, injectorPid, injectorUid, syncMode, timeoutMillis);
@@ -1332,13 +1348,14 @@ int register_android_server_InputManager(JNIEnv* env) {
             "notifyANR", "(Ljava/lang/Object;Landroid/view/InputChannel;)J");
 
     GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeQueueing, gCallbacksClassInfo.clazz,
-            "interceptKeyBeforeQueueing", "(JIIIIIZ)I");
+            "interceptKeyBeforeQueueing", "(Landroid/view/KeyEvent;IZ)I");
 
     GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeDispatching, gCallbacksClassInfo.clazz,
-            "interceptKeyBeforeDispatching", "(Landroid/view/InputChannel;IIIIIII)Z");
+            "interceptKeyBeforeDispatching",
+            "(Landroid/view/InputChannel;Landroid/view/KeyEvent;I)Z");
 
     GET_METHOD_ID(gCallbacksClassInfo.dispatchUnhandledKey, gCallbacksClassInfo.clazz,
-            "dispatchUnhandledKey", "(Landroid/view/InputChannel;IIIIIII)Z");
+            "dispatchUnhandledKey", "(Landroid/view/InputChannel;Landroid/view/KeyEvent;I)Z");
 
     GET_METHOD_ID(gCallbacksClassInfo.checkInjectEventsPermission, gCallbacksClassInfo.clazz,
             "checkInjectEventsPermission", "(II)Z");

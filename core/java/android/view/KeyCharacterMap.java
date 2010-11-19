@@ -31,7 +31,19 @@ import java.lang.Character;
 public class KeyCharacterMap {
     /**
      * The id of the device's primary built in keyboard is always 0.
+     *
+     * @deprecated This constant should no longer be used because there is no
+     * guarantee that a device has a built-in keyboard that can be used for
+     * typing text.  There might not be a built-in keyboard, the built-in keyboard
+     * might be a {@link #NUMERIC} or {@link #SPECIAL_FUNCTION} keyboard, or there
+     * might be multiple keyboards installed including external keyboards.
+     * When interpreting key presses received from the framework, applications should
+     * use the device id specified in the {@link #KeyEvent} received.
+     * When synthesizing key presses for delivery elsewhere or when translating key presses
+     * from unknown keyboards, applications should use the special {@link #VIRTUAL_KEYBOARD}
+     * device id.
      */
+    @Deprecated
     public static final int BUILT_IN_KEYBOARD = 0;
 
     /**

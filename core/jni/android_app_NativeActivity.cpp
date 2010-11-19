@@ -579,20 +579,30 @@ static int mainWorkCallback(int fd, int events, void* data) {
             while ((keyEvent=code->nativeInputQueue->consumeUnhandledEvent()) != NULL) {
                 jobject inputEventObj = android_view_KeyEvent_fromNative(
                         code->env, keyEvent);
-                jboolean handled = code->env->CallBooleanMethod(code->clazz,
-                        gNativeActivityClassInfo.dispatchUnhandledKeyEvent, inputEventObj);
-                checkAndClearExceptionFromCallback(code->env, "dispatchUnhandledKeyEvent");
-                code->env->DeleteLocalRef(inputEventObj);
+                jboolean handled;
+                if (inputEventObj) {
+                    handled = code->env->CallBooleanMethod(code->clazz,
+                            gNativeActivityClassInfo.dispatchUnhandledKeyEvent, inputEventObj);
+                    checkAndClearExceptionFromCallback(code->env, "dispatchUnhandledKeyEvent");
+                    code->env->DeleteLocalRef(inputEventObj);
+                } else {
+                    LOGE("Failed to obtain key event for dispatchUnhandledKeyEvent.");
+                    handled = false;
+                }
                 code->nativeInputQueue->finishEvent(keyEvent, handled, true);
             }
             int seq;
             while ((keyEvent=code->nativeInputQueue->consumePreDispatchingEvent(&seq)) != NULL) {
                 jobject inputEventObj = android_view_KeyEvent_fromNative(
                         code->env, keyEvent);
-                code->env->CallVoidMethod(code->clazz,
-                        gNativeActivityClassInfo.preDispatchKeyEvent, inputEventObj, seq);
-                checkAndClearExceptionFromCallback(code->env, "preDispatchKeyEvent");
-                code->env->DeleteLocalRef(inputEventObj);
+                if (inputEventObj) {
+                    code->env->CallVoidMethod(code->clazz,
+                            gNativeActivityClassInfo.preDispatchKeyEvent, inputEventObj, seq);
+                    checkAndClearExceptionFromCallback(code->env, "preDispatchKeyEvent");
+                    code->env->DeleteLocalRef(inputEventObj);
+                } else {
+                    LOGE("Failed to obtain key event for preDispatchKeyEvent.");
+                }
             }
         } break;
         case CMD_FINISH: {
@@ -987,7 +997,12 @@ dispatchKeyEvent_native(JNIEnv* env, jobject clazz, jint handle, jobject eventOb
         NativeCode* code = (NativeCode*)handle;
         if (code->nativeInputQueue != NULL) {
             KeyEvent* event = code->nativeInputQueue->createKeyEvent();
-            android_view_KeyEvent_toNative(env, eventObj, event);
+            status_t status = android_view_KeyEvent_toNative(env, eventObj, event);
+            if (status) {
+                delete event;
+                jniThrowRuntimeException(env, "Could not read contents of KeyEvent object.");
+                return;
+            }
             code->nativeInputQueue->dispatchEvent(event);
         }
     }

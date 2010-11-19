@@ -169,7 +169,7 @@ jobject android_view_MotionEvent_fromNative(JNIEnv* env, const MotionEvent* even
     return eventObj;
 }
 
-void android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj,
+status_t android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj,
         MotionEvent* event) {
     jint deviceId = env->GetIntField(eventObj, gMotionEventClassInfo.mDeviceId);
     jint source = env->GetIntField(eventObj, gMotionEventClassInfo.mSource);
@@ -184,15 +184,22 @@ void android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj,
     jint flags = env->GetIntField(eventObj, gMotionEventClassInfo.mFlags);
     jint numPointers = env->GetIntField(eventObj, gMotionEventClassInfo.mNumPointers);
     jint numSamples = env->GetIntField(eventObj, gMotionEventClassInfo.mNumSamples);
+
+    if (numPointers == 0) {
+        LOGE("Malformed MotionEvent: mNumPointers was zero");
+        return BAD_VALUE;
+    }
+    if (numSamples == 0) {
+        LOGE("Malformed MotionEvent: mNumSamples was zero");
+        return BAD_VALUE;
+    }
+
     jintArray pointerIdentifierArray = jintArray(env->GetObjectField(eventObj,
             gMotionEventClassInfo.mPointerIdentifiers));
     jfloatArray dataSampleArray = jfloatArray(env->GetObjectField(eventObj,
             gMotionEventClassInfo.mDataSamples));
     jlongArray eventTimeNanoSampleArray = jlongArray(env->GetObjectField(eventObj,
             gMotionEventClassInfo.mEventTimeNanoSamples));
-
-    LOG_FATAL_IF(numPointers == 0, "numPointers was zero");
-    LOG_FATAL_IF(numSamples == 0, "numSamples was zero");
 
     jint* pointerIdentifiers = (jint*)env->GetPrimitiveArrayCritical(pointerIdentifierArray, NULL);
     jfloat* dataSamples = (jfloat*)env->GetPrimitiveArrayCritical(dataSampleArray, NULL);
@@ -236,22 +243,25 @@ void android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj,
         event->addSample(sampleEventTime, samplePointerCoords);
     }
 
-    env->ReleasePrimitiveArrayCritical(pointerIdentifierArray, pointerIdentifiers, JNI_ABORT);
-    env->ReleasePrimitiveArrayCritical(dataSampleArray, dataSamples, JNI_ABORT);
     env->ReleasePrimitiveArrayCritical(eventTimeNanoSampleArray, eventTimeNanoSamples, JNI_ABORT);
+    env->ReleasePrimitiveArrayCritical(dataSampleArray, dataSamples, JNI_ABORT);
+    env->ReleasePrimitiveArrayCritical(pointerIdentifierArray, pointerIdentifiers, JNI_ABORT);
 
-    env->DeleteLocalRef(pointerIdentifierArray);
-    env->DeleteLocalRef(dataSampleArray);
     env->DeleteLocalRef(eventTimeNanoSampleArray);
+    env->DeleteLocalRef(dataSampleArray);
+    env->DeleteLocalRef(pointerIdentifierArray);
+    return OK;
 }
 
-void android_view_MotionEvent_recycle(JNIEnv* env, jobject eventObj) {
+status_t android_view_MotionEvent_recycle(JNIEnv* env, jobject eventObj) {
     env->CallVoidMethod(eventObj, gMotionEventClassInfo.recycle);
     if (env->ExceptionCheck()) {
         LOGW("An exception occurred while recycling a motion event.");
         LOGW_EX(env);
         env->ExceptionClear();
+        return UNKNOWN_ERROR;
     }
+    return OK;
 }
 
 static inline float transformAngle(const SkMatrix* matrix, float angleRadians) {

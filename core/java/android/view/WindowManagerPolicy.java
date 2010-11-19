@@ -551,19 +551,14 @@ public interface WindowManagerPolicy {
      * affect the power state of the device, for example, the power keys.
      * Generally, it's best to keep as little as possible in the queue thread
      * because it's the most fragile.
-     * @param whenNanos The event time in uptime nanoseconds.
-     * @param action The key event action.
-     * @param flags The key event flags.
-     * @param keyCode The key code.
-     * @param scanCode The key's scan code.
+     * @param event The key event.
      * @param policyFlags The policy flags associated with the key.
      * @param isScreenOn True if the screen is already on
      *
      * @return The bitwise or of the {@link #ACTION_PASS_TO_USER},
      *          {@link #ACTION_POKE_USER_ACTIVITY} and {@link #ACTION_GO_TO_SLEEP} flags.
      */
-    public int interceptKeyBeforeQueueing(long whenNanos, int action, int flags,
-            int keyCode, int scanCode, int policyFlags, boolean isScreenOn);
+    public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn);
     
     /**
      * Called from the input dispatcher thread before a key is dispatched to a window.
@@ -574,18 +569,12 @@ public interface WindowManagerPolicy {
      * 
      * @param win The window that currently has focus.  This is where the key
      *            event will normally go.
-     * @param action The key event action.
-     * @param flags The key event flags.
-     * @param keyCode The key code.
-     * @param scanCode The key's scan code.
-     * @param metaState bit mask of meta keys that are held.
-     * @param repeatCount Number of times a key down has repeated.
+     * @param event The key event.
      * @param policyFlags The policy flags associated with the key.
      * @return Returns true if the policy consumed the event and it should
      * not be further dispatched.
      */
-    public boolean interceptKeyBeforeDispatching(WindowState win, int action, int flags,
-            int keyCode, int scanCode, int metaState, int repeatCount, int policyFlags);
+    public boolean interceptKeyBeforeDispatching(WindowState win, KeyEvent event, int policyFlags);
 
     /**
      * Called from the input dispatcher thread when an application did not handle
@@ -596,17 +585,11 @@ public interface WindowManagerPolicy {
      * 
      * @param win The window that currently has focus.  This is where the key
      *            event will normally go.
-     * @param action The key event action.
-     * @param flags The key event flags.
-     * @param keyCode The key code.
-     * @param scanCode The key's scan code.
-     * @param metaState bit mask of meta keys that are held.
-     * @param repeatCount Number of times a key down has repeated.
+     * @param event The key event.
      * @param policyFlags The policy flags associated with the key.
      * @return Returns true if the policy consumed the event.
      */
-    public boolean dispatchUnhandledKey(WindowState win, int action, int flags,
-            int keyCode, int scanCode, int metaState, int repeatCount, int policyFlags);
+    public boolean dispatchUnhandledKey(WindowState win, KeyEvent event, int policyFlags);
 
     /**
      * Called when layout of the windows is about to start.

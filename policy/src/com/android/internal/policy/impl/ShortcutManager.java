@@ -25,6 +25,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 
 import java.net.URISyntaxException;
 
@@ -100,20 +101,17 @@ class ShortcutManager extends ContentObserver {
      * This will first try an exact match (with modifiers), and then try a
      * match without modifiers (primary character on a key).
      * 
-     * @param keyCode The keycode of the key pushed.
-     * @param modifiers The modifiers without any that are used for chording
-     *            to invoke a shortcut.
+     * @param event The key event of the key that was pressed.
      * @return The intent that matches the shortcut, or null if not found.
      */
-    public Intent getIntent(int keyCode, int modifiers) {
-        KeyCharacterMap kcm = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
+    public Intent getIntent(KeyEvent event) {
         // First try the exact keycode (with modifiers)
-        int shortcut = kcm.get(keyCode, modifiers);
+        int shortcut = event.getUnicodeChar();
         Intent intent = shortcut != 0 ? mShortcutIntents.get(shortcut) : null; 
         if (intent != null) return intent;
-        
+
         // Next try the keycode without modifiers (the primary character on that key)
-        shortcut = Character.toLowerCase(kcm.get(keyCode, 0));
+        shortcut = Character.toLowerCase(event.getUnicodeChar(0));
         return shortcut != 0 ? mShortcutIntents.get(shortcut) : null;
     }
 

@@ -507,10 +507,8 @@ enum InputDeviceConfigurationFileType {
 /*
  * Get the path of an input device configuration file, if one is available.
  * Spaces in the name are replaced with underscores.
+ * Considers both system provided and user installed configuration files.
  *
- * Looks in: <system-root>/usr/<type-specific-directory>/<name><extension>.
- *
- * TODO Also look in a user installable location.
  * Returns an empty string if not found.
  */
 extern String8 getInputDeviceConfigurationFilePath(

@@ -30,6 +30,7 @@ import android.util.Xml;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
+import android.view.KeyEvent;
 import android.view.Surface;
 
 import java.io.BufferedReader;
@@ -398,26 +399,23 @@ public class InputManager {
         }
         
         @SuppressWarnings("unused")
-        public int interceptKeyBeforeQueueing(long whenNanos, int action, int flags,
-                int keyCode, int scanCode, int policyFlags, boolean isScreenOn) {
+        public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn) {
             return mWindowManagerService.mInputMonitor.interceptKeyBeforeQueueing(
-                    whenNanos, action, flags, keyCode, scanCode, policyFlags, isScreenOn);
+                    event, policyFlags, isScreenOn);
         }
         
         @SuppressWarnings("unused")
-        public boolean interceptKeyBeforeDispatching(InputChannel focus, int action,
-                int flags, int keyCode, int scanCode, int metaState, int repeatCount,
-                int policyFlags) {
-            return mWindowManagerService.mInputMonitor.interceptKeyBeforeDispatching(focus,
-                    action, flags, keyCode, scanCode, metaState, repeatCount, policyFlags);
+        public boolean interceptKeyBeforeDispatching(InputChannel focus,
+                KeyEvent event, int policyFlags) {
+            return mWindowManagerService.mInputMonitor.interceptKeyBeforeDispatching(
+                    focus, event, policyFlags);
         }
         
         @SuppressWarnings("unused")
-        public boolean dispatchUnhandledKey(InputChannel focus, int action,
-                int flags, int keyCode, int scanCode, int metaState, int repeatCount,
-                int policyFlags) {
-            return mWindowManagerService.mInputMonitor.dispatchUnhandledKey(focus,
-                    action, flags, keyCode, scanCode, metaState, repeatCount, policyFlags);
+        public boolean dispatchUnhandledKey(InputChannel focus,
+                KeyEvent event, int policyFlags) {
+            return mWindowManagerService.mInputMonitor.dispatchUnhandledKey(
+                    focus, event, policyFlags);
         }
         
         @SuppressWarnings("unused")

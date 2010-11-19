@@ -2007,7 +2007,7 @@ void TouchInputMapper::dumpCalibration(String8& dump) {
     }
 
     if (mCalibration.haveToolSizeIsSummed) {
-        dump.appendFormat(INDENT4 "touch.toolSize.isSummed: %d\n",
+        dump.appendFormat(INDENT4 "touch.toolSize.isSummed: %s\n",
                 toString(mCalibration.toolSizeIsSummed));
     }
 
