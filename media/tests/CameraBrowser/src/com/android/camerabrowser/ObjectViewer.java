@@ -16,6 +16,7 @@
 package com.android.camerabrowser;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -23,9 +24,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.FileUtils;
-import android.os.ParcelFileDescriptor;
-import android.os.Process;
 import android.provider.Mtp;
 import android.util.Log;
 import android.view.Menu;
@@ -37,9 +35,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -53,6 +48,7 @@ public class ObjectViewer extends Activity {
     private int mDeviceID;
     private long mStorageID;
     private long mObjectID;
+    private String mFileName;
 
     private static final String[] OBJECT_COLUMNS =
         new String[] {  Mtp.Object._ID,
@@ -93,7 +89,8 @@ public class ObjectViewer extends Activity {
                         OBJECT_COLUMNS, null, null, null);
             c.moveToFirst();
             TextView view = (TextView)findViewById(R.id.name);
-            view.setText(c.getString(1));
+            mFileName = c.getString(1);
+            view.setText(mFileName);
             view = (TextView)findViewById(R.id.size);
             view.setText(Long.toString(c.getLong(2)));
             view = (TextView)findViewById(R.id.thumb_width);
@@ -167,71 +164,18 @@ public class ObjectViewer extends Activity {
     }
 
     private void save() {
-        boolean success = false;
-        Uri uri = Mtp.Object.getContentUri(mDeviceID, mObjectID);
-        File destFile = null;
-        ParcelFileDescriptor pfd = null;
-        FileInputStream fis = null;
-        FileOutputStream fos = null;
+        // copy file to /mnt/sdcard/imported/<filename>
+        File dest = Environment.getExternalStorageDirectory();
+        dest = new File(dest, "imported");
+        dest.mkdirs();
+        dest = new File(dest, mFileName);
 
-        try {
-            pfd = getContentResolver().openFileDescriptor(uri, "r");
-            Log.d(TAG, "save got pfd " + pfd);
-            if (pfd != null) {
-                fis = new FileInputStream(pfd.getFileDescriptor());
-                Log.d(TAG, "save got fis " + fis);
-                File destDir = Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_DCIM);
-                destDir.mkdirs();
-                destFile = new File(destDir, "CameraBrowser-" + getTimestamp() + ".jpeg");
+        Uri requestUri = Mtp.Object.getContentUriForImport(mDeviceID, mObjectID,
+                dest.getAbsolutePath());
+        Uri resultUri = getContentResolver().insert(requestUri, new ContentValues());
+        Log.d(TAG, "save returned " + resultUri);
 
-
-                Log.d(TAG, "save got destFile " + destFile);
-
-                if (destFile.exists()) {
-                    destFile.delete();
-                }
-                fos = new FileOutputStream(destFile);
-
-                byte[] buffer = new byte[65536];
-                int bytesRead;
-                while ((bytesRead = fis.read(buffer)) >= 0) {
-                    fos.write(buffer, 0, bytesRead);
-                }
-
-                // temporary workaround until we straighten out permissions in /data/media
-                FileUtils.setPermissions(destDir.getPath(), 0775, Process.myUid(), Process.SDCARD_RW_GID);
-                FileUtils.setPermissions(destFile.getPath(), 0664, Process.myUid(), Process.SDCARD_RW_GID);
-
-                success = true;
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Exception in ObjectView.save", e);
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (Exception e) {
-                }
-            }
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (Exception e) {
-                }
-            }
-            if (pfd != null) {
-                try {
-                    pfd.close();
-                } catch (Exception e) {
-                }
-            }
-        }
-
-        if (success) {
-            Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-            intent.setData(Uri.fromFile(destFile));
-            sendBroadcast(intent);
+        if (resultUri != null) {
             Toast.makeText(this, R.string.object_saved_message, Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, R.string.save_failed_message, Toast.LENGTH_SHORT).show();

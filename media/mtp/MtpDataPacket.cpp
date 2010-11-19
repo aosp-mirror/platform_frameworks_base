@@ -413,18 +413,30 @@ int MtpDataPacket::read(struct usb_endpoint *ep) {
 }
 
 int MtpDataPacket::readData(struct usb_endpoint *ep, void* buffer, int length) {
-    int packetSize = usb_endpoint_max_packet(ep);
     int read = 0;
     while (read < length) {
-        int ret = transfer(ep, (char *)buffer + read, packetSize);
+        int ret = transfer(ep, (char *)buffer + read, length - read);
         if (ret < 0) {
-printf("MtpDataPacket::readData returning %d\n", ret);
             return ret;
         }
         read += ret;
     }
-printf("MtpDataPacket::readData returning %d\n", read);
     return read;
+}
+
+// Queue a read request.  Call readDataWait to wait for result
+int MtpDataPacket::readDataAsync(struct usb_endpoint *ep, void* buffer, int length) {
+    if (usb_endpoint_queue(ep, buffer, length)) {
+        LOGE("usb_endpoint_queue failed, errno: %d", errno);
+        return -1;
+    }
+    return 0;
+}
+
+// Wait for result of readDataAsync
+int MtpDataPacket::readDataWait(struct usb_endpoint *ep) {
+    int ep_num;
+    return usb_endpoint_wait(usb_endpoint_get_device(ep), &ep_num);
 }
 
 int MtpDataPacket::readDataHeader(struct usb_endpoint *ep) {
@@ -454,15 +466,7 @@ int MtpDataPacket::write(struct usb_endpoint *ep) {
 }
 
 int MtpDataPacket::write(struct usb_endpoint *ep, void* buffer, uint32_t length) {
-    int ret = 0;
-    int packetSize = usb_endpoint_max_packet(ep);
-    while (length > 0) {
-        int write = (length > packetSize ? packetSize : length);
-        int ret = transfer(ep, buffer, write);
-        if (ret < 0)
-            break;
-        length -= ret;
-    }
+    int ret = transfer(ep, buffer, length);
     return (ret < 0 ? ret : 0);
 }
 
