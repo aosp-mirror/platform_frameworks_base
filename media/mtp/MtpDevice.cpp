@@ -349,13 +349,19 @@ MtpProperty* MtpDevice::getDevicePropDesc(MtpDeviceProperty code) {
 }
 
 // reads the object's data and writes it to the specified file path
-bool MtpDevice::readObject(MtpObjectHandle handle, const char* destPath) {
+bool MtpDevice::readObject(MtpObjectHandle handle, const char* destPath, int group, int perm) {
     LOGD("readObject: %s", destPath);
     int fd = ::open(destPath, O_RDWR | O_CREAT | O_TRUNC);
     if (fd < 0) {
         LOGE("open failed for %s", destPath);
         return false;
     }
+
+    fchown(fd, getuid(), group);
+    // set permissions
+    int mask = umask(0);
+    fchmod(fd, perm);
+    umask(mask);
 
     Mutex::Autolock autoLock(mMutex);
     bool result = false;

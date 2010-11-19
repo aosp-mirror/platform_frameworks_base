@@ -26,6 +26,7 @@
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
+#include "private/android_filesystem_config.h"
 
 #include "MtpClient.h"
 #include "MtpDevice.h"
@@ -197,7 +198,7 @@ android_media_MtpClient_import_file(JNIEnv *env, jobject thiz,
     MtpDevice* device = client->getDevice(device_id);
     if (device) {
         const char *destPathStr = env->GetStringUTFChars(dest_path, NULL);
-        bool result = device->readObject(object_id, destPathStr);
+        bool result = device->readObject(object_id, destPathStr, AID_SDCARD_RW, 0664);
         env->ReleaseStringUTFChars(dest_path, destPathStr);
         return result;
     }

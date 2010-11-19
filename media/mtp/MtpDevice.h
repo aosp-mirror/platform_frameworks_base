@@ -75,7 +75,8 @@ public:
     MtpDeviceInfo*          getDeviceInfo();
     MtpStorageIDList*       getStorageIDs();
     MtpStorageInfo*         getStorageInfo(MtpStorageID storageID);
-    MtpObjectHandleList*    getObjectHandles(MtpStorageID storageID, MtpObjectFormat format, MtpObjectHandle parent);
+    MtpObjectHandleList*    getObjectHandles(MtpStorageID storageID, MtpObjectFormat format,
+                                    MtpObjectHandle parent);
     MtpObjectInfo*          getObjectInfo(MtpObjectHandle handle);
     void*                   getThumbnail(MtpObjectHandle handle, int& outLength);
     MtpObjectHandle         sendObjectInfo(MtpObjectInfo* info);
@@ -86,7 +87,8 @@ public:
 
     MtpProperty*            getDevicePropDesc(MtpDeviceProperty code);
 
-    bool                   readObject(MtpObjectHandle handle, const char* destPath);
+    bool                   readObject(MtpObjectHandle handle, const char* destPath, int group,
+                                    int perm);
 
 private:
     bool                    sendRequest(MtpOperationCode operation);
