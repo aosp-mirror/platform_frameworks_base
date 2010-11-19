@@ -348,97 +348,90 @@ MtpProperty* MtpDevice::getDevicePropDesc(MtpDeviceProperty code) {
     return NULL;
 }
 
-class ReadObjectThread : public Thread {
-private:
-    MtpDevice*          mDevice;
-    MtpObjectHandle     mHandle;
-    int                 mObjectSize;
-    void*               mInitialData;
-    int                 mInitialDataLength;
-    int                 mFD;
-
-public:
-    ReadObjectThread(MtpDevice* device, MtpObjectHandle handle, int objectSize)
-        : mDevice(device),
-          mHandle(handle),
-          mObjectSize(objectSize),
-          mInitialData(NULL),
-          mInitialDataLength(0)
-    {
-    }
-
-    virtual ~ReadObjectThread() {
-        if (mFD >= 0)
-            close(mFD);
-        free(mInitialData);
-    }
-
-    // returns file descriptor
-    int init() {
-        mDevice->mRequest.reset();
-        mDevice->mRequest.setParameter(1, mHandle);
-        if (mDevice->sendRequest(MTP_OPERATION_GET_OBJECT)
-                && mDevice->mData.readDataHeader(mDevice->mEndpointIn)) {
-
-            // mData will contain header and possibly the beginning of the object data
-            mInitialData = mDevice->mData.getData(mInitialDataLength);
-
-            // create a pipe for the client to read from
-            int pipefd[2];
-            if (pipe(pipefd) < 0) {
-                LOGE("pipe failed (%s)", strerror(errno));
-                return -1;
-            }
-
-            mFD = pipefd[1];
-            return pipefd[0];
-        } else {
-           return -1;
-        }
-    }
-
-    virtual bool threadLoop() {
-        int remaining = mObjectSize;
-        if (mInitialData) {
-            write(mFD, mInitialData, mInitialDataLength);
-            remaining -= mInitialDataLength;
-            free(mInitialData);
-            mInitialData = NULL;
-        }
-
-        char buffer[16384];
-        while (remaining > 0) {
-            int readSize = (remaining > sizeof(buffer) ? sizeof(buffer) : remaining);
-            int count = mDevice->mData.readData(mDevice->mEndpointIn, buffer, readSize);
-            int written;
-            if (count >= 0) {
-                int written = write(mFD, buffer, count);
-                // FIXME check error
-                remaining -= count;
-            } else {
-                break;
-            }
-        }
-
-        MtpResponseCode ret = mDevice->readResponse();
-        mDevice->mMutex.unlock();
+// reads the object's data and writes it to the specified file path
+bool MtpDevice::readObject(MtpObjectHandle handle, const char* destPath) {
+    LOGD("readObject: %s", destPath);
+    int fd = ::open(destPath, O_RDWR | O_CREAT | O_TRUNC);
+    if (fd < 0) {
+        LOGE("open failed for %s", destPath);
         return false;
     }
-};
 
-    // returns the file descriptor for a pipe to read the object's data
-int MtpDevice::readObject(MtpObjectHandle handle, int objectSize) {
-    mMutex.lock();
+    Mutex::Autolock autoLock(mMutex);
+    bool result = false;
 
-    ReadObjectThread* thread = new ReadObjectThread(this, handle, objectSize);
-    int fd = thread->init();
-    if (fd < 0) {
-        delete thread;
-        mMutex.unlock();
-    } else {
-        thread->run("ReadObjectThread");
+    mRequest.reset();
+    mRequest.setParameter(1, handle);
+    if (sendRequest(MTP_OPERATION_GET_OBJECT)
+            && mData.readDataHeader(mEndpointIn)) {
+        uint32_t length = mData.getContainerLength();
+        if (length < MTP_CONTAINER_HEADER_SIZE)
+            goto fail;
+        length -= MTP_CONTAINER_HEADER_SIZE;
+        uint32_t remaining = length;
+
+        int initialDataLength = 0;
+        void* initialData = mData.getData(initialDataLength);
+        if (initialData) {
+            if (initialDataLength > 0) {
+                if (write(fd, initialData, initialDataLength) != initialDataLength)
+                    goto fail;
+                remaining -= initialDataLength;
+            }
+            free(initialData);
+        }
+
+        // USB reads greater than 16K don't work
+        char buffer1[16384], buffer2[16384];
+        char* readBuffer = buffer1;
+        char* writeBuffer = NULL;
+        int writeLength = 0;
+
+        while (remaining > 0 || writeBuffer) {
+            if (remaining > 0) {
+                // queue up a read request
+                int readSize = (remaining > sizeof(buffer1) ? sizeof(buffer1) : remaining);
+                if (mData.readDataAsync(mEndpointIn, readBuffer, readSize)) {
+                    LOGE("readDataAsync failed");
+                    goto fail;
+                }
+            } else {
+                readBuffer = NULL;
+            }
+
+            if (writeBuffer) {
+                // write previous buffer
+                if (write(fd, writeBuffer, writeLength) != writeLength) {
+                    LOGE("write failed");
+                    // wait for pending read before failing
+                    if (readBuffer)
+                        mData.readDataWait(mEndpointIn);
+                    goto fail;
+                }
+                writeBuffer = NULL;
+            }
+
+            // wait for read to complete
+            if (readBuffer) {
+                int read = mData.readDataWait(mEndpointIn);
+                if (read < 0)
+                    goto fail;
+
+                writeBuffer = readBuffer;
+                writeLength = read;
+                remaining -= read;
+                readBuffer = (readBuffer == buffer1 ? buffer2 : buffer1);
+            }
+        }
+
+        MtpResponseCode response = readResponse();
+        if (response == MTP_RESPONSE_OK)
+            result = true;
     }
-    return fd;
+
+fail:
+    ::close(fd);
+    return result;
 }
 
 bool MtpDevice::sendRequest(MtpOperationCode operation) {

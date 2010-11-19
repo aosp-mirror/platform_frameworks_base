@@ -158,32 +158,12 @@ static int get_file(int argc, char* argv[]) {
     }
 
     dest = (argc > 1 ? argv[1] : info->mName);
-    destFD = open(dest, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    if (destFD < 0) {
-        fprintf(stderr, "could not create %s\n", dest);
-        goto fail;
-    }
-    srcFD = srcFile->getDevice()->readObject(info->mHandle, info->mCompressedSize);
-    if (srcFD < 0)
-        goto fail;
-
-    char buffer[65536];
-    while (1) {
-        int count = read(srcFD, buffer, sizeof(buffer));
-        if (count <= 0)
-            break;
-        write(destFD, buffer, count);
-    }
-    // FIXME - error checking and reporting
-    ret = 0;
+    if (srcFile->getDevice()->readObject(info->mHandle, dest))
+        ret = 0;
 
 fail:
     delete srcFile;
     delete info;
-    if (srcFD >= 0)
-        close(srcFD);
-    if (destFD >= 0)
-        close(destFD);
     return ret;
 }
 

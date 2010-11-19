@@ -113,6 +113,25 @@ public final class Mtp
         }
 
         /**
+         * Used for copying files from device to host.
+         * Constructs a Uri based on the ID of the device and object for the source file,
+         * and the path for the destination file.
+         * When passed to the ContentProvider.insert() method, the file will be transferred
+         * to the specified destination directory and insert() will return a content Uri
+         * for the new file in the MediaProvider.
+         * ContentProvider.insert() will throw IllegalArgumentException if the destination
+         * path is not in the external storage or internal media directory.
+         */
+        public static Uri getContentUriForImport(int deviceID, long objectID, String destPath) {
+            if (destPath.length() == 0 || destPath.charAt(0) != '/') {
+                throw new IllegalArgumentException(
+                        "destPath must be a full path in getContentUriForImport");
+            }
+            return Uri.parse(CONTENT_AUTHORITY_DEVICE_SLASH + deviceID
+                    + "/import/" + objectID + "?" +  destPath);
+        }
+
+        /**
          * The following columns correspond to the fields in the ObjectInfo dataset
          * as described in the MTP specification.
          */
