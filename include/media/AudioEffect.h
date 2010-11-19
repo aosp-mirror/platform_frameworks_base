@@ -403,7 +403,7 @@ public:
      static status_t guidToString(const effect_uuid_t *guid, char *str, size_t maxLen);
 
 protected:
-     volatile int32_t        mEnabled;           // enable state
+     bool                    mEnabled;           // enable state
      int32_t                 mSessionId;         // audio session ID
      int32_t                 mPriority;          // priority for effect control
      status_t                mStatus;            // effect status
@@ -412,6 +412,7 @@ protected:
      void*                   mUserData;          // client context for callback function
      effect_descriptor_t     mDescriptor;        // effect descriptor
      int32_t                 mId;                // system wide unique effect engine instance ID
+     Mutex                   mLock;               // Mutex for mEnabled access
 
 private:
 
