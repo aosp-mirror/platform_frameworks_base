@@ -25,7 +25,6 @@
         android:id="@+id/bar_contents"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:animateLayoutChanges="false"
         >
 
         <!-- notification icons & panel access -->
@@ -105,7 +104,6 @@
             android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:orientation="horizontal"
-            android:animateLayoutChanges="false"
             >
 
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
@@ -178,62 +176,68 @@
         </LinearLayout>
 
         <!-- lights out mode: "shadow" views -->
-        <ImageView
-            android:id="@+id/notification_shadow"
-            android:layout_width="176dip"
+        <RelativeLayout
+            android:id="@+id/shadows"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingRight="48dip"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/ic_sysbar_shadow"
-            android:visibility="gone"
-            android:scaleType="fitXY"
-            />
+            >
+            <ImageView
+                android:id="@+id/notification_shadow"
+                android:layout_width="176dip"
+                android:layout_height="match_parent"
+                android:paddingRight="48dip"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:src="@drawable/ic_sysbar_shadow"
+                android:visibility="gone"
+                android:scaleType="fitXY"
+                />
 
-        <ImageView
-            android:id="@+id/back_shadow"
-            android:layout_width="96dip"
-            android:layout_height="match_parent"
-            android:paddingLeft="18dip"
-            android:paddingRight="18dip"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/ic_sysbar_shadow"
-            android:visibility="gone"
-            />
-        <ImageView
-            android:id="@+id/home_shadow"
-            android:layout_width="96dip"
-            android:layout_height="match_parent"
-            android:paddingLeft="18dip"
-            android:paddingRight="18dip"
-            android:layout_toRightOf="@id/back_shadow"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/ic_sysbar_shadow"
-            android:visibility="gone"
-            />
-        <ImageView
-            android:id="@+id/recent_shadow"
-            android:layout_width="96dip"
-            android:layout_height="match_parent"
-            android:paddingLeft="18dip"
-            android:paddingRight="18dip"
-            android:layout_toRightOf="@id/home_shadow"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/ic_sysbar_shadow"
-            android:visibility="gone"
-            />
-        <ImageView
-            android:id="@+id/menu_shadow"
-            android:layout_width="96dip"
-            android:layout_height="match_parent"
-            android:paddingLeft="18dip"
-            android:paddingRight="18dip"
-            android:layout_toRightOf="@id/recent_shadow"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/ic_sysbar_shadow"
-            android:visibility="gone"
-            />
+            <ImageView
+                android:id="@+id/back_shadow"
+                android:layout_width="96dip"
+                android:layout_height="match_parent"
+                android:paddingLeft="18dip"
+                android:paddingRight="18dip"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentBottom="true"
+                android:src="@drawable/ic_sysbar_shadow"
+                android:visibility="gone"
+                />
+            <ImageView
+                android:id="@+id/home_shadow"
+                android:layout_width="96dip"
+                android:layout_height="match_parent"
+                android:paddingLeft="18dip"
+                android:paddingRight="18dip"
+                android:layout_toRightOf="@id/back_shadow"
+                android:layout_alignParentBottom="true"
+                android:src="@drawable/ic_sysbar_shadow"
+                android:visibility="gone"
+                />
+            <ImageView
+                android:id="@+id/recent_shadow"
+                android:layout_width="96dip"
+                android:layout_height="match_parent"
+                android:paddingLeft="18dip"
+                android:paddingRight="18dip"
+                android:layout_toRightOf="@id/home_shadow"
+                android:layout_alignParentBottom="true"
+                android:src="@drawable/ic_sysbar_shadow"
+                android:visibility="gone"
+                />
+            <ImageView
+                android:id="@+id/menu_shadow"
+                android:layout_width="96dip"
+                android:layout_height="match_parent"
+                android:paddingLeft="18dip"
+                android:paddingRight="18dip"
+                android:layout_toRightOf="@id/recent_shadow"
+                android:layout_alignParentBottom="true"
+                android:src="@drawable/ic_sysbar_shadow"
+                android:visibility="gone"
+                />
+        </RelativeLayout>
 
         <!-- ticker: transient incoming notification information -->
         <FrameLayout
@@ -244,7 +248,6 @@
             android:layout_toRightOf="@+id/systemInfo"
             android:paddingLeft="6dip"
             android:gravity="center_vertical"
-            android:animateLayoutChanges="true"
             />
             
     </RelativeLayout>
