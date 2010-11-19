@@ -22,6 +22,7 @@ import com.android.layoutlib.api.IResourceValue;
 import com.android.layoutlib.api.IStyleResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
+import com.android.layoutlib.bridge.impl.Stack;
 import com.android.layoutlib.bridge.impl.TempResourceValue;
 
 import android.app.Activity;
@@ -65,7 +66,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.Stack;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
@@ -191,14 +191,33 @@ public final class BridgeContext extends Activity {
         return mDefaultPropMaps.get(key);
     }
 
+    /**
+     * Adds a parser to the stack.
+     * @param parser the parser to add.
+     */
     public void pushParser(BridgeXmlBlockParser parser) {
         mParserStack.push(parser);
     }
 
+    /**
+     * Removes the parser at the top of the stack
+     */
     public void popParser() {
         mParserStack.pop();
     }
 
+    /**
+     * Returns the current parser at the top the of the stack.
+     * @return a parser or null.
+     */
+    public BridgeXmlBlockParser getCurrentParser() {
+        return mParserStack.peek();
+    }
+
+    /**
+     * Returns the previous parser.
+     * @return a parser or null if there isn't any previous parser
+     */
     public BridgeXmlBlockParser getPreviousParser() {
         if (mParserStack.size() < 2) {
             return null;

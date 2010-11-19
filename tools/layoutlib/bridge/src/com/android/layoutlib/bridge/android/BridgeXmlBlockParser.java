@@ -56,11 +56,21 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
         mPlatformFile = platformFile;
         mAttrib = new BridgeXmlPullAttributes(parser, context, mPlatformFile);
 
-        mContext.pushParser(this);
+        if (mContext != null) {
+            mContext.pushParser(this);
+        }
     }
 
     public boolean isPlatformFile() {
         return mPlatformFile;
+    }
+
+    public IXmlPullParser getParser(String layoutName) {
+        if (mParser instanceof IXmlPullParser) {
+            return ((IXmlPullParser)mParser).getParser(layoutName);
+        }
+
+        return null;
     }
 
     public Object getViewKey() {
@@ -238,7 +248,7 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
         }
         int ev = mParser.next();
 
-        if (ev == END_TAG && mParser.getDepth() == 1) {
+        if (ev == END_TAG && mParser.getDepth() == 1 && mContext != null) {
             // done with parser remove it from the context stack.
             mContext.popParser();
         }
