@@ -22,6 +22,8 @@
 
 type FULL
 
+### Basic QWERTY keys ###
+
 key A {
     label:                              'A'
     base:                               'a'
@@ -369,6 +371,8 @@ key APOSTROPHE {
     ctrl, alt, meta:                    none
 }
 
+### Numeric keypad ###
+
 key NUMPAD_0 {
     label, number:                      '0'
     base:                               fallback INSERT
@@ -498,4 +502,26 @@ key NUMPAD_ENTER {
     label:                              '\n'
     base:                               '\n' fallback ENTER
     ctrl, alt, meta:                    none fallback ENTER
+}
+
+### Special keys on phones ###
+
+key AT {
+    label, number:                      '@'
+    base:                               '@'
+}
+
+key STAR {
+    label, number:                      '*'
+    base:                               '*'
+}
+
+key POUND {
+    label, number:                      '#'
+    base:                               '#'
+}
+
+key PLUS {
+    label, number:                      '+'
+    base:                               '+'
 }

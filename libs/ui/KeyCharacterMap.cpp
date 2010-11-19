@@ -733,6 +733,7 @@ status_t KeyCharacterMap::Parser::parseModifier(const String8& token, int32_t* o
             }
 
             combinedMeta |= metaState;
+            start = cur + 1;
 
             if (ch == '\0') {
                 break;
