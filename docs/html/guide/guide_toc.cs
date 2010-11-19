@@ -196,6 +196,9 @@
       </li>
     </ul>
     <ul>
+      <li><a href="<?cs var:toroot ?>guide/topics/fragments/index.html">
+            <span class="en">Fragments</span>
+          </a> <span class="new">new!</span></li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/graphics/index.html">
                <span class="en">Graphics</span>
