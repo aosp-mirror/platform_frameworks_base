@@ -6598,6 +6598,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final Rect mContentFrame = new Rect();
         final Rect mVisibleFrame = new Rect();
 
+        boolean mContentChanged;
+
         float mShownAlpha = 1;
         float mAlpha = 1;
         float mLastAlpha = 1;
@@ -6800,6 +6802,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             final Rect content = mContentFrame;
+            mContentChanged |= !content.equals(cf);
             content.set(cf);
 
             final Rect visible = mVisibleFrame;
@@ -9084,7 +9087,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private final int performLayoutLockedInner() {
+    private final int performLayoutLockedInner(boolean initial) {
         if (!mLayoutNeeded) {
             return 0;
         }
@@ -9142,6 +9145,9 @@ public class WindowManagerService extends IWindowManager.Stub
             // just don't display").
             if (!gone || !win.mHaveFrame) {
                 if (!win.mLayoutAttached) {
+                    if (initial) {
+                        win.mContentChanged = false;
+                    }
                     mPolicy.layoutWindowLw(win, win.mAttrs, null);
                     win.mLayoutSeq = seq;
                     if (DEBUG_LAYOUT) Slog.v(TAG, "-> mFrame="
@@ -9173,6 +9179,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " mRelayoutCalled=" + win.mRelayoutCalled);
                 if ((win.mViewVisibility != View.GONE && win.mRelayoutCalled)
                         || !win.mHaveFrame) {
+                    if (initial) {
+                        win.mContentChanged = false;
+                    }
                     mPolicy.layoutWindowLw(win, win.mAttrs, win.mAttachedWindow);
                     win.mLayoutSeq = seq;
                     if (DEBUG_LAYOUT) Slog.v(TAG, "-> mFrame="
@@ -9277,7 +9286,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 
                 // FIRST LOOP: Perform a layout, if needed.
                 if (repeats < 4) {
-                    changes = performLayoutLockedInner();
+                    changes = performLayoutLockedInner(repeats == 0);
                     if (changes != 0) {
                         continue;
                     }
@@ -9327,7 +9336,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     final WindowManager.LayoutParams attrs = w.mAttrs;
 
                     if (w.mSurface != null) {
-                        // Execute animation.
+                        // Take care of the window being ready to display.
                         if (w.commitFinishDrawingLocked(currentTime)) {
                             if ((w.mAttrs.flags
                                     & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0) {
@@ -9338,7 +9347,31 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
 
                         final boolean wasAnimating = w.mAnimating;
-                        final boolean nowAnimating = w.stepAnimationLocked(currentTime, dw, dh);
+
+                        int animDw = dw;
+                        int animDh = dh;
+
+                        // If the window has moved due to its containing
+                        // content frame changing, then we'd like to animate
+                        // it.  The checks here are ordered by what is least
+                        //Êlikely to be true first.
+                        if (w.mContentChanged && !wasAnimating && !w.mLastHidden && !mDisplayFrozen
+                                && (w.mFrame.top != w.mLastFrame.top
+                                        || w.mFrame.left != w.mLastFrame.left)
+                                && mPolicy.isScreenOn()) {
+                            // Frame has moved, containing content frame
+                            // has also moved, and we're not currently animating...
+                            // let's do something.
+                            Animation a = AnimationUtils.loadAnimation(mContext,
+                                    com.android.internal.R.anim.window_move_from_decor);
+                            w.setAnimation(a);
+                            animDw = w.mLastFrame.left - w.mFrame.left;
+                            animDh = w.mLastFrame.top - w.mFrame.top;
+                        }
+
+                        // Execute animation.
+                        final boolean nowAnimating = w.stepAnimationLocked(currentTime,
+                                animDw, animDh);
 
                         // If this window is animating, make a note that we have
                         // an animating window and take care of a request to run
@@ -10606,7 +10639,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     mLayoutNeeded = true;
                 }
                 if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
-                    performLayoutLockedInner();
+                    performLayoutLockedInner(true);
                 } else if (mode == UPDATE_FOCUS_WILL_PLACE_SURFACES) {
                     // Client will do the layout, but we need to assign layers
                     // for handleNewWindowLocked() below.
