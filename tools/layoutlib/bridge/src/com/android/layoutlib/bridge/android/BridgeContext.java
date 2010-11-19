@@ -65,6 +65,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Stack;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
@@ -98,6 +99,8 @@ public final class BridgeContext extends Activity {
     private final IProjectCallback mProjectCallback;
     private final ILayoutLog mLogger;
     private BridgeContentResolver mContentResolver;
+
+    private final Stack<BridgeXmlBlockParser> mParserStack = new Stack<BridgeXmlBlockParser>();
 
     /**
      * @param projectKey An Object identifying the project. This is used for the cache mechanism.
@@ -186,6 +189,21 @@ public final class BridgeContext extends Activity {
 
     public Map<String, String> getDefaultPropMap(Object key) {
         return mDefaultPropMaps.get(key);
+    }
+
+    public void pushParser(BridgeXmlBlockParser parser) {
+        mParserStack.push(parser);
+    }
+
+    public void popParser() {
+        mParserStack.pop();
+    }
+
+    public BridgeXmlBlockParser getPreviousParser() {
+        if (mParserStack.size() < 2) {
+            return null;
+        }
+        return mParserStack.get(mParserStack.size() - 2);
     }
 
     // ------------- Activity Methods

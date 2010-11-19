@@ -40,10 +40,9 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
     private XmlPullAttributes mAttrib;
 
     private boolean mStarted = false;
-    private boolean mDecNextDepth = false;
-    private int mDepth = 0;
     private int mEventType = START_DOCUMENT;
     private final boolean mPlatformFile;
+    private final BridgeContext mContext;
 
     /**
      * Builds a {@link BridgeXmlBlockParser}.
@@ -53,10 +52,13 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
      */
     public BridgeXmlBlockParser(XmlPullParser parser, BridgeContext context, boolean platformFile) {
         mParser = parser;
+        mContext = context;
         mPlatformFile = platformFile;
         mAttrib = new BridgeXmlPullAttributes(parser, context, mPlatformFile);
+
+        mContext.pushParser(this);
     }
-    
+
     public boolean isPlatformFile() {
         return mPlatformFile;
     }
@@ -68,10 +70,9 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
 
         return null;
     }
-    
-    
+
     // ------- XmlResourceParser implementation
-    
+
     public void setFeature(String name, boolean state)
             throws XmlPullParserException {
         if (FEATURE_PROCESS_NAMESPACES.equals(name) && state) {
@@ -145,7 +146,7 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
     }
 
     public int getDepth() {
-        return mDepth;
+        return mParser.getDepth();
     }
 
     public String getText() {
@@ -236,17 +237,10 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
             return START_DOCUMENT;
         }
         int ev = mParser.next();
-        if (mDecNextDepth) {
-            mDepth--;
-            mDecNextDepth = false;
-        }
-        switch (ev) {
-        case START_TAG:
-            mDepth++;
-            break;
-        case END_TAG:
-            mDecNextDepth = true;
-            break;
+
+        if (ev == END_TAG && mParser.getDepth() == 1) {
+            // done with parser remove it from the context stack.
+            mContext.popParser();
         }
         mEventType = ev;
         return ev;
@@ -301,7 +295,7 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
 
     // AttributeSet implementation
 
-    
+
     public void close() {
         // pass
     }
