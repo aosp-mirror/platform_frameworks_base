@@ -22,6 +22,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.MobileDataStateTracker;
@@ -29,8 +30,9 @@ import android.net.NetworkInfo;
 import android.net.LinkProperties;
 import android.net.NetworkStateTracker;
 import android.net.NetworkUtils;
+import android.net.Proxy;
+import android.net.ProxyProperties;
 import android.net.wifi.WifiStateTracker;
-import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -55,13 +57,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 /**
  * @hide
@@ -179,6 +180,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final int EVENT_CLEAR_NET_TRANSITION_WAKELOCK =
             MAX_NETWORK_STATE_TRACKER_EVENT + 8;
 
+    /**
+     * used internally to reload global proxy settings
+     */
+    private static final int EVENT_APPLY_GLOBAL_HTTP_PROXY =
+            MAX_NETWORK_STATE_TRACKER_EVENT + 9;
+
     private Handler mHandler;
 
     // list of DeathRecipients used to make sure features are turned off when
@@ -198,6 +205,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     // used in DBG mode to track inet condition reports
     private static final int INET_CONDITION_LOG_MAX_SIZE = 15;
     private ArrayList mInetLog;
+
+    // track the current default http proxy - tell the world if we get a new one (real change)
+    private ProxyProperties mDefaultProxy = null;
+    // track the global proxy.
+    private ProxyProperties mGlobalProxy = null;
+    private final Object mGlobalProxyLock = new Object();
+
+    private SettingsObserver mSettingsObserver;
 
     private static class NetworkAttributes {
         /**
@@ -412,6 +427,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (DBG) {
             mInetLog = new ArrayList();
         }
+
+        mSettingsObserver = new SettingsObserver(mHandler, EVENT_APPLY_GLOBAL_HTTP_PROXY);
+        mSettingsObserver.observe(mContext);
     }
 
 
@@ -1303,6 +1321,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mInitialBroadcast = null;
             }
         }
+        // load the global proxy at startup
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_APPLY_GLOBAL_HTTP_PROXY));
     }
 
     private void handleConnect(NetworkInfo info) {
@@ -1380,6 +1400,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         if (mNetTrackers[netType].getNetworkInfo().isConnected()) {
             if (mNetAttributes[netType].isDefault()) {
+                handleApplyDefaultProxy(netType);
                 addDefaultRoute(mNetTrackers[netType]);
             } else {
                 addPrivateDnsRoutes(mNetTrackers[netType]);
@@ -1783,10 +1804,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                     break;
                 case NetworkStateTracker.EVENT_CONFIGURATION_CHANGED:
-                    // TODO - make this handle ip/proxy/gateway/dns changes
                     info = (NetworkInfo) msg.obj;
                     type = info.getType();
-                    handleDnsConfigurationChange(type);
+                    handleConnectivityChange(type);
                     break;
                 case EVENT_CLEAR_NET_TRANSITION_WAKELOCK:
                     String causedBy = null;
@@ -1837,6 +1857,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     boolean enabled = (msg.arg1 == ENABLED);
                     handleSetMobileData(enabled);
                     break;
+                }
+                case EVENT_APPLY_GLOBAL_HTTP_PROXY:
+                {
+                    handleDeprecatedGlobalHttpProxy();
                 }
             }
         }
@@ -2036,5 +2060,114 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mDefaultInetConditionPublished = mDefaultInetCondition;
         sendInetConditionBroadcast(networkInfo);
         return;
+    }
+
+    public synchronized ProxyProperties getProxy() {
+        if (mGlobalProxy != null) return mGlobalProxy;
+        if (mDefaultProxy != null) return mDefaultProxy;
+        return null;
+    }
+
+    public void setGlobalProxy(ProxyProperties proxyProperties) {
+        enforceChangePermission();
+        synchronized (mGlobalProxyLock) {
+            if (proxyProperties == mGlobalProxy) return;
+            if (proxyProperties != null && proxyProperties.equals(mGlobalProxy)) return;
+            if (mGlobalProxy != null && mGlobalProxy.equals(proxyProperties)) return;
+
+            String host = "";
+            int port = 0;
+            String exclList = "";
+            if (proxyProperties != null && !TextUtils.isEmpty(proxyProperties.getHost())) {
+                mGlobalProxy = new ProxyProperties(proxyProperties);
+                host = mGlobalProxy.getHost();
+                port = mGlobalProxy.getPort();
+                exclList = mGlobalProxy.getExclusionList();
+            } else {
+                mGlobalProxy = null;
+            }
+            ContentResolver res = mContext.getContentResolver();
+            Settings.Secure.putString(res, Settings.Secure.GLOBAL_HTTP_PROXY_HOST, host);
+            Settings.Secure.putInt(res, Settings.Secure.GLOBAL_HTTP_PROXY_PORT, port);
+            Settings.Secure.putString(res,Settings.Secure.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
+                    exclList);
+        }
+
+        if (mGlobalProxy == null) {
+            proxyProperties = mDefaultProxy;
+        }
+        sendProxyBroadcast(proxyProperties);
+    }
+
+    public ProxyProperties getGlobalProxy() {
+        synchronized (mGlobalProxyLock) {
+            return mGlobalProxy;
+        }
+    }
+
+    private void handleApplyDefaultProxy(int type) {
+        // check if new default - push it out to all VM if so
+        ProxyProperties proxy = mNetTrackers[type].getLinkProperties().getHttpProxy();
+        synchronized (this) {
+            if (mDefaultProxy != null && mDefaultProxy.equals(proxy)) return;
+            if (mDefaultProxy == proxy) return;
+            if (!TextUtils.isEmpty(proxy.getHost())) {
+                mDefaultProxy = proxy;
+            } else {
+                mDefaultProxy = null;
+            }
+        }
+        if (DBG) Slog.d(TAG, "changing default proxy to " + proxy);
+        if ((proxy == null && mGlobalProxy == null) || proxy.equals(mGlobalProxy)) return;
+        if (mGlobalProxy != null) return;
+        sendProxyBroadcast(proxy);
+    }
+
+    private void handleDeprecatedGlobalHttpProxy() {
+        String proxy = Settings.Secure.getString(mContext.getContentResolver(),
+                Settings.Secure.HTTP_PROXY);
+        if (!TextUtils.isEmpty(proxy)) {
+            String data[] = proxy.split(":");
+            String proxyHost =  data[0];
+            int proxyPort = 8080;
+            if (data.length > 1) {
+                try {
+                    proxyPort = Integer.parseInt(data[1]);
+                } catch (NumberFormatException e) {
+                    return;
+                }
+            }
+            ProxyProperties p = new ProxyProperties(data[0], proxyPort, "");
+            setGlobalProxy(p);
+        }
+    }
+
+    private void sendProxyBroadcast(ProxyProperties proxy) {
+        Slog.d(TAG, "sending Proxy Broadcast for " + proxy);
+        Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        intent.putExtra(Proxy.EXTRA_PROXY_INFO, proxy);
+        mContext.sendBroadcast(intent);
+    }
+
+    private static class SettingsObserver extends ContentObserver {
+        private int mWhat;
+        private Handler mHandler;
+        SettingsObserver(Handler handler, int what) {
+            super(handler);
+            mHandler = handler;
+            mWhat = what;
+        }
+
+        void observe(Context context) {
+            ContentResolver resolver = context.getContentResolver();
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.HTTP_PROXY), false, this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            mHandler.obtainMessage(mWhat).sendToTarget();
+        }
     }
 }

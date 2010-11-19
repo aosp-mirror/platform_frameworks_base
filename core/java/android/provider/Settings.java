@@ -2424,17 +2424,32 @@ public final class Settings {
         public static final String DISABLED_SYSTEM_INPUT_METHODS = "disabled_system_input_methods";
 
         /**
-         * Host name and port for global proxy.
+         * Host name and port for global http proxy.  Uses ':' seperator for between host and port
+         * TODO - deprecate in favor of global_http_proxy_host, etc
          */
         public static final String HTTP_PROXY = "http_proxy";
+
+        /**
+         * Host name for global http proxy.  Set via ConnectivityManager.
+         * @hide
+         */
+        public static final String GLOBAL_HTTP_PROXY_HOST = "global_http_proxy_host";
+
+        /**
+         * Integer host port for global http proxy.  Set via ConnectivityManager.
+         * @hide
+         */
+        public static final String GLOBAL_HTTP_PROXY_PORT = "global_http_proxy_port";
 
         /**
          * Exclusion list for global proxy. This string contains a list of comma-separated
          * domains where the global proxy does not apply. Domains should be listed in a comma-
          * separated list. Example of acceptable formats: ".domain1.com,my.domain2.com"
+         * Use ConnectivityManager to set/get.
          * @hide
          */
-        public static final String HTTP_PROXY_EXCLUSION_LIST = "http_proxy_exclusion_list";
+        public static final String GLOBAL_HTTP_PROXY_EXCLUSION_LIST =
+                "global_http_proxy_exclusion_list";
 
         /**
          * Enables the UI setting to allow the user to specify the global HTTP proxy
