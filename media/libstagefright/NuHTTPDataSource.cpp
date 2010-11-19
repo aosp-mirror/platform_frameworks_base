@@ -178,7 +178,7 @@ status_t NuHTTPDataSource::connect(
         }
 
         if (IsRedirectStatusCode(httpStatus)) {
-            string value;
+            AString value;
             CHECK(mHTTP.find_header_value("Location", &value));
 
             mState = DISCONNECTED;
@@ -198,9 +198,8 @@ status_t NuHTTPDataSource::connect(
         mHasChunkedTransferEncoding = false;
 
         {
-            string value;
-            if (mHTTP.find_header_value("Transfer-Encoding", &value)
-                    || mHTTP.find_header_value("Transfer-encoding", &value)) {
+            AString value;
+            if (mHTTP.find_header_value("Transfer-Encoding", &value)) {
                 // We don't currently support any transfer encodings but
                 // chunked.
 
@@ -222,9 +221,9 @@ status_t NuHTTPDataSource::connect(
         applyTimeoutResponse();
 
         if (offset == 0) {
-            string value;
+            AString value;
             unsigned long x;
-            if (mHTTP.find_header_value(string("Content-Length"), &value)
+            if (mHTTP.find_header_value(AString("Content-Length"), &value)
                     && ParseSingleUnsignedLong(value.c_str(), &x)) {
                 mContentLength = (off64_t)x;
                 mContentLengthValid = true;
@@ -239,9 +238,9 @@ status_t NuHTTPDataSource::connect(
                 return ERROR_UNSUPPORTED;
             }
 
-            string value;
+            AString value;
             unsigned long x;
-            if (mHTTP.find_header_value(string("Content-Range"), &value)) {
+            if (mHTTP.find_header_value(AString("Content-Range"), &value)) {
                 const char *slashPos = strchr(value.c_str(), '/');
                 if (slashPos != NULL
                         && ParseSingleUnsignedLong(slashPos + 1, &x)) {
@@ -439,7 +438,7 @@ void NuHTTPDataSource::MakeFullHeaders(
 }
 
 void NuHTTPDataSource::applyTimeoutResponse() {
-    string timeout;
+    AString timeout;
     if (mHTTP.find_header_value("X-SocketTimeout", &timeout)) {
         const char *s = timeout.c_str();
         char *end;

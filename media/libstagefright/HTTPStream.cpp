@@ -36,7 +36,7 @@
 namespace android {
 
 // static
-const char *HTTPStream::kStatusKey = ":status:";
+const char *HTTPStream::kStatusKey = ":status:";  // MUST be lowercase.
 
 HTTPStream::HTTPStream()
     : mState(READY),
@@ -220,7 +220,7 @@ status_t HTTPStream::receive_header(int *http_status) {
         return err;
     }
 
-    mHeaders.add(string(kStatusKey), string(line));
+    mHeaders.add(AString(kStatusKey), AString(line));
 
     char *spacePos = strchr(line, ' ');
     if (spacePos == NULL) {
@@ -264,7 +264,10 @@ status_t HTTPStream::receive_header(int *http_status) {
 
         char *colonPos = strchr(line, ':');
         if (colonPos == NULL) {
-            mHeaders.add(string(line), string());
+            AString key = line;
+            key.tolower();
+
+            mHeaders.add(key, AString());
         } else {
             char *end_of_key = colonPos;
             while (end_of_key > line && isspace(end_of_key[-1])) {
@@ -278,7 +281,10 @@ status_t HTTPStream::receive_header(int *http_status) {
 
             *end_of_key = '\0';
 
-            mHeaders.add(string(line), string(start_of_value));
+            AString key = line;
+            key.tolower();
+
+            mHeaders.add(key, AString(start_of_value));
         }
     }
 
@@ -314,8 +320,11 @@ ssize_t HTTPStream::receive(void *data, size_t size) {
     return (ssize_t)total;
 }
 
-bool HTTPStream::find_header_value(const string &key, string *value) const {
-    ssize_t index = mHeaders.indexOfKey(key);
+bool HTTPStream::find_header_value(const AString &key, AString *value) const {
+    AString key_lower = key;
+    key_lower.tolower();
+
+    ssize_t index = mHeaders.indexOfKey(key_lower);
     if (index < 0) {
         value->clear();
         return false;

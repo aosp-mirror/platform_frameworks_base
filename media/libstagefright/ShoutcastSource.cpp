@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "include/stagefright_string.h"
 #include "include/HTTPStream.h"
 
 #include <stdlib.h>
@@ -34,7 +33,7 @@ ShoutcastSource::ShoutcastSource(HTTPStream *http)
       mBytesUntilMetaData(0),
       mGroup(NULL),
       mStarted(false) {
-    string metaint;
+    AString metaint;
     if (mHttp->find_header_value("icy-metaint", &metaint)) {
         char *end;
         const char *start = metaint.c_str();
