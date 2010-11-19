@@ -37,6 +37,7 @@ import android.util.Finalizers;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,7 +63,7 @@ public final class Bridge extends LayoutBridge {
     /**
      * Same as sRMap except for int[] instead of int resources. This is for android.R only.
      */
-    private final static Map<int[], String> sRArrayMap = new HashMap<int[], String>();
+    private final static Map<IntArray, String> sRArrayMap = new HashMap<IntArray, String>();
     /**
      * Reverse map compared to sRMap, resource type -> (resource name -> id).
      * This is for android.R only.
@@ -81,6 +82,44 @@ public final class Bridge extends LayoutBridge {
         new HashMap<String, SoftReference<NinePatch>>();
 
     private static Map<String, Map<String, Integer>> sEnumValueMap;
+
+    /**
+     * int[] wrapper to use as keys in maps.
+     */
+    private final static class IntArray {
+        private int[] mArray;
+
+        private IntArray() {
+            // do nothing
+        }
+
+        private IntArray(int[] a) {
+            mArray = a;
+        }
+
+        private void set(int[] a) {
+            mArray = a;
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(mArray);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
+
+            IntArray other = (IntArray) obj;
+            if (!Arrays.equals(mArray, other.mArray)) return false;
+            return true;
+        }
+    }
+
+    /** Instance of IntArrayWrapper to be reused in {@link #resolveResourceValue(int[])}. */
+    private final static IntArray sIntArrayWrapper = new IntArray();
 
     /**
      * A default logger than prints to stdout/stderr.
@@ -183,7 +222,7 @@ public final class Bridge extends LayoutBridge {
                         Class<?> type = f.getType();
                         if (type.isArray() && type.getComponentType() == int.class) {
                             // if the object is an int[] we put it in sRArrayMap
-                            sRArrayMap.put((int[]) f.get(null), f.getName());
+                            sRArrayMap.put(new IntArray((int[]) f.get(null)), f.getName());
                         } else if (type == int.class) {
                             Integer value = (Integer) f.get(null);
                             sRMap.put(value, new String[] { f.getName(), resType });
@@ -319,7 +358,8 @@ public final class Bridge extends LayoutBridge {
      * @param array
      */
     public static String resolveResourceValue(int[] array) {
-        return sRArrayMap.get(array);
+        sIntArrayWrapper.set(array);
+        return sRArrayMap.get(sIntArrayWrapper);
     }
 
     /**
