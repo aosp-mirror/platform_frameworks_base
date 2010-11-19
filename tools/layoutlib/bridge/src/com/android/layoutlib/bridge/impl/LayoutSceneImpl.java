@@ -25,6 +25,7 @@ import com.android.layoutlib.api.SceneParams;
 import com.android.layoutlib.api.SceneResult;
 import com.android.layoutlib.api.ViewInfo;
 import com.android.layoutlib.api.IDensityBasedResourceValue.Density;
+import com.android.layoutlib.api.SceneParams.RenderingMode;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeInflater;
@@ -259,22 +260,32 @@ public class LayoutSceneImpl {
             int renderScreenWidth = mParams.getScreenWidth();
             int renderScreenHeight = mParams.getScreenHeight();
 
-            if (mParams.getRenderFullSize()) {
+            RenderingMode renderingMode = mParams.getRenderingMode();
+
+            if (renderingMode != RenderingMode.NORMAL) {
                 // measure the full size needed by the layout.
                 w_spec = MeasureSpec.makeMeasureSpec(renderScreenWidth,
-                        MeasureSpec.UNSPECIFIED); // this lets us know the actual needed size
+                        renderingMode.isHorizExpand() ?
+                                MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
+                                : MeasureSpec.EXACTLY);
                 h_spec = MeasureSpec.makeMeasureSpec(renderScreenHeight - mScreenOffset,
-                        MeasureSpec.UNSPECIFIED); // this lets us know the actual needed size
+                        renderingMode.isVertExpand() ?
+                                MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
+                                : MeasureSpec.EXACTLY);
                 mViewRoot.measure(w_spec, h_spec);
 
-                int neededWidth = mViewRoot.getChildAt(0).getMeasuredWidth();
-                if (neededWidth > renderScreenWidth) {
-                    renderScreenWidth = neededWidth;
+                if (renderingMode.isHorizExpand()) {
+                    int neededWidth = mViewRoot.getChildAt(0).getMeasuredWidth();
+                    if (neededWidth > renderScreenWidth) {
+                        renderScreenWidth = neededWidth;
+                    }
                 }
 
-                int neededHeight = mViewRoot.getChildAt(0).getMeasuredHeight();
-                if (neededHeight > renderScreenHeight - mScreenOffset) {
-                    renderScreenHeight = neededHeight + mScreenOffset;
+                if (renderingMode.isVertExpand()) {
+                    int neededHeight = mViewRoot.getChildAt(0).getMeasuredHeight();
+                    if (neededHeight > renderScreenHeight - mScreenOffset) {
+                        renderScreenHeight = neededHeight + mScreenOffset;
+                    }
                 }
             }
 
