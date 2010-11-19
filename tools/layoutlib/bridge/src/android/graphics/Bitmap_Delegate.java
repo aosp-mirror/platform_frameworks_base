@@ -162,8 +162,7 @@ public class Bitmap_Delegate {
     }
 
     /*package*/ static void nativeDestructor(int nativeBitmap) {
-        // FIXME implement native delegate
-        throw new UnsupportedOperationException("Native delegate needed for Bitmap");
+        sManager.removeDelegate(nativeBitmap);
     }
 
     /*package*/ static void nativeRecycle(int nativeBitmap) {

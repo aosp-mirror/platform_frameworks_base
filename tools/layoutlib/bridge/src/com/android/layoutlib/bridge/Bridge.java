@@ -32,6 +32,7 @@ import com.android.tools.layoutlib.create.OverrideMethod;
 
 import android.graphics.Bitmap;
 import android.graphics.Typeface_Delegate;
+import android.util.Finalizers;
 
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
@@ -114,19 +115,12 @@ public final class Bridge extends LayoutBridge {
      */
     @Override
     public boolean init(String fontOsLocation, Map<String, Map<String, Integer>> enumValueMap) {
+        sEnumValueMap = enumValueMap;
+
+        Finalizers.init();
+
         BridgeAssetManager.initSystem();
 
-        return sinit(fontOsLocation, enumValueMap);
-    }
-
-    @Override
-    public boolean dispose() {
-        BridgeAssetManager.clearSystem();
-        return true;
-    }
-
-    private static synchronized boolean sinit(String fontOsLocation,
-            Map<String, Map<String, Integer>> enumValueMap) {
 
         // When DEBUG_LAYOUT is set and is not 0 or false, setup a default listener
         // on static (native) methods which prints the signature on the console and
@@ -164,8 +158,6 @@ public final class Bridge extends LayoutBridge {
         } else {
             return false;
         }
-
-        sEnumValueMap = enumValueMap;
 
         // now parse com.android.internal.R (and only this one as android.R is a subset of
         // the internal version), and put the content in the maps.
@@ -211,6 +203,12 @@ public final class Bridge extends LayoutBridge {
             return false;
         }
 
+        return true;
+    }
+
+    @Override
+    public boolean dispose() {
+        BridgeAssetManager.clearSystem();
         return true;
     }
 
@@ -423,70 +421,4 @@ public final class Bridge extends LayoutBridge {
 
         return null;
     }
-
-
-    // ---------- OBSOLETE API METHODS ----------
-
-    /*
-     * For compatilibty purposes, we implement the old deprecated version of computeLayout.
-     * (non-Javadoc)
-     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, java.lang.String, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
-     */
-    @Deprecated
-    public com.android.layoutlib.api.ILayoutResult computeLayout(IXmlPullParser layoutDescription,
-            Object projectKey,
-            int screenWidth, int screenHeight, String themeName,
-            Map<String, Map<String, IResourceValue>> projectResources,
-            Map<String, Map<String, IResourceValue>> frameworkResources,
-            IProjectCallback customViewLoader, ILayoutLog logger) {
-        throw new UnsupportedOperationException();
-    }
-
-    /*
-     * For compatilibty purposes, we implement the old deprecated version of computeLayout.
-     * (non-Javadoc)
-     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
-     */
-    @Deprecated
-    public com.android.layoutlib.api.ILayoutResult computeLayout(IXmlPullParser layoutDescription,
-            Object projectKey,
-            int screenWidth, int screenHeight, String themeName, boolean isProjectTheme,
-            Map<String, Map<String, IResourceValue>> projectResources,
-            Map<String, Map<String, IResourceValue>> frameworkResources,
-            IProjectCallback customViewLoader, ILayoutLog logger) {
-        throw new UnsupportedOperationException();
-    }
-
-    /*
-     * For compatilibty purposes, we implement the old deprecated version of computeLayout.
-     * (non-Javadoc)
-     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, int, float, float, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
-     */
-    @Deprecated
-    public com.android.layoutlib.api.ILayoutResult computeLayout(IXmlPullParser layoutDescription,
-            Object projectKey,
-            int screenWidth, int screenHeight, int density, float xdpi, float ydpi,
-            String themeName, boolean isProjectTheme,
-            Map<String, Map<String, IResourceValue>> projectResources,
-            Map<String, Map<String, IResourceValue>> frameworkResources,
-            IProjectCallback customViewLoader, ILayoutLog logger) {
-        throw new UnsupportedOperationException();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, boolean, int, float, float, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
-     */
-    @Deprecated
-    public com.android.layoutlib.api.ILayoutResult computeLayout(IXmlPullParser layoutDescription,
-            Object projectKey,
-            int screenWidth, int screenHeight, boolean renderFullSize,
-            int density, float xdpi, float ydpi,
-            String themeName, boolean isProjectTheme,
-            Map<String, Map<String, IResourceValue>> projectResources,
-            Map<String, Map<String, IResourceValue>> frameworkResources,
-            IProjectCallback customViewLoader, ILayoutLog logger) {
-        throw new UnsupportedOperationException();
-    }
-
 }

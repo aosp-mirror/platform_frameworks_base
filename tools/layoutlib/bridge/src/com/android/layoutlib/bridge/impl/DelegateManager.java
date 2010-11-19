@@ -59,9 +59,7 @@ public final class DelegateManager<T> {
      * @return the delegate or null if not found.
      */
     public T getDelegate(int native_object) {
-        synchronized (mDelegates) {
-            return mDelegates.get(native_object);
-        }
+        return mDelegates.get(native_object);
     }
 
     /**
@@ -70,11 +68,9 @@ public final class DelegateManager<T> {
      * @return a unique native int to identify the delegate
      */
     public int addDelegate(T newDelegate) {
-        synchronized (mDelegates) {
-            int native_object = ++mDelegateCounter;
-            mDelegates.put(native_object, newDelegate);
-            return native_object;
-        }
+        int native_object = ++mDelegateCounter;
+        mDelegates.put(native_object, newDelegate);
+        return native_object;
     }
 
     /**
@@ -82,8 +78,6 @@ public final class DelegateManager<T> {
      * @param native_object the native int.
      */
     public void removeDelegate(int native_object) {
-        synchronized (mDelegates) {
-            mDelegates.remove(native_object);
-        }
+        mDelegates.remove(native_object);
     }
 }
