@@ -3018,6 +3018,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
             clearScrollingCache();
             mScroller.abortAnimation();
+
+            if (mFlingStrictSpan != null) {
+                mFlingStrictSpan.finish();
+                mFlingStrictSpan = null;
+            }
         }
 
         void flywheelTouch() {
@@ -3085,11 +3090,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     if (mFlingProfilingStarted) {
                         Debug.stopMethodTracing();
                         mFlingProfilingStarted = false;
-                    }
-
-                    if (mFlingStrictSpan != null) {
-                        mFlingStrictSpan.finish();
-                        mFlingStrictSpan = null;
                     }
                 }
             }
