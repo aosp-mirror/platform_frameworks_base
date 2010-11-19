@@ -58,7 +58,7 @@ public class MediaPlayerSetAudioStreamTypeStateUnitTest extends AndroidTestCase 
     }
 
     @LargeTest
-    public void testSetAudioSystemType() {
+    public void testSetAudioStreamType() {
         mTestTemplate.runTestOnMethod(this);
     }
     

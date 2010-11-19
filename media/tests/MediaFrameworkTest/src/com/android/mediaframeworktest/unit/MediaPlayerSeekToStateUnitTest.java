@@ -39,17 +39,17 @@ public class MediaPlayerSeekToStateUnitTest extends AndroidTestCase implements M
         // Valid states.
         assertTrue(!stateErrors.errorInPreparedState);
         assertTrue(!stateErrors.errorInPreparedStateAfterStop);
-        assertTrue(!stateErrors.errorInStartedState);
         assertTrue(!stateErrors.errorInStartedStateAfterPause);
         assertTrue(!stateErrors.errorInPausedState);
         assertTrue(!stateErrors.errorInPlaybackCompletedState);
 
         // Invalid states.
-        assertTrue(!stateErrors.errorInIdleState);  // onError() won't be called
+        assertTrue(stateErrors.errorInIdleState);
         assertTrue(stateErrors.errorInIdleStateAfterReset);
         assertTrue(stateErrors.errorInInitializedState);
         assertTrue(stateErrors.errorInStoppedState);
         assertTrue(stateErrors.errorInErrorState);
+        assertTrue(!stateErrors.errorInStartedState);
     }
 
     public void invokeMethodUnderTest(MediaPlayer player) {

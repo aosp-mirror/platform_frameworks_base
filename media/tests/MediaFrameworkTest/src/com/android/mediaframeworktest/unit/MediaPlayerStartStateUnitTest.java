@@ -45,7 +45,7 @@ public class MediaPlayerStartStateUnitTest extends AndroidTestCase implements Me
         assertTrue(!stateErrors.errorInPlaybackCompletedState);
         
         // Invalid states.
-        assertTrue(!stateErrors.errorInIdleState);  // onError() won't be called
+        assertTrue(stateErrors.errorInIdleState);
         assertTrue(stateErrors.errorInErrorState);
         assertTrue(stateErrors.errorInIdleStateAfterReset);
         assertTrue(stateErrors.errorInInitializedState);
