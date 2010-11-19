@@ -410,7 +410,7 @@ void MPEG2TSWriter::SourceInfo::onMessageReceived(const sp<AMessage> &msg) {
 ////////////////////////////////////////////////////////////////////////////////
 
 MPEG2TSWriter::MPEG2TSWriter(int fd)
-    : mFile(fdopen(fd, "wb")),
+    : mFile(fdopen(dup(fd), "wb")),
       mStarted(false),
       mNumSourcesDone(0),
       mNumTSPacketsWritten(0),

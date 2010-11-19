@@ -864,7 +864,7 @@ status_t StagefrightRecorder::startAMRRecording() {
         return UNKNOWN_ERROR;
     }
 
-    mWriter = new AMRWriter(dup(mOutputFd));
+    mWriter = new AMRWriter(mOutputFd);
     mWriter->addSource(audioEncoder);
 
     if (mMaxFileDurationUs != 0) {
@@ -912,7 +912,7 @@ status_t StagefrightRecorder::startRTPRecording() {
         }
     }
 
-    mWriter = new ARTPWriter(dup(mOutputFd));
+    mWriter = new ARTPWriter(mOutputFd);
     mWriter->addSource(source);
     mWriter->setListener(mListener);
 
@@ -922,7 +922,7 @@ status_t StagefrightRecorder::startRTPRecording() {
 status_t StagefrightRecorder::startMPEG2TSRecording() {
     CHECK_EQ(mOutputFormat, OUTPUT_FORMAT_MPEG2TS);
 
-    sp<MediaWriter> writer = new MPEG2TSWriter(dup(mOutputFd));
+    sp<MediaWriter> writer = new MPEG2TSWriter(mOutputFd);
 
     if (mAudioSource != AUDIO_SOURCE_LIST_END) {
         if (mAudioEncoder != AUDIO_ENCODER_AAC) {
@@ -1204,7 +1204,7 @@ status_t StagefrightRecorder::setupMPEG4Recording(
     mediaWriter->clear();
     *totalBitRate = 0;
     status_t err = OK;
-    sp<MediaWriter> writer = new MPEG4Writer(dup(outputFd));
+    sp<MediaWriter> writer = new MPEG4Writer(outputFd);
 
     // Add audio source first if it exists
     if (!mCaptureTimeLapse && (mAudioSource != AUDIO_SOURCE_LIST_END)) {
