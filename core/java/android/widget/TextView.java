@@ -7117,7 +7117,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         csr = new CommitSelectionReceiver(oldSelStart, oldSelEnd);
                     }
 
-                    handled |= imm.showSoftInput(this, 0, csr) && (csr != null);
+                    if (!mTextIsSelectable) {
+                        // Selection in read-only text should not bring up the IME.
+                        handled |= imm.showSoftInput(this, 0, csr) && (csr != null);
+                    }
 
                     // Cannot be done by CommitSelectionReceiver, which might not always be called,
                     // for instance when dealing with an ExtractEditText.
