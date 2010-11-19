@@ -26,9 +26,6 @@ typedef struct VpConsts {
 } VpConsts_t;
 VpConsts_t *vpConstants;
 
-
-#pragma rs export_func(initParts)
-
 rs_script physics_script;
 
 Ball_t *balls1;
