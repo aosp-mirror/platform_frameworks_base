@@ -17,7 +17,9 @@
 package com.android.internal.telephony.gsm;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.AsyncResult;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -29,7 +31,10 @@ import com.android.internal.telephony.SmsRawData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static android.telephony.SmsManager.STATUS_ON_ICC_FREE;
 
@@ -44,9 +49,15 @@ public class SimSmsInterfaceManager extends IccSmsInterfaceManager {
     private final Object mLock = new Object();
     private boolean mSuccess;
     private List<SmsRawData> mSms;
+    private HashMap<Integer, HashSet<String>> mCellBroadcastSubscriptions =
+            new HashMap<Integer, HashSet<String>>();
 
     private static final int EVENT_LOAD_DONE = 1;
     private static final int EVENT_UPDATE_DONE = 2;
+    private static final int EVENT_SET_BROADCAST_ACTIVATION_DONE = 3;
+    private static final int EVENT_SET_BROADCAST_CONFIG_DONE = 4;
+    private static final int SMS_CB_CODE_SCHEME_MIN = 0;
+    private static final int SMS_CB_CODE_SCHEME_MAX = 255;
 
     Handler mHandler = new Handler() {
         @Override
@@ -71,6 +82,14 @@ public class SimSmsInterfaceManager extends IccSmsInterfaceManager {
                             if (mSms != null)
                                 mSms.clear();
                         }
+                        mLock.notifyAll();
+                    }
+                    break;
+                case EVENT_SET_BROADCAST_ACTIVATION_DONE:
+                case EVENT_SET_BROADCAST_CONFIG_DONE:
+                    ar = (AsyncResult) msg.obj;
+                    synchronized (mLock) {
+                        mSuccess = (ar.exception == null);
                         mLock.notifyAll();
                     }
                     break;
@@ -189,6 +208,126 @@ public class SimSmsInterfaceManager extends IccSmsInterfaceManager {
             }
         }
         return mSms;
+    }
+
+    public boolean enableCellBroadcast(int messageIdentifier) {
+        if (DBG) log("enableCellBroadcast");
+
+        Context context = mPhone.getContext();
+
+        context.enforceCallingPermission(
+                "android.permission.RECEIVE_SMS",
+                "Enabling cell broadcast SMS");
+
+        String client = context.getPackageManager().getNameForUid(
+                Binder.getCallingUid());
+        HashSet<String> clients = mCellBroadcastSubscriptions.get(messageIdentifier);
+
+        if (clients == null) {
+            // This is a new message identifier
+            clients = new HashSet<String>();
+            mCellBroadcastSubscriptions.put(messageIdentifier, clients);
+
+            if (!updateCellBroadcastConfig()) {
+                mCellBroadcastSubscriptions.remove(messageIdentifier);
+                return false;
+            }
+        }
+
+        clients.add(client);
+
+        if (DBG)
+            log("Added cell broadcast subscription for MID " + messageIdentifier
+                    + " from client " + client);
+
+        return true;
+    }
+
+    public boolean disableCellBroadcast(int messageIdentifier) {
+        if (DBG) log("disableCellBroadcast");
+
+        Context context = mPhone.getContext();
+
+        context.enforceCallingPermission(
+                "android.permission.RECEIVE_SMS",
+                "Disabling cell broadcast SMS");
+
+        String client = context.getPackageManager().getNameForUid(
+                Binder.getCallingUid());
+        HashSet<String> clients = mCellBroadcastSubscriptions.get(messageIdentifier);
+
+        if (clients != null && clients.remove(client)) {
+            if (DBG)
+                log("Removed cell broadcast subscription for MID " + messageIdentifier
+                        + " from client " + client);
+
+            if (clients.isEmpty()) {
+                mCellBroadcastSubscriptions.remove(messageIdentifier);
+                updateCellBroadcastConfig();
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean updateCellBroadcastConfig() {
+        Set<Integer> messageIdentifiers = mCellBroadcastSubscriptions.keySet();
+
+        if (messageIdentifiers.size() > 0) {
+            SmsBroadcastConfigInfo[] configs =
+                    new SmsBroadcastConfigInfo[messageIdentifiers.size()];
+            int i = 0;
+
+            for (int messageIdentifier : messageIdentifiers) {
+                configs[i++] = new SmsBroadcastConfigInfo(messageIdentifier, messageIdentifier,
+                        SMS_CB_CODE_SCHEME_MIN, SMS_CB_CODE_SCHEME_MAX, true);
+            }
+
+            return setCellBroadcastConfig(configs) && setCellBroadcastActivation(true);
+        } else {
+            return setCellBroadcastActivation(false);
+        }
+    }
+
+    private boolean setCellBroadcastConfig(SmsBroadcastConfigInfo[] configs) {
+        if (DBG)
+            log("Calling setGsmBroadcastConfig with " + configs.length + " configurations");
+
+        synchronized (mLock) {
+            Message response = mHandler.obtainMessage(EVENT_SET_BROADCAST_CONFIG_DONE);
+
+            mSuccess = false;
+            mPhone.mCM.setGsmBroadcastConfig(configs, response);
+
+            try {
+                mLock.wait();
+            } catch (InterruptedException e) {
+                log("interrupted while trying to set cell broadcast config");
+            }
+        }
+
+        return mSuccess;
+    }
+
+    private boolean setCellBroadcastActivation(boolean activate) {
+        if (DBG)
+            log("Calling setCellBroadcastActivation(" + activate + ")");
+
+        synchronized (mLock) {
+            Message response = mHandler.obtainMessage(EVENT_SET_BROADCAST_ACTIVATION_DONE);
+
+            mSuccess = false;
+            mPhone.mCM.setGsmBroadcastActivation(activate, response);
+
+            try {
+                mLock.wait();
+            } catch (InterruptedException e) {
+                log("interrupted while trying to set cell broadcast activation");
+            }
+        }
+
+        return mSuccess;
     }
 
     protected void log(String msg) {
