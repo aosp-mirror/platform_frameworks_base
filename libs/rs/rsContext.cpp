@@ -268,6 +268,7 @@ Context::PushState::PushState(Context *con) {
     mVertex.set(con->getProgramVertex());
     mStore.set(con->getProgramStore());
     mRaster.set(con->getProgramRaster());
+    mFont.set(con->getFont());
 }
 
 Context::PushState::~PushState() {
