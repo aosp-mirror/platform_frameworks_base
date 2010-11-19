@@ -22,7 +22,7 @@ page.title=Android Supported Media Formats
 <tr>
 <td rowspan="9">Audio</td>
 <td>AAC LC/LTP</td>
-<td>&nbsp;</td>
+<td style="text-align: center;">X</td>
 <td style="text-align: center;">X</td>
 <td rowspan="3">Mono/Stereo content in any combination of standard bit rates up to 160 kbps and sampling rates from 8 to 48kHz</td>
 <td rowspan="3">3GPP (.3gp) and MPEG-4 (.mp4, .m4a). No support for raw AAC (.aac)</td>
@@ -51,7 +51,7 @@ page.title=Android Supported Media Formats
 
 <tr>
 <td>AMR-WB</td>
-<td>&nbsp;</td>
+<td style="text-align: center;">X</td>
 <td style="text-align: center;">X</td>
 <td>9 rates from 6.60 kbit/s to 23.85 kbit/s sampled @ 16kHz</td>
 <td>3GPP (.3gp)</td>
@@ -109,7 +109,7 @@ page.title=Android Supported Media Formats
 
 <tr>
 <td>PNG</td>
-<td>&nbsp;</td>
+<td style="text-align: center;">X</td>
 <td style="text-align: center;">X</td>
 <td>&nbsp;</td>
 <td>PNG (.png)</td>
