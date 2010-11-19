@@ -286,9 +286,7 @@ public class AudioTrack {
     }
 
     /**
-     * @return The timeline duration. If looping is enabled this value
-     *         represents the duration of the looped audio track, otherwise it
-     *         is the duration of the audio track (mDurationMs).
+     * @return The timeline duration as defined by the begin and end boundaries
      */
     public long getTimelineDuration() {
         return mTimelineDurationMs;
@@ -312,13 +310,8 @@ public class AudioTrack {
 
         mBeginBoundaryTimeMs = beginMs;
         mEndBoundaryTimeMs = endMs;
-        if (mLoop) {
-            // TODO: Compute mDurationMs (from the beginning of the loop until
-            // the end of all the loops.
-            mTimelineDurationMs = mEndBoundaryTimeMs - mBeginBoundaryTimeMs;
-        } else {
-            mTimelineDurationMs = mEndBoundaryTimeMs - mBeginBoundaryTimeMs;
-        }
+
+        mTimelineDurationMs = mEndBoundaryTimeMs - mBeginBoundaryTimeMs;
     }
 
     /**
