@@ -2187,14 +2187,6 @@ public class WebView extends AbsoluteLayout
     private View mTitleBar;
 
     /**
-     * Since we draw the title bar ourselves, we removed the shadow from the
-     * browser's activity.  We do want a shadow at the bottom of the title bar,
-     * or at the top of the screen if the title bar is not visible.  This
-     * drawable serves that purpose.
-     */
-    private Drawable mTitleShadow;
-
-    /**
      * Add or remove a title bar to be embedded into the WebView, and scroll
      * along with it vertically, while remaining in view horizontally. Pass
      * null to remove the title bar from the WebView, and return to drawing
@@ -2220,10 +2212,6 @@ public class WebView extends AbsoluteLayout
             addView(v, new AbsoluteLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT, 0, 0));
-            if (mTitleShadow == null) {
-                mTitleShadow = (Drawable) mContext.getResources().getDrawable(
-                        com.android.internal.R.drawable.title_bar_shadow);
-            }
         }
         mTitleBar = v;
     }
@@ -3470,15 +3458,6 @@ public class WebView extends AbsoluteLayout
         drawContent(canvas);
         canvas.restoreToCount(saveCount);
 
-        // Now draw the shadow.
-        int titleH = getVisibleTitleHeight();
-        if (mTitleBar != null && titleH == 0) {
-            int height = (int) (5f * getContext().getResources()
-                    .getDisplayMetrics().density);
-            mTitleShadow.setBounds(mScrollX, mScrollY, mScrollX + getWidth(),
-                    mScrollY + height);
-            mTitleShadow.draw(canvas);
-        }
         if (AUTO_REDRAW_HACK && mAutoRedraw) {
             invalidate();
         }
