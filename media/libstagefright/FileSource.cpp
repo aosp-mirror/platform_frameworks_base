@@ -18,12 +18,14 @@
 #include <media/stagefright/MediaDebug.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 namespace android {
 
 FileSource::FileSource(const char *filename)
-    : mFile(fopen(filename, "rb")),
-      mFd(mFile == NULL ? -1 : fileno(mFile)),
+    : mFd(-1),
       mOffset(0),
       mLength(-1),
       mDecryptHandle(NULL),
@@ -31,11 +33,12 @@ FileSource::FileSource(const char *filename)
       mDrmBufOffset(0),
       mDrmBufSize(0),
       mDrmBuf(NULL){
+
+    mFd = open(filename, O_LARGEFILE | O_RDONLY);
 }
 
 FileSource::FileSource(int fd, int64_t offset, int64_t length)
-    : mFile(fdopen(fd, "rb")),
-      mFd(fd),
+    : mFd(fd),
       mOffset(offset),
       mLength(length),
       mDecryptHandle(NULL),
@@ -48,9 +51,9 @@ FileSource::FileSource(int fd, int64_t offset, int64_t length)
 }
 
 FileSource::~FileSource() {
-    if (mFile != NULL) {
-        fclose(mFile);
-        mFile = NULL;
+    if (mFd >= 0) {
+        close(mFd);
+        mFd = -1;
     }
 
     if (mDrmBuf != NULL) {
@@ -60,11 +63,11 @@ FileSource::~FileSource() {
 }
 
 status_t FileSource::initCheck() const {
-    return mFile != NULL ? OK : NO_INIT;
+    return mFd >= 0 ? OK : NO_INIT;
 }
 
 ssize_t FileSource::readAt(off64_t offset, void *data, size_t size) {
-    if (mFile == NULL) {
+    if (mFd < 0) {
         return NO_INIT;
     }
 
@@ -95,7 +98,7 @@ ssize_t FileSource::readAt(off64_t offset, void *data, size_t size) {
 }
 
 status_t FileSource::getSize(off64_t *size) {
-    if (mFile == NULL) {
+    if (mFd < 0) {
         return NO_INIT;
     }
 

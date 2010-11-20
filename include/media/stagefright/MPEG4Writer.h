@@ -61,8 +61,8 @@ protected:
 private:
     class Track;
 
-    FILE *mFile;
     int  mFd;
+    status_t mInitCheck;
     bool mUse4ByteNalLength;
     bool mUse32BitOffset;
     bool mIsFileSizeLimitExplicitlyRequested;
@@ -149,7 +149,7 @@ private:
     off64_t addSample_l(MediaBuffer *buffer);
     off64_t addLengthPrefixedSample_l(MediaBuffer *buffer);
 
-    inline size_t write(const void *ptr, size_t size, size_t nmemb, FILE* stream);
+    inline size_t write(const void *ptr, size_t size, size_t nmemb);
     bool exceedsFileSizeLimit();
     bool use32BitFileOffset() const;
     bool exceedsFileDurationLimit();

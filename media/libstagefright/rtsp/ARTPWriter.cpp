@@ -46,7 +46,7 @@ static int UniformRand(int limit) {
 
 ARTPWriter::ARTPWriter(int fd)
     : mFlags(0),
-      mFd(fd),
+      mFd(dup(fd)),
       mLooper(new ALooper),
       mReflector(new AHandlerReflector<ARTPWriter>(this)) {
     CHECK_GE(fd, 0);
