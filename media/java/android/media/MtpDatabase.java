@@ -25,11 +25,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.RemoteException;
+import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.Files;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.MediaColumns;
-import android.provider.Mtp;
 import android.util.Log;
 
 import java.io.File;
@@ -1023,7 +1023,7 @@ public class MtpDatabase {
         Log.d(TAG, "sessionEnded");
         if (mDatabaseModified) {
             Log.d(TAG, "sending ACTION_MTP_SESSION_END");
-            mContext.sendBroadcast(new Intent(Mtp.ACTION_MTP_SESSION_END));
+            mContext.sendBroadcast(new Intent(MediaStore.ACTION_MTP_SESSION_END));
             mDatabaseModified = false;
         }
     }

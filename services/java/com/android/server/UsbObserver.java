@@ -24,7 +24,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.UEventObserver;
-import android.provider.Mtp;
+import android.provider.Ptp;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
@@ -155,7 +155,7 @@ class UsbObserver extends UEventObserver {
     // called from JNI in monitorUsbHostBus()
     private void usbCameraAdded(int deviceID) {
         Intent intent = new Intent(Usb.ACTION_USB_CAMERA_ATTACHED,
-                                Mtp.Device.getContentUri(deviceID));
+                                Ptp.Device.getContentUri(deviceID));
         Log.d(TAG, "usbCameraAdded, sending " + intent);
         mContext.sendBroadcast(intent);
     }
@@ -163,7 +163,7 @@ class UsbObserver extends UEventObserver {
     // called from JNI in monitorUsbHostBus()
     private void usbCameraRemoved(int deviceID) {
         Intent intent = new Intent(Usb.ACTION_USB_CAMERA_DETACHED,
-                                Mtp.Device.getContentUri(deviceID));
+                                Ptp.Device.getContentUri(deviceID));
         Log.d(TAG, "usbCameraRemoved, sending " + intent);
         mContext.sendBroadcast(intent);
     }

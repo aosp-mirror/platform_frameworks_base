@@ -24,7 +24,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.Mtp;
+import android.provider.Ptp;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -51,21 +51,21 @@ public class ObjectViewer extends Activity implements View.OnClickListener {
     private DeviceDisconnectedReceiver mDisconnectedReceiver;
 
     private static final String[] OBJECT_COLUMNS =
-        new String[] {  Mtp.Object._ID,
-                        Mtp.Object.NAME,
-                        Mtp.Object.SIZE,
-                        Mtp.Object.THUMB_WIDTH,
-                        Mtp.Object.THUMB_HEIGHT,
-                        Mtp.Object.THUMB_SIZE,
-                        Mtp.Object.IMAGE_WIDTH,
-                        Mtp.Object.IMAGE_HEIGHT,
-                        Mtp.Object.IMAGE_DEPTH,
-                        Mtp.Object.SEQUENCE_NUMBER,
-                        Mtp.Object.DATE_CREATED,
-                        Mtp.Object.DATE_MODIFIED,
-                        Mtp.Object.KEYWORDS,
-                        Mtp.Object.THUMB,
-                        Mtp.Object.FORMAT,
+        new String[] {  Ptp.Object._ID,
+                        Ptp.Object.NAME,
+                        Ptp.Object.SIZE,
+                        Ptp.Object.THUMB_WIDTH,
+                        Ptp.Object.THUMB_HEIGHT,
+                        Ptp.Object.THUMB_SIZE,
+                        Ptp.Object.IMAGE_WIDTH,
+                        Ptp.Object.IMAGE_HEIGHT,
+                        Ptp.Object.IMAGE_DEPTH,
+                        Ptp.Object.SEQUENCE_NUMBER,
+                        Ptp.Object.DATE_CREATED,
+                        Ptp.Object.DATE_MODIFIED,
+                        Ptp.Object.KEYWORDS,
+                        Ptp.Object.THUMB,
+                        Ptp.Object.FORMAT,
                         };
 
     @Override
@@ -91,7 +91,7 @@ public class ObjectViewer extends Activity implements View.OnClickListener {
 
         if (mDeviceID != 0 && mObjectID != 0) {
         Cursor c = getContentResolver().query(
-                        Mtp.Object.getContentUri(mDeviceID, mObjectID),
+                        Ptp.Object.getContentUri(mDeviceID, mObjectID),
                         OBJECT_COLUMNS, null, null, null);
             c.moveToFirst();
             TextView view = (TextView)findViewById(R.id.name);
@@ -147,7 +147,7 @@ public class ObjectViewer extends Activity implements View.OnClickListener {
         dest.mkdirs();
         dest = new File(dest, mFileName);
 
-        Uri requestUri = Mtp.Object.getContentUriForImport(mDeviceID, mObjectID,
+        Uri requestUri = Ptp.Object.getContentUriForImport(mDeviceID, mObjectID,
                 dest.getAbsolutePath());
         Uri resultUri = getContentResolver().insert(requestUri, new ContentValues());
         Log.d(TAG, "save returned " + resultUri);
@@ -162,7 +162,7 @@ public class ObjectViewer extends Activity implements View.OnClickListener {
     }
 
     private void deleteObject() {
-        Uri uri = Mtp.Object.getContentUri(mDeviceID, mObjectID);
+        Uri uri = Ptp.Object.getContentUri(mDeviceID, mObjectID);
 
         Log.d(TAG, "deleting " + uri);
 

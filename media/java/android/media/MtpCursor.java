@@ -18,13 +18,13 @@ package android.media;
 
 import android.database.AbstractWindowedCursor;
 import android.database.CursorWindow;
-import android.provider.Mtp;
+import android.provider.Ptp;
 import android.util.Log;
 
 import java.util.HashMap;
 
 /**
-  * Cursor class for MTP content provider
+  * Cursor class for PTP content provider
   * @hide
   */
 public final class MtpCursor extends AbstractWindowedCursor {
@@ -173,39 +173,39 @@ public final class MtpCursor extends AbstractWindowedCursor {
 
     static {
         sDeviceProjectionMap = new HashMap<String, Integer>();
-        sDeviceProjectionMap.put(Mtp.Device._ID, new Integer(DEVICE_ROW_ID));
-        sDeviceProjectionMap.put(Mtp.Device.MANUFACTURER, new Integer(DEVICE_MANUFACTURER));
-        sDeviceProjectionMap.put(Mtp.Device.MODEL, new Integer(DEVICE_MODEL));
+        sDeviceProjectionMap.put(Ptp.Device._ID, new Integer(DEVICE_ROW_ID));
+        sDeviceProjectionMap.put(Ptp.Device.MANUFACTURER, new Integer(DEVICE_MANUFACTURER));
+        sDeviceProjectionMap.put(Ptp.Device.MODEL, new Integer(DEVICE_MODEL));
 
         sStorageProjectionMap = new HashMap<String, Integer>();
-        sStorageProjectionMap.put(Mtp.Storage._ID, new Integer(STORAGE_ROW_ID));
-        sStorageProjectionMap.put(Mtp.Storage.IDENTIFIER, new Integer(STORAGE_IDENTIFIER));
-        sStorageProjectionMap.put(Mtp.Storage.DESCRIPTION, new Integer(STORAGE_DESCRIPTION));
+        sStorageProjectionMap.put(Ptp.Storage._ID, new Integer(STORAGE_ROW_ID));
+        sStorageProjectionMap.put(Ptp.Storage.IDENTIFIER, new Integer(STORAGE_IDENTIFIER));
+        sStorageProjectionMap.put(Ptp.Storage.DESCRIPTION, new Integer(STORAGE_DESCRIPTION));
 
         sObjectProjectionMap = new HashMap<String, Integer>();
-        sObjectProjectionMap.put(Mtp.Object._ID, new Integer(OBJECT_ROW_ID));
-        sObjectProjectionMap.put(Mtp.Object.STORAGE_ID, new Integer(OBJECT_STORAGE_ID));
-        sObjectProjectionMap.put(Mtp.Object.FORMAT, new Integer(OBJECT_FORMAT));
-        sObjectProjectionMap.put(Mtp.Object.PROTECTION_STATUS, new Integer(OBJECT_PROTECTION_STATUS));
-        sObjectProjectionMap.put(Mtp.Object.SIZE, new Integer(OBJECT_SIZE));
-        sObjectProjectionMap.put(Mtp.Object.THUMB_FORMAT, new Integer(OBJECT_THUMB_FORMAT));
-        sObjectProjectionMap.put(Mtp.Object.THUMB_SIZE, new Integer(OBJECT_THUMB_SIZE));
-        sObjectProjectionMap.put(Mtp.Object.THUMB_WIDTH, new Integer(OBJECT_THUMB_WIDTH));
-        sObjectProjectionMap.put(Mtp.Object.THUMB_HEIGHT, new Integer(OBJECT_THUMB_HEIGHT));
-        sObjectProjectionMap.put(Mtp.Object.IMAGE_WIDTH, new Integer(OBJECT_IMAGE_WIDTH));
-        sObjectProjectionMap.put(Mtp.Object.IMAGE_HEIGHT, new Integer(OBJECT_IMAGE_HEIGHT));
-        sObjectProjectionMap.put(Mtp.Object.IMAGE_DEPTH, new Integer(OBJECT_IMAGE_DEPTH));
-        sObjectProjectionMap.put(Mtp.Object.PARENT, new Integer(OBJECT_PARENT));
-        sObjectProjectionMap.put(Mtp.Object.ASSOCIATION_TYPE, new Integer(OBJECT_ASSOCIATION_TYPE));
-        sObjectProjectionMap.put(Mtp.Object.ASSOCIATION_DESC, new Integer(OBJECT_ASSOCIATION_DESC));
-        sObjectProjectionMap.put(Mtp.Object.SEQUENCE_NUMBER, new Integer(OBJECT_SEQUENCE_NUMBER));
-        sObjectProjectionMap.put(Mtp.Object.NAME, new Integer(OBJECT_NAME));
-        sObjectProjectionMap.put(Mtp.Object.DATE_CREATED, new Integer(OBJECT_DATE_CREATED));
-        sObjectProjectionMap.put(Mtp.Object.DATE_MODIFIED, new Integer(OBJECT_DATE_MODIFIED));
-        sObjectProjectionMap.put(Mtp.Object.KEYWORDS, new Integer(OBJECT_KEYWORDS));
-        sObjectProjectionMap.put(Mtp.Object.THUMB, new Integer(OBJECT_THUMB));
+        sObjectProjectionMap.put(Ptp.Object._ID, new Integer(OBJECT_ROW_ID));
+        sObjectProjectionMap.put(Ptp.Object.STORAGE_ID, new Integer(OBJECT_STORAGE_ID));
+        sObjectProjectionMap.put(Ptp.Object.FORMAT, new Integer(OBJECT_FORMAT));
+        sObjectProjectionMap.put(Ptp.Object.PROTECTION_STATUS, new Integer(OBJECT_PROTECTION_STATUS));
+        sObjectProjectionMap.put(Ptp.Object.SIZE, new Integer(OBJECT_SIZE));
+        sObjectProjectionMap.put(Ptp.Object.THUMB_FORMAT, new Integer(OBJECT_THUMB_FORMAT));
+        sObjectProjectionMap.put(Ptp.Object.THUMB_SIZE, new Integer(OBJECT_THUMB_SIZE));
+        sObjectProjectionMap.put(Ptp.Object.THUMB_WIDTH, new Integer(OBJECT_THUMB_WIDTH));
+        sObjectProjectionMap.put(Ptp.Object.THUMB_HEIGHT, new Integer(OBJECT_THUMB_HEIGHT));
+        sObjectProjectionMap.put(Ptp.Object.IMAGE_WIDTH, new Integer(OBJECT_IMAGE_WIDTH));
+        sObjectProjectionMap.put(Ptp.Object.IMAGE_HEIGHT, new Integer(OBJECT_IMAGE_HEIGHT));
+        sObjectProjectionMap.put(Ptp.Object.IMAGE_DEPTH, new Integer(OBJECT_IMAGE_DEPTH));
+        sObjectProjectionMap.put(Ptp.Object.PARENT, new Integer(OBJECT_PARENT));
+        sObjectProjectionMap.put(Ptp.Object.ASSOCIATION_TYPE, new Integer(OBJECT_ASSOCIATION_TYPE));
+        sObjectProjectionMap.put(Ptp.Object.ASSOCIATION_DESC, new Integer(OBJECT_ASSOCIATION_DESC));
+        sObjectProjectionMap.put(Ptp.Object.SEQUENCE_NUMBER, new Integer(OBJECT_SEQUENCE_NUMBER));
+        sObjectProjectionMap.put(Ptp.Object.NAME, new Integer(OBJECT_NAME));
+        sObjectProjectionMap.put(Ptp.Object.DATE_CREATED, new Integer(OBJECT_DATE_CREATED));
+        sObjectProjectionMap.put(Ptp.Object.DATE_MODIFIED, new Integer(OBJECT_DATE_MODIFIED));
+        sObjectProjectionMap.put(Ptp.Object.KEYWORDS, new Integer(OBJECT_KEYWORDS));
+        sObjectProjectionMap.put(Ptp.Object.THUMB, new Integer(OBJECT_THUMB));
 
-        sObjectProjectionMap.put(Mtp.Object.NAME, new Integer(OBJECT_NAME));
+        sObjectProjectionMap.put(Ptp.Object.NAME, new Integer(OBJECT_NAME));
     }
 
     // used by the JNI code

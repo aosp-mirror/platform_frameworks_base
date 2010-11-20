@@ -22,28 +22,20 @@ import android.util.Log;
 
 
 /**
- * The MTP provider supports accessing content on MTP and PTP devices.
+ * The PTP provider supports accessing content on PTP devices.
  * @hide
  */
-public final class Mtp
+public final class Ptp
 {
-    private final static String TAG = "Mtp";
+    private final static String TAG = "Ptp";
 
-    public static final String AUTHORITY = "mtp";
+    public static final String AUTHORITY = "ptp";
 
     private static final String CONTENT_AUTHORITY_SLASH = "content://" + AUTHORITY + "/";
     private static final String CONTENT_AUTHORITY_DEVICE_SLASH = "content://" + AUTHORITY + "/device/";
 
-
-   /**
-     * Broadcast Action:  A broadcast to indicate the end of an MTP session with the host.
-     * This broadcast is only sent if MTP activity has modified the media database during the
-     * most recent MTP session
-     */
-    public static final String ACTION_MTP_SESSION_END = "android.provider.action.MTP_SESSION_END";
-
     /**
-     * Contains list of all MTP/PTP devices
+     * Contains list of all PTP devices
      */
     public static final class Device implements BaseColumns {
 
@@ -67,7 +59,7 @@ public final class Mtp
     }
 
     /**
-     * Contains list of storage units for an MTP/PTP device
+     * Contains list of storage units for an PTP device
      */
     public static final class Storage implements BaseColumns {
 
@@ -93,7 +85,7 @@ public final class Mtp
     }
 
     /**
-     * Contains list of objects on an MTP/PTP device
+     * Contains list of objects on an PTP device
      */
     public static final class Object implements BaseColumns {
 
@@ -133,7 +125,7 @@ public final class Mtp
 
         /**
          * The following columns correspond to the fields in the ObjectInfo dataset
-         * as described in the MTP specification.
+         * as described in the PTP specification.
          */
 
         /**
@@ -144,7 +136,7 @@ public final class Mtp
 
         /**
          * The object's format.  Can be one of the FORMAT_* symbols below,
-         * or any of the valid MTP object formats as defined in the MTP specification.
+         * or any of the valid PTP object formats as defined in the PTP specification.
          * <P>Type: INTEGER</P>
          */
         public static final String FORMAT = "format";
@@ -163,7 +155,7 @@ public final class Mtp
 
         /**
          * The object's thumbnail format.  Can be one of the FORMAT_* symbols below,
-         * or any of the valid MTP object formats as defined in the MTP specification.
+         * or any of the valid PTP object formats as defined in the PTP specification.
          * <P>Type: INTEGER</P>
          */
         public static final String THUMB_FORMAT = "thumb_format";
