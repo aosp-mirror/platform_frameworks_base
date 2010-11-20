@@ -163,16 +163,23 @@ public:
     // the best.
     // Example value: "90". Read/write.
     static const char KEY_JPEG_QUALITY[];
-    // The orientation of the device in degrees. For example, suppose the
-    // natural position of the device is landscape. If the user takes a picture
-    // in landscape mode in 2048x1536 resolution, the rotation will be set to
-    // "0". If the user rotates the phone 90 degrees clockwise, the rotation
-    // should be set to "90".
-    // The camera driver can set orientation in the EXIF header without rotating
-    // the picture. Or the driver can rotate the picture and the EXIF thumbnail.
-    // If the Jpeg picture is rotated, the orientation in the EXIF header should
-    // be missing or 1 (row #0 is top and column #0 is left side). The driver
-    // should not set default value for this parameter.
+    // The rotation angle in degrees relative to the orientation of the camera.
+    // This affects the pictures returned from CAMERA_MSG_COMPRESSED_IMAGE. The
+    // camera driver may set orientation in the EXIF header without rotating the
+    // picture. Or the driver may rotate the picture and the EXIF thumbnail. If
+    // the Jpeg picture is rotated, the orientation in the EXIF header will be
+    // missing or 1 (row #0 is top and column #0 is left side).
+    //
+    // Note that the JPEG pictures of front-facing cameras are not mirrored
+    // as in preview display.
+    //
+    // For example, suppose the natural orientation of the device is portrait.
+    // The device is rotated 270 degrees clockwise, so the device orientation is
+    // 270. Suppose a back-facing camera sensor is mounted in landscape and the
+    // top side of the camera sensor is aligned with the right edge of the
+    // display in natural orientation. So the camera orientation is 90. The
+    // rotation should be set to 0 (270 + 90).
+    //
     // Example value: "0" or "90" or "180" or "270". Write only.
     static const char KEY_ROTATION[];
     // GPS latitude coordinate. GPSLatitude and GPSLatitudeRef will be stored in

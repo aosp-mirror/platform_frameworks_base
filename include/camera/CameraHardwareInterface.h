@@ -269,7 +269,9 @@ public:
      */
     virtual status_t    cancelPicture() = 0;
 
-    /** Set the camera parameters. */
+    /**
+     * Set the camera parameters. This returns BAD_VALUE if any parameter is
+     * invalid or not supported. */
     virtual status_t    setParameters(const CameraParameters& params) = 0;
 
     /** Return the camera parameters. */
