@@ -16,9 +16,12 @@
 
 package com.android.systemui.statusbar.tablet;
 
+import java.util.Arrays;
+
 import android.app.Notification;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Slog;
@@ -31,11 +34,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
 
 import com.android.systemui.R;
-
-import java.util.Arrays;
+import com.android.systemui.statusbar.StatusBarIconView;
 
 public class TabletTicker extends Handler {
     private static final String TAG = "StatusBar.TabletTicker";
@@ -167,6 +170,10 @@ public class TabletTicker extends Handler {
             group.addView(expanded, lp);
         } else if (n.tickerText != null) {
             group = (ViewGroup)inflater.inflate(R.layout.ticker_compat, mParent, false);
+            final Drawable icon = StatusBarIconView.getIcon(mContext,
+                    new StatusBarIcon(notification.pkg, n.icon, n.iconLevel, 0));
+            ImageView iv = (ImageView)group.findViewById(R.id.icon);
+            iv.setImageDrawable(icon);
             TextView tv = (TextView)group.findViewById(R.id.text);
             tv.setText(n.tickerText);
         } else {

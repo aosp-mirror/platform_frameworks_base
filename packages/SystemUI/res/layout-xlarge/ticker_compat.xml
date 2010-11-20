@@ -20,8 +20,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:background="#ff000000"
+    android:background="#ff1d1d1d"
     >
+
+    <ImageView android:id="@+id/icon"
+        android:layout_width="64dp"
+        android:layout_height="match_parent"
+        android:scaleType="center"
+        />
 
     <TextView android:id="@+id/text"
         android:textAppearance="@*android:style/TextAppearance.StatusBar.Ticker"
