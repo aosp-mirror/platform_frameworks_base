@@ -9354,7 +9354,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // If the window has moved due to its containing
                         // content frame changing, then we'd like to animate
                         // it.  The checks here are ordered by what is least
-                        //Êlikely to be true first.
+                        // likely to be true first.
                         if (w.mContentChanged && !wasAnimating && !w.mLastHidden && !mDisplayFrozen
                                 && (w.mFrame.top != w.mLastFrame.top
                                         || w.mFrame.left != w.mLastFrame.left)
