@@ -329,7 +329,8 @@ indicates the current locale.</p>
       <td>
         <code>small</code><br/>
         <code>normal</code><br/>
-        <code>large</code>
+        <code>large</code><br/>
+        <code>xlarge</code>
       </td>
       <td>
         <ul class="nolist">
@@ -347,6 +348,10 @@ indicates the current locale.</p>
         medium-density VGA screen.  Such a screen has significantly more
         available space in both width and height than an HVGA display.
         Examples are VGA and WVGA medium density screens.</li>
+        <li>{@code xlarge}: Screens that are considerably larger than the traditional
+        medium-density HVGA screen. In most cases, devices with extra large screens would be too
+large to carry in a pocket and would most likely be tablet-style devices. <em>Added in API Level
+9.</em></li>
         </ul>
         <p><em>Added in API Level 4.</em></p>
         <p>See <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
@@ -437,6 +442,7 @@ application during runtime.</p>
         <code>ldpi</code><br/>
         <code>mdpi</code><br/>
         <code>hdpi</code><br/>
+        <code>xhdpi</code><br/>
         <code>nodpi</code>
       </td>
       <td>
@@ -445,6 +451,8 @@ application during runtime.</p>
           <li>{@code mdpi}: Medium-density (on traditional HVGA) screens; approximately
 160dpi.</li>
           <li>{@code hdpi}: High-density screens; approximately 240dpi.</li>
+          <li>{@code xhdpi}: Extra high-density screens; approximately 320dpi. <em>Added in API
+Level 8</em></li>
           <li>{@code nodpi}: This can be used for bitmap resources that you do not want to be scaled
 to match the device density.</li>
         </ul>
