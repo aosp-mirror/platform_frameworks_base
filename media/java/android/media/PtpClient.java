@@ -21,9 +21,9 @@ import android.util.Log;
 /**
  * {@hide}
  */
-public class MtpClient {
+public class PtpClient {
 
-    private static final String TAG = "MtpClient";
+    private static final String TAG = "PtpClient";
 
     private final Listener mListener;
 
@@ -31,10 +31,10 @@ public class MtpClient {
         System.loadLibrary("media_jni");
     }
 
-    public MtpClient(Listener listener) {
+    public PtpClient(Listener listener) {
         native_setup();
         if (listener == null) {
-            throw new NullPointerException("MtpClient: listener is null");
+            throw new NullPointerException("PtpClient: listener is null");
         }
         mListener = listener;
     }
@@ -75,10 +75,10 @@ public class MtpClient {
     }
 
     public interface Listener {
-        // called when a new MTP device has been discovered
+        // called when a new PTP device has been discovered
         void deviceAdded(int id);
 
-        // called when an MTP device has been removed
+        // called when an PTP device has been removed
         void deviceRemoved(int id);
     }
 

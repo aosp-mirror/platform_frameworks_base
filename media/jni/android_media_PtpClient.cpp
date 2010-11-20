@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "MtpClientJNI"
+#define LOG_TAG "PtpClientJNI"
 #include "utils/Log.h"
 
 #include <stdio.h>
@@ -103,7 +103,7 @@ void MyClient::deviceRemoved(MtpDevice *device) {
 // ----------------------------------------------------------------------------
 
 static void
-android_media_MtpClient_setup(JNIEnv *env, jobject thiz)
+android_media_PtpClient_setup(JNIEnv *env, jobject thiz)
 {
 #ifdef HAVE_ANDROID_OS
     LOGD("setup\n");
@@ -114,7 +114,7 @@ android_media_MtpClient_setup(JNIEnv *env, jobject thiz)
 }
 
 static void
-android_media_MtpClient_finalize(JNIEnv *env, jobject thiz)
+android_media_PtpClient_finalize(JNIEnv *env, jobject thiz)
 {
 #ifdef HAVE_ANDROID_OS
     LOGD("finalize\n");
@@ -126,7 +126,7 @@ android_media_MtpClient_finalize(JNIEnv *env, jobject thiz)
 }
 
 static jboolean
-android_media_MtpClient_start(JNIEnv *env, jobject thiz)
+android_media_PtpClient_start(JNIEnv *env, jobject thiz)
 {
 #ifdef HAVE_ANDROID_OS
     LOGD("start\n");
@@ -138,7 +138,7 @@ android_media_MtpClient_start(JNIEnv *env, jobject thiz)
 }
 
 static void
-android_media_MtpClient_stop(JNIEnv *env, jobject thiz)
+android_media_PtpClient_stop(JNIEnv *env, jobject thiz)
 {
 #ifdef HAVE_ANDROID_OS
     LOGD("stop\n");
@@ -148,7 +148,7 @@ android_media_MtpClient_stop(JNIEnv *env, jobject thiz)
 }
 
 static jboolean
-android_media_MtpClient_delete_object(JNIEnv *env, jobject thiz,
+android_media_PtpClient_delete_object(JNIEnv *env, jobject thiz,
         jint device_id, jlong object_id)
 {
 #ifdef HAVE_ANDROID_OS
@@ -162,7 +162,7 @@ android_media_MtpClient_delete_object(JNIEnv *env, jobject thiz,
 }
 
 static jlong
-android_media_MtpClient_get_parent(JNIEnv *env, jobject thiz,
+android_media_PtpClient_get_parent(JNIEnv *env, jobject thiz,
         jint device_id, jlong object_id)
 {
 #ifdef HAVE_ANDROID_OS
@@ -176,7 +176,7 @@ android_media_MtpClient_get_parent(JNIEnv *env, jobject thiz,
 }
 
 static jlong
-android_media_MtpClient_get_storage_id(JNIEnv *env, jobject thiz,
+android_media_PtpClient_get_storage_id(JNIEnv *env, jobject thiz,
         jint device_id, jlong object_id)
 {
  #ifdef HAVE_ANDROID_OS
@@ -190,7 +190,7 @@ android_media_MtpClient_get_storage_id(JNIEnv *env, jobject thiz,
 }
 
 static jboolean
-android_media_MtpClient_import_file(JNIEnv *env, jobject thiz,
+android_media_PtpClient_import_file(JNIEnv *env, jobject thiz,
         jint device_id, jlong object_id, jstring dest_path)
 {
 #ifdef HAVE_ANDROID_OS
@@ -209,28 +209,28 @@ android_media_MtpClient_import_file(JNIEnv *env, jobject thiz,
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"native_setup",            "()V",  (void *)android_media_MtpClient_setup},
-    {"native_finalize",         "()V",  (void *)android_media_MtpClient_finalize},
-    {"native_start",            "()Z",  (void *)android_media_MtpClient_start},
-    {"native_stop",             "()V",  (void *)android_media_MtpClient_stop},
-    {"native_delete_object",   "(IJ)Z", (void *)android_media_MtpClient_delete_object},
-    {"native_get_parent",      "(IJ)J", (void *)android_media_MtpClient_get_parent},
-    {"native_get_storage_id",  "(IJ)J", (void *)android_media_MtpClient_get_storage_id},
+    {"native_setup",            "()V",  (void *)android_media_PtpClient_setup},
+    {"native_finalize",         "()V",  (void *)android_media_PtpClient_finalize},
+    {"native_start",            "()Z",  (void *)android_media_PtpClient_start},
+    {"native_stop",             "()V",  (void *)android_media_PtpClient_stop},
+    {"native_delete_object",   "(IJ)Z", (void *)android_media_PtpClient_delete_object},
+    {"native_get_parent",      "(IJ)J", (void *)android_media_PtpClient_get_parent},
+    {"native_get_storage_id",  "(IJ)J", (void *)android_media_PtpClient_get_storage_id},
     {"native_import_file",     "(IJLjava/lang/String;)Z",
-                                        (void *)android_media_MtpClient_import_file},
+                                        (void *)android_media_PtpClient_import_file},
 };
 
-static const char* const kClassPathName = "android/media/MtpClient";
+static const char* const kClassPathName = "android/media/PtpClient";
 
-int register_android_media_MtpClient(JNIEnv *env)
+int register_android_media_PtpClient(JNIEnv *env)
 {
     jclass clazz;
 
-    LOGD("register_android_media_MtpClient\n");
+    LOGD("register_android_media_PtpClient\n");
 
-    clazz = env->FindClass("android/media/MtpClient");
+    clazz = env->FindClass("android/media/PtpClient");
     if (clazz == NULL) {
-        LOGE("Can't find android/media/MtpClient");
+        LOGE("Can't find android/media/PtpClient");
         return -1;
     }
     method_deviceAdded = env->GetMethodID(clazz, "deviceAdded", "(I)V");
@@ -245,10 +245,10 @@ int register_android_media_MtpClient(JNIEnv *env)
     }
     field_context = env->GetFieldID(clazz, "mNativeContext", "I");
     if (field_context == NULL) {
-        LOGE("Can't find MtpClient.mNativeContext");
+        LOGE("Can't find PtpClient.mNativeContext");
         return -1;
     }
 
     return AndroidRuntime::registerNativeMethods(env,
-                "android/media/MtpClient", gMethods, NELEM(gMethods));
+                "android/media/PtpClient", gMethods, NELEM(gMethods));
 }

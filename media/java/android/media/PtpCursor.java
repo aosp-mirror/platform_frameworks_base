@@ -27,8 +27,8 @@ import java.util.HashMap;
   * Cursor class for PTP content provider
   * @hide
   */
-public final class MtpCursor extends AbstractWindowedCursor {
-    static final String TAG = "MtpCursor";
+public final class PtpCursor extends AbstractWindowedCursor {
+    static final String TAG = "PtpCursor";
     static final int NO_COUNT = -1;
 
     /* constants for queryType */
@@ -49,10 +49,10 @@ public final class MtpCursor extends AbstractWindowedCursor {
     private int mCount = NO_COUNT;
 
 
-    public MtpCursor(MtpClient client, int queryType, int deviceID, long storageID, long objectID,
+    public PtpCursor(PtpClient client, int queryType, int deviceID, long storageID, long objectID,
             String[] projection) {
         if (client == null) {
-            throw new NullPointerException("client null in MtpCursor constructor");
+            throw new NullPointerException("client null in PtpCursor constructor");
         }
         mColumns = projection;
 
@@ -132,19 +132,19 @@ public final class MtpCursor extends AbstractWindowedCursor {
     }
 
     /* Device Column IDs */
-     /* These must match the values in MtpCursor.cpp */
+     /* These must match the values in PtpCursor.cpp */
    private static final int DEVICE_ROW_ID          = 1;
     private static final int DEVICE_MANUFACTURER    = 2;
     private static final int DEVICE_MODEL           = 3;
 
     /* Storage Column IDs */
-    /* These must match the values in MtpCursor.cpp */
+    /* These must match the values in PtpCursor.cpp */
     private static final int STORAGE_ROW_ID         = 101;
     private static final int STORAGE_IDENTIFIER     = 102;
     private static final int STORAGE_DESCRIPTION    = 103;
 
     /* Object Column IDs */
-    /* These must match the values in MtpCursor.cpp */
+    /* These must match the values in PtpCursor.cpp */
     private static final int OBJECT_ROW_ID              = 201;
     private static final int OBJECT_STORAGE_ID          = 202;
     private static final int OBJECT_FORMAT              = 203;
@@ -211,7 +211,7 @@ public final class MtpCursor extends AbstractWindowedCursor {
     // used by the JNI code
     private int mNativeContext;
 
-    private native final void native_setup(MtpClient client, int queryType,
+    private native final void native_setup(PtpClient client, int queryType,
             int deviceID, long storageID, long objectID, int[] columns);
     private native final void native_finalize();
     private native void native_wait_for_event();
