@@ -16,6 +16,7 @@
 
 package android.app;
 
+import java.text.NumberFormat;
 import java.util.Date;
 
 import android.app.PendingIntent;
@@ -30,6 +31,7 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.Slog;
+import android.view.View;
 import android.widget.RemoteViews;
 
 /**
@@ -607,7 +609,7 @@ public class Notification implements Parcelable
         private long mWhen;
         private int mSmallIcon;
         private int mSmallIconLevel;
-        private int mSmallIconNumber;
+        private int mNumber;
         private CharSequence mContentTitle;
         private CharSequence mContentText;
         private CharSequence mContentInfo;
@@ -648,11 +650,6 @@ public class Notification implements Parcelable
             return this;
         }
 
-        public Builder setSmallIconNumber(int number) {
-            mSmallIconNumber = number;
-            return this;
-        }
-
         public Builder setContentTitle(CharSequence title) {
             mContentTitle = title;
             return this;
@@ -660,6 +657,11 @@ public class Notification implements Parcelable
 
         public Builder setContentText(CharSequence text) {
             mContentText = text;
+            return this;
+        }
+
+        public Builder setNumber(int number) {
+            mNumber = number;
             return this;
         }
 
@@ -767,10 +769,17 @@ public class Notification implements Parcelable
                 if (mContentText != null) {
                     contentView.setTextViewText(com.android.internal.R.id.text, mContentText);
                 }
-                //TODO
-                //if (mContentInfo) {
-                //    contentVeiw.setTextViewText(com.android.internal.R.id.info, mContentInfo);
-                //}
+                if (mContentInfo != null) {
+                    contentView.setTextViewText(com.android.internal.R.id.info, mContentInfo);
+                } else if (mNumber > 0) {
+                    NumberFormat f = NumberFormat.getIntegerInstance();
+                    contentView.setTextViewText(com.android.internal.R.id.info, f.format(mNumber));
+                    contentView.setFloat(com.android.internal.R.id.info, "setTextSize",
+                            mContext.getResources().getDimensionPixelSize(
+                                com.android.internal.R.dimen.status_bar_content_number_size));
+                } else {
+                    contentView.setViewVisibility(com.android.internal.R.id.info, View.GONE);
+                }
                 if (mWhen != 0) {
                     contentView.setLong(com.android.internal.R.id.time, "setTime", mWhen);
                 }
@@ -791,7 +800,7 @@ public class Notification implements Parcelable
             n.when = mWhen;
             n.icon = mSmallIcon;
             n.iconLevel = mSmallIconLevel;
-            n.number = mSmallIconNumber;
+            n.number = mNumber;
             n.contentView = makeContentView();
             n.contentIntent = mContentIntent;
             n.deleteIntent = mDeleteIntent;

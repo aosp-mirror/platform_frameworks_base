@@ -1,13 +1,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
 
     <ImageView android:id="@+id/icon"
         android:layout_width="48dp"
         android:layout_height="64dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
         android:scaleType="center"
         />
 
@@ -37,5 +35,11 @@
             android:fadingEdge="horizontal"
             />
     </LinearLayout>
+    <TextView android:id="@+id/info"
+        android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        />
 </LinearLayout>
 

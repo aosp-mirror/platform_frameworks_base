@@ -75,6 +75,25 @@ public class NotificationBuilderTest extends TestActivity
                 mNM.notify(id, b.getNotification());
             }
         },
+
+        new Test("Basic Content w/ Number (1)") {
+            public void run() {
+                int id = 1;
+
+                Notification.Builder b = new Notification.Builder(NotificationBuilderTest.this);
+
+                b.setWhen(System.currentTimeMillis());
+                b.setSmallIcon(R.drawable.ic_statusbar_chat);
+                b.setContentTitle("Title");
+                b.setContentText("text\nline2");
+                b.setContentIntent(makeContentIntent(id));
+                b.setDeleteIntent(makeDeleteIntent(id));
+                b.setNumber(12345);
+
+                mNM.notify(id, b.getNotification());
+            }
+        },
+
     };
 
     private PendingIntent makeContentIntent(int id) {

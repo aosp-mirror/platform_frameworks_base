@@ -21,6 +21,9 @@
     <dimen name="status_bar_height">48dip</dimen>
     <!-- Height of the status bar -->
     <dimen name="status_bar_icon_size">48dip</dimen>
+    <!-- Size of the giant number (unread count) in the notifications -->
+    <dimen name="status_bar_content_number_size">48sp</dimen>
+    
     <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
     <!-- Margin for permanent screen decorations at the bottom. -->
     <dimen name="screen_margin_bottom">48dip</dimen>

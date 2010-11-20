@@ -20,7 +20,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:background="#ff000000"
+    android:background="#ff1d1d1d"
     >
     <!--
     android:background="@drawable/ticker_background"
