@@ -46,10 +46,10 @@ public class MediaPlayerGetDurationStateUnitTest extends AndroidTestCase impleme
         assertTrue(!stateErrors.errorInPlaybackCompletedState);
         
         // Invalid states.
-        assertTrue(!stateErrors.errorInIdleState);  // onError() won't be called
         assertTrue(stateErrors.errorInInitializedState);
         assertTrue(stateErrors.errorInErrorState);
         assertTrue(stateErrors.errorInIdleStateAfterReset);
+        assertTrue(stateErrors.errorInIdleState);
     }
     
     public void invokeMethodUnderTest(MediaPlayer player) {

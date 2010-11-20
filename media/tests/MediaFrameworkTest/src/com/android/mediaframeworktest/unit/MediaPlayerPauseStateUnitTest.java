@@ -29,9 +29,9 @@ public class MediaPlayerPauseStateUnitTest extends AndroidTestCase implements Me
 
     /**
      * 1. It is valid to call pause() in the following states:
-     *    {Started, Paused}.
+     *    {Started, Paused, PlaybackCompleted}.
      * 2. It is invalid to call pause() in the following states:
-     *    {Idle, Initialized, Prepared, Stopped, PlaybackCompleted, Error}
+     *    {Idle, Initialized, Prepared, Stopped, Error}
      *    
      * @param stateErrors the MediaPlayerStateErrors to check against.
      */
@@ -40,12 +40,12 @@ public class MediaPlayerPauseStateUnitTest extends AndroidTestCase implements Me
         assertTrue(!stateErrors.errorInStartedState);
         assertTrue(!stateErrors.errorInStartedStateAfterPause);
         assertTrue(!stateErrors.errorInPausedState);
+        assertTrue(!stateErrors.errorInPlaybackCompletedState);
 
         // Invalid states.
         assertTrue(stateErrors.errorInPreparedState);
         assertTrue(stateErrors.errorInPreparedStateAfterStop);
-        assertTrue(stateErrors.errorInPlaybackCompletedState);
-        assertTrue(!stateErrors.errorInIdleState);  // noError() won't be called
+        assertTrue(stateErrors.errorInIdleState);
         assertTrue(stateErrors.errorInIdleStateAfterReset);
         assertTrue(stateErrors.errorInInitializedState);
         assertTrue(stateErrors.errorInStoppedState);
