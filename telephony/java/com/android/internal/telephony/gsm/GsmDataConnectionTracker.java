@@ -81,7 +81,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     private boolean mReregisterOnReconnectFailure = false;
     private ContentResolver mResolver;
 
-    private boolean mPingTestActive = false;
     // Count of PDP reset attempts; reset when we see incoming,
     // call reRegisterNetwork, or pingTest succeeds.
     private int mPdpResetCount = 0;
@@ -654,7 +653,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     protected void startNetStatPoll() {
-        if (mState == State.CONNECTED && mPingTestActive == false && mNetStatPollEnabled == false) {
+        if (mState == State.CONNECTED && mNetStatPollEnabled == false) {
             log("[DataConnection] Start poll NetStat");
             resetPollStats();
             mNetStatPollEnabled = true;
@@ -763,18 +762,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                             POLL_NETSTAT_SLOW_MILLIS);
                 } else {
                     if (DBG) log("Sent " + String.valueOf(mSentSinceLastRecv) +
-                                        " pkts since last received");
-                    // We've exceeded the threshold.  Run ping test as a final check;
-                    // it will proceed with recovery if ping fails.
+                                        " pkts since last received start recovery process");
                     stopNetStatPoll();
-                    Thread pingTest = new Thread() {
-                        @Override
-                        public void run() {
-                            runPingTest();
-                        }
-                    };
-                    mPingTestActive = true;
-                    pingTest.start();
+                    sendMessage(obtainMessage(EVENT_START_RECOVERY));
                 }
             } else {
                 mNoRecvPollCount = 0;
@@ -793,37 +783,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             }
         }
     };
-
-    private void runPingTest () {
-        int status = -1;
-        try {
-            String address = Settings.Secure.getString(mResolver,
-                    Settings.Secure.PDP_WATCHDOG_PING_ADDRESS);
-            int deadline = Settings.Secure.getInt(mResolver,
-                        Settings.Secure.PDP_WATCHDOG_PING_DEADLINE, DEFAULT_PING_DEADLINE);
-            if (DBG) log("pinging " + address + " for " + deadline + "s");
-            if (address != null && !NULL_IP.equals(address)) {
-                Process p = Runtime.getRuntime()
-                                .exec("ping -c 1 -i 1 -w "+ deadline + " " + address);
-                status = p.waitFor();
-            }
-        } catch (IOException e) {
-            loge("ping failed: IOException");
-        } catch (Exception e) {
-            loge("exception trying to ping");
-        }
-
-        if (status == 0) {
-            // ping succeeded.  False alarm.  Reset netStatPoll.
-            // ("-1" for this event indicates a false alarm)
-            EventLog.writeEvent(EventLogTags.PDP_RADIO_RESET, -1);
-            mPdpResetCount = 0;
-            sendMessage(obtainMessage(EVENT_START_NETSTAT_POLL));
-        } else {
-            // ping failed.  Proceed with recovery.
-            sendMessage(obtainMessage(EVENT_START_RECOVERY));
-        }
-    }
 
     /**
      * Returns true if the last fail cause is something that
@@ -1399,12 +1358,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 break;
 
             case EVENT_START_NETSTAT_POLL:
-                mPingTestActive = false;
                 startNetStatPoll();
                 break;
 
             case EVENT_START_RECOVERY:
-                mPingTestActive = false;
                 doRecovery();
                 break;
 

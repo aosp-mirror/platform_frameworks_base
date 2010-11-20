@@ -3318,20 +3318,6 @@ public final class Settings {
                 "pdp_watchdog_max_pdp_reset_fail_count";
 
         /**
-         * Address to ping as a last sanity check before attempting any recovery.
-         * Unset or set to "0.0.0.0" to skip this check.
-         * @hide
-         */
-        public static final String PDP_WATCHDOG_PING_ADDRESS = "pdp_watchdog_ping_address";
-
-        /**
-         * The "-w deadline" parameter for the ping, ie, the max time in
-         * seconds to spend pinging.
-         * @hide
-         */
-        public static final String PDP_WATCHDOG_PING_DEADLINE = "pdp_watchdog_ping_deadline";
-
-        /**
          * The interval in milliseconds at which to check gprs registration
          * after the first registration mismatch of gprs and voice service,
          * to detect possible data network registration problems.
