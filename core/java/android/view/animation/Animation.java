@@ -18,9 +18,11 @@ package android.view.animation;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.RectF;
+import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.graphics.RectF;
+import dalvik.system.CloseGuard;
 
 /**
  * Abstraction for an Animation that can be applied to Views, Surfaces, or
@@ -86,7 +88,10 @@ public abstract class Animation implements Cloneable {
      * content for the duration of the animation.
      */
     public static final int ZORDER_BOTTOM = -1;
-    
+
+    private static final boolean USE_CLOSEGUARD
+            = SystemProperties.getBoolean("log.closeguard.Animation", false);
+
     /**
      * Set by {@link #getTransformation(long, Transformation)} when the animation ends.
      */
@@ -194,6 +199,8 @@ public abstract class Animation implements Cloneable {
     Transformation mTransformation = new Transformation();
     Transformation mPreviousTransformation = new Transformation();
 
+    private final CloseGuard guard = CloseGuard.get();
+
     /**
      * Creates a new animation with a duration of 0ms, the default interpolator, with
      * fillBefore set to true and fillAfter set to false
@@ -276,6 +283,7 @@ public abstract class Animation implements Cloneable {
         if (mStarted && !mEnded) {
             if (mListener != null) mListener.onAnimationEnd(this);
             mEnded = true;
+            guard.close();
         }
         // Make sure we move the animation to the end
         mStartTime = Long.MIN_VALUE;
@@ -288,6 +296,7 @@ public abstract class Animation implements Cloneable {
     public void detach() {
         if (mStarted && !mEnded) {
             mEnded = true;
+            guard.close();
             if (mListener != null) mListener.onAnimationEnd(this);
         }
     }
@@ -781,6 +790,9 @@ public abstract class Animation implements Cloneable {
                     mListener.onAnimationStart(this);
                 }
                 mStarted = true;
+                if (USE_CLOSEGUARD) {
+                    guard.open("cancel or detach or getTransformation");
+                }
             }
 
             if (mFillEnabled) normalizedTime = Math.max(Math.min(normalizedTime, 1.0f), 0.0f);
@@ -797,6 +809,7 @@ public abstract class Animation implements Cloneable {
             if (mRepeatCount == mRepeated) {
                 if (!mEnded) {
                     mEnded = true;
+                    guard.close();
                     if (mListener != null) {
                         mListener.onAnimationEnd(this);
                     }
@@ -950,6 +963,16 @@ public abstract class Animation implements Cloneable {
         if (mFillBefore) {
             final Transformation previousTransformation = mPreviousTransformation;
             applyTransformation(mInterpolator.getInterpolation(0.0f), previousTransformation);
+        }
+    }
+
+    protected void finalize() throws Throwable {
+        try {
+            if (guard != null) {
+                guard.warnIfOpen();
+            }
+        } finally {
+            super.finalize();
         }
     }
 
