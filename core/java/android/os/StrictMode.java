@@ -32,6 +32,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * <p>StrictMode is a developer tool which detects things you might be
@@ -207,6 +208,12 @@ public final class StrictMode {
      * The current VmPolicy in effect.
      */
     private static volatile int sVmPolicyMask = 0;
+
+    /**
+     * The number of threads trying to do an async dropbox write.
+     * Just to limit ourselves out of paranoia.
+     */
+    private static final AtomicInteger sDropboxCallsInFlight = new AtomicInteger(0);
 
     private StrictMode() {}
 
@@ -984,7 +991,6 @@ public final class StrictMode {
             if (violationMaskSubset != 0) {
                 int violationBit = parseViolationFromMessage(info.crashInfo.exceptionMessage);
                 violationMaskSubset |= violationBit;
-                final int violationMaskSubsetFinal = violationMaskSubset;
                 final int savedPolicyMask = getThreadPolicyMask();
 
                 final boolean justDropBox = (info.policy & PENALTY_MASK) == PENALTY_DROPBOX;
@@ -995,20 +1001,7 @@ public final class StrictMode {
                     // call synchronously which Binder data suggests
                     // isn't always super fast, despite the implementation
                     // in the ActivityManager trying to be mostly async.
-                    new Thread("callActivityManagerForStrictModeDropbox") {
-                        public void run() {
-                            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                            try {
-                                ActivityManagerNative.getDefault().
-                                        handleApplicationStrictModeViolation(
-                                            RuntimeInit.getApplicationObject(),
-                                            violationMaskSubsetFinal,
-                                            info);
-                            } catch (RemoteException e) {
-                                Log.e(TAG, "RemoteException handling StrictMode violation", e);
-                            }
-                        }
-                    }.start();
+                    dropboxViolationAsync(violationMaskSubset, info);
                     return;
                 }
 
@@ -1038,6 +1031,44 @@ public final class StrictMode {
                 System.exit(10);
             }
         }
+    }
+
+    /**
+     * In the common case, as set by conditionallyEnableDebugLogging,
+     * we're just dropboxing any violations but not showing a dialog,
+     * not loggging, and not killing the process.  In these cases we
+     * don't need to do a synchronous call to the ActivityManager.
+     * This is used by both per-thread and vm-wide violations when
+     * applicable.
+     */
+    private static void dropboxViolationAsync(
+            final int violationMaskSubset, final ViolationInfo info) {
+        int outstanding = sDropboxCallsInFlight.incrementAndGet();
+        if (outstanding > 20) {
+            // What's going on?  Let's not make make the situation
+            // worse and just not log.
+            sDropboxCallsInFlight.decrementAndGet();
+            return;
+        }
+
+        if (LOG_V) Log.d(TAG, "Dropboxing async; in-flight=" + outstanding);
+
+        new Thread("callActivityManagerForStrictModeDropbox") {
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                try {
+                    ActivityManagerNative.getDefault().
+                            handleApplicationStrictModeViolation(
+                                RuntimeInit.getApplicationObject(),
+                                violationMaskSubset,
+                                info);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException handling StrictMode violation", e);
+                }
+                int outstanding = sDropboxCallsInFlight.decrementAndGet();
+                if (LOG_V) Log.d(TAG, "Dropbox complete; in-flight=" + outstanding);
+            }
+        }.start();
     }
 
     private static class AndroidCloseGuardReporter implements CloseGuard.Reporter {
@@ -1130,14 +1161,25 @@ public final class StrictMode {
             Log.e(TAG, message, originStack);
         }
 
-        if ((sVmPolicyMask & PENALTY_DROPBOX) != 0) {
-            final ViolationInfo info = new ViolationInfo(originStack, sVmPolicyMask);
+        boolean penaltyDropbox = (sVmPolicyMask & PENALTY_DROPBOX) != 0;
+        boolean penaltyDeath = (sVmPolicyMask & PENALTY_DEATH) != 0;
 
+        int violationMaskSubset = PENALTY_DROPBOX | DETECT_VM_CURSOR_LEAKS;
+        ViolationInfo info = new ViolationInfo(originStack, sVmPolicyMask);
+
+        if (penaltyDropbox && !penaltyDeath) {
+            // Common case for userdebug/eng builds.  If no death and
+            // just dropboxing, we can do the ActivityManager call
+            // asynchronously.
+            dropboxViolationAsync(violationMaskSubset, info);
+            return;
+        }
+
+        if (penaltyDropbox) {
             // The violationMask, passed to ActivityManager, is a
             // subset of the original StrictMode policy bitmask, with
             // only the bit violated and penalty bits to be executed
             // by the ActivityManagerService remaining set.
-            int violationMaskSubset = PENALTY_DROPBOX | DETECT_VM_CURSOR_LEAKS;
             final int savedPolicyMask = getThreadPolicyMask();
             try {
                 // First, remove any policy before we call into the Activity Manager,
@@ -1158,7 +1200,7 @@ public final class StrictMode {
             }
         }
 
-        if ((sVmPolicyMask & PENALTY_DEATH) != 0) {
+        if (penaltyDeath) {
             System.err.println("StrictMode VmPolicy violation with POLICY_DEATH; shutting down.");
             Process.killProcess(Process.myPid());
             System.exit(10);
