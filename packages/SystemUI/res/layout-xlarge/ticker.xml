@@ -21,6 +21,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:background="#ff1d1d1d"
+    android:paddingRight="48dp"
     >
     <!--
     android:background="@drawable/ticker_background"

@@ -76,6 +76,24 @@ public class NotificationBuilderTest extends TestActivity
             }
         },
 
+        new Test("Basic Content w/ Info (1)") {
+            public void run() {
+                int id = 1;
+
+                Notification.Builder b = new Notification.Builder(NotificationBuilderTest.this);
+
+                b.setWhen(System.currentTimeMillis());
+                b.setSmallIcon(R.drawable.ic_statusbar_chat);
+                b.setContentTitle("Title");
+                b.setContentText("text\nline2");
+                b.setContentIntent(makeContentIntent(id));
+                b.setDeleteIntent(makeDeleteIntent(id));
+                b.setContentInfo("Snoozed");
+
+                mNM.notify(id, b.getNotification());
+            }
+        },
+
         new Test("Basic Content w/ Number (1)") {
             public void run() {
                 int id = 1;
@@ -93,7 +111,6 @@ public class NotificationBuilderTest extends TestActivity
                 mNM.notify(id, b.getNotification());
             }
         },
-
     };
 
     private PendingIntent makeContentIntent(int id) {
