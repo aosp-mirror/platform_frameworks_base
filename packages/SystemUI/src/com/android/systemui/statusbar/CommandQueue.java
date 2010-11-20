@@ -82,7 +82,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void animateCollapse();
         public void setLightsOn(boolean on);
         public void setMenuKeyVisible(boolean visible);
-        public void setIMEButtonVisible(boolean visible);
+        public void setIMEButtonVisible(IBinder token, boolean visible);
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -165,10 +165,10 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void setIMEButtonVisible(boolean visible) {
+    public void setIMEButtonVisible(IBinder token, boolean visible) {
         synchronized (mList) {
             mHandler.removeMessages(MSG_SHOW_IME_BUTTON);
-            mHandler.obtainMessage(MSG_SHOW_IME_BUTTON, visible ? 1 : 0, 0, null).sendToTarget();
+            mHandler.obtainMessage(MSG_SHOW_IME_BUTTON, visible ? 1 : 0, 0, token).sendToTarget();
         }
     }
 
@@ -233,7 +233,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     mCallbacks.setMenuKeyVisible(msg.arg1 != 0);
                     break;
                 case MSG_SHOW_IME_BUTTON:
-                    mCallbacks.setIMEButtonVisible(msg.arg1 != 0);
+                    mCallbacks.setIMEButtonVisible((IBinder)msg.obj, msg.arg1 != 0);
                     break;
             }
         }

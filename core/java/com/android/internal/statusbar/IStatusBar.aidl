@@ -32,6 +32,6 @@ oneway interface IStatusBar
     void animateCollapse();
     void setLightsOn(boolean on);
     void setMenuKeyVisible(boolean visible);
-    void setIMEButtonVisible(boolean visible);
+    void setIMEButtonVisible(in IBinder token, boolean visible);
 }
 

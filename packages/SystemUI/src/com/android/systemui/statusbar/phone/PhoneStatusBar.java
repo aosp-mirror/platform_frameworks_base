@@ -1016,7 +1016,7 @@ public class PhoneStatusBar extends StatusBar {
 
     // Not supported
     public void setMenuKeyVisible(boolean visible) { }
-    public void setIMEButtonVisible(boolean visible) { }
+    public void setIMEButtonVisible(IBinder token, boolean visible) { }
 
     private class Launcher implements View.OnClickListener {
         private PendingIntent mIntent;

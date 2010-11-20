@@ -107,7 +107,8 @@ public class TabletStatusBar extends StatusBar {
     View mMenuButton;
     View mRecentButton;
 
-    InputMethodButton mInputMethodButton;
+    InputMethodButton mInputMethodSwitchButton;
+    InputMethodButton mInputMethodShortcutButton;
 
     NotificationPanel mNotificationPanel;
     NotificationPeekPanel mNotificationPeekWindow;
@@ -294,7 +295,8 @@ public class TabletStatusBar extends StatusBar {
         mRecentButton.setOnClickListener(mOnClickListener);
 
         // The bar contents buttons
-        mInputMethodButton = (InputMethodButton) sb.findViewById(R.id.imeButton);
+        mInputMethodSwitchButton = (InputMethodButton) sb.findViewById(R.id.imeSwitchButton);
+        mInputMethodShortcutButton = (InputMethodButton) sb.findViewById(R.id.imeShortcutButton);
 
         // "shadows" of the status bar features, for lights-out mode
         mBackShadow = sb.findViewById(R.id.back_shadow);
@@ -645,11 +647,12 @@ public class TabletStatusBar extends StatusBar {
         mMenuButton.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
-    public void setIMEButtonVisible(boolean visible) {
+    public void setIMEButtonVisible(IBinder token, boolean visible) {
         if (DEBUG) {
             Slog.d(TAG, (visible?"showing":"hiding") + " the IME button");
         }
-        mInputMethodButton.setIMEButtonVisible(visible);
+        mInputMethodSwitchButton.setIMEButtonVisible(token, visible);
+        mInputMethodShortcutButton.setIMEButtonVisible(token, visible);
     }
 
     private void setAreThereNotifications() {
