@@ -167,7 +167,7 @@ public class TabletStatusBar extends StatusBar {
         mStatusBarView.setIgnoreChildren(0, mNotificationTrigger, mNotificationPanel);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
