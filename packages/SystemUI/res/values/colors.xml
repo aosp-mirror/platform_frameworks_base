@@ -19,4 +19,5 @@
 <resources>
     <drawable name="notification_number_text_color">#ffffffff</drawable>
     <drawable name="notification_item_background_color">#ff000000</drawable>
+    <drawable name="ticker_background_color">#ff1d1d1d</drawable>
 </resources>

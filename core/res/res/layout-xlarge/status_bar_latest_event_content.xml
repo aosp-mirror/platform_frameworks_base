@@ -37,8 +37,9 @@
     <TextView android:id="@+id/info"
         android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Info"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_height="match_parent"
+        android:singleLine="true"
+        android:gravity="center_vertical"
         android:paddingLeft="8dp"
         />
 </LinearLayout>

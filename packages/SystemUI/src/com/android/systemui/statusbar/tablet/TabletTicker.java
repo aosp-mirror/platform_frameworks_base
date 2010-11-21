@@ -20,7 +20,9 @@ import java.util.Arrays;
 
 import android.app.Notification;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
@@ -29,6 +31,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.WindowManagerImpl;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -45,20 +49,19 @@ public class TabletTicker extends Handler {
 
     private static final int MSG_ADVANCE = 1;
 
-    private static final int ADVANCE_DELAY = 5000; // 5 seconds
+    private static final int ADVANCE_DELAY = 10000; // 5 seconds
 
     private Context mContext;
-    private FrameLayout mParent;
 
+    private ViewGroup mWindow;
     private StatusBarNotification mCurrentNotification;
     private View mCurrentView;
 
     private StatusBarNotification[] mQueue;
     private int mQueuePos;
 
-    public TabletTicker(Context context, FrameLayout parent) {
+    public TabletTicker(Context context) {
         mContext = context;
-        mParent = parent;
 
         // TODO: Make this a configuration value.
         // 3 is enough to let us see most cases, but not get so far behind that it's annoying.
@@ -105,7 +108,7 @@ public class TabletTicker extends Handler {
     private void advance() {
         // Out with the old...
         if (mCurrentView != null) {
-            mParent.removeView(mCurrentView);
+            mWindow.removeView(mCurrentView);
             mCurrentView = null;
             mCurrentNotification = null;
         }
@@ -116,11 +119,22 @@ public class TabletTicker extends Handler {
             mCurrentNotification = next;
             mCurrentView = makeTickerView(next);
             if (mCurrentView != null) {
-                mParent.addView(mCurrentView);
+                if (mWindow == null) {
+                    mWindow = makeWindow();
+                    WindowManagerImpl.getDefault().addView(mWindow, mWindow.getLayoutParams());
+                }
+                mWindow.addView(mCurrentView);
                 sendEmptyMessageDelayed(MSG_ADVANCE, ADVANCE_DELAY);
                 break;
             }
             next = dequeue();
+        }
+
+        // if there's nothing left, close the window
+        // TODO: Do this when the animation is done instead
+        if (mCurrentView == null) {
+            WindowManagerImpl.getDefault().removeView(mWindow);
+            mWindow = null;
         }
     }
 
@@ -138,6 +152,23 @@ public class TabletTicker extends Handler {
             mQueuePos--;
         }
         return notification;
+    }
+
+    private ViewGroup makeWindow() {
+        final Resources res = mContext.getResources();
+        final FrameLayout view = new FrameLayout(mContext);
+        final int width = res.getDimensionPixelSize(R.dimen.notification_ticker_width);
+        final int height = res.getDimensionPixelSize(R.dimen.notification_large_icon_height);
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(width, height,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                PixelFormat.TRANSLUCENT);
+        lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+        lp.setTitle("NotificationTicker");
+        view.setLayoutParams(lp);
+        return view;
     }
 
     private View makeTickerView(StatusBarNotification notification) {
@@ -170,12 +201,14 @@ public class TabletTicker extends Handler {
                 Slog.e(TAG, "couldn't inflate view for notification " + ident, exception);
                 return null;
             }
+            final int statusBarHeight = mContext.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.status_bar_height);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
+                    ViewGroup.LayoutParams.WRAP_CONTENT, statusBarHeight, 1.0f);
             lp.gravity = Gravity.BOTTOM;
             group.addView(expanded, lp);
         } else if (n.tickerText != null) {
-            group = (ViewGroup)inflater.inflate(R.layout.ticker_compat, mParent, false);
+            group = (ViewGroup)inflater.inflate(R.layout.ticker_compat, mWindow, false);
             final Drawable icon = StatusBarIconView.getIcon(mContext,
                     new StatusBarIcon(notification.pkg, n.icon, n.iconLevel, 0));
             ImageView iv = (ImageView)group.findViewById(iconId);

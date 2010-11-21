@@ -721,6 +721,12 @@ public class Notification implements Parcelable
             return this;
         }
 
+        public Builder setSound(Uri sound) {
+            mSound = sound;
+            mAudioStreamType = STREAM_DEFAULT;
+            return this;
+        }
+
         public Builder setSound(Uri sound, int streamType) {
             mSound = sound;
             mAudioStreamType = streamType;
@@ -757,6 +763,10 @@ public class Notification implements Parcelable
 
         public Builder setDefaults(int defaults) {
             mDefaults = defaults;
+            int moreFlags = 0;
+            if ((defaults & DEFAULT_LIGHTS) != 0) {
+                moreFlags |= FLAG_SHOW_LIGHTS;
+            }
             return this;
         }
 

@@ -132,8 +132,6 @@ public class TabletStatusBar extends StatusBar {
     NotificationIconArea.IconLayout mIconLayout;
 
     TabletTicker mTicker;
-    View mTickerView;
-    boolean mTicking;
 
     // for disabling the status bar
     int mDisabled = 0;
@@ -278,7 +276,7 @@ public class TabletStatusBar extends StatusBar {
         mNotificationPeekTapDuration = vc.getTapTimeout();
         mNotificationFlingVelocity = 300; // px/s
 
-        mTicker = new TabletTicker(context, (FrameLayout)sb.findViewById(R.id.ticker));
+        mTicker = new TabletTicker(context);
 
         // The icons
         mBatteryController = new BatteryController(mContext);
@@ -385,9 +383,7 @@ public class TabletStatusBar extends StatusBar {
                     if (DEBUG) Slog.d(TAG, "opening notifications panel");
                     if (mNotificationPanel.getVisibility() == View.GONE) {
                         mNotificationPeekWindow.setVisibility(View.GONE);
-
                         mNotificationPanel.setVisibility(View.VISIBLE);
-
                         // synchronize with current shadow state
                         mShadowController.hideElement(mNotificationArea);
                     }
@@ -396,7 +392,6 @@ public class TabletStatusBar extends StatusBar {
                     if (DEBUG) Slog.d(TAG, "closing notifications panel");
                     if (mNotificationPanel.getVisibility() == View.VISIBLE) {
                         mNotificationPanel.setVisibility(View.GONE);
-
                         // synchronize with current shadow state
                         mShadowController.showElement(mNotificationArea);
                     }
