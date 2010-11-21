@@ -1,11 +1,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="@dimen/status_bar_height"
     >
     <ImageView android:id="@+id/icon"
         android:layout_width="48dp"
         android:layout_height="64dp"
-        android:layout_marginLeft="4dp"
         android:scaleType="center"
         />
     <LinearLayout
@@ -14,7 +13,7 @@
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:paddingLeft="8dp"
+        android:paddingLeft="16dp"
         >
         <TextView android:id="@+id/title"
             android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Title"
@@ -39,7 +38,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:paddingLeft="8dp"
         />
 </LinearLayout>
 

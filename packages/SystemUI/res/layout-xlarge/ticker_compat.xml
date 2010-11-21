@@ -23,10 +23,19 @@
     android:background="#ff1d1d1d"
     >
 
-    <ImageView android:id="@+id/icon"
+    <ImageView
+        android:id="@+id/large_icon"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:scaleType="center"
+        android:visibility="gone"
+        />
+    
+    <ImageView android:id="@+id/left_icon"
         android:layout_width="64dp"
         android:layout_height="match_parent"
         android:scaleType="center"
+        android:visibility="gone"
         />
 
     <TextView android:id="@+id/text"
@@ -37,6 +46,13 @@
         android:layout_marginLeft="12dp"
         android:gravity="center_vertical"
         android:maxLines="2"
+        />
+
+    <ImageView android:id="@+id/right_icon"
+        android:layout_width="64dp"
+        android:layout_height="match_parent"
+        android:scaleType="center"
+        android:visibility="gone"
         />
 
 </LinearLayout>

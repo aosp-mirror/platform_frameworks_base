@@ -27,5 +27,13 @@
     android:background="@drawable/ticker_background"
     -->
 
+    <ImageView
+        android:id="@+id/large_icon"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:scaleType="center"
+        android:visibility="gone"
+        />
+        <!-- TODO: scaleType should be top-left but ImageView doesn't support that. -->
 
 </LinearLayout>

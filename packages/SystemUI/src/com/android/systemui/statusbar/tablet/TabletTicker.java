@@ -148,6 +148,12 @@ public class TabletTicker extends Handler {
 
         ViewGroup group;
         int layoutId;
+        int iconId;
+        if (n.largeIcon != null) {
+            iconId = R.id.right_icon;
+        } else {
+            iconId = R.id.left_icon;
+        }
         if (n.tickerView != null) {
             group = (ViewGroup)inflater.inflate(R.layout.ticker, null, false);
             View expanded = null;
@@ -172,14 +178,19 @@ public class TabletTicker extends Handler {
             group = (ViewGroup)inflater.inflate(R.layout.ticker_compat, mParent, false);
             final Drawable icon = StatusBarIconView.getIcon(mContext,
                     new StatusBarIcon(notification.pkg, n.icon, n.iconLevel, 0));
-            ImageView iv = (ImageView)group.findViewById(R.id.icon);
+            ImageView iv = (ImageView)group.findViewById(iconId);
             iv.setImageDrawable(icon);
+            iv.setVisibility(View.VISIBLE);
             TextView tv = (TextView)group.findViewById(R.id.text);
             tv.setText(n.tickerText);
         } else {
             throw new RuntimeException("tickerView==null && tickerText==null");
         }
-        // TODO: Add Large icon
+        ImageView largeIcon = (ImageView)group.findViewById(R.id.large_icon);
+        if (n.largeIcon != null) {
+            largeIcon.setImageBitmap(n.largeIcon);
+            largeIcon.setVisibility(View.VISIBLE);
+        }
         return group;
     }
 }

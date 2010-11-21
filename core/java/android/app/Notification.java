@@ -34,6 +34,8 @@ import android.util.Slog;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import com.android.internal.R;
+
 /**
  * A class that represents how a persistent notification is to be presented to
  * the user using the {@link android.app.NotificationManager}.
@@ -379,6 +381,9 @@ public class Notification implements Parcelable
         if (parcel.readInt() != 0) {
             contentView = RemoteViews.CREATOR.createFromParcel(parcel);
         }
+        if (parcel.readInt() != 0) {
+            largeIcon = Bitmap.CREATOR.createFromParcel(parcel);
+        }
         defaults = parcel.readInt();
         flags = parcel.readInt();
         if (parcel.readInt() != 0) {
@@ -417,6 +422,9 @@ public class Notification implements Parcelable
         }
         if (this.contentView != null) {
             that.contentView = this.contentView.clone();
+        }
+        if (this.largeIcon != null) {
+            that.largeIcon = Bitmap.createBitmap(this.largeIcon);
         }
         that.iconLevel = that.iconLevel;
         that.sound = this.sound; // android.net.Uri is immutable
@@ -483,6 +491,12 @@ public class Notification implements Parcelable
         } else {
             parcel.writeInt(0);
         }
+        if (largeIcon != null) {
+            parcel.writeInt(1);
+            largeIcon.writeToParcel(parcel, 0);
+        } else {
+            parcel.writeInt(0);
+        }
 
         parcel.writeInt(defaults);
         parcel.writeInt(this.flags);
@@ -546,18 +560,18 @@ public class Notification implements Parcelable
     public void setLatestEventInfo(Context context,
             CharSequence contentTitle, CharSequence contentText, PendingIntent contentIntent) {
         RemoteViews contentView = new RemoteViews(context.getPackageName(),
-                com.android.internal.R.layout.status_bar_latest_event_content);
+                R.layout.status_bar_latest_event_content);
         if (this.icon != 0) {
-            contentView.setImageViewResource(com.android.internal.R.id.icon, this.icon);
+            contentView.setImageViewResource(R.id.icon, this.icon);
         }
         if (contentTitle != null) {
-            contentView.setTextViewText(com.android.internal.R.id.title, contentTitle);
+            contentView.setTextViewText(R.id.title, contentTitle);
         }
         if (contentText != null) {
-            contentView.setTextViewText(com.android.internal.R.id.text, contentText);
+            contentView.setTextViewText(R.id.text, contentText);
         }
         if (this.when != 0) {
-            contentView.setLong(com.android.internal.R.id.time, "setTime", when);
+            contentView.setLong(R.id.time, "setTime", when);
         }
 
         this.contentView = contentView;
@@ -754,36 +768,41 @@ public class Notification implements Parcelable
             }
         }
 
+        private RemoteViews makeRemoteViews(int resId) {
+            RemoteViews contentView = new RemoteViews(mContext.getPackageName(), resId);
+            if (mSmallIcon != 0) {
+                contentView.setImageViewResource(R.id.icon, mSmallIcon);
+            }
+            if (mContentTitle != null) {
+                contentView.setTextViewText(R.id.title, mContentTitle);
+            }
+            if (mContentText != null) {
+                contentView.setTextViewText(R.id.text, mContentText);
+            }
+            if (mContentInfo != null) {
+                contentView.setTextViewText(R.id.info, mContentInfo);
+            } else if (mNumber > 0) {
+                NumberFormat f = NumberFormat.getIntegerInstance();
+                contentView.setTextViewText(R.id.info, f.format(mNumber));
+                contentView.setFloat(R.id.info, "setTextSize",
+                        mContext.getResources().getDimensionPixelSize(
+                            R.dimen.status_bar_content_number_size));
+            } else {
+                contentView.setViewVisibility(R.id.info, View.GONE);
+            }
+            if (mWhen != 0) {
+                contentView.setLong(R.id.time, "setTime", mWhen);
+            }
+            return contentView;
+        }
+
         private RemoteViews makeContentView() {
             if (mContentView != null) {
                 return mContentView;
             } else {
-                RemoteViews contentView = new RemoteViews(mContext.getPackageName(),
-                        com.android.internal.R.layout.status_bar_latest_event_content);
-                if (mSmallIcon != 0) {
-                    contentView.setImageViewResource(com.android.internal.R.id.icon, mSmallIcon);
-                }
-                if (mContentTitle != null) {
-                    contentView.setTextViewText(com.android.internal.R.id.title, mContentTitle);
-                }
-                if (mContentText != null) {
-                    contentView.setTextViewText(com.android.internal.R.id.text, mContentText);
-                }
-                if (mContentInfo != null) {
-                    contentView.setTextViewText(com.android.internal.R.id.info, mContentInfo);
-                } else if (mNumber > 0) {
-                    NumberFormat f = NumberFormat.getIntegerInstance();
-                    contentView.setTextViewText(com.android.internal.R.id.info, f.format(mNumber));
-                    contentView.setFloat(com.android.internal.R.id.info, "setTextSize",
-                            mContext.getResources().getDimensionPixelSize(
-                                com.android.internal.R.dimen.status_bar_content_number_size));
-                } else {
-                    contentView.setViewVisibility(com.android.internal.R.id.info, View.GONE);
-                }
-                if (mWhen != 0) {
-                    contentView.setLong(com.android.internal.R.id.time, "setTime", mWhen);
-                }
-                return contentView;
+                    return makeRemoteViews(mLargeIcon == null
+                            ? R.layout.status_bar_latest_event_content
+                        : R.layout.status_bar_latest_event_content_large_icon);
             }
         }
 
@@ -791,7 +810,13 @@ public class Notification implements Parcelable
             if (mTickerView != null) {
                 return mTickerView;
             } else {
-                return makeContentView();
+                if (mContentView == null) {
+                    return makeRemoteViews(mLargeIcon == null
+                            ? R.layout.status_bar_latest_event_ticker
+                            : R.layout.status_bar_latest_event_ticker_large_icon);
+                } else {
+                    return null;
+                }
             }
         }
 

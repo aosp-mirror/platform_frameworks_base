@@ -1009,6 +1009,15 @@ public class TabletStatusBar extends StatusBar {
             vetoButton.setVisibility(View.INVISIBLE);
         }
 
+        // the large icon
+        ImageView largeIcon = (ImageView)row.findViewById(R.id.large_icon);
+        if (sbn.notification.largeIcon != null) {
+            largeIcon.setImageBitmap(sbn.notification.largeIcon);
+        } else {
+            largeIcon.getLayoutParams().width = 0;
+            largeIcon.setVisibility(View.INVISIBLE);
+        }
+
         // bind the click event to the content area
         ViewGroup content = (ViewGroup)row.findViewById(R.id.content);
         // XXX: update to allow controls within notification views

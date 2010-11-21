@@ -62,56 +62,62 @@ public class NotificationBuilderTest extends TestActivity
         new Test("Basic Content (1)") {
             public void run() {
                 int id = 1;
-
-                Notification.Builder b = new Notification.Builder(NotificationBuilderTest.this);
-
-                b.setWhen(System.currentTimeMillis());
-                b.setSmallIcon(R.drawable.ic_statusbar_chat);
-                b.setContentTitle("Title");
-                b.setContentText("text\nline2");
-                b.setContentIntent(makeContentIntent(id));
-                b.setDeleteIntent(makeDeleteIntent(id));
+                final Notification.Builder b = makeBasicBuilder(this, id);
 
                 mNM.notify(id, b.getNotification());
             }
         },
 
-        new Test("Basic Content w/ Info (1)") {
+        new Test("Content w/ Info (1)") {
             public void run() {
                 int id = 1;
+                final Notification.Builder b = makeBasicBuilder(this, id);
 
-                Notification.Builder b = new Notification.Builder(NotificationBuilderTest.this);
-
-                b.setWhen(System.currentTimeMillis());
-                b.setSmallIcon(R.drawable.ic_statusbar_chat);
-                b.setContentTitle("Title");
-                b.setContentText("text\nline2");
-                b.setContentIntent(makeContentIntent(id));
-                b.setDeleteIntent(makeDeleteIntent(id));
                 b.setContentInfo("Snoozed");
 
                 mNM.notify(id, b.getNotification());
             }
         },
 
-        new Test("Basic Content w/ Number (1)") {
+        new Test("w/ Number (1)") {
             public void run() {
                 int id = 1;
+                final Notification.Builder b = makeBasicBuilder(this, id);
 
-                Notification.Builder b = new Notification.Builder(NotificationBuilderTest.this);
-
-                b.setWhen(System.currentTimeMillis());
-                b.setSmallIcon(R.drawable.ic_statusbar_chat);
-                b.setContentTitle("Title");
-                b.setContentText("text\nline2");
-                b.setContentIntent(makeContentIntent(id));
-                b.setDeleteIntent(makeDeleteIntent(id));
                 b.setNumber(12345);
 
                 mNM.notify(id, b.getNotification());
             }
         },
+
+        new Test("w/ Number and Large Icon (1)") {
+            public void run() {
+                int id = 1;
+                final Notification.Builder b = makeBasicBuilder(this, id);
+
+                b.setNumber(42);
+
+                final BitmapDrawable bd = (BitmapDrawable)getResources().getDrawable(
+                        R.drawable.pineapple);
+                b.setLargeIcon(Bitmap.createBitmap(bd.getBitmap()));
+
+                mNM.notify(id, b.getNotification());
+            }
+        },
     };
+
+    private Notification.Builder makeBasicBuilder(Test t, int id) {
+        final Notification.Builder b = new Notification.Builder(this);
+
+        b.setWhen(System.currentTimeMillis());
+        b.setSmallIcon(R.drawable.ic_statusbar_chat);
+        b.setContentTitle("Notification builder Test");
+        b.setContentText(t.name + "\nhappy notifying");
+        b.setContentIntent(makeContentIntent(id));
+        b.setDeleteIntent(makeDeleteIntent(id));
+
+        return b;
+    }
 
     private PendingIntent makeContentIntent(int id) {
         Intent intent = new Intent(this, ConfirmationActivity.class);
