@@ -780,50 +780,11 @@ class BrowserFrame extends Handler {
             if (cacheMode == WebSettings.LOAD_NORMAL) {
                 cacheMode = WebSettings.LOAD_NO_CACHE;
             }
-            if (mSettings.getSavePassword() && hasPasswordField()) {
-                try {
-                    if (DebugFlags.BROWSER_FRAME) {
-                        Assert.assertNotNull(mCallbackProxy.getBackForwardList()
-                                .getCurrentItem());
-                    }
-                    WebAddress uri = new WebAddress(mCallbackProxy
-                            .getBackForwardList().getCurrentItem().getUrl());
-                    String schemePlusHost = uri.getScheme() + uri.getHost();
-                    String[] ret = getUsernamePassword();
-                    // Has the user entered a username/password pair and is
-                    // there some POST data
-                    if (ret != null && postData != null && 
-                            ret[0].length() > 0 && ret[1].length() > 0) {
-                        // Check to see if the username & password appear in
-                        // the post data (there could be another form on the
-                        // page and that was posted instead.
-                        String postString = new String(postData);
-                        if (postString.contains(URLEncoder.encode(ret[0])) &&
-                                postString.contains(URLEncoder.encode(ret[1]))) {
-                            String[] saved = mDatabase.getUsernamePassword(
-                                    schemePlusHost);
-                            if (saved != null) {
-                                // null username implies that user has chosen not to
-                                // save password
-                                if (saved[0] != null) {
-                                    // non-null username implies that user has
-                                    // chosen to save password, so update the 
-                                    // recorded password
-                                    mDatabase.setUsernamePassword(
-                                            schemePlusHost, ret[0], ret[1]);
-                                }
-                            } else {
-                                // CallbackProxy will handle creating the resume
-                                // message
-                                mCallbackProxy.onSavePassword(schemePlusHost, ret[0], 
-                                        ret[1], null);
-                            }
-                        }
-                    }
-                } catch (ParseException ex) {
-                    // if it is bad uri, don't save its password
-                }
-                
+            String[] ret = getUsernamePassword();
+            if (ret != null) {
+                String domUsername = ret[0];
+                String domPassword = ret[1];
+                maybeSavePassword(postData, domUsername, domPassword);
             }
         }
 
@@ -872,6 +833,68 @@ class BrowserFrame extends Handler {
         checker.responseAlert("startLoadingResource succeed");
 
         return !synchronous ? loadListener : null;
+    }
+
+    /**
+     * If this looks like a POST request (form submission) containing a username
+     * and password, give the user the option of saving them. Will either do
+     * nothing, or block until the UI interaction is complete.
+     *
+     * Called by startLoadingResource when using the Apache HTTP stack.
+     * Called directly by WebKit when using the Chrome HTTP stack.
+     *
+     * @param postData The data about to be sent as the body of a POST request.
+     * @param username The username entered by the user (sniffed from the DOM).
+     * @param password The password entered by the user (sniffed from the DOM).
+     */
+    private void maybeSavePassword(
+            byte[] postData, String username, String password) {
+        if (postData == null
+                || username == null || username.isEmpty()
+                || password == null || password.isEmpty()) {
+            return; // No password to save.
+        }
+
+        if (!mSettings.getSavePassword()) {
+            return; // User doesn't want to save passwords.
+        }
+
+        try {
+            if (DebugFlags.BROWSER_FRAME) {
+                Assert.assertNotNull(mCallbackProxy.getBackForwardList()
+                        .getCurrentItem());
+            }
+            WebAddress uri = new WebAddress(mCallbackProxy
+                    .getBackForwardList().getCurrentItem().getUrl());
+            String schemePlusHost = uri.getScheme() + uri.getHost();
+            // Check to see if the username & password appear in
+            // the post data (there could be another form on the
+            // page and that was posted instead.
+            String postString = new String(postData);
+            if (postString.contains(URLEncoder.encode(username)) &&
+                    postString.contains(URLEncoder.encode(password))) {
+                String[] saved = mDatabase.getUsernamePassword(
+                        schemePlusHost);
+                if (saved != null) {
+                    // null username implies that user has chosen not to
+                    // save password
+                    if (saved[0] != null) {
+                        // non-null username implies that user has
+                        // chosen to save password, so update the
+                        // recorded password
+                        mDatabase.setUsernamePassword(
+                                schemePlusHost, username, password);
+                    }
+                } else {
+                    // CallbackProxy will handle creating the resume
+                    // message
+                    mCallbackProxy.onSavePassword(schemePlusHost, username,
+                            password, null);
+                }
+            }
+        } catch (ParseException ex) {
+            // if it is bad uri, don't save its password
+        }
     }
 
     // Called by jni from the chrome network stack.
