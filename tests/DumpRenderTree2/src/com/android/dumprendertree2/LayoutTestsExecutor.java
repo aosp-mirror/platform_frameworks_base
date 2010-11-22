@@ -21,17 +21,15 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.PowerManager.WakeLock;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Window;
@@ -48,10 +46,7 @@ import android.webkit.WebStorage.QuotaUpdater;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import java.io.File;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -79,7 +74,7 @@ public class LayoutTestsExecutor extends Activity {
 
     private static final String LOG_TAG = "LayoutTestsExecutor";
 
-    public static final String EXTRA_TESTS_LIST = "TestsList";
+    public static final String EXTRA_TESTS_FILE = "TestsList";
     public static final String EXTRA_TEST_INDEX = "TestIndex";
 
     private static final int MSG_ACTUAL_RESULT_OBTAINED = 0;
@@ -305,7 +300,7 @@ public class LayoutTestsExecutor extends Activity {
         requestWindowFeature(Window.FEATURE_PROGRESS);
 
         Intent intent = getIntent();
-        mTestsList = intent.getStringArrayListExtra(EXTRA_TESTS_LIST);
+        mTestsList = FsUtils.loadTestListFromStorage(intent.getStringExtra(EXTRA_TESTS_FILE));
         mCurrentTestIndex = intent.getIntExtra(EXTRA_TEST_INDEX, -1);
         mTotalTestCount = mCurrentTestIndex + mTestsList.size();
 
@@ -735,4 +730,5 @@ public class LayoutTestsExecutor extends Activity {
         Log.i(LOG_TAG, mCurrentTestRelativePath + ": waitUntilDone() called");
         mLayoutTestControllerHandler.sendEmptyMessage(MSG_WAIT_UNTIL_DONE);
     }
+
 }
