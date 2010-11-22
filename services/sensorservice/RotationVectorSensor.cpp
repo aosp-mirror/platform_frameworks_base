@@ -125,6 +125,7 @@ bool RotationVectorSensor::process(sensors_event_t* outEvent,
         outEvent->data[0] = qx;
         outEvent->data[1] = qy;
         outEvent->data[2] = qz;
+        outEvent->data[3] = qw;
         outEvent->sensor = '_rov';
         outEvent->type = SENSOR_TYPE_ROTATION_VECTOR;
         return true;
