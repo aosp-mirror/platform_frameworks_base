@@ -53,6 +53,15 @@
         android.label="Test runner for unit tests"
     />
 
+    <!-- run stress test suite:
+      "adb shell am instrument -e stressnum <200> -w
+      com.android.connectivitymanagertest/.ConnectivityManagerStressTestRunner"
+    -->
+    <instrumentation android:name=".ConnectivityManagerStressTestRunner"
+        android:targetPackage="com.android.connectivitymanagertest"
+        android:label="Test runner for Connectivity Manager Stress Tests"
+    />
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
