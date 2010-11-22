@@ -419,8 +419,10 @@ status_t SampleTable::findSyncSampleNear(
 
         ++left;
     }
+    if (left > 0) {
+        --left;
+    }
 
-    --left;
     uint32_t x;
     if (mDataSource->readAt(
                 mSyncSampleOffset + 8 + left * 4, &x, 4) != 4) {
