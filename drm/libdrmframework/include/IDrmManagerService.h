@@ -116,7 +116,7 @@ public:
             int uniqueId, DecryptHandle* decryptHandle, int action, bool reserve) = 0;
 
     virtual status_t setPlaybackStatus(
-            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int position) = 0;
+            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int64_t position) = 0;
 
     virtual bool validateAction(
             int uniqueId, const String8& path,
@@ -136,7 +136,7 @@ public:
     virtual status_t getAllSupportInfo(
             int uniqueId, int* length, DrmSupportInfo** drmSupportInfoArray) = 0;
 
-    virtual DecryptHandle* openDecryptSession(int uniqueId, int fd, int offset, int length) = 0;
+    virtual DecryptHandle* openDecryptSession(int uniqueId, int fd, off64_t offset, off64_t length) = 0;
 
     virtual DecryptHandle* openDecryptSession(int uniqueId, const char* uri) = 0;
 
@@ -152,7 +152,7 @@ public:
             int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId) = 0;
 
     virtual ssize_t pread(int uniqueId, DecryptHandle* decryptHandle,
-            void* buffer, ssize_t numBytes,off_t offset) = 0;
+            void* buffer, ssize_t numBytes,off64_t offset) = 0;
 };
 
 /**
@@ -198,7 +198,7 @@ public:
             int uniqueId, DecryptHandle* decryptHandle, int action, bool reserve);
 
     virtual status_t setPlaybackStatus(
-            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int position);
+            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int64_t position);
 
     virtual bool validateAction(
             int uniqueId, const String8& path, int action, const ActionDescription& description);
@@ -217,7 +217,7 @@ public:
     virtual status_t getAllSupportInfo(
             int uniqueId, int* length, DrmSupportInfo** drmSupportInfoArray);
 
-    virtual DecryptHandle* openDecryptSession(int uniqueId, int fd, int offset, int length);
+    virtual DecryptHandle* openDecryptSession(int uniqueId, int fd, off64_t offset, off64_t length);
 
     virtual DecryptHandle* openDecryptSession(int uniqueId, const char* uri);
 
@@ -233,7 +233,7 @@ public:
             int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId);
 
     virtual ssize_t pread(int uniqueId, DecryptHandle* decryptHandle,
-            void* buffer, ssize_t numBytes, off_t offset);
+            void* buffer, ssize_t numBytes, off64_t offset);
 };
 
 /**

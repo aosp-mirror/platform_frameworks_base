@@ -60,7 +60,7 @@ public:
     status_t consumeRights(int uniqueId, DecryptHandle* decryptHandle, int action, bool reserve);
 
     status_t setPlaybackStatus(
-            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int position);
+            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int64_t position);
 
     bool validateAction(
             int uniqueId, const String8& path, int action, const ActionDescription& description);
@@ -78,7 +78,7 @@ public:
     DrmSupportInfo* getSupportInfo(int uniqueId);
 
     status_t openDecryptSession(
-            int uniqueId, DecryptHandle* decryptHandle, int fd, int offset, int length);
+            int uniqueId, DecryptHandle* decryptHandle, int fd, off64_t offset, off64_t length);
 
     status_t openDecryptSession(
             int uniqueId, DecryptHandle* decryptHandle, const char* uri);
@@ -94,7 +94,7 @@ public:
     status_t finalizeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId);
 
     ssize_t pread(int uniqueId, DecryptHandle* decryptHandle,
-            void* buffer, ssize_t numBytes, off_t offset);
+            void* buffer, ssize_t numBytes, off64_t offset);
 
 protected:
     /////////////////////////////////////////////////////
@@ -254,7 +254,7 @@ protected:
      *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
     virtual status_t onSetPlaybackStatus(
-            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int position) = 0;
+            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int64_t position) = 0;
 
     /**
      * Validates whether an action on the DRM content is allowed or not.
@@ -355,7 +355,7 @@ protected:
      *     DRM_ERROR_CANNOT_HANDLE for failure and DRM_NO_ERROR for success
      */
     virtual status_t onOpenDecryptSession(
-            int uniqueId, DecryptHandle* decryptHandle, int fd, int offset, int length) = 0;
+            int uniqueId, DecryptHandle* decryptHandle, int fd, off64_t offset, off64_t length) = 0;
 
     /**
      * Open the decrypt session to decrypt the given protected content
@@ -436,7 +436,7 @@ protected:
      * @return Number of bytes read. Returns -1 for Failure.
      */
     virtual ssize_t onPread(int uniqueId, DecryptHandle* decryptHandle,
-            void* buffer, ssize_t numBytes, off_t offset) = 0;
+            void* buffer, ssize_t numBytes, off64_t offset) = 0;
 };
 
 };

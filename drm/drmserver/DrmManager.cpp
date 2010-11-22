@@ -258,7 +258,7 @@ status_t DrmManager::consumeRights(
 }
 
 status_t DrmManager::setPlaybackStatus(
-    int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int position) {
+    int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int64_t position) {
     status_t result = DRM_ERROR_UNKNOWN;
     if (mDecryptSessionMap.indexOfKey(decryptHandle->decryptId) != NAME_NOT_FOUND) {
         IDrmEngine* drmEngine = mDecryptSessionMap.valueFor(decryptHandle->decryptId);
@@ -370,7 +370,7 @@ status_t DrmManager::getAllSupportInfo(
     return DRM_NO_ERROR;
 }
 
-DecryptHandle* DrmManager::openDecryptSession(int uniqueId, int fd, int offset, int length) {
+DecryptHandle* DrmManager::openDecryptSession(int uniqueId, int fd, off64_t offset, off64_t length) {
     Mutex::Autolock _l(mDecryptLock);
     status_t result = DRM_ERROR_CANNOT_HANDLE;
     Vector<String8> plugInIdList = mPlugInManager.getPlugInIdList();
@@ -470,7 +470,7 @@ status_t DrmManager::finalizeDecryptUnit(
 }
 
 ssize_t DrmManager::pread(int uniqueId, DecryptHandle* decryptHandle,
-            void* buffer, ssize_t numBytes, off_t offset) {
+            void* buffer, ssize_t numBytes, off64_t offset) {
     ssize_t result = DECRYPT_FILE_ERROR;
 
     if (mDecryptSessionMap.indexOfKey(decryptHandle->decryptId) != NAME_NOT_FOUND) {

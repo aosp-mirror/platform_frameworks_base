@@ -125,7 +125,7 @@ status_t DrmManagerService::consumeRights(
 }
 
 status_t DrmManagerService::setPlaybackStatus(
-            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int position) {
+            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int64_t position) {
     LOGV("Entering setPlaybackStatus");
     return mDrmManager->setPlaybackStatus(uniqueId, decryptHandle, playbackStatus, position);
 }
@@ -170,7 +170,7 @@ status_t DrmManagerService::getAllSupportInfo(
 }
 
 DecryptHandle* DrmManagerService::openDecryptSession(
-            int uniqueId, int fd, int offset, int length) {
+            int uniqueId, int fd, off64_t offset, off64_t length) {
     LOGV("Entering DrmManagerService::openDecryptSession");
     return mDrmManager->openDecryptSession(uniqueId, fd, offset, length);
 }
@@ -206,7 +206,7 @@ status_t DrmManagerService::finalizeDecryptUnit(
 }
 
 ssize_t DrmManagerService::pread(int uniqueId, DecryptHandle* decryptHandle,
-            void* buffer, ssize_t numBytes, off_t offset) {
+            void* buffer, ssize_t numBytes, off64_t offset) {
     LOGV("Entering pread");
     return mDrmManager->pread(uniqueId, decryptHandle, buffer, numBytes, offset);
 }

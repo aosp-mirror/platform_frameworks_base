@@ -80,7 +80,7 @@ status_t DrmEngineBase::consumeRights(
 }
 
 status_t DrmEngineBase::setPlaybackStatus(
-    int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int position) {
+    int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int64_t position) {
     return onSetPlaybackStatus(uniqueId, decryptHandle, playbackStatus, position);
 }
 
@@ -116,7 +116,7 @@ DrmSupportInfo* DrmEngineBase::getSupportInfo(int uniqueId) {
 }
 
 status_t DrmEngineBase::openDecryptSession(
-    int uniqueId, DecryptHandle* decryptHandle, int fd, int offset, int length) {
+    int uniqueId, DecryptHandle* decryptHandle, int fd, off64_t offset, off64_t length) {
     return onOpenDecryptSession(uniqueId, decryptHandle, fd, offset, length);
 }
 
@@ -146,7 +146,7 @@ status_t DrmEngineBase::finalizeDecryptUnit(
 }
 
 ssize_t DrmEngineBase::pread(
-    int uniqueId, DecryptHandle* decryptHandle, void* buffer, ssize_t numBytes, off_t offset) {
+    int uniqueId, DecryptHandle* decryptHandle, void* buffer, ssize_t numBytes, off64_t offset) {
     return onPread(uniqueId, decryptHandle, buffer, numBytes, offset);
 }
 
