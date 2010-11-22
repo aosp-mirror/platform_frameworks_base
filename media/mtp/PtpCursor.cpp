@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "MtpCursor"
+#define LOG_TAG "PtpCursor"
 
 #include "MtpDebug.h"
 #include "MtpClient.h"
-#include "MtpCursor.h"
+#include "PtpCursor.h"
 #include "MtpDevice.h"
 #include "MtpDeviceInfo.h"
 #include "MtpObjectInfo.h"
@@ -30,19 +30,19 @@
 namespace android {
 
 /* Device Column IDs */
-/* These must match the values in MtpCursor.java */
+/* These must match the values in PtpCursor.java */
 #define DEVICE_ROW_ID           1
 #define DEVICE_MANUFACTURER     2
 #define DEVICE_MODEL            3
 
 /* Storage Column IDs */
-/* These must match the values in MtpCursor.java */
+/* These must match the values in PtpCursor.java */
 #define STORAGE_ROW_ID          101
 #define STORAGE_IDENTIFIER      102
 #define STORAGE_DESCRIPTION     103
 
 /* Object Column IDs */
-/* These must match the values in MtpCursor.java */
+/* These must match the values in PtpCursor.java */
 #define OBJECT_ROW_ID               201
 #define OBJECT_STORAGE_ID           202
 #define OBJECT_FORMAT               203
@@ -65,7 +65,7 @@ namespace android {
 #define OBJECT_KEYWORDS             220
 #define OBJECT_THUMB                221
 
-MtpCursor::MtpCursor(MtpClient* client, int queryType, int deviceID,
+PtpCursor::PtpCursor(MtpClient* client, int queryType, int deviceID,
                 MtpStorageID storageID, MtpObjectHandle objectID,
                 int columnCount, int* columns)
         :   mClient(client),
@@ -82,12 +82,12 @@ MtpCursor::MtpCursor(MtpClient* client, int queryType, int deviceID,
     }
 }
 
-MtpCursor::~MtpCursor() {
+PtpCursor::~PtpCursor() {
     delete[] mColumns;
 }
 
-int MtpCursor::fillWindow(CursorWindow* window, int startPos) {
-    LOGD("MtpCursor::fillWindow mQueryType: %d\n", mQueryType);
+int PtpCursor::fillWindow(CursorWindow* window, int startPos) {
+    LOGD("PtpCursor::fillWindow mQueryType: %d\n", mQueryType);
 
     switch (mQueryType) {
         case DEVICE:
@@ -107,12 +107,12 @@ int MtpCursor::fillWindow(CursorWindow* window, int startPos) {
         case OBJECT_CHILDREN:
             return fillObjects(window, mQbjectID, startPos);
         default:
-            LOGE("MtpCursor::fillWindow: unknown query type %d\n", mQueryType);
+            LOGE("PtpCursor::fillWindow: unknown query type %d\n", mQueryType);
             return 0;
     }
 }
 
-int MtpCursor::fillDevices(CursorWindow* window, int startPos) {
+int PtpCursor::fillDevices(CursorWindow* window, int startPos) {
     int count = 0;
     MtpDeviceList& deviceList = mClient->getDeviceList();
     for (int i = 0; i < deviceList.size(); i++) {
@@ -127,7 +127,7 @@ int MtpCursor::fillDevices(CursorWindow* window, int startPos) {
     return count;
 }
 
-int MtpCursor::fillDevice(CursorWindow* window, int startPos) {
+int PtpCursor::fillDevice(CursorWindow* window, int startPos) {
     MtpDevice* device = mClient->getDevice(mDeviceID);
     if (device && fillDevice(window, device, startPos))
         return 1;
@@ -135,7 +135,7 @@ int MtpCursor::fillDevice(CursorWindow* window, int startPos) {
         return 0;
 }
 
-int MtpCursor::fillStorages(CursorWindow* window, int startPos) {
+int PtpCursor::fillStorages(CursorWindow* window, int startPos) {
     int count = 0;
     MtpDevice* device = mClient->getDevice(mDeviceID);
     if (!device)
@@ -157,7 +157,7 @@ int MtpCursor::fillStorages(CursorWindow* window, int startPos) {
     return count;
 }
 
-int MtpCursor::fillStorage(CursorWindow* window, int startPos) {
+int PtpCursor::fillStorage(CursorWindow* window, int startPos) {
     MtpDevice* device = mClient->getDevice(mDeviceID);
     if (device && fillStorage(window, device, mStorageID, startPos))
         return 1;
@@ -165,7 +165,7 @@ int MtpCursor::fillStorage(CursorWindow* window, int startPos) {
         return 0;
 }
 
-int MtpCursor::fillObjects(CursorWindow* window, int parent, int startPos) {
+int PtpCursor::fillObjects(CursorWindow* window, int parent, int startPos) {
     int count = 0;
     MtpDevice* device = mClient->getDevice(mDeviceID);
     if (!device)
@@ -187,7 +187,7 @@ int MtpCursor::fillObjects(CursorWindow* window, int parent, int startPos) {
     return count;
 }
 
-int MtpCursor::fillObject(CursorWindow* window, int startPos) {
+int PtpCursor::fillObject(CursorWindow* window, int startPos) {
     MtpDevice* device = mClient->getDevice(mDeviceID);
     if (device && fillObject(window, device, mQbjectID, startPos))
         return 1;
@@ -195,7 +195,7 @@ int MtpCursor::fillObject(CursorWindow* window, int startPos) {
         return 0;
 }
 
-bool MtpCursor::fillDevice(CursorWindow* window, MtpDevice* device, int row) {
+bool PtpCursor::fillDevice(CursorWindow* window, MtpDevice* device, int row) {
     MtpDeviceInfo* deviceInfo = device->getDeviceInfo();
     if (!deviceInfo)
         return false;
@@ -225,7 +225,7 @@ bool MtpCursor::fillDevice(CursorWindow* window, MtpDevice* device, int row) {
     return true;
 }
 
-bool MtpCursor::fillStorage(CursorWindow* window, MtpDevice* device,
+bool PtpCursor::fillStorage(CursorWindow* window, MtpDevice* device,
         MtpStorageID storageID, int row) {
 
 LOGD("fillStorage %d\n", storageID);
@@ -273,7 +273,7 @@ fail:
     return false;
 }
 
-bool MtpCursor::fillObject(CursorWindow* window, MtpDevice* device,
+bool PtpCursor::fillObject(CursorWindow* window, MtpDevice* device,
         MtpObjectHandle objectID, int row) {
 
     MtpObjectInfo* objectInfo = device->getObjectInfo(objectID);
@@ -385,7 +385,7 @@ fail:
     return false;
 }
 
-bool MtpCursor::prepareRow(CursorWindow* window) {
+bool PtpCursor::prepareRow(CursorWindow* window) {
     if (!window->setNumColumns(mColumnCount)) {
         LOGE("Failed to change column count from %d to %d", window->getNumColumns(), mColumnCount);
         return false;
@@ -399,7 +399,7 @@ bool MtpCursor::prepareRow(CursorWindow* window) {
 }
 
 
-bool MtpCursor::putLong(CursorWindow* window, int64_t value, int row, int column) {
+bool PtpCursor::putLong(CursorWindow* window, int64_t value, int row, int column) {
     if (!window->putLong(row, column, value)) {
         window->freeLastRow();
         LOGE("Failed allocating space for a long in column %d", column);
@@ -408,7 +408,7 @@ bool MtpCursor::putLong(CursorWindow* window, int64_t value, int row, int column
     return true;
 }
 
-bool MtpCursor::putString(CursorWindow* window, const char* text, int row, int column) {
+bool PtpCursor::putString(CursorWindow* window, const char* text, int row, int column) {
     int size = strlen(text) + 1;
     int offset = window->alloc(size);
     if (!offset) {
@@ -427,7 +427,7 @@ bool MtpCursor::putString(CursorWindow* window, const char* text, int row, int c
     return true;
 }
 
-bool MtpCursor::putThumbnail(CursorWindow* window, MtpObjectHandle objectID,
+bool PtpCursor::putThumbnail(CursorWindow* window, MtpObjectHandle objectID,
                             MtpObjectFormat format, int row, int column) {
     MtpDevice* device = mClient->getDevice(mDeviceID);
     void* thumbnail;

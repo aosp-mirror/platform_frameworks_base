@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _MTP_CURSOR_H
-#define _MTP_CURSOR_H
+#ifndef _PTP_CURSOR_H
+#define _PTP_CURSOR_H
 
 #include "MtpTypes.h"
 
@@ -23,7 +23,7 @@ namespace android {
 
 class CursorWindow;
 
-class MtpCursor {
+class PtpCursor {
 private:
     enum {
         DEVICE              = 1,
@@ -45,10 +45,10 @@ private:
     int*            mColumns;
 
 public:
-                MtpCursor(MtpClient* client, int queryType, int deviceID,
+                PtpCursor(MtpClient* client, int queryType, int deviceID,
                         MtpStorageID storageID, MtpObjectHandle objectID,
                         int columnCount, int* columns);
-    virtual     ~MtpCursor();
+    virtual     ~PtpCursor();
 
     int         fillWindow(CursorWindow* window, int startPos);
 
@@ -75,4 +75,4 @@ private:
 
 }; // namespace android
 
-#endif // _MTP_CURSOR_H
+#endif // _PTP_CURSOR_H

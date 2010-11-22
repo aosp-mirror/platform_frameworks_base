@@ -29,7 +29,7 @@
 #include "binder/CursorWindow.h"
 
 #include "MtpClient.h"
-#include "MtpCursor.h"
+#include "PtpCursor.h"
 
 using namespace android;
 
@@ -63,7 +63,7 @@ android_media_PtpCursor_setup(JNIEnv *env, jobject thiz, jobject javaClient,
     }
 
     MtpClient* client = get_client_from_object(env, javaClient);
-    MtpCursor* cursor = new MtpCursor(client, queryType,
+    PtpCursor* cursor = new PtpCursor(client, queryType,
             deviceID, storageID, objectID, columnCount, columns);
 
     if (columns)
@@ -77,7 +77,7 @@ android_media_PtpCursor_finalize(JNIEnv *env, jobject thiz)
 {
 #ifdef HAVE_ANDROID_OS
     LOGD("finalize\n");
-    MtpCursor *cursor = (MtpCursor *)env->GetIntField(thiz, field_context);
+    PtpCursor *cursor = (PtpCursor *)env->GetIntField(thiz, field_context);
     delete cursor;
 #endif
 }
@@ -93,7 +93,7 @@ android_media_PtpCursor_fill_window(JNIEnv *env, jobject thiz, jobject javaWindo
                           "Bad CursorWindow");
         return 0;
     }
-    MtpCursor *cursor = (MtpCursor *)env->GetIntField(thiz, field_context);
+    PtpCursor *cursor = (PtpCursor *)env->GetIntField(thiz, field_context);
 
     return cursor->fillWindow(window, startPos);
 #else

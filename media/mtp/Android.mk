@@ -22,7 +22,6 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=                                       \
                   MtpClient.cpp                         \
-                  MtpCursor.cpp                         \
                   MtpDataPacket.cpp                     \
                   MtpDebug.cpp                          \
                   MtpDevice.cpp                         \
@@ -38,6 +37,7 @@ LOCAL_SRC_FILES:=                                       \
                   MtpStringBuffer.cpp                   \
                   MtpStorage.cpp                        \
                   MtpUtils.cpp                          \
+                  PtpCursor.cpp                         \
 
 LOCAL_MODULE:= libmtp
 
