@@ -1912,7 +1912,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     // If there are no selected subtypes, tries finding the most applicable one according to the
     // current system locale
-    private int findApplicableSubtype(String id) {
+    private int findApplicableSubtypeLocked(String id) {
         InputMethodInfo imi = mMethodMap.get(id);
         if (imi == null) {
             return NOT_A_SUBTYPE_ID;
@@ -1954,24 +1954,28 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * @return Return the current subtype of this input method.
      */
     public InputMethodSubtype getCurrentInputMethodSubtype() {
-        boolean subtypeIsSelected = false;
-        try {
-            subtypeIsSelected = Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE) != NOT_A_SUBTYPE_ID;
-        } catch (SettingNotFoundException e) {
-        }
-        if (!subtypeIsSelected || mCurrentSubtype == null) {
-            String lastInputMethodId = Settings.Secure.getString(mContext
-                    .getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
-            int subtypeId = getSelectedInputMethodSubtypeId(lastInputMethodId);
-            if (subtypeId == NOT_A_SUBTYPE_ID) {
-                subtypeId = findApplicableSubtype(lastInputMethodId);
+        synchronized (mMethodMap) {
+            boolean subtypeIsSelected = false;
+            try {
+                subtypeIsSelected = Settings.Secure.getInt(mContext.getContentResolver(),
+                                Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE) != NOT_A_SUBTYPE_ID;
+            } catch (SettingNotFoundException e) {
             }
-            if (subtypeId != NOT_A_SUBTYPE_ID) {
-                mCurrentSubtype = mMethodMap.get(lastInputMethodId).getSubtypes().get(subtypeId);
+            if (!subtypeIsSelected || mCurrentSubtype == null) {
+                String lastInputMethodId =
+                        Settings.Secure.getString(mContext.getContentResolver(),
+                                Settings.Secure.DEFAULT_INPUT_METHOD);
+                int subtypeId = getSelectedInputMethodSubtypeId(lastInputMethodId);
+                if (subtypeId == NOT_A_SUBTYPE_ID) {
+                    subtypeId = findApplicableSubtypeLocked(lastInputMethodId);
+                }
+                if (subtypeId != NOT_A_SUBTYPE_ID) {
+                    mCurrentSubtype =
+                            mMethodMap.get(lastInputMethodId).getSubtypes().get(subtypeId);
+                }
             }
+            return mCurrentSubtype;
         }
-        return mCurrentSubtype;
     }
 
     public boolean setCurrentInputMethodSubtype(InputMethodSubtype subtype) {
