@@ -71,6 +71,7 @@ LOCAL_SHARED_LIBRARIES := \
         libcrypto
 
 LOCAL_STATIC_LIBRARIES := \
+        libstagefright_color_conversion \
         libstagefright_aacdec \
         libstagefright_aacenc \
         libstagefright_amrnbdec \
@@ -97,7 +98,6 @@ LOCAL_SHARED_LIBRARIES += \
         libstagefright_enc_common \
         libstagefright_avc_common \
         libstagefright_foundation \
-        libstagefright_color_conversion
 
 ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
         LOCAL_LDLIBS += -lpthread -ldl

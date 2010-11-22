@@ -81,16 +81,8 @@ private:
 
 struct AwesomeLocalRenderer : public AwesomeRenderer {
     AwesomeLocalRenderer(
-            OMX_COLOR_FORMATTYPE colorFormat,
-            const sp<Surface> &surface,
-            size_t displayWidth, size_t displayHeight,
-            size_t decodedWidth, size_t decodedHeight,
-            int32_t rotationDegrees)
-        : mTarget(NULL) {
-            init(colorFormat, surface,
-                 displayWidth, displayHeight,
-                 decodedWidth, decodedHeight,
-                 rotationDegrees);
+            const sp<Surface> &surface, const sp<MetaData> &meta)
+        : mTarget(new SoftwareRenderer(surface, meta)) {
     }
 
     virtual void render(MediaBuffer *buffer) {
@@ -111,27 +103,9 @@ protected:
 private:
     SoftwareRenderer *mTarget;
 
-    void init(
-            OMX_COLOR_FORMATTYPE colorFormat,
-            const sp<Surface> &surface,
-            size_t displayWidth, size_t displayHeight,
-            size_t decodedWidth, size_t decodedHeight,
-            int32_t rotationDegrees);
-
     AwesomeLocalRenderer(const AwesomeLocalRenderer &);
     AwesomeLocalRenderer &operator=(const AwesomeLocalRenderer &);;
 };
-
-void AwesomeLocalRenderer::init(
-        OMX_COLOR_FORMATTYPE colorFormat,
-        const sp<Surface> &surface,
-        size_t displayWidth, size_t displayHeight,
-        size_t decodedWidth, size_t decodedHeight,
-        int32_t rotationDegrees) {
-    mTarget = new SoftwareRenderer(
-            colorFormat, surface, displayWidth, displayHeight,
-            decodedWidth, decodedHeight, rotationDegrees);
-}
 
 struct AwesomeNativeWindowRenderer : public AwesomeRenderer {
     AwesomeNativeWindowRenderer(
@@ -188,9 +162,7 @@ AwesomePlayer::AwesomePlayer()
       mAudioPlayer(NULL),
       mFlags(0),
       mExtractorFlags(0),
-      mLastVideoBuffer(NULL),
       mVideoBuffer(NULL),
-      mSuspensionState(NULL),
       mDecryptHandle(NULL) {
     CHECK_EQ(mClient.connect(), OK);
 
@@ -433,11 +405,6 @@ void AwesomePlayer::reset_l() {
 
     mVideoRenderer.clear();
 
-    if (mLastVideoBuffer) {
-        mLastVideoBuffer->release();
-        mLastVideoBuffer = NULL;
-    }
-
     if (mVideoBuffer) {
         mVideoBuffer->release();
         mVideoBuffer = NULL;
@@ -469,7 +436,6 @@ void AwesomePlayer::reset_l() {
     mDurationUs = -1;
     mFlags = 0;
     mExtractorFlags = 0;
-    mVideoWidth = mVideoHeight = -1;
     mTimeSourceDeltaUs = 0;
     mVideoTimeUs = 0;
 
@@ -481,9 +447,6 @@ void AwesomePlayer::reset_l() {
     mUriHeaders.clear();
 
     mFileSource.clear();
-
-    delete mSuspensionState;
-    mSuspensionState = NULL;
 
     mBitrate = -1;
 }
@@ -636,11 +599,6 @@ void AwesomePlayer::partial_reset_l() {
     // Then instantiate a new video decoder and resume video playback.
 
     mVideoRenderer.clear();
-
-    if (mLastVideoBuffer) {
-        mLastVideoBuffer->release();
-        mLastVideoBuffer = NULL;
-    }
 
     if (mVideoBuffer) {
         mVideoBuffer->release();
@@ -815,9 +773,25 @@ status_t AwesomePlayer::play_l() {
 void AwesomePlayer::notifyVideoSize_l() {
     sp<MetaData> meta = mVideoSource->getFormat();
 
-    int32_t decodedWidth, decodedHeight;
-    CHECK(meta->findInt32(kKeyWidth, &decodedWidth));
-    CHECK(meta->findInt32(kKeyHeight, &decodedHeight));
+    int32_t cropLeft, cropTop, cropRight, cropBottom;
+    if (!meta->findRect(
+                kKeyCropRect, &cropLeft, &cropTop, &cropRight, &cropBottom)) {
+        int32_t width, height;
+        CHECK(meta->findInt32(kKeyWidth, &width));
+        CHECK(meta->findInt32(kKeyHeight, &height));
+
+        cropLeft = cropTop = 0;
+        cropRight = width - 1;
+        cropBottom = height - 1;
+
+        LOGV("got dimensions only %d x %d", width, height);
+    } else {
+        LOGV("got crop rect %d, %d, %d, %d",
+             cropLeft, cropTop, cropRight, cropBottom);
+    }
+
+    int32_t usableWidth = cropRight - cropLeft + 1;
+    int32_t usableHeight = cropBottom - cropTop + 1;
 
     int32_t rotationDegrees;
     if (!mVideoTrack->getFormat()->findInt32(
@@ -827,10 +801,10 @@ void AwesomePlayer::notifyVideoSize_l() {
 
     if (rotationDegrees == 90 || rotationDegrees == 270) {
         notifyListener_l(
-                MEDIA_SET_VIDEO_SIZE, decodedHeight, decodedWidth);
+                MEDIA_SET_VIDEO_SIZE, usableHeight, usableWidth);
     } else {
         notifyListener_l(
-                MEDIA_SET_VIDEO_SIZE, decodedWidth, decodedHeight);
+                MEDIA_SET_VIDEO_SIZE, usableWidth, usableHeight);
     }
 }
 
@@ -872,12 +846,7 @@ void AwesomePlayer::initRenderer_l() {
         // allocate their buffers in local address space.  This renderer
         // then performs a color conversion and copy to get the data
         // into the ANativeBuffer.
-        mVideoRenderer = new AwesomeLocalRenderer(
-            (OMX_COLOR_FORMATTYPE)format,
-            mSurface,
-            mVideoWidth, mVideoHeight,
-            decodedWidth, decodedHeight,
-            rotationDegrees);
+        mVideoRenderer = new AwesomeLocalRenderer(mSurface, meta);
     }
 }
 
@@ -1041,20 +1010,6 @@ void AwesomePlayer::seekAudioIfNecessary_l() {
     }
 }
 
-status_t AwesomePlayer::getVideoDimensions(
-        int32_t *width, int32_t *height) const {
-    Mutex::Autolock autoLock(mLock);
-
-    if (mVideoWidth < 0 || mVideoHeight < 0) {
-        return UNKNOWN_ERROR;
-    }
-
-    *width = mVideoWidth;
-    *height = mVideoHeight;
-
-    return OK;
-}
-
 void AwesomePlayer::setAudioSource(sp<MediaSource> source) {
     CHECK(source != NULL);
 
@@ -1123,9 +1078,6 @@ status_t AwesomePlayer::initVideoDecoder(uint32_t flags) {
             }
         }
 
-        CHECK(mVideoTrack->getFormat()->findInt32(kKeyWidth, &mVideoWidth));
-        CHECK(mVideoTrack->getFormat()->findInt32(kKeyHeight, &mVideoHeight));
-
         status_t err = mVideoSource->start();
 
         if (err != OK) {
@@ -1180,11 +1132,6 @@ void AwesomePlayer::onVideoEvent() {
     mVideoEventPending = false;
 
     if (mSeeking) {
-        if (mLastVideoBuffer) {
-            mLastVideoBuffer->release();
-            mLastVideoBuffer = NULL;
-        }
-
         if (mVideoBuffer) {
             mVideoBuffer->release();
             mVideoBuffer = NULL;
@@ -1327,11 +1274,7 @@ void AwesomePlayer::onVideoEvent() {
         mVideoRenderer->render(mVideoBuffer);
     }
 
-    if (mLastVideoBuffer) {
-        mLastVideoBuffer->release();
-        mLastVideoBuffer = NULL;
-    }
-    mLastVideoBuffer = mVideoBuffer;
+    mVideoBuffer->release();
     mVideoBuffer = NULL;
 
     postVideoEvent_l();
@@ -1743,142 +1686,6 @@ void AwesomePlayer::finishAsyncPrepare_l() {
     mFlags |= PREPARED;
     mAsyncPrepareEvent = NULL;
     mPreparedCondition.broadcast();
-}
-
-status_t AwesomePlayer::suspend() {
-    LOGV("suspend");
-    Mutex::Autolock autoLock(mLock);
-
-    if (mSuspensionState != NULL) {
-        if (mLastVideoBuffer == NULL) {
-            //go into here if video is suspended again
-            //after resuming without being played between
-            //them
-            SuspensionState *state = mSuspensionState;
-            mSuspensionState = NULL;
-            reset_l();
-            mSuspensionState = state;
-            return OK;
-        }
-
-        delete mSuspensionState;
-        mSuspensionState = NULL;
-    }
-
-    if (mFlags & PREPARING) {
-        mFlags |= PREPARE_CANCELLED;
-        if (mConnectingDataSource != NULL) {
-            LOGI("interrupting the connection process");
-            mConnectingDataSource->disconnect();
-        }
-    }
-
-    while (mFlags & PREPARING) {
-        mPreparedCondition.wait(mLock);
-    }
-
-    SuspensionState *state = new SuspensionState;
-    state->mUri = mUri;
-    state->mUriHeaders = mUriHeaders;
-    state->mFileSource = mFileSource;
-
-    state->mFlags = mFlags & (PLAYING | AUTO_LOOPING | LOOPING | AT_EOS);
-    getPosition(&state->mPositionUs);
-
-    if (mLastVideoBuffer) {
-        size_t size = mLastVideoBuffer->range_length();
-
-        if (size) {
-            int32_t unreadable;
-            if (!mLastVideoBuffer->meta_data()->findInt32(
-                        kKeyIsUnreadable, &unreadable)
-                    || unreadable == 0) {
-                state->mLastVideoFrameSize = size;
-                state->mLastVideoFrame = malloc(size);
-                memcpy(state->mLastVideoFrame,
-                       (const uint8_t *)mLastVideoBuffer->data()
-                            + mLastVideoBuffer->range_offset(),
-                       size);
-
-                state->mVideoWidth = mVideoWidth;
-                state->mVideoHeight = mVideoHeight;
-
-                sp<MetaData> meta = mVideoSource->getFormat();
-                CHECK(meta->findInt32(kKeyColorFormat, &state->mColorFormat));
-                CHECK(meta->findInt32(kKeyWidth, &state->mDecodedWidth));
-                CHECK(meta->findInt32(kKeyHeight, &state->mDecodedHeight));
-            } else {
-                LOGV("Unable to save last video frame, we have no access to "
-                     "the decoded video data.");
-            }
-        }
-    }
-
-    reset_l();
-
-    mSuspensionState = state;
-
-    return OK;
-}
-
-status_t AwesomePlayer::resume() {
-    LOGV("resume");
-    Mutex::Autolock autoLock(mLock);
-
-    if (mSuspensionState == NULL) {
-        return INVALID_OPERATION;
-    }
-
-    SuspensionState *state = mSuspensionState;
-    mSuspensionState = NULL;
-
-    status_t err;
-    if (state->mFileSource != NULL) {
-        err = setDataSource_l(state->mFileSource);
-
-        if (err == OK) {
-            mFileSource = state->mFileSource;
-        }
-    } else {
-        err = setDataSource_l(state->mUri, &state->mUriHeaders);
-    }
-
-    if (err != OK) {
-        delete state;
-        state = NULL;
-
-        return err;
-    }
-
-    seekTo_l(state->mPositionUs);
-
-    mFlags = state->mFlags & (AUTO_LOOPING | LOOPING | AT_EOS);
-
-    if (state->mLastVideoFrame && mSurface != NULL) {
-        mVideoRenderer =
-            new AwesomeLocalRenderer(
-                    (OMX_COLOR_FORMATTYPE)state->mColorFormat,
-                    mSurface,
-                    state->mVideoWidth,
-                    state->mVideoHeight,
-                    state->mDecodedWidth,
-                    state->mDecodedHeight,
-                    0);
-
-        mVideoRendererIsPreview = true;
-
-        ((AwesomeLocalRenderer *)mVideoRenderer.get())->render(
-                state->mLastVideoFrame, state->mLastVideoFrameSize);
-    }
-
-    if (state->mFlags & PLAYING) {
-        play_l();
-    }
-
-    mSuspensionState = state;
-    state = NULL;
-
-    return OK;
 }
 
 uint32_t AwesomePlayer::flags() const {

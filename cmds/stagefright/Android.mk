@@ -7,13 +7,16 @@ LOCAL_SRC_FILES:=       \
 	SineSource.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libstagefright libmedia libutils libbinder libstagefright_foundation
+	libstagefright libmedia libutils libbinder libstagefright_foundation \
+        libskia
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
 	frameworks/base/media/libstagefright \
 	frameworks/base/media/libstagefright/include \
-	$(TOP)/frameworks/base/include/media/stagefright/openmax
+	$(TOP)/frameworks/base/include/media/stagefright/openmax \
+        external/skia/include/core \
+        external/skia/include/images \
 
 LOCAL_CFLAGS += -Wno-multichar
 

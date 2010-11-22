@@ -88,11 +88,6 @@ struct AwesomePlayer {
 
     status_t seekTo(int64_t timeUs);
 
-    status_t getVideoDimensions(int32_t *width, int32_t *height) const;
-
-    status_t suspend();
-    status_t resume();
-
     // This is a mask of MediaExtractor::Flags.
     uint32_t flags() const;
 
@@ -153,7 +148,6 @@ private:
     uint32_t mFlags;
     uint32_t mExtractorFlags;
 
-    int32_t mVideoWidth, mVideoHeight;
     int64_t mTimeSourceDeltaUs;
     int64_t mVideoTimeUs;
 
@@ -187,7 +181,6 @@ private:
     void postCheckAudioStatusEvent_l();
     status_t play_l();
 
-    MediaBuffer *mLastVideoBuffer;
     MediaBuffer *mVideoBuffer;
 
     sp<NuHTTPDataSource> mConnectingDataSource;
@@ -197,32 +190,6 @@ private:
     sp<ARTSPController> mRTSPController;
     sp<ARTPSession> mRTPSession;
     sp<UDPPusher> mRTPPusher, mRTCPPusher;
-
-    struct SuspensionState {
-        String8 mUri;
-        KeyedVector<String8, String8> mUriHeaders;
-        sp<DataSource> mFileSource;
-
-        uint32_t mFlags;
-        int64_t mPositionUs;
-
-        void *mLastVideoFrame;
-        size_t mLastVideoFrameSize;
-        int32_t mColorFormat;
-        int32_t mVideoWidth, mVideoHeight;
-        int32_t mDecodedWidth, mDecodedHeight;
-
-        SuspensionState()
-            : mLastVideoFrame(NULL) {
-        }
-
-        ~SuspensionState() {
-            if (mLastVideoFrame) {
-                free(mLastVideoFrame);
-                mLastVideoFrame = NULL;
-            }
-        }
-    } *mSuspensionState;
 
     DrmManagerClient *mDrmManagerClient;
     DecryptHandle *mDecryptHandle;
