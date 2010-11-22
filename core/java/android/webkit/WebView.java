@@ -906,6 +906,7 @@ public class WebView extends AbsoluteLayout
 
         mCallbackProxy = new CallbackProxy(context, this);
         mViewManager = new ViewManager(this);
+        L10nUtils.loadStrings(context);
         mWebViewCore = new WebViewCore(context, this, mCallbackProxy, javascriptInterfaces);
         mDatabase = WebViewDatabase.getInstance(context);
         mScroller = new Scroller(context);
@@ -922,7 +923,6 @@ public class WebView extends AbsoluteLayout
             startPrivateBrowsing();
         }
 
-        L10nUtils.loadStrings(context);
         mAutoFillData = new WebViewCore.AutoFillData();
     }
 
