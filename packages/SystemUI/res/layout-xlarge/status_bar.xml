@@ -112,7 +112,6 @@
                 android:paddingLeft="18dip"
                 android:paddingRight="18dip"
                 android:src="@drawable/ic_sysbar_back"
-                android:background="@drawable/ic_sysbar_icon_bg"
                 systemui:keyCode="4"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
@@ -121,14 +120,13 @@
                 android:paddingLeft="18dip"
                 android:paddingRight="18dip"
                 android:src="@drawable/ic_sysbar_home"
-                android:background="@drawable/ic_sysbar_icon_bg"
                 systemui:keyCode="3"
                 />
             <ImageButton android:id="@+id/recent_apps"
                 android:layout_width="96dip"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_recent"
-                android:background="@drawable/ic_sysbar_icon_bg"
+                android:background="@null"
                 android:paddingLeft="18dip"
                 android:clickable="true"
                 android:paddingRight="18dip"
@@ -139,7 +137,6 @@
                 android:paddingLeft="18dip"
                 android:paddingRight="18dip"
                 android:src="@drawable/ic_sysbar_menu"
-                android:background="@drawable/ic_sysbar_icon_bg"
                 systemui:keyCode="82"
                 android:visibility="invisible"
                 />
@@ -147,7 +144,6 @@
                 android:id="@+id/pocket"
                 android:layout_width="96dip"
                 android:layout_height="match_parent"
-                android:background="@drawable/ic_sysbar_icon_bg"
                 android:paddingLeft="18dip"
                 android:paddingRight="18dip"
                 android:animateLayoutChanges="true"
@@ -169,8 +165,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="8dip"
-                android:src="@drawable/ic_sysbar_ime_default"
-                android:background="@drawable/ic_sysbar_icon_bg"
+                android:src="@drawable/ic_sysbar_ime"
                 android:visibility="invisible"
                 />
         </LinearLayout>
