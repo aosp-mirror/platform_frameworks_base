@@ -2026,7 +2026,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (app == null || app.instrumentationClass == null) {
                 intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
                 mMainStack.startActivityLocked(null, intent, null, null, 0, aInfo,
-                        null, null, 0, 0, 0, false, false);
+                        null, null, 0, 0, 0, false, false, null);
             }
         }
         
@@ -2082,7 +2082,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     intent.setComponent(new ComponentName(
                             ri.activityInfo.packageName, ri.activityInfo.name));
                     mMainStack.startActivityLocked(null, intent, null, null, 0, ri.activityInfo,
-                            null, null, 0, 0, 0, false, false);
+                            null, null, 0, 0, 0, false, false, null);
                 }
             }
         }
@@ -2121,13 +2121,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         mPendingActivityLaunches.clear();
     }
-    
+
     public final int startActivity(IApplicationThread caller,
             Intent intent, String resolvedType, Uri[] grantedUriPermissions,
             int grantedMode, IBinder resultTo,
             String resultWho, int requestCode, boolean onlyIfNeeded,
             boolean debug) {
-        return mMainStack.startActivityMayWait(caller, intent, resolvedType,
+        return mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
                 grantedUriPermissions, grantedMode, resultTo, resultWho,
                 requestCode, onlyIfNeeded, debug, null, null);
     }
@@ -2138,7 +2138,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             String resultWho, int requestCode, boolean onlyIfNeeded,
             boolean debug) {
         WaitResult res = new WaitResult();
-        mMainStack.startActivityMayWait(caller, intent, resolvedType,
+        mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
                 grantedUriPermissions, grantedMode, resultTo, resultWho,
                 requestCode, onlyIfNeeded, debug, res, null);
         return res;
@@ -2149,12 +2149,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             int grantedMode, IBinder resultTo,
             String resultWho, int requestCode, boolean onlyIfNeeded,
             boolean debug, Configuration config) {
-        return mMainStack.startActivityMayWait(caller, intent, resolvedType,
+        return mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
                 grantedUriPermissions, grantedMode, resultTo, resultWho,
                 requestCode, onlyIfNeeded, debug, null, config);
     }
 
-     public int startActivityIntentSender(IApplicationThread caller,
+    public int startActivityIntentSender(IApplicationThread caller,
             IntentSender intent, Intent fillInIntent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode,
             int flagsMask, int flagsValues) {
@@ -2267,7 +2267,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // those are not yet exposed to user code, so there is no need.
             int res = mMainStack.startActivityLocked(r.app.thread, intent,
                     r.resolvedType, null, 0, aInfo, resultTo, resultWho,
-                    requestCode, -1, r.launchedFromUid, false, false);
+                    requestCode, -1, r.launchedFromUid, false, false, null);
             Binder.restoreCallingIdentity(origId);
 
             r.finishing = wasFinishing;
@@ -2289,38 +2289,28 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException(
                     "startActivityInPackage only available to the system");
         }
-        
-        final boolean componentSpecified = intent.getComponent() != null;
-        
-        // Don't modify the client's object!
-        intent = new Intent(intent);
 
-        // Collect information about the target of the Intent.
-        ActivityInfo aInfo;
-        try {
-            ResolveInfo rInfo =
-                AppGlobals.getPackageManager().resolveIntent(
-                        intent, resolvedType,
-                        PackageManager.MATCH_DEFAULT_ONLY | STOCK_PM_FLAGS);
-            aInfo = rInfo != null ? rInfo.activityInfo : null;
-        } catch (RemoteException e) {
-            aInfo = null;
+        return mMainStack.startActivityMayWait(null, uid, intent, resolvedType,
+                null, 0, resultTo, resultWho, requestCode, onlyIfNeeded, false, null, null);
+    }
+
+    public final int startActivities(IApplicationThread caller,
+            Intent[] intents, String[] resolvedTypes, IBinder resultTo) {
+        return mMainStack.startActivities(caller, -1, intents, resolvedTypes, resultTo);
+    }
+
+    public final int startActivitiesInPackage(int uid,
+            Intent[] intents, String[] resolvedTypes, IBinder resultTo) {
+
+        // This is so super not safe, that only the system (or okay root)
+        // can do it.
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != 0 && callingUid != Process.myUid()) {
+            throw new SecurityException(
+                    "startActivityInPackage only available to the system");
         }
 
-        if (aInfo != null) {
-            // Store the found target back into the intent, because now that
-            // we have it we never want to do this again.  For example, if the
-            // user navigates back to this point in the history, we should
-            // always restart the exact same activity.
-            intent.setComponent(new ComponentName(
-                    aInfo.applicationInfo.packageName, aInfo.name));
-        }
-
-        synchronized(this) {
-            return mMainStack.startActivityLocked(null, intent, resolvedType,
-                    null, 0, aInfo, resultTo, resultWho, requestCode, -1, uid,
-                    onlyIfNeeded, componentSpecified);
-        }
+        return mMainStack.startActivities(null, uid, intents, resolvedTypes, resultTo);
     }
 
     final void addRecentTaskLocked(TaskRecord task) {
@@ -3890,16 +3880,30 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public IIntentSender getIntentSender(int type,
             String packageName, IBinder token, String resultWho,
-            int requestCode, Intent intent, String resolvedType, int flags) {
+            int requestCode, Intent[] intents, String[] resolvedTypes, int flags) {
         // Refuse possible leaked file descriptors
-        if (intent != null && intent.hasFileDescriptors() == true) {
-            throw new IllegalArgumentException("File descriptors passed in Intent");
-        }
-
-        if (type == INTENT_SENDER_BROADCAST) {
-            if ((intent.getFlags()&Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0) {
+        if (intents != null) {
+            if (intents.length < 1) {
+                throw new IllegalArgumentException("Intents array length must be >= 1");
+            }
+            for (int i=0; i<intents.length; i++) {
+                Intent intent = intents[i];
+                if (intent == null) {
+                    throw new IllegalArgumentException("Null intent at index " + i);
+                }
+                if (intent.hasFileDescriptors()) {
+                    throw new IllegalArgumentException("File descriptors passed in Intent");
+                }
+                if (type == INTENT_SENDER_BROADCAST &&
+                        (intent.getFlags()&Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0) {
+                    throw new IllegalArgumentException(
+                            "Can't use FLAG_RECEIVER_BOOT_UPGRADE here");
+                }
+                intents[i] = new Intent(intent);
+            }
+            if (resolvedTypes != null && resolvedTypes.length != intents.length) {
                 throw new IllegalArgumentException(
-                        "Can't use FLAG_RECEIVER_BOOT_UPGRADE here");
+                        "Intent array length does not match resolvedTypes length");
             }
         }
         
@@ -3922,7 +3926,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 
                 return getIntentSenderLocked(type, packageName, callingUid,
-                        token, resultWho, requestCode, intent, resolvedType, flags);
+                        token, resultWho, requestCode, intents, resolvedTypes, flags);
                 
             } catch (RemoteException e) {
                 throw new SecurityException(e);
@@ -3932,7 +3936,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     
     IIntentSender getIntentSenderLocked(int type,
             String packageName, int callingUid, IBinder token, String resultWho,
-            int requestCode, Intent intent, String resolvedType, int flags) {
+            int requestCode, Intent[] intents, String[] resolvedTypes, int flags) {
         ActivityRecord activity = null;
         if (type == INTENT_SENDER_ACTIVITY_RESULT) {
             int index = mMainStack.indexOfTokenLocked(token);
@@ -3953,14 +3957,24 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         PendingIntentRecord.Key key = new PendingIntentRecord.Key(
                 type, packageName, activity, resultWho,
-                requestCode, intent, resolvedType, flags);
+                requestCode, intents, resolvedTypes, flags);
         WeakReference<PendingIntentRecord> ref;
         ref = mIntentSenderRecords.get(key);
         PendingIntentRecord rec = ref != null ? ref.get() : null;
         if (rec != null) {
             if (!cancelCurrent) {
                 if (updateCurrent) {
-                    rec.key.requestIntent.replaceExtras(intent);
+                    if (rec.key.requestIntent != null) {
+                        rec.key.requestIntent.replaceExtras(intents != null ? intents[0] : null);
+                    }
+                    if (intents != null) {
+                        intents[intents.length-1] = rec.key.requestIntent;
+                        rec.key.allIntents = intents;
+                        rec.key.allResolvedTypes = resolvedTypes;
+                    } else {
+                        rec.key.allIntents = null;
+                        rec.key.allResolvedTypes = null;
+                    }
                 }
                 return rec;
             }
@@ -5006,7 +5020,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     /**
      * TODO: Add mController hook
      */
-    public void moveTaskToFront(int task) {
+    public void moveTaskToFront(int task, int flags) {
         enforceCallingPermission(android.Manifest.permission.REORDER_TASKS,
                 "moveTaskToFront()");
 
@@ -5021,6 +5035,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 for (int i=0; i<N; i++) {
                     TaskRecord tr = mRecentTasks.get(i);
                     if (tr.taskId == task) {
+                        if ((flags&ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
+                            // Caller wants the home activity moved with it.  To accomplish this,
+                            // we'll just move the home task to the top first.
+                            mMainStack.moveHomeToFrontLocked();
+                        }
                         mMainStack.moveTaskToFrontLocked(tr, null);
                         return;
                     }
@@ -5028,6 +5047,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 for (int i=mMainStack.mHistory.size()-1; i>=0; i--) {
                     ActivityRecord hr = (ActivityRecord)mMainStack.mHistory.get(i);
                     if (hr.task.taskId == task) {
+                        if ((flags&ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
+                            // Caller wants the home activity moved with it.  To accomplish this,
+                            // we'll just move the home task to the top first.
+                            mMainStack.moveHomeToFrontLocked();
+                        }
                         mMainStack.moveTaskToFrontLocked(hr.task, null);
                         return;
                     }

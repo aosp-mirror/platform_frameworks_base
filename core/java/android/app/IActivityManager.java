@@ -134,7 +134,7 @@ public interface IActivityManager extends IInterface {
     public List getServices(int maxNum, int flags) throws RemoteException;
     public List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState()
             throws RemoteException;
-    public void moveTaskToFront(int task) throws RemoteException;
+    public void moveTaskToFront(int task, int flags) throws RemoteException;
     public void moveTaskToBack(int task) throws RemoteException;
     public boolean moveActivityTaskToBack(IBinder token, boolean nonRoot) throws RemoteException;
     public void moveTaskBackwards(int task) throws RemoteException;
@@ -199,7 +199,8 @@ public interface IActivityManager extends IInterface {
     public static final int INTENT_SENDER_SERVICE = 4;
     public IIntentSender getIntentSender(int type,
             String packageName, IBinder token, String resultWho,
-            int requestCode, Intent intent, String resolvedType, int flags) throws RemoteException;
+            int requestCode, Intent[] intents, String[] resolvedTypes,
+            int flags) throws RemoteException;
     public void cancelIntentSender(IIntentSender sender) throws RemoteException;
     public boolean clearApplicationUserData(final String packageName,
             final IPackageDataObserver observer) throws RemoteException;
@@ -208,7 +209,8 @@ public interface IActivityManager extends IInterface {
     public void setProcessLimit(int max) throws RemoteException;
     public int getProcessLimit() throws RemoteException;
     
-    public void setProcessForeground(IBinder token, int pid, boolean isForeground) throws RemoteException;
+    public void setProcessForeground(IBinder token, int pid,
+            boolean isForeground) throws RemoteException;
     
     public int checkPermission(String permission, int pid, int uid)
             throws RemoteException;
@@ -331,6 +333,11 @@ public interface IActivityManager extends IInterface {
     // Cause the specified process to dump the specified heap.
     public boolean dumpHeap(String process, boolean managed, String path,
         ParcelFileDescriptor fd) throws RemoteException;
+
+    public int startActivities(IApplicationThread caller,
+            Intent[] intents, String[] resolvedTypes, IBinder resultTo) throws RemoteException;
+    public int startActivitiesInPackage(int uid,
+            Intent[] intents, String[] resolvedTypes, IBinder resultTo) throws RemoteException;
 
     /*
      * Private non-Binder interfaces
@@ -544,4 +551,6 @@ public interface IActivityManager extends IInterface {
     int REVOKE_URI_PERMISSION_FROM_OWNER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+117;
     int CHECK_GRANT_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+118;
     int DUMP_HEAP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+119;
+    int START_ACTIVITIES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+120;
+    int START_ACTIVITIES_IN_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+121;
 }

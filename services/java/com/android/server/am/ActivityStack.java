@@ -99,8 +99,8 @@ public class ActivityStack {
     static final int DESTROY_TIMEOUT = 10*1000;
     
     // How long until we reset a task when the user returns to it.  Currently
-    // 30 minutes.
-    static final long ACTIVITY_INACTIVE_RESET_TIME = 1000*60*30;
+    // disabled.
+    static final long ACTIVITY_INACTIVE_RESET_TIME = 0;
     
     // How long between activity launches that we consider safe to not warn
     // the user about an unexpected activity being launched on top.
@@ -1487,7 +1487,8 @@ public class ActivityStack {
             ActivityRecord newActivity) {
         boolean forceReset = (newActivity.info.flags
                 &ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH) != 0;
-        if (taskTop.task.getInactiveDuration() > ACTIVITY_INACTIVE_RESET_TIME) {
+        if (ACTIVITY_INACTIVE_RESET_TIME > 0
+                && taskTop.task.getInactiveDuration() > ACTIVITY_INACTIVE_RESET_TIME) {
             if ((newActivity.info.flags
                     &ActivityInfo.FLAG_ALWAYS_RETAIN_TASK_STATE) == 0) {
                 forceReset = true;
@@ -1573,8 +1574,7 @@ public class ActivityStack {
                             if (mService.mCurTask <= 0) {
                                 mService.mCurTask = 1;
                             }
-                            target.task = new TaskRecord(mService.mCurTask, target.info, null,
-                                    (target.info.flags&ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH) != 0);
+                            target.task = new TaskRecord(mService.mCurTask, target.info, null);
                             target.task.affinityIntent = target.intent;
                             if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
                                     + " out to new task " + target.task);
@@ -1776,11 +1776,11 @@ public class ActivityStack {
      * activities on top of it and return the instance.
      *
      * @param newR Description of the new activity being started.
-     * @return Returns the old activity that should be continue to be used,
+     * @return Returns the old activity that should be continued to be used,
      * or null if none was found.
      */
     private final ActivityRecord performClearTaskLocked(int taskId,
-            ActivityRecord newR, int launchFlags, boolean doClear) {
+            ActivityRecord newR, int launchFlags) {
         int i = mHistory.size();
         
         // First find the requested task.
@@ -1806,17 +1806,18 @@ public class ActivityStack {
             if (r.realActivity.equals(newR.realActivity)) {
                 // Here it is!  Now finish everything in front...
                 ActivityRecord ret = r;
-                if (doClear) {
-                    while (i < (mHistory.size()-1)) {
-                        i++;
-                        r = (ActivityRecord)mHistory.get(i);
-                        if (r.finishing) {
-                            continue;
-                        }
-                        if (finishActivityLocked(r, i, Activity.RESULT_CANCELED,
-                                null, "clear")) {
-                            i--;
-                        }
+                while (i < (mHistory.size()-1)) {
+                    i++;
+                    r = (ActivityRecord)mHistory.get(i);
+                    if (r.task.taskId != taskId) {
+                        break;
+                    }
+                    if (r.finishing) {
+                        continue;
+                    }
+                    if (finishActivityLocked(r, i, Activity.RESULT_CANCELED,
+                            null, "clear")) {
+                        i--;
                     }
                 }
                 
@@ -1840,6 +1841,51 @@ public class ActivityStack {
         }
 
         return null;
+    }
+
+    /**
+     * Completely remove all activities associated with an existing task.
+     */
+    private final void performClearTaskLocked(int taskId) {
+        int i = mHistory.size();
+
+        // First find the requested task.
+        while (i > 0) {
+            i--;
+            ActivityRecord r = (ActivityRecord)mHistory.get(i);
+            if (r.task.taskId == taskId) {
+                i++;
+                break;
+            }
+        }
+
+        // Now clear it.
+        while (i > 0) {
+            i--;
+            ActivityRecord r = (ActivityRecord)mHistory.get(i);
+            if (r.finishing) {
+                continue;
+            }
+            if (r.task.taskId != taskId) {
+                // We hit the bottom.  Now finish it all...
+                while (i < (mHistory.size()-1)) {
+                    i++;
+                    r = (ActivityRecord)mHistory.get(i);
+                    if (r.task.taskId != taskId) {
+                        // Whoops hit the end.
+                        return;
+                    }
+                    if (r.finishing) {
+                        continue;
+                    }
+                    if (finishActivityLocked(r, i, Activity.RESULT_CANCELED,
+                            null, "clear")) {
+                        i--;
+                    }
+                }
+                return;
+            }
+        }
     }
 
     /**
@@ -1882,7 +1928,7 @@ public class ActivityStack {
             int grantedMode, ActivityInfo aInfo, IBinder resultTo,
             String resultWho, int requestCode,
             int callingPid, int callingUid, boolean onlyIfNeeded,
-            boolean componentSpecified) {
+            boolean componentSpecified, ActivityRecord[] outActivity) {
 
         int err = START_SUCCESS;
 
@@ -2004,6 +2050,9 @@ public class ActivityStack {
         ActivityRecord r = new ActivityRecord(mService, this, callerApp, callingUid,
                 intent, resolvedType, aInfo, mService.mConfiguration,
                 resultRecord, resultWho, requestCode, componentSpecified);
+        if (outActivity != null) {
+            outActivity[0] = r;
+        }
 
         if (mMainStack) {
             if (mResumedActivity == null
@@ -2038,6 +2087,16 @@ public class ActivityStack {
                 grantedUriPermissions, grantedMode, onlyIfNeeded, true);
     }
   
+    final void moveHomeToFrontFromLaunchLocked(int launchFlags) {
+        if ((launchFlags &
+                (Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_TASK_ON_HOME))
+                == (Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_TASK_ON_HOME)) {
+            // Caller wants to appear on home activity, so before starting
+            // their own activity we will bring home to the front.
+            moveHomeToFrontLocked();
+        }
+    }
+
     final int startActivityUncheckedLocked(ActivityRecord r,
             ActivityRecord sourceRecord, Uri[] grantedUriPermissions,
             int grantedMode, boolean onlyIfNeeded, boolean doResume) {
@@ -2111,6 +2170,7 @@ public class ActivityStack {
         }
 
         boolean addingToTask = false;
+        TaskRecord reuseTask = null;
         if (((launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0 &&
                 (launchFlags&Intent.FLAG_ACTIVITY_MULTIPLE_TASK) == 0)
                 || r.launchMode == ActivityInfo.LAUNCH_SINGLE_TASK
@@ -2148,6 +2208,7 @@ public class ActivityStack {
                         if (callerAtFront) {
                             // We really do want to push this one into the
                             // user's face, right now.
+                            moveHomeToFrontFromLaunchLocked(launchFlags);
                             moveTaskToFrontLocked(taskTop.task, r);
                         }
                     }
@@ -2166,7 +2227,16 @@ public class ActivityStack {
                         }
                         return START_RETURN_INTENT_TO_CALLER;
                     }
-                    if ((launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0
+                    if ((launchFlags &
+                            (Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK))
+                            == (Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK)) {
+                        // The caller has requested to completely replace any
+                        // exising task with its new activity.  Well that should
+                        // not be too hard...
+                        reuseTask = taskTop.task;
+                        performClearTaskLocked(taskTop.task.taskId);
+                        reuseTask.setIntent(r.intent, r.info);
+                    } else if ((launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0
                             || r.launchMode == ActivityInfo.LAUNCH_SINGLE_TASK
                             || r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
                         // In this situation we want to remove all activities
@@ -2174,7 +2244,7 @@ public class ActivityStack {
                         // cases this means we are resetting the task to its
                         // initial state.
                         ActivityRecord top = performClearTaskLocked(
-                                taskTop.task.taskId, r, launchFlags, true);
+                                taskTop.task.taskId, r, launchFlags);
                         if (top != null) {
                             if (top.frontOfTask) {
                                 // Activity aliases may mean we use different
@@ -2235,7 +2305,7 @@ public class ActivityStack {
                         // for now we'll just drop it.
                         taskTop.task.setIntent(r.intent, r.info);
                     }
-                    if (!addingToTask) {
+                    if (!addingToTask && reuseTask == null) {
                         // We didn't do anything...  but it was needed (a.k.a., client
                         // don't use that intent!)  And for paranoia, make
                         // sure we have correctly resumed the top activity.
@@ -2298,19 +2368,23 @@ public class ActivityStack {
         // Should this be considered a new task?
         if (r.resultTo == null && !addingToTask
                 && (launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
-            // todo: should do better management of integers.
-            mService.mCurTask++;
-            if (mService.mCurTask <= 0) {
-                mService.mCurTask = 1;
+            if (reuseTask == null) {
+                // todo: should do better management of integers.
+                mService.mCurTask++;
+                if (mService.mCurTask <= 0) {
+                    mService.mCurTask = 1;
+                }
+                r.task = new TaskRecord(mService.mCurTask, r.info, intent);
+                if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
+                        + " in new task " + r.task);
+            } else {
+                r.task = reuseTask;
             }
-            r.task = new TaskRecord(mService.mCurTask, r.info, intent,
-                    (r.info.flags&ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH) != 0);
-            if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
-                    + " in new task " + r.task);
             newTask = true;
             if (mMainStack) {
                 mService.addRecentTaskLocked(r.task);
             }
+            moveHomeToFrontFromLaunchLocked(launchFlags);
             
         } else if (sourceRecord != null) {
             if (!addingToTask &&
@@ -2319,7 +2393,7 @@ public class ActivityStack {
                 // task, but the caller has asked to clear that task if the
                 // activity is already running.
                 ActivityRecord top = performClearTaskLocked(
-                        sourceRecord.task.taskId, r, launchFlags, true);
+                        sourceRecord.task.taskId, r, launchFlags);
                 if (top != null) {
                     logStartActivity(EventLogTags.AM_NEW_INTENT, r, top.task);
                     top.deliverNewIntentLocked(callingUid, r.intent);
@@ -2361,9 +2435,8 @@ public class ActivityStack {
             ActivityRecord prev =
                 N > 0 ? (ActivityRecord)mHistory.get(N-1) : null;
             r.task = prev != null
-                ? prev.task
-                : new TaskRecord(mService.mCurTask, r.info, intent,
-                        (r.info.flags&ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH) != 0);
+                    ? prev.task
+                    : new TaskRecord(mService.mCurTask, r.info, intent);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in new guessed " + r.task);
         }
@@ -2386,21 +2459,7 @@ public class ActivityStack {
         return START_SUCCESS;
     }
 
-    final int startActivityMayWait(IApplicationThread caller,
-            Intent intent, String resolvedType, Uri[] grantedUriPermissions,
-            int grantedMode, IBinder resultTo,
-            String resultWho, int requestCode, boolean onlyIfNeeded,
-            boolean debug, WaitResult outResult, Configuration config) {
-        // Refuse possible leaked file descriptors
-        if (intent != null && intent.hasFileDescriptors()) {
-            throw new IllegalArgumentException("File descriptors passed in Intent");
-        }
-
-        boolean componentSpecified = intent.getComponent() != null;
-        
-        // Don't modify the client's object!
-        intent = new Intent(intent);
-
+    ActivityInfo resolveActivity(Intent intent, String resolvedType, boolean debug) {
         // Collect information about the target of the Intent.
         ActivityInfo aInfo;
         try {
@@ -2429,11 +2488,32 @@ public class ActivityStack {
                 }
             }
         }
+        return aInfo;
+    }
+
+    final int startActivityMayWait(IApplicationThread caller, int callingUid,
+            Intent intent, String resolvedType, Uri[] grantedUriPermissions,
+            int grantedMode, IBinder resultTo,
+            String resultWho, int requestCode, boolean onlyIfNeeded,
+            boolean debug, WaitResult outResult, Configuration config) {
+        // Refuse possible leaked file descriptors
+        if (intent != null && intent.hasFileDescriptors()) {
+            throw new IllegalArgumentException("File descriptors passed in Intent");
+        }
+
+        boolean componentSpecified = intent.getComponent() != null;
+
+        // Don't modify the client's object!
+        intent = new Intent(intent);
+
+        // Collect information about the target of the Intent.
+        ActivityInfo aInfo = resolveActivity(intent, resolvedType, debug);
 
         synchronized (mService) {
             int callingPid;
-            int callingUid;
-            if (caller == null) {
+            if (callingUid >= 0) {
+                callingPid = -1;
+            } else if (caller == null) {
                 callingPid = Binder.getCallingPid();
                 callingUid = Binder.getCallingUid();
             } else {
@@ -2472,8 +2552,8 @@ public class ActivityStack {
                         
                         IIntentSender target = mService.getIntentSenderLocked(
                                 IActivityManager.INTENT_SENDER_ACTIVITY, "android",
-                                realCallingUid, null, null, 0, intent,
-                                resolvedType, PendingIntent.FLAG_CANCEL_CURRENT
+                                realCallingUid, null, null, 0, new Intent[] { intent },
+                                new String[] { resolvedType }, PendingIntent.FLAG_CANCEL_CURRENT
                                 | PendingIntent.FLAG_ONE_SHOT);
                         
                         Intent newIntent = new Intent();
@@ -2518,7 +2598,7 @@ public class ActivityStack {
             int res = startActivityLocked(caller, intent, resolvedType,
                     grantedUriPermissions, grantedMode, aInfo,
                     resultTo, resultWho, requestCode, callingPid, callingUid,
-                    onlyIfNeeded, componentSpecified);
+                    onlyIfNeeded, componentSpecified, null);
             
             if (mConfigWillChange && mMainStack) {
                 // If the caller also wants to switch to a new configuration,
@@ -2569,6 +2649,75 @@ public class ActivityStack {
         }
     }
     
+    final int startActivities(IApplicationThread caller, int callingUid,
+            Intent[] intents, String[] resolvedTypes, IBinder resultTo) {
+        if (intents == null) {
+            throw new NullPointerException("intents is null");
+        }
+        if (resolvedTypes == null) {
+            throw new NullPointerException("resolvedTypes is null");
+        }
+        if (intents.length != resolvedTypes.length) {
+            throw new IllegalArgumentException("intents are length different than resolvedTypes");
+        }
+
+        ActivityRecord[] outActivity = new ActivityRecord[1];
+
+        int callingPid;
+        if (callingUid >= 0) {
+            callingPid = -1;
+        } else if (caller == null) {
+            callingPid = Binder.getCallingPid();
+            callingUid = Binder.getCallingUid();
+        } else {
+            callingPid = callingUid = -1;
+        }
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mService) {
+
+                for (int i=0; i<intents.length; i++) {
+                    Intent intent = intents[i];
+                    if (intent == null) {
+                        continue;
+                    }
+
+                    // Refuse possible leaked file descriptors
+                    if (intent != null && intent.hasFileDescriptors()) {
+                        throw new IllegalArgumentException("File descriptors passed in Intent");
+                    }
+
+                    boolean componentSpecified = intent.getComponent() != null;
+
+                    // Don't modify the client's object!
+                    intent = new Intent(intent);
+
+                    // Collect information about the target of the Intent.
+                    ActivityInfo aInfo = resolveActivity(intent, resolvedTypes[i], false);
+
+                    if (mMainStack && aInfo != null && (aInfo.applicationInfo.flags
+                            & ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
+                        throw new IllegalArgumentException(
+                                "FLAG_CANT_SAVE_STATE not supported here");
+                    }
+
+                    int res = startActivityLocked(caller, intent, resolvedTypes[i],
+                            null, 0, aInfo, resultTo, null, -1, callingPid, callingUid,
+                            false, componentSpecified, outActivity);
+                    if (res < 0) {
+                        return res;
+                    }
+
+                    resultTo = outActivity[0];
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+
+        return IActivityManager.START_SUCCESS;
+    }
+
     void reportActivityLaunchedLocked(boolean timeout, ActivityRecord r,
             long thisTime, long totalTime) {
         for (int i=mWaitingActivityLaunched.size()-1; i>=0; i--) {
@@ -3252,6 +3401,24 @@ public class ActivityStack {
         removeHistoryRecordsForAppLocked(mFinishingActivities, app);
     }
     
+    /**
+     * Move the current home activity's task (if one exists) to the front
+     * of the stack.
+     */
+    final void moveHomeToFrontLocked() {
+        TaskRecord homeTask = null;
+        for (int i=mHistory.size()-1; i>=0; i--) {
+            ActivityRecord hr = (ActivityRecord)mHistory.get(i);
+            if (hr.isHomeActivity) {
+                homeTask = hr.task;
+            }
+        }
+        if (homeTask != null) {
+            moveTaskToFrontLocked(homeTask, null);
+        }
+    }
+
+
     final void moveTaskToFrontLocked(TaskRecord tr, ActivityRecord reason) {
         if (DEBUG_SWITCH) Slog.v(TAG, "moveTaskToFront: " + tr);
 

@@ -266,6 +266,11 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public void startActivities(Intent[] intents) {
+        mBase.startActivities(intents);
+    }
+
+    @Override
     public void startIntentSender(IntentSender intent,
             Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
             throws IntentSender.SendIntentException {

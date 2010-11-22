@@ -844,6 +844,19 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public void startActivities(Intent[] intents) {
+        if ((intents[0].getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
+            throw new AndroidRuntimeException(
+                    "Calling startActivities() from outside of an Activity "
+                    + " context requires the FLAG_ACTIVITY_NEW_TASK flag on first Intent."
+                    + " Is this really what you want?");
+        }
+        mMainThread.getInstrumentation().execStartActivities(
+            getOuterContext(), mMainThread.getApplicationThread(), null,
+            (Activity)null, intents);
+    }
+
+    @Override
     public void startIntentSender(IntentSender intent,
             Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
             throws IntentSender.SendIntentException {
