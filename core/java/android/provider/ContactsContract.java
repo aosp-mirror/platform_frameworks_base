@@ -5669,6 +5669,13 @@ public final class ContactsContract {
          * Type: INTEGER (boolean)
          */
         public static final String FAVORITES = "favorites";
+
+        /**
+         * The "read-only" flag: "0" by default, "1" if the row cannot be modified or
+         * deleted except by a sync adapter.  See {@link ContactsContract#CALLER_IS_SYNCADAPTER}.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String GROUP_IS_READ_ONLY = "group_is_read_only";
     }
 
     /**
