@@ -31,7 +31,6 @@ LOCAL_SHARED_LIBRARIES :=       \
         libutils                \
         libui                   \
         libcutils               \
-        libstagefright_color_conversion
 
 ifneq ($(BUILD_WITHOUT_PV),true)
 LOCAL_SHARED_LIBRARIES += \

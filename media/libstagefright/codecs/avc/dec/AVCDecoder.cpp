@@ -73,6 +73,7 @@ AVCDecoder::AVCDecoder(const sp<MediaSource> &source)
     CHECK(mSource->getFormat()->findInt32(kKeyHeight, &height));
     mFormat->setInt32(kKeyWidth, width);
     mFormat->setInt32(kKeyHeight, height);
+    mFormat->setRect(kKeyCropRect, 0, 0, width - 1, height - 1);
     mFormat->setInt32(kKeyColorFormat, OMX_COLOR_FormatYUV420Planar);
     mFormat->setCString(kKeyDecoderComponent, "AVCDecoder");
 
@@ -418,16 +419,32 @@ status_t AVCDecoder::read(
                     crop_top = crop_left = 0;
                 }
 
-                int32_t aligned_width = (crop_right - crop_left + 1 + 15) & ~15;
-                int32_t aligned_height = (crop_bottom - crop_top + 1 + 15) & ~15;
+                int32_t prevCropLeft, prevCropTop;
+                int32_t prevCropRight, prevCropBottom;
+                if (!mFormat->findRect(
+                            kKeyCropRect,
+                            &prevCropLeft, &prevCropTop,
+                            &prevCropRight, &prevCropBottom)) {
+                    prevCropLeft = prevCropTop = 0;
+                    prevCropRight = width - 1;
+                    prevCropBottom = height - 1;
+                }
 
                 int32_t oldWidth, oldHeight;
                 CHECK(mFormat->findInt32(kKeyWidth, &oldWidth));
                 CHECK(mFormat->findInt32(kKeyHeight, &oldHeight));
 
-                if (oldWidth != aligned_width || oldHeight != aligned_height) {
-                    mFormat->setInt32(kKeyWidth, aligned_width);
-                    mFormat->setInt32(kKeyHeight, aligned_height);
+                if (oldWidth != width || oldHeight != height
+                        || prevCropLeft != crop_left
+                        || prevCropTop != crop_top
+                        || prevCropRight != crop_right
+                        || prevCropBottom != crop_bottom) {
+                    mFormat->setRect(
+                            kKeyCropRect,
+                            crop_left, crop_top, crop_right, crop_bottom);
+
+                    mFormat->setInt32(kKeyWidth, width);
+                    mFormat->setInt32(kKeyHeight, height);
 
                     err = INFO_FORMAT_CHANGED;
                 } else {

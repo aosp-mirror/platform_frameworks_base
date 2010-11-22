@@ -31,7 +31,6 @@ LOCAL_SHARED_LIBRARIES :=     		\
 	libandroid_runtime    			\
 	libstagefright        			\
 	libstagefright_omx    			\
-	libstagefright_color_conversion         \
 	libstagefright_foundation               \
 	libsurfaceflinger_client
 

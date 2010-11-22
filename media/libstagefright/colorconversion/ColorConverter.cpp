@@ -50,31 +50,64 @@ bool ColorConverter::isValid() const {
     }
 }
 
-void ColorConverter::convert(
+ColorConverter::BitmapParams::BitmapParams(
+        void *bits,
         size_t width, size_t height,
-        const void *srcBits, size_t srcSkip,
-        void *dstBits, size_t dstSkip) {
+        size_t cropLeft, size_t cropTop,
+        size_t cropRight, size_t cropBottom)
+    : mBits(bits),
+      mWidth(width),
+      mHeight(height),
+      mCropLeft(cropLeft),
+      mCropTop(cropTop),
+      mCropRight(cropRight),
+      mCropBottom(cropBottom) {
+}
+
+size_t ColorConverter::BitmapParams::cropWidth() const {
+    return mCropRight - mCropLeft + 1;
+}
+
+size_t ColorConverter::BitmapParams::cropHeight() const {
+    return mCropBottom - mCropTop + 1;
+}
+
+void ColorConverter::convert(
+        const void *srcBits,
+        size_t srcWidth, size_t srcHeight,
+        size_t srcCropLeft, size_t srcCropTop,
+        size_t srcCropRight, size_t srcCropBottom,
+        void *dstBits,
+        size_t dstWidth, size_t dstHeight,
+        size_t dstCropLeft, size_t dstCropTop,
+        size_t dstCropRight, size_t dstCropBottom) {
     CHECK_EQ(mDstFormat, OMX_COLOR_Format16bitRGB565);
+
+    BitmapParams src(
+            const_cast<void *>(srcBits),
+            srcWidth, srcHeight,
+            srcCropLeft, srcCropTop, srcCropRight, srcCropBottom);
+
+    BitmapParams dst(
+            dstBits,
+            dstWidth, dstHeight,
+            dstCropLeft, dstCropTop, dstCropRight, dstCropBottom);
 
     switch (mSrcFormat) {
         case OMX_COLOR_FormatYUV420Planar:
-            convertYUV420Planar(
-                    width, height, srcBits, srcSkip, dstBits, dstSkip);
+            convertYUV420Planar(src, dst);
             break;
 
         case OMX_COLOR_FormatCbYCrY:
-            convertCbYCrY(
-                    width, height, srcBits, srcSkip, dstBits, dstSkip);
+            convertCbYCrY(src, dst);
             break;
 
         case OMX_QCOM_COLOR_FormatYVU420SemiPlanar:
-            convertQCOMYUV420SemiPlanar(
-                    width, height, srcBits, srcSkip, dstBits, dstSkip);
+            convertQCOMYUV420SemiPlanar(src, dst);
             break;
 
         case OMX_COLOR_FormatYUV420SemiPlanar:
-            convertYUV420SemiPlanar(
-                    width, height, srcBits, srcSkip, dstBits, dstSkip);
+            convertYUV420SemiPlanar(src, dst);
             break;
 
         default:
@@ -86,25 +119,27 @@ void ColorConverter::convert(
 }
 
 void ColorConverter::convertCbYCrY(
-        size_t width, size_t height,
-        const void *srcBits, size_t srcSkip,
-        void *dstBits, size_t dstSkip) {
-    CHECK_EQ(srcSkip, 0);  // Doesn't really make sense for YUV formats.
-    CHECK(dstSkip >= width * 2);
-    CHECK((dstSkip & 3) == 0);
+        const BitmapParams &src, const BitmapParams &dst) {
+    // XXX Untested
 
     uint8_t *kAdjustedClip = initClip();
 
-    uint32_t *dst_ptr = (uint32_t *)dstBits;
+    CHECK((src.mCropLeft & 1) == 0);
+    CHECK_EQ(src.cropWidth(), dst.cropWidth());
+    CHECK_EQ(src.cropHeight(), dst.cropHeight());
 
-    const uint8_t *src = (const uint8_t *)srcBits;
+    uint32_t *dst_ptr = (uint32_t *)dst.mBits
+        + (dst.mCropTop * dst.mWidth + dst.mCropLeft) / 2;
 
-    for (size_t y = 0; y < height; ++y) {
-        for (size_t x = 0; x < width; x += 2) {
-            signed y1 = (signed)src[2 * x + 1] - 16;
-            signed y2 = (signed)src[2 * x + 3] - 16;
-            signed u = (signed)src[2 * x] - 128;
-            signed v = (signed)src[2 * x + 2] - 128;
+    const uint8_t *src_ptr = (const uint8_t *)src.mBits
+        + (src.mCropTop * dst.mWidth + src.mCropLeft) * 2;
+
+    for (size_t y = 0; y < src.cropHeight(); ++y) {
+        for (size_t x = 0; x < src.cropWidth(); x += 2) {
+            signed y1 = (signed)src_ptr[2 * x + 1] - 16;
+            signed y2 = (signed)src_ptr[2 * x + 3] - 16;
+            signed u = (signed)src_ptr[2 * x] - 128;
+            signed v = (signed)src_ptr[2 * x + 2] - 128;
 
             signed u_b = u * 517;
             signed u_g = -u * 100;
@@ -134,32 +169,35 @@ void ColorConverter::convertCbYCrY(
             dst_ptr[x / 2] = (rgb2 << 16) | rgb1;
         }
 
-        src += width * 2;
-        dst_ptr += dstSkip / 4;
+        src_ptr += src.mWidth * 2;
+        dst_ptr += dst.mWidth / 2;
     }
 }
 
 void ColorConverter::convertYUV420Planar(
-        size_t width, size_t height,
-        const void *srcBits, size_t srcSkip,
-        void *dstBits, size_t dstSkip) {
-    CHECK_EQ(srcSkip, 0);  // Doesn't really make sense for YUV formats.
-    CHECK(dstSkip >= width * 2);
-    CHECK((dstSkip & 3) == 0);
-
+        const BitmapParams &src, const BitmapParams &dst) {
     uint8_t *kAdjustedClip = initClip();
 
-    uint32_t *dst_ptr = (uint32_t *)dstBits;
-    const uint8_t *src_y = (const uint8_t *)srcBits;
+    CHECK((dst.mWidth & 3) == 0);
+    CHECK((src.mCropLeft & 1) == 0);
+    CHECK_EQ(src.cropWidth(), dst.cropWidth());
+    CHECK_EQ(src.cropHeight(), dst.cropHeight());
+
+    uint32_t *dst_ptr = (uint32_t *)dst.mBits
+        + (dst.mCropTop * dst.mWidth + dst.mCropLeft) / 2;
+
+    const uint8_t *src_y =
+        (const uint8_t *)src.mBits + src.mCropTop * src.mWidth + src.mCropLeft;
 
     const uint8_t *src_u =
-        (const uint8_t *)src_y + width * height;
+        (const uint8_t *)src_y + src.mWidth * src.mHeight
+        + src.mCropTop * (src.mWidth / 2) + src.mCropLeft / 2;
 
     const uint8_t *src_v =
-        (const uint8_t *)src_u + (width / 2) * (height / 2);
+        src_u + (src.mWidth / 2) * (src.mHeight / 2);
 
-    for (size_t y = 0; y < height; ++y) {
-        for (size_t x = 0; x < width; x += 2) {
+    for (size_t y = 0; y < src.cropHeight(); ++y) {
+        for (size_t x = 0; x < src.cropWidth(); x += 2) {
             // B = 1.164 * (Y - 16) + 2.018 * (U - 128)
             // G = 1.164 * (Y - 16) - 0.813 * (V - 128) - 0.391 * (U - 128)
             // R = 1.164 * (Y - 16) + 1.596 * (V - 128)
@@ -212,35 +250,38 @@ void ColorConverter::convertYUV420Planar(
             dst_ptr[x / 2] = (rgb2 << 16) | rgb1;
         }
 
-        src_y += width;
+        src_y += src.mWidth;
 
         if (y & 1) {
-            src_u += width / 2;
-            src_v += width / 2;
+            src_u += src.mWidth / 2;
+            src_v += src.mWidth / 2;
         }
 
-        dst_ptr += dstSkip / 4;
+        dst_ptr += dst.mWidth / 2;
     }
 }
 
 void ColorConverter::convertQCOMYUV420SemiPlanar(
-        size_t width, size_t height,
-        const void *srcBits, size_t srcSkip,
-        void *dstBits, size_t dstSkip) {
-    CHECK_EQ(srcSkip, 0);  // Doesn't really make sense for YUV formats.
-    CHECK(dstSkip >= width * 2);
-    CHECK((dstSkip & 3) == 0);
-
+        const BitmapParams &src, const BitmapParams &dst) {
     uint8_t *kAdjustedClip = initClip();
 
-    uint32_t *dst_ptr = (uint32_t *)dstBits;
-    const uint8_t *src_y = (const uint8_t *)srcBits;
+    CHECK((dst.mWidth & 3) == 0);
+    CHECK((src.mCropLeft & 1) == 0);
+    CHECK_EQ(src.cropWidth(), dst.cropWidth());
+    CHECK_EQ(src.cropHeight(), dst.cropHeight());
+
+    uint32_t *dst_ptr = (uint32_t *)dst.mBits
+        + (dst.mCropTop * dst.mWidth + dst.mCropLeft) / 2;
+
+    const uint8_t *src_y =
+        (const uint8_t *)src.mBits + src.mCropTop * src.mWidth + src.mCropLeft;
 
     const uint8_t *src_u =
-        (const uint8_t *)src_y + width * height;
+        (const uint8_t *)src_y + src.mWidth * src.mHeight
+        + src.mCropTop * src.mWidth + src.mCropLeft;
 
-    for (size_t y = 0; y < height; ++y) {
-        for (size_t x = 0; x < width; x += 2) {
+    for (size_t y = 0; y < src.cropHeight(); ++y) {
+        for (size_t x = 0; x < src.cropWidth(); x += 2) {
             signed y1 = (signed)src_y[x] - 16;
             signed y2 = (signed)src_y[x + 1] - 16;
 
@@ -275,34 +316,39 @@ void ColorConverter::convertQCOMYUV420SemiPlanar(
             dst_ptr[x / 2] = (rgb2 << 16) | rgb1;
         }
 
-        src_y += width;
+        src_y += src.mWidth;
 
         if (y & 1) {
-            src_u += width;
+            src_u += src.mWidth;
         }
 
-        dst_ptr += dstSkip / 4;
+        dst_ptr += dst.mWidth / 2;
     }
 }
 
 void ColorConverter::convertYUV420SemiPlanar(
-        size_t width, size_t height,
-        const void *srcBits, size_t srcSkip,
-        void *dstBits, size_t dstSkip) {
-    CHECK_EQ(srcSkip, 0);  // Doesn't really make sense for YUV formats.
-    CHECK(dstSkip >= width * 2);
-    CHECK((dstSkip & 3) == 0);
+        const BitmapParams &src, const BitmapParams &dst) {
+    // XXX Untested
 
     uint8_t *kAdjustedClip = initClip();
 
-    uint32_t *dst_ptr = (uint32_t *)dstBits;
-    const uint8_t *src_y = (const uint8_t *)srcBits;
+    CHECK((dst.mWidth & 3) == 0);
+    CHECK((src.mCropLeft & 1) == 0);
+    CHECK_EQ(src.cropWidth(), dst.cropWidth());
+    CHECK_EQ(src.cropHeight(), dst.cropHeight());
+
+    uint32_t *dst_ptr = (uint32_t *)dst.mBits
+        + (dst.mCropTop * dst.mWidth + dst.mCropLeft) / 2;
+
+    const uint8_t *src_y =
+        (const uint8_t *)src.mBits + src.mCropTop * src.mWidth + src.mCropLeft;
 
     const uint8_t *src_u =
-        (const uint8_t *)src_y + width * height;
+        (const uint8_t *)src_y + src.mWidth * src.mHeight
+        + src.mCropTop * src.mWidth + src.mCropLeft;
 
-    for (size_t y = 0; y < height; ++y) {
-        for (size_t x = 0; x < width; x += 2) {
+    for (size_t y = 0; y < src.cropHeight(); ++y) {
+        for (size_t x = 0; x < src.cropWidth(); x += 2) {
             signed y1 = (signed)src_y[x] - 16;
             signed y2 = (signed)src_y[x + 1] - 16;
 
@@ -337,13 +383,13 @@ void ColorConverter::convertYUV420SemiPlanar(
             dst_ptr[x / 2] = (rgb2 << 16) | rgb1;
         }
 
-        src_y += width;
+        src_y += src.mWidth;
 
         if (y & 1) {
-            src_u += width;
+            src_u += src.mWidth;
         }
 
-        dst_ptr += dstSkip / 4;
+        dst_ptr += dst.mWidth / 2;
     }
 }
 
