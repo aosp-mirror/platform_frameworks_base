@@ -49,7 +49,7 @@ public class TabletTicker extends Handler {
 
     private static final int MSG_ADVANCE = 1;
 
-    private static final int ADVANCE_DELAY = 10000; // 5 seconds
+    private static final int ADVANCE_DELAY = 5000; // 5 seconds
 
     private Context mContext;
 
@@ -162,8 +162,8 @@ public class TabletTicker extends Handler {
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(width, height,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
         lp.setTitle("NotificationTicker");
