@@ -147,25 +147,6 @@ static jintArray android_content_StringBlock_nativeGetStyle(JNIEnv* env, jobject
     return array;
 }
 
-static jint android_content_StringBlock_nativeIndexOfString(JNIEnv* env, jobject clazz,
-                                                         jint token, jstring str)
-{
-    ResStringPool* osb = (ResStringPool*)token;
-    if (osb == NULL || str == NULL) {
-        doThrow(env, "java/lang/NullPointerException");
-        return 0;
-    }
-
-    const char16_t* str16 = env->GetStringChars(str, NULL);
-    jsize strLen = env->GetStringLength(str);
-
-    ssize_t idx = osb->indexOfString(str16, strLen);
-
-    env->ReleaseStringChars(str, str16);
-
-    return idx;
-}
-
 static void android_content_StringBlock_nativeDestroy(JNIEnv* env, jobject clazz,
                                                    jint token)
 {
@@ -193,8 +174,6 @@ static JNINativeMethod gStringBlockMethods[] = {
             (void*) android_content_StringBlock_nativeGetString },
     { "nativeGetStyle",    "(II)[I",
             (void*) android_content_StringBlock_nativeGetStyle },
-    { "nativeIndexOfString","(ILjava/lang/String;)I",
-            (void*) android_content_StringBlock_nativeIndexOfString },
     { "nativeDestroy",      "(I)V",
             (void*) android_content_StringBlock_nativeDestroy },
 };

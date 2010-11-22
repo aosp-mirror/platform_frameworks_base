@@ -19,9 +19,12 @@ package com.android.systemui.statusbar.tablet;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.IdentityHashMap;
 
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
+import android.animation.AnimatorSet;
 import android.app.ActivityManagerNative;
 import android.app.PendingIntent;
 import android.app.Notification;
@@ -129,8 +132,6 @@ public class TabletStatusBar extends StatusBar {
     NotificationIconArea.IconLayout mIconLayout;
 
     TabletTicker mTicker;
-    View mTickerView;
-    boolean mTicking;
 
     // for disabling the status bar
     int mDisabled = 0;
@@ -164,7 +165,7 @@ public class TabletStatusBar extends StatusBar {
         mStatusBarView.setIgnoreChildren(0, mNotificationTrigger, mNotificationPanel);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
@@ -257,21 +258,6 @@ public class TabletStatusBar extends StatusBar {
 
         mBarContents = sb.findViewById(R.id.bar_contents);
 
-        // "shadows" of the status bar features, for lights-out mode
-        mBackShadow = sb.findViewById(R.id.back_shadow);
-        mHomeShadow = sb.findViewById(R.id.home_shadow);
-        mRecentShadow = sb.findViewById(R.id.recent_shadow);
-        mMenuShadow = sb.findViewById(R.id.menu_shadow);
-        mNotificationShadow = sb.findViewById(R.id.notification_shadow);
-
-        mShadowController = new ShadowController(false);
-
-        mBackShadow.setOnTouchListener(mShadowController.makeTouchListener());
-        mHomeShadow.setOnTouchListener(mShadowController.makeTouchListener());
-        mRecentShadow.setOnTouchListener(mShadowController.makeTouchListener());
-        mMenuShadow.setOnTouchListener(mShadowController.makeTouchListener());
-        mNotificationShadow.setOnTouchListener(mShadowController.makeTouchListener());
-
         // the whole right-hand side of the bar
         mNotificationArea = sb.findViewById(R.id.notificationArea);
 
@@ -290,7 +276,7 @@ public class TabletStatusBar extends StatusBar {
         mNotificationPeekTapDuration = vc.getTapTimeout();
         mNotificationFlingVelocity = 300; // px/s
 
-        mTicker = new TabletTicker(context, (FrameLayout)sb.findViewById(R.id.ticker));
+        mTicker = new TabletTicker(context);
 
         // The icons
         mBatteryController = new BatteryController(mContext);
@@ -309,6 +295,20 @@ public class TabletStatusBar extends StatusBar {
 
         // The bar contents buttons
         mInputMethodButton = (InputMethodButton) sb.findViewById(R.id.imeButton);
+
+        // "shadows" of the status bar features, for lights-out mode
+        mBackShadow = sb.findViewById(R.id.back_shadow);
+        mHomeShadow = sb.findViewById(R.id.home_shadow);
+        mRecentShadow = sb.findViewById(R.id.recent_shadow);
+        mMenuShadow = sb.findViewById(R.id.menu_shadow);
+        mNotificationShadow = sb.findViewById(R.id.notification_shadow);
+
+        mShadowController = new ShadowController(false);
+        mShadowController.add(mBackButton, mBackShadow);
+        mShadowController.add(mHomeButton, mHomeShadow);
+        mShadowController.add(mRecentButton, mRecentShadow);
+        mShadowController.add(mMenuButton, mMenuShadow);
+        mShadowController.add(mNotificationArea, mNotificationShadow);
 
         // set the initial view visibility
         setAreThereNotifications();
@@ -383,20 +383,17 @@ public class TabletStatusBar extends StatusBar {
                     if (DEBUG) Slog.d(TAG, "opening notifications panel");
                     if (mNotificationPanel.getVisibility() == View.GONE) {
                         mNotificationPeekWindow.setVisibility(View.GONE);
-
                         mNotificationPanel.setVisibility(View.VISIBLE);
-
-                        // XXX: need to synchronize with shadows here
-                        mNotificationArea.setVisibility(View.GONE);
+                        // synchronize with current shadow state
+                        mShadowController.hideElement(mNotificationArea);
                     }
                     break;
                 case MSG_CLOSE_NOTIFICATION_PANEL:
                     if (DEBUG) Slog.d(TAG, "closing notifications panel");
                     if (mNotificationPanel.getVisibility() == View.VISIBLE) {
                         mNotificationPanel.setVisibility(View.GONE);
-
-                        // XXX: need to synchronize with shadows here
-                        mNotificationArea.setVisibility(View.VISIBLE);
+                        // synchronize with current shadow state
+                        mShadowController.showElement(mNotificationArea);
                     }
                     break;
                 case MSG_OPEN_RECENTS_PANEL:
@@ -462,7 +459,7 @@ public class TabletStatusBar extends StatusBar {
         boolean immersive = false;
         try {
             immersive = ActivityManagerNative.getDefault().isTopActivityImmersive();
-            Slog.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
+            //Slog.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
         } catch (RemoteException ex) {
         }
         if (false && immersive) {
@@ -576,11 +573,13 @@ public class TabletStatusBar extends StatusBar {
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
                 Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
-                mNotificationIconArea.setVisibility(View.GONE);
+                // synchronize with current shadow state
+                mShadowController.hideElement(mNotificationArea);
                 mTicker.halt();
             } else {
                 Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: no");
-                mNotificationIconArea.setVisibility(View.VISIBLE);
+                // synchronize with current shadow state
+                mShadowController.showElement(mNotificationArea);
             }
         } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
@@ -599,9 +598,7 @@ public class TabletStatusBar extends StatusBar {
     }
 
     private boolean hasTicker(Notification n) {
-        return !TextUtils.isEmpty(n.tickerText)
-                || !TextUtils.isEmpty(n.tickerTitle)
-                || !TextUtils.isEmpty(n.tickerSubtitle);
+        return n.tickerView != null || !TextUtils.isEmpty(n.tickerText);
     }
 
     private void tick(StatusBarNotification n) {
@@ -1001,11 +998,19 @@ public class TabletStatusBar extends StatusBar {
                         } catch (RemoteException ex) {
                             // system process is dead if we're here.
                         }
-    //                    animateCollapse();
                     }
                 });
         } else {
             vetoButton.setVisibility(View.INVISIBLE);
+        }
+
+        // the large icon
+        ImageView largeIcon = (ImageView)row.findViewById(R.id.large_icon);
+        if (sbn.notification.largeIcon != null) {
+            largeIcon.setImageBitmap(sbn.notification.largeIcon);
+        } else {
+            largeIcon.getLayoutParams().width = 0;
+            largeIcon.setVisibility(View.INVISIBLE);
         }
 
         // bind the click event to the content area
@@ -1030,7 +1035,7 @@ public class TabletStatusBar extends StatusBar {
             exception = e;
         }
         if (expanded == null) {
-            String ident = sbn.pkg + "/0x" + Integer.toHexString(sbn.id);
+            final String ident = sbn.pkg + "/0x" + Integer.toHexString(sbn.id);
             Slog.e(TAG, "couldn't inflate view for notification " + ident, exception);
             return false;
         } else {
@@ -1047,11 +1052,57 @@ public class TabletStatusBar extends StatusBar {
 
     public class ShadowController {
         boolean mShowShadows;
+        Map<View, View> mShadowsForElements = new IdentityHashMap<View, View>(7);
+        Map<View, View> mElementsForShadows = new IdentityHashMap<View, View>(7);
+        LayoutTransition mElementTransition, mShadowTransition;
+
         View mTouchTarget;
 
         ShadowController(boolean showShadows) {
             mShowShadows = showShadows;
             mTouchTarget = null;
+
+            mElementTransition = new LayoutTransition();
+//            AnimatorSet s = new AnimatorSet();
+//            s.play(ObjectAnimator.ofInt(null, "top", 48, 0))
+//                .with(ObjectAnimator.ofFloat(null, "scaleY", 0.5f, 1f))
+//                .with(ObjectAnimator.ofFloat(null, "alpha", 0.5f, 1f))
+//                ;
+            mElementTransition.setAnimator(LayoutTransition.APPEARING, //s);
+                   ObjectAnimator.ofInt(null, "top", 48, 0));
+            mElementTransition.setDuration(LayoutTransition.APPEARING, 100);
+            mElementTransition.setStartDelay(LayoutTransition.APPEARING, 0);
+
+//            s = new AnimatorSet();
+//            s.play(ObjectAnimator.ofInt(null, "top", 0, 48))
+//                .with(ObjectAnimator.ofFloat(null, "scaleY", 1f, 0.5f))
+//                .with(ObjectAnimator.ofFloat(null, "alpha", 1f, 0.5f))
+//                ;
+            mElementTransition.setAnimator(LayoutTransition.DISAPPEARING, //s);
+                    ObjectAnimator.ofInt(null, "top", 0, 48));
+            mElementTransition.setDuration(LayoutTransition.DISAPPEARING, 400);
+
+            mShadowTransition = new LayoutTransition();
+            mShadowTransition.setAnimator(LayoutTransition.APPEARING, 
+                    ObjectAnimator.ofFloat(null, "alpha", 0f, 1f));
+            mShadowTransition.setDuration(LayoutTransition.APPEARING, 200);
+            mShadowTransition.setStartDelay(LayoutTransition.APPEARING, 100);
+            mShadowTransition.setAnimator(LayoutTransition.DISAPPEARING, 
+                    ObjectAnimator.ofFloat(null, "alpha", 1f, 0f));
+            mShadowTransition.setDuration(LayoutTransition.DISAPPEARING, 100);
+
+            ViewGroup bar = (ViewGroup) TabletStatusBar.this.mBarContents;
+            bar.setLayoutTransition(mElementTransition);
+            ViewGroup nav = (ViewGroup) TabletStatusBar.this.mNavigationArea;
+            nav.setLayoutTransition(mElementTransition);
+            ViewGroup shadowGroup = (ViewGroup) bar.findViewById(R.id.shadows);
+            shadowGroup.setLayoutTransition(mShadowTransition);
+        }
+
+        public void add(View element, View shadow) {
+            shadow.setOnTouchListener(makeTouchListener());
+            mShadowsForElements.put(element, shadow);
+            mElementsForShadows.put(shadow, element);
         }
 
         public boolean getShadowState() {
@@ -1067,17 +1118,7 @@ public class TabletStatusBar extends StatusBar {
 
                     // currently redirecting events?
                     if (mTouchTarget == null) {
-                        if (v == mBackShadow) {
-                            mTouchTarget = mBackButton;
-                        } else if (v == mHomeShadow) {
-                            mTouchTarget = mHomeButton;
-                        } else if (v == mMenuShadow) {
-                            mTouchTarget = mMenuButton;
-                        } else if (v == mRecentShadow) {
-                            mTouchTarget = mRecentButton;
-                        } else if (v == mNotificationShadow) {
-                            mTouchTarget = mNotificationArea;
-                        }
+                        mTouchTarget = mElementsForShadows.get(v);
                     }
 
                     if (mTouchTarget != null && mTouchTarget.getVisibility() != View.GONE) {
@@ -1094,7 +1135,7 @@ public class TabletStatusBar extends StatusBar {
                                 break;
                             case MotionEvent.ACTION_DOWN:
                                 mHandler.removeMessages(MSG_RESTORE_SHADOWS);
-                                setShadowForButton(mTouchTarget, false);
+                                setElementShadow(mTouchTarget, false);
                                 break;
                         }
                         mTouchTarget.dispatchTouchEvent(ev);
@@ -1108,11 +1149,9 @@ public class TabletStatusBar extends StatusBar {
         }
 
         public void refresh() {
-            setShadowForButton(mBackButton, mShowShadows);
-            setShadowForButton(mHomeButton, mShowShadows);
-            setShadowForButton(mRecentButton, mShowShadows);
-            setShadowForButton(mMenuButton, mShowShadows);
-            setShadowForButton(mNotificationArea, mShowShadows);
+            for (View element : mShadowsForElements.keySet()) {
+                setElementShadow(element, mShowShadows);
+            }
         }
 
         public void showAllShadows() {
@@ -1127,25 +1166,34 @@ public class TabletStatusBar extends StatusBar {
 
         // Use View.INVISIBLE for things hidden due to shadowing, and View.GONE for things that are
         // disabled (and should not be shadowed or re-shown)
-        public void setShadowForButton(View button, boolean shade) {
-            View shadow = null;
-            if (button == mBackButton) {
-                shadow = mBackShadow;
-            } else if (button == mHomeButton) {
-                shadow = mHomeShadow;
-            } else if (button == mMenuButton) {
-                shadow = mMenuShadow;
-            } else if (button == mRecentButton) {
-                shadow = mRecentShadow;
-            } else if (button == mNotificationArea) {
-                shadow = mNotificationShadow;
-            }
+        public void setElementShadow(View button, boolean shade) {
+            View shadow = mShadowsForElements.get(button);
             if (shadow != null) {
                 if (button.getVisibility() != View.GONE) {
                     shadow.setVisibility(shade ? View.VISIBLE : View.INVISIBLE);
                     button.setVisibility(shade ? View.INVISIBLE : View.VISIBLE);
                 }
             }
+        }
+
+        // Hide both element and shadow, using default layout animations.
+        public void hideElement(View button) {
+            Slog.d(TAG, "hiding: " + button);
+            View shadow = mShadowsForElements.get(button);
+            if (shadow != null) {
+                shadow.setVisibility(View.GONE);
+            }
+            button.setVisibility(View.GONE);
+        }
+
+        // Honoring the current shadow state.
+        public void showElement(View button) {
+            Slog.d(TAG, "showing: " + button);
+            View shadow = mShadowsForElements.get(button);
+            if (shadow != null) {
+                shadow.setVisibility(mShowShadows ? View.VISIBLE : View.INVISIBLE);
+            }
+            button.setVisibility(mShowShadows ? View.INVISIBLE : View.VISIBLE);
         }
     }
 
@@ -1170,15 +1218,6 @@ public class TabletStatusBar extends StatusBar {
             return false;
         }
     }
-
-    private void setViewVisibility(View v, int vis, int anim) {
-        if (v.getVisibility() != vis) {
-            //Slog.d(TAG, "setViewVisibility vis=" + (vis == View.VISIBLE) + " v=" + v);
-            v.setAnimation(AnimationUtils.loadAnimation(mContext, anim));
-            v.setVisibility(vis);
-        }
-    }
-
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.print("mDisabled=0x");

@@ -19,16 +19,16 @@ package com.android.systemui.statusbar.tablet;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Slog;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.android.systemui.R;
 
-public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
+public class NotificationPanel extends LinearLayout implements StatusBarPanel,
         View.OnClickListener {
     static final String TAG = "NotificationPanel";
 
@@ -68,6 +68,29 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         // when we hide, put back the notifications
         if (!isShown()) {
             switchToNotificationMode();
+        }
+    }
+
+    /**
+     * We need to be aligned at the bottom.  LinearLayout can't do this, so instead,
+     * let LinearLayout do all the hard work, and then shift everything down to the bottom.
+     */
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        // We know that none of our children are GONE, so don't worry about skipping GONE views.
+        final int N = getChildCount();
+        if (N == 0) {
+            return;
+        }
+        final int allocatedBottom = getChildAt(N-1).getBottom();
+        final int shift = b - allocatedBottom - getPaddingBottom();
+        if (shift <= 0) {
+            return;
+        }
+        for (int i=0; i<N; i++) {
+            final View c = getChildAt(i);
+            c.layout(c.getLeft(), c.getTop() + shift, c.getRight(), c.getBottom() + shift);
         }
     }
 

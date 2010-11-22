@@ -906,6 +906,7 @@ public class Camera {
      * Changes the settings for this Camera service.
      *
      * @param params the Parameters to use for this Camera service
+     * @throws RuntimeException if any parameter is invalid or not supported.
      * @see #getParameters()
      */
     public void setParameters(Parameters params) {

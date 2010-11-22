@@ -465,7 +465,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'ui', 'search', 'new'],
+    tags: ['sample', 'ui', 'search'],
     path: 'samples/SearchableDictionary/index.html',
     title: {
       en: 'Searchable Dictionary v2'
@@ -485,7 +485,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'testing', 'new'],
+    tags: ['sample', 'testing'],
     path: 'samples/Spinner/index.html',
     title: {
       en: 'Spinner'
@@ -495,7 +495,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'testing', 'new'],
+    tags: ['sample', 'testing'],
     path: 'samples/SpinnerTest/index.html',
     title: {
       en: 'SpinnerTest'
@@ -505,7 +505,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'newfeature', 'new'],
+    tags: ['sample', 'newfeature'],
     path: 'samples/TicTacToeLib/index.html',
     title: {
       en: 'TicTacToeLib'
@@ -515,7 +515,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'newfeature', 'new'],
+    tags: ['sample', 'newfeature',],
     path: 'samples/TicTacToeMain/index.html',
     title: {
       en: 'TicTacToeMain'
@@ -610,7 +610,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['tutorial', 'testing', 'new'],
+    tags: ['tutorial', 'testing'],
     path: 'tutorials/testing/helloandroid_test.html',
     title: {
       en: 'Hello Testing'
@@ -620,7 +620,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['tutorial', 'testing', 'new'],
+    tags: ['tutorial', 'testing'],
     path: 'tutorials/testing/activity_test.html',
     title: {
       en: 'Activity Testing'

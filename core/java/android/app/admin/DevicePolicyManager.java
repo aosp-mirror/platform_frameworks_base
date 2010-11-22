@@ -691,8 +691,6 @@ public class DevicePolicyManager {
      *
      * <p>To disable password expiration, a value of 0 may be used for timeout.
      *
-     * <p>Timeout must be at least 1 day or IllegalArgumentException will be thrown.
-     *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD} to be able to call this
      * method; if it has not, a security exception will be thrown.

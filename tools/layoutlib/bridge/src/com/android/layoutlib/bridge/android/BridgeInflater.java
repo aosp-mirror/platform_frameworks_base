@@ -35,17 +35,17 @@ import java.io.File;
 import java.io.FileReader;
 
 /**
- * Custom implementation of {@link LayoutInflater} to handle custom views. 
+ * Custom implementation of {@link LayoutInflater} to handle custom views.
  */
 public final class BridgeInflater extends LayoutInflater {
-    
+
     private final IProjectCallback mProjectCallback;
 
     /**
      * List of class prefixes which are tried first by default.
      * <p/>
      * This should match the list in com.android.internal.policy.impl.PhoneLayoutInflater.
-     */ 
+     */
     private static final String[] sClassPrefixList = {
         "android.widget.",
         "android.webkit."
@@ -55,10 +55,10 @@ public final class BridgeInflater extends LayoutInflater {
         super(original, newContext);
         mProjectCallback = null;
     }
-    
+
     /**
      * Instantiate a new BridgeInflater with an {@link IProjectCallback} object.
-     * 
+     *
      * @param context The Android application context.
      * @param projectCallback the {@link IProjectCallback} object.
      */
@@ -84,7 +84,7 @@ public final class BridgeInflater extends LayoutInflater {
                     // Ignore. We'll try again using the base class below.
                 }
             }
-    
+
             // Next try using the parent loader. This will most likely only work for
             // fully-qualified class names.
             try {
@@ -94,7 +94,7 @@ public final class BridgeInflater extends LayoutInflater {
             } catch (ClassNotFoundException e) {
                 // Ignore. We'll try again using the custom view loader below.
             }
-    
+
             // Finally try again using the custom view loader
             try {
                 if (view == null) {
@@ -111,12 +111,12 @@ public final class BridgeInflater extends LayoutInflater {
             ClassNotFoundException exception = new ClassNotFoundException("onCreateView", e);
             throw exception;
         }
-        
+
         setupViewInContext(view, attrs);
-        
+
         return view;
     }
-    
+
     @Override
     public View createViewFromTag(View parent, String name, AttributeSet attrs) {
         View view = null;
@@ -130,7 +130,7 @@ public final class BridgeInflater extends LayoutInflater {
                 // Wrap the real exception in an InflateException so that the calling
                 // method can deal with it.
                 InflateException exception = new InflateException();
-                if (e2.getClass().equals(ClassNotFoundException.class) == false) { 
+                if (e2.getClass().equals(ClassNotFoundException.class) == false) {
                     exception.initCause(e2);
                 } else {
                     exception.initCause(e);
@@ -138,18 +138,18 @@ public final class BridgeInflater extends LayoutInflater {
                 throw exception;
             }
         }
-        
+
         setupViewInContext(view, attrs);
-        
+
         return view;
     }
-    
+
     @Override
     public View inflate(int resource, ViewGroup root) {
         Context context = getContext();
         if (context instanceof BridgeContext) {
             BridgeContext bridgeContext = (BridgeContext)context;
-            
+
             IResourceValue value = null;
 
             String[] layoutInfo = Bridge.resolveResourceValue(resource);
@@ -158,7 +158,7 @@ public final class BridgeInflater extends LayoutInflater {
                         layoutInfo[0]);
             } else {
                 layoutInfo = mProjectCallback.resolveResourceValue(resource);
-                
+
                 if (layoutInfo != null) {
                     value = bridgeContext.getProjectResource(BridgeConstants.RES_LAYOUT,
                             layoutInfo[0]);
@@ -172,10 +172,10 @@ public final class BridgeInflater extends LayoutInflater {
                         KXmlParser parser = new KXmlParser();
                         parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
                         parser.setInput(new FileReader(f));
-                        
+
                         BridgeXmlBlockParser bridgeParser = new BridgeXmlBlockParser(
                                 parser, bridgeContext, false);
-                        
+
                         return inflate(bridgeParser, root);
                     } catch (Exception e) {
                         bridgeContext.getLogger().error(e);
@@ -186,7 +186,7 @@ public final class BridgeInflater extends LayoutInflater {
         }
         return null;
     }
-    
+
     private View loadCustomView(String name, AttributeSet attrs) throws ClassNotFoundException,
             Exception{
         if (mProjectCallback != null) {
@@ -194,12 +194,12 @@ public final class BridgeInflater extends LayoutInflater {
             if (name.equals("view")) {
                 name = attrs.getAttributeValue(null, "class");
             }
-            
+
             mConstructorArgs[1] = attrs;
 
             Object customView = mProjectCallback.loadView(name, mConstructorSignature,
                     mConstructorArgs);
-            
+
             if (customView instanceof View) {
                 return (View)customView;
             }
@@ -207,14 +207,27 @@ public final class BridgeInflater extends LayoutInflater {
 
         return null;
     }
-    
-    
-    
+
+
+
     private void setupViewInContext(View view, AttributeSet attrs) {
         if (getContext() instanceof BridgeContext) {
             BridgeContext bc = (BridgeContext) getContext();
             if (attrs instanceof BridgeXmlBlockParser) {
-                Object viewKey = ((BridgeXmlBlockParser) attrs).getViewKey();
+                BridgeXmlBlockParser parser = (BridgeXmlBlockParser) attrs;
+
+                // get the view key
+                Object viewKey = parser.getViewKey();
+
+                // if there's no view key and the depth is 1 (ie this is the first tag),
+                // look for a previous parser in the context, and check if this one has a viewkey.
+                if (viewKey == null && parser.getDepth() == 1) {
+                    BridgeXmlBlockParser previousParser = bc.getPreviousParser();
+                    if (previousParser != null) {
+                        viewKey = previousParser.getViewKey();
+                    }
+                }
+
                 if (viewKey != null) {
                     bc.addViewKey(view, viewKey);
                 }

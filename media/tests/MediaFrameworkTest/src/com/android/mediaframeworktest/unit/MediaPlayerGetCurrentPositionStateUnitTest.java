@@ -45,11 +45,11 @@ public class MediaPlayerGetCurrentPositionStateUnitTest extends AndroidTestCase 
         assertTrue(!stateErrors.errorInPausedState);
         assertTrue(!stateErrors.errorInStoppedState);
         assertTrue(!stateErrors.errorInPlaybackCompletedState);
-        assertTrue(!stateErrors.errorInIdleStateAfterReset);
         
         // Invalid states.
         assertTrue(stateErrors.errorInErrorState);
-        assertTrue(!stateErrors.errorInIdleState);  // onError() won't be called
+        assertTrue(stateErrors.errorInIdleStateAfterReset);
+        assertTrue(stateErrors.errorInIdleState);
     }
     
     public void invokeMethodUnderTest(MediaPlayer player) {

@@ -4578,6 +4578,80 @@ class PackageManagerService extends IPackageManager.Stub {
         mHandler.sendMessage(msg);
     }
 
+    public void setInstallerPackageName(String targetPackage,
+            String installerPackageName) {
+        PackageSetting pkgSetting;
+        final int uid = Binder.getCallingUid();
+        final int permission = mContext.checkCallingPermission(
+                android.Manifest.permission.INSTALL_PACKAGES);
+        final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);
+        synchronized (mPackages) {
+            PackageSetting targetPackageSetting = mSettings.mPackages.get(targetPackage);
+            if (targetPackageSetting == null) {
+                throw new IllegalArgumentException("Unknown target package: " + targetPackage);
+            }
+
+            PackageSetting installerPackageSetting;
+            if (installerPackageName != null) {
+                installerPackageSetting = mSettings.mPackages.get(installerPackageName);
+                if (installerPackageSetting == null) {
+                    throw new IllegalArgumentException("Unknown installer package: "
+                            + installerPackageName);
+                }
+            } else {
+                installerPackageSetting = null;
+            }
+
+            Signature[] callerSignature;
+            Object obj = mSettings.getUserIdLP(uid);
+            if (obj != null) {
+                if (obj instanceof SharedUserSetting) {
+                    callerSignature = ((SharedUserSetting)obj).signatures.mSignatures;
+                } else if (obj instanceof PackageSetting) {
+                    callerSignature = ((PackageSetting)obj).signatures.mSignatures;
+                } else {
+                    throw new SecurityException("Bad object " + obj + " for uid " + uid);
+                }
+            } else {
+                throw new SecurityException("Unknown calling uid " + uid);
+            }
+
+            // Verify: can't set installerPackageName to a package that is
+            // not signed with the same cert as the caller.
+            if (installerPackageSetting != null) {
+                if (checkSignaturesLP(callerSignature,
+                        installerPackageSetting.signatures.mSignatures)
+                        != PackageManager.SIGNATURE_MATCH) {
+                    throw new SecurityException(
+                            "Caller does not have same cert as new installer package "
+                            + installerPackageName);
+                }
+            }
+
+            // Verify: if target already has an installer package, it must
+            // be signed with the same cert as the caller.
+            if (targetPackageSetting.installerPackageName != null) {
+                PackageSetting setting = mSettings.mPackages.get(
+                        targetPackageSetting.installerPackageName);
+                // If the currently set package isn't valid, then it's always
+                // okay to change it.
+                if (setting != null) {
+                    if (checkSignaturesLP(callerSignature,
+                            setting.signatures.mSignatures)
+                            != PackageManager.SIGNATURE_MATCH) {
+                        throw new SecurityException(
+                                "Caller does not have same cert as old installer package "
+                                + targetPackageSetting.installerPackageName);
+                    }
+                }
+            }
+
+            // Okay!
+            targetPackageSetting.installerPackageName = installerPackageName;
+            scheduleWriteSettingsLocked();
+        }
+    }
+
     public void setPackageObbPath(String packageName, String path) {
         if (DEBUG_OBB)
             Log.v(TAG, "Setting .obb path for " + packageName + " to: " + path);

@@ -35,7 +35,6 @@
 #include <binder/Parcel.h>
 #include <binder/IPCThreadState.h>
 #include <utils/Timers.h>
-#include <cutils/atomic.h>
 
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
 #define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
@@ -312,7 +311,9 @@ void AudioTrack::start()
         t->mLock.lock();
      }
 
-    if (android_atomic_or(1, &mActive) == 0) {
+    AutoMutex lock(mLock);
+    if (mActive == 0) {
+        mActive = 1;
         mNewPosition = mCblk->server + mUpdatePeriod;
         mCblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
         mCblk->waitTimeMs = 0;
@@ -344,7 +345,7 @@ void AudioTrack::start()
         }
         if (status != NO_ERROR) {
             LOGV("start() failed");
-            android_atomic_and(~1, &mActive);
+            mActive = 0;
             if (t != 0) {
                 t->requestExit();
             } else {
@@ -367,7 +368,9 @@ void AudioTrack::stop()
         t->mLock.lock();
     }
 
-    if (android_atomic_and(~1, &mActive) == 1) {
+    AutoMutex lock(mLock);
+    if (mActive == 1) {
+        mActive = 0;
         mCblk->cv.signal();
         mAudioTrack->stop();
         // Cancel loops (If we are in the middle of a loop, playback
@@ -407,7 +410,6 @@ void AudioTrack::flush()
     mMarkerReached = false;
     mUpdatePeriod = 0;
 
-
     if (!mActive) {
         mAudioTrack->flush();
         // Release AudioTrack callback thread in case it was waiting for new buffers
@@ -419,7 +421,9 @@ void AudioTrack::flush()
 void AudioTrack::pause()
 {
     LOGV("pause");
-    if (android_atomic_and(~1, &mActive) == 1) {
+    AutoMutex lock(mLock);
+    if (mActive == 1) {
+        mActive = 0;
         mAudioTrack->pause();
     }
 }

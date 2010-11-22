@@ -595,9 +595,9 @@ class WifiConfigStore {
                                 out.writeUTF(PROXY_SETTINGS_KEY);
                                 out.writeUTF(config.proxySettings.toString());
                                 out.writeUTF(PROXY_HOST_KEY);
-                                out.writeUTF(proxyProperties.getSocketAddress().getHostName());
+                                out.writeUTF(proxyProperties.getHost());
                                 out.writeUTF(PROXY_PORT_KEY);
-                                out.writeInt(proxyProperties.getSocketAddress().getPort());
+                                out.writeInt(proxyProperties.getPort());
                                 out.writeUTF(EXCLUSION_LIST_KEY);
                                 out.writeUTF(exclusionList);
                                 writeToFile = true;
@@ -716,10 +716,8 @@ class WifiConfigStore {
                             switch (proxySettings) {
                                 case STATIC:
                                     config.proxySettings = proxySettings;
-                                    ProxyProperties proxyProperties = new ProxyProperties();
-                                    proxyProperties.setSocketAddress(
-                                            new InetSocketAddress(proxyHost, proxyPort));
-                                    proxyProperties.setExclusionList(exclusionList);
+                                    ProxyProperties proxyProperties =
+                                        new ProxyProperties(proxyHost, proxyPort, exclusionList);
                                     linkProperties.setHttpProxy(proxyProperties);
                                     break;
                                 case NONE:
@@ -1012,42 +1010,13 @@ class WifiConfigStore {
 
         switch (newConfig.proxySettings) {
             case STATIC:
-                InetSocketAddress newSockAddr = null;
-                String newExclusionList = null;
-                InetSocketAddress currentSockAddr = null;
-                String currentExclusionList = null;
-
                 ProxyProperties newHttpProxy = newConfig.linkProperties.getHttpProxy();
-                if (newHttpProxy != null) {
-                    newSockAddr = newHttpProxy.getSocketAddress();
-                    newExclusionList = newHttpProxy.getExclusionList();
-                }
-
                 ProxyProperties currentHttpProxy = currentConfig.linkProperties.getHttpProxy();
-                if (currentHttpProxy != null) {
-                    currentSockAddr =  currentHttpProxy.getSocketAddress();
-                    currentExclusionList = currentHttpProxy.getExclusionList();
-                }
 
-                boolean socketAddressDiffers = false;
-                boolean exclusionListDiffers = false;
-
-                if (newSockAddr != null && currentSockAddr != null ) {
-                    socketAddressDiffers = !currentSockAddr.equals(newSockAddr);
-                } else if (newSockAddr != null || currentSockAddr != null) {
-                    socketAddressDiffers = true;
-                }
-
-                if (newExclusionList != null && currentExclusionList != null) {
-                    exclusionListDiffers = !currentExclusionList.equals(newExclusionList);
-                } else if (newExclusionList != null || currentExclusionList != null) {
-                    exclusionListDiffers = true;
-                }
-
-                if ((currentConfig.proxySettings != newConfig.proxySettings) ||
-                        socketAddressDiffers ||
-                        exclusionListDiffers) {
-                    proxyChanged = true;
+                if (newHttpProxy != null) {
+                    proxyChanged = !newHttpProxy.equals(currentHttpProxy);
+                } else {
+                    proxyChanged = (currentHttpProxy != null);
                 }
                 break;
             case NONE:

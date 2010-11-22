@@ -22,7 +22,6 @@
 #include <utils/Vector.h>
 #include <utils/KeyedVector.h>
 #include <media/AudioTrack.h>
-#include <cutils/atomic.h>
 
 namespace android {
 

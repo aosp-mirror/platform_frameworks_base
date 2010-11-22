@@ -24,22 +24,28 @@
 #include <media/mediarecorder.h>
 #include <sys/prctl.h>
 #include <sys/resource.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 namespace android {
 
 AMRWriter::AMRWriter(const char *filename)
-    : mFile(fopen(filename, "wb")),
-      mFd(mFile == NULL? -1: fileno(mFile)),
-      mInitCheck(mFile != NULL ? OK : NO_INIT),
+    : mFd(-1),
+      mInitCheck(NO_INIT),
       mStarted(false),
       mPaused(false),
       mResumed(false) {
+
+    mFd = open(filename, O_CREAT | O_LARGEFILE | O_TRUNC);
+    if (mFd >= 0) {
+        mInitCheck = OK;
+    }
 }
 
 AMRWriter::AMRWriter(int fd)
-    : mFile(fdopen(fd, "wb")),
-      mFd(mFile == NULL? -1: fileno(mFile)),
-      mInitCheck(mFile != NULL ? OK : NO_INIT),
+    : mFd(dup(fd)),
+      mInitCheck(mFd < 0? NO_INIT: OK),
       mStarted(false),
       mPaused(false),
       mResumed(false) {
@@ -50,9 +56,9 @@ AMRWriter::~AMRWriter() {
         stop();
     }
 
-    if (mFile != NULL) {
-        fclose(mFile);
-        mFile = NULL;
+    if (mFd != -1) {
+        close(mFd);
+        mFd = -1;
     }
 }
 
@@ -92,7 +98,7 @@ status_t AMRWriter::addSource(const sp<MediaSource> &source) {
     mSource = source;
 
     const char *kHeader = isWide ? "#!AMR-WB\n" : "#!AMR\n";
-    size_t n = strlen(kHeader);
+    ssize_t n = strlen(kHeader);
     if (write(mFd, kHeader, n) != n) {
         return ERROR_IO;
     }
@@ -266,9 +272,8 @@ status_t AMRWriter::threadFunc() {
         notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_COMPLETION_STATUS, UNKNOWN_ERROR);
     }
 
-    fflush(mFile);
-    fclose(mFile);
-    mFile = NULL;
+    close(mFd);
+    mFd = -1;
     mReachedEOS = true;
     if (err == ERROR_END_OF_STREAM) {
         return OK;

@@ -25,7 +25,6 @@
         android:id="@+id/bar_contents"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:animateLayoutChanges="false"
         >
 
         <!-- notification icons & panel access -->
@@ -40,7 +39,6 @@
                 android:id="@+id/notificationIcons"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:gravity="center_vertical"
                 android:orientation="horizontal"
                 >
                 <view
@@ -48,7 +46,9 @@
                     android:id="@+id/icons"
                     android:layout_width="wrap_content"
                     android:layout_height="@*android:dimen/status_bar_icon_size"
-                    android:layout_marginLeft="8dip"
+                    android:layout_gravity="top"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="8dp"
                     />
             </com.android.systemui.statusbar.tablet.NotificationIconArea>
 
@@ -85,13 +85,15 @@
                         android:id="@+id/battery"
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
-                        android:layout_gravity="center_vertical"
+                        android:layout_gravity="top"
+                        android:layout_marginTop="18dp"
                         />
                     <ImageView
                         android:id="@+id/network"
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
-                        android:layout_gravity="center_vertical"
+                        android:layout_gravity="top"
+                        android:layout_marginTop="14dp"
                         android:src="@drawable/ic_sysbar_wifi_mini"
                         />
                 </LinearLayout>
@@ -105,7 +107,6 @@
             android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:orientation="horizontal"
-            android:animateLayoutChanges="false"
             >
 
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
@@ -114,7 +115,6 @@
                 android:paddingLeft="18dip"
                 android:paddingRight="18dip"
                 android:src="@drawable/ic_sysbar_back"
-                android:background="@drawable/ic_sysbar_icon_bg"
                 systemui:keyCode="4"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
@@ -123,14 +123,13 @@
                 android:paddingLeft="18dip"
                 android:paddingRight="18dip"
                 android:src="@drawable/ic_sysbar_home"
-                android:background="@drawable/ic_sysbar_icon_bg"
                 systemui:keyCode="3"
                 />
             <ImageButton android:id="@+id/recent_apps"
                 android:layout_width="96dip"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_recent"
-                android:background="@drawable/ic_sysbar_icon_bg"
+                android:background="@null"
                 android:paddingLeft="18dip"
                 android:clickable="true"
                 android:paddingRight="18dip"
@@ -141,7 +140,6 @@
                 android:paddingLeft="18dip"
                 android:paddingRight="18dip"
                 android:src="@drawable/ic_sysbar_menu"
-                android:background="@drawable/ic_sysbar_icon_bg"
                 systemui:keyCode="82"
                 android:visibility="invisible"
                 />
@@ -149,7 +147,6 @@
                 android:id="@+id/pocket"
                 android:layout_width="96dip"
                 android:layout_height="match_parent"
-                android:background="@drawable/ic_sysbar_icon_bg"
                 android:paddingLeft="18dip"
                 android:paddingRight="18dip"
                 android:animateLayoutChanges="true"
@@ -171,81 +168,73 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="8dip"
-                android:src="@drawable/ic_sysbar_ime_default"
-                android:background="@drawable/ic_sysbar_icon_bg"
+                android:src="@drawable/ic_sysbar_ime"
                 android:visibility="invisible"
                 />
         </LinearLayout>
 
         <!-- lights out mode: "shadow" views -->
-        <ImageView
-            android:id="@+id/notification_shadow"
-            android:layout_width="176dip"
+        <RelativeLayout
+            android:id="@+id/shadows"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingRight="48dip"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/ic_sysbar_shadow"
-            android:visibility="gone"
-            android:scaleType="fitXY"
-            />
+            >
+            <ImageView
+                android:id="@+id/notification_shadow"
+                android:layout_width="176dip"
+                android:layout_height="match_parent"
+                android:paddingRight="48dip"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:src="@drawable/ic_sysbar_shadow"
+                android:visibility="gone"
+                android:scaleType="fitXY"
+                />
 
-        <ImageView
-            android:id="@+id/back_shadow"
-            android:layout_width="96dip"
-            android:layout_height="match_parent"
-            android:paddingLeft="18dip"
-            android:paddingRight="18dip"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/ic_sysbar_shadow"
-            android:visibility="gone"
-            />
-        <ImageView
-            android:id="@+id/home_shadow"
-            android:layout_width="96dip"
-            android:layout_height="match_parent"
-            android:paddingLeft="18dip"
-            android:paddingRight="18dip"
-            android:layout_toRightOf="@id/back_shadow"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/ic_sysbar_shadow"
-            android:visibility="gone"
-            />
-        <ImageView
-            android:id="@+id/recent_shadow"
-            android:layout_width="96dip"
-            android:layout_height="match_parent"
-            android:paddingLeft="18dip"
-            android:paddingRight="18dip"
-            android:layout_toRightOf="@id/home_shadow"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/ic_sysbar_shadow"
-            android:visibility="gone"
-            />
-        <ImageView
-            android:id="@+id/menu_shadow"
-            android:layout_width="96dip"
-            android:layout_height="match_parent"
-            android:paddingLeft="18dip"
-            android:paddingRight="18dip"
-            android:layout_toRightOf="@id/recent_shadow"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/ic_sysbar_shadow"
-            android:visibility="gone"
-            />
-
-        <!-- ticker: transient incoming notification information -->
-        <FrameLayout
-            android:id="@+id/ticker"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:layout_toRightOf="@+id/systemInfo"
-            android:paddingLeft="6dip"
-            android:gravity="center_vertical"
-            android:animateLayoutChanges="true"
-            />
-            
+            <ImageView
+                android:id="@+id/back_shadow"
+                android:layout_width="96dip"
+                android:layout_height="match_parent"
+                android:paddingLeft="18dip"
+                android:paddingRight="18dip"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentBottom="true"
+                android:src="@drawable/ic_sysbar_shadow"
+                android:visibility="gone"
+                />
+            <ImageView
+                android:id="@+id/home_shadow"
+                android:layout_width="96dip"
+                android:layout_height="match_parent"
+                android:paddingLeft="18dip"
+                android:paddingRight="18dip"
+                android:layout_toRightOf="@id/back_shadow"
+                android:layout_alignParentBottom="true"
+                android:src="@drawable/ic_sysbar_shadow"
+                android:visibility="gone"
+                />
+            <ImageView
+                android:id="@+id/recent_shadow"
+                android:layout_width="96dip"
+                android:layout_height="match_parent"
+                android:paddingLeft="18dip"
+                android:paddingRight="18dip"
+                android:layout_toRightOf="@id/home_shadow"
+                android:layout_alignParentBottom="true"
+                android:src="@drawable/ic_sysbar_shadow"
+                android:visibility="gone"
+                />
+            <ImageView
+                android:id="@+id/menu_shadow"
+                android:layout_width="96dip"
+                android:layout_height="match_parent"
+                android:paddingLeft="18dip"
+                android:paddingRight="18dip"
+                android:layout_toRightOf="@id/recent_shadow"
+                android:layout_alignParentBottom="true"
+                android:src="@drawable/ic_sysbar_shadow"
+                android:visibility="gone"
+                />
+        </RelativeLayout>
     </RelativeLayout>
 </com.android.systemui.statusbar.tablet.TabletStatusBarView>

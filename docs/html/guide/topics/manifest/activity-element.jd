@@ -290,7 +290,8 @@ activity is ignored.  The activity is not re-parented, but destroyed.
 <dd>An icon representing the activity. The icon is displayed to users when 
 a representation of the activity is required on-screen.  For example, icons 
 for activities that initiate tasks are displayed in the launcher window.  
-The icon is often accompanied by a label (see the {@code label} attribute).
+The icon is often accompanied by a label (see the <a href="#label">{@code
+android:label}</a> attribute).
 </p>
 
 <p>

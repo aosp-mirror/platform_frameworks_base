@@ -41,9 +41,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.net.ConnectivityManager;
+import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -55,9 +54,9 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.util.Slog;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
+import android.util.Slog;
 import android.util.Xml;
 import android.view.WindowManagerPolicy;
 
@@ -89,9 +88,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             = "com.android.server.ACTION_EXPIRED_PASSWORD_NOTIFICATION";
 
     private static final long MS_PER_DAY = 86400 * 1000;
-    private static final long MS_PER_HOUR = 3600 * 1000;
-    private static final long MS_PER_MINUTE = 60 * 1000;
-    private static final long MIN_TIMEOUT = 86400 * 1000; // minimum expiration timeout is 1 day
 
     final Context mContext;
     final MyPackageMonitor mMonitor;
@@ -364,6 +360,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     class MyPackageMonitor extends PackageMonitor {
+        @Override
         public void onSomePackagesChanged() {
             synchronized (DevicePolicyManagerService.this) {
                 boolean removed = false;
@@ -410,13 +407,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         context.registerReceiver(mReceiver, filter);
     }
 
-    static String countdownString(long time) {
-        long days = time / MS_PER_DAY;
-        long hours = (time / MS_PER_HOUR) % 24;
-        long minutes = (time / MS_PER_MINUTE) % 60;
-        return days + "d" + hours + "h" + minutes + "m";
-    }
-
     protected void setExpirationAlarmCheckLocked(Context context) {
         final long expiration = getPasswordExpirationLocked(null);
         final long now = System.currentTimeMillis();
@@ -430,12 +420,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             alarmTime = now + MS_PER_DAY;
         }
 
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        PendingIntent pi = PendingIntent.getBroadcast(context, REQUEST_EXPIRE_PASSWORD,
-                new Intent(ACTION_EXPIRED_PASSWORD_NOTIFICATION),
-                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
-        am.cancel(pi);
-        am.set(AlarmManager.RTC, alarmTime, pi);
+        long token = Binder.clearCallingIdentity();
+        try {
+            AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            PendingIntent pi = PendingIntent.getBroadcast(context, REQUEST_EXPIRE_PASSWORD,
+                    new Intent(ACTION_EXPIRED_PASSWORD_NOTIFICATION),
+                    PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
+            am.cancel(pi);
+            am.set(AlarmManager.RTC, alarmTime, pi);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private IPowerManager getIPowerManager() {
@@ -993,8 +988,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
             }
-            if (timeout != 0L && timeout < MIN_TIMEOUT) {
-                throw new IllegalArgumentException("Timeout must be > " + MIN_TIMEOUT + "ms");
+            if (timeout < 0) {
+                throw new IllegalArgumentException("Timeout must be >= 0 ms");
             }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD);
@@ -1757,10 +1752,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         // Remove white spaces
         proxySpec = proxySpec.trim();
+        String data[] = proxySpec.split(":");
+        int proxyPort = 8080;
+        if (data.length > 1) {
+            try {
+                proxyPort = Integer.parseInt(data[1]);
+            } catch (NumberFormatException e) {}
+        }
         exclusionList = exclusionList.trim();
         ContentResolver res = mContext.getContentResolver();
-        Settings.Secure.putString(res, Settings.Secure.HTTP_PROXY, proxySpec);
-        Settings.Secure.putString(res, Settings.Secure.HTTP_PROXY_EXCLUSION_LIST, exclusionList);
+        Settings.Secure.putString(res, Settings.Secure.GLOBAL_HTTP_PROXY_HOST, data[0]);
+        Settings.Secure.putInt(res, Settings.Secure.GLOBAL_HTTP_PROXY_PORT, proxyPort);
+        Settings.Secure.putString(res, Settings.Secure.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
+                exclusionList);
     }
 
     @Override

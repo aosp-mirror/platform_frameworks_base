@@ -46,6 +46,7 @@ public class ObjectBrowser extends ListActivity {
     private int mDeviceID;
     private long mStorageID;
     private long mObjectID;
+    private DeviceDisconnectedReceiver mDisconnectedReceiver;
 
     private static final String[] OBJECT_COLUMNS =
         new String[] { Mtp.Object._ID, Mtp.Object.NAME, Mtp.Object.FORMAT, Mtp.Object.THUMB };
@@ -58,15 +59,17 @@ public class ObjectBrowser extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mDeviceID = getIntent().getIntExtra("device", 0);
+        mStorageID = getIntent().getLongExtra("storage", 0);
+        mObjectID = getIntent().getLongExtra("object", 0);
+        mDisconnectedReceiver = new DeviceDisconnectedReceiver(this, mDeviceID);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        mDeviceID = getIntent().getIntExtra("device", 0);
-        mStorageID = getIntent().getLongExtra("storage", 0);
-        mObjectID = getIntent().getLongExtra("object", 0);
         if (mDeviceID != 0 && mStorageID != 0) {
             Cursor c;
             Uri uri;
@@ -84,6 +87,12 @@ public class ObjectBrowser extends ListActivity {
             mAdapter = new ObjectCursorAdapter(this, c);
             setListAdapter(mAdapter);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(mDisconnectedReceiver);
+        super.onDestroy();
     }
 
     @Override

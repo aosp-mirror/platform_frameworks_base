@@ -107,6 +107,20 @@ static void displayDecodeHistogram(Vector<int64_t> *decodeTimesUs) {
     }
 }
 
+static void displayAVCProfileLevelIfPossible(const sp<MetaData>& meta) {
+    uint32_t type;
+    const void *data;
+    size_t size;
+    if (meta->findData(kKeyAVCC, &type, &data, &size)) {
+        const uint8_t *ptr = (const uint8_t *)data;
+        CHECK(size >= 7);
+        CHECK(ptr[0] == 1);  // configurationVersion == 1
+        uint8_t profile = ptr[1];
+        uint8_t level = ptr[3];
+        fprintf(stderr, "AVC video profile %d and level %d\n", profile, level);
+    }
+}
+
 static void playSource(OMXClient *client, sp<MediaSource> &source) {
     sp<MetaData> meta = source->getFormat();
 
@@ -126,6 +140,7 @@ static void playSource(OMXClient *client, sp<MediaSource> &source) {
             fprintf(stderr, "Failed to instantiate decoder for '%s'.\n", mime);
             return;
         }
+        displayAVCProfileLevelIfPossible(meta);
     }
 
     source.clear();

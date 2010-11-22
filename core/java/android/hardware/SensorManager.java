@@ -1158,7 +1158,7 @@ public class SensorManager
      *
      * <p>
      * <center><img src="../../../images/axis_globe.png"
-     * alt="Sensors coordinate-system diagram." border="0" /></center>
+     * alt="World coordinate-system diagram." border="0" /></center>
      * </p>
      *
      * <p>
@@ -1521,9 +1521,19 @@ public class SensorManager
      * <li>values[1]: <i>pitch</i>, rotation around the X axis.</li>
      * <li>values[2]: <i>roll</i>, rotation around the Y axis.</li>
      * </ul>
+     * <p>The reference coordinate-system used is different from the world
+     * coordinate-system defined for the rotation matrix:</p>
+     * <ul>
+     * <li>X is defined as the vector product <b>Y.Z</b> (It is tangential to
+     * the ground at the device's current location and roughly points West).</li>
+     * <li>Y is tangential to the ground at the device's current location and
+     * points towards the magnetic North Pole.</li>
+     * <li>Z points towards the center of the Earth and is perpendicular to the ground.</li>
+     * </ul>
+     *
      * <p>
-     * <center><img src="../../../images/axis_device.png"
-     * alt="Sensors coordinate-system diagram." border="0" /></center>
+     * <center><img src="../../../images/axis_device_inverted.png"
+     * alt="Inverted world coordinate-system diagram." border="0" /></center>
      * </p>
      * <p>
      * All three angles above are in <b>radians</b> and <b>positive</b> in the

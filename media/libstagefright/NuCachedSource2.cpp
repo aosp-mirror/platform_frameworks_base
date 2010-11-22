@@ -465,7 +465,7 @@ status_t NuCachedSource2::seekInternal_l(off64_t offset) {
         return OK;
     }
 
-    LOGI("new range: offset= %ld", offset);
+    LOGI("new range: offset= %lld", offset);
 
     mCacheOffset = offset;
 

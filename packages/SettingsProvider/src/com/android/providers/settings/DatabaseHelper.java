@@ -61,7 +61,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 61;
+    private static final int DATABASE_VERSION = 62;
 
     private Context mContext;
 
@@ -793,20 +793,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 60) {
-            // Increase screen timeout for tablet
-            db.beginTransaction();
-            SQLiteStatement stmt = null;
-            try {
-                stmt = db.compileStatement("INSERT OR REPLACE INTO system(name,value)"
-                        + " VALUES(?,?);");
-                loadIntegerSetting(stmt, Settings.System.SCREEN_OFF_TIMEOUT,
-                        R.integer.def_screen_off_timeout); 
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-                if (stmt != null) stmt.close();
-            }
+            upgradeScreenTimeout(db);
             upgradeVersion = 61;
+        }
+
+        if (upgradeVersion == 61) {
+            upgradeScreenTimeout(db);
+            upgradeVersion = 62;
         }
 
         // *** Remember to update DATABASE_VERSION above!
@@ -911,6 +904,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
         } else {
             c.close();
+        }
+    }
+
+    private void upgradeScreenTimeout(SQLiteDatabase db) {
+        // Change screen timeout to current default
+        db.beginTransaction();
+        SQLiteStatement stmt = null;
+        try {
+            stmt = db.compileStatement("INSERT OR REPLACE INTO system(name,value)"
+                    + " VALUES(?,?);");
+            loadIntegerSetting(stmt, Settings.System.SCREEN_OFF_TIMEOUT,
+                    R.integer.def_screen_off_timeout);
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+            if (stmt != null)
+                stmt.close();
         }
     }
 

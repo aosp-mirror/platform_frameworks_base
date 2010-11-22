@@ -44,7 +44,6 @@ protected:
     virtual ~AMRWriter();
 
 private:
-    FILE *mFile;
     int   mFd;
     status_t mInitCheck;
     sp<MediaSource> mSource;

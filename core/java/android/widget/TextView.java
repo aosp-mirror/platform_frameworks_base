@@ -7117,7 +7117,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         csr = new CommitSelectionReceiver(oldSelStart, oldSelEnd);
                     }
 
-                    handled |= imm.showSoftInput(this, 0, csr) && (csr != null);
+                    if (!mTextIsSelectable) {
+                        // Selection in read-only text should not bring up the IME.
+                        handled |= imm.showSoftInput(this, 0, csr) && (csr != null);
+                    }
 
                     // Cannot be done by CommitSelectionReceiver, which might not always be called,
                     // for instance when dealing with an ExtractEditText.
@@ -9012,7 +9015,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean                 mUserSetTextScaleX;
     private final Paint             mHighlightPaint;
     private int                     mHighlightColor = 0xCC475925;
-    private Layout                  mLayout;
+    /**
+     * This is temporarily visible to fix bug 3085564 in webView. Do not rely on
+     * this field being protected. Will be restored as private when lineHeight
+     * feature request 3215097 is implemented
+     * @hide
+     */
+    protected Layout                mLayout;
 
     private long                    mShowCursor;
     private Blink                   mBlink;

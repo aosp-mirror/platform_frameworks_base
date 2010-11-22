@@ -220,24 +220,37 @@ public final class BridgeResources extends Resources {
         IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            File xml = new File(value.getValue());
-            if (xml.isFile()) {
-                // we need to create a pull parser around the layout XML file, and then
-                // give that to our XmlBlockParser
-                try {
-                    KXmlParser parser = new KXmlParser();
-                    parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                    parser.setInput(new FileReader(xml));
+            XmlPullParser parser = null;
 
-                    return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
-                } catch (XmlPullParserException e) {
-                    mContext.getLogger().error(e);
-
-                    // we'll return null below.
-                } catch (FileNotFoundException e) {
-                    // this shouldn't happen since we check above.
+            try {
+                // check if the current parser can provide us with a custom parser.
+                BridgeXmlBlockParser currentParser = mContext.getCurrentParser();
+                if (currentParser != null) {
+                    parser = currentParser.getParser(value.getName());
                 }
+
+                // create a new one manually if needed.
+                if (parser == null) {
+                    File xml = new File(value.getValue());
+                    if (xml.isFile()) {
+                        // we need to create a pull parser around the layout XML file, and then
+                        // give that to our XmlBlockParser
+                        parser = new KXmlParser();
+                        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
+                        parser.setInput(new FileReader(xml));
+                    }
+                }
+
+                if (parser != null) {
+                    return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
+                }
+            } catch (XmlPullParserException e) {
+                mContext.getLogger().error(e);
+                // we'll return null below.
+            } catch (FileNotFoundException e) {
+                // this shouldn't happen since we check above.
             }
+
         }
 
         // id was not found or not resolved. Throw a NotFoundException.

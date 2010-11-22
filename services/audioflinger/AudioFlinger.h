@@ -785,7 +785,7 @@ private:
               float streamVolumeInternal(int stream) const { return mStreamTypes[stream].volume; }
               void audioConfigChanged_l(int event, int ioHandle, void *param2);
 
-              int  nextUniqueId();
+              int  nextUniqueId_l();
               status_t moveEffectChain_l(int session,
                                      AudioFlinger::PlaybackThread *srcThread,
                                      AudioFlinger::PlaybackThread *dstThread,

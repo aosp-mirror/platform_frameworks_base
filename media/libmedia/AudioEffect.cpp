@@ -27,7 +27,6 @@
 #include <media/AudioEffect.h>
 
 #include <utils/Log.h>
-#include <cutils/atomic.h>
 #include <binder/IPCThreadState.h>
 
 
@@ -207,18 +206,22 @@ status_t AudioEffect::setEnabled(bool enabled)
         return INVALID_OPERATION;
     }
 
-    if (enabled) {
-        LOGV("enable %p", this);
-        if (android_atomic_or(1, &mEnabled) == 0) {
-           return mIEffect->enable();
+    status_t status = NO_ERROR;
+
+    AutoMutex lock(mLock);
+    if (enabled != mEnabled) {
+        if (enabled) {
+            LOGV("enable %p", this);
+            status = mIEffect->enable();
+        } else {
+            LOGV("disable %p", this);
+            status = mIEffect->disable();
         }
-    } else {
-        LOGV("disable %p", this);
-        if (android_atomic_and(~1, &mEnabled) == 1) {
-           return mIEffect->disable();
+        if (status == NO_ERROR) {
+            mEnabled = enabled;
         }
     }
-    return NO_ERROR;
+    return status;
 }
 
 status_t AudioEffect::command(uint32_t cmdCode,
@@ -232,26 +235,26 @@ status_t AudioEffect::command(uint32_t cmdCode,
         return INVALID_OPERATION;
     }
 
-    if ((cmdCode == EFFECT_CMD_ENABLE || cmdCode == EFFECT_CMD_DISABLE) &&
-            (replySize == NULL || *replySize != sizeof(status_t) || replyData == NULL)) {
-        return BAD_VALUE;
+    if (cmdCode == EFFECT_CMD_ENABLE || cmdCode == EFFECT_CMD_DISABLE) {
+        if (mEnabled == (cmdCode == EFFECT_CMD_ENABLE)) {
+            return NO_ERROR;
+        }
+        if (replySize == NULL || *replySize != sizeof(status_t) || replyData == NULL) {
+            return BAD_VALUE;
+        }
+        mLock.lock();
     }
 
     status_t status = mIEffect->command(cmdCode, cmdSize, cmdData, replySize, replyData);
-    if (status != NO_ERROR) {
-        return status;
-    }
 
     if (cmdCode == EFFECT_CMD_ENABLE || cmdCode == EFFECT_CMD_DISABLE) {
-        status = *(status_t *)replyData;
-        if (status != NO_ERROR) {
-            return status;
+        if (status == NO_ERROR) {
+            status = *(status_t *)replyData;
         }
-        if (cmdCode == EFFECT_CMD_ENABLE) {
-            android_atomic_or(1, &mEnabled);
-        } else {
-            android_atomic_and(~1, &mEnabled);
+        if (status == NO_ERROR) {
+            mEnabled = (cmdCode == EFFECT_CMD_ENABLE);
         }
+        mLock.unlock();
     }
 
     return status;
@@ -370,11 +373,7 @@ void AudioEffect::enableStatusChanged(bool enabled)
 {
     LOGV("enableStatusChanged %p enabled %d mCbf %p", this, enabled, mCbf);
     if (mStatus == ALREADY_EXISTS) {
-        if (enabled) {
-            android_atomic_or(1, &mEnabled);
-        } else {
-            android_atomic_and(~1, &mEnabled);
-        }
+        mEnabled = enabled;
         if (mCbf) {
             mCbf(EVENT_ENABLE_STATUS_CHANGED, mUserData, &enabled);
         }

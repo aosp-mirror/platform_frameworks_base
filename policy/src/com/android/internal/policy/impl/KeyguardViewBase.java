@@ -43,13 +43,6 @@ public abstract class KeyguardViewBase extends FrameLayout {
 
     public KeyguardViewBase(Context context) {
         super(context);
-
-        // drop shadow below status bar in keyguard too
-        mForegroundInPadding = false;
-        setForegroundGravity(Gravity.FILL_HORIZONTAL | Gravity.TOP);
-        setForeground(
-                context.getResources().getDrawable(
-                        com.android.internal.R.drawable.title_bar_shadow));
     }
 
     // used to inject callback

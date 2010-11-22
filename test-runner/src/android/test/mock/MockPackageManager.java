@@ -341,6 +341,12 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public void setInstallerPackageName(String targetPackage,
+            String installerPackageName) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * @hide - to match hiding in superclass
      */

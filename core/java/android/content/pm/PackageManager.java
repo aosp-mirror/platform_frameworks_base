@@ -1918,6 +1918,24 @@ public abstract class PackageManager {
             String installerPackageName);
 
     /**
+     * Change the installer associated with a given package.  There are limitations
+     * on how the installer package can be changed; in particular:
+     * <ul>
+     * <li> A SecurityException will be thrown if <var>installerPackageName</var>
+     * is not signed with the same certificate as the calling application.
+     * <li> A SecurityException will be thrown if <var>targetPackage</var> already
+     * has an installer package, and that installer package is not signed with
+     * the same certificate as the calling application.
+     * </ul>
+     *
+     * @param targetPackage The installed package whose installer will be changed.
+     * @param installerPackageName The package name of the new installer.  May be
+     * null to clear the association.
+     */
+    public abstract void setInstallerPackageName(String targetPackage,
+            String installerPackageName);
+
+    /**
      * Attempts to delete a package.  Since this may take a little while, the result will
      * be posted back to the given observer.  A deletion will fail if the calling context
      * lacks the {@link android.Manifest.permission#DELETE_PACKAGES} permission, if the

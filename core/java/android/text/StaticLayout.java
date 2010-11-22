@@ -21,10 +21,10 @@ import com.android.internal.util.ArrayUtils;
 import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.text.style.LeadingMarginSpan;
+import android.text.style.LeadingMarginSpan.LeadingMarginSpan2;
 import android.text.style.LineHeightSpan;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.TabStopSpan;
-import android.text.style.LeadingMarginSpan.LeadingMarginSpan2;
 
 /**
  * StaticLayout is a Layout for text that will not be edited after it
@@ -36,9 +36,7 @@ import android.text.style.LeadingMarginSpan.LeadingMarginSpan2;
  * float, float, android.graphics.Paint)
  * Canvas.drawText()} directly.</p>
  */
-public class
-StaticLayout
-extends Layout
+public class StaticLayout extends Layout
 {
     public StaticLayout(CharSequence source, TextPaint paint,
                         int width,
@@ -260,7 +258,7 @@ extends Layout
                     float before = w;
 
                     if (c == '\n') {
-                        ;
+                        // intentionally left empty
                     } else if (c == '\t') {
                         if (hasTab == false) {
                             hasTab = true;
@@ -837,6 +835,7 @@ extends Layout
     // rather than relying on member functions.
     // The logic mirrors that of Layout.getLineForVertical
     // FIXME: It may be faster to do a linear search for layouts without many lines.
+    @Override
     public int getLineForVertical(int vertical) {
         int high = mLineCount;
         int low = -1;
@@ -857,38 +856,47 @@ extends Layout
         }
     }
 
+    @Override
     public int getLineCount() {
         return mLineCount;
     }
 
+    @Override
     public int getLineTop(int line) {
         return mLines[mColumns * line + TOP];
     }
 
+    @Override
     public int getLineDescent(int line) {
         return mLines[mColumns * line + DESCENT];
     }
 
+    @Override
     public int getLineStart(int line) {
         return mLines[mColumns * line + START] & START_MASK;
     }
 
+    @Override
     public int getParagraphDirection(int line) {
         return mLines[mColumns * line + DIR] >> DIR_SHIFT;
     }
 
+    @Override
     public boolean getLineContainsTab(int line) {
         return (mLines[mColumns * line + TAB] & TAB_MASK) != 0;
     }
 
+    @Override
     public final Directions getLineDirections(int line) {
         return mLineDirections[line];
     }
 
+    @Override
     public int getTopPadding() {
         return mTopPadding;
     }
 
+    @Override
     public int getBottomPadding() {
         return mBottomPadding;
     }
@@ -935,7 +943,6 @@ extends Layout
     private Directions[] mLineDirections;
 
     private static final int START_MASK = 0x1FFFFFFF;
-    private static final int DIR_MASK   = 0xC0000000;
     private static final int DIR_SHIFT  = 30;
     private static final int TAB_MASK   = 0x20000000;
 

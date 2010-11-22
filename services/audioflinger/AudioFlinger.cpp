@@ -343,7 +343,7 @@ sp<IAudioTrack> AudioFlinger::createTrack(
             lSessionId = *sessionId;
         } else {
             // if no audio session id is provided, create one here
-            lSessionId = nextUniqueId();
+            lSessionId = nextUniqueId_l();
             if (sessionId != NULL) {
                 *sessionId = lSessionId;
             }
@@ -3699,7 +3699,7 @@ sp<IAudioRecord> AudioFlinger::openRecord(
         if (sessionId != NULL && *sessionId != AudioSystem::SESSION_OUTPUT_MIX) {
             lSessionId = *sessionId;
         } else {
-            lSessionId = nextUniqueId();
+            lSessionId = nextUniqueId_l();
             if (sessionId != NULL) {
                 *sessionId = lSessionId;
             }
@@ -4300,7 +4300,7 @@ int AudioFlinger::openOutput(uint32_t *pDevices,
 
     mHardwareStatus = AUDIO_HW_IDLE;
     if (output != 0) {
-        int id = nextUniqueId();
+        int id = nextUniqueId_l();
         if ((flags & AudioSystem::OUTPUT_FLAG_DIRECT) ||
             (format != AudioSystem::PCM_16_BIT) ||
             (channels != AudioSystem::CHANNEL_OUT_STEREO)) {
@@ -4348,7 +4348,7 @@ int AudioFlinger::openDuplicateOutput(int output1, int output2)
         return 0;
     }
 
-    int id = nextUniqueId();
+    int id = nextUniqueId_l();
     DuplicatingThread *thread = new DuplicatingThread(this, thread1, id);
     thread->addOutputTrack(thread2);
     mPlaybackThreads.add(id, thread);
@@ -4473,7 +4473,7 @@ int AudioFlinger::openInput(uint32_t *pDevices,
     }
 
     if (input != 0) {
-        int id = nextUniqueId();
+        int id = nextUniqueId_l();
          // Start record thread
         thread = new RecordThread(this, input, reqSamplingRate, reqChannels, id);
         mRecordThreads.add(id, thread);
@@ -4543,7 +4543,8 @@ status_t AudioFlinger::setStreamOutput(uint32_t stream, int output)
 
 int AudioFlinger::newAudioSessionId()
 {
-    return nextUniqueId();
+    AutoMutex _l(mLock);
+    return nextUniqueId_l();
 }
 
 // checkPlaybackThread_l() must be called with AudioFlinger::mLock held
@@ -4578,9 +4579,10 @@ AudioFlinger::RecordThread *AudioFlinger::checkRecordThread_l(int input) const
     return thread;
 }
 
-int AudioFlinger::nextUniqueId()
+// nextUniqueId_l() must be called with AudioFlinger::mLock held
+int AudioFlinger::nextUniqueId_l()
 {
-    return android_atomic_inc(&mNextUniqueId);
+    return mNextUniqueId++;
 }
 
 // ----------------------------------------------------------------------------
@@ -4967,7 +4969,7 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::PlaybackThread::createEffect_l(
         LOGV("createEffect_l() got effect %p on chain %p", effect == 0 ? 0 : effect.get(), chain.get());
 
         if (effect == 0) {
-            int id = mAudioFlinger->nextUniqueId();
+            int id = mAudioFlinger->nextUniqueId_l();
             // Check CPU and memory usage
             lStatus = AudioSystem::registerEffect(desc, mId, chain->strategy(), sessionId, id);
             if (lStatus != NO_ERROR) {

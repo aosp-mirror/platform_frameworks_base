@@ -189,7 +189,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     public boolean hasText() {
         try {
-            return getService().hasPrimaryClip();
+            return getService().hasClipboardText();
         } catch (RemoteException e) {
             return false;
         }

@@ -46,7 +46,7 @@ public class MediaPlayerStopStateUnitTest extends AndroidTestCase implements Med
         assertTrue(!stateErrors.errorInPausedState);
         
         // Invalid states.
-        assertTrue(!stateErrors.errorInIdleState);  // noError() won't be called
+        assertTrue(stateErrors.errorInIdleState);
         assertTrue(stateErrors.errorInIdleStateAfterReset);
         assertTrue(stateErrors.errorInInitializedState);
         assertTrue(stateErrors.errorInErrorState);

@@ -67,7 +67,6 @@
         <item>@drawable/text_select_handle_middle</item>
         <item>@drawable/text_select_handle_right</item>
         <item>@drawable/title_bar</item>
-        <item>@drawable/title_bar_shadow</item>
         <!-- Visual lock screen -->
         <item>@drawable/indicator_code_lock_drag_direction_green_up</item>
         <item>@drawable/indicator_code_lock_drag_direction_red_up</item>

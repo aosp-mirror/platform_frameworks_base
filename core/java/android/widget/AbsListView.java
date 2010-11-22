@@ -2542,7 +2542,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         mTouchMode = TOUCH_MODE_SCROLL;
                         mMotionCorrection = 0;
                         motionPosition = findMotionRow(y);
-                        reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
                         mFlingRunnable.flywheelTouch();
                     }
                 }
@@ -2968,6 +2967,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 } else {
                     endFling();
                     mTouchMode = TOUCH_MODE_SCROLL;
+                    reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
                 }
             }
         };
@@ -3018,6 +3018,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
             clearScrollingCache();
             mScroller.abortAnimation();
+
+            if (mFlingStrictSpan != null) {
+                mFlingStrictSpan.finish();
+                mFlingStrictSpan = null;
+            }
         }
 
         void flywheelTouch() {
@@ -3085,11 +3090,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     if (mFlingProfilingStarted) {
                         Debug.stopMethodTracing();
                         mFlingProfilingStarted = false;
-                    }
-
-                    if (mFlingStrictSpan != null) {
-                        mFlingStrictSpan.finish();
-                        mFlingStrictSpan = null;
                     }
                 }
             }

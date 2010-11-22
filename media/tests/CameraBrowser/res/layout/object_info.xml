@@ -153,5 +153,17 @@
     <TableRow>
         <ImageView android:id="@+id/thumbnail" />
     </TableRow>
+    <TableRow>
+        <Button android:id="@+id/import_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/import_label">
+        </Button>
+        <Button android:id="@+id/delete_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/delete_label">
+        </Button>
+    </TableRow>
 </TableLayout>
 

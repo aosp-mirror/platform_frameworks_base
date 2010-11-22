@@ -624,4 +624,39 @@ public class ConnectivityManager
         } catch (RemoteException e) {
         }
     }
+
+    /**
+     * @param proxyProperties The definition for the new global http proxy
+     * {@hide}
+     */
+    public void setGlobalProxy(ProxyProperties p) {
+        try {
+            mService.setGlobalProxy(p);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @return proxyProperties for the current global proxy
+     * {@hide}
+     */
+    public ProxyProperties getGlobalProxy() {
+        try {
+            return mService.getGlobalProxy();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * @return proxyProperties for the current proxy (global if set, network specific if not)
+     * {@hide}
+     */
+    public ProxyProperties getProxy() {
+        try {
+            return mService.getProxy();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
 }

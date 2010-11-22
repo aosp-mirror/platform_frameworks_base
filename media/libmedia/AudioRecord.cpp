@@ -35,7 +35,6 @@
 #include <binder/Parcel.h>
 #include <binder/IPCThreadState.h>
 #include <utils/Timers.h>
-#include <cutils/atomic.h>
 
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
 #define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
@@ -282,7 +281,9 @@ status_t AudioRecord::start()
         t->mLock.lock();
      }
 
-    if (android_atomic_or(1, &mActive) == 0) {
+    AutoMutex lock(mLock);
+    if (mActive == 0) {
+        mActive = 1;
         ret = mAudioRecord->start();
         if (ret == DEAD_OBJECT) {
             LOGV("start() dead IAudioRecord: creating a new one");
@@ -302,8 +303,7 @@ status_t AudioRecord::start()
                 setpriority(PRIO_PROCESS, 0, THREAD_PRIORITY_AUDIO_CLIENT);
             }
         } else {
-            LOGV("start() failed");
-            android_atomic_and(~1, &mActive);
+            mActive = 0;
         }
     }
 
@@ -322,9 +322,11 @@ status_t AudioRecord::stop()
 
     if (t != 0) {
         t->mLock.lock();
-     }
+    }
 
-    if (android_atomic_and(~1, &mActive) == 1) {
+    AutoMutex lock(mLock);
+    if (mActive == 1) {
+        mActive = 0;
         mCblk->cv.signal();
         mAudioRecord->stop();
         // the record head position will reset to 0, so if a marker is set, we need

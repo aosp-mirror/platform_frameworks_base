@@ -149,8 +149,6 @@ public abstract class DataConnectionTracker extends Handler {
 
     /** Slow poll when attempting connection recovery. */
     protected static final int POLL_NETSTAT_SLOW_MILLIS = 5000;
-    /** Default ping deadline, in seconds. */
-    protected static final int DEFAULT_PING_DEADLINE = 5;
     /** Default max failure count before attempting to network re-registration. */
     protected static final int DEFAULT_MAX_PDP_RESET_FAIL = 3;
 

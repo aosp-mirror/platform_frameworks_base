@@ -276,7 +276,7 @@ public abstract class ApplicationThreadNative extends Binder
             requestThumbnail(b);
             return true;
         }
-        
+
         case SCHEDULE_CONFIGURATION_CHANGED_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
@@ -297,12 +297,21 @@ public abstract class ApplicationThreadNative extends Binder
             return true;
         }
 
+        case SET_HTTP_PROXY_TRANSACTION: {
+            data.enforceInterface(IApplicationThread.descriptor);
+            final String proxy = data.readString();
+            final String port = data.readString();
+            final String exclList = data.readString();
+            setHttpProxy(proxy, port, exclList);
+            return true;
+        }
+
         case PROCESS_IN_BACKGROUND_TRANSACTION: {
             data.enforceInterface(IApplicationThread.descriptor);
             processInBackground();
             return true;
         }
-        
+
         case DUMP_SERVICE_TRANSACTION: {
             data.enforceInterface(IApplicationThread.descriptor);
             ParcelFileDescriptor fd = data.readFileDescriptor();
@@ -755,6 +764,16 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInterfaceToken(IApplicationThread.descriptor);
         mRemote.transact(CLEAR_DNS_CACHE_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
+    public void setHttpProxy(String proxy, String port, String exclList) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeString(proxy);
+        data.writeString(port);
+        data.writeString(exclList);
+        mRemote.transact(SET_HTTP_PROXY_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 

@@ -103,11 +103,15 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
     }
 
-    public void replace(Map newContents) {
+    /*package*/ void replace(Map newContents, FileStatus stat) {
         synchronized (this) {
             mLoaded = true;
             if (newContents != null) {
                 mMap = newContents;
+            }
+            if (stat != null) {
+                mStatTimestamp = stat.mtime;
+                mStatSize = stat.size;
             }
         }
     }

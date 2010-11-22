@@ -18,6 +18,7 @@ package android.graphics;
 
 import com.android.layoutlib.api.ILayoutLog;
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.layoutlib.bridge.impl.Stack;
 
 import android.graphics.Paint_Delegate.FontInfo;
 import android.text.TextUtils;
@@ -32,7 +33,6 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.List;
-import java.util.Stack;
 
 
 /**

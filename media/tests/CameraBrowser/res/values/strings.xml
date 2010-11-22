@@ -32,9 +32,9 @@
     <string name="modified_label">Modified: </string>
     <string name="keywords_label">Keywords: </string>
 
-    <!-- menu items -->
-    <string name="save_item">Save</string>
-    <string name="delete_item">Delete</string>
+    <!-- button labels -->
+    <string name="import_label">Import</string>
+    <string name="delete_label">Delete</string>
 
     <!-- toasts -->
     <string name="object_saved_message">Object saved</string>
