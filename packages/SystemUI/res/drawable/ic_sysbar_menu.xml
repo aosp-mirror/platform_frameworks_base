@@ -15,7 +15,7 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true" android:drawable="@drawable/status_bar_recent_pressed" />
-    <item android:drawable="@drawable/status_bar_recent_default" />
+    <item android:state_pressed="true" android:drawable="@drawable/ic_sysbar_menu_pressed" />
+    <item android:drawable="@drawable/ic_sysbar_menu_default" />
 </selector>
 
