@@ -3549,6 +3549,15 @@ public class WebView extends AbsoluteLayout
          * click action, look for a word under the  click. If one is found,
          * animate the text selection into view.
          * FIXME: no animation code yet */
+        return selectText();
+    }
+
+    /**
+     * Select the word at the last click point.
+     *
+     * @hide pending API council approval
+     */
+    public boolean selectText() {
         int x = viewToContentX((int) mLastTouchX + mScrollX);
         int y = viewToContentY((int) mLastTouchY + mScrollY);
         setUpSelect();
