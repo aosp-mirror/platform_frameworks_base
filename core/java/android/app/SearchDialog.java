@@ -1109,6 +1109,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      * @return true if a successful launch, false if could not (e.g. bad position).
      */
     protected boolean launchSuggestion(int position, int actionKey, String actionMsg) {
+        if (mSuggestionsAdapter == null) {
+            return false;
+        }
         Cursor c = mSuggestionsAdapter.getCursor();
         if ((c != null) && c.moveToPosition(position)) {
 
