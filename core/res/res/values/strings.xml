@@ -2273,4 +2273,20 @@
     <!-- Shown when the users bandwidth is reduced because of excessive data use -->
     <string name="throttled_notification_title">Mobile data limit exceeded</string>
     <string name="throttled_notification_message">Touch to learn more about mobile data use</string>
+
+    <!-- Network positioning notification ticker. The name of the user (e.g. John Doe) who sent
+         the request is shown as a dynamic string. -->
+    <string name="gpsNotifTicker">Location request from <xliff:g id="name">%s</xliff:g></string>
+    <!-- Network positioning notification and verification title to inform the user about
+         an incoming location request. -->
+    <string name="gpsNotifTitle">Location request</string>
+    <!-- Network positioning notification message. The name of the user (e.g. John Doe) and
+         service (SUPL-service) who sent the request is shown as dynamic strings.
+         Translation should not be longer than master text. -->
+    <string name="gpsNotifMessage">Requested by <xliff:g id="name">%1$s</xliff:g> (<xliff:g id="service" example="SUPL-service">%2$s</xliff:g>)</string>
+    <!-- Network positioning verification Yes. Button to push to share location information. -->
+    <string name="gpsVerifYes">Yes</string>
+    <!-- Network positioning verification No. Button to push to deny sharing of location
+         information. -->
+    <string name="gpsVerifNo">No</string>
 </resources>

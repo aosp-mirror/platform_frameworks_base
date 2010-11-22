@@ -27,6 +27,8 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.R;
+
 /**
  * A GPS Network-initiated Handler class used by LocationManager.
  *
@@ -187,8 +189,8 @@ public class GpsNetInitiatedHandler {
             return;
         }
       
-    	String title = getNotifTitle(notif);
-    	String message = getNotifMessage(notif);
+    	String title = getNotifTitle(notif, mContext);
+    	String message = getNotifMessage(notif, mContext);
         
         if (DEBUG) Log.d(TAG, "setNiNotification, notifyId: " + notif.notificationId +
         		", title: " + title +
@@ -208,7 +210,7 @@ public class GpsNetInitiatedHandler {
         }        
         
         mNiNotification.flags = Notification.FLAG_ONGOING_EVENT;
-        mNiNotification.tickerText = getNotifTicker(notif);
+        mNiNotification.tickerText = getNotifTicker(notif, mContext);
         
         // if not to popup dialog immediately, pending intent will open the dialog
         Intent intent = !mPopupImmediately ? getDlgIntent(notif) : new Intent();    	        
@@ -239,8 +241,8 @@ public class GpsNetInitiatedHandler {
     private Intent getDlgIntent(GpsNiNotification notif)
     {
     	Intent intent = new Intent();
-    	String title = getDialogTitle(notif);
-    	String message = getDialogMessage(notif);
+    	String title = getDialogTitle(notif, mContext);
+    	String message = getDialogMessage(notif, mContext);
     	
     	// directly bring up the NI activity
     	intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -417,41 +419,40 @@ public class GpsNetInitiatedHandler {
     }
     
     // change this to configure notification display
-    static private String getNotifTicker(GpsNiNotification notif)
+    static private String getNotifTicker(GpsNiNotification notif, Context context)
     {
-    	String ticker = String.format("Position request! ReqId: [%s] ClientName: [%s]",
+    	String ticker = String.format(context.getString(R.string.gpsNotifTicker),
     			decodeString(notif.requestorId, mIsHexInput, notif.requestorIdEncoding),
     			decodeString(notif.text, mIsHexInput, notif.textEncoding));
     	return ticker;
     }
     
     // change this to configure notification display
-    static private String getNotifTitle(GpsNiNotification notif)
+    static private String getNotifTitle(GpsNiNotification notif, Context context)
     {
-    	String title = String.format("Position Request");
+    	String title = String.format(context.getString(R.string.gpsNotifTitle));
     	return title;
     }
     
     // change this to configure notification display
-    static private String getNotifMessage(GpsNiNotification notif)
+    static private String getNotifMessage(GpsNiNotification notif, Context context)
     {
-    	String message = String.format(
-    			"NI Request received from [%s] for client [%s]!", 
+    	String message = String.format(context.getString(R.string.gpsNotifMessage),
     			decodeString(notif.requestorId, mIsHexInput, notif.requestorIdEncoding),
     			decodeString(notif.text, mIsHexInput, notif.textEncoding));
     	return message;
     }       
     
     // change this to configure dialog display (for verification)
-    static public String getDialogTitle(GpsNiNotification notif)
+    static public String getDialogTitle(GpsNiNotification notif, Context context)
     {
-    	return getNotifTitle(notif);
+    	return getNotifTitle(notif, context);
     }
     
     // change this to configure dialog display (for verification)
-    static private String getDialogMessage(GpsNiNotification notif)
+    static private String getDialogMessage(GpsNiNotification notif, Context context)
     {
-    	return getNotifMessage(notif);
+    	return getNotifMessage(notif, context);
     }
     
 }
