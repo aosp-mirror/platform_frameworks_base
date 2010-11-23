@@ -1529,7 +1529,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     void setNetworkAvailable(boolean available) {
-        sendMessage(CMD_SET_NETWORK_AVAILABLE, available ? 1 : 0);
+        sendMessage(obtainMessage(CMD_SET_NETWORK_AVAILABLE, available ? 1 : 0, 0));
     }
 
     /********************************************************
