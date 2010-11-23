@@ -376,6 +376,7 @@ public class WindowManagerService extends IWindowManager.Stub
     Surface mBlurSurface;
     boolean mBlurShown;
     Watermark mWatermark;
+    StrictModeFlash mStrictModeFlash;
 
     int mTransactionSequence = 0;
 
@@ -4883,6 +4884,36 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    // TODO: more accounting of which pid(s) turned it on, keep count,
+    // only allow disables from pids which have count on, etc.
+    public void showStrictModeViolation(boolean on) {
+        int pid = Binder.getCallingPid();
+        synchronized(mWindowMap) {
+            // Ignoring requests to enable the red border from clients
+            // which aren't on screen.  (e.g. Broadcast Receivers in
+            // the background..)
+            if (on) {
+                boolean isVisible = false;
+                for (WindowState ws : mWindows) {
+                    if (ws.mSession.mPid == pid && ws.isVisibleLw()) {
+                        isVisible = true;
+                        break;
+                    }
+                }
+                if (!isVisible) {
+                    return;
+                }
+            }
+
+            Surface.openTransaction();
+            if (mStrictModeFlash == null) {
+                mStrictModeFlash = new StrictModeFlash(mDisplay, mFxSession);
+            }
+            mStrictModeFlash.setVisibility(on);
+            Surface.closeTransaction();
+        }
+    }
+
     public void freezeRotation() {
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
                 "setRotation()")) {
@@ -9198,6 +9229,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return mPolicy.finishLayoutLw();
     }
 
+    // "Something has changed!  Let's make it correct now."
     private final void performLayoutAndPlaceSurfacesLockedInner(
             boolean recoveringMemory) {
         if (mDisplay == null) {
@@ -9248,6 +9280,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         if (mWatermark != null) {
             mWatermark.positionSurface(dw, dh);
+        }
+        if (mStrictModeFlash != null) {
+            mStrictModeFlash.positionSurface(dw, dh);
         }
 
         try {
