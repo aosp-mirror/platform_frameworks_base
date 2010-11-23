@@ -21,7 +21,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="NotificationBuilderTest" android:label="_Notify Builder">
+        <activity android:name="NotificationBuilderTest"
+                android:label="_Notify Builder"
+                android:theme="@android:style/Theme.Holo"
+                android:hardwareAccelerated="true"
+                >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
