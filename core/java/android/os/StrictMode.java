@@ -22,6 +22,7 @@ import android.app.ApplicationErrorReport;
 import android.content.Intent;
 import android.util.Log;
 import android.util.Printer;
+import android.util.Singleton;
 import android.view.IWindowManager;
 
 import com.android.internal.os.RuntimeInit;
@@ -922,10 +923,8 @@ public final class StrictMode {
                 return;
             }
 
-            // TODO: cache the window manager stub?
             final IWindowManager windowManager = (info.policy & PENALTY_FLASH) != 0 ?
-                    IWindowManager.Stub.asInterface(ServiceManager.getService("window")) :
-                    null;
+                    sWindowManager.get() : null;
             if (windowManager != null) {
                 try {
                     windowManager.showStrictModeViolation(true);
@@ -1401,6 +1400,12 @@ public final class StrictMode {
             new ThreadLocal<ThreadSpanState>() {
         @Override protected ThreadSpanState initialValue() {
             return new ThreadSpanState();
+        }
+    };
+
+    private static Singleton<IWindowManager> sWindowManager = new Singleton<IWindowManager>() {
+        protected IWindowManager create() {
+            return IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
         }
     };
 
