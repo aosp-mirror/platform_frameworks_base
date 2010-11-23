@@ -78,7 +78,6 @@
             android:layout_below="@id/date"
             android:layout_marginTop="16dp"
             android:layout_marginLeft="48dp"
-            android:src="@drawable/ic_sysbar_battery_mini"
             android:baseline="17dp"
             />
 
@@ -98,7 +97,6 @@
             android:layout_width="wrap_content"
             android:layout_toRightOf="@id/battery_text"
             android:layout_alignBaseline="@id/battery"
-            android:src="@drawable/ic_sysbar_wifi_mini"
             android:baseline="21dp"
             />
 

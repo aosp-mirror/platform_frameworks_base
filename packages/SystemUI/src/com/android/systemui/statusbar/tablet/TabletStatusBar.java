@@ -157,7 +157,7 @@ public class TabletStatusBar extends StatusBar {
         mBatteryController.addIconView((ImageView)mNotificationPanel.findViewById(R.id.battery));
         mBatteryController.addLabelView(
                 (TextView)mNotificationPanel.findViewById(R.id.battery_text));
-        mNetworkController.addCombinedDataIconView(
+        mNetworkController.addCombinedSignalIconView(
                 (ImageView)mNotificationPanel.findViewById(R.id.network));
         mNetworkController.addLabelView(
                 (TextView)mNotificationPanel.findViewById(R.id.network_text));
@@ -282,7 +282,7 @@ public class TabletStatusBar extends StatusBar {
         mBatteryController = new BatteryController(mContext);
         mBatteryController.addIconView((ImageView)sb.findViewById(R.id.battery));
         mNetworkController = new NetworkController(mContext);
-        mNetworkController.addCombinedDataIconView((ImageView)sb.findViewById(R.id.network));
+        mNetworkController.addCombinedSignalIconView((ImageView)sb.findViewById(R.id.network));
 
         // The navigation buttons
         mNavigationArea = sb.findViewById(R.id.navigationArea);

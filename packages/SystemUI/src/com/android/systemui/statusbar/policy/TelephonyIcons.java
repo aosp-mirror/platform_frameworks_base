@@ -48,6 +48,8 @@ class TelephonyIcons {
           R.drawable.stat_sys_r_signal_4_fully }
     };
 
+    static final int[][] DATA_SIGNAL_STRENGTH = TELEPHONY_SIGNAL_STRENGTH;
+
     //***** Data connection icons
 
     //GSM/UMTS
