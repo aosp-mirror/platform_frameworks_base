@@ -144,4 +144,30 @@ interface ISms {
             in List<String> parts, in List<PendingIntent> sentIntents,
             in List<PendingIntent> deliveryIntents);
 
+    /**
+     * Enable reception of cell broadcast (SMS-CB) messages with the given
+     * message identifier. Note that if two different clients enable the same
+     * message identifier, they must both disable it for the device to stop
+     * receiving those messages.
+     *
+     * @param messageIdentifier Message identifier as specified in TS 23.041
+     * @return true if successful, false otherwise
+     *
+     * @see #disableCellBroadcast(int)
+     */
+    boolean enableCellBroadcast(int messageIdentifier);
+
+    /**
+     * Disable reception of cell broadcast (SMS-CB) messages with the given
+     * message identifier. Note that if two different clients enable the same
+     * message identifier, they must both disable it for the device to stop
+     * receiving those messages.
+     *
+     * @param messageIdentifier Message identifier as specified in TS 23.041
+     * @return true if successful, false otherwise
+     *
+     * @see #enableCellBroadcast(int)
+     */
+    boolean disableCellBroadcast(int messageIdentifier);
+
 }
