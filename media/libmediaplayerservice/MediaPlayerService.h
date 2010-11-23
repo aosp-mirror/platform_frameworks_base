@@ -191,6 +191,11 @@ public:
             const KeyedVector<String8, String8> *headers, int audioSessionId);
 
     virtual sp<IMediaPlayer>    create(pid_t pid, const sp<IMediaPlayerClient>& client, int fd, int64_t offset, int64_t length, int audioSessionId);
+
+    virtual sp<IMediaPlayer>    create(
+            pid_t pid, const sp<IMediaPlayerClient> &client,
+            const sp<IStreamSource> &source, int audioSessionId);
+
     virtual sp<IMemory>         decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
     virtual sp<IMemory>         decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
     virtual sp<IOMX>            getOMX();
@@ -234,6 +239,9 @@ private:
                         const KeyedVector<String8, String8> *headers);
 
                 status_t        setDataSource(int fd, int64_t offset, int64_t length);
+
+                status_t        setDataSource(const sp<IStreamSource> &source);
+
         static  void            notify(void* cookie, int msg, int ext1, int ext2);
 
                 pid_t           pid() const { return mPid; }

@@ -98,3 +98,27 @@ LOCAL_MODULE_TAGS := debug
 LOCAL_MODULE:= audioloop
 
 include $(BUILD_EXECUTABLE)
+
+################################################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=         \
+        stream.cpp    \
+
+LOCAL_SHARED_LIBRARIES := \
+	libstagefright liblog libutils libbinder libsurfaceflinger_client \
+        libstagefright_foundation libmedia
+
+LOCAL_C_INCLUDES:= \
+	$(JNI_H_INCLUDE) \
+	frameworks/base/media/libstagefright \
+	$(TOP)/frameworks/base/include/media/stagefright/openmax
+
+LOCAL_CFLAGS += -Wno-multichar
+
+LOCAL_MODULE_TAGS := debug
+
+LOCAL_MODULE:= stream
+
+include $(BUILD_EXECUTABLE)
