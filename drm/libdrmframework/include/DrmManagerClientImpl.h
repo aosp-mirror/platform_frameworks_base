@@ -86,6 +86,18 @@ public:
     DrmConstraints* getConstraints(int uniqueId, const String8* path, const int action);
 
     /**
+     * Get metadata information associated with input content.
+     *
+     * @param[in] uniqueId Unique identifier for a session
+     * @param[in] path Path of the protected content
+     * @return DrmMetadata
+     *         key-value pairs of metadata are embedded in it
+     * @note
+     *    In case of error, return NULL
+     */
+    DrmMetadata* getMetadata(int uniqueId, const String8* path);
+
+    /**
      * Check whether the given mimetype or path can be handled
      *
      * @param[in] uniqueId Unique identifier for a session

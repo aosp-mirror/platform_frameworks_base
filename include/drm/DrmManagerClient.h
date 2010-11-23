@@ -25,6 +25,7 @@ namespace android {
 
 class DrmInfo;
 class DrmRights;
+class DrmMetadata;
 class DrmInfoEvent;
 class DrmInfoStatus;
 class DrmInfoRequest;
@@ -202,6 +203,17 @@ public:
      *     In case of error, return NULL
      */
     DrmConstraints* getConstraints(const String8* path, const int action);
+
+    /**
+     * Get metadata information associated with input content
+     *
+     * @param[in] path Path of the protected content
+     * @return DrmMetadata
+     *         key-value pairs of metadata
+     * @note
+     *     In case of error, return NULL
+     */
+    DrmMetadata* getMetadata(const String8* path);
 
     /**
      * Check whether the given mimetype or path can be handled

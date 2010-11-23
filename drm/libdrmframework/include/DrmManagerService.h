@@ -61,6 +61,8 @@ public:
 
     DrmConstraints* getConstraints(int uniqueId, const String8* path, const int action);
 
+    DrmMetadata* getMetadata(int uniqueId, const String8* path);
+
     bool canHandle(int uniqueId, const String8& path, const String8& mimeType);
 
     DrmInfoStatus* processDrmInfo(int uniqueId, const DrmInfo* drmInfo);

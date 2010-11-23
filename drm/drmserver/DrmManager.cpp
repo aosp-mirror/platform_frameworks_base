@@ -23,6 +23,7 @@
 #include <drm/DrmInfoEvent.h>
 #include <drm/DrmRights.h>
 #include <drm/DrmConstraints.h>
+#include <drm/DrmMetadata.h>
 #include <drm/DrmInfoStatus.h>
 #include <drm/DrmInfoRequest.h>
 #include <drm/DrmSupportInfo.h>
@@ -144,6 +145,15 @@ DrmConstraints* DrmManager::getConstraints(int uniqueId, const String8* path, co
     if (EMPTY_STRING != plugInId) {
         IDrmEngine& rDrmEngine = mPlugInManager.getPlugIn(plugInId);
         return rDrmEngine.getConstraints(uniqueId, path, action);
+    }
+    return NULL;
+}
+
+DrmMetadata* DrmManager::getMetadata(int uniqueId, const String8* path) {
+    const String8 plugInId = getSupportedPlugInIdFromPath(uniqueId, *path);
+    if (EMPTY_STRING != plugInId) {
+        IDrmEngine& rDrmEngine = mPlugInManager.getPlugIn(plugInId);
+        return rDrmEngine.getMetadata(uniqueId, path);
     }
     return NULL;
 }

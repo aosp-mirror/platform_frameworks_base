@@ -31,6 +31,10 @@ DrmConstraints* DrmEngineBase::getConstraints(
     return onGetConstraints(uniqueId, path, action);
 }
 
+DrmMetadata* DrmEngineBase::getMetadata(int uniqueId, const String8* path) {
+    return onGetMetadata(uniqueId, path);
+}
+
 status_t DrmEngineBase::initialize(int uniqueId) {
     return onInitialize(uniqueId);
 }

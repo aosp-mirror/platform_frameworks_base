@@ -18,18 +18,50 @@
 #define LOG_TAG "DrmManagerService(Native)"
 #include <utils/Log.h>
 
+#include <private/android_filesystem_config.h>
+
 #include <errno.h>
 #include <utils/threads.h>
 #include <binder/IServiceManager.h>
+#include <binder/IPCThreadState.h>
 #include <sys/stat.h>
 #include "DrmManagerService.h"
 #include "DrmManager.h"
 
 using namespace android;
 
+static Vector<uid_t> trustedUids;
+
+static bool isProtectedCallAllowed() {
+    // TODO
+    // Following implementation is just for reference.
+    // Each OEM manufacturer should implement/replace with their own solutions.
+    bool result = false;
+
+    IPCThreadState* ipcState = IPCThreadState::self();
+    uid_t uid = ipcState->getCallingUid();
+
+    for (unsigned int i = 0; i < trustedUids.size(); ++i) {
+        if (trustedUids[i] == uid) {
+            result = true;
+            break;
+        }
+    }
+    return result;
+}
+
 void DrmManagerService::instantiate() {
     LOGV("instantiate");
     defaultServiceManager()->addService(String16("drm.drmManager"), new DrmManagerService());
+
+    if (0 >= trustedUids.size()) {
+        // TODO
+        // Following implementation is just for reference.
+        // Each OEM manufacturer should implement/replace with their own solutions.
+
+        // Add trusted uids here
+        trustedUids.push(AID_MEDIA);
+    }
 }
 
 DrmManagerService::DrmManagerService() :
@@ -77,6 +109,11 @@ DrmConstraints* DrmManagerService::getConstraints(
             int uniqueId, const String8* path, const int action) {
     LOGV("Entering getConstraints from content");
     return mDrmManager->getConstraints(uniqueId, path, action);
+}
+
+DrmMetadata* DrmManagerService::getMetadata(int uniqueId, const String8* path) {
+    LOGV("Entering getMetadata from content");
+    return mDrmManager->getMetadata(uniqueId, path);
 }
 
 bool DrmManagerService::canHandle(int uniqueId, const String8& path, const String8& mimeType) {
@@ -172,13 +209,21 @@ status_t DrmManagerService::getAllSupportInfo(
 DecryptHandle* DrmManagerService::openDecryptSession(
             int uniqueId, int fd, off64_t offset, off64_t length) {
     LOGV("Entering DrmManagerService::openDecryptSession");
-    return mDrmManager->openDecryptSession(uniqueId, fd, offset, length);
+    if (isProtectedCallAllowed()) {
+        return mDrmManager->openDecryptSession(uniqueId, fd, offset, length);
+    }
+
+    return NULL;
 }
 
 DecryptHandle* DrmManagerService::openDecryptSession(
             int uniqueId, const char* uri) {
     LOGV("Entering DrmManagerService::openDecryptSession with uri");
-    return mDrmManager->openDecryptSession(uniqueId, uri);
+    if (isProtectedCallAllowed()) {
+        return mDrmManager->openDecryptSession(uniqueId, uri);
+    }
+
+    return NULL;
 }
 
 status_t DrmManagerService::closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle) {

@@ -27,6 +27,7 @@ namespace android {
 
 class DrmContentIds;
 class DrmConstraints;
+class DrmMetadata;
 class DrmRights;
 class DrmInfo;
 class DrmInfoStatus;
@@ -51,6 +52,7 @@ public:
         SET_DRM_SERVICE_LISTENER,
         INSTALL_DRM_ENGINE,
         GET_CONSTRAINTS_FROM_CONTENT,
+        GET_METADATA_FROM_CONTENT,
         CAN_HANDLE,
         PROCESS_DRM_INFO,
         ACQUIRE_DRM_INFO,
@@ -95,6 +97,8 @@ public:
 
     virtual DrmConstraints* getConstraints(
             int uniqueId, const String8* path, const int action) = 0;
+
+    virtual DrmMetadata* getMetadata(int uniqueId, const String8* path) = 0;
 
     virtual bool canHandle(int uniqueId, const String8& path, const String8& mimeType) = 0;
 
@@ -178,6 +182,8 @@ public:
     virtual status_t installDrmEngine(int uniqueId, const String8& drmEngineFile);
 
     virtual DrmConstraints* getConstraints(int uniqueId, const String8* path, const int action);
+
+    virtual DrmMetadata* getMetadata(int uniqueId, const String8* path);
 
     virtual bool canHandle(int uniqueId, const String8& path, const String8& mimeType);
 
