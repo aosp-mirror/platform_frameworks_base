@@ -610,6 +610,9 @@
 
         <!-- Specifies a drawable to use for the 'home as up' indicator. -->
         <attr name="homeAsUpIndicator" format="reference" />
+
+        <!-- Preference frame layout styles. -->
+        <attr name="preferenceFrameLayoutStyle" format="reference" />
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -2134,6 +2137,12 @@
         <attr name="overScrollHeader" format="reference|color" />
         <!-- Drawable to draw below list content. -->
         <attr name="overScrollFooter" format="reference|color" />
+    </declare-styleable>
+    <declare-styleable name="PreferenceFrameLayout">
+        <!-- Padding to use at the top of the prefs content. -->
+        <attr name="topPadding" format="dimension" />
+        <!-- Padding to use at the bottom of the prefs content. -->
+        <attr name="bottomPadding" format="dimension" />
     </declare-styleable>
     <declare-styleable name="MenuView">
         <!-- Default appearance of menu item text. -->
