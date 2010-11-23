@@ -59,6 +59,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -200,10 +201,6 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     static final int DEFAULT_FADE_IN_OUT_DURATION = 400;
 
-    /** Adjustment to time to perform a dim, to make it more dramatic.
-     */
-    static final int DIM_DURATION_MULTIPLIER = 6;
-    
     // Maximum number of milliseconds to wait for input event injection.
     // FIXME is this value reasonable?
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
@@ -6627,6 +6624,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final Rect mContainingFrame = new Rect();
         final Rect mDisplayFrame = new Rect();
         final Rect mContentFrame = new Rect();
+        final Rect mParentFrame = new Rect();
         final Rect mVisibleFrame = new Rect();
 
         boolean mContentChanged;
@@ -6832,8 +6830,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 h = mAttrs.height== mAttrs.MATCH_PARENT ? ph : mRequestedHeight;
             }
 
+            if (!mParentFrame.equals(pf)) {
+                mParentFrame.set(pf);
+                mContentChanged = true;
+            }
+
             final Rect content = mContentFrame;
-            mContentChanged |= !content.equals(cf);
             content.set(cf);
 
             final Rect visible = mVisibleFrame;
@@ -7699,6 +7701,21 @@ public class WindowManagerService extends IWindowManager.Stub
                     && !mDrawPending && !mCommitDrawPending;
         }
 
+        /**
+         * Return whether this window is wanting to have a translation
+         * animation applied to it for an in-progress move.  (Only makes
+         * sense to call from performLayoutAndPlaceSurfacesLockedInner().)
+         */
+        boolean shouldAnimateMove() {
+            return mContentChanged && !mAnimating && !mLastHidden && !mDisplayFrozen
+                    && (mFrame.top != mLastFrame.top
+                            || mFrame.left != mLastFrame.left)
+                    && (mAttachedWindow == null
+                            || (mAttachedWindow.mAnimation == null
+                                    && !mAttachedWindow.shouldAnimateMove()))
+                    && mPolicy.isScreenOn();
+        }
+
         boolean needsBackgroundFiller(int screenWidth, int screenHeight) {
             return
                  // only if the application is requesting compatible window
@@ -7925,6 +7942,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.println();
             pw.print(prefix); pw.print("mContainingFrame=");
                     mContainingFrame.printShortString(pw);
+                    pw.print(" mParentFrame=");
+                    mParentFrame.printShortString(pw);
                     pw.print(" mDisplayFrame=");
                     mDisplayFrame.printShortString(pw);
                     pw.println();
@@ -9157,11 +9176,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     || win.mAttachedHidden
                     || win.mExiting || win.mDestroying;
 
-            if (!win.mLayoutAttached) {
-                if (DEBUG_LAYOUT) Slog.v(TAG, "First pass " + win
+            if (DEBUG_LAYOUT && !win.mLayoutAttached) {
+                Slog.v(TAG, "First pass " + win
                         + ": gone=" + gone + " mHaveFrame=" + win.mHaveFrame
                         + " mLayoutAttached=" + win.mLayoutAttached);
-                if (DEBUG_LAYOUT && gone) Slog.v(TAG, "  (mViewVisibility="
+                if (gone) Slog.v(TAG, "  (mViewVisibility="
                         + win.mViewVisibility + " mRelayoutCalled="
                         + win.mRelayoutCalled + " hidden="
                         + win.mRootToken.hidden + " hiddenRequested="
@@ -9198,16 +9217,16 @@ public class WindowManagerService extends IWindowManager.Stub
         for (i = topAttached; i >= 0; i--) {
             WindowState win = mWindows.get(i);
 
-            // If this view is GONE, then skip it -- keep the current
-            // frame, and let the caller know so they can ignore it
-            // if they want.  (We do the normal layout for INVISIBLE
-            // windows, since that means "perform layout as normal,
-            // just don't display").
             if (win.mLayoutAttached) {
                 if (DEBUG_LAYOUT) Slog.v(TAG, "Second pass " + win
                         + " mHaveFrame=" + win.mHaveFrame
                         + " mViewVisibility=" + win.mViewVisibility
                         + " mRelayoutCalled=" + win.mRelayoutCalled);
+                // If this view is GONE, then skip it -- keep the current
+                // frame, and let the caller know so they can ignore it
+                // if they want.  (We do the normal layout for INVISIBLE
+                // windows, since that means "perform layout as normal,
+                // just don't display").
                 if ((win.mViewVisibility != View.GONE && win.mRelayoutCalled)
                         || !win.mHaveFrame) {
                     if (initial) {
@@ -9390,10 +9409,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // content frame changing, then we'd like to animate
                         // it.  The checks here are ordered by what is least
                         // likely to be true first.
-                        if (w.mContentChanged && !wasAnimating && !w.mLastHidden && !mDisplayFrozen
-                                && (w.mFrame.top != w.mLastFrame.top
-                                        || w.mFrame.left != w.mLastFrame.left)
-                                && mPolicy.isScreenOn()) {
+                        if (w.shouldAnimateMove()) {
                             // Frame has moved, containing content frame
                             // has also moved, and we're not currently animating...
                             // let's do something.
@@ -9402,6 +9418,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             w.setAnimation(a);
                             animDw = w.mLastFrame.left - w.mFrame.left;
                             animDh = w.mLastFrame.top - w.mFrame.top;
+                            w.mContentChanged = false;
                         }
 
                         // Execute animation.
@@ -10265,7 +10282,8 @@ public class WindowManagerService extends IWindowManager.Stub
                                     mDimAnimator = new DimAnimator(mFxSession);
                                 }
                                 mDimAnimator.show(dw, dh);
-                                mDimAnimator.updateParameters(w, currentTime);
+                                mDimAnimator.updateParameters(mContext.getResources(),
+                                        w, currentTime);
                             }
                         }
                         if ((attrFlags&FLAG_BLUR_BEHIND) != 0) {
@@ -11327,7 +11345,7 @@ public class WindowManagerService extends IWindowManager.Stub
          * Set's the dim surface's layer and update dim parameters that will be used in
          * {@link updateSurface} after all windows are examined.
          */
-        void updateParameters(WindowState w, long currentTime) {
+        void updateParameters(Resources res, WindowState w, long currentTime) {
             mDimSurface.setLayer(w.mAnimLayer-1);
 
             final float target = w.mExiting ? 0 : w.mAttrs.dimAmount;
@@ -11341,11 +11359,15 @@ public class WindowManagerService extends IWindowManager.Stub
                         ? w.mAnimation.computeDurationHint()
                         : DEFAULT_DIM_DURATION;
                 if (target > mDimTargetAlpha) {
-                    // This is happening behind the activity UI,
-                    // so we can make it run a little longer to
-                    // give a stronger impression without disrupting
-                    // the user.
-                    duration *= DIM_DURATION_MULTIPLIER;
+                    TypedValue tv = new TypedValue();
+                    res.getValue(com.android.internal.R.fraction.config_dimBehindFadeDuration,
+                            tv, true);
+                    if (tv.type == TypedValue.TYPE_FRACTION) {
+                        duration = (long)tv.getFraction((float)duration, (float)duration);
+                    } else if (tv.type >= TypedValue.TYPE_FIRST_INT
+                            && tv.type <= TypedValue.TYPE_LAST_INT) {
+                        duration = tv.data;
+                    }
                 }
                 if (duration < 1) {
                     // Don't divide by zero
