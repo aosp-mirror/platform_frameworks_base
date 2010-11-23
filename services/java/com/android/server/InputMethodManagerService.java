@@ -240,10 +240,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private InputMethodSubtype mCurrentSubtype;
 
     // This list contains the pairs of InputMethodInfo and InputMethodSubtype.
-    private List<Pair<InputMethodInfo, InputMethodSubtype>> mShortcutInputMethodsAndSubtypes;
-    // This list is used for returning the pairs of InputMethodInfo and InputMethodSubtype through
-    // aidl. This list has imi1, subtype1 imi2, subtype2...
-    private List mShortcutInputMethodsAndSubtypesObjectList;
+    private final HashMap<InputMethodInfo, ArrayList<InputMethodSubtype>>
+            mShortcutInputMethodsAndSubtypes =
+                new HashMap<InputMethodInfo, ArrayList<InputMethodSubtype>>();
 
     /**
      * Set to true if our ServiceConnection is currently actively bound to
@@ -992,7 +991,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mCurMethodId = null;
                 unbindCurrentMethodLocked(true);
             }
-            mShortcutInputMethodsAndSubtypes = null;
+            mShortcutInputMethodsAndSubtypes.clear();
         } else {
             // There is no longer an input method set, so stop any current one.
             mCurMethodId = null;
@@ -2022,7 +2021,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + mostApplicableIMI.getId() + "," + mostApplicableSubtypeId);
         }
         if (mostApplicableIMI != null && mostApplicableSubtypeId != NOT_A_SUBTYPE_ID) {
-            ArrayList<Parcelable> ret = new ArrayList<Parcelable>(2);
             return new Pair<InputMethodInfo, InputMethodSubtype> (mostApplicableIMI,
                     mostApplicableIMI.getSubtypes().get(mostApplicableSubtypeId));
         } else {
@@ -2067,25 +2065,37 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    private void addShortcutInputMethodAndSubtypes(InputMethodInfo imi,
+            InputMethodSubtype subtype) {
+        if (mShortcutInputMethodsAndSubtypes.containsKey(imi)) {
+            mShortcutInputMethodsAndSubtypes.get(imi).add(subtype);
+        } else {
+            ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            subtypes.add(subtype);
+            mShortcutInputMethodsAndSubtypes.put(imi, subtypes);
+        }
+    }
+
     // TODO: We should change the return type from List to List<Parcelable>
     public List getShortcutInputMethodsAndSubtypes() {
         synchronized (mMethodMap) {
-            if (mShortcutInputMethodsAndSubtypesObjectList != null) {
+            if (mShortcutInputMethodsAndSubtypes.size() == 0) {
                 // If there are no selected shortcut subtypes, the framework will try to find
                 // the most applicable subtype from all subtypes whose mode is
                 // SUBTYPE_MODE_VOICE. This is an exceptional case, so we will hardcode the mode.
-                mShortcutInputMethodsAndSubtypes =
-                        new ArrayList<Pair<InputMethodInfo, InputMethodSubtype>>();
-                mShortcutInputMethodsAndSubtypes.add(
-                        findLastResortApplicableShortcutInputMethodAndSubtypeLocked(
-                                SUBTYPE_MODE_VOICE));
-                mShortcutInputMethodsAndSubtypesObjectList = new ArrayList<Parcelable>();
-                for (Pair ime: mShortcutInputMethodsAndSubtypes) {
-                    mShortcutInputMethodsAndSubtypesObjectList.add(ime.first);
-                    mShortcutInputMethodsAndSubtypesObjectList.add(ime.second);
+                Pair<InputMethodInfo, InputMethodSubtype> info =
+                    findLastResortApplicableShortcutInputMethodAndSubtypeLocked(
+                            SUBTYPE_MODE_VOICE);
+                addShortcutInputMethodAndSubtypes(info.first, info.second);
+            }
+            ArrayList ret = new ArrayList<Object>();
+            for (InputMethodInfo imi: mShortcutInputMethodsAndSubtypes.keySet()) {
+                ret.add(imi);
+                for (InputMethodSubtype subtype: mShortcutInputMethodsAndSubtypes.get(imi)) {
+                    ret.add(subtype);
                 }
             }
-            return mShortcutInputMethodsAndSubtypesObjectList;
+            return ret;
         }
     }
 
