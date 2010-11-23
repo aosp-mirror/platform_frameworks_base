@@ -30,6 +30,8 @@ public:
 protected:
     DrmConstraints* onGetConstraints(int uniqueId, const String8* path, int action);
 
+    DrmMetadata* onGetMetadata(int uniqueId, const String8* path);
+
     status_t onInitialize(int uniqueId);
 
     status_t onSetOnInfoListener(int uniqueId, const IDrmEngine::OnInfoListener* infoListener);

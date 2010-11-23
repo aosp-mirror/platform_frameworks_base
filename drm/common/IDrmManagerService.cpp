@@ -24,6 +24,7 @@
 
 #include <drm/DrmInfo.h>
 #include <drm/DrmConstraints.h>
+#include <drm/DrmMetadata.h>
 #include <drm/DrmRights.h>
 #include <drm/DrmInfoStatus.h>
 #include <drm/DrmConvertedStatus.h>
@@ -121,6 +122,35 @@ DrmConstraints* BpDrmManagerService::getConstraints(
         }
     }
     return drmConstraints;
+}
+
+DrmMetadata* BpDrmManagerService::getMetadata(int uniqueId, const String8* path) {
+    LOGV("Get Metadata");
+    Parcel data, reply;
+    data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
+    data.writeInt32(uniqueId);
+
+    DrmMetadata* drmMetadata = NULL;
+    data.writeString8(*path);
+    remote()->transact(GET_METADATA_FROM_CONTENT, data, &reply);
+
+    if (0 != reply.dataAvail()) {
+        //Filling Drm Metadata
+        drmMetadata = new DrmMetadata();
+
+        const int size = reply.readInt32();
+        for (int index = 0; index < size; ++index) {
+            const String8 key(reply.readString8());
+            const int bufferSize = reply.readInt32();
+            char* data = NULL;
+            if (0 < bufferSize) {
+                data = new char[bufferSize];
+                reply.read(data, bufferSize);
+            }
+            drmMetadata->put(&key, data);
+        }
+    }
+    return drmMetadata;
 }
 
 bool BpDrmManagerService::canHandle(int uniqueId, const String8& path, const String8& mimeType) {
@@ -825,6 +855,38 @@ status_t BnDrmManagerService::onTransact(
         }
         delete drmConstraints; drmConstraints = NULL;
         return DRM_NO_ERROR;
+    }
+
+    case GET_METADATA_FROM_CONTENT:
+    {
+        LOGV("BnDrmManagerService::onTransact :GET_METADATA_FROM_CONTENT");
+        CHECK_INTERFACE(IDrmManagerService, data, reply);
+
+        const int uniqueId = data.readInt32();
+        const String8 path = data.readString8();
+
+        DrmMetadata* drmMetadata = getMetadata(uniqueId, &path);
+        if (NULL != drmMetadata) {
+            //Filling DRM Metadata contents
+            reply->writeInt32(drmMetadata->getCount());
+
+            DrmMetadata::KeyIterator keyIt = drmMetadata->keyIterator();
+            while (keyIt.hasNext()) {
+                const String8 key = keyIt.next();
+                reply->writeString8(key);
+                const char* value = drmMetadata->getAsByteArray(&key);
+                int bufferSize = 0;
+                if (NULL != value) {
+                    bufferSize = strlen(value);
+                    reply->writeInt32(bufferSize + 1);
+                    reply->write(value, bufferSize + 1);
+                } else {
+                    reply->writeInt32(0);
+                }
+            }
+        }
+        delete drmMetadata; drmMetadata = NULL;
+        return NO_ERROR;
     }
 
     case CAN_HANDLE:

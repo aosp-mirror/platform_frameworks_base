@@ -23,6 +23,7 @@ namespace android {
 
 class DrmContentIds;
 class DrmConstraints;
+class DrmMetadata;
 class DrmRights;
 class DrmInfo;
 class DrmInfoStatus;
@@ -103,6 +104,18 @@ public:
      */
     virtual DrmConstraints* getConstraints(
             int uniqueId, const String8* path, int action) = 0;
+
+    /**
+     * Get metadata information associated with input content
+     *
+     * @param[in] uniqueId Unique identifier for a session
+     * @param[in] path Path of the protected content
+     * @return DrmMetadata
+     *         key-value pairs of metadata
+     * @note
+     *      In case of error, return NULL
+     */
+    virtual DrmMetadata* getMetadata(int uniqueId, const String8* path) = 0;
 
     /**
      * Get whether the given content can be handled by this plugin or not

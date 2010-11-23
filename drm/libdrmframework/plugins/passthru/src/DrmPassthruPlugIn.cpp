@@ -20,6 +20,7 @@
 
 #include <drm/DrmRights.h>
 #include <drm/DrmConstraints.h>
+#include <drm/DrmMetadata.h>
 #include <drm/DrmInfo.h>
 #include <drm/DrmInfoEvent.h>
 #include <drm/DrmInfoStatus.h>
@@ -49,6 +50,10 @@ DrmPassthruPlugIn::DrmPassthruPlugIn()
 
 DrmPassthruPlugIn::~DrmPassthruPlugIn() {
 
+}
+
+DrmMetadata* DrmPassthruPlugIn::onGetMetadata(int uniqueId, const String8* path) {
+    return NULL;
 }
 
 DrmConstraints* DrmPassthruPlugIn::onGetConstraints(

@@ -32,6 +32,7 @@ class DrmUnregistrationInfo;
 class DrmRightsAcquisitionInfo;
 class DrmContentIds;
 class DrmConstraints;
+class DrmMetadata;
 class DrmRights;
 class DrmInfo;
 class DrmInfoStatus;
@@ -73,6 +74,8 @@ public:
     status_t installDrmEngine(int uniqueId, const String8& drmEngineFile);
 
     DrmConstraints* getConstraints(int uniqueId, const String8* path, const int action);
+
+    DrmMetadata* getMetadata(int uniqueId, const String8* path);
 
     bool canHandle(int uniqueId, const String8& path, const String8& mimeType);
 

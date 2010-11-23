@@ -18,6 +18,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
     DrmConstraints.cpp \
+    DrmMetadata.cpp \
     DrmConvertedStatus.cpp \
     DrmEngineBase.cpp \
     DrmInfo.cpp \

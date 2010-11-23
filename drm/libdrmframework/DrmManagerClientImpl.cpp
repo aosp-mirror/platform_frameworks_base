@@ -101,6 +101,14 @@ DrmConstraints* DrmManagerClientImpl::getConstraints(
     return drmConstraints;
 }
 
+DrmMetadata* DrmManagerClientImpl::getMetadata(int uniqueId, const String8* path) {
+    DrmMetadata *drmMetadata = NULL;
+    if ((NULL != path) && (EMPTY_STRING != *path)) {
+        drmMetadata = getDrmManagerService()->getMetadata(uniqueId, path);
+    }
+    return drmMetadata;
+}
+
 bool DrmManagerClientImpl::canHandle(int uniqueId, const String8& path, const String8& mimeType) {
     bool retCode = false;
     if ((EMPTY_STRING != path) || (EMPTY_STRING != mimeType)) {
