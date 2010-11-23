@@ -22,8 +22,8 @@ import com.android.layoutlib.api.IResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
-import com.android.layoutlib.bridge.android.NinePatchDrawable;
 import com.android.ninepatch.NinePatch;
+import com.android.ninepatch.NinePatchChunk;
 
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
@@ -31,9 +31,12 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
+import android.graphics.NinePatch_Delegate;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.NinePatchDrawable;
 import android.util.TypedValue;
 
 import java.io.File;
@@ -121,15 +124,38 @@ public final class ResourceHelper {
         if (lowerCaseValue.endsWith(NinePatch.EXTENSION_9PATCH)) {
             File file = new File(stringValue);
             if (file.isFile()) {
-                NinePatch ninePatch = Bridge.getCached9Patch(stringValue,
+                // see if we still have both the chunk and the bitmap in the caches
+                NinePatchChunk chunk = Bridge.getCached9Patch(stringValue,
+                        isFramework ? null : context.getProjectKey());
+                Bitmap bitmap = Bridge.getCachedBitmap(stringValue,
                         isFramework ? null : context.getProjectKey());
 
-                if (ninePatch == null) {
+                // if either chunk or bitmap is null, then we reload the 9-patch file.
+                if (chunk == null || bitmap == null) {
                     try {
-                        ninePatch = NinePatch.load(file.toURL(), false /* convert */);
+                        NinePatch ninePatch = NinePatch.load(file.toURL(), false /* convert */);
+                        if (ninePatch != null) {
+                            if (chunk == null) {
+                                chunk = ninePatch.getChunk();
 
-                        Bridge.setCached9Patch(stringValue, ninePatch,
-                                isFramework ? null : context.getProjectKey());
+                                Bridge.setCached9Patch(stringValue, chunk,
+                                        isFramework ? null : context.getProjectKey());
+                            }
+
+                            if (bitmap == null) {
+                                Density density = Density.MEDIUM;
+                                if (value instanceof IDensityBasedResourceValue) {
+                                    density = ((IDensityBasedResourceValue)value).getDensity();
+                                }
+
+                                bitmap = Bitmap_Delegate.createBitmap(ninePatch.getImage(),
+                                        false /*isMutable*/,
+                                        density);
+
+                                Bridge.setCachedBitmap(stringValue, bitmap,
+                                        isFramework ? null : context.getProjectKey());
+                            }
+                        }
                     } catch (MalformedURLException e) {
                         // URL is wrong, we'll return null below
                     } catch (IOException e) {
@@ -137,8 +163,13 @@ public final class ResourceHelper {
                     }
                 }
 
-                if (ninePatch != null) {
-                    return new NinePatchDrawable(ninePatch);
+                if (chunk != null && bitmap != null) {
+                    int[] padding = chunk.getPadding();
+                    Rect paddingRect = new Rect(padding[0], padding[1], padding[2], padding[3]);
+
+                    return new NinePatchDrawable(context.getResources(), bitmap,
+                            NinePatch_Delegate.serialize(chunk),
+                            paddingRect, null);
                 }
             }
 
@@ -174,27 +205,15 @@ public final class ResourceHelper {
                             isFramework ? null : context.getProjectKey());
 
                     if (bitmap == null) {
-                        // always create the cache copy in the original density.
-                        bitmap = Bitmap_Delegate.createBitmap(bmpFile, Density.MEDIUM);
+                        Density density = Density.MEDIUM;
+                        if (value instanceof IDensityBasedResourceValue) {
+                            density = ((IDensityBasedResourceValue)value).getDensity();
+                        }
+
+                        bitmap = Bitmap_Delegate.createBitmap(bmpFile, false /*isMutable*/,
+                                density);
                         Bridge.setCachedBitmap(stringValue, bitmap,
                                 isFramework ? null : context.getProjectKey());
-                    }
-
-                    try {
-                        if (value instanceof IDensityBasedResourceValue) {
-                            Density density = ((IDensityBasedResourceValue)value).getDensity();
-                            if (density != Density.MEDIUM) {
-                                // create a copy of the bitmap
-                                bitmap = Bitmap.createBitmap(bitmap);
-
-                                // apply the density
-                                bitmap.setDensity(density.getValue());
-                            }
-                        }
-                    } catch (NoClassDefFoundError error) {
-                        // look like we're running in an older version of ADT that doesn't include
-                        // the new layoutlib_api. Let's just ignore this, the drawing will just be
-                        // wrong.
                     }
 
                     return new BitmapDrawable(context.getResources(), bitmap);

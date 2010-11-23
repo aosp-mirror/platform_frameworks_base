@@ -960,7 +960,7 @@ public class Canvas_Delegate {
      * Creates a new {@link Graphics2D} based on the {@link Paint} parameters.
      * <p/>The object must be disposed ({@link Graphics2D#dispose()}) after being used.
      */
-    private Graphics2D getCustomGraphics(Paint_Delegate paint) {
+    /*package*/ Graphics2D getCustomGraphics(Paint_Delegate paint) {
         // make new one
         Graphics2D g = getGraphics2d();
         g = (Graphics2D)g.create();
