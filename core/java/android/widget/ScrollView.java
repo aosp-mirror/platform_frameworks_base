@@ -24,6 +24,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.StrictMode;
 import android.util.AttributeSet;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
@@ -128,7 +129,16 @@ public class ScrollView extends FrameLayout {
      * drags/flings if multiple pointers are used.
      */
     private int mActivePointerId = INVALID_POINTER;
-    
+
+    /**
+     * The StrictMode "critical time span" objects to catch animation
+     * stutters.  Non-null when a time-sensitive animation is
+     * in-flight.  Must call finish() on them when done animating.
+     * These are no-ops on user builds.
+     */
+    private StrictMode.Span mScrollStrictSpan = null;  // aka "drag"
+    private StrictMode.Span mFlingStrictSpan = null;
+
     /**
      * Sentinel value for no current active pointer.
      * Used by {@link #mActivePointerId}.
@@ -437,6 +447,9 @@ public class ScrollView extends FrameLayout {
                 if (yDiff > mTouchSlop) {
                     mIsBeingDragged = true;
                     mLastMotionY = y;
+                    if (mScrollStrictSpan == null) {
+                        mScrollStrictSpan = StrictMode.enterCriticalSpan("ScrollView-scroll");
+                    }
                 }
                 break;
             }
@@ -461,6 +474,9 @@ public class ScrollView extends FrameLayout {
                 * being flinged.
                 */
                 mIsBeingDragged = !mScroller.isFinished();
+                if (mIsBeingDragged && mScrollStrictSpan == null) {
+                    mScrollStrictSpan = StrictMode.enterCriticalSpan("ScrollView-scroll");
+                }
                 break;
             }
 
@@ -512,6 +528,10 @@ public class ScrollView extends FrameLayout {
                  */
                 if (!mScroller.isFinished()) {
                     mScroller.abortAnimation();
+                    if (mFlingStrictSpan != null) {
+                        mFlingStrictSpan.finish();
+                        mFlingStrictSpan = null;
+                    }
                 }
 
                 // Remember where the motion event started
@@ -577,16 +597,7 @@ public class ScrollView extends FrameLayout {
                     }
 
                     mActivePointerId = INVALID_POINTER;
-                    mIsBeingDragged = false;
-
-                    if (mVelocityTracker != null) {
-                        mVelocityTracker.recycle();
-                        mVelocityTracker = null;
-                    }
-                    if (mEdgeGlowTop != null) {
-                        mEdgeGlowTop.onRelease();
-                        mEdgeGlowBottom.onRelease();
-                    }
+                    endDrag();
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
@@ -595,15 +606,7 @@ public class ScrollView extends FrameLayout {
                         invalidate();
                     }
                     mActivePointerId = INVALID_POINTER;
-                    mIsBeingDragged = false;
-                    if (mVelocityTracker != null) {
-                        mVelocityTracker.recycle();
-                        mVelocityTracker = null;
-                    }
-                    if (mEdgeGlowTop != null) {
-                        mEdgeGlowTop.onRelease();
-                        mEdgeGlowBottom.onRelease();
-                    }
+                    endDrag();
                 }
                 break;
             case MotionEvent.ACTION_POINTER_UP:
@@ -1004,6 +1007,10 @@ public class ScrollView extends FrameLayout {
         } else {
             if (!mScroller.isFinished()) {
                 mScroller.abortAnimation();
+                if (mFlingStrictSpan != null) {
+                    mFlingStrictSpan.finish();
+                    mFlingStrictSpan = null;
+                }
             }
             scrollBy(dx, dy);
         }
@@ -1122,6 +1129,11 @@ public class ScrollView extends FrameLayout {
 
             // Keep on drawing until the animation has finished.
             postInvalidate();
+        } else {
+            if (mFlingStrictSpan != null) {
+                mFlingStrictSpan.finish();
+                mFlingStrictSpan = null;
+            }
         }
     }
 
@@ -1296,6 +1308,20 @@ public class ScrollView extends FrameLayout {
     }
 
     @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        if (mScrollStrictSpan != null) {
+            mScrollStrictSpan.finish();
+            mScrollStrictSpan = null;
+        }
+        if (mFlingStrictSpan != null) {
+            mFlingStrictSpan.finish();
+            mFlingStrictSpan = null;
+        }
+    }
+
+    @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
         mIsLayoutDirty = false;
@@ -1368,8 +1394,31 @@ public class ScrollView extends FrameLayout {
                 mScrollViewMovedFocus = true;
                 mScrollViewMovedFocus = false;
             }
-    
+
+            if (mFlingStrictSpan == null) {
+                mFlingStrictSpan = StrictMode.enterCriticalSpan("ScrollView-fling");
+            }
+
             invalidate();
+        }
+    }
+
+    private void endDrag() {
+        mIsBeingDragged = false;
+
+        if (mVelocityTracker != null) {
+            mVelocityTracker.recycle();
+            mVelocityTracker = null;
+        }
+
+        if (mEdgeGlowTop != null) {
+            mEdgeGlowTop.onRelease();
+            mEdgeGlowBottom.onRelease();
+        }
+
+        if (mScrollStrictSpan != null) {
+            mScrollStrictSpan.finish();
+            mScrollStrictSpan = null;
         }
     }
 
