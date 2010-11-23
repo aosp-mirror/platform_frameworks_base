@@ -17,74 +17,16 @@
 */
 -->
 
-<!-- New holo animation, zooming contents on top of wallpaper back up. -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:detachWallpaper="true" android:shareInterpolator="false">
-    <scale android:fromXScale="0.8" android:toXScale="1.0"
-            android:fromYScale="0.8" android:toYScale="1.0"
+    <scale android:fromXScale="0.95" android:toXScale="1.0"
+            android:fromYScale="0.95" android:toYScale="1.0"
             android:pivotX="50%p" android:pivotY="50%p"
             android:interpolator="@anim/decelerate_quint_interpolator"
-            android:startOffset="@android:integer/config_mediumAnimTime"
-            android:duration="@android:integer/config_mediumAnimTime" />
+            android:startOffset="200"
+            android:duration="300" />
     <alpha android:fromAlpha="0" android:toAlpha="1.0"
             android:interpolator="@anim/decelerate_cubic_interpolator"
-            android:startOffset="@android:integer/config_mediumAnimTime"
-            android:duration="@android:integer/config_mediumAnimTime"/>
+            android:startOffset="200"
+            android:duration="300"/>
 </set>
-
-
-<!-- This version zooms the exiting non-wallpaper down in to the
-     wallpaper, without zooming the wallpaper itself. -->
-<!--
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:interpolator="@anim/decelerate_interpolator"
-        android:detachWallpaper="true">
-    <scale android:fromXScale="2.0" android:toXScale="1.0"
-           android:fromYScale="2.0" android:toYScale="1.0"
-           android:pivotX="50%p" android:pivotY="50%p"
-           android:duration="@android:integer/config_mediumAnimTime" />
-</set>
--->
-
-<!-- This version zooms the new non-wallpaper down on top of the
-     wallpaper, without zooming the wallpaper itself. -->
-<!--
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:interpolator="@anim/decelerate_interpolator"
-        android:detachWallpaper="true">
-    <scale android:fromXScale=".5" android:toXScale="1.0"
-           android:fromYScale=".5" android:toYScale="1.0"
-           android:pivotX="50%p" android:pivotY="50%p"
-           android:duration="@android:integer/config_mediumAnimTime" />
-</set>
--->
-
-<!-- This version zooms the new non-wallpaper up off the wallpaper the
-     wallpaper.  The wallpaper here just stays fixed behind. -->
-<!--
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:interpolator="@anim/decelerate_interpolator"
-        android:zAdjustment="top">
-    <scale android:fromXScale=".5" android:toXScale="1.0"
-           android:fromYScale=".5" android:toYScale="1.0"
-           android:pivotX="50%p" android:pivotY="50%p"
-           android:duration="@android:integer/config_mediumAnimTime" />
-    <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
-            android:duration="@android:integer/config_mediumAnimTime"/>
-</set>
--->
-
-<!-- This version is a variation on the inter-activity slide that
-    also scales the wallpaper. -->
-<!--
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:interpolator="@anim/decelerate_interpolator"
-        android:zAdjustment="top">
-    <scale android:fromXScale="2.0" android:toXScale="1.0"
-           android:fromYScale="2.0" android:toYScale="1.0"
-           android:pivotX="100%p" android:pivotY="50%p"
-           android:duration="@android:integer/config_mediumAnimTime" />
-	<translate android:fromXDelta="-100%" android:toXDelta="0"
-        android:duration="@android:integer/config_mediumAnimTime"/>
-</set>
--->
