@@ -192,6 +192,18 @@ public class RuimSmsInterfaceManager extends IccSmsInterfaceManager {
         return mSms;
     }
 
+    public boolean enableCellBroadcast(int messageIdentifier) {
+        // Not implemented
+        Log.e(LOG_TAG, "Error! Not implemented for CDMA.");
+        return false;
+    }
+
+    public boolean disableCellBroadcast(int messageIdentifier) {
+        // Not implemented
+        Log.e(LOG_TAG, "Error! Not implemented for CDMA.");
+        return false;
+    }
+
     protected void log(String msg) {
         Log.d(LOG_TAG, "[RuimSmsInterfaceManager] " + msg);
     }

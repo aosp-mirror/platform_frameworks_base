@@ -22,20 +22,26 @@ import android.app.PendingIntent.CanceledException;
 import android.content.Intent;
 import android.os.AsyncResult;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.provider.Telephony.Sms.Intents;
 import android.telephony.ServiceState;
+import android.telephony.SmsCbMessage;
+import android.telephony.gsm.GsmCellLocation;
 import android.util.Config;
 import android.util.Log;
 
+import com.android.internal.telephony.BaseCommands;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.SMSDispatcher;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
+import com.android.internal.telephony.TelephonyProperties;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import static android.telephony.SmsMessage.MessageClass;
 
@@ -47,6 +53,8 @@ final class GsmSMSDispatcher extends SMSDispatcher {
     GsmSMSDispatcher(GSMPhone phone) {
         super(phone);
         mGsmPhone = phone;
+
+        ((BaseCommands)mCm).setOnNewGsmBroadcastSms(this, EVENT_NEW_BROADCAST_SMS, null);
     }
 
     /**
@@ -383,4 +391,162 @@ final class GsmSMSDispatcher extends SMSDispatcher {
                 return CommandsInterface.GSM_SMS_FAIL_CAUSE_UNSPECIFIED_ERROR;
         }
     }
+
+    /**
+     * Holds all info about a message page needed to assemble a complete
+     * concatenated message
+     */
+    private static final class SmsCbConcatInfo {
+        private final SmsCbHeader mHeader;
+
+        private final String mPlmn;
+
+        private final int mLac;
+
+        private final int mCid;
+
+        public SmsCbConcatInfo(SmsCbHeader header, String plmn, int lac, int cid) {
+            mHeader = header;
+            mPlmn = plmn;
+            mLac = lac;
+            mCid = cid;
+        }
+
+        @Override
+        public int hashCode() {
+            return mHeader.messageIdentifier * 31 + mHeader.updateNumber;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof SmsCbConcatInfo) {
+                SmsCbConcatInfo other = (SmsCbConcatInfo)obj;
+
+                // Two pages match if all header attributes (except the page
+                // index) are identical, and both pages belong to the same
+                // location (which is also determined by the scope parameter)
+                if (mHeader.geographicalScope == other.mHeader.geographicalScope
+                        && mHeader.messageCode == other.mHeader.messageCode
+                        && mHeader.updateNumber == other.mHeader.updateNumber
+                        && mHeader.messageIdentifier == other.mHeader.messageIdentifier
+                        && mHeader.dataCodingScheme == other.mHeader.dataCodingScheme
+                        && mHeader.nrOfPages == other.mHeader.nrOfPages) {
+                    return matchesLocation(other.mPlmn, other.mLac, other.mCid);
+                }
+            }
+
+            return false;
+        }
+
+        /**
+         * Checks if this concatenation info matches the given location. The
+         * granularity of the match depends on the geographical scope.
+         *
+         * @param plmn PLMN
+         * @param lac Location area code
+         * @param cid Cell ID
+         * @return true if matching, false otherwise
+         */
+        public boolean matchesLocation(String plmn, int lac, int cid) {
+            switch (mHeader.geographicalScope) {
+                case SmsCbMessage.GEOGRAPHICAL_SCOPE_CELL_WIDE:
+                case SmsCbMessage.GEOGRAPHICAL_SCOPE_CELL_WIDE_IMMEDIATE:
+                    if (mCid != cid) {
+                        return false;
+                    }
+                    // deliberate fall-through
+                case SmsCbMessage.GEOGRAPHICAL_SCOPE_LA_WIDE:
+                    if (mLac != lac) {
+                        return false;
+                    }
+                    // deliberate fall-through
+                case SmsCbMessage.GEOGRAPHICAL_SCOPE_PLMN_WIDE:
+                    return mPlmn != null && mPlmn.equals(plmn);
+            }
+
+            return false;
+        }
+    }
+
+    // This map holds incomplete concatenated messages waiting for assembly
+    private HashMap<SmsCbConcatInfo, byte[][]> mSmsCbPageMap =
+            new HashMap<SmsCbConcatInfo, byte[][]>();
+
+    protected void handleBroadcastSms(AsyncResult ar) {
+        try {
+            byte[][] pdus = null;
+            byte[] receivedPdu = (byte[])ar.result;
+
+            if (Config.LOGD) {
+                for (int i = 0; i < receivedPdu.length; i += 8) {
+                    StringBuilder sb = new StringBuilder("SMS CB pdu data: ");
+                    for (int j = i; j < i + 8 && j < receivedPdu.length; j++) {
+                        int b = receivedPdu[j] & 0xff;
+                        if (b < 0x10) {
+                            sb.append("0");
+                        }
+                        sb.append(Integer.toHexString(b)).append(" ");
+                    }
+                    Log.d(TAG, sb.toString());
+                }
+            }
+
+            SmsCbHeader header = new SmsCbHeader(receivedPdu);
+            String plmn = SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_NUMERIC);
+            GsmCellLocation cellLocation = (GsmCellLocation)mGsmPhone.getCellLocation();
+            int lac = cellLocation.getLac();
+            int cid = cellLocation.getCid();
+
+            if (header.nrOfPages > 1) {
+                // Multi-page message
+                SmsCbConcatInfo concatInfo = new SmsCbConcatInfo(header, plmn, lac, cid);
+
+                // Try to find other pages of the same message
+                pdus = mSmsCbPageMap.get(concatInfo);
+
+                if (pdus == null) {
+                    // This it the first page of this message, make room for all
+                    // pages and keep until complete
+                    pdus = new byte[header.nrOfPages][];
+
+                    mSmsCbPageMap.put(concatInfo, pdus);
+                }
+
+                // Page parameter is one-based
+                pdus[header.pageIndex - 1] = receivedPdu;
+
+                for (int i = 0; i < pdus.length; i++) {
+                    if (pdus[i] == null) {
+                        // Still missing pages, exit
+                        return;
+                    }
+                }
+
+                // Message complete, remove and dispatch
+                mSmsCbPageMap.remove(concatInfo);
+            } else {
+                // Single page message
+                pdus = new byte[1][];
+                pdus[0] = receivedPdu;
+            }
+
+            dispatchBroadcastPdus(pdus);
+
+            // Remove messages that are out of scope to prevent the map from
+            // growing indefinitely, containing incomplete messages that were
+            // never assembled
+            Iterator<SmsCbConcatInfo> iter = mSmsCbPageMap.keySet().iterator();
+
+            while (iter.hasNext()) {
+                SmsCbConcatInfo info = iter.next();
+
+                if (!info.matchesLocation(plmn, lac, cid)) {
+                    iter.remove();
+                }
+            }
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Error in decoding SMS CB pdu", e);
+        }
+    }
+
 }
