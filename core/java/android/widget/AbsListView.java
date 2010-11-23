@@ -3115,8 +3115,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final int restoreCount = canvas.save();
                 final int width = getWidth();
 
-                canvas.translate(-width / 2, Math.min(0, scrollY + mFirstPositionDistanceGuess));
-                mEdgeGlowTop.setSize(width * 2, getHeight());
+                canvas.translate(0, Math.min(0, scrollY + mFirstPositionDistanceGuess));
+                mEdgeGlowTop.setSize(width, getHeight());
                 if (mEdgeGlowTop.draw(canvas)) {
                     invalidate();
                 }
@@ -3127,10 +3127,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final int width = getWidth();
                 final int height = getHeight();
 
-                canvas.translate(-width / 2,
-                        Math.max(height, scrollY + mLastPositionDistanceGuess));
-                canvas.rotate(180, width, 0);
-                mEdgeGlowBottom.setSize(width * 2, height);
+                canvas.translate(-width, 0);
+                canvas.rotate(-180, width, 0);
+                canvas.translate(0, -height);
+                mEdgeGlowBottom.setSize(width, height);
                 if (mEdgeGlowBottom.draw(canvas)) {
                     invalidate();
                 }
