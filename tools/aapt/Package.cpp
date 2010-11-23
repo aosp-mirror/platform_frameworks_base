@@ -33,8 +33,8 @@ static const char* kNoCompressExt[] = {
 
 /* fwd decls, so I can write this downward */
 ssize_t processAssets(Bundle* bundle, ZipFile* zip, const sp<AaptAssets>& assets);
-ssize_t processAssets(Bundle* bundle, ZipFile* zip,
-                        const sp<AaptDir>& dir, const AaptGroupEntry& ge);
+ssize_t processAssets(Bundle* bundle, ZipFile* zip, const sp<AaptDir>& dir,
+                        const AaptGroupEntry& ge, const ResourceFilter* filter);
 bool processFile(Bundle* bundle, ZipFile* zip,
                         const sp<AaptGroup>& group, const sp<AaptFile>& file);
 bool okayToCompress(Bundle* bundle, const String8& pathName);
@@ -204,32 +204,43 @@ ssize_t processAssets(Bundle* bundle, ZipFile* zip,
     const size_t N = assets->getGroupEntries().size();
     for (size_t i=0; i<N; i++) {
         const AaptGroupEntry& ge = assets->getGroupEntries()[i];
-        if (!filter.match(ge.toParams())) {
-            continue;
-        }
-        ssize_t res = processAssets(bundle, zip, assets, ge);
+
+        ssize_t res = processAssets(bundle, zip, assets, ge, &filter);
         if (res < 0) {
             return res;
         }
+
         count += res;
     }
 
     return count;
 }
 
-ssize_t processAssets(Bundle* bundle, ZipFile* zip,
-                      const sp<AaptDir>& dir, const AaptGroupEntry& ge)
+ssize_t processAssets(Bundle* bundle, ZipFile* zip, const sp<AaptDir>& dir,
+        const AaptGroupEntry& ge, const ResourceFilter* filter)
 {
     ssize_t count = 0;
 
     const size_t ND = dir->getDirs().size();
     size_t i;
     for (i=0; i<ND; i++) {
-        ssize_t res = processAssets(bundle, zip, dir->getDirs().valueAt(i), ge);
+        const sp<AaptDir>& subDir = dir->getDirs().valueAt(i);
+
+        const bool filterable = filter != NULL && subDir->getLeaf().find("mipmap-") != 0;
+
+        if (filterable && subDir->getLeaf() != subDir->getPath() && !filter->match(ge.toParams())) {
+            continue;
+        }
+
+        ssize_t res = processAssets(bundle, zip, subDir, ge, filterable ? filter : NULL);
         if (res < 0) {
             return res;
         }
         count += res;
+    }
+
+    if (filter != NULL && !filter->match(ge.toParams())) {
+        return count;
     }
 
     const size_t NF = dir->getFiles().size();

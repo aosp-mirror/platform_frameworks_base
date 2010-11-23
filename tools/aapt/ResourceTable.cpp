@@ -2539,7 +2539,7 @@ ResourceFilter::parse(const char* arg)
 }
 
 bool
-ResourceFilter::match(int axis, uint32_t value)
+ResourceFilter::match(int axis, uint32_t value) const
 {
     if (value == 0) {
         // they didn't specify anything so take everything
@@ -2555,7 +2555,7 @@ ResourceFilter::match(int axis, uint32_t value)
 }
 
 bool
-ResourceFilter::match(const ResTable_config& config)
+ResourceFilter::match(const ResTable_config& config) const
 {
     if (config.locale) {
         uint32_t locale = (config.country[1] << 24) | (config.country[0] << 16)
@@ -2608,6 +2608,8 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
     const size_t N = mOrderedPackages.size();
     size_t pi;
 
+    const static String16 mipmap16("mipmap");
+
     bool useUTF8 = !bundle->getWantUTF16() && bundle->isMinSdkAtLeast(SDK_FROYO);
 
     // Iterate through all data, collecting all values (strings,
@@ -2630,7 +2632,10 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 typeStrings.add(String16("<empty>"), false);
                 continue;
             }
-            typeStrings.add(t->getName(), false);
+            const String16 typeName(t->getName());
+            typeStrings.add(typeName, false);
+
+            const bool filterable = (typeName != mipmap16);
 
             const size_t N = t->getOrderedConfigs().size();
             for (size_t ci=0; ci<N; ci++) {
@@ -2641,7 +2646,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 const size_t N = c->getEntries().size();
                 for (size_t ei=0; ei<N; ei++) {
                     ConfigDescription config = c->getEntries().keyAt(ei);
-                    if (!filter.match(config)) {
+                    if (filterable && !filter.match(config)) {
                         continue;
                     }
                     sp<Entry> e = c->getEntries().valueAt(ei);
@@ -2721,6 +2726,8 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                                 "Type name %s not found",
                                 String8(typeName).string());
 
+            const bool filterable = (typeName != mipmap16);
+
             const size_t N = t != NULL ? t->getOrderedConfigs().size() : 0;
             
             // First write the typeSpec chunk, containing information about
@@ -2745,7 +2752,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                     (((uint8_t*)data->editData())
                         + typeSpecStart + sizeof(ResTable_typeSpec));
                 memset(typeSpecFlags, 0, sizeof(uint32_t)*N);
-                        
+
                 for (size_t ei=0; ei<N; ei++) {
                     sp<ConfigList> cl = t->getOrderedConfigs().itemAt(ei);
                     if (cl->getPublic()) {
@@ -2753,11 +2760,11 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                     }
                     const size_t CN = cl->getEntries().size();
                     for (size_t ci=0; ci<CN; ci++) {
-                        if (!filter.match(cl->getEntries().keyAt(ci))) {
+                        if (filterable && !filter.match(cl->getEntries().keyAt(ci))) {
                             continue;
                         }
                         for (size_t cj=ci+1; cj<CN; cj++) {
-                            if (!filter.match(cl->getEntries().keyAt(cj))) {
+                            if (filterable && !filter.match(cl->getEntries().keyAt(cj))) {
                                 continue;
                             }
                             typeSpecFlags[ei] |= htodl(
@@ -2794,7 +2801,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                       config.screenWidth,
                       config.screenHeight));
                       
-                if (!filter.match(config)) {
+                if (filterable && !filter.match(config)) {
                     continue;
                 }
                 
