@@ -43,6 +43,10 @@ DrmConstraints* DrmManagerClient::getConstraints(const String8* path, const int 
     return mDrmManagerClientImpl->getConstraints(mUniqueId, path, action);
 }
 
+DrmMetadata* DrmManagerClient::getMetadata(const String8* path) {
+    return mDrmManagerClientImpl->getMetadata(mUniqueId, path);
+}
+
 bool DrmManagerClient::canHandle(const String8& path, const String8& mimeType) {
     return mDrmManagerClientImpl->canHandle(mUniqueId, path, mimeType);
 }
