@@ -30,8 +30,8 @@
     <!-- Enable lockscreen rotation -->
     <bool name="config_enableLockScreenRotation">true</bool>
 
-    <!-- Enables 3d task switcher on xlarge device -->
-    <bool name="config_enableRecentApps3D">true</bool>
+    <!-- see comment in values/config.xml -->
+    <integer name="config_longPressOnHomeBehavior">1</integer>
 
 </resources>
 
