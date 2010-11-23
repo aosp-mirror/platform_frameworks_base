@@ -245,19 +245,23 @@ public class EdgeGlow {
         update();
 
         final int edgeHeight = mEdge.getIntrinsicHeight();
+        final int edgeWidth = mEdge.getIntrinsicWidth();
         final int glowHeight = mGlow.getIntrinsicHeight();
-
-        final float distScale = (float) mHeight / mWidth;
+        final int glowWidth = mGlow.getIntrinsicWidth();
 
         mGlow.setAlpha((int) (Math.max(0, Math.min(mGlowAlpha, 1)) * 255));
-        // Width of the image should be 3 * the width of the screen.
-        // Should start off screen to the left.
-        mGlow.setBounds(-mWidth, 0, mWidth * 2, (int) Math.min(
-                glowHeight * mGlowScaleY * distScale * 0.6f, mHeight * MAX_GLOW_HEIGHT));
+
+        // Center the glow inside the width of the container.
+        int glowLeft = (mWidth - glowWidth)/2;
+        mGlow.setBounds(glowLeft, 0, mWidth - glowLeft, (int) Math.min(
+                glowHeight * mGlowScaleY * glowHeight/ glowWidth * 0.6f,
+                glowHeight * MAX_GLOW_HEIGHT));
         mGlow.draw(canvas);
 
         mEdge.setAlpha((int) (Math.max(0, Math.min(mEdgeAlpha, 1)) * 255));
-        mEdge.setBounds(0, 0, mWidth, (int) (edgeHeight * mEdgeScaleY));
+
+        int edgeLeft = (mWidth - edgeWidth)/2;
+        mEdge.setBounds(edgeLeft, 0, mWidth - edgeLeft, (int) (edgeHeight * mEdgeScaleY));
         mEdge.draw(canvas);
 
         return mState != STATE_IDLE;
