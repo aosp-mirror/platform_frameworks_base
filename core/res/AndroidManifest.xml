@@ -60,7 +60,7 @@
     <protected-broadcast android:name="android.app.action.EXIT_CAR_MODE" />
     <protected-broadcast android:name="android.app.action.ENTER_DESK_MODE" />
     <protected-broadcast android:name="android.app.action.EXIT_DESK_MODE" />
-    
+
     <protected-broadcast android:name="android.backup.intent.RUN" />
     <protected-broadcast android:name="android.backup.intent.CLEAR" />
     <protected-broadcast android:name="android.backup.intent.INIT" />
@@ -1278,7 +1278,7 @@
         android:description="@string/permlab_copyProtectedData"
         android:protectionLevel="signature" />
 
-    <!-- C2DM permission. 
+    <!-- C2DM permission.
          @hide Used internally.
      -->
     <permission android:name="android.intent.category.MASTER_CLEAR.permission.C2D_MESSAGE"
@@ -1332,6 +1332,7 @@
         </activity>
 
         <activity android:name="android.accounts.GrantCredentialsPermissionActivity"
+                android:permission="android.permission.ACCOUNT_MANAGER"
                 android:excludeFromRecents="true"
                 android:exported="true">
         </activity>
