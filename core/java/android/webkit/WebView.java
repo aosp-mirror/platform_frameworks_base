@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
@@ -3731,6 +3732,16 @@ public class WebView extends AbsoluteLayout
         }
         selectionDone();
         return false;
+    }
+
+    private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        if (mSelectingText && mOrientation != newConfig.orientation) {
+            selectionDone();
+        }
+        mOrientation = newConfig.orientation;
     }
 
     /**
