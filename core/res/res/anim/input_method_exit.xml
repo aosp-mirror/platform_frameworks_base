@@ -18,9 +18,11 @@
 */
 -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:interpolator="@anim/accelerate_interpolator">
-    <translate android:fromYDelta="0" android:toYDelta="20%"
+	android:shareInterpolator="false">
+    <translate android:fromYDelta="0" android:toYDelta="10%"
+			android:interpolator="@anim/accelerate_quint_interpolator"
             android:duration="@android:integer/config_shortAnimTime"/>
     <alpha android:fromAlpha="1.0" android:toAlpha="0.0"
+			android:interpolator="@anim/accelerate_cubic_interpolator"
             android:duration="@android:integer/config_shortAnimTime"/>
 </set>

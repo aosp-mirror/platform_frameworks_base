@@ -18,8 +18,14 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
+		android:zAdjustment="normal"
         android:shareInterpolator="false">
-    <!-- Do nothing. -->
-    <alpha android:fromAlpha="1.0" android:toAlpha="1.0"
-            android:duration="@android:integer/config_mediumAnimTime"/>
+    <scale android:fromXScale="0.98" android:toXScale="1.0"
+            android:fromYScale="0.98" android:toYScale="1.0"
+            android:pivotX="50%p" android:pivotY="50%p"
+            android:interpolator="@anim/decelerate_quint_interpolator"
+            android:duration="@android:integer/config_activityDefaultDur" />
+    <alpha android:fromAlpha=".75" android:toAlpha="1.0"
+            android:interpolator="@anim/decelerate_quint_interpolator"
+            android:duration="@android:integer/config_activityDefaultDur"/>
 </set>

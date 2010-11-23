@@ -16,19 +16,28 @@
 ** limitations under the License.
 */
 -->
-<set xmlns:android="http://schemas.android.com/apk/res/android">
-    <objectAnimator
-        android:interpolator="@anim/decelerate_cubic_interpolator"
-        android:valueFrom="1"
-        android:valueTo="0"
-        android:valueType="floatType"
-        android:propertyName="alpha"
-        android:duration="@android:integer/config_mediumAnimTime"/>
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+	android:zAdjustment="top">
     <objectAnimator
         android:interpolator="@anim/decelerate_quint_interpolator"
-        android:valueFrom="1"
-        android:valueTo=".8"
+        android:valueFrom="1.0"
+        android:valueTo="1.04"
         android:valueType="floatType"
         android:propertyName="scaleY"
-        android:duration="@android:integer/config_mediumAnimTime"/>
+        android:duration="@android:integer/config_activityDefaultDur"/>
+    <objectAnimator
+        android:interpolator="@anim/decelerate_quint_interpolator"
+        android:valueFrom="1.0"
+        android:valueTo="1.04"
+        android:valueType="floatType"
+        android:propertyName="scaleX"
+        android:duration="@android:integer/config_activityDefaultDur"/>
+    <objectAnimator
+        android:interpolator="@anim/decelerate_cubic_interpolator"
+        android:valueFrom="1.0"
+        android:valueTo="0.0"
+        android:valueType="floatType"
+        android:propertyName="alpha"
+        android:duration="@android:integer/config_activityDefaultDur"/>
+
 </set>
