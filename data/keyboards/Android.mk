@@ -12,14 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Warning: this is actually a product definition, to be inherited from
+# This makefile performs build time validation of framework keymap files.
+
+LOCAL_PATH := $(call my-dir)
 
 include $(LOCAL_PATH)/common.mk
-
-PRODUCT_COPY_FILES := $(foreach file,$(keylayouts),\
-    frameworks/base/data/keyboards/$(file):system/usr/keylayout/$(file))
-
-PRODUCT_COPY_FILES += $(foreach file,$(keycharmaps),\
-    frameworks/base/data/keyboards/$(file):system/usr/keychars/$(file))
-
-PRODUCT_PACKAGES := $(keylayouts) $(keycharmaps)

@@ -12,14 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Warning: this is actually a product definition, to be inherited from
+# This is the list of framework provided keylayouts and key character maps to include.
+# Used by Android.mk and keyboards.mk.
 
-include $(LOCAL_PATH)/common.mk
+keylayouts := \
+    AVRCP.kl \
+    Generic.kl \
+    Motorola_Bluetooth_Wireless_Keyboard.kl \
+    qwerty.kl \
+    qwerty2.kl
 
-PRODUCT_COPY_FILES := $(foreach file,$(keylayouts),\
-    frameworks/base/data/keyboards/$(file):system/usr/keylayout/$(file))
-
-PRODUCT_COPY_FILES += $(foreach file,$(keycharmaps),\
-    frameworks/base/data/keyboards/$(file):system/usr/keychars/$(file))
-
-PRODUCT_PACKAGES := $(keylayouts) $(keycharmaps)
+keycharmaps := \
+    Generic.kcm \
+    Virtual.kcm \
+    Motorola_Bluetooth_Wireless_Keyboard.kcm \
+    qwerty.kcm \
+    qwerty2.kcm
