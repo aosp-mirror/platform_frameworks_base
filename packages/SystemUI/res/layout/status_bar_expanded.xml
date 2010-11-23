@@ -71,6 +71,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fadingEdge="none"
+            android:overScrollMode="ifContentScrolls"
             >
             <LinearLayout
                 android:id="@+id/notificationLinearLayout"
