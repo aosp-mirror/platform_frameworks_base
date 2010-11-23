@@ -987,7 +987,7 @@ public final class StrictMode {
             }
 
             // Not perfect, but fast and good enough for dup suppression.
-            Integer crashFingerprint = info.crashInfo.stackTrace.hashCode();
+            Integer crashFingerprint = info.hashCode();
             long lastViolationTime = 0;
             if (mLastViolationTime.containsKey(crashFingerprint)) {
                 lastViolationTime = mLastViolationTime.get(crashFingerprint);
@@ -1548,6 +1548,24 @@ public final class StrictMode {
                     }
                 }
             }
+        }
+
+        @Override
+        public int hashCode() {
+            int result = 17;
+            result = 37 * result + crashInfo.stackTrace.hashCode();
+            if (numAnimationsRunning != 0) {
+                result *= 37;
+            }
+            if (broadcastIntentAction != null) {
+                result = 37 * result + broadcastIntentAction.hashCode();
+            }
+            if (tags != null) {
+                for (String tag : tags) {
+                    result = 37 * result + tag.hashCode();
+                }
+            }
+            return result;
         }
 
         /**

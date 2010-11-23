@@ -557,7 +557,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             = new HashMap<PendingIntentRecord.Key, WeakReference<PendingIntentRecord>>();
 
     /**
-     * Fingerprints (String.hashCode()) of stack traces that we've
+     * Fingerprints (hashCode()) of stack traces that we've
      * already logged DropBox entries for.  Guarded by itself.  If
      * something (rogue user app) forces this over
      * MAX_DUP_SUPPRESSED_STACKS entries, the contents are cleared.
@@ -6671,7 +6671,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         ProcessRecord r = findAppProcess(app);
 
         if ((violationMask & StrictMode.PENALTY_DROPBOX) != 0) {
-            Integer stackFingerprint = info.crashInfo.stackTrace.hashCode();
+            Integer stackFingerprint = info.hashCode();
             boolean logIt = true;
             synchronized (mAlreadyLoggedViolatedStacks) {
                 if (mAlreadyLoggedViolatedStacks.contains(stackFingerprint)) {
