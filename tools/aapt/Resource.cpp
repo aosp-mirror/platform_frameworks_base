@@ -150,7 +150,7 @@ bool isValidResourceType(const String8& type)
 {
     return type == "anim" || type == "drawable" || type == "layout"
         || type == "values" || type == "xml" || type == "raw"
-        || type == "color" || type == "menu";
+        || type == "color" || type == "menu" || type == "mipmap";
 }
 
 static sp<AaptFile> getResourceFile(const sp<AaptAssets>& assets, bool makeIfNecessary=true)
@@ -284,9 +284,9 @@ static status_t makeFileResources(Bundle* bundle, const sp<AaptAssets>& assets,
 }
 
 static status_t preProcessImages(Bundle* bundle, const sp<AaptAssets>& assets,
-                          const sp<ResourceTypeSet>& set)
+                          const sp<ResourceTypeSet>& set, const char* type)
 {
-    ResourceDirIterator it(set, String8("drawable"));
+    ResourceDirIterator it(set, String8(type));
     Vector<sp<AaptFile> > newNameFiles;
     Vector<String8> newNamePaths;
     bool hasErrors = false;
@@ -802,6 +802,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
     sp<ResourceTypeSet> raws;
     sp<ResourceTypeSet> colors;
     sp<ResourceTypeSet> menus;
+    sp<ResourceTypeSet> mipmaps;
 
     ASSIGN_IT(drawable);
     ASSIGN_IT(layout);
@@ -810,6 +811,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
     ASSIGN_IT(raw);
     ASSIGN_IT(color);
     ASSIGN_IT(menu);
+    ASSIGN_IT(mipmap);
 
     assets->setResources(resources);
     // now go through any resource overlays and collect their files
@@ -828,7 +830,8 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
             !applyFileOverlay(bundle, assets, &xmls, "xml") ||
             !applyFileOverlay(bundle, assets, &raws, "raw") ||
             !applyFileOverlay(bundle, assets, &colors, "color") ||
-            !applyFileOverlay(bundle, assets, &menus, "menu")) {
+            !applyFileOverlay(bundle, assets, &menus, "menu") ||
+            !applyFileOverlay(bundle, assets, &mipmaps, "mipmap")) {
         return UNKNOWN_ERROR;
     }
 
@@ -836,10 +839,24 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
 
     if (drawables != NULL) {
         if (bundle->getOutputAPKFile() != NULL) {
-            err = preProcessImages(bundle, assets, drawables);
+            err = preProcessImages(bundle, assets, drawables, "drawable");
         }
         if (err == NO_ERROR) {
             err = makeFileResources(bundle, assets, &table, drawables, "drawable");
+            if (err != NO_ERROR) {
+                hasErrors = true;
+            }
+        } else {
+            hasErrors = true;
+        }
+    }
+
+    if (mipmaps != NULL) {
+        if (bundle->getOutputAPKFile() != NULL) {
+            err = preProcessImages(bundle, assets, mipmaps, "mipmap");
+        }
+        if (err == NO_ERROR) {
+            err = makeFileResources(bundle, assets, &table, mipmaps, "mipmap");
             if (err != NO_ERROR) {
                 hasErrors = true;
             }
