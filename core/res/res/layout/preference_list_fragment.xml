@@ -18,6 +18,7 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/default_preference_layout"
     android:orientation="vertical"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
@@ -27,6 +28,9 @@
         android:layout_width="match_parent"
         android:layout_height="0px"
         android:layout_weight="1"
+        android:paddingTop="48dip"
+        android:paddingBottom="48dip"
+        android:clipToPadding="false"
         android:drawSelectorOnTop="false"
         android:cacheColorHint="@android:color/transparent"
         android:scrollbarAlwaysDrawVerticalTrack="true" />

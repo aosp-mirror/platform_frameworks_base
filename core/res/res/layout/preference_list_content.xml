@@ -56,7 +56,7 @@
 
         </LinearLayout>
 
-        <FrameLayout android:id="@+id/prefs"
+        <android.preference.PreferenceFrameLayout android:id="@+id/prefs"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight="20"
@@ -66,8 +66,6 @@
                 android:layout_marginBottom="16dp"
                 android:paddingLeft="32dip"
                 android:paddingRight="32dip"
-                android:paddingTop="48dip"
-                android:paddingBottom="48dip"
                 android:background="?attr/preferencePanelBackground"
                 android:visibility="gone" />
     </LinearLayout>

@@ -262,13 +262,16 @@
 
         <!-- SearchView attributes -->
         <item name="searchDropdownBackground">@android:drawable/search_dropdown_dark</item>
+
+        <!-- PreferenceFrameLayout attributes -->
+        <item name="preferenceFrameLayoutStyle">@android:style/Widget.PreferenceFrameLayout</item>
     </style>
-    
+
     <!-- Variant of the default (dark) theme with no title bar -->
     <style name="Theme.NoTitleBar">
         <item name="android:windowNoTitle">true</item>
     </style>
-    
+
     <!-- Variant of the default (dark) theme that has no title bar and
          fills the entire screen -->
     <style name="Theme.NoTitleBar.Fullscreen">
@@ -871,6 +874,9 @@
 
         <!-- SearchView attributes -->
         <item name="searchDropdownBackground">@android:drawable/search_dropdown_dark</item>
+
+        <!-- PreferenceFrameLayout attributes -->
+        <item name="preferenceFrameLayoutStyle">@android:style/Widget.Holo.PreferenceFrameLayout</item>
     </style>
 
     <!-- New Honeycomb holographic theme. Light version.  The widgets in the
