@@ -3898,32 +3898,34 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
             mOutputFormat->setInt32(kKeyHeight, video_def->nFrameHeight);
             mOutputFormat->setInt32(kKeyColorFormat, video_def->eColorFormat);
 
-            OMX_CONFIG_RECTTYPE rect;
-            status_t err =
-                     mOMX->getConfig(
-                         mNode, OMX_IndexConfigCommonOutputCrop,
-                         &rect, sizeof(rect));
+            if (!mIsEncoder) {
+                OMX_CONFIG_RECTTYPE rect;
+                status_t err =
+                        mOMX->getConfig(
+                            mNode, OMX_IndexConfigCommonOutputCrop,
+                            &rect, sizeof(rect));
 
-            if (err == OK) {
-                CHECK_GE(rect.nLeft, 0);
-                CHECK_GE(rect.nTop, 0);
-                CHECK_GE(rect.nWidth, 0u);
-                CHECK_GE(rect.nHeight, 0u);
-                CHECK_LE(rect.nLeft + rect.nWidth - 1, video_def->nFrameWidth);
-                CHECK_LE(rect.nTop + rect.nHeight - 1, video_def->nFrameHeight);
+                if (err == OK) {
+                    CHECK_GE(rect.nLeft, 0);
+                    CHECK_GE(rect.nTop, 0);
+                    CHECK_GE(rect.nWidth, 0u);
+                    CHECK_GE(rect.nHeight, 0u);
+                    CHECK_LE(rect.nLeft + rect.nWidth - 1, video_def->nFrameWidth);
+                    CHECK_LE(rect.nTop + rect.nHeight - 1, video_def->nFrameHeight);
 
-                mOutputFormat->setRect(
-                        kKeyCropRect,
-                        rect.nLeft,
-                        rect.nTop,
-                        rect.nLeft + rect.nWidth - 1,
-                        rect.nTop + rect.nHeight - 1);
-            } else {
-                mOutputFormat->setRect(
-                        kKeyCropRect,
-                        0, 0,
-                        video_def->nFrameWidth - 1,
-                        video_def->nFrameHeight - 1);
+                    mOutputFormat->setRect(
+                            kKeyCropRect,
+                            rect.nLeft,
+                            rect.nTop,
+                            rect.nLeft + rect.nWidth - 1,
+                            rect.nTop + rect.nHeight - 1);
+                } else {
+                    mOutputFormat->setRect(
+                            kKeyCropRect,
+                            0, 0,
+                            video_def->nFrameWidth - 1,
+                            video_def->nFrameHeight - 1);
+                }
             }
 
             break;
