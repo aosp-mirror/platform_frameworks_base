@@ -1,0 +1,332 @@
+page.title=Using the Action Bar
+parent.title=User Interface
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Quickview</h2>
+  <ul>
+    <li>A replacement for the title bar for displaying global actions for the activity</li>
+    <li>Provides toolbar actions and modes of navigating around the application</li>
+    <li>Switches to contextual menu options when one or more items are selected</li>
+    <li>Requires API Level HONEYCOMB</li>
+  </ul>
+
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#Adding">Adding the Action Bar</a></li>
+    <li><a href="#ActionItems">Adding Action Items</a>
+      <ol>
+        <li><a href="#Home">Using the application icon as an action item</a></li>
+      </ol>
+    </li>
+    <li><a href="#Tabs">Adding Tabs</a></li>
+    <li><a href="#Dropdown">Adding Drop-down Navigation</a></li>
+    <li><a href="#Search">Adding Search</a></li>
+  </ol>
+
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.app.ActionBar}</li>
+    <li>{@link android.view.Menu}</li>
+  </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/topics/ui/menus.html">Creating Menus</a></li>
+  </ol>
+</div>
+</div>
+
+<p>The action bar is a widget for activities that replaces the traditional title bar at
+the top of an activity. By default, the action bar includes the application logo on the left side,
+followed by the activity title. The action bar offers several useful features for
+applications&mdash;especially those targeted to tablet devices. The action bar features include
+the ability to:</p>
+
+<ul>
+  <li>Display menu items from the <a
+href="{@docRoot}guide/topics/ui/menus.html#OptionsMenu">options menu</a> as "action
+items"&mdash;providing instant access to key user actions.</li>
+  <li>Provide tabs for navigating between <a
+href="{@docRoot}guide/topics/fragments/index.html">fragments</a>.</li>
+  <li>Provide drop-down navigation items.</li>
+  <li>Embed a {@link android.widget.SearchView} for instant searching.</li>
+  <li>Use the application logo as a "return home" or "up" navigation action.</li>
+</ul>
+
+<img src="{@docRoot}images/ui/actionbar.png" height="36" alt="" />
+<p class="img-caption"><strong>Figure 1.</strong> A screenshot of the action bar in the NotePad
+sample application, containing action items to save and delete the note.</p>
+
+
+<h2 id="Adding">Adding the Action Bar</h2>
+
+<p>To add the Action Bar to your activity, apply the holographic theme&mdash;{@code
+Theme.Holo}&mdash;or the action bar theme&mdash;{@code Theme.WithActionBar}&mdash;in your manifest
+file. For example:</p>
+
+<pre>
+&lt;activity android:theme="@android:style/Theme.Holo" &gt;
+</pre>
+
+<p>The activity now appears with the action bar in place of the traditional title bar.</p>
+
+
+<h2 id="ActionItems">Adding Action Items</h2>
+
+<p>For each action item you want to add to the action bar, you must add a menu item to the
+activity's <a href="{@docRoot}guide/topics/ui/menus.html#OptionsMenu">options menu</a> and declare
+that the item be shown as an action, using the {@code android:showAsAction} attribute in the menu
+XML or with {@link android.view.MenuItem#setShowAsAction setShowAsAction()} on the {@link
+android.view.MenuItem}.</p>
+
+<div class="figure" style="width:359px">
+  <img src="{@docRoot}images/ui/actionbar-item-withtext.png" height="57" alt="" />
+  <p class="img-caption"><strong>Figure 2.</strong> A screenshot from an action bar with two
+action items.</p>
+</div>
+
+<p>You can specify a menu item to appear as an action item in the action bar&mdash;if there is room
+for it&mdash;from the <a href="{@docRoot}guide/topics/resources/menu-resource.html">menu
+resource</a> by declaring {@code
+android:showAsAction="ifRoom"} for the {@code &lt;item&gt;} element. This way, the item will display
+in the action bar for quick access only if there is room available for it&mdash;if there's not
+enough room, the item is placed the options menu (revealed by the drop-down icon on the right side
+of the action bar). From your application code, you can specify the item to appear as an action item
+by calling {@link android.view.MenuItem#setShowAsAction setShowAsAction()} on the {@link
+android.view.MenuItem} and passing {@link android.view.MenuItem#SHOW_AS_ACTION_IF_ROOM}.</p>
+
+<p>If your item supplies both a title and an icon, then the action item shows only
+the icon by defult. If you want to include the text with the action item, add the <em>with text</em>
+flag&mdash;in XML, add {@code withText} to the {@code android:showAsAction} attribute or, in
+your application code, use the {@link android.view.MenuItem#SHOW_AS_ACTION_WITH_TEXT} flag when
+calling {@link android.view.MenuItem#setShowAsAction setShowAsAction()}. Figure 2 shows a screenshot
+of an action bar with two action items that include text.</p>
+
+<p>Here's an example of how you can declare a menu item as an action item in a <a
+href="{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a> file:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;item android:id="@+id/menu_add"
+          android:icon="@drawable/ic_menu_save"
+          android:title="@string/menu_save"
+          <b>android:showAsAction="ifRoom|withText"</b> /&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>In this case, both the {@code ifRoom} and {@code withText} flags are set, so that when this
+item appears as an action item, it includes the title text along with the icon.</p>
+
+<p>A menu item placed in the action bar triggers the same callback methods as other items in the
+options menu. When the user selects an item in the action bar, your activity receives a call to
+{@link android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}, passing the
+item ID. (If you added the item from a fragment, then the respective {@link
+android.app.Fragment#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} method is called
+for that fragment.)</p>
+
+<p class="note"><strong>Note:</strong> Even menu items that are contained in the options menu
+(and not shown as action items) will show an icon, so when using the action bar, you should
+provide an icon for every item in the options menu.</p>
+
+<p>You can also declare an item to <em>always</em> appear as an action item,  but you should avoid
+doing so. Most of the time, there will be enough room for several action items and they will appear
+in the order you declare them. If you set items to always appear as action
+items  (instead of <em>if room</em>), then they are added without discrimination and there is a risk
+that they will collide with other elements in the action bar, such as tabs or custom views.</p>
+
+<p>For more information about menus, see the <a
+href="{@docRoot}guide/topics/ui/menus.html#options-menu">Creating Menus</a> developer guide.</p>
+
+
+<h3 id="Home">Using the application icon as an action item</h3>
+
+<p>By default, the application icon appears in the action bar on the left side, but does nothing
+when tapped. To use the application icon as an action item when tapped, you simply need to add a
+condition to your {@link android.app.Activity#onOptionsItemSelected onOptionsItemSelected()} method
+that performs an action when the {@link android.view.MenuItem} ID is {@code android.R.id.home}.
+This ID is delivered every time the user taps the application icon.</p>
+
+<p>For example, here's an implementation of {@link android.app.Activity#onOptionsItemSelected
+onOptionsItemSelected()} that returns to the application's "home" activity:</p>
+
+<pre>
+&#64;Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+        case android.R.id.home:
+            // app icon in action bar clicked; go home
+            Intent intent = new Intent(this, HomeActivity.class);
+            startActivity(intent);
+            break;
+    }
+    return super.onOptionsItemSelected(item);
+}
+</pre>
+
+<div class="figure" style="width:144px">
+  <img src="{@docRoot}images/ui/actionbar-logo.png" height="140" alt="" />
+  <p class="img-caption"><strong>Figure 3.</strong> The standard icon for the Email application
+(top) and the "up navigation" icon (bottom).</p>
+</div>
+
+<p>You can also use the application icon to provide "up" navigation. The way you handle the event
+when a user taps the icon is the same, but if the user experience for the event is to <em>navigate
+up to the parent activity</em>, then you should indicate this behavior by setting the
+action bar to "show home as up." You can do so by calling {@link
+android.app.ActionBar#setDisplayOptions setDisplayOptions()} on your activity's {@link
+android.app.ActionBar}, and passing the {@link
+android.app.ActionBar#DISPLAY_HOME_AS_UP} display option.</p>
+
+<p>To get the {@link android.app.ActionBar}, call {@link android.app.Activity#getActionBar} from
+your {@link android.app.Activity} during {@link android.app.Activity#onCreate onCreate()} (but be
+sure you do so <em>after</em> you've called {@link android.app.Activity#setContentView
+setContentView()}).</p>
+
+<p>For example, here's how you can change the action bar display mode to show the application
+icon as an "up" action:</p>
+
+<pre>
+&#64;Override
+protected void onStart() {
+  super.onStart();
+  ActionBar actionBar = this.getActionBar();
+  actionBar.setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP, ActionBar.DISPLAY_HOME_AS_UP);
+}
+</pre>
+
+<p class="caution"><strong>Caution:</strong> If your activity does not have an action bar (if you
+did not set the theme of your activity or application to the holographic or action bar theme), then
+{@link android.app.Activity#getActionBar} returns null.</p>
+
+
+<h2 id="Tabs">Adding Tabs</h2>
+
+<p>The action bar can display tabs that allow the user navigate between different fragments in the
+activity. Each tab can include a title and/or an icon.</p>
+
+<p>To begin, your layout must include a {@link android.view.View} in which each {@link
+android.app.Fragment} associated with a tab is displayed. Be sure the view has an ID that you
+can use to reference it from your code.</p>
+
+<p>To add tabs to the action bar:</p>
+<ol>
+  <li>Create an implementation of {@link android.app.ActionBar.TabListener} to handle the
+interaction events on the action bar tabs. You must implement all methods: {@link
+android.app.ActionBar.TabListener#onTabSelected onTabSelected()}, {@link
+android.app.ActionBar.TabListener#onTabUnselected onTabUnselected()}, and {@link
+android.app.ActionBar.TabListener#onTabReselected onTabReselected()}.
+    <p>Each callback method passes the {@link android.app.ActionBar.Tab} that received the
+event and a {@link android.app.FragmentTransaction} for you to perform the fragment
+transactions (add or remove fragments).</p>
+    <p>For example:</p>
+<pre>
+private class MyTabListener implements ActionBar.TabListener {
+    private TabContentFragment mFragment;
+
+    // Called to create an instance of the listener when adding a new tab
+    public TabListener(TabContentFragment fragment) {
+        mFragment = fragment;
+    }
+
+    &#64;Override
+    public void onTabSelected(Tab tab, FragmentTransaction ft) {
+        ft.add(R.id.fragment_content, mFragment, null);
+    }
+
+    &#64;Override
+    public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+        ft.remove(mFragment);
+    }
+
+    &#64;Override
+    public void onTabReselected(Tab tab, FragmentTransaction ft) {
+        // do nothing
+    }
+
+}
+</pre>
+  <p>This implementation of {@link android.app.ActionBar.TabListener} adds a constructor
+that saves the {@link android.app.Fragment} associated with a tab so that each callback
+can add or remove that fragment.</p>
+  </li>
+  <li>Get the {@link android.app.ActionBar} for your activity by calling {@link
+android.app.Activity#getActionBar} from your {@link android.app.Activity}, during {@link
+android.app.Activity#onCreate onCreate()} (but be sure you do so <em>after</em> you've called
+{@link android.app.Activity#setContentView setContentView()}).</li>
+  <li>Call {@link android.app.ActionBar#setNavigationMode(int)
+setNavigationMode(NAVIGATION_MODE_TABS)} to enable tab mode for the {@link
+android.app.ActionBar}.</li>
+  <li>Create each tab for the action bar:
+    <ol>
+      <li>Create a new {@link android.app.ActionBar.Tab} by calling {@link
+android.app.ActionBar#newTab()} on the {@link android.app.ActionBar}.</li>
+      <li>Add title text and/or an icon for the tab by calling {@link
+android.app.ActionBar.Tab#setText setText()} and/or {@link android.app.ActionBar.Tab#setIcon
+setIcon()}.
+        <p class="note"><strong>Tip:</strong> These methods return the same {@link
+android.app.ActionBar.Tab} instance, so you can chain the calls together.</p></li>
+      <li>Declare the {@link android.app.ActionBar.TabListener} to use for the tab by passing an
+instance of your implementation to {@link android.app.ActionBar.Tab#setTabListener
+setTabListener()}.
+    </ol>
+  </li>
+  <li>Add each {@link android.app.ActionBar.Tab} to the action bar by calling {@link
+android.app.ActionBar#addTab addTab()} on the {@link android.app.ActionBar} and passing the
+{@link android.app.ActionBar.Tab}.</li>
+</ol>
+<p>For example, the following code combines steps 2 - 5 to create two tabs and add them to
+the action bar:</p>
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+
+    // setup action bar for tabs
+    final ActionBar actionBar = getActionBar();
+    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+    // remove the activity title to make space for tabs
+    actionBar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
+
+    // instantiate fragment for the tab
+    Fragment artistsFragment = new ArtistsFragment();
+    // add a new tab and set its title text and tab listener
+    bar.addTab(bar.newTab().setText(R.string.tab_artists)
+            .setTabListener(new TabListener(artistsFragment)));
+
+    Fragment albumsFragment = new AlbumsFragment();
+    bar.addTab(bar.newTab().setText(R.string.tab_albums)
+            .setTabListener(new TabListener(albumsFragment)));
+}
+</pre>
+
+<p>All the behaviors that occur when a tab is selected must be defined by your {@link
+android.app.ActionBar.TabListener} callback methods. When a tab is selected, it receives a call to
+{@link android.app.ActionBar.TabListener#onTabSelected onTabSelected()} and that's where you should
+add the appropriate fragment to the designated view in your layout, using {@link
+android.app.FragmentTransaction#add add()} with the provided {@link
+android.app.FragmentTransaction}. Likewise, when a tab is deselected (because another tab becomes
+selected), you should remove that fragment from the layout, using {@link
+android.app.FragmentTransaction#remove remove()}.</p>
+
+<p class="note"><strong>Note:</strong> You <strong>do not</strong> need
+to call {@link android.app.FragmentTransaction#commit} for these transactions. You also
+<strong>cannot</strong> add these fragment transactions to the back stack.</p>
+
+<p>If your activity is stopped, you should retain the currently selected tab with the saved state so
+that when the user returns to your application, you can open the tab. When it's time to save the
+state, you can query the currently selected tab with {@link
+android.app.ActionBar#getSelectedNavigationItem()}. This returns the index position of the selected
+tab.</p>
+
+<p class="caution"><strong>Caution:</strong> It's important that you save
+the state of each fragment as necessary, so when the user switches fragments with the tabs,
+then returns to a previous fragment, it appears the way they left. For information about saving
+the state of your fragment, see the <a
+href="{@docRoot}guide/topics/fragments/index.html">Fragments</a> developer guide.</p>
+
+

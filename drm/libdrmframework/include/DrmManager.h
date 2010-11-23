@@ -32,6 +32,7 @@ class DrmUnregistrationInfo;
 class DrmRightsAcquisitionInfo;
 class DrmContentIds;
 class DrmConstraints;
+class DrmMetadata;
 class DrmRights;
 class DrmInfo;
 class DrmInfoStatus;
@@ -74,6 +75,8 @@ public:
 
     DrmConstraints* getConstraints(int uniqueId, const String8* path, const int action);
 
+    DrmMetadata* getMetadata(int uniqueId, const String8* path);
+
     bool canHandle(int uniqueId, const String8& path, const String8& mimeType);
 
     DrmInfoStatus* processDrmInfo(int uniqueId, const DrmInfo* drmInfo);
@@ -92,7 +95,7 @@ public:
     status_t consumeRights(int uniqueId, DecryptHandle* decryptHandle, int action, bool reserve);
 
     status_t setPlaybackStatus(
-            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int position);
+            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int64_t position);
 
     bool validateAction(
             int uniqueId, const String8& path, int action, const ActionDescription& description);
@@ -109,7 +112,7 @@ public:
 
     status_t getAllSupportInfo(int uniqueId, int* length, DrmSupportInfo** drmSupportInfoArray);
 
-    DecryptHandle* openDecryptSession(int uniqueId, int fd, int offset, int length);
+    DecryptHandle* openDecryptSession(int uniqueId, int fd, off64_t offset, off64_t length);
 
     DecryptHandle* openDecryptSession(int uniqueId, const char* uri);
 
@@ -124,7 +127,7 @@ public:
     status_t finalizeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId);
 
     ssize_t pread(int uniqueId, DecryptHandle* decryptHandle,
-            void* buffer, ssize_t numBytes, off_t offset);
+            void* buffer, ssize_t numBytes, off64_t offset);
 
     void onInfo(const DrmInfoEvent& event);
 

@@ -70,6 +70,19 @@ bool MetaData::setPointer(uint32_t key, void *value) {
     return setData(key, TYPE_POINTER, &value, sizeof(value));
 }
 
+bool MetaData::setRect(
+        uint32_t key,
+        int32_t left, int32_t top,
+        int32_t right, int32_t bottom) {
+    Rect r;
+    r.mLeft = left;
+    r.mTop = top;
+    r.mRight = right;
+    r.mBottom = bottom;
+
+    return setData(key, TYPE_RECT, &r, sizeof(r));
+}
+
 bool MetaData::findCString(uint32_t key, const char **value) {
     uint32_t type;
     const void *data;
@@ -139,6 +152,28 @@ bool MetaData::findPointer(uint32_t key, void **value) {
     CHECK_EQ(size, sizeof(*value));
 
     *value = *(void **)data;
+
+    return true;
+}
+
+bool MetaData::findRect(
+        uint32_t key,
+        int32_t *left, int32_t *top,
+        int32_t *right, int32_t *bottom) {
+    uint32_t type;
+    const void *data;
+    size_t size;
+    if (!findData(key, &type, &data, &size) || type != TYPE_RECT) {
+        return false;
+    }
+
+    CHECK_EQ(size, sizeof(Rect));
+
+    const Rect *r = (const Rect *)data;
+    *left = r->mLeft;
+    *top = r->mTop;
+    *right = r->mRight;
+    *bottom = r->mBottom;
 
     return true;
 }

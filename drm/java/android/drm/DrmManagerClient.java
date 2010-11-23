@@ -102,8 +102,7 @@ public class DrmManagerClient {
     }
 
     private static final int ACTION_REMOVE_ALL_RIGHTS = 1001;
-    private static final int ACTION_ACQUIRE_DRM_INFO = 1002;
-    private static final int ACTION_PROCESS_DRM_INFO = 1003;
+    private static final int ACTION_PROCESS_DRM_INFO = 1002;
 
     private int mUniqueId;
     private int mNativeContext;
@@ -126,18 +125,6 @@ public class DrmManagerClient {
             HashMap<String, Object> attributes = new HashMap<String, Object>();
 
             switch(msg.what) {
-            case ACTION_ACQUIRE_DRM_INFO: {
-                final DrmInfoRequest request = (DrmInfoRequest) msg.obj;
-                DrmInfo drmInfo = _acquireDrmInfo(mUniqueId, request);
-                if (null != drmInfo) {
-                    attributes.put(DrmEvent.DRM_INFO_OBJECT, drmInfo);
-                    event = new DrmEvent(mUniqueId, DrmEvent.TYPE_DRM_INFO_ACQUIRED, null);
-                } else {
-                    error = new DrmErrorEvent(mUniqueId,
-                            DrmErrorEvent.TYPE_DRM_INFO_ACQUISITION_FAILED, null);
-                }
-                break;
-            }
             case ACTION_PROCESS_DRM_INFO: {
                 final DrmInfo drmInfo = (DrmInfo) msg.obj;
                 DrmInfoStatus status = _processDrmInfo(mUniqueId, drmInfo);
@@ -243,19 +230,14 @@ public class DrmManagerClient {
      */
     public DrmManagerClient(Context context) {
         mContext = context;
-        Looper looper;
 
-        if (null != (looper = Looper.myLooper())) {
-            mInfoHandler = new InfoHandler(looper);
-        } else if (null != (looper = Looper.getMainLooper())) {
-            mInfoHandler = new InfoHandler(looper);
-        } else {
-            mInfoHandler = null;
-        }
+        HandlerThread infoThread = new HandlerThread("DrmManagerClient.InfoHandler");
+        infoThread.start();
+        mInfoHandler = new InfoHandler(infoThread.getLooper());
 
-        HandlerThread thread = new HandlerThread("DrmManagerClient.EventHandler");
-        thread.start();
-        mEventHandler = new EventHandler(thread.getLooper());
+        HandlerThread eventThread = new HandlerThread("DrmManagerClient.EventHandler");
+        eventThread.start();
+        mEventHandler = new EventHandler(eventThread.getLooper());
 
         // save the unique id
         mUniqueId = hashCode();
@@ -335,10 +317,24 @@ public class DrmManagerClient {
         return _getConstraints(mUniqueId, path, action);
     }
 
+   /**
+    * Get metadata information from DRM content
+    *
+    * @param path Content path from where DRM metadata would be retrieved.
+    * @return ContentValues instance in which metadata key-value pairs are embedded
+    *         or null in case of failure
+    */
+    public ContentValues getMetadata(String path) {
+        if (null == path || path.equals("")) {
+            throw new IllegalArgumentException("Given path is invalid/null");
+        }
+        return _getMetadata(mUniqueId, path);
+    }
+
     /**
      * Get constraints information evaluated from DRM content
      *
-     * @param uri The Content URI of the data
+     * @param uri Content URI from where DRM constraints would be retrieved.
      * @param action Actions defined in {@link DrmStore.Action}
      * @return ContentValues instance in which constraints key-value pairs are embedded
      *         or null in case of failure
@@ -348,6 +344,20 @@ public class DrmManagerClient {
             throw new IllegalArgumentException("Uri should be non null");
         }
         return getConstraints(convertUriToPath(uri), action);
+    }
+
+   /**
+    * Get metadata information from DRM content
+    *
+    * @param uri Content URI from where DRM metadata would be retrieved.
+    * @return ContentValues instance in which metadata key-value pairs are embedded
+    *         or null in case of failure
+    */
+    public ContentValues getMetadata(Uri uri) {
+        if (null == uri || Uri.EMPTY == uri) {
+            throw new IllegalArgumentException("Uri should be non null");
+        }
+        return getMetadata(convertUriToPath(uri));
     }
 
     /**
@@ -408,7 +418,7 @@ public class DrmManagerClient {
     /**
      * Check whether the given mimetype or uri can be handled.
      *
-     * @param uri The content URI of the data
+     * @param uri Content URI of the data to be handled.
      * @param mimeType Mimetype of the object to be handled
      * @return
      *        true - if the given mimeType or path can be handled
@@ -445,20 +455,31 @@ public class DrmManagerClient {
      * Retrieves necessary information for register, unregister or rights acquisition.
      *
      * @param drmInfoRequest Request information to retrieve drmInfo
+     * @return DrmInfo Instance as a result of processing given input
+     */
+    public DrmInfo acquireDrmInfo(DrmInfoRequest drmInfoRequest) {
+        if (null == drmInfoRequest || !drmInfoRequest.isValid()) {
+            throw new IllegalArgumentException("Given drmInfoRequest is invalid/null");
+        }
+        return _acquireDrmInfo(mUniqueId, drmInfoRequest);
+    }
+
+    /**
+     * Executes given DrmInfoRequest and returns the rights information asynchronously.
+     * This is a utility API which consists of {@link #acquireDrmInfo(DrmInfoRequest)}
+     * and {@link #processDrmInfo(DrmInfo)}.
+     * It can be used if selected DRM agent can work with this combined sequences.
+     * In case of some DRM schemes, such as OMA DRM, application needs to invoke
+     * {@link #acquireDrmInfo(DrmInfoRequest)} and {@link #processDrmInfo(DrmInfo)}, separately.
+     *
+     * @param drmInfoRequest Request information to retrieve drmInfo
      * @return
      *     ERROR_NONE for success
      *     ERROR_UNKNOWN for failure
      */
-    public int acquireDrmInfo(DrmInfoRequest drmInfoRequest) {
-        if (null == drmInfoRequest || !drmInfoRequest.isValid()) {
-            throw new IllegalArgumentException("Given drmInfoRequest is invalid/null");
-        }
-        int result = ERROR_UNKNOWN;
-        if (null != mEventHandler) {
-            Message msg = mEventHandler.obtainMessage(ACTION_ACQUIRE_DRM_INFO, drmInfoRequest);
-            result = (mEventHandler.sendMessage(msg)) ? ERROR_NONE : result;
-        }
-        return result;
+    public int acquireRights(DrmInfoRequest drmInfoRequest) {
+        DrmInfo drmInfo = acquireDrmInfo(drmInfoRequest);
+        return processDrmInfo(drmInfo);
     }
 
     /**
@@ -749,6 +770,8 @@ public class DrmManagerClient {
     private native void _installDrmEngine(int uniqueId, String engineFilepath);
 
     private native ContentValues _getConstraints(int uniqueId, String path, int usage);
+
+    private native ContentValues _getMetadata(int uniqueId, String path);
 
     private native boolean _canHandle(int uniqueId, String path, String mimeType);
 

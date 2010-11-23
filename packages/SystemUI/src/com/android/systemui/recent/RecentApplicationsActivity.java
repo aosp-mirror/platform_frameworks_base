@@ -193,14 +193,13 @@ public class RecentApplicationsActivity extends Activity {
                 ActivityDescription item = mActivityDescriptions.get(n);
                 if (item.id >= 0) {
                     // This is an active task; it should just go to the foreground.
-                    IActivityManager am = ActivityManagerNative.getDefault();
-                    try {
-                        am.moveTaskToFront(item.id);
-                    } catch (RemoteException e) {
-                    }
+                    final ActivityManager am = (ActivityManager)
+                            getSystemService(Context.ACTIVITY_SERVICE);
+                    am.moveTaskToFront(item.id, ActivityManager.MOVE_TASK_WITH_HOME);
                 } else if (item.intent != null) {
                     // prepare a launch intent and send it
-                    item.intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
+                    item.intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
+                            | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
                     try {
                         if (DBG) Log.v(TAG, "Starting intent " + item.intent);
                         startActivity(item.intent);

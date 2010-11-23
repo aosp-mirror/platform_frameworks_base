@@ -30,6 +30,8 @@ public:
 protected:
     DrmConstraints* onGetConstraints(int uniqueId, const String8* path, int action);
 
+    DrmMetadata* onGetMetadata(int uniqueId, const String8* path);
+
     status_t onInitialize(int uniqueId);
 
     status_t onSetOnInfoListener(int uniqueId, const IDrmEngine::OnInfoListener* infoListener);
@@ -54,7 +56,7 @@ protected:
     status_t onConsumeRights(int uniqueId, DecryptHandle* decryptHandle, int action, bool reserve);
 
     status_t onSetPlaybackStatus(
-            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int position);
+            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int64_t position);
 
     bool onValidateAction(
             int uniqueId, const String8& path, int action, const ActionDescription& description);
@@ -72,7 +74,7 @@ protected:
     DrmSupportInfo* onGetSupportInfo(int uniqueId);
 
     status_t onOpenDecryptSession(
-            int uniqueId, DecryptHandle* decryptHandle, int fd, int offset, int length);
+            int uniqueId, DecryptHandle* decryptHandle, int fd, off64_t offset, off64_t length);
 
     status_t onOpenDecryptSession(
             int uniqueId, DecryptHandle* decryptHandle, const char* uri);
@@ -88,7 +90,7 @@ protected:
     status_t onFinalizeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId);
 
     ssize_t onPread(int uniqueId, DecryptHandle* decryptHandle,
-            void* buffer, ssize_t numBytes, off_t offset);
+            void* buffer, ssize_t numBytes, off64_t offset);
 
 private:
     DecryptHandle* openDecryptSessionImpl();

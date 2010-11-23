@@ -24,6 +24,7 @@
 
 #include <drm/DrmInfo.h>
 #include <drm/DrmConstraints.h>
+#include <drm/DrmMetadata.h>
 #include <drm/DrmRights.h>
 #include <drm/DrmInfoStatus.h>
 #include <drm/DrmConvertedStatus.h>
@@ -121,6 +122,35 @@ DrmConstraints* BpDrmManagerService::getConstraints(
         }
     }
     return drmConstraints;
+}
+
+DrmMetadata* BpDrmManagerService::getMetadata(int uniqueId, const String8* path) {
+    LOGV("Get Metadata");
+    Parcel data, reply;
+    data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
+    data.writeInt32(uniqueId);
+
+    DrmMetadata* drmMetadata = NULL;
+    data.writeString8(*path);
+    remote()->transact(GET_METADATA_FROM_CONTENT, data, &reply);
+
+    if (0 != reply.dataAvail()) {
+        //Filling Drm Metadata
+        drmMetadata = new DrmMetadata();
+
+        const int size = reply.readInt32();
+        for (int index = 0; index < size; ++index) {
+            const String8 key(reply.readString8());
+            const int bufferSize = reply.readInt32();
+            char* data = NULL;
+            if (0 < bufferSize) {
+                data = new char[bufferSize];
+                reply.read(data, bufferSize);
+            }
+            drmMetadata->put(&key, data);
+        }
+    }
+    return drmMetadata;
 }
 
 bool BpDrmManagerService::canHandle(int uniqueId, const String8& path, const String8& mimeType) {
@@ -333,7 +363,7 @@ status_t BpDrmManagerService::consumeRights(
 }
 
 status_t BpDrmManagerService::setPlaybackStatus(
-            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int position) {
+            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int64_t position) {
     LOGV("setPlaybackStatus");
     Parcel data, reply;
 
@@ -429,7 +459,7 @@ DrmConvertedStatus* BpDrmManagerService::convertData(
     if (0 != reply.dataAvail()) {
         //Filling DRM Converted Status
         const int statusCode = reply.readInt32();
-        const int offset = reply.readInt32();
+        const off64_t offset = reply.readInt64();
 
         DrmBuffer* convertedData = NULL;
         if (0 != reply.dataAvail()) {
@@ -461,7 +491,7 @@ DrmConvertedStatus* BpDrmManagerService::closeConvertSession(int uniqueId, int c
     if (0 != reply.dataAvail()) {
         //Filling DRM Converted Status
         const int statusCode = reply.readInt32();
-        const int offset = reply.readInt32();
+        const off64_t offset = reply.readInt64();
 
         DrmBuffer* convertedData = NULL;
         if (0 != reply.dataAvail()) {
@@ -515,15 +545,15 @@ status_t BpDrmManagerService::getAllSupportInfo(
 }
 
 DecryptHandle* BpDrmManagerService::openDecryptSession(
-            int uniqueId, int fd, int offset, int length) {
+            int uniqueId, int fd, off64_t offset, off64_t length) {
     LOGV("Entering BpDrmManagerService::openDecryptSession");
     Parcel data, reply;
 
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
     data.writeFileDescriptor(fd);
-    data.writeInt32(offset);
-    data.writeInt32(length);
+    data.writeInt64(offset);
+    data.writeInt64(length);
 
     remote()->transact(OPEN_DECRYPT_SESSION, data, &reply);
 
@@ -697,7 +727,7 @@ status_t BpDrmManagerService::finalizeDecryptUnit(
 
 ssize_t BpDrmManagerService::pread(
             int uniqueId, DecryptHandle* decryptHandle, void* buffer,
-            ssize_t numBytes, off_t offset) {
+            ssize_t numBytes, off64_t offset) {
     LOGV("read");
     Parcel data, reply;
     int result;
@@ -717,7 +747,7 @@ ssize_t BpDrmManagerService::pread(
     }
 
     data.writeInt32(numBytes);
-    data.writeInt32(offset);
+    data.writeInt64(offset);
 
     remote()->transact(PREAD, data, &reply);
     result = reply.readInt32();
@@ -823,6 +853,38 @@ status_t BnDrmManagerService::onTransact(
         }
         delete drmConstraints; drmConstraints = NULL;
         return DRM_NO_ERROR;
+    }
+
+    case GET_METADATA_FROM_CONTENT:
+    {
+        LOGV("BnDrmManagerService::onTransact :GET_METADATA_FROM_CONTENT");
+        CHECK_INTERFACE(IDrmManagerService, data, reply);
+
+        const int uniqueId = data.readInt32();
+        const String8 path = data.readString8();
+
+        DrmMetadata* drmMetadata = getMetadata(uniqueId, &path);
+        if (NULL != drmMetadata) {
+            //Filling DRM Metadata contents
+            reply->writeInt32(drmMetadata->getCount());
+
+            DrmMetadata::KeyIterator keyIt = drmMetadata->keyIterator();
+            while (keyIt.hasNext()) {
+                const String8 key = keyIt.next();
+                reply->writeString8(key);
+                const char* value = drmMetadata->getAsByteArray(&key);
+                int bufferSize = 0;
+                if (NULL != value) {
+                    bufferSize = strlen(value);
+                    reply->writeInt32(bufferSize + 1);
+                    reply->write(value, bufferSize + 1);
+                } else {
+                    reply->writeInt32(0);
+                }
+            }
+        }
+        delete drmMetadata; drmMetadata = NULL;
+        return NO_ERROR;
     }
 
     case CAN_HANDLE:
@@ -1121,7 +1183,7 @@ status_t BnDrmManagerService::onTransact(
         if (NULL != drmConvertedStatus) {
             //Filling Drm Converted Ststus
             reply->writeInt32(drmConvertedStatus->statusCode);
-            reply->writeInt32(drmConvertedStatus->offset);
+            reply->writeInt64(drmConvertedStatus->offset);
 
             if (NULL != drmConvertedStatus->convertedData) {
                 const DrmBuffer* convertedData = drmConvertedStatus->convertedData;
@@ -1150,7 +1212,7 @@ status_t BnDrmManagerService::onTransact(
         if (NULL != drmConvertedStatus) {
             //Filling Drm Converted Ststus
             reply->writeInt32(drmConvertedStatus->statusCode);
-            reply->writeInt32(drmConvertedStatus->offset);
+            reply->writeInt64(drmConvertedStatus->offset);
 
             if (NULL != drmConvertedStatus->convertedData) {
                 const DrmBuffer* convertedData = drmConvertedStatus->convertedData;
@@ -1210,7 +1272,7 @@ status_t BnDrmManagerService::onTransact(
         const int fd = data.readFileDescriptor();
 
         DecryptHandle* handle
-            = openDecryptSession(uniqueId, fd, data.readInt32(), data.readInt32());
+            = openDecryptSession(uniqueId, fd, data.readInt64(), data.readInt64());
 
         if (NULL != handle) {
             reply->writeInt32(handle->decryptId);
@@ -1415,7 +1477,7 @@ status_t BnDrmManagerService::onTransact(
         const int numBytes = data.readInt32();
         char* buffer = new char[numBytes];
 
-        const off_t offset = data.readInt32();
+        const off64_t offset = data.readInt64();
 
         ssize_t result = pread(uniqueId, &handle, buffer, numBytes, offset);
         reply->writeInt32(result);

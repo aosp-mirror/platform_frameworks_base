@@ -17,6 +17,7 @@
 package android.media.videoeditor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.graphics.Bitmap;
@@ -178,12 +179,11 @@ public class MediaImageItem extends MediaItem {
         // duration change.
         invalidateEndTransition();
 
-        final long oldDurationMs = mDurationMs;
         mDurationMs = durationMs;
 
         adjustTransitions();
-        adjustOverlays();
-        adjustEffects();
+        final List<Overlay> adjustedOverlays = adjustOverlays();
+        final List<Effect> adjustedEffects = adjustEffects();
 
         // Invalidate the beginning and end transitions after adjustments.
         // This invalidation is necessary for the case in which an effect or
@@ -191,11 +191,7 @@ public class MediaImageItem extends MediaItem {
         // before the setDuration reduces the duration of the media item and
         // causes an overlap of the beginning and/or end transition with the
         // effect.
-        // If the duration is growing, the begin transition does not need to
-        // be invalidated since the effects, overlays are not adjusted.
-        if (mDurationMs < oldDurationMs) {
-            invalidateBeginTransition();
-        }
+        invalidateBeginTransition(adjustedEffects, adjustedOverlays);
         invalidateEndTransition();
     }
 
@@ -293,14 +289,16 @@ public class MediaImageItem extends MediaItem {
     /**
      * Invalidate the begin transition if any effects and overlays overlap
      * with the begin transition.
+     *
+     * @param effects List of effects to check for transition overlap
+     * @param overlays List of overlays to check for transition overlap
      */
-    private void invalidateBeginTransition() {
+    private void invalidateBeginTransition(List<Effect> effects, List<Overlay> overlays) {
         if (mBeginTransition != null && mBeginTransition.isGenerated()) {
             final long transitionDurationMs = mBeginTransition.getDuration();
 
             // The begin transition must be invalidated if it overlaps with
             // an effect.
-            final List<Effect> effects = getAllEffects();
             for (Effect effect : effects) {
                 // Check if the effect overlaps with the begin transition
                 if (effect.getStartTime() < transitionDurationMs) {
@@ -312,7 +310,6 @@ public class MediaImageItem extends MediaItem {
             if (mBeginTransition.isGenerated()) {
                 // The end transition must be invalidated if it overlaps with
                 // an overlay.
-                final List<Overlay> overlays = getAllOverlays();
                 for (Overlay overlay : overlays) {
                     // Check if the overlay overlaps with the end transition
                     if (overlay.getStartTime() < transitionDurationMs) {
@@ -362,8 +359,11 @@ public class MediaImageItem extends MediaItem {
 
     /**
      * Adjust the start time and/or duration of effects.
+     *
+     * @return The list of effects which were adjusted
      */
-    private void adjustEffects() {
+    private List<Effect> adjustEffects() {
+        final List<Effect> adjustedEffects = new ArrayList<Effect>();
         final List<Effect> effects = getAllEffects();
         for (Effect effect : effects) {
             // Adjust the start time if necessary
@@ -385,14 +385,20 @@ public class MediaImageItem extends MediaItem {
             if (effectStartTimeMs != effect.getStartTime() ||
                     effectDurationMs != effect.getDuration()) {
                 effect.setStartTimeAndDuration(effectStartTimeMs, effectDurationMs);
+                adjustedEffects.add(effect);
             }
         }
+
+        return adjustedEffects;
     }
 
     /**
      * Adjust the start time and/or duration of overlays.
+     *
+     * @return The list of overlays which were adjusted
      */
-    private void adjustOverlays() {
+    private List<Overlay> adjustOverlays() {
+        final List<Overlay> adjustedOverlays = new ArrayList<Overlay>();
         final List<Overlay> overlays = getAllOverlays();
         for (Overlay overlay : overlays) {
             // Adjust the start time if necessary
@@ -414,8 +420,11 @@ public class MediaImageItem extends MediaItem {
             if (overlayStartTimeMs != overlay.getStartTime() ||
                     overlayDurationMs != overlay.getDuration()) {
                 overlay.setStartTimeAndDuration(overlayStartTimeMs, overlayDurationMs);
+                adjustedOverlays.add(overlay);
             }
         }
+
+        return adjustedOverlays;
     }
 
     /**

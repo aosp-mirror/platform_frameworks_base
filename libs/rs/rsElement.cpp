@@ -348,7 +348,6 @@ RsElement rsi_ElementCreate(Context *rsc,
                             RsDataKind dk,
                             bool norm,
                             uint32_t vecSize) {
-    //LOGE("rsi_ElementCreate %i %i %i %i", dt, dk, norm, vecSize);
     const Element *e = Element::create(rsc, dt, dk, norm, vecSize);
     e->incUserRef();
     return (RsElement)e;
@@ -360,7 +359,6 @@ RsElement rsi_ElementCreate2(Context *rsc,
                              const char ** names,
                              const size_t * nameLengths,
                              const uint32_t * arraySizes) {
-    //LOGE("rsi_ElementCreate2 %i", count);
     const Element *e = Element::create(rsc, count, (const Element **)ein, names, nameLengths, arraySizes);
     e->incUserRef();
     return (RsElement)e;

@@ -252,13 +252,13 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         ActivityDescription ad = (ActivityDescription)v.getTag();
         if (ad.id >= 0) {
             // This is an active task; it should just go to the foreground.
-            IActivityManager am = ActivityManagerNative.getDefault();
-            try {
-                am.moveTaskToFront(ad.id);
-            } catch (RemoteException e) {
-            }
+            final ActivityManager am = (ActivityManager)
+                    getContext().getSystemService(Context.ACTIVITY_SERVICE);
+            am.moveTaskToFront(ad.id, ActivityManager.MOVE_TASK_WITH_HOME);
         } else {
             Intent intent = ad.intent;
+            intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
+                    | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
             if (DEBUG) Log.v(TAG, "Starting activity " + intent);
             getContext().startActivity(intent);
         }

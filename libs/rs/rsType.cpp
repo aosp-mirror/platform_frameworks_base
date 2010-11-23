@@ -136,7 +136,7 @@ void Type::dumpLOGV(const char *prefix) const {
     char buf[1024];
     ObjectBase::dumpLOGV(prefix);
     LOGV("%s   Type: x=%i y=%i z=%i mip=%i face=%i", prefix, mDimX, mDimY, mDimZ, mDimLOD, mFaces);
-    sprintf(buf, "%s element: ", prefix);
+    snprintf(buf, sizeof(buf), "%s element: ", prefix);
     mElement->dumpLOGV(buf);
 }
 

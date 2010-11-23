@@ -120,7 +120,7 @@ public class HeavyWeightSwitcherActivity extends Activity {
     private OnClickListener mSwitchOldListener = new OnClickListener() {
         public void onClick(View v) {
             try {
-                ActivityManagerNative.getDefault().moveTaskToFront(mCurTask);
+                ActivityManagerNative.getDefault().moveTaskToFront(mCurTask, 0);
             } catch (RemoteException e) {
             }
             finish();

@@ -122,7 +122,7 @@ interface IWindowManager
     int getTrackballKeycodeState(int sw);
     int getDPadKeycodeState(int sw);
     InputChannel monitorInput(String inputChannelName);
-    
+
     // Report whether the hardware supports the given keys; returns true if successful
     boolean hasKeys(in int[] keycodes, inout boolean[] keyExists);
     
@@ -132,7 +132,14 @@ interface IWindowManager
     
     // For testing
     void setInTouchMode(boolean showFocus);
-    
+
+    // For StrictMode flashing a red border on violations from the UI
+    // thread.  The uid/pid is implicit from the Binder call, and the Window
+    // Manager uses that to determine whether or not the red border should
+    // actually be shown.  (it will be ignored that pid doesn't have windows
+    // on screen)
+    void showStrictModeViolation(boolean on);
+
     // These can only be called with the SET_ORIENTATION permission.
     /**
      * Change the current screen rotation, constants as per

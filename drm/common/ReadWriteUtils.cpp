@@ -42,7 +42,7 @@ String8 ReadWriteUtils::readBytes(const String8& filePath) {
         struct stat sb;
 
         if (fstat(fd, &sb) == 0 && sb.st_size > 0) {
-            int length = sb.st_size;
+            off64_t length = sb.st_size;
             char* bytes = new char[length];
             if (length == read(fd, (void*) bytes, length)) {
                 string.append(bytes, length);
@@ -57,7 +57,7 @@ String8 ReadWriteUtils::readBytes(const String8& filePath) {
 int ReadWriteUtils::readBytes(const String8& filePath, char** buffer) {
     FILE* file = NULL;
     file = fopen(filePath.string(), "r");
-    int length = 0;
+    off64_t length = 0;
 
     if (NULL != file) {
         int fd = fileno(file);

@@ -2614,12 +2614,28 @@ public class Intent implements Parcelable, Cloneable {
      * animation to go to the next activity state.  This doesn't mean an
      * animation will never run -- if another activity change happens that doesn't
      * specify this flag before the activity started here is displayed, then
-     * that transition will be used.  This this flag can be put to good use
+     * that transition will be used.  This flag can be put to good use
      * when you are going to do a series of activity operations but the
      * animation seen by the user shouldn't be driven by the first activity
      * change but rather a later one.
      */
     public static final int FLAG_ACTIVITY_NO_ANIMATION = 0X00010000;
+    /**
+     * If set in an Intent passed to {@link Context#startActivity Context.startActivity()},
+     * this flag will cause any existing task that would be associated with the
+     * activity to be cleared before the activity is started.  That is, the activity
+     * becomes the new root of an otherwise empty task, and any old activities
+     * are finished.  This can only be used in conjunction with {@link #FLAG_ACTIVITY_NEW_TASK}.
+     */
+    public static final int FLAG_ACTIVITY_CLEAR_TASK = 0X00008000;
+    /**
+     * If set in an Intent passed to {@link Context#startActivity Context.startActivity()},
+     * this flag will cause a newly launching task to be placed on top of the current
+     * home activity task (if there is one).  That is, pressing back from the task
+     * will always return the user to home even if that was not the last activity they
+     * saw.   This can only be used in conjunction with {@link #FLAG_ACTIVITY_NEW_TASK}.
+     */
+    public static final int FLAG_ACTIVITY_TASK_ON_HOME = 0X00004000;
     /**
      * If set, when sending a broadcast only registered receivers will be
      * called -- no BroadcastReceiver components will be launched.
@@ -4871,18 +4887,22 @@ public class Intent implements Parcelable, Cloneable {
      * @see #FLAG_DEBUG_LOG_RESOLUTION
      * @see #FLAG_FROM_BACKGROUND
      * @see #FLAG_ACTIVITY_BROUGHT_TO_FRONT
-     * @see #FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET
+     * @see #FLAG_ACTIVITY_CLEAR_TASK
      * @see #FLAG_ACTIVITY_CLEAR_TOP
+     * @see #FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET
      * @see #FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
      * @see #FLAG_ACTIVITY_FORWARD_RESULT
      * @see #FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
      * @see #FLAG_ACTIVITY_MULTIPLE_TASK
      * @see #FLAG_ACTIVITY_NEW_TASK
+     * @see #FLAG_ACTIVITY_NO_ANIMATION
      * @see #FLAG_ACTIVITY_NO_HISTORY
      * @see #FLAG_ACTIVITY_NO_USER_ACTION
      * @see #FLAG_ACTIVITY_PREVIOUS_IS_TOP
      * @see #FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+     * @see #FLAG_ACTIVITY_REORDER_TO_FRONT
      * @see #FLAG_ACTIVITY_SINGLE_TOP
+     * @see #FLAG_ACTIVITY_TASK_ON_HOME
      * @see #FLAG_RECEIVER_REGISTERED_ONLY
      */
     public Intent setFlags(int flags) {

@@ -494,6 +494,11 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         mCm.setCdmaBroadcastConfig(configValuesArray, response);
     }
 
+    protected void handleBroadcastSms(AsyncResult ar) {
+        // Not supported
+        Log.e(TAG, "Error! Not implemented for CDMA.");
+    }
+
     private int resultToCause(int rc) {
         switch (rc) {
         case Activity.RESULT_OK:

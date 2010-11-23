@@ -334,6 +334,32 @@ public class ActivityManager {
     }
 
     /**
+     * Flag for {@link #moveTaskToFront(int, int)}: also move the "home"
+     * activity along with the task, so it is positioned immediately behind
+     * the task.
+     */
+    public static final int MOVE_TASK_WITH_HOME = 0x00000001;
+
+    /**
+     * Ask that the task associated with a given task ID be moved to the
+     * front of the stack, so it is now visible to the user.  Requires that
+     * the caller hold permission {@link android.Manifest.permission#REORDER_TASKS}
+     * or a SecurityException will be thrown.
+     *
+     * @param taskId The identifier of the task to be moved, as found in
+     * {@link RunningTaskInfo} or {@link RecentTaskInfo}.
+     * @param flags Additional operational flags, 0 or more of
+     * {@link #MOVE_TASK_WITH_HOME}.
+     */
+    public void moveTaskToFront(int taskId, int flags) {
+        try {
+            ActivityManagerNative.getDefault().moveTaskToFront(taskId, flags);
+        } catch (RemoteException e) {
+            // System dead, we will be dead too soon!
+        }
+    }
+
+    /**
      * Information you can retrieve about a particular Service that is
      * currently running in the system.
      */

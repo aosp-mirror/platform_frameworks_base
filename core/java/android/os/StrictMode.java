@@ -22,6 +22,7 @@ import android.app.ApplicationErrorReport;
 import android.content.Intent;
 import android.util.Log;
 import android.util.Printer;
+import android.view.IWindowManager;
 
 import com.android.internal.os.RuntimeInit;
 
@@ -108,6 +109,7 @@ public final class StrictMode {
     private static final boolean LOG_V = Log.isLoggable(TAG, Log.VERBOSE);
 
     private static final boolean IS_USER_BUILD = "user".equals(Build.TYPE);
+    private static final boolean IS_ENG_BUILD = "eng".equals(Build.TYPE);
 
     // Only log a duplicate stack trace to the logs every second.
     private static final long MIN_LOG_INTERVAL_MS = 1000;
@@ -180,6 +182,13 @@ public final class StrictMode {
     public static final int PENALTY_DEATH_ON_NETWORK = 0x200;
 
     /**
+     * Flash the screen during violations.
+     *
+     * @hide
+     */
+    public static final int PENALTY_FLASH = 0x800;
+
+    /**
      * @hide
      */
     public static final int PENALTY_DROPBOX = 0x80;
@@ -202,7 +211,7 @@ public final class StrictMode {
      */
     private static final int PENALTY_MASK =
             PENALTY_LOG | PENALTY_DIALOG | PENALTY_DEATH | PENALTY_DROPBOX | PENALTY_GATHER |
-            PENALTY_DEATH_ON_NETWORK;
+            PENALTY_DEATH_ON_NETWORK | PENALTY_FLASH;
 
     /**
      * The current VmPolicy in effect.
@@ -374,6 +383,13 @@ public final class StrictMode {
              */
             public Builder penaltyDeathOnNetwork() {
                 return enable(PENALTY_DEATH_ON_NETWORK);
+            }
+
+            /**
+             * Flash the screen during a violation.
+             */
+            public Builder penaltyFlashScreen() {
+                return enable(PENALTY_FLASH);
             }
 
             /**
@@ -710,7 +726,9 @@ public final class StrictMode {
             StrictMode.DETECT_DISK_WRITE |
             StrictMode.DETECT_DISK_READ |
             StrictMode.DETECT_NETWORK |
-            StrictMode.PENALTY_DROPBOX);
+            StrictMode.PENALTY_DROPBOX |
+            (IS_ENG_BUILD ? StrictMode.PENALTY_FLASH : 0)
+        );
         sVmPolicyMask = StrictMode.DETECT_VM_CURSOR_LEAKS |
                 StrictMode.DETECT_VM_CLOSABLE_LEAKS |
                 StrictMode.PENALTY_DROPBOX;
@@ -904,6 +922,17 @@ public final class StrictMode {
                 return;
             }
 
+            // TODO: cache the window manager stub?
+            final IWindowManager windowManager = (info.policy & PENALTY_FLASH) != 0 ?
+                    IWindowManager.Stub.asInterface(ServiceManager.getService("window")) :
+                    null;
+            if (windowManager != null) {
+                try {
+                    windowManager.showStrictModeViolation(true);
+                } catch (RemoteException unused) {
+                }
+            }
+
             queue.addIdleHandler(new MessageQueue.IdleHandler() {
                     public boolean queueIdle() {
                         long loopFinishTime = SystemClock.uptimeMillis();
@@ -915,6 +944,12 @@ public final class StrictMode {
                             handleViolation(v);
                         }
                         records.clear();
+                        if (windowManager != null) {
+                            try {
+                                windowManager.showStrictModeViolation(false);
+                            } catch (RemoteException unused) {
+                            }
+                        }
                         return false;  // remove this idle handler from the array
                     }
                 });

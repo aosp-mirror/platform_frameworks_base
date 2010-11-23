@@ -26,6 +26,8 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Message;
 import android.text.BoringLayout.Metrics;
 import android.text.DynamicLayout;
 import android.text.Editable;
@@ -129,6 +131,7 @@ import junit.framework.Assert;
 
     private boolean mAutoFillable; // Is this textview part of an autofillable form?
     private int mQueryId;
+    private boolean mAutoFillProfileIsSet;
 
     // Types used with setType.  Keep in sync with CachedInput.h
     private static final int NORMAL_TEXT_FIELD = 0;
@@ -139,6 +142,9 @@ import junit.framework.Assert;
     private static final int NUMBER = 5;
     private static final int TELEPHONE = 6;
     private static final int URL = 7;
+
+    private static final int AUTOFILL_FORM = 100;
+    private Handler mHandler;
 
     /**
      * Create a new WebTextView.
@@ -163,6 +169,18 @@ import junit.framework.Assert;
         setTextColor(DebugFlags.DRAW_WEBTEXTVIEW ? Color.RED : Color.BLACK);
         // This helps to align the text better with the text in the web page.
         setIncludeFontPadding(false);
+
+        mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                case AUTOFILL_FORM:
+                    mWebView.autoFillForm(mQueryId);
+                    break;
+                }
+            }
+        };
+
     }
 
     public void setAutoFillable(int queryId) {
@@ -801,8 +819,17 @@ import junit.framework.Assert;
                     if (id == 0 && position == 0) {
                         // Blank out the text box while we wait for WebCore to fill the form.
                         replaceText("");
-                        // Call a webview method to tell WebCore to autofill the form.
-                        mWebView.autoFillForm(mQueryId);
+                        WebSettings settings = mWebView.getSettings();
+                        if (mAutoFillProfileIsSet) {
+                            // Call a webview method to tell WebCore to autofill the form.
+                            mWebView.autoFillForm(mQueryId);
+                        } else {
+                            // There is no autofill profile setup yet and the user has
+                            // elected to try and set one up. Call through to the
+                            // embedder to action that.
+                            mWebView.getWebChromeClient().setupAutoFill(
+                                    mHandler.obtainMessage(AUTOFILL_FORM));
+                        }
                     }
                 }
             });
@@ -1123,5 +1150,9 @@ import junit.framework.Assert;
      */
     /* package */ void updateCachedTextfield() {
         mWebView.updateCachedTextfield(getText().toString());
+    }
+
+    /* package */ void setAutoFillProfileIsSet(boolean autoFillProfileIsSet) {
+        mAutoFillProfileIsSet = autoFillProfileIsSet;
     }
 }

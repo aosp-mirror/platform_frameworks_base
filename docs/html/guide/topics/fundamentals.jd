@@ -19,6 +19,7 @@ page.title=Application Fundamentals
     <li><a href="#lmodes">Launch modes</a></li>
     <li><a href="#clearstack">Clearing the stack</a></li>
     <li><a href="#starttask">Starting tasks</a></li>
+    <li><a href="#commonpatterns">Common patterns</a></li>
   </ol></li>
 <li><a href="#procthread">Processes and Threads</a>
   <ol>
@@ -891,6 +892,60 @@ finishOnTaskLaunch} to "{@code true}".
 See <a href="#clearstack">Clearing the stack</a>, earlier.
 </p>
 
+
+<h3 id="commonpatterns">Common patterns</h3>
+
+<p>
+In most cases an application won't use any flags or special features.
+This gives the standard interaction the user expects: launching the application
+brings any existing task to the foreground, or starts the main activity in
+a new task if there isn't one.
+</p>
+
+<p>
+If an application posts notifications, it needs to decide how the user's
+selection of a notification should impact any currently running task.  The
+current suggested behavior is that any current tasks be completely removed,
+replaced with a new task containing a stack of activities representing where
+the user is jumping in to the app.  This can be accomplished with a combination
+of the {@link android.app.PendingIntent#getActivities PendingIntent.getActivities()}
+method and {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TASK Intent.FLAG_ACTIVITY_CLEAR_TASK}.
+</p>
+
+<p>
+For example, here is sample code to build an array of Intents to launch an
+application into an activity three levels deep.  The first Intent is always
+the main Intent of the application as started by the launcher.  The exact
+details of the Intent data will of course depend on your application.
+</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/StatusBarNotifications.java
+      intent_array}
+
+<p>
+In some cases an application may not want to directly launch its application
+from a notification, but instead go to a intermediate summary activity.  To
+accomplish this, the summary activity should be given a task affinity that
+is different from the main application (one will typically give it no affinity,
+that is "") so that it does not get launched into any existing application task.
+</p>
+
+{@sample development/samples/ApiDemos/AndroidManifest.xml no_task_affinity}
+
+<p>
+The PendingIntent to launch this then does not need to supply anything special:
+</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/IncomingMessage.java
+      pending_intent}
+
+<p>
+If an application implements an app widget, it should generally use the same
+approach as the first one for notifications: when the user taps on the app
+widget it should throw away any current task of the application and start a
+new task with potentially multiple activities representing the state the
+user is jumping in to.
+</p>
 
 <h2 id="procthread">Processes and Threads</h2>
 

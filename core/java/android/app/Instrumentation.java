@@ -1354,8 +1354,8 @@ public class Instrumentation {
      * {@hide}
      */
     public ActivityResult execStartActivity(
-        Context who, IBinder contextThread, IBinder token, Activity target,
-        Intent intent, int requestCode) {
+            Context who, IBinder contextThread, IBinder token, Activity target,
+            Intent intent, int requestCode) {
         IApplicationThread whoThread = (IApplicationThread) contextThread;
         if (mActivityMonitors != null) {
             synchronized (mSync) {
@@ -1382,6 +1382,44 @@ public class Instrumentation {
         } catch (RemoteException e) {
         }
         return null;
+    }
+
+    /**
+     * Like {@link #execStartActivity(Context, IBinder, IBinder, Activity, Intent, int)},
+     * but accepts an array of activities to be started.  Note that active
+     * {@link ActivityMonitor} objects only match against the first activity in
+     * the array.
+     *
+     * {@hide}
+     */
+    public void execStartActivities(Context who, IBinder contextThread,
+            IBinder token, Activity target, Intent[] intents) {
+        IApplicationThread whoThread = (IApplicationThread) contextThread;
+        if (mActivityMonitors != null) {
+            synchronized (mSync) {
+                final int N = mActivityMonitors.size();
+                for (int i=0; i<N; i++) {
+                    final ActivityMonitor am = mActivityMonitors.get(i);
+                    if (am.match(who, null, intents[0])) {
+                        am.mHits++;
+                        if (am.isBlocking()) {
+                            return;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        try {
+            String[] resolvedTypes = new String[intents.length];
+            for (int i=0; i<intents.length; i++) {
+                resolvedTypes[i] = intents[i].resolveTypeIfNeeded(who.getContentResolver());
+            }
+            int result = ActivityManagerNative.getDefault()
+                .startActivities(whoThread, intents, resolvedTypes, token);
+            checkStartActivityResult(result, intents[0]);
+        } catch (RemoteException e) {
+        }
     }
 
     /**

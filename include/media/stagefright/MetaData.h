@@ -32,6 +32,10 @@ enum {
     kKeyMIMEType          = 'mime',  // cstring
     kKeyWidth             = 'widt',  // int32_t
     kKeyHeight            = 'heig',  // int32_t
+
+    // a rectangle, if absent assumed to be (0, 0, width - 1, height - 1)
+    kKeyCropRect          = 'crop',
+
     kKeyRotation          = 'rotA',  // int32_t (angle in degrees)
     kKeyIFramesInterval   = 'ifiv',  // int32_t
     kKeyStride            = 'strd',  // int32_t
@@ -125,6 +129,7 @@ public:
         TYPE_INT64    = 'in64',
         TYPE_FLOAT    = 'floa',
         TYPE_POINTER  = 'ptr ',
+        TYPE_RECT     = 'rect',
     };
 
     void clear();
@@ -136,11 +141,21 @@ public:
     bool setFloat(uint32_t key, float value);
     bool setPointer(uint32_t key, void *value);
 
+    bool setRect(
+            uint32_t key,
+            int32_t left, int32_t top,
+            int32_t right, int32_t bottom);
+
     bool findCString(uint32_t key, const char **value);
     bool findInt32(uint32_t key, int32_t *value);
     bool findInt64(uint32_t key, int64_t *value);
     bool findFloat(uint32_t key, float *value);
     bool findPointer(uint32_t key, void **value);
+
+    bool findRect(
+            uint32_t key,
+            int32_t *left, int32_t *top,
+            int32_t *right, int32_t *bottom);
 
     bool setData(uint32_t key, uint32_t type, const void *data, size_t size);
 
@@ -185,6 +200,10 @@ private:
         const void *storage() const {
             return usesReservoir() ? &u.reservoir : u.ext_data;
         }
+    };
+
+    struct Rect {
+        int32_t mLeft, mTop, mRight, mBottom;
     };
 
     KeyedVector<uint32_t, typed_data> mItems;

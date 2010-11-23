@@ -49,6 +49,10 @@
 #include <media/stagefright/MPEG2TSWriter.h>
 #include <media/stagefright/MPEG4Writer.h>
 
+#include <private/media/VideoFrame.h>
+#include <SkBitmap.h>
+#include <SkImageEncoder.h>
+
 #include <fcntl.h>
 
 using namespace android;
@@ -681,6 +685,19 @@ int main(int argc, char **argv) {
 
             if (mem != NULL) {
                 printf("captureFrame(%s) => OK\n", filename);
+
+                VideoFrame *frame = (VideoFrame *)mem->pointer();
+
+                SkBitmap bitmap;
+                bitmap.setConfig(
+                        SkBitmap::kRGB_565_Config, frame->mWidth, frame->mHeight);
+
+                bitmap.setPixels((uint8_t *)frame + sizeof(VideoFrame));
+
+                CHECK(SkImageEncoder::EncodeFile(
+                            "/sdcard/out.jpg", bitmap,
+                            SkImageEncoder::kJPEG_Type,
+                            SkImageEncoder::kDefaultQuality));
             } else {
                 mem = retriever->extractAlbumArt();
 

@@ -43,6 +43,10 @@ DrmConstraints* DrmManagerClient::getConstraints(const String8* path, const int 
     return mDrmManagerClientImpl->getConstraints(mUniqueId, path, action);
 }
 
+DrmMetadata* DrmManagerClient::getMetadata(const String8* path) {
+    return mDrmManagerClientImpl->getMetadata(mUniqueId, path);
+}
+
 bool DrmManagerClient::canHandle(const String8& path, const String8& mimeType) {
     return mDrmManagerClientImpl->canHandle(mUniqueId, path, mimeType);
 }
@@ -78,7 +82,7 @@ status_t DrmManagerClient::consumeRights(DecryptHandle* decryptHandle, int actio
 }
 
 status_t DrmManagerClient::setPlaybackStatus(
-            DecryptHandle* decryptHandle, int playbackStatus, int position) {
+            DecryptHandle* decryptHandle, int playbackStatus, int64_t position) {
     return mDrmManagerClientImpl
             ->setPlaybackStatus(mUniqueId, decryptHandle, playbackStatus, position);
 }
@@ -112,7 +116,7 @@ status_t DrmManagerClient::getAllSupportInfo(int* length, DrmSupportInfo** drmSu
     return mDrmManagerClientImpl->getAllSupportInfo(mUniqueId, length, drmSupportInfoArray);
 }
 
-DecryptHandle* DrmManagerClient::openDecryptSession(int fd, int offset, int length) {
+DecryptHandle* DrmManagerClient::openDecryptSession(int fd, off64_t offset, off64_t length) {
     return mDrmManagerClientImpl->openDecryptSession(mUniqueId, fd, offset, length);
 }
 
@@ -145,7 +149,7 @@ status_t DrmManagerClient::finalizeDecryptUnit(DecryptHandle* decryptHandle, int
 }
 
 ssize_t DrmManagerClient::pread(
-            DecryptHandle* decryptHandle, void* buffer, ssize_t numBytes, off_t offset) {
+            DecryptHandle* decryptHandle, void* buffer, ssize_t numBytes, off64_t offset) {
     Mutex::Autolock _l(mDecryptLock);
     return mDrmManagerClientImpl->pread(mUniqueId, decryptHandle, buffer, numBytes, offset);
 }

@@ -138,13 +138,12 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
                 RecentTag tag = (RecentTag)b.getTag();
                 if (tag.info.id >= 0) {
                     // This is an active task; it should just go to the foreground.
-                    IActivityManager am = ActivityManagerNative.getDefault();
-                    try {
-                        am.moveTaskToFront(tag.info.id);
-                    } catch (RemoteException e) {
-                    }
+                    final ActivityManager am = (ActivityManager)
+                            getContext().getSystemService(Context.ACTIVITY_SERVICE);
+                    am.moveTaskToFront(tag.info.id, ActivityManager.MOVE_TASK_WITH_HOME);
                 } else if (tag.intent != null) {
-                    tag.intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
+                    tag.intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
+                            | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
                     try {
                         getContext().startActivity(tag.intent);
                     } catch (ActivityNotFoundException e) {

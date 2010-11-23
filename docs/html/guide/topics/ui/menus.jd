@@ -36,6 +36,7 @@ parent.link=index.html
 
   <h2>See also</h2>
   <ol>
+    <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Using the Action Bar</a></li>
     <li><a href="{@docRoot}guide/topics/resources/menu-resource.html">Menu Resource</a></li>
   </ol>
 </div>
@@ -48,20 +49,9 @@ for you to provide application menus in your application.</p>
 <p>Android provides three types of application menus:</p>
 <dl>
   <dt><strong>Options Menu</strong></dt>
-    <dd>The primary menu for an Activity, which appears when the user presses
-    the device MENU key. Within the Options Menu are two groups:
-      <dl style="margin-top:1em">
-        <dt><em>Icon Menu</em></dt>
-          <dd>The menu items visible at the bottom of the screen
-          at the press of the MENU key. It supports a maximum of six menu items.
-          These are the only menu items that support icons and the only menu items that <em>do not</em> support
-          checkboxes or radio buttons.</dd>
-        <dt><em>Expanded Menu</em></dt>
-          <dd>The vertical list of menu items exposed by the "More" menu item in the Icon Menu.
-          When the Icon Menu is full, the expanded menu is comprised of the sixth
-          menu item and the rest.</dd>
-      </dl>
-    </dd>
+    <dd>The primary collection of menu items for an Activity that is associated with the device MENU
+key. To provide instant access to select menu items, you can place some items in the <a
+href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a>, if available.</dd>
   <dt><strong>Context Menu</strong></dt>
     <dd>A floating list of menu items that appears when the user performs a long-press on a View.
 </dd>
@@ -74,7 +64,7 @@ Menu or a context menu. A submenu item cannot support a nested submenu. </dd>
 
 <h2 id="xml">Defining Menus</h2>
 
-<p>Instead of instantiating {@link android.view.Menu} objects in your application code, you should
+<p>Instead of instantiating a {@link android.view.Menu} in your application code, you should
 define a menu and all its items in an XML <a
 href="{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a>, then inflate the menu
 resource (load it as a programmable object) in your application code. Defining your menus in XML is
@@ -104,9 +94,9 @@ href="#groups">Menu groups</a>.</dd>
     &lt;item android:id="@+id/new_game"
           android:icon="@drawable/ic_new_game"
           android:title="@string/new_game" /&gt;
-    &lt;item android:id="@+id/quit"
-          android:icon="@drawable/ic_quit"
-          android:title="@string/quit" /&gt;
+    &lt;item android:id="@+id/help"
+          android:icon="@drawable/ic_help"
+          android:title="@string/help" /&gt;
 &lt;/menu&gt;
 </pre>
 
@@ -161,36 +151,64 @@ creating an option menu is discussed more in the next section.)</p>
 </div>
 
 
-<p>The Options Menu is where you should include basic application functions
-and necessary navigation items (for example, a button
-to open application settings). The user
-can open the Options Menu with the device MENU key.
-Figure 1 shows a screenshot of an Options Menu.</p>
+<p>The Options Menu is where you should include basic application functions and necessary navigation
+items (for example, a button to open the application settings). Items in the Options Menu are
+accessible in two distinct ways: in the Action Bar and in the menu revealed by the MENU
+key.</p>
 
-<p>When opened, the first visible portion of the Options Menu is called the Icon Menu. It
-holds the first six menu items.
-If you add more than six items to the Options Menu, Android places the sixth item and those after it
-into the Expanded Menu, which the user can open with the "More" menu item.</p>
+<p>The Action Bar is an optional widget that appears at the top of the activity in place of the
+title bar. It can display several menu items that you choose from the Options Menu, but items in
+the Action Bar display only an icon (no title text). Users can reveal the other menu items in the
+Options Menu with the MENU key.</p>
+
+<p>If you include the Action Bar in your activity, the menu items that are not placed in the Action
+Bar can appear in two different styles:</p>
+<dl>
+  <dt>Action Bar Menu</dt>
+    <dd>If the device has an extra-large screen ({@code xlarge}), then all items in the Options Menu
+that are not placed in the Action Bar are placed into a drop-down list at the right side of the
+Action Bar, with icons and title text. The user can reveal the drop-down list by pressing the
+drop-down icon in the Action Bar or the MENU key.</dd>
+  <dt>Standard Options Menu</dt>
+    <dd>If the device <em>does not</em> have an extra-large screen, then all items in the Options
+Menu that are not placed in the Action Bar are placed into the Standard Options Menu at the bottom
+of the activity. The user can reveal the standard Options Menu by pressing the MENU key.
+    <p>The first visible portion of the Standard Options Menu is called the Icon Menu.
+It holds the first six menu items (excluding any added to the Action Bar), with icons and title
+text. If there are more than six items, Android adds a "More" item as the sixth menu item and places
+the remaining items into the Expanded Menu, which the user can open by selecting "More". The
+Expanded Menu displays menu items only by their title text (no icon)</p>
+    </dd>
+</dl>
 
 <p>When the user opens the Options Menu for the first time, Android calls your Activity's
 {@link android.app.Activity#onCreateOptionsMenu(Menu)
 onCreateOptionsMenu()} method. Override this method in your Activity
 and populate the {@link android.view.Menu} that is passed into the method. Populate the
 {@link android.view.Menu} by inflating a menu resource as described in <a
-href="#Inflating">Inflating a Menu Resource</a>. (You can
-also populate the menu in code, using {@link android.view.Menu#add(int,int,int,int)
-add()} to add menu items.)</p>
+href="#Inflating">Inflating a Menu Resource</a>. For example:</p>
 
-<p>When the user selects a menu item from the Options Menu, the system calls your Activity's
+<pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu) {
+    MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.game_menu, menu);
+    return true;
+}
+</pre>
+
+<p>(You can also populate the menu in code, using {@link android.view.Menu#add(int,int,int,int)
+add()} to add items to the {@link android.view.Menu}.)</p>
+
+<p>When the user selects a menu item from the Options Menu (including items selected from the
+Action Bar), the system calls your Activity's
 {@link android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}
 method. This method passes the
 {@link android.view.MenuItem} that the user selected. You can identify the menu item by calling
 {@link android.view.MenuItem#getItemId()}, which returns the unique ID for the menu
 item (defined by the {@code android:id} attribute in the menu resource or with an integer passed
 to the {@link android.view.Menu#add(int,int,int,int) add()} method). You can match this ID
-against known menu items and perform the appropriate action.</p>
-
-<p>For example:</p>
+against known menu items and perform the appropriate action. For example:</p>
 
 <pre>
 &#64;Override
@@ -200,8 +218,8 @@ public boolean onOptionsItemSelected(MenuItem item) {
     case R.id.new_game:
         newGame();
         return true;
-    case R.id.quit:
-        quit();
+    case R.id.help:
+        showHelp();
         return true;
     default:
         return super.onOptionsItemSelected(item);
@@ -224,8 +242,8 @@ an Activity that implements nothing except the {@link android.app.Activity#onCre
 onCreateOptionsMenu()} and {@link android.app.Activity#onOptionsItemSelected(MenuItem)
 onOptionsItemSelected()} methods. Then extend this class for each Activity that should share the
 same Options Menu. This way, you have to manage only one set of code for handling menu
-actions and each decendent class inherits the menu behaviors.<br/><br/>
-If you want to add menu items to one of your decendent activities,
+actions and each descendant class inherits the menu behaviors.<br/><br/>
+If you want to add menu items to one of your descendant activities,
 override {@link android.app.Activity#onCreateOptionsMenu(Menu)
 onCreateOptionsMenu()} in that Activity. Call {@code super.onCreateOptionsMenu(menu)} so the
 original menu items are created, then add new menu items with {@link
@@ -542,7 +560,7 @@ hardware keyboard. Shortcuts cannot be added to items in a Context Menu.</p>
 <h3 id="intents">Intents for menu items</h3>
 
 <p>Sometimes you'll want a menu item to launch an Activity using an Intent (whether it's an
-Actvitity in your application or another application). When you know the Intent you want to use and
+Activity in your application or another application). When you know the Intent you want to use and
 have a specific menu item that should initiate the Intent, you can execute the Intent with {@link
 android.app.Activity#startActivity(Intent) startActivity()} during the appropriate on-item-selected
 callback method (such as the {@link android.app.Activity#onOptionsItemSelected(MenuItem)

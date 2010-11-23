@@ -906,6 +906,7 @@ public class WebView extends AbsoluteLayout
 
         mCallbackProxy = new CallbackProxy(context, this);
         mViewManager = new ViewManager(this);
+        L10nUtils.loadStrings(context);
         mWebViewCore = new WebViewCore(context, this, mCallbackProxy, javascriptInterfaces);
         mDatabase = WebViewDatabase.getInstance(context);
         mScroller = new Scroller(context);
@@ -922,7 +923,6 @@ public class WebView extends AbsoluteLayout
             startPrivateBrowsing();
         }
 
-        L10nUtils.loadStrings(context);
         mAutoFillData = new WebViewCore.AutoFillData();
     }
 
@@ -3549,6 +3549,15 @@ public class WebView extends AbsoluteLayout
          * click action, look for a word under the  click. If one is found,
          * animate the text selection into view.
          * FIXME: no animation code yet */
+        return selectText();
+    }
+
+    /**
+     * Select the word at the last click point.
+     *
+     * @hide pending API council approval
+     */
+    public boolean selectText() {
         int x = viewToContentX((int) mLastTouchX + mScrollX);
         int y = viewToContentY((int) mLastTouchY + mScrollY);
         setUpSelect();
@@ -4042,10 +4051,20 @@ public class WebView extends AbsoluteLayout
                 // Note that code inside the adapter click handler in WebTextView depends
                 // on the AutoFill item being at the top of the drop down list. If you change
                 // the order, make sure to do it there too!
-                pastEntries.add(getResources().getText(
-                        com.android.internal.R.string.autofill_this_form).toString() +
-                        " " +
-                        mAutoFillData.getPreviewString());
+                WebSettings settings = getSettings();
+                if (settings != null && settings.getAutoFillProfile() != null) {
+                    pastEntries.add(getResources().getText(
+                            com.android.internal.R.string.autofill_this_form).toString() +
+                            " " +
+                            mAutoFillData.getPreviewString());
+                    mWebTextView.setAutoFillProfileIsSet(true);
+                } else {
+                    // There is no autofill profile set up yet, so add an option that
+                    // will invite the user to set their profile up.
+                    pastEntries.add(getResources().getText(
+                            com.android.internal.R.string.setup_autofill).toString());
+                    mWebTextView.setAutoFillProfileIsSet(false);
+                }
             }
 
             pastEntries.addAll(mDatabase.getFormData(mUrl, mName));

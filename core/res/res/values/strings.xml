@@ -1824,8 +1824,10 @@
     <!-- Toast for double-tap -->
     <string name="double_tap_toast">Tip: double-tap to zoom in and out.</string>
 
-    <!-- Text to show in the auto complete drop down list on a text view when the browser can auto fill the entire form -->
+    <!-- Text to show in the auto complete drop down list on a text view when the WebView can auto fill the entire form, and the user has configured an AutoFill profile [CHAR-LIMIT=8] -->
     <string name="autofill_this_form">AutoFill</string>
+    <!-- Text to show in the auto complete drop down list on a text view when the WebView can auto fill the entire form but the user has not configured an AutoFill profile [CHAR-LIMIT=16] -->
+    <string name="setup_autofill">Setup AutoFill</string>
 
     <!-- String used to separate FirstName and LastName when writing out a local name
          e.g. John<separator>Smith [CHAR-LIMIT=NONE]-->

@@ -150,7 +150,7 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
                 }
             }
             glDeleteProgram(pgm);
-            rsc->setError(RS_ERROR_BAD_SHADER, "Error linking GL Programs");
+            rsc->setError(RS_ERROR_FATAL_PROGRAM_LINK, "Error linking GL Programs");
             return false;
         }
 

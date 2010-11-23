@@ -23,16 +23,13 @@
 
 namespace android {
 
+struct MetaData;
 class Surface;
 
 class SoftwareRenderer {
 public:
     SoftwareRenderer(
-            OMX_COLOR_FORMATTYPE colorFormat,
-            const sp<Surface> &surface,
-            size_t displayWidth, size_t displayHeight,
-            size_t decodedWidth, size_t decodedHeight,
-            int32_t rotationDegrees);
+            const sp<Surface> &surface, const sp<MetaData> &meta);
 
     ~SoftwareRenderer();
 
@@ -42,16 +39,14 @@ public:
 private:
     enum YUVMode {
         None,
-        YUV420ToYUV420sp,
-        YUV420spToYUV420sp,
     };
 
     OMX_COLOR_FORMATTYPE mColorFormat;
     ColorConverter *mConverter;
     YUVMode mYUVMode;
     sp<Surface> mSurface;
-    size_t mDisplayWidth, mDisplayHeight;
-    size_t mDecodedWidth, mDecodedHeight;
+    int32_t mWidth, mHeight;
+    int32_t mCropLeft, mCropTop, mCropRight, mCropBottom;
 
     SoftwareRenderer(const SoftwareRenderer &);
     SoftwareRenderer &operator=(const SoftwareRenderer &);
