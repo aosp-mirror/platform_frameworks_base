@@ -343,16 +343,17 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
 
             if ((entry.flags & DropBoxManager.IS_TEXT) != 0 && (doPrint || !doFile)) {
                 DropBoxManager.Entry dbe = null;
+                InputStreamReader isr = null;
                 try {
                     dbe = new DropBoxManager.Entry(
                              entry.tag, entry.timestampMillis, entry.file, entry.flags);
 
                     if (doPrint) {
-                        InputStreamReader r = new InputStreamReader(dbe.getInputStream());
+                        isr = new InputStreamReader(dbe.getInputStream());
                         char[] buf = new char[4096];
                         boolean newline = false;
                         for (;;) {
-                            int n = r.read(buf);
+                            int n = isr.read(buf);
                             if (n <= 0) break;
                             out.append(buf, 0, n);
                             newline = (buf[n - 1] == '\n');
@@ -376,6 +377,12 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
                     Slog.e(TAG, "Can't read: " + entry.file, e);
                 } finally {
                     if (dbe != null) dbe.close();
+                    if (isr != null) {
+                        try {
+                            isr.close();
+                        } catch (IOException unused) {
+                        }
+                    }
                 }
             }
 
