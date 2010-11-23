@@ -456,7 +456,11 @@ public class BitmapFactory {
             // into is.read(...) This number is not related to the value passed
             // to mark(...) above.
             try {
-                bm = Bitmap_Delegate.createBitmap(is, Density.MEDIUM);
+                Density density = Density.MEDIUM;
+                if (opts != null) {
+                    density = Density.getEnum(opts.inDensity);
+                }
+                bm = Bitmap_Delegate.createBitmap(is, true, density);
             } catch (IOException e) {
                 return null;
             }

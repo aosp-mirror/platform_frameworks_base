@@ -26,7 +26,7 @@ import com.android.layoutlib.api.SceneResult;
 import com.android.layoutlib.bridge.android.BridgeAssetManager;
 import com.android.layoutlib.bridge.impl.FontLoader;
 import com.android.layoutlib.bridge.impl.LayoutSceneImpl;
-import com.android.ninepatch.NinePatch;
+import com.android.ninepatch.NinePatchChunk;
 import com.android.tools.layoutlib.create.MethodAdapter;
 import com.android.tools.layoutlib.create.OverrideMethod;
 
@@ -73,13 +73,13 @@ public final class Bridge extends LayoutBridge {
 
     private final static Map<Object, Map<String, SoftReference<Bitmap>>> sProjectBitmapCache =
         new HashMap<Object, Map<String, SoftReference<Bitmap>>>();
-    private final static Map<Object, Map<String, SoftReference<NinePatch>>> sProject9PatchCache =
-        new HashMap<Object, Map<String, SoftReference<NinePatch>>>();
+    private final static Map<Object, Map<String, SoftReference<NinePatchChunk>>> sProject9PatchCache =
+        new HashMap<Object, Map<String, SoftReference<NinePatchChunk>>>();
 
     private final static Map<String, SoftReference<Bitmap>> sFrameworkBitmapCache =
         new HashMap<String, SoftReference<Bitmap>>();
-    private final static Map<String, SoftReference<NinePatch>> sFramework9PatchCache =
-        new HashMap<String, SoftReference<NinePatch>>();
+    private final static Map<String, SoftReference<NinePatchChunk>> sFramework9PatchCache =
+        new HashMap<String, SoftReference<NinePatchChunk>>();
 
     private static Map<String, Map<String, Integer>> sEnumValueMap;
 
@@ -252,23 +252,23 @@ public final class Bridge extends LayoutBridge {
     }
 
     /**
-     * Sets a 9 patch in a project cache or in the framework cache.
+     * Sets a 9 patch chunk in a project cache or in the framework cache.
      * @param value the path of the 9 patch
      * @param ninePatch the 9 patch object
      * @param projectKey the key of the project, or null to put the bitmap in the framework cache.
      */
-    public static void setCached9Patch(String value, NinePatch ninePatch, Object projectKey) {
+    public static void setCached9Patch(String value, NinePatchChunk ninePatch, Object projectKey) {
         if (projectKey != null) {
-            Map<String, SoftReference<NinePatch>> map = sProject9PatchCache.get(projectKey);
+            Map<String, SoftReference<NinePatchChunk>> map = sProject9PatchCache.get(projectKey);
 
             if (map == null) {
-                map = new HashMap<String, SoftReference<NinePatch>>();
+                map = new HashMap<String, SoftReference<NinePatchChunk>>();
                 sProject9PatchCache.put(projectKey, map);
             }
 
-            map.put(value, new SoftReference<NinePatch>(ninePatch));
+            map.put(value, new SoftReference<NinePatchChunk>(ninePatch));
         } else {
-            sFramework9PatchCache.put(value, new SoftReference<NinePatch>(ninePatch));
+            sFramework9PatchCache.put(value, new SoftReference<NinePatchChunk>(ninePatch));
         }
     }
 
@@ -436,24 +436,24 @@ public final class Bridge extends LayoutBridge {
     }
 
     /**
-     * Returns the 9 patch for a specific path, from a specific project cache, or from the
+     * Returns the 9 patch chunk for a specific path, from a specific project cache, or from the
      * framework cache.
      * @param value the path of the 9 patch
      * @param projectKey the key of the project, or null to query the framework cache.
      * @return the cached 9 patch or null if not found.
      */
-    public static NinePatch getCached9Patch(String value, Object projectKey) {
+    public static NinePatchChunk getCached9Patch(String value, Object projectKey) {
         if (projectKey != null) {
-            Map<String, SoftReference<NinePatch>> map = sProject9PatchCache.get(projectKey);
+            Map<String, SoftReference<NinePatchChunk>> map = sProject9PatchCache.get(projectKey);
 
             if (map != null) {
-                SoftReference<NinePatch> ref = map.get(value);
+                SoftReference<NinePatchChunk> ref = map.get(value);
                 if (ref != null) {
                     return ref.get();
                 }
             }
         } else {
-            SoftReference<NinePatch> ref = sFramework9PatchCache.get(value);
+            SoftReference<NinePatchChunk> ref = sFramework9PatchCache.get(value);
             if (ref != null) {
                 return ref.get();
             }

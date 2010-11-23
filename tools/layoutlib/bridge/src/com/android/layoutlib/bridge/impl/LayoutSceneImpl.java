@@ -313,10 +313,12 @@ public class LayoutSceneImpl {
 
             // create an Android bitmap around the BufferedImage
             Bitmap bitmap = Bitmap_Delegate.createBitmap(mImage,
+                    true /*isMutable*/,
                     Density.getEnum(mParams.getDensity()));
 
             // create a Canvas around the Android bitmap
             Canvas canvas = new Canvas(bitmap);
+            canvas.setDensity(mParams.getDensity());
 
             // to set the logger, get the native delegate
             Canvas_Delegate canvasDelegate = Canvas_Delegate.getDelegate(canvas);

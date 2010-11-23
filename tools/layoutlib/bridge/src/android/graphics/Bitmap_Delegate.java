@@ -75,32 +75,56 @@ public class Bitmap_Delegate {
 
     /**
      * Creates and returns a {@link Bitmap} initialized with the given file content.
+     *
+     * @param input the file from which to read the bitmap content
+     * @param isMutable whether the bitmap is mutable
+     * @param density the density associated with the bitmap
+     *
+     * @see Bitmap#isMutable()
+     * @see Bitmap#getDensity()
      */
-    public static Bitmap createBitmap(File input, Density density) throws IOException {
+    public static Bitmap createBitmap(File input, boolean isMutable, Density density)
+            throws IOException {
         // create a delegate with the content of the file.
         Bitmap_Delegate delegate = new Bitmap_Delegate(ImageIO.read(input));
 
-        return createBitmap(delegate, density.getValue());
+        return createBitmap(delegate, isMutable, density.getValue());
     }
 
     /**
      * Creates and returns a {@link Bitmap} initialized with the given stream content.
+     *
+     * @param input the stream from which to read the bitmap content
+     * @param isMutable whether the bitmap is mutable
+     * @param density the density associated with the bitmap
+     *
+     * @see Bitmap#isMutable()
+     * @see Bitmap#getDensity()
      */
-    public static Bitmap createBitmap(InputStream input, Density density) throws IOException {
+    public static Bitmap createBitmap(InputStream input, boolean isMutable, Density density)
+            throws IOException {
         // create a delegate with the content of the stream.
         Bitmap_Delegate delegate = new Bitmap_Delegate(ImageIO.read(input));
 
-        return createBitmap(delegate, density.getValue());
+        return createBitmap(delegate, isMutable, density.getValue());
     }
 
     /**
      * Creates and returns a {@link Bitmap} initialized with the given {@link BufferedImage}
+     *
+     * @param image the bitmap content
+     * @param isMutable whether the bitmap is mutable
+     * @param density the density associated with the bitmap
+     *
+     * @see Bitmap#isMutable()
+     * @see Bitmap#getDensity()
      */
-    public static Bitmap createBitmap(BufferedImage image, Density density) throws IOException {
+    public static Bitmap createBitmap(BufferedImage image, boolean isMutable, Density density)
+            throws IOException {
         // create a delegate with the given image.
         Bitmap_Delegate delegate = new Bitmap_Delegate(image);
 
-        return createBitmap(delegate, density.getValue());
+        return createBitmap(delegate, isMutable, density.getValue());
     }
 
     /**
@@ -153,7 +177,7 @@ public class Bitmap_Delegate {
         // create a delegate with the content of the stream.
         Bitmap_Delegate delegate = new Bitmap_Delegate(image);
 
-        return createBitmap(delegate, Bitmap.getDefaultDensity());
+        return createBitmap(delegate, mutable, Bitmap.getDefaultDensity());
     }
 
     /*package*/ static Bitmap nativeCopy(int srcBitmap, int nativeConfig, boolean isMutable) {
@@ -166,8 +190,7 @@ public class Bitmap_Delegate {
     }
 
     /*package*/ static void nativeRecycle(int nativeBitmap) {
-        // FIXME implement native delegate
-        throw new UnsupportedOperationException("Native delegate needed for Bitmap");
+        sManager.removeDelegate(nativeBitmap);
     }
 
     /*package*/ static boolean nativeCompress(int nativeBitmap, int format, int quality,
@@ -336,11 +359,11 @@ public class Bitmap_Delegate {
         mImage = image;
     }
 
-    private static Bitmap createBitmap(Bitmap_Delegate delegate, int density) {
+    private static Bitmap createBitmap(Bitmap_Delegate delegate, boolean isMutable, int density) {
         // get its native_int
         int nativeInt = sManager.addDelegate(delegate);
 
         // and create/return a new Bitmap with it
-        return new Bitmap(nativeInt, true /*isMutable*/, null /*ninePatchChunk*/, density);
+        return new Bitmap(nativeInt, isMutable, null /*ninePatchChunk*/, density);
     }
 }

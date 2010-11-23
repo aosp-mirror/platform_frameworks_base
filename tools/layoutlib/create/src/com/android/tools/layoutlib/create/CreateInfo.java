@@ -109,6 +109,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.DashPathEffect",
         "android.graphics.LinearGradient",
         "android.graphics.Matrix",
+        "android.graphics.NinePatch",
         "android.graphics.Paint",
         "android.graphics.PathEffect",
         "android.graphics.PorterDuffXfermode",
