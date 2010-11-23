@@ -685,6 +685,8 @@ public class RenderScript {
         public static final int RS_MESSAGE_TO_CLIENT_ERROR = 3;
         public static final int RS_MESSAGE_TO_CLIENT_USER = 4;
 
+        public static final int RS_ERROR_FATAL_UNKNOWN = 0x1000;
+
         MessageThread(RenderScript rs) {
             super("RSMessageThread");
             mRS = rs;
@@ -721,6 +723,10 @@ public class RenderScript {
 
                 if (msg == RS_MESSAGE_TO_CLIENT_ERROR) {
                     String e = mRS.nContextGetErrorMessage(mRS.mContext);
+
+                    if (subID >= RS_ERROR_FATAL_UNKNOWN) {
+                        throw new RSRuntimeException("Fatal error " + subID + ", details: " + e);
+                    }
 
                     if(mRS.mErrorCallback != null) {
                         mRS.mErrorCallback.mErrorMessage = e;

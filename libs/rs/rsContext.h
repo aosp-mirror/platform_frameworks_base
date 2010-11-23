@@ -144,7 +144,7 @@ public:
 
     RsMessageToClientType peekMessageToClient(size_t *receiveLen, uint32_t *subID, bool wait);
     RsMessageToClientType getMessageToClient(void *data, size_t *receiveLen, uint32_t *subID, size_t bufferLen, bool wait);
-    bool sendMessageToClient(const void *data, RsMessageToClientType cmdID, uint32_t subID, size_t len, bool waitForSpace);
+    bool sendMessageToClient(const void *data, RsMessageToClientType cmdID, uint32_t subID, size_t len, bool waitForSpace) const;
     uint32_t runScript(Script *s);
 
     void initToClient();
@@ -169,7 +169,7 @@ public:
     uint32_t getWidth() const {return mWidth;}
     uint32_t getHeight() const {return mHeight;}
 
-    ThreadIO mIO;
+    mutable ThreadIO mIO;
 
     // Timers
     enum Timers {
@@ -197,9 +197,8 @@ public:
     } props;
 
     void dumpDebug() const;
-    void checkError(const char *) const;
-    const char * getError(RsError *);
-    void setError(RsError e, const char *msg = NULL);
+    void checkError(const char *, bool isFatal = false) const;
+    void setError(RsError e, const char *msg = NULL) const;
 
     mutable const ObjectBase * mObjHead;
 
@@ -259,8 +258,7 @@ protected:
     bool mRunning;
     bool mExit;
     bool mPaused;
-    RsError mError;
-    const char *mErrorMsg;
+    mutable RsError mError;
 
     pthread_t mThreadId;
     pid_t mNativeThreadId;

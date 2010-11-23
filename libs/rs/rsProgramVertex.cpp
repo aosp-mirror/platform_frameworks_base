@@ -49,7 +49,7 @@ void ProgramVertex::loadShader(Context *rsc) {
     Program::loadShader(rsc, GL_VERTEX_SHADER);
 }
 
-void ProgramVertex::createShader() {
+void ProgramVertex::createShader(Context *rsc) {
     if (mUserShader.length() > 1) {
 
         appendUserConstants();
@@ -81,13 +81,12 @@ void ProgramVertex::createShader() {
         }
         mShader.append(mUserShader);
     } else {
-        LOGE("ProgramFragment::createShader cannot create program, shader code not defined");
-        rsAssert(0);
+        rsc->setError(RS_ERROR_FATAL_UNKNOWN,
+                      "ProgramFragment::createShader cannot create program, shader code not defined");
     }
 }
 
 void ProgramVertex::setupGL2(Context *rsc, ProgramVertexState *state, ShaderCache *sc) {
-    //LOGE("sgl2 vtx1 %x", glGetError());
     if ((state->mLast.get() == this) && !mDirty) {
         return;
     }
@@ -96,8 +95,8 @@ void ProgramVertex::setupGL2(Context *rsc, ProgramVertexState *state, ShaderCach
 
     if (!isUserProgram()) {
         if (mConstants[0].get() == NULL) {
-            LOGE("Unable to set fixed function emulation matrices because allocation is missing");
-            rsc->setError(RS_ERROR_BAD_SHADER, "Fixed function allocation missing");
+            rsc->setError(RS_ERROR_FATAL_UNKNOWN,
+                          "Unable to set fixed function emulation matrices because allocation is missing");
             return;
         }
         float *f = static_cast<float *>(mConstants[0]->getPtr());
@@ -120,12 +119,13 @@ void ProgramVertex::setupGL2(Context *rsc, ProgramVertexState *state, ShaderCach
 
 void ProgramVertex::setProjectionMatrix(Context *rsc, const rsc_Matrix *m) const {
     if (isUserProgram()) {
-        LOGE("Attempting to set fixed function emulation matrix projection on user program");
-        rsc->setError(RS_ERROR_BAD_SHADER, "Cannot set emulation matrix on user shader");
+        rsc->setError(RS_ERROR_FATAL_UNKNOWN,
+                      "Attempting to set fixed function emulation matrix projection on user program");
         return;
     }
     if (mConstants[0].get() == NULL) {
-        LOGE("Unable to set fixed function emulation matrix projection because allocation is missing");
+        rsc->setError(RS_ERROR_FATAL_UNKNOWN,
+                      "Unable to set fixed function emulation matrix projection because allocation is missing");
         return;
     }
     float *f = static_cast<float *>(mConstants[0]->getPtr());
@@ -135,13 +135,13 @@ void ProgramVertex::setProjectionMatrix(Context *rsc, const rsc_Matrix *m) const
 
 void ProgramVertex::setModelviewMatrix(Context *rsc, const rsc_Matrix *m) const {
     if (isUserProgram()) {
-        LOGE("Attempting to set fixed function emulation matrix modelview on user program");
-        rsc->setError(RS_ERROR_BAD_SHADER, "Cannot set emulation matrix on user shader");
+        rsc->setError(RS_ERROR_FATAL_UNKNOWN,
+                      "Attempting to set fixed function emulation matrix modelview on user program");
         return;
     }
     if (mConstants[0].get() == NULL) {
-        LOGE("Unable to set fixed function emulation matrix modelview because allocation is missing");
-        rsc->setError(RS_ERROR_BAD_SHADER, "Fixed function allocation missing");
+        rsc->setError(RS_ERROR_FATAL_UNKNOWN,
+                      "Unable to set fixed function emulation matrix modelview because allocation is missing");
         return;
     }
     float *f = static_cast<float *>(mConstants[0]->getPtr());
@@ -151,13 +151,13 @@ void ProgramVertex::setModelviewMatrix(Context *rsc, const rsc_Matrix *m) const 
 
 void ProgramVertex::setTextureMatrix(Context *rsc, const rsc_Matrix *m) const {
     if (isUserProgram()) {
-        LOGE("Attempting to set fixed function emulation matrix texture on user program");
-        rsc->setError(RS_ERROR_BAD_SHADER, "Cannot set emulation matrix on user shader");
+        rsc->setError(RS_ERROR_FATAL_UNKNOWN,
+                      "Attempting to set fixed function emulation matrix texture on user program");
         return;
     }
     if (mConstants[0].get() == NULL) {
-        LOGE("Unable to set fixed function emulation matrix texture because allocation is missing");
-        rsc->setError(RS_ERROR_BAD_SHADER, "Fixed function allocation missing");
+        rsc->setError(RS_ERROR_FATAL_UNKNOWN,
+                      "Unable to set fixed function emulation matrix texture because allocation is missing");
         return;
     }
     float *f = static_cast<float *>(mConstants[0]->getPtr());
@@ -167,13 +167,13 @@ void ProgramVertex::setTextureMatrix(Context *rsc, const rsc_Matrix *m) const {
 
 void ProgramVertex::getProjectionMatrix(Context *rsc, rsc_Matrix *m) const {
     if (isUserProgram()) {
-        LOGE("Attempting to get fixed function emulation matrix projection on user program");
-        rsc->setError(RS_ERROR_BAD_SHADER, "Cannot get emulation matrix on user shader");
+        rsc->setError(RS_ERROR_FATAL_UNKNOWN,
+                      "Attempting to get fixed function emulation matrix projection on user program");
         return;
     }
     if (mConstants[0].get() == NULL) {
-        LOGE("Unable to get fixed function emulation matrix projection because allocation is missing");
-        rsc->setError(RS_ERROR_BAD_SHADER, "Fixed function allocation missing");
+        rsc->setError(RS_ERROR_FATAL_UNKNOWN,
+                      "Unable to get fixed function emulation matrix projection because allocation is missing");
         return;
     }
     float *f = static_cast<float *>(mConstants[0]->getPtr());
@@ -202,7 +202,7 @@ void ProgramVertex::init(Context *rsc) {
             initAddUserElement(mConstantTypes[ct]->getElement(), mUniformNames, mUniformArraySizes, &uniformCount, RS_SHADER_UNI);
         }
     }
-    createShader();
+    createShader(rsc);
 }
 
 void ProgramVertex::serialize(OStream *stream) const {

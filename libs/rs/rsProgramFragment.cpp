@@ -136,9 +136,9 @@ void ProgramFragment::createShader() {
         char buf[256];
         for (uint32_t ct=0; ct < mTextureCount; ct++) {
             if (mTextureTargets[ct] == RS_TEXTURE_2D) {
-                sprintf(buf, "uniform sampler2D UNI_Tex%i;\n", ct);
+                snprintf(buf, sizeof(buf), "uniform sampler2D UNI_Tex%i;\n", ct);
             } else {
-                sprintf(buf, "uniform samplerCube UNI_Tex%i;\n", ct);
+                snprintf(buf, sizeof(buf), "uniform samplerCube UNI_Tex%i;\n", ct);
             }
             mShader.append(buf);
         }
@@ -159,7 +159,7 @@ void ProgramFragment::init(Context *rsc) {
     mTextureUniformIndexStart = uniformIndex;
     char buf[256];
     for (uint32_t ct=0; ct < mTextureCount; ct++) {
-        sprintf(buf, "UNI_Tex%i", ct);
+        snprintf(buf, sizeof(buf), "UNI_Tex%i", ct);
         mUniformNames[uniformIndex].setTo(buf);
         mUniformArraySizes[uniformIndex] = 1;
         uniformIndex++;

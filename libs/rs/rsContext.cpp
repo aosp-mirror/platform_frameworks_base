@@ -287,10 +287,27 @@ uint32_t Context::runScript(Script *s) {
     return ret;
 }
 
-void Context::checkError(const char *msg) const {
+void Context::checkError(const char *msg, bool isFatal) const {
+
     GLenum err = glGetError();
     if (err != GL_NO_ERROR) {
-        LOGE("%p, GL Error, 0x%x, from %s", this, err, msg);
+        char buf[1024];
+        snprintf(buf, sizeof(buf), "GL Error = 0x%08x, from: %s", err, msg);
+
+        if (isFatal) {
+            setError(RS_ERROR_FATAL_DRIVER, buf);
+        } else {
+            switch (err) {
+            case GL_OUT_OF_MEMORY:
+                setError(RS_ERROR_OUT_OF_MEMORY, buf);
+                break;
+            default:
+                setError(RS_ERROR_DRIVER, buf);
+                break;
+            }
+        }
+
+        LOGE("%p, %s", this, buf);
     }
 }
 
@@ -597,7 +614,6 @@ Context::Context() {
     mPaused = false;
     mObjHead = NULL;
     mError = RS_ERROR_NONE;
-    mErrorMsg = NULL;
 }
 
 Context * Context::createContext(Device *dev, const RsSurfaceConfig *sc) {
@@ -861,7 +877,8 @@ RsMessageToClientType Context::getMessageToClient(void *data, size_t *receiveLen
     return RS_MESSAGE_TO_CLIENT_RESIZE;
 }
 
-bool Context::sendMessageToClient(const void *data, RsMessageToClientType cmdID, uint32_t subID, size_t len, bool waitForSpace) {
+bool Context::sendMessageToClient(const void *data, RsMessageToClientType cmdID,
+                                  uint32_t subID, size_t len, bool waitForSpace) const {
     //LOGE("sendMessageToClient %i %i %i %i", cmdID, subID, len, waitForSpace);
     if (cmdID == 0) {
         LOGE("Attempting to send invalid command 0 to client.");
@@ -894,18 +911,8 @@ void Context::deinitToClient() {
     mIO.mToClient.shutdown();
 }
 
-const char * Context::getError(RsError *err) {
-    *err = mError;
-    mError = RS_ERROR_NONE;
-    if (*err != RS_ERROR_NONE) {
-        return mErrorMsg;
-    }
-    return NULL;
-}
-
-void Context::setError(RsError e, const char *msg) {
+void Context::setError(RsError e, const char *msg) const {
     mError = e;
-    mErrorMsg = msg;
     sendMessageToClient(msg, RS_MESSAGE_TO_CLIENT_ERROR, e, strlen(msg) + 1, true);
 }
 
@@ -1010,14 +1017,6 @@ void rsi_ContextSetPriority(Context *rsc, int32_t p) {
 
 void rsi_ContextDump(Context *rsc, int32_t bits) {
     ObjectBase::dumpAll(rsc);
-}
-
-const char* rsi_ContextGetError(Context *rsc, RsError *e) {
-    const char *msg = rsc->getError(e);
-    if (*e != RS_ERROR_NONE) {
-        LOGE("RS Error %i %s", *e, msg);
-    }
-    return msg;
 }
 
 }
