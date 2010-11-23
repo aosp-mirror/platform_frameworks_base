@@ -742,7 +742,6 @@ public class Notification implements Parcelable
             mLedArgb = argb;
             mLedOnMs = onMs;
             mLedOffMs = offMs;
-            mFlags |= FLAG_SHOW_LIGHTS;
             return this;
         }
 
@@ -763,10 +762,6 @@ public class Notification implements Parcelable
 
         public Builder setDefaults(int defaults) {
             mDefaults = defaults;
-            int moreFlags = 0;
-            if ((defaults & DEFAULT_LIGHTS) != 0) {
-                moreFlags |= FLAG_SHOW_LIGHTS;
-            }
             return this;
         }
 
@@ -851,6 +846,12 @@ public class Notification implements Parcelable
             n.ledOffMS = mLedOffMs;
             n.defaults = mDefaults;
             n.flags = mFlags;
+            if (mLedOnMs != 0 && mLedOffMs != 0) {
+                n.flags |= FLAG_SHOW_LIGHTS;
+            }
+            if ((mDefaults & DEFAULT_LIGHTS) != 0) {
+                n.flags |= FLAG_SHOW_LIGHTS;
+            }
             return n;
         }
     }
