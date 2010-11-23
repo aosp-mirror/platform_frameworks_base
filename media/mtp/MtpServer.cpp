@@ -539,7 +539,7 @@ MtpResponseCode MtpServer::doGetObjectPropList() {
     MtpObjectFormat format = mRequest.getParameter(2);
     MtpDeviceProperty property = mRequest.getParameter(3);
     int groupCode = mRequest.getParameter(4);
-    int depth = mRequest.getParameter(4);
+    int depth = mRequest.getParameter(5);
    LOGD("GetObjectPropList %d format: %s property: %s group: %d depth: %d\n",
             handle, MtpDebug::getFormatCodeName(format),
             MtpDebug::getObjectPropCodeName(property), groupCode, depth);
