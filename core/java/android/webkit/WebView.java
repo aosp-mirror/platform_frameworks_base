@@ -3053,7 +3053,9 @@ public class WebView extends AbsoluteLayout
                 abortAnimation();
                 mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
                 WebViewCore.resumePriority();
-                WebViewCore.resumeUpdatePicture(mWebViewCore);
+                if (!mSelectingText) {
+                    WebViewCore.resumeUpdatePicture(mWebViewCore);
+                }
             }
         } else {
             super.computeScroll();
@@ -3818,7 +3820,9 @@ public class WebView extends AbsoluteLayout
     }
 
     void onFixedLengthZoomAnimationEnd() {
-        WebViewCore.resumeUpdatePicture(mWebViewCore);
+        if (!mSelectingText) {
+            WebViewCore.resumeUpdatePicture(mWebViewCore);
+        }
         onZoomAnimationEnd();
     }
 
@@ -4647,6 +4651,7 @@ public class WebView extends AbsoluteLayout
             // called by mSelectCallback.onDestroyActionMode
             mSelectCallback.finish();
             mSelectCallback = null;
+            WebViewCore.resumePriority();
             WebViewCore.resumeUpdatePicture(mWebViewCore);
             invalidate(); // redraw without selection
         }
@@ -5552,7 +5557,9 @@ public class WebView extends AbsoluteLayout
                         // is possible on emulator.
                         mLastVelocity = 0;
                         WebViewCore.resumePriority();
-                        WebViewCore.resumeUpdatePicture(mWebViewCore);
+                        if (!mSelectingText) {
+                            WebViewCore.resumeUpdatePicture(mWebViewCore);
+                        }
                         break;
                 }
                 stopTouch();
@@ -5681,8 +5688,8 @@ public class WebView extends AbsoluteLayout
             mVelocityTracker = null;
         }
 
-        if (mTouchMode == TOUCH_DRAG_MODE ||
-                mTouchMode == TOUCH_DRAG_LAYER_MODE) {
+        if ((mTouchMode == TOUCH_DRAG_MODE
+                || mTouchMode == TOUCH_DRAG_LAYER_MODE) && !mSelectingText) {
             WebViewCore.resumePriority();
             WebViewCore.resumeUpdatePicture(mWebViewCore);
         }
@@ -6053,7 +6060,9 @@ public class WebView extends AbsoluteLayout
         }
         if ((maxX == 0 && vy == 0) || (maxY == 0 && vx == 0)) {
             WebViewCore.resumePriority();
-            WebViewCore.resumeUpdatePicture(mWebViewCore);
+            if (!mSelectingText) {
+                WebViewCore.resumeUpdatePicture(mWebViewCore);
+            }
             if (mScroller.springBack(mScrollX, mScrollY, 0, computeMaxScrollX(),
                     0, computeMaxScrollY())) {
                 invalidate();
