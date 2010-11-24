@@ -36,8 +36,28 @@ import android.os.RemoteException;
  * permission.
  */
 public final class NfcF extends BasicTagTechnology {
+    /** @hide */
+    public static final String EXTRA_SC = "systemcode";
+    /** @hide */
+    public static final String EXTRA_PMM = "pmm";
+
+    private byte[] mSystemCode = null;
+    private byte[] mManufacturer = null;
+
     public NfcF(NfcAdapter adapter, Tag tag, Bundle extras)
             throws RemoteException {
         super(adapter, tag, TagTechnology.NFC_F);
+        if (extras != null) {
+            mSystemCode = extras.getByteArray(EXTRA_SC);
+            mManufacturer = extras.getByteArray(EXTRA_PMM);
+        }
+    }
+
+    public byte[] getSystemCode() {
+      return mSystemCode;
+    }
+
+    public byte[] getManufacturer() {
+      return mManufacturer;
     }
 }
