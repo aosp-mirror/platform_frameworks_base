@@ -1278,10 +1278,10 @@ public final class InputMethodManager {
             }
         }
     }
-    
+
     /**
-     * Force switch to a new input method component.  This can only be called
-     * from the currently active input method, as validated by the given token.
+     * Force switch to a new input method component. This can only be called
+     * from an application or a service which has a token of the currently active input method.
      * @param token Supplies the identifying token given to an input method
      * when it was started, which allows it to perform this operation on
      * itself.
@@ -1294,7 +1294,24 @@ public final class InputMethodManager {
             throw new RuntimeException(e);
         }
     }
-    
+
+    /**
+     * Force switch to a new input method and subtype. This can only be called
+     * from an application or a service which has a token of the currently active input method.
+     * @param token Supplies the identifying token given to an input method
+     * when it was started, which allows it to perform this operation on
+     * itself.
+     * @param id The unique identifier for the new input method to be switched to.
+     * @param subtype The new subtype of the new input method to be switched to.
+     */
+    public void setInputMethodAndSubtype(IBinder token, String id, InputMethodSubtype subtype) {
+        try {
+            mService.setInputMethodAndSubtype(token, id, subtype);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * Close/hide the input method's soft input area, so the user no longer
      * sees it or can interact with it.  This can only be called
