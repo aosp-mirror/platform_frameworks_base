@@ -20,9 +20,8 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:animateLayoutChanges="true"
-    android:background="@drawable/bg_scrim_notification"
     android:paddingTop="32dp"
-    android:paddingBottom="32dp"
+    android:paddingBottom="@dimen/status_bar_panel_bottom_offset"
     android:orientation="vertical"
     android:gravity="right"
     >

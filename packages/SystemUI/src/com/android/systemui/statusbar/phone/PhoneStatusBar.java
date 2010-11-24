@@ -294,7 +294,7 @@ public class PhoneStatusBar extends StatusBar {
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -1254,7 +1254,7 @@ public class PhoneStatusBar extends StatusBar {
         lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                 | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
@@ -1282,7 +1282,7 @@ public class PhoneStatusBar extends StatusBar {
         lp.height = getExpandedHeight();
         lp.x = 0;
         mTrackingPosition = lp.y = -disph; // sufficiently large negative
-        lp.type = WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
+        lp.type = WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
         lp.flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
