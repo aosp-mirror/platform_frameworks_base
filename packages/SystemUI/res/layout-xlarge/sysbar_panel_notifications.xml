@@ -65,6 +65,7 @@
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:layout_below="@id/clock"
+            android:layout_marginTop="4dp"
             android:layout_marginRight="48dp"
             android:gravity="right"
             />
@@ -75,9 +76,10 @@
             android:layout_width="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_below="@id/date"
-            android:layout_marginTop="16dp"
             android:layout_marginLeft="48dp"
-            android:baseline="17dp"
+            android:layout_marginTop="18dp"
+            android:layout_marginRight="8dp"
+            android:baseline="15dp"
             />
 
         <TextView
@@ -96,7 +98,8 @@
             android:layout_width="wrap_content"
             android:layout_toRightOf="@id/battery_text"
             android:layout_alignBaseline="@id/battery"
-            android:baseline="21dp"
+            android:layout_marginRight="8dp"
+            android:baseline="15dp"
             />
 
         <TextView
@@ -113,11 +116,11 @@
             android:id="@+id/settings_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
             android:layout_alignBaseline="@id/battery"
+            android:layout_alignParentRight="true"
             android:paddingRight="16dp"
             android:src="@drawable/ic_notification_open"
-            android:baseline="17dp"
+            android:baseline="21dp"
             />
 
         <ImageView
@@ -129,7 +132,7 @@
             android:paddingRight="16dp"
             android:visibility="invisible"
             android:src="@drawable/status_bar_veto"
-            android:baseline="17dp"
+            android:baseline="21dp"
             />
     </com.android.systemui.statusbar.tablet.NotificationTitleArea>
 
