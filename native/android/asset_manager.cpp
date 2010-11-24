@@ -201,7 +201,7 @@ off_t AAsset_getRemainingLength(AAsset* asset)
 
 int AAsset_openFileDescriptor(AAsset* asset, off_t* outStart, off_t* outLength)
 {
-    return asset->mAsset->openFileDescriptor(outStart, outLength);
+    return asset->mAsset->openFileDescriptor((off64_t*)outStart, (off64_t*)outLength);
 }
 
 int AAsset_isAllocated(AAsset* asset)

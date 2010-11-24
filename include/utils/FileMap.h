@@ -22,6 +22,8 @@
 
 #include <sys/types.h>
 
+#include <utils/Compat.h>
+
 #ifdef HAVE_WIN32_FILEMAP
 #include <windows.h>
 #endif
@@ -55,7 +57,7 @@ public:
      * Returns "false" on failure.
      */
     bool create(const char* origFileName, int fd,
-                off_t offset, size_t length, bool readOnly);
+                off64_t offset, size_t length, bool readOnly);
 
     /*
      * Return the name of the file this map came from, if known.
@@ -75,7 +77,7 @@ public:
     /*
      * Get the data offset used to create this map.
      */
-    off_t getDataOffset(void) const { return mDataOffset; }
+    off64_t getDataOffset(void) const { return mDataOffset; }
 
     /*
      * Get a "copy" of the object.
@@ -118,7 +120,7 @@ private:
     char*       mFileName;      // original file name, if known
     void*       mBasePtr;       // base of mmap area; page aligned
     size_t      mBaseLength;    // length, measured from "mBasePtr"
-    off_t       mDataOffset;    // offset used when map was created
+    off64_t     mDataOffset;    // offset used when map was created
     void*       mDataPtr;       // start of requested data, offset from base
     size_t      mDataLength;    // length, measured from "mDataPtr"
 #ifdef HAVE_WIN32_FILEMAP

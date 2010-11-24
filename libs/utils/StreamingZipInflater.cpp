@@ -31,7 +31,7 @@ using namespace android;
 /*
  * Streaming access to compressed asset data in an open fd
  */
-StreamingZipInflater::StreamingZipInflater(int fd, off_t compDataStart,
+StreamingZipInflater::StreamingZipInflater(int fd, off64_t compDataStart,
         size_t uncompSize, size_t compSize) {
     mFd = fd;
     mDataMap = NULL;
@@ -210,7 +210,7 @@ int StreamingZipInflater::readNextChunk() {
 // seeking backwards requires uncompressing fom the beginning, so is very
 // expensive.  seeking forwards only requires uncompressing from the current
 // position to the destination.
-off_t StreamingZipInflater::seekAbsolute(off_t absoluteInputPosition) {
+off64_t StreamingZipInflater::seekAbsolute(off64_t absoluteInputPosition) {
     if (absoluteInputPosition < mOutCurPosition) {
         // rewind and reprocess the data from the beginning
         if (!mStreamNeedsInit) {

@@ -146,7 +146,7 @@ status_t ZipFileRO::open(const char* zipFileName)
         return NAME_NOT_FOUND;
     }
 
-    mFileLength = lseek(fd, 0, SEEK_END);
+    mFileLength = lseek64(fd, 0, SEEK_END);
     if (mFileLength < kEOCDLen) {
         TEMP_FAILURE_RETRY(close(fd));
         return UNKNOWN_ERROR;
@@ -202,7 +202,7 @@ bool ZipFileRO::mapCentralDirectory(void)
     /*
      * Make sure this is a Zip archive.
      */
-    if (lseek(mFd, 0, SEEK_SET) != 0) {
+    if (lseek64(mFd, 0, SEEK_SET) != 0) {
         LOGW("seek to start failed: %s", strerror(errno));
         free(scanBuf);
         return false;
@@ -240,9 +240,9 @@ bool ZipFileRO::mapCentralDirectory(void)
      *
      * We start by pulling in the last part of the file.
      */
-    off_t searchStart = mFileLength - readAmount;
+    off64_t searchStart = mFileLength - readAmount;
 
-    if (lseek(mFd, searchStart, SEEK_SET) != searchStart) {
+    if (lseek64(mFd, searchStart, SEEK_SET) != searchStart) {
         LOGW("seek %ld failed: %s\n",  (long) searchStart, strerror(errno));
         free(scanBuf);
         return false;
@@ -274,7 +274,7 @@ bool ZipFileRO::mapCentralDirectory(void)
         return false;
     }
 
-    off_t eocdOffset = searchStart + i;
+    off64_t eocdOffset = searchStart + i;
     const unsigned char* eocdPtr = scanBuf + i;
 
     assert(eocdOffset < mFileLength);
@@ -473,7 +473,7 @@ ZipEntryRO ZipFileRO::findEntryByIndex(int idx) const
  * appear to be bogus.
  */
 bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
-    size_t* pCompLen, off_t* pOffset, long* pModWhen, long* pCrc32) const
+    size_t* pCompLen, off64_t* pOffset, long* pModWhen, long* pCrc32) const
 {
     bool ret = false;
 
@@ -489,7 +489,7 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
      * so we can just subtract back from that.
      */
     const unsigned char* ptr = (const unsigned char*) hashEntry.name;
-    off_t cdOffset = mDirectoryOffset;
+    off64_t cdOffset = mDirectoryOffset;
 
     ptr -= kCDELen;
 
@@ -536,12 +536,12 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
 #ifdef HAVE_PREAD
         /*
          * This file descriptor might be from zygote's preloaded assets,
-         * so we need to do an pread() instead of a lseek() + read() to
+         * so we need to do an pread64() instead of a lseek64() + read() to
          * guarantee atomicity across the processes with the shared file
          * descriptors.
          */
         ssize_t actual =
-                TEMP_FAILURE_RETRY(pread(mFd, lfhBuf, sizeof(lfhBuf), localHdrOffset));
+                TEMP_FAILURE_RETRY(pread64(mFd, lfhBuf, sizeof(lfhBuf), localHdrOffset));
 
         if (actual != sizeof(lfhBuf)) {
             LOGW("failed reading lfh from offset %ld\n", localHdrOffset);
@@ -556,17 +556,17 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
         }
 #else /* HAVE_PREAD */
         /*
-         * For hosts don't have pread() we cannot guarantee atomic reads from
+         * For hosts don't have pread64() we cannot guarantee atomic reads from
          * an offset in a file. Android should never run on those platforms.
          * File descriptors inherited from a fork() share file offsets and
          * there would be nothing to protect from two different processes
-         * calling lseek() concurrently.
+         * calling lseek64() concurrently.
          */
 
         {
             AutoMutex _l(mFdLock);
 
-            if (lseek(mFd, localHdrOffset, SEEK_SET) != localHdrOffset) {
+            if (lseek64(mFd, localHdrOffset, SEEK_SET) != localHdrOffset) {
                 LOGW("failed seeking to lfh at offset %ld\n", localHdrOffset);
                 return false;
             }
@@ -579,7 +579,7 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
             }
 
             if (get4LE(lfhBuf) != kLFHSignature) {
-                off_t actualOffset = lseek(mFd, 0, SEEK_CUR);
+                off64_t actualOffset = lseek64(mFd, 0, SEEK_CUR);
                 LOGW("didn't find signature at start of lfh; wanted: offset=%ld data=0x%08x; "
                         "got: offset=" ZD " data=0x%08lx\n",
                         localHdrOffset, kLFHSignature, (ZD_TYPE) actualOffset, get4LE(lfhBuf));
@@ -588,7 +588,7 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
         }
 #endif /* HAVE_PREAD */
 
-        off_t dataOffset = localHdrOffset + kLFHLen
+        off64_t dataOffset = localHdrOffset + kLFHLen
             + get2LE(lfhBuf + kLFHNameLen) + get2LE(lfhBuf + kLFHExtraLen);
         if (dataOffset >= cdOffset) {
             LOGW("bad data offset %ld in zip\n", (long) dataOffset);
@@ -596,14 +596,14 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
         }
 
         /* check lengths */
-        if ((off_t)(dataOffset + compLen) > cdOffset) {
+        if ((off64_t)(dataOffset + compLen) > cdOffset) {
             LOGW("bad compressed length in zip (%ld + " ZD " > %ld)\n",
                 (long) dataOffset, (ZD_TYPE) compLen, (long) cdOffset);
             return false;
         }
 
         if (method == kCompressStored &&
-            (off_t)(dataOffset + uncompLen) > cdOffset)
+            (off64_t)(dataOffset + uncompLen) > cdOffset)
         {
             LOGE("ERROR: bad uncompressed length in zip (%ld + " ZD " > %ld)\n",
                 (long) dataOffset, (ZD_TYPE) uncompLen, (long) cdOffset);
@@ -649,7 +649,7 @@ FileMap* ZipFileRO::createEntryFileMap(ZipEntryRO entry) const
 
     FileMap* newMap;
     size_t compLen;
-    off_t offset;
+    off64_t offset;
 
     if (!getEntryInfo(entry, NULL, NULL, &compLen, &offset, NULL, NULL))
         return NULL;
@@ -679,7 +679,7 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, void* buffer) const
 
     int method;
     size_t uncompLen, compLen;
-    off_t offset;
+    off64_t offset;
     const unsigned char* ptr;
 
     getEntryInfo(entry, &method, &uncompLen, &compLen, &offset, NULL, NULL);
@@ -739,7 +739,7 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, int fd) const
 
     int method;
     size_t uncompLen, compLen;
-    off_t offset;
+    off64_t offset;
     const unsigned char* ptr;
 
     getEntryInfo(entry, &method, &uncompLen, &compLen, &offset, NULL, NULL);

@@ -149,7 +149,7 @@ static jint android_content_AssetManager_openAsset(JNIEnv* env, jobject clazz,
 
 static jobject returnParcelFileDescriptor(JNIEnv* env, Asset* a, jlongArray outOffsets)
 {
-    off_t startOffset, length;
+    off64_t startOffset, length;
     int fd = a->openFileDescriptor(&startOffset, &length);
     delete a;
     
