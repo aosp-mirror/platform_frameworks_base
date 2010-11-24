@@ -313,6 +313,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     Drawable mSelectHandleRight;
     Drawable mSelectHandleCenter;
 
+    private int mLastDownPositionX, mLastDownPositionY;
+
     /*
      * Kick-start the font cache for the zygote process (to pay the cost of
      * initializing freetype for our default font only once).
@@ -7065,6 +7067,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (action == MotionEvent.ACTION_DOWN) {
+            mLastDownPositionX = (int) event.getX();
+            mLastDownPositionY = (int) event.getY();
+
             // Reset this state; it will be re-set if super.onTouchEvent
             // causes focus to move to the view.
             mTouchFocusSelected = false;
@@ -7834,20 +7839,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return true;
         }
 
-        if (mSelectionActionMode != null) {
-            if (touchPositionIsInSelection()) {
-                // Start a drag
-                final int start = getSelectionStart();
-                final int end = getSelectionEnd();
-                CharSequence selectedText = mTransformed.subSequence(start, end);
-                ClipData data = ClipData.newPlainText(null, null, selectedText);
-                startDrag(data, getTextThumbnailBuilder(selectedText), false);
-                stopSelectionActionMode();
+        if (!isPositionOnText(mLastDownPositionX, mLastDownPositionY) && mInsertionControllerEnabled) {
+            final int offset = getOffset(mLastDownPositionX, mLastDownPositionY);
+            Selection.setSelection((Spannable)mText, offset);
+            if (canPaste()) {
+                getInsertionController().showWithPaste();
+                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             } else {
-                selectCurrentWord();
-                // Selection controller is not null since we were able to start a previous selection
-                getSelectionController().show();
+                getInsertionController().show();
             }
+            mEatTouchRelease = true;
+            return true;
+        }
+
+        if (mSelectionActionMode != null && touchPositionIsInSelection()) {
+            final int start = getSelectionStart();
+            final int end = getSelectionEnd();
+            CharSequence selectedText = mTransformed.subSequence(start, end);
+            ClipData data = ClipData.newPlainText(null, null, selectedText);
+            startDrag(data, getTextThumbnailBuilder(selectedText), false);
+            stopSelectionActionMode();
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             mEatTouchRelease = true;
             return true;
@@ -8501,7 +8512,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         final int doubleTapSlop = viewConfiguration.getScaledDoubleTapSlop();
                         final int slopSquared = doubleTapSlop * doubleTapSlop;
                         if (distanceSquared < slopSquared) {
-                            mPastePopupWindow.show();
+                            showPastePopupWindow();
                         }
                     }
                 }
@@ -8535,6 +8546,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             convertFromViewportToContentCoordinates(bounds);
             moveTo(bounds.left, bounds.top);
         }
+
+        void showPastePopupWindow() {
+            if (mPastePopupWindow != null) {
+                mPastePopupWindow.show();
+            }
+        }
     }
 
     private class InsertionPointCursorController implements CursorController {
@@ -8557,6 +8574,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             updatePosition();
             mHandle.show();
             hideDelayed(DELAY_BEFORE_FADE_OUT);
+        }
+
+        void showWithPaste() {
+            show();
+            mHandle.showPastePopupWindow();
         }
 
         public void hide() {
@@ -8833,15 +8855,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         hideSelectionModifierCursorController();
     }
 
-    private int getOffsetForHorizontal(int line, int x) {
-        x -= getTotalPaddingLeft();
-        // Clamp the position to inside of the view.
-        x = Math.max(0, x);
-        x = Math.min(getWidth() - getTotalPaddingRight() - 1, x);
-        x += getScrollX();
-        return getLayout().getOffsetForHorizontal(line, x);
-    }
-
     /**
      * Get the offset character closest to the specified absolute position.
      *
@@ -8854,15 +8867,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public int getOffset(int x, int y) {
         if (getLayout() == null) return -1;
-
-        y -= getTotalPaddingTop();
-        // Clamp the position to inside of the view.
-        y = Math.max(0, y);
-        y = Math.min(getHeight() - getTotalPaddingBottom() - 1, y);
-        y += getScrollY();
-
-        final int line = getLayout().getLineForVertical(y);
-        final int offset = getOffsetForHorizontal(line, x);
+        final int line = getLineAtCoordinate(y);
+        final int offset = getOffsetAtCoordinate(line, x);
         return offset;
     }
 
@@ -8870,14 +8876,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final Layout layout = getLayout();
         if (layout == null) return -1;
 
-        y -= getTotalPaddingTop();
-        // Clamp the position to inside of the view.
-        y = Math.max(0, y);
-        y = Math.min(getHeight() - getTotalPaddingBottom() - 1, y);
-        y += getScrollY();
-
-        int line = getLayout().getLineForVertical(y);
-
+        int line = getLineAtCoordinate(y);
         final int previousLine = layout.getLineForOffset(previousOffset);
         final int previousLineTop = layout.getLineTop(previousLine);
         final int previousLineBottom = layout.getLineBottom(previousLine);
@@ -8890,7 +8889,44 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             line = previousLine;
         }
 
-        return getOffsetForHorizontal(line, x);
+        return getOffsetAtCoordinate(line, x);
+    }
+
+    private int convertToLocalHorizontalCoordinate(int x) {
+        x -= getTotalPaddingLeft();
+        // Clamp the position to inside of the view.
+        x = Math.max(0, x);
+        x = Math.min(getWidth() - getTotalPaddingRight() - 1, x);
+        x += getScrollX();
+        return x;
+    }
+
+    private int getLineAtCoordinate(int y) {
+        y -= getTotalPaddingTop();
+        // Clamp the position to inside of the view.
+        y = Math.max(0, y);
+        y = Math.min(getHeight() - getTotalPaddingBottom() - 1, y);
+        y += getScrollY();
+        return getLayout().getLineForVertical(y);
+    }
+
+    private int getOffsetAtCoordinate(int line, int x) {
+        x = convertToLocalHorizontalCoordinate(x);
+        return getLayout().getOffsetForHorizontal(line, x);
+    }
+
+    /** Returns true if the screen coordinates position (x,y) corresponds to a character displayed
+     * in the view. Returns false when the position is in the empty space of left/right of text.
+     */
+    private boolean isPositionOnText(int x, int y) {
+        if (getLayout() == null) return false;
+
+        final int line = getLineAtCoordinate(y);
+        x = convertToLocalHorizontalCoordinate(x);
+
+        if (x < getLayout().getLineLeft(line)) return false;
+        if (x > getLayout().getLineRight(line)) return false;
+        return true;
     }
 
     @Override
@@ -8904,7 +8940,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return true;
 
             case DragEvent.ACTION_DRAG_LOCATION: {
-                final int offset = getOffset((int)event.getX(), (int)event.getY());
+                final int offset = getOffset((int) event.getX(), (int) event.getY());
                 Selection.setSelection((Spannable)mText, offset);
                 return true;
             }
@@ -8947,7 +8983,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mSelectionControllerEnabled;
     }
 
-    CursorController getInsertionController() {
+    InsertionPointCursorController getInsertionController() {
         if (!mInsertionControllerEnabled) {
             return null;
         }
@@ -9023,7 +9059,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean                 mCursorVisible = true;
 
     // Cursor Controllers.
-    private CursorController        mInsertionPointCursorController;
+    private InsertionPointCursorController mInsertionPointCursorController;
     private SelectionModifierCursorController mSelectionModifierCursorController;
     private ActionMode              mSelectionActionMode;
     private boolean                 mInsertionControllerEnabled;
