@@ -19,7 +19,9 @@
 #include <stdio.h>
 
 #include "android_util_Binder.h"
+#include "android/graphics/GraphicsJNI.h"
 
+#include <binder/IMemory.h>
 #include <surfaceflinger/SurfaceComposerClient.h>
 #include <surfaceflinger/Surface.h>
 #include <ui/Region.h>
@@ -90,15 +92,6 @@ struct no_t {
 };
 static no_t no;
 
-
-static __attribute__((noinline))
-void doThrow(JNIEnv* env, const char* exc, const char* msg = NULL)
-{
-    if (!env->ExceptionOccurred()) {
-        jclass npeClazz = env->FindClass(exc);
-        env->ThrowNew(npeClazz, msg);
-    }
-}
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -444,6 +437,56 @@ static void Surface_unfreezeDisplay(
     }
 }
 
+class ScreenshotBitmap : public SkBitmap {
+public:
+    ScreenshotBitmap() {
+    }
+
+    status_t update(int width, int height) {
+        status_t res = (width > 0 && height > 0)
+                ? mScreenshot.update(width, height)
+                : mScreenshot.update();
+        if (res != NO_ERROR) {
+            return res;
+        }
+
+        void const* base = mScreenshot.getPixels();
+        uint32_t w = mScreenshot.getWidth();
+        uint32_t h = mScreenshot.getHeight();
+        uint32_t s = mScreenshot.getStride();
+        uint32_t f = mScreenshot.getFormat();
+
+        ssize_t bpr = s * android::bytesPerPixel(f);
+        setConfig(convertPixelFormat(f), w, h, bpr);
+        if (f == PIXEL_FORMAT_RGBX_8888) {
+            setIsOpaque(true);
+        }
+        if (w > 0 && h > 0) {
+            setPixels((void*)base);
+        } else {
+            // be safe with an empty bitmap.
+            setPixels(NULL);
+        }
+
+        return NO_ERROR;
+    }
+
+private:
+    ScreenshotClient mScreenshot;
+};
+
+static jobject Surface_screenshot(JNIEnv* env, jobject clazz, jint width, jint height)
+{
+    ScreenshotBitmap* bitmap = new ScreenshotBitmap();
+
+    if (bitmap->update(width, height) != NO_ERROR) {
+        delete bitmap;
+        return 0;
+    }
+
+    return GraphicsJNI::createBitmap(env, bitmap, false, NULL);
+}
+
 static void Surface_setLayer(
         JNIEnv* env, jobject clazz, jint zorder)
 {
@@ -669,6 +712,7 @@ static JNINativeMethod gSurfaceMethods[] = {
     {"setOrientation",      "(III)V", (void*)Surface_setOrientation },
     {"freezeDisplay",       "(I)V", (void*)Surface_freezeDisplay },
     {"unfreezeDisplay",     "(I)V", (void*)Surface_unfreezeDisplay },
+    {"screenshot",          "(II)Landroid/graphics/Bitmap;", (void*)Surface_screenshot },
     {"setLayer",            "(I)V", (void*)Surface_setLayer },
     {"setPosition",         "(II)V",(void*)Surface_setPosition },
     {"setSize",             "(II)V",(void*)Surface_setSize },

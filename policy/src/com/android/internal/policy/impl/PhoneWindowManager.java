@@ -241,6 +241,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mUserRotationMode = WindowManagerPolicy.USER_ROTATION_FREE;
     int mUserRotation = Surface.ROTATION_0;
 
+    boolean mAllowAllRotations;
     boolean mCarDockEnablesAccelerometer;
     boolean mDeskDockEnablesAccelerometer;
     int mLidKeyboardAccessibility;
@@ -657,6 +658,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_carDockRotation);
         mDeskDockRotation = readRotation(
                 com.android.internal.R.integer.config_deskDockRotation);
+        mAllowAllRotations = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowAllRotations);
         mCarDockEnablesAccelerometer = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_carDockEnablesAccelerometer);
         mDeskDockEnablesAccelerometer = mContext.getResources().getBoolean(
@@ -2344,7 +2347,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return getCurrentPortraitRotation(lastRotation);
             }
 
-            mOrientationListener.setAllow180Rotation(
+            mOrientationListener.setAllow180Rotation(mAllowAllRotations ||
                     orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
 
             // case for nosensor meaning ignore sensor and consider only lid

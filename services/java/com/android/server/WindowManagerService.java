@@ -201,6 +201,12 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     static final int DEFAULT_FADE_IN_OUT_DURATION = 400;
 
+    /**
+     * If true, the window manager will do its own custom freezing and general
+     * management of the screen during rotation.
+     */
+    static final boolean CUSTOM_SCREEN_ROTATION = true;
+
     // Maximum number of milliseconds to wait for input event injection.
     // FIXME is this value reasonable?
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
@@ -374,6 +380,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mBlurShown;
     Watermark mWatermark;
     StrictModeFlash mStrictModeFlash;
+    ScreenRotationAnimation mScreenRotationAnimation;
 
     int mTransactionSequence = 0;
 
@@ -4998,7 +5005,18 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.i(TAG, "Setting rotation to " + rotation + ", animFlags=" + animFlags);
             mInputManager.setDisplayOrientation(0, rotation);
             if (mDisplayEnabled) {
-                Surface.setOrientation(0, rotation, animFlags);
+                if (CUSTOM_SCREEN_ROTATION) {
+                    Surface.freezeDisplay(0);
+                    Surface.openTransaction();
+                    if (mScreenRotationAnimation != null) {
+                        mScreenRotationAnimation.setRotation(rotation);
+                    }
+                    Surface.closeTransaction();
+                    Surface.setOrientation(0, rotation, animFlags);
+                    Surface.unfreezeDisplay(0);
+                } else {
+                    Surface.setOrientation(0, rotation, animFlags);
+                }
             }
             for (int i=mWindows.size()-1; i>=0; i--) {
                 WindowState w = mWindows.get(i);
@@ -10817,7 +10835,14 @@ public class WindowManagerService extends IWindowManager.Stub
             File file = new File("/data/system/frozen");
             Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
         }
-        Surface.freezeDisplay(0);
+
+        if (CUSTOM_SCREEN_ROTATION) {
+            if (mScreenRotationAnimation == null) {
+                mScreenRotationAnimation = new ScreenRotationAnimation(mDisplay, mFxSession);
+            }
+        } else {
+            Surface.freezeDisplay(0);
+        }
     }
 
     private void stopFreezingDisplayLocked() {
@@ -10834,7 +10859,15 @@ public class WindowManagerService extends IWindowManager.Stub
         if (PROFILE_ORIENTATION) {
             Debug.stopMethodTracing();
         }
-        Surface.unfreezeDisplay(0);
+
+        if (CUSTOM_SCREEN_ROTATION) {
+            if (mScreenRotationAnimation != null) {
+                mScreenRotationAnimation.dismiss();
+                mScreenRotationAnimation = null;
+            }
+        } else {
+            Surface.unfreezeDisplay(0);
+        }
 
         mInputMonitor.thawInputDispatchingLw();
 
