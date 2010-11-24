@@ -139,6 +139,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_POWER_GLOBAL_ACTIONS = 1;
     static final int LONG_PRESS_POWER_SHUT_OFF = 2;
     
+    static final int LONG_PRESS_HOME_NOTHING = 0;
+    static final int LONG_PRESS_HOME_RECENT_DIALOG = 1;
+    static final int LONG_PRESS_HOME_RECENT_ACTIVITY = 2;
+
     // wallpaper is at the bottom, though the window manager may move it.
     static final int WALLPAPER_LAYER = 2;
     static final int APPLICATION_LAYER = 2;
@@ -327,8 +331,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Nothing to see here, move along...
     int mFancyRotationAnimation;
     
-    // Enable 3D recents based on config settings.
-    private Boolean mUse3dRecents;
+    // What we do when the user long presses on home
+    private int mLongPressOnHomeBehavior = -1;
 
     ShortcutManager mShortcutManager;
     PowerManager.WakeLock mBroadcastWakeLock;
@@ -565,8 +569,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
              * the user lets go of the home key
              */
             mHomePressed = false;
-            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
-            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
             showRecentAppsDialog();
         }
     };
@@ -576,16 +578,32 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     void showRecentAppsDialog() {
         // We can't initialize this in init() since the configuration hasn't been loaded yet.
-        if (mUse3dRecents == null) {
-            mUse3dRecents = mContext.getResources().getBoolean(R.bool.config_enableRecentApps3D);
+        if (mLongPressOnHomeBehavior < 0) {
+            mLongPressOnHomeBehavior
+                    = mContext.getResources().getInteger(R.integer.config_longPressOnPowerBehavior);
+            if (mLongPressOnHomeBehavior < LONG_PRESS_HOME_NOTHING ||
+                    mLongPressOnHomeBehavior > LONG_PRESS_HOME_RECENT_ACTIVITY) {
+                mLongPressOnHomeBehavior = LONG_PRESS_HOME_NOTHING;
+            }
+        }
+
+        if (mLongPressOnHomeBehavior != LONG_PRESS_HOME_NOTHING) {
+            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
         }
         
         // Use 3d Recents dialog
-        if (mUse3dRecents) {
+        if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_DIALOG) {
+            // Fallback to dialog if we fail to launch the above.
+            if (mRecentAppsDialog == null) {
+                mRecentAppsDialog = new RecentApplicationsDialog(mContext);
+            }
+            mRecentAppsDialog.show();
+        } else if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_ACTIVITY) {
             try {
                 Intent intent = new Intent();
                 intent.setClassName("com.android.systemui", 
-                        "com.android.systemui.statusbar.RecentApplicationsActivity");
+                        "com.android.systemui.recent.RecentApplicationsActivity");
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK 
                         | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
                 mContext.startActivity(intent);
@@ -594,12 +612,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Log.e(TAG, "Failed to launch RecentAppsIntent", e);
             }
         }
-
-        // Fallback to dialog if we fail to launch the above.
-        if (mRecentAppsDialog == null) {
-            mRecentAppsDialog = new RecentApplicationsDialog(mContext);
-        }
-        mRecentAppsDialog.show();
     }
     
     /** {@inheritDoc} */

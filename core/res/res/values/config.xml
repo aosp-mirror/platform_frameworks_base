@@ -346,8 +346,12 @@
     <!-- Diable lockscreen rotation by default -->
     <bool name="config_enableLockScreenRotation">false</bool>
 
-    <!-- Enable 3D RecentApplications view -->
-    <bool name="config_enableRecentApps3D">false</bool>
+    <!-- Control the behavior when the user long presses the power button.
+            0 - Nothing
+            1 - Recent apps dialog
+            2 - Recent apps activity in SystemUI
+    -->
+    <integer name="config_longPressOnHomeBehavior">0</integer>
 
     <!-- Array of light sensor LUX values to define our levels for auto backlight brightness support.
          The N entries of this array define N + 1 zones as follows:
