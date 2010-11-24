@@ -40,6 +40,7 @@ import android.util.EventLog;
 import android.util.Log;
 
 import com.android.internal.R;
+import com.android.internal.telephony.ApnSetting;
 import com.android.internal.telephony.DataCallState;
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.DataConnectionTracker;

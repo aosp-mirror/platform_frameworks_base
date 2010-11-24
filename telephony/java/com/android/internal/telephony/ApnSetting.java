@@ -14,27 +14,26 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm;
+package com.android.internal.telephony;
 
-import com.android.internal.telephony.*;
 /**
  * This class represents a apn setting for create PDP link
  */
 public class ApnSetting {
 
-    String carrier;
-    String apn;
-    String proxy;
-    String port;
-    String mmsc;
-    String mmsProxy;
-    String mmsPort;
-    String user;
-    String password;
-    int authType;
+    public String carrier;
+    public String apn;
+    public String proxy;
+    public String port;
+    public String mmsc;
+    public String mmsProxy;
+    public String mmsPort;
+    public String user;
+    public String password;
+    public int authType;
     public String[] types;
-    int id;
-    String numeric;
+    public int id;
+    public String numeric;
 
 
     public ApnSetting(int id, String numeric, String carrier, String apn, String proxy, String port,
