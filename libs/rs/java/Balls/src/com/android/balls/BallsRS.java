@@ -21,7 +21,7 @@ import android.renderscript.*;
 import android.util.Log;
 
 public class BallsRS {
-    public static final int PART_COUNT = 800;
+    public static final int PART_COUNT = 1000;
 
     public BallsRS() {
     }

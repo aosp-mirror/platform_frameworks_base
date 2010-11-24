@@ -41,7 +41,20 @@ void root(const Ball_t *ballIn, Ball_t *ballOut, const BallControl_t *ctl, uint3
                 fv -= (vec / (len * len * len)) * 20000.f;
             } else {
                 if (len2 < 0.1) {
-                    continue;
+                    if (xin == x) {
+                        continue;
+                    }
+                    ballOut->delta = 0.f;
+                    ballOut->position = ballIn->position;
+                    if (xin > x) {
+                        ballOut->position.x += 1.f;
+                    } else {
+                        ballOut->position.x -= 1.f;
+                    }
+                    ballOut->color.rgb = 1.f;
+                    ballOut->arcID = -1;
+                    ballOut->arcStr = 0;
+                    return;
                 }
                 // Collision
                 float2 axis = normalize(vec);
