@@ -17,7 +17,9 @@
 package android.os;
 
 import android.util.Config;
+import android.util.Log;
 import android.util.Printer;
+import android.util.PrefixPrinter;
 
 /**
   * Class used to run a message loop for a thread.  Threads by default do
@@ -31,37 +33,38 @@ import android.util.Printer;
   * <p>This is a typical example of the implementation of a Looper thread,
   * using the separation of {@link #prepare} and {@link #loop} to create an
   * initial Handler to communicate with the Looper.
-  * 
+  *
   * <pre>
   *  class LooperThread extends Thread {
   *      public Handler mHandler;
-  *      
+  *
   *      public void run() {
   *          Looper.prepare();
-  *          
+  *
   *          mHandler = new Handler() {
   *              public void handleMessage(Message msg) {
   *                  // process incoming messages here
   *              }
   *          };
-  *          
+  *
   *          Looper.loop();
   *      }
   *  }</pre>
   */
 public class Looper {
-    private static final boolean DEBUG = false;
-    private static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
+    private static final String TAG = "Looper";
+    private static final boolean LOG_V = Log.isLoggable(TAG, Log.VERBOSE);
 
     // sThreadLocal.get() will return null unless you've called prepare().
-    private static final ThreadLocal sThreadLocal = new ThreadLocal();
+    private static final ThreadLocal<Looper> sThreadLocal = new ThreadLocal<Looper>();
 
     final MessageQueue mQueue;
+    final Thread mThread;
     volatile boolean mRun;
-    Thread mThread;
+
     private Printer mLogging = null;
-    private static Looper mMainLooper = null;
-    
+    private static Looper mMainLooper = null;  // guarded by Looper.class
+
      /** Initialize the current thread as a looper.
       * This gives you a chance to create handlers that then reference
       * this looper, before actually starting the loop. Be sure to call
@@ -74,13 +77,13 @@ public class Looper {
         }
         sThreadLocal.set(new Looper());
     }
-    
-    /** Initialize the current thread as a looper, marking it as an application's main 
-     *  looper. The main looper for your application is created by the Android environment,
-     *  so you should never need to call this function yourself.
-     * {@link #prepare()}
+
+    /**
+     * Initialize the current thread as a looper, marking it as an
+     * application's main looper. The main looper for your application
+     * is created by the Android environment, so you should never need
+     * to call this function yourself.  See also: {@link #prepare()}
      */
-     
     public static final void prepareMainLooper() {
         prepare();
         setMainLooper(myLooper());
@@ -92,7 +95,7 @@ public class Looper {
     private synchronized static void setMainLooper(Looper looper) {
         mMainLooper = looper;
     }
-    
+
     /** Returns the application's main looper, which lives in the main thread of the application.
      */
     public synchronized static final Looper getMainLooper() {
@@ -100,28 +103,28 @@ public class Looper {
     }
 
     /**
-     *  Run the message queue in this thread. Be sure to call
+     * Run the message queue in this thread. Be sure to call
      * {@link #quit()} to end the loop.
      */
     public static final void loop() {
         Looper me = myLooper();
+        if (me == null) {
+            throw new RuntimeException("No Looper; Looper.prepare() wasn't called on this thread.");
+        }
         MessageQueue queue = me.mQueue;
         while (true) {
             Message msg = queue.next(); // might block
-            //if (!me.mRun) {
-            //    break;
-            //}
             if (msg != null) {
                 if (msg.target == null) {
                     // No target is a magic identifier for the quit message.
                     return;
                 }
-                if (me.mLogging!= null) me.mLogging.println(
+                if (me.mLogging != null) me.mLogging.println(
                         ">>>>> Dispatching to " + msg.target + " "
                         + msg.callback + ": " + msg.what
                         );
                 msg.target.dispatchMessage(msg);
-                if (me.mLogging!= null) me.mLogging.println(
+                if (me.mLogging != null) me.mLogging.println(
                         "<<<<< Finished to    " + msg.target + " "
                         + msg.callback);
                 msg.recycle();
@@ -134,7 +137,7 @@ public class Looper {
      * null if the calling thread is not associated with a Looper.
      */
     public static final Looper myLooper() {
-        return (Looper)sThreadLocal.get();
+        return sThreadLocal.get();
     }
 
     /**
@@ -179,28 +182,29 @@ public class Looper {
     public Thread getThread() {
         return mThread;
     }
-    
+
     /** @hide */
     public MessageQueue getQueue() {
         return mQueue;
     }
-    
+
     public void dump(Printer pw, String prefix) {
-        pw.println(prefix + this);
-        pw.println(prefix + "mRun=" + mRun);
-        pw.println(prefix + "mThread=" + mThread);
-        pw.println(prefix + "mQueue=" + ((mQueue != null) ? mQueue : "(null"));
+        pw = PrefixPrinter.create(pw, prefix);
+        pw.println(this.toString());
+        pw.println("mRun=" + mRun);
+        pw.println("mThread=" + mThread);
+        pw.println("mQueue=" + ((mQueue != null) ? mQueue : "(null"));
         if (mQueue != null) {
             synchronized (mQueue) {
                 long now = SystemClock.uptimeMillis();
                 Message msg = mQueue.mMessages;
                 int n = 0;
                 while (msg != null) {
-                    pw.println(prefix + "  Message " + n + ": " + msg.toString(now));
+                    pw.println("  Message " + n + ": " + msg.toString(now));
                     n++;
                     msg = msg.next;
                 }
-                pw.println(prefix + "(Total messages: " + n + ")");
+                pw.println("(Total messages: " + n + ")");
             }
         }
     }
@@ -226,4 +230,3 @@ public class Looper {
         }
     }
 }
-
