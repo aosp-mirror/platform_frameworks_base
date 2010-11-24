@@ -8562,8 +8562,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private class InsertionPointCursorController implements CursorController {
         private static final int DELAY_BEFORE_FADE_OUT = 4100;
 
-        // The cursor controller image
-        private final HandleView mHandle;
+        // The cursor controller image. Lazily created.
+        private HandleView mHandle;
 
         private final Runnable mHider = new Runnable() {
             public void run() {
@@ -8571,23 +8571,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         };
 
-        InsertionPointCursorController() {
-            mHandle = new HandleView(this, HandleView.CENTER);
-        }
-
         public void show() {
             updatePosition();
-            mHandle.show();
+            getHandle().show();
             hideDelayed(DELAY_BEFORE_FADE_OUT);
         }
 
         void showWithPaste() {
             show();
-            mHandle.showPastePopupWindow();
+            getHandle().showPastePopupWindow();
         }
 
         public void hide() {
-            mHandle.hide();
+            if (mHandle != null) {
+                mHandle.hide();
+            }
             TextView.this.removeCallbacks(mHider);
         }
 
@@ -8597,7 +8595,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         public boolean isShowing() {
-            return mHandle.isShowing();
+            return mHandle != null && mHandle.isShowing();
         }
 
         public void updatePosition(HandleView handle, int x, int y) {
@@ -8621,7 +8619,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return;
             }
 
-            mHandle.positionAtCursor(offset, true);
+            // updatePosition is called only when isShowing. Handle has been created at this point.
+            getHandle().positionAtCursor(offset, true);
         }
 
         public boolean onTouchEvent(MotionEvent ev) {
@@ -8633,10 +8632,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 hide();
             }
         }
+
+        private HandleView getHandle() {
+            if (mHandle == null) {
+                mHandle = new HandleView(this, HandleView.CENTER);
+            }
+            return mHandle;
+        }
     }
 
     private class SelectionModifierCursorController implements CursorController {
-        // The cursor controller images
+        // The cursor controller images, lazily created when shown.
         private HandleView mStartHandle, mEndHandle;
         // The offsets of that last touch down event. Remembered to start selection there.
         private int mMinTouchOffset, mMaxTouchOffset;
@@ -8657,8 +8663,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         };
 
         SelectionModifierCursorController() {
-            mStartHandle = new HandleView(this, HandleView.LEFT);
-            mEndHandle = new HandleView(this, HandleView.RIGHT);
             resetTouchOffsets();
         }
 
@@ -8667,17 +8671,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return;
             }
 
+            // Lazy object creation has to be done before updatePosition() is called.
+            if (mStartHandle == null) mStartHandle = new HandleView(this, HandleView.LEFT);
+            if (mEndHandle == null) mEndHandle = new HandleView(this, HandleView.RIGHT);
+
             mIsShowing = true;
             updatePosition();
+
             mStartHandle.show();
             mEndHandle.show();
+
             hideInsertionPointCursorController();
             hideDelayed(DELAY_BEFORE_FADE_OUT);
         }
 
         public void hide() {
-            mStartHandle.hide();
-            mEndHandle.hide();
+            if (mStartHandle != null) mStartHandle.hide();
+            if (mEndHandle != null) mEndHandle.hide();
             mIsShowing = false;
             removeCallbacks(mHider);
         }
@@ -8744,6 +8754,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return;
             }
 
+            // The handles have been created since the controller isShowing().
             mStartHandle.positionAtCursor(selectionStart, true);
             mEndHandle.positionAtCursor(selectionEnd, true);
             hideDelayed(DELAY_BEFORE_FADE_OUT);
@@ -8831,7 +8842,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
          * @return true iff this controller is currently used to move the selection start.
          */
         public boolean isSelectionStartDragged() {
-            return mStartHandle.isDragging();
+            return mStartHandle != null && mStartHandle.isDragging();
         }
 
         public void onTouchModeChanged(boolean isInTouchMode) {
