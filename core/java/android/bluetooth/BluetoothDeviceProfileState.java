@@ -301,10 +301,9 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                     if (isPhoneDocked(mDevice)) {
                         // Don't auto connect to docks.
                         break;
-                    } else if (mHeadsetService == null) {
-                        deferMessage(message);
                     } else {
-                        if (mHeadsetService.getPriority(mDevice) ==
+                        if (mHeadsetService != null && 
+                              mHeadsetService.getPriority(mDevice) ==
                               BluetoothHeadset.PRIORITY_AUTO_CONNECT &&
                               mHeadsetService.getDevicesMatchingConnectionStates(
                                   new int[] {BluetoothProfile.STATE_CONNECTED,
@@ -1027,7 +1026,8 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 // This is again against spec. HFP incoming connections should be made
                 // before A2DP, so we should not hit this case. But many devices
                 // don't follow this.
-                if (mHeadsetService.getPriority(mDevice) == BluetoothProfile.PRIORITY_ON) {
+                if (mHeadsetService != null && 
+                      mHeadsetService.getPriority(mDevice) == BluetoothProfile.PRIORITY_ON) {
                     Message msg = new Message();
                     msg.what = CONNECT_OTHER_PROFILES;
                     msg.arg1 = CONNECT_HFP_OUTGOING;
