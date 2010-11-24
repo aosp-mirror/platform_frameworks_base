@@ -19,6 +19,7 @@ import android.animation.ValueAnimator;
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
+import android.app.IActivityManager;
 import android.content.Intent;
 import android.util.Log;
 import android.util.Printer;
@@ -1091,11 +1092,15 @@ public final class StrictMode {
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 try {
-                    ActivityManagerNative.getDefault().
-                            handleApplicationStrictModeViolation(
-                                RuntimeInit.getApplicationObject(),
-                                violationMaskSubset,
-                                info);
+                    IActivityManager am = ActivityManagerNative.getDefault();
+                    if (am == null) {
+                        Log.d(TAG, "No activity manager; failed to Dropbox violation.");
+                    } else {
+                        am.handleApplicationStrictModeViolation(
+                            RuntimeInit.getApplicationObject(),
+                            violationMaskSubset,
+                            info);
+                    }
                 } catch (RemoteException e) {
                     Log.e(TAG, "RemoteException handling StrictMode violation", e);
                 }
