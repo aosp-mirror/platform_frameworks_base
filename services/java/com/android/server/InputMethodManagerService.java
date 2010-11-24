@@ -1300,7 +1300,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     public void setInputMethod(IBinder token, String id) {
-        setInputMethodWithSubtype(token, id, NOT_A_SUBTYPE_ID);
+        setInputMethodWithSubtypeId(token, id, NOT_A_SUBTYPE_ID);
+    }
+
+    public void setInputMethodAndSubtype(IBinder token, String id, InputMethodSubtype subtype) {
+        synchronized (mMethodMap) {
+            if (subtype != null) {
+                setInputMethodWithSubtypeId(token, id, getSubtypeIdFromHashCode(
+                        mMethodMap.get(id), subtype.hashCode()));
+            } else {
+                setInputMethod(token, id);
+            }
+        }
     }
 
     public boolean switchToLastInputMethod(IBinder token) {
@@ -1309,7 +1320,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (lastIme != null) {
                 InputMethodInfo imi = mMethodMap.get(lastIme.first);
                 if (imi != null) {
-                    setInputMethodWithSubtype(token, lastIme.first, getSubtypeIdFromHashCode(
+                    setInputMethodWithSubtypeId(token, lastIme.first, getSubtypeIdFromHashCode(
                             imi, Integer.valueOf(lastIme.second)));
                     return true;
                 }
@@ -1318,7 +1329,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private void setInputMethodWithSubtype(IBinder token, String id, int subtypeId) {
+    private void setInputMethodWithSubtypeId(IBinder token, String id, int subtypeId) {
         synchronized (mMethodMap) {
             if (token == null) {
                 if (mContext.checkCallingOrSelfPermission(
@@ -1909,11 +1920,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     private int getSubtypeIdFromHashCode(InputMethodInfo imi, int subtypeHashCode) {
-        ArrayList<InputMethodSubtype> subtypes = imi.getSubtypes();
-        for (int i = 0; i < subtypes.size(); ++i) {
-            InputMethodSubtype ims = subtypes.get(i);
-            if (subtypeHashCode == ims.hashCode()) {
-                return i;
+        if (imi != null) {
+            ArrayList<InputMethodSubtype> subtypes = imi.getSubtypes();
+            for (int i = 0; i < subtypes.size(); ++i) {
+                InputMethodSubtype ims = subtypes.get(i);
+                if (subtypeHashCode == ims.hashCode()) {
+                    return i;
+                }
             }
         }
         return NOT_A_SUBTYPE_ID;
