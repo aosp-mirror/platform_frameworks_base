@@ -3233,10 +3233,10 @@
     </declare-styleable>
 
     <declare-styleable name="ScaleAnimation">
-        <attr name="fromXScale" format="float" />
-        <attr name="toXScale" format="float" />
-        <attr name="fromYScale" format="float" />
-        <attr name="toYScale" format="float" />
+        <attr name="fromXScale" format="float|fraction|dimension" />
+        <attr name="toXScale" format="float|fraction|dimension" />
+        <attr name="fromYScale" format="float|fraction|dimension" />
+        <attr name="toYScale" format="float|fraction|dimension" />
         <attr name="pivotX" />
         <attr name="pivotY" />
     </declare-styleable>
