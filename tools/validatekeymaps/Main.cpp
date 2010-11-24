@@ -42,7 +42,7 @@ static void usage() {
 }
 
 static FileType getFileType(const char* filename) {
-    char *extension = strrchr(filename, '.');
+    const char *extension = strrchr(filename, '.');
     if (extension) {
         if (strcmp(extension, ".kl") == 0) {
             return FILETYPE_KEYLAYOUT;
