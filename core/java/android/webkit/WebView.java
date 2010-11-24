@@ -4836,13 +4836,19 @@ public class WebView extends AbsoluteLayout
     }
 
     void setGLRectViewport() {
-        View window = getRootView();
-        int[] location = new int[2];
-        getLocationInWindow(location);
-        mGLRectViewport = new Rect(location[0], window.getHeight()
-                             - (location[1] + getHeight()),
-                             location[0] + getWidth(),
-                             window.getHeight() - location[1]);
+        // Use the getGlobalVisibleRect() to get the intersection among the parents
+        Rect webViewRect = new Rect();
+        boolean visible = getGlobalVisibleRect(webViewRect);
+
+        // Then need to invert the Y axis, just for GL
+        View rootView = getRootView();
+        int rootViewHeight = rootView.getHeight();
+        int savedWebViewBottom = webViewRect.bottom;
+        webViewRect.bottom = rootViewHeight - webViewRect.top;
+        webViewRect.top = rootViewHeight - savedWebViewBottom;
+
+        // Store the viewport
+        mGLRectViewport = webViewRect;
     }
 
     /**
