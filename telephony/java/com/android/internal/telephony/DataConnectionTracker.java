@@ -16,8 +16,6 @@
 
 package com.android.internal.telephony;
 
-import com.android.internal.telephony.cdma.CDMAPhone;
-
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -231,6 +229,9 @@ public abstract class DataConnectionTracker extends Handler {
     protected HashMap<Integer, DataConnection> mDataConnections =
         new HashMap<Integer, DataConnection>();
 
+    /* Currently active APN */
+    protected ApnSetting mActiveApn;
+
     protected BroadcastReceiver mIntentReceiver = new BroadcastReceiver ()
     {
         @Override
@@ -341,6 +342,40 @@ public abstract class DataConnectionTracker extends Handler {
     public ArrayList<DataConnection> getAllDataConnections() {
         /** TODO: change return type to Collection? */
         return new ArrayList<DataConnection>(mDataConnections.values());
+    }
+
+    protected boolean isApnTypeActive(String type) {
+        // TODO: support simultaneous with List instead
+        return mActiveApn != null && mActiveApn.canHandleType(type);
+    }
+
+    public String[] getActiveApnTypes() {
+        String[] result;
+        if (mActiveApn != null) {
+            result = mActiveApn.types;
+        } else {
+            result = new String[1];
+            result[0] = Phone.APN_TYPE_DEFAULT;
+        }
+        return result;
+    }
+
+    public String getActiveApnType() {
+        String result;
+        if (mActiveApn != null) {
+            result = apnIdToType(mActiveApn.id);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    protected String getActiveApnString() {
+        String result = null;
+        if (mActiveApn != null) {
+            result = mActiveApn.apn;
+        }
+        return result;
     }
 
     /**
@@ -533,13 +568,7 @@ public abstract class DataConnectionTracker extends Handler {
         }
     }
 
-    protected abstract boolean isApnTypeActive(String type);
-
     protected abstract boolean isApnTypeAvailable(String type);
-
-    protected abstract String[] getActiveApnTypes();
-
-    protected abstract String getActiveApnString();
 
     protected abstract void setState(State s);
 
