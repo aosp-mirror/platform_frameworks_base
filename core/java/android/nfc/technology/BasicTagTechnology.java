@@ -63,7 +63,11 @@ import android.util.Log;
 
         mAdapter = adapter;
         mService = mAdapter.getService();
-        mTagService = mService.getNfcTagInterface();
+        try {
+          mTagService = mService.getNfcTagInterface();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+        }
         mTag = tag;
         mSelectedTechnology = tech;
     }

@@ -71,7 +71,6 @@ public class Tag implements Parcelable {
         }
         mId = id;
         mTechList = Arrays.copyOf(techList, techList.length);
-        Arrays.sort(mTechList);
         // Ensure mTechExtras is as long as mTechList
         mTechExtras = Arrays.copyOf(techListExtras, techList.length);
         mServiceHandle = serviceHandle;
@@ -122,13 +121,19 @@ public class Tag implements Parcelable {
      * Returns the technology, or null if not present
      */
     public TagTechnology getTechnology(int tech) {
-        int pos = Arrays.binarySearch(mTechList, tech);
+        int pos = -1;
+        for (int idx = 0; idx < mTechList.length; idx++) {
+          if (mTechList[idx] == tech) {
+              pos = idx;
+              break;
+          }
+        }
         if (pos < 0) {
             return null;
         }
 
         Bundle extras = mTechExtras[pos];
-        NfcAdapter adapter = null;
+        NfcAdapter adapter = NfcAdapter.getDefaultAdapter();
         try {
             switch (tech) {
                 case TagTechnology.NFC_A: {
