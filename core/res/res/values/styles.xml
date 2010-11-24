@@ -779,23 +779,22 @@
         <item name="android:textColor">@android:color/sliding_tab_text_color_active</item>
         <item name="android:textSize">28sp</item>
     </style>
-    
 
-    <!-- @hide -->	
+    <!-- @hide -->
      <style name="TextAppearance.SearchResult">
          <item name="android:textStyle">normal</item>
          <item name="android:textColor">?textColorPrimaryInverse</item>
          <item name="android:textColorHint">?textColorHintInverse</item>
      </style>	
-     	
-     <!-- @hide -->	
+
+     <!-- @hide -->
      <style name="TextAppearance.SearchResult.Title">
-         <item name="android:textSize">16sp</item>
+         <item name="android:textSize">18sp</item>
      </style>
-     	
-     <!-- @hide -->	
+
+     <!-- @hide -->
      <style name="TextAppearance.SearchResult.Subtitle">
-         <item name="android:textSize">13sp</item>
+         <item name="android:textSize">14sp</item>
          <item name="android:textColor">?textColorSecondaryInverse</item>
      </style>
 
@@ -1061,17 +1060,17 @@
 
     <style name="TextAppearance.Holo.SearchResult">
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">?textColorPrimaryInverse</item>
-        <item name="android:textColorHint">?textColorHintInverse</item>
+        <item name="android:textColor">?textColorPrimary</item>
+        <item name="android:textColorHint">?textColorHint</item>
     </style>
 
     <style name="TextAppearance.Holo.SearchResult.Title">
-         <item name="android:textSize">16sp</item>
+         <item name="android:textSize">18sp</item>
     </style>
 
     <style name="TextAppearance.Holo.SearchResult.Subtitle">
-        <item name="android:textSize">13sp</item>
-        <item name="android:textColor">?textColorSecondaryInverse</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.Holo.Widget" parent="TextAppearance.Widget">
@@ -1203,14 +1202,17 @@
     </style>
 
     <style name="TextAppearance.Holo.Light.SearchResult" parent="TextAppearance.Holo.SearchResult">
-         <item name="android:textColor">?textColorPrimary</item>
-         <item name="android:textColorHint">?textColorHint</item>
+        <item name="android:textColor">?textColorPrimary</item>
+        <item name="android:textColorHint">?textColorHint</item>
     </style>
 
     <style name="TextAppearance.Holo.Light.SearchResult.Title">
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="TextAppearance.Holo.Light.SearchResult.Subtitle">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.Holo.Light.Widget" parent="TextAppearance.Widget">
@@ -1320,6 +1322,8 @@
     </style>
 
     <style name="Widget.Holo.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
+        <item name="android:dropDownSelector">@android:drawable/list_selector_holo_dark</item>
+        <item name="android:popupBackground">@android:drawable/menu_dropdown_panel_holo_dark</item>
     </style>
 
     <style name="Widget.Holo.CompoundButton.CheckBox" parent="Widget.CompoundButton.CheckBox">
@@ -1620,6 +1624,8 @@
     </style>
 
     <style name="Widget.Holo.Light.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
+        <item name="android:dropDownSelector">@android:drawable/list_selector_holo_light</item>
+        <item name="android:popupBackground">@android:drawable/menu_dropdown_panel_holo_light</item>
     </style>
 
     <style name="Widget.Holo.Light.CompoundButton.CheckBox" parent="Widget.CompoundButton.CheckBox">

@@ -261,7 +261,11 @@
         <item name="buttonGroupStyle">@android:style/Widget.ButtonGroup</item>
 
         <!-- SearchView attributes -->
-        <item name="searchDropdownBackground">@android:drawable/search_dropdown_dark</item>
+        <item name="searchDropdownBackground">@android:drawable/spinner_dropdown_background</item>
+        <item name="searchViewCloseIcon">@android:drawable/ic_clear</item>
+        <item name="searchViewSearchIcon">@android:drawable/ic_search</item>
+        <item name="searchViewGoIcon">@android:drawable/ic_go</item>
+        <item name="searchViewVoiceIcon">@android:drawable/ic_voice_search</item>
 
         <!-- PreferenceFrameLayout attributes -->
         <item name="preferenceFrameLayoutStyle">@android:style/Widget.PreferenceFrameLayout</item>
@@ -1028,7 +1032,7 @@
 
         <!-- Widget styles -->
         <item name="absListViewStyle">@android:style/Widget.Holo.AbsListView</item>
-        <item name="autoCompleteTextViewStyle">@android:style/Widget.Holo.AutoCompleteTextView</item>
+        <item name="autoCompleteTextViewStyle">@android:style/Widget.Holo.Light.AutoCompleteTextView</item>
         <item name="checkboxStyle">@android:style/Widget.Holo.CompoundButton.CheckBox</item>
         <item name="dropDownListViewStyle">@android:style/Widget.Holo.ListView.DropDown</item>
         <item name="editTextStyle">@android:style/Widget.Holo.EditText</item>
