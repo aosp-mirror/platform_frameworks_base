@@ -8258,6 +8258,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private int mLastParentY;
         private int mContainerPositionX, mContainerPositionY;
         private long mTouchTimer;
+        private boolean mHasPastePopupWindow = false;
         private PastePopupMenu mPastePopupWindow;
 
         public static final int LEFT = 0;
@@ -8310,7 +8311,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mDrawable = mSelectHandleCenter;
                 handleWidth = mDrawable.getIntrinsicWidth();
                 mHotspotX = handleWidth / 2;
-                mPastePopupWindow = new PastePopupMenu();
+                mHasPastePopupWindow = true;
                 break;
             }
             }
@@ -8478,9 +8479,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mLastParentX = coords[0];
                 mLastParentY = coords[1];
                 mIsDragging = true;
-                if (mPastePopupWindow != null) {
+                if (mHasPastePopupWindow) {
                     mTouchTimer = SystemClock.uptimeMillis();
-                    if (mPastePopupWindow.isShowing()) {
+                    if (mPastePopupWindow != null && mPastePopupWindow.isShowing()) {
                         // Tapping on the handle again dismisses the displayed paste view,
                         mPastePopupWindow.hide();
                         // and makes sure the action up does not display the paste view.
@@ -8548,7 +8549,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         void showPastePopupWindow() {
-            if (mPastePopupWindow != null) {
+            if (mHasPastePopupWindow) {
+                if (mPastePopupWindow == null) {
+                    // Lazy initialisation: create when actually shown only.
+                    mPastePopupWindow = new PastePopupMenu();
+                }
                 mPastePopupWindow.show();
             }
         }
