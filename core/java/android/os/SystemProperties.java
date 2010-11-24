@@ -93,7 +93,7 @@ public class SystemProperties
      * Get the value for the given key, returned as a boolean.
      * Values 'n', 'no', '0', 'false' or 'off' are considered false.
      * Values 'y', 'yes', '1', 'true' or 'on' are considered true.
-     * (case insensitive).
+     * (case sensitive).
      * If the key does not exist, or has any other value, then the default
      * result is returned.
      * @param key the key to lookup

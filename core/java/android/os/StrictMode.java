@@ -113,6 +113,13 @@ public final class StrictMode {
     private static final boolean IS_USER_BUILD = "user".equals(Build.TYPE);
     private static final boolean IS_ENG_BUILD = "eng".equals(Build.TYPE);
 
+    /**
+     * The boolean system property to control screen flashes on violations.
+     *
+     * @hide
+     */
+    public static final String VISUAL_PROPERTY = "persist.sys.strictmode.visual";
+
     // Only log a duplicate stack trace to the logs every second.
     private static final long MIN_LOG_INTERVAL_MS = 1000;
 
@@ -718,23 +725,36 @@ public final class StrictMode {
      * @hide
      */
     public static boolean conditionallyEnableDebugLogging() {
+        boolean doFlashes = SystemProperties.getBoolean(VISUAL_PROPERTY, IS_ENG_BUILD);
+
         // For debug builds, log event loop stalls to dropbox for analysis.
         // Similar logic also appears in ActivityThread.java for system apps.
-        if (IS_USER_BUILD) {
+        if (IS_USER_BUILD && !doFlashes) {
             setCloseGuardEnabled(false);
             return false;
         }
-        StrictMode.setThreadPolicyMask(
-            StrictMode.DETECT_DISK_WRITE |
-            StrictMode.DETECT_DISK_READ |
-            StrictMode.DETECT_NETWORK |
-            StrictMode.PENALTY_DROPBOX |
-            (IS_ENG_BUILD ? StrictMode.PENALTY_FLASH : 0)
-        );
-        sVmPolicyMask = StrictMode.DETECT_VM_CURSOR_LEAKS |
-                StrictMode.DETECT_VM_CLOSABLE_LEAKS |
-                StrictMode.PENALTY_DROPBOX;
-        setCloseGuardEnabled(vmClosableObjectLeaksEnabled());
+
+        int threadPolicyMask = StrictMode.DETECT_DISK_WRITE |
+                StrictMode.DETECT_DISK_READ |
+                StrictMode.DETECT_NETWORK;
+
+        if (!IS_USER_BUILD) {
+            threadPolicyMask |= StrictMode.PENALTY_DROPBOX;
+        }
+        if (doFlashes) {
+            threadPolicyMask |= StrictMode.PENALTY_FLASH;
+        }
+
+        StrictMode.setThreadPolicyMask(threadPolicyMask);
+
+        if (IS_USER_BUILD) {
+            setCloseGuardEnabled(false);
+        } else {
+            sVmPolicyMask = StrictMode.DETECT_VM_CURSOR_LEAKS |
+                    StrictMode.DETECT_VM_CLOSABLE_LEAKS |
+                    StrictMode.PENALTY_DROPBOX;
+            setCloseGuardEnabled(vmClosableObjectLeaksEnabled());
+        }
         return true;
     }
 
