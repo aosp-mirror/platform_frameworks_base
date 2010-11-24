@@ -30,9 +30,11 @@ import android.view.KeyEvent;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import android.widget.LinearLayout;
 import android.net.ConnectivityManager;
+import android.net.DhcpInfo;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 
@@ -61,6 +63,7 @@ public class ConnectivityManagerTestActivity extends Activity {
     private static final String ACCESS_POINT_FILE = "accesspoints.xml";
     public ConnectivityReceiver mConnectivityReceiver = null;
     public WifiReceiver mWifiReceiver = null;
+    private AccessPointParserHelper mParseHelper = null;
     /*
      * Track network connectivity information
      */
@@ -156,6 +159,7 @@ public class ConnectivityManagerTestActivity extends Activity {
             } else if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
                 mWifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
                                                 WifiManager.WIFI_STATE_UNKNOWN);
+                Log.v(LOG_TAG, "mWifiState: " + mWifiState);
                 notifyWifiState();
             } else if (action.equals(WifiManager.WIFI_AP_STATE_CHANGED_ACTION)) {
                 notifyWifiAPState();
@@ -220,9 +224,18 @@ public class ConnectivityManagerTestActivity extends Activity {
 
     public List<WifiConfiguration> loadNetworkConfigurations() throws Exception {
         InputStream in = getAssets().open(ACCESS_POINT_FILE);
-        AccessPointParserHelper parseHelper = new AccessPointParserHelper();
-        return parseHelper.processAccessPoint(in);
+        mParseHelper = new AccessPointParserHelper(in);
+        return mParseHelper.getNetworkConfigurations();
     }
+
+    public HashMap<String, DhcpInfo> getDhcpInfo() throws Exception{
+        if (mParseHelper == null) {
+            InputStream in = getAssets().open(ACCESS_POINT_FILE);
+            mParseHelper = new AccessPointParserHelper(in);
+        }
+        return mParseHelper.getSsidToDhcpInfoHashMap();
+    }
+
 
     private void printNetConfig(String[] configuration) {
         for (int i = 0; i < configuration.length; i++) {
@@ -388,7 +401,7 @@ public class ConnectivityManagerTestActivity extends Activity {
                     e.printStackTrace();
                 }
                 if (mWifiState != expectedState) {
-                    Log.v(LOG_TAG, "Wifi state is: " + mWifiNetworkInfo.getState());
+                    Log.v(LOG_TAG, "Wifi state is: " + mWifiState);
                     continue;
                 }
                 return true;
