@@ -109,9 +109,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     private int mWaitingApnsPermanentFailureCountDown = 0;
     private ApnSetting mPreferredApn = null;
 
-    /* Currently active APN */
-    protected ApnSetting mActiveApn;
-
       /** The DataConnection being setup */
     private GsmDataConnection mPendingDataConnection;
 
@@ -212,27 +209,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
     }
 
-    @Override
-    public String[] getActiveApnTypes() {
-        String[] result;
-        if (mActiveApn != null) {
-            result = mActiveApn.types;
-        } else {
-            result = new String[1];
-            result[0] = Phone.APN_TYPE_DEFAULT;
-        }
-        return result;
-    }
-
-    @Override
-    protected String getActiveApnString() {
-        String result = null;
-        if (mActiveApn != null) {
-            result = mActiveApn.apn;
-        }
-        return result;
-    }
-
     /**
      * The data connection is expected to be setup while device
      *  1. has sim card
@@ -254,12 +230,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             return (mState == State.CONNECTED);
         }
         return true;
-    }
-
-    @Override
-    protected boolean isApnTypeActive(String type) {
-        // TODO: support simultaneous with List instead
-        return mActiveApn != null && mActiveApn.canHandleType(type);
     }
 
     @Override

@@ -89,9 +89,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             Phone.APN_TYPE_MMS,
             Phone.APN_TYPE_HIPRI };
 
-    // if we have no active Apn this is null
-    protected ApnSetting mActiveApn;
-
     /* Constructor */
 
     CdmaDataConnectionTracker(CDMAPhone p) {
@@ -158,11 +155,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     @Override
-    protected boolean isApnTypeActive(String type) {
-        return mActiveApn != null && mActiveApn.canHandleType(type);
-    }
-
-    @Override
     protected boolean isApnTypeAvailable(String type) {
         for (String s : mSupportedApnTypes) {
             if (TextUtils.equals(type, s)) {
@@ -170,23 +162,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             }
         }
         return false;
-    }
-
-    @Override
-    protected String[] getActiveApnTypes() {
-        String[] result;
-        if (mActiveApn != null) {
-            result = mActiveApn.types;
-        } else {
-            result = new String[1];
-            result[0] = Phone.APN_TYPE_DEFAULT;
-        }
-        return result;
-    }
-
-    @Override
-    protected String getActiveApnString() {
-        return null;
     }
 
     /**
