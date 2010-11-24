@@ -20,6 +20,7 @@ import android.os.Message;
 import android.util.Log;
 import android.util.Patterns;
 
+import com.android.internal.telephony.ApnSetting;
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.RILConstants;
