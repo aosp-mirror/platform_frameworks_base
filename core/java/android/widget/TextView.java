@@ -7565,9 +7565,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void selectCurrentWord() {
-        // In case selection mode is started after an orientation change or after a select all,
-        // use the current selection instead of creating one
-        if (hasSelection()) {
+        if (hasPasswordTransformationMethod()) {
+            // selectCurrentWord is not available on a password field and would return an
+            // arbitrary 10-charater selection around pressed position. Select all instead.
+            // Note that cut/copy menu entries are not available for passwords.
+            // This is however useful to delete or paste to replace the entire content.
+            Selection.setSelection((Spannable) mText, 0, mText.length());
             return;
         }
 
@@ -7835,13 +7838,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return true;
         }
 
-        if (mSelectionActionMode != null && touchPositionIsInSelection()) {
-            final int start = getSelectionStart();
-            final int end = getSelectionEnd();
-            CharSequence selectedText = mTransformed.subSequence(start, end);
-            ClipData data = ClipData.newPlainText(null, null, selectedText);
-            startDrag(data, getTextThumbnailBuilder(selectedText), false);
-            stopSelectionActionMode();
+        if (mSelectionActionMode != null) {
+            if (touchPositionIsInSelection()) {
+                // Start a drag
+                final int start = getSelectionStart();
+                final int end = getSelectionEnd();
+                CharSequence selectedText = mTransformed.subSequence(start, end);
+                ClipData data = ClipData.newPlainText(null, null, selectedText);
+                startDrag(data, getTextThumbnailBuilder(selectedText), false);
+                stopSelectionActionMode();
+            } else {
+                selectCurrentWord();
+                getSelectionController().show();
+            }
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             mEatTouchRelease = true;
             return true;
@@ -7886,9 +7895,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * mode is not available.
      */
     private ActionMode.Callback getActionModeCallback() {
-        // Long press in the current selection.
-        // Should initiate a drag. Return false, to rely on context menu for now.
-        if (canSelectText() && !touchPositionIsInSelection()) {
+        if (canSelectText()) {
             return new SelectionActionModeCallback();
         }
         return null;
@@ -7983,15 +7990,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             boolean atLeastOne = false;
 
             if (canSelectText()) {
-                if (hasPasswordTransformationMethod()) {
-                    // selectCurrentWord is not available on a password field and would return an
-                    // arbitrary 10-charater selection around pressed position. Select all instead.
-                    // Note that cut/copy menu entries are not available for passwords.
-                    // This is however useful to delete or paste to replace the entire content.
-                    Selection.setSelection((Spannable) mText, 0, mText.length());
-                } else {
-                    selectCurrentWord();
-                }
+                selectCurrentWord();
 
                 menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
                     setAlphabeticShortcut('a').
