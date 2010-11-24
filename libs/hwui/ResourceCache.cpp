@@ -111,11 +111,6 @@ void ResourceCache::recycle(SkBitmap* resource) {
         resource->setPixels(NULL, NULL);
         return;
     }
-    recycle((void*) resource);
-}
-
-void ResourceCache::recycle(void* resource) {
-    Mutex::Autolock _l(mLock);
     ResourceReference* ref = mCache->indexOfKey(resource) >= 0 ? mCache->valueFor(resource) : NULL;
     if (ref == NULL) {
         // Should not get here - shouldn't get a call to recycle if we're not yet tracking it
