@@ -278,6 +278,26 @@ sp<IMediaPlayer> MediaPlayerService::create(pid_t pid, const sp<IMediaPlayerClie
     return c;
 }
 
+sp<IMediaPlayer> MediaPlayerService::create(
+        pid_t pid, const sp<IMediaPlayerClient> &client,
+        const sp<IStreamSource> &source, int audioSessionId) {
+    int32_t connId = android_atomic_inc(&mNextConnId);
+    sp<Client> c = new Client(this, pid, connId, client, audioSessionId);
+
+    LOGV("Create new client(%d) from pid %d, audioSessionId=%d",
+         connId, pid, audioSessionId);
+
+    if (OK != c->setDataSource(source)) {
+        c.clear();
+    } else {
+        wp<Client> w = c;
+        Mutex::Autolock lock(mLock);
+        mClients.add(w);
+    }
+
+    return c;
+}
+
 sp<IOMX> MediaPlayerService::getOMX() {
     Mutex::Autolock autoLock(mLock);
 
@@ -861,6 +881,30 @@ status_t MediaPlayerService::Client::setDataSource(int fd, int64_t offset, int64
     // now set data source
     mStatus = p->setDataSource(fd, offset, length);
     if (mStatus == NO_ERROR) mPlayer = p;
+    return mStatus;
+}
+
+status_t MediaPlayerService::Client::setDataSource(
+        const sp<IStreamSource> &source) {
+    // create the right type of player
+    sp<MediaPlayerBase> p = createPlayer(STAGEFRIGHT_PLAYER);
+
+    if (p == NULL) {
+        return NO_INIT;
+    }
+
+    if (!p->hardwareOutput()) {
+        mAudioOutput = new AudioOutput(mAudioSessionId);
+        static_cast<MediaPlayerInterface*>(p.get())->setAudioSink(mAudioOutput);
+    }
+
+    // now set data source
+    mStatus = p->setDataSource(source);
+
+    if (mStatus == OK) {
+        mPlayer = p;
+    }
+
     return mStatus;
 }
 

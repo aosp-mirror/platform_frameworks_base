@@ -44,6 +44,10 @@ status_t StagefrightPlayer::setDataSource(int fd, int64_t offset, int64_t length
     return mPlayer->setDataSource(dup(fd), offset, length);
 }
 
+status_t StagefrightPlayer::setDataSource(const sp<IStreamSource> &source) {
+    return mPlayer->setDataSource(source);
+}
+
 status_t StagefrightPlayer::setVideoSurface(const sp<Surface> &surface) {
     LOGV("setVideoSurface");
 
