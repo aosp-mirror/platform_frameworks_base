@@ -3049,12 +3049,10 @@ public class WebView extends AbsoluteLayout
             } else {
                 mScrollX = x;
                 mScrollY = y;
-                if (mScroller.getStartX() != mScrollX || mScroller.getStartY() != mScrollY) {
-                    abortAnimation();
-                    mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
-                    WebViewCore.resumePriority();
-                    WebViewCore.resumeUpdatePicture(mWebViewCore);
-                }
+                abortAnimation();
+                mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
+                WebViewCore.resumePriority();
+                WebViewCore.resumeUpdatePicture(mWebViewCore);
             }
         } else {
             super.computeScroll();
