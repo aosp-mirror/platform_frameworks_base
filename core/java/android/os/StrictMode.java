@@ -719,13 +719,37 @@ public final class StrictMode {
         return new ThreadPolicy(oldPolicyMask);
     }
 
+    // We don't want to flash the screen red in the system server
+    // process, nor do we want to modify all the call sites of
+    // conditionallyEnableDebugLogging() in the system server,
+    // so instead we use this to determine if we are the system server.
+    private static boolean amTheSystemServerProcess() {
+        // Fast path.  Most apps don't have the system server's UID.
+        if (Process.myUid() != Process.SYSTEM_UID) {
+            return false;
+        }
+
+        // The settings app, though, has the system server's UID so
+        // look up our stack to see if we came from the system server.
+        Throwable stack = new Throwable();
+        stack.fillInStackTrace();
+        for (StackTraceElement ste : stack.getStackTrace()) {
+            String clsName = ste.getClassName();
+            if (clsName != null && clsName.startsWith("com.android.server.")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Enable DropBox logging for debug phone builds.
      *
      * @hide
      */
     public static boolean conditionallyEnableDebugLogging() {
-        boolean doFlashes = SystemProperties.getBoolean(VISUAL_PROPERTY, IS_ENG_BUILD);
+        boolean doFlashes = !amTheSystemServerProcess() &&
+                SystemProperties.getBoolean(VISUAL_PROPERTY, IS_ENG_BUILD);
 
         // For debug builds, log event loop stalls to dropbox for analysis.
         // Similar logic also appears in ActivityThread.java for system apps.
