@@ -377,6 +377,7 @@ public interface WindowManager extends ViewManager {
 
         /**
          * Window type: panel that slides out from under the status bar
+         * @hide
          */
         public static final int TYPE_STATUS_BAR_SUB_PANEL = FIRST_SYSTEM_WINDOW+17;
 
