@@ -123,7 +123,7 @@ void MtpPacket::setTransactionID(MtpTransactionID id) {
 
 uint32_t MtpPacket::getParameter(int index) const {
     if (index < 1 || index > 5) {
-        LOGE("index %d out of range in MtpRequestPacket::getParameter", index);
+        LOGE("index %d out of range in MtpPacket::getParameter", index);
         return 0;
     }
     return getUInt32(MTP_CONTAINER_PARAMETER_OFFSET + (index - 1) * sizeof(uint32_t));
@@ -131,7 +131,7 @@ uint32_t MtpPacket::getParameter(int index) const {
 
 void MtpPacket::setParameter(int index, uint32_t value) {
     if (index < 1 || index > 5) {
-        LOGE("index %d out of range in MtpResponsePacket::setParameter", index);
+        LOGE("index %d out of range in MtpPacket::setParameter", index);
         return;
     }
     int offset = MTP_CONTAINER_PARAMETER_OFFSET + (index - 1) * sizeof(uint32_t);

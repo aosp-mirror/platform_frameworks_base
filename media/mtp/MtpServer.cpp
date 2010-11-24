@@ -66,7 +66,7 @@ static const MtpOperationCode kSupportedOperationCodes[] = {
 //    MTP_OPERATION_TERMINATE_OPEN_CAPTURE,
 //    MTP_OPERATION_MOVE_OBJECT,
 //    MTP_OPERATION_COPY_OBJECT,
-//    MTP_OPERATION_GET_PARTIAL_OBJECT,
+    MTP_OPERATION_GET_PARTIAL_OBJECT,
 //    MTP_OPERATION_INITIATE_OPEN_CAPTURE,
     MTP_OPERATION_GET_OBJECT_PROPS_SUPPORTED,
     MTP_OPERATION_GET_OBJECT_PROP_DESC,
@@ -288,6 +288,9 @@ bool MtpServer::handleRequest() {
             break;
         case MTP_OPERATION_GET_OBJECT:
             response = doGetObject();
+            break;
+        case MTP_OPERATION_GET_PARTIAL_OBJECT:
+            response = doGetPartialObject();
             break;
         case MTP_OPERATION_SEND_OBJECT_INFO:
             response = doSendObjectInfo();
@@ -536,7 +539,7 @@ MtpResponseCode MtpServer::doGetObjectPropList() {
     MtpObjectFormat format = mRequest.getParameter(2);
     MtpDeviceProperty property = mRequest.getParameter(3);
     int groupCode = mRequest.getParameter(4);
-    int depth = mRequest.getParameter(4);
+    int depth = mRequest.getParameter(5);
    LOGD("GetObjectPropList %d format: %s property: %s group: %d depth: %d\n",
             handle, MtpDebug::getFormatCodeName(format),
             MtpDebug::getObjectPropCodeName(property), groupCode, depth);
@@ -570,6 +573,45 @@ MtpResponseCode MtpServer::doGetObject() {
     mData.setOperationCode(mRequest.getOperationCode());
     mData.setTransactionID(mRequest.getTransactionID());
     mData.writeDataHeader(mFD, fileLength + MTP_CONTAINER_HEADER_SIZE);
+
+    // then transfer the file
+    int ret = ioctl(mFD, MTP_SEND_FILE, (unsigned long)&mfr);
+    close(mfr.fd);
+    if (ret < 0) {
+        if (errno == ECANCELED)
+            return MTP_RESPONSE_TRANSACTION_CANCELLED;
+        else
+            return MTP_RESPONSE_GENERAL_ERROR;
+    }
+    return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doGetPartialObject() {
+    MtpObjectHandle handle = mRequest.getParameter(1);
+    uint32_t offset = mRequest.getParameter(2);
+    uint32_t length = mRequest.getParameter(3);
+    MtpString pathBuf;
+    int64_t fileLength;
+    int result = mDatabase->getObjectFilePath(handle, pathBuf, fileLength);
+    if (result != MTP_RESPONSE_OK)
+        return result;
+    if (offset + length > fileLength)
+        length = fileLength - offset;
+
+    const char* filePath = (const char *)pathBuf;
+    mtp_file_range  mfr;
+    mfr.fd = open(filePath, O_RDONLY);
+    if (mfr.fd < 0) {
+        return MTP_RESPONSE_GENERAL_ERROR;
+    }
+    mfr.offset = offset;
+    mfr.length = length;
+    mResponse.setParameter(1, length);
+
+    // send data header
+    mData.setOperationCode(mRequest.getOperationCode());
+    mData.setTransactionID(mRequest.getTransactionID());
+    mData.writeDataHeader(mFD, length + MTP_CONTAINER_HEADER_SIZE);
 
     // then transfer the file
     int ret = ioctl(mFD, MTP_SEND_FILE, (unsigned long)&mfr);
