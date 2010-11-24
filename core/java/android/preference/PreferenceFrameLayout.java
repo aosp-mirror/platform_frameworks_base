@@ -45,12 +45,18 @@ public class PreferenceFrameLayout extends FrameLayout {
         TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.PreferenceFrameLayout, defStyle, 0);
 
-        mTopPadding = (int) a.getDimension(
+        float density = context.getResources().getDisplayMetrics().density;
+        int defaultTopPadding = (int) (density * DEFAULT_TOP_PADDING + 0.5f);
+        int defaultBottomPadding = (int) (density * DEFAULT_BOTTOM_PADDING + 0.5f);
+
+        mTopPadding = a.getDimensionPixelSize(
                 com.android.internal.R.styleable.PreferenceFrameLayout_topPadding,
-                DEFAULT_TOP_PADDING);
-        mBottomPadding = (int) a.getDimension(
+                defaultTopPadding);
+        mBottomPadding = a.getDimensionPixelSize(
                 com.android.internal.R.styleable.PreferenceFrameLayout_bottomPadding,
-                DEFAULT_BOTTOM_PADDING);
+                defaultBottomPadding);
+
+
 
         a.recycle();
     }
