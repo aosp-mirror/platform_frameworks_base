@@ -7748,7 +7748,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         }
                     }
                     if (clip != null) {
-                        clipboard.setPrimaryClip(clip);
+                        setPrimaryClip(clip);
                     }
                 }
                 return true;
@@ -7839,26 +7839,29 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return true;
         }
 
-        if (!isPositionOnText(mLastDownPositionX, mLastDownPositionY) && mInsertionControllerEnabled) {
+        if (!isPositionOnText(mLastDownPositionX, mLastDownPositionY) &&
+                mInsertionControllerEnabled) {
+            // Long press in empty space moves cursor and shows the Paste affordance if available.
             final int offset = getOffset(mLastDownPositionX, mLastDownPositionY);
             Selection.setSelection((Spannable)mText, offset);
-            if (canPaste()) {
-                getInsertionController().showWithPaste();
-                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-            } else {
-                getInsertionController().show();
-            }
+            getInsertionController().show(0);
             mEatTouchRelease = true;
             return true;
         }
 
-        if (mSelectionActionMode != null && touchPositionIsInSelection()) {
-            final int start = getSelectionStart();
-            final int end = getSelectionEnd();
-            CharSequence selectedText = mTransformed.subSequence(start, end);
-            ClipData data = ClipData.newPlainText(null, null, selectedText);
-            startDrag(data, getTextThumbnailBuilder(selectedText), false);
-            stopSelectionActionMode();
+        if (mSelectionActionMode != null) {
+            if (touchPositionIsInSelection()) {
+                // Start a drag
+                final int start = getSelectionStart();
+                final int end = getSelectionEnd();
+                CharSequence selectedText = mTransformed.subSequence(start, end);
+                ClipData data = ClipData.newPlainText(null, null, selectedText);
+                startDrag(data, getTextThumbnailBuilder(selectedText), false);
+                stopSelectionActionMode();
+            } else {
+                selectCurrentWord();
+                getSelectionController().show();
+            }
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             mEatTouchRelease = true;
             return true;
@@ -7950,10 +7953,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Paste clipboard content between min and max positions.
-     *
-     * @param clipboard getSystemService(Context.CLIPBOARD_SERVICE)
      */
-    private void paste(ClipboardManager clipboard, int min, int max) {
+    private void paste(int min, int max) {
+        ClipboardManager clipboard =
+            (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = clipboard.getPrimaryClip();
         if (clip != null) {
             boolean didfirst = false;
@@ -7973,7 +7976,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
             stopSelectionActionMode();
+            sLastCutOrCopyTime = 0;
         }
+    }
+
+    private void setPrimaryClip(ClipData clip) {
+        ClipboardManager clipboard = (ClipboardManager) getContext().
+                getSystemService(Context.CLIPBOARD_SERVICE);
+        clipboard.setPrimaryClip(clip);
+        sLastCutOrCopyTime = SystemClock.uptimeMillis();
     }
 
     private class SelectionActionModeCallback implements ActionMode.Callback {
@@ -8061,9 +8072,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return true;
             }
 
-            ClipboardManager clipboard = (ClipboardManager) getContext().
-                    getSystemService(Context.CLIPBOARD_SERVICE);
-
             int min = 0;
             int max = mText.length();
 
@@ -8077,18 +8085,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             switch (item.getItemId()) {
                 case ID_PASTE:
-                    paste(clipboard, min, max);
+                    paste(min, max);
                     return true;
 
                 case ID_CUT:
-                    clipboard.setPrimaryClip(ClipData.newPlainText(null, null,
+                    setPrimaryClip(ClipData.newPlainText(null, null,
                             mTransformed.subSequence(min, max)));
                     ((Editable) mText).delete(min, max);
                     stopSelectionActionMode();
                     return true;
 
                 case ID_COPY:
-                    clipboard.setPrimaryClip(ClipData.newPlainText(null, null,
+                    setPrimaryClip(ClipData.newPlainText(null, null,
                             mTransformed.subSequence(min, max)));
                     stopSelectionActionMode();
                     return true;
@@ -8211,9 +8219,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         @Override
         public void onClick(View v) {
             if (canPaste()) {
-                ClipboardManager clipboard =
-                    (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                paste(clipboard, getSelectionStart(), getSelectionEnd());
+                paste(getSelectionStart(), getSelectionEnd());
             }
             hide();
         }
@@ -8502,6 +8508,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             case MotionEvent.ACTION_UP:
                 if (mPastePopupWindow != null) {
+                    // Will show the paste popup after a delay.
+                    mController.show();
+                    /* TEMP USER TEST: Display Paste as soon as handle is draggged
                     long delay = SystemClock.uptimeMillis() - mTouchTimer;
                     if (delay < ViewConfiguration.getTapTimeout()) {
                         final float touchOffsetX = ev.getRawX() - mPositionX;
@@ -8515,7 +8524,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         if (distanceSquared < slopSquared) {
                             showPastePopupWindow();
                         }
-                    }
+                    }*/
                 }
                 mIsDragging = false;
                 break;
@@ -8561,6 +8570,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private class InsertionPointCursorController implements CursorController {
         private static final int DELAY_BEFORE_FADE_OUT = 4100;
+        private static final int DELAY_BEFORE_PASTE = 2000;
+        private static final int RECENT_CUT_COPY_DURATION = 15 * 1000;
 
         // The cursor controller image. Lazily created.
         private HandleView mHandle;
@@ -8571,14 +8582,27 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         };
 
+        private final Runnable mPastePopupShower = new Runnable() {
+            public void run() {
+                getHandle().showPastePopupWindow();
+            }
+        };
+
         public void show() {
-            updatePosition();
-            getHandle().show();
+            show(DELAY_BEFORE_PASTE);
         }
 
-        void showWithPaste() {
-            show();
-            getHandle().showPastePopupWindow();
+        public void show(int delayBeforePaste) {
+            updatePosition();
+            hideDelayed();
+            getHandle().show();
+            removeCallbacks(mPastePopupShower);
+            if (canPaste()) {
+                final long durationSinceCutOrCopy = SystemClock.uptimeMillis() - sLastCutOrCopyTime;
+                if (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION)
+                    delayBeforePaste = 0;
+                postDelayed(mPastePopupShower, delayBeforePaste);
+            }
         }
 
         public void hide() {
@@ -8586,6 +8610,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mHandle.hide();
             }
             removeCallbacks(mHider);
+            removeCallbacks(mPastePopupShower);
         }
 
         private void hideDelayed() {
@@ -8618,7 +8643,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return;
             }
 
-            // updatePosition is called only when isShowing. Handle has been created at this point.
             getHandle().positionAtCursor(offset, true);
         }
 
@@ -8681,6 +8705,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mEndHandle.show();
 
             hideInsertionPointCursorController();
+            hideDelayed();
         }
 
         public void hide() {
@@ -8735,6 +8760,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
             updatePosition();
+            hideDelayed();
         }
 
         public void updatePosition() {
@@ -8755,7 +8781,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // The handles have been created since the controller isShowing().
             mStartHandle.positionAtCursor(selectionStart, true);
             mEndHandle.positionAtCursor(selectionEnd, true);
-            hideDelayed();
         }
 
         public boolean onTouchEvent(MotionEvent event) {
@@ -9143,4 +9168,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private InputFilter[] mFilters = NO_FILTERS;
     private static final Spanned EMPTY_SPANNED = new SpannedString("");
     private static int DRAG_THUMBNAIL_MAX_TEXT_LENGTH = 20;
+    // System wide time for last cut or copy action.
+    private static long sLastCutOrCopyTime;
 }
