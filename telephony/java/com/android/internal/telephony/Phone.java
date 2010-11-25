@@ -1325,36 +1325,6 @@ public interface Phone {
     SimulatedRadioControl getSimulatedRadioControl();
 
     /**
-     * Allow mobile data connections.
-     * @return {@code true} if the operation started successfully
-     * <br/>{@code false} if it
-     * failed immediately.<br/>
-     * Even in the {@code true} case, it may still fail later
-     * during setup, in which case an asynchronous indication will
-     * be supplied.
-     */
-    boolean enableDataConnectivity();
-
-    /**
-     * Disallow mobile data connections, and terminate any that
-     * are in progress.
-     * @return {@code true} if the operation started successfully
-     * <br/>{@code false} if it
-     * failed immediately.<br/>
-     * Even in the {@code true} case, it may still fail later
-     * during setup, in which case an asynchronous indication will
-     * be supplied.
-     */
-    boolean disableDataConnectivity();
-
-    /**
-     * Report the current state of data connectivity (enabled or disabled)
-     * @return {@code false} if data connectivity has been explicitly disabled,
-     * {@code true} otherwise.
-     */
-    boolean isDataConnectivityEnabled();
-
-    /**
      * Enables the specified APN type. Only works for "special" APN types,
      * i.e., not the default APN.
      * @param type The desired APN type. Cannot be {@link #APN_TYPE_DEFAULT}.

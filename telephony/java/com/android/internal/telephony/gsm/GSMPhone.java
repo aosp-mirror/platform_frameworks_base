@@ -1084,14 +1084,6 @@ public class GSMPhone extends PhoneBase {
         mDataConnection.setDataOnRoamingEnabled(enable);
     }
 
-    public boolean enableDataConnectivity() {
-        return mDataConnection.setDataEnabled(true);
-    }
-
-    public boolean disableDataConnectivity() {
-        return mDataConnection.setDataEnabled(false);
-    }
-
     /**
      * Removes the given MMI from the pending list and notifies
      * registrants that it is complete.

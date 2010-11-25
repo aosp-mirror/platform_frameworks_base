@@ -110,7 +110,7 @@ public abstract class DataConnectionTracker extends Handler {
     public static final int EVENT_CLEAN_UP_CONNECTION = 34;
     protected static final int EVENT_CDMA_OTA_PROVISION = 35;
     protected static final int EVENT_RESTART_RADIO = 36;
-    protected static final int EVENT_SET_MASTER_DATA_ENABLE = 37;
+    protected static final int EVENT_SET_INTERNAL_DATA_ENABLE = 37;
     protected static final int EVENT_RESET_DONE = 38;
 
     /***** Constants *****/
@@ -126,8 +126,9 @@ public abstract class DataConnectionTracker extends Handler {
     protected static final int DISABLED = 0;
     protected static final int ENABLED = 1;
 
-    // responds to the setDataEnabled call - used independently from the APN requests
-    protected boolean mMasterDataEnabled = true;
+    // responds to the setInternalDataEnabled call - used internally to turn off data
+    // for example during emergency calls
+    protected boolean mInternalDataEnabled = true;
 
     protected boolean[] dataEnabled = new boolean[APN_NUM_TYPES];
 
@@ -489,9 +490,9 @@ public abstract class DataConnectionTracker extends Handler {
                 onCleanUpConnection(tearDown, (String) msg.obj);
                 break;
 
-            case EVENT_SET_MASTER_DATA_ENABLE:
+            case EVENT_SET_INTERNAL_DATA_ENABLE:
                 boolean enabled = (msg.arg1 == ENABLED) ? true : false;
-                onSetDataEnabled(enabled);
+                onSetInternalDataEnabled(enabled);
                 break;
 
             case EVENT_RESET_DONE:
@@ -505,23 +506,13 @@ public abstract class DataConnectionTracker extends Handler {
     }
 
     /**
-     * Report the current state of data connectivity (enabled or disabled)
-     *
-     * @return {@code false} if data connectivity has been explicitly disabled,
-     *         {@code true} otherwise.
-     */
-    public synchronized boolean getDataEnabled() {
-        return (mMasterDataEnabled && dataEnabled[APN_DEFAULT_ID]);
-    }
-
-    /**
      * Report on whether data connectivity is enabled
      *
      * @return {@code false} if data connectivity has been explicitly disabled,
      *         {@code true} otherwise.
      */
     public synchronized boolean getAnyDataEnabled() {
-        return (mMasterDataEnabled && (enabledCount != 0));
+        return (mInternalDataEnabled && (enabledCount != 0));
     }
 
     protected abstract void startNetStatPoll();
@@ -676,7 +667,7 @@ public abstract class DataConnectionTracker extends Handler {
      */
     protected boolean isDataPossible() {
         boolean possible = (isDataAllowed()
-                && !(getDataEnabled() && (mState == State.FAILED || mState == State.IDLE)));
+                && !(getAnyDataEnabled() && (mState == State.FAILED || mState == State.IDLE)));
         if (!possible && DBG && isDataAllowed()) {
             log("Data not possible.  No coverage: dataState = " + mState);
         }
@@ -847,20 +838,20 @@ public abstract class DataConnectionTracker extends Handler {
      *            {@code false}) data
      * @return {@code true} if the operation succeeded
      */
-    public boolean setDataEnabled(boolean enable) {
+    public boolean setInternalDataEnabled(boolean enable) {
         if (DBG)
-            log("setDataEnabled(" + enable + ")");
+            log("setInternalDataEnabled(" + enable + ")");
 
-        Message msg = obtainMessage(EVENT_SET_MASTER_DATA_ENABLE);
+        Message msg = obtainMessage(EVENT_SET_INTERNAL_DATA_ENABLE);
         msg.arg1 = (enable ? ENABLED : DISABLED);
         sendMessage(msg);
         return true;
     }
 
-    protected void onSetDataEnabled(boolean enable) {
-        if (mMasterDataEnabled != enable) {
+    protected void onSetInternalDataEnabled(boolean enable) {
+        if (mInternalDataEnabled != enable) {
             synchronized (this) {
-                mMasterDataEnabled = enable;
+                mInternalDataEnabled = enable;
             }
             if (enable) {
                 mRetryMgr.resetRetryCount();

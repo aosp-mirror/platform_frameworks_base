@@ -650,24 +650,12 @@ public class PhoneProxy extends Handler implements Phone {
         return mActivePhone.getSimulatedRadioControl();
     }
 
-    public boolean enableDataConnectivity() {
-        return mActivePhone.enableDataConnectivity();
-    }
-
-    public boolean disableDataConnectivity() {
-        return mActivePhone.disableDataConnectivity();
-    }
-
     public int enableApnType(String type) {
         return mActivePhone.enableApnType(type);
     }
 
     public int disableApnType(String type) {
         return mActivePhone.disableApnType(type);
-    }
-
-    public boolean isDataConnectivityEnabled() {
-        return mActivePhone.isDataConnectivityEnabled();
     }
 
     public boolean isDataConnectivityPossible() {
