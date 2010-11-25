@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import android.util.Log;
+
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.gsm.SmsCbHeader;
 
@@ -58,9 +60,12 @@ public class SmsCbMessage {
         try {
             return new SmsCbMessage(pdu);
         } catch (IllegalArgumentException e) {
+            Log.w(LOG_TAG, "Failed parsing SMS-CB pdu", e);
             return null;
         }
     }
+
+    private static final String LOG_TAG = "SMSCB";
 
     /**
      * Languages in the 0000xxxx DCS group as defined in 3GPP TS 23.038, section 5.
@@ -79,6 +84,8 @@ public class SmsCbMessage {
     };
 
     private static final char CARRIAGE_RETURN = 0x0d;
+
+    private static final int PDU_BODY_PAGE_LENGTH = 82;
 
     private SmsCbHeader mHeader;
 
@@ -149,6 +156,13 @@ public class SmsCbMessage {
         return mHeader.updateNumber;
     }
 
+    /**
+     * Parse and unpack the body text according to the encoding in the DCS.
+     * After completing successfully this method will have assigned the body
+     * text into mBody, and optionally the language code into mLanguage
+     *
+     * @param pdu The pdu
+     */
     private void parseBody(byte[] pdu) {
         int encoding;
         boolean hasLanguageIndicator = false;
@@ -221,28 +235,81 @@ public class SmsCbMessage {
                 break;
         }
 
+        if (mHeader.format == SmsCbHeader.FORMAT_UMTS) {
+            // Payload may contain multiple pages
+            int nrPages = pdu[SmsCbHeader.PDU_HEADER_LENGTH];
+
+            if (pdu.length < SmsCbHeader.PDU_HEADER_LENGTH + 1 + (PDU_BODY_PAGE_LENGTH + 1)
+                    * nrPages) {
+                throw new IllegalArgumentException("Pdu length " + pdu.length + " does not match "
+                        + nrPages + " pages");
+            }
+
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < nrPages; i++) {
+                // Each page is 82 bytes followed by a length octet indicating
+                // the number of useful octets within those 82
+                int offset = SmsCbHeader.PDU_HEADER_LENGTH + 1 + (PDU_BODY_PAGE_LENGTH + 1) * i;
+                int length = pdu[offset + PDU_BODY_PAGE_LENGTH];
+
+                if (length > PDU_BODY_PAGE_LENGTH) {
+                    throw new IllegalArgumentException("Page length " + length
+                            + " exceeds maximum value " + PDU_BODY_PAGE_LENGTH);
+                }
+
+                sb.append(unpackBody(pdu, encoding, offset, length, hasLanguageIndicator));
+            }
+            mBody = sb.toString();
+        } else {
+            // Payload is one single page
+            int offset = SmsCbHeader.PDU_HEADER_LENGTH;
+            int length = pdu.length - offset;
+
+            mBody = unpackBody(pdu, encoding, offset, length, hasLanguageIndicator);
+        }
+    }
+
+    /**
+     * Unpack body text from the pdu using the given encoding, position and
+     * length within the pdu
+     *
+     * @param pdu The pdu
+     * @param encoding The encoding, as derived from the DCS
+     * @param offset Position of the first byte to unpack
+     * @param length Number of bytes to unpack
+     * @param hasLanguageIndicator true if the body text is preceded by a
+     *            language indicator. If so, this method will as a side-effect
+     *            assign the extracted language code into mLanguage
+     * @return Body text
+     */
+    private String unpackBody(byte[] pdu, int encoding, int offset, int length,
+            boolean hasLanguageIndicator) {
+        String body = null;
+
         switch (encoding) {
             case SmsMessage.ENCODING_7BIT:
-                mBody = GsmAlphabet.gsm7BitPackedToString(pdu, SmsCbHeader.PDU_HEADER_LENGTH,
-                        (pdu.length - SmsCbHeader.PDU_HEADER_LENGTH) * 8 / 7);
+                body = GsmAlphabet.gsm7BitPackedToString(pdu, offset, length * 8 / 7);
 
-                if (hasLanguageIndicator && mBody != null && mBody.length() > 2) {
-                    mLanguage = mBody.substring(0, 2);
-                    mBody = mBody.substring(3);
+                if (hasLanguageIndicator && body != null && body.length() > 2) {
+                    // Language is two GSM characters followed by a CR.
+                    // The actual body text is offset by 3 characters.
+                    mLanguage = body.substring(0, 2);
+                    body = body.substring(3);
                 }
                 break;
 
             case SmsMessage.ENCODING_16BIT:
-                int offset = SmsCbHeader.PDU_HEADER_LENGTH;
-
-                if (hasLanguageIndicator && pdu.length >= SmsCbHeader.PDU_HEADER_LENGTH + 2) {
-                    mLanguage = GsmAlphabet.gsm7BitPackedToString(pdu,
-                            SmsCbHeader.PDU_HEADER_LENGTH, 2);
+                if (hasLanguageIndicator && pdu.length >= offset + 2) {
+                    // Language is two GSM characters.
+                    // The actual body text is offset by 2 bytes.
+                    mLanguage = GsmAlphabet.gsm7BitPackedToString(pdu, offset, 2);
                     offset += 2;
+                    length -= 2;
                 }
 
                 try {
-                    mBody = new String(pdu, offset, (pdu.length & 0xfffe) - offset, "utf-16");
+                    body = new String(pdu, offset, (length & 0xfffe), "utf-16");
                 } catch (UnsupportedEncodingException e) {
                     // Eeeek
                 }
@@ -252,16 +319,18 @@ public class SmsCbMessage {
                 break;
         }
 
-        if (mBody != null) {
+        if (body != null) {
             // Remove trailing carriage return
-            for (int i = mBody.length() - 1; i >= 0; i--) {
-                if (mBody.charAt(i) != CARRIAGE_RETURN) {
-                    mBody = mBody.substring(0, i + 1);
+            for (int i = body.length() - 1; i >= 0; i--) {
+                if (body.charAt(i) != CARRIAGE_RETURN) {
+                    body = body.substring(0, i + 1);
                     break;
                 }
             }
         } else {
-            mBody = "";
+            body = "";
         }
+
+        return body;
     }
 }
