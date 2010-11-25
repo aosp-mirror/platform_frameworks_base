@@ -43,7 +43,8 @@
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:layout_gravity="center_vertical"
-        android:src="@android:drawable/ic_btn_search"
+        android:background="?android:attr/selectableItemBackground"
+        android:src="@android:drawable/ic_search"
     />
 
     <LinearLayout
@@ -56,6 +57,7 @@
 
         <!-- Inner layout contains the app icon, button(s) and EditText -->
         <LinearLayout
+            android:id="@+id/search_plate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -65,16 +67,16 @@
 
             <ImageView
                 android:id="@+id/search_app_icon"
-                android:layout_height="24dip"
-                android:layout_width="24dip"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginRight="7dip"
-                android:layout_gravity="bottom"
-                android:src="@android:drawable/ic_btn_search"
+                android:layout_gravity="center_vertical"
+                android:src="?android:attr/searchViewSearchIcon"
             />
 
             <AutoCompleteTextView
                 android:id="@+id/search_src_text"
-                android:layout_height="wrap_content"
+                android:layout_height="36dip"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:minWidth="100dp"
@@ -88,43 +90,46 @@
                 android:inputType="text|textAutoComplete"
                 android:imeOptions="actionSearch"
                 android:dropDownHeight="wrap_content"
-                android:dropDownAnchor="@id/search_edit_frame"
+                android:dropDownAnchor="@id/search_plate"
                 android:dropDownVerticalOffset="0dip"
                 android:dropDownHorizontalOffset="0dip"
-                android:popupBackground="?android:attr/searchDropdownBackground"
             />
 
-            <!-- TODO: Use the generic dialog close drawable -->
             <ImageView
                 android:id="@+id/search_close_btn"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="bottom"
-                android:src="@android:drawable/btn_close"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingLeft="4dip"
+                android:paddingRight="4dip"
+                android:layout_gravity="center_vertical"
+                android:background="?android:attr/selectableItemBackground"
+                android:src="?android:attr/searchViewCloseIcon"
             />
 
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/search_go_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:layout_marginLeft="4dip"
-            android:layout_marginRight="4dip"
-            android:src="@android:drawable/ic_btn_find_next"
-        />
     </LinearLayout>
 
-    <ImageButton
+    <ImageView
+        android:id="@+id/search_go_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:paddingLeft="4dip"
+        android:paddingRight="4dip"
+        android:background="?android:attr/selectableItemBackground"
+        android:src="?android:attr/searchViewGoIcon"
+    />
+
+    <ImageView
         android:id="@+id/search_voice_btn"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="4dip"
-        android:layout_marginRight="4dip"
-        android:src="@android:drawable/ic_btn_speak_now"
-        android:background="@android:color/transparent"
+        android:paddingLeft="4dip"
+        android:paddingRight="4dip"
+        android:src="?android:attr/searchViewVoiceIcon"
+        android:background="?android:attr/selectableItemBackground"
         android:visibility="gone"
     />
 </LinearLayout>

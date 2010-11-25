@@ -605,8 +605,20 @@
         <!-- Background drawable for standalone items that need focus/pressed states. -->
         <attr name="selectableItemBackground" format="reference" />
 
+        <!-- ============================ -->
+        <!-- SearchView styles and assets -->
+        <!-- ============================ -->
+        <eat-comment />
         <!-- SearchView dropdown background -->
         <attr name="searchDropdownBackground" format="reference" />
+        <!-- SearchView close button icon -->
+        <attr name="searchViewCloseIcon" format="reference" />
+        <!-- SearchView Go button icon -->
+        <attr name="searchViewGoIcon" format="reference" />
+        <!-- SearchView Search icon -->
+        <attr name="searchViewSearchIcon" format="reference" />
+        <!-- SearchView Voice button icon -->
+        <attr name="searchViewVoiceIcon" format="reference" />
 
         <!-- Specifies a drawable to use for the 'home as up' indicator. -->
         <attr name="homeAsUpIndicator" format="reference" />
