@@ -17,6 +17,7 @@ package android.webkit;
 
 import com.android.internal.R;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -40,13 +41,14 @@ public class OverScrollGlow {
 
     public OverScrollGlow(WebView host) {
         mHostView = host;
-        final Resources res = host.getContext().getResources();
+        Context context = host.getContext();
+        final Resources res = context.getResources();
         final Drawable edge = res.getDrawable(R.drawable.overscroll_edge);
         final Drawable glow = res.getDrawable(R.drawable.overscroll_glow);
-        mEdgeGlowTop = new EdgeGlow(edge, glow);
-        mEdgeGlowBottom = new EdgeGlow(edge, glow);
-        mEdgeGlowLeft = new EdgeGlow(edge, glow);
-        mEdgeGlowRight = new EdgeGlow(edge, glow);
+        mEdgeGlowTop = new EdgeGlow(context, edge, glow);
+        mEdgeGlowBottom = new EdgeGlow(context, edge, glow);
+        mEdgeGlowLeft = new EdgeGlow(context, edge, glow);
+        mEdgeGlowRight = new EdgeGlow(context, edge, glow);
     }
 
     /**

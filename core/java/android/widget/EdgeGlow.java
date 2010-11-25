@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.view.animation.AnimationUtils;
@@ -44,7 +45,7 @@ public class EdgeGlow {
     private static final float HELD_GLOW_ALPHA = 0.5f;
     private static final float HELD_GLOW_SCALE_Y = 0.5f;
 
-    private static final float MAX_GLOW_HEIGHT = 3.f;
+    private static final float MAX_GLOW_HEIGHT = 4.f;
 
     private static final float PULL_GLOW_BEGIN = 1.f;
     private static final float PULL_EDGE_BEGIN = 0.6f;
@@ -58,6 +59,8 @@ public class EdgeGlow {
     private final Drawable mGlow;
     private int mWidth;
     private int mHeight;
+    private final int MIN_WIDTH = 300;
+    private final int mMinWidth;
 
     private float mEdgeAlpha;
     private float mEdgeScaleY;
@@ -86,12 +89,12 @@ public class EdgeGlow {
 
     // How much dragging should effect the height of the edge image.
     // Number determined by user testing.
-    private static final int PULL_DISTANCE_EDGE_FACTOR = 5;
+    private static final int PULL_DISTANCE_EDGE_FACTOR = 7;
 
     // How much dragging should effect the height of the glow image.
     // Number determined by user testing.
-    private static final int PULL_DISTANCE_GLOW_FACTOR = 5;
-    private static final float PULL_DISTANCE_ALPHA_GLOW_FACTOR = 0.8f;
+    private static final int PULL_DISTANCE_GLOW_FACTOR = 7;
+    private static final float PULL_DISTANCE_ALPHA_GLOW_FACTOR = 1.1f;
 
     private static final int VELOCITY_EDGE_FACTOR = 8;
     private static final int VELOCITY_GLOW_FACTOR = 16;
@@ -100,10 +103,11 @@ public class EdgeGlow {
 
     private float mPullDistance;
 
-    public EdgeGlow(Drawable edge, Drawable glow) {
+    public EdgeGlow(Context context, Drawable edge, Drawable glow) {
         mEdge = edge;
         mGlow = glow;
 
+        mMinWidth = (int) (context.getResources().getDisplayMetrics().density * MIN_WIDTH + 0.5f);
         mInterpolator = new DecelerateInterpolator();
     }
 
@@ -251,17 +255,31 @@ public class EdgeGlow {
 
         mGlow.setAlpha((int) (Math.max(0, Math.min(mGlowAlpha, 1)) * 255));
 
-        // Center the glow inside the width of the container.
-        int glowLeft = (mWidth - glowWidth)/2;
-        mGlow.setBounds(glowLeft, 0, mWidth - glowLeft, (int) Math.min(
+        int glowBottom = (int) Math.min(
                 glowHeight * mGlowScaleY * glowHeight/ glowWidth * 0.6f,
-                glowHeight * MAX_GLOW_HEIGHT));
+                glowHeight * MAX_GLOW_HEIGHT);
+        if (mWidth < mMinWidth) {
+            // Center the glow and clip it.
+            int glowLeft = (mWidth - glowWidth)/2;
+            mGlow.setBounds(glowLeft, 0, mWidth - glowLeft, glowBottom);
+        } else {
+            // Stretch the glow to fit.
+            mGlow.setBounds(0, 0, mWidth, glowBottom);
+        }
+
         mGlow.draw(canvas);
 
         mEdge.setAlpha((int) (Math.max(0, Math.min(mEdgeAlpha, 1)) * 255));
 
-        int edgeLeft = (mWidth - edgeWidth)/2;
-        mEdge.setBounds(edgeLeft, 0, mWidth - edgeLeft, (int) (edgeHeight * mEdgeScaleY));
+        int edgeBottom = (int) (edgeHeight * mEdgeScaleY);
+        if (mWidth < mMinWidth) {
+            // Center the edge and clip it.
+            int edgeLeft = (mWidth - edgeWidth)/2;
+            mEdge.setBounds(edgeLeft, 0, mWidth - edgeLeft, edgeBottom);
+        } else {
+            // Stretch the edge to fit.
+            mEdge.setBounds(0, 0, mWidth, edgeBottom);
+        }
         mEdge.draw(canvas);
 
         return mState != STATE_IDLE;
