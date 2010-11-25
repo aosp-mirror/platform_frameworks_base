@@ -46,6 +46,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
 
     private static final String TAG = "MobileDataStateTracker";
     private static final boolean DBG = true;
+    private static final boolean VDBG = false;
 
     private Phone.DataState mMobileDataState;
     private ITelephony mPhoneService;
@@ -156,10 +157,15 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     private class MobileDataStateReceiver extends BroadcastReceiver {
         IConnectivityManager mConnectivityManager;
 
+        @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(TelephonyIntents.
                     ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
                 String apnType = intent.getStringExtra(Phone.DATA_APN_TYPE_KEY);
+                if (VDBG) Log.d(TAG,
+                        String.format("Broadcast received: ACTION_ANY_DATA_CONNECTION_STATE_CHANGED"
+                                            + "mApnType=%s %s received apnType=%s",
+                        mApnType, TextUtils.equals(apnType, mApnType) ? "==" : "!=", apnType));
                 if (!TextUtils.equals(apnType, mApnType)) {
                     return;
                 }
@@ -171,8 +177,8 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 mNetworkInfo.setIsAvailable(!intent.getBooleanExtra(Phone.NETWORK_UNAVAILABLE_KEY,
                         false));
 
-                if (DBG) Log.d(TAG, mApnType + " Received state= " + state + ", old= " +
-                        mMobileDataState + ", reason= " +
+                if (DBG) Log.d(TAG, mApnType + " Received state=" + state + ", old=" +
+                        mMobileDataState + ", reason=" +
                         (reason == null ? "(unspecified)" : reason));
 
                 if (mMobileDataState != state) {
@@ -249,6 +255,8 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                     equals(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED)) {
                 String apnType = intent.getStringExtra(Phone.DATA_APN_TYPE_KEY);
                 if (!TextUtils.equals(apnType, mApnType)) {
+                    if (DBG) Log.d(TAG, String.format("Broadcast received: ACTION_ANY_DATA_CONNECTION_FAILED ignore, mApnType=%s != received apnType=%s",
+                            mApnType, apnType));
                     return;
                 }
                 String reason = intent.getStringExtra(Phone.FAILURE_REASON_KEY);
@@ -256,6 +264,8 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 if (DBG) Log.d(TAG, mApnType + "Received " + intent.getAction() +
                         " broadcast" + reason == null ? "" : "(" + reason + ")");
                 setDetailedState(DetailedState.FAILED, reason, apnName);
+            } else {
+                if (DBG) Log.d(TAG, "Broadcast received: ignore " + intent.getAction());
             }
         }
     }

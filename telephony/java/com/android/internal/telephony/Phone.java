@@ -309,16 +309,17 @@ public interface Phone {
 
     /**
      * Returns an array of string identifiers for the APN types serviced by the
-     * currently active or last connected APN.
-     *  @return The string array.
+     * currently active.
+     *  @return The string array will always return at least one entry, Phone.APN_TYPE_DEFAULT.
+     * TODO: Revisit if we always should return at least one entry.
      */
     String[] getActiveApnTypes();
 
     /**
-     * Returns a string identifier for currently active or last connected APN.
-     *  @return The string name.
+     * Returns string for the active APN host.
+     *  @return type as a string or null if none.
      */
-    String getActiveApn();
+    String getActiveApnHost();
 
     /**
      * Return the LinkProperties for the named apn or null if not available

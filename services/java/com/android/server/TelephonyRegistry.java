@@ -388,8 +388,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
         Slog.i(TAG, "notifyDataConnection: state=" + state + " isDataConnectivityPossible="
-                + isDataConnectivityPossible + " reason=" + reason
-                + " apn=" + apn + " networkType=" + networkType);
+                + isDataConnectivityPossible + " reason='" + reason
+                + "' apn='" + apn + "' apnType=" + apnType + " networkType=" + networkType);
         synchronized (mRecords) {
             boolean modified = false;
             if (state == TelephonyManager.DATA_CONNECTED) {
