@@ -8574,7 +8574,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public void show() {
             updatePosition();
             getHandle().show();
-            hideDelayed(DELAY_BEFORE_FADE_OUT);
         }
 
         void showWithPaste() {
@@ -8586,12 +8585,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mHandle != null) {
                 mHandle.hide();
             }
-            TextView.this.removeCallbacks(mHider);
+            removeCallbacks(mHider);
         }
 
-        private void hideDelayed(int msec) {
-            TextView.this.removeCallbacks(mHider);
-            TextView.this.postDelayed(mHider, msec);
+        private void hideDelayed() {
+            removeCallbacks(mHider);
+            postDelayed(mHider, DELAY_BEFORE_FADE_OUT);
         }
 
         public boolean isShowing() {
@@ -8606,7 +8605,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 Selection.setSelection((Spannable) mText, offset);
                 updatePosition();
             }
-            hideDelayed(DELAY_BEFORE_FADE_OUT);
+            hideDelayed();
         }
 
         public void updatePosition() {
@@ -8682,7 +8681,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mEndHandle.show();
 
             hideInsertionPointCursorController();
-            hideDelayed(DELAY_BEFORE_FADE_OUT);
         }
 
         public void hide() {
@@ -8692,9 +8690,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             removeCallbacks(mHider);
         }
 
-        private void hideDelayed(int delay) {
+        private void hideDelayed() {
             removeCallbacks(mHider);
-            postDelayed(mHider, delay);
+            postDelayed(mHider, DELAY_BEFORE_FADE_OUT);
         }
 
         public boolean isShowing() {
@@ -8757,7 +8755,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // The handles have been created since the controller isShowing().
             mStartHandle.positionAtCursor(selectionStart, true);
             mEndHandle.positionAtCursor(selectionEnd, true);
-            hideDelayed(DELAY_BEFORE_FADE_OUT);
+            hideDelayed();
         }
 
         public boolean onTouchEvent(MotionEvent event) {
