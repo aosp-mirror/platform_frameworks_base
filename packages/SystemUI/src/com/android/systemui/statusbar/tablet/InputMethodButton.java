@@ -76,7 +76,7 @@ public class InputMethodButton extends ImageView {
             public void onClick(View v) {
                 switch (mId) {
                     case ID_IME_SWITCH_BUTTON:
-                        mImm.showInputMethodSubtypePicker();
+                        mImm.showInputMethodPicker();
                         break;
                     case ID_IME_SHORTCUT_BUTTON:
                         if (mToken != null && mShortcutInfo != null) {

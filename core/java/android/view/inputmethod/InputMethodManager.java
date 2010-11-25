@@ -1430,16 +1430,6 @@ public final class InputMethodManager {
         }
     }
 
-    public void showInputMethodSubtypePicker() {
-        synchronized (mH) {
-            try {
-                mService.showInputMethodSubtypePickerFromClient(mClient);
-            } catch (RemoteException e) {
-                Log.w(TAG, "IME died: " + mCurId, e);
-            }
-        }
-    }
-
     public void showInputMethodAndSubtypeEnabler(String topId) {
         synchronized (mH) {
             try {

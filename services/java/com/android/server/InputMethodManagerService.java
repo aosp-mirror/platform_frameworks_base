@@ -1277,31 +1277,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         + Binder.getCallingUid() + ": " + client);
             }
 
-            mHandler.sendEmptyMessage(MSG_SHOW_IM_PICKER);
-        }
-    }
-
-    public void showInputMethodSubtypePickerFromClient(IInputMethodClient client) {
-        synchronized (mMethodMap) {
-            if (mCurClient == null || client == null
-                    || mCurClient.client.asBinder() != client.asBinder()) {
-                Slog.w(TAG, "Ignoring showInputMethodSubtypePickerFromClient of: " + client);
-            }
-
+            // Always call subtype picker, because subtype picker is a superset of input method
+            // picker.
             mHandler.sendEmptyMessage(MSG_SHOW_IM_SUBTYPE_PICKER);
-        }
-    }
-
-    public void showInputMethodAndSubtypeEnablerFromClient(
-            IInputMethodClient client, String topId) {
-        // TODO: Handle topId for setting the top position of the list activity
-        synchronized (mMethodMap) {
-            if (mCurClient == null || client == null
-                    || mCurClient.client.asBinder() != client.asBinder()) {
-                Slog.w(TAG, "Ignoring showInputMethodAndSubtypeEnablerFromClient of: " + client);
-            }
-
-            mHandler.sendEmptyMessage(MSG_SHOW_IM_SUBTYPE_ENABLER);
         }
     }
 
