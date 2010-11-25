@@ -149,16 +149,22 @@ resource.</dd>
         </dd>
         <dt><code>android:layout_height</code></dt>
         <dd><em>Dimension or keyword</em>. Overrides the height given to the root view in the
-included layout.
+included layout. Only effective if <code>android:layout_width</code> is also declared.
         </dd>
         <dt><code>android:layout_width</code></dt>
         <dd><em>Dimension or keyword</em>. Overrides the width given to the root view in the
-included layout.
+included layout. Only effective if <code>android:layout_height</code> is also declared.
         </dd>
       </dl>
       <p>You can include any other layout attributes in the <code>&lt;include&gt;</code> that are
 supported by the root element in the included layout and they will override those defined in the
 root element.</p>
+
+      <p class="caution"><strong>Caution:</strong> If you want to override the layout dimensions,
+you must override both <code>android:layout_height</code> and
+<code>android:layout_width</code>&mdash;you cannot override only the height or only the width.
+If you override only one, it will not take effect. (Other layout properties, such as weight,
+are still inherited from the source layout.)</p>
 
     <p>Another way to include a layout is to use {@link android.view.ViewStub}. It is a lightweight
 View that consumes no layout space until you explicitly inflate it, at which point, it includes a
