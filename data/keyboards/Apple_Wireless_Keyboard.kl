@@ -12,7 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-key 1     BACK
+#
+# Apple Wireless Keyboard
+#
+# Notes:
+# - Keys such as PAGE_UP and FORWARD_DEL are produced using the
+#   function key.
+# - Special function keys for brightness control, etc. are not
+#   implemented here.
+
+key 1     ESCAPE
 key 2     1
 key 3     2
 key 4     3
@@ -81,21 +90,30 @@ key 67    F9
 key 68    F10
 key 87    F11
 key 88    F12
-key 97    CTRL_RIGHT
-key 102   HOME
+key 100   ALT_RIGHT
+key 102   MOVE_HOME
 key 103   DPAD_UP
+key 104   PAGE_UP
 key 105   DPAD_LEFT
 key 106   DPAD_RIGHT
 key 107   MOVE_END
 key 108   DPAD_DOWN
+key 109   PAGE_DOWN
+key 110   NUMPAD_ENTER
 key 111   FORWARD_DEL
-key 113   VOLUME_MUTE
+key 113   VALUME_MUTE
 key 114   VOLUME_DOWN
 key 115   VOLUME_UP
-key 125   MENU
-key 127   SEARCH
+# key 120  switch applications
+key 125   META_LEFT
+key 126   META_RIGHT
+key 161   MEDIA_EJECT
 key 163   MEDIA_NEXT
 key 164   MEDIA_PLAY_PAUSE
 key 165   MEDIA_PREVIOUS
-key 166   MEDIA_STOP
-# key 226  tbd reserved key
+# key 204  show gadgets
+# key 224  reduce brightness
+# key 225  increase brightness
+# key 229  blank special function on F5
+# key 230  blank special function on F6
+key 464   FUNCTION

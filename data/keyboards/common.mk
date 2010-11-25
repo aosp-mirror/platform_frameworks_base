@@ -16,15 +16,16 @@
 # Used by Android.mk and keyboards.mk.
 
 keylayouts := \
+    Apple_Wireless_Keyboard.kl \
     AVRCP.kl \
     Generic.kl \
+    Logitech_USB_Receiver.kl \
     Motorola_Bluetooth_Wireless_Keyboard.kl \
     qwerty.kl \
     qwerty2.kl
 
 keycharmaps := \
     Generic.kcm \
-    Virtual.kcm \
-    Motorola_Bluetooth_Wireless_Keyboard.kcm \
     qwerty.kcm \
-    qwerty2.kcm
+    qwerty2.kcm \
+    Virtual.kcm
