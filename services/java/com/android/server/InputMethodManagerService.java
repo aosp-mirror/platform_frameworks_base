@@ -1298,6 +1298,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    public void showInputMethodAndSubtypeEnablerFromClient(
+            IInputMethodClient client, String topId) {
+        // TODO: Handle topId for setting the top position of the list ActivityManagerNative
+        synchronized (mMethodMap) {
+            if (mCurClient == null || client == null
+                || mCurClient.client.asBinder() != client.asBinder()) {
+                Slog.w(TAG, "Ignoring showInputMethodAndSubtypeEnablerFromClient of: " + client);
+            }
+            mHandler.sendEmptyMessage(MSG_SHOW_IM_SUBTYPE_ENABLER);
+        }
+    }
+
     public boolean switchToLastInputMethod(IBinder token) {
         synchronized (mMethodMap) {
             Pair<String, String> lastIme = mSettings.getLastInputMethodAndSubtypeLocked();
