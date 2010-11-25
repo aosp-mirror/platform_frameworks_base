@@ -89,6 +89,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             Phone.APN_TYPE_MMS,
             Phone.APN_TYPE_HIPRI };
 
+    private static final int mDefaultApnId = DataConnectionTracker.APN_DEFAULT_ID;
+
     /* Constructor */
 
     CdmaDataConnectionTracker(CDMAPhone p) {
@@ -324,13 +326,17 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         /** TODO: We probably want the connection being setup to a parameter passed around */
         mPendingDataConnection = conn;
         String[] types;
+        int apnId;
         if (mRequestedApnType.equals(Phone.APN_TYPE_DUN)) {
             types = new String[1];
             types[0] = Phone.APN_TYPE_DUN;
+            apnId = DataConnectionTracker.APN_DUN_ID;
         } else {
             types = mDefaultApnTypes;
+            apnId = mDefaultApnId;
         }
-        mActiveApn = new ApnSetting(0, "", "", "", "", "", "", "", "", "", "", 0, types);
+        mActiveApn = new ApnSetting(apnId, "", "", "", "", "", "", "", "", "", "", 0, types);
+        if (DBG) log("setupData: mActiveApn=" + mActiveApn);
 
         Message msg = obtainMessage();
         msg.what = EVENT_DATA_SETUP_COMPLETE;

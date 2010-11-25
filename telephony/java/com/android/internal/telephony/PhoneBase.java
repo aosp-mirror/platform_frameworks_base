@@ -746,8 +746,10 @@ public abstract class PhoneBase extends Handler implements Phone {
     }
 
     public void notifyDataConnection() {
-        String apn = getActiveApn();
-        mNotifier.notifyDataConnection(this, null, apn, getDataConnectionState(apn));
+        String types[] = getActiveApnTypes();
+        for (String apnType : types) {
+            mNotifier.notifyDataConnection(this, null, apnType, getDataConnectionState(apnType));
+        }
     }
 
     public void notifyOtaspChanged(int otaspMode) {
@@ -947,16 +949,16 @@ public abstract class PhoneBase extends Handler implements Phone {
         return mDataConnection.getActiveApnTypes();
     }
 
+    public String getActiveApnHost() {
+        return mDataConnection.getActiveApnString();
+    }
+
     public LinkProperties getLinkProperties(String apnType) {
         return mDataConnection.getLinkProperties(apnType);
     }
 
     public LinkCapabilities getLinkCapabilities(String apnType) {
         return mDataConnection.getLinkCapabilities(apnType);
-    }
-
-    public String getActiveApn() {
-        return mDataConnection.getActiveApnString();
     }
 
     public int enableApnType(String type) {

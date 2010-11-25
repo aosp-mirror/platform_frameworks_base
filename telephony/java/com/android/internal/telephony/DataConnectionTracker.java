@@ -687,7 +687,7 @@ public abstract class DataConnectionTracker extends Handler {
 
     public boolean isApnTypeEnabled(String apnType) {
         if (apnType == null) {
-            apnType = getActiveApnString();
+            apnType = getActiveApnType();
         }
         return isApnIdEnabled(apnTypeToId(apnType));
     }

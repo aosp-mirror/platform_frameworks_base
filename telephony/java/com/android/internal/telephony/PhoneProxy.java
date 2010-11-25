@@ -209,16 +209,16 @@ public class PhoneProxy extends Handler implements Phone {
         return mActivePhone.getActiveApnTypes();
     }
 
+    public String getActiveApnHost() {
+        return mActivePhone.getActiveApnHost();
+    }
+
     public LinkProperties getLinkProperties(String apnType) {
         return mActivePhone.getLinkProperties(apnType);
     }
 
     public LinkCapabilities getLinkCapabilities(String apnType) {
         return mActivePhone.getLinkCapabilities(apnType);
-    }
-
-    public String getActiveApn() {
-        return mActivePhone.getActiveApn();
     }
 
     public SignalStrength getSignalStrength() {
