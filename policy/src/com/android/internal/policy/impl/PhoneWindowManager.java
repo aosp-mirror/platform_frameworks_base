@@ -588,7 +588,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // We can't initialize this in init() since the configuration hasn't been loaded yet.
         if (mLongPressOnHomeBehavior < 0) {
             mLongPressOnHomeBehavior
-                    = mContext.getResources().getInteger(R.integer.config_longPressOnPowerBehavior);
+                    = mContext.getResources().getInteger(R.integer.config_longPressOnHomeBehavior);
             if (mLongPressOnHomeBehavior < LONG_PRESS_HOME_NOTHING ||
                     mLongPressOnHomeBehavior > LONG_PRESS_HOME_RECENT_ACTIVITY) {
                 mLongPressOnHomeBehavior = LONG_PRESS_HOME_NOTHING;
@@ -600,7 +600,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             sendCloseSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
         }
         
-        // Use 3d Recents dialog
         if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_DIALOG) {
             // Fallback to dialog if we fail to launch the above.
             if (mRecentAppsDialog == null) {

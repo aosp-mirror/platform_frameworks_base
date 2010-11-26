@@ -31,7 +31,7 @@
     <bool name="config_enableLockScreenRotation">true</bool>
 
     <!-- see comment in values/config.xml -->
-    <integer name="config_longPressOnHomeBehavior">1</integer>
+    <integer name="config_longPressOnHomeBehavior">0</integer>
 
 </resources>
 
