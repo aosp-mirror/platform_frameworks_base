@@ -16,16 +16,27 @@
 
 package com.android.systemui.statusbar.tablet;
 
+import android.app.StatusBarManager;
 import android.content.Context;
+import android.content.Intent;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.widget.LinearLayout;
 import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.AirplaneModeController;
+import com.android.systemui.statusbar.policy.AutoRotateController;
 
-public class SettingsPanel extends LinearLayout {
+public class SettingsPanel extends LinearLayout implements View.OnClickListener {
     static final String TAG = "SettingsPanel";
+
+    AirplaneModeController mAirplane;
+    AutoRotateController mRotate;
 
     public SettingsPanel(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -33,6 +44,56 @@ public class SettingsPanel extends LinearLayout {
 
     public SettingsPanel(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+
+        final Context context = getContext();
+
+        mAirplane = new AirplaneModeController(context,
+                (CompoundButton)findViewById(R.id.airplane_checkbox));
+        findViewById(R.id.network).setOnClickListener(this);
+        mRotate = new AutoRotateController(context,
+                (CompoundButton)findViewById(R.id.rotate_checkbox));
+        findViewById(R.id.settings).setOnClickListener(this);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mAirplane.release();
+    }
+
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.network:
+                onClickNetwork();
+                break;
+            case R.id.settings:
+                onClickSettings();
+                break;
+        }
+    }
+
+    private StatusBarManager getStatusBarManager() {
+        return (StatusBarManager)getContext().getSystemService(Context.STATUS_BAR_SERVICE);
+    }
+
+    // Network
+    // ----------------------------
+    private void onClickNetwork() {
+        Slog.d(TAG, "onClickNetwork");
+    }
+
+    // Settings
+    // ----------------------------
+    private void onClickSettings() {
+        Slog.d(TAG, "onClickSettings");
+        getContext().startActivity(new Intent(Settings.ACTION_SETTINGS)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        getStatusBarManager().collapse();
     }
 }
 
