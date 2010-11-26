@@ -1923,25 +1923,15 @@ public class WebView extends AbsoluteLayout
      * browsing session and clears any internal state associated with that
      * session. The consequences of calling this method while a private
      * browsing session is active are unspecified.
-     * @param context The same context which was used to create the private
-     *                browsing WebView.
      * @return True if the private browsing files were successfully deleted,
      *         false otherwise.
      * @hide pending API council approval.
      */
-    public static boolean cleanupPrivateBrowsingFiles(Context context) {
-        // It seems wrong that we have to pass the storage locations here, given
-        // that the storage files are created native-side in WebRequestContext
-        // (albeit using a dumb getter on BrowserFrame to get the paths from
-        // Java). It looks like this is required because we may need to call
-        // this method before the BrowserFrame has been set up.
-        // TODO: Investigate whether this can be avoided.
-        return nativeCleanupPrivateBrowsingFiles(context.getDatabasePath("dummy").getParent(),
-                                                 context.getCacheDir().getAbsolutePath());
+    public static boolean cleanupPrivateBrowsingFiles() {
+        return nativeCleanupPrivateBrowsingFiles();
     }
 
-    private static native boolean nativeCleanupPrivateBrowsingFiles(String databaseDirectory,
-                                                                    String cacheDirectory);
+    private static native boolean nativeCleanupPrivateBrowsingFiles();
 
     private boolean extendScroll(int y) {
         int finalY = mScroller.getFinalY();
