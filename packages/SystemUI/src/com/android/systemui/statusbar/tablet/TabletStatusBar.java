@@ -145,11 +145,11 @@ public class TabletStatusBar extends StatusBar {
 
         final Resources res = context.getResources();
         final int barHeight= res.getDimensionPixelSize(
-            com.android.internal.R.dimen.status_bar_height);
+                com.android.internal.R.dimen.status_bar_height);
 
         // Notification Panel
         mNotificationPanel = (NotificationPanel)View.inflate(context,
-                R.layout.sysbar_panel_notifications, null);
+                R.layout.status_bar_notification_panel, null);
         mNotificationPanel.setVisibility(View.GONE);
         mNotificationPanel.setOnTouchListener(
                 new TouchOutsideListener(MSG_CLOSE_NOTIFICATION_PANEL, mNotificationPanel));
@@ -180,7 +180,7 @@ public class TabletStatusBar extends StatusBar {
 
         // Notification preview window
         mNotificationPeekWindow = (NotificationPeekPanel) View.inflate(context,
-                R.layout.sysbar_panel_notification_peek, null);
+                R.layout.status_bar_notification_peek, null);
         mNotificationPeekRow = (ViewGroup) mNotificationPeekWindow.findViewById(R.id.content);
         mNotificationPeekWindow.setVisibility(View.GONE);
         mNotificationPeekWindow.setOnTouchListener(
@@ -216,8 +216,8 @@ public class TabletStatusBar extends StatusBar {
 
         // Recents Panel
         if (USE_2D_RECENTS) {
-            mRecentsPanel = (RecentAppsPanel) View.inflate(context, R.layout.sysbar_panel_recent,
-                    null);
+            mRecentsPanel = (RecentAppsPanel) View.inflate(context,
+                    R.layout.status_bar_recent_panel, null);
             mRecentsPanel.setVisibility(View.GONE);
             mRecentsPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_RECENTS_PANEL,
                     mRecentsPanel));
@@ -987,7 +987,7 @@ public class TabletStatusBar extends StatusBar {
         // create the row view
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        View row = inflater.inflate(R.layout.status_bar_latest_event, parent, false);
+        View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
         workAroundBadLayerDrawableOpacity(row);
         View vetoButton = row.findViewById(R.id.veto);
         if (entry.notification.isClearable()) {

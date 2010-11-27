@@ -505,7 +505,7 @@ public class PhoneStatusBar extends StatusBar {
         // create the row view
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        View row = inflater.inflate(R.layout.status_bar_latest_event, parent, false);
+        View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
 
         // bind the click event to the content area
         ViewGroup content = (ViewGroup)row.findViewById(R.id.content);

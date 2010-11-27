@@ -32,17 +32,17 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.AirplaneModeController;
 import com.android.systemui.statusbar.policy.AutoRotateController;
 
-public class SettingsPanel extends LinearLayout implements View.OnClickListener {
-    static final String TAG = "SettingsPanel";
+public class SettingsView extends LinearLayout implements View.OnClickListener {
+    static final String TAG = "SettingsView";
 
     AirplaneModeController mAirplane;
     AutoRotateController mRotate;
 
-    public SettingsPanel(Context context, AttributeSet attrs) {
+    public SettingsView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public SettingsPanel(Context context, AttributeSet attrs, int defStyle) {
+    public SettingsView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 

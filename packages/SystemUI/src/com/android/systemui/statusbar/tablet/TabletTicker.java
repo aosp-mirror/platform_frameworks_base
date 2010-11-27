@@ -187,7 +187,7 @@ public class TabletTicker extends Handler {
             iconId = R.id.left_icon;
         }
         if (n.tickerView != null) {
-            group = (ViewGroup)inflater.inflate(R.layout.ticker, null, false);
+            group = (ViewGroup)inflater.inflate(R.layout.status_bar_ticker_panel, null, false);
             View expanded = null;
             Exception exception = null;
             try {
@@ -209,7 +209,7 @@ public class TabletTicker extends Handler {
             lp.gravity = Gravity.BOTTOM;
             group.addView(expanded, lp);
         } else if (n.tickerText != null) {
-            group = (ViewGroup)inflater.inflate(R.layout.ticker_compat, mWindow, false);
+            group = (ViewGroup)inflater.inflate(R.layout.status_bar_ticker_compat, mWindow, false);
             final Drawable icon = StatusBarIconView.getIcon(mContext,
                     new StatusBarIcon(notification.pkg, n.icon, n.iconLevel, 0));
             ImageView iv = (ImageView)group.findViewById(iconId);

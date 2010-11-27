@@ -15,7 +15,7 @@
  * limitations under the License.
 -->
 
-<com.android.systemui.statusbar.tablet.SettingsPanel
+<com.android.systemui.statusbar.tablet.SettingsView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -166,5 +166,5 @@
     </LinearLayout>
     <View style="@style/StatusBarPanelSettingsPanelSeparator" />
 
-</com.android.systemui.statusbar.tablet.SettingsPanel>
+</com.android.systemui.statusbar.tablet.SettingsView>
 
