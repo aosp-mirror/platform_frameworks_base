@@ -16,6 +16,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <style name="StatusBarNotificationText">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">#ff999999</item>
+    </style>
+
     <style name="StatusBarPanelSettingsRow">
         <item name="android:layout_height">64dp</item>
         <item name="android:layout_width">match_parent</item>

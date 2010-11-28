@@ -62,6 +62,7 @@
 
         <com.android.systemui.statusbar.policy.DateView
             android:id="@+id/date"
+            style="@style/StatusBarNotificationText"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:layout_below="@id/clock"
@@ -84,7 +85,8 @@
 
         <TextView
             android:id="@+id/battery_text"
-            android:layout_width="48dp"
+            style="@style/StatusBarNotificationText"
+            android:layout_width="56dp"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/battery"
             android:layout_alignBaseline="@id/battery"
@@ -104,6 +106,7 @@
 
         <TextView
             android:id="@+id/network_text"
+            style="@style/StatusBarNotificationText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/network"
