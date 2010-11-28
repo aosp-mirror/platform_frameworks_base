@@ -89,7 +89,7 @@
             android:layout_toRightOf="@id/battery"
             android:layout_alignBaseline="@id/battery"
             android:singleLine="true"
-            android:text="@string/system_panel_settings_button"
+            android:text="@string/status_bar_settings_settings_button"
             />
 
         <ImageView
@@ -109,7 +109,7 @@
             android:layout_toRightOf="@id/network"
             android:layout_alignBaseline="@id/battery"
             android:singleLine="true"
-            android:text="@string/system_panel_settings_button"
+            android:text="@string/status_bar_settings_settings_button"
             />
 
         <ImageView

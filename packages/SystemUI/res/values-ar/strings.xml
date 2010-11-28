@@ -35,7 +35,7 @@
     <!-- no translation found for invalid_charger (4549105996740522523) -->
     <skip />
     <string name="battery_low_why" msgid="7279169609518386372">"استخدام البطارية"</string>
-    <!-- no translation found for system_panel_settings_button (7832600575390861653) -->
+    <!-- no translation found for status_bar_settings_settings_button (7832600575390861653) -->
     <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"حديثة"</string>
     <!-- no translation found for recent_tasks_empty (1905484479067697884) -->

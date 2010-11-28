@@ -616,18 +616,18 @@ public class NetworkController extends BroadcastReceiver {
 
         if (mWifiConnected) {
             if (mWifiSsid == null) {
-                label = context.getString(R.string.system_panel_signal_meter_wifi_nossid);
+                label = context.getString(R.string.status_bar_settings_signal_meter_wifi_nossid);
             } else {
-                label = context.getString(R.string.system_panel_signal_meter_wifi_ssid_format,
+                label = context.getString(R.string.status_bar_settings_signal_meter_wifi_ssid_format,
                                       mWifiSsid);
             }
             combinedSignalIconId = mWifiIconId;
             dataTypeIconId = 0;
         } else {
             if (mDataConnected) {
-                label = context.getString(R.string.system_panel_signal_meter_data_connected);
+                label = context.getString(R.string.status_bar_settings_signal_meter_data_connected);
             } else {
-                label = context.getString(R.string.system_panel_signal_meter_disconnected);
+                label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
             }
             combinedSignalIconId = mDataSignalIconId;
             dataTypeIconId = mDataTypeIconId;

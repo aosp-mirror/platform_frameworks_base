@@ -37,7 +37,7 @@
         <TextView
                 android:id="@+id/airplane_label"
                 style="@style/StatusBarPanelSettingsContents"
-                android:text="@string/system_panel_airplane"
+                android:text="@string/status_bar_settings_airplane"
                 />
         <CheckBox
                 android:id="@+id/airplane_checkbox"
@@ -86,7 +86,7 @@
         <TextView
                 android:id="@+id/rotate_label"
                 style="@style/StatusBarPanelSettingsContents"
-                android:text="@string/system_panel_rotation_lock"
+                android:text="@string/status_bar_settings_rotation_lock"
                 />
         <CheckBox
                 android:id="@+id/rotate_checkbox"
@@ -129,7 +129,7 @@
                 />
         <TextView
                 style="@style/StatusBarPanelSettingsContents"
-                android:text="@string/system_panel_notifications"
+                android:text="@string/status_bar_settings_notifications"
                 />
         <CheckBox
                 android:id="@+id/do_not_disturb_checkbox"
@@ -153,7 +153,7 @@
                 />
         <TextView
                 style="@style/StatusBarPanelSettingsContents"
-                android:text="@string/system_panel_settings_button"
+                android:text="@string/status_bar_settings_settings_button"
                 />
         <ImageView
             android:layout_width="wrap_content"
