@@ -76,7 +76,7 @@ public class TabletTicker extends Handler {
         mQueue[mQueuePos] = notification;
 
         // If nothing is running now, start the next one
-        if (mCurrentNotification == null) {
+        if (mQueuePos == 0) {
             sendEmptyMessage(MSG_ADVANCE);
         }
 
@@ -87,7 +87,7 @@ public class TabletTicker extends Handler {
 
     public void halt() {
         removeMessages(MSG_ADVANCE);
-        if (mCurrentView != null) {
+        if (mCurrentView != null || mQueuePos != 0) {
             final int N = mQueue.length;
             for (int i=0; i<N; i++) {
                 mQueue[i] = null;
