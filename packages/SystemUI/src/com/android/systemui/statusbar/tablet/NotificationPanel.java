@@ -68,6 +68,7 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
         // when we hide, put back the notifications
         if (!isShown()) {
             switchToNotificationMode();
+            mNotificationScroller.scrollTo(0, 0);
         }
     }
 
