@@ -132,7 +132,7 @@ public class TabletTicker extends Handler {
 
         // if there's nothing left, close the window
         // TODO: Do this when the animation is done instead
-        if (mCurrentView == null) {
+        if (mCurrentView == null && mWindow != null) {
             WindowManagerImpl.getDefault().removeView(mWindow);
             mWindow = null;
         }
