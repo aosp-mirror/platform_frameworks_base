@@ -1177,6 +1177,9 @@
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
+    <style name="TextAppearance.Holo.Widget.Switch" parent="TextAppearance.Holo.Small">
+    </style>
+
     <style name="TextAppearance.Holo.WindowTitle">
         <item name="android:textColor">#fff</item>
         <item name="android:textSize">14sp</item>
@@ -1351,6 +1354,9 @@
     <style name="Widget.Holo.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
         <item name="android:dropDownSelector">@android:drawable/list_selector_holo_dark</item>
         <item name="android:popupBackground">@android:drawable/menu_dropdown_panel_holo_dark</item>
+    </style>
+
+    <style name="Widget.Holo.CompoundButton" parent="Widget.CompoundButton">
     </style>
 
     <style name="Widget.Holo.CompoundButton.CheckBox" parent="Widget.CompoundButton.CheckBox">
@@ -1608,6 +1614,17 @@
         <item name="android:progressBarStyle">@android:style/Widget.Holo.ProgressBar.Horizontal</item>
         <item name="android:indeterminateProgressStyle">@android:style/Widget.Holo.ProgressBar</item>
         <item name="android:progressBarPadding">32dip</item>
+    </style>
+
+    <style name="Widget.Holo.CompoundButton.Switch">
+        <item name="android:switchTrack">@android:drawable/switch_track_holo_dark</item>
+        <item name="android:switchThumb">@android:drawable/switch_inner_holo_dark</item>
+        <item name="android:switchTextAppearance">@android:style/TextAppearance.Holo.Widget.Switch</item>
+        <item name="android:textOn">@android:string/capital_on</item>
+        <item name="android:textOff">@android:string/capital_off</item>
+        <item name="android:thumbTextPadding">12dip</item>
+        <item name="android:switchMinWidth">96dip</item>
+        <item name="android:switchPadding">16dip</item>
     </style>
 
     <!-- Light widget styles -->
