@@ -63,7 +63,8 @@ static void native_init_empty(JNIEnv * env, jobject object, jboolean localOnly)
     }
 
     if (!window->initBuffer(localOnly)) {
-        jniThrowException(env, "java/lang/IllegalStateException", "Couldn't init cursor window");
+        jniThrowException(env, "java/lang/RuntimeException",
+                "Memory couldn't be allocated for 1MB CursorWindow object.");
         delete window;
         return;
     }
@@ -82,11 +83,13 @@ static void native_init_memory(JNIEnv * env, jobject object, jobject memObj)
 
     CursorWindow * window = new CursorWindow();
     if (!window) {
-        jniThrowException(env, "java/lang/RuntimeException", "No memory for native window object");
+        jniThrowException(env, "java/lang/RuntimeException",
+                "CursorWindow of size 1MB couldn't be created. No memory?");
         return;
     }
     if (!window->setMemory(memory)) {
-        jniThrowException(env, "java/lang/RuntimeException", "No memory in memObj");
+        jniThrowException(env, "java/lang/RuntimeException",
+                "Memory couldn't be initialized for 1MB CursorWindow object.");
         delete window;
         return;
     }
@@ -131,8 +134,9 @@ LOG_WINDOW("Closing window %p", window);
 
 static void throwExceptionWithRowCol(JNIEnv * env, jint row, jint column)
 {
-    char buf[100];
-    snprintf(buf, sizeof(buf), "get field slot from row %d col %d failed", row, column);
+    char buf[200];
+    snprintf(buf, sizeof(buf), "Couldn't read row %d, col %d from CursorWindow. Make sure the Cursor is initialized correctly before accessing data from it",
+            row, column);
     jniThrowException(env, "java/lang/IllegalStateException", buf);
 }
 
