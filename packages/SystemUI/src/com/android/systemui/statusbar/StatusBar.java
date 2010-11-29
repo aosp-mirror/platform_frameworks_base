@@ -53,6 +53,8 @@ public abstract class StatusBar extends SystemUI implements CommandQueue.Callbac
     protected abstract View makeStatusBarView();
     protected abstract int getStatusBarGravity();
 
+    private DoNotDisturb mDoNotDisturb;
+
     public void start() {
         // First set up our views and stuff.
         View sb = makeStatusBarView();
@@ -127,5 +129,7 @@ public abstract class StatusBar extends SystemUI implements CommandQueue.Callbac
                    + " imeButton=" + switches[3]
                    );
         }
+
+        mDoNotDisturb = new DoNotDisturb(mContext);
     }
 }
