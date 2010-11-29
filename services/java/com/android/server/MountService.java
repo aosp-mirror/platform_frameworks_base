@@ -73,8 +73,8 @@ import javax.crypto.spec.PBEKeySpec;
  * @hide - Applications should use android.os.storage.StorageManager
  * to access the MountService.
  */
-class MountService extends IMountService.Stub
-        implements INativeDaemonConnectorCallbacks {
+class MountService extends IMountService.Stub implements INativeDaemonConnectorCallbacks {
+
     private static final boolean LOCAL_LOGD = false;
     private static final boolean DEBUG_UNMOUNT = false;
     private static final boolean DEBUG_EVENTS = false;
@@ -334,6 +334,7 @@ class MountService extends IMountService.Stub
             super(l);
         }
 
+        @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case H_UNMOUNT_PM_UPDATE: {
@@ -427,6 +428,7 @@ class MountService extends IMountService.Stub
     }
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
@@ -442,6 +444,7 @@ class MountService extends IMountService.Stub
                     return;
                 }
                 new Thread() {
+                    @Override
                     public void run() {
                         try {
                             String path = Environment.getExternalStorageDirectory().getPath();
@@ -565,6 +568,7 @@ class MountService extends IMountService.Stub
          * we need to do our work in a new thread.
          */
         new Thread() {
+            @Override
             public void run() {
                 /**
                  * Determine media state and UMS detection status
@@ -678,6 +682,7 @@ class MountService extends IMountService.Stub
 
             if (code == VoldResponseCode.VolumeDiskInserted) {
                 new Thread() {
+                    @Override
                     public void run() {
                         try {
                             int rc;
@@ -1007,6 +1012,7 @@ class MountService extends IMountService.Stub
              * USB mass storage disconnected while enabled
              */
             new Thread() {
+                @Override
                 public void run() {
                     try {
                         int rc;
@@ -1624,6 +1630,29 @@ class MountService extends IMountService.Stub
             Slog.i(TAG, "Send to OBB handler: " + action.toString());
     }
 
+    public int decryptStorage(String password) {
+        if (password == null) {
+            throw new IllegalArgumentException("password cannot be null");
+        }
+
+        // TODO: Enforce a permission
+
+        waitForReady();
+
+        if (DEBUG_EVENTS) {
+            Slog.i(TAG, "decrypting storage...");
+        }
+
+        try {
+            mConnector.doCommand(String.format("cryptfs checkpw %s", password));
+        } catch (NativeDaemonConnectorException e) {
+            // Decryption failed
+            return e.getCode();
+        }
+
+        return 0;
+    }
+
     private void addObbStateLocked(ObbState obbState) throws RemoteException {
         final IBinder binder = obbState.getBinder();
         List<ObbState> obbStates = mObbMounts.get(binder);
@@ -1911,6 +1940,7 @@ class MountService extends IMountService.Stub
             mKey = key;
         }
 
+        @Override
         public void handleExecute() throws IOException, RemoteException {
             waitForReady();
             warnOnNotMounted();
@@ -1991,6 +2021,7 @@ class MountService extends IMountService.Stub
             }
         }
 
+        @Override
         public void handleError() {
             sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_INTERNAL);
         }
@@ -2020,6 +2051,7 @@ class MountService extends IMountService.Stub
             mForceUnmount = force;
         }
 
+        @Override
         public void handleExecute() throws IOException {
             waitForReady();
             warnOnNotMounted();
@@ -2074,6 +2106,7 @@ class MountService extends IMountService.Stub
             }
         }
 
+        @Override
         public void handleError() {
             sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_INTERNAL);
         }
