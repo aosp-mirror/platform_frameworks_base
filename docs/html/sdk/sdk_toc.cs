@@ -37,6 +37,17 @@
     </ul>
   </li><?cs
   /if ?>
+  <?cs
+  if:sdk.preview ?>
+  <li><h2>Android Preview SDK</h2></li>
+    <ul>
+      <li><a href="<?cs var:toroot ?>sdk/preview/features.html">Introduction
+to Honeycomb</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/preview/installing.html">Getting
+Started</a></li>
+    </ul>
+  </li><?cs
+  /if ?>
   <li>
     <h2>
       <span class="en">Downloadable SDK Components</span>
