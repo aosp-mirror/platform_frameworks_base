@@ -388,6 +388,7 @@ public class TabletStatusBar extends StatusBar {
                         mNotificationPanel.setVisibility(View.VISIBLE);
                         // synchronize with current shadow state
                         mShadowController.hideElement(mNotificationArea);
+                        mTicker.halt();
                     }
                     break;
                 case MSG_CLOSE_NOTIFICATION_PANEL:
@@ -458,12 +459,7 @@ public class TabletStatusBar extends StatusBar {
         if (DEBUG) Slog.d(TAG, "addNotification(" + key + " -> " + notification + ")");
         addNotificationViews(key, notification);
 
-        boolean immersive = false;
-        try {
-            immersive = ActivityManagerNative.getDefault().isTopActivityImmersive();
-            //Slog.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
-        } catch (RemoteException ex) {
-        }
+        final boolean immersive = isImmersive();
         if (false && immersive) {
             // TODO: immersive mode popups for tablet
         } else if (notification.notification.fullScreenIntent != null) {
@@ -475,7 +471,7 @@ public class TabletStatusBar extends StatusBar {
             } catch (PendingIntent.CanceledException e) {
             }
         } else {
-            tick(notification);
+            tick(key, notification);
         }
 
         setAreThereNotifications();
@@ -549,7 +545,14 @@ public class TabletStatusBar extends StatusBar {
             removeNotificationViews(key);
             addNotificationViews(key, notification);
         }
-        // TODO: ticker; immersive mode
+        // fullScreenIntent doesn't happen on updates.  You need to clear & repost a new
+        // notification.
+        final boolean immersive = isImmersive();
+        if (false && immersive) {
+            // TODO: immersive mode
+        } else {
+            tick(key, notification);
+        }
 
         setAreThereNotifications();
     }
@@ -557,6 +560,7 @@ public class TabletStatusBar extends StatusBar {
     public void removeNotification(IBinder key) {
         if (DEBUG) Slog.d(TAG, "removeNotification(" + key + ") // TODO");
         removeNotificationViews(key);
+        mTicker.remove(key);
         setAreThereNotifications();
     }
 
@@ -603,7 +607,7 @@ public class TabletStatusBar extends StatusBar {
         return n.tickerView != null || !TextUtils.isEmpty(n.tickerText);
     }
 
-    private void tick(StatusBarNotification n) {
+    private void tick(IBinder key, StatusBarNotification n) {
         // Don't show the ticker when the windowshade is open.
         if (mNotificationPanel.getVisibility() == View.VISIBLE) {
             return;
@@ -615,7 +619,7 @@ public class TabletStatusBar extends StatusBar {
         if (hasTicker(n.notification) && mStatusBarView.getWindowToken() != null) {
             if (0 == (mDisabled & (StatusBarManager.DISABLE_NOTIFICATION_ICONS
                             | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
-                mTicker.add(n);
+                mTicker.add(key, n);
             }
         }
     }
@@ -655,6 +659,16 @@ public class TabletStatusBar extends StatusBar {
         mInputMethodShortcutButton.setIMEButtonVisible(token, visible);
     }
 
+    private boolean isImmersive() {
+        try {
+            return ActivityManagerNative.getDefault().isTopActivityImmersive();
+            //Slog.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
+        } catch (RemoteException ex) {
+            // the end is nigh
+            return false;
+        }
+    }
+    
     private void setAreThereNotifications() {
         final boolean hasClearable = mNotns.hasClearableItems();
 
