@@ -7103,7 +7103,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 handled |= mMovement.onTouchEvent(this, (Spannable) mText, event);
             }
 
-            if (isTextEditable()) {
+            if (isTextEditable() || mTextIsSelectable) {
                 if (mScrollX != oldScrollX || mScrollY != oldScrollY) {
                     // Hide insertion anchor while scrolling. Leave selection.
                     hideInsertionPointCursorController();
@@ -7153,7 +7153,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         mInsertionControllerEnabled = windowSupportsHandles && isTextEditable() && mCursorVisible &&
-                mLayout != null && !mTextIsSelectable;
+                mLayout != null;
         mSelectionControllerEnabled = windowSupportsHandles && textCanBeSelected() &&
                 mLayout != null;
 
@@ -7172,8 +7172,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * a selectable TextView.
      */
     private boolean isTextEditable() {
-        return (mText instanceof Editable && onCheckIsTextEditor() && isEnabled())
-                || mTextIsSelectable;
+        return mText instanceof Editable && onCheckIsTextEditor() && isEnabled();
     }
 
     /**
@@ -8786,7 +8785,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public boolean onTouchEvent(MotionEvent event) {
             // This is done even when the View does not have focus, so that long presses can start
             // selection and tap can move cursor from this tap position.
-            if (isTextEditable()) {
+            if (isTextEditable() || mTextIsSelectable) {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
                         final int x = (int) event.getX();
