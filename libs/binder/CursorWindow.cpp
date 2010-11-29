@@ -219,7 +219,8 @@ LOG_WINDOW("follwing 'pointer' to next chunk, offset of next pointer is %d", chu
 field_slot_t * CursorWindow::getFieldSlotWithCheck(int row, int column)
 {
   if (row < 0 || row >= mHeader->numRows || column < 0 || column >= mHeader->numColumns) {
-      LOGE("Bad request for field slot %d,%d. numRows = %d, numColumns = %d", row, column, mHeader->numRows, mHeader->numColumns);
+      LOGE("Failed to read row# %d, column# from a CursorWindow which has %d rows, %d columns.",
+              row, column, mHeader->numRows, mHeader->numColumns);
       return NULL;
   }        
   row_slot_t * rowSlot = getRowSlot(row);
@@ -238,7 +239,8 @@ field_slot_t * CursorWindow::getFieldSlotWithCheck(int row, int column)
 uint32_t CursorWindow::read_field_slot(int row, int column, field_slot_t * slotOut)
 {
     if (row < 0 || row >= mHeader->numRows || column < 0 || column >= mHeader->numColumns) {
-        LOGE("Bad request for field slot %d,%d. numRows = %d, numColumns = %d", row, column, mHeader->numRows, mHeader->numColumns);
+        LOGE("Can't read row# %d, col# %d from CursorWindow. Make sure your Cursor is initialized correctly.",
+                row, column);
         return -1;
     }        
     row_slot_t * rowSlot = getRowSlot(row);
