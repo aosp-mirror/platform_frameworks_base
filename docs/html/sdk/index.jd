@@ -19,6 +19,7 @@ sdk.linux_checksum=TODO
 
 @jd:body
 
+<div class="non-preview">
 <p>Here's an overview of the steps you must follow to set up the Android SDK:</p>
 
 <ol>
@@ -32,3 +33,4 @@ installer for help with the initial setup.)</li>
 
 <p>To get started, download the appropriate package from the table above, then read the guide to <a
 href="installing.html">Installing the SDK</a>.</p>
+</div>
