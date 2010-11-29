@@ -2507,7 +2507,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                     if (pageCount > 0) {
                         dbStatsList.add(new DbStats(dbName, pageCount, db.getPageSize(),
                                 lookasideUsed, db.getCacheHitNum(), db.getCacheMissNum(),
-                                db.getCachesize(), getDataDump(db)));
+                                db.getCachesize()));
                     }
                 }
                 // if there are pooled connections, return the cache stats for them also.
@@ -2518,7 +2518,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                     for (SQLiteDatabase pDb : connPool.getConnectionList()) {
                         dbStatsList.add(new DbStats("(pooled # " + pDb.mConnectionNum + ") "
                                 + lastnode, 0, 0, 0, pDb.getCacheHitNum(),
-                                pDb.getCacheMissNum(), pDb.getCachesize(), null));
+                                pDb.getCacheMissNum(), pDb.getCachesize()));
                     }
                 }
             } catch (SQLiteException e) {
@@ -2527,44 +2527,6 @@ public class SQLiteDatabase extends SQLiteClosable {
             }
         }
         return dbStatsList;
-    }
-
-    private static ArrayList<String> getDataDump(SQLiteDatabase db) {
-        // create database dump of certain data from certain databases for debugging purposes
-        if (db.getPath().equalsIgnoreCase(
-                "/data/data/com.android.providers.downloads/databases/downloads.db")) {
-            String sql =
-                    "select * from downloads " +
-                    " where notificationpackage = 'com.google.android.gsf'" + 
-                    " or status >= 400";
-            Cursor cursor = db.rawQuery(sql, null);
-            try {
-                int count = cursor.getCount();
-                if (count == 0) {
-                    return null;
-                }
-                ArrayList<String> buff = new ArrayList<String>();
-                buff.add("  Data from downloads.db");
-                int columnCount = cursor.getColumnCount();
-                for (int i =0; i < count && cursor.moveToNext(); i++) {
-                    buff.add("    Row#" + i + "");
-                    for (int j = 0; j < columnCount; j++) {
-                        String colName = cursor.getColumnName(j);
-                        String value = cursor.getString(j);
-                        buff.add("      " + colName + " = " + value);
-                    }
-                }
-                for (String s : buff)  Log.i("vnoritag", s);
-                return buff;
-            } catch (SQLiteException e) {
-                Log.w(TAG, "exception in executing the sql: " + sql, e);
-            } finally {
-                if (cursor != null) {
-                    cursor.close();
-                }
-            }
-        }
-        return null;
     }
 
     /**
