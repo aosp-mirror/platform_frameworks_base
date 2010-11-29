@@ -314,6 +314,17 @@ public class WebView extends AbsoluteLayout
         implements ViewTreeObserver.OnGlobalFocusChangeListener,
         ViewGroup.OnHierarchyChangeListener {
 
+    private class InnerGlobalLayoutListener implements ViewTreeObserver.OnGlobalLayoutListener {
+        public void onGlobalLayout() {
+            if (isShown()) {
+                setGLRectViewport();
+            }
+        }
+    }
+
+    // The listener to capture global layout change event.
+    private InnerGlobalLayoutListener mListener = null;
+
     // if AUTO_REDRAW_HACK is true, then the CALL key will toggle redrawing
     // the screen all-the-time. Good for profiling our drawing code
     static private final boolean AUTO_REDRAW_HACK = false;
@@ -4689,6 +4700,11 @@ public class WebView extends AbsoluteLayout
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         if (hasWindowFocus()) setActive(true);
+        final ViewTreeObserver treeObserver = getViewTreeObserver();
+        if (treeObserver != null && mListener == null) {
+            mListener = new InnerGlobalLayoutListener();
+            treeObserver.addOnGlobalLayoutListener(mListener);
+        }
     }
 
     @Override
@@ -4696,6 +4712,13 @@ public class WebView extends AbsoluteLayout
         clearHelpers();
         mZoomManager.dismissZoomPicker();
         if (hasWindowFocus()) setActive(false);
+
+        final ViewTreeObserver treeObserver = getViewTreeObserver();
+        if (treeObserver != null && mListener != null) {
+            treeObserver.removeGlobalOnLayoutListener(mListener);
+            mListener = null;
+        }
+
         super.onDetachedFromWindow();
     }
 
