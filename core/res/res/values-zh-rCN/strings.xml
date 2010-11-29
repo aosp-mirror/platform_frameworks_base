@@ -632,7 +632,8 @@
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次绘错了自己的解锁图案。"\n\n"请在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地输入了密码。"\n\n"请在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地输入了 PIN。"\n\n"请在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后重试。"</string>
-    <!-- outdated translation 3351013842320127827 -->     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次绘错了自己的解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统会要求您使用自己的 Google 登录信息解锁手机。"\n\n"请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (8687762517114904651) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次绘错了自己的解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统会要求您使用自己的 Google 登录信息解锁手机。"\n\n"请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"忘记了图案？"</string>
@@ -662,6 +663,8 @@
     <string name="save_password_label" msgid="6860261758665825069">"确认"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"提示：点按两次可放大和缩小。"</string>
     <!-- outdated translation 8940110866775097494 -->     <string name="autofill_this_form" msgid="1272247532604569872">"自动填充此表单"</string>
+    <!-- no translation found for setup_autofill (8154593408885654044) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />
