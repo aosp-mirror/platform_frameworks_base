@@ -366,13 +366,59 @@ public class Canvas_Delegate {
 
 
     /*package*/ static void native_concat(int nCanvas, int nMatrix) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
+        if (canvasDelegate == null) {
+            assert false;
+            return;
+        }
+
+        Matrix_Delegate matrixDelegate = Matrix_Delegate.getDelegate(nMatrix);
+        if (matrixDelegate == null) {
+            assert false;
+            return;
+        }
+
+        // get the current top graphics2D object.
+        Graphics2D g = canvasDelegate.getGraphics2d();
+
+        // get its current matrix
+        AffineTransform currentTx = g.getTransform();
+        // get the AffineTransform of the given matrix
+        AffineTransform matrixTx = matrixDelegate.getAffineTransform();
+
+        // combine them so that the given matrix is applied after.
+        currentTx.preConcatenate(matrixTx);
+
+        // give it to the graphics2D as a new matrix replacing all previous transform
+        g.setTransform(currentTx);
     }
 
     /*package*/ static void native_setMatrix(int nCanvas, int nMatrix) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
+        if (canvasDelegate == null) {
+            assert false;
+        }
+
+        Matrix_Delegate matrixDelegate = Matrix_Delegate.getDelegate(nMatrix);
+        if (matrixDelegate == null) {
+            assert false;
+        }
+
+        // get the current top graphics2D object.
+        Graphics2D g = canvasDelegate.getGraphics2d();
+
+        // get the AffineTransform of the given matrix
+        AffineTransform matrixTx = matrixDelegate.getAffineTransform();
+
+        // give it to the graphics2D as a new matrix replacing all previous transform
+        g.setTransform(matrixTx);
+
+        // FIXME: log
+//        if (mLogger != null && matrixDelegate.hasPerspective()) {
+//            mLogger.warning("android.graphics.Canvas#setMatrix(android.graphics.Matrix) only supports affine transformations in the Layout Editor.");
+//        }
     }
 
     /*package*/ static boolean native_clipRect(int nCanvas,

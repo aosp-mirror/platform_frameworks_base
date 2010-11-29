@@ -64,7 +64,7 @@ public final class Matrix_Delegate {
             return null;
         }
 
-        return getAffineTransform(delegate);
+        return delegate.getAffineTransform();
     }
 
     public static boolean hasPerspective(Matrix m) {
@@ -74,7 +74,7 @@ public final class Matrix_Delegate {
             return false;
         }
 
-        return (delegate.mValues[6] != 0 || delegate.mValues[7] != 0 || delegate.mValues[8] != 1);
+        return delegate.hasPerspective();
     }
 
     /**
@@ -105,6 +105,18 @@ public final class Matrix_Delegate {
 
         return true;
     }
+
+    /**
+     * Returns an {@link AffineTransform} matching the matrix.
+     */
+    public AffineTransform getAffineTransform() {
+        return getAffineTransform(mValues);
+    }
+
+    public boolean hasPerspective() {
+        return (mValues[6] != 0 || mValues[7] != 0 || mValues[8] != 1);
+    }
+
 
 
     // ---- native methods ----
@@ -599,7 +611,7 @@ public final class Matrix_Delegate {
 
 
         try {
-            AffineTransform affineTransform = getAffineTransform(d);
+            AffineTransform affineTransform = d.getAffineTransform();
             AffineTransform inverseTransform = affineTransform.createInverse();
             inv_mtx.mValues[0] = (float)inverseTransform.getScaleX();
             inv_mtx.mValues[1] = (float)inverseTransform.getShearX();
@@ -712,10 +724,6 @@ public final class Matrix_Delegate {
     }
 
     // ---- Private helper methods ----
-
-    private static AffineTransform getAffineTransform(Matrix_Delegate d) {
-        return getAffineTransform(d.mValues);
-    }
 
     /*package*/ static AffineTransform getAffineTransform(float[] matrix) {
         // the AffineTransform constructor takes the value in a different order

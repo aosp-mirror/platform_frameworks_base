@@ -40,6 +40,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Main entry point of the LayoutLib Bridge.
@@ -55,6 +56,12 @@ public final class Bridge extends LayoutBridge {
             super(msg);
         }
     }
+
+    /**
+     * Lock to ensure only one rendering/inflating happens at a time.
+     * This is due to some singleton in the Android framework.
+     */
+    private final static ReentrantLock sLock = new ReentrantLock();
 
     /**
      * Maps from id to resource name/type. This is for android.R only.
@@ -160,7 +167,6 @@ public final class Bridge extends LayoutBridge {
 
         BridgeAssetManager.initSystem();
 
-
         // When DEBUG_LAYOUT is set and is not 0 or false, setup a default listener
         // on static (native) methods which prints the signature on the console and
         // throws an exception.
@@ -252,27 +258,6 @@ public final class Bridge extends LayoutBridge {
     }
 
     /**
-     * Sets a 9 patch chunk in a project cache or in the framework cache.
-     * @param value the path of the 9 patch
-     * @param ninePatch the 9 patch object
-     * @param projectKey the key of the project, or null to put the bitmap in the framework cache.
-     */
-    public static void setCached9Patch(String value, NinePatchChunk ninePatch, Object projectKey) {
-        if (projectKey != null) {
-            Map<String, SoftReference<NinePatchChunk>> map = sProject9PatchCache.get(projectKey);
-
-            if (map == null) {
-                map = new HashMap<String, SoftReference<NinePatchChunk>>();
-                sProject9PatchCache.put(projectKey, map);
-            }
-
-            map.put(value, new SoftReference<NinePatchChunk>(ninePatch));
-        } else {
-            sFramework9PatchCache.put(value, new SoftReference<NinePatchChunk>(ninePatch));
-        }
-    }
-
-    /**
      * Starts a layout session by inflating and rendering it. The method returns a
      * {@link ILayoutScene} on which further actions can be taken.
      *
@@ -306,27 +291,25 @@ public final class Bridge extends LayoutBridge {
     public BridgeLayoutScene createScene(SceneParams params) {
         try {
             SceneResult lastResult = SceneResult.SUCCESS;
-            LayoutSceneImpl scene = null;
-            synchronized (this) {
-                try {
-                    scene = new LayoutSceneImpl(params);
-
-                    scene.prepare();
+            LayoutSceneImpl scene = new LayoutSceneImpl(params);
+            try {
+                scene.prepareThread();
+                lastResult = scene.init(params.getTimeout());
+                if (lastResult == SceneResult.SUCCESS) {
                     lastResult = scene.inflate();
                     if (lastResult == SceneResult.SUCCESS) {
                         lastResult = scene.render();
                     }
-                } finally {
-                    if (scene != null) {
-                        scene.cleanup();
-                    }
                 }
+            } finally {
+                scene.release();
+                scene.cleanupThread();
             }
 
-            return new BridgeLayoutScene(this, scene, lastResult);
+            return new BridgeLayoutScene(scene, lastResult);
         } catch (Throwable t) {
             t.printStackTrace();
-            return new BridgeLayoutScene(this, null, new SceneResult("error!", t));
+            return new BridgeLayoutScene(null, new SceneResult("error!", t));
         }
     }
 
@@ -340,6 +323,13 @@ public final class Bridge extends LayoutBridge {
             sProjectBitmapCache.remove(projectKey);
             sProject9PatchCache.remove(projectKey);
         }
+    }
+
+    /**
+     * Returns the lock for the bridge
+     */
+    public static ReentrantLock getLock() {
+        return sLock;
     }
 
     /**
@@ -461,4 +451,27 @@ public final class Bridge extends LayoutBridge {
 
         return null;
     }
+
+    /**
+     * Sets a 9 patch chunk in a project cache or in the framework cache.
+     * @param value the path of the 9 patch
+     * @param ninePatch the 9 patch object
+     * @param projectKey the key of the project, or null to put the bitmap in the framework cache.
+     */
+    public static void setCached9Patch(String value, NinePatchChunk ninePatch, Object projectKey) {
+        if (projectKey != null) {
+            Map<String, SoftReference<NinePatchChunk>> map = sProject9PatchCache.get(projectKey);
+
+            if (map == null) {
+                map = new HashMap<String, SoftReference<NinePatchChunk>>();
+                sProject9PatchCache.put(projectKey, map);
+            }
+
+            map.put(value, new SoftReference<NinePatchChunk>(ninePatch));
+        } else {
+            sFramework9PatchCache.put(value, new SoftReference<NinePatchChunk>(ninePatch));
+        }
+    }
+
+
 }

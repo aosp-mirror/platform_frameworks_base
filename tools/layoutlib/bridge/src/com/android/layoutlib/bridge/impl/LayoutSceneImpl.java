@@ -16,6 +16,10 @@
 
 package com.android.layoutlib.bridge.impl;
 
+import static com.android.layoutlib.api.SceneResult.SceneStatus.ERROR_LOCK_INTERRUPTED;
+import static com.android.layoutlib.api.SceneResult.SceneStatus.ERROR_TIMEOUT;
+import static com.android.layoutlib.api.SceneResult.SceneStatus.SUCCESS;
+
 import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.api.IProjectCallback;
 import com.android.layoutlib.api.IResourceValue;
@@ -25,7 +29,9 @@ import com.android.layoutlib.api.SceneParams;
 import com.android.layoutlib.api.SceneResult;
 import com.android.layoutlib.api.ViewInfo;
 import com.android.layoutlib.api.IDensityBasedResourceValue.Density;
+import com.android.layoutlib.api.LayoutScene.IAnimationListener;
 import com.android.layoutlib.api.SceneParams.RenderingMode;
+import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeInflater;
@@ -33,6 +39,8 @@ import com.android.layoutlib.bridge.android.BridgeWindow;
 import com.android.layoutlib.bridge.android.BridgeWindowSession;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 
+import android.animation.AnimatorInflater;
+import android.animation.ObjectAnimator;
 import android.app.Fragment_Delegate;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
@@ -59,6 +67,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Class managing a layout "scene".
@@ -72,6 +82,12 @@ public class LayoutSceneImpl {
 
     private static final int DEFAULT_TITLE_BAR_HEIGHT = 25;
     private static final int DEFAULT_STATUS_BAR_HEIGHT = 25;
+
+    /**
+     * The current context being rendered. This is set through {@link #acquire(long)} and
+     * {@link #init(long)}, and unset in {@link #release()}.
+     */
+    private static BridgeContext sCurrentContext = null;
 
     private final SceneParams mParams;
 
@@ -98,22 +114,35 @@ public class LayoutSceneImpl {
 
     /**
      * Creates a layout scene with all the information coming from the layout bridge API.
-     *
-     * This also calls {@link LayoutSceneImpl#prepare()}.
      * <p>
-     * <b>THIS MUST BE INSIDE A SYNCHRONIZED BLOCK on the BRIDGE OBJECT.<b>
+     * This <b>must</b> be followed by a call to {@link LayoutSceneImpl#init()}, which act as a
+     * call to {@link LayoutSceneImpl#acquire(long)}
      *
      * @see LayoutBridge#createScene(com.android.layoutlib.api.SceneParams)
      */
     public LayoutSceneImpl(SceneParams params) {
-        // we need to make sure the Looper has been initialized for this thread.
-        // this is required for View that creates Handler objects.
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-
         // copy the params.
         mParams = new SceneParams(params);
+    }
+
+    /**
+     * Initializes and acquires the scene, creating various Android objects such as context,
+     * inflater, and parser.
+     *
+     * @param timeout the time to wait if another rendering is happening.
+     *
+     * @return whether the scene was prepared
+     *
+     * @see #acquire(long)
+     * @see #release()
+     */
+    public SceneResult init(long timeout) {
+        // acquire the lock. if the result is null, lock was just acquired, otherwise, return
+        // the result.
+        SceneResult result = acquireLock(timeout);
+        if (result != null) {
+            return result;
+        }
 
         // setup the display Metrics.
         DisplayMetrics metrics = new DisplayMetrics();
@@ -138,6 +167,9 @@ public class LayoutSceneImpl {
                 mParams.getProjectResources(), mParams.getFrameworkResources(),
                 styleParentMap, mParams.getProjectCallback(), mParams.getLogger());
 
+        // set the current rendering context
+        sCurrentContext = mContext;
+
         // make sure the Resources object references the context (and other objects) for this
         // scene
         mContext.initResources();
@@ -149,7 +181,8 @@ public class LayoutSceneImpl {
             mWindowBackground = mContext.findItemInStyle(mCurrentTheme, "windowBackground");
             mWindowBackground = mContext.resolveResValue(mWindowBackground);
 
-            mScreenOffset = getScreenOffset(mParams.getFrameworkResources(), mCurrentTheme, mContext);
+            mScreenOffset = getScreenOffset(mParams.getFrameworkResources(), mCurrentTheme,
+                    mContext);
         }
 
         // build the inflater and parser.
@@ -159,44 +192,144 @@ public class LayoutSceneImpl {
 
         mBlockParser = new BridgeXmlBlockParser(mParams.getLayoutDescription(),
                 mContext, false /* platformResourceFlag */);
+
+        return SceneResult.SUCCESS;
     }
 
     /**
-     * Prepares the scene for action.
-     * <p>
-     * <b>THIS MUST BE INSIDE A SYNCHRONIZED BLOCK on the BRIDGE OBJECT.<b>
+     * Prepares the current thread for rendering.
+     *
+     * Note that while this can be called several time, the first call to {@link #cleanupThread()}
+     * will do the clean-up, and make the thread unable to do further scene actions.
      */
-    public void prepare() {
+    public void prepareThread() {
         // we need to make sure the Looper has been initialized for this thread.
         // this is required for View that creates Handler objects.
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
+    }
+
+    /**
+     * Cleans up thread-specific data. After this, the thread cannot be used for scene actions.
+     * <p>
+     * Note that it doesn't matter how many times {@link #prepareThread()} was called, a single
+     * call to this will prevent the thread from doing further scene actions
+     */
+    public void cleanupThread() {
+        // clean up the looper
+        Looper.sThreadLocal.remove();
+    }
+
+    /**
+     * Prepares the scene for action.
+     * <p>
+     * This call is blocking if another rendering/inflating is currently happening, and will return
+     * whether the preparation worked.
+     *
+     * The preparation can fail if another rendering took too long and the timeout was elapsed.
+     *
+     * More than one call to this from the same thread will have no effect and will return
+     * {@link SceneResult#SUCCESS}.
+     *
+     * After scene actions have taken place, only one call to {@link #release()} must be
+     * done.
+     *
+     * @param timeout the time to wait if another rendering is happening.
+     *
+     * @return whether the scene was prepared
+     *
+     * @see #release()
+     *
+     * @throws IllegalStateException if {@link #init(long)} was never called.
+     */
+    public SceneResult acquire(long timeout) {
+        if (mContext == null) {
+            throw new IllegalStateException("After scene creation, #init() must be called");
+        }
+
+        // acquire the lock. if the result is null, lock was just acquired, otherwise, return
+        // the result.
+        SceneResult result = acquireLock(timeout);
+        if (result != null) {
+            return result;
+        }
 
         // make sure the Resources object references the context (and other objects) for this
         // scene
         mContext.initResources();
+        sCurrentContext = mContext;
+
+        return SUCCESS.getResult();
+    }
+
+    /**
+     * Acquire the lock so that the scene can be acted upon.
+     * <p>
+     * This returns null if the lock was just acquired, otherwise it returns
+     * {@link SceneResult#SUCCESS} if the lock already belonged to that thread, or another
+     * instance (see {@link SceneResult#getStatus()}) if an error occurred.
+     *
+     * @param timeout the time to wait if another rendering is happening.
+     * @return null if the lock was just acquire or another result depending on the state.
+     *
+     * @throws IllegalStateException if the current context is different than the one owned by
+     *      the scene.
+     */
+    private SceneResult acquireLock(long timeout) {
+        ReentrantLock lock = Bridge.getLock();
+        if (lock.isHeldByCurrentThread() == false) {
+            try {
+                boolean acquired = lock.tryLock(timeout, TimeUnit.MILLISECONDS);
+
+                if (acquired == false) {
+                    return ERROR_TIMEOUT.getResult();
+                }
+            } catch (InterruptedException e) {
+                return ERROR_LOCK_INTERRUPTED.getResult();
+            }
+        } else {
+            // This thread holds the lock already. Checks that this wasn't for a different context.
+            // If this is called by init, mContext will be null and so should sCurrentContext
+            // anyway
+            if (mContext != sCurrentContext) {
+                throw new IllegalStateException("Acquiring different scenes from same thread without releases");
+            }
+            return SUCCESS.getResult();
+        }
+
+        return null;
     }
 
     /**
      * Cleans up the scene after an action.
-     * <p>
-     * <b>THIS MUST BE INSIDE A SYNCHRONIZED BLOCK on the BRIDGE OBJECT.<b>
      */
-    public void cleanup() {
-        // clean up the looper
-        Looper.sThreadLocal.remove();
+    public void release() {
+        ReentrantLock lock = Bridge.getLock();
 
-        // Make sure to remove static references, otherwise we could not unload the lib
-        mContext.disposeResources();
+        // with the use of finally blocks, it is possible to find ourself calling this
+        // without a successful call to prepareScene. This test makes sure that unlock() will
+        // not throw IllegalMonitorStateException.
+        if (lock.isHeldByCurrentThread()) {
+            // Make sure to remove static references, otherwise we could not unload the lib
+            mContext.disposeResources();
+            sCurrentContext = null;
+
+            lock.unlock();
+        }
     }
 
     /**
      * Inflates the layout.
      * <p>
-     * <b>THIS MUST BE INSIDE A SYNCHRONIZED BLOCK on the BRIDGE OBJECT.<b>
+     * {@link #acquire(long)} must have been called before this.
+     *
+     * @throws IllegalStateException if the current context is different than the one owned by
+     *      the scene, or if {@link #init(long)} was not called.
      */
     public SceneResult inflate() {
+        checkLock();
+
         try {
 
             mViewRoot = new FrameLayout(mContext);
@@ -247,10 +380,16 @@ public class LayoutSceneImpl {
     /**
      * Renders the scene.
      * <p>
-     * <b>THIS MUST BE INSIDE A SYNCHRONIZED BLOCK on the BRIDGE OBJECT.<b>
+     * {@link #acquire(long)} must have been called before this.
+     *
+     * @throws IllegalStateException if the current context is different than the one owned by
+     *      the scene, or if {@link #acquire(long)} was not called.
      */
     public SceneResult render() {
+        checkLock();
+
         try {
+            long current = System.currentTimeMillis();
             if (mViewRoot == null) {
                 return new SceneResult("Layout has not been inflated!");
             }
@@ -329,6 +468,8 @@ public class LayoutSceneImpl {
 
             mViewInfo = visit(((ViewGroup)mViewRoot).getChildAt(0), mContext);
 
+            System.out.println("rendering (ms): " + (System.currentTimeMillis() - current));
+
             // success!
             return SceneResult.SUCCESS;
         } catch (Throwable e) {
@@ -344,6 +485,71 @@ public class LayoutSceneImpl {
             return new SceneResult("Unknown error during inflation.", t);
         }
     }
+
+    /**
+     * Animate an object
+     * <p>
+     * {@link #acquire(long)} must have been called before this.
+     *
+     * @throws IllegalStateException if the current context is different than the one owned by
+     *      the scene, or if {@link #acquire(long)} was not called.
+     */
+    public SceneResult animate(Object targetObject, String animationName,
+            boolean isFrameworkAnimation, IAnimationListener listener) {
+        checkLock();
+
+        // find the animation file.
+        IResourceValue animationResource = null;
+        int animationId = 0;
+        if (isFrameworkAnimation) {
+            animationResource = mContext.getFrameworkResource("anim", animationName);
+            if (animationResource != null) {
+                animationId = Bridge.getResourceValue("anim", animationName);
+            }
+        } else {
+            animationResource = mContext.getProjectResource("anim", animationName);
+            if (animationResource != null) {
+                animationId = mContext.getProjectCallback().getResourceValue("anim", animationName);
+            }
+        }
+
+        if (animationResource != null) {
+            try {
+                ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(
+                        mContext, animationId);
+                if (anim != null) {
+                    anim.setTarget(targetObject);
+
+                    new AnimationThread(this, anim, listener).start();
+
+                    return SceneResult.SUCCESS;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new SceneResult("", e);
+            }
+        }
+
+        return new SceneResult("Failed to find animation");
+    }
+
+    /**
+     * Checks that the lock is owned by the current thread and that the current context is the one
+     * from this scene.
+     *
+     * @throws IllegalStateException if the current context is different than the one owned by
+     *      the scene, or if {@link #acquire(long)} was not called.
+     */
+    private void checkLock() {
+        ReentrantLock lock = Bridge.getLock();
+        if (lock.isHeldByCurrentThread() == false) {
+            throw new IllegalStateException("scene must be acquired first. see #acquire(long)");
+        }
+        if (sCurrentContext != mContext) {
+            throw new IllegalStateException("Thread acquired a scene but is rendering a different one");
+        }
+    }
+
 
     /**
      * Compute style information from the given list of style for the project and framework.
