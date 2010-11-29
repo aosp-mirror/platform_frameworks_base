@@ -580,12 +580,12 @@ public class TabletStatusBar extends StatusBar {
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
                 Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
                 // synchronize with current shadow state
-                mShadowController.hideElement(mNotificationArea);
+                mShadowController.hideElement(mNotificationIconArea);
                 mTicker.halt();
             } else {
                 Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: no");
                 // synchronize with current shadow state
-                mShadowController.showElement(mNotificationArea);
+                mShadowController.showElement(mNotificationIconArea);
             }
         } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
