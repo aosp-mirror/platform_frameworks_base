@@ -7487,8 +7487,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            final boolean screenAnimation = mScreenRotationAnimation != null
+                    && mScreenRotationAnimation.isAnimating();
             if (selfTransformation || attachedTransformation != null
-                    || appTransformation != null) {
+                    || appTransformation != null || screenAnimation) {
                 // cache often used attributes locally
                 final Rect frame = mFrame;
                 final float tmpFloats[] = mTmpFloats;
@@ -7506,6 +7508,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (appTransformation != null) {
                     tmpMatrix.postConcat(appTransformation.getMatrix());
                 }
+                if (screenAnimation) {
+                    tmpMatrix.postConcat(
+                            mScreenRotationAnimation.getEnterTransformation().getMatrix());
+                }
 
                 // "convert" it into SurfaceFlinger's format
                 // (a 2x2 matrix + an offset)
@@ -7515,8 +7521,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 tmpMatrix.getValues(tmpFloats);
                 mDsDx = tmpFloats[Matrix.MSCALE_X];
-                mDtDx = tmpFloats[Matrix.MSKEW_X];
-                mDsDy = tmpFloats[Matrix.MSKEW_Y];
+                mDtDx = tmpFloats[Matrix.MSKEW_Y];
+                mDsDy = tmpFloats[Matrix.MSKEW_X];
                 mDtDy = tmpFloats[Matrix.MSCALE_Y];
                 int x = (int)tmpFloats[Matrix.MTRANS_X] + mXOffset;
                 int y = (int)tmpFloats[Matrix.MTRANS_Y] + mYOffset;
@@ -7543,6 +7549,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     if (appTransformation != null) {
                         mShownAlpha *= appTransformation.getAlpha();
+                    }
+                    if (screenAnimation) {
+                        mShownAlpha *=
+                            mScreenRotationAnimation.getEnterTransformation().getAlpha();
                     }
                 } else {
                     //Slog.i(TAG, "Not applying alpha transform");
@@ -9397,6 +9407,16 @@ public class WindowManagerService extends IWindowManager.Stub
                         
                 animating = tokensAnimating;
 
+                if (mScreenRotationAnimation != null) {
+                    if (mScreenRotationAnimation.isAnimating()) {
+                        if (mScreenRotationAnimation.stepAnimation(currentTime)) {
+                            animating = true;
+                        } else {
+                            mScreenRotationAnimation = null;
+                        }
+                    }
+                }
+
                 boolean tokenMayBeDrawn = false;
                 boolean wallpaperMayChange = false;
                 boolean forceHiding = false;
@@ -10841,8 +10861,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (CUSTOM_SCREEN_ROTATION) {
+            if (mScreenRotationAnimation != null && mScreenRotationAnimation.isAnimating()) {
+                mScreenRotationAnimation.kill();
+                mScreenRotationAnimation = null;
+            }
             if (mScreenRotationAnimation == null) {
-                mScreenRotationAnimation = new ScreenRotationAnimation(mDisplay, mFxSession);
+                mScreenRotationAnimation = new ScreenRotationAnimation(mContext,
+                        mDisplay, mFxSession);
             }
         } else {
             Surface.freezeDisplay(0);
@@ -10866,8 +10891,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (CUSTOM_SCREEN_ROTATION) {
             if (mScreenRotationAnimation != null) {
-                mScreenRotationAnimation.dismiss();
-                mScreenRotationAnimation = null;
+                if (mScreenRotationAnimation.dismiss(MAX_ANIMATION_DURATION,
+                        mTransitionAnimationScale)) {
+                    requestAnimationLocked(0);
+                } else {
+                    mScreenRotationAnimation = null;
+                }
             }
         } else {
             Surface.unfreezeDisplay(0);
