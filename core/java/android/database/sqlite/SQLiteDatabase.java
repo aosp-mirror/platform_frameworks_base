@@ -1122,11 +1122,11 @@ public class SQLiteDatabase extends SQLiteClosable {
                 Map.Entry<SQLiteClosable, Object> entry = iter.next();
                 SQLiteClosable program = entry.getKey();
                 if (program != null && program instanceof SQLiteProgram) {
-                        SQLiteCompiledSql compiledSql = ((SQLiteProgram)program).mCompiledSql;
-                        if (compiledSql.nStatement == stmtId) {
-                            msg = compiledSql.toString();
-                            found = true;
-                        }
+                    SQLiteCompiledSql compiledSql = ((SQLiteProgram)program).mCompiledSql;
+                    if (compiledSql.nStatement == stmtId) {
+                        msg = compiledSql.toString();
+                        found = true;
+                    }
                 }
             }
             if (!found) {
@@ -1140,8 +1140,9 @@ public class SQLiteDatabase extends SQLiteClosable {
                 }
             } else {
                 // the statement is not yet closed. most probably programming error in the app.
-                Log.w(TAG, "dbclose failed due to un-close()d SQL statements: " + msg);
-                throw e;
+                throw new SQLiteUnfinalizedObjectsException(
+                        "close() on database: " + getPath() +
+                        " failed due to un-close()d SQL statements: " + msg);
             }
         }
     }
