@@ -38,21 +38,32 @@ import java.io.IOException;
  * permission.
  */
 public final class IsoDep extends BasicTagTechnology {
+    /** @hide */
+    public static final String EXTRA_ATTRIB = "attrib";
+    /** @hide */
+    public static final String EXTRA_HIST_BYTES = "histbytes";
+
+    private byte[] mAttrib = null;
+    private byte[] mHistBytes = null;
 
     public IsoDep(NfcAdapter adapter, Tag tag, Bundle extras)
             throws RemoteException {
         super(adapter, tag, TagTechnology.ISO_DEP);
+        if (extras != null) {
+            mAttrib = extras.getByteArray(EXTRA_ATTRIB);
+            mHistBytes = extras.getByteArray(EXTRA_HIST_BYTES);
+        }
     }
 
     /**
      * 3A only
      */
-    public byte[] getHistoricalBytes() { throw new UnsupportedOperationException(); }
+    public byte[] getHistoricalBytes() { return mHistBytes; }
 
     /**
      * 3B only
      */
-    public byte[] getAttrib() { throw new UnsupportedOperationException(); }
+    public byte[] getAttrib() { return mAttrib; }
 
     /**
      * Attempts to select the given application on the tag. Note that this only works
