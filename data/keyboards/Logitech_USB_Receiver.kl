@@ -12,7 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-key 1     BACK
+#
+# Logitech Revue keyboard
+#
+# Notes:
+# - The GRAVE key is emulated by the keyboard.
+#     ALT + LEFT_BRACKET produces GRAVE.
+#     ALT + RIGHT_BRACKET produces SHIFT + GRAVE.
+# - FORWARD_DEL is produced by fn + BACKSPACE
+# - PAGE_UP / PAGE_DOWN is produced by fn + CHANNEL_UP / CHANNEL_DOWN
+# - The AVR / STB / TV power and input buttons seem to be non-functional
+#   as well as several of the other fn buttons and the PIP button?
+
+key 1     ESCAPE
 key 2     1
 key 3     2
 key 4     3
@@ -66,7 +78,7 @@ key 51    COMMA
 key 52    PERIOD
 key 53    SLASH
 key 54    SHIFT_RIGHT
-key 56    ALT_LEFT
+key 56    ALT_RIGHT
 key 57    SPACE
 key 58    CAPS_LOCK
 key 59    F1
@@ -81,21 +93,41 @@ key 67    F9
 key 68    F10
 key 87    F11
 key 88    F12
+key 96    DPAD_CENTER
 key 97    CTRL_RIGHT
-key 102   HOME
+key 102   MOVE_HOME
 key 103   DPAD_UP
+key 104   PAGE_UP
 key 105   DPAD_LEFT
 key 106   DPAD_RIGHT
 key 107   MOVE_END
 key 108   DPAD_DOWN
+key 109   PAGE_DOWN
+key 110   NUMPAD_ENTER
 key 111   FORWARD_DEL
-key 113   VOLUME_MUTE
+key 113   VALUME_MUTE
 key 114   VOLUME_DOWN
 key 115   VOLUME_UP
-key 125   MENU
-key 127   SEARCH
+key 119   MEDIA_PAUSE
+key 125   SEARCH
+key 127   MENU
+key 156   BOOKMARK
+key 158   BACK
 key 163   MEDIA_NEXT
-key 164   MEDIA_PLAY_PAUSE
 key 165   MEDIA_PREVIOUS
 key 166   MEDIA_STOP
-# key 226  tbd reserved key
+key 167   MEDIA_RECORD
+key 168   MEDIA_REWIND
+key 172   HOME
+key 207   MEDIA_PLAY
+key 208   MEDIA_FAST_FORWARD
+# key 288  left mouse button
+# key 289  right mouse button (fn + button)
+key 362   GUIDE
+key 366   DVR
+key 377   TV
+key 402   CHANNEL_UP
+key 403   CHANNEL_DOWN
+key 418   ZOOM_IN
+key 419   ZOOM_OUT
+
