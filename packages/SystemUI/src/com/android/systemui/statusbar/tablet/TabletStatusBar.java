@@ -184,7 +184,7 @@ public class TabletStatusBar extends StatusBar {
         mNotificationPeekRow = (ViewGroup) mNotificationPeekWindow.findViewById(R.id.content);
         mNotificationPeekWindow.setVisibility(View.GONE);
         mNotificationPeekWindow.setOnTouchListener(
-                new TouchOutsideListener(MSG_CLOSE_NOTIFICATION_PANEL, mNotificationPeekWindow));
+                new TouchOutsideListener(MSG_CLOSE_NOTIFICATION_PEEK, mNotificationPeekWindow));
         mNotificationPeekScrubRight = new LayoutTransition();
         mNotificationPeekScrubRight.setAnimator(LayoutTransition.APPEARING, 
                 ObjectAnimator.ofInt(null, "left", -512, 0));
@@ -832,8 +832,7 @@ public class TabletStatusBar extends StatusBar {
                 case MotionEvent.ACTION_MOVE:
                     // peek and switch icons if necessary
                     int numIcons = mIconLayout.getChildCount();
-                    int peekIndex = 
-                            (int)((float)event.getX() * numIcons / mIconLayout.getWidth());
+                    int peekIndex = (int)((float)event.getX() * numIcons / mIconLayout.getWidth());
                     if (peekIndex > numIcons - 1) peekIndex = numIcons - 1;
                     else if (peekIndex < 0) peekIndex = 0;
 
@@ -845,8 +844,7 @@ public class TabletStatusBar extends StatusBar {
                         mHandler.removeMessages(MSG_OPEN_NOTIFICATION_PEEK);
 
                         // no delay if we're scrubbing left-right
-                        mHandler.sendMessageDelayed(peekMsg,
-                                peeking ? 0 : mNotificationPeekTapDuration);
+                        mHandler.sendMessage(peekMsg);
                     }
 
                     // check for fling
@@ -868,7 +866,7 @@ public class TabletStatusBar extends StatusBar {
                 case MotionEvent.ACTION_CANCEL:
                     mHandler.removeMessages(MSG_OPEN_NOTIFICATION_PEEK);
                     if (peeking) {
-                        mHandler.sendEmptyMessageDelayed(MSG_CLOSE_NOTIFICATION_PEEK, 250);
+                        mHandler.sendEmptyMessageDelayed(MSG_CLOSE_NOTIFICATION_PEEK, 5000);
                     }
                     mVT.recycle();
                     mVT = null;
