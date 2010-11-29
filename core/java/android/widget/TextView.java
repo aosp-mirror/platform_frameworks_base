@@ -7024,8 +7024,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     getInsertionController().show();
                 }
             }
-        } else if (hasSelection() && hasSelectionController()) {
-            getSelectionController().show();
         }
     }
 
