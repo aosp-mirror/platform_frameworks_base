@@ -1296,7 +1296,7 @@ static jint android_content_AssetManager_getArraySize(JNIEnv* env, jobject clazz
 {
     AssetManager* am = assetManagerForJavaObject(env, clazz);
     if (am == NULL) {
-        return NULL;
+        return 0;
     }
     const ResTable& res(am->getResources());
     
