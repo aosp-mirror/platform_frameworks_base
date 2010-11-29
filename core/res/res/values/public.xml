@@ -1382,6 +1382,16 @@
   <public type="attr" name="baseline" />
   <public type="attr" name="homeLayout" />
   <public type="attr" name="opacity" />
+  <public type="attr" name="alpha"/>
+  <public type="attr" name="transformPivotX"/>
+  <public type="attr" name="transformPivotY"/>
+  <public type="attr" name="translationX"/>
+  <public type="attr" name="translationY"/>
+  <public type="attr" name="scaleX"/>
+  <public type="attr" name="scaleY"/>
+  <public type="attr" name="rotation"/>
+  <public type="attr" name="rotationX"/>
+  <public type="attr" name="rotationY"/>
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />

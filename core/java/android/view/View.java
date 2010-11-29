@@ -595,6 +595,11 @@ import java.util.WeakHashMap;
  * @attr ref android.R.styleable#View_paddingRight
  * @attr ref android.R.styleable#View_paddingTop
  * @attr ref android.R.styleable#View_saveEnabled
+ * @attr ref android.R.styleable#View_rotation
+ * @attr ref android.R.styleable#View_rotationX
+ * @attr ref android.R.styleable#View_rotationY
+ * @attr ref android.R.styleable#View_scaleX
+ * @attr ref android.R.styleable#View_scaleY
  * @attr ref android.R.styleable#View_scrollX
  * @attr ref android.R.styleable#View_scrollY
  * @attr ref android.R.styleable#View_scrollbarSize
@@ -610,6 +615,10 @@ import java.util.WeakHashMap;
  * @attr ref android.R.styleable#View_scrollbarAlwaysDrawVerticalTrack
  * @attr ref android.R.styleable#View_soundEffectsEnabled
  * @attr ref android.R.styleable#View_tag
+ * @attr ref android.R.styleable#View_transformPivotX
+ * @attr ref android.R.styleable#View_transformPivotY
+ * @attr ref android.R.styleable#View_translationX
+ * @attr ref android.R.styleable#View_translationY
  * @attr ref android.R.styleable#View_visibility
  *
  * @see android.view.ViewGroup
@@ -2155,6 +2164,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         int x = 0;
         int y = 0;
 
+        float tx = 0;
+        float ty = 0;
+        float rotation = 0;
+        float rotationX = 0;
+        float rotationY = 0;
+        float sx = 1f;
+        float sy = 1f;
+        boolean transformSet = false;
+
         int scrollbarStyle = SCROLLBARS_INSIDE_OVERLAY;
 
         int overScrollMode = mOverScrollMode;
@@ -2185,6 +2203,43 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     break;
                 case com.android.internal.R.styleable.View_scrollY:
                     y = a.getDimensionPixelOffset(attr, 0);
+                    break;
+                case com.android.internal.R.styleable.View_alpha:
+                    setAlpha(a.getFloat(attr, 1f));
+                    break;
+                case com.android.internal.R.styleable.View_transformPivotX:
+                    setPivotX(a.getDimensionPixelOffset(attr, 0));
+                    break;
+                case com.android.internal.R.styleable.View_transformPivotY:
+                    setPivotY(a.getDimensionPixelOffset(attr, 0));
+                    break;
+                case com.android.internal.R.styleable.View_translationX:
+                    tx = a.getDimensionPixelOffset(attr, 0);
+                    transformSet = true;
+                    break;
+                case com.android.internal.R.styleable.View_translationY:
+                    ty = a.getDimensionPixelOffset(attr, 0);
+                    transformSet = true;
+                    break;
+                case com.android.internal.R.styleable.View_rotation:
+                    rotation = a.getFloat(attr, 0);
+                    transformSet = true;
+                    break;
+                case com.android.internal.R.styleable.View_rotationX:
+                    rotationX = a.getFloat(attr, 0);
+                    transformSet = true;
+                    break;
+                case com.android.internal.R.styleable.View_rotationY:
+                    rotationY = a.getFloat(attr, 0);
+                    transformSet = true;
+                    break;
+                case com.android.internal.R.styleable.View_scaleX:
+                    sx = a.getFloat(attr, 1f);
+                    transformSet = true;
+                    break;
+                case com.android.internal.R.styleable.View_scaleY:
+                    sy = a.getFloat(attr, 1f);
+                    transformSet = true;
                     break;
                 case com.android.internal.R.styleable.View_id:
                     mID = a.getResourceId(attr, NO_ID);
@@ -2402,6 +2457,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         if (x != 0 || y != 0) {
             scrollTo(x, y);
+        }
+
+        if (transformSet) {
+            setTranslationX(tx);
+            setTranslationY(ty);
+            setRotation(rotation);
+            setRotationX(rotationX);
+            setRotationY(rotationY);
+            setScaleX(sx);
+            setScaleY(sy);
         }
 
         if (!setScrollContainer && (viewFlagValues&SCROLLBARS_VERTICAL) != 0) {
@@ -5286,6 +5351,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param rotation The degrees of rotation.
      * @see #getPivotX()
      * @see #getPivotY()
+     *
+     * @attr ref android.R.styleable#View_rotation
      */
     public void setRotation(float rotation) {
         if (mRotation != rotation) {
@@ -5317,6 +5384,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param rotationY The degrees of Y rotation.
      * @see #getPivotX()
      * @see #getPivotY()
+     *
+     * @attr ref android.R.styleable#View_rotationY
      */
     public void setRotationY(float rotationY) {
         if (mRotationY != rotationY) {
@@ -5348,6 +5417,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param rotationX The degrees of X rotation.
      * @see #getPivotX()
      * @see #getPivotY()
+     *
+     * @attr ref android.R.styleable#View_rotationX
      */
     public void setRotationX(float rotationX) {
         if (mRotationX != rotationX) {
@@ -5381,6 +5452,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param scaleX The scaling factor.
      * @see #getPivotX()
      * @see #getPivotY()
+     *
+     * @attr ref android.R.styleable#View_scaleX
      */
     public void setScaleX(float scaleX) {
         if (mScaleX != scaleX) {
@@ -5414,6 +5487,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param scaleY The scaling factor.
      * @see #getPivotX()
      * @see #getPivotY()
+     *
+     * @attr ref android.R.styleable#View_scaleY
      */
     public void setScaleY(float scaleY) {
         if (mScaleY != scaleY) {
@@ -5452,6 +5527,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #getScaleX()
      * @see #getScaleY()
      * @see #getPivotY()
+     *
+     * @attr ref android.R.styleable#View_transformPivotX
      */
     public void setPivotX(float pivotX) {
         mPrivateFlags |= PIVOT_EXPLICITLY_SET;
@@ -5490,6 +5567,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #getScaleX()
      * @see #getScaleY()
      * @see #getPivotY()
+     *
+     * @attr ref android.R.styleable#View_transformPivotY
      */
     public void setPivotY(float pivotY) {
         mPrivateFlags |= PIVOT_EXPLICITLY_SET;
@@ -5519,6 +5598,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * completely transparent and 1 means the view is completely opaque.
      *
      * @param alpha The opacity of the view.
+     *
+     * @attr ref android.R.styleable#View_alpha
      */
     public void setAlpha(float alpha) {
         mAlpha = alpha;
@@ -5810,6 +5891,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @param translationX The horizontal position of this view relative to its left position,
      * in pixels.
+     *
+     * @attr ref android.R.styleable#View_translationX
      */
     public void setTranslationX(float translationX) {
         if (mTranslationX != translationX) {
@@ -5841,6 +5924,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @param translationY The vertical position of this view relative to its top position,
      * in pixels.
+     *
+     * @attr ref android.R.styleable#View_translationY
      */
     public void setTranslationY(float translationY) {
         if (mTranslationY != translationY) {

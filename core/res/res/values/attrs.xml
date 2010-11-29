@@ -1674,6 +1674,42 @@
             <!-- Never show over-scroll effects. -->
             <enum name="never" value="2" />
         </attr>
+
+        <!-- alpha property of the view, as a value between 0 (completely transparent) and 1
+             (completely opaque). -->
+        <attr name="alpha" format="float" />
+
+        <!-- translation in x of the view. This value is added post-layout to the left
+             property of the view, which is set by its layout. -->
+        <attr name="translationX" format="dimension" />
+
+        <!-- translation in y of the view. This value is added post-layout to the left
+             property of the view, which is set by its layout. -->
+        <attr name="translationY" format="dimension" />
+
+        <!-- x location of the pivot point around which the view will rotate and scale.
+             This xml attribute sets the pivotX property of the View. -->
+        <attr name="transformPivotX" format="dimension" />
+
+        <!-- y location of the pivot point around which the view will rotate and scale.
+             This xml attribute sets the pivotY property of the View. -->
+        <attr name="transformPivotY" format="dimension" />
+
+        <!-- rotation of the view, in degrees. -->
+        <attr name="rotation" format="float" />
+
+        <!-- rotation of the view around the x axis, in degrees. -->
+        <attr name="rotationX" format="float" />
+
+        <!-- rotation of the view around the y axis, in degrees. -->
+        <attr name="rotationY" format="float" />
+
+        <!-- scale of the view in the x direction. -->
+        <attr name="scaleX" format="float" />
+
+        <!-- scale of the view in the y direction. -->
+        <attr name="scaleY" format="float" />
+
     </declare-styleable>
 
     <!-- Attributes that can be used with a {@link android.view.ViewGroup} or any
