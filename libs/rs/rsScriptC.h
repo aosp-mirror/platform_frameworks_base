@@ -21,7 +21,9 @@
 
 #include "RenderScriptEnv.h"
 
-struct BCCscript;
+namespace bcc {
+class BCCscript;
+}
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -46,7 +48,7 @@ public:
 
     Program_t mProgram;
 
-    BCCscript*    mBccScript;
+    bcc::BCCscript* mBccScript;
 
     const Allocation *ptrToAllocation(const void *) const;
 
