@@ -53,6 +53,13 @@ public final class MediaStore {
 
     private static final String CONTENT_AUTHORITY_SLASH = "content://" + AUTHORITY + "/";
 
+   /**
+     * Broadcast Action:  A broadcast to indicate the end of an MTP session with the host.
+     * This broadcast is only sent if MTP activity has modified the media database during the
+     * most recent MTP session.
+     */
+    public static final String ACTION_MTP_SESSION_END = "android.provider.action.MTP_SESSION_END";
+
     /**
      * Activity Action: Launch a music player.
      * The activity should be able to play, browse, or manipulate music files stored on the device.

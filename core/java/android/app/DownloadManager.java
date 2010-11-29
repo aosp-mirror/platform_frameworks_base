@@ -841,6 +841,12 @@ public class DownloadManager {
         }
         ContentValues values = new ContentValues();
         values.put(Downloads.Impl.COLUMN_DELETED, 1);
+        // if only one id is passed in, then include it in the uri itself.
+        // this will eliminate a full database scan in the download service.
+        if (ids.length == 1) {
+            return mResolver.update(ContentUris.withAppendedId(mBaseUri, ids[0]), values,
+                    null, null);
+        } 
         return mResolver.update(mBaseUri, values, getWhereClauseForIds(ids),
                 getWhereArgsForIds(ids));
     }

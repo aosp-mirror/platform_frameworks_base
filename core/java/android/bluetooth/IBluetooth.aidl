@@ -35,6 +35,7 @@ interface IBluetooth
     String getAddress();
     String getName();
     boolean setName(in String name);
+    ParcelUuid[] getUuids();
 
     int getScanMode();
     boolean setScanMode(int mode, int duration);

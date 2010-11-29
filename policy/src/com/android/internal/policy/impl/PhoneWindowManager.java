@@ -103,6 +103,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
@@ -139,36 +140,41 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_POWER_GLOBAL_ACTIONS = 1;
     static final int LONG_PRESS_POWER_SHUT_OFF = 2;
     
+    static final int LONG_PRESS_HOME_NOTHING = 0;
+    static final int LONG_PRESS_HOME_RECENT_DIALOG = 1;
+    static final int LONG_PRESS_HOME_RECENT_ACTIVITY = 2;
+
     // wallpaper is at the bottom, though the window manager may move it.
     static final int WALLPAPER_LAYER = 2;
     static final int APPLICATION_LAYER = 2;
     static final int PHONE_LAYER = 3;
     static final int SEARCH_BAR_LAYER = 4;
-    static final int STATUS_BAR_PANEL_LAYER = 5;
+    static final int STATUS_BAR_SUB_PANEL_LAYER = 5;
     static final int SYSTEM_DIALOG_LAYER = 6;
     // toasts and the plugged-in battery thing
     static final int TOAST_LAYER = 7;
     static final int STATUS_BAR_LAYER = 8;
+    static final int STATUS_BAR_PANEL_LAYER = 9;
     // SIM errors and unlock.  Not sure if this really should be in a high layer.
-    static final int PRIORITY_PHONE_LAYER = 9;
+    static final int PRIORITY_PHONE_LAYER = 10;
     // like the ANR / app crashed dialogs
-    static final int SYSTEM_ALERT_LAYER = 10;
+    static final int SYSTEM_ALERT_LAYER = 11;
     // system-level error dialogs
-    static final int SYSTEM_ERROR_LAYER = 11;
+    static final int SYSTEM_ERROR_LAYER = 12;
     // on-screen keyboards and other such input method user interfaces go here.
-    static final int INPUT_METHOD_LAYER = 12;
+    static final int INPUT_METHOD_LAYER = 13;
     // on-screen keyboards and other such input method user interfaces go here.
-    static final int INPUT_METHOD_DIALOG_LAYER = 13;
+    static final int INPUT_METHOD_DIALOG_LAYER = 14;
     // the keyguard; nothing on top of these can take focus, since they are
     // responsible for power management when displayed.
-    static final int KEYGUARD_LAYER = 14;
-    static final int KEYGUARD_DIALOG_LAYER = 15;
+    static final int KEYGUARD_LAYER = 15;
+    static final int KEYGUARD_DIALOG_LAYER = 16;
     // the drag layer: input for drag-and-drop is associated with this window,
     // which sits above all other focusable windows
-    static final int DRAG_LAYER = 16;
+    static final int DRAG_LAYER = 17;
     // things in here CAN NOT take focus, but are shown on top of everything else.
-    static final int SYSTEM_OVERLAY_LAYER = 17;
-    static final int SECURE_SYSTEM_OVERLAY_LAYER = 18;
+    static final int SYSTEM_OVERLAY_LAYER = 18;
+    static final int SECURE_SYSTEM_OVERLAY_LAYER = 19;
 
     static final int APPLICATION_MEDIA_SUBLAYER = -2;
     static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
@@ -235,6 +241,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mUserRotationMode = WindowManagerPolicy.USER_ROTATION_FREE;
     int mUserRotation = Surface.ROTATION_0;
 
+    boolean mAllowAllRotations;
     boolean mCarDockEnablesAccelerometer;
     boolean mDeskDockEnablesAccelerometer;
     int mLidKeyboardAccessibility;
@@ -270,10 +277,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
     
+    // The current size of the screen; really; (ir)regardless of whether the status
+    // bar can be hidden or not
+    int mUnrestrictedScreenLeft, mUnrestrictedScreenTop;
+    int mUnrestrictedScreenWidth, mUnrestrictedScreenHeight;
     // The current size of the screen; these may be different than (0,0)-(dw,dh)
     // if the status bar can't be hidden; in that case it effectively carves out
     // that area of the display from all other windows.
-    int mScreenLeft, mScreenTop, mScreenWidth, mScreenHeight;
+    int mRestrictedScreenLeft, mRestrictedScreenTop;
+    int mRestrictedScreenWidth, mRestrictedScreenHeight;
     // During layout, the current screen borders with all outer decoration
     // (status bar, input method dock) accounted for.
     int mCurLeft, mCurTop, mCurRight, mCurBottom;
@@ -327,8 +339,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Nothing to see here, move along...
     int mFancyRotationAnimation;
     
-    // Enable 3D recents based on config settings.
-    private Boolean mUse3dRecents;
+    // What we do when the user long presses on home
+    private int mLongPressOnHomeBehavior = -1;
 
     ShortcutManager mShortcutManager;
     PowerManager.WakeLock mBroadcastWakeLock;
@@ -565,8 +577,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
              * the user lets go of the home key
              */
             mHomePressed = false;
-            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
-            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
             showRecentAppsDialog();
         }
     };
@@ -576,16 +586,31 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     void showRecentAppsDialog() {
         // We can't initialize this in init() since the configuration hasn't been loaded yet.
-        if (mUse3dRecents == null) {
-            mUse3dRecents = mContext.getResources().getBoolean(R.bool.config_enableRecentApps3D);
+        if (mLongPressOnHomeBehavior < 0) {
+            mLongPressOnHomeBehavior
+                    = mContext.getResources().getInteger(R.integer.config_longPressOnHomeBehavior);
+            if (mLongPressOnHomeBehavior < LONG_PRESS_HOME_NOTHING ||
+                    mLongPressOnHomeBehavior > LONG_PRESS_HOME_RECENT_ACTIVITY) {
+                mLongPressOnHomeBehavior = LONG_PRESS_HOME_NOTHING;
+            }
+        }
+
+        if (mLongPressOnHomeBehavior != LONG_PRESS_HOME_NOTHING) {
+            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
         }
         
-        // Use 3d Recents dialog
-        if (mUse3dRecents) {
+        if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_DIALOG) {
+            // Fallback to dialog if we fail to launch the above.
+            if (mRecentAppsDialog == null) {
+                mRecentAppsDialog = new RecentApplicationsDialog(mContext);
+            }
+            mRecentAppsDialog.show();
+        } else if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_ACTIVITY) {
             try {
                 Intent intent = new Intent();
                 intent.setClassName("com.android.systemui", 
-                        "com.android.systemui.statusbar.RecentApplicationsActivity");
+                        "com.android.systemui.recent.RecentApplicationsActivity");
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK 
                         | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
                 mContext.startActivity(intent);
@@ -594,12 +619,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Log.e(TAG, "Failed to launch RecentAppsIntent", e);
             }
         }
-
-        // Fallback to dialog if we fail to launch the above.
-        if (mRecentAppsDialog == null) {
-            mRecentAppsDialog = new RecentApplicationsDialog(mContext);
-        }
-        mRecentAppsDialog.show();
     }
     
     /** {@inheritDoc} */
@@ -638,6 +657,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_carDockRotation);
         mDeskDockRotation = readRotation(
                 com.android.internal.R.integer.config_deskDockRotation);
+        mAllowAllRotations = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowAllRotations);
         mCarDockEnablesAccelerometer = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_carDockEnablesAccelerometer);
         mDeskDockEnablesAccelerometer = mContext.getResources().getBoolean(
@@ -894,6 +915,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return STATUS_BAR_LAYER;
         case TYPE_STATUS_BAR_PANEL:
             return STATUS_BAR_PANEL_LAYER;
+        case TYPE_STATUS_BAR_SUB_PANEL:
+            return STATUS_BAR_SUB_PANEL_LAYER;
         case TYPE_SYSTEM_DIALOG:
             return SYSTEM_DIALOG_LAYER;
         case TYPE_SEARCH_BAR:
@@ -1109,6 +1132,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
                 break;
             case TYPE_STATUS_BAR_PANEL:
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.STATUS_BAR_SERVICE,
+                        "PhoneWindowManager");
+                mStatusBarPanels.add(win);
+                break;
+            case TYPE_STATUS_BAR_SUB_PANEL:
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.STATUS_BAR_SERVICE,
                         "PhoneWindowManager");
@@ -1389,8 +1418,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if ((fl & (FLAG_LAYOUT_IN_SCREEN | FLAG_FULLSCREEN | FLAG_LAYOUT_INSET_DECOR))
                 == (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR)) {
             contentInset.set(mCurLeft, mCurTop,
-                    (mScreenLeft+mScreenWidth) - mCurRight,
-                    (mScreenTop+mScreenHeight) - mCurBottom);
+                    (mRestrictedScreenLeft+mRestrictedScreenWidth) - mCurRight,
+                    (mRestrictedScreenTop+mRestrictedScreenHeight) - mCurBottom);
         } else {
             contentInset.setEmpty();
         }
@@ -1398,9 +1427,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     /** {@inheritDoc} */
     public void beginLayoutLw(int displayWidth, int displayHeight) {
-        mScreenLeft = mScreenTop = 0;
-        mScreenWidth = displayWidth;
-        mScreenHeight = displayHeight;
+        mUnrestrictedScreenLeft = mUnrestrictedScreenTop = 0;
+        mUnrestrictedScreenWidth = displayWidth;
+        mUnrestrictedScreenHeight = displayHeight;
+        mRestrictedScreenLeft = mRestrictedScreenTop = 0;
+        mRestrictedScreenWidth = displayWidth;
+        mRestrictedScreenHeight = displayHeight;
         mDockLeft = mContentLeft = mCurLeft = 0;
         mDockTop = mContentTop = mCurTop = 0;
         mDockRight = mContentRight = mCurRight = displayWidth;
@@ -1439,16 +1471,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 } else {
                     // Status bar can't go away; the part of the screen it
                     // covers does not exist for anything behind it.
-                    if (mScreenTop == r.top) {
-                        mScreenTop = r.bottom;
-                        mScreenHeight -= (r.bottom-r.top);
-                    } else if ((mScreenHeight-mScreenTop) == r.bottom) {
-                        mScreenHeight -= (r.bottom-r.top);
+                    if (mRestrictedScreenTop == r.top) {
+                        mRestrictedScreenTop = r.bottom;
+                        mRestrictedScreenHeight -= (r.bottom-r.top);
+                    } else if ((mRestrictedScreenHeight-mRestrictedScreenTop) == r.bottom) {
+                        mRestrictedScreenHeight -= (r.bottom-r.top);
                     }
-                    mContentTop = mCurTop = mDockTop = mScreenTop;
-                    mContentBottom = mCurBottom = mDockBottom = mScreenTop+mScreenHeight;
-                    if (DEBUG_LAYOUT) Log.v(TAG, "Status bar: mScreenTop=" + mScreenTop
-                            + " mScreenHeight=" + mScreenHeight);
+                    mContentTop = mCurTop = mDockTop = mRestrictedScreenTop;
+                    mContentBottom = mCurBottom = mDockBottom
+                            = mRestrictedScreenTop + mRestrictedScreenHeight;
+                    if (DEBUG_LAYOUT) Log.v(TAG, "Status bar: mRestrictedScreenTop="
+                            + mRestrictedScreenTop
+                            + " mRestrictedScreenHeight=" + mRestrictedScreenHeight);
                 }
             }
         }
@@ -1540,10 +1574,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // frame is the same as the one we are attached to.
                     setAttachedWindowFrames(win, fl, sim, attached, true, pf, df, cf, vf);
                 } else {
-                    pf.left = df.left = mScreenLeft;
-                    pf.top = df.top = mScreenTop;
-                    pf.right = df.right = mScreenLeft+mScreenWidth;
-                    pf.bottom = df.bottom = mScreenTop+mScreenHeight;
+                    if (attrs.type == TYPE_STATUS_BAR_PANEL) {
+                        // Status bar panels are the only windows who can go on top of
+                        // the status bar.  They are protected by the STATUS_BAR_SERVICE
+                        // permission, so they have the same privileges as the status
+                        // bar itself.
+                        pf.left = df.left = mUnrestrictedScreenLeft;
+                        pf.top = df.top = mUnrestrictedScreenTop;
+                        pf.right = df.right = mUnrestrictedScreenLeft+mUnrestrictedScreenWidth;
+                        pf.bottom = df.bottom = mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
+                    } else {
+                        pf.left = df.left = mRestrictedScreenLeft;
+                        pf.top = df.top = mRestrictedScreenTop;
+                        pf.right = df.right = mRestrictedScreenLeft+mRestrictedScreenWidth;
+                        pf.bottom = df.bottom = mRestrictedScreenTop+mRestrictedScreenHeight;
+                    }
                     if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
                         cf.left = mDockLeft;
                         cf.top = mDockTop;
@@ -1567,10 +1612,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else if ((fl & FLAG_LAYOUT_IN_SCREEN) != 0) {
                 // A window that has requested to fill the entire screen just
                 // gets everything, period.
-                pf.left = df.left = cf.left = mScreenLeft;
-                pf.top = df.top = cf.top = mScreenTop;
-                pf.right = df.right = cf.right = mScreenLeft+mScreenWidth;
-                pf.bottom = df.bottom = cf.bottom = mScreenTop+mScreenHeight;
+                if (attrs.type == TYPE_STATUS_BAR_PANEL) {
+                    pf.left = df.left = cf.left = mUnrestrictedScreenLeft;
+                    pf.top = df.top = cf.top = mUnrestrictedScreenTop;
+                    pf.right = df.right = cf.right
+                            = mUnrestrictedScreenLeft+mUnrestrictedScreenWidth;
+                    pf.bottom = df.bottom = cf.bottom
+                            = mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
+                } else {
+                    pf.left = df.left = cf.left = mRestrictedScreenLeft;
+                    pf.top = df.top = cf.top = mRestrictedScreenTop;
+                    pf.right = df.right = cf.right = mRestrictedScreenLeft+mRestrictedScreenWidth;
+                    pf.bottom = df.bottom = cf.bottom
+                            = mRestrictedScreenTop+mRestrictedScreenHeight;
+                }
                 if (adjust != SOFT_INPUT_ADJUST_NOTHING) {
                     vf.left = mCurLeft;
                     vf.top = mCurTop;
@@ -1829,9 +1884,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     rect.union(w.getShownFrameLw());
                 }
             }
-            final int insetw = mScreenWidth/10;
-            final int inseth = mScreenHeight/10;
-            if (rect.contains(insetw, inseth, mScreenWidth-insetw, mScreenHeight-inseth)) {
+            final int insetw = mRestrictedScreenWidth/10;
+            final int inseth = mRestrictedScreenHeight/10;
+            if (rect.contains(insetw, inseth, mRestrictedScreenWidth-insetw,
+                        mRestrictedScreenHeight-inseth)) {
                 // All of the status bar windows put together cover the
                 // screen, so the app can't be seen.  (Note this test doesn't
                 // work if the rects of these windows are at off offsets or
@@ -2290,7 +2346,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return getCurrentPortraitRotation(lastRotation);
             }
 
-            mOrientationListener.setAllow180Rotation(
+            mOrientationListener.setAllow180Rotation(mAllowAllRotations ||
                     orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
 
             // case for nosensor meaning ignore sensor and consider only lid

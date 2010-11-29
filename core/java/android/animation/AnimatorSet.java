@@ -341,6 +341,20 @@ public final class AnimatorSet extends Animator {
         return this;
     }
 
+    @Override
+    public void setupStartValues() {
+        for (Node node : mNodes) {
+            node.animation.setupStartValues();
+        }
+    }
+
+    @Override
+    public void setupEndValues() {
+        for (Node node : mNodes) {
+            node.animation.setupEndValues();
+        }
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -401,6 +415,7 @@ public final class AnimatorSet extends Animator {
                     }
                 }
             });
+            delayAnim.start();
         }
         if (mListeners != null) {
             ArrayList<AnimatorListener> tmpListeners =
@@ -408,6 +423,11 @@ public final class AnimatorSet extends Animator {
             int numListeners = tmpListeners.size();
             for (int i = 0; i < numListeners; ++i) {
                 tmpListeners.get(i).onAnimationStart(this);
+                if (mNodes.size() == 0) {
+                    // Handle unusual case where empty AnimatorSet is started - should send out
+                    // end event immediately since the event will not be sent out at all otherwise
+                    tmpListeners.get(i).onAnimationEnd(this);
+                }
             }
         }
     }
@@ -894,7 +914,7 @@ public final class AnimatorSet extends Animator {
          * @param anim The animation that will play when the animation supplied to the
          * {@link AnimatorSet#play(Animator)} method starts.
          */
-        public void with(Animator anim) {
+        public Builder with(Animator anim) {
             Node node = mNodeMap.get(anim);
             if (node == null) {
                 node = new Node(anim);
@@ -903,6 +923,7 @@ public final class AnimatorSet extends Animator {
             }
             Dependency dependency = new Dependency(mCurrentNode, Dependency.WITH);
             node.addDependency(dependency);
+            return this;
         }
 
         /**
@@ -913,7 +934,7 @@ public final class AnimatorSet extends Animator {
          * @param anim The animation that will play when the animation supplied to the
          * {@link AnimatorSet#play(Animator)} method ends.
          */
-        public void before(Animator anim) {
+        public Builder before(Animator anim) {
             Node node = mNodeMap.get(anim);
             if (node == null) {
                 node = new Node(anim);
@@ -922,6 +943,7 @@ public final class AnimatorSet extends Animator {
             }
             Dependency dependency = new Dependency(mCurrentNode, Dependency.AFTER);
             node.addDependency(dependency);
+            return this;
         }
 
         /**
@@ -932,7 +954,7 @@ public final class AnimatorSet extends Animator {
          * @param anim The animation whose end will cause the animation supplied to the
          * {@link AnimatorSet#play(Animator)} method to play.
          */
-        public void after(Animator anim) {
+        public Builder after(Animator anim) {
             Node node = mNodeMap.get(anim);
             if (node == null) {
                 node = new Node(anim);
@@ -941,6 +963,7 @@ public final class AnimatorSet extends Animator {
             }
             Dependency dependency = new Dependency(node, Dependency.AFTER);
             mCurrentNode.addDependency(dependency);
+            return this;
         }
 
         /**
@@ -951,11 +974,12 @@ public final class AnimatorSet extends Animator {
          * @param delay The number of milliseconds that should elapse before the
          * animation starts.
          */
-        public void after(long delay) {
+        public Builder after(long delay) {
             // setup dummy ValueAnimator just to run the clock
             ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
             anim.setDuration(delay);
             after(anim);
+            return this;
         }
 
     }

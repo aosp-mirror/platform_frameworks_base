@@ -382,6 +382,27 @@ public final class Downloads {
          */
         public static final String COLUMN_ERROR_MSG = "errorMsg";
 
+        /**
+         *  This column stores the source of the last update to this row.
+         *  This column is only for internal use.
+         *  Valid values are indicated by LAST_UPDATESRC_* constants.
+         * <P>Type: INT</P>
+         */
+        public static final String COLUMN_LAST_UPDATESRC = "lastUpdateSrc";
+
+        /**
+         * default value for {@link #COLUMN_LAST_UPDATESRC}.
+         * This value is used when this column's value is not relevant.
+         */
+        public static final int LAST_UPDATESRC_NOT_RELEVANT = 0;
+
+        /**
+         * One of the values taken by {@link #COLUMN_LAST_UPDATESRC}.
+         * This value is used when the update is NOT to be relayed to the DownloadService
+         * (and thus spare DownloadService from scanning the database when this change occurs)
+         */
+        public static final int LAST_UPDATESRC_DONT_NOTIFY_DOWNLOADSVC = 1;
+
         /*
          * Lists the destinations that an application can specify for a download.
          */

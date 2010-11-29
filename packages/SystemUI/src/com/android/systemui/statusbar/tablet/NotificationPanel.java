@@ -37,7 +37,7 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
     View mNotificationButton;
     View mNotificationScroller;
     FrameLayout mContentFrame;
-    View mSettingsPanel;
+    View mSettingsView;
 
     public NotificationPanel(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -68,6 +68,7 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
         // when we hide, put back the notifications
         if (!isShown()) {
             switchToNotificationMode();
+            mNotificationScroller.scrollTo(0, 0);
         }
     }
 
@@ -103,15 +104,15 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
     }
 
     public void switchToSettingsMode() {
-        removeSettingsPanel();
-        addSettingsPanel();
+        removeSettingsView();
+        addSettingsView();
         mSettingsButton.setVisibility(View.INVISIBLE);
         mNotificationScroller.setVisibility(View.GONE);
         mNotificationButton.setVisibility(View.VISIBLE);
     }
 
     public void switchToNotificationMode() {
-        removeSettingsPanel();
+        removeSettingsView();
         mSettingsButton.setVisibility(View.VISIBLE);
         mNotificationScroller.setVisibility(View.VISIBLE);
         mNotificationButton.setVisibility(View.INVISIBLE);
@@ -125,17 +126,17 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
         return x >= l && x < r && y >= t && y < b;
     }
 
-    void removeSettingsPanel() {
-        if (mSettingsPanel != null) {
-            mContentFrame.removeView(mSettingsPanel);
-            mSettingsPanel = null;
+    void removeSettingsView() {
+        if (mSettingsView != null) {
+            mContentFrame.removeView(mSettingsView);
+            mSettingsView = null;
         }
     }
 
-    void addSettingsPanel() {
+    void addSettingsView() {
         LayoutInflater infl = LayoutInflater.from(getContext());
-        mSettingsPanel = infl.inflate(R.layout.sysbar_panel_settings, mContentFrame, false);
-        mContentFrame.addView(mSettingsPanel);
+        mSettingsView = infl.inflate(R.layout.status_bar_settings_view, mContentFrame, false);
+        mContentFrame.addView(mSettingsView);
     }
 }
 

@@ -72,10 +72,19 @@
     <string name="battery_low_why">Battery use</string>
 
     <!-- Name of the button that links to the Settings app. [CHAR LIMIT=NONE] -->
-    <string name="system_panel_settings_button">Settings</string>
+    <string name="status_bar_settings_settings_button">Settings</string>
+
+    <!-- Label in the system panel for airplane mode (all radios are turned off)[CHAR LIMIT=30] -->
+    <string name="status_bar_settings_airplane">Airplane mode</string>
+
+    <!-- Label in system panel saying the device will use the orientation sensor to rotate [CHAR LIMIT=30] -->
+    <string name="status_bar_settings_rotation_lock">Lock screen orientation</string>
+
+    <!-- Label in system panel saying the device will show notifications [CHAR LIMIT=30] -->
+    <string name="status_bar_settings_notifications">Notifications</string>
 
     <!-- Text to display next to the graphical battery meter.  [CHAR LIMIT=3] -->
-    <string name="system_panel_battery_meter_format" translatable="false">
+    <string name="status_bar_settings_battery_meter_format" translatable="false">
         <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g>
     </string>
 

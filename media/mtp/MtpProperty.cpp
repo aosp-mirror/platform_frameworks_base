@@ -312,6 +312,10 @@ void MtpProperty::setFormEnum(const int* values, int count) {
     }
 }
 
+void MtpProperty::setFormDateTime() {
+     mFormFlag = kFormDateTime;
+}
+
 void MtpProperty::print() {
     LOGV("MtpProperty %04X\n", mCode);
     LOGV("    type %04X\n", mType);

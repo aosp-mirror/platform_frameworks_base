@@ -41,6 +41,7 @@ import android.os.StrictMode;
 import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
+import android.util.Singleton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,8 +53,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
      * Cast a Binder object into an activity manager interface, generating
      * a proxy if needed.
      */
-    static public IActivityManager asInterface(IBinder obj)
-    {
+    static public IActivityManager asInterface(IBinder obj) {
         if (obj == null) {
             return null;
         }
@@ -62,27 +62,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         if (in != null) {
             return in;
         }
-        
+
         return new ActivityManagerProxy(obj);
     }
-    
+
     /**
      * Retrieve the system's default/global activity manager.
      */
-    static public IActivityManager getDefault()
-    {
-        if (gDefault != null) {
-            //if (Config.LOGV) Log.v(
-            //    "ActivityManager", "returning cur default = " + gDefault);
-            return gDefault;
-        }
-        IBinder b = ServiceManager.getService("activity");
-        if (Config.LOGV) Log.v(
-            "ActivityManager", "default service binder = " + b);
-        gDefault = asInterface(b);
-        if (Config.LOGV) Log.v(
-            "ActivityManager", "default service = " + gDefault);
-        return gDefault;
+    static public IActivityManager getDefault() {
+        return gDefault.get();
     }
 
     /**
@@ -95,13 +83,12 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         return sSystemReady;
     }
     static boolean sSystemReady = false;
-    
+
     /**
      * Convenience for sending a sticky broadcast.  For internal use only.
      * If you don't care about permission, use null.
      */
-    static public void broadcastStickyIntent(Intent intent, String permission)
-    {
+    static public void broadcastStickyIntent(Intent intent, String permission) {
         try {
             getDefault().broadcastIntent(
                 null, intent, null, null, Activity.RESULT_OK, null, null,
@@ -117,8 +104,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         }
     }
 
-    public ActivityManagerNative()
-    {
+    public ActivityManagerNative() {
         attachInterface(this, descriptor);
     }
     
@@ -1390,16 +1376,27 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         }
 
         }
-        
+
         return super.onTransact(code, data, reply, flags);
     }
 
-    public IBinder asBinder()
-    {
+    public IBinder asBinder() {
         return this;
     }
 
-    private static IActivityManager gDefault;
+    private static final Singleton<IActivityManager> gDefault = new Singleton<IActivityManager>() {
+        protected IActivityManager create() {
+            IBinder b = ServiceManager.getService("activity");
+            if (Config.LOGV) {
+                Log.v("ActivityManager", "default service binder = " + b);
+            }
+            IActivityManager am = asInterface(b);
+            if (Config.LOGV) {
+                Log.v("ActivityManager", "default service = " + am);
+            }
+            return am;
+        }
+    };
 }
 
 class ActivityManagerProxy implements IActivityManager

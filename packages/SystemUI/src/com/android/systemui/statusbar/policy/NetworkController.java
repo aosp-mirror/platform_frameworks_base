@@ -37,6 +37,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -57,8 +58,6 @@ public class NetworkController extends BroadcastReceiver {
     boolean mHspaDataDistinguishable;
     final TelephonyManager mPhone;
     boolean mDataConnected;
-    int mPhoneSignalIconId;
-    int mDataIconId;
     IccCard.State mSimState = IccCard.State.READY;
     int mPhoneState = TelephonyManager.CALL_STATE_IDLE;
     int mDataState = TelephonyManager.DATA_DISCONNECTED;
@@ -66,6 +65,10 @@ public class NetworkController extends BroadcastReceiver {
     ServiceState mServiceState;
     SignalStrength mSignalStrength;
     int[] mDataIconList = TelephonyIcons.DATA_G[0];
+    int mPhoneSignalIconId;
+    int mDataDirectionIconId;
+    int mDataSignalIconId;
+    int mDataTypeIconId;
  
     // wifi
     final WifiManager mWifiManager;
@@ -81,11 +84,17 @@ public class NetworkController extends BroadcastReceiver {
 
     // our ui
     Context mContext;
-    ArrayList<ImageView> mPhoneIconViews = new ArrayList<ImageView>();
-    ArrayList<ImageView> mDataIconViews = new ArrayList<ImageView>();
+    ArrayList<ImageView> mPhoneSignalIconViews = new ArrayList<ImageView>();
+    ArrayList<ImageView> mDataDirectionIconViews = new ArrayList<ImageView>();
+    ArrayList<ImageView> mWifiIconViews = new ArrayList<ImageView>();
+    ArrayList<ImageView> mCombinedSignalIconViews = new ArrayList<ImageView>();
+    ArrayList<ImageView> mDataTypeIconViews = new ArrayList<ImageView>();
     ArrayList<TextView> mLabelViews = new ArrayList<TextView>();
     int mLastPhoneSignalIconId = -1;
-    int mLastCombinedDataIconId = -1;
+    int mLastDataDirectionIconId = -1;
+    int mLastWifiIconId = -1;
+    int mLastCombinedSignalIconId = -1;
+    int mLastDataTypeIconId = -1;
     String mLastLabel = "";
     
     // yuck -- stop doing this here and put it in the framework
@@ -116,7 +125,6 @@ public class NetworkController extends BroadcastReceiver {
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         context.registerReceiver(this, filter);
@@ -125,12 +133,24 @@ public class NetworkController extends BroadcastReceiver {
         mBatteryStats = BatteryStatsService.getService();
     }
 
-    public void addPhoneIconView(ImageView v) {
-        mPhoneIconViews.add(v);
+    public void addPhoneSignalIconView(ImageView v) {
+        mPhoneSignalIconViews.add(v);
     }
 
-    public void addCombinedDataIconView(ImageView v) {
-        mDataIconViews.add(v);
+    public void addDataDirectionIconView(ImageView v) {
+        mDataDirectionIconViews.add(v);
+    }
+
+    public void addWifiIconView(ImageView v) {
+        mWifiIconViews.add(v);
+    }
+
+    public void addCombinedSignalIconView(ImageView v) {
+        mCombinedSignalIconViews.add(v);
+    }
+
+    public void addDataTypeIconView(ImageView v) {
+        mDataTypeIconViews.add(v);
     }
 
     public void addLabelView(TextView v) {
@@ -141,7 +161,6 @@ public class NetworkController extends BroadcastReceiver {
         final String action = intent.getAction();
         if (action.equals(WifiManager.RSSI_CHANGED_ACTION)
                 || action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)
-                || action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)
                 || action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
             updateWifiState(intent);
             refreshViews();
@@ -317,12 +336,15 @@ public class NetworkController extends BroadcastReceiver {
             if (Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.AIRPLANE_MODE_ON, 0) == 1) {
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_flightmode;
+                mDataSignalIconId = R.drawable.stat_sys_signal_flightmode;
             } else {
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
+                mDataSignalIconId = R.drawable.stat_sys_signal_0; // note we use 0 instead of null
             }
         } else {
             if (mSignalStrength == null) {
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
+                mDataSignalIconId = R.drawable.stat_sys_signal_0; // note we use 0 instead of null
             } else if (isCdma()) {
                 // If 3G(EV) and 1x network are available than 3G should be
                 // displayed, displayed RSSI should be from the EV side.
@@ -340,6 +362,7 @@ public class NetworkController extends BroadcastReceiver {
                     iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[mInetCondition];
                 }
                 mPhoneSignalIconId = iconList[iconLevel];
+                mDataSignalIconId = TelephonyIcons.DATA_SIGNAL_STRENGTH[mInetCondition][iconLevel];
             } else {
                 int asu = mSignalStrength.getGsmSignalStrength();
 
@@ -362,6 +385,7 @@ public class NetworkController extends BroadcastReceiver {
                     iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[mInetCondition];
                 }
                 mPhoneSignalIconId = iconList[iconLevel];
+                mDataSignalIconId = TelephonyIcons.DATA_SIGNAL_STRENGTH[mInetCondition][iconLevel];
             }
         }
     }
@@ -370,35 +394,46 @@ public class NetworkController extends BroadcastReceiver {
         switch (net) {
             case TelephonyManager.NETWORK_TYPE_EDGE:
                 mDataIconList = TelephonyIcons.DATA_E[mInetCondition];
+                mDataTypeIconId = R.drawable.stat_sys_signal_edge;
                 break;
             case TelephonyManager.NETWORK_TYPE_UMTS:
                 mDataIconList = TelephonyIcons.DATA_3G[mInetCondition];
+                mDataTypeIconId = R.drawable.stat_sys_signal_3g;
                 break;
             case TelephonyManager.NETWORK_TYPE_HSDPA:
             case TelephonyManager.NETWORK_TYPE_HSUPA:
             case TelephonyManager.NETWORK_TYPE_HSPA:
                 if (mHspaDataDistinguishable) {
                     mDataIconList = TelephonyIcons.DATA_H[mInetCondition];
+                    mDataTypeIconId = R.drawable.stat_sys_signal_hsdpa;
                 } else {
                     mDataIconList = TelephonyIcons.DATA_3G[mInetCondition];
+                    mDataTypeIconId = R.drawable.stat_sys_signal_3g;
                 }
                 break;
             case TelephonyManager.NETWORK_TYPE_CDMA:
                 // display 1xRTT for IS95A/B
                 mDataIconList = TelephonyIcons.DATA_1X[mInetCondition];
+                mDataTypeIconId = R.drawable.stat_sys_signal_1x;
                 break;
             case TelephonyManager.NETWORK_TYPE_1xRTT:
                 mDataIconList = TelephonyIcons.DATA_1X[mInetCondition];
+                mDataTypeIconId = R.drawable.stat_sys_signal_1x;
                 break;
             case TelephonyManager.NETWORK_TYPE_EVDO_0: //fall through
             case TelephonyManager.NETWORK_TYPE_EVDO_A:
             case TelephonyManager.NETWORK_TYPE_EVDO_B:
                 mDataIconList = TelephonyIcons.DATA_3G[mInetCondition];
+                mDataTypeIconId = R.drawable.stat_sys_signal_3g;
                 break;
             // TODO - add support for NETWORK_TYPE_LTE and NETWORK_TYPE_EHRPD
             default:
                 mDataIconList = TelephonyIcons.DATA_G[mInetCondition];
+                mDataTypeIconId = R.drawable.stat_sys_signal_gprs;
             break;
+        }
+        if ((isCdma() && isCdmaEri()) || mPhone.isNetworkRoaming()) {
+            mDataTypeIconId = R.drawable.stat_sys_signal_roam;
         }
     }
 
@@ -436,7 +471,7 @@ public class NetworkController extends BroadcastReceiver {
                             iconId = mDataIconList[0];
                             break;
                     }
-                    mDataIconId = iconId;
+                    mDataDirectionIconId = iconId;
                 } else {
                     iconId = 0;
                     visible = false;
@@ -477,7 +512,7 @@ public class NetworkController extends BroadcastReceiver {
             Binder.restoreCallingIdentity(ident);
         }
 
-        mDataIconId = iconId;
+        mDataDirectionIconId = iconId;
         mDataConnected = visible;
     }
 
@@ -489,8 +524,7 @@ public class NetworkController extends BroadcastReceiver {
             mWifiEnabled = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
                     WifiManager.WIFI_STATE_UNKNOWN) == WifiManager.WIFI_STATE_ENABLED;
 
-        } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)
-                || action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
+        } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
             final NetworkInfo networkInfo = (NetworkInfo)
                     intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
             boolean wasConnected = mWifiConnected;
@@ -575,45 +609,96 @@ public class NetworkController extends BroadcastReceiver {
     void refreshViews() {
         Context context = mContext;
 
-        int combinedDataIconId;
+        int combinedSignalIconId;
+        int dataTypeIconId;
         String label;
+        int N;
 
         if (mWifiConnected) {
             if (mWifiSsid == null) {
-                label = context.getString(R.string.system_panel_signal_meter_wifi_nossid);
+                label = context.getString(R.string.status_bar_settings_signal_meter_wifi_nossid);
             } else {
-                label = context.getString(R.string.system_panel_signal_meter_wifi_ssid_format,
+                label = context.getString(R.string.status_bar_settings_signal_meter_wifi_ssid_format,
                                       mWifiSsid);
             }
-            combinedDataIconId = mWifiIconId;
-        } else if (mDataConnected) {
-            label = context.getString(R.string.system_panel_signal_meter_data_connected);
-            combinedDataIconId = mDataIconId;
+            combinedSignalIconId = mWifiIconId;
+            dataTypeIconId = 0;
         } else {
-            label = context.getString(R.string.system_panel_signal_meter_disconnected);
-            combinedDataIconId = 0;
+            if (mDataConnected) {
+                label = context.getString(R.string.status_bar_settings_signal_meter_data_connected);
+            } else {
+                label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
+            }
+            combinedSignalIconId = mDataSignalIconId;
+            dataTypeIconId = mDataTypeIconId;
         }
 
-        int N;
+        if (false) {
+            Slog.d(TAG, "refreshViews combinedSignalIconId=0x"
+                    + Integer.toHexString(mPhoneSignalIconId)
+                    + " mPhoneSignalIconId=0x" + Integer.toHexString(mPhoneSignalIconId)
+                    + " mDataDirectionIconId=0x" + Integer.toHexString(mDataDirectionIconId)
+                    + " mDataSignalIconId=0x" + Integer.toHexString(mDataSignalIconId)
+                    + " mDataTypeIconId=0x" + Integer.toHexString(mDataTypeIconId)
+                    + " mWifiIconId=0x" + Integer.toHexString(mWifiIconId));
+        }
 
+        // the phone icon on phones
         if (mLastPhoneSignalIconId != mPhoneSignalIconId) {
             mLastPhoneSignalIconId = mPhoneSignalIconId;
-            N = mPhoneIconViews.size();
+            N = mPhoneSignalIconViews.size();
             for (int i=0; i<N; i++) {
-                ImageView v = mPhoneIconViews.get(i);
+                final ImageView v = mPhoneSignalIconViews.get(i);
                 v.setImageResource(mPhoneSignalIconId);
             }
         }
 
-        if (mLastCombinedDataIconId != combinedDataIconId) {
-            mLastCombinedDataIconId = combinedDataIconId;
-            N = mDataIconViews.size();
+        // the data icon on phones
+        if (mLastDataDirectionIconId != mDataDirectionIconId) {
+            mLastDataDirectionIconId = mDataDirectionIconId;
+            N = mDataDirectionIconViews.size();
             for (int i=0; i<N; i++) {
-                ImageView v = mDataIconViews.get(i);
-                v.setImageResource(combinedDataIconId);
+                final ImageView v = mDataDirectionIconViews.get(i);
+                v.setImageResource(mDataDirectionIconId);
             }
         }
 
+        // the wifi icon on phones
+        if (mLastWifiIconId != mWifiIconId) {
+            mLastWifiIconId = mWifiIconId;
+            N = mWifiIconViews.size();
+            for (int i=0; i<N; i++) {
+                final ImageView v = mWifiIconViews.get(i);
+                v.setImageResource(mWifiIconId);
+            }
+        }
+
+        // the combined data signal icon
+        if (mLastCombinedSignalIconId != combinedSignalIconId) {
+            mLastCombinedSignalIconId = combinedSignalIconId;
+            N = mCombinedSignalIconViews.size();
+            for (int i=0; i<N; i++) {
+                final ImageView v = mCombinedSignalIconViews.get(i);
+                v.setImageResource(combinedSignalIconId);
+            }
+        }
+
+        // the data network type overlay
+        if (mLastDataTypeIconId != dataTypeIconId) {
+            mLastDataTypeIconId = dataTypeIconId;
+            N = mDataTypeIconViews.size();
+            for (int i=0; i<N; i++) {
+                final ImageView v = mDataTypeIconViews.get(i);
+                if (dataTypeIconId == 0) {
+                    v.setVisibility(View.INVISIBLE);
+                } else {
+                    v.setVisibility(View.VISIBLE);
+                    v.setImageResource(dataTypeIconId);
+                }
+            }
+        }
+
+        // the label in the notification panel
         if (!mLastLabel.equals(label)) {
             mLastLabel = label;
             N = mLabelViews.size();

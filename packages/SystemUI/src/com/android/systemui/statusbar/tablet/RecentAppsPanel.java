@@ -224,7 +224,7 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         final int last = Math.min(mActivityDescriptions.size(), DISPLAY_TASKS) - 1;
         for (int i = last; i >= first; i--) {
             ActivityDescription activityDescription = mActivityDescriptions.get(i);
-            View view = View.inflate(mContext, R.layout.sysbar_panel_recent_item, null);
+            View view = View.inflate(mContext, R.layout.status_bar_recent_item, null);
             ImageView appThumbnail = (ImageView) view.findViewById(R.id.app_thumbnail);
             ImageView appIcon = (ImageView) view.findViewById(R.id.app_icon);
             TextView appDescription = (TextView) view.findViewById(R.id.app_label);

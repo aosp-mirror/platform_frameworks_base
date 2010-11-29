@@ -294,7 +294,7 @@ public class PhoneStatusBar extends StatusBar {
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -505,7 +505,7 @@ public class PhoneStatusBar extends StatusBar {
         // create the row view
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        View row = inflater.inflate(R.layout.status_bar_latest_event, parent, false);
+        View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
 
         // bind the click event to the content area
         ViewGroup content = (ViewGroup)row.findViewById(R.id.content);
@@ -1016,7 +1016,7 @@ public class PhoneStatusBar extends StatusBar {
 
     // Not supported
     public void setMenuKeyVisible(boolean visible) { }
-    public void setIMEButtonVisible(boolean visible) { }
+    public void setIMEButtonVisible(IBinder token, boolean visible) { }
 
     private class Launcher implements View.OnClickListener {
         private PendingIntent mIntent;
@@ -1254,7 +1254,7 @@ public class PhoneStatusBar extends StatusBar {
         lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                 | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
@@ -1282,7 +1282,7 @@ public class PhoneStatusBar extends StatusBar {
         lp.height = getExpandedHeight();
         lp.x = 0;
         mTrackingPosition = lp.y = -disph; // sufficiently large negative
-        lp.type = WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
+        lp.type = WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
         lp.flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL

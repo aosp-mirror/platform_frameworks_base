@@ -67,6 +67,8 @@ struct AwesomePlayer {
 
     status_t setDataSource(int fd, int64_t offset, int64_t length);
 
+    status_t setDataSource(const sp<IStreamSource> &source);
+
     void reset();
 
     status_t prepare();

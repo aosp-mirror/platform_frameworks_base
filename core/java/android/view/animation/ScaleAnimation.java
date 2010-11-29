@@ -17,8 +17,10 @@
 package android.view.animation;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 
 /**
  * An animation that controls the scale of an object. You can specify the point
@@ -26,10 +28,22 @@ import android.util.AttributeSet;
  * 
  */
 public class ScaleAnimation extends Animation {
+    private final Resources mResources;
+
     private float mFromX;
     private float mToX;
     private float mFromY;
     private float mToY;
+
+    private int mFromXType = TypedValue.TYPE_NULL;
+    private int mToXType = TypedValue.TYPE_NULL;
+    private int mFromYType = TypedValue.TYPE_NULL;
+    private int mToYType = TypedValue.TYPE_NULL;
+
+    private int mFromXData = 0;
+    private int mToXData = 0;
+    private int mFromYData = 0;
+    private int mToYData = 0;
 
     private int mPivotXType = ABSOLUTE;
     private int mPivotYType = ABSOLUTE;
@@ -48,14 +62,60 @@ public class ScaleAnimation extends Animation {
     public ScaleAnimation(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        mResources = context.getResources();
+
         TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.ScaleAnimation);
 
-        mFromX = a.getFloat(com.android.internal.R.styleable.ScaleAnimation_fromXScale, 0.0f);
-        mToX = a.getFloat(com.android.internal.R.styleable.ScaleAnimation_toXScale, 0.0f);
+        TypedValue tv = a.peekValue(
+                com.android.internal.R.styleable.ScaleAnimation_fromXScale);
+        mFromX = 0.0f;
+        if (tv != null) {
+            if (tv.type == TypedValue.TYPE_FLOAT) {
+                // This is a scaling factor.
+                mFromX = tv.getFloat();
+            } else {
+                mFromXType = tv.type;
+                mFromXData = tv.data;
+            }
+        }
+        tv = a.peekValue(
+                com.android.internal.R.styleable.ScaleAnimation_toXScale);
+        mToX = 0.0f;
+        if (tv != null) {
+            if (tv.type == TypedValue.TYPE_FLOAT) {
+                // This is a scaling factor.
+                mToX = tv.getFloat();
+            } else {
+                mToXType = tv.type;
+                mToXData = tv.data;
+            }
+        }
 
-        mFromY = a.getFloat(com.android.internal.R.styleable.ScaleAnimation_fromYScale, 0.0f);
-        mToY = a.getFloat(com.android.internal.R.styleable.ScaleAnimation_toYScale, 0.0f);
+        tv = a.peekValue(
+                com.android.internal.R.styleable.ScaleAnimation_fromYScale);
+        mFromY = 0.0f;
+        if (tv != null) {
+            if (tv.type == TypedValue.TYPE_FLOAT) {
+                // This is a scaling factor.
+                mFromY = tv.getFloat();
+            } else {
+                mFromYType = tv.type;
+                mFromYData = tv.data;
+            }
+        }
+        tv = a.peekValue(
+                com.android.internal.R.styleable.ScaleAnimation_toYScale);
+        mToY = 0.0f;
+        if (tv != null) {
+            if (tv.type == TypedValue.TYPE_FLOAT) {
+                // This is a scaling factor.
+                mToY = tv.getFloat();
+            } else {
+                mToYType = tv.type;
+                mToYData = tv.data;
+            }
+        }
 
         Description d = Description.parseValue(a.peekValue(
                 com.android.internal.R.styleable.ScaleAnimation_pivotX));
@@ -81,6 +141,7 @@ public class ScaleAnimation extends Animation {
      * @param toY Vertical scaling factor to apply at the end of the animation
      */
     public ScaleAnimation(float fromX, float toX, float fromY, float toY) {
+        mResources = null;
         mFromX = fromX;
         mToX = toX;
         mFromY = fromY;
@@ -107,6 +168,7 @@ public class ScaleAnimation extends Animation {
      */
     public ScaleAnimation(float fromX, float toX, float fromY, float toY,
             float pivotX, float pivotY) {
+        mResources = null;
         mFromX = fromX;
         mToX = toX;
         mFromY = fromY;
@@ -146,6 +208,7 @@ public class ScaleAnimation extends Animation {
      */
     public ScaleAnimation(float fromX, float toX, float fromY, float toY,
             int pivotXType, float pivotXValue, int pivotYType, float pivotYValue) {
+        mResources = null;
         mFromX = fromX;
         mToX = toX;
         mFromY = fromY;
@@ -177,9 +240,31 @@ public class ScaleAnimation extends Animation {
         }
     }
 
+    float resolveScale(float scale, int type, int data, int size, int psize) {
+        float targetSize;
+        if (type == TypedValue.TYPE_FRACTION) {
+            targetSize = TypedValue.complexToFraction(data, size, psize);
+        } else if (type == TypedValue.TYPE_DIMENSION) {
+            targetSize = TypedValue.complexToDimension(data, mResources.getDisplayMetrics());
+        } else {
+            return scale;
+        }
+
+        if (size == 0) {
+            return 1;
+        }
+
+        return targetSize/(float)size;
+    }
+
     @Override
     public void initialize(int width, int height, int parentWidth, int parentHeight) {
         super.initialize(width, height, parentWidth, parentHeight);
+
+        mFromX = resolveScale(mFromX, mFromXType, mFromXData, width, parentWidth);
+        mToX = resolveScale(mToX, mToXType, mToXData, width, parentWidth);
+        mFromY = resolveScale(mFromY, mFromYType, mFromYData, height, parentHeight);
+        mToY = resolveScale(mToY, mToYType, mToYData, height, parentHeight);
 
         mPivotX = resolveSize(mPivotXType, mPivotXValue, width, parentWidth);
         mPivotY = resolveSize(mPivotYType, mPivotYValue, height, parentHeight);

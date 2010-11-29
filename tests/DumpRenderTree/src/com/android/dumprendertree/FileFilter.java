@@ -112,6 +112,7 @@ public class FileFilter {
         ignoreResultList.add("fast/events/touch/touch-coords-in-zoom-and-scroll.html"); // Requires eventSender.zoomPageIn(),zoomPageOut()
         ignoreResultList.add("fast/events/touch/touch-target.html"); // Requires multi-touch gestures not supported by Android system
         ignoreResultList.add("fast/workers"); // workers not supported
+        ignoreResultList.add("http/tests/cookies/third-party-cookie-relaxing.html"); // We don't support conditional acceptance of third-party cookies
         ignoreResultList.add("http/tests/eventsource/workers"); // workers not supported
         ignoreResultList.add("http/tests/workers"); // workers not supported
         ignoreResultList.add("http/tests/xmlhttprequest/workers"); // workers not supported

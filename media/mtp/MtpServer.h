@@ -96,6 +96,7 @@ private:
     MtpResponseCode     doGetObjectPropList();
     MtpResponseCode     doGetObjectInfo();
     MtpResponseCode     doGetObject();
+    MtpResponseCode     doGetPartialObject();
     MtpResponseCode     doSendObjectInfo();
     MtpResponseCode     doSendObject();
     MtpResponseCode     doDeleteObject();

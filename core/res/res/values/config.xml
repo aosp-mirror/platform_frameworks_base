@@ -195,6 +195,10 @@
     
     <!-- XXXXXX END OF RESOURCES USING WRONG NAMING CONVENTION -->
 
+    <!-- If true, the screen can be rotated via the accelerometer in all 4
+         rotations as the default behavior. -->
+    <bool name="config_allowAllRotations">true</bool>
+
     <!-- The number of degrees to rotate the display when the keyboard is open. -->
     <integer name="config_lidOpenRotation">90</integer>
 
@@ -346,8 +350,12 @@
     <!-- Diable lockscreen rotation by default -->
     <bool name="config_enableLockScreenRotation">false</bool>
 
-    <!-- Enable 3D RecentApplications view -->
-    <bool name="config_enableRecentApps3D">false</bool>
+    <!-- Control the behavior when the user long presses the power button.
+            0 - Nothing
+            1 - Recent apps dialog
+            2 - Recent apps activity in SystemUI
+    -->
+    <integer name="config_longPressOnHomeBehavior">1</integer>
 
     <!-- Array of light sensor LUX values to define our levels for auto backlight brightness support.
          The N entries of this array define N + 1 zones as follows:

@@ -73,6 +73,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     boolean mLightsOn = true;
     boolean mMenuVisible = false;
     boolean mIMEButtonVisible = false;
+    IBinder mIMEToken = null;
 
     private class DisableRecord implements IBinder.DeathRecipient {
         String pkg;
@@ -257,7 +258,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
-    public void setIMEButtonVisible(final boolean visible) {
+    public void setIMEButtonVisible(final IBinder token, final boolean visible) {
         enforceStatusBar();
 
         if (SPEW) Slog.d(TAG, (visible?"showing":"hiding") + " IME Button");
@@ -267,11 +268,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             // mIMEButtonVisible because mIMEButtonVisible may not have been set to false when the
             // previous IME was destroyed.
             mIMEButtonVisible = visible;
+            mIMEToken = token;
             mHandler.post(new Runnable() {
                 public void run() {
                     if (mBar != null) {
                         try {
-                            mBar.setIMEButtonVisible(visible);
+                            mBar.setIMEButtonVisible(token, visible);
                         } catch (RemoteException ex) {
                         }
                     }
@@ -351,7 +353,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // ================================================================================
     public void registerStatusBar(IStatusBar bar, StatusBarIconList iconList,
             List<IBinder> notificationKeys, List<StatusBarNotification> notifications,
-            int switches[]) {
+            int switches[], List<IBinder> binders) {
         enforceStatusBarService();
 
         Slog.i(TAG, "registerStatusBar bar=" + bar);
@@ -370,6 +372,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             switches[1] = mLightsOn ? 1 : 0;
             switches[2] = mMenuVisible ? 1 : 0;
             switches[3] = mIMEButtonVisible ? 1 : 0;
+            binders.add(mIMEToken);
         }
     }
 

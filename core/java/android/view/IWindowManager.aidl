@@ -140,6 +140,12 @@ interface IWindowManager
     // on screen)
     void showStrictModeViolation(boolean on);
 
+    // Proxy to set the system property for whether the flashing
+    // should be enabled.  The 'enabled' value is null or blank for
+    // the system default (differs per build variant) or any valid
+    // boolean string as parsed by SystemProperties.getBoolean().
+    void setStrictModeVisualIndicatorPreference(String enabled);
+
     // These can only be called with the SET_ORIENTATION permission.
     /**
      * Change the current screen rotation, constants as per

@@ -9,10 +9,10 @@ LOCAL_SRC_FILES:= \
     android_media_ResampleInputStream.cpp \
     android_media_MediaProfiles.cpp \
     android_media_AmrInputStream.cpp \
-	android_media_MtpClient.cpp \
-	android_media_MtpCursor.cpp \
 	android_media_MtpDatabase.cpp \
 	android_media_MtpServer.cpp \
+	android_media_PtpClient.cpp \
+	android_media_PtpCursor.cpp \
 
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \

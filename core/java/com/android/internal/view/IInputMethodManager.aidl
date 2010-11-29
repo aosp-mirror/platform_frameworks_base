@@ -52,9 +52,9 @@ interface IInputMethodManager {
             int softInputMode, boolean first, int windowFlags);
             
     void showInputMethodPickerFromClient(in IInputMethodClient client);
-    void showInputMethodSubtypePickerFromClient(in IInputMethodClient client);
     void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
     void setInputMethod(in IBinder token, String id);
+    void setInputMethodAndSubtype(in IBinder token, String id, in InputMethodSubtype subtype);
     void hideMySoftInput(in IBinder token, int flags);
     void showMySoftInput(in IBinder token, int flags);
     void updateStatusIcon(in IBinder token, String packageName, int iconId);

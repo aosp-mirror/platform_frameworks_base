@@ -95,6 +95,9 @@ public class MediaProperties {
     public static final int BITRATE_384K = 384000;
     public static final int BITRATE_512K = 512000;
     public static final int BITRATE_800K = 800000;
+    public static final int BITRATE_2M = 2000000;
+    public static final int BITRATE_5M = 5000000;
+    public static final int BITRATE_8M = 8000000;
 
     // The array of supported bitrates
     private static final int[] SUPPORTED_BITRATES = new int[] {

@@ -25,7 +25,7 @@ import android.graphics.BitmapFactory;
 import android.media.MtpConstants;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Mtp;
+import android.provider.Ptp;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -49,7 +49,7 @@ public class ObjectBrowser extends ListActivity {
     private DeviceDisconnectedReceiver mDisconnectedReceiver;
 
     private static final String[] OBJECT_COLUMNS =
-        new String[] { Mtp.Object._ID, Mtp.Object.NAME, Mtp.Object.FORMAT, Mtp.Object.THUMB };
+        new String[] { Ptp.Object._ID, Ptp.Object.NAME, Ptp.Object.FORMAT, Ptp.Object.THUMB };
 
     static final int ID_COLUMN = 0;
     static final int NAME_COLUMN = 1;
@@ -74,9 +74,9 @@ public class ObjectBrowser extends ListActivity {
             Cursor c;
             Uri uri;
             if (mObjectID == 0) {
-                uri = Mtp.Object.getContentUriForStorageChildren(mDeviceID, mStorageID);
+                uri = Ptp.Object.getContentUriForStorageChildren(mDeviceID, mStorageID);
             } else {
-                uri = Mtp.Object.getContentUriForObjectChildren(mDeviceID, mObjectID);
+                uri = Ptp.Object.getContentUriForObjectChildren(mDeviceID, mObjectID);
             }
             Log.d(TAG, "query " + uri);
             c = getContentResolver().query(uri, OBJECT_COLUMNS, null, null, null);
@@ -99,7 +99,7 @@ public class ObjectBrowser extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         long rowID = mAdapter.getItemId(position);
         Cursor c = getContentResolver().query(
-                        Mtp.Object.getContentUri(mDeviceID, rowID),
+                        Ptp.Object.getContentUri(mDeviceID, rowID),
                         OBJECT_COLUMNS, null, null, null);
         Log.d(TAG, "query returned " + c + " count: " + c.getCount());
         long format = 0;

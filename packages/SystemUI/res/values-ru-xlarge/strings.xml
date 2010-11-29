@@ -21,11 +21,11 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- no translation found for status_bar_clear_all_button (4722520806446512408) -->
     <skip />
-    <string name="system_panel_signal_meter_disconnected" msgid="2123001074951934237">"связь отсутствует"</string>
-    <!-- no translation found for system_panel_signal_meter_wifi_ssid_format (6261810256542749384) -->
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="2123001074951934237">"связь отсутствует"</string>
+    <!-- no translation found for status_bar_settings_signal_meter_wifi_ssid_format (6261810256542749384) -->
     <skip />
-    <string name="system_panel_signal_meter_wifi_nossid" msgid="160846667119240422">"Wi-Fi: подключено"</string>
-    <string name="system_panel_signal_meter_wifi_connecting" msgid="4087640898624652649">"Wi-Fi: подключение..."</string>
-    <string name="system_panel_signal_meter_data_connected" msgid="2171100321540926054">"Моб. данные: подключено"</string>
-    <string name="system_panel_signal_meter_data_connecting" msgid="7183001278053801143">"Моб. данные: подключение..."</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="160846667119240422">"Wi-Fi: подключено"</string>
+    <string name="status_bar_settings_signal_meter_wifi_connecting" msgid="4087640898624652649">"Wi-Fi: подключение..."</string>
+    <string name="status_bar_settings_signal_meter_data_connected" msgid="2171100321540926054">"Моб. данные: подключено"</string>
+    <string name="status_bar_settings_signal_meter_data_connecting" msgid="7183001278053801143">"Моб. данные: подключение..."</string>
 </resources>

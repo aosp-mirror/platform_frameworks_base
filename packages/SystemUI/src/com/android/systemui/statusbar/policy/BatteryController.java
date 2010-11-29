@@ -67,7 +67,7 @@ public class BatteryController extends BroadcastReceiver {
             for (int i=0; i<N; i++) {
                 //final boolean plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
                 TextView v = mLabelViews.get(i);
-                v.setText(mContext.getString(R.string.system_panel_battery_meter_format, level));
+                v.setText(mContext.getString(R.string.status_bar_settings_battery_meter_format, level));
             }
         }
     }

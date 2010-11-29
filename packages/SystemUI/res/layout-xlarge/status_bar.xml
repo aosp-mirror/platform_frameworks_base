@@ -80,21 +80,24 @@
                     android:layout_width="48dip"
                     android:layout_height="match_parent"
                     android:orientation="horizontal"
+                    android:gravity="center"
                     >
-                    <ImageView
-                        android:id="@+id/battery"
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:layout_gravity="top"
-                        android:layout_marginTop="18dp"
-                        />
                     <ImageView
                         android:id="@+id/network"
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:layout_gravity="top"
-                        android:layout_marginTop="14dp"
-                        android:src="@drawable/ic_sysbar_wifi_mini"
+                        android:layout_marginTop="19dp"
+                        android:layout_marginRight="4dp"
+                        />
+                    <ImageView
+                        android:id="@+id/battery"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:layout_gravity="top"
+                        android:layout_marginTop="19dp"
+                        android:layout_marginLeft="2dp"
+                        android:layout_marginRight="2dp"
                         />
                 </LinearLayout>
             </LinearLayout>
@@ -164,11 +167,19 @@
                     />
             </com.android.systemui.statusbar.tablet.ShirtPocket>
             <com.android.systemui.statusbar.tablet.InputMethodButton
-                android:id="@+id/imeButton"
+                android:id="@+id/imeSwitchButton"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="8dip"
-                android:src="@drawable/ic_sysbar_ime"
+                android:src="@drawable/ic_sysbar_ime_default"
+                android:visibility="invisible"
+                />
+            <com.android.systemui.statusbar.tablet.InputMethodButton
+                android:id="@+id/imeShortcutButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="8dip"
+                android:src="@drawable/ic_sysbar_ime_default"
                 android:visibility="invisible"
                 />
         </LinearLayout>

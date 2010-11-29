@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 
+import com.android.internal.telephony.ApnSetting;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataCallState;
 import com.android.internal.telephony.DataConnection.FailCause;
@@ -39,7 +40,6 @@ import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.EventLogTags;
 import com.android.internal.telephony.RetryManager;
-import com.android.internal.telephony.gsm.ApnSetting;
 import com.android.internal.telephony.Phone;
 
 import java.util.ArrayList;
@@ -89,8 +89,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             Phone.APN_TYPE_MMS,
             Phone.APN_TYPE_HIPRI };
 
-    // if we have no active Apn this is null
-    protected ApnSetting mActiveApn;
+    private static final int mDefaultApnId = DataConnectionTracker.APN_DEFAULT_ID;
 
     /* Constructor */
 
@@ -158,11 +157,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     @Override
-    protected boolean isApnTypeActive(String type) {
-        return mActiveApn != null && mActiveApn.canHandleType(type);
-    }
-
-    @Override
     protected boolean isApnTypeAvailable(String type) {
         for (String s : mSupportedApnTypes) {
             if (TextUtils.equals(type, s)) {
@@ -170,23 +164,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             }
         }
         return false;
-    }
-
-    @Override
-    protected String[] getActiveApnTypes() {
-        String[] result;
-        if (mActiveApn != null) {
-            result = mActiveApn.types;
-        } else {
-            result = new String[1];
-            result[0] = Phone.APN_TYPE_DEFAULT;
-        }
-        return result;
-    }
-
-    @Override
-    protected String getActiveApnString() {
-        return null;
     }
 
     /**
@@ -349,13 +326,17 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         /** TODO: We probably want the connection being setup to a parameter passed around */
         mPendingDataConnection = conn;
         String[] types;
+        int apnId;
         if (mRequestedApnType.equals(Phone.APN_TYPE_DUN)) {
             types = new String[1];
             types[0] = Phone.APN_TYPE_DUN;
+            apnId = DataConnectionTracker.APN_DUN_ID;
         } else {
             types = mDefaultApnTypes;
+            apnId = mDefaultApnId;
         }
-        mActiveApn = new ApnSetting(0, "", "", "", "", "", "", "", "", "", "", 0, types);
+        mActiveApn = new ApnSetting(apnId, "", "", "", "", "", "", "", "", "", "", 0, types);
+        if (DBG) log("setupData: mActiveApn=" + mActiveApn);
 
         Message msg = obtainMessage();
         msg.what = EVENT_DATA_SETUP_COMPLETE;

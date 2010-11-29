@@ -14,15 +14,7 @@
 
 # Warning: this is actually a product definition, to be inherited from
 
-keylayouts := \
-    AVRCP.kl \
-    Generic.kl \
-    Motorola_Bluetooth_Wireless_Keyboard.kl
-
-keycharmaps := \
-    Generic.kcm \
-    Virtual.kcm \
-    Motorola_Bluetooth_Wireless_Keyboard.kcm
+include $(LOCAL_PATH)/common.mk
 
 PRODUCT_COPY_FILES := $(foreach file,$(keylayouts),\
     frameworks/base/data/keyboards/$(file):system/usr/keylayout/$(file))
@@ -30,4 +22,4 @@ PRODUCT_COPY_FILES := $(foreach file,$(keylayouts),\
 PRODUCT_COPY_FILES += $(foreach file,$(keycharmaps),\
     frameworks/base/data/keyboards/$(file):system/usr/keychars/$(file))
 
-PRODUCT_PACKAGES := $(keycharmaps)
+PRODUCT_PACKAGES := $(keylayouts) $(keycharmaps)

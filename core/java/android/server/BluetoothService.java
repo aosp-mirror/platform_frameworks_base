@@ -541,14 +541,15 @@ public class BluetoothService extends IBluetooth.Stub {
                             mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 3, -1), 500);
                     break;
                 case 3:
-                    Log.d(TAG, "Registering opush record");
-                    SystemService.start("opush");
-                    mHandler.sendMessageDelayed(
-                            mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 4, -1), 500);
-                    break;
-                case 4:
                     Log.d(TAG, "Registering pbap record");
                     SystemService.start("pbap");
+                    mHandler.sendMessageDelayed(
+                        mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 4, -1), 500);
+
+                    break;
+                case 4:
+                    Log.d(TAG, "Registering opush record");
+                    SystemService.start("opush");
                     break;
                 }
                 break;
@@ -630,8 +631,15 @@ public class BluetoothService extends IBluetooth.Stub {
                 initProfileState();
 
                 //Register SDP records.
-                mHandler.sendMessageDelayed(
+                if (mContext.getResources().
+                        getBoolean(com.android.internal.R.bool.config_voice_capable)) {
+                    mHandler.sendMessageDelayed(
                         mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 1, -1), 3000);
+                } else {
+                    // Register only OPP.
+                    mHandler.sendMessageDelayed(
+                        mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 4, -1), 3000);
+                }
                 setBluetoothTetheringNative(true, BluetoothPan.NAP_ROLE, BluetoothPan.NAP_BRIDGE);
 
 
@@ -1195,6 +1203,24 @@ public class BluetoothService extends IBluetooth.Stub {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return getProperty("Name");
     }
+
+    public synchronized ParcelUuid[] getUuids() {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        String value =  getProperty("UUIDs");
+        if (value == null) return null;
+
+        String[] uuidStrings = null;
+        // The UUIDs are stored as a "," separated string.
+        uuidStrings = value.split(",");
+        ParcelUuid[] uuids = new ParcelUuid[uuidStrings.length];
+
+        for (int i = 0; i < uuidStrings.length; i++) {
+            uuids[i] = ParcelUuid.fromString(uuidStrings[i]);
+        }
+        return uuids;
+
+    }
+
 
     /**
      * Returns the user-friendly name of a remote device.  This value is

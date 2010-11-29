@@ -61,7 +61,6 @@ public:
     void decrementRefcount(SkBitmap* resource);
     void decrementRefcount(SkiaShader* resource);
     void decrementRefcount(SkiaColorFilter* resource);
-    void recycle(void* resource);
     void recycle(SkBitmap* resource);
     void destructor(SkBitmap* resource);
     void destructor(SkiaShader* resource);

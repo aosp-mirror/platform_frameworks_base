@@ -19,6 +19,7 @@ package android.animation;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.AndroidRuntimeException;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationUtils;
 
@@ -860,21 +861,22 @@ public class ValueAnimator extends Animator {
     /**
      * Start the animation playing. This version of start() takes a boolean flag that indicates
      * whether the animation should play in reverse. The flag is usually false, but may be set
-     * to true if called from the reverse() method/
+     * to true if called from the reverse() method.
+     *
+     * <p>The animation started by calling this method will be run on the thread that called
+     * this method. This thread should have a Looper on it (a runtime exception will be thrown if
+     * this is not the case). Also, if the animation will animate
+     * properties of objects in the view hierarchy, then the calling thread should be the UI
+     * thread for that view hierarchy.</p>
      *
      * @param playBackwards Whether the ValueAnimator should start playing in reverse.
      */
     private void start(boolean playBackwards) {
-        mPlayingBackwards = playBackwards;
-        Looper looper = Looper.getMainLooper();
-        final boolean isUiThread;
-        if (looper != null) {
-            isUiThread = Thread.currentThread() == looper.getThread();
-        } else {
-            // ignore check if we don't have a Looper (this isn't an Activity)
-            isUiThread = true;
+        if (Looper.myLooper() == null) {
+            throw new AndroidRuntimeException("Animators may only be run on Looper threads");
         }
-        if ((mStartDelay == 0) && isUiThread) {
+        mPlayingBackwards = playBackwards;
+        if (mStartDelay == 0) {
             if (mListeners != null) {
                 ArrayList<AnimatorListener> tmpListeners =
                         (ArrayList<AnimatorListener>) mListeners.clone();
@@ -912,9 +914,14 @@ public class ValueAnimator extends Animator {
                 listener.onAnimationCancel(this);
             }
         }
-        // Just set the CANCELED flag - this causes the animation to end the next time a frame
-        // is processed.
-        mPlayingState = CANCELED;
+        // Only cancel if the animation is actually running or has been started and is about
+        // to run
+        if (mPlayingState != STOPPED || sPendingAnimations.get().contains(this) ||
+                sDelayedAnims.get().contains(this)) {
+            // Just set the CANCELED flag - this causes the animation to end the next time a frame
+            // is processed.
+            mPlayingState = CANCELED;
+        }
     }
 
     @Override

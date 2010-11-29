@@ -32,13 +32,13 @@ interface IStatusBarService
     void removeIcon(String slot);
     void setActiveWindowIsFullscreen(boolean fullscreen);
     void setMenuKeyVisible(boolean visible);
-    void setIMEButtonVisible(boolean visible);
+    void setIMEButtonVisible(in IBinder token, boolean visible);
 
     // ---- Methods below are for use by the status bar policy services ----
     // You need the STATUS_BAR_SERVICE permission
     void registerStatusBar(IStatusBar callbacks, out StatusBarIconList iconList,
             out List<IBinder> notificationKeys, out List<StatusBarNotification> notifications,
-            out int[] switches);
+            out int[] switches, out List<IBinder> binders);
     void onPanelRevealed();
     void onNotificationClick(String pkg, String tag, int id);
     void onNotificationError(String pkg, String tag, int id,

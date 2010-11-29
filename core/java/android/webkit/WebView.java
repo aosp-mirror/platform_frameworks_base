@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
@@ -1922,25 +1923,15 @@ public class WebView extends AbsoluteLayout
      * browsing session and clears any internal state associated with that
      * session. The consequences of calling this method while a private
      * browsing session is active are unspecified.
-     * @param context The same context which was used to create the private
-     *                browsing WebView.
      * @return True if the private browsing files were successfully deleted,
      *         false otherwise.
      * @hide pending API council approval.
      */
-    public static boolean cleanupPrivateBrowsingFiles(Context context) {
-        // It seems wrong that we have to pass the storage locations here, given
-        // that the storage files are created native-side in WebRequestContext
-        // (albeit using a dumb getter on BrowserFrame to get the paths from
-        // Java). It looks like this is required because we may need to call
-        // this method before the BrowserFrame has been set up.
-        // TODO: Investigate whether this can be avoided.
-        return nativeCleanupPrivateBrowsingFiles(context.getDatabasePath("dummy").getParent(),
-                                                 context.getCacheDir().getAbsolutePath());
+    public static boolean cleanupPrivateBrowsingFiles() {
+        return nativeCleanupPrivateBrowsingFiles();
     }
 
-    private static native boolean nativeCleanupPrivateBrowsingFiles(String databaseDirectory,
-                                                                    String cacheDirectory);
+    private static native boolean nativeCleanupPrivateBrowsingFiles();
 
     private boolean extendScroll(int y) {
         int finalY = mScroller.getFinalY();
@@ -3052,7 +3043,9 @@ public class WebView extends AbsoluteLayout
                 abortAnimation();
                 mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
                 WebViewCore.resumePriority();
-                WebViewCore.resumeUpdatePicture(mWebViewCore);
+                if (!mSelectingText) {
+                    WebViewCore.resumeUpdatePicture(mWebViewCore);
+                }
             }
         } else {
             super.computeScroll();
@@ -3731,6 +3724,16 @@ public class WebView extends AbsoluteLayout
         return false;
     }
 
+    private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        if (mSelectingText && mOrientation != newConfig.orientation) {
+            selectionDone();
+        }
+        mOrientation = newConfig.orientation;
+    }
+
     /**
      * Keep track of the Callback so we can end its ActionMode or remove its
      * titlebar.
@@ -3807,7 +3810,9 @@ public class WebView extends AbsoluteLayout
     }
 
     void onFixedLengthZoomAnimationEnd() {
-        WebViewCore.resumeUpdatePicture(mWebViewCore);
+        if (!mSelectingText) {
+            WebViewCore.resumeUpdatePicture(mWebViewCore);
+        }
         onZoomAnimationEnd();
     }
 
@@ -4636,6 +4641,7 @@ public class WebView extends AbsoluteLayout
             // called by mSelectCallback.onDestroyActionMode
             mSelectCallback.finish();
             mSelectCallback = null;
+            WebViewCore.resumePriority();
             WebViewCore.resumeUpdatePicture(mWebViewCore);
             invalidate(); // redraw without selection
         }
@@ -5002,7 +5008,7 @@ public class WebView extends AbsoluteLayout
 
         final ScaleGestureDetector detector =
                 mZoomManager.getMultiTouchGestureDetector();
-        boolean skipScaleGesture = false;
+        boolean isScrollGesture = false;
         // Set to the mid-point of a two-finger gesture used to detect if the
         // user has touched a layer.
         float gestureX = x;
@@ -5030,7 +5036,7 @@ public class WebView extends AbsoluteLayout
                 }
                 action = ev.getActionMasked();
                 if (dist < DRAG_LAYER_FINGER_DISTANCE) {
-                    skipScaleGesture = true;
+                    isScrollGesture = true;
                 } else if (mTouchMode == TOUCH_DRAG_LAYER_MODE) {
                     // Fingers moved too far apart while dragging, the user
                     // might be trying to zoom.
@@ -5039,9 +5045,13 @@ public class WebView extends AbsoluteLayout
             }
         }
 
-        // If the page disallows zoom, pass multi-pointer events to webkit.
-        if (!skipScaleGesture && ev.getPointerCount() > 1
-            && (mZoomManager.isZoomScaleFixed() || mDeferMultitouch)) {
+        // If the page disallows zoom, pass multi-touch events to webkit.
+        // mDeferMultitouch is a hack for layout tests, where it is used to
+        // force passing multi-touch events to webkit.
+        // FIXME: always pass multi-touch events to webkit and remove everything
+        // related to mDeferMultitouch.
+        if (ev.getPointerCount() > 1 &&
+                (mDeferMultitouch || (!isScrollGesture && mZoomManager.isZoomScaleFixed()))) {
             if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "passing " + ev.getPointerCount() + " points to webkit");
             }
@@ -5050,7 +5060,7 @@ public class WebView extends AbsoluteLayout
         }
 
         if (mZoomManager.supportsMultiTouchZoom() && ev.getPointerCount() > 1 &&
-                mTouchMode != TOUCH_DRAG_LAYER_MODE && !skipScaleGesture) {
+                mTouchMode != TOUCH_DRAG_LAYER_MODE && !isScrollGesture) {
             if (!detector.isInProgress() &&
                     ev.getActionMasked() != MotionEvent.ACTION_POINTER_DOWN) {
                 // Insert a fake pointer down event in order to start
@@ -5323,7 +5333,7 @@ public class WebView extends AbsoluteLayout
                     deltaX = 0;
                     deltaY = 0;
 
-                    if (skipScaleGesture) {
+                    if (isScrollGesture) {
                         startScrollingLayer(gestureX, gestureY);
                     }
                     startDrag();
@@ -5537,7 +5547,9 @@ public class WebView extends AbsoluteLayout
                         // is possible on emulator.
                         mLastVelocity = 0;
                         WebViewCore.resumePriority();
-                        WebViewCore.resumeUpdatePicture(mWebViewCore);
+                        if (!mSelectingText) {
+                            WebViewCore.resumeUpdatePicture(mWebViewCore);
+                        }
                         break;
                 }
                 stopTouch();
@@ -5666,8 +5678,8 @@ public class WebView extends AbsoluteLayout
             mVelocityTracker = null;
         }
 
-        if (mTouchMode == TOUCH_DRAG_MODE ||
-                mTouchMode == TOUCH_DRAG_LAYER_MODE) {
+        if ((mTouchMode == TOUCH_DRAG_MODE
+                || mTouchMode == TOUCH_DRAG_LAYER_MODE) && !mSelectingText) {
             WebViewCore.resumePriority();
             WebViewCore.resumeUpdatePicture(mWebViewCore);
         }
@@ -6038,7 +6050,9 @@ public class WebView extends AbsoluteLayout
         }
         if ((maxX == 0 && vy == 0) || (maxY == 0 && vx == 0)) {
             WebViewCore.resumePriority();
-            WebViewCore.resumeUpdatePicture(mWebViewCore);
+            if (!mSelectingText) {
+                WebViewCore.resumeUpdatePicture(mWebViewCore);
+            }
             if (mScroller.springBack(mScrollX, mScrollY, 0, computeMaxScrollX(),
                     0, computeMaxScrollY())) {
                 invalidate();

@@ -23,6 +23,7 @@
 #include <media/IMediaPlayerService.h>
 #include <media/IMediaRecorder.h>
 #include <media/IOMX.h>
+#include <media/IStreamSource.h>
 
 #include <utils/Errors.h>  // for status_t
 
@@ -31,6 +32,7 @@ namespace android {
 enum {
     CREATE_URL = IBinder::FIRST_CALL_TRANSACTION,
     CREATE_FD,
+    CREATE_STREAM,
     DECODE_URL,
     DECODE_FD,
     CREATE_MEDIA_RECORDER,
@@ -103,6 +105,21 @@ public:
         data.writeInt32(audioSessionId);
 
         remote()->transact(CREATE_FD, data, &reply);
+
+        return interface_cast<IMediaPlayer>(reply.readStrongBinder());;
+    }
+
+    virtual sp<IMediaPlayer> create(
+            pid_t pid, const sp<IMediaPlayerClient> &client,
+            const sp<IStreamSource> &source, int audioSessionId) {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
+        data.writeInt32(static_cast<int32_t>(pid));
+        data.writeStrongBinder(client->asBinder());
+        data.writeStrongBinder(source->asBinder());
+        data.writeInt32(static_cast<int32_t>(audioSessionId));
+
+        remote()->transact(CREATE_STREAM, data, &reply);
 
         return interface_cast<IMediaPlayer>(reply.readStrongBinder());;
     }
@@ -184,6 +201,27 @@ status_t BnMediaPlayerService::onTransact(
             reply->writeStrongBinder(player->asBinder());
             return NO_ERROR;
         } break;
+        case CREATE_STREAM:
+        {
+            CHECK_INTERFACE(IMediaPlayerService, data, reply);
+
+            pid_t pid = static_cast<pid_t>(data.readInt32());
+
+            sp<IMediaPlayerClient> client =
+                interface_cast<IMediaPlayerClient>(data.readStrongBinder());
+
+            sp<IStreamSource> source =
+                interface_cast<IStreamSource>(data.readStrongBinder());
+
+            int audioSessionId = static_cast<int>(data.readInt32());
+
+            sp<IMediaPlayer> player =
+                create(pid, client, source, audioSessionId);
+
+            reply->writeStrongBinder(player->asBinder());
+            return OK;
+            break;
+        }
         case DECODE_URL: {
             CHECK_INTERFACE(IMediaPlayerService, data, reply);
             const char* url = data.readCString();

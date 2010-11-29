@@ -103,6 +103,7 @@ private:
                 status_t    setAddress(const char* address);
                 status_t    setBluetoothEnabled(bool enabled);
                 status_t    setSuspended(bool onOff);
+                status_t    standby_l();
 
     private:
                 int         mFd;

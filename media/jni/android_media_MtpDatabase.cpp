@@ -948,17 +948,20 @@ MtpProperty* MyMtpDatabase::getObjectPropertyDesc(MtpObjectProperty property,
             result = new MtpProperty(property, MTP_TYPE_UINT128);
             break;
         case MTP_PROPERTY_NAME:
-        case MTP_PROPERTY_DATE_MODIFIED:
         case MTP_PROPERTY_DISPLAY_NAME:
-        case MTP_PROPERTY_DATE_ADDED:
         case MTP_PROPERTY_ARTIST:
         case MTP_PROPERTY_ALBUM_NAME:
         case MTP_PROPERTY_ALBUM_ARTIST:
-        case MTP_PROPERTY_ORIGINAL_RELEASE_DATE:
         case MTP_PROPERTY_GENRE:
         case MTP_PROPERTY_COMPOSER:
         case MTP_PROPERTY_DESCRIPTION:
             result = new MtpProperty(property, MTP_TYPE_STR);
+            break;
+        case MTP_PROPERTY_DATE_MODIFIED:
+        case MTP_PROPERTY_DATE_ADDED:
+        case MTP_PROPERTY_ORIGINAL_RELEASE_DATE:
+            result = new MtpProperty(property, MTP_TYPE_STR);
+            result->setFormDateTime();
             break;
         case MTP_PROPERTY_OBJECT_FILE_NAME:
             // We allow renaming files and folders

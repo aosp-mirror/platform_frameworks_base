@@ -132,7 +132,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Indicates the touch gesture is a scroll
      */
     static final int TOUCH_MODE_SCROLL = 3;
-    
+
     /**
      * Indicates the view is in the process of being flung
      */
@@ -385,7 +385,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Handles one frame of a fling
      */
     private FlingRunnable mFlingRunnable;
-    
+
     /**
      * Handles scrolling between positions within the list.
      */
@@ -456,7 +456,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     int mResurrectToPosition = INVALID_POSITION;
 
     private ContextMenuInfo mContextMenuInfo = null;
-    
+
     /**
      * Maximum distance to record overscroll
      */
@@ -550,19 +550,19 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private int mMinimumVelocity;
     private int mMaximumVelocity;
     private float mVelocityScale = 1.0f;
-    
+
     final boolean[] mIsScrap = new boolean[1];
-    
+
     // True when the popup should be hidden because of a call to
     // dispatchDisplayHint()
     private boolean mPopupHidden;
-    
+
     /**
      * ID of the active pointer. This is used to retain consistency during
      * drags/flings if multiple pointers are used.
      */
     private int mActivePointerId = INVALID_POINTER;
-    
+
     /**
      * Sentinel value for no current active pointer.
      * Used by {@link #mActivePointerId}.
@@ -726,7 +726,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         boolean smoothScrollbar = a.getBoolean(R.styleable.AbsListView_smoothScrollbar, true);
         setSmoothScrollbarEnabled(smoothScrollbar);
-        
+
         final int adapterId = a.getResourceId(R.styleable.AbsListView_adapter, 0);
         if (adapterId != 0) {
             final Context c = context;
@@ -764,11 +764,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public void setOverScrollMode(int mode) {
         if (mode != OVER_SCROLL_NEVER) {
             if (mEdgeGlowTop == null) {
-                final Resources res = getContext().getResources();
+                Context context = getContext();
+                final Resources res = context.getResources();
                 final Drawable edge = res.getDrawable(R.drawable.overscroll_edge);
                 final Drawable glow = res.getDrawable(R.drawable.overscroll_glow);
-                mEdgeGlowTop = new EdgeGlow(edge, glow);
-                mEdgeGlowBottom = new EdgeGlow(edge, glow);
+                mEdgeGlowTop = new EdgeGlow(context, edge, glow);
+                mEdgeGlowBottom = new EdgeGlow(context, edge, glow);
             }
         } else {
             mEdgeGlowTop = null;
@@ -1843,7 +1844,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @param position The position to display
      * @param isScrap Array of at least 1 boolean, the first entry will become true if
      *                the returned view was taken from the scrap heap, false if otherwise.
-     * 
+     *
      * @return A view displaying the data associated with the specified position
      */
     View obtainView(int position, boolean[] isScrap) {
@@ -2166,7 +2167,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 treeObserver.addOnGlobalLayoutListener(this);
             }
         }
-        
+
         if (mAdapter != null && mDataSetObserver == null) {
             mDataSetObserver = new AdapterDataSetObserver();
             mAdapter.registerDataSetObserver(mDataSetObserver);
@@ -2962,7 +2963,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                 mFlingRunnable = new FlingRunnable();
                             }
                             reportScrollStateChange(OnScrollListener.SCROLL_STATE_FLING);
-                            
+
                             mFlingRunnable.start(-initialVelocity);
                         } else {
                             mTouchMode = TOUCH_MODE_REST;
@@ -3015,7 +3016,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mVelocityTracker.recycle();
                 mVelocityTracker = null;
             }
-            
+
             mActivePointerId = INVALID_POINTER;
 
             if (PROFILE_SCROLLING) {
@@ -3064,7 +3065,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mVelocityTracker = null;
                 }
             }
-            
+
             if (mEdgeGlowTop != null) {
                 mEdgeGlowTop.onRelease();
                 mEdgeGlowBottom.onRelease();
@@ -3072,7 +3073,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mActivePointerId = INVALID_POINTER;
             break;
         }
-        
+
         case MotionEvent.ACTION_POINTER_UP: {
             onSecondaryPointerUp(ev);
             final int x = mMotionX;
@@ -3170,11 +3171,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mMotionCorrection = 0;
                 return true;
             }
-            
+
             final int x = (int) ev.getX();
             final int y = (int) ev.getY();
             mActivePointerId = ev.getPointerId(0);
-            
+
             int motionPosition = findMotionRow(y);
             if (touchMode != TOUCH_MODE_FLING && motionPosition >= 0) {
                 // User clicked on an actual view (and was not stopping a fling).
@@ -3213,7 +3214,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
             break;
         }
-        
+
         case MotionEvent.ACTION_POINTER_UP: {
             onSecondaryPointerUp(ev);
             break;
@@ -3222,7 +3223,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         return false;
     }
-    
+
     private void onSecondaryPointerUp(MotionEvent ev) {
         final int pointerIndex = (ev.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >>
                 MotionEvent.ACTION_POINTER_INDEX_SHIFT;
@@ -3418,7 +3419,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             default:
                 endFling();
                 return;
-                
+
             case TOUCH_MODE_SCROLL:
                 if (mScroller.isFinished()) {
                     return;
@@ -3521,17 +3522,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
         }
     }
-    
-    
+
+
     class PositionScroller implements Runnable {
         private static final int SCROLL_DURATION = 400;
-        
+
         private static final int MOVE_DOWN_POS = 1;
         private static final int MOVE_UP_POS = 2;
         private static final int MOVE_DOWN_BOUND = 3;
         private static final int MOVE_UP_BOUND = 4;
         private static final int MOVE_OFFSET = 5;
-        
+
         private int mMode;
         private int mTargetPos;
         private int mBoundPos;
@@ -3540,17 +3541,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         private final int mExtraScroll;
 
         private int mOffsetFromTop;
-        
+
         PositionScroller() {
             mExtraScroll = ViewConfiguration.get(mContext).getScaledFadingEdgeLength();
         }
-        
+
         void start(int position) {
             final int firstPos = mFirstPosition;
             final int lastPos = firstPos + getChildCount() - 1;
-            
+
             int viewTravelCount;
-            if (position <= firstPos) {                
+            if (position <= firstPos) {
                 viewTravelCount = firstPos - position + 1;
                 mMode = MOVE_UP_POS;
             } else if (position >= lastPos) {
@@ -3560,7 +3561,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 // Already on screen, nothing to do
                 return;
             }
-            
+
             if (viewTravelCount > 0) {
                 mScrollDuration = SCROLL_DURATION / viewTravelCount;
             } else {
@@ -3569,19 +3570,19 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mTargetPos = position;
             mBoundPos = INVALID_POSITION;
             mLastSeenPos = INVALID_POSITION;
-            
+
             post(this);
         }
-        
+
         void start(int position, int boundPosition) {
             if (boundPosition == INVALID_POSITION) {
                 start(position);
                 return;
             }
-            
+
             final int firstPos = mFirstPosition;
             final int lastPos = firstPos + getChildCount() - 1;
-            
+
             int viewTravelCount;
             if (position <= firstPos) {
                 final int boundPosFromLast = lastPos - boundPosition;
@@ -3589,7 +3590,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     // Moving would shift our bound position off the screen. Abort.
                     return;
                 }
-                
+
                 final int posTravel = firstPos - position + 1;
                 final int boundTravel = boundPosFromLast - 1;
                 if (boundTravel < posTravel) {
@@ -3619,7 +3620,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 // Already on screen, nothing to do
                 return;
             }
-            
+
             if (viewTravelCount > 0) {
                 mScrollDuration = SCROLL_DURATION / viewTravelCount;
             } else {
@@ -3628,7 +3629,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mTargetPos = position;
             mBoundPos = boundPosition;
             mLastSeenPos = INVALID_POSITION;
-            
+
             post(this);
         }
 
@@ -3679,12 +3680,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
             final int listHeight = getHeight();
             final int firstPos = mFirstPosition;
-            
+
             switch (mMode) {
             case MOVE_DOWN_POS: {
                 final int lastViewIndex = getChildCount() - 1;
                 final int lastPos = firstPos + lastViewIndex;
-                
+
                 if (lastViewIndex < 0) {
                     return;
                 }
@@ -3710,11 +3711,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
                 break;
             }
-                
+
             case MOVE_DOWN_BOUND: {
                 final int nextViewIndex = 1;
                 final int childCount = getChildCount();
-                
+
                 if (firstPos == mBoundPos || childCount <= nextViewIndex
                         || firstPos + childCount >= mItemCount) {
                     return;
@@ -3739,13 +3740,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
                     post(this);
                 } else  {
-                    if (nextViewTop > extraScroll) { 
+                    if (nextViewTop > extraScroll) {
                         smoothScrollBy(nextViewTop - extraScroll, mScrollDuration);
                     }
                 }
                 break;
             }
-                
+
             case MOVE_UP_POS: {
                 if (firstPos == mLastSeenPos) {
                     // No new views, let things keep going.
@@ -3769,7 +3770,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
                 break;
             }
-                
+
             case MOVE_UP_BOUND: {
                 final int lastViewIndex = getChildCount() - 2;
                 if (lastViewIndex < 0) {
@@ -3835,11 +3836,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
         }
     }
-    
+
     /**
      * The amount of friction applied to flings. The default value
      * is {@link ViewConfiguration#getScrollFriction}.
-     * 
+     *
      * @return A scalar dimensionless value representing the coefficient of
      *         friction.
      */
@@ -3847,19 +3848,19 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mFlingRunnable == null) {
             mFlingRunnable = new FlingRunnable();
         }
-        mFlingRunnable.mScroller.setFriction(friction);        
+        mFlingRunnable.mScroller.setFriction(friction);
     }
 
     /**
      * Sets a scale factor for the fling velocity. The initial scale
      * factor is 1.0.
-     * 
+     *
      * @param scale The scale factor to multiply the velocity by.
      */
     public void setVelocityScale(float scale) {
         mVelocityScale = scale;
     }
-    
+
     /**
      * Smoothly scroll to the specified adapter position. The view will
      * scroll such that the indicated position is displayed.
@@ -3913,7 +3914,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Smoothly scroll to the specified adapter position. The view will
      * scroll such that the indicated position is displayed, but it will
      * stop early if scrolling further would scroll boundPosition out of
-     * view. 
+     * view.
      * @param position Scroll to this adapter position.
      * @param boundPosition Do not scroll if it would move this adapter
      *          position out of view.
@@ -3924,7 +3925,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
         mPositionScroller.start(position, boundPosition);
     }
-    
+
     /**
      * Smoothly scroll by distance pixels over duration milliseconds.
      * @param distance Distance to scroll in pixels.
@@ -4145,7 +4146,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (down) {
             mFirstPosition += count;
         }
-        
+
         invalidate();
 
         final int absIncrementalDeltaY = Math.abs(incrementalDeltaY);
@@ -4171,7 +4172,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         invokeOnItemScrollListener();
         awakenScrollBars();
-        
+
         return false;
     }
 
@@ -5289,7 +5290,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mCurrentScrap = scrapViews[0];
             mScrapViews = scrapViews;
         }
-        
+
         public void markChildrenDirty() {
             if (mViewTypeCount == 1) {
                 final ArrayList<View> scrap = mCurrentScrap;

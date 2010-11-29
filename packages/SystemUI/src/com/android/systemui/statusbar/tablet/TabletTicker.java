@@ -25,6 +25,7 @@ import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.util.Slog;
 import android.view.Gravity;
@@ -47,6 +48,9 @@ import com.android.systemui.statusbar.StatusBarIconView;
 public class TabletTicker extends Handler {
     private static final String TAG = "StatusBar.TabletTicker";
 
+    // 3 is enough to let us see most cases, but not get so far behind that it's too annoying.
+    private static final int QUEUE_LENGTH = 3;
+
     private static final int MSG_ADVANCE = 1;
 
     private static final int ADVANCE_DELAY = 5000; // 5 seconds
@@ -54,42 +58,77 @@ public class TabletTicker extends Handler {
     private Context mContext;
 
     private ViewGroup mWindow;
+    private IBinder mCurrentKey;
     private StatusBarNotification mCurrentNotification;
     private View mCurrentView;
 
-    private StatusBarNotification[] mQueue;
+    private IBinder[] mKeys = new IBinder[QUEUE_LENGTH];
+    private StatusBarNotification[] mQueue = new StatusBarNotification[QUEUE_LENGTH];
     private int mQueuePos;
 
     public TabletTicker(Context context) {
         mContext = context;
-
-        // TODO: Make this a configuration value.
-        // 3 is enough to let us see most cases, but not get so far behind that it's annoying.
-        mQueue = new StatusBarNotification[3];
     }
 
-    public void add(StatusBarNotification notification) {
+    public void add(IBinder key, StatusBarNotification notification) {
         if (false) {
-            Slog.d(TAG, "add mCurrentNotification=" + mCurrentNotification
+            Slog.d(TAG, "add 1 mCurrentNotification=" + mCurrentNotification
                     + " mQueuePos=" + mQueuePos + " mQueue=" + Arrays.toString(mQueue));
         }
+
+        // If it's already in here, remove whatever's in there and put the new one at the end.
+        remove(key, false);
+
+        mKeys[mQueuePos] = key;
         mQueue[mQueuePos] = notification;
 
-        // If nothing is running now, start the next one
-        if (mCurrentNotification == null) {
+        // If nothing is running now, start the next one.
+        if (mQueuePos == 0 && mCurrentNotification == null) {
             sendEmptyMessage(MSG_ADVANCE);
         }
 
-        if (mQueuePos < mQueue.length - 1) {
+        if (mQueuePos < QUEUE_LENGTH - 1) {
             mQueuePos++;
+        }
+    }
+
+    public void remove(IBinder key) {
+        remove(key, true);
+    }
+
+    public void remove(IBinder key, boolean advance) {
+        if (mCurrentKey == key) {
+            Slog.d(TAG, "removed current");
+            // Showing now
+            if (advance) {
+                removeMessages(MSG_ADVANCE);
+                sendEmptyMessage(MSG_ADVANCE);
+            }
+        } else {
+            // In the queue
+            for (int i=0; i<QUEUE_LENGTH; i++) {
+                if (mKeys[i] == key) {
+                    Slog.d(TAG, "removed from queue: " + i);
+                    for (; i<QUEUE_LENGTH-1; i++) {
+                        mKeys[i] = mKeys[i+1];
+                        mQueue[i] = mQueue[i+1];
+                    }
+                    mKeys[QUEUE_LENGTH-1] = null;
+                    mQueue[QUEUE_LENGTH-1] = null;
+                    if (mQueuePos > 0) {
+                        mQueuePos--;
+                    }
+                    break;
+                }
+            }
         }
     }
 
     public void halt() {
         removeMessages(MSG_ADVANCE);
-        if (mCurrentView != null) {
-            final int N = mQueue.length;
-            for (int i=0; i<N; i++) {
+        if (mCurrentView != null || mQueuePos != 0) {
+            for (int i=0; i<QUEUE_LENGTH; i++) {
+                mKeys[i] = null;
                 mQueue[i] = null;
             }
             mQueuePos = 0;
@@ -110,14 +149,14 @@ public class TabletTicker extends Handler {
         if (mCurrentView != null) {
             mWindow.removeView(mCurrentView);
             mCurrentView = null;
+            mCurrentKey = null;
             mCurrentNotification = null;
         }
 
         // In with the new...
-        StatusBarNotification next = dequeue();
-        while (next != null) {
-            mCurrentNotification = next;
-            mCurrentView = makeTickerView(next);
+        dequeue();
+        while (mCurrentNotification != null) {
+            mCurrentView = makeTickerView(mCurrentNotification);
             if (mCurrentView != null) {
                 if (mWindow == null) {
                     mWindow = makeWindow();
@@ -127,31 +166,33 @@ public class TabletTicker extends Handler {
                 sendEmptyMessageDelayed(MSG_ADVANCE, ADVANCE_DELAY);
                 break;
             }
-            next = dequeue();
+            dequeue();
         }
 
         // if there's nothing left, close the window
         // TODO: Do this when the animation is done instead
-        if (mCurrentView == null) {
+        if (mCurrentView == null && mWindow != null) {
             WindowManagerImpl.getDefault().removeView(mWindow);
             mWindow = null;
         }
     }
 
-    private StatusBarNotification dequeue() {
-        StatusBarNotification notification = mQueue[0];
+    private void dequeue() {
+        mCurrentKey = mKeys[0];
+        mCurrentNotification = mQueue[0];
         if (false) {
             Slog.d(TAG, "dequeue mQueuePos=" + mQueuePos + " mQueue=" + Arrays.toString(mQueue));
         }
         final int N = mQueuePos;
         for (int i=0; i<N; i++) {
+            mKeys[i] = mKeys[i+1];
             mQueue[i] = mQueue[i+1];
         }
+        mKeys[N] = null;
         mQueue[N] = null;
         if (mQueuePos > 0) {
             mQueuePos--;
         }
-        return notification;
     }
 
     private ViewGroup makeWindow() {
@@ -163,6 +204,7 @@ public class TabletTicker extends Handler {
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
@@ -186,7 +228,7 @@ public class TabletTicker extends Handler {
             iconId = R.id.left_icon;
         }
         if (n.tickerView != null) {
-            group = (ViewGroup)inflater.inflate(R.layout.ticker, null, false);
+            group = (ViewGroup)inflater.inflate(R.layout.status_bar_ticker_panel, null, false);
             View expanded = null;
             Exception exception = null;
             try {
@@ -208,7 +250,7 @@ public class TabletTicker extends Handler {
             lp.gravity = Gravity.BOTTOM;
             group.addView(expanded, lp);
         } else if (n.tickerText != null) {
-            group = (ViewGroup)inflater.inflate(R.layout.ticker_compat, mWindow, false);
+            group = (ViewGroup)inflater.inflate(R.layout.status_bar_ticker_compat, mWindow, false);
             final Drawable icon = StatusBarIconView.getIcon(mContext,
                     new StatusBarIcon(notification.pkg, n.icon, n.iconLevel, 0));
             ImageView iv = (ImageView)group.findViewById(iconId);

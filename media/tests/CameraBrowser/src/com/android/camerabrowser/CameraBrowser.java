@@ -24,7 +24,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.Mtp;
+import android.provider.Ptp;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListAdapter;
@@ -58,7 +58,7 @@ public class CameraBrowser extends ListActivity {
     }
 
     private static final String[] DEVICE_COLUMNS =
-         new String[] { Mtp.Device._ID, Mtp.Device.MANUFACTURER, Mtp.Device.MODEL };
+         new String[] { Ptp.Device._ID, Ptp.Device.MANUFACTURER, Ptp.Device.MODEL };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +71,7 @@ public class CameraBrowser extends ListActivity {
     protected void onResume() {
         super.onResume();
 
-        Cursor c = getContentResolver().query(Mtp.Device.CONTENT_URI,
+        Cursor c = getContentResolver().query(Ptp.Device.CONTENT_URI,
                 DEVICE_COLUMNS, null, null, null);
         Log.d(TAG, "query returned " + c);
         startManagingCursor(c);
@@ -80,12 +80,12 @@ public class CameraBrowser extends ListActivity {
         // Map Cursor columns to views defined in simple_list_item_2.xml
         mAdapter = new SimpleCursorAdapter(this,
                 android.R.layout.simple_list_item_2, c,
-                        new String[] { Mtp.Device.MANUFACTURER, Mtp.Device.MODEL },
+                        new String[] { Ptp.Device.MANUFACTURER, Ptp.Device.MODEL },
                         new int[] { android.R.id.text1, android.R.id.text2 });
         setListAdapter(mAdapter);
 
         // register for changes to the device list
-        mResolver.registerContentObserver(Mtp.Device.CONTENT_URI, true, mDeviceObserver);
+        mResolver.registerContentObserver(Ptp.Device.CONTENT_URI, true, mDeviceObserver);
     }
 
     @Override

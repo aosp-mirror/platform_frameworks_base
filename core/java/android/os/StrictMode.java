@@ -19,9 +19,11 @@ import android.animation.ValueAnimator;
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
+import android.app.IActivityManager;
 import android.content.Intent;
 import android.util.Log;
 import android.util.Printer;
+import android.util.Singleton;
 import android.view.IWindowManager;
 
 import com.android.internal.os.RuntimeInit;
@@ -110,6 +112,13 @@ public final class StrictMode {
 
     private static final boolean IS_USER_BUILD = "user".equals(Build.TYPE);
     private static final boolean IS_ENG_BUILD = "eng".equals(Build.TYPE);
+
+    /**
+     * The boolean system property to control screen flashes on violations.
+     *
+     * @hide
+     */
+    public static final String VISUAL_PROPERTY = "persist.sys.strictmode.visual";
 
     // Only log a duplicate stack trace to the logs every second.
     private static final long MIN_LOG_INTERVAL_MS = 1000;
@@ -710,29 +719,66 @@ public final class StrictMode {
         return new ThreadPolicy(oldPolicyMask);
     }
 
+    // We don't want to flash the screen red in the system server
+    // process, nor do we want to modify all the call sites of
+    // conditionallyEnableDebugLogging() in the system server,
+    // so instead we use this to determine if we are the system server.
+    private static boolean amTheSystemServerProcess() {
+        // Fast path.  Most apps don't have the system server's UID.
+        if (Process.myUid() != Process.SYSTEM_UID) {
+            return false;
+        }
+
+        // The settings app, though, has the system server's UID so
+        // look up our stack to see if we came from the system server.
+        Throwable stack = new Throwable();
+        stack.fillInStackTrace();
+        for (StackTraceElement ste : stack.getStackTrace()) {
+            String clsName = ste.getClassName();
+            if (clsName != null && clsName.startsWith("com.android.server.")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Enable DropBox logging for debug phone builds.
      *
      * @hide
      */
     public static boolean conditionallyEnableDebugLogging() {
+        boolean doFlashes = !amTheSystemServerProcess() &&
+                SystemProperties.getBoolean(VISUAL_PROPERTY, IS_ENG_BUILD);
+
         // For debug builds, log event loop stalls to dropbox for analysis.
         // Similar logic also appears in ActivityThread.java for system apps.
-        if (IS_USER_BUILD) {
+        if (IS_USER_BUILD && !doFlashes) {
             setCloseGuardEnabled(false);
             return false;
         }
-        StrictMode.setThreadPolicyMask(
-            StrictMode.DETECT_DISK_WRITE |
-            StrictMode.DETECT_DISK_READ |
-            StrictMode.DETECT_NETWORK |
-            StrictMode.PENALTY_DROPBOX |
-            (IS_ENG_BUILD ? StrictMode.PENALTY_FLASH : 0)
-        );
-        sVmPolicyMask = StrictMode.DETECT_VM_CURSOR_LEAKS |
-                StrictMode.DETECT_VM_CLOSABLE_LEAKS |
-                StrictMode.PENALTY_DROPBOX;
-        setCloseGuardEnabled(vmClosableObjectLeaksEnabled());
+
+        int threadPolicyMask = StrictMode.DETECT_DISK_WRITE |
+                StrictMode.DETECT_DISK_READ |
+                StrictMode.DETECT_NETWORK;
+
+        if (!IS_USER_BUILD) {
+            threadPolicyMask |= StrictMode.PENALTY_DROPBOX;
+        }
+        if (doFlashes) {
+            threadPolicyMask |= StrictMode.PENALTY_FLASH;
+        }
+
+        StrictMode.setThreadPolicyMask(threadPolicyMask);
+
+        if (IS_USER_BUILD) {
+            setCloseGuardEnabled(false);
+        } else {
+            sVmPolicyMask = StrictMode.DETECT_VM_CURSOR_LEAKS |
+                    StrictMode.DETECT_VM_CLOSABLE_LEAKS |
+                    StrictMode.PENALTY_DROPBOX;
+            setCloseGuardEnabled(vmClosableObjectLeaksEnabled());
+        }
         return true;
     }
 
@@ -922,10 +968,8 @@ public final class StrictMode {
                 return;
             }
 
-            // TODO: cache the window manager stub?
             final IWindowManager windowManager = (info.policy & PENALTY_FLASH) != 0 ?
-                    IWindowManager.Stub.asInterface(ServiceManager.getService("window")) :
-                    null;
+                    sWindowManager.get() : null;
             if (windowManager != null) {
                 try {
                     windowManager.showStrictModeViolation(true);
@@ -1092,11 +1136,15 @@ public final class StrictMode {
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 try {
-                    ActivityManagerNative.getDefault().
-                            handleApplicationStrictModeViolation(
-                                RuntimeInit.getApplicationObject(),
-                                violationMaskSubset,
-                                info);
+                    IActivityManager am = ActivityManagerNative.getDefault();
+                    if (am == null) {
+                        Log.d(TAG, "No activity manager; failed to Dropbox violation.");
+                    } else {
+                        am.handleApplicationStrictModeViolation(
+                            RuntimeInit.getApplicationObject(),
+                            violationMaskSubset,
+                            info);
+                    }
                 } catch (RemoteException e) {
                     Log.e(TAG, "RemoteException handling StrictMode violation", e);
                 }
@@ -1401,6 +1449,12 @@ public final class StrictMode {
             new ThreadLocal<ThreadSpanState>() {
         @Override protected ThreadSpanState initialValue() {
             return new ThreadSpanState();
+        }
+    };
+
+    private static Singleton<IWindowManager> sWindowManager = new Singleton<IWindowManager>() {
+        protected IWindowManager create() {
+            return IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
         }
     };
 

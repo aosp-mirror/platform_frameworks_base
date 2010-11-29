@@ -58,6 +58,7 @@ public:
         kFormNone = 0,
         kFormRange = 1,
         kFormEnum = 2,
+        kFormDateTime = 3,
     };
 
     uint32_t            mGroupCode;
@@ -90,6 +91,7 @@ public:
 
     void                setFormRange(int min, int max, int step);
     void                setFormEnum(const int* values, int count);
+    void                setFormDateTime();
 
     void                print();
 

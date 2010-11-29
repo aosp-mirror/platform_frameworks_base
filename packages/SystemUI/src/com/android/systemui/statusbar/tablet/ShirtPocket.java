@@ -184,7 +184,7 @@ public class ShirtPocket extends FrameLayout {
     };
 
     private void setupWindow() {
-        mWindow = View.inflate(getContext(), R.layout.sysbar_panel_pocket, null);
+        mWindow = View.inflate(getContext(), R.layout.status_bar_pocket_panel, null);
 
         mPreviewIcon = (ImageView) mWindow.findViewById(R.id.icon);
         mDescription = (TextView) mWindow.findViewById(R.id.description);

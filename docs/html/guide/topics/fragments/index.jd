@@ -399,7 +399,7 @@ in the back stack:</p>
 Fragment newFragment = new MyFragment();
 FragmentTransaction ft = openFragmentTransaction();
 // Replace and add to back stack
-ft.replace(newFragment, R.id.myfragment);
+ft.replace(R.id.myfragment, newFragment);
 ft.addToBackStack(null);
 // Apply changes
 ft.commit();

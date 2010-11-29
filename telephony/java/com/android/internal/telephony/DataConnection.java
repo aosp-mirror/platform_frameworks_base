@@ -16,7 +16,6 @@
 
 package com.android.internal.telephony;
 
-import com.android.internal.telephony.gsm.ApnSetting;
 
 import com.android.internal.util.HierarchicalState;
 import com.android.internal.util.HierarchicalStateMachine;

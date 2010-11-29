@@ -102,12 +102,13 @@ public class TabletStatusBar extends StatusBar {
     NotificationIconArea mNotificationIconArea;
     View mNavigationArea;
 
-    View mBackButton;
+    ImageView mBackButton;
     View mHomeButton;
     View mMenuButton;
     View mRecentButton;
 
-    InputMethodButton mInputMethodButton;
+    InputMethodButton mInputMethodSwitchButton;
+    InputMethodButton mInputMethodShortcutButton;
 
     NotificationPanel mNotificationPanel;
     NotificationPeekPanel mNotificationPeekWindow;
@@ -144,11 +145,11 @@ public class TabletStatusBar extends StatusBar {
 
         final Resources res = context.getResources();
         final int barHeight= res.getDimensionPixelSize(
-            com.android.internal.R.dimen.status_bar_height);
+                com.android.internal.R.dimen.status_bar_height);
 
         // Notification Panel
         mNotificationPanel = (NotificationPanel)View.inflate(context,
-                R.layout.sysbar_panel_notifications, null);
+                R.layout.status_bar_notification_panel, null);
         mNotificationPanel.setVisibility(View.GONE);
         mNotificationPanel.setOnTouchListener(
                 new TouchOutsideListener(MSG_CLOSE_NOTIFICATION_PANEL, mNotificationPanel));
@@ -157,7 +158,7 @@ public class TabletStatusBar extends StatusBar {
         mBatteryController.addIconView((ImageView)mNotificationPanel.findViewById(R.id.battery));
         mBatteryController.addLabelView(
                 (TextView)mNotificationPanel.findViewById(R.id.battery_text));
-        mNetworkController.addCombinedDataIconView(
+        mNetworkController.addCombinedSignalIconView(
                 (ImageView)mNotificationPanel.findViewById(R.id.network));
         mNetworkController.addLabelView(
                 (TextView)mNotificationPanel.findViewById(R.id.network_text));
@@ -179,11 +180,11 @@ public class TabletStatusBar extends StatusBar {
 
         // Notification preview window
         mNotificationPeekWindow = (NotificationPeekPanel) View.inflate(context,
-                R.layout.sysbar_panel_notification_peek, null);
+                R.layout.status_bar_notification_peek, null);
         mNotificationPeekRow = (ViewGroup) mNotificationPeekWindow.findViewById(R.id.content);
         mNotificationPeekWindow.setVisibility(View.GONE);
         mNotificationPeekWindow.setOnTouchListener(
-                new TouchOutsideListener(MSG_CLOSE_NOTIFICATION_PANEL, mNotificationPeekWindow));
+                new TouchOutsideListener(MSG_CLOSE_NOTIFICATION_PEEK, mNotificationPeekWindow));
         mNotificationPeekScrubRight = new LayoutTransition();
         mNotificationPeekScrubRight.setAnimator(LayoutTransition.APPEARING, 
                 ObjectAnimator.ofInt(null, "left", -512, 0));
@@ -215,8 +216,8 @@ public class TabletStatusBar extends StatusBar {
 
         // Recents Panel
         if (USE_2D_RECENTS) {
-            mRecentsPanel = (RecentAppsPanel) View.inflate(context, R.layout.sysbar_panel_recent,
-                    null);
+            mRecentsPanel = (RecentAppsPanel) View.inflate(context,
+                    R.layout.status_bar_recent_panel, null);
             mRecentsPanel.setVisibility(View.GONE);
             mRecentsPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_RECENTS_PANEL,
                     mRecentsPanel));
@@ -282,11 +283,11 @@ public class TabletStatusBar extends StatusBar {
         mBatteryController = new BatteryController(mContext);
         mBatteryController.addIconView((ImageView)sb.findViewById(R.id.battery));
         mNetworkController = new NetworkController(mContext);
-        mNetworkController.addCombinedDataIconView((ImageView)sb.findViewById(R.id.network));
+        mNetworkController.addCombinedSignalIconView((ImageView)sb.findViewById(R.id.network));
 
         // The navigation buttons
         mNavigationArea = sb.findViewById(R.id.navigationArea);
-        mBackButton = mNavigationArea.findViewById(R.id.back);
+        mBackButton = (ImageView)mNavigationArea.findViewById(R.id.back);
         mHomeButton = mNavigationArea.findViewById(R.id.home);
         mMenuButton = mNavigationArea.findViewById(R.id.menu);
         mRecentButton = mNavigationArea.findViewById(R.id.recent_apps);
@@ -294,7 +295,8 @@ public class TabletStatusBar extends StatusBar {
         mRecentButton.setOnClickListener(mOnClickListener);
 
         // The bar contents buttons
-        mInputMethodButton = (InputMethodButton) sb.findViewById(R.id.imeButton);
+        mInputMethodSwitchButton = (InputMethodButton) sb.findViewById(R.id.imeSwitchButton);
+        mInputMethodShortcutButton = (InputMethodButton) sb.findViewById(R.id.imeShortcutButton);
 
         // "shadows" of the status bar features, for lights-out mode
         mBackShadow = sb.findViewById(R.id.back_shadow);
@@ -386,6 +388,7 @@ public class TabletStatusBar extends StatusBar {
                         mNotificationPanel.setVisibility(View.VISIBLE);
                         // synchronize with current shadow state
                         mShadowController.hideElement(mNotificationArea);
+                        mTicker.halt();
                     }
                     break;
                 case MSG_CLOSE_NOTIFICATION_PANEL:
@@ -456,12 +459,7 @@ public class TabletStatusBar extends StatusBar {
         if (DEBUG) Slog.d(TAG, "addNotification(" + key + " -> " + notification + ")");
         addNotificationViews(key, notification);
 
-        boolean immersive = false;
-        try {
-            immersive = ActivityManagerNative.getDefault().isTopActivityImmersive();
-            //Slog.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
-        } catch (RemoteException ex) {
-        }
+        final boolean immersive = isImmersive();
         if (false && immersive) {
             // TODO: immersive mode popups for tablet
         } else if (notification.notification.fullScreenIntent != null) {
@@ -473,7 +471,7 @@ public class TabletStatusBar extends StatusBar {
             } catch (PendingIntent.CanceledException e) {
             }
         } else {
-            tick(notification);
+            tick(key, notification);
         }
 
         setAreThereNotifications();
@@ -547,7 +545,14 @@ public class TabletStatusBar extends StatusBar {
             removeNotificationViews(key);
             addNotificationViews(key, notification);
         }
-        // TODO: ticker; immersive mode
+        // fullScreenIntent doesn't happen on updates.  You need to clear & repost a new
+        // notification.
+        final boolean immersive = isImmersive();
+        if (false && immersive) {
+            // TODO: immersive mode
+        } else {
+            tick(key, notification);
+        }
 
         setAreThereNotifications();
     }
@@ -555,6 +560,7 @@ public class TabletStatusBar extends StatusBar {
     public void removeNotification(IBinder key) {
         if (DEBUG) Slog.d(TAG, "removeNotification(" + key + ") // TODO");
         removeNotificationViews(key);
+        mTicker.remove(key);
         setAreThereNotifications();
     }
 
@@ -601,7 +607,7 @@ public class TabletStatusBar extends StatusBar {
         return n.tickerView != null || !TextUtils.isEmpty(n.tickerText);
     }
 
-    private void tick(StatusBarNotification n) {
+    private void tick(IBinder key, StatusBarNotification n) {
         // Don't show the ticker when the windowshade is open.
         if (mNotificationPanel.getVisibility() == View.VISIBLE) {
             return;
@@ -613,7 +619,7 @@ public class TabletStatusBar extends StatusBar {
         if (hasTicker(n.notification) && mStatusBarView.getWindowToken() != null) {
             if (0 == (mDisabled & (StatusBarManager.DISABLE_NOTIFICATION_ICONS
                             | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
-                mTicker.add(n);
+                mTicker.add(key, n);
             }
         }
     }
@@ -645,13 +651,26 @@ public class TabletStatusBar extends StatusBar {
         mMenuButton.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
-    public void setIMEButtonVisible(boolean visible) {
+    public void setIMEButtonVisible(IBinder token, boolean visible) {
         if (DEBUG) {
             Slog.d(TAG, (visible?"showing":"hiding") + " the IME button");
         }
-        mInputMethodButton.setIMEButtonVisible(visible);
+        mInputMethodSwitchButton.setIMEButtonVisible(token, visible);
+        mInputMethodShortcutButton.setIMEButtonVisible(token, visible);
+        mBackButton.setImageResource(
+                visible ? R.drawable.ic_sysbar_back_ime : R.drawable.ic_sysbar_back);
     }
 
+    private boolean isImmersive() {
+        try {
+            return ActivityManagerNative.getDefault().isTopActivityImmersive();
+            //Slog.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
+        } catch (RemoteException ex) {
+            // the end is nigh
+            return false;
+        }
+    }
+    
     private void setAreThereNotifications() {
         final boolean hasClearable = mNotns.hasClearableItems();
 
@@ -815,8 +834,7 @@ public class TabletStatusBar extends StatusBar {
                 case MotionEvent.ACTION_MOVE:
                     // peek and switch icons if necessary
                     int numIcons = mIconLayout.getChildCount();
-                    int peekIndex = 
-                            (int)((float)event.getX() * numIcons / mIconLayout.getWidth());
+                    int peekIndex = (int)((float)event.getX() * numIcons / mIconLayout.getWidth());
                     if (peekIndex > numIcons - 1) peekIndex = numIcons - 1;
                     else if (peekIndex < 0) peekIndex = 0;
 
@@ -828,8 +846,7 @@ public class TabletStatusBar extends StatusBar {
                         mHandler.removeMessages(MSG_OPEN_NOTIFICATION_PEEK);
 
                         // no delay if we're scrubbing left-right
-                        mHandler.sendMessageDelayed(peekMsg,
-                                peeking ? 0 : mNotificationPeekTapDuration);
+                        mHandler.sendMessage(peekMsg);
                     }
 
                     // check for fling
@@ -851,7 +868,7 @@ public class TabletStatusBar extends StatusBar {
                 case MotionEvent.ACTION_CANCEL:
                     mHandler.removeMessages(MSG_OPEN_NOTIFICATION_PEEK);
                     if (peeking) {
-                        mHandler.sendEmptyMessageDelayed(MSG_CLOSE_NOTIFICATION_PEEK, 250);
+                        mHandler.sendEmptyMessageDelayed(MSG_CLOSE_NOTIFICATION_PEEK, 5000);
                     }
                     mVT.recycle();
                     mVT = null;
@@ -984,7 +1001,7 @@ public class TabletStatusBar extends StatusBar {
         // create the row view
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        View row = inflater.inflate(R.layout.status_bar_latest_event, parent, false);
+        View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
         workAroundBadLayerDrawableOpacity(row);
         View vetoButton = row.findViewById(R.id.veto);
         if (entry.notification.isClearable()) {

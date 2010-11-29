@@ -21,7 +21,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Mtp;
+import android.provider.Ptp;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListAdapter;
@@ -40,7 +40,7 @@ public class StorageBrowser extends ListActivity {
     private DeviceDisconnectedReceiver mDisconnectedReceiver;
 
     private static final String[] STORAGE_COLUMNS =
-        new String[] { Mtp.Storage._ID, Mtp.Storage.DESCRIPTION };
+        new String[] { Ptp.Storage._ID, Ptp.Storage.DESCRIPTION };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +54,7 @@ public class StorageBrowser extends ListActivity {
         super.onResume();
 
         if (mDeviceID != 0) {
-            Cursor c = getContentResolver().query(Mtp.Storage.getContentUri(mDeviceID),
+            Cursor c = getContentResolver().query(Ptp.Storage.getContentUri(mDeviceID),
                     STORAGE_COLUMNS, null, null, null);
             Log.d(TAG, "query returned " + c);
             startManagingCursor(c);
@@ -62,7 +62,7 @@ public class StorageBrowser extends ListActivity {
             // Map Cursor columns to views defined in simple_list_item_1.xml
             mAdapter = new SimpleCursorAdapter(this,
                     android.R.layout.simple_list_item_1, c,
-                            new String[] { Mtp.Storage.DESCRIPTION },
+                            new String[] { Ptp.Storage.DESCRIPTION },
                             new int[] { android.R.id.text1, android.R.id.text2 });
             setListAdapter(mAdapter);
         }

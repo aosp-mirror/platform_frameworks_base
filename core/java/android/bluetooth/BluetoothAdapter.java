@@ -521,6 +521,21 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Get the UUIDs supported by the local Bluetooth adapter.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     *
+     * @return the UUIDs supported by the local Bluetooth Adapter.
+     * @hide
+     */
+    public ParcelUuid[] getUuids() {
+        try {
+            return mService.getUuids();
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return null;
+    }
+
+    /**
      * Set the friendly Bluetooth name of the local Bluetooth adapter.
      * <p>This name is visible to remote Bluetooth devices.
      * <p>Valid Bluetooth names are a maximum of 248 bytes using UTF-8
