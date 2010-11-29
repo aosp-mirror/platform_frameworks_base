@@ -102,7 +102,7 @@ public class TabletStatusBar extends StatusBar {
     NotificationIconArea mNotificationIconArea;
     View mNavigationArea;
 
-    View mBackButton;
+    ImageView mBackButton;
     View mHomeButton;
     View mMenuButton;
     View mRecentButton;
@@ -287,7 +287,7 @@ public class TabletStatusBar extends StatusBar {
 
         // The navigation buttons
         mNavigationArea = sb.findViewById(R.id.navigationArea);
-        mBackButton = mNavigationArea.findViewById(R.id.back);
+        mBackButton = (ImageView)mNavigationArea.findViewById(R.id.back);
         mHomeButton = mNavigationArea.findViewById(R.id.home);
         mMenuButton = mNavigationArea.findViewById(R.id.menu);
         mRecentButton = mNavigationArea.findViewById(R.id.recent_apps);
@@ -657,6 +657,8 @@ public class TabletStatusBar extends StatusBar {
         }
         mInputMethodSwitchButton.setIMEButtonVisible(token, visible);
         mInputMethodShortcutButton.setIMEButtonVisible(token, visible);
+        mBackButton.setImageResource(
+                visible ? R.drawable.ic_sysbar_back_ime : R.drawable.ic_sysbar_back);
     }
 
     private boolean isImmersive() {
