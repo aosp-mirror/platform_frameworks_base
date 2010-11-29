@@ -95,7 +95,17 @@
             />
 
         <ImageView
-            android:id="@+id/network"
+            android:id="@+id/network_signal"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_toRightOf="@id/battery_text"
+            android:layout_alignBaseline="@id/battery"
+            android:layout_marginRight="8dp"
+            android:baseline="15dp"
+            />
+
+        <ImageView
+            android:id="@+id/network_type"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:layout_toRightOf="@id/battery_text"
@@ -109,7 +119,7 @@
             style="@style/StatusBarNotificationText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/network"
+            android:layout_toRightOf="@id/network_signal"
             android:layout_alignBaseline="@id/battery"
             android:singleLine="true"
             android:text="@string/status_bar_settings_settings_button"
