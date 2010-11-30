@@ -104,7 +104,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public boolean isLayoutSizeAtLeast(int size) {
         int cur = screenLayout&SCREENLAYOUT_SIZE_MASK;
         if (cur == SCREENLAYOUT_SIZE_UNDEFINED) return false;
-        return size >= cur;
+        return cur >= size;
     }
 
     public static final int TOUCHSCREEN_UNDEFINED = 0;

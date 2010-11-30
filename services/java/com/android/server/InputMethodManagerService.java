@@ -55,7 +55,6 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Message;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -125,6 +124,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final String SUBTYPE_MODE_VOICE = "voice";
 
     final Context mContext;
+    final Resources mRes;
     final Handler mHandler;
     final InputMethodSettings mSettings;
     final SettingsObserver mSettingsObserver;
@@ -468,6 +468,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     public InputMethodManagerService(Context context, StatusBarManagerService statusBar) {
         mContext = context;
+        mRes = context.getResources();
         mHandler = new Handler(this);
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
@@ -1214,11 +1215,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 mCurFocusedWindow = windowToken;
 
+                // Should we auto-show the IME even if the caller has not
+                // specified what should be done with it?
+                // We only do this automatically if the window can resize
+                // to accommodate the IME (so what the user sees will give
+                // them good context without input information being obscured
+                // by the IME) or if running on a large screen where there
+                // is more room for the target window + IME.
+                final boolean doAutoShow =
+                        (softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
+                                == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+                        || mRes.getConfiguration().isLayoutSizeAtLeast(
+                                Configuration.SCREENLAYOUT_SIZE_LARGE);
+                        
                 switch (softInputMode&WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE) {
                     case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
-                        if (!isTextEditor || (softInputMode &
-                                WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
-                                != WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
+                        if (!isTextEditor || !doAutoShow) {
                             if (WindowManager.LayoutParams.mayUseInputMethod(windowFlags)) {
                                 // There is no focus view, and this window will
                                 // be behind any soft input window, so hide the
@@ -1226,13 +1238,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 if (DEBUG) Slog.v(TAG, "Unspecified window will hide input");
                                 hideCurrentInputLocked(InputMethodManager.HIDE_NOT_ALWAYS, null);
                             }
-                        } else if (isTextEditor && (softInputMode &
-                                WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
-                                == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-                                && (softInputMode &
-                                        WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
+                        } else if (isTextEditor && doAutoShow && (softInputMode &
+                                WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
                             // There is a focus view, and we are navigating forward
                             // into the window, so show the input window for the user.
+                            // We only do this automatically if the window an resize
+                            // to accomodate the IME (so what the user sees will give
+                            // them good context without input information being obscured
+                            // by the IME) or if running on a large screen where there
+                            // is more room for the target window + IME.
                             if (DEBUG) Slog.v(TAG, "Unspecified window will show input");
                             showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
                         }
@@ -1544,7 +1558,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         map.clear();
 
         PackageManager pm = mContext.getPackageManager();
-        final Configuration config = mContext.getResources().getConfiguration();
+        final Configuration config = mRes.getConfiguration();
         final boolean haveHardKeyboard = config.keyboard == Configuration.KEYBOARD_QWERTY;
         String disabledSysImes = Settings.Secure.getString(mContext.getContentResolver(),
                 Secure.DISABLED_SYSTEM_INPUT_METHODS);
@@ -1944,7 +1958,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return null;
         }
         if (TextUtils.isEmpty(locale)) {
-            locale = mContext.getResources().getConfiguration().locale.toString();
+            locale = mRes.getConfiguration().locale.toString();
         }
         final String language = locale.substring(0, 2);
         boolean partialMatchFound = false;

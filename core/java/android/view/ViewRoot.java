@@ -54,7 +54,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TypedValue;
-import android.view.InputQueue.FinishedCallback;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -775,7 +774,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                     baseSize = (int)mTmpValue.getDimension(packageMetrics);
                 }
                 if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": baseSize=" + baseSize);
-                if (desiredWindowWidth > baseSize) {
+                if (baseSize != 0 && desiredWindowWidth > baseSize) {
                     int maxHeight = (desiredWindowHeight*2)/3;
                     childWidthMeasureSpec = getRootMeasureSpec(baseSize, lp.width);
                     childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
