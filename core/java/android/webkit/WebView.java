@@ -485,6 +485,8 @@ public class WebView extends AbsoluteLayout
     // true if onPause has been called (and not onResume)
     private boolean mIsPaused;
 
+    private HitTestResult mInitialHitTestResult;
+
     /**
      * Customizable constant
      */
@@ -2102,6 +2104,10 @@ public class WebView extends AbsoluteLayout
      * HitTestResult type is set to UNKNOWN_TYPE.
      */
     public HitTestResult getHitTestResult() {
+        return hitTestResult(mInitialHitTestResult);
+    }
+
+    private HitTestResult hitTestResult(HitTestResult fallback) {
         if (mNativeClass == 0) {
             return null;
         }
@@ -2129,6 +2135,16 @@ public class WebView extends AbsoluteLayout
                     }
                 }
             }
+        } else if (fallback != null) {
+            /* If webkit causes a rebuild while the long press is in progress,
+             * the cursor node may be reset, even if it is still around. This
+             * uses the cursor node saved when the touch began. Since the
+             * nativeImageURI below only changes the result if it is successful,
+             * this uses the data beneath the touch if available or the original
+             * tap data otherwise.
+             */
+            Log.v(LOGTAG, "hitTestResult use fallback");
+            result = fallback;
         }
         int type = result.getType();
         if (type == HitTestResult.UNKNOWN_TYPE
@@ -5141,6 +5157,7 @@ public class WebView extends AbsoluteLayout
             case MotionEvent.ACTION_DOWN: {
                 mPreventDefault = PREVENT_DEFAULT_NO;
                 mConfirmMove = false;
+                mInitialHitTestResult = null;
                 if (!mScroller.isFinished()) {
                     // stop the current scroll animation, but if this is
                     // the start of a fling, allow it to add to the current
@@ -6217,6 +6234,7 @@ public class WebView extends AbsoluteLayout
         Rect rect = new Rect(contentX - mNavSlop, contentY - mNavSlop,
                 contentX + mNavSlop, contentY + mNavSlop);
         nativeSelectBestAt(rect);
+        mInitialHitTestResult = hitTestResult(null);
     }
 
     /**
@@ -6657,6 +6675,7 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SWITCH_TO_SHORTPRESS: {
+                    mInitialHitTestResult = null; // set by updateSelection()
                     if (mTouchMode == TOUCH_INIT_MODE) {
                         if (!getSettings().supportTouchOnly()
                                 && mPreventDefault != PREVENT_DEFAULT_YES) {
