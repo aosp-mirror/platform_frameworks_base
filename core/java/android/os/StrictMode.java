@@ -847,6 +847,13 @@ public final class StrictMode {
         }
     };
 
+    // Note: only access this once verifying the thread has a Looper.
+    private static final ThreadLocal<Handler> threadHandler = new ThreadLocal<Handler>() {
+        @Override protected Handler initialValue() {
+            return new Handler();
+        }
+    };
+
     private static boolean tooManyViolationsThisLoop() {
         return violationsBeingTimed.get().size() >= MAX_OFFENSES_PER_LOOP;
     }
@@ -954,7 +961,6 @@ public final class StrictMode {
                 return;
             }
 
-            MessageQueue queue = Looper.myQueue();
             final ArrayList<ViolationInfo> records = violationsBeingTimed.get();
             if (records.size() >= MAX_OFFENSES_PER_LOOP) {
                 // Not worth measuring.  Too many offenses in one loop.
@@ -977,9 +983,30 @@ public final class StrictMode {
                 }
             }
 
-            queue.addIdleHandler(new MessageQueue.IdleHandler() {
-                    public boolean queueIdle() {
+            // We post a runnable to a Handler (== delay 0 ms) for
+            // measuring the end time of a violation instead of using
+            // an IdleHandler (as was previously used) because an
+            // IdleHandler may not run for quite a long period of time
+            // if an ongoing animation is happening and continually
+            // posting ASAP (0 ms) animation steps.  Animations are
+            // throttled back to 60fps via SurfaceFlinger/View
+            // invalidates, _not_ by posting frame updates every 16
+            // milliseconds.
+            threadHandler.get().post(new Runnable() {
+                    public void run() {
                         long loopFinishTime = SystemClock.uptimeMillis();
+
+                        // Note: we do this early, before handling the
+                        // violation below, as handling the violation
+                        // may include PENALTY_DEATH and we don't want
+                        // to keep the red border on.
+                        if (windowManager != null) {
+                            try {
+                                windowManager.showStrictModeViolation(false);
+                            } catch (RemoteException unused) {
+                            }
+                        }
+
                         for (int n = 0; n < records.size(); ++n) {
                             ViolationInfo v = records.get(n);
                             v.violationNumThisLoop = n + 1;
@@ -988,13 +1015,6 @@ public final class StrictMode {
                             handleViolation(v);
                         }
                         records.clear();
-                        if (windowManager != null) {
-                            try {
-                                windowManager.showStrictModeViolation(false);
-                            } catch (RemoteException unused) {
-                            }
-                        }
-                        return false;  // remove this idle handler from the array
                     }
                 });
         }
