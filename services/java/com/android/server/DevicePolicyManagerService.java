@@ -407,17 +407,29 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         context.registerReceiver(mReceiver, filter);
     }
 
+    /**
+     * Set an alarm for an upcoming event - expiration warning, expiration, or post-expiration
+     * reminders.  Clears alarm if no expirations are configured.
+     */
     protected void setExpirationAlarmCheckLocked(Context context) {
         final long expiration = getPasswordExpirationLocked(null);
         final long now = System.currentTimeMillis();
         final long timeToExpire = expiration - now;
         final long alarmTime;
-        if (timeToExpire > 0L && timeToExpire < MS_PER_DAY) {
-            // Next expiration is less than a day, set alarm for exact expiration time
-            alarmTime = now + timeToExpire;
-        } else {
-            // Check again in 24 hours...
+        if (expiration == 0) {
+            // No expirations are currently configured:  Cancel alarm.
+            alarmTime = 0;
+        } else if (timeToExpire <= 0) {
+            // The password has already expired:  Repeat every 24 hours.
             alarmTime = now + MS_PER_DAY;
+        } else {
+            // Selecting the next alarm time:  Roll forward to the next 24 hour multiple before
+            // the expiration time.
+            long alarmInterval = timeToExpire % MS_PER_DAY;
+            if (alarmInterval == 0) {
+                alarmInterval = MS_PER_DAY;
+            }
+            alarmTime = now + alarmInterval;
         }
 
         long token = Binder.clearCallingIdentity();
@@ -427,7 +439,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     new Intent(ACTION_EXPIRED_PASSWORD_NOTIFICATION),
                     PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
             am.cancel(pi);
-            am.set(AlarmManager.RTC, alarmTime, pi);
+            if (alarmTime != 0) {
+                am.set(AlarmManager.RTC, alarmTime, pi);
+            }
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -794,7 +808,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD)
                         && admin.passwordExpirationTimeout > 0L
                         && admin.passwordExpirationDate > 0L
-                        && now > admin.passwordExpirationDate - EXPIRATION_GRACE_PERIOD_MS) {
+                        && now >= admin.passwordExpirationDate - EXPIRATION_GRACE_PERIOD_MS) {
                     sendAdminCommandLocked(admin, DeviceAdminReceiver.ACTION_PASSWORD_EXPIRING);
                 }
             }
@@ -1007,14 +1021,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    /**
+     * Return a single admin's expiration cycle time, or the min of all cycle times.
+     * Returns 0 if not configured.
+     */
     public long getPasswordExpirationTimeout(ComponentName who) {
         synchronized (this) {
-            long timeout = 0L;
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
-                return admin != null ? admin.passwordExpirationTimeout : timeout;
+                return admin != null ? admin.passwordExpirationTimeout : 0L;
             }
 
+            long timeout = 0L;
             final int N = mAdminList.size();
             for (int i = 0; i < N; i++) {
                 ActiveAdmin admin = mAdminList.get(i);
@@ -1027,13 +1045,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    /**
+     * Return a single admin's expiration date/time, or the min (soonest) for all admins.
+     * Returns 0 if not configured.
+     */
     private long getPasswordExpirationLocked(ComponentName who) {
-        long timeout = 0L;
         if (who != null) {
             ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
-            return admin != null ? admin.passwordExpirationDate : timeout;
+            return admin != null ? admin.passwordExpirationDate : 0L;
         }
 
+        long timeout = 0L;
         final int N = mAdminList.size();
         for (int i = 0; i < N; i++) {
             ActiveAdmin admin = mAdminList.get(i);
@@ -1606,6 +1628,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     mFailedPasswordAttempts = 0;
                     saveSettingsLocked();
                     updatePasswordExpirationsLocked();
+                    setExpirationAlarmCheckLocked(mContext);
                     sendAdminCommandLocked(DeviceAdminReceiver.ACTION_PASSWORD_CHANGED,
                             DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
                 } finally {
@@ -1615,14 +1638,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    /**
+     * Called any time the device password is updated.  Resets all password expiration clocks.
+     */
     private void updatePasswordExpirationsLocked() {
         final int N = mAdminList.size();
         if (N > 0) {
             for (int i=0; i<N; i++) {
                 ActiveAdmin admin = mAdminList.get(i);
                 if (admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD)) {
-                    admin.passwordExpirationDate = System.currentTimeMillis()
-                            + admin.passwordExpirationTimeout;
+                    long timeout = admin.passwordExpirationTimeout;
+                    long expiration = timeout > 0L ? (timeout + System.currentTimeMillis()) : 0L;
+                    admin.passwordExpirationDate = expiration;
                 }
             }
             saveSettingsLocked();
