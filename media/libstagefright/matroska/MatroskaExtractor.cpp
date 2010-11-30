@@ -252,7 +252,7 @@ void BlockIterator::reset() {
 }
 
 void BlockIterator::seek(int64_t seekTimeUs) {
-    mCluster = mSegment->GetCluster(seekTimeUs * 1000ll);
+    mCluster = mSegment->FindCluster(seekTimeUs * 1000ll);
     mBlockEntry = mCluster != NULL ? mCluster->GetFirst() : NULL;
 
     while (!eos() && block()->GetTrackNumber() != mTrackNum) {
@@ -476,7 +476,7 @@ void MatroskaExtractor::addTracks() {
 
         size_t codecPrivateSize;
         const unsigned char *codecPrivate =
-            track->GetCodecPrivate(&codecPrivateSize);
+            track->GetCodecPrivate(codecPrivateSize);
 
         enum { VIDEO_TRACK = 1, AUDIO_TRACK = 2 };
 
