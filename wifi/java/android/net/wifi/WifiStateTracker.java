@@ -601,8 +601,6 @@ public class WifiStateTracker extends NetworkStateTracker {
      * Send the tracker a notification that the Wi-Fi driver has been stopped.
      */
     void notifyDriverStopped() {
-        mRunState = RUN_STATE_STOPPED;
-
         // Send a driver stopped message to our handler
         Message.obtain(this, EVENT_DRIVER_STATE_CHANGED, DRIVER_STOPPED, 0).sendToTarget();
     }
@@ -1300,6 +1298,9 @@ public class WifiStateTracker extends NetworkStateTracker {
                             scan(true);
                         }
                     }
+                    break;
+                case DRIVER_STOPPED:
+                    mRunState = RUN_STATE_STOPPED;
                     break;
                 case DRIVER_HUNG:
                     Log.e(TAG, "Wifi Driver reports HUNG - reloading.");
