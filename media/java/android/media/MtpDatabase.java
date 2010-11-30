@@ -169,11 +169,6 @@ public class MtpDatabase {
             // handle abstract playlists separately
             // they do not exist in the file system so don't use the media scanner here
             if (format == MtpConstants.FORMAT_ABSTRACT_AV_PLAYLIST) {
-                // Strip Windows Media Player file extension
-                if (path.endsWith(".pla")) {
-                    path = path.substring(0, path.length() - 4);
-                }
-
                 // extract name from path
                 String name = path;
                 int lastSlash = name.lastIndexOf('/');
@@ -1005,7 +1000,7 @@ public class MtpDatabase {
             valuesList[i] = values;
         }
         try {
-            if (count == mMediaProvider.bulkInsert(uri, valuesList)) {
+            if (mMediaProvider.bulkInsert(uri, valuesList) > 0) {
                 return MtpConstants.RESPONSE_OK;
             }
         } catch (RemoteException e) {
