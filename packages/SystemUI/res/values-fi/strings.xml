@@ -31,11 +31,18 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Ilmoitukset"</string>
     <string name="battery_low_title" msgid="7923774589611311406">"Kytke laturi"</string>
     <!-- outdated translation 7388781709819722764 -->     <string name="battery_low_subtitle" msgid="1752040062087829196">"Akun virta on vähissä:"</string>
-    <!-- outdated translation 696154104579022959 -->     <string name="battery_low_percent_format" msgid="1077244949318261761">"jäljellä <xliff:g id="NUMBER">%d%%</xliff:g> tai vähemmän."</string>
+    <!-- no translation found for battery_low_percent_format (1077244949318261761) -->
+    <skip />
     <!-- no translation found for invalid_charger (4549105996740522523) -->
     <skip />
     <string name="battery_low_why" msgid="7279169609518386372">"Akun käyttö"</string>
-    <!-- no translation found for status_bar_settings_settings_button (7832600575390861653) -->
+    <!-- no translation found for status_bar_settings_settings_button (3023889916699270224) -->
+    <skip />
+    <!-- no translation found for status_bar_settings_airplane (4879879698500955300) -->
+    <skip />
+    <!-- no translation found for status_bar_settings_rotation_lock (8361452930058000609) -->
+    <skip />
+    <!-- no translation found for status_bar_settings_notifications (397146176280905137) -->
     <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"Viimeisimmät"</string>
     <!-- no translation found for recent_tasks_empty (1905484479067697884) -->

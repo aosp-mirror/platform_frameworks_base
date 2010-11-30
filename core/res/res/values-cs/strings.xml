@@ -632,7 +632,8 @@
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"<xliff:g id="NUMBER_0">%d</xliff:g>krát jste nakreslili nesprávné bezpečnostní gesto. "\n\n"Opakujte prosím akci za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Vícekrát (<xliff:g id="NUMBER_0">%d</xliff:g>) jste nesprávně zadali heslo. "\n\n"Zkuste to znovu za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Vícekrát (<xliff:g id="NUMBER_0">%d</xliff:g>) jste nesprávně zadali kód PIN. "\n\n"Zkuste to znovu za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
-    <!-- outdated translation 3351013842320127827 -->     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"<xliff:g id="NUMBER_0">%d</xliff:g>krát jste nesprávně nakreslili své bezpečnostní gesto. Po dalších neúspěšných pokusech (<xliff:g id="NUMBER_1">%d</xliff:g>) budete požádáni o odemčení telefonu pomocí přihlášení do účtu Google."\n\n" Akci prosím opakujte za několik sekund (<xliff:g id="NUMBER_2">%d</xliff:g>)."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (8687762517114904651) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"<xliff:g id="NUMBER_0">%d</xliff:g>krát jste nesprávně nakreslili své bezpečnostní gesto. Po dalších neúspěšných pokusech (<xliff:g id="NUMBER_1">%d</xliff:g>) budete požádáni o odemčení telefonu pomocí přihlášení do účtu Google."\n\n" Akci prosím opakujte za několik sekund (<xliff:g id="NUMBER_2">%d</xliff:g>)."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Sekundy zbývající do dalšího pokusu: <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Zapomněli jste gesto?"</string>
@@ -662,6 +663,8 @@
     <string name="save_password_label" msgid="6860261758665825069">"Potvrdit"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Tip: Dvojitým klepnutím můžete zobrazení přiblížit nebo oddálit."</string>
     <!-- outdated translation 8940110866775097494 -->     <string name="autofill_this_form" msgid="1272247532604569872">"Automaticky vyplnit tento formulář"</string>
+    <!-- no translation found for setup_autofill (8154593408885654044) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />

@@ -667,7 +667,8 @@
     <skip />
     <!-- no translation found for lockscreen_too_many_failed_pin_attempts_dialog_message (6827749231465145590) -->
     <skip />
-    <!-- outdated translation 3351013842320127827 -->     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده اید. <xliff:g id="NUMBER_1">%d</xliff:g> تلاش های ناموفق بیشتر سبب می شود از شما خواسته شود که برای بازگشایی قفل گوشی خود به برنامه Google وارد شوید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (8687762517114904651) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده اید. <xliff:g id="NUMBER_1">%d</xliff:g> تلاش های ناموفق بیشتر سبب می شود از شما خواسته شود که برای بازگشایی قفل گوشی خود به برنامه Google وارد شوید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"در <xliff:g id="NUMBER">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"الگو را فراموش کرده اید؟"</string>
@@ -697,6 +698,8 @@
     <string name="save_password_label" msgid="6860261758665825069">"تأیید"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"نکته: برای انجام بزرگنمایی مثبت و منفی، دو بار ضربه بزنید."</string>
     <!-- no translation found for autofill_this_form (1272247532604569872) -->
+    <skip />
+    <!-- no translation found for setup_autofill (8154593408885654044) -->
     <skip />
     <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
     <skip />
