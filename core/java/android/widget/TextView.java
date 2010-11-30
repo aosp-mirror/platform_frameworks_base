@@ -7843,6 +7843,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mInsertionControllerEnabled) {
             // Long press in empty space moves cursor and shows the Paste affordance if available.
             final int offset = getOffset(mLastDownPositionX, mLastDownPositionY);
+            stopSelectionActionMode();
             Selection.setSelection((Spannable)mText, offset);
             getInsertionController().show(0);
             mEatTouchRelease = true;
