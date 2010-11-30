@@ -98,64 +98,6 @@ static inline bool sourcesMatchMask(uint32_t sources, uint32_t sourceMask) {
 }
 
 
-// --- InputDeviceCalibration ---
-
-InputDeviceCalibration::InputDeviceCalibration() {
-}
-
-void InputDeviceCalibration::clear() {
-    mProperties.clear();
-}
-
-void InputDeviceCalibration::addProperty(const String8& key, const String8& value) {
-    mProperties.add(key, value);
-}
-
-bool InputDeviceCalibration::tryGetProperty(const String8& key, String8& outValue) const {
-    ssize_t index = mProperties.indexOfKey(key);
-    if (index < 0) {
-        return false;
-    }
-
-    outValue = mProperties.valueAt(index);
-    return true;
-}
-
-bool InputDeviceCalibration::tryGetProperty(const String8& key, int32_t& outValue) const {
-    String8 stringValue;
-    if (! tryGetProperty(key, stringValue) || stringValue.length() == 0) {
-        return false;
-    }
-
-    char* end;
-    int value = strtol(stringValue.string(), & end, 10);
-    if (*end != '\0') {
-        LOGW("Input device calibration key '%s' has invalid value '%s'.  Expected an integer.",
-                key.string(), stringValue.string());
-        return false;
-    }
-    outValue = value;
-    return true;
-}
-
-bool InputDeviceCalibration::tryGetProperty(const String8& key, float& outValue) const {
-    String8 stringValue;
-    if (! tryGetProperty(key, stringValue) || stringValue.length() == 0) {
-        return false;
-    }
-
-    char* end;
-    float value = strtof(stringValue.string(), & end);
-    if (*end != '\0') {
-        LOGW("Input device calibration key '%s' has invalid value '%s'.  Expected a float.",
-                key.string(), stringValue.string());
-        return false;
-    }
-    outValue = value;
-    return true;
-}
-
-
 // --- InputReader ---
 
 InputReader::InputReader(const sp<EventHubInterface>& eventHub,
@@ -274,8 +216,6 @@ void InputReader::removeDevice(int32_t deviceId) {
 InputDevice* InputReader::createDevice(int32_t deviceId, const String8& name, uint32_t classes) {
     InputDevice* device = new InputDevice(this, deviceId, name);
 
-    const int32_t associatedDisplayId = 0; // FIXME: hardcoded for current single-display devices
-
     // Switch-like devices.
     if (classes & INPUT_DEVICE_CLASS_SWITCH) {
         device->addMapper(new SwitchInputMapper(device));
@@ -295,20 +235,19 @@ InputDevice* InputReader::createDevice(int32_t deviceId, const String8& name, ui
     }
 
     if (keyboardSources != 0) {
-        device->addMapper(new KeyboardInputMapper(device,
-                associatedDisplayId, keyboardSources, keyboardType));
+        device->addMapper(new KeyboardInputMapper(device, keyboardSources, keyboardType));
     }
 
     // Trackball-like devices.
     if (classes & INPUT_DEVICE_CLASS_TRACKBALL) {
-        device->addMapper(new TrackballInputMapper(device, associatedDisplayId));
+        device->addMapper(new TrackballInputMapper(device));
     }
 
     // Touchscreen-like devices.
     if (classes & INPUT_DEVICE_CLASS_TOUCHSCREEN_MT) {
-        device->addMapper(new MultiTouchInputMapper(device, associatedDisplayId));
+        device->addMapper(new MultiTouchInputMapper(device));
     } else if (classes & INPUT_DEVICE_CLASS_TOUCHSCREEN) {
-        device->addMapper(new SingleTouchInputMapper(device, associatedDisplayId));
+        device->addMapper(new SingleTouchInputMapper(device));
     }
 
     return device;
@@ -626,7 +565,7 @@ void InputDevice::addMapper(InputMapper* mapper) {
 
 void InputDevice::configure() {
     if (! isIgnored()) {
-        mContext->getPolicy()->getInputDeviceCalibration(mName, mCalibration);
+        mContext->getEventHub()->getConfiguration(mId, &mConfiguration);
     }
 
     mSources = 0;
@@ -792,9 +731,9 @@ int32_t SwitchInputMapper::getSwitchState(uint32_t sourceMask, int32_t switchCod
 
 // --- KeyboardInputMapper ---
 
-KeyboardInputMapper::KeyboardInputMapper(InputDevice* device, int32_t associatedDisplayId,
+KeyboardInputMapper::KeyboardInputMapper(InputDevice* device,
         uint32_t sources, int32_t keyboardType) :
-        InputMapper(device), mAssociatedDisplayId(associatedDisplayId), mSources(sources),
+        InputMapper(device), mSources(sources),
         mKeyboardType(keyboardType) {
     initializeLocked();
 }
@@ -832,12 +771,36 @@ void KeyboardInputMapper::dump(String8& dump) {
     { // acquire lock
         AutoMutex _l(mLock);
         dump.append(INDENT2 "Keyboard Input Mapper:\n");
-        dump.appendFormat(INDENT3 "AssociatedDisplayId: %d\n", mAssociatedDisplayId);
+        dumpParameters(dump);
         dump.appendFormat(INDENT3 "KeyboardType: %d\n", mKeyboardType);
         dump.appendFormat(INDENT3 "KeyDowns: %d keys currently down\n", mLocked.keyDowns.size());
         dump.appendFormat(INDENT3 "MetaState: 0x%0x\n", mLocked.metaState);
         dump.appendFormat(INDENT3 "DownTime: %lld\n", mLocked.downTime);
     } // release lock
+}
+
+
+void KeyboardInputMapper::configure() {
+    InputMapper::configure();
+
+    // Configure basic parameters.
+    configureParameters();
+}
+
+void KeyboardInputMapper::configureParameters() {
+    mParameters.orientationAware = false;
+    getDevice()->getConfiguration().tryGetProperty(String8("keyboard.orientationAware"),
+            mParameters.orientationAware);
+
+    mParameters.associatedDisplayId = mParameters.orientationAware ? 0 : -1;
+}
+
+void KeyboardInputMapper::dumpParameters(String8& dump) {
+    dump.append(INDENT3 "Parameters:\n");
+    dump.appendFormat(INDENT4 "AssociatedDisplayId: %d\n",
+            mParameters.associatedDisplayId);
+    dump.appendFormat(INDENT4 "OrientationAware: %s\n",
+            toString(mParameters.orientationAware));
 }
 
 void KeyboardInputMapper::reset() {
@@ -896,9 +859,10 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
         if (down) {
             // Rotate key codes according to orientation if needed.
             // Note: getDisplayInfo is non-reentrant so we can continue holding the lock.
-            if (mAssociatedDisplayId >= 0) {
+            if (mParameters.orientationAware && mParameters.associatedDisplayId >= 0) {
                 int32_t orientation;
-                if (!getPolicy()->getDisplayInfo(mAssociatedDisplayId, NULL, NULL, & orientation)) {
+                if (!getPolicy()->getDisplayInfo(mParameters.associatedDisplayId,
+                        NULL, NULL, & orientation)) {
                     orientation = InputReaderPolicyInterface::ROTATION_0;
                 }
 
@@ -1011,8 +975,8 @@ void KeyboardInputMapper::updateLedStateForModifierLocked(LockedState::LedState&
 
 // --- TrackballInputMapper ---
 
-TrackballInputMapper::TrackballInputMapper(InputDevice* device, int32_t associatedDisplayId) :
-        InputMapper(device), mAssociatedDisplayId(associatedDisplayId) {
+TrackballInputMapper::TrackballInputMapper(InputDevice* device) :
+        InputMapper(device) {
     mXPrecision = TRACKBALL_MOVEMENT_THRESHOLD;
     mYPrecision = TRACKBALL_MOVEMENT_THRESHOLD;
     mXScale = 1.0f / TRACKBALL_MOVEMENT_THRESHOLD;
@@ -1039,12 +1003,35 @@ void TrackballInputMapper::dump(String8& dump) {
     { // acquire lock
         AutoMutex _l(mLock);
         dump.append(INDENT2 "Trackball Input Mapper:\n");
-        dump.appendFormat(INDENT3 "AssociatedDisplayId: %d\n", mAssociatedDisplayId);
+        dumpParameters(dump);
         dump.appendFormat(INDENT3 "XPrecision: %0.3f\n", mXPrecision);
         dump.appendFormat(INDENT3 "YPrecision: %0.3f\n", mYPrecision);
         dump.appendFormat(INDENT3 "Down: %s\n", toString(mLocked.down));
         dump.appendFormat(INDENT3 "DownTime: %lld\n", mLocked.downTime);
     } // release lock
+}
+
+void TrackballInputMapper::configure() {
+    InputMapper::configure();
+
+    // Configure basic parameters.
+    configureParameters();
+}
+
+void TrackballInputMapper::configureParameters() {
+    mParameters.orientationAware = false;
+    getDevice()->getConfiguration().tryGetProperty(String8("trackball.orientationAware"),
+            mParameters.orientationAware);
+
+    mParameters.associatedDisplayId = mParameters.orientationAware ? 0 : -1;
+}
+
+void TrackballInputMapper::dumpParameters(String8& dump) {
+    dump.append(INDENT3 "Parameters:\n");
+    dump.appendFormat(INDENT4 "AssociatedDisplayId: %d\n",
+            mParameters.associatedDisplayId);
+    dump.appendFormat(INDENT4 "OrientationAware: %s\n",
+            toString(mParameters.orientationAware));
 }
 
 void TrackballInputMapper::initializeLocked() {
@@ -1155,11 +1142,13 @@ void TrackballInputMapper::sync(nsecs_t when) {
         pointerCoords.toolMinor = 0;
         pointerCoords.orientation = 0;
 
-        if (mAssociatedDisplayId >= 0 && (x != 0.0f || y != 0.0f)) {
+        if (mParameters.orientationAware && mParameters.associatedDisplayId >= 0
+                && (x != 0.0f || y != 0.0f)) {
             // Rotate motion based on display orientation if needed.
             // Note: getDisplayInfo is non-reentrant so we can continue holding the lock.
             int32_t orientation;
-            if (! getPolicy()->getDisplayInfo(mAssociatedDisplayId, NULL, NULL, & orientation)) {
+            if (! getPolicy()->getDisplayInfo(mParameters.associatedDisplayId,
+                    NULL, NULL, & orientation)) {
                 orientation = InputReaderPolicyInterface::ROTATION_0;
             }
 
@@ -1205,8 +1194,8 @@ int32_t TrackballInputMapper::getScanCodeState(uint32_t sourceMask, int32_t scan
 
 // --- TouchInputMapper ---
 
-TouchInputMapper::TouchInputMapper(InputDevice* device, int32_t associatedDisplayId) :
-        InputMapper(device), mAssociatedDisplayId(associatedDisplayId) {
+TouchInputMapper::TouchInputMapper(InputDevice* device) :
+        InputMapper(device) {
     mLocked.surfaceOrientation = -1;
     mLocked.surfaceWidth = -1;
     mLocked.surfaceHeight = -1;
@@ -1218,7 +1207,15 @@ TouchInputMapper::~TouchInputMapper() {
 }
 
 uint32_t TouchInputMapper::getSources() {
-    return mAssociatedDisplayId >= 0 ? AINPUT_SOURCE_TOUCHSCREEN : AINPUT_SOURCE_TOUCHPAD;
+    switch (mParameters.deviceType) {
+    case Parameters::DEVICE_TYPE_TOUCH_SCREEN:
+        return AINPUT_SOURCE_TOUCHSCREEN;
+    case Parameters::DEVICE_TYPE_TOUCH_PAD:
+        return AINPUT_SOURCE_TOUCHPAD;
+    default:
+        assert(false);
+        return AINPUT_SOURCE_UNKNOWN;
+    }
 }
 
 void TouchInputMapper::populateDeviceInfo(InputDeviceInfo* info) {
@@ -1269,7 +1266,6 @@ void TouchInputMapper::dump(String8& dump) {
     { // acquire lock
         AutoMutex _l(mLock);
         dump.append(INDENT2 "Touch Input Mapper:\n");
-        dump.appendFormat(INDENT3 "AssociatedDisplayId: %d\n", mAssociatedDisplayId);
         dumpParameters(dump);
         dumpVirtualKeysLocked(dump);
         dumpRawAxes(dump);
@@ -1339,14 +1335,50 @@ void TouchInputMapper::configureParameters() {
     mParameters.useBadTouchFilter = getPolicy()->filterTouchEvents();
     mParameters.useAveragingTouchFilter = getPolicy()->filterTouchEvents();
     mParameters.useJumpyTouchFilter = getPolicy()->filterJumpyTouchEvents();
+
+    String8 deviceTypeString;
+    mParameters.deviceType = Parameters::DEVICE_TYPE_TOUCH_SCREEN;
+    if (getDevice()->getConfiguration().tryGetProperty(String8("touch.deviceType"),
+            deviceTypeString)) {
+        if (deviceTypeString == "touchPad") {
+            mParameters.deviceType = Parameters::DEVICE_TYPE_TOUCH_PAD;
+        } else if (deviceTypeString != "touchScreen") {
+            LOGW("Invalid value for touch.deviceType: '%s'", deviceTypeString.string());
+        }
+    }
+    bool isTouchScreen = mParameters.deviceType == Parameters::DEVICE_TYPE_TOUCH_SCREEN;
+
+    mParameters.orientationAware = isTouchScreen;
+    getDevice()->getConfiguration().tryGetProperty(String8("touch.orientationAware"),
+            mParameters.orientationAware);
+
+    mParameters.associatedDisplayId = mParameters.orientationAware || isTouchScreen ? 0 : -1;
 }
 
 void TouchInputMapper::dumpParameters(String8& dump) {
-    dump.appendFormat(INDENT3 "UseBadTouchFilter: %s\n",
+    dump.append(INDENT3 "Parameters:\n");
+
+    switch (mParameters.deviceType) {
+    case Parameters::DEVICE_TYPE_TOUCH_SCREEN:
+        dump.append(INDENT4 "DeviceType: touchScreen\n");
+        break;
+    case Parameters::DEVICE_TYPE_TOUCH_PAD:
+        dump.append(INDENT4 "DeviceType: touchPad\n");
+        break;
+    default:
+        assert(false);
+    }
+
+    dump.appendFormat(INDENT4 "AssociatedDisplayId: %d\n",
+            mParameters.associatedDisplayId);
+    dump.appendFormat(INDENT4 "OrientationAware: %s\n",
+            toString(mParameters.orientationAware));
+
+    dump.appendFormat(INDENT4 "UseBadTouchFilter: %s\n",
             toString(mParameters.useBadTouchFilter));
-    dump.appendFormat(INDENT3 "UseAveragingTouchFilter: %s\n",
+    dump.appendFormat(INDENT4 "UseAveragingTouchFilter: %s\n",
             toString(mParameters.useAveragingTouchFilter));
-    dump.appendFormat(INDENT3 "UseJumpyTouchFilter: %s\n",
+    dump.appendFormat(INDENT4 "UseJumpyTouchFilter: %s\n",
             toString(mParameters.useJumpyTouchFilter));
 }
 
@@ -1384,17 +1416,20 @@ void TouchInputMapper::dumpRawAxes(String8& dump) {
 
 bool TouchInputMapper::configureSurfaceLocked() {
     // Update orientation and dimensions if needed.
-    int32_t orientation;
-    int32_t width, height;
-    if (mAssociatedDisplayId >= 0) {
+    int32_t orientation = InputReaderPolicyInterface::ROTATION_0;
+    int32_t width = mRawAxes.x.getRange();
+    int32_t height = mRawAxes.y.getRange();
+
+    if (mParameters.associatedDisplayId >= 0) {
+        bool wantSize = mParameters.deviceType == Parameters::DEVICE_TYPE_TOUCH_SCREEN;
+        bool wantOrientation = mParameters.orientationAware;
+
         // Note: getDisplayInfo is non-reentrant so we can continue holding the lock.
-        if (! getPolicy()->getDisplayInfo(mAssociatedDisplayId, & width, & height, & orientation)) {
+        if (! getPolicy()->getDisplayInfo(mParameters.associatedDisplayId,
+                wantSize ? &width : NULL, wantSize ? &height : NULL,
+                wantOrientation ? &orientation : NULL)) {
             return false;
         }
-    } else {
-        orientation = InputReaderPolicyInterface::ROTATION_0;
-        width = mRawAxes.x.getRange();
-        height = mRawAxes.y.getRange();
     }
 
     bool orientationChanged = mLocked.surfaceOrientation != orientation;
@@ -1686,7 +1721,7 @@ void TouchInputMapper::dumpVirtualKeysLocked(String8& dump) {
 }
 
 void TouchInputMapper::parseCalibration() {
-    const InputDeviceCalibration& in = getDevice()->getCalibration();
+    const PropertyMap& in = getDevice()->getConfiguration();
     Calibration& out = mCalibration;
 
     // Position
@@ -1973,7 +2008,7 @@ void TouchInputMapper::dumpCalibration(String8& dump) {
 
     if (mCalibration.haveToolSizeIsSummed) {
         dump.appendFormat(INDENT4 "touch.toolSize.isSummed: %d\n",
-                mCalibration.toolSizeIsSummed);
+                toString(mCalibration.toolSizeIsSummed));
     }
 
     // Pressure
@@ -3157,8 +3192,8 @@ bool TouchInputMapper::markSupportedKeyCodes(uint32_t sourceMask, size_t numCode
 
 // --- SingleTouchInputMapper ---
 
-SingleTouchInputMapper::SingleTouchInputMapper(InputDevice* device, int32_t associatedDisplayId) :
-        TouchInputMapper(device, associatedDisplayId) {
+SingleTouchInputMapper::SingleTouchInputMapper(InputDevice* device) :
+        TouchInputMapper(device) {
     initialize();
 }
 
@@ -3286,8 +3321,8 @@ void SingleTouchInputMapper::configureRawAxes() {
 
 // --- MultiTouchInputMapper ---
 
-MultiTouchInputMapper::MultiTouchInputMapper(InputDevice* device, int32_t associatedDisplayId) :
-        TouchInputMapper(device, associatedDisplayId) {
+MultiTouchInputMapper::MultiTouchInputMapper(InputDevice* device) :
+        TouchInputMapper(device) {
     initialize();
 }
 

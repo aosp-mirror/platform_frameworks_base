@@ -93,12 +93,13 @@ static inline const char* toString(bool value) {
 
 EventHub::device_t::device_t(int32_t _id, const char* _path, const char* name)
     : id(_id), path(_path), name(name), classes(0)
-    , keyBitmask(NULL), layoutMap(NULL), fd(-1), next(NULL) {
+    , keyBitmask(NULL), layoutMap(NULL), configuration(NULL), fd(-1), next(NULL) {
 }
 
 EventHub::device_t::~device_t() {
     delete [] keyBitmask;
     delete layoutMap;
+    delete configuration;
 }
 
 EventHub::EventHub(void)
@@ -142,6 +143,16 @@ uint32_t EventHub::getDeviceClasses(int32_t deviceId) const
     device_t* device = getDeviceLocked(deviceId);
     if (device == NULL) return 0;
     return device->classes;
+}
+
+void EventHub::getConfiguration(int32_t deviceId, PropertyMap* outConfiguration) const {
+    outConfiguration->clear();
+
+    AutoMutex _l(mLock);
+    device_t* device = getDeviceLocked(deviceId);
+    if (device && device->configuration) {
+        *outConfiguration = *device->configuration;
+    }
 }
 
 status_t EventHub::getAbsoluteAxisInfo(int32_t deviceId, int axis,
@@ -716,6 +727,9 @@ int EventHub::openDevice(const char *deviceName) {
     mFDs[mFDCount].events = POLLIN;
     mFDs[mFDCount].revents = 0;
 
+    // Load the configuration file for the device.
+    loadConfiguration(device);
+
     // Figure out the kinds of events the device reports.
     
     uint8_t key_bitmask[sizeof_bit_array(KEY_MAX + 1)];
@@ -803,7 +817,6 @@ int EventHub::openDevice(const char *deviceName) {
         device->name = name;
 
         // Configure the keymap for the device.
-
         configureKeyMap(device);
 
         // Tell the world about the devname (the descriptive name)
@@ -868,9 +881,11 @@ int EventHub::openDevice(const char *deviceName) {
         return -1;
     }
 
-    LOGI("New device: path=%s name=%s id=0x%x (of 0x%x) index=%d fd=%d classes=0x%x\n",
-         deviceName, name, device->id, mNumDevicesById, mFDCount, fd, device->classes);
-         
+    LOGI("New device: path=%s name=%s id=0x%x (of 0x%x) index=%d fd=%d classes=0x%x "
+            "configuration='%s'\n",
+         deviceName, name, device->id, mNumDevicesById, mFDCount, fd, device->classes,
+         device->configurationFile.string());
+
     LOGV("Adding device %s %p at %d, id = %d, classes = 0x%x\n",
          deviceName, device, mFDCount, devid, device->classes);
 
@@ -883,8 +898,24 @@ int EventHub::openDevice(const char *deviceName) {
     return 0;
 }
 
+void EventHub::loadConfiguration(device_t* device) {
+    device->configurationFile = getInputDeviceConfigurationFilePath(device->name,
+            INPUT_DEVICE_CONFIGURATION_FILE_TYPE_CONFIGURATION);
+    if (device->configurationFile.isEmpty()) {
+        LOGI("No input device configuration file found for device '%s'.",
+                device->name.string());
+    } else {
+        status_t status = PropertyMap::load(device->configurationFile,
+                &device->configuration);
+        if (status) {
+            LOGE("Error loading input device configuration file for device '%s'.",
+                    device->name.string());
+        }
+    }
+}
+
 void EventHub::configureKeyMap(device_t* device) {
-    android::resolveKeyMap(device->name, device->keyMapInfo);
+    android::resolveKeyMap(device->name, device->configuration, device->keyMapInfo);
 }
 
 void EventHub::setKeyboardProperties(device_t* device, bool firstKeyboard) {
@@ -1058,12 +1089,12 @@ void EventHub::dump(String8& dump) {
                 dump.appendFormat(INDENT3 "Path: %s\n", device->path.string());
                 dump.appendFormat(INDENT3 "IsDefaultKeyMap: %s\n",
                         toString(device->keyMapInfo.isDefaultKeyMap));
-                dump.appendFormat(INDENT3 "KeyMapName: %s\n",
-                        device->keyMapInfo.keyMapName.string());
                 dump.appendFormat(INDENT3 "KeyLayoutFile: %s\n",
                         device->keyMapInfo.keyLayoutFile.string());
                 dump.appendFormat(INDENT3 "KeyCharacterMapFile: %s\n",
                         device->keyMapInfo.keyCharacterMapFile.string());
+                dump.appendFormat(INDENT3 "ConfigurationFile: %s\n",
+                        device->configurationFile.string());
             }
         }
     } // release lock

@@ -57,7 +57,6 @@ static struct {
     jmethodID filterTouchEvents;
     jmethodID filterJumpyTouchEvents;
     jmethodID getVirtualKeyDefinitions;
-    jmethodID getInputDeviceCalibration;
     jmethodID getExcludedDeviceNames;
     jmethodID getMaxEventsPerSecond;
 } gCallbacksClassInfo;
@@ -71,13 +70,6 @@ static struct {
     jfieldID width;
     jfieldID height;
 } gVirtualKeyDefinitionClassInfo;
-
-static struct {
-    jclass clazz;
-
-    jfieldID keys;
-    jfieldID values;
-} gInputDeviceCalibrationClassInfo;
 
 static struct {
     jclass clazz;
@@ -186,8 +178,6 @@ public:
     virtual bool filterJumpyTouchEvents();
     virtual void getVirtualKeyDefinitions(const String8& deviceName,
             Vector<VirtualKeyDefinition>& outVirtualKeyDefinitions);
-    virtual void getInputDeviceCalibration(const String8& deviceName,
-            InputDeviceCalibration& outCalibration);
     virtual void getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames);
 
     /* --- InputDispatcherPolicyInterface implementation --- */
@@ -483,48 +473,6 @@ void NativeInputManager::getVirtualKeyDefinitions(const String8& deviceName,
 
                 env->DeleteLocalRef(item);
             }
-            env->DeleteLocalRef(result);
-        }
-        env->DeleteLocalRef(deviceNameStr);
-    }
-}
-
-void NativeInputManager::getInputDeviceCalibration(const String8& deviceName,
-        InputDeviceCalibration& outCalibration) {
-    outCalibration.clear();
-
-    JNIEnv* env = jniEnv();
-
-    jstring deviceNameStr = env->NewStringUTF(deviceName.string());
-    if (! checkAndClearExceptionFromCallback(env, "getInputDeviceCalibration")) {
-        jobject result = env->CallObjectMethod(mCallbacksObj,
-                gCallbacksClassInfo.getInputDeviceCalibration, deviceNameStr);
-        if (! checkAndClearExceptionFromCallback(env, "getInputDeviceCalibration") && result) {
-            jobjectArray keys = jobjectArray(env->GetObjectField(result,
-                    gInputDeviceCalibrationClassInfo.keys));
-            jobjectArray values = jobjectArray(env->GetObjectField(result,
-                    gInputDeviceCalibrationClassInfo.values));
-
-            jsize length = env->GetArrayLength(keys);
-            for (jsize i = 0; i < length; i++) {
-                jstring keyStr = jstring(env->GetObjectArrayElement(keys, i));
-                jstring valueStr = jstring(env->GetObjectArrayElement(values, i));
-
-                const char* keyChars = env->GetStringUTFChars(keyStr, NULL);
-                String8 key(keyChars);
-                env->ReleaseStringUTFChars(keyStr, keyChars);
-
-                const char* valueChars = env->GetStringUTFChars(valueStr, NULL);
-                String8 value(valueChars);
-                env->ReleaseStringUTFChars(valueStr, valueChars);
-
-                outCalibration.addProperty(key, value);
-
-                env->DeleteLocalRef(keyStr);
-                env->DeleteLocalRef(valueStr);
-            }
-            env->DeleteLocalRef(keys);
-            env->DeleteLocalRef(values);
             env->DeleteLocalRef(result);
         }
         env->DeleteLocalRef(deviceNameStr);
@@ -1405,10 +1353,6 @@ int register_android_server_InputManager(JNIEnv* env) {
             "getVirtualKeyDefinitions",
             "(Ljava/lang/String;)[Lcom/android/server/InputManager$VirtualKeyDefinition;");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getInputDeviceCalibration, gCallbacksClassInfo.clazz,
-            "getInputDeviceCalibration",
-            "(Ljava/lang/String;)Lcom/android/server/InputManager$InputDeviceCalibration;");
-
     GET_METHOD_ID(gCallbacksClassInfo.getExcludedDeviceNames, gCallbacksClassInfo.clazz,
             "getExcludedDeviceNames", "()[Ljava/lang/String;");
 
@@ -1434,17 +1378,6 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_FIELD_ID(gVirtualKeyDefinitionClassInfo.height, gVirtualKeyDefinitionClassInfo.clazz,
             "height", "I");
-
-    // InputDeviceCalibration
-
-    FIND_CLASS(gInputDeviceCalibrationClassInfo.clazz,
-            "com/android/server/InputManager$InputDeviceCalibration");
-
-    GET_FIELD_ID(gInputDeviceCalibrationClassInfo.keys, gInputDeviceCalibrationClassInfo.clazz,
-            "keys", "[Ljava/lang/String;");
-
-    GET_FIELD_ID(gInputDeviceCalibrationClassInfo.values, gInputDeviceCalibrationClassInfo.clazz,
-            "values", "[Ljava/lang/String;");
 
     // InputWindow
 

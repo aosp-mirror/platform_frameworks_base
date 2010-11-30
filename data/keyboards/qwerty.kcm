@@ -259,9 +259,9 @@ key COMMA {
     label:                              ','
     number:                             ','
     base:                               ','
-    shift, capslock:                    ';'
+    shift:                              ';'
     alt:                                ';'
-    shift+alt, capslock+alt:            '|'
+    shift+alt:                          '|'
 }
 
 key PERIOD {

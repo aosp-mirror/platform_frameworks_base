@@ -43,7 +43,6 @@ class FakeInputReaderPolicy : public InputReaderPolicyInterface {
     bool mFilterTouchEvents;
     bool mFilterJumpyTouchEvents;
     KeyedVector<String8, Vector<VirtualKeyDefinition> > mVirtualKeyDefinitions;
-    KeyedVector<String8, InputDeviceCalibration> mInputDeviceCalibrations;
     Vector<String8> mExcludedDeviceNames;
 
 protected:
@@ -74,20 +73,6 @@ public:
 
     void setFilterJumpyTouchEvents(bool enabled) {
         mFilterJumpyTouchEvents = enabled;
-    }
-
-    void addInputDeviceCalibration(const String8& deviceName,
-            const InputDeviceCalibration& calibration) {
-        mInputDeviceCalibrations.add(deviceName, calibration);
-    }
-
-    void addInputDeviceCalibrationProperty(const String8& deviceName,
-            const String8& key, const String8& value) {
-        ssize_t index = mInputDeviceCalibrations.indexOfKey(deviceName);
-        if (index < 0) {
-            index = mInputDeviceCalibrations.add(deviceName, InputDeviceCalibration());
-        }
-        mInputDeviceCalibrations.editValueAt(index).addProperty(key, value);
     }
 
     void addVirtualKeyDefinition(const String8& deviceName,
@@ -136,14 +121,6 @@ private:
         ssize_t index = mVirtualKeyDefinitions.indexOfKey(deviceName);
         if (index >= 0) {
             outVirtualKeyDefinitions.appendVector(mVirtualKeyDefinitions.valueAt(index));
-        }
-    }
-
-    virtual void getInputDeviceCalibration(const String8& deviceName,
-            InputDeviceCalibration& outCalibration) {
-        ssize_t index = mInputDeviceCalibrations.indexOfKey(deviceName);
-        if (index >= 0) {
-            outCalibration = mInputDeviceCalibrations.valueAt(index);
         }
     }
 
@@ -371,6 +348,7 @@ class FakeEventHub : public EventHubInterface {
     struct Device {
         String8 name;
         uint32_t classes;
+        PropertyMap configuration;
         KeyedVector<int, RawAbsoluteAxisInfo> axes;
         KeyedVector<int32_t, int32_t> keyCodeStates;
         KeyedVector<int32_t, int32_t> scanCodeStates;
@@ -413,6 +391,11 @@ public:
 
     void finishDeviceScan() {
         enqueueEvent(ARBITRARY_TIME, 0, EventHubInterface::FINISHED_DEVICE_SCAN, 0, 0, 0, 0);
+    }
+
+    void addConfigurationProperty(int32_t deviceId, const String8& key, const String8& value) {
+        Device* device = getDevice(deviceId);
+        device->configuration.addProperty(key, value);
     }
 
     void addAxis(int32_t deviceId, int axis,
@@ -497,6 +480,13 @@ private:
     virtual String8 getDeviceName(int32_t deviceId) const {
         Device* device = getDevice(deviceId);
         return device ? device->name : String8("unknown");
+    }
+
+    virtual void getConfiguration(int32_t deviceId, PropertyMap* outConfiguration) const {
+        Device* device = getDevice(deviceId);
+        if (device) {
+            *outConfiguration = device->configuration;
+        }
     }
 
     virtual status_t getAbsoluteAxisInfo(int32_t deviceId, int axis,
@@ -1208,9 +1198,7 @@ TEST_F(InputDeviceTest, WhenNoMappersAreRegistered_DeviceIsIgnored) {
 
 TEST_F(InputDeviceTest, WhenMappersAreRegistered_DeviceIsNotIgnoredAndForwardsRequestsToMappers) {
     // Configuration.
-    InputDeviceCalibration calibration;
-    calibration.addProperty(String8("key"), String8("value"));
-    mFakePolicy->addInputDeviceCalibration(String8(DEVICE_NAME), calibration);
+    mFakeEventHub->addConfigurationProperty(DEVICE_ID, String8("key"), String8("value"));
 
     FakeInputMapper* mapper1 = new FakeInputMapper(mDevice, AINPUT_SOURCE_KEYBOARD);
     mapper1->setKeyboardType(AINPUT_KEYBOARD_TYPE_ALPHABETIC);
@@ -1231,8 +1219,8 @@ TEST_F(InputDeviceTest, WhenMappersAreRegistered_DeviceIsNotIgnoredAndForwardsRe
     mDevice->configure();
 
     String8 propertyValue;
-    ASSERT_TRUE(mDevice->getCalibration().tryGetProperty(String8("key"), propertyValue))
-            << "Device should have read calibration during configuration phase.";
+    ASSERT_TRUE(mDevice->getConfiguration().tryGetProperty(String8("key"), propertyValue))
+            << "Device should have read configuration during configuration phase.";
     ASSERT_STREQ("value", propertyValue.string());
 
     ASSERT_NO_FATAL_FAILURE(mapper1->assertConfigureWasCalled());
@@ -1329,9 +1317,8 @@ protected:
         mFakeEventHub.clear();
     }
 
-    void prepareCalibration(const char* key, const char* value) {
-        mFakePolicy->addInputDeviceCalibrationProperty(String8(DEVICE_NAME),
-                String8(key), String8(value));
+    void addConfigurationProperty(const char* key, const char* value) {
+        mFakeEventHub->addConfigurationProperty(DEVICE_ID, String8(key), String8(value));
     }
 
     void addMapperAndConfigure(InputMapper* mapper) {
@@ -1448,7 +1435,7 @@ void KeyboardInputMapperTest::testDPadKeyRotation(KeyboardInputMapper* mapper,
 
 
 TEST_F(KeyboardInputMapperTest, GetSources) {
-    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice, -1,
+    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice,
             AINPUT_SOURCE_KEYBOARD, AINPUT_KEYBOARD_TYPE_ALPHABETIC);
     addMapperAndConfigure(mapper);
 
@@ -1456,7 +1443,7 @@ TEST_F(KeyboardInputMapperTest, GetSources) {
 }
 
 TEST_F(KeyboardInputMapperTest, Process_SimpleKeyPress) {
-    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice, -1,
+    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice,
             AINPUT_SOURCE_KEYBOARD, AINPUT_KEYBOARD_TYPE_ALPHABETIC);
     addMapperAndConfigure(mapper);
 
@@ -1493,7 +1480,7 @@ TEST_F(KeyboardInputMapperTest, Process_SimpleKeyPress) {
 }
 
 TEST_F(KeyboardInputMapperTest, Reset_WhenKeysAreNotDown_DoesNotSynthesizeKeyUp) {
-    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice, -1,
+    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice,
             AINPUT_SOURCE_KEYBOARD, AINPUT_KEYBOARD_TYPE_ALPHABETIC);
     addMapperAndConfigure(mapper);
 
@@ -1513,7 +1500,7 @@ TEST_F(KeyboardInputMapperTest, Reset_WhenKeysAreNotDown_DoesNotSynthesizeKeyUp)
 }
 
 TEST_F(KeyboardInputMapperTest, Reset_WhenKeysAreDown_SynthesizesKeyUps) {
-    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice, -1,
+    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice,
             AINPUT_SOURCE_KEYBOARD, AINPUT_KEYBOARD_TYPE_ALPHABETIC);
     addMapperAndConfigure(mapper);
 
@@ -1558,7 +1545,7 @@ TEST_F(KeyboardInputMapperTest, Reset_WhenKeysAreDown_SynthesizesKeyUps) {
 }
 
 TEST_F(KeyboardInputMapperTest, Process_ShouldUpdateMetaState) {
-    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice, -1,
+    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice,
             AINPUT_SOURCE_KEYBOARD, AINPUT_KEYBOARD_TYPE_ALPHABETIC);
     addMapperAndConfigure(mapper);
 
@@ -1597,11 +1584,14 @@ TEST_F(KeyboardInputMapperTest, Process_ShouldUpdateMetaState) {
     ASSERT_NO_FATAL_FAILURE(mFakeContext->assertUpdateGlobalMetaStateWasCalled());
 }
 
-TEST_F(KeyboardInputMapperTest, Process_WhenNotAttachedToDisplay_ShouldNotRotateDPad) {
-    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice, -1,
+TEST_F(KeyboardInputMapperTest, Process_WhenNotOrientationAware_ShouldNotRotateDPad) {
+    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice,
             AINPUT_SOURCE_KEYBOARD, AINPUT_KEYBOARD_TYPE_ALPHABETIC);
     addMapperAndConfigure(mapper);
 
+    mFakePolicy->setDisplayInfo(DISPLAY_ID,
+            DISPLAY_WIDTH, DISPLAY_HEIGHT,
+            InputReaderPolicyInterface::ROTATION_90);
     ASSERT_NO_FATAL_FAILURE(testDPadKeyRotation(mapper,
             KEY_UP, AKEYCODE_DPAD_UP, AKEYCODE_DPAD_UP));
     ASSERT_NO_FATAL_FAILURE(testDPadKeyRotation(mapper,
@@ -1612,9 +1602,10 @@ TEST_F(KeyboardInputMapperTest, Process_WhenNotAttachedToDisplay_ShouldNotRotate
             KEY_LEFT, AKEYCODE_DPAD_LEFT, AKEYCODE_DPAD_LEFT));
 }
 
-TEST_F(KeyboardInputMapperTest, Process_WhenAttachedToDisplay_ShouldRotateDPad) {
-    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice, DISPLAY_ID,
+TEST_F(KeyboardInputMapperTest, Process_WhenOrientationAware_ShouldRotateDPad) {
+    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice,
             AINPUT_SOURCE_KEYBOARD, AINPUT_KEYBOARD_TYPE_ALPHABETIC);
+    addConfigurationProperty("keyboard.orientationAware", "1");
     addMapperAndConfigure(mapper);
 
     mFakePolicy->setDisplayInfo(DISPLAY_ID,
@@ -1689,7 +1680,7 @@ TEST_F(KeyboardInputMapperTest, Process_WhenAttachedToDisplay_ShouldRotateDPad) 
 }
 
 TEST_F(KeyboardInputMapperTest, GetKeyCodeState) {
-    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice, -1,
+    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice,
             AINPUT_SOURCE_KEYBOARD, AINPUT_KEYBOARD_TYPE_ALPHABETIC);
     addMapperAndConfigure(mapper);
 
@@ -1701,7 +1692,7 @@ TEST_F(KeyboardInputMapperTest, GetKeyCodeState) {
 }
 
 TEST_F(KeyboardInputMapperTest, GetScanCodeState) {
-    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice, -1,
+    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice,
             AINPUT_SOURCE_KEYBOARD, AINPUT_KEYBOARD_TYPE_ALPHABETIC);
     addMapperAndConfigure(mapper);
 
@@ -1713,7 +1704,7 @@ TEST_F(KeyboardInputMapperTest, GetScanCodeState) {
 }
 
 TEST_F(KeyboardInputMapperTest, MarkSupportedKeyCodes) {
-    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice, -1,
+    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice,
             AINPUT_SOURCE_KEYBOARD, AINPUT_KEYBOARD_TYPE_ALPHABETIC);
     addMapperAndConfigure(mapper);
 
@@ -1731,7 +1722,7 @@ TEST_F(KeyboardInputMapperTest, Process_LockedKeysShouldToggleMetaStateAndLeds) 
     mFakeEventHub->addLed(DEVICE_ID, LED_NUML, false /*initially off*/);
     mFakeEventHub->addLed(DEVICE_ID, LED_SCROLLL, false /*initially off*/);
 
-    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice, -1,
+    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice,
             AINPUT_SOURCE_KEYBOARD, AINPUT_KEYBOARD_TYPE_ALPHABETIC);
     addMapperAndConfigure(mapper);
 
@@ -1830,14 +1821,14 @@ void TrackballInputMapperTest::testMotionRotation(TrackballInputMapper* mapper,
 }
 
 TEST_F(TrackballInputMapperTest, GetSources) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice, -1);
+    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
     addMapperAndConfigure(mapper);
 
     ASSERT_EQ(AINPUT_SOURCE_TRACKBALL, mapper->getSources());
 }
 
 TEST_F(TrackballInputMapperTest, PopulateDeviceInfo) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice, -1);
+    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
     addMapperAndConfigure(mapper);
 
     InputDeviceInfo info;
@@ -1850,7 +1841,7 @@ TEST_F(TrackballInputMapperTest, PopulateDeviceInfo) {
 }
 
 TEST_F(TrackballInputMapperTest, Process_ShouldSetAllFieldsAndIncludeGlobalMetaState) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice, -1);
+    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
     addMapperAndConfigure(mapper);
 
     mFakeContext->setGlobalMetaState(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON);
@@ -1898,7 +1889,7 @@ TEST_F(TrackballInputMapperTest, Process_ShouldSetAllFieldsAndIncludeGlobalMetaS
 }
 
 TEST_F(TrackballInputMapperTest, Process_ShouldHandleIndependentXYUpdates) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice, -1);
+    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
     addMapperAndConfigure(mapper);
 
     FakeInputDispatcher::NotifyMotionArgs args;
@@ -1922,7 +1913,7 @@ TEST_F(TrackballInputMapperTest, Process_ShouldHandleIndependentXYUpdates) {
 }
 
 TEST_F(TrackballInputMapperTest, Process_ShouldHandleIndependentButtonUpdates) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice, -1);
+    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
     addMapperAndConfigure(mapper);
 
     FakeInputDispatcher::NotifyMotionArgs args;
@@ -1943,7 +1934,7 @@ TEST_F(TrackballInputMapperTest, Process_ShouldHandleIndependentButtonUpdates) {
 }
 
 TEST_F(TrackballInputMapperTest, Process_ShouldHandleCombinedXYAndButtonUpdates) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice, -1);
+    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
     addMapperAndConfigure(mapper);
 
     FakeInputDispatcher::NotifyMotionArgs args;
@@ -1978,7 +1969,7 @@ TEST_F(TrackballInputMapperTest, Process_ShouldHandleCombinedXYAndButtonUpdates)
 }
 
 TEST_F(TrackballInputMapperTest, Reset_WhenButtonIsNotDown_ShouldNotSynthesizeButtonUp) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice, -1);
+    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
     addMapperAndConfigure(mapper);
 
     FakeInputDispatcher::NotifyMotionArgs args;
@@ -1998,7 +1989,7 @@ TEST_F(TrackballInputMapperTest, Reset_WhenButtonIsNotDown_ShouldNotSynthesizeBu
 }
 
 TEST_F(TrackballInputMapperTest, Reset_WhenButtonIsDown_ShouldSynthesizeButtonUp) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice, -1);
+    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
     addMapperAndConfigure(mapper);
 
     FakeInputDispatcher::NotifyMotionArgs args;
@@ -2016,10 +2007,13 @@ TEST_F(TrackballInputMapperTest, Reset_WhenButtonIsDown_ShouldSynthesizeButtonUp
             0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
 }
 
-TEST_F(TrackballInputMapperTest, Process_WhenNotAttachedToDisplay_ShouldNotRotateMotions) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice, -1);
+TEST_F(TrackballInputMapperTest, Process_WhenNotOrientationAware_ShouldNotRotateMotions) {
+    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
     addMapperAndConfigure(mapper);
 
+    mFakePolicy->setDisplayInfo(DISPLAY_ID,
+            DISPLAY_WIDTH, DISPLAY_HEIGHT,
+            InputReaderPolicyInterface::ROTATION_90);
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  0,  1,  0,  1));
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  1,  1,  1,  1));
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  1,  0,  1,  0));
@@ -2030,8 +2024,9 @@ TEST_F(TrackballInputMapperTest, Process_WhenNotAttachedToDisplay_ShouldNotRotat
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper, -1,  1, -1,  1));
 }
 
-TEST_F(TrackballInputMapperTest, Process_WhenAttachedToDisplay_ShouldRotateMotions) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice, DISPLAY_ID);
+TEST_F(TrackballInputMapperTest, Process_WhenOrientationAware_ShouldRotateMotions) {
+    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
+    addConfigurationProperty("trackball.orientationAware", "1");
     addMapperAndConfigure(mapper);
 
     mFakePolicy->setDisplayInfo(DISPLAY_ID,
@@ -2232,24 +2227,26 @@ void SingleTouchInputMapperTest::processSync(SingleTouchInputMapper* mapper) {
 }
 
 
-TEST_F(SingleTouchInputMapperTest, GetSources_WhenNotAttachedToADisplay_ReturnsTouchPad) {
-    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice, -1);
+TEST_F(SingleTouchInputMapperTest, GetSources_WhenDisplayTypeIsTouchPad_ReturnsTouchPad) {
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     prepareAxes(POSITION);
+    addConfigurationProperty("touch.displayType", "touchPad");
     addMapperAndConfigure(mapper);
 
     ASSERT_EQ(AINPUT_SOURCE_TOUCHPAD, mapper->getSources());
 }
 
-TEST_F(SingleTouchInputMapperTest, GetSources_WhenAttachedToADisplay_ReturnsTouchScreen) {
-    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice, DISPLAY_ID);
+TEST_F(SingleTouchInputMapperTest, GetSources_WhenDisplayTypeIsTouchScreen_ReturnsTouchScreen) {
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     prepareAxes(POSITION);
+    addConfigurationProperty("touch.displayType", "touchScreen");
     addMapperAndConfigure(mapper);
 
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, mapper->getSources());
 }
 
 TEST_F(SingleTouchInputMapperTest, GetKeyCodeState) {
-    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice, DISPLAY_ID);
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2276,7 +2273,7 @@ TEST_F(SingleTouchInputMapperTest, GetKeyCodeState) {
 }
 
 TEST_F(SingleTouchInputMapperTest, GetScanCodeState) {
-    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice, DISPLAY_ID);
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2303,7 +2300,7 @@ TEST_F(SingleTouchInputMapperTest, GetScanCodeState) {
 }
 
 TEST_F(SingleTouchInputMapperTest, MarkSupportedKeyCodes) {
-    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice, DISPLAY_ID);
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2319,7 +2316,7 @@ TEST_F(SingleTouchInputMapperTest, MarkSupportedKeyCodes) {
 TEST_F(SingleTouchInputMapperTest, Reset_WhenVirtualKeysAreDown_SendsUp) {
     // Note: Ideally we should send cancels but the implementation is more straightforward
     // with up and this will only happen if a device is forcibly removed.
-    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice, DISPLAY_ID);
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2352,7 +2349,7 @@ TEST_F(SingleTouchInputMapperTest, Reset_WhenVirtualKeysAreDown_SendsUp) {
 }
 
 TEST_F(SingleTouchInputMapperTest, Reset_WhenNothingIsPressed_NothingMuchHappens) {
-    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice, DISPLAY_ID);
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2378,7 +2375,7 @@ TEST_F(SingleTouchInputMapperTest, Reset_WhenNothingIsPressed_NothingMuchHappens
 }
 
 TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndReleasedNormally_SendsKeyDownAndKeyUp) {
-    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice, DISPLAY_ID);
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2427,7 +2424,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndReleasedNor
 }
 
 TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfBounds_SendsKeyDownAndKeyCancel) {
-    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice, DISPLAY_ID);
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2541,7 +2538,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfB
 }
 
 TEST_F(SingleTouchInputMapperTest, Process_WhenTouchStartsOutsideDisplayAndMovesIn_SendsDownAsTouchEntersDisplay) {
-    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice, DISPLAY_ID);
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2609,7 +2606,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenTouchStartsOutsideDisplayAndMoves
 }
 
 TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
-    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice, DISPLAY_ID);
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2691,8 +2688,30 @@ TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasNotCalled());
 }
 
-TEST_F(SingleTouchInputMapperTest, Process_Rotation) {
-    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice, DISPLAY_ID);
+TEST_F(SingleTouchInputMapperTest, Process_WhenNotOrientationAware_DoesNotRotateMotions) {
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    prepareAxes(POSITION);
+    addConfigurationProperty("touch.orientationAware", "0");
+    addMapperAndConfigure(mapper);
+
+    FakeInputDispatcher::NotifyMotionArgs args;
+
+    // Rotation 90.
+    prepareDisplay(InputReaderPolicyInterface::ROTATION_90);
+    processDown(mapper, toRawX(50), toRawY(75));
+    processSync(mapper);
+
+    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NEAR(50, args.pointerCoords[0].x, 1);
+    ASSERT_NEAR(75, args.pointerCoords[0].y, 1);
+
+    processUp(mapper);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled());
+}
+
+TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) {
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     prepareAxes(POSITION);
     addMapperAndConfigure(mapper);
 
@@ -2752,7 +2771,7 @@ TEST_F(SingleTouchInputMapperTest, Process_Rotation) {
 }
 
 TEST_F(SingleTouchInputMapperTest, Process_AllAxes_DefaultCalibration) {
-    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice, DISPLAY_ID);
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
     prepareAxes(POSITION | PRESSURE | TOOL);
     addMapperAndConfigure(mapper);
@@ -2884,7 +2903,7 @@ void MultiTouchInputMapperTest::processSync(MultiTouchInputMapper* mapper) {
 
 
 TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackingIds) {
-    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice, DISPLAY_ID);
+    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
     prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -3135,7 +3154,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
 }
 
 TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingIds) {
-    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice, DISPLAY_ID);
+    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
     prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
     prepareAxes(POSITION | ID);
     prepareVirtualKeys();
@@ -3295,7 +3314,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
 }
 
 TEST_F(MultiTouchInputMapperTest, Process_AllAxes_WithDefaultCalibration) {
-    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice, DISPLAY_ID);
+    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
     prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
     prepareAxes(POSITION | TOUCH | TOOL | PRESSURE | ORIENTATION | ID | MINOR);
     addMapperAndConfigure(mapper);
@@ -3340,11 +3359,11 @@ TEST_F(MultiTouchInputMapperTest, Process_AllAxes_WithDefaultCalibration) {
 }
 
 TEST_F(MultiTouchInputMapperTest, Process_TouchAndToolAxes_GeometricCalibration) {
-    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice, DISPLAY_ID);
+    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
     prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
     prepareAxes(POSITION | TOUCH | TOOL | MINOR);
-    prepareCalibration("touch.touchSize.calibration", "geometric");
-    prepareCalibration("touch.toolSize.calibration", "geometric");
+    addConfigurationProperty("touch.touchSize.calibration", "geometric");
+    addConfigurationProperty("touch.toolSize.calibration", "geometric");
     addMapperAndConfigure(mapper);
 
     // These calculations are based on the input device calibration documentation.
@@ -3381,17 +3400,17 @@ TEST_F(MultiTouchInputMapperTest, Process_TouchAndToolAxes_GeometricCalibration)
 }
 
 TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_SummedLinearCalibration) {
-    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice, DISPLAY_ID);
+    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
     prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
     prepareAxes(POSITION | TOUCH | TOOL);
-    prepareCalibration("touch.touchSize.calibration", "pressure");
-    prepareCalibration("touch.toolSize.calibration", "linear");
-    prepareCalibration("touch.toolSize.linearScale", "10");
-    prepareCalibration("touch.toolSize.linearBias", "160");
-    prepareCalibration("touch.toolSize.isSummed", "1");
-    prepareCalibration("touch.pressure.calibration", "amplitude");
-    prepareCalibration("touch.pressure.source", "touch");
-    prepareCalibration("touch.pressure.scale", "0.01");
+    addConfigurationProperty("touch.touchSize.calibration", "pressure");
+    addConfigurationProperty("touch.toolSize.calibration", "linear");
+    addConfigurationProperty("touch.toolSize.linearScale", "10");
+    addConfigurationProperty("touch.toolSize.linearBias", "160");
+    addConfigurationProperty("touch.toolSize.isSummed", "1");
+    addConfigurationProperty("touch.pressure.calibration", "amplitude");
+    addConfigurationProperty("touch.pressure.source", "touch");
+    addConfigurationProperty("touch.pressure.scale", "0.01");
     addMapperAndConfigure(mapper);
 
     // These calculations are based on the input device calibration documentation.
@@ -3437,18 +3456,18 @@ TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_SummedLinear
 }
 
 TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_AreaCalibration) {
-    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice, DISPLAY_ID);
+    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
     prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
     prepareAxes(POSITION | TOUCH | TOOL);
-    prepareCalibration("touch.touchSize.calibration", "pressure");
-    prepareCalibration("touch.toolSize.calibration", "area");
-    prepareCalibration("touch.toolSize.areaScale", "22");
-    prepareCalibration("touch.toolSize.areaBias", "1");
-    prepareCalibration("touch.toolSize.linearScale", "9.2");
-    prepareCalibration("touch.toolSize.linearBias", "3");
-    prepareCalibration("touch.pressure.calibration", "amplitude");
-    prepareCalibration("touch.pressure.source", "touch");
-    prepareCalibration("touch.pressure.scale", "0.01");
+    addConfigurationProperty("touch.touchSize.calibration", "pressure");
+    addConfigurationProperty("touch.toolSize.calibration", "area");
+    addConfigurationProperty("touch.toolSize.areaScale", "22");
+    addConfigurationProperty("touch.toolSize.areaBias", "1");
+    addConfigurationProperty("touch.toolSize.linearScale", "9.2");
+    addConfigurationProperty("touch.toolSize.linearBias", "3");
+    addConfigurationProperty("touch.pressure.calibration", "amplitude");
+    addConfigurationProperty("touch.pressure.source", "touch");
+    addConfigurationProperty("touch.pressure.scale", "0.01");
     addMapperAndConfigure(mapper);
 
     // These calculations are based on the input device calibration documentation.

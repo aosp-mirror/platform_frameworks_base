@@ -41,7 +41,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Properties;
 
 /*
  * Wraps the C++ InputManager and provides its callbacks.
@@ -368,11 +367,6 @@ public class InputManager {
         public int height;
     }
     
-    private static final class InputDeviceCalibration {
-        public String[] keys;
-        public String[] values;
-    }
-    
     /*
      * Callbacks from native.
      */
@@ -491,33 +485,6 @@ public class InputManager {
             }
             
             return keys.toArray(new VirtualKeyDefinition[keys.size()]);
-        }
-        
-        @SuppressWarnings("unused")
-        public InputDeviceCalibration getInputDeviceCalibration(String deviceName) {
-            // Calibration is specified as a sequence of colon-delimited key value pairs.
-            Properties properties = new Properties();
-            File calibrationFile = new File(Environment.getRootDirectory(),
-                    CALIBRATION_DIR_PATH + deviceName + ".idc");
-            if (calibrationFile.exists()) {
-                try {
-                    FileInputStream fis = new FileInputStream(calibrationFile);
-                    properties.load(fis);
-                    fis.close();
-                } catch (IOException ex) {
-                    Slog.w(TAG, "Error reading input device calibration properties for device "
-                            + deviceName + " from " + calibrationFile + ".", ex);
-                }
-            } else {
-                Slog.i(TAG, "No input device calibration properties found for device "
-                        + deviceName + ".");
-                return null;
-            }
-            
-            InputDeviceCalibration calibration = new InputDeviceCalibration();
-            calibration.keys = properties.keySet().toArray(new String[properties.size()]);
-            calibration.values = properties.values().toArray(new String[properties.size()]);
-            return calibration;
         }
         
         @SuppressWarnings("unused")

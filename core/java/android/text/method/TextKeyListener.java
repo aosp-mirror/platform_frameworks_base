@@ -189,7 +189,12 @@ public class TextKeyListener extends BaseKeyListener implements SpanWatcher {
             return MultiTapKeyListener.getInstance(mAutoText, mAutoCap);
         } else if (kind == KeyCharacterMap.FULL
                 || kind == KeyCharacterMap.SPECIAL_FUNCTION) {
-            return QwertyKeyListener.getInstance(false, Capitalize.NONE);
+            // We consider special function keyboards full keyboards as a workaround for
+            // devices that do not have built-in keyboards.  Applications may try to inject
+            // key events using the built-in keyboard device id which may be configured as
+            // a special function keyboard using a default key map.  Ideally, as of Honeycomb,
+            // these applications should be modified to use KeyCharacterMap.VIRTUAL_KEYBOARD.
+            return QwertyKeyListener.getInstanceForFullKeyboard();
         }
 
         return NullKeyListener.getInstance();

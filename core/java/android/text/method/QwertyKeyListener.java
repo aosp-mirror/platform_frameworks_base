@@ -31,25 +31,46 @@ import android.view.View;
 public class QwertyKeyListener extends BaseKeyListener {
     private static QwertyKeyListener[] sInstance =
         new QwertyKeyListener[Capitalize.values().length * 2];
+    private static QwertyKeyListener sFullKeyboardInstance;
 
-    public QwertyKeyListener(Capitalize cap, boolean autotext) {
+    private Capitalize mAutoCap;
+    private boolean mAutoText;
+    private boolean mFullKeyboard;
+
+    private QwertyKeyListener(Capitalize cap, boolean autoText, boolean fullKeyboard) {
         mAutoCap = cap;
-        mAutoText = autotext;
+        mAutoText = autoText;
+        mFullKeyboard = fullKeyboard;
+    }
+
+    public QwertyKeyListener(Capitalize cap, boolean autoText) {
+        this(cap, autoText, false);
     }
 
     /**
      * Returns a new or existing instance with the specified capitalization
      * and correction properties.
      */
-    public static QwertyKeyListener getInstance(boolean autotext,
-                                              Capitalize cap) {
-        int off = cap.ordinal() * 2 + (autotext ? 1 : 0);
+    public static QwertyKeyListener getInstance(boolean autoText, Capitalize cap) {
+        int off = cap.ordinal() * 2 + (autoText ? 1 : 0);
 
         if (sInstance[off] == null) {
-            sInstance[off] = new QwertyKeyListener(cap, autotext);
+            sInstance[off] = new QwertyKeyListener(cap, autoText);
         }
 
         return sInstance[off];
+    }
+
+    /**
+     * Gets an instance of the listener suitable for use with full keyboards.
+     * Disables auto-capitalization, auto-text and long-press initiated on-screen
+     * character pickers.
+     */
+    public static QwertyKeyListener getInstanceForFullKeyboard() {
+        if (sFullKeyboardInstance == null) {
+            sFullKeyboardInstance = new QwertyKeyListener(Capitalize.NONE, false, true);
+        }
+        return sFullKeyboardInstance;
     }
 
     public int getInputType() {
@@ -85,14 +106,16 @@ public class QwertyKeyListener extends BaseKeyListener {
 
         int i = event.getUnicodeChar(event.getMetaState() | getMetaState(content));
 
-        int count = event.getRepeatCount();
-        if (count > 0 && selStart == selEnd && selStart > 0) {
-            char c = content.charAt(selStart - 1);
+        if (!mFullKeyboard) {
+            int count = event.getRepeatCount();
+            if (count > 0 && selStart == selEnd && selStart > 0) {
+                char c = content.charAt(selStart - 1);
 
-            if (c == i || c == Character.toUpperCase(i) && view != null) {
-                if (showCharacterPicker(view, content, c, false, count)) {
-                    resetMetaState(content);
-                    return true;
+                if (c == i || c == Character.toUpperCase(i) && view != null) {
+                    if (showCharacterPicker(view, content, c, false, count)) {
+                        resetMetaState(content);
+                        return true;
+                    }
                 }
             }
         }
@@ -490,8 +513,5 @@ public class QwertyKeyListener extends BaseKeyListener {
 
         private char[] mText;
     }
-
-    private Capitalize mAutoCap;
-    private boolean mAutoText;
 }
 
