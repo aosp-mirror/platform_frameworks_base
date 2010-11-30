@@ -190,6 +190,7 @@ class SipSessionGroup implements SipListener {
 
     public synchronized void close() {
         Log.d(TAG, " close stack for " + mLocalProfile.getUriString());
+        onConnectivityChanged();
         mSessionMap.clear();
         closeToNotReceiveCalls();
         if (mSipStack != null) {
