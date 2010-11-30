@@ -1282,6 +1282,7 @@
      Resources added in version 11 of the platform (Honeycomb / 3.0).
      =============================================================== -->
   <eat-comment />
+
   <public type="attr" name="allContactsName" id="0x010102cc" />
   <public type="attr" name="windowActionBar" id="0x010102cd" />
   <public type="attr" name="actionBarStyle" id="0x010102ce" />
@@ -1442,6 +1443,7 @@
   <public type="interpolator" name="accelerate_quad" id="0x010c0000" />
   <!-- Acceleration curve matching a quadtratic ease in function. -->
   <public type="interpolator" name="decelerate_quad" id="0x010c0001" />
+
   <!-- Acceleration curve matching a cubic ease out function. -->
   <public type="interpolator" name="accelerate_cubic" id="0x010c0002" />
   <!-- Acceleration curve matching a cubic ease in function. -->
@@ -1661,13 +1663,17 @@
   <public type="style" name="Theme.Holo.Light.NoActionBar.Fullscreen" />
 
 <!-- ===============================================================
-     Resources added in version 13 of the platform (Ice Cream Sandwich)
+     Resources added in version 14 of the platform (Ice Cream Sandwich)
      =============================================================== -->
   <eat-comment />
   <public type="attr" name="state_hovered" />
   <public type="attr" name="state_drag_can_accept" />
   <public type="attr" name="state_drag_hovered" />
   <public type="attr" name="stopWithTask" />
+
+  <public type="attr" name="switchTextOn" />
+  <public type="attr" name="switchTextOff" />
+  <public type="attr" name="switchPreferenceStyle" />
 
   <public type="style" name="TextAppearance.SuggestionHighlight" />
   <public type="style" name="Theme.Holo.SplitActionBarWhenNarrow" />
