@@ -64,8 +64,6 @@
                 android:layout_marginRight="@dimen/preference_screen_side_margin"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
-                android:paddingLeft="32dip"
-                android:paddingRight="32dip"
                 android:background="?attr/preferencePanelBackground"
                 android:visibility="gone" />
     </LinearLayout>

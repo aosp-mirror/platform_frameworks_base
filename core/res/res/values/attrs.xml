@@ -2201,9 +2201,17 @@
     </declare-styleable>
     <declare-styleable name="PreferenceFrameLayout">
         <!-- Padding to use at the top of the prefs content. -->
-        <attr name="topPadding" format="dimension" />
+        <attr name="borderTop" format="dimension" />
         <!-- Padding to use at the bottom of the prefs content. -->
-        <attr name="bottomPadding" format="dimension" />
+        <attr name="borderBottom" format="dimension" />
+        <!-- Padding to use at the left of the prefs content. -->
+        <attr name="borderLeft" format="dimension" />
+        <!-- Padding to use at the right of the prefs content. -->
+        <attr name="borderRight" format="dimension" />
+    </declare-styleable>
+    <declare-styleable name="PreferenceFrameLayout_Layout">
+        <!-- Padding to use at the top of the prefs content. -->
+        <attr name="layout_removeBorders" format="boolean" />
     </declare-styleable>
     <declare-styleable name="MenuView">
         <!-- Default appearance of menu item text. -->
