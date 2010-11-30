@@ -40,8 +40,7 @@ class SensorDevice : public Singleton<SensorDevice> {
     Mutex mLock; // protect mActivationCount[].rates
     // fixed-size array after construction
     struct Info {
-        Info() : count(0) { }
-        int32_t count;
+        Info() { }
         KeyedVector<void*, nsecs_t> rates;
     };
     DefaultKeyedVector<int, Info> mActivationCount;
