@@ -49,19 +49,23 @@ public final class InputMethodSubtype implements Parcelable {
     InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue) {
         mSubtypeNameResId = nameId;
         mSubtypeIconResId = iconId;
-        mSubtypeLocale = locale;
-        mSubtypeMode = mode;
-        mSubtypeExtraValue = extraValue;
+        mSubtypeLocale = locale != null ? locale : "";
+        mSubtypeMode = mode != null ? mode : "";
+        mSubtypeExtraValue = extraValue != null ? extraValue : "";
         mSubtypeHashCode = hashCodeInternal(mSubtypeNameResId, mSubtypeIconResId, mSubtypeLocale,
                 mSubtypeMode, mSubtypeExtraValue);
     }
 
     InputMethodSubtype(Parcel source) {
+        String s;
         mSubtypeNameResId = source.readInt();
         mSubtypeIconResId = source.readInt();
-        mSubtypeLocale = source.readString();
-        mSubtypeMode = source.readString();
-        mSubtypeExtraValue = source.readString();
+        s = source.readString();
+        mSubtypeLocale = s != null ? s : "";
+        s = source.readString();
+        mSubtypeMode = s != null ? s : "";
+        s = source.readString();
+        mSubtypeExtraValue = s != null ? s : "";
         mSubtypeHashCode = hashCodeInternal(mSubtypeNameResId, mSubtypeIconResId, mSubtypeLocale,
                 mSubtypeMode, mSubtypeExtraValue);
     }
@@ -110,8 +114,9 @@ public final class InputMethodSubtype implements Parcelable {
     public boolean equals(Object o) {
         if (o instanceof InputMethodSubtype) {
             InputMethodSubtype subtype = (InputMethodSubtype) o;
-            return (subtype.getNameResId() == getNameResId())
-                && (subtype.getMode() == getMode())
+            return (subtype.hashCode() == hashCode())
+                && (subtype.getNameResId() == getNameResId())
+                && (subtype.getMode().equals(getMode()))
                 && (subtype.getIconResId() == getIconResId())
                 && (subtype.getLocale().equals(getLocale()))
                 && (subtype.getExtraValue().equals(getExtraValue()));
