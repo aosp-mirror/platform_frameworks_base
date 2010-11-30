@@ -70,6 +70,10 @@ public class ActionBarImpl extends ActionBar {
     
     private ActionMode mActionMode;
     
+    private boolean mLastMenuVisibility;
+    private ArrayList<OnMenuVisibilityListener> mMenuVisibilityListeners =
+            new ArrayList<OnMenuVisibilityListener>();
+
     private static final int CONTEXT_DISPLAY_NORMAL = 0;
     private static final int CONTEXT_DISPLAY_SPLIT = 1;
     
@@ -120,6 +124,26 @@ public class ActionBarImpl extends ActionBar {
                 CONTEXT_DISPLAY_NORMAL : CONTEXT_DISPLAY_SPLIT;
     }
 
+    public void addOnMenuVisibilityListener(OnMenuVisibilityListener listener) {
+        mMenuVisibilityListeners.add(listener);
+    }
+
+    public void removeOnMenuVisibilityListener(OnMenuVisibilityListener listener) {
+        mMenuVisibilityListeners.remove(listener);
+    }
+
+    public void dispatchMenuVisibilityChanged(boolean isVisible) {
+        if (isVisible == mLastMenuVisibility) {
+            return;
+        }
+        mLastMenuVisibility = isVisible;
+
+        final int count = mMenuVisibilityListeners.size();
+        for (int i = 0; i < count; i++) {
+            mMenuVisibilityListeners.get(i).onMenuVisibilityChanged(isVisible);
+        }
+    }
+
     @Override
     public void setTitle(int resId) {
         setTitle(mContext.getString(resId));
@@ -138,11 +162,11 @@ public class ActionBarImpl extends ActionBar {
         mActionView.setCallback(null);
     }
 
-    public void setDropdownNavigationMode(SpinnerAdapter adapter, NavigationCallback callback) {
+    public void setDropdownNavigationMode(SpinnerAdapter adapter, OnNavigationListener callback) {
         setDropdownNavigationMode(adapter, callback, -1);
     }
 
-    public void setDropdownNavigationMode(SpinnerAdapter adapter, NavigationCallback callback,
+    public void setDropdownNavigationMode(SpinnerAdapter adapter, OnNavigationListener callback,
             int defaultSelectedPosition) {
         cleanupTabs();
         setDisplayOptions(0, DISPLAY_SHOW_CUSTOM | DISPLAY_SHOW_TITLE);
@@ -516,7 +540,7 @@ public class ActionBarImpl extends ActionBar {
 
         public void onMenuModeChange(MenuBuilder menu) {
             invalidate();
-            mUpperContextView.showOverflowMenu();
+            mUpperContextView.openOverflowMenu();
         }
     }
 
@@ -627,7 +651,7 @@ public class ActionBarImpl extends ActionBar {
     }
 
     @Override
-    public void setListNavigationCallbacks(SpinnerAdapter adapter, NavigationCallback callback) {
+    public void setListNavigationCallbacks(SpinnerAdapter adapter, OnNavigationListener callback) {
         mActionView.setDropdownAdapter(adapter);
         mActionView.setCallback(callback);
     }

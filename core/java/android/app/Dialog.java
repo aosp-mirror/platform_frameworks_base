@@ -735,6 +735,9 @@ public class Dialog implements DialogInterface, Window.Callback,
      * @see Activity#onMenuOpened(int, Menu)
      */
     public boolean onMenuOpened(int featureId, Menu menu) {
+        if (featureId == Window.FEATURE_ACTION_BAR) {
+            mActionBar.dispatchMenuVisibilityChanged(true);
+        }
         return true;
     }
 
@@ -749,6 +752,9 @@ public class Dialog implements DialogInterface, Window.Callback,
      * @see Activity#onPanelClosed(int, Menu)
      */
     public void onPanelClosed(int featureId, Menu menu) {
+        if (featureId == Window.FEATURE_ACTION_BAR) {
+            mActionBar.dispatchMenuVisibilityChanged(false);
+        }
     }
 
     /**

@@ -180,6 +180,12 @@ public class ActionBarContextView extends ViewGroup {
         return false;
     }
 
+    public void openOverflowMenu() {
+        if (mMenuView != null) {
+            mMenuView.openOverflowMenu();
+        }
+    }
+
     public boolean hideOverflowMenu() {
         if (mMenuView != null) {
             return mMenuView.hideOverflowMenu();

@@ -2362,6 +2362,9 @@ public class Activity extends ContextThemeWrapper
      * @return The default implementation returns true.
      */
     public boolean onMenuOpened(int featureId, Menu menu) {
+        if (featureId == Window.FEATURE_ACTION_BAR) {
+            mActionBar.dispatchMenuVisibilityChanged(true);
+        }
         return true;
     }
 
@@ -2392,7 +2395,7 @@ public class Activity extends ContextThemeWrapper
                     return true;
                 }
                 return mFragments.dispatchContextItemSelected(item);
-                
+
             default:
                 return false;
         }
@@ -2416,6 +2419,10 @@ public class Activity extends ContextThemeWrapper
                 
             case Window.FEATURE_CONTEXT_MENU:
                 onContextMenuClosed(menu);
+                break;
+
+            case Window.FEATURE_ACTION_BAR:
+                mActionBar.dispatchMenuVisibilityChanged(false);
                 break;
         }
     }
