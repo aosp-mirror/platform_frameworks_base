@@ -79,6 +79,14 @@ public:
     // the camera only has a single output, and does not have
     // separate output for video frames and preview frame.
     void getSupportedVideoSizes(Vector<Size> &sizes) const;
+    // Retrieve the preferred preview size (width and height) in pixels
+    // for video recording. The given width and height must be one of
+    // supported preview sizes returned from getSupportedPreviewSizes().
+    // Must not be called if getSupportedVideoSizes() returns an empty
+    // Vector of Size. If getSupportedVideoSizes() returns an empty
+    // Vector of Size, the width and height returned from this method
+    // is invalid, and is "-1x-1".
+    void getPreferredPreviewSizeForVideo(int *width, int *height) const;
 
     void setPreviewFrameRate(int fps);
     int getPreviewFrameRate() const;
@@ -319,6 +327,21 @@ public:
     // frameworks/base/include/camera/Camera.h.
     // Example: "176x144,1280x720". Read only.
     static const char KEY_SUPPORTED_VIDEO_SIZES[];
+
+    // Preferred preview frame size in pixels for video recording.
+    // The width and height must be one of the supported sizes retrieved
+    // via KEY_SUPPORTED_PREVIEW_SIZES. This key can be used only when
+    // getSupportedVideoSizes() does not return an empty Vector of Size.
+    // Camcorder applications are recommended to set the preview size
+    // to a value that is not larger than the preferred preview size.
+    // In other words, the product of the width and height of the
+    // preview size should not be larger than that of the preferred
+    // preview size. In addition, we recommend to choos a preview size
+    // that has the same aspect ratio as the resolution of video to be
+    // recorded.
+    // Example value: "800x600". Read only.
+    static const char KEY_PREFERRED_PREVIEW_SIZE_FOR_VIDEO[];
+
     // The image format for video frames. See CAMERA_MSG_VIDEO_FRAME in
     // frameworks/base/include/camera/Camera.h.
     // Example value: "yuv420sp" or PIXEL_FORMAT_XXX constants. Read only.
