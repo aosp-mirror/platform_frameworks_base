@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
-** Copyright 2009, The Android Open Source Project
+** Copyright 2010, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License"); 
 ** you may not use this file except in compliance with the License. 
@@ -20,21 +20,6 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <bool name="config_statusBarCanHide">false</bool>
-
-    <!-- see comment in values/config.xml -->
-    <integer name="config_longPressOnPowerBehavior">2</integer>
-
-    <!-- Show sliding tab before lockscreen -->
-    <bool name="config_enableSlidingTabFirst">false</bool>
-    <!-- Enable lockscreen rotation -->
-    <bool name="config_enableLockScreenRotation">true</bool>
-
-    <!-- see comment in values/config.xml -->
-    <integer name="config_longPressOnHomeBehavior">0</integer>
-
     <!-- see comment in values/config.xml -->
     <dimen name="config_prefDialogWidth">440dp</dimen>
-    
 </resources>
-
