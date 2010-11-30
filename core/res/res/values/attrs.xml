@@ -3418,21 +3418,18 @@
              greater than 0 or infinite. The default value is restart. -->
         <attr name="repeatMode"/>
         <!-- Value the animation starts from. -->
-        <attr name="valueFrom" format="float|integer"/>
+        <attr name="valueFrom" format="float|integer|color|dimension"/>
         <!-- Value the animation animates to. -->
-        <attr name="valueTo" format="float|integer"/>
+        <attr name="valueTo" format="float|integer|color|dimension"/>
         <!-- The type of valueFrom and valueTo. -->
         <attr name="valueType">
-            <!-- valueFrom and valueTo are floats. -->
+            <!-- valueFrom and valueTo are floats. This is the default value is valueType is
+                 unspecified. Note that if either valueFrom or valueTo represent colors
+                 (beginning with "#"), then this attribute is ignored and the color values are
+                 interpreted as integers. -->
             <enum name="floatType" value="0" />
             <!-- valueFrom and valueTo are integers. -->
             <enum name="intType"   value="1" />
-            <!-- valueFrom and valueTo are doubles. -->
-            <enum name="doubleType" value="2" />
-            <!-- valueFrom and valueTo are colors. -->
-            <enum name="colorType" value="3" />
-            <!-- valueFrom and valueTo are a custom type. -->
-            <enum name="customType" value="4" />
         </attr>
     </declare-styleable>
 
