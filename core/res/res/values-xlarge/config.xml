@@ -34,7 +34,7 @@
     <integer name="config_longPressOnHomeBehavior">0</integer>
 
     <!-- see comment in values/config.xml -->
-    <dimen name="config_prefDialogWidth">440dp</dimen>
+    <dimen name="config_prefDialogWidth">580dp</dimen>
     
 </resources>
 
