@@ -503,6 +503,15 @@
         <attr name="listPopupWindowStyle" format="reference" />
         <!-- Default PopupMenu style. -->
         <attr name="popupMenuStyle" format="reference" />
+        <!-- NumberPicker up button style -->
+        <attr name="numberPickerUpButtonStyle" format="reference" />
+        <!-- NumberPicker down button style -->
+        <attr name="numberPickerDownButtonStyle" format="reference" />
+        <!-- NumberPicker input text style -->
+        <attr name="numberPickerInputTextStyle" format="reference" />
+
+        <!-- NumberPicker the fading edge length of the selector wheel -->
+        <attr name="numberPickerStyle" format="reference" />
 
         <!-- =================== -->
         <!-- Action bar styles   -->
@@ -625,6 +634,10 @@
 
         <!-- Preference frame layout styles. -->
         <attr name="preferenceFrameLayoutStyle" format="reference" />
+
+        <!-- Default style for the Switch widget. -->
+        <attr name="switchStyle" format="reference" />
+
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -2856,6 +2869,12 @@
         <attr name="minorWeightMax" format="float" />
     </declare-styleable>
 
+    <!-- @hide -->
+    <declare-styleable name="NumberPicker">
+        <attr name="orientation" />
+        <attr name="solidColor" format="color|reference" />
+    </declare-styleable>
+
     <!-- ========================= -->
     <!-- Drawable class attributes -->
     <!-- ========================= -->
@@ -4496,5 +4515,24 @@
 
     <declare-styleable name="ActionBar_LayoutParams">
         <attr name="layout_gravity" />
+    </declare-styleable>
+
+    <declare-styleable name="Switch">
+        <!-- Drawable to use as the "thumb" that switches back and forth. -->
+        <attr name="switchThumb" format="reference" />
+        <!-- Drawable to use as the "track" that the switch thumb slides within. -->
+        <attr name="switchTrack" format="reference" />
+        <!-- Text to use when the switch is in the checked/"on" state. -->
+        <attr name="textOn" />
+        <!-- Text to use when the switch is in the unchecked/"off" state. -->
+        <attr name="textOff" />
+        <!-- Amount of padding on either side of text within the switch thumb. -->
+        <attr name="thumbTextPadding" format="dimension" />
+        <!-- TextAppearance style for text displayed on the switch thumb. -->
+        <attr name="switchTextAppearance" format="reference" />
+        <!-- Minimum width for the switch component -->
+        <attr name="switchMinWidth" format="dimension" />
+        <!-- Minimum space between the switch and caption text -->
+        <attr name="switchPadding" format="dimension" />
     </declare-styleable>
 </resources>

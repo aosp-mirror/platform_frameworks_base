@@ -281,7 +281,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         mUpdateMonitor.registerSimStateCallback(this);
 
         mLockPatternUtils = new LockPatternUtils(mContext);
-        mKeyguardViewProperties 
+        mKeyguardViewProperties
                 = new LockPatternKeyguardViewProperties(mLockPatternUtils, mUpdateMonitor);
 
         mKeyguardViewManager = new KeyguardViewManager(
@@ -586,6 +586,11 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             if (!lockedOrMissing && !provisioned) {
                 if (DEBUG) Log.d(TAG, "doKeyguard: not showing because device isn't provisioned"
                         + " and the sim is not locked or missing");
+                return;
+            }
+
+            if (mLockPatternUtils.isLockScreenDisabled()) {
+                if (DEBUG) Log.d(TAG, "doKeyguard: not showing because lockscreen is off");
                 return;
             }
 
@@ -1005,7 +1010,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 Log.d(TAG, "playSounds: whichSound = " + whichSound + "; soundPath was null");
             }
         }
-    }        
+    }
 
     /**
      * Handle message sent by {@link #showLocked}.

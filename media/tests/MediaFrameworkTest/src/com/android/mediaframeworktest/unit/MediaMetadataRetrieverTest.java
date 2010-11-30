@@ -25,11 +25,6 @@ import com.android.mediaframeworktest.MediaNames;
 import com.android.mediaframeworktest.MediaProfileReader;
 import android.test.suitebuilder.annotation.*;
 
-/**
- * WARNING:
- * Currently, captureFrame() does not work, due to hardware access permission problem.
- * We are currently only testing the metadata/album art retrieval features.
- */
 public class MediaMetadataRetrieverTest extends AndroidTestCase {
     
     private static final String TAG         = "MediaMetadataRetrieverTest";
@@ -101,6 +96,7 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
                 } catch (Exception e) {
                     Log.e(TAG, "Fails to convert the bitmap to a JPEG file for " + MediaNames.THUMBNAIL_CAPTURE_TEST_FILES[i]);
                     hasFailed = true;
+                    Log.e(TAG, e.toString());
                 }
             } catch(Exception e) {
                 Log.e(TAG, "Fails to setDataSource for file " + MediaNames.THUMBNAIL_CAPTURE_TEST_FILES[i]);
@@ -148,11 +144,8 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     public static void testBasicNormalMethodCallSequence() throws Exception {
         boolean hasFailed = false;
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         try {
             retriever.setDataSource(MediaNames.TEST_PATH_1);
-            /*
-             * captureFrame() fails due to lack of permission to access hardware decoder devices
             Bitmap bitmap = retriever.captureFrame();
             assertTrue(bitmap != null);
             try {
@@ -162,7 +155,6 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
             } catch (Exception e) {
                 throw new Exception("Fails to convert the bitmap to a JPEG file for " + MediaNames.TEST_PATH_1, e);
             }
-            */
             extractAllSupportedMetadataValues(retriever);
         } catch(Exception e) {
             Log.e(TAG, "Fails to setDataSource for " + MediaNames.TEST_PATH_1, e);
@@ -251,17 +243,14 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
         assertTrue(!hasFailed);
     }
 
-    // Due to the lack of permission to access hardware decoder, any calls
-    // attempting to capture a frame will fail. These are commented out for now
-    // until we find a solution to this access permission problem.
     @MediumTest
     public static void testIntendedUsage() {
         // By default, capture frame and retrieve metadata
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         boolean hasFailed = false;
-        // retriever.setDataSource(MediaNames.TEST_PATH_1);
-        // assertTrue(retriever.captureFrame() != null);
-        // assertTrue(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) != null);
+        retriever.setDataSource(MediaNames.TEST_PATH_1);
+        assertTrue(retriever.captureFrame() != null);
+        assertTrue(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) != null);
 
         // Do not capture frame or retrieve metadata
         retriever.setMode(MediaMetadataRetriever.MODE_CAPTURE_FRAME_ONLY & MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
@@ -276,9 +265,9 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
         }
 
         // Capture frame only
-        // retriever.setMode(MediaMetadataRetriever.MODE_CAPTURE_FRAME_ONLY);
-        // retriever.setDataSource(MediaNames.TEST_PATH_1);
-        // assertTrue(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) == null);
+        retriever.setMode(MediaMetadataRetriever.MODE_CAPTURE_FRAME_ONLY);
+        retriever.setDataSource(MediaNames.TEST_PATH_1);
+        assertTrue(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) == null);
 
         // Retriever metadata only
         retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
@@ -289,10 +278,10 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
         }
 
         // Capture frame and retrieve metadata
-        // retriever.setMode(MediaMetadataRetriever.MODE_CAPTURE_FRAME_ONLY | MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
-        // retriever.setDataSource(MediaNames.TEST_PATH_1);
-        // assertTrue(retriever.captureFrame() != null);
-        // assertTrue(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) != null);
+        retriever.setMode(MediaMetadataRetriever.MODE_CAPTURE_FRAME_ONLY | MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
+        retriever.setDataSource(MediaNames.TEST_PATH_1);
+        assertTrue(retriever.captureFrame() != null);
+        assertTrue(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) != null);
         retriever.release();
         assertTrue(!hasFailed);
     }

@@ -95,6 +95,7 @@ public final class CreateInfo implements ICreateInfo {
      */
     private final static String[] DELEGATE_METHODS = new String[] {
         "android.app.Fragment#instantiate", //(Landroid/content/Context;Ljava/lang/String;Landroid/os/Bundle;)Landroid/app/Fragment;",
+        "android.os.Handler#sendMessageAtTime",
         "android.view.View#isInEditMode",
         // TODO: comment out once DelegateClass is working
         // "android.content.res.Resources$Theme#obtainStyledAttributes",
@@ -118,6 +119,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.SweepGradient",
         "android.graphics.Typeface",
         "android.graphics.Xfermode",
+        "android.os.SystemClock",
         "android.util.FloatMath",
     };
 

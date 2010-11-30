@@ -277,10 +277,6 @@ void CameraService::releaseSound() {
 
 void CameraService::playSound(sound_kind kind) {
     LOG1("playSound(%d)", kind);
-    // FIXME: temporarily disable sound while working on audio HAL issues preventing simultaneous
-    // playback and record
-    if (kind == SOUND_RECORDING) return;
-
     Mutex::Autolock lock(mSoundLock);
     sp<MediaPlayer> player = mSoundPlayer[kind];
     if (player != 0) {

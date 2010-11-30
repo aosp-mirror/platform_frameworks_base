@@ -667,7 +667,8 @@
     <skip />
     <!-- no translation found for lockscreen_too_many_failed_pin_attempts_dialog_message (6827749231465145590) -->
     <skip />
-    <!-- outdated translation 3351013842320127827 -->     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Helytelenül rajzolta le a feloldási mintát <xliff:g id="NUMBER_0">%d</xliff:g> alkalommal. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után a Google rendszerében használt bejelentkezési adataival kell feloldania a telefonját."\n\n" Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (8687762517114904651) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Helytelenül rajzolta le a feloldási mintát <xliff:g id="NUMBER_0">%d</xliff:g> alkalommal. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után a Google rendszerében használt bejelentkezési adataival kell feloldania a telefonját."\n\n" Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Próbálkozzon újra <xliff:g id="NUMBER">%d</xliff:g> másodperc múlva."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Elfelejtette a mintát?"</string>
@@ -697,6 +698,8 @@
     <string name="save_password_label" msgid="6860261758665825069">"Megerősítés"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Tipp: érintse meg kétszer a nagyításhoz és kicsinyítéshez."</string>
     <!-- no translation found for autofill_this_form (1272247532604569872) -->
+    <skip />
+    <!-- no translation found for setup_autofill (8154593408885654044) -->
     <skip />
     <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
     <skip />

@@ -53,7 +53,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.InputQueue.FinishedCallback;
+import android.util.TypedValue;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -87,7 +87,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     /** @noinspection PointlessBooleanExpression*/
     private static final boolean DEBUG_DRAW = false || LOCAL_LOGV;
     private static final boolean DEBUG_LAYOUT = false || LOCAL_LOGV;
-    private static final boolean DEBUG_INPUT = true || LOCAL_LOGV;
+    private static final boolean DEBUG_DIALOG = false || LOCAL_LOGV;
     private static final boolean DEBUG_INPUT_RESIZE = false || LOCAL_LOGV;
     private static final boolean DEBUG_ORIENTATION = false || LOCAL_LOGV;
     private static final boolean DEBUG_TRACKBALL = false || LOCAL_LOGV;
@@ -125,6 +125,8 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
 
     final int[] mTmpLocation = new int[2];
 
+    final TypedValue mTmpValue = new TypedValue();
+    
     final InputMethodCallback mInputMethodCallback;
     final SparseArray<Object> mPendingEvents = new SparseArray<Object>();
     int mPendingEventSeq = 0;
@@ -405,7 +407,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 }
                 mPendingContentInsets.set(mAttachInfo.mContentInsets);
                 mPendingVisibleInsets.set(0, 0, 0, 0);
-                if (Config.LOGV) Log.v(TAG, "Added window " + mWindow);
+                if (DEBUG_LAYOUT) Log.v(TAG, "Added window " + mWindow);
                 if (res < WindowManagerImpl.ADD_OKAY) {
                     mView = null;
                     mAttachInfo.mRootView = null;
@@ -639,7 +641,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
 
         mTraversalScheduled = false;
         mWillDrawSoon = true;
-        boolean windowResizesToFitContent = false;
+        boolean windowSizeMayChange = false;
         boolean fullRedrawNeeded = mFullRedrawNeeded;
         boolean newSurface = false;
         boolean surfaceChanged = false;
@@ -696,7 +698,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                         "View " + host + " resized to: " + frame);
                 fullRedrawNeeded = true;
                 mLayoutRequested = true;
-                windowResizesToFitContent = true;
+                windowSizeMayChange = true;
             }
         }
 
@@ -722,6 +724,8 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             // enqueued an action after being detached
             getRunQueue().executeActions(attachInfo.mHandler);
 
+            final Resources res = mView.getContext().getResources();
+
             if (mFirst) {
                 host.fitSystemWindows(mAttachInfo.mContentInsets);
                 // make sure touch mode code executes by setting cached value
@@ -743,23 +747,69 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 }
                 if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT
                         || lp.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
-                    windowResizesToFitContent = true;
+                    windowSizeMayChange = true;
 
-                    DisplayMetrics packageMetrics =
-                        mView.getContext().getResources().getDisplayMetrics();
+                    DisplayMetrics packageMetrics = res.getDisplayMetrics();
                     desiredWindowWidth = packageMetrics.widthPixels;
                     desiredWindowHeight = packageMetrics.heightPixels;
                 }
             }
 
-            childWidthMeasureSpec = getRootMeasureSpec(desiredWindowWidth, lp.width);
-            childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
-
             // Ask host how big it wants to be
             if (DEBUG_ORIENTATION || DEBUG_LAYOUT) Log.v(TAG,
                     "Measuring " + host + " in display " + desiredWindowWidth
                     + "x" + desiredWindowHeight + "...");
-            host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+
+            boolean goodMeasure = false;
+            if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT
+                    || lp.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
+                // On large screens, we don't want to allow dialogs to just
+                // stretch to fill the entire width of the screen to display
+                // one line of text.  First try doing the layout at a smaller
+                // size to see if it will fit.
+                final DisplayMetrics packageMetrics = res.getDisplayMetrics();
+                res.getValue(com.android.internal.R.dimen.config_prefDialogWidth, mTmpValue, true);
+                int baseSize = 0;
+                if (mTmpValue.type == TypedValue.TYPE_DIMENSION) {
+                    baseSize = (int)mTmpValue.getDimension(packageMetrics);
+                }
+                if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": baseSize=" + baseSize);
+                if (baseSize != 0 && desiredWindowWidth > baseSize) {
+                    int maxHeight = (desiredWindowHeight*2)/3;
+                    childWidthMeasureSpec = getRootMeasureSpec(baseSize, lp.width);
+                    childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
+                    host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+                    if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": measured ("
+                            + host.getWidth() + "," + host.getHeight() + ")");
+                    // Note: for now we are not taking into account height, since we
+                    // can't distinguish between places where it would be useful to
+                    // increase the width (text) vs. where it would not (a list).
+                    // Maybe we can just try the next size up, and see if that reduces
+                    // the height?
+                    if (host.getWidth() <= baseSize /*&& host.getHeight() <= maxHeight*/) {
+                        Log.v(TAG, "Good!");
+                        goodMeasure = true;
+                    } else {
+                        // Didn't fit in that size... try expanding a bit.
+                        baseSize = (baseSize+desiredWindowWidth)/2;
+                        if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": next baseSize="
+                                + baseSize);
+                        host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+                        if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": measured ("
+                                + host.getWidth() + "," + host.getHeight() + ")");
+                        if (host.getWidth() <= baseSize /*&& host.getHeight() <= maxHeight*/) {
+                            if (DEBUG_DIALOG) Log.v(TAG, "Good!");
+                            goodMeasure = true;
+                        }
+                    }
+                }
+            }
+
+            if (!goodMeasure) {
+                childWidthMeasureSpec = getRootMeasureSpec(desiredWindowWidth, lp.width);
+                childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
+                host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+            }
 
             if (DBG) {
                 System.out.println("======================================");
@@ -812,7 +862,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             }
         }
 
-        boolean windowShouldResize = mLayoutRequested && windowResizesToFitContent
+        boolean windowShouldResize = mLayoutRequested && windowSizeMayChange
             && ((mWidth != host.mMeasuredWidth || mHeight != host.mMeasuredHeight)
                 || (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT &&
                         frame.width() < desiredWindowWidth && frame.width() != mWidth)

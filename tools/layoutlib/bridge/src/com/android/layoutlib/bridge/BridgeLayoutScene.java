@@ -17,6 +17,7 @@
 package com.android.layoutlib.bridge;
 
 import com.android.layoutlib.api.LayoutScene;
+import com.android.layoutlib.api.SceneParams;
 import com.android.layoutlib.api.SceneResult;
 import com.android.layoutlib.api.ViewInfo;
 import com.android.layoutlib.bridge.impl.LayoutSceneImpl;
@@ -33,7 +34,6 @@ import java.util.Map;
  */
 public class BridgeLayoutScene extends LayoutScene {
 
-    private final Bridge mBridge;
     private final LayoutSceneImpl mScene;
     private SceneResult mLastResult;
 
@@ -58,15 +58,34 @@ public class BridgeLayoutScene extends LayoutScene {
     }
 
     @Override
-    public SceneResult render() {
-
-        synchronized (mBridge) {
-            try {
-                mScene.prepare();
+    public SceneResult render(long timeout) {
+        try {
+            mScene.prepareThread();
+            mLastResult = mScene.acquire(timeout);
+            if (mLastResult == SceneResult.SUCCESS) {
                 mLastResult = mScene.render();
-            } finally {
-                mScene.cleanup();
             }
+        } finally {
+            mScene.release();
+            mScene.cleanupThread();
+        }
+
+        return mLastResult;
+    }
+
+    @Override
+    public SceneResult animate(Object targetObject, String animationName,
+            boolean isFrameworkAnimation, IAnimationListener listener) {
+        try {
+            mScene.prepareThread();
+            mLastResult = mScene.acquire(SceneParams.DEFAULT_TIMEOUT);
+            if (mLastResult == SceneResult.SUCCESS) {
+                mLastResult = mScene.animate(targetObject, animationName, isFrameworkAnimation,
+                        listener);
+            }
+        } finally {
+            mScene.release();
+            mScene.cleanupThread();
         }
 
         return mLastResult;
@@ -78,8 +97,7 @@ public class BridgeLayoutScene extends LayoutScene {
 
     }
 
-    /*package*/ BridgeLayoutScene(Bridge bridge, LayoutSceneImpl scene, SceneResult lastResult) {
-        mBridge = bridge;
+    /*package*/ BridgeLayoutScene(LayoutSceneImpl scene, SceneResult lastResult) {
         mScene = scene;
         mLastResult = lastResult;
     }

@@ -198,22 +198,26 @@ class BackupManagerService extends IBackupManager.Stub {
         public long token;
         public PackageInfo pkgInfo;
         public int pmToken; // in post-install restore, the PM's token for this transaction
+        public boolean needFullBackup;
 
         RestoreParams(IBackupTransport _transport, IRestoreObserver _obs,
-                long _token, PackageInfo _pkg, int _pmToken) {
+                long _token, PackageInfo _pkg, int _pmToken, boolean _needFullBackup) {
             transport = _transport;
             observer = _obs;
             token = _token;
             pkgInfo = _pkg;
             pmToken = _pmToken;
+            needFullBackup = _needFullBackup;
         }
 
-        RestoreParams(IBackupTransport _transport, IRestoreObserver _obs, long _token) {
+        RestoreParams(IBackupTransport _transport, IRestoreObserver _obs, long _token,
+                boolean _needFullBackup) {
             transport = _transport;
             observer = _obs;
             token = _token;
             pkgInfo = null;
             pmToken = 0;
+            needFullBackup = _needFullBackup;
         }
     }
 
@@ -323,7 +327,8 @@ class BackupManagerService extends IBackupManager.Stub {
                 RestoreParams params = (RestoreParams)msg.obj;
                 Slog.d(TAG, "MSG_RUN_RESTORE observer=" + params.observer);
                 (new PerformRestoreTask(params.transport, params.observer,
-                        params.token, params.pkgInfo, params.pmToken)).run();
+                        params.token, params.pkgInfo, params.pmToken,
+                        params.needFullBackup)).run();
                 break;
             }
 
@@ -1560,6 +1565,7 @@ class BackupManagerService extends IBackupManager.Stub {
         private PackageInfo mTargetPackage;
         private File mStateDir;
         private int mPmToken;
+        private boolean mNeedFullBackup;
 
         class RestoreRequest {
             public PackageInfo app;
@@ -1572,12 +1578,14 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         PerformRestoreTask(IBackupTransport transport, IRestoreObserver observer,
-                long restoreSetToken, PackageInfo targetPackage, int pmToken) {
+                long restoreSetToken, PackageInfo targetPackage, int pmToken,
+                boolean needFullBackup) {
             mTransport = transport;
             mObserver = observer;
             mToken = restoreSetToken;
             mTargetPackage = targetPackage;
             mPmToken = pmToken;
+            mNeedFullBackup = needFullBackup;
 
             try {
                 mStateDir = new File(mBaseStateDir, transport.transportDirName());
@@ -1655,7 +1663,8 @@ class BackupManagerService extends IBackupManager.Stub {
                 // Pull the Package Manager metadata from the restore set first
                 pmAgent = new PackageManagerBackupAgent(
                         mPackageManager, agentPackages);
-                processOneRestore(omPackage, 0, IBackupAgent.Stub.asInterface(pmAgent.onBind()));
+                processOneRestore(omPackage, 0, IBackupAgent.Stub.asInterface(pmAgent.onBind()),
+                        mNeedFullBackup);
 
                 // Verify that the backup set includes metadata.  If not, we can't do
                 // signature/version verification etc, so we simply do not proceed with
@@ -1752,7 +1761,8 @@ class BackupManagerService extends IBackupManager.Stub {
 
                     // And then finally run the restore on this agent
                     try {
-                        processOneRestore(packageInfo, metaInfo.versionCode, agent);
+                        processOneRestore(packageInfo, metaInfo.versionCode, agent,
+                                mNeedFullBackup);
                         ++count;
                     } finally {
                         // unbind and tidy up even on timeout or failure, just in case
@@ -1822,7 +1832,8 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         // Do the guts of a restore of one application, using mTransport.getRestoreData().
-        void processOneRestore(PackageInfo app, int appVersionCode, IBackupAgent agent) {
+        void processOneRestore(PackageInfo app, int appVersionCode, IBackupAgent agent,
+                boolean needFullBackup) {
             // !!! TODO: actually run the restore through mTransport
             final String packageName = app.packageName;
 
@@ -1901,6 +1912,14 @@ class BackupManagerService extends IBackupManager.Stub {
                 try { if (newState != null) newState.close(); } catch (IOException e) {}
                 backupData = newState = null;
                 mCurrentOperations.delete(token);
+
+                // If we know a priori that we'll need to perform a full post-restore backup
+                // pass, clear the new state file data.  This means we're discarding work that
+                // was just done by the app's agent, but this way the agent doesn't need to
+                // take any special action based on global device state.
+                if (needFullBackup) {
+                    newStateName.delete();
+                }
             }
         }
     }
@@ -2386,7 +2405,7 @@ class BackupManagerService extends IBackupManager.Stub {
             mWakelock.acquire();
             Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
             msg.obj = new RestoreParams(getTransport(mCurrentTransport), null,
-                    restoreSet, pkg, token);
+                    restoreSet, pkg, token, true);
             mBackupHandler.sendMessage(msg);
         } else {
             // Auto-restore disabled or no way to attempt a restore; just tell the Package
@@ -2517,7 +2536,7 @@ class BackupManagerService extends IBackupManager.Stub {
                         long oldId = Binder.clearCallingIdentity();
                         mWakelock.acquire();
                         Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-                        msg.obj = new RestoreParams(mRestoreTransport, observer, token);
+                        msg.obj = new RestoreParams(mRestoreTransport, observer, token, true);
                         mBackupHandler.sendMessage(msg);
                         Binder.restoreCallingIdentity(oldId);
                         return 0;
@@ -2582,7 +2601,7 @@ class BackupManagerService extends IBackupManager.Stub {
             long oldId = Binder.clearCallingIdentity();
             mWakelock.acquire();
             Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-            msg.obj = new RestoreParams(mRestoreTransport, observer, token, app, 0);
+            msg.obj = new RestoreParams(mRestoreTransport, observer, token, app, 0, false);
             mBackupHandler.sendMessage(msg);
             Binder.restoreCallingIdentity(oldId);
             return 0;

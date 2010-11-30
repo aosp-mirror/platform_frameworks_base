@@ -870,12 +870,6 @@ public final class ActivityThread {
                             (dbStats.dbSize > 0) ? String.valueOf(dbStats.dbSize) : " ",
                             (dbStats.lookaside > 0) ? String.valueOf(dbStats.lookaside) : " ",
                             dbStats.cache, dbStats.dbName);
-                    if (dbStats.dataDump != null) {
-                        int size = dbStats.dataDump.size();
-                        for (int dumpIndex = 0; dumpIndex < size; dumpIndex++) {
-                            printRow(pw, "%s", dbStats.dataDump.get(dumpIndex));
-                        }
-                    }
                 }
             }
 

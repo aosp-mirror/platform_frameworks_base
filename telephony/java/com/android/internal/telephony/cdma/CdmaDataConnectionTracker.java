@@ -204,7 +204,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                     (mCdmaPhone.mSST.isConcurrentVoiceAndData() ||
                             mPhone.getState() == Phone.State.IDLE) &&
                     !roaming &&
-                    mMasterDataEnabled &&
+                    mInternalDataEnabled &&
                     desiredPowerState &&
                     !mPendingRestartRadio &&
                     !mCdmaPhone.needsOtaServiceProvisioning();
@@ -222,7 +222,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 reason += " - concurrentVoiceAndData not allowed and state= " + mPhone.getState();
             }
             if (roaming) reason += " - Roaming";
-            if (!mMasterDataEnabled) reason += " - mMasterDataEnabled= false";
+            if (!mInternalDataEnabled) reason += " - mInternalDataEnabled= false";
             if (!desiredPowerState) reason += " - desiredPowerState= false";
             if (mPendingRestartRadio) reason += " - mPendingRestartRadio= true";
             if (mCdmaPhone.needsOtaServiceProvisioning()) reason += " - needs Provisioning";

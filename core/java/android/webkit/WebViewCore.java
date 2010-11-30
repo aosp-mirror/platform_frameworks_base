@@ -1884,6 +1884,7 @@ final class WebViewCore {
         int mScrollX;
         int mScrollY;
         boolean mMobileSite;
+        boolean mIsRestored;
     }
 
     static class DrawData {
@@ -2285,6 +2286,7 @@ final class WebViewCore {
         mInitialViewState.mScrollY = mRestoredY;
         mInitialViewState.mMobileSite = (0 == mViewportWidth);
         if (mRestoredScale > 0) {
+            mInitialViewState.mIsRestored = true;
             mInitialViewState.mViewScale = mRestoredScale / 100.0f;
             if (mRestoredTextWrapScale > 0) {
                 mInitialViewState.mTextWrapScale = mRestoredTextWrapScale / 100.0f;

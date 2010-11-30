@@ -32,6 +32,7 @@
 #include <SkCanvas.h>
 #include <SkBitmap.h>
 #include <SkRegion.h>
+#include <SkPixelRef.h>
 
 #include "jni.h"
 #include <android_runtime/AndroidRuntime.h>
@@ -437,9 +438,15 @@ static void Surface_unfreezeDisplay(
     }
 }
 
-class ScreenshotBitmap : public SkBitmap {
+class ScreenshotPixelRef : public SkPixelRef {
 public:
-    ScreenshotBitmap() {
+    ScreenshotPixelRef(SkColorTable* ctable) {
+        fCTable = ctable;
+        ctable->safeRef();
+        setImmutable();
+    }
+    virtual ~ScreenshotPixelRef() {
+        SkSafeUnref(fCTable);
     }
 
     status_t update(int width, int height) {
@@ -450,38 +457,69 @@ public:
             return res;
         }
 
-        void const* base = mScreenshot.getPixels();
-        uint32_t w = mScreenshot.getWidth();
-        uint32_t h = mScreenshot.getHeight();
-        uint32_t s = mScreenshot.getStride();
-        uint32_t f = mScreenshot.getFormat();
-
-        ssize_t bpr = s * android::bytesPerPixel(f);
-        setConfig(convertPixelFormat(f), w, h, bpr);
-        if (f == PIXEL_FORMAT_RGBX_8888) {
-            setIsOpaque(true);
-        }
-        if (w > 0 && h > 0) {
-            setPixels((void*)base);
-        } else {
-            // be safe with an empty bitmap.
-            setPixels(NULL);
-        }
-
         return NO_ERROR;
+    }
+
+    uint32_t getWidth() const {
+        return mScreenshot.getWidth();
+    }
+
+    uint32_t getHeight() const {
+        return mScreenshot.getHeight();
+    }
+
+    uint32_t getStride() const {
+        return mScreenshot.getStride();
+    }
+
+    uint32_t getFormat() const {
+        return mScreenshot.getFormat();
+    }
+
+protected:
+    // overrides from SkPixelRef
+    virtual void* onLockPixels(SkColorTable** ct) {
+        *ct = fCTable;
+        return (void*)mScreenshot.getPixels();
+    }
+
+    virtual void onUnlockPixels() {
     }
 
 private:
     ScreenshotClient mScreenshot;
+    SkColorTable*    fCTable;
+
+    typedef SkPixelRef INHERITED;
 };
 
 static jobject Surface_screenshot(JNIEnv* env, jobject clazz, jint width, jint height)
 {
-    ScreenshotBitmap* bitmap = new ScreenshotBitmap();
-
-    if (bitmap->update(width, height) != NO_ERROR) {
-        delete bitmap;
+    ScreenshotPixelRef* pixels = new ScreenshotPixelRef(NULL);
+    if (pixels->update(width, height) != NO_ERROR) {
+        delete pixels;
         return 0;
+    }
+
+    uint32_t w = pixels->getWidth();
+    uint32_t h = pixels->getHeight();
+    uint32_t s = pixels->getStride();
+    uint32_t f = pixels->getFormat();
+    ssize_t bpr = s * android::bytesPerPixel(f);
+
+    SkBitmap* bitmap = new SkBitmap();
+    bitmap->setConfig(convertPixelFormat(f), w, h, bpr);
+    if (f == PIXEL_FORMAT_RGBX_8888) {
+        bitmap->setIsOpaque(true);
+    }
+
+    if (w > 0 && h > 0) {
+        bitmap->setPixelRef(pixels)->unref();
+        bitmap->lockPixels();
+    } else {
+        // be safe with an empty bitmap.
+        delete pixels;
+        bitmap->setPixels(NULL);
     }
 
     return GraphicsJNI::createBitmap(env, bitmap, false, NULL);

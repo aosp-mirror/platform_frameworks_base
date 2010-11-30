@@ -941,10 +941,6 @@ public abstract class PhoneBase extends Handler implements Phone {
          logUnexpectedCdmaMethodCall("unsetOnEcbModeExitResponse");
      }
 
-    public boolean isDataConnectivityEnabled() {
-        return mDataConnection.getDataEnabled();
-    }
-
     public String[] getActiveApnTypes() {
         return mDataConnection.getActiveApnTypes();
     }

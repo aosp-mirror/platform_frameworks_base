@@ -260,12 +260,7 @@ class ZoomManager {
     public final float getReadingLevelScale() {
         // The reading scale is at least 0.5f apart from the overview scale.
         final float MIN_SCALE_DIFF = 0.5f;
-        final float zoomOverviewScale = getZoomOverviewScale();
-        if (zoomOverviewScale > DEFAULT_READING_LEVEL_SCALE) {
-            return Math.min(DEFAULT_READING_LEVEL_SCALE,
-                zoomOverviewScale - MIN_SCALE_DIFF);
-        }
-        return Math.max(zoomOverviewScale + MIN_SCALE_DIFF,
+        return Math.max(getZoomOverviewScale() + MIN_SCALE_DIFF,
             DEFAULT_READING_LEVEL_SCALE);
     }
 
@@ -864,32 +859,33 @@ class ZoomManager {
 
         if (!mWebView.drawHistory()) {
             float scale;
-            final boolean reflowText;
-            WebSettings settings = mWebView.getSettings();
+            final float overviewScale = getZoomOverviewScale();
 
             if (mInitialScale > 0) {
                 scale = mInitialScale;
-                reflowText = exceedsMinScaleIncrement(mTextWrapScale, scale);
             } else if (viewState.mViewScale > 0) {
                 mTextWrapScale = viewState.mTextWrapScale;
                 scale = viewState.mViewScale;
-                reflowText = false;
             } else {
-                scale = getZoomOverviewScale();
-                if (settings.getUseWideViewPort()
-                    && settings.getLoadWithOverviewMode()) {
-                    mInitialZoomOverview = true;
-                } else {
+                scale = overviewScale;
+                WebSettings settings = mWebView.getSettings();
+                if (!settings.getUseWideViewPort()
+                    || !settings.getLoadWithOverviewMode()) {
                     scale = Math.max(viewState.mTextWrapScale, scale);
-                    mInitialZoomOverview = !exceedsMinScaleIncrement(scale, getZoomOverviewScale());
                 }
                 if (settings.isNarrowColumnLayout() && settings.getUseFixedViewport()) {
                     // When first layout, reflow using the reading level scale to avoid
                     // reflow when double tapped.
                     mTextWrapScale = getReadingLevelScale();
                 }
+            }
+            boolean reflowText = false;
+            if (!viewState.mIsRestored) {
+                scale = Math.max(scale, overviewScale);
+                mTextWrapScale = Math.max(mTextWrapScale, overviewScale);
                 reflowText = exceedsMinScaleIncrement(mTextWrapScale, scale);
             }
+            mInitialZoomOverview = !exceedsMinScaleIncrement(scale, overviewScale);
             setZoomScale(scale, reflowText);
 
             // update the zoom buttons as the scale can be changed

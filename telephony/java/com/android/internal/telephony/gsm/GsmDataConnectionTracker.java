@@ -284,7 +284,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     (gprsState == ServiceState.STATE_IN_SERVICE || mAutoAttachOnCreation) &&
                     mGsmPhone.mSIMRecords.getRecordsLoaded() &&
                     mPhone.getState() == Phone.State.IDLE &&
-                    mMasterDataEnabled &&
+                    mInternalDataEnabled &&
                     (!mPhone.getServiceState().getRoaming() || getDataOnRoamingEnabled()) &&
                     !mIsPsRestricted &&
                     desiredPowerState;
@@ -297,7 +297,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (mPhone.getState() != Phone.State.IDLE) {
                 reason += " - PhoneState= " + mPhone.getState();
             }
-            if (!mMasterDataEnabled) reason += " - mMasterDataEnabled= false";
+            if (!mInternalDataEnabled) reason += " - mInternalDataEnabled= false";
             if (mPhone.getServiceState().getRoaming() && !getDataOnRoamingEnabled()) {
                 reason += " - Roaming and data roaming not enabled";
             }

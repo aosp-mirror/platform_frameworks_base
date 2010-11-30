@@ -159,7 +159,9 @@ public class TabletStatusBar extends StatusBar {
         mBatteryController.addLabelView(
                 (TextView)mNotificationPanel.findViewById(R.id.battery_text));
         mNetworkController.addCombinedSignalIconView(
-                (ImageView)mNotificationPanel.findViewById(R.id.network));
+                (ImageView)mNotificationPanel.findViewById(R.id.network_signal));
+        mNetworkController.addDataTypeIconView(
+                (ImageView)mNotificationPanel.findViewById(R.id.network_type));
         mNetworkController.addLabelView(
                 (TextView)mNotificationPanel.findViewById(R.id.network_text));
 
@@ -283,7 +285,10 @@ public class TabletStatusBar extends StatusBar {
         mBatteryController = new BatteryController(mContext);
         mBatteryController.addIconView((ImageView)sb.findViewById(R.id.battery));
         mNetworkController = new NetworkController(mContext);
-        mNetworkController.addCombinedSignalIconView((ImageView)sb.findViewById(R.id.network));
+        mNetworkController.addCombinedSignalIconView(
+                (ImageView)sb.findViewById(R.id.network_signal));
+        mNetworkController.addDataTypeIconView(
+                (ImageView)sb.findViewById(R.id.network_type));
 
         // The navigation buttons
         mNavigationArea = sb.findViewById(R.id.navigationArea);
@@ -580,12 +585,12 @@ public class TabletStatusBar extends StatusBar {
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
                 Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
                 // synchronize with current shadow state
-                mShadowController.hideElement(mNotificationArea);
+                mShadowController.hideElement(mNotificationIconArea);
                 mTicker.halt();
             } else {
                 Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: no");
                 // synchronize with current shadow state
-                mShadowController.showElement(mNotificationArea);
+                mShadowController.showElement(mNotificationIconArea);
             }
         } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {

@@ -95,6 +95,7 @@ public class LockPatternUtils {
     private final static String PATTERN_EVER_CHOSEN_KEY = "lockscreen.patterneverchosen";
     public final static String PASSWORD_TYPE_KEY = "lockscreen.password_type";
     private final static String LOCK_PASSWORD_SALT_KEY = "lockscreen.password_salt";
+    private final static String DISABLE_LOCKSCREEN_KEY = "lockscreen.disabled";
 
     private final static String PASSWORD_HISTORY_KEY = "lockscreen.passwordhistory";
 
@@ -352,6 +353,26 @@ public class LockPatternUtils {
         setLockPatternEnabled(false);
         saveLockPattern(null);
         setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+    }
+
+    /**
+     * Disable showing lock screen at all when the DevicePolicyManager allows it.
+     * This is only meaningful if pattern, pin or password are not set.
+     *
+     * @param disable Disables lock screen when true
+     */
+    public void setLockScreenDisabled(boolean disable) {
+        setLong(DISABLE_LOCKSCREEN_KEY, disable ? 1 : 0);
+    }
+
+    /**
+     * Determine if LockScreen can be disabled. This is used, for example, to tell if we should
+     * show LockScreen or go straight to the home screen.
+     *
+     * @return true if lock screen is can be disabled
+     */
+    public boolean isLockScreenDisabled() {
+        return !isSecure() && getLong(DISABLE_LOCKSCREEN_KEY, 0) != 0;
     }
 
     /**

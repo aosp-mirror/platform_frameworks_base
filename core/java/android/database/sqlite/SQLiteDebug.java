@@ -121,31 +121,27 @@ public final class SQLiteDebug {
      */
     public static class DbStats {
         /** name of the database */
-        public final String dbName;
+        public String dbName;
 
         /** the page size for the database */
-        public final long pageSize;
+        public long pageSize;
 
         /** the database size */
-        public final long dbSize;
+        public long dbSize;
 
         /** documented here http://www.sqlite.org/c3ref/c_dbstatus_lookaside_used.html */
-        public final int lookaside;
+        public int lookaside;
 
         /** statement cache stats: hits/misses/cachesize */
-        public final String cache;
-
-        /** database dump of 'useful info for debugging only */
-        public final ArrayList<String> dataDump;
+        public String cache;
 
         public DbStats(String dbName, long pageCount, long pageSize, int lookaside,
-            int hits, int misses, int cachesize, ArrayList<String> data) {
+            int hits, int misses, int cachesize) {
             this.dbName = dbName;
             this.pageSize = pageSize / 1024;
             dbSize = (pageCount * pageSize) / 1024;
             this.lookaside = lookaside;
             this.cache = hits + "/" + misses + "/" + cachesize;
-            this.dataDump = data;
         }
     }
 

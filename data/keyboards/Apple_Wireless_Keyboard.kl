@@ -1,0 +1,119 @@
+# Copyright (C) 2010 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#
+# Apple Wireless Keyboard
+#
+# Notes:
+# - Keys such as PAGE_UP and FORWARD_DEL are produced using the
+#   function key.
+# - Special function keys for brightness control, etc. are not
+#   implemented here.
+
+key 1     ESCAPE
+key 2     1
+key 3     2
+key 4     3
+key 5     4
+key 6     5
+key 7     6
+key 8     7
+key 9     8
+key 10    9
+key 11    0
+key 12    MINUS
+key 13    EQUALS
+key 14    DEL
+key 15    TAB
+key 16    Q
+key 17    W
+key 18    E
+key 19    R
+key 20    T
+key 21    Y
+key 22    U
+key 23    I
+key 24    O
+key 25    P
+key 26    LEFT_BRACKET
+key 27    RIGHT_BRACKET
+key 28    ENTER
+key 29    CTRL_LEFT
+key 30    A
+key 31    S
+key 32    D
+key 33    F
+key 34    G
+key 35    H
+key 36    J
+key 37    K
+key 38    L
+key 39    SEMICOLON
+key 40    APOSTROPHE
+key 41    GRAVE
+key 42    SHIFT_LEFT
+key 43    BACKSLASH
+key 44    Z
+key 45    X
+key 46    C
+key 47    V
+key 48    B
+key 49    N
+key 50    M
+key 51    COMMA
+key 52    PERIOD
+key 53    SLASH
+key 54    SHIFT_RIGHT
+key 56    ALT_LEFT
+key 57    SPACE
+key 58    CAPS_LOCK
+key 59    F1
+key 60    F2
+key 61    F3
+key 62    F4
+key 63    F5
+key 64    F6
+key 65    F7
+key 66    F8
+key 67    F9
+key 68    F10
+key 87    F11
+key 88    F12
+key 100   ALT_RIGHT
+key 102   MOVE_HOME
+key 103   DPAD_UP
+key 104   PAGE_UP
+key 105   DPAD_LEFT
+key 106   DPAD_RIGHT
+key 107   MOVE_END
+key 108   DPAD_DOWN
+key 109   PAGE_DOWN
+key 110   NUMPAD_ENTER
+key 111   FORWARD_DEL
+key 113   VALUME_MUTE
+key 114   VOLUME_DOWN
+key 115   VOLUME_UP
+# key 120  switch applications
+key 125   META_LEFT
+key 126   META_RIGHT
+key 161   MEDIA_EJECT
+key 163   MEDIA_NEXT
+key 164   MEDIA_PLAY_PAUSE
+key 165   MEDIA_PREVIOUS
+# key 204  show gadgets
+# key 224  reduce brightness
+# key 225  increase brightness
+# key 229  blank special function on F5
+# key 230  blank special function on F6
+key 464   FUNCTION

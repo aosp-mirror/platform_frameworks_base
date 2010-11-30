@@ -91,6 +91,22 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public int screenLayout;
     
+    /**
+     * Check if the Configuration's current {@link #screenLayout} is at
+     * least the given size.
+     *
+     * @param size The desired size, either {@link #SCREENLAYOUT_SIZE_SMALL},
+     * {@link #SCREENLAYOUT_SIZE_NORMAL}, {@link #SCREENLAYOUT_SIZE_LARGE}, or
+     * {@link #SCREENLAYOUT_SIZE_XLARGE}.
+     * @return Returns true if the current screen layout size is at least
+     * the given size.
+     */
+    public boolean isLayoutSizeAtLeast(int size) {
+        int cur = screenLayout&SCREENLAYOUT_SIZE_MASK;
+        if (cur == SCREENLAYOUT_SIZE_UNDEFINED) return false;
+        return cur >= size;
+    }
+
     public static final int TOUCHSCREEN_UNDEFINED = 0;
     public static final int TOUCHSCREEN_NOTOUCH = 1;
     public static final int TOUCHSCREEN_STYLUS = 2;

@@ -175,7 +175,7 @@ key 150   EXPLORER
 # key 153 "KEY_DIRECTION"
 # key 154 "KEY_CYCLEWINDOWS"
 key 155   ENVELOPE
-# key 156 "KEY_BOOKMARKS"
+key 156   BOOKMARK
 # key 157 "KEY_COMPUTER"
 key 158   BACK              WAKE_DROPPED
 key 159   FORWARD
@@ -289,11 +289,11 @@ key 318   BUTTON_THUMBR
 # key 359 "KEY_TIME"
 # key 360 "KEY_VENDOR"
 # key 361 "KEY_ARCHIVE"
-# key 362 "KEY_PROGRAM"
+key 362   GUIDE
 # key 363 "KEY_CHANNEL"
 # key 364 "KEY_FAVORITES"
 # key 365 "KEY_EPG"
-# key 366 "KEY_PVR"
+key 366   DVR
 # key 367 "KEY_MHP"
 # key 368 "KEY_LANGUAGE"
 # key 369 "KEY_TITLE"
@@ -304,7 +304,7 @@ key 318   BUTTON_THUMBR
 # key 374 "KEY_KEYBOARD"
 # key 375 "KEY_SCREEN"
 # key 376 "KEY_PC"
-# key 377 "KEY_TV"
+key 377   TV
 # key 378 "KEY_TV2"
 # key 379 "KEY_VCR"
 # key 380 "KEY_VCR2"
@@ -329,8 +329,8 @@ key 318   BUTTON_THUMBR
 # key 399 "KEY_GREEN"
 # key 400 "KEY_YELLOW"
 # key 401 "KEY_BLUE"
-# key 402 "KEY_CHANNELUP"
-# key 403 "KEY_CHANNELDOWN"
+key 402   CHANNEL_UP
+key 403   CHANNEL_DOWN
 # key 404 "KEY_FIRST"
 # key 405 "KEY_LAST"
 # key 406 "KEY_AB"

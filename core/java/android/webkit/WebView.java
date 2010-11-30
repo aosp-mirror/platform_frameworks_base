@@ -588,9 +588,11 @@ public class WebView extends AbsoluteLayout
     private static final int DRAG_HELD_MOTIONLESS       = 8;
     private static final int AWAKEN_SCROLL_BARS         = 9;
     private static final int PREVENT_DEFAULT_TIMEOUT    = 10;
+    private static final int SCROLL_SELECT_TEXT         = 11;
+
 
     private static final int FIRST_PRIVATE_MSG_ID = REMEMBER_PASSWORD;
-    private static final int LAST_PRIVATE_MSG_ID = PREVENT_DEFAULT_TIMEOUT;
+    private static final int LAST_PRIVATE_MSG_ID = SCROLL_SELECT_TEXT;
 
     /*
      * Package message ids
@@ -647,7 +649,8 @@ public class WebView extends AbsoluteLayout
         "RESUME_WEBCORE_PRIORITY", //        = 7;
         "DRAG_HELD_MOTIONLESS", //           = 8;
         "AWAKEN_SCROLL_BARS", //             = 9;
-        "PREVENT_DEFAULT_TIMEOUT" //         = 10;
+        "PREVENT_DEFAULT_TIMEOUT", //        = 10;
+        "SCROLL_SELECT_TEXT" //              = 11;
     };
 
     static final String[] HandlerPackageDebugString = {
@@ -786,6 +789,11 @@ public class WebView extends AbsoluteLayout
     public static final String SCHEME_GEO = "geo:0,0?q=";
 
     private int mBackgroundColor = Color.WHITE;
+
+    private static final long SELECT_SCROLL_INTERVAL = 1000 / 60; // 60 / second
+    private int mAutoScrollX = 0;
+    private int mAutoScrollY = 0;
+    private boolean mSentAutoScrollMessage = false;
 
     // Used to notify listeners of a new picture.
     private PictureListener mPictureListener;
@@ -3873,13 +3881,6 @@ public class WebView extends AbsoluteLayout
 
         // decide which adornments to draw
         int extras = DRAW_EXTRAS_NONE;
-        if (DebugFlags.WEB_VIEW) {
-            Log.v(LOGTAG, "mFindIsUp=" + mFindIsUp
-                    + " mSelectingText=" + mSelectingText
-                    + " nativePageShouldHandleShiftAndArrows()="
-                    + nativePageShouldHandleShiftAndArrows()
-                    + " animateZoom=" + animateZoom);
-        }
         if (mFindIsUp) {
             extras = DRAW_EXTRAS_FIND;
         } else if (mSelectingText) {
@@ -3889,6 +3890,14 @@ public class WebView extends AbsoluteLayout
                     mSelectX, mSelectY - getTitleHeight());
         } else if (drawCursorRing) {
             extras = DRAW_EXTRAS_CURSOR_RING;
+        }
+        if (DebugFlags.WEB_VIEW) {
+            Log.v(LOGTAG, "mFindIsUp=" + mFindIsUp
+                    + " mSelectingText=" + mSelectingText
+                    + " nativePageShouldHandleShiftAndArrows()="
+                    + nativePageShouldHandleShiftAndArrows()
+                    + " animateZoom=" + animateZoom
+                    + " extras=" + extras);
         }
 
         if (canvas.isHardwareAccelerated()) {
@@ -4644,6 +4653,9 @@ public class WebView extends AbsoluteLayout
             WebViewCore.resumePriority();
             WebViewCore.resumeUpdatePicture(mWebViewCore);
             invalidate(); // redraw without selection
+            mAutoScrollX = 0;
+            mAutoScrollY = 0;
+            mSentAutoScrollMessage = false;
         }
     }
 
@@ -5289,6 +5301,22 @@ public class WebView extends AbsoluteLayout
                     if (parent != null) {
                         parent.requestDisallowInterceptTouchEvent(true);
                     }
+                    int layer = nativeScrollableLayer(contentX, contentY);
+                    if (layer == 0) {
+                        mAutoScrollX = x <= SELECT_SCROLL ? -SELECT_SCROLL
+                            : x >= getViewWidth() - SELECT_SCROLL
+                            ? SELECT_SCROLL : 0;
+                        mAutoScrollY = y <= SELECT_SCROLL ? -SELECT_SCROLL
+                            : y >= getViewHeightWithTitle() - SELECT_SCROLL
+                            ? SELECT_SCROLL : 0;
+                        if (!mSentAutoScrollMessage) {
+                            mSentAutoScrollMessage = true;
+                            mPrivateHandler.sendEmptyMessageDelayed(
+                                    SCROLL_SELECT_TEXT, SELECT_SCROLL_INTERVAL);
+                        }
+                    } else {
+                        // TODO: allow scrollable overflow div to autoscroll
+                    }
                     nativeExtendSelection(contentX, contentY);
                     invalidate();
                     break;
@@ -5713,6 +5741,7 @@ public class WebView extends AbsoluteLayout
     private static final int TRACKBALL_MOVE_COUNT = 10;
     private static final int TRACKBALL_MULTIPLIER = 3;
     private static final int SELECT_CURSOR_OFFSET = 16;
+    private static final int SELECT_SCROLL = 5;
     private int mSelectX = 0;
     private int mSelectY = 0;
     private boolean mFocusSizeChanged = false;
@@ -6615,6 +6644,16 @@ public class WebView extends AbsoluteLayout
                                 viewToContentY((int) mLastTouchY + mScrollY),
                                 true);
                     }
+                    break;
+                }
+                case SCROLL_SELECT_TEXT: {
+                    if (mAutoScrollX == 0 && mAutoScrollY == 0) {
+                        mSentAutoScrollMessage = false;
+                        break;
+                    }
+                    scrollBy(mAutoScrollX, mAutoScrollY);
+                    sendEmptyMessageDelayed(
+                            SCROLL_SELECT_TEXT, SELECT_SCROLL_INTERVAL);
                     break;
                 }
                 case SWITCH_TO_SHORTPRESS: {
@@ -7729,6 +7768,7 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeHitSelection(int x, int y);
     private native String   nativeImageURI(int x, int y);
     private native void     nativeInstrumentReport();
+    private native Rect     nativeLayerBounds(int layer);
     /* package */ native boolean nativeMoveCursorToNextTextInput();
     // return true if the page has been scrolled
     private native boolean  nativeMotionUp(int x, int y, int slop);

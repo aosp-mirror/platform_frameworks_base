@@ -261,6 +261,41 @@ public final class BridgeResources extends Resources {
     }
 
     @Override
+    public XmlResourceParser getAnimation(int id) throws NotFoundException {
+        IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+
+        if (value != null) {
+            XmlPullParser parser = null;
+
+            try {
+                File xml = new File(value.getValue());
+                if (xml.isFile()) {
+                    // we need to create a pull parser around the layout XML file, and then
+                    // give that to our XmlBlockParser
+                    parser = new KXmlParser();
+                    parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
+                    parser.setInput(new FileReader(xml));
+
+                    return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
+                }
+            } catch (XmlPullParserException e) {
+                mContext.getLogger().error(e);
+                // we'll return null below.
+            } catch (FileNotFoundException e) {
+                // this shouldn't happen since we check above.
+            }
+
+        }
+
+        // id was not found or not resolved. Throw a NotFoundException.
+        throwException(id);
+
+        // this is not used since the method above always throws
+        return null;
+    }
+
+
+    @Override
     public TypedArray obtainAttributes(AttributeSet set, int[] attrs) {
         return mContext.obtainStyledAttributes(set, attrs);
     }

@@ -76,6 +76,11 @@
          be an integer for a constant duration. -->
     <fraction name="config_dimBehindFadeDuration">100%</fraction>
 
+    <!-- The maximum width we would prefer dialogs to be.  0 if there is no
+         maximum (let them grow as large as the screen).  Actual values are
+         specified for -large and -xlarge configurations. -->
+    <dimen name="config_prefDialogWidth">0px</dimen>
+    
     <!-- The duration (in milliseconds) that the radio will scan for a signal
          when there's no network connection. If the scan doesn't timeout, use zero -->
     <integer name="config_radioScanningTimeout">0</integer>

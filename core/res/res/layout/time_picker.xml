@@ -28,32 +28,46 @@
     <!-- hour -->
     <NumberPicker
         android:id="@+id/hour"
-        android:layout_width="70dip"
+        android:layout_width="48dip"
         android:layout_height="wrap_content"
+        android:layout_marginRight="20dip"
+        android:layout_marginTop="35dip"
+        android:layout_marginBottom="35dip"
         android:focusable="true"
         android:focusableInTouchMode="true"
         />
-    
+
+    <!-- divider -->
+    <TextView
+        android:id="@+id/divider"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        />
+
     <!-- minute -->
     <NumberPicker
         android:id="@+id/minute"
-        android:layout_width="70dip"
+        android:layout_width="48dip"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="5dip"
+        android:layout_marginLeft="20dip"
+        android:layout_marginRight="22dip"
+        android:layout_marginTop="35dip"
+        android:layout_marginBottom="35dip"
         android:focusable="true"
         android:focusableInTouchMode="true"
         />
-    
+
     <!-- AM / PM -->
-    <Button
+    <NumberPicker
         android:id="@+id/amPm"
-        android:layout_width="wrap_content"
+        android:layout_width="48dip"
         android:layout_height="wrap_content"
-        android:layout_marginTop="43dip"
-        android:layout_marginLeft="5dip"
-        android:paddingLeft="20dip"
-        android:paddingRight="20dip"
-        style="?android:attr/textAppearanceLargeInverse"
-        android:textColor="@android:color/primary_text_light_nodisable"
+        android:layout_marginLeft="22dip"
+        android:layout_marginTop="35dip"
+        android:layout_marginBottom="35dip"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         />
+
 </LinearLayout>
