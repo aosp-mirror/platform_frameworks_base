@@ -190,7 +190,9 @@ public class ArrowKeyMovementMethod implements MovementMethod {
 
     public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
         int initialScrollX = -1, initialScrollY = -1;
-        if (event.getAction() == MotionEvent.ACTION_UP) {
+        final int action = event.getAction();
+
+        if (action == MotionEvent.ACTION_UP) {
             initialScrollX = Touch.getInitialScrollX(widget, buffer);
             initialScrollY = Touch.getInitialScrollY(widget, buffer);
         }
@@ -198,7 +200,7 @@ public class ArrowKeyMovementMethod implements MovementMethod {
         boolean handled = Touch.onTouchEvent(widget, buffer, event);
 
         if (widget.isFocused() && !widget.didTouchFocusSelect()) {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (action == MotionEvent.ACTION_DOWN) {
               boolean cap = isCap(buffer);
               if (cap) {
                   int offset = widget.getOffset((int) event.getX(), (int) event.getY());
@@ -211,7 +213,7 @@ public class ArrowKeyMovementMethod implements MovementMethod {
                   // mode once the view detected it needed to scroll.
                   widget.getParent().requestDisallowInterceptTouchEvent(true);
               }
-            } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            } else if (action == MotionEvent.ACTION_MOVE) {
                 boolean cap = isCap(buffer);
 
                 if (cap && handled) {
@@ -231,7 +233,7 @@ public class ArrowKeyMovementMethod implements MovementMethod {
                     Selection.extendSelection(buffer, offset);
                     return true;
                 }
-            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+            } else if (action == MotionEvent.ACTION_UP) {
                 // If we have scrolled, then the up shouldn't move the cursor,
                 // but we do need to make sure the cursor is still visible at
                 // the current scroll offset to avoid the scroll jumping later
