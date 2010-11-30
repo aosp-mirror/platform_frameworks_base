@@ -117,7 +117,11 @@ status_t DrmManager::unloadPlugIns() {
 status_t DrmManager::setDrmServiceListener(
             int uniqueId, const sp<IDrmServiceListener>& drmServiceListener) {
     Mutex::Autolock _l(mLock);
-    mServiceListeners.add(uniqueId, drmServiceListener);
+    if (NULL != drmServiceListener.get()) {
+        mServiceListeners.add(uniqueId, drmServiceListener);
+    } else {
+        mServiceListeners.removeItem(uniqueId);
+    }
     return DRM_NO_ERROR;
 }
 
