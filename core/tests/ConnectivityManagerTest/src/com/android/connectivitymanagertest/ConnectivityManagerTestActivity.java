@@ -545,11 +545,6 @@ public class ConnectivityManagerTestActivity extends Activity {
                 // Connect to network by disabling others.
                 mWifiManager.enableNetwork(networkId, true);
                 mWifiManager.saveConfiguration();
-                List<WifiConfiguration> wifiNetworks = mWifiManager.getConfiguredNetworks();
-                for (WifiConfiguration netConfig : wifiNetworks) {
-                    Log.v(LOG_TAG, netConfig.toString());
-                }
-
                 mWifiManager.reconnect();
                 break;
            }
@@ -688,3 +683,4 @@ public class ConnectivityManagerTestActivity extends Activity {
         return super.onKeyDown(keyCode, event);
     }
 }
+
