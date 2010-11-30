@@ -67,7 +67,9 @@ NuHTTPDataSource::NuHTTPDataSource()
       mPort(0),
       mOffset(0),
       mContentLength(0),
-      mContentLengthValid(false) {
+      mContentLengthValid(false),
+      mHasChunkedTransferEncoding(false),
+      mChunkDataBytesLeft(0) {
 }
 
 NuHTTPDataSource::~NuHTTPDataSource() {
@@ -184,6 +186,30 @@ status_t NuHTTPDataSource::connect(
             return ERROR_IO;
         }
 
+        mHasChunkedTransferEncoding = false;
+
+        {
+            string value;
+            if (mHTTP.find_header_value("Transfer-Encoding", &value)
+                    || mHTTP.find_header_value("Transfer-encoding", &value)) {
+                // We don't currently support any transfer encodings but
+                // chunked.
+
+                if (!strcasecmp(value.c_str(), "chunked")) {
+                    LOGI("Chunked transfer encoding applied.");
+                    mHasChunkedTransferEncoding = true;
+                    mChunkDataBytesLeft = 0;
+                } else {
+                    mState = DISCONNECTED;
+                    mHTTP.disconnect();
+
+                    LOGE("We don't support '%s' transfer encoding.", value.c_str());
+
+                    return ERROR_UNSUPPORTED;
+                }
+            }
+        }
+
         applyTimeoutResponse();
 
         if (offset == 0) {
@@ -193,8 +219,17 @@ status_t NuHTTPDataSource::connect(
                     && ParseSingleUnsignedLong(value.c_str(), &x)) {
                 mContentLength = (off_t)x;
                 mContentLengthValid = true;
+            } else {
+                LOGW("Server did not give us the content length!");
             }
         } else {
+            if (httpStatus != 206 /* Partial Content */) {
+                // We requested a range but the server didn't support that.
+                LOGE("We requested a range but the server didn't "
+                     "support that.");
+                return ERROR_UNSUPPORTED;
+            }
+
             string value;
             unsigned long x;
             if (mHTTP.find_header_value(string("Content-Range"), &value)) {
@@ -220,6 +255,71 @@ void NuHTTPDataSource::disconnect() {
 
 status_t NuHTTPDataSource::initCheck() const {
     return mState == CONNECTED ? OK : NO_INIT;
+}
+
+ssize_t NuHTTPDataSource::internalRead(void *data, size_t size) {
+    if (!mHasChunkedTransferEncoding) {
+        return mHTTP.receive(data, size);
+    }
+
+    if (mChunkDataBytesLeft < 0) {
+        return 0;
+    } else if (mChunkDataBytesLeft == 0) {
+        char line[1024];
+        status_t err = mHTTP.receive_line(line, sizeof(line));
+
+        if (err != OK) {
+            return err;
+        }
+
+        LOGV("line = '%s'", line);
+
+        char *end;
+        unsigned long n = strtoul(line, &end, 16);
+
+        if (end == line || (*end != ';' && *end != '\0')) {
+            LOGE("malformed HTTP chunk '%s'", line);
+            return ERROR_MALFORMED;
+        }
+
+        mChunkDataBytesLeft = n;
+        LOGV("chunk data size = %lu", n);
+
+        if (mChunkDataBytesLeft == 0) {
+            mChunkDataBytesLeft = -1;
+            return 0;
+        }
+
+        // fall through
+    }
+
+    if (size > (size_t)mChunkDataBytesLeft) {
+        size = mChunkDataBytesLeft;
+    }
+
+    ssize_t n = mHTTP.receive(data, size);
+
+    if (n < 0) {
+        return n;
+    }
+
+    mChunkDataBytesLeft -= (size_t)n;
+
+    if (mChunkDataBytesLeft == 0) {
+        char line[1024];
+        status_t err = mHTTP.receive_line(line, sizeof(line));
+
+        if (err != OK) {
+            return err;
+        }
+
+        if (line[0] != '\0') {
+            LOGE("missing HTTP chunk terminator.");
+            return ERROR_MALFORMED;
+        }
+    }
+
+    return n;
 }
 
 ssize_t NuHTTPDataSource::readAt(off_t offset, void *data, size_t size) {
@@ -250,7 +350,7 @@ ssize_t NuHTTPDataSource::readAt(off_t offset, void *data, size_t size) {
     size_t numBytesRead = 0;
     while (numBytesRead < size) {
         ssize_t n =
-            mHTTP.receive((uint8_t *)data + numBytesRead, size - numBytesRead);
+            internalRead((uint8_t *)data + numBytesRead, size - numBytesRead);
 
         if (n < 0) {
             return n;

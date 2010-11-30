@@ -55,6 +55,10 @@ public:
     // Pass a negative value to disable the timeout.
     void setReceiveTimeout(int seconds);
 
+    // Receive a line of data terminated by CRLF, line will be '\0' terminated
+    // _excluding_ the termianting CRLF.
+    status_t receive_line(char *line, size_t size);
+
 private:
     enum State {
         READY,
@@ -67,10 +71,6 @@ private:
     int mSocket;
 
     KeyedVector<string, string> mHeaders;
-
-    // Receive a line of data terminated by CRLF, line will be '\0' terminated
-    // _excluding_ the termianting CRLF.
-    status_t receive_line(char *line, size_t size);
 
     HTTPStream(const HTTPStream &);
     HTTPStream &operator=(const HTTPStream &);
