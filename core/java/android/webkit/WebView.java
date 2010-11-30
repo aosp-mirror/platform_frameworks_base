@@ -2257,9 +2257,6 @@ public class WebView extends AbsoluteLayout
         if (null == v) {
             // If one of our callbacks is holding onto the titlebar to replace
             // it when its ActionMode ends, remove it.
-            if (mSelectCallback != null) {
-                mSelectCallback.setTitleBar(null);
-            }
             if (mFindCallback != null) {
                 mFindCallback.setTitleBar(null);
             }
@@ -4626,12 +4623,6 @@ public class WebView extends AbsoluteLayout
         nativeHideCursor();
         mSelectCallback = new SelectActionModeCallback();
         mSelectCallback.setWebView(this);
-        View titleBar = mTitleBar;
-        // We do not want to show the embedded title bar during find or
-        // select, but keep track of it so that it can be replaced when the
-        // mode is exited.
-        setEmbeddedTitleBar(null);
-        mSelectCallback.setTitleBar(titleBar);
         startActionMode(mSelectCallback);
     }
 

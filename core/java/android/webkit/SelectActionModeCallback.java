@@ -25,14 +25,11 @@ import android.view.View;
 
 class SelectActionModeCallback implements ActionMode.Callback {
     private WebView mWebView;
-    private View mTitleBar;
     private ActionMode mActionMode;
 
     void setWebView(WebView webView) {
         mWebView = webView;
     }
-
-    void setTitleBar(View v) { mTitleBar = v; }
 
     void finish() {
         mActionMode.finish();
@@ -86,7 +83,6 @@ class SelectActionModeCallback implements ActionMode.Callback {
 
     @Override
     public void onDestroyActionMode(ActionMode mode) {
-        if (mTitleBar != null) mWebView.setEmbeddedTitleBar(mTitleBar);
         mWebView.selectionDone();
     }
 }
