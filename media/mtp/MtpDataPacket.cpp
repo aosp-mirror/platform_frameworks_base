@@ -351,6 +351,7 @@ int MtpDataPacket::read(int fd) {
         return -1;
     // then the following data
     int total = MtpPacket::getUInt32(MTP_CONTAINER_LENGTH_OFFSET);
+    allocate(total);
     int remaining = total - MTP_CONTAINER_HEADER_SIZE;
     ret = ::read(fd, &mBuffer[0] + MTP_CONTAINER_HEADER_SIZE, remaining);
     if (ret != remaining)
