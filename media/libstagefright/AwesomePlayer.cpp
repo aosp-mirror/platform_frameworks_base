@@ -82,6 +82,10 @@ struct AwesomeRemoteRenderer : public AwesomeRenderer {
         : mTarget(target) {
     }
 
+    virtual status_t initCheck() const {
+        return OK;
+    }
+
     virtual void render(MediaBuffer *buffer) {
         void *id;
         if (buffer->meta_data()->findPointer(kKeyBufferID, &id)) {
@@ -105,12 +109,17 @@ struct AwesomeLocalRenderer : public AwesomeRenderer {
             size_t displayWidth, size_t displayHeight,
             size_t decodedWidth, size_t decodedHeight,
             int32_t rotationDegrees)
-        : mTarget(NULL),
+        : mInitCheck(NO_INIT),
+          mTarget(NULL),
           mLibHandle(NULL) {
-            init(previewOnly, componentName,
+            mInitCheck = init(previewOnly, componentName,
                  colorFormat, surface, displayWidth,
                  displayHeight, decodedWidth, decodedHeight,
                  rotationDegrees);
+    }
+
+    virtual status_t initCheck() const {
+        return mInitCheck;
     }
 
     virtual void render(MediaBuffer *buffer) {
@@ -134,10 +143,11 @@ protected:
     }
 
 private:
+    status_t mInitCheck;
     VideoRenderer *mTarget;
     void *mLibHandle;
 
-    void init(
+    status_t init(
             bool previewOnly,
             const char *componentName,
             OMX_COLOR_FORMATTYPE colorFormat,
@@ -150,7 +160,7 @@ private:
     AwesomeLocalRenderer &operator=(const AwesomeLocalRenderer &);;
 };
 
-void AwesomeLocalRenderer::init(
+status_t AwesomeLocalRenderer::init(
         bool previewOnly,
         const char *componentName,
         OMX_COLOR_FORMATTYPE colorFormat,
@@ -215,11 +225,15 @@ void AwesomeLocalRenderer::init(
         }
     }
 
-    if (mTarget == NULL) {
-        mTarget = new SoftwareRenderer(
-                colorFormat, surface, displayWidth, displayHeight,
-                decodedWidth, decodedHeight, rotationDegrees);
+    if (mTarget != NULL) {
+        return OK;
     }
+
+    mTarget = new SoftwareRenderer(
+            colorFormat, surface, displayWidth, displayHeight,
+            decodedWidth, decodedHeight, rotationDegrees);
+
+    return ((SoftwareRenderer *)mTarget)->initCheck();
 }
 
 AwesomePlayer::AwesomePlayer()
@@ -830,53 +844,64 @@ status_t AwesomePlayer::play_l() {
     return OK;
 }
 
-void AwesomePlayer::initRenderer_l() {
-    if (mISurface != NULL) {
-        sp<MetaData> meta = mVideoSource->getFormat();
-
-        int32_t format;
-        const char *component;
-        int32_t decodedWidth, decodedHeight;
-        CHECK(meta->findInt32(kKeyColorFormat, &format));
-        CHECK(meta->findCString(kKeyDecoderComponent, &component));
-        CHECK(meta->findInt32(kKeyWidth, &decodedWidth));
-        CHECK(meta->findInt32(kKeyHeight, &decodedHeight));
-
-        int32_t rotationDegrees;
-        if (!mVideoTrack->getFormat()->findInt32(
-                    kKeyRotation, &rotationDegrees)) {
-            rotationDegrees = 0;
-        }
-
-        mVideoRenderer.clear();
-
-        // Must ensure that mVideoRenderer's destructor is actually executed
-        // before creating a new one.
-        IPCThreadState::self()->flushCommands();
-
-        if (!strncmp("OMX.", component, 4)) {
-            // Our OMX codecs allocate buffers on the media_server side
-            // therefore they require a remote IOMXRenderer that knows how
-            // to display them.
-            mVideoRenderer = new AwesomeRemoteRenderer(
-                mClient.interface()->createRenderer(
-                        mISurface, component,
-                        (OMX_COLOR_FORMATTYPE)format,
-                        decodedWidth, decodedHeight,
-                        mVideoWidth, mVideoHeight,
-                        rotationDegrees));
-        } else {
-            // Other decoders are instantiated locally and as a consequence
-            // allocate their buffers in local address space.
-            mVideoRenderer = new AwesomeLocalRenderer(
-                false,  // previewOnly
-                component,
-                (OMX_COLOR_FORMATTYPE)format,
-                mISurface,
-                mVideoWidth, mVideoHeight,
-                decodedWidth, decodedHeight, rotationDegrees);
-        }
+status_t AwesomePlayer::initRenderer_l() {
+    if (mISurface == NULL) {
+        return OK;
     }
+
+    sp<MetaData> meta = mVideoSource->getFormat();
+
+    int32_t format;
+    const char *component;
+    int32_t decodedWidth, decodedHeight;
+    CHECK(meta->findInt32(kKeyColorFormat, &format));
+    CHECK(meta->findCString(kKeyDecoderComponent, &component));
+    CHECK(meta->findInt32(kKeyWidth, &decodedWidth));
+    CHECK(meta->findInt32(kKeyHeight, &decodedHeight));
+
+    int32_t rotationDegrees;
+    if (!mVideoTrack->getFormat()->findInt32(
+                kKeyRotation, &rotationDegrees)) {
+        rotationDegrees = 0;
+    }
+
+    mVideoRenderer.clear();
+
+    // Must ensure that mVideoRenderer's destructor is actually executed
+    // before creating a new one.
+    IPCThreadState::self()->flushCommands();
+
+    if (!strncmp("OMX.", component, 4)) {
+        // Our OMX codecs allocate buffers on the media_server side
+        // therefore they require a remote IOMXRenderer that knows how
+        // to display them.
+
+        sp<IOMXRenderer> native =
+            mClient.interface()->createRenderer(
+                    mISurface, component,
+                    (OMX_COLOR_FORMATTYPE)format,
+                    decodedWidth, decodedHeight,
+                    mVideoWidth, mVideoHeight,
+                    rotationDegrees);
+
+        if (native == NULL) {
+            return NO_INIT;
+        }
+
+        mVideoRenderer = new AwesomeRemoteRenderer(native);
+    } else {
+        // Other decoders are instantiated locally and as a consequence
+        // allocate their buffers in local address space.
+        mVideoRenderer = new AwesomeLocalRenderer(
+            false,  // previewOnly
+            component,
+            (OMX_COLOR_FORMATTYPE)format,
+            mISurface,
+            mVideoWidth, mVideoHeight,
+            decodedWidth, decodedHeight, rotationDegrees);
+    }
+
+    return mVideoRenderer->initCheck();
 }
 
 status_t AwesomePlayer::pause() {
@@ -1217,9 +1242,14 @@ void AwesomePlayer::onVideoEvent() {
 
                     if (mVideoRenderer != NULL) {
                         mVideoRendererIsPreview = false;
-                        initRenderer_l();
+                        err = initRenderer_l();
+
+                        if (err == OK) {
+                            continue;
+                        }
+
+                        // fall through
                     }
-                    continue;
                 }
 
                 // So video playback is complete, but we may still have
@@ -1310,7 +1340,15 @@ void AwesomePlayer::onVideoEvent() {
     if (mVideoRendererIsPreview || mVideoRenderer == NULL) {
         mVideoRendererIsPreview = false;
 
-        initRenderer_l();
+        status_t err = initRenderer_l();
+
+        if (err != OK) {
+            finishSeekIfNecessary(-1);
+
+            mFlags |= VIDEO_AT_EOS;
+            postStreamDoneEvent_l(err);
+            return;
+        }
     }
 
     if (mVideoRenderer != NULL) {
