@@ -553,8 +553,8 @@ final class WebViewCore {
     private native void nativeMoveMouseIfLatest(int moveGeneration,
             int framePtr, int x, int y);
 
-    private native String nativeRetrieveHref(int framePtr, int nodePtr);
-    private native String nativeRetrieveAnchorText(int framePtr, int nodePtr);
+    private native String nativeRetrieveHref(int x, int y);
+    private native String nativeRetrieveAnchorText(int x, int y);
 
     private native void nativeTouchUp(int touchGeneration,
             int framePtr, int nodePtr, int x, int y);

@@ -2183,14 +2183,13 @@ public class WebView extends AbsoluteLayout
     // look at the cursor node, and not the focus node.  Also, what is
     // getFocusNodePath?
     public void requestFocusNodeHref(Message hrefMsg) {
-        if (hrefMsg == null || mNativeClass == 0) {
+        if (hrefMsg == null) {
             return;
         }
-        if (nativeCursorIsAnchor()) {
-            mWebViewCore.sendMessage(EventHub.REQUEST_CURSOR_HREF,
-                    nativeCursorFramePointer(), nativeCursorNodePointer(),
-                    hrefMsg);
-        }
+        int contentX = viewToContentX((int) mLastTouchX + mScrollX);
+        int contentY = viewToContentY((int) mLastTouchY + mScrollY);
+        mWebViewCore.sendMessage(EventHub.REQUEST_CURSOR_HREF,
+                contentX, contentY, hrefMsg);
     }
 
     /**
