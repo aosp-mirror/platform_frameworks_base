@@ -7,7 +7,9 @@ page.title=Data Backup
 
   <h2>Quickview</h2>
   <ul>
-    <li>Back up your data to the cloud in case the user looses it</li>
+    <li>Back up the user's data to the cloud in case the user loses it</li>
+    <li>If the user upgrades to a new Android-powered device, your app can restore the user's
+data onto the new device</li>
     <li>Easily back up SharedPreferences and private files with BackupAgentHelper</li>
     <li>Requires API Level 8</li>
   </ul>
@@ -389,7 +391,7 @@ conceptually a set of key-value pairs.</p>
     <p>To add an entity to your backup data set, you must:</p>
     <ol>
       <li>Call {@link android.app.backup.BackupDataOutput#writeEntityHeader(String,int)
-writeEntityheader()}, passing a unique string key for the data you're about to write and the data
+writeEntityHeader()}, passing a unique string key for the data you're about to write and the data
 size.</li>
       <li>Call {@link android.app.backup.BackupDataOutput#writeEntityData(byte[],int)
 writeEntityData()}, passing a byte buffer that contains your data and the number of bytes to write
@@ -403,8 +405,8 @@ single entity:</p>
 ByteArrayOutputStream bufStream = new ByteArrayOutputStream();
 DataOutputStream outWriter = new DataOutputStream(bufStream);
 // Write structured data
-outWriter.writeString(playerName);
-outWriter.writeInt(playerScore);
+outWriter.writeUTF(mPlayerName);
+outWriter.writeInt(mPlayerScore);
 // Send the data to the Backup Manager via the BackupDataOutput
 byte[] buffer = bufStream.toByteArray();
 int len = buffer.length;
@@ -422,10 +424,10 @@ android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,Pa
 onBackup()} so you can determine whether another backup is necessary (as handled in step 1). If you
 do not write the current data state to this file, then
 {@code oldState} will be empty during the next callback.
-    <p>Again, the following example saves a representation of the data using the file's
-last-modified timestamp:</p>
+    <p>The following example saves a representation of the current data into {@code newState} using
+the file's last-modified timestamp:</p>
     <pre>
-FileOutputStream outstream = new FileOutputStream(stateFile.getFileDescriptor());
+FileOutputStream outstream = new FileOutputStream(newState.getFileDescriptor());
 DataOutputStream out = new DataOutputStream(outstream);
 
 long modified = mDataFile.lastModified();
@@ -493,7 +495,8 @@ onBackup()} is called after the device is restored.</dd>
 
 <p>In your implementation of {@link
 android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor)
-onRestore()}, you should call {@link android.app.backup.BackupDataInput#readNextHeader()} to iterate
+onRestore()}, you should call {@link android.app.backup.BackupDataInput#readNextHeader()} on the
+{@code data} to iterate
 through all entities in the data set. For each entity found, do the following:</p>
 
 <ol>
@@ -516,6 +519,54 @@ however you like.</li>
 android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
 onBackup()}.
 </ol>
+
+<p>For example, here's how you can restore the data backed up by the example in the previous
+section:</p>
+
+<pre>
+&#64;Override
+public void onRestore(BackupDataInput data, int appVersionCode,
+                      ParcelFileDescriptor newState) throws IOException {
+    // There should be only one entity, but the safest
+    // way to consume it is using a while loop
+    while (data.readNextHeader()) {
+        String key = data.getKey();
+        int dataSize = data.getDataSize();
+
+        // If the key is ours (for saving top score). Note this key was used when
+        // we wrote the backup entity header
+        if (TOPSCORE_BACKUP_KEY.equals(key)) {
+            // Create an input stream for the BackupDataInput
+            byte[] dataBuf = new byte[dataSize];
+            data.readEntityData(dataBuf, 0, dataSize);
+            ByteArrayInputStream baStream = new ByteArrayInputStream(dataBuf);
+            DataInputStream in = new DataInputStream(baStream);
+
+            // Read the player name and score from the backup data
+            mPlayerName = in.readUTF();
+            mPlayerScore = in.readInt();
+
+            // Record the score on the device (to a file or something)
+            recordScore(mPlayerName, mPlayerScore);
+        } else {
+            // We don't know this entity key. Skip it. (Shouldn't happen.)
+            data.skipEntityData();
+        }
+    }
+
+    // Finally, write to the state blob (newState) that describes the restored data
+    FileOutputStream outstream = new FileOutputStream(newState.getFileDescriptor());
+    DataOutputStream out = new DataOutputStream(outstream);
+    out.writeUTF(mPlayerName);
+    out.writeInt(mPlayerScore);
+}
+</pre>
+
+<p>In this example, the {@code appVersionCode} parameter passed to {@link
+android.app.backup.BackupAgent#onRestore onRestore()} is not used. However, you might want to use
+it if you've chosen to perform backup when the user's version of the application has actually moved
+backward (for example, the user went from version 1.5 of your app to 1.0). For more information, see
+the section about <a href="#RestoreVersion">Checking the Restore Data Version</a>.</p>
 
 <div class="special">
 <p>For an example implementation of {@link android.app.backup.BackupAgent}, see the <a
@@ -592,7 +643,8 @@ public class MyPrefsBackupAgent extends BackupAgentHelper {
     static final String PREFS_BACKUP_KEY = "prefs";
 
     // Allocate a helper and add it to the backup agent
-    void onCreate() {
+    &#64;Override
+    public void onCreate() {
         SharedPreferencesBackupHelper helper = new SharedPreferencesBackupHelper(this, PREFS);
         addHelper(PREFS_BACKUP_KEY, helper);
     }
