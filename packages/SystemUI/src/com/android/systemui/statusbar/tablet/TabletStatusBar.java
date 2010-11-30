@@ -496,7 +496,7 @@ public class TabletStatusBar extends StatusBar {
 
         final RemoteViews contentView = notification.notification.contentView;
 
-        if (false) {
+        if (DEBUG) {
             Slog.d(TAG, "old notification: when=" + oldNotification.notification.when
                     + " ongoing=" + oldNotification.isOngoing()
                     + " expanded=" + oldEntry.expanded
@@ -508,7 +508,7 @@ public class TabletStatusBar extends StatusBar {
 
         // Can we just reapply the RemoteViews in place?  If when didn't change, the order
         // didn't change.
-        if (notification.notification.when == oldNotification.notification.when
+        boolean orderUnchanged = (notification.notification.when == oldNotification.notification.when
                 && notification.isOngoing() == oldNotification.isOngoing()
                 && oldEntry.expanded != null
                 && contentView != null
@@ -516,7 +516,10 @@ public class TabletStatusBar extends StatusBar {
                 && contentView.getPackage() != null
                 && oldContentView.getPackage() != null
                 && oldContentView.getPackage().equals(contentView.getPackage())
-                && oldContentView.getLayoutId() == contentView.getLayoutId()) {
+                && oldContentView.getLayoutId() == contentView.getLayoutId());
+        ViewGroup rowParent = (ViewGroup) oldEntry.row.getParent();
+        boolean isLastAnyway = rowParent.indexOfChild(oldEntry.row) == rowParent.getChildCount() - 1;
+        if (orderUnchanged || isLastAnyway) {
             if (DEBUG) Slog.d(TAG, "reusing notification for key: " + key);
             oldEntry.notification = notification;
             try {
