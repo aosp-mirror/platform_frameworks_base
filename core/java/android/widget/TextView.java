@@ -7761,14 +7761,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Prepare text so that there are not zero or two spaces at beginning and end of region defined
      * by [min, max] when replacing this region by paste.
+     * Note that if there was two spaces (or more) at that position before, they are kept. We just
+     * make sure we do not add an extra one from the paste content.
      */
     private long prepareSpacesAroundPaste(int min, int max, CharSequence paste) {
         // Paste adds/removes spaces before or after insertion as needed.
-        if (Character.isSpaceChar(paste.charAt(0))) {
+        if (paste.length() > 0 && Character.isSpaceChar(paste.charAt(0))) {
             if (min > 0 && Character.isSpaceChar(mTransformed.charAt(min - 1))) {
                 // Two spaces at beginning of paste: remove one
                 final int originalLength = mText.length();
-                ((Editable) mText).replace(min - 1, min, "");
+                ((Editable) mText).delete(min - 1, min);
                 // Due to filters, there is no guarantee that exactly one character was
                 // removed. Count instead.
                 final int delta = mText.length() - originalLength;
@@ -7787,10 +7789,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        if (Character.isSpaceChar(paste.charAt(paste.length() - 1))) {
+        if (paste.length() > 0 && Character.isSpaceChar(paste.charAt(paste.length() - 1))) {
             if (max < mText.length() && Character.isSpaceChar(mTransformed.charAt(max))) {
                 // Two spaces at end of paste: remove one
-                ((Editable) mText).replace(max, max + 1, "");
+                ((Editable) mText).delete(max, max + 1);
             }
         } else {
             if (max < mText.length() && !Character.isSpaceChar(mTransformed.charAt(max))) {
@@ -7798,6 +7800,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 ((Editable) mText).replace(max, max, " ");
             }
         }
+
         return packRangeInLong(min, max);
     }
 
@@ -7854,6 +7857,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 CharSequence selectedText = mTransformed.subSequence(start, end);
                 ClipData data = ClipData.newPlainText(null, null, selectedText);
                 startDrag(data, getTextThumbnailBuilder(selectedText), false);
+                mDragSourcePositions = packRangeInLong(start, end);
                 stopSelectionActionMode();
             } else {
                 selectCurrentWord();
@@ -8989,17 +8993,58 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     Item item = clipData.getItem(i);
                     content.append(item.coerceToText(TextView.this.mContext));
                 }
+
                 final int offset = getOffset((int) event.getX(), (int) event.getY());
+
+                if (mDragSourcePositions != -1) {
+                    final int dragSourceStart = extractRangeStartFromLong(mDragSourcePositions);
+                    final int dragSourceEnd = extractRangeEndFromLong(mDragSourcePositions);
+                    if (offset >= dragSourceStart && offset < dragSourceEnd) {
+                        // A drop inside the original selection discards the drop.
+                        return true;
+                    }
+                }
+
+                final int originalLength = mText.length();
                 long minMax = prepareSpacesAroundPaste(offset, offset, content);
                 int min = extractRangeStartFromLong(minMax);
                 int max = extractRangeEndFromLong(minMax);
+
                 Selection.setSelection((Spannable) mText, max);
                 ((Editable) mText).replace(min, max, content);
+
+                if (mDragSourcePositions != -1) {
+                    int dragSourceStart = extractRangeStartFromLong(mDragSourcePositions);
+                    int dragSourceEnd = extractRangeEndFromLong(mDragSourcePositions);
+                    if (max <= dragSourceStart) {
+                        // Inserting text before selection has shifted positions
+                        final int shift = mText.length() - originalLength;
+                        dragSourceStart += shift;
+                        dragSourceEnd += shift;
+                    }
+
+                    // Delete original selection
+                    ((Editable) mText).delete(dragSourceStart, dragSourceEnd);
+
+                    // Make sure we do not leave two adjacent spaces.
+                    if ((dragSourceStart == 0 ||
+                            Character.isSpaceChar(mTransformed.charAt(dragSourceStart - 1))) &&
+                            (dragSourceStart == mText.length() ||
+                            Character.isSpaceChar(mTransformed.charAt(dragSourceStart)))) {
+                        final int pos = dragSourceStart == mText.length() ?
+                                dragSourceStart - 1 : dragSourceStart;
+                        ((Editable) mText).delete(pos, pos + 1);
+                    }
+                }
+
                 return true;
             }
 
-            case DragEvent.ACTION_DRAG_EXITED:
             case DragEvent.ACTION_DRAG_ENDED:
+                mDragSourcePositions = -1;
+                return true;
+
+            case DragEvent.ACTION_DRAG_EXITED:
             default:
                 return true;
         }
@@ -9166,6 +9211,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private InputFilter[] mFilters = NO_FILTERS;
     private static final Spanned EMPTY_SPANNED = new SpannedString("");
     private static int DRAG_THUMBNAIL_MAX_TEXT_LENGTH = 20;
+    // A packed range containing the drag source if it occured in that TextView. -1 otherwise.
+    private long mDragSourcePositions = -1;
     // System wide time for last cut or copy action.
     private static long sLastCutOrCopyTime;
 }
