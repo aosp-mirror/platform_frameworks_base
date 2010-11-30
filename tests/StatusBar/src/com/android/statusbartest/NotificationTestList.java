@@ -31,6 +31,8 @@ import android.util.Log;
 import android.net.Uri;
 import android.os.SystemClock;
 import android.widget.RemoteViews;
+import android.widget.TextView;
+import android.widget.ProgressBar;
 import android.os.PowerManager;
 
 public class NotificationTestList extends TestActivity
@@ -43,6 +45,8 @@ public class NotificationTestList extends TestActivity
 
     long mActivityCreateTime = System.currentTimeMillis();
     long mChronometerBase = 0;
+
+    boolean mProgressDone = true;
 
     final int[] kNumberedIconResIDs = {
         R.drawable.notification0,
@@ -286,6 +290,50 @@ public class NotificationTestList extends TestActivity
                         300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 
                         300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400 };
                 mNM.notify(1, n);
+            }
+        },
+
+        new Test("Progress #1") {
+            public void run() {
+                final boolean PROGRESS_UPDATES_WHEN = true;
+                if (!mProgressDone) return;
+                mProgressDone = false;
+                Thread t = new Thread() {
+                    public void run() {
+                        int x = 0;
+                        while (!mProgressDone) {
+                            Notification n = new Notification(R.drawable.icon1, null,
+                                    PROGRESS_UPDATES_WHEN
+                                    ? System.currentTimeMillis()
+                                    : mActivityCreateTime);
+                            RemoteViews v = new RemoteViews(getPackageName(),
+                                    R.layout.progress_notification);
+                            
+                            v.setProgressBar(R.id.progress_bar, 100, x, false);
+                            v.setTextViewText(R.id.status_text, "Progress: " + x + "%");
+                    
+                            n.contentView = v;
+                            n.flags |= Notification.FLAG_ONGOING_EVENT;
+
+                            mNM.notify(500, n);
+                            x = (x + 7) % 100;
+
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                break;
+                            }
+                        }
+                    }
+                };
+                t.start();
+            }
+        },
+
+        new Test("Stop Progress") {
+            public void run() {
+                mProgressDone = true;
+                mNM.cancel(500);
             }
         },
 
