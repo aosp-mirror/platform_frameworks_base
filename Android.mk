@@ -404,8 +404,6 @@ web_docs_sample_code_flags := \
                             resources/samples/CubeLiveWallpaper "Live Wallpaper" \
 		-samplecode $(sample_dir)/Home \
 		            resources/samples/Home "Home" \
-		-samplecode $(sample_dir)/HeavyWeight \
-		            resources/samples/HeavyWeight "Heavy Weight App" \
 		-samplecode $(sample_dir)/JetBoy \
 		            resources/samples/JetBoy "JetBoy" \
 		-samplecode $(sample_dir)/LunarLander \
