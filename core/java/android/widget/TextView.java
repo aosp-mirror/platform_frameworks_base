@@ -7450,6 +7450,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 hasPrimaryClip());
     }
 
+    private boolean isWordCharacter(int position) {
+        final char c = mTransformed.charAt(position);
+        final int type = Character.getType(c);
+        return (c == '\'' || c == '"' ||
+                type == Character.UPPERCASE_LETTER ||
+                type == Character.LOWERCASE_LETTER ||
+                type == Character.TITLECASE_LETTER ||
+                type == Character.MODIFIER_LETTER ||
+                type == Character.DECIMAL_DIGIT_NUMBER);
+    }
+
     /**
      * Returns the offsets delimiting the 'word' located at position offset.
      *
@@ -7459,74 +7470,48 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Returns a negative value if no valid word was found.
      */
     private long getWordLimitsAt(int offset) {
-        /*
-         * Quick return if the input type is one where adding words
-         * to the dictionary doesn't make any sense.
-         */
         int klass = mInputType & InputType.TYPE_MASK_CLASS;
-        if (klass == InputType.TYPE_CLASS_NUMBER ||
-            klass == InputType.TYPE_CLASS_PHONE ||
-            klass == InputType.TYPE_CLASS_DATETIME) {
-            return -1;
-        }
-
         int variation = mInputType & InputType.TYPE_MASK_VARIATION;
-        if (variation == InputType.TYPE_TEXT_VARIATION_URI ||
-            variation == InputType.TYPE_TEXT_VARIATION_PASSWORD ||
-            variation == InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD ||
-            variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD ||
-            variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
-            variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS ||
-            variation == InputType.TYPE_TEXT_VARIATION_FILTER) {
+
+        // Text selection is not permitted in password fields
+        if (variation == InputType.TYPE_TEXT_VARIATION_PASSWORD ||
+                variation == InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD ||
+                variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
             return -1;
         }
 
-        int len = mText.length();
-        int end = Math.min(offset, len);
+        final int len = mText.length();
 
+        // Specific text fields: always select the entire text
+        if (klass == InputType.TYPE_CLASS_NUMBER ||
+                klass == InputType.TYPE_CLASS_PHONE ||
+                klass == InputType.TYPE_CLASS_DATETIME ||
+                variation == InputType.TYPE_TEXT_VARIATION_URI ||
+                variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
+                variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS ||
+                variation == InputType.TYPE_TEXT_VARIATION_FILTER) {
+            return len > 0 ? packRangeInLong(0, len) : -1;
+        }
+
+        int end = Math.min(offset, len);
         if (end < 0) {
             return -1;
         }
 
+        final int MAX_LENGTH = 48;
         int start = end;
 
         for (; start > 0; start--) {
-            char c = mTransformed.charAt(start - 1);
-            int type = Character.getType(c);
-
-            // Cases where the text ends with a '.' and we select from the end of the line (right
-            // after the dot), or when we select from the space character in "aaaa, bbbb".
-            if (start == end && type == Character.OTHER_PUNCTUATION) continue;
-
-            if (c != '\'' &&
-                type != Character.UPPERCASE_LETTER &&
-                type != Character.LOWERCASE_LETTER &&
-                type != Character.TITLECASE_LETTER &&
-                type != Character.MODIFIER_LETTER &&
-                type != Character.DECIMAL_DIGIT_NUMBER) {
-                break;
-            }
+            if (!isWordCharacter(start - 1)) break;
+            if ((end - start) > MAX_LENGTH) return -1;
         }
 
         for (; end < len; end++) {
-            char c = mTransformed.charAt(end);
-            int type = Character.getType(c);
-
-            if (c != '\'' &&
-                type != Character.UPPERCASE_LETTER &&
-                type != Character.LOWERCASE_LETTER &&
-                type != Character.TITLECASE_LETTER &&
-                type != Character.MODIFIER_LETTER &&
-                type != Character.DECIMAL_DIGIT_NUMBER) {
-                break;
-            }
+            if (!isWordCharacter(end)) break;
+            if ((end - start) > MAX_LENGTH) return -1;
         }
 
         if (start == end) {
-            return -1;
-        }
-
-        if (end - start > 48) {
             return -1;
         }
 
