@@ -589,7 +589,7 @@
     <string name="factorytest_not_system" msgid="4435201656767276723">"Действие FACTORY_TEST поддерживается только для пакетов, установленных в /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Пакет, обеспечивающий действие FACTORY_TEST, не найден."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"Перезагрузка"</string>
-    <string name="js_dialog_title" msgid="8143918455087008109">"На странице по адресу \"<xliff:g id="TITLE">%s</xliff:g>\" сказано:"</string>
+    <string name="js_dialog_title" msgid="8143918455087008109">"Подтвердите действие на <xliff:g id="TITLE">%s</xliff:g>"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Перейти с этой страницы?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Нажмите \"ОК\", чтобы продолжить, или \"Отмена\", чтобы остаться на текущей странице."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Подтвердите"</string>
