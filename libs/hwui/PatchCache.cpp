@@ -87,8 +87,9 @@ Patch* PatchCache::get(const float bitmapWidth, const float bitmapHeight,
                 width, height, pixelWidth, pixelHeight, bitmapWidth, bitmapHeight);
 
         mesh = new Patch(width, height, transparentQuads);
-        mesh->updateVertices(bitmapWidth, bitmapHeight, 0.0f, 0.0f,
-                pixelWidth, pixelHeight, xDivs, yDivs, width, height, colorKey);
+        mesh->updateColorKey(colorKey);
+        mesh->copy(xDivs, yDivs);
+        mesh->updateVertices(bitmapWidth, bitmapHeight, 0.0f, 0.0f, pixelWidth, pixelHeight);
 
         if (mCache.size() >= mMaxEntries) {
             delete mCache.valueAt(mCache.size() - 1);
@@ -96,6 +97,9 @@ Patch* PatchCache::get(const float bitmapWidth, const float bitmapHeight,
         }
 
         mCache.add(description, mesh);
+    } else if (!mesh->matches(xDivs, yDivs, colorKey)) {
+        PATCH_LOGD("Patch mesh does not match, refreshing vertices");
+        mesh->updateVertices(bitmapWidth, bitmapHeight, 0.0f, 0.0f, pixelWidth, pixelHeight);
     }
 
     return mesh;
