@@ -7010,11 +7010,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (start >= prevStart && start < prevEnd) {
                 // Restore previous selection
                 Selection.setSelection((Spannable)mText, prevStart, prevEnd);
-
-                if (hasSelectionController()) {
-                    // Revive the anchors.
-                    getSelectionController().show();
-                }
                 return;
             } else {
                 // Tapping outside stops selection mode, if any
@@ -8679,14 +8674,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private int mPreviousTapPositionX;
         private int mPreviousTapPositionY;
 
-        private static final int DELAY_BEFORE_FADE_OUT = 4100;
-
-        private final Runnable mHider = new Runnable() {
-            public void run() {
-                hide();
-            }
-        };
-
         SelectionModifierCursorController() {
             resetTouchOffsets();
         }
@@ -8707,19 +8694,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mEndHandle.show();
 
             hideInsertionPointCursorController();
-            hideDelayed();
         }
 
         public void hide() {
             if (mStartHandle != null) mStartHandle.hide();
             if (mEndHandle != null) mEndHandle.hide();
             mIsShowing = false;
-            removeCallbacks(mHider);
-        }
-
-        private void hideDelayed() {
-            removeCallbacks(mHider);
-            postDelayed(mHider, DELAY_BEFORE_FADE_OUT);
         }
 
         public boolean isShowing() {
@@ -8762,7 +8742,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
             updatePosition();
-            hideDelayed();
         }
 
         public void updatePosition() {
@@ -8808,9 +8787,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             final int slopSquared = doubleTapSlop * doubleTapSlop;
                             if (distanceSquared < slopSquared) {
                                 startSelectionActionMode();
-                                // Hacky: onTapUpEvent will open a context menu with cut/copy
-                                // Prevent this by hiding handles which will be revived instead.
-                                hide();
                             }
                         }
 
