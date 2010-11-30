@@ -32,7 +32,8 @@ SoftwareRenderer::SoftwareRenderer(
         size_t displayWidth, size_t displayHeight,
         size_t decodedWidth, size_t decodedHeight,
         int32_t rotationDegrees)
-    : mColorFormat(colorFormat),
+    : mInitCheck(NO_INIT),
+      mColorFormat(colorFormat),
       mConverter(colorFormat, OMX_COLOR_Format16bitRGB565),
       mISurface(surface),
       mDisplayWidth(displayWidth),
@@ -74,15 +75,28 @@ SoftwareRenderer::SoftwareRenderer(
             mMemoryHeap);
 
     status_t err = mISurface->registerBuffers(bufferHeap);
-    CHECK_EQ(err, OK);
+
+    if (err != OK) {
+        LOGW("ISurface failed to register buffers (0x%08x)", err);
+    }
+
+    mInitCheck = err;
 }
 
 SoftwareRenderer::~SoftwareRenderer() {
     mISurface->unregisterBuffers();
 }
 
+status_t SoftwareRenderer::initCheck() const {
+    return mInitCheck;
+}
+
 void SoftwareRenderer::render(
         const void *data, size_t size, void *platformPrivate) {
+    if (mInitCheck != OK) {
+        return;
+    }
+
     size_t offset = mIndex * mFrameSize;
     void *dst = (uint8_t *)mMemoryHeap->getBase() + offset;
 

@@ -525,6 +525,13 @@ sp<IOMXRenderer> OMX::createRenderer(
                 surface,
                 displayWidth, displayHeight,
                 encodedWidth, encodedHeight);
+
+        if (((SoftwareRenderer *)impl)->initCheck() != OK) {
+            delete impl;
+            impl = NULL;
+
+            return NULL;
+        }
     }
 
     return new OMXRenderer(impl);
