@@ -621,6 +621,20 @@ public final class CookieManager {
     }
 
     /**
+     * Tell the cookie store that this is a good time to flush cookies to flash.
+     *
+     * This should be called when the app is paused. Note that this method only
+     * acts as a hint, and may not have any effect. Flushing is asynchronous.
+     *
+     * @hide pending API council approval.
+     */
+    public void flushCookieStore() {
+        if (useChromiumHttpStack()) {
+            nativeFlushCookieStore();
+        }
+    }
+
+    /**
      * Package level api, called from CookieSyncManager
      *
      * Get a list of cookies which are updated since a given time.
@@ -1078,4 +1092,5 @@ public final class CookieManager {
     private static native void nativeRemoveSessionCookie();
     private static native void nativeSetAcceptCookie(boolean accept);
     private static native void nativeSetCookie(String url, String value);
+    private static native void nativeFlushCookieStore();
 }
