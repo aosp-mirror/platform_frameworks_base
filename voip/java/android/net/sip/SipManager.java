@@ -314,10 +314,6 @@ public class SipManager {
         SipAudioCall call = new SipAudioCall(mContext, localProfile);
         call.setListener(listener);
         SipSession s = createSipSession(localProfile, null);
-        if (s == null) {
-            throw new SipException(
-                    "Failed to create SipSession; network available?");
-        }
         call.makeCall(peerProfile, s, timeout);
         return call;
     }
@@ -366,7 +362,9 @@ public class SipManager {
      */
     public SipAudioCall takeAudioCall(Intent incomingCallIntent,
             SipAudioCall.Listener listener) throws SipException {
-        if (incomingCallIntent == null) return null;
+        if (incomingCallIntent == null) {
+            throw new SipException("Cannot retrieve session with null intent");
+        }
 
         String callId = getCallId(incomingCallIntent);
         if (callId == null) {
@@ -381,7 +379,9 @@ public class SipManager {
 
         try {
             ISipSession session = mSipService.getPendingSession(callId);
-            if (session == null) return null;
+            if (session == null) {
+                throw new SipException("No pending session for the call");
+            }
             SipAudioCall call = new SipAudioCall(
                     mContext, session.getLocalProfile());
             call.attachCall(new SipSession(session), offerSd);
@@ -526,6 +526,10 @@ public class SipManager {
             SipSession.Listener listener) throws SipException {
         try {
             ISipSession s = mSipService.createSession(localProfile, null);
+            if (s == null) {
+                throw new SipException(
+                        "Failed to create SipSession; network unavailable?");
+            }
             return new SipSession(s, listener);
         } catch (RemoteException e) {
             throw new SipException("createSipSession()", e);
@@ -541,7 +545,7 @@ public class SipManager {
         try {
             return mSipService.getListOfProfiles();
         } catch (RemoteException e) {
-            return null;
+            return new SipProfile[0];
         }
     }
 
