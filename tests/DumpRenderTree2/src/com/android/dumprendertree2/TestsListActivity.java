@@ -16,6 +16,8 @@
 
 package com.android.dumprendertree2;
 
+import com.android.dumprendertree2.scriptsupport.OnEverythingFinishedCallback;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -28,8 +30,7 @@ import android.view.Window;
 import android.webkit.WebView;
 import android.widget.Toast;
 
-import com.android.dumprendertree2.scriptsupport.OnEverythingFinishedCallback;
-
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -189,12 +190,12 @@ public class TestsListActivity extends Activity {
         intent.setAction(Intent.ACTION_RUN);
 
         if (startFrom < mTotalTestCount) {
-            intent.putStringArrayListExtra(LayoutTestsExecutor.EXTRA_TESTS_LIST,
-                    new ArrayList<String>(mTestsList.subList(startFrom, mTotalTestCount)));
+            File testListFile = new File(getExternalFilesDir(null), "test_list.txt");
+            FsUtils.saveTestListToStorage(testListFile, startFrom, mTestsList);
+            intent.putExtra(LayoutTestsExecutor.EXTRA_TESTS_FILE, testListFile.getAbsolutePath());
             intent.putExtra(LayoutTestsExecutor.EXTRA_TEST_INDEX, startFrom);
         } else {
-            intent.putStringArrayListExtra(LayoutTestsExecutor.EXTRA_TESTS_LIST,
-                    new ArrayList<String>());
+            intent.putExtra(LayoutTestsExecutor.EXTRA_TESTS_FILE, "");
         }
 
         startActivity(intent);

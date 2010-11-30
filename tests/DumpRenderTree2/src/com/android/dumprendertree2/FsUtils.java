@@ -39,9 +39,12 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -49,6 +52,7 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -272,6 +276,39 @@ public class FsUtils {
             }
         } catch (IOException e) {
             Log.e(LOG_TAG, "Couldn't close stream!", e);
+        }
+    }
+
+    public static List<String> loadTestListFromStorage(String path) {
+        List<String> list = new ArrayList<String>();
+        if (path != null && !path.isEmpty()) {
+            try {
+                File file = new File(path);
+                Log.d(LOG_TAG, "test list loaded from " + path);
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    list.add(line);
+                }
+                reader.close();
+            } catch (IOException ioe) {
+                Log.e(LOG_TAG, "failed to load test list", ioe);
+            }
+        }
+        return list;
+    }
+
+    public static void saveTestListToStorage(File file, int start, List<String> testList) {
+        try {
+            BufferedWriter writer = new BufferedWriter(
+                    new FileWriter(file));
+            for (String line : testList.subList(start, testList.size())) {
+                writer.write(line + '\n');
+            }
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "failed to write test list", e);
         }
     }
 }
