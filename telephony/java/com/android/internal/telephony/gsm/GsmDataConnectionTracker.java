@@ -115,7 +115,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      * It is a subset of allApns and has the same format
      */
     private ArrayList<ApnSetting> waitingApns = null;
-
+    private int waitingApnsPermanentFailureCountDown = 0;
     private ApnSetting preferredApn = null;
 
     /* Currently active APN */
@@ -449,6 +449,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
             if (state == State.IDLE) {
                 waitingApns = buildWaitingApns();
+                waitingApnsPermanentFailureCountDown = waitingApns.size();
                 if (waitingApns.isEmpty()) {
                     if (DBG) log("No APN found");
                     notifyNoData(GsmDataConnection.FailCause.MISSING_UNKNOWN_APN);
@@ -1154,20 +1155,25 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                         TelephonyManager.getDefault().getNetworkType());
             }
 
-            // No try for permanent failure
-            if (cause.isPermanentFail()) {
-                notifyNoData(cause);
-                phone.notifyDataConnection(Phone.REASON_APN_FAILED);
-                onEnableApn(apnTypeToId(mRequestedApnType), DISABLED);
-                return;
-            }
-
+            // Count permanent failures and remove the APN we just tried
+            waitingApnsPermanentFailureCountDown -= cause.isPermanentFail() ? 1 : 0;
             waitingApns.remove(0);
+            if (DBG) log(String.format("onDataSetupComplete: waitingApns.size=%d" +
+                            " waitingApnsPermanenatFailureCountDown=%d",
+                            waitingApns.size(), waitingApnsPermanentFailureCountDown));
+
+            // See if there are more APN's to try
             if (waitingApns.isEmpty()) {
-                // No more to try, start delayed retry
-                startDelayedRetry(cause, reason);
+                if (waitingApnsPermanentFailureCountDown == 0) {
+                    if (DBG) log("onDataSetupComplete: Permanent failures stop retrying");
+                    notifyNoData(cause);
+                    phone.notifyDataConnection(Phone.REASON_APN_FAILED);
+                } else {
+                    if (DBG) log("onDataSetupComplete: Not all permanent failures, retry");
+                    startDelayedRetry(cause, reason);
+                }
             } else {
-                // we still have more apns to try
+                if (DBG) log("onDataSetupComplete: Try next APN");
                 setState(State.SCANNING);
                 // Wait a bit before trying the next APN, so that
                 // we're not tying up the RIL command channel
