@@ -25,7 +25,9 @@
                 <category android:name="android.intent.category.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name="TestShellActivity" android:launchMode="singleTop"
+        <activity android:name="TestShellActivity"
+          android:launchMode="singleTop"
+          android:hardwareAccelerated="true"
           android:screenOrientation="portrait"
           android:theme="@android:style/Theme.Light"/>
         <activity android:name="ReliabilityTestActivity" android:screenOrientation="portrait"
