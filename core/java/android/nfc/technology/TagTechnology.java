@@ -74,17 +74,17 @@ public interface TagTechnology {
     /**
      * A Mifare Classic tag with NDEF data
      */
-    public static final int MIFRARE_CLASSIC_NDEF = 201;
+    public static final int MIFARE_CLASSIC_NDEF = 201;
 
     /**
      * A Mifare Ultralight tag
      */
-    public static final int MIFRARE_ULTRALIGHT = 202;
+    public static final int MIFARE_ULTRALIGHT = 202;
 
     /**
      * A Mifare DESFire tag
      */
-    public static final int MIFRARE_DESFIRE = 203;
+    public static final int MIFARE_DESFIRE = 203;
 
     /**
      * Returns the technology type for this tag connection.
