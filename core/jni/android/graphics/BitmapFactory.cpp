@@ -291,7 +291,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         env->ReleasePrimitiveArrayCritical(ninePatchChunk, array, 0);
     }
 
-    // detach bitmap from its autotdeleter, since we want to own it now
+    // detach bitmap from its autodeleter, since we want to own it now
     adb.detach();
 
     if (padding) {
@@ -322,7 +322,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         return javaBitmap;
     }
     // now create the java bitmap
-    return GraphicsJNI::createBitmap(env, bitmap, false, ninePatchChunk);
+    return GraphicsJNI::createBitmap(env, bitmap, javaAllocator.getStorageObj(), false, ninePatchChunk);
 }
 
 static jobject nativeDecodeStream(JNIEnv* env, jobject clazz,

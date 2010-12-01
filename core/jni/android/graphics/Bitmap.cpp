@@ -1,4 +1,5 @@
 #include "SkBitmap.h"
+#include "SkPixelRef.h"
 #include "SkImageEncoder.h"
 #include "SkColorPriv.h"
 #include "GraphicsJNI.h"
@@ -210,11 +211,6 @@ static ToColorProc ChooseToColorProc(const SkBitmap& src) {
 static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
                               int offset, int stride, int width, int height,
                               SkBitmap::Config config, jboolean isMutable) {
-    if (width <= 0 || height <= 0) {
-        doThrowIAE(env, "width and height must be > 0");
-        return NULL;
-    }
-
     if (NULL != jColors) {
         size_t n = env->GetArrayLength(jColors);
         if (n < SkAbs32(stride) * (size_t)height) {
@@ -226,7 +222,9 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     SkBitmap bitmap;
 
     bitmap.setConfig(config, width, height);
-    if (!GraphicsJNI::setJavaPixelRef(env, &bitmap, NULL, true)) {
+
+    jbyteArray buff = GraphicsJNI::allocateJavaPixelRef(env, &bitmap, NULL);
+    if (NULL == buff) {
         return NULL;
     }
 
@@ -235,21 +233,19 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
                                0, 0, width, height, bitmap);
     }
 
-    return GraphicsJNI::createBitmap(env, new SkBitmap(bitmap), isMutable,
-                                     NULL);
+    return GraphicsJNI::createBitmap(env, new SkBitmap(bitmap), buff, isMutable, NULL);
 }
 
 static jobject Bitmap_copy(JNIEnv* env, jobject, const SkBitmap* src,
                            SkBitmap::Config dstConfig, jboolean isMutable) {
     SkBitmap            result;
-    JavaPixelAllocator  allocator(env, true);
+    JavaPixelAllocator  allocator(env);
 
     if (!src->copyTo(&result, dstConfig, &allocator)) {
         return NULL;
     }
 
-    return GraphicsJNI::createBitmap(env, new SkBitmap(result), isMutable,
-                                     NULL);
+    return GraphicsJNI::createBitmap(env, new SkBitmap(result), allocator.getStorageObj(), isMutable, NULL);
 }
 
 static void Bitmap_destructor(JNIEnv* env, jobject, SkBitmap* bitmap) {
@@ -380,7 +376,8 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         }
     }
 
-    if (!GraphicsJNI::setJavaPixelRef(env, bitmap, ctable, true)) {
+    jbyteArray buffer = GraphicsJNI::allocateJavaPixelRef(env, bitmap, ctable);
+    if (NULL == buffer) {
         ctable->safeUnref();
         delete bitmap;
         return NULL;
@@ -393,7 +390,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     memcpy(bitmap->getPixels(), p->readInplace(size), size);
     bitmap->unlockPixels();
 
-    return GraphicsJNI::createBitmap(env, bitmap, isMutable, NULL, density);
+    return GraphicsJNI::createBitmap(env, bitmap, buffer, isMutable, NULL, density);
 }
 
 static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
@@ -447,8 +444,9 @@ static jobject Bitmap_extractAlpha(JNIEnv* env, jobject clazz,
                                    jintArray offsetXY) {
     SkIPoint  offset;
     SkBitmap* dst = new SkBitmap;
+    JavaPixelAllocator allocator(env);
 
-    src->extractAlpha(dst, paint, &offset);
+    src->extractAlpha(dst, paint, &allocator, &offset);
     if (offsetXY != 0 && env->GetArrayLength(offsetXY) >= 2) {
         int* array = env->GetIntArrayElements(offsetXY, NULL);
         array[0] = offset.fX;
@@ -456,7 +454,7 @@ static jobject Bitmap_extractAlpha(JNIEnv* env, jobject clazz,
         env->ReleaseIntArrayElements(offsetXY, array, 0);
     }
 
-    return GraphicsJNI::createBitmap(env, dst, true, NULL);
+    return GraphicsJNI::createBitmap(env, dst, allocator.getStorageObj(), true, NULL);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

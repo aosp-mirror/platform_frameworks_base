@@ -459,35 +459,37 @@ class GLES20Canvas extends HardwareCanvas {
         // Shaders are ignored when drawing patches
         boolean hasColorFilter = paint != null && setupColorFilter(paint);
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-        nDrawPatch(mRenderer, bitmap.mNativeBitmap, chunks, dst.left, dst.top,
-                dst.right, dst.bottom, nativePaint);
+        nDrawPatch(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, chunks,
+                dst.left, dst.top, dst.right, dst.bottom, nativePaint);
         if (hasColorFilter) nResetModifiers(mRenderer);
     }
 
-    private native void nDrawPatch(int renderer, int bitmap, byte[] chunks, float left, float top,
-            float right, float bottom, int paint);
+    private native void nDrawPatch(int renderer, int bitmap, byte[] buffer, byte[] chunks,
+            float left, float top, float right, float bottom, int paint);
 
     @Override
     public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
         // Shaders are ignored when drawing bitmaps
         boolean hasColorFilter = paint != null && setupColorFilter(paint);
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, left, top, nativePaint);
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, left, top, nativePaint);
         if (hasColorFilter) nResetModifiers(mRenderer);
     }
 
-    private native void nDrawBitmap(int renderer, int bitmap, float left, float top, int paint);
+    private native void nDrawBitmap(
+            int renderer, int bitmap, byte[] buffer, float left, float top, int paint);
 
     @Override
     public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
         // Shaders are ignored when drawing bitmaps
         boolean hasColorFilter = paint != null && setupColorFilter(paint);
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, matrix.native_instance, nativePaint);
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer,
+                matrix.native_instance, nativePaint);
         if (hasColorFilter) nResetModifiers(mRenderer);
     }
 
-    private native void nDrawBitmap(int renderer, int bitmap, int matrix, int paint);
+    private native void nDrawBitmap(int renderer, int bitmap, byte[] buff, int matrix, int paint);
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
@@ -507,7 +509,7 @@ class GLES20Canvas extends HardwareCanvas {
             bottom = src.bottom;
         }
 
-        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, left, top, right, bottom,
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, left, top, right, bottom,
                 dst.left, dst.top, dst.right, dst.bottom, nativePaint);
         if (hasColorFilter) nResetModifiers(mRenderer);
     }
@@ -517,12 +519,12 @@ class GLES20Canvas extends HardwareCanvas {
         // Shaders are ignored when drawing bitmaps
         boolean hasColorFilter = paint != null && setupColorFilter(paint);
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, src.left, src.top, src.right, src.bottom,
-                dst.left, dst.top, dst.right, dst.bottom, nativePaint);
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, src.left, src.top, src.right,
+                src.bottom, dst.left, dst.top, dst.right, dst.bottom, nativePaint);
         if (hasColorFilter) nResetModifiers(mRenderer);
     }
 
-    private native void nDrawBitmap(int renderer, int bitmap,
+    private native void nDrawBitmap(int renderer, int bitmap, byte[] buffer,
             float srcLeft, float srcTop, float srcRight, float srcBottom,
             float left, float top, float right, float bottom, int paint);
 
@@ -534,7 +536,7 @@ class GLES20Canvas extends HardwareCanvas {
         final Bitmap.Config config = hasAlpha ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
         final Bitmap b = Bitmap.createBitmap(colors, offset, stride, width, height, config);
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-        nDrawBitmap(mRenderer, b.mNativeBitmap, x, y, nativePaint);
+        nDrawBitmap(mRenderer, b.mNativeBitmap, b.mBuffer, x, y, nativePaint);
         b.recycle();
         if (hasColorFilter) nResetModifiers(mRenderer);
     }

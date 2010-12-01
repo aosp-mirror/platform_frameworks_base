@@ -74,6 +74,23 @@ public class Canvas {
      */
     public static final int DIRECTION_RTL = 1;
     
+    private final CanvasFinalizer mFinalizer;
+
+    private static class CanvasFinalizer {
+        private final int mNativeCanvas;
+
+        public CanvasFinalizer(int nativeCanvas) {
+            mNativeCanvas = nativeCanvas;
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            if (mNativeCanvas != 0) {
+                finalizer(mNativeCanvas);
+            }
+        }
+    }
+
     /**
      * Construct an empty raster canvas. Use setBitmap() to specify a bitmap to
      * draw into.  The initial target density is {@link Bitmap#DENSITY_NONE};
@@ -83,6 +100,7 @@ public class Canvas {
     public Canvas() {
         // 0 means no native bitmap
         mNativeCanvas = initRaster(0);
+        mFinalizer = new CanvasFinalizer(0);
     }
 
     /**
@@ -101,6 +119,7 @@ public class Canvas {
         }
         throwIfRecycled(bitmap);
         mNativeCanvas = initRaster(bitmap.ni());
+        mFinalizer = new CanvasFinalizer(mNativeCanvas);
         mBitmap = bitmap;
         mDensity = bitmap.mDensity;
     }
@@ -110,6 +129,7 @@ public class Canvas {
             throw new IllegalStateException();
         }
         mNativeCanvas = nativeCanvas;
+        mFinalizer = new CanvasFinalizer(nativeCanvas);
         mDensity = Bitmap.getDefaultDensity();
     }
 
@@ -1605,19 +1625,6 @@ public class Canvas {
      * @hide
      */
     public void releaseContext() {
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            super.finalize();
-        } finally {
-            // If the constructor threw an exception before setting mNativeCanvas,
-            // the native finalizer must not be invoked.
-            if (mNativeCanvas != 0) {
-                finalizer(mNativeCanvas);
-            }
-        }
     }
 
     /**
