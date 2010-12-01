@@ -1039,13 +1039,18 @@ public class WifiStateTracker extends NetworkStateTracker {
                         }
                         handleDisconnectedState(newDetailedState, true);
                         /**
-                         * If we were associated with a network (networkId != -1),
-                         * assume we reached this state because of a failed attempt
-                         * to acquire an IP address, and attempt another connection
-                         * and IP address acquisition in RECONNECT_DELAY_MSECS
-                         * milliseconds.
+                         * We should never let the supplicant stay in DORMANT state
+                         * as long as we are in connect mode and driver is started
+                         *
+                         * We should normally hit a DORMANT state due to a disconnect
+                         * issued after an IP configuration failure. We issue a reconnect
+                         * after RECONNECT_DELAY_MSECS in such a case.
+                         *
+                         * After multiple failures, the network gets disabled and the
+                         * supplicant should reach an INACTIVE state.
+                         *
                          */
-                        if (mRunState == RUN_STATE_RUNNING && !mIsScanOnly && networkId != -1) {
+                        if (mRunState == RUN_STATE_RUNNING && !mIsScanOnly) {
                             sendMessageDelayed(reconnectMsg, RECONNECT_DELAY_MSECS);
                         } else if (mRunState == RUN_STATE_STOPPING) {
                             stopDriver();
