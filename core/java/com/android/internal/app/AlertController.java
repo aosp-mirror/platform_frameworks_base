@@ -118,6 +118,12 @@ public class AlertController {
     
     private int mCheckedItem = -1;
 
+    private int mAlertDialogLayout;
+    private int mListLayout;
+    private int mMultiChoiceItemLayout;
+    private int mSingleChoiceItemLayout;
+    private int mListItemLayout;
+
     private Handler mHandler;
 
     View.OnClickListener mButtonHandler = new View.OnClickListener() {
@@ -178,6 +184,27 @@ public class AlertController {
         mDialogInterface = di;
         mWindow = window;
         mHandler = new ButtonHandler(di);
+
+        TypedArray a = context.obtainStyledAttributes(null,
+                com.android.internal.R.styleable.AlertDialog,
+                com.android.internal.R.attr.alertDialogStyle, 0);
+
+        mAlertDialogLayout = a.getResourceId(com.android.internal.R.styleable.AlertDialog_layout,
+                com.android.internal.R.layout.alert_dialog);
+        mListLayout = a.getResourceId(
+                com.android.internal.R.styleable.AlertDialog_listLayout,
+                com.android.internal.R.layout.select_dialog);
+        mMultiChoiceItemLayout = a.getResourceId(
+                com.android.internal.R.styleable.AlertDialog_multiChoiceItemLayout,
+                com.android.internal.R.layout.select_dialog_multichoice);
+        mSingleChoiceItemLayout = a.getResourceId(
+                com.android.internal.R.styleable.AlertDialog_singleChoiceItemLayout,
+                com.android.internal.R.layout.select_dialog_singlechoice);
+        mListItemLayout = a.getResourceId(
+                com.android.internal.R.styleable.AlertDialog_listItemLayout,
+                com.android.internal.R.layout.select_dialog_item);
+
+        a.recycle();
     }
     
     static boolean canTextInput(View v) {
@@ -210,7 +237,7 @@ public class AlertController {
             mWindow.setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                     WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         }
-        mWindow.setContentView(com.android.internal.R.layout.alert_dialog);
+        mWindow.setContentView(mAlertDialogLayout);
         setupView();
     }
     
@@ -810,13 +837,13 @@ public class AlertController {
         
         private void createListView(final AlertController dialog) {
             final RecycleListView listView = (RecycleListView)
-                    mInflater.inflate(R.layout.select_dialog, null);
+                    mInflater.inflate(dialog.mListLayout, null);
             ListAdapter adapter;
             
             if (mIsMultiChoice) {
                 if (mCursor == null) {
                     adapter = new ArrayAdapter<CharSequence>(
-                            mContext, R.layout.select_dialog_multichoice, R.id.text1, mItems) {
+                            mContext, dialog.mMultiChoiceItemLayout, R.id.text1, mItems) {
                         @Override
                         public View getView(int position, View convertView, ViewGroup parent) {
                             View view = super.getView(position, convertView, parent);
@@ -850,7 +877,7 @@ public class AlertController {
     
                         @Override
                         public View newView(Context context, Cursor cursor, ViewGroup parent) {
-                            return mInflater.inflate(R.layout.select_dialog_multichoice,
+                            return mInflater.inflate(dialog.mMultiChoiceItemLayout,
                                     parent, false);
                         }
                         
@@ -858,7 +885,7 @@ public class AlertController {
                 }
             } else {
                 int layout = mIsSingleChoice 
-                        ? R.layout.select_dialog_singlechoice : R.layout.select_dialog_item;
+                        ? dialog.mSingleChoiceItemLayout : dialog.mListItemLayout;
                 if (mCursor == null) {
                     adapter = (mAdapter != null) ? mAdapter
                             : new ArrayAdapter<CharSequence>(mContext, layout, R.id.text1, mItems);

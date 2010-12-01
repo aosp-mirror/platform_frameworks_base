@@ -1392,6 +1392,10 @@
   <public type="attr" name="rotation"/>
   <public type="attr" name="rotationX"/>
   <public type="attr" name="rotationY"/>
+  <public type="attr" name="showDividers" />
+  <public type="attr" name="dividerPadding" />
+  <public type="attr" name="borderlessButtonStyle" />
+  <public type="attr" name="dividerHorizontal" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
@@ -1555,6 +1559,7 @@
   <public type="style" name="Widget.Holo.Light.ActionMode" />
   <public type="style" name="Widget.Holo.Light.ActionButton.CloseMode" />
   <public type="style" name="Widget.Holo.Light.ActionBar" />
+  <public type="style" name="Widget.Holo.Button.Borderless" />
 
   <public type="string" name="selectTextMode" />
 </resources>
