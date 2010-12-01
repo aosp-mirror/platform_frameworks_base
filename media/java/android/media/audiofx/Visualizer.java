@@ -43,10 +43,8 @@ import android.os.Message;
  *   <li>Frequency data: 8-bit magnitude FFT by using the {@link #getFft(byte[])} method</li>
  * </ul>
  * <p>The length of the capture can be retrieved or specified by calling respectively
- * {@link #getCaptureSize()} and {@link #setCaptureSize(int)} methods. Note that the size of the FFT
- * is half of the specified capture size but both sides of the spectrum are returned yielding in a
- * number of bytes equal to the capture size. The capture size must be a power of 2 in the range
- * returned by {@link #getCaptureSizeRange()}.
+ * {@link #getCaptureSize()} and {@link #setCaptureSize(int)} methods. The capture size must be a
+ * power of 2 in the range returned by {@link #getCaptureSizeRange()}.
  * <p>In addition to the polling capture mode described above with {@link #getWaveForm(byte[])} and
  *  {@link #getFft(byte[])} methods, a callback mode is also available by installing a listener by
  *  use of the {@link #setDataCaptureListener(OnDataCaptureListener, int, boolean, boolean)} method.
@@ -333,11 +331,43 @@ public class Visualizer {
         }
     }
     /**
-     * Returns a frequency capture of currently playing audio content. The capture is a 8-bit
-     * magnitude FFT. Note that the size of the FFT is half of the specified capture size but both
-     * sides of the spectrum are returned yielding in a number of bytes equal to the capture size.
-     * {@see #getCaptureSize()}.
+     * Returns a frequency capture of currently playing audio content.
      * <p>This method must be called when the Visualizer is enabled.
+     * <p>The capture is an 8-bit magnitude FFT, the frequency range covered being 0 (DC) to half of
+     * the sampling rate returned by {@link #getSamplingRate()}. The capture returns the real and
+     * imaginary parts of a number of frequency points equal to half of the capture size plus one.
+     * <p>Note: only the real part is returned for the first point (DC) and the last point
+     * (sampling frequency / 2).
+     * <p>The layout in the returned byte array is as follows:
+     * <ul>
+     *   <li> n is the capture size returned by getCaptureSize()</li>
+     *   <li> Rfk, Ifk are respectively  the real and imaginary parts of the kth frequency
+     *   component</li>
+     *   <li> If Fs is the sampling frequency retuned by getSamplingRate() the kth frequency is:
+     *   (k*Fs)/(n/2) </li>
+     * </ul>
+     * <table border="0" cellspacing="0" cellpadding="0">
+     * <tr><td>Index </p></td>
+     *     <td>0 </p></td>
+     *     <td>1 </p></td>
+     *     <td>2 </p></td>
+     *     <td>3 </p></td>
+     *     <td>4 </p></td>
+     *     <td>5 </p></td>
+     *     <td>... </p></td>
+     *     <td>n - 2 </p></td>
+     *     <td>n - 1 </p></td></tr>
+     * <tr><td>Data </p></td>
+     *     <td>Rf0 </p></td>
+     *     <td>Rf(n/2) </p></td>
+     *     <td>Rf1 </p></td>
+     *     <td>If1 </p></td>
+     *     <td>Rf2 </p></td>
+     *     <td>If2 </p></td>
+     *     <td>... </p></td>
+     *     <td>Rf(n-1)/2 </p></td>
+     *     <td>If(n-1)/2 </p></td></tr>
+     * </table>
      * @param fft array of bytes where the FFT should be returned
      * @return {@link #SUCCESS} in case of success,
      * {@link #ERROR_NO_MEMORY}, {@link #ERROR_INVALID_OPERATION} or {@link #ERROR_DEAD_OBJECT}
