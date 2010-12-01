@@ -7818,7 +7818,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final int end = getSelectionEnd();
                 CharSequence selectedText = mTransformed.subSequence(start, end);
                 ClipData data = ClipData.newPlainText(null, null, selectedText);
-                startDrag(data, getTextThumbnailBuilder(selectedText), false);
+                startDrag(data, getTextThumbnailBuilder(selectedText), false, null);
                 mDragSourcePositions = packRangeInLong(start, end);
                 stopSelectionActionMode();
             } else {

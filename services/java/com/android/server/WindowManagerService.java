@@ -619,7 +619,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mDragInProgress && newWin.isPotentialDragTarget()) {
                 DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_STARTED,
                         touchX - newWin.mFrame.left, touchY - newWin.mFrame.top,
-                        desc, null, false);
+                        null, desc, null, false);
                 try {
                     newWin.mClient.dispatchDragEvent(event);
                     // track each window that we've notified that the drag is starting
@@ -659,7 +659,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.d(TAG, "broadcasting DRAG_ENDED");
             }
             DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED,
-                    0, 0, null, null, mDragResult);
+                    0, 0, null, null, null, mDragResult);
             for (WindowState ws: mNotifiedWindows) {
                 try {
                     ws.mClient.dispatchDragEvent(evt);
@@ -711,7 +711,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // force DRAG_EXITED_EVENT if appropriate
                     DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_EXITED,
                             x - mTargetWindow.mFrame.left, y - mTargetWindow.mFrame.top,
-                            null, null, false);
+                            null, null, null, false);
                     mTargetWindow.mClient.dispatchDragEvent(evt);
                     if (myPid != mTargetWindow.mSession.mPid) {
                         evt.recycle();
@@ -723,7 +723,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_LOCATION,
                             x - touchedWin.mFrame.left, y - touchedWin.mFrame.top,
-                            null, null, false);
+                            null, null, null, false);
                     touchedWin.mClient.dispatchDragEvent(evt);
                     if (myPid != touchedWin.mSession.mPid) {
                         evt.recycle();
@@ -754,7 +754,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final IBinder token = touchedWin.mClient.asBinder();
             DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DROP,
                     x - touchedWin.mFrame.left, y - touchedWin.mFrame.top,
-                    null, mData, false);
+                    null, null, mData, false);
             try {
                 touchedWin.mClient.dispatchDragEvent(evt);
 

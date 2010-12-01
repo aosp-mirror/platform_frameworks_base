@@ -10081,9 +10081,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * onProvideThumbnailMetrics() and onDrawThumbnail() methods happen, then the drag
      * operation is handed over to the OS.
      * !!! TODO: real docs
+     *
+     * @param data !!! TODO
+     * @param thumbBuilder !!! TODO
+     * @param myWindowOnly When {@code true}, indicates that the drag operation should be
+     *     restricted to the calling application. In this case only the calling application
+     *     will see any DragEvents related to this drag operation.
+     * @param myLocalState An arbitrary object that will be passed as part of every DragEvent
+     *     delivered to the calling application during the course of the current drag operation.
+     *     This object is private to the application that called startDrag(), and is not
+     *     visible to other applications. It provides a lightweight way for the application to
+     *     propagate information from the initiator to the recipient of a drag within its own
+     *     application; for example, to help disambiguate between 'copy' and 'move' semantics.
+     * @return {@code true} if the drag operation was initiated successfully; {@code false} if
+     *     an error prevented the drag from taking place.
      */
     public final boolean startDrag(ClipData data, DragThumbnailBuilder thumbBuilder,
-            boolean myWindowOnly) {
+            boolean myWindowOnly, Object myLocalState) {
         if (ViewDebug.DEBUG_DRAG) {
             Log.d(VIEW_LOG_TAG, "startDrag: data=" + data + " local=" + myWindowOnly);
         }
@@ -10117,8 +10131,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     surface.unlockCanvasAndPost(canvas);
                 }
 
+                final ViewRoot root = getViewRoot();
+
+                // Cache the local state object for delivery with DragEvents
+                root.setLocalDragState(myLocalState);
+
                 // repurpose 'thumbSize' for the last touch point
-                getViewRoot().getLastTouchPoint(thumbSize);
+                root.getLastTouchPoint(thumbSize);
 
                 okay = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, token,
                         (float) thumbSize.x, (float) thumbSize.y,

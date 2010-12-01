@@ -228,6 +228,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     /* Drag/drop */
     ClipDescription mDragDescription;
     View mCurrentDragView;
+    Object mLocalDragState;
     final PointF mDragPoint = new PointF();
     final PointF mLastTouchPoint = new PointF();
 
@@ -2680,6 +2681,10 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
     /* drag/drop */
+    void setLocalDragState(Object obj) {
+        mLocalDragState = obj;
+    }
+
     private void handleDragEvent(DragEvent event) {
         // From the root, only drag start/end/location are dispatched.  entered/exited
         // are determined and dispatched by the viewgroup hierarchy, who then report
@@ -2738,7 +2743,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     }
                 }
 
-                // Report the drop result if necessary
+                // Report the drop result when we're done
                 if (what == DragEvent.ACTION_DROP) {
                     try {
                         Log.i(TAG, "Reporting drop result: " + result);
@@ -2746,6 +2751,12 @@ public final class ViewRoot extends Handler implements ViewParent,
                     } catch (RemoteException e) {
                         Log.e(TAG, "Unable to report drop result");
                     }
+                }
+
+                // When the drag operation ends, release any local state object
+                // that may have been in use
+                if (what == DragEvent.ACTION_DRAG_ENDED) {
+                    setLocalDragState(null);
                 }
             }
         }
@@ -3063,6 +3074,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         } else {
             what = DISPATCH_DRAG_EVENT;
         }
+        event.mLocalState = mLocalDragState;    // only present when this app called startDrag()
         Message msg = obtainMessage(what, event);
         sendMessage(msg);
     }
