@@ -8744,7 +8744,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                         // Double tap detection
                         long duration = SystemClock.uptimeMillis() - mPreviousTapUpTime;
-                        if (duration <= ViewConfiguration.getDoubleTapTimeout()) {
+                        if (duration <= ViewConfiguration.getDoubleTapTimeout() &&
+                                isPositionOnText(x, y)) {
                             final int deltaX = x - mPreviousTapPositionX;
                             final int deltaY = y - mPreviousTapPositionY;
                             final int distanceSquared = deltaX * deltaX + deltaY * deltaY;
