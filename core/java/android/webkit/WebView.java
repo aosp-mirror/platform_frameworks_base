@@ -7706,6 +7706,10 @@ public class WebView extends AbsoluteLayout
         mWebViewCore.sendMessage(EventHub.AUTOFILL_FORM, autoFillQueryId, /* unused */0);
     }
 
+    /* package */ ViewManager getViewManager() {
+        return mViewManager;
+    }
+
     private native int nativeCacheHitFramePointer();
     private native Rect nativeCacheHitNodeBounds();
     private native int nativeCacheHitNodePointer();
