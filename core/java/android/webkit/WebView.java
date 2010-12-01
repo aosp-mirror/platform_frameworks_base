@@ -3738,6 +3738,8 @@ public class WebView extends AbsoluteLayout
         if (mNativeClass != 0 && nativeWordSelection(x, y)) {
             nativeSetExtendSelection();
             mDrawSelectionPointer = false;
+            mSelectionStarted = true;
+            mTouchMode = TOUCH_DRAG_MODE;
             return true;
         }
         selectionDone();
