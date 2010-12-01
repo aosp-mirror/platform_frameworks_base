@@ -910,8 +910,11 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
          */
         public int globalTotal() {
             int count = 0;
-            for (int i = 0; i < NUM_INSTR; i++)
+
+            for (int i = 0; i < NUM_INSTR; i++) {
                 count += mCounts[i];
+            }
+
             return count;
         }
 
@@ -922,26 +925,15 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
         public int globalMethodInvocations() {
             int count = 0;
 
-            //count += mCounts[Opcodes.OP_EXECUTE_INLINE];
-            count += mCounts[Opcodes.OP_INVOKE_VIRTUAL];
-            count += mCounts[Opcodes.OP_INVOKE_SUPER];
-            count += mCounts[Opcodes.OP_INVOKE_DIRECT];
-            count += mCounts[Opcodes.OP_INVOKE_STATIC];
-            count += mCounts[Opcodes.OP_INVOKE_INTERFACE];
-            count += mCounts[Opcodes.OP_INVOKE_VIRTUAL_RANGE];
-            count += mCounts[Opcodes.OP_INVOKE_SUPER_RANGE];
-            count += mCounts[Opcodes.OP_INVOKE_DIRECT_RANGE];
-            count += mCounts[Opcodes.OP_INVOKE_STATIC_RANGE];
-            count += mCounts[Opcodes.OP_INVOKE_INTERFACE_RANGE];
-            //count += mCounts[Opcodes.OP_INVOKE_DIRECT_EMPTY];
-            count += mCounts[Opcodes.OP_INVOKE_VIRTUAL_QUICK];
-            count += mCounts[Opcodes.OP_INVOKE_VIRTUAL_QUICK_RANGE];
-            count += mCounts[Opcodes.OP_INVOKE_SUPER_QUICK];
-            count += mCounts[Opcodes.OP_INVOKE_SUPER_QUICK_RANGE];
+            for (int i = 0; i < NUM_INSTR; i++) {
+                if (OpcodeInfo.isInvoke(i)) {
+                    count += mCounts[i];
+                }
+            }
+
             return count;
         }
     }
-
 
     /**
      * A Map of typed debug properties.
