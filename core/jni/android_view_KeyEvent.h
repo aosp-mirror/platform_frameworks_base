@@ -18,17 +18,27 @@
 #define _ANDROID_VIEW_KEYEVENT_H
 
 #include "jni.h"
+#include <utils/Errors.h>
+#include <utils/threads.h>
 
 namespace android {
 
 class KeyEvent;
 
-/* Obtains an instance of a DVM KeyEvent object as a copy of a native KeyEvent instance. */
+/* Obtains an instance of a DVM KeyEvent object as a copy of a native KeyEvent instance.
+ * Returns NULL on error. */
 extern jobject android_view_KeyEvent_fromNative(JNIEnv* env, const KeyEvent* event);
 
-/* Copies the contents of a DVM KeyEvent object to a native KeyEvent instance. */
-extern void android_view_KeyEvent_toNative(JNIEnv* env, jobject eventObj,
+/* Copies the contents of a DVM KeyEvent object to a native KeyEvent instance.
+ * Returns non-zero on error. */
+extern status_t android_view_KeyEvent_toNative(JNIEnv* env, jobject eventObj,
         KeyEvent* event);
+
+/* Recycles a DVM KeyEvent object.
+ * Key events should only be recycled if they are owned by the system since user
+ * code expects them to be essentially immutable, "tracking" notwithstanding.
+ * Returns non-zero on error. */
+extern status_t android_view_KeyEvent_recycle(JNIEnv* env, jobject eventObj);
 
 } // namespace android
 

@@ -32,7 +32,8 @@ import android.view.FallbackEventHandler;
 import android.view.KeyEvent;
 
 public class PhoneFallbackEventHandler implements FallbackEventHandler {
-    static String TAG = "PhoneFallbackEventHandler";
+    private static String TAG = "PhoneFallbackEventHandler";
+    private static final boolean DEBUG = false;
 
     Context mContext;
     View mView;
@@ -180,7 +181,9 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
     }
 
     boolean onKeyUp(int keyCode, KeyEvent event) {
-        Slog.d(TAG, "up " + keyCode);
+        if (DEBUG) {
+            Slog.d(TAG, "up " + keyCode);
+        }
         final KeyEvent.DispatcherState dispatcher = mView.getKeyDispatcherState();
         if (dispatcher != null) {
             dispatcher.handleUpEvent(event);

@@ -58,6 +58,8 @@ public:
         mXDivs[0] = mYDivs[0] = 2;
         mXDivs[1] = mYDivs[1] = 3;
 
+        mPatch->copy(mXDivs, mYDivs);
+
         glGenTextures(1, &mTexture);
         glBindTexture(GL_TEXTURE_2D, mTexture);
 
@@ -89,8 +91,7 @@ public:
         const float half = lineWidth * 0.5f;
 
         mPatch->updateVertices(gLineTextureWidth, gLineTextureHeight,
-                -gLineAABias, -half - gLineAABias, length + gLineAABias, half + gLineAABias,
-                mXDivs, mYDivs, mXDivsCount, mYDivsCount);
+                -gLineAABias, -half - gLineAABias, length + gLineAABias, half + gLineAABias);
 
         tx = -gLineAABias;
         ty = lineWidth <= 1.0f ? -gLineAABias : -half - gLineAABias;

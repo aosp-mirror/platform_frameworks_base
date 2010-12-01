@@ -18,20 +18,24 @@
 #define _ANDROID_VIEW_MOTIONEVENT_H
 
 #include "jni.h"
+#include <utils/Errors.h>
 
 namespace android {
 
 class MotionEvent;
 
-/* Obtains an instance of a DVM MotionEvent object as a copy of a native MotionEvent instance. */
+/* Obtains an instance of a DVM MotionEvent object as a copy of a native MotionEvent instance.
+ * Returns NULL on error. */
 extern jobject android_view_MotionEvent_fromNative(JNIEnv* env, const MotionEvent* event);
 
-/* Copies the contents of a DVM MotionEvent object to a native MotionEvent instance. */
-extern void android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj,
+/* Copies the contents of a DVM MotionEvent object to a native MotionEvent instance.
+ * Returns non-zero on error. */
+extern status_t android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj,
         MotionEvent* event);
 
-/* Recycles a DVM MotionEvent object. */
-extern void android_view_MotionEvent_recycle(JNIEnv* env, jobject eventObj);
+/* Recycles a DVM MotionEvent object.
+ * Returns non-zero on error. */
+extern status_t android_view_MotionEvent_recycle(JNIEnv* env, jobject eventObj);
 
 } // namespace android
 

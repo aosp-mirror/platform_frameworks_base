@@ -1215,11 +1215,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public boolean interceptKeyBeforeDispatching(WindowState win, int action, int flags,
-            int keyCode, int scanCode, int metaState, int repeatCount, int policyFlags) {
+    public boolean interceptKeyBeforeDispatching(WindowState win, KeyEvent event, int policyFlags) {
         final boolean keyguardOn = keyguardOn();
-        final boolean down = (action == KeyEvent.ACTION_DOWN);
-        final boolean canceled = ((flags & KeyEvent.FLAG_CANCELED) != 0);
+        final int keyCode = event.getKeyCode();
+        final int repeatCount = event.getRepeatCount();
+        final int metaState = event.getMetaState();
+        final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
+        final boolean canceled = event.isCanceled();
 
         if (false) {
             Log.d(TAG, "interceptKeyTi keyCode=" + keyCode + " down=" + down + " repeatCount="
@@ -1348,7 +1350,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Shortcuts are invoked through Search+key, so intercept those here
         if (mSearchKeyPressed) {
             if (down && repeatCount == 0 && !keyguardOn) {
-                Intent shortcutIntent = mShortcutManager.getIntent(keyCode, metaState);
+                Intent shortcutIntent = mShortcutManager.getIntent(event);
                 if (shortcutIntent != null) {
                     shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(shortcutIntent);
@@ -1368,13 +1370,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public boolean dispatchUnhandledKey(WindowState win, int action, int flags,
-            int keyCode, int scanCode, int metaState, int repeatCount, int policyFlags) {
+    public boolean dispatchUnhandledKey(WindowState win, KeyEvent event, int policyFlags) {
         if (false) {
-            Slog.d(TAG, "Unhandled key: win=" + win + ", action=" + action
-                    + ", flags=" + flags + ", keyCode=" + keyCode
-                    + ", scanCode=" + scanCode + ", metaState=" + metaState
-                    + ", repeatCount=" + repeatCount + ", policyFlags=" + policyFlags);
+            Slog.d(TAG, "Unhandled key: win=" + win + ", action=" + event.getAction()
+                    + ", flags=" + event.getFlags()
+                    + ", keyCode=" + event.getKeyCode()
+                    + ", scanCode=" + event.getScanCode()
+                    + ", metaState=" + event.getMetaState()
+                    + ", repeatCount=" + event.getRepeatCount()
+                    + ", policyFlags=" + policyFlags);
         }
         return false;
     }
@@ -1970,10 +1974,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public int interceptKeyBeforeQueueing(long whenNanos, int action, int flags,
-            int keyCode, int scanCode, int policyFlags, boolean isScreenOn) {
-        final boolean down = action == KeyEvent.ACTION_DOWN;
-        final boolean canceled = (flags & KeyEvent.FLAG_CANCELED) != 0;
+    public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn) {
+        final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
+        final boolean canceled = event.isCanceled();
+        final int keyCode = event.getKeyCode();
 
         final boolean isInjected = (policyFlags & WindowManagerPolicy.FLAG_INJECTED) != 0;
 
@@ -2164,12 +2168,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // Only do this if we would otherwise not pass it to the user. In that
                     // case, the PhoneWindow class will do the same thing, except it will
                     // only do it if the showing app doesn't process the key on its own.
-                    long when = whenNanos / 1000000;
-                    KeyEvent keyEvent = new KeyEvent(when, when, action, keyCode, 0, 0,
-                            KeyCharacterMap.VIRTUAL_KEYBOARD, scanCode, flags,
-                            InputDevice.SOURCE_KEYBOARD);
                     mBroadcastWakeLock.acquire();
-                    mHandler.post(new PassHeadsetKey(keyEvent));
+                    mHandler.post(new PassHeadsetKey(new KeyEvent(event)));
                 }
                 break;
             }

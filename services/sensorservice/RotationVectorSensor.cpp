@@ -114,10 +114,12 @@ bool RotationVectorSensor::process(sensors_event_t* outEvent,
         float qx = sqrtf( clamp( Hx - My - Az + 1) * 0.25f );
         float qy = sqrtf( clamp(-Hx + My - Az + 1) * 0.25f );
         float qz = sqrtf( clamp(-Hx - My + Az + 1) * 0.25f );
-        const float n = 1.0f / (qw*qw + qx*qx + qy*qy + qz*qz);
-        qx = copysignf(qx, Ay - Mz) * n;
-        qy = copysignf(qy, Hz - Ax) * n;
-        qz = copysignf(qz, Mx - Hy) * n;
+        qx = copysignf(qx, Ay - Mz);
+        qy = copysignf(qy, Hz - Ax);
+        qz = copysignf(qz, Mx - Hy);
+
+        // this quaternion is guaranteed to be normalized, by construction
+        // of the rotation matrix.
 
         *outEvent = event;
         outEvent->data[0] = qx;

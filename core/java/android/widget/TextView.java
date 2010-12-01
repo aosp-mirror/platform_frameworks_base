@@ -7010,11 +7010,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (start >= prevStart && start < prevEnd) {
                 // Restore previous selection
                 Selection.setSelection((Spannable)mText, prevStart, prevEnd);
-
-                if (hasSelectionController()) {
-                    // Revive the anchors.
-                    getSelectionController().show();
-                }
                 return;
             } else {
                 // Tapping outside stops selection mode, if any
@@ -7455,6 +7450,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 hasPrimaryClip());
     }
 
+    private boolean isWordCharacter(int position) {
+        final char c = mTransformed.charAt(position);
+        final int type = Character.getType(c);
+        return (c == '\'' || c == '"' ||
+                type == Character.UPPERCASE_LETTER ||
+                type == Character.LOWERCASE_LETTER ||
+                type == Character.TITLECASE_LETTER ||
+                type == Character.MODIFIER_LETTER ||
+                type == Character.DECIMAL_DIGIT_NUMBER);
+    }
+
     /**
      * Returns the offsets delimiting the 'word' located at position offset.
      *
@@ -7464,74 +7470,48 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Returns a negative value if no valid word was found.
      */
     private long getWordLimitsAt(int offset) {
-        /*
-         * Quick return if the input type is one where adding words
-         * to the dictionary doesn't make any sense.
-         */
         int klass = mInputType & InputType.TYPE_MASK_CLASS;
-        if (klass == InputType.TYPE_CLASS_NUMBER ||
-            klass == InputType.TYPE_CLASS_PHONE ||
-            klass == InputType.TYPE_CLASS_DATETIME) {
-            return -1;
-        }
-
         int variation = mInputType & InputType.TYPE_MASK_VARIATION;
-        if (variation == InputType.TYPE_TEXT_VARIATION_URI ||
-            variation == InputType.TYPE_TEXT_VARIATION_PASSWORD ||
-            variation == InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD ||
-            variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD ||
-            variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
-            variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS ||
-            variation == InputType.TYPE_TEXT_VARIATION_FILTER) {
+
+        // Text selection is not permitted in password fields
+        if (variation == InputType.TYPE_TEXT_VARIATION_PASSWORD ||
+                variation == InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD ||
+                variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
             return -1;
         }
 
-        int len = mText.length();
-        int end = Math.min(offset, len);
+        final int len = mText.length();
 
+        // Specific text fields: always select the entire text
+        if (klass == InputType.TYPE_CLASS_NUMBER ||
+                klass == InputType.TYPE_CLASS_PHONE ||
+                klass == InputType.TYPE_CLASS_DATETIME ||
+                variation == InputType.TYPE_TEXT_VARIATION_URI ||
+                variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
+                variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS ||
+                variation == InputType.TYPE_TEXT_VARIATION_FILTER) {
+            return len > 0 ? packRangeInLong(0, len) : -1;
+        }
+
+        int end = Math.min(offset, len);
         if (end < 0) {
             return -1;
         }
 
+        final int MAX_LENGTH = 48;
         int start = end;
 
         for (; start > 0; start--) {
-            char c = mTransformed.charAt(start - 1);
-            int type = Character.getType(c);
-
-            // Cases where the text ends with a '.' and we select from the end of the line (right
-            // after the dot), or when we select from the space character in "aaaa, bbbb".
-            if (start == end && type == Character.OTHER_PUNCTUATION) continue;
-
-            if (c != '\'' &&
-                type != Character.UPPERCASE_LETTER &&
-                type != Character.LOWERCASE_LETTER &&
-                type != Character.TITLECASE_LETTER &&
-                type != Character.MODIFIER_LETTER &&
-                type != Character.DECIMAL_DIGIT_NUMBER) {
-                break;
-            }
+            if (!isWordCharacter(start - 1)) break;
+            if ((end - start) > MAX_LENGTH) return -1;
         }
 
         for (; end < len; end++) {
-            char c = mTransformed.charAt(end);
-            int type = Character.getType(c);
-
-            if (c != '\'' &&
-                type != Character.UPPERCASE_LETTER &&
-                type != Character.LOWERCASE_LETTER &&
-                type != Character.TITLECASE_LETTER &&
-                type != Character.MODIFIER_LETTER &&
-                type != Character.DECIMAL_DIGIT_NUMBER) {
-                break;
-            }
+            if (!isWordCharacter(end)) break;
+            if ((end - start) > MAX_LENGTH) return -1;
         }
 
         if (start == end) {
-            return -1;
-        }
-
-        if (end - start > 48) {
             return -1;
         }
 
@@ -7761,14 +7741,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Prepare text so that there are not zero or two spaces at beginning and end of region defined
      * by [min, max] when replacing this region by paste.
+     * Note that if there was two spaces (or more) at that position before, they are kept. We just
+     * make sure we do not add an extra one from the paste content.
      */
     private long prepareSpacesAroundPaste(int min, int max, CharSequence paste) {
         // Paste adds/removes spaces before or after insertion as needed.
-        if (Character.isSpaceChar(paste.charAt(0))) {
+        if (paste.length() > 0 && Character.isSpaceChar(paste.charAt(0))) {
             if (min > 0 && Character.isSpaceChar(mTransformed.charAt(min - 1))) {
                 // Two spaces at beginning of paste: remove one
                 final int originalLength = mText.length();
-                ((Editable) mText).replace(min - 1, min, "");
+                ((Editable) mText).delete(min - 1, min);
                 // Due to filters, there is no guarantee that exactly one character was
                 // removed. Count instead.
                 final int delta = mText.length() - originalLength;
@@ -7787,10 +7769,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        if (Character.isSpaceChar(paste.charAt(paste.length() - 1))) {
+        if (paste.length() > 0 && Character.isSpaceChar(paste.charAt(paste.length() - 1))) {
             if (max < mText.length() && Character.isSpaceChar(mTransformed.charAt(max))) {
                 // Two spaces at end of paste: remove one
-                ((Editable) mText).replace(max, max + 1, "");
+                ((Editable) mText).delete(max, max + 1);
             }
         } else {
             if (max < mText.length() && !Character.isSpaceChar(mTransformed.charAt(max))) {
@@ -7798,6 +7780,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 ((Editable) mText).replace(max, max, " ");
             }
         }
+
         return packRangeInLong(min, max);
     }
 
@@ -7840,6 +7823,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mInsertionControllerEnabled) {
             // Long press in empty space moves cursor and shows the Paste affordance if available.
             final int offset = getOffset(mLastDownPositionX, mLastDownPositionY);
+            stopSelectionActionMode();
             Selection.setSelection((Spannable)mText, offset);
             getInsertionController().show(0);
             mEatTouchRelease = true;
@@ -7854,6 +7838,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 CharSequence selectedText = mTransformed.subSequence(start, end);
                 ClipData data = ClipData.newPlainText(null, null, selectedText);
                 startDrag(data, getTextThumbnailBuilder(selectedText), false);
+                mDragSourcePositions = packRangeInLong(start, end);
                 stopSelectionActionMode();
             } else {
                 selectCurrentWord();
@@ -8674,14 +8659,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private int mPreviousTapPositionX;
         private int mPreviousTapPositionY;
 
-        private static final int DELAY_BEFORE_FADE_OUT = 4100;
-
-        private final Runnable mHider = new Runnable() {
-            public void run() {
-                hide();
-            }
-        };
-
         SelectionModifierCursorController() {
             resetTouchOffsets();
         }
@@ -8702,19 +8679,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mEndHandle.show();
 
             hideInsertionPointCursorController();
-            hideDelayed();
         }
 
         public void hide() {
             if (mStartHandle != null) mStartHandle.hide();
             if (mEndHandle != null) mEndHandle.hide();
             mIsShowing = false;
-            removeCallbacks(mHider);
-        }
-
-        private void hideDelayed() {
-            removeCallbacks(mHider);
-            postDelayed(mHider, DELAY_BEFORE_FADE_OUT);
         }
 
         public boolean isShowing() {
@@ -8757,7 +8727,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
             updatePosition();
-            hideDelayed();
         }
 
         public void updatePosition() {
@@ -8803,9 +8772,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             final int slopSquared = doubleTapSlop * doubleTapSlop;
                             if (distanceSquared < slopSquared) {
                                 startSelectionActionMode();
-                                // Hacky: onTapUpEvent will open a context menu with cut/copy
-                                // Prevent this by hiding handles which will be revived instead.
-                                hide();
                             }
                         }
 
@@ -8989,17 +8955,58 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     Item item = clipData.getItem(i);
                     content.append(item.coerceToText(TextView.this.mContext));
                 }
+
                 final int offset = getOffset((int) event.getX(), (int) event.getY());
+
+                if (mDragSourcePositions != -1) {
+                    final int dragSourceStart = extractRangeStartFromLong(mDragSourcePositions);
+                    final int dragSourceEnd = extractRangeEndFromLong(mDragSourcePositions);
+                    if (offset >= dragSourceStart && offset < dragSourceEnd) {
+                        // A drop inside the original selection discards the drop.
+                        return true;
+                    }
+                }
+
+                final int originalLength = mText.length();
                 long minMax = prepareSpacesAroundPaste(offset, offset, content);
                 int min = extractRangeStartFromLong(minMax);
                 int max = extractRangeEndFromLong(minMax);
+
                 Selection.setSelection((Spannable) mText, max);
                 ((Editable) mText).replace(min, max, content);
+
+                if (mDragSourcePositions != -1) {
+                    int dragSourceStart = extractRangeStartFromLong(mDragSourcePositions);
+                    int dragSourceEnd = extractRangeEndFromLong(mDragSourcePositions);
+                    if (max <= dragSourceStart) {
+                        // Inserting text before selection has shifted positions
+                        final int shift = mText.length() - originalLength;
+                        dragSourceStart += shift;
+                        dragSourceEnd += shift;
+                    }
+
+                    // Delete original selection
+                    ((Editable) mText).delete(dragSourceStart, dragSourceEnd);
+
+                    // Make sure we do not leave two adjacent spaces.
+                    if ((dragSourceStart == 0 ||
+                            Character.isSpaceChar(mTransformed.charAt(dragSourceStart - 1))) &&
+                            (dragSourceStart == mText.length() ||
+                            Character.isSpaceChar(mTransformed.charAt(dragSourceStart)))) {
+                        final int pos = dragSourceStart == mText.length() ?
+                                dragSourceStart - 1 : dragSourceStart;
+                        ((Editable) mText).delete(pos, pos + 1);
+                    }
+                }
+
                 return true;
             }
 
-            case DragEvent.ACTION_DRAG_EXITED:
             case DragEvent.ACTION_DRAG_ENDED:
+                mDragSourcePositions = -1;
+                return true;
+
+            case DragEvent.ACTION_DRAG_EXITED:
             default:
                 return true;
         }
@@ -9166,6 +9173,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private InputFilter[] mFilters = NO_FILTERS;
     private static final Spanned EMPTY_SPANNED = new SpannedString("");
     private static int DRAG_THUMBNAIL_MAX_TEXT_LENGTH = 20;
+    // A packed range containing the drag source if it occured in that TextView. -1 otherwise.
+    private long mDragSourcePositions = -1;
     // System wide time for last cut or copy action.
     private static long sLastCutOrCopyTime;
 }

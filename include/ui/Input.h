@@ -497,6 +497,22 @@ private:
     KeyedVector<int32_t, MotionRange> mMotionRanges;
 };
 
+/* Types of input device configuration files. */
+enum InputDeviceConfigurationFileType {
+    INPUT_DEVICE_CONFIGURATION_FILE_TYPE_CONFIGURATION = 0,     /* .idc file */
+    INPUT_DEVICE_CONFIGURATION_FILE_TYPE_KEY_LAYOUT = 1,        /* .kl file */
+    INPUT_DEVICE_CONFIGURATION_FILE_TYPE_KEY_CHARACTER_MAP = 2, /* .kcm file */
+};
+
+/*
+ * Get the path of an input device configuration file, if one is available.
+ * Spaces in the name are replaced with underscores.
+ * Considers both system provided and user installed configuration files.
+ *
+ * Returns an empty string if not found.
+ */
+extern String8 getInputDeviceConfigurationFilePath(
+        const String8& name, InputDeviceConfigurationFileType type);
 
 } // namespace android
 

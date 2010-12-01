@@ -18,11 +18,11 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/default_preference_layout"
     android:orientation="vertical"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:background="@android:color/transparent">
+    android:background="@android:color/transparent"
+    android:layout_removeBorders="true">
 
     <ListView android:id="@android:id/list"
         android:layout_width="match_parent"
@@ -30,6 +30,8 @@
         android:layout_weight="1"
         android:paddingTop="48dip"
         android:paddingBottom="48dip"
+        android:paddingLeft="32dip"
+        android:paddingRight="32dip"
         android:clipToPadding="false"
         android:drawSelectorOnTop="false"
         android:cacheColorHint="@android:color/transparent"

@@ -20,6 +20,7 @@
 #include <ui/Input.h>
 #include <utils/Errors.h>
 #include <utils/String8.h>
+#include <utils/PropertyMap.h>
 
 namespace android {
 
@@ -33,19 +34,23 @@ enum {
 };
 
 struct KeyMapInfo {
-    String8 keyMapName;
     String8 keyLayoutFile;
     String8 keyCharacterMapFile;
     bool isDefaultKeyMap;
 
     KeyMapInfo() : isDefaultKeyMap(false) {
     }
+
+    bool isComplete() {
+        return !keyLayoutFile.isEmpty() && !keyCharacterMapFile.isEmpty();
+    }
 };
 
 /**
  * Resolves the key map to use for a particular keyboard device.
  */
-extern status_t resolveKeyMap(const String8& deviceName, KeyMapInfo& outKeyMapInfo);
+extern status_t resolveKeyMap(const String8& deviceName,
+        const PropertyMap* deviceConfiguration, KeyMapInfo& outKeyMapInfo);
 
 /**
  * Sets keyboard system properties.

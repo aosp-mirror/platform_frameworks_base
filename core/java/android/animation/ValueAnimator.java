@@ -1072,12 +1072,11 @@ public class ValueAnimator extends Animator {
                             mListeners.get(i).onAnimationRepeat(this);
                         }
                     }
-                    ++mCurrentIteration;
                     if (mRepeatMode == REVERSE) {
                         mPlayingBackwards = mPlayingBackwards ? false : true;
                     }
-                    // TODO: doesn't account for fraction going Wayyyyy over 1, like 2+
-                    fraction = fraction - 1f;
+                    mCurrentIteration += (int)fraction;
+                    fraction = fraction % 1f;
                     mStartTime += mDuration;
                 } else {
                     done = true;

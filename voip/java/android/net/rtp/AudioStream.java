@@ -34,8 +34,12 @@ import java.net.SocketException;
  * of the setter methods are disabled. This is designed to ease the task of
  * managing native resources. One can always make an AudioStream leave its
  * AudioGroup by calling {@link #join(AudioGroup)} with {@code null} and put it
- * back after the modification is done.
+ * back after the modification is done.</p>
  *
+ * <p class="note">Using this class requires
+ * {@link android.Manifest.permission#INTERNET} permission.</p>
+ *
+ * @see RtpStream
  * @see AudioGroup
  * @hide
  */
@@ -82,16 +86,18 @@ public class AudioStream extends RtpStream {
      * @see AudioGroup
      */
     public void join(AudioGroup group) {
-        if (mGroup == group) {
-            return;
-        }
-        if (mGroup != null) {
-            mGroup.remove(this);
-            mGroup = null;
-        }
-        if (group != null) {
-            group.add(this, mCodec, mDtmfType);
-            mGroup = group;
+        synchronized (this) {
+            if (mGroup == group) {
+                return;
+            }
+            if (mGroup != null) {
+                mGroup.remove(this);
+                mGroup = null;
+            }
+            if (group != null) {
+                group.add(this, mCodec, mDtmfType);
+                mGroup = group;
+            }
         }
     }
 

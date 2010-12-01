@@ -35,55 +35,6 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * Description of a patch.
- */
-struct PatchDescription {
-    PatchDescription(): bitmapWidth(0), bitmapHeight(0), pixelWidth(0), pixelHeight(0),
-            xCount(0), yCount(0), emptyCount(0), colorKey(0) { }
-    PatchDescription(const float bitmapWidth, const float bitmapHeight,
-            const float pixelWidth, const float pixelHeight,
-            const uint32_t xCount, const uint32_t yCount,
-            const int8_t emptyCount, const uint32_t colorKey):
-            bitmapWidth(bitmapWidth), bitmapHeight(bitmapHeight),
-            pixelWidth(pixelWidth), pixelHeight(pixelHeight),
-            xCount(xCount), yCount(yCount),
-            emptyCount(emptyCount), colorKey(colorKey) { }
-    PatchDescription(const PatchDescription& description):
-            bitmapWidth(description.bitmapWidth), bitmapHeight(description.bitmapHeight),
-            pixelWidth(description.pixelWidth), pixelHeight(description.pixelHeight),
-            xCount(description.xCount), yCount(description.yCount),
-            emptyCount(description.emptyCount), colorKey(description.colorKey) { }
-
-    float bitmapWidth;
-    float bitmapHeight;
-    float pixelWidth;
-    float pixelHeight;
-    uint32_t xCount;
-    uint32_t yCount;
-    int8_t emptyCount;
-    uint32_t colorKey;
-
-    bool operator<(const PatchDescription& rhs) const {
-        LTE_FLOAT(bitmapWidth) {
-            LTE_FLOAT(bitmapHeight) {
-                LTE_FLOAT(pixelWidth) {
-                    LTE_FLOAT(pixelHeight) {
-                        LTE_INT(xCount) {
-                            LTE_INT(yCount) {
-                                LTE_INT(emptyCount) {
-                                    LTE_INT(colorKey) return false;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
-}; // struct PatchDescription
-
-/**
  * An OpenGL patch. This contains an array of vertices and an array of
  * indices to render the vertices.
  */
@@ -92,10 +43,11 @@ struct Patch {
     ~Patch();
 
     void updateVertices(const float bitmapWidth, const float bitmapHeight,
-            float left, float top, float right, float bottom,
-            const int32_t* xDivs, const int32_t* yDivs,
-            const uint32_t width, const uint32_t height,
-            const uint32_t colorKey = 0);
+            float left, float top, float right, float bottom);
+
+    void updateColorKey(const uint32_t colorKey);
+    void copy(const int32_t* xDivs, const int32_t* yDivs);
+    bool matches(const int32_t* xDivs, const int32_t* yDivs, const uint32_t colorKey);
 
     GLuint meshBuffer;
     uint32_t verticesCount;
@@ -104,15 +56,23 @@ struct Patch {
 
 private:
     TextureVertex* mVertices;
+    bool mUploaded;
+
+    uint32_t mXCount;
+    int32_t* mXDivs;
+    uint32_t mYCount;
+    int32_t* mYDivs;
+    uint32_t mColorKey;
+
+    void copy(const int32_t* yDivs);
 
     void generateRow(TextureVertex*& vertex, float y1, float y2,
-            float v1, float v2, const int32_t xDivs[], uint32_t xCount,
-            float stretchX, float width, float bitmapWidth,
-            uint32_t& quadCount, const uint32_t colorKey);
+            float v1, float v2, float stretchX, float width, float bitmapWidth,
+            uint32_t& quadCount);
     void generateQuad(TextureVertex*& vertex,
             float x1, float y1, float x2, float y2,
             float u1, float v1, float u2, float v2,
-            uint32_t& quadCount, const uint32_t colorKey);
+            uint32_t& quadCount);
 }; // struct Patch
 
 }; // namespace uirenderer

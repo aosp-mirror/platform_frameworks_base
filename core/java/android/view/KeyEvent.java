@@ -1081,7 +1081,15 @@ public class KeyEvent extends InputEvent implements Parcelable {
     
     static final boolean DEBUG = false;
     static final String TAG = "KeyEvent";
-    
+
+    private static final int MAX_RECYCLED = 10;
+    private static final Object gRecyclerLock = new Object();
+    private static int gRecyclerUsed;
+    private static KeyEvent gRecyclerTop;
+
+    private KeyEvent mNext;
+    private boolean mRecycled;
+
     private int mMetaState;
     private int mAction;
     private int mKeyCode;
@@ -1158,6 +1166,9 @@ public class KeyEvent extends InputEvent implements Parcelable {
             throw new IllegalStateException(
                     "KEYCODE_SYMBOLIC_NAMES array is out of sync with the keycode constants.");
         }
+    }
+
+    private KeyEvent() {
     }
 
     /**
@@ -1380,6 +1391,67 @@ public class KeyEvent extends InputEvent implements Parcelable {
         mScanCode = origEvent.mScanCode;
         mFlags = origEvent.mFlags;
         mCharacters = origEvent.mCharacters;
+    }
+
+    private static KeyEvent obtain() {
+        final KeyEvent ev;
+        synchronized (gRecyclerLock) {
+            ev = gRecyclerTop;
+            if (ev == null) {
+                return new KeyEvent();
+            }
+            gRecyclerTop = ev.mNext;
+            gRecyclerUsed -= 1;
+        }
+        ev.mRecycled = false;
+        ev.mNext = null;
+        return ev;
+    }
+
+    /**
+     * Obtains a (potentially recycled) key event.
+     *
+     * @hide
+     */
+    public static KeyEvent obtain(long downTime, long eventTime, int action,
+                    int code, int repeat, int metaState,
+                    int deviceId, int scancode, int flags, int source, String characters) {
+        KeyEvent ev = obtain();
+        ev.mDownTime = downTime;
+        ev.mEventTime = eventTime;
+        ev.mAction = action;
+        ev.mKeyCode = code;
+        ev.mRepeatCount = repeat;
+        ev.mMetaState = metaState;
+        ev.mDeviceId = deviceId;
+        ev.mScanCode = scancode;
+        ev.mFlags = flags;
+        ev.mSource = source;
+        ev.mCharacters = characters;
+        return ev;
+    }
+
+    /**
+     * Recycles a key event.
+     * Key events should only be recycled if they are owned by the system since user
+     * code expects them to be essentially immutable, "tracking" notwithstanding.
+     *
+     * @hide
+     */
+    public final void recycle() {
+        if (mRecycled) {
+            throw new RuntimeException(toString() + " recycled twice!");
+        }
+        mRecycled = true;
+        mCharacters = null;
+
+        synchronized (gRecyclerLock) {
+            if (gRecyclerUsed < MAX_RECYCLED) {
+                gRecyclerUsed++;
+                mNext = gRecyclerTop;
+                gRecyclerTop = this;
+            }
+        }
     }
 
     /**

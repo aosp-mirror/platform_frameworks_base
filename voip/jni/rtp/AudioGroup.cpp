@@ -90,6 +90,7 @@ public:
     void encode(int tick, AudioStream *chain);
     void decode(int tick);
 
+private:
     enum {
         NORMAL = 0,
         SEND_ONLY = 1,
@@ -97,7 +98,6 @@ public:
         LAST_MODE = 2,
     };
 
-private:
     int mMode;
     int mSocket;
     sockaddr_storage mRemote;
@@ -463,6 +463,7 @@ public:
     bool add(AudioStream *stream);
     bool remove(int socket);
 
+private:
     enum {
         ON_HOLD = 0,
         MUTED = 1,
@@ -471,7 +472,6 @@ public:
         LAST_MODE = 3,
     };
 
-private:
     AudioStream *mChain;
     int mEventQueue;
     volatile int mDtmfEvent;
@@ -948,16 +948,10 @@ void remove(JNIEnv *env, jobject thiz, jint socket)
 
 void setMode(JNIEnv *env, jobject thiz, jint mode)
 {
-    if (mode < 0 || mode > AudioGroup::LAST_MODE) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        return;
-    }
     AudioGroup *group = (AudioGroup *)env->GetIntField(thiz, gNative);
     if (group && !group->setMode(mode)) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        return;
     }
-    env->SetIntField(thiz, gMode, mode);
 }
 
 void sendDtmf(JNIEnv *env, jobject thiz, jint event)
@@ -969,10 +963,10 @@ void sendDtmf(JNIEnv *env, jobject thiz, jint event)
 }
 
 JNINativeMethod gMethods[] = {
-    {"add", "(IILjava/lang/String;ILjava/lang/String;I)V", (void *)add},
-    {"remove", "(I)V", (void *)remove},
-    {"setMode", "(I)V", (void *)setMode},
-    {"sendDtmf", "(I)V", (void *)sendDtmf},
+    {"nativeAdd", "(IILjava/lang/String;ILjava/lang/String;I)V", (void *)add},
+    {"nativeRemove", "(I)V", (void *)remove},
+    {"nativeSetMode", "(I)V", (void *)setMode},
+    {"nativeSendDtmf", "(I)V", (void *)sendDtmf},
 };
 
 } // namespace

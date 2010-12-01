@@ -7,11 +7,82 @@
 
 //#define LOG_NDEBUG 0
 
+#define DEBUG_PROBE 0
+
+#include <stdlib.h>
+#include <unistd.h>
+
 #include <ui/Input.h>
 
 namespace android {
 
-// class InputEvent
+static const char* CONFIGURATION_FILE_DIR[] = {
+        "idc/",
+        "keylayout/",
+        "keychars/",
+};
+
+static const char* CONFIGURATION_FILE_EXTENSION[] = {
+        ".idc",
+        ".kl",
+        ".kcm",
+};
+
+static void appendInputDeviceConfigurationFileRelativePath(String8& path,
+        const String8& name, InputDeviceConfigurationFileType type) {
+    path.append(CONFIGURATION_FILE_DIR[type]);
+    for (size_t i = 0; i < name.length(); i++) {
+        char ch = name[i];
+        if (ch == ' ') {
+            ch = '_';
+        }
+        path.append(&ch, 1);
+    }
+    path.append(CONFIGURATION_FILE_EXTENSION[type]);
+}
+
+extern String8 getInputDeviceConfigurationFilePath(
+        const String8& name, InputDeviceConfigurationFileType type) {
+    // Search system repository.
+    String8 path;
+    path.setTo(getenv("ANDROID_ROOT"));
+    path.append("/usr/");
+    appendInputDeviceConfigurationFileRelativePath(path, name, type);
+#if DEBUG_PROBE
+    LOGD("Probing for system provided input device configuration file: path='%s'", path.string());
+#endif
+    if (!access(path.string(), R_OK)) {
+#if DEBUG_PROBE
+        LOGD("Found");
+#endif
+        return path;
+    }
+
+    // Search user repository.
+    // TODO Should only look here if not in safe mode.
+    path.setTo(getenv("ANDROID_DATA"));
+    path.append("/system/devices/");
+    appendInputDeviceConfigurationFileRelativePath(path, name, type);
+#if DEBUG_PROBE
+    LOGD("Probing for system user input device configuration file: path='%s'", path.string());
+#endif
+    if (!access(path.string(), R_OK)) {
+#if DEBUG_PROBE
+        LOGD("Found");
+#endif
+        return path;
+    }
+
+    // Not found.
+#if DEBUG_PROBE
+    LOGD("Probe failed to find input device configuration file: name='%s', type=%d",
+            name.string(), type);
+#endif
+    return String8();
+}
+
+
+// --- InputEvent ---
 
 void InputEvent::initialize(int32_t deviceId, int32_t source) {
     mDeviceId = deviceId;
@@ -23,7 +94,7 @@ void InputEvent::initialize(const InputEvent& from) {
     mSource = from.mSource;
 }
 
-// class KeyEvent
+// --- KeyEvent ---
 
 bool KeyEvent::hasDefaultAction(int32_t keyCode) {
     switch (keyCode) {
@@ -131,7 +202,7 @@ void KeyEvent::initialize(const KeyEvent& from) {
     mEventTime = from.mEventTime;
 }
 
-// class MotionEvent
+// --- MotionEvent ---
 
 void MotionEvent::initialize(
         int32_t deviceId,
@@ -178,7 +249,7 @@ void MotionEvent::offsetLocation(float xOffset, float yOffset) {
     mYOffset += yOffset;
 }
 
-// class InputDeviceInfo
+// --- InputDeviceInfo ---
 
 InputDeviceInfo::InputDeviceInfo() {
     initialize(-1, String8("uninitialized device info"));

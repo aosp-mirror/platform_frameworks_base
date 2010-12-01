@@ -50,8 +50,10 @@
     </style>
 
     <style name="Widget.PreferenceFrameLayout">
-        <item name="android:topPadding">0dip</item>
-        <item name="android:bottomPadding">0dip</item>
+        <item name="android:borderTop">0dip</item>
+        <item name="android:borderBottom">0dip</item>
+        <item name="android:borderLeft">0dip</item>
+        <item name="android:borderRight">0dip</item>
     </style>
 
     <!-- Base style for animations.  This style specifies no animations. -->
@@ -1962,7 +1964,9 @@
     </style>
 
     <style name="Widget.Holo.PreferenceFrameLayout">
-        <item name="android:topPadding">48dip</item>
-        <item name="android:bottomPadding">48dip</item>
+        <item name="android:borderTop">48dip</item>
+        <item name="android:borderBottom">48dip</item>
+        <item name="android:borderLeft">32dip</item>
+        <item name="android:borderRight">32dip</item>
     </style>
 </resources>

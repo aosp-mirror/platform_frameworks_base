@@ -5829,30 +5829,25 @@ public class WindowManagerService extends IWindowManager.Stub
         
         /* Provides an opportunity for the window manager policy to intercept early key
          * processing as soon as the key has been read from the device. */
-        public int interceptKeyBeforeQueueing(long whenNanos, int action, int flags,
-                int keyCode, int scanCode, int policyFlags, boolean isScreenOn) {
-            return mPolicy.interceptKeyBeforeQueueing(whenNanos, action, flags,
-                    keyCode, scanCode, policyFlags, isScreenOn);
+        public int interceptKeyBeforeQueueing(
+                KeyEvent event, int policyFlags, boolean isScreenOn) {
+            return mPolicy.interceptKeyBeforeQueueing(event, policyFlags, isScreenOn);
         }
         
         /* Provides an opportunity for the window manager policy to process a key before
          * ordinary dispatch. */
-        public boolean interceptKeyBeforeDispatching(InputChannel focus,
-                int action, int flags, int keyCode, int scanCode, int metaState, int repeatCount,
-                int policyFlags) {
+        public boolean interceptKeyBeforeDispatching(
+                InputChannel focus, KeyEvent event, int policyFlags) {
             WindowState windowState = getWindowStateForInputChannel(focus);
-            return mPolicy.interceptKeyBeforeDispatching(windowState, action, flags,
-                    keyCode, scanCode, metaState, repeatCount, policyFlags);
+            return mPolicy.interceptKeyBeforeDispatching(windowState, event, policyFlags);
         }
         
         /* Provides an opportunity for the window manager policy to process a key that
          * the application did not handle. */
-        public boolean dispatchUnhandledKey(InputChannel focus,
-                int action, int flags, int keyCode, int scanCode, int metaState, int repeatCount,
-                int policyFlags) {
+        public boolean dispatchUnhandledKey(
+                InputChannel focus, KeyEvent event, int policyFlags) {
             WindowState windowState = getWindowStateForInputChannel(focus);
-            return mPolicy.dispatchUnhandledKey(windowState, action, flags,
-                    keyCode, scanCode, metaState, repeatCount, policyFlags);
+            return mPolicy.dispatchUnhandledKey(windowState, event, policyFlags);
         }
         
         /* Called when the current input focus changes.

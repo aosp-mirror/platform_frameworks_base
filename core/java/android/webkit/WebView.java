@@ -485,6 +485,8 @@ public class WebView extends AbsoluteLayout
     // true if onPause has been called (and not onResume)
     private boolean mIsPaused;
 
+    private HitTestResult mInitialHitTestResult;
+
     /**
      * Customizable constant
      */
@@ -2102,6 +2104,10 @@ public class WebView extends AbsoluteLayout
      * HitTestResult type is set to UNKNOWN_TYPE.
      */
     public HitTestResult getHitTestResult() {
+        return hitTestResult(mInitialHitTestResult);
+    }
+
+    private HitTestResult hitTestResult(HitTestResult fallback) {
         if (mNativeClass == 0) {
             return null;
         }
@@ -2129,6 +2135,16 @@ public class WebView extends AbsoluteLayout
                     }
                 }
             }
+        } else if (fallback != null) {
+            /* If webkit causes a rebuild while the long press is in progress,
+             * the cursor node may be reset, even if it is still around. This
+             * uses the cursor node saved when the touch began. Since the
+             * nativeImageURI below only changes the result if it is successful,
+             * this uses the data beneath the touch if available or the original
+             * tap data otherwise.
+             */
+            Log.v(LOGTAG, "hitTestResult use fallback");
+            result = fallback;
         }
         int type = result.getType();
         if (type == HitTestResult.UNKNOWN_TYPE
@@ -2167,14 +2183,13 @@ public class WebView extends AbsoluteLayout
     // look at the cursor node, and not the focus node.  Also, what is
     // getFocusNodePath?
     public void requestFocusNodeHref(Message hrefMsg) {
-        if (hrefMsg == null || mNativeClass == 0) {
+        if (hrefMsg == null) {
             return;
         }
-        if (nativeCursorIsAnchor()) {
-            mWebViewCore.sendMessage(EventHub.REQUEST_CURSOR_HREF,
-                    nativeCursorFramePointer(), nativeCursorNodePointer(),
-                    hrefMsg);
-        }
+        int contentX = viewToContentX((int) mLastTouchX + mScrollX);
+        int contentY = viewToContentY((int) mLastTouchY + mScrollY);
+        mWebViewCore.sendMessage(EventHub.REQUEST_CURSOR_HREF,
+                contentX, contentY, hrefMsg);
     }
 
     /**
@@ -2241,9 +2256,6 @@ public class WebView extends AbsoluteLayout
         if (null == v) {
             // If one of our callbacks is holding onto the titlebar to replace
             // it when its ActionMode ends, remove it.
-            if (mSelectCallback != null) {
-                mSelectCallback.setTitleBar(null);
-            }
             if (mFindCallback != null) {
                 mFindCallback.setTitleBar(null);
             }
@@ -4610,12 +4622,6 @@ public class WebView extends AbsoluteLayout
         nativeHideCursor();
         mSelectCallback = new SelectActionModeCallback();
         mSelectCallback.setWebView(this);
-        View titleBar = mTitleBar;
-        // We do not want to show the embedded title bar during find or
-        // select, but keep track of it so that it can be replaced when the
-        // mode is exited.
-        setEmbeddedTitleBar(null);
-        mSelectCallback.setTitleBar(titleBar);
         startActionMode(mSelectCallback);
     }
 
@@ -5141,6 +5147,7 @@ public class WebView extends AbsoluteLayout
             case MotionEvent.ACTION_DOWN: {
                 mPreventDefault = PREVENT_DEFAULT_NO;
                 mConfirmMove = false;
+                mInitialHitTestResult = null;
                 if (!mScroller.isFinished()) {
                     // stop the current scroll animation, but if this is
                     // the start of a fling, allow it to add to the current
@@ -6217,6 +6224,7 @@ public class WebView extends AbsoluteLayout
         Rect rect = new Rect(contentX - mNavSlop, contentY - mNavSlop,
                 contentX + mNavSlop, contentY + mNavSlop);
         nativeSelectBestAt(rect);
+        mInitialHitTestResult = hitTestResult(null);
     }
 
     /**
@@ -6657,6 +6665,7 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SWITCH_TO_SHORTPRESS: {
+                    mInitialHitTestResult = null; // set by updateSelection()
                     if (mTouchMode == TOUCH_INIT_MODE) {
                         if (!getSettings().supportTouchOnly()
                                 && mPreventDefault != PREVENT_DEFAULT_YES) {
@@ -7694,6 +7703,10 @@ public class WebView extends AbsoluteLayout
 
     /*package*/ void autoFillForm(int autoFillQueryId) {
         mWebViewCore.sendMessage(EventHub.AUTOFILL_FORM, autoFillQueryId, /* unused */0);
+    }
+
+    /* package */ ViewManager getViewManager() {
+        return mViewManager;
     }
 
     private native int nativeCacheHitFramePointer();

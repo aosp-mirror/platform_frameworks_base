@@ -30,6 +30,7 @@ import android.util.Xml;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
+import android.view.KeyEvent;
 import android.view.Surface;
 
 import java.io.BufferedReader;
@@ -41,7 +42,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Properties;
 
 /*
  * Wraps the C++ InputManager and provides its callbacks.
@@ -368,11 +368,6 @@ public class InputManager {
         public int height;
     }
     
-    private static final class InputDeviceCalibration {
-        public String[] keys;
-        public String[] values;
-    }
-    
     /*
      * Callbacks from native.
      */
@@ -404,26 +399,23 @@ public class InputManager {
         }
         
         @SuppressWarnings("unused")
-        public int interceptKeyBeforeQueueing(long whenNanos, int action, int flags,
-                int keyCode, int scanCode, int policyFlags, boolean isScreenOn) {
+        public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn) {
             return mWindowManagerService.mInputMonitor.interceptKeyBeforeQueueing(
-                    whenNanos, action, flags, keyCode, scanCode, policyFlags, isScreenOn);
+                    event, policyFlags, isScreenOn);
         }
         
         @SuppressWarnings("unused")
-        public boolean interceptKeyBeforeDispatching(InputChannel focus, int action,
-                int flags, int keyCode, int scanCode, int metaState, int repeatCount,
-                int policyFlags) {
-            return mWindowManagerService.mInputMonitor.interceptKeyBeforeDispatching(focus,
-                    action, flags, keyCode, scanCode, metaState, repeatCount, policyFlags);
+        public boolean interceptKeyBeforeDispatching(InputChannel focus,
+                KeyEvent event, int policyFlags) {
+            return mWindowManagerService.mInputMonitor.interceptKeyBeforeDispatching(
+                    focus, event, policyFlags);
         }
         
         @SuppressWarnings("unused")
-        public boolean dispatchUnhandledKey(InputChannel focus, int action,
-                int flags, int keyCode, int scanCode, int metaState, int repeatCount,
-                int policyFlags) {
-            return mWindowManagerService.mInputMonitor.dispatchUnhandledKey(focus,
-                    action, flags, keyCode, scanCode, metaState, repeatCount, policyFlags);
+        public boolean dispatchUnhandledKey(InputChannel focus,
+                KeyEvent event, int policyFlags) {
+            return mWindowManagerService.mInputMonitor.dispatchUnhandledKey(
+                    focus, event, policyFlags);
         }
         
         @SuppressWarnings("unused")
@@ -491,33 +483,6 @@ public class InputManager {
             }
             
             return keys.toArray(new VirtualKeyDefinition[keys.size()]);
-        }
-        
-        @SuppressWarnings("unused")
-        public InputDeviceCalibration getInputDeviceCalibration(String deviceName) {
-            // Calibration is specified as a sequence of colon-delimited key value pairs.
-            Properties properties = new Properties();
-            File calibrationFile = new File(Environment.getRootDirectory(),
-                    CALIBRATION_DIR_PATH + deviceName + ".idc");
-            if (calibrationFile.exists()) {
-                try {
-                    FileInputStream fis = new FileInputStream(calibrationFile);
-                    properties.load(fis);
-                    fis.close();
-                } catch (IOException ex) {
-                    Slog.w(TAG, "Error reading input device calibration properties for device "
-                            + deviceName + " from " + calibrationFile + ".", ex);
-                }
-            } else {
-                Slog.i(TAG, "No input device calibration properties found for device "
-                        + deviceName + ".");
-                return null;
-            }
-            
-            InputDeviceCalibration calibration = new InputDeviceCalibration();
-            calibration.keys = properties.keySet().toArray(new String[properties.size()]);
-            calibration.values = properties.values().toArray(new String[properties.size()]);
-            return calibration;
         }
         
         @SuppressWarnings("unused")

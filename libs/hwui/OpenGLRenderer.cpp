@@ -952,6 +952,9 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
                 mode, texture->blend, (GLvoid*) 0, (GLvoid*) gMeshTextureOffset,
                 GL_TRIANGLES, mesh->verticesCount, false, false, mesh->meshBuffer,
                 true, !mesh->hasEmptyQuads);
+    } else {
+        PATCH_LOGD("Invisible 9patch, ignoring (%.2f, %.2f, %.2f, %.2f)",
+                left, top, right, bottom);
     }
 }
 

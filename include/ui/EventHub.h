@@ -26,6 +26,7 @@
 #include <utils/threads.h>
 #include <utils/List.h>
 #include <utils/Errors.h>
+#include <utils/PropertyMap.h>
 
 #include <linux/input.h>
 
@@ -156,6 +157,8 @@ public:
 
     virtual String8 getDeviceName(int32_t deviceId) const = 0;
 
+    virtual void getConfiguration(int32_t deviceId, PropertyMap* outConfiguration) const = 0;
+
     virtual status_t getAbsoluteAxisInfo(int32_t deviceId, int axis,
             RawAbsoluteAxisInfo* outAxisInfo) const = 0;
 
@@ -205,6 +208,8 @@ public:
 
     virtual String8 getDeviceName(int32_t deviceId) const;
 
+    virtual void getConfiguration(int32_t deviceId, PropertyMap* outConfiguration) const;
+
     virtual status_t getAbsoluteAxisInfo(int32_t deviceId, int axis,
             RawAbsoluteAxisInfo* outAxisInfo) const;
 
@@ -247,6 +252,8 @@ private:
         uint32_t        classes;
         uint8_t*        keyBitmask;
         KeyLayoutMap*   layoutMap;
+        String8         configurationFile;
+        PropertyMap*    configuration;
         KeyMapInfo      keyMapInfo;
         int             fd;
         device_t*       next;
@@ -264,6 +271,7 @@ private:
     bool markSupportedKeyCodesLocked(device_t* device, size_t numCodes,
             const int32_t* keyCodes, uint8_t* outFlags) const;
 
+    void loadConfiguration(device_t* device);
     void configureKeyMap(device_t* device);
     void setKeyboardProperties(device_t* device, bool firstKeyboard);
     void clearKeyboardProperties(device_t* device, bool firstKeyboard);

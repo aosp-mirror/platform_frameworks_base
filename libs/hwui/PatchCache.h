@@ -61,8 +61,65 @@ public:
     }
 
 private:
+    /**
+     * Description of a patch.
+     */
+    struct PatchDescription {
+        PatchDescription(): bitmapWidth(0), bitmapHeight(0), pixelWidth(0), pixelHeight(0),
+                xCount(0), yCount(0), emptyCount(0), colorKey(0) {
+        }
+
+        PatchDescription(const float bitmapWidth, const float bitmapHeight,
+                const float pixelWidth, const float pixelHeight,
+                const uint32_t xCount, const uint32_t yCount,
+                const int8_t emptyCount, const uint32_t colorKey):
+                bitmapWidth(bitmapWidth), bitmapHeight(bitmapHeight),
+                pixelWidth(pixelWidth), pixelHeight(pixelHeight),
+                xCount(xCount), yCount(yCount),
+                emptyCount(emptyCount), colorKey(colorKey) {
+        }
+
+        PatchDescription(const PatchDescription& description):
+                bitmapWidth(description.bitmapWidth), bitmapHeight(description.bitmapHeight),
+                pixelWidth(description.pixelWidth), pixelHeight(description.pixelHeight),
+                xCount(description.xCount), yCount(description.yCount),
+                emptyCount(description.emptyCount), colorKey(description.colorKey) {
+        }
+
+        bool operator<(const PatchDescription& rhs) const {
+            LTE_FLOAT(bitmapWidth) {
+                LTE_FLOAT(bitmapHeight) {
+                    LTE_FLOAT(pixelWidth) {
+                        LTE_FLOAT(pixelHeight) {
+                            LTE_INT(xCount) {
+                                LTE_INT(yCount) {
+                                    LTE_INT(emptyCount) {
+                                        LTE_INT(colorKey) return false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+    private:
+        float bitmapWidth;
+        float bitmapHeight;
+        float pixelWidth;
+        float pixelHeight;
+        uint32_t xCount;
+        uint32_t yCount;
+        int8_t emptyCount;
+        uint32_t colorKey;
+
+    }; // struct PatchDescription
+
     uint32_t mMaxEntries;
     KeyedVector<PatchDescription, Patch*> mCache;
+
 }; // class PatchCache
 
 }; // namespace uirenderer

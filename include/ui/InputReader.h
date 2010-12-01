@@ -47,23 +47,6 @@ struct VirtualKeyDefinition {
 };
 
 
-/* Specifies input device calibration settings. */
-class InputDeviceCalibration {
-public:
-    InputDeviceCalibration();
-
-    void clear();
-    void addProperty(const String8& key, const String8& value);
-
-    bool tryGetProperty(const String8& key, String8& outValue) const;
-    bool tryGetProperty(const String8& key, int32_t& outValue) const;
-    bool tryGetProperty(const String8& key, float& outValue) const;
-
-private:
-    KeyedVector<String8, String8> mProperties;
-};
-
-
 /*
  * Input reader policy interface.
  *
@@ -106,10 +89,6 @@ public:
     /* Gets the configured virtual key definitions for an input device. */
     virtual void getVirtualKeyDefinitions(const String8& deviceName,
             Vector<VirtualKeyDefinition>& outVirtualKeyDefinitions) = 0;
-
-    /* Gets the calibration for an input device. */
-    virtual void getInputDeviceCalibration(const String8& deviceName,
-            InputDeviceCalibration& outCalibration) = 0;
 
     /* Gets the excluded device names for the platform. */
     virtual void getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames) = 0;
@@ -314,8 +293,8 @@ public:
 
     int32_t getMetaState();
 
-    inline const InputDeviceCalibration& getCalibration() {
-        return mCalibration;
+    inline const PropertyMap& getConfiguration() {
+        return mConfiguration;
     }
 
 private:
@@ -330,7 +309,7 @@ private:
     typedef int32_t (InputMapper::*GetStateFunc)(uint32_t sourceMask, int32_t code);
     int32_t getState(uint32_t sourceMask, int32_t code, GetStateFunc getStateFunc);
 
-    InputDeviceCalibration mCalibration;
+    PropertyMap mConfiguration;
 };
 
 
@@ -389,13 +368,13 @@ private:
 
 class KeyboardInputMapper : public InputMapper {
 public:
-    KeyboardInputMapper(InputDevice* device, int32_t associatedDisplayId, uint32_t sources,
-            int32_t keyboardType);
+    KeyboardInputMapper(InputDevice* device, uint32_t sources, int32_t keyboardType);
     virtual ~KeyboardInputMapper();
 
     virtual uint32_t getSources();
     virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
     virtual void dump(String8& dump);
+    virtual void configure();
     virtual void reset();
     virtual void process(const RawEvent* rawEvent);
 
@@ -414,9 +393,14 @@ private:
         int32_t scanCode;
     };
 
-    int32_t mAssociatedDisplayId;
     uint32_t mSources;
     int32_t mKeyboardType;
+
+    // Immutable configuration parameters.
+    struct Parameters {
+        int32_t associatedDisplayId;
+        bool orientationAware;
+    } mParameters;
 
     struct LockedState {
         Vector<KeyDown> keyDowns; // keys that are down
@@ -435,6 +419,9 @@ private:
     void initializeLocked();
     void initializeLedStateLocked(LockedState::LedState& ledState, int32_t led);
 
+    void configureParameters();
+    void dumpParameters(String8& dump);
+
     bool isKeyboardOrGamepadKey(int32_t scanCode);
 
     void processKey(nsecs_t when, bool down, int32_t keyCode, int32_t scanCode,
@@ -450,12 +437,13 @@ private:
 
 class TrackballInputMapper : public InputMapper {
 public:
-    TrackballInputMapper(InputDevice* device, int32_t associatedDisplayId);
+    TrackballInputMapper(InputDevice* device);
     virtual ~TrackballInputMapper();
 
     virtual uint32_t getSources();
     virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
     virtual void dump(String8& dump);
+    virtual void configure();
     virtual void reset();
     virtual void process(const RawEvent* rawEvent);
 
@@ -467,7 +455,11 @@ private:
 
     Mutex mLock;
 
-    int32_t mAssociatedDisplayId;
+    // Immutable configuration parameters.
+    struct Parameters {
+        int32_t associatedDisplayId;
+        bool orientationAware;
+    } mParameters;
 
     struct Accumulator {
         enum {
@@ -499,13 +491,16 @@ private:
 
     void initializeLocked();
 
+    void configureParameters();
+    void dumpParameters(String8& dump);
+
     void sync(nsecs_t when);
 };
 
 
 class TouchInputMapper : public InputMapper {
 public:
-    TouchInputMapper(InputDevice* device, int32_t associatedDisplayId);
+    TouchInputMapper(InputDevice* device);
     virtual ~TouchInputMapper();
 
     virtual uint32_t getSources();
@@ -591,10 +586,17 @@ protected:
         }
     };
 
-    int32_t mAssociatedDisplayId;
-
     // Immutable configuration parameters.
     struct Parameters {
+        enum DeviceType {
+            DEVICE_TYPE_TOUCH_SCREEN,
+            DEVICE_TYPE_TOUCH_PAD,
+        };
+
+        DeviceType deviceType;
+        int32_t associatedDisplayId;
+        bool orientationAware;
+
         bool useBadTouchFilter;
         bool useJumpyTouchFilter;
         bool useAveragingTouchFilter;
@@ -641,7 +643,7 @@ protected:
         bool haveToolSizeAreaBias;
         float toolSizeAreaBias;
         bool haveToolSizeIsSummed;
-        int32_t toolSizeIsSummed;
+        bool toolSizeIsSummed;
 
         // Pressure
         enum PressureCalibration {
@@ -846,7 +848,7 @@ private:
 
 class SingleTouchInputMapper : public TouchInputMapper {
 public:
-    SingleTouchInputMapper(InputDevice* device, int32_t associatedDisplayId);
+    SingleTouchInputMapper(InputDevice* device);
     virtual ~SingleTouchInputMapper();
 
     virtual void reset();
@@ -892,7 +894,7 @@ private:
 
 class MultiTouchInputMapper : public TouchInputMapper {
 public:
-    MultiTouchInputMapper(InputDevice* device, int32_t associatedDisplayId);
+    MultiTouchInputMapper(InputDevice* device);
     virtual ~MultiTouchInputMapper();
 
     virtual void reset();

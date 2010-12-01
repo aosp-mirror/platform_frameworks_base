@@ -20,16 +20,22 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
 
 /**
  * @hide
  */
 public class PreferenceFrameLayout extends FrameLayout {
-    private static final int DEFAULT_TOP_PADDING = 0;
-    private static final int DEFAULT_BOTTOM_PADDING = 0;
-    private final int mTopPadding;
-    private final int mBottomPadding;
+    private static final int DEFAULT_BORDER_TOP = 0;
+    private static final int DEFAULT_BORDER_BOTTOM = 0;
+    private static final int DEFAULT_BORDER_LEFT = 0;
+    private static final int DEFAULT_BORDER_RIGHT = 0;
+    private final int mBorderTop;
+    private final int mBorderBottom;
+    private final int mBorderLeft;
+    private final int mBorderRight;
     private boolean mPaddingApplied = false;
 
     public PreferenceFrameLayout(Context context) {
@@ -46,45 +52,98 @@ public class PreferenceFrameLayout extends FrameLayout {
                 com.android.internal.R.styleable.PreferenceFrameLayout, defStyle, 0);
 
         float density = context.getResources().getDisplayMetrics().density;
-        int defaultTopPadding = (int) (density * DEFAULT_TOP_PADDING + 0.5f);
-        int defaultBottomPadding = (int) (density * DEFAULT_BOTTOM_PADDING + 0.5f);
+        int defaultBorderTop = (int) (density * DEFAULT_BORDER_TOP + 0.5f);
+        int defaultBottomPadding = (int) (density * DEFAULT_BORDER_BOTTOM + 0.5f);
+        int defaultLeftPadding = (int) (density * DEFAULT_BORDER_LEFT + 0.5f);
+        int defaultRightPadding = (int) (density * DEFAULT_BORDER_RIGHT + 0.5f);
 
-        mTopPadding = a.getDimensionPixelSize(
-                com.android.internal.R.styleable.PreferenceFrameLayout_topPadding,
-                defaultTopPadding);
-        mBottomPadding = a.getDimensionPixelSize(
-                com.android.internal.R.styleable.PreferenceFrameLayout_bottomPadding,
+        mBorderTop = a.getDimensionPixelSize(
+                com.android.internal.R.styleable.PreferenceFrameLayout_borderTop,
+                defaultBorderTop);
+        mBorderBottom = a.getDimensionPixelSize(
+                com.android.internal.R.styleable.PreferenceFrameLayout_borderBottom,
                 defaultBottomPadding);
-
+        mBorderLeft = a.getDimensionPixelSize(
+                com.android.internal.R.styleable.PreferenceFrameLayout_borderLeft,
+                defaultLeftPadding);
+        mBorderRight = a.getDimensionPixelSize(
+                com.android.internal.R.styleable.PreferenceFrameLayout_borderRight,
+                defaultRightPadding);
 
 
         a.recycle();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new LayoutParams(getContext(), attrs);
+    }
+
     @Override
     public void addView(View child) {
-        int topPadding = getPaddingTop();
-        int bottomPadding = getPaddingBottom();
+        int borderTop = getPaddingTop();
+        int borderBottom = getPaddingBottom();
+        int borderLeft = getPaddingLeft();
+        int borderRight = getPaddingRight();
+
+        LayoutParams layoutParams = (PreferenceFrameLayout.LayoutParams) child.getLayoutParams();
         // Check on the id of the child before adding it.
-        if (child != null && child.getId() != com.android.internal.R.id.default_preference_layout) {
-            // Add the padding to the view group after determining if the padding already exists.
-            if (!mPaddingApplied) {
-                topPadding += mTopPadding;
-                bottomPadding += mBottomPadding;
-                mPaddingApplied = true;
-            }
-        } else {
+        if (layoutParams != null && layoutParams.removeBorders) {
             if (mPaddingApplied) {
-                topPadding -= mTopPadding;
-                bottomPadding -= mBottomPadding;
+                borderTop -= mBorderTop;
+                borderBottom -= mBorderBottom;
+                borderLeft -= mBorderLeft;
+                borderRight -= mBorderRight;
                 mPaddingApplied = false;
             }
+        } else {
+            // Add the padding to the view group after determining if the
+            // padding already exists.
+            if (!mPaddingApplied) {
+                borderTop += mBorderTop;
+                borderBottom += mBorderBottom;
+                borderLeft += mBorderLeft;
+                borderRight += mBorderRight;
+                mPaddingApplied = true;
+            }
         }
+
         int previousTop = getPaddingTop();
         int previousBottom = getPaddingBottom();
-        if (previousTop != topPadding || previousBottom != bottomPadding) {
-            setPadding(getPaddingLeft(), topPadding, getPaddingRight(), bottomPadding);
+        int previousLeft = getPaddingLeft();
+        int previousRight = getPaddingRight();
+        if (previousTop != borderTop || previousBottom != borderBottom
+                || previousLeft != borderLeft || previousRight != borderRight) {
+            setPadding(borderLeft, borderTop, borderRight, borderBottom);
         }
+
         super.addView(child);
+    }
+
+    public static class LayoutParams extends FrameLayout.LayoutParams {
+        public boolean removeBorders = false;
+        /**
+         * {@inheritDoc}
+         */
+        public LayoutParams(Context c, AttributeSet attrs) {
+            super(c, attrs);
+
+            TypedArray a = c.obtainStyledAttributes(attrs,
+                    com.android.internal.R.styleable.PreferenceFrameLayout_Layout);
+            removeBorders = a.getBoolean(
+                    com.android.internal.R.styleable.PreferenceFrameLayout_Layout_layout_removeBorders,
+                    false);
+            a.recycle();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public LayoutParams(int width, int height) {
+            super(width, height);
+        }
     }
 }

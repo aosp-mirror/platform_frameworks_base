@@ -37,7 +37,7 @@ class GravitySensor : public SensorInterface {
     double mAccTime;
 
     SecondOrderLowPassFilter mLowPass;
-    BiquadFilter mX, mY, mZ;
+    CascadedBiquadFilter mX, mY, mZ;
 
 public:
     GravitySensor(sensor_t const* list, size_t count);

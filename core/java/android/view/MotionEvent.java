@@ -314,10 +314,10 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      */
     static private final int BASE_AVAIL_SAMPLES = 8;
     
-    static private final int MAX_RECYCLED = 10;
-    static private Object gRecyclerLock = new Object();
-    static private int gRecyclerUsed = 0;
-    static private MotionEvent gRecyclerTop = null;
+    private static final int MAX_RECYCLED = 10;
+    private static final Object gRecyclerLock = new Object();
+    private static int gRecyclerUsed;
+    private static MotionEvent gRecyclerTop;
 
     private long mDownTimeNano;
     private int mAction;
@@ -361,7 +361,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     static private MotionEvent obtain(int pointerCount, int sampleCount) {
         final MotionEvent ev;
         synchronized (gRecyclerLock) {
-            if (gRecyclerTop == null) {
+            ev = gRecyclerTop;
+            if (ev == null) {
                 if (pointerCount < BASE_AVAIL_POINTERS) {
                     pointerCount = BASE_AVAIL_POINTERS;
                 }
@@ -370,7 +371,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                 }
                 return new MotionEvent(pointerCount, sampleCount);
             }
-            ev = gRecyclerTop;
             gRecyclerTop = ev.mNext;
             gRecyclerUsed -= 1;
         }
