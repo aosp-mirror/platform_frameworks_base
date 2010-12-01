@@ -75,6 +75,7 @@ const char CameraParameters::KEY_FOCUS_DISTANCES[] = "focus-distances";
 const char CameraParameters::KEY_VIDEO_FRAME_FORMAT[] = "video-frame-format";
 const char CameraParameters::KEY_VIDEO_SIZE[] = "video-size";
 const char CameraParameters::KEY_SUPPORTED_VIDEO_SIZES[] = "video-size-values";
+const char CameraParameters::KEY_PREFERRED_PREVIEW_SIZE_FOR_VIDEO[] = "preferred-preview-size-for-video";
 
 const char CameraParameters::TRUE[] = "true";
 const char CameraParameters::FOCUS_DISTANCE_INFINITY[] = "Infinity";
@@ -329,6 +330,14 @@ void CameraParameters::getPreviewSize(int *width, int *height) const
     *width = *height = -1;
     // Get the current string, if it doesn't exist, leave the -1x-1
     const char *p = get(KEY_PREVIEW_SIZE);
+    if (p == 0)  return;
+    parse_pair(p, width, height, 'x');
+}
+
+void CameraParameters::getPreferredPreviewSizeForVideo(int *width, int *height) const
+{
+    *width = *height = -1;
+    const char *p = get(KEY_PREFERRED_PREVIEW_SIZE_FOR_VIDEO);
     if (p == 0)  return;
     parse_pair(p, width, height, 'x');
 }
