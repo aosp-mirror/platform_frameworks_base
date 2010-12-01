@@ -41,7 +41,6 @@ import android.database.ContentObserver;
 import android.hardware.Usb;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Binder;
 import android.os.Handler;
@@ -60,7 +59,6 @@ import android.util.Slog;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
-import android.widget.Toast;
 import android.widget.Toast;
 
 import java.io.FileDescriptor;
@@ -92,7 +90,6 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     private WorkerHandler mHandler;
     private StatusBarManagerService mStatusBar;
-    private LightsService mLightsService;
     private LightsService.Light mNotificationLight;
     private LightsService.Light mAttentionLight;
 
@@ -440,7 +437,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             mDisabledNotifications = StatusBarManager.DISABLE_NOTIFICATION_ALERTS;
         }
 
-        // register for battery changed notifications
+        // register for various Intents
         IntentFilter filter = new IntentFilter();
         filter.addAction(Usb.ACTION_USB_STATE);
         filter.addAction(Intent.ACTION_SCREEN_ON);
