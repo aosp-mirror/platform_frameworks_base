@@ -732,4 +732,20 @@ public class UriTest extends TestCase {
         assertEquals(1, names.size());
         assertEquals("foo", names.iterator().next());
     }
+
+    /**
+     * Query parameters may omit the '='. http://b/3124097
+     */
+    public void testGetQueryParametersEmptyValue() {
+        assertEquals(Arrays.asList(""),
+                Uri.parse("http://foo/path?abc").getQueryParameters("abc"));
+        assertEquals(Arrays.asList(""),
+                Uri.parse("http://foo/path?foo=bar&abc").getQueryParameters("abc"));
+        assertEquals(Arrays.asList(""),
+                Uri.parse("http://foo/path?abcd=abc&abc").getQueryParameters("abc"));
+        assertEquals(Arrays.asList("a", "", ""),
+                Uri.parse("http://foo/path?abc=a&abc=&abc").getQueryParameters("abc"));
+        assertEquals(Arrays.asList("a", "", ""),
+                Uri.parse("http://foo/path?abc=a&abc=&abc=").getQueryParameters("abc"));
+    }
 }
