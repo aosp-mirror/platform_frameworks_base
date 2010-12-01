@@ -1462,34 +1462,34 @@ public class WifiStateTracker extends NetworkStateTracker {
     }
 
     private void requestConnectionStatus(WifiInfo info) {
-        String reply = status();
-        if (reply == null) {
-            return;
-        }
-        /*
-         * Parse the reply from the supplicant to the status command, and update
-         * local state accordingly. The reply is a series of lines of the form
-         * "name=value".
-         */
         String SSID = null;
         String BSSID = null;
         String suppState = null;
         int netId = -1;
-        String[] lines = reply.split("\n");
-        for (String line : lines) {
-            String[] prop = line.split(" *= *", 2);
-            if (prop.length < 2)
-                continue;
-            String name = prop[0];
-            String value = prop[1];
-            if (name.equalsIgnoreCase("id"))
-                netId = Integer.parseInt(value);
-            else if (name.equalsIgnoreCase("ssid"))
-                SSID = value;
-            else if (name.equalsIgnoreCase("bssid"))
-                BSSID = value;
-            else if (name.equalsIgnoreCase("wpa_state"))
-                suppState = value;
+        String reply = status();
+        if (reply != null) {
+            /*
+             * Parse the reply from the supplicant to the status command, and update
+             * local state accordingly. The reply is a series of lines of the form
+             * "name=value".
+             */
+
+            String[] lines = reply.split("\n");
+            for (String line : lines) {
+                String[] prop = line.split(" *= *");
+                if (prop.length < 2)
+                    continue;
+                String name = prop[0];
+                String value = prop[1];
+                if (name.equalsIgnoreCase("id"))
+                    netId = Integer.parseInt(value);
+                else if (name.equalsIgnoreCase("ssid"))
+                    SSID = value;
+                else if (name.equalsIgnoreCase("bssid"))
+                    BSSID = value;
+                else if (name.equalsIgnoreCase("wpa_state"))
+                    suppState = value;
+            }
         }
         info.setNetworkId(netId);
         info.setSSID(SSID);
