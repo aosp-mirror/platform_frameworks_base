@@ -43,7 +43,6 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
     private Resources mResources;
     private boolean mMatchesFound;
     private int mNumberOfMatches;
-    private View mTitleBar;
     private ActionMode mActionMode;
 
     FindActionModeCallback(Context context) {
@@ -61,8 +60,6 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
                 context.getSystemService(Context.INPUT_METHOD_SERVICE);
         mResources = context.getResources();
     }
-
-    void setTitleBar(View v) { mTitleBar = v; }
 
     void finish() {
         mActionMode.finish();
@@ -174,7 +171,6 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
 
     @Override
     public void onDestroyActionMode(ActionMode mode) {
-        if (mTitleBar != null) mWebView.setEmbeddedTitleBar(mTitleBar);
         mWebView.notifyFindDialogDismissed();
         mInput.hideSoftInputFromWindow(mWebView.getWindowToken(), 0);
     }
