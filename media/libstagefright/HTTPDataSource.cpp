@@ -88,7 +88,7 @@ status_t HTTPDataSource::connectWithRedirectsAndRange(off_t rangeStart) {
             return OK;
         }
 
-        if (httpStatus != 301 && httpStatus != 302) {
+        if (httpStatus != 301 && httpStatus != 302 && httpStatus != 303 && httpStatus != 307) {
             LOGE("HTTP request failed w/ http status %d", httpStatus);
             return ERROR_IO;
         }
