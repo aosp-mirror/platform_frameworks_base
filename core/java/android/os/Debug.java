@@ -40,6 +40,7 @@ import org.apache.harmony.dalvik.ddmc.Chunk;
 import org.apache.harmony.dalvik.ddmc.ChunkHandler;
 import org.apache.harmony.dalvik.ddmc.DdmServer;
 
+import dalvik.bytecode.OpcodeInfo;
 import dalvik.bytecode.Opcodes;
 import dalvik.system.VMDebug;
 
@@ -865,7 +866,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * </pre>
      */
     public static class InstructionCount {
-        private static final int NUM_INSTR = 256;
+        private static final int NUM_INSTR = OpcodeInfo.MAXIMUM_VALUE + 1;
 
         private int[] mCounts;
 
