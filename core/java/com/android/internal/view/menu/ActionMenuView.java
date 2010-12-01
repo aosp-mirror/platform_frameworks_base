@@ -59,6 +59,22 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         }
     };
     
+    private class OpenOverflowRunnable implements Runnable {
+        private MenuPopupHelper mPopup;
+
+        public OpenOverflowRunnable(MenuPopupHelper popup) {
+            mPopup = popup;
+        }
+
+        public void run() {
+            mOverflowPopup = mPopup;
+            mPopup.show();
+            mPostedOpenRunnable = null;
+        }
+    }
+
+    private OpenOverflowRunnable mPostedOpenRunnable;
+
     public ActionMenuView(Context context) {
         this(context, null);
     }
@@ -100,6 +116,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
         final int screen = newConfig.screenLayout;
         mReserveOverflow = (screen & Configuration.SCREENLAYOUT_SIZE_MASK) ==
                 Configuration.SCREENLAYOUT_SIZE_XLARGE;
@@ -112,6 +129,14 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         if (mOverflowPopup != null && mOverflowPopup.isShowing()) {
             mOverflowPopup.dismiss();
             post(mShowOverflow);
+        }
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mOverflowPopup != null && mOverflowPopup.isShowing()) {
+            mOverflowPopup.dismiss();
         }
     }
 
@@ -193,30 +218,34 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     }
 
     public boolean showOverflowMenu() {
-        if (mOverflowButton != null) {
-            final MenuPopupHelper popup =
-                    new MenuPopupHelper(getContext(), mMenu, mOverflowButton, true);
-            // Post this for later; we might still need a layout for the anchor to be right.
-            post(new Runnable() {
-                public void run() {
-                    popup.show();
-                }
-            });
-            mOverflowPopup = popup;
+        if (mOverflowButton != null && !isOverflowMenuShowing()) {
+            mMenu.getCallback().onMenuModeChange(mMenu);
             return true;
         }
         return false;
     }
 
+    public void openOverflowMenu() {
+        OverflowPopup popup = new OverflowPopup(getContext(), mMenu, mOverflowButton, true);
+        mPostedOpenRunnable = new OpenOverflowRunnable(popup);
+        // Post this for later; we might still need a layout for the anchor to be right.
+        post(mPostedOpenRunnable);
+    }
+
     public boolean isOverflowMenuShowing() {
-        MenuPopupHelper popup = mOverflowPopup;
-        if (popup != null) {
-            return popup.isShowing();
-        }
-        return false;
+        return mOverflowPopup != null && mOverflowPopup.isShowing();
+    }
+
+    public boolean isOverflowMenuOpen() {
+        return mOverflowPopup != null;
     }
 
     public boolean hideOverflowMenu() {
+        if (mPostedOpenRunnable != null) {
+            removeCallbacks(mPostedOpenRunnable);
+            return true;
+        }
+
         MenuPopupHelper popup = mOverflowPopup;
         if (popup != null) {
             popup.dismiss();
@@ -274,9 +303,22 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                 return true;
             }
 
-            // Change to overflow mode
-            mMenu.getCallback().onMenuModeChange(mMenu);
+            showOverflowMenu();
             return true;
+        }
+    }
+
+    private class OverflowPopup extends MenuPopupHelper {
+        public OverflowPopup(Context context, MenuBuilder menu, View anchorView,
+                boolean overflowOnly) {
+            super(context, menu, anchorView, overflowOnly);
+        }
+
+        @Override
+        public void onDismiss() {
+            super.onDismiss();
+            mMenu.getCallback().onCloseMenu(mMenu, true);
+            mOverflowPopup = null;
         }
     }
 }

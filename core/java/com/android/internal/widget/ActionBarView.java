@@ -22,7 +22,7 @@ import com.android.internal.view.menu.ActionMenuView;
 import com.android.internal.view.menu.MenuBuilder;
 
 import android.app.ActionBar;
-import android.app.ActionBar.NavigationCallback;
+import android.app.ActionBar.OnNavigationListener;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -114,7 +114,7 @@ public class ActionBarView extends ViewGroup {
     private ActionMenuItem mLogoNavItem;
 
     private SpinnerAdapter mSpinnerAdapter;
-    private NavigationCallback mCallback;
+    private OnNavigationListener mCallback;
 
     private final AdapterView.OnItemSelectedListener mNavItemSelectedListener =
             new AdapterView.OnItemSelectedListener() {
@@ -243,7 +243,7 @@ public class ActionBarView extends ViewGroup {
         return null;
     }
 
-    public void setCallback(NavigationCallback callback) {
+    public void setCallback(OnNavigationListener callback) {
         mCallback = callback;
     }
 
@@ -269,6 +269,12 @@ public class ActionBarView extends ViewGroup {
         return false;
     }
 
+    public void openOverflowMenu() {
+        if (mMenuView != null) {
+            mMenuView.openOverflowMenu();
+        }
+    }
+
     public void postShowOverflowMenu() {
         post(new Runnable() {
             public void run() {
@@ -287,6 +293,13 @@ public class ActionBarView extends ViewGroup {
     public boolean isOverflowMenuShowing() {
         if (mMenuView != null) {
             return mMenuView.isOverflowMenuShowing();
+        }
+        return false;
+    }
+
+    public boolean isOverflowMenuOpen() {
+        if (mMenuView != null) {
+            return mMenuView.isOverflowMenuOpen();
         }
         return false;
     }

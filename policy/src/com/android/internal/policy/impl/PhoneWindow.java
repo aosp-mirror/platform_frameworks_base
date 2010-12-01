@@ -160,6 +160,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private ContextMenuBuilder mContextMenu;
     private MenuDialogHelper mContextMenuHelper;
+    private ActionButtonSubmenu mActionButtonPopup;
+    private boolean mClosingActionMenu;
 
     private int mVolumeControlStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
 
@@ -542,6 +544,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (doCallback) {
                 callOnPanelClosed(st.featureId, st, null);
             }
+        } else if (st.featureId == FEATURE_OPTIONS_PANEL && doCallback &&
+                mActionBar != null) {
+            checkCloseActionMenu(st.menu);
         }
         st.isPrepared = false;
         st.isHandled = false;
@@ -561,6 +566,27 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mPreparedPanel = null;
             mPanelChordingKey = 0;
         }
+    }
+
+    private void checkCloseActionMenu(Menu menu) {
+        if (mClosingActionMenu) {
+            return;
+        }
+
+        boolean closed = false;
+        mClosingActionMenu = true;
+        if (mActionBar.isOverflowMenuOpen() && mActionBar.hideOverflowMenu()) {
+            closed = true;
+        }
+        if (mActionButtonPopup != null) {
+            mActionButtonPopup.dismiss();
+            closed = true;
+        }
+        Callback cb = getCallback();
+        if (cb != null && closed) {
+            cb.onPanelClosed(FEATURE_ACTION_BAR, menu);
+        }
+        mClosingActionMenu = false;
     }
 
     @Override
@@ -842,7 +868,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // The window manager will give us a valid window token
             new MenuDialogHelper(subMenu).show(null);
         } else {
-            new MenuPopupHelper(getContext(), subMenu).show();
+            mActionButtonPopup = new ActionButtonSubmenu(getContext(), subMenu);
+            mActionButtonPopup.show();
+            Callback cb = getCallback();
+            if (cb != null) {
+                cb.onMenuOpened(FEATURE_ACTION_BAR, subMenu);
+            }
         }
 
         return true;
@@ -854,16 +885,21 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private void reopenMenu(boolean toggleMenuMode) {
         if (mActionBar != null) {
+            final Callback cb = getCallback();
             if (!mActionBar.isOverflowMenuShowing() || !toggleMenuMode) {
-                final Callback cb = getCallback();
                 if (cb != null) {
                     final PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
                     if (cb.onPreparePanel(FEATURE_OPTIONS_PANEL, st.createdPanelView, st.menu)) {
-                        mActionBar.showOverflowMenu();
+                        cb.onMenuOpened(FEATURE_ACTION_BAR, st.menu);
+                        mActionBar.openOverflowMenu();
                     }
                 }
             } else {
                 mActionBar.hideOverflowMenu();
+                if (cb != null) {
+                    final PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
+                    cb.onPanelClosed(FEATURE_ACTION_BAR, st.menu);
+                }
             }
             return;
         }
@@ -2042,8 +2078,23 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (cb != null && mFeatureId < 0) {
                 cb.onDetachedFromWindow();
             }
+
+            if (mActionButtonPopup != null) {
+                if (mActionButtonPopup.isShowing()) {
+                    mActionButtonPopup.dismiss();
+                }
+                mActionButtonPopup = null;
+            }
         }
-        
+
+        @Override
+        protected void onConfigurationChanged(Configuration newConfig) {
+            if (mActionButtonPopup != null) {
+                mActionButtonPopup.dismiss();
+                post(mActionButtonPopup);
+            }
+        }
+
         @Override
         public void onCloseSystemDialogs(String reason) {
             if (mFeatureId >= 0) {
@@ -2920,5 +2971,30 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     void sendCloseSystemWindows(String reason) {
         PhoneWindowManager.sendCloseSystemWindows(getContext(), reason);
+    }
+
+    private class ActionButtonSubmenu extends MenuPopupHelper implements Runnable {
+        private SubMenuBuilder mSubMenu;
+
+        public ActionButtonSubmenu(Context context, SubMenuBuilder subMenu) {
+            super(context, subMenu);
+            mSubMenu = subMenu;
+        }
+
+        @Override
+        public void onDismiss() {
+            super.onDismiss();
+            mSubMenu.getCallback().onCloseSubMenu(mSubMenu);
+            mActionButtonPopup = null;
+        }
+
+        @Override
+        public void run() {
+            show();
+            Callback cb = getCallback();
+            if (cb != null) {
+                cb.onMenuOpened(FEATURE_ACTION_BAR, mSubMenu);
+            }
+        }
     }
 }
