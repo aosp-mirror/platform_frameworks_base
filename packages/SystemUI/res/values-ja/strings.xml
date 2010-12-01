@@ -19,22 +19,17 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_label (7164937344850004466) -->
-    <skip />
+    <string name="app_label" msgid="7164937344850004466">"システムUI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"通知を消去"</string>
-    <!-- no translation found for status_bar_do_not_disturb_button (5812628897510997853) -->
-    <skip />
-    <!-- no translation found for status_bar_please_disturb_button (3345398298841572813) -->
-    <skip />
+    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"通知を非表示"</string>
+    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"通知を表示"</string>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"通知なし"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"実行中"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
     <string name="battery_low_title" msgid="7923774589611311406">"充電してください"</string>
-    <!-- outdated translation 7388781709819722764 -->     <string name="battery_low_subtitle" msgid="1752040062087829196">"電池が残り少なくなっています:"</string>
-    <!-- no translation found for battery_low_percent_format (1077244949318261761) -->
-    <skip />
-    <!-- no translation found for invalid_charger (4549105996740522523) -->
-    <skip />
+    <string name="battery_low_subtitle" msgid="1752040062087829196">"電池が残り少なくなっています。"</string>
+    <string name="battery_low_percent_format" msgid="1077244949318261761">"残り<xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"USB充電には対応していません。"\n"付属の充電器をお使いください。"</string>
     <string name="battery_low_why" msgid="7279169609518386372">"電池使用量"</string>
     <!-- no translation found for status_bar_settings_settings_button (3023889916699270224) -->
     <skip />
@@ -45,12 +40,9 @@
     <!-- no translation found for status_bar_settings_notifications (397146176280905137) -->
     <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"新着"</string>
-    <!-- no translation found for recent_tasks_empty (1905484479067697884) -->
-    <skip />
+    <string name="recent_tasks_empty" msgid="1905484479067697884">"新着のアプリケーションはありません。"</string>
     <!-- no translation found for recent_tasks_app_label (3796483981246752469) -->
     <skip />
-    <!-- no translation found for toast_rotation_free (2700542202836832631) -->
-    <skip />
-    <!-- no translation found for toast_rotation_locked (7484691306949652450) -->
-    <skip />
+    <string name="toast_rotation_free" msgid="2700542202836832631">"画面は自動的に回転します。"</string>
+    <string name="toast_rotation_locked" msgid="7484691306949652450">"画面の回転をロックしました。"</string>
 </resources>

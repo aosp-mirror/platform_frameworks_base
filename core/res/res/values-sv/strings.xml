@@ -482,10 +482,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Ta bort data från telefonen utan förvarning genom att återställa standardinställningarna"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Ange global proxyserver"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Ange vilken global proxyserver som ska användas när policyn är aktiverad. Endast den första enhetsadministratören anger den faktiska globala proxyservern."</string>
-    <!-- no translation found for policylab_expirePassword (2314569545488269564) -->
-    <skip />
-    <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
-    <skip />
+    <string name="policylab_expirePassword" msgid="2314569545488269564">"Ange lösenordets utgångsdatum"</string>
+    <string name="policydesc_expirePassword" msgid="7276906351852798814">"Se hur långt det är kvar till du måste ändra lösenordet till låsningsskärmen"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hem"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -668,8 +666,7 @@
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />
-    <!-- no translation found for autofill_address_summary_separator (7483307893170324129) -->
-    <skip />
+    <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
     <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"läsa webbläsarhistorik och bokmärken"</string>
@@ -869,6 +866,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Flera SMS-meddelanden skickas. Tryck på OK om du vill fortsätta eller på Avbryt om du vill avsluta sändningen."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Avbryt"</string>
+    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <skip />
     <string name="date_time_set" msgid="5777075614321087758">"Ställ in"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Standardinställning"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Inga behörigheter krävs"</string>
@@ -876,8 +875,8 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Visa alla"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB-masslagring"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB-ansluten"</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Du har anslutit telefonen till datorn via USB. Välj knappen nedan om du vill kopiera filer mellan datorn och Android-telefonens USB-lagringsenhet."</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Du har anslutit telefonen till datorn via USB. Välj knappen nedan om du vill kopiera filer mellan datorn och Android-telefonens USB-lagringsenhet."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Du har anslutit telefonen till datorn via USB. Tryck på knappen nedan om du vill kopiera filer mellan datorn och Android-telefonens USB-lagringsenhet."</string>
+    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Du har anslutit telefonen till datorn via USB. Tryck på knappen nedan om du vill kopiera filer mellan datorn och SD-kortet i din Android."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Aktivera USB-lagring"</string>
     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Det gick inte att använda din USB-lagringsenhet för USB-masslagring."</string>
     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Det gick inte att använda ditt SD-kort för USB-masslagring."</string>

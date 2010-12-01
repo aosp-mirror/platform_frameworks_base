@@ -482,10 +482,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"警告せずにデータの初期化を実行して端末内のデータを消去します。"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"端末のグローバルプロキシを設定"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"ポリシーが有効になっている場合は端末のグローバルプロキシが使用されるように設定します。有効なグローバルプロキシを設定できるのは最初のデバイス管理者だけです。"</string>
-    <!-- no translation found for policylab_expirePassword (2314569545488269564) -->
-    <skip />
-    <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
-    <skip />
+    <string name="policylab_expirePassword" msgid="2314569545488269564">"パスワードの有効期限の設定"</string>
+    <string name="policydesc_expirePassword" msgid="7276906351852798814">"画面ロックパスワードの変更が必要になるまでの期間を指定します"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"自宅"</item>
     <item msgid="869923650527136615">"携帯"</item>
@@ -668,8 +666,7 @@
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />
-    <!-- no translation found for autofill_address_summary_separator (7483307893170324129) -->
-    <skip />
+    <string name="autofill_address_summary_separator" msgid="7483307893170324129">"、 "</string>
     <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
     <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"ブラウザの履歴とブックマークを読み取る"</string>
@@ -869,6 +866,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"大量のSMSメッセージを送信しようとしています。[OK]で送信、[キャンセル]で中止します。"</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"キャンセル"</string>
+    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <skip />
     <string name="date_time_set" msgid="5777075614321087758">"設定"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"端末既定"</string>
     <string name="no_permissions" msgid="7283357728219338112">"権限の許可は必要ありません"</string>
@@ -876,8 +875,8 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"すべて表示"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USBマスストレージ"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB接続"</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"携帯端末をUSBでパソコンに接続しています。パソコンとAndroidのUSBストレージの間でファイルをコピーするには、下のボタンを選択します。"</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"携帯端末をUSBでパソコンに接続しています。パソコンとAndroidのUSBストレージの間でファイルをコピーするには、下のボタンを選択します。"</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"USBでパソコンに接続しています。パソコンとAndroidのUSBストレージ間でファイルをコピーするには下のボタンをタップします。"</string>
+    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"USBでパソコンに接続しています。パソコンとAndroidのSDカード間でファイルをコピーするには下のボタンをタップします。"</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"USBストレージをONにする"</string>
     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"USBストレージをUSBマスストレージとして使用する際に問題が発生しました。"</string>
     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"USBをUSBマスストレージとして使用する際に問題が発生しました。"</string>

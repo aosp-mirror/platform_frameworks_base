@@ -482,10 +482,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Διαγραφή των δεδομένων του τηλεφώνου χωρίς προειδοποίηση με επαναφορά των εργοστασιακών δεδομένων"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Ρύθμιση του γενικού διακομιστή μεσολάβησης της συσκευής"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Ορίστε τη χρήση του γενικού διακομιστή μεσολάβησης της συσκευής όταν είναι ενεργοποιημένη η πολιτική. Μόνο ο διαχειριστής της πρώτης συσκευής ορίζει τον ισχύοντα γενικό διακομιστή μεσολάβησης."</string>
-    <!-- no translation found for policylab_expirePassword (2314569545488269564) -->
-    <skip />
-    <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
-    <skip />
+    <string name="policylab_expirePassword" msgid="2314569545488269564">"Ορισμός λήξης κωδ. πρόσβασης"</string>
+    <string name="policydesc_expirePassword" msgid="7276906351852798814">"Ελέγξτε πόσος χρόνος απομένει προτού πρέπει να αλλάξετε τον κωδικό πρόσβασης κλειδώματος της οθόνης"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Οικία"</item>
     <item msgid="869923650527136615">"Κινητό"</item>
@@ -668,8 +666,7 @@
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />
-    <!-- no translation found for autofill_address_summary_separator (7483307893170324129) -->
-    <skip />
+    <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
     <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"ανάγνωση ιστορικού και σελιδοδεικτών προγράμματος περιήγησης"</string>
@@ -869,6 +866,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Αποστέλλεται μεγάλος αριθμός μηνυμάτων SMS. Επιλέξτε \"OK\" για συνέχεια, ή \"Ακύρωση\" για διακοπή αποστολής."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Ακύρωση"</string>
+    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <skip />
     <string name="date_time_set" msgid="5777075614321087758">"Ορισμός"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Προεπιλεγμένο"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Δεν απαιτούνται άδειες"</string>
@@ -876,8 +875,8 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Εμφάνιση όλων"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"Μαζική αποθήκευση USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Το USB είναι συνδεδεμένο"</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Συνδέσατε το τηλέφωνό σας στον υπολογιστή μέσω USB. Επιλέξτε το παρακάτω κουμπί αν θέλετε να αντιγράψετε αρχεία μεταξύ του υπολογιστή και του χώρου αποθήκευσης USB του Android."</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Συνδέσατε το τηλέφωνό σας στον υπολογιστή μέσω USB. Επιλέξτε το παρακάτω κουμπί αν θέλετε να αντιγράψετε αρχεία μεταξύ του υπολογιστή και του χώρου αποθήκευσης USB του Android."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Συνδεθήκατε στον υπολογιστή σας μέσω USB. Αγγίξτε το παρακάτω κουμπί, αν θέλετε να αντιγράψετε αρχεία ανάμεσα στον υπολογιστή σας και τον χώρο αποθήκευσης USB του Android."</string>
+    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Συνδεθήκατε στον υπολογιστή σας μέσω USB. Αγγίξτε το παρακάτω κουμπί, αν θέλετε να αντιγράψετε αρχεία ανάμεσα στον υπολογιστή σας και την κάρτα SD του Android."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Ενεργοποίηση αποθηκευτικού χώρου USB"</string>
     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Παρουσιάστηκε ένα πρόβλημα στη χρήση του αποθηκευτικού χώρου USB ως χώρο USB μαζικής αποθήκευσης."</string>
     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Παρουσιάστηκε ένα πρόβλημα στη χρήση της κάρτας SD ως χώρο USB μαζικής αποθήκευσης."</string>

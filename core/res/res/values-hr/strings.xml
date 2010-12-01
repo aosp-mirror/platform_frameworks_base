@@ -925,6 +925,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Šalje se velika količina SMS poruka. Odaberite \"U redu\" za nastavak, ili za prekid slanja odaberite \"Odustani\"."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"U redu"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Odustani"</string>
+    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <skip />
     <string name="date_time_set" msgid="5777075614321087758">"Postavi"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Zadano"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Nije potrebno dopuštenje"</string>

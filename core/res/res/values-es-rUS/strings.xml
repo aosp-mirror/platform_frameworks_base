@@ -481,10 +481,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Borrar los datos del teléfono sin advertencias al restablecer la configuración original"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Configura el proxy global de dispositivo"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Configuración del proxy global de dispositivo que se utilizará mientras se habilita la política. Sólo la primera administración de dispositivo configura el proxy global efectivo."</string>
-    <!-- no translation found for policylab_expirePassword (2314569545488269564) -->
-    <skip />
-    <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
-    <skip />
+    <string name="policylab_expirePassword" msgid="2314569545488269564">"Establecer la caducidad de la contraseña"</string>
+    <string name="policydesc_expirePassword" msgid="7276906351852798814">"Verifica cuánto tiempo antes debes cambiar la contraseña de la pantalla de bloqueo"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Celular"</item>
@@ -867,6 +865,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Se envía una gran cantidad de mensajes SMS. Selecciona \"Aceptar\" para continuar o \"Cancelar\" para detener el envío."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"Aceptar"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Cancelar"</string>
+    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <skip />
     <string name="date_time_set" msgid="5777075614321087758">"Establecer"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Predeterminado"</string>
     <string name="no_permissions" msgid="7283357728219338112">"No se requieren permisos"</string>
@@ -874,8 +874,8 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostrar todos"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"Almacenamiento masivo USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"conectado al USB"</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Has conectado tu teléfono a tu computadora mediante USB. Selecciona el botón a continuación si deseas copiar los archivos entre tu computadora y el almacenamiento USB de Android."</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Has conectado tu teléfono a tu computadora mediante USB. Selecciona el botón a continuación si deseas copiar los archivos entre tu computadora y el almacenamiento USB de Android."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Has conectado tu teléfono a tu computadora mediante USB. Selecciona el botón a continuación si deseas copiar los archivos entre tu computadora y el almacenamiento USB de Android."</string>
+    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Has conectado tu teléfono a tu computadora mediante USB. Selecciona el botón a continuación si deseas copiar los archivos entre tu computadora y la tarjeta SD de Android."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Activar el almacenamiento USB"</string>
     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Hay un problema para utilizar el almacenamiento USB en el almacenamiento masivo USB."</string>
     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Hay un problema para utilizar tu tarjeta SD en el almacenamiento masivo USB."</string>
