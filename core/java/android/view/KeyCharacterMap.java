@@ -38,7 +38,7 @@ public class KeyCharacterMap {
      * might be a {@link #NUMERIC} or {@link #SPECIAL_FUNCTION} keyboard, or there
      * might be multiple keyboards installed including external keyboards.
      * When interpreting key presses received from the framework, applications should
-     * use the device id specified in the {@link #KeyEvent} received.
+     * use the device id specified in the {@link KeyEvent} received.
      * When synthesizing key presses for delivery elsewhere or when translating key presses
      * from unknown keyboards, applications should use the special {@link #VIRTUAL_KEYBOARD}
      * device id.
