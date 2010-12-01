@@ -137,9 +137,8 @@ void SensorDevice::dump(String8& result, char* buffer, size_t SIZE)
 
     Mutex::Autolock _l(mLock);
     for (size_t i=0 ; i<size_t(count) ; i++) {
-        snprintf(buffer, SIZE, "handle=0x%08x, active-count=%d / %d\n",
+        snprintf(buffer, SIZE, "handle=0x%08x, active-count=%d\n",
                 list[i].handle,
-                mActivationCount.valueFor(list[i].handle).count,
                 mActivationCount.valueFor(list[i].handle).rates.size());
         result.append(buffer);
     }
@@ -167,22 +166,25 @@ status_t SensorDevice::activate(void* ident, int handle, int enabled)
     bool actuateHardware = false;
 
     Info& info( mActivationCount.editValueFor(handle) );
-    int32_t& count(info.count);
     if (enabled) {
-        if (android_atomic_inc(&count) == 0) {
-            actuateHardware = true;
-        }
         Mutex::Autolock _l(mLock);
         if (info.rates.indexOfKey(ident) < 0) {
             info.rates.add(ident, DEFAULT_EVENTS_PERIOD);
+            actuateHardware = true;
+        } else {
+            // sensor was already activated for this ident
         }
     } else {
-        if (android_atomic_dec(&count) == 1) {
-            actuateHardware = true;
-        }
         Mutex::Autolock _l(mLock);
-        info.rates.removeItem(ident);
+        if (info.rates.removeItem(ident) >= 0) {
+            if (info.rates.size() == 0) {
+                actuateHardware = true;
+            }
+        } else {
+            // sensor wasn't enabled for this ident
+        }
     }
+
     if (actuateHardware) {
         err = mSensorDevice->activate(mSensorDevice, handle, enabled);
         if (enabled) {

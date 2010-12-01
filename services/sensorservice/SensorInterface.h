@@ -38,7 +38,6 @@ public:
     virtual bool process(sensors_event_t* outEvent,
             const sensors_event_t& event) = 0;
 
-    virtual bool isEnabled() const = 0;
     virtual status_t activate(void* ident, bool enabled) = 0;
     virtual status_t setDelay(void* ident, int handle, int64_t ns) = 0;
     virtual Sensor getSensor() const = 0;
@@ -51,7 +50,6 @@ class HardwareSensor : public SensorInterface
 {
     SensorDevice& mSensorDevice;
     Sensor mSensor;
-    bool mEnabled;
 
 public:
     HardwareSensor(const sensor_t& sensor);
@@ -61,7 +59,6 @@ public:
     virtual bool process(sensors_event_t* outEvent,
             const sensors_event_t& event);
 
-    virtual bool isEnabled() const;
     virtual status_t activate(void* ident, bool enabled);
     virtual status_t setDelay(void* ident, int handle, int64_t ns);
     virtual Sensor getSensor() const;

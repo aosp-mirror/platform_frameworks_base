@@ -34,7 +34,6 @@ static inline T clamp(T v) {
 
 RotationVectorSensor::RotationVectorSensor(sensor_t const* list, size_t count)
     : mSensorDevice(SensorDevice::getInstance()),
-      mEnabled(false),
       mALowPass(M_SQRT1_2, 5.0f),
       mAX(mALowPass), mAY(mALowPass), mAZ(mALowPass),
       mMLowPass(M_SQRT1_2, 2.5f),
@@ -133,19 +132,12 @@ bool RotationVectorSensor::process(sensors_event_t* outEvent,
     return false;
 }
 
-bool RotationVectorSensor::isEnabled() const {
-    return mEnabled;
-}
-
 status_t RotationVectorSensor::activate(void* ident, bool enabled) {
-    if (mEnabled != enabled) {
-        mSensorDevice.activate(this, mAcc.getHandle(), enabled);
-        mSensorDevice.activate(this, mMag.getHandle(), enabled);
-        mEnabled = enabled;
-        if (enabled) {
-            mMagTime = 0;
-            mAccTime = 0;
-        }
+    mSensorDevice.activate(this, mAcc.getHandle(), enabled);
+    mSensorDevice.activate(this, mMag.getHandle(), enabled);
+    if (enabled) {
+        mMagTime = 0;
+        mAccTime = 0;
     }
     return NO_ERROR;
 }
