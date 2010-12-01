@@ -94,13 +94,18 @@ public abstract class HardwareRenderer {
      */
     abstract void setup(int width, int height);
 
+    interface HardwareDrawCallbacks {
+        void onHardwarePreDraw(Canvas canvas);
+        void onHardwarePostDraw(Canvas canvas);
+    }
+
     /**
      * Draws the specified view.
      * 
      * @param view The view to draw.
      * @param attachInfo AttachInfo tied to the specified view.
      */
-    abstract void draw(View view, View.AttachInfo attachInfo, int yOffset);
+    abstract void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks);
 
     /**
      * Creates a new display list that can be used to record batches of
@@ -456,7 +461,7 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        void draw(View view, View.AttachInfo attachInfo, int yOffset) {
+        void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks) {
             if (canDraw()) {
                 attachInfo.mDrawingTime = SystemClock.uptimeMillis();
                 attachInfo.mIgnoreDirtyState = true;
@@ -473,11 +478,12 @@ public abstract class HardwareRenderer {
 
                 Canvas canvas = mCanvas;
                 int saveCount = canvas.save();
-                canvas.translate(0, -yOffset);
+                callbacks.onHardwarePreDraw(canvas);
 
                 try {
                     view.draw(canvas);
                 } finally {
+                    callbacks.onHardwarePostDraw(canvas);
                     canvas.restoreToCount(saveCount);
                 }
 

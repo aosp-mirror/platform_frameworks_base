@@ -25,7 +25,9 @@ import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -57,6 +59,8 @@ import android.util.TypedValue;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Interpolator;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
@@ -79,7 +83,8 @@ import java.util.ArrayList;
  * {@hide}
  */
 @SuppressWarnings({"EmptyCatchBlock", "PointlessBooleanExpression"})
-public final class ViewRoot extends Handler implements ViewParent, View.AttachInfo.Callbacks {
+public final class ViewRoot extends Handler implements ViewParent,
+        View.AttachInfo.Callbacks, HardwareRenderer.HardwareDrawCallbacks {
     private static final String TAG = "ViewRoot";
     private static final boolean DBG = false;
     private static final boolean SHOW_FPS = false;
@@ -213,6 +218,10 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     int mScrollY;
     int mCurScrollY;
     Scroller mScroller;
+    Bitmap mResizeBitmap;
+    long mResizeBitmapStartTime;
+    int mResizeBitmapDuration;
+    static final Interpolator mResizeInterpolator = new AccelerateDecelerateInterpolator();
 
     final ViewConfiguration mViewConfiguration;
 
@@ -626,6 +635,13 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         return mAppVisible ? mView.getVisibility() : View.GONE;
     }
 
+    void disposeResizeBitmap() {
+        if (mResizeBitmap != null) {
+            mResizeBitmap.recycle();
+            mResizeBitmap = null;
+        }
+    }
+
     private void performTraversals() {
         // cache mView since it is used so much below...
         final View host = mView;
@@ -734,6 +750,48 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 ensureTouchModeLocally(mAddedTouchMode);
             } else {
                 if (!mAttachInfo.mContentInsets.equals(mPendingContentInsets)) {
+                    if (mWidth > 0 && mHeight > 0 &&
+                            mSurface != null && mSurface.isValid() &&
+                            mAttachInfo.mHardwareRenderer != null &&
+                            mAttachInfo.mHardwareRenderer.isEnabled() &&
+                            lp != null && !PixelFormat.formatHasAlpha(lp.format)) {
+
+                        disposeResizeBitmap();
+
+                        boolean completed = false;
+                        try {
+                            mResizeBitmap = Bitmap.createBitmap(mWidth, mHeight,
+                                    Bitmap.Config.ARGB_8888);
+                            mResizeBitmap.setHasAlpha(false);
+                            Canvas canvas = new Canvas(mResizeBitmap);
+                            int yoff;
+                            final boolean scrolling = mScroller != null
+                                    && mScroller.computeScrollOffset();
+                            if (scrolling) {
+                                yoff = mScroller.getCurrY();
+                                mScroller.abortAnimation();
+                            } else {
+                                yoff = mScrollY;
+                            }
+                            canvas.translate(0, -yoff);
+                            if (mTranslator != null) {
+                                mTranslator.translateCanvas(canvas);
+                            }
+                            canvas.setScreenDensity(mAttachInfo.mScalingRequired
+                                    ? DisplayMetrics.DENSITY_DEVICE : 0);
+                            mView.draw(canvas);
+                            mResizeBitmapStartTime = SystemClock.uptimeMillis();
+                            mResizeBitmapDuration = mView.getResources().getInteger(
+                                    com.android.internal.R.integer.config_mediumAnimTime);
+                            completed = true;
+                        } catch (OutOfMemoryError e) {
+                            Log.w(TAG, "Not enough memory for content change anim buffer", e);
+                        } finally {
+                            if (!completed) {
+                                mResizeBitmap = null;
+                            }
+                        }
+                    }
                     mAttachInfo.mContentInsets.set(mPendingContentInsets);
                     host.fitSystemWindows(mAttachInfo.mContentInsets);
                     insetsChanged = true;
@@ -787,7 +845,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                     // Maybe we can just try the next size up, and see if that reduces
                     // the height?
                     if (host.getWidth() <= baseSize /*&& host.getHeight() <= maxHeight*/) {
-                        Log.v(TAG, "Good!");
                         goodMeasure = true;
                     } else {
                         // Didn't fit in that size... try expanding a bit.
@@ -972,6 +1029,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                     if (mScroller != null) {
                         mScroller.abortAnimation();
                     }
+                    disposeResizeBitmap();
                 }
             } catch (RemoteException e) {
             }
@@ -1310,6 +1368,22 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         return measureSpec;
     }
 
+    int mHardwareYOffset;
+    int mResizeAlpha;
+    final Paint mResizePaint = new Paint();
+
+    public void onHardwarePreDraw(Canvas canvas) {
+        canvas.translate(0, -mHardwareYOffset);
+    }
+
+    public void onHardwarePostDraw(Canvas canvas) {
+        if (mResizeBitmap != null) {
+            canvas.translate(0, mHardwareYOffset);
+            mResizePaint.setAlpha(mResizeAlpha);
+            canvas.drawBitmap(mResizeBitmap, 0, 0, mResizePaint);
+        }
+    }
+
     private void draw(boolean fullRedrawNeeded) {
         Surface surface = mSurface;
         if (surface == null || !surface.isValid()) {
@@ -1334,8 +1408,8 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         }
 
         int yoff;
-        final boolean scrolling = mScroller != null && mScroller.computeScrollOffset();
-        if (scrolling) {
+        boolean animating = mScroller != null && mScroller.computeScrollOffset();
+        if (animating) {
             yoff = mScroller.getCurrY();
         } else {
             yoff = mScrollY;
@@ -1347,10 +1421,29 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         float appScale = mAttachInfo.mApplicationScale;
         boolean scalingRequired = mAttachInfo.mScalingRequired;
 
+        int resizeAlpha = 0;
+        if (mResizeBitmap != null) {
+            long deltaTime = SystemClock.uptimeMillis() - mResizeBitmapStartTime;
+            if (deltaTime < mResizeBitmapDuration) {
+                float amt = deltaTime/(float)mResizeBitmapDuration;
+                amt = mResizeInterpolator.getInterpolation(amt);
+                animating = true;
+                resizeAlpha = 255 - (int)(amt*255);
+            } else {
+                disposeResizeBitmap();
+            }
+        }
+
         Rect dirty = mDirty;
         if (mSurfaceHolder != null) {
             // The app owns the surface, we won't draw.
             dirty.setEmpty();
+            if (animating) {
+                if (mScroller != null) {
+                    mScroller.abortAnimation();
+                }
+                disposeResizeBitmap();
+            }
             return;
         }
 
@@ -1363,10 +1456,12 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             if (!dirty.isEmpty() || mIsAnimating) {
                 mIsAnimating = false;
                 dirty.setEmpty();
-                mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, yoff);
+                mHardwareYOffset = yoff;
+                mResizeAlpha = resizeAlpha;
+                mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this);
             }
 
-            if (scrolling) {
+            if (animating) {
                 mFullRedrawNeeded = true;
                 scheduleTraversals();
             }
@@ -1486,7 +1581,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             Log.v(TAG, "Surface " + surface + " unlockCanvasAndPost");
         }
 
-        if (scrolling) {
+        if (animating) {
             mFullRedrawNeeded = true;
             scheduleTraversals();
         }
@@ -1600,7 +1695,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         if (scrollY != mScrollY) {
             if (DEBUG_INPUT_RESIZE) Log.v(TAG, "Pan scroll changed: old="
                     + mScrollY + " , new=" + scrollY);
-            if (!immediate) {
+            if (!immediate && mResizeBitmap == null) {
                 if (mScroller == null) {
                     mScroller = new Scroller(mView.getContext());
                 }
