@@ -24,6 +24,9 @@ import java.net.SocketException;
 /**
  * RtpStream represents the base class of streams which send and receive network
  * packets with media payloads over Real-time Transport Protocol (RTP).
+ *
+ * <p class="note">Using this class requires
+ * {@link android.Manifest.permission#INTERNET} permission.</p>
  * @hide
  */
 public class RtpStream {
@@ -42,6 +45,8 @@ public class RtpStream {
      * This mode indicates that the stream only receives packets.
      */
     public static final int MODE_RECEIVE_ONLY = 2;
+
+    private static final int MODE_LAST = 2;
 
     private final InetAddress mLocalAddress;
     private final int mLocalPort;
@@ -129,7 +134,7 @@ public class RtpStream {
         if (isBusy()) {
             throw new IllegalStateException("Busy");
         }
-        if (mode != MODE_NORMAL && mode != MODE_SEND_ONLY && mode != MODE_RECEIVE_ONLY) {
+        if (mode < 0 || mode > MODE_LAST) {
             throw new IllegalArgumentException("Invalid mode");
         }
         mMode = mode;
