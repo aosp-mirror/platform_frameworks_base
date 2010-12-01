@@ -863,7 +863,10 @@ bool MPEG4Writer::exceedsFileSizeLimit() {
         nTotalBytesEstimate += (*it)->getEstimatedTrackSizeBytes();
     }
 
-    return (nTotalBytesEstimate >= mMaxFileSizeLimitBytes);
+    // Be conservative in the estimate: do not exceed 95% of
+    // the target file limit. For small target file size limit, though,
+    // this will not help.
+    return (nTotalBytesEstimate >= (95 * mMaxFileSizeLimitBytes) / 100);
 }
 
 bool MPEG4Writer::exceedsFileDurationLimit() {
