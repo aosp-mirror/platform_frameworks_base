@@ -8923,66 +8923,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 TextView.this.requestFocus();
                 return true;
 
-            case DragEvent.ACTION_DRAG_LOCATION: {
+            case DragEvent.ACTION_DRAG_LOCATION:
                 final int offset = getOffset((int) event.getX(), (int) event.getY());
                 Selection.setSelection((Spannable)mText, offset);
                 return true;
-            }
 
-            case DragEvent.ACTION_DROP: {
-                StringBuilder content = new StringBuilder("");
-                ClipData clipData = event.getClipData();
-                final int itemCount = clipData.getItemCount();
-                for (int i=0; i < itemCount; i++) {
-                    Item item = clipData.getItem(i);
-                    content.append(item.coerceToText(TextView.this.mContext));
-                }
-
-                final int offset = getOffset((int) event.getX(), (int) event.getY());
-
-                if (mDragSourcePositions != -1) {
-                    final int dragSourceStart = extractRangeStartFromLong(mDragSourcePositions);
-                    final int dragSourceEnd = extractRangeEndFromLong(mDragSourcePositions);
-                    if (offset >= dragSourceStart && offset < dragSourceEnd) {
-                        // A drop inside the original selection discards the drop.
-                        return true;
-                    }
-                }
-
-                final int originalLength = mText.length();
-                long minMax = prepareSpacesAroundPaste(offset, offset, content);
-                int min = extractRangeStartFromLong(minMax);
-                int max = extractRangeEndFromLong(minMax);
-
-                Selection.setSelection((Spannable) mText, max);
-                ((Editable) mText).replace(min, max, content);
-
-                if (mDragSourcePositions != -1) {
-                    int dragSourceStart = extractRangeStartFromLong(mDragSourcePositions);
-                    int dragSourceEnd = extractRangeEndFromLong(mDragSourcePositions);
-                    if (max <= dragSourceStart) {
-                        // Inserting text before selection has shifted positions
-                        final int shift = mText.length() - originalLength;
-                        dragSourceStart += shift;
-                        dragSourceEnd += shift;
-                    }
-
-                    // Delete original selection
-                    ((Editable) mText).delete(dragSourceStart, dragSourceEnd);
-
-                    // Make sure we do not leave two adjacent spaces.
-                    if ((dragSourceStart == 0 ||
-                            Character.isSpaceChar(mTransformed.charAt(dragSourceStart - 1))) &&
-                            (dragSourceStart == mText.length() ||
-                            Character.isSpaceChar(mTransformed.charAt(dragSourceStart)))) {
-                        final int pos = dragSourceStart == mText.length() ?
-                                dragSourceStart - 1 : dragSourceStart;
-                        ((Editable) mText).delete(pos, pos + 1);
-                    }
-                }
-
+            case DragEvent.ACTION_DROP:
+                onDrop(event);
                 return true;
-            }
 
             case DragEvent.ACTION_DRAG_ENDED:
                 mDragSourcePositions = -1;
@@ -8991,6 +8939,59 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case DragEvent.ACTION_DRAG_EXITED:
             default:
                 return true;
+        }
+    }
+
+    private void onDrop(DragEvent event) {
+        StringBuilder content = new StringBuilder("");
+        ClipData clipData = event.getClipData();
+        final int itemCount = clipData.getItemCount();
+        for (int i=0; i < itemCount; i++) {
+            Item item = clipData.getItem(i);
+            content.append(item.coerceToText(TextView.this.mContext));
+        }
+
+        final int offset = getOffset((int) event.getX(), (int) event.getY());
+
+        if (mDragSourcePositions != -1) {
+            final int dragSourceStart = extractRangeStartFromLong(mDragSourcePositions);
+            final int dragSourceEnd = extractRangeEndFromLong(mDragSourcePositions);
+            if (offset >= dragSourceStart && offset < dragSourceEnd) {
+                // A drop inside the original selection discards the drop.
+                return;
+            }
+        }
+
+        final int originalLength = mText.length();
+        long minMax = prepareSpacesAroundPaste(offset, offset, content);
+        int min = extractRangeStartFromLong(minMax);
+        int max = extractRangeEndFromLong(minMax);
+
+        Selection.setSelection((Spannable) mText, max);
+        ((Editable) mText).replace(min, max, content);
+
+        if (mDragSourcePositions != -1) {
+            int dragSourceStart = extractRangeStartFromLong(mDragSourcePositions);
+            int dragSourceEnd = extractRangeEndFromLong(mDragSourcePositions);
+            if (max <= dragSourceStart) {
+                // Inserting text before selection has shifted positions
+                final int shift = mText.length() - originalLength;
+                dragSourceStart += shift;
+                dragSourceEnd += shift;
+            }
+
+            // Delete original selection
+            ((Editable) mText).delete(dragSourceStart, dragSourceEnd);
+
+            // Make sure we do not leave two adjacent spaces.
+            if ((dragSourceStart == 0 ||
+                    Character.isSpaceChar(mTransformed.charAt(dragSourceStart - 1))) &&
+                    (dragSourceStart == mText.length() ||
+                    Character.isSpaceChar(mTransformed.charAt(dragSourceStart)))) {
+                final int pos = dragSourceStart == mText.length() ?
+                        dragSourceStart - 1 : dragSourceStart;
+                ((Editable) mText).delete(pos, pos + 1);
+            }
         }
     }
 
