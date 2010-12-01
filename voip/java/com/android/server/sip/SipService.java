@@ -135,7 +135,7 @@ public final class SipService extends ISipService.Stub {
                     switch (state) {
                         case WifiManager.WIFI_STATE_ENABLED:
                             mWifiEnabled = true;
-                            if (anyOpened()) grabWifiLock();
+                            if (anyOpenedToReceiveCalls()) grabWifiLock();
                             break;
                         case WifiManager.WIFI_STATE_DISABLED:
                             mWifiEnabled = false;
@@ -231,7 +231,7 @@ public final class SipService extends ISipService.Stub {
         notifyProfileRemoved(group.getLocalProfile());
         group.close();
 
-        if (!anyOpened()) {
+        if (!anyOpenedToReceiveCalls()) {
             releaseWifiLock();
             mMyWakeLock.reset(); // in case there's leak
         }
@@ -243,7 +243,7 @@ public final class SipService extends ISipService.Stub {
         SipSessionGroupExt group = mSipGroups.get(localProfileUri);
         if (group == null) return false;
         if (isCallerCreatorOrRadio(group)) {
-            return group.isOpened();
+            return true;
         } else {
             Log.w(TAG, "only creator or radio can query on the profile");
             return false;
@@ -358,9 +358,9 @@ public final class SipService extends ISipService.Stub {
         mContext.sendBroadcast(intent);
     }
 
-    private boolean anyOpened() {
+    private boolean anyOpenedToReceiveCalls() {
         for (SipSessionGroupExt group : mSipGroups.values()) {
-            if (group.isOpened()) return true;
+            if (group.isOpenedToReceiveCalls()) return true;
         }
         return false;
     }
@@ -479,7 +479,7 @@ public final class SipService extends ISipService.Stub {
     private class SipSessionGroupExt extends SipSessionAdapter {
         private SipSessionGroup mSipGroup;
         private PendingIntent mIncomingCallPendingIntent;
-        private boolean mOpened;
+        private boolean mOpenedToReceiveCalls;
 
         private AutoRegistrationProcess mAutoRegistration =
                 new AutoRegistrationProcess();
@@ -541,7 +541,7 @@ public final class SipService extends ISipService.Stub {
         }
 
         public void openToReceiveCalls() throws SipException {
-            mOpened = true;
+            mOpenedToReceiveCalls = true;
             if (mConnected) {
                 mSipGroup.openToReceiveCalls(this);
                 mAutoRegistration.start(mSipGroup);
@@ -555,9 +555,9 @@ public final class SipService extends ISipService.Stub {
             mSipGroup.onConnectivityChanged();
             if (connected) {
                 resetGroup(mLocalIp);
-                if (mOpened) openToReceiveCalls();
+                if (mOpenedToReceiveCalls) openToReceiveCalls();
             } else {
-                // close mSipGroup but remember mOpened
+                // close mSipGroup but remember mOpenedToReceiveCalls
                 if (DEBUG) Log.d(TAG, "  close auto reg temporarily: "
                         + getUri() + ": " + mIncomingCallPendingIntent);
                 mSipGroup.close();
@@ -582,7 +582,7 @@ public final class SipService extends ISipService.Stub {
         }
 
         public void close() {
-            mOpened = false;
+            mOpenedToReceiveCalls = false;
             mSipGroup.close();
             mAutoRegistration.stop();
             if (DEBUG) Log.d(TAG, "   close: " + getUri() + ": "
@@ -629,8 +629,8 @@ public final class SipService extends ISipService.Stub {
                     + SipErrorCode.toString(errorCode) + ": " + message);
         }
 
-        public boolean isOpened() {
-            return mOpened;
+        public boolean isOpenedToReceiveCalls() {
+            return mOpenedToReceiveCalls;
         }
 
         public boolean isRegistered() {
