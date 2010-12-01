@@ -1163,11 +1163,6 @@ class SipSessionGroup implements SipListener {
             mProxy.onCallEstablished(this, mPeerSessionDescription);
         }
 
-        private void fallbackToPreviousInCall(int errorCode, String message) {
-            mState = SipSession.State.IN_CALL;
-            mProxy.onCallChangeFailed(this, errorCode, message);
-        }
-
         private void endCallNormally() {
             reset();
             mProxy.onCallEnded(this);
@@ -1191,12 +1186,7 @@ class SipSessionGroup implements SipListener {
                     onRegistrationFailed(errorCode, message);
                     break;
                 default:
-                    if ((errorCode != SipErrorCode.DATA_CONNECTION_LOST)
-                            && mInCall) {
-                        fallbackToPreviousInCall(errorCode, message);
-                    } else {
-                        endCallOnError(errorCode, message);
-                    }
+                    endCallOnError(errorCode, message);
             }
         }
 
