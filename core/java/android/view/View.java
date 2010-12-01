@@ -9233,14 +9233,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     + "two integers");
         }
 
-        location[0] = mLeft;
-        location[1] = mTop;
+        location[0] = mLeft + (int) (mTranslationX + 0.5f);
+        location[1] = mTop + (int) (mTranslationY + 0.5f);
 
         ViewParent viewParent = mParent;
         while (viewParent instanceof View) {
             final View view = (View)viewParent;
-            location[0] += view.mLeft - view.mScrollX;
-            location[1] += view.mTop - view.mScrollY;
+            location[0] += view.mLeft + (int) (view.mTranslationX + 0.5f) - view.mScrollX;
+            location[1] += view.mTop + (int) (view.mTranslationY + 0.5f) - view.mScrollY;
             viewParent = view.mParent;
         }
 
