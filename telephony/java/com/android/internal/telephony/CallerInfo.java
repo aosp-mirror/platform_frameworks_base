@@ -469,27 +469,40 @@ public class CallerInfo {
      * @return a string debug representation of this instance.
      */
     public String toString() {
-        return new StringBuilder(384)
-                .append("\nname: " + /*name*/ "nnnnnn")
-                .append("\nphoneNumber: " + /*phoneNumber*/ "xxxxxxx")
-                .append("\ncnapName: " + cnapName)
-                .append("\nnumberPresentation: " + numberPresentation)
-                .append("\nnamePresentation: " + namePresentation)
-                .append("\ncontactExits: " + contactExists)
-                .append("\nphoneLabel: " + phoneLabel)
-                .append("\nnumberType: " + numberType)
-                .append("\nnumberLabel: " + numberLabel)
-                .append("\nphotoResource: " + photoResource)
-                .append("\nperson_id: " + person_id)
-                .append("\nneedUpdate: " + needUpdate)
-                .append("\ncontactRefUri: " + /*contactRefUri*/ "xxxxxxx")
-                .append("\ncontactRingtoneUri: " + /*contactRefUri*/ "xxxxxxx")
-                .append("\nshouldSendToVoicemail: " + shouldSendToVoicemail)
-                .append("\ncachedPhoto: " + cachedPhoto)
-                .append("\nisCachedPhotoCurrent: " + isCachedPhotoCurrent)
-                .append("\nemergency: " + mIsEmergency)
-                .append("\nvoicemail " + mIsVoiceMail)
-                .append("\ncontactExists " + contactExists)
-                .toString();
+        // Warning: never check in this file with VERBOSE_DEBUG = true
+        // because that will result in PII in the system log.
+        final boolean VERBOSE_DEBUG = false;
+
+        if (VERBOSE_DEBUG) {
+            return new StringBuilder(384)
+                    .append("\nname: " + name)
+                    .append("\nphoneNumber: " + phoneNumber)
+                    .append("\ncnapName: " + cnapName)
+                    .append("\nnumberPresentation: " + numberPresentation)
+                    .append("\nnamePresentation: " + namePresentation)
+                    .append("\ncontactExits: " + contactExists)
+                    .append("\nphoneLabel: " + phoneLabel)
+                    .append("\nnumberType: " + numberType)
+                    .append("\nnumberLabel: " + numberLabel)
+                    .append("\nphotoResource: " + photoResource)
+                    .append("\nperson_id: " + person_id)
+                    .append("\nneedUpdate: " + needUpdate)
+                    .append("\ncontactRefUri: " + contactRefUri)
+                    .append("\ncontactRingtoneUri: " + contactRefUri)
+                    .append("\nshouldSendToVoicemail: " + shouldSendToVoicemail)
+                    .append("\ncachedPhoto: " + cachedPhoto)
+                    .append("\nisCachedPhotoCurrent: " + isCachedPhotoCurrent)
+                    .append("\nemergency: " + mIsEmergency)
+                    .append("\nvoicemail " + mIsVoiceMail)
+                    .append("\ncontactExists " + contactExists)
+                    .toString();
+        } else {
+            return new StringBuilder(128)
+                    .append("CallerInfo { ")
+                    .append("name " + ((name == null) ? "null" : "non-null"))
+                    .append(", phoneNumber " + ((phoneNumber == null) ? "null" : "non-null"))
+                    .append(" }")
+                    .toString();
+        }
     }
 }
