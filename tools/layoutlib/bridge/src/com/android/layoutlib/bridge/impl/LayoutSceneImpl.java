@@ -440,8 +440,13 @@ public class LayoutSceneImpl {
 
             // draw the views
             // create the BufferedImage into which the layout will be rendered.
-            mImage = new BufferedImage(renderScreenWidth, renderScreenHeight - mScreenOffset,
-                    BufferedImage.TYPE_INT_ARGB);
+            if (mParams.getImageFactory() != null) {
+                mImage = mParams.getImageFactory().getImage(renderScreenWidth,
+                        renderScreenHeight - mScreenOffset);
+            } else {
+                mImage = new BufferedImage(renderScreenWidth, renderScreenHeight - mScreenOffset,
+                        BufferedImage.TYPE_INT_ARGB);
+            }
 
             if (mParams.isCustomBackgroundEnabled()) {
                 Graphics2D gc = mImage.createGraphics();
@@ -482,7 +487,7 @@ public class LayoutSceneImpl {
             // log it
             mParams.getLogger().error(t);
 
-            return new SceneResult("Unknown error during inflation.", t);
+            return new SceneResult("Unknown error during rendering.", t);
         }
     }
 
