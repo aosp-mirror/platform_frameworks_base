@@ -786,7 +786,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * @hide
      */
     public static long countInstancesOfClass(Class cls) {
-        return VMDebug.countInstancesOfClass(cls);
+        return VMDebug.countInstancesOfClass(cls, true);
     }
 
     /**
