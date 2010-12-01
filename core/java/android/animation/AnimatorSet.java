@@ -17,7 +17,9 @@
 package android.animation;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * This class plays a set of {@link Animator} objects in the specified order. Animations
@@ -117,10 +119,29 @@ public final class AnimatorSet extends Animator {
     }
 
     /**
+     * Sets up this AnimatorSet to play all of the supplied animations at the same time.
+     *
+     * @param items The animations that will be started simultaneously.
+     */
+    public void playTogether(Collection<Animator> items) {
+        if (items != null && items.size() > 0) {
+            mNeedsSort = true;
+            Builder builder = null;
+            for (Animator anim : items) {
+                if (builder == null) {
+                    builder = play(anim);
+                } else {
+                    builder.with(anim);
+                }
+            }
+        }
+    }
+
+    /**
      * Sets up this AnimatorSet to play each of the supplied animations when the
      * previous animation ends.
      *
-     * @param items The aniamtions that will be started one after another.
+     * @param items The animations that will be started one after another.
      */
     public void playSequentially(Animator... items) {
         if (items != null) {
@@ -130,6 +151,25 @@ public final class AnimatorSet extends Animator {
             } else {
                 for (int i = 0; i < items.length - 1; ++i) {
                     play(items[i]).before(items[i+1]);
+                }
+            }
+        }
+    }
+
+    /**
+     * Sets up this AnimatorSet to play each of the supplied animations when the
+     * previous animation ends.
+     *
+     * @param items The animations that will be started one after another.
+     */
+    public void playSequentially(List<Animator> items) {
+        if (items != null && items.size() > 0) {
+            mNeedsSort = true;
+            if (items.size() == 1) {
+                play(items.get(0));
+            } else {
+                for (int i = 0; i < items.size() - 1; ++i) {
+                    play(items.get(i)).before(items.get(i+1));
                 }
             }
         }
