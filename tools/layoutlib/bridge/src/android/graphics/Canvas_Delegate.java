@@ -92,13 +92,6 @@ public class Canvas_Delegate {
         return mGraphicsStack.peek();
     }
 
-    /**
-     * Disposes of the {@link Graphics2D} stack.
-     */
-    public void dispose() {
-
-    }
-
     // ---- native methods ----
 
     /*package*/ static boolean isOpaque(Canvas thisCanvas) {
@@ -985,6 +978,16 @@ public class Canvas_Delegate {
     }
 
     /*package*/ static void finalizer(int nativeCanvas) {
+        // get the delegate from the native int so that it can be disposed.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
+        if (canvasDelegate == null) {
+            assert false;
+            return;
+        }
+
+        canvasDelegate.dispose();
+
+        // remove it from the manager.
         sManager.removeDelegate(nativeCanvas);
     }
 
@@ -995,6 +998,15 @@ public class Canvas_Delegate {
     }
 
     private Canvas_Delegate() {
+    }
+
+    /**
+     * Disposes of the {@link Graphics2D} stack.
+     */
+    private void dispose() {
+        while (mGraphicsStack.size() > 0) {
+            mGraphicsStack.pop().dispose();
+        }
     }
 
     private void setBitmap(BufferedImage image) {

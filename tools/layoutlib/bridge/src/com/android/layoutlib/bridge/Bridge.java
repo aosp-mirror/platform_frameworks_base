@@ -33,6 +33,7 @@ import com.android.tools.layoutlib.create.OverrideMethod;
 
 import android.graphics.Bitmap;
 import android.graphics.Typeface_Delegate;
+import android.os.Looper;
 import android.util.Finalizers;
 
 import java.lang.ref.SoftReference;
@@ -294,7 +295,7 @@ public final class Bridge extends LayoutBridge {
             SceneResult lastResult = SceneResult.SUCCESS;
             LayoutSceneImpl scene = new LayoutSceneImpl(params);
             try {
-                scene.prepareThread();
+                prepareThread();
                 lastResult = scene.init(params.getTimeout());
                 if (lastResult == SceneResult.SUCCESS) {
                     lastResult = scene.inflate();
@@ -304,7 +305,7 @@ public final class Bridge extends LayoutBridge {
                 }
             } finally {
                 scene.release();
-                scene.cleanupThread();
+                cleanupThread();
             }
 
             return new BridgeLayoutScene(scene, lastResult);
@@ -336,6 +337,31 @@ public final class Bridge extends LayoutBridge {
      */
     public static ReentrantLock getLock() {
         return sLock;
+    }
+
+    /**
+     * Prepares the current thread for rendering.
+     *
+     * Note that while this can be called several time, the first call to {@link #cleanupThread()}
+     * will do the clean-up, and make the thread unable to do further scene actions.
+     */
+    public static void prepareThread() {
+        // we need to make sure the Looper has been initialized for this thread.
+        // this is required for View that creates Handler objects.
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
+    }
+
+    /**
+     * Cleans up thread-specific data. After this, the thread cannot be used for scene actions.
+     * <p>
+     * Note that it doesn't matter how many times {@link #prepareThread()} was called, a single
+     * call to this will prevent the thread from doing further scene actions
+     */
+    public static void cleanupThread() {
+        // clean up the looper
+        Looper.sThreadLocal.remove();
     }
 
     /**

@@ -18,6 +18,7 @@ package com.android.layoutlib.bridge.impl;
 
 import com.android.layoutlib.api.SceneResult;
 import com.android.layoutlib.api.LayoutScene.IAnimationListener;
+import com.android.layoutlib.bridge.Bridge;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
@@ -57,7 +58,7 @@ public class AnimationThread extends Thread {
 
     @Override
     public void run() {
-        mScene.prepareThread();
+        Bridge.prepareThread();
         try {
             Handler_Delegate.setCallback(new IHandlerCallback() {
                 public void sendMessageAtTime(Handler handler, Message msg, long uptimeMillis) {
@@ -115,7 +116,7 @@ public class AnimationThread extends Thread {
             mListener.done(SceneResult.SUCCESS);
         } finally {
             Handler_Delegate.setCallback(null);
-            mScene.cleanupThread();
+            Bridge.cleanupThread();
         }
     }
 }
