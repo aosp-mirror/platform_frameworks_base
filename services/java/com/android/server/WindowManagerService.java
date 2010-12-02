@@ -5488,12 +5488,13 @@ public class WindowManagerService extends IWindowManager.Stub
         int metaState = ev.getMetaState();
         int deviceId = ev.getDeviceId();
         int scancode = ev.getScanCode();
+        int flags = ev.getFlags();
 
         if (eventTime == 0) eventTime = SystemClock.uptimeMillis();
         if (downTime == 0) downTime = eventTime;
 
         KeyEvent newEvent = new KeyEvent(downTime, eventTime, action, code, repeatCount, metaState,
-                deviceId, scancode, KeyEvent.FLAG_FROM_SYSTEM);
+                deviceId, scancode, flags | KeyEvent.FLAG_FROM_SYSTEM);
 
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
