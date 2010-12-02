@@ -1460,7 +1460,7 @@ void SurfaceFlinger::screenAcquired(int dpy)
 
 status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
 {
-    const size_t SIZE = 1024;
+    const size_t SIZE = 4096;
     char buffer[SIZE];
     String8 result;
     if (!mDump.checkCalling()) {
@@ -1538,6 +1538,7 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
 
         const GraphicBufferAllocator& alloc(GraphicBufferAllocator::get());
         alloc.dump(result);
+        hw.dump(result);
 
         if (locked) {
             mStateLock.unlock();

@@ -80,6 +80,8 @@ public:
     EGLDisplay getEGLDisplay() const { return mDisplay; }
     overlay_control_device_t* getOverlayEngine() const { return mOverlayEngine; }
 
+    void dump(String8& res) const;
+
     // Hardware Composer
     HWComposer& getHwComposer() const;
     

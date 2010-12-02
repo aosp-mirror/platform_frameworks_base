@@ -23,6 +23,7 @@
 #include <EGL/egl.h>
 
 #include <utils/threads.h>
+#include <utils/String8.h>
 #include <ui/Rect.h>
 
 #include <pixelflinger/pixelflinger.h>
@@ -56,7 +57,9 @@ public:
     bool isUpdateOnDemand() const { return mUpdateOnDemand; }
     status_t setUpdateRectangle(const Rect& updateRect);
     status_t compositionComplete();
-    
+
+    void dump(String8& result);
+
     // for debugging only
     int getCurrentBufferIndex() const;
 

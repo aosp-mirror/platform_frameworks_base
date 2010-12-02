@@ -182,6 +182,16 @@ int FramebufferNativeWindow::setSwapInterval(
     return fb->setSwapInterval(fb, interval);
 }
 
+void FramebufferNativeWindow::dump(String8& result) {
+    if (fbDev->common.version >= 1 && fbDev->dump) {
+        const size_t SIZE = 4096;
+        char buffer[SIZE];
+
+        fbDev->dump(fbDev, buffer, SIZE);
+        result.append(buffer);
+    }
+}
+
 // only for debugging / logging
 int FramebufferNativeWindow::getCurrentBufferIndex() const
 {

@@ -56,7 +56,7 @@ void GraphicBufferAllocator::dump(String8& result) const
     Mutex::Autolock _l(sLock);
     KeyedVector<buffer_handle_t, alloc_rec_t>& list(sAllocList);
     size_t total = 0;
-    const size_t SIZE = 512;
+    const size_t SIZE = 4096;
     char buffer[SIZE];
     snprintf(buffer, SIZE, "Allocated buffers:\n");
     result.append(buffer);
@@ -71,6 +71,10 @@ void GraphicBufferAllocator::dump(String8& result) const
     }
     snprintf(buffer, SIZE, "Total allocated: %.2f KB\n", total/1024.0f);
     result.append(buffer);
+    if (mAllocDev->common.version >= 1 && mAllocDev->dump) {
+        mAllocDev->dump(mAllocDev, buffer, SIZE);
+        result.append(buffer);
+    }
 }
 
 void GraphicBufferAllocator::dumpToSystemLog()

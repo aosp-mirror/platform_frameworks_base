@@ -120,6 +120,11 @@ void HWComposer::dump(String8& result, char* buffer, size_t SIZE) const {
                     l.displayFrame.left, l.displayFrame.top, l.displayFrame.right, l.displayFrame.bottom);
             result.append(buffer);
         }
+
+    }
+    if (mHwc && mHwc->common.version >= 1 && mHwc->dump) {
+        mHwc->dump(mHwc, buffer, SIZE);
+        result.append(buffer);
     }
 }
 

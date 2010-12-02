@@ -367,3 +367,8 @@ void DisplayHardware::makeCurrent() const
 {
     eglMakeCurrent(mDisplay, mSurface, mSurface, mContext);
 }
+
+void DisplayHardware::dump(String8& res) const
+{
+    mNativeWindow->dump(res);
+}
