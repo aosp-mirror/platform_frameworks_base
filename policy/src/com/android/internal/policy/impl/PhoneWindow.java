@@ -867,7 +867,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (panel.isOpen) {
             // The window manager will give us a valid window token
             new MenuDialogHelper(subMenu).show(null);
-        } else {
+        } else if (hasFeature(FEATURE_ACTION_BAR)) {
             mActionButtonPopup = new ActionButtonSubmenu(getContext(), subMenu);
             mActionButtonPopup.show();
             Callback cb = getCallback();
