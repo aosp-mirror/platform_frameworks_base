@@ -654,6 +654,12 @@ public class TabletStatusBar extends StatusBar {
     // called by StatusBar
     @Override
     public void setLightsOn(boolean on) {
+        // Policy note: if the frontmost activity needs the menu key, we assume it is a legacy app
+        // that can't handle lights-out mode.
+        if (mMenuButton.getVisibility() == View.VISIBLE
+                || mMenuShadow.getVisibility() == View.VISIBLE) {
+            on = true;
+        }
         mHandler.removeMessages(MSG_SHOW_SHADOWS);
         mHandler.removeMessages(MSG_HIDE_SHADOWS);
         mHandler.sendEmptyMessage(on ? MSG_HIDE_SHADOWS : MSG_SHOW_SHADOWS);
@@ -664,6 +670,9 @@ public class TabletStatusBar extends StatusBar {
             Slog.d(TAG, (visible?"showing":"hiding") + " the MENU button");
         }
         mMenuButton.setVisibility(visible ? View.VISIBLE : View.GONE);
+
+        // See above re: lights-out policy for legacy apps.
+        if (visible) setLightsOn(true);
     }
 
     public void setIMEButtonVisible(IBinder token, boolean visible) {
