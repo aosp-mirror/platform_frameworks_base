@@ -387,8 +387,12 @@ sample_dir := development/samples
 # (see development/build/sdk.atree)
 web_docs_sample_code_flags := \
 		-hdf android.hasSamples 1 \
+		-samplecode $(sample_dir)/AccessibilityService \
+		            resources/samples/AccessibilityService "Accessibility Service" \
 		-samplecode $(sample_dir)/ApiDemos \
 		            resources/samples/ApiDemos "API Demos" \
+		-samplecode $(sample_dir)/AccelerometerPlay \
+		            resources/samples/AccelerometerPlay "Accelerometer Play" \
 		-samplecode $(sample_dir)/BackupRestore \
 		            resources/samples/BackupRestore "Backup and Restore" \
 		-samplecode $(sample_dir)/BluetoothChat \
@@ -401,8 +405,6 @@ web_docs_sample_code_flags := \
                             resources/samples/CubeLiveWallpaper "Live Wallpaper" \
 		-samplecode $(sample_dir)/Home \
 		            resources/samples/Home "Home" \
-		-samplecode $(sample_dir)/HeavyWeight \
-		            resources/samples/HeavyWeight "Heavy Weight App" \
 		-samplecode $(sample_dir)/JetBoy \
 		            resources/samples/JetBoy "JetBoy" \
 		-samplecode $(sample_dir)/LunarLander \
@@ -434,11 +436,13 @@ web_docs_sample_code_flags := \
 		-samplecode $(sample_dir)/WiktionarySimple \
 		            resources/samples/WiktionarySimple "Wiktionary (Simplified)" \
 		-samplecode $(sample_dir)/VoiceRecognitionService \
-		            resources/samples/VoiceRecognitionService "Voice Recognition Service"
+		            resources/samples/VoiceRecognitionService "Voice Recognition Service" \
+		-samplecode $(sample_dir)/NFCDemo \
+		            resources/samples/NFCDemo "NFC Demo"
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
-framework_docs_SDK_VERSION:=2.2
+framework_docs_SDK_VERSION:=2.3
   # release version (ie "Release x")  (full releases only)
 framework_docs_SDK_REL_ID:=1
   # flag to build offline docs for a preview release

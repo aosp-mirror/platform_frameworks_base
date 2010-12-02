@@ -695,6 +695,10 @@ public final class CallManager {
             Log.d(LOG_TAG, this.toString());
         }
 
+        if (!canDial(phone)) {
+            throw new CallStateException("cannot dial in current state");
+        }
+
         if ( hasActiveFgCall() ) {
             Phone activePhone = getActiveFgCall().getPhone();
             boolean hasBgCall = !(activePhone.getBackgroundCall().isIdle());
@@ -746,6 +750,32 @@ public final class CallManager {
             phone.clearDisconnected();
         }
     }
+
+    /**
+     * Phone can make a call only if ALL of the following are true:
+     *        - Phone is not powered off
+     *        - There's no incoming or waiting call
+     *        - There's available call slot in either foreground or background
+     *        - The foreground call is ACTIVE or IDLE or DISCONNECTED.
+     *          (We mainly need to make sure it *isn't* DIALING or ALERTING.)
+     * @param phone
+     * @return true if the phone can make a new call
+     */
+    private boolean canDial(Phone phone) {
+        int serviceState = phone.getServiceState().getState();
+        boolean hasRingingCall = hasActiveRingingCall();
+        boolean hasActiveCall = hasActiveFgCall();
+        boolean hasHoldingCall = hasActiveBgCall();
+        boolean allLinesTaken = hasActiveCall && hasHoldingCall;
+        Call.State fgCallState = getActiveFgCallState();
+
+        return (serviceState != ServiceState.STATE_POWER_OFF
+                && !hasRingingCall
+                && !allLinesTaken
+                && ((fgCallState == Call.State.ACTIVE)
+                    || (fgCallState == Call.State.IDLE)
+                    || (fgCallState == Call.State.DISCONNECTED)));
+            }
 
     /**
      * Whether or not the phone can do explicit call transfer in the current

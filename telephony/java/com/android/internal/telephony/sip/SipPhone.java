@@ -390,12 +390,11 @@ public class SipPhone extends SipPhoneBase {
                         new SipProfile.Builder(calleeSipUri).build();
                 SipConnection c = new SipConnection(this, callee,
                         originalNumber);
-                connections.add(c);
                 c.dial();
+                connections.add(c);
                 setState(Call.State.DIALING);
                 return c;
             } catch (ParseException e) {
-                // TODO: notify someone
                 throw new SipException("dial", e);
             }
         }
@@ -657,12 +656,6 @@ public class SipPhone extends SipPhoneBase {
             @Override
             protected void onError(DisconnectCause cause) {
                 if (DEBUG) Log.d(LOG_TAG, "SIP error: " + cause);
-                if (mSipAudioCall.isInCall()
-                        && (cause != DisconnectCause.LOST_SIGNAL)) {
-                    // Don't end the call when in a call.
-                    return;
-                }
-
                 onCallEnded(cause);
             }
         };

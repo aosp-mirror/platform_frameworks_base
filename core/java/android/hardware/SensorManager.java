@@ -1158,7 +1158,7 @@ public class SensorManager
      *
      * <p>
      * <center><img src="../../../images/axis_globe.png"
-     * alt="Sensors coordinate-system diagram." border="0" /></center>
+     * alt="World coordinate-system diagram." border="0" /></center>
      * </p>
      *
      * <p>
@@ -1521,9 +1521,19 @@ public class SensorManager
      * <li>values[1]: <i>pitch</i>, rotation around the X axis.</li>
      * <li>values[2]: <i>roll</i>, rotation around the Y axis.</li>
      * </ul>
+     * <p>The reference coordinate-system used is different from the world
+     * coordinate-system defined for the rotation matrix:</p>
+     * <ul>
+     * <li>X is defined as the vector product <b>Y.Z</b> (It is tangential to
+     * the ground at the device's current location and roughly points West).</li>
+     * <li>Y is tangential to the ground at the device's current location and
+     * points towards the magnetic North Pole.</li>
+     * <li>Z points towards the center of the Earth and is perpendicular to the ground.</li>
+     * </ul>
+     *
      * <p>
-     * <center><img src="../../../images/axis_device.png"
-     * alt="Sensors coordinate-system diagram." border="0" /></center>
+     * <center><img src="../../../images/axis_device_inverted.png"
+     * alt="Inverted world coordinate-system diagram." border="0" /></center>
      * </p>
      * <p>
      * All three angles above are in <b>radians</b> and <b>positive</b> in the
@@ -1928,12 +1938,17 @@ public class SensorManager
      *  @param R an array of floats in which to store the rotation matrix
      */
     public static void getRotationMatrixFromVector(float[] R, float[] rotationVector) {
-        float q0 = (float)Math.sqrt(1 - rotationVector[0]*rotationVector[0] -
-                                    rotationVector[1]*rotationVector[1] -
-                                    rotationVector[2]*rotationVector[2]);
+
+        float q0;
         float q1 = rotationVector[0];
         float q2 = rotationVector[1];
         float q3 = rotationVector[2];
+
+        if (rotationVector.length == 4) {
+            q0 = rotationVector[3];
+        } else {
+            q0 = (float)Math.sqrt(1 - q1*q1 - q2*q2 - q3*q3);
+        }
 
         float sq_q1 = 2 * q1 * q1;
         float sq_q2 = 2 * q2 * q2;
@@ -1985,10 +2000,12 @@ public class SensorManager
      *  @param Q an array of floats in which to store the computed quaternion
      */
     public static void getQuaternionFromVector(float[] Q, float[] rv) {
-        float w = (float)Math.sqrt(1 - rv[0]*rv[0] - rv[1]*rv[1] - rv[2]*rv[2]);
-        //In this case, the w component of the quaternion is known to be a positive number
-
-        Q[0] = w;
+        if (rv.length == 4) {
+            Q[0] = rv[3];
+        } else {
+            //In this case, the w component of the quaternion is known to be a positive number
+            Q[0] = (float)Math.sqrt(1 - rv[0]*rv[0] - rv[1]*rv[1] - rv[2]*rv[2]);
+        }
         Q[1] = rv[0];
         Q[2] = rv[1];
         Q[3] = rv[2];

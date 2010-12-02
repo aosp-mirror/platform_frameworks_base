@@ -209,8 +209,8 @@ status_t Visualizer::doFft(uint8_t *fft, uint8_t *waveform)
     int32_t nonzero = 0;
 
     for (uint32_t i = 0; i < mCaptureSize; i += 2) {
-        workspace[i >> 1] = (waveform[i] ^ 0x80) << 23;
-        workspace[i >> 1] |= (waveform[i + 1] ^ 0x80) << 7;
+        workspace[i >> 1] =
+                ((waveform[i] ^ 0x80) << 24) | ((waveform[i + 1] ^ 0x80) << 8);
         nonzero |= workspace[i >> 1];
     }
 
@@ -219,8 +219,8 @@ status_t Visualizer::doFft(uint8_t *fft, uint8_t *waveform)
     }
 
     for (uint32_t i = 0; i < mCaptureSize; i += 2) {
-        fft[i] = workspace[i >> 1] >> 23;
-        fft[i + 1] = workspace[i >> 1] >> 7;
+        fft[i] = workspace[i >> 1] >> 24;
+        fft[i + 1] = workspace[i >> 1] >> 8;
     }
 
     return NO_ERROR;

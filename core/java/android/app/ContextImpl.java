@@ -367,7 +367,8 @@ class ContextImpl extends Context {
             }
 
             Map map = null;
-            if (prefsFile.exists() && prefsFile.canRead()) {
+            FileStatus stat = new FileStatus();
+            if (FileUtils.getFileStatus(prefsFile.getPath(), stat) && prefsFile.canRead()) {
                 try {
                     FileInputStream str = new FileInputStream(prefsFile);
                     map = XmlUtils.readMapXml(str);
@@ -380,7 +381,7 @@ class ContextImpl extends Context {
                     Log.w(TAG, "getSharedPreferences", e);
                 }
             }
-            sp.replace(map);
+            sp.replace(map, stat);
         }
         return sp;
     }
@@ -2768,11 +2769,15 @@ class ContextImpl extends Context {
             }
         }
 
-        public void replace(Map newContents) {
+        /* package */ void replace(Map newContents, FileStatus stat) {
             synchronized (this) {
                 mLoaded = true;
                 if (newContents != null) {
                     mMap = newContents;
+                }
+                if (stat != null) {
+                    mStatTimestamp = stat.mtime;
+                    mStatSize = stat.size;
                 }
             }
         }

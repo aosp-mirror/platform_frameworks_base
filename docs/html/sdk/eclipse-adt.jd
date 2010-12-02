@@ -99,14 +99,14 @@ padding: .25em 1em;
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
         <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
-ADT 8.0</a> <em>(November 2010)</em>
+ADT 8.0.0</a> <em>(December 2010)</em>
   <div class="toggleme">
 
 <dl>
 
 <dt>Dependencies:</dt>
 
-<p><p>ADT 8.0 is designed for use with SDK Tools r8. If you haven't
+<p><p>ADT 8.0.0 is designed for use with SDK Tools r8. If you haven't
 already installed SDK Tools r8 into your SDK, use the Android SDK and AVD Manager to do
 so.</p></dd>
 

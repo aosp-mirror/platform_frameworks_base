@@ -227,6 +227,9 @@
           <li><a href="<?cs var:toroot ?>resources/samples/MultiResolution/index.html">
                 <span class="en">Multiple Resolutions</span>
               </a></li>
+          <li><a href="<?cs var:toroot ?>resources/samples/NFCDemo/index.html">
+                <span class="en">NFCDemo</span>
+                </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>resources/samples/NotePad/index.html">
                 <span class="en">Note Pad</span>
               </a></li>

@@ -318,20 +318,41 @@ status_t LiveSource::fetchM3U(const char *url, sp<ABuffer> *out) {
     status_t err = source->getSize(&size);
 
     if (err != OK) {
-        return err;
+        size = 65536;
     }
 
     sp<ABuffer> buffer = new ABuffer(size);
-    size_t offset = 0;
-    while (offset < (size_t)size) {
-        ssize_t n = source->readAt(
-                offset, buffer->data() + offset, size - offset);
+    buffer->setRange(0, 0);
 
-        if (n <= 0) {
-            return ERROR_IO;
+    for (;;) {
+        size_t bufferRemaining = buffer->capacity() - buffer->size();
+
+        if (bufferRemaining == 0) {
+            bufferRemaining = 32768;
+
+            LOGV("increasing download buffer to %d bytes",
+                 buffer->size() + bufferRemaining);
+
+            sp<ABuffer> copy = new ABuffer(buffer->size() + bufferRemaining);
+            memcpy(copy->data(), buffer->data(), buffer->size());
+            copy->setRange(0, buffer->size());
+
+            buffer = copy;
         }
 
-        offset += n;
+        ssize_t n = source->readAt(
+                buffer->size(), buffer->data() + buffer->size(),
+                bufferRemaining);
+
+        if (n < 0) {
+            return err;
+        }
+
+        if (n == 0) {
+            break;
+        }
+
+        buffer->setRange(0, buffer->size() + (size_t)n);
     }
 
     *out = buffer;

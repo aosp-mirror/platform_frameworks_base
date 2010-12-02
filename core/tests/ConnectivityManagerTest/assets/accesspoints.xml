@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <accesspoint>
+    <ssid>opennet</ssid>
+    <security>NONE</security>
+  </accesspoint>
+    <accesspoint>
+    <ssid>GoogleGuest</ssid>
+    <security>NONE</security>
+  </accesspoint>
+  <accesspoint>
+    <ssid>securenetdhcp</ssid>
+    <security>PSK</security>
+    <password>androidwifi</password>
+  </accesspoint>
+  <accesspoint>
+    <ssid>securenetstatic</ssid>
+    <security>PSK</security>
+    <password>androidwifi</password>
+    <ip>192.168.14.2</ip>
+    <gateway>192.168.14.1</gateway>
+    <netmask>255.255.255.0</netmask>
+    <dns1>192.168.14.1</dns1>
+    <dns2>192.168.1.9</dns2>
+  </accesspoint>
+  <accesspoint>
+    <ssid>botnet</ssid>
+    <security>EAP</security>
+    <eap>PEAP</eap>
+    <phase2>MSCHAPV2</phase2>
+    <identity>donut</identity>
+    <password>android</password>
+  </accesspoint>
+</resources>
+

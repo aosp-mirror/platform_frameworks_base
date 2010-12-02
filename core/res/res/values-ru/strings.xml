@@ -589,7 +589,7 @@
     <string name="factorytest_not_system" msgid="4435201656767276723">"Действие FACTORY_TEST поддерживается только для пакетов, установленных в /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Пакет, обеспечивающий действие FACTORY_TEST, не найден."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"Перезагрузка"</string>
-    <string name="js_dialog_title" msgid="8143918455087008109">"На странице по адресу \"<xliff:g id="TITLE">%s</xliff:g>\" сказано:"</string>
+    <string name="js_dialog_title" msgid="8143918455087008109">"Подтвердите действие на <xliff:g id="TITLE">%s</xliff:g>"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Перейти с этой страницы?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Нажмите \"ОК\", чтобы продолжить, или \"Отмена\", чтобы остаться на текущей странице."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Подтвердите"</string>
@@ -864,7 +864,7 @@
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"отмечено"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"не проверено"</string>
     <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Одна или несколько программ требуют разрешения для доступа к вашему аккаунту сейчас и в дальнейшем."</string>
-    <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Разрешить этот запрос?"</string>
+    <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Разрешить доступ?"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"Запрос доступа"</string>
     <string name="allow" msgid="7225948811296386551">"Разрешить"</string>
     <string name="deny" msgid="2081879885755434506">"Отклонить"</string>

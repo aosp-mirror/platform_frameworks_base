@@ -20,12 +20,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
-import static android.provider.ContactsContract.RawContacts;
-import android.text.TextUtils;
-import android.telephony.TelephonyManager;
+import android.provider.ContactsContract.Data;
+import android.provider.ContactsContract.PhoneLookup;
+import android.provider.ContactsContract.RawContacts;
 import android.telephony.PhoneNumberUtils;
+import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 
@@ -164,33 +165,17 @@ public class CallerInfo {
                     }
                 }
 
-                // Look for the person ID.
-
-                // TODO: This is pretty ugly now, see bug 2269240 for
-                // more details. The column to use depends upon the type of URL,
-                // for content://com.android.contacts/data/phones the "contact_id"
-                // column is used. For content/com.andriod.contacts/phone_lookup"
-                // the "_ID" column is used. If it is neither we leave columnIndex
-                // at -1 and no person ID will be available.
-
-                columnIndex = -1;
-                String url = contactRef.toString();
-                if (url.startsWith("content://com.android.contacts/data/phones")) {
-                    if (VDBG) Log.v(TAG,
-                        "URL path starts with 'data/phones' using RawContacts.CONTACT_ID");
-                    columnIndex = cursor.getColumnIndex(RawContacts.CONTACT_ID);
-                } else if (url.startsWith("content://com.android.contacts/phone_lookup")) {
-                    if (VDBG) Log.v(TAG,
-                        "URL path starts with 'phone_lookup' using PhoneLookup._ID");
-                    columnIndex = cursor.getColumnIndex(PhoneLookup._ID);
-                } else {
-                    Log.e(TAG, "Bad contact URL '" + url + "'");
-                }
-
+                // Look for the person_id.
+                columnIndex = getColumnIndexForPersonId(contactRef, cursor);
                 if (columnIndex != -1) {
                     info.person_id = cursor.getLong(columnIndex);
+                    if (VDBG) Log.v(TAG, "==> got info.person_id: " + info.person_id);
                 } else {
-                    Log.e(TAG, "person_id column missing for " + contactRef);
+                    // No valid columnIndex, so we can't look up person_id.
+                    Log.w(TAG, "Couldn't find person_id column for " + contactRef);
+                    // Watch out: this means that anything that depends on
+                    // person_id will be broken (like contact photo lookups in
+                    // the in-call UI, for example.)
                 }
 
                 // look for the custom ringtone, create from the string stored
@@ -404,30 +389,120 @@ public class CallerInfo {
     }
 
     /**
+     * Returns the column index to use to find the "person_id" field in
+     * the specified cursor, based on the contact URI that was originally
+     * queried.
+     *
+     * This is a helper function for the getCallerInfo() method that takes
+     * a Cursor.  Looking up the person_id is nontrivial (compared to all
+     * the other CallerInfo fields) since the column we need to use
+     * depends on what query we originally ran.
+     *
+     * Watch out: be sure to not do any database access in this method, since
+     * it's run from the UI thread (see comments below for more info.)
+     *
+     * @return the columnIndex to use (with cursor.getLong()) to get the
+     * person_id, or -1 if we couldn't figure out what colum to use.
+     *
+     * TODO: Add a unittest for this method.  (This is a little tricky to
+     * test, since we'll need a live contacts database to test against,
+     * preloaded with at least some phone numbers and SIP addresses.  And
+     * we'll probably have to hardcode the column indexes we expect, so
+     * the test might break whenever the contacts schema changes.  But we
+     * can at least make sure we handle all the URI patterns we claim to,
+     * and that the mime types match what we expect...)
+     */
+    private static int getColumnIndexForPersonId(Uri contactRef, Cursor cursor) {
+        // TODO: This is pretty ugly now, see bug 2269240 for
+        // more details. The column to use depends upon the type of URL:
+        // - content://com.android.contacts/data/phones ==> use the "contact_id" column
+        // - content://com.android.contacts/phone_lookup ==> use the "_ID" column
+        // - content://com.android.contacts/data ==> use the "contact_id" column
+        // If it's none of the above, we leave columnIndex=-1 which means
+        // that the person_id field will be left unset.
+        //
+        // The logic here *used* to be based on the mime type of contactRef
+        // (for example Phone.CONTENT_ITEM_TYPE would tell us to use the
+        // RawContacts.CONTACT_ID column).  But looking up the mime type requires
+        // a call to context.getContentResolver().getType(contactRef), which
+        // isn't safe to do from the UI thread since it can cause an ANR if
+        // the contacts provider is slow or blocked (like during a sync.)
+        //
+        // So instead, figure out the column to use for person_id by just
+        // looking at the URI itself.
+
+        if (VDBG) Log.v(TAG, "- getColumnIndexForPersonId: contactRef URI = '"
+                        + contactRef + "'...");
+        // Warning: Do not enable the following logging (due to ANR risk.)
+        // if (VDBG) Log.v(TAG, "- MIME type: "
+        //                 + context.getContentResolver().getType(contactRef));
+
+        String url = contactRef.toString();
+        String columnName = null;
+        if (url.startsWith("content://com.android.contacts/data/phones")) {
+            // Direct lookup in the Phone table.
+            // MIME type: Phone.CONTENT_ITEM_TYPE (= "vnd.android.cursor.item/phone_v2")
+            if (VDBG) Log.v(TAG, "'data/phones' URI; using RawContacts.CONTACT_ID");
+            columnName = RawContacts.CONTACT_ID;
+        } else if (url.startsWith("content://com.android.contacts/data")) {
+            // Direct lookup in the Data table.
+            // MIME type: Data.CONTENT_TYPE (= "vnd.android.cursor.dir/data")
+            if (VDBG) Log.v(TAG, "'data' URI; using Data.CONTACT_ID");
+            // (Note Data.CONTACT_ID and RawContacts.CONTACT_ID are equivalent.)
+            columnName = Data.CONTACT_ID;
+        } else if (url.startsWith("content://com.android.contacts/phone_lookup")) {
+            // Lookup in the PhoneLookup table, which provides "fuzzy matching"
+            // for phone numbers.
+            // MIME type: PhoneLookup.CONTENT_TYPE (= "vnd.android.cursor.dir/phone_lookup")
+            if (VDBG) Log.v(TAG, "'phone_lookup' URI; using PhoneLookup._ID");
+            columnName = PhoneLookup._ID;
+        } else {
+            Log.w(TAG, "Unexpected prefix for contactRef '" + url + "'");
+        }
+        int columnIndex = (columnName != null) ? cursor.getColumnIndex(columnName) : -1;
+        if (VDBG) Log.v(TAG, "==> Using column '" + columnName
+                        + "' (columnIndex = " + columnIndex + ") for person_id lookup...");
+        return columnIndex;
+    }
+
+    /**
      * @return a string debug representation of this instance.
      */
     public String toString() {
-        return new StringBuilder(384)
-                .append("\nname: " + /*name*/ "nnnnnn")
-                .append("\nphoneNumber: " + /*phoneNumber*/ "xxxxxxx")
-                .append("\ncnapName: " + cnapName)
-                .append("\nnumberPresentation: " + numberPresentation)
-                .append("\nnamePresentation: " + namePresentation)
-                .append("\ncontactExits: " + contactExists)
-                .append("\nphoneLabel: " + phoneLabel)
-                .append("\nnumberType: " + numberType)
-                .append("\nnumberLabel: " + numberLabel)
-                .append("\nphotoResource: " + photoResource)
-                .append("\nperson_id: " + person_id)
-                .append("\nneedUpdate: " + needUpdate)
-                .append("\ncontactRefUri: " + /*contactRefUri*/ "xxxxxxx")
-                .append("\ncontactRingtoneUri: " + /*contactRefUri*/ "xxxxxxx")
-                .append("\nshouldSendToVoicemail: " + shouldSendToVoicemail)
-                .append("\ncachedPhoto: " + cachedPhoto)
-                .append("\nisCachedPhotoCurrent: " + isCachedPhotoCurrent)
-                .append("\nemergency: " + mIsEmergency)
-                .append("\nvoicemail " + mIsVoiceMail)
-                .append("\ncontactExists " + contactExists)
-                .toString();
+        // Warning: never check in this file with VERBOSE_DEBUG = true
+        // because that will result in PII in the system log.
+        final boolean VERBOSE_DEBUG = false;
+
+        if (VERBOSE_DEBUG) {
+            return new StringBuilder(384)
+                    .append("\nname: " + name)
+                    .append("\nphoneNumber: " + phoneNumber)
+                    .append("\ncnapName: " + cnapName)
+                    .append("\nnumberPresentation: " + numberPresentation)
+                    .append("\nnamePresentation: " + namePresentation)
+                    .append("\ncontactExits: " + contactExists)
+                    .append("\nphoneLabel: " + phoneLabel)
+                    .append("\nnumberType: " + numberType)
+                    .append("\nnumberLabel: " + numberLabel)
+                    .append("\nphotoResource: " + photoResource)
+                    .append("\nperson_id: " + person_id)
+                    .append("\nneedUpdate: " + needUpdate)
+                    .append("\ncontactRefUri: " + contactRefUri)
+                    .append("\ncontactRingtoneUri: " + contactRefUri)
+                    .append("\nshouldSendToVoicemail: " + shouldSendToVoicemail)
+                    .append("\ncachedPhoto: " + cachedPhoto)
+                    .append("\nisCachedPhotoCurrent: " + isCachedPhotoCurrent)
+                    .append("\nemergency: " + mIsEmergency)
+                    .append("\nvoicemail " + mIsVoiceMail)
+                    .append("\ncontactExists " + contactExists)
+                    .toString();
+        } else {
+            return new StringBuilder(128)
+                    .append("CallerInfo { ")
+                    .append("name " + ((name == null) ? "null" : "non-null"))
+                    .append(", phoneNumber " + ((phoneNumber == null) ? "null" : "non-null"))
+                    .append(" }")
+                    .toString();
+        }
     }
 }

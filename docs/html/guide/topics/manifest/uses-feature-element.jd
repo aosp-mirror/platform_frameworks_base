@@ -472,11 +472,11 @@ If you are developing in Eclipse with ADT, right-click the project and select
 Package</strong>. Select a destination filename and path and click
 <strong>OK</strong>. </li>
 <li>Next, locate the <code>aapt</code> tool, if it is not already in your PATH.
-If you are using SDK Tools r7 or earlier, you can find <code>aapt</code> in the
-<code>&lt;<em>SDK</em>&gt;/platforms/android-&lt;<em>platform</em>&gt;/tools/</code> directory.
+If you are using SDK Tools r8 or higher, you can find <code>aapt</code> in the
+<code>&lt;<em>SDK</em>&gt;/platform-tools/</code> directory.
 <p class="note"><strong>Note:</strong> You must use the version of
-<code>aapt</code> that is provided for the latest platform release available. If
-you do not have the latest platform release, download it using the <a
+<code>aapt</code> that is provided for the latest Platform-Tools component available. If
+you do not have the latest Platform-Tools component, download it using the <a
 href="{@docRoot}sdk/adding-components.html">Android SDK and AVD Manager</a>.
 </p></li>
 <li>Run <code>aapt</code> using this syntax: </li>
@@ -522,6 +522,14 @@ in a separate <code>&lt;uses-feature&gt;</code> element. </p>
        <th>Comments</th>
     </tr>
     <tr>
+       <td>Audio</td>
+       <td><code>android.hardware.audio.low_latency</td>
+       <td>The application uses a low-latency audio pipeline on the device and
+is sensitive to delays or lag in sound input or output.</td>
+<td>
+</td>
+    </tr>
+    <tr>
        <td>Bluetooth</td>
        <td><code>android.hardware.bluetooth</td>
        <td>The application uses Bluetooth radio features in the device.</td>
@@ -529,7 +537,7 @@ in a separate <code>&lt;uses-feature&gt;</code> element. </p>
 </td>
     </tr>
     <tr>
-       <td rowspan="3">Camera</td>
+       <td rowspan="4">Camera</td>
        <td><code>android.hardware.camera</code></td>
        <td>The application uses the device's camera. If the device supports
            multiple cameras, the application uses the camera that facing
@@ -539,13 +547,17 @@ in a separate <code>&lt;uses-feature&gt;</code> element. </p>
 <tr>
   <td><code>android.hardware.camera.autofocus</code></td>
   <td>Subfeature. The application uses the device camera's autofocus capability.</td>
-  <td rowspan="2">If declared with the <code>"android:required="true"</code>
+  <td rowspan="3">If declared with the <code>"android:required="true"</code>
 attribute, these subfeatures implicitly declare the
 <code>android.hardware.camera</code> parent feature. </td>
 </tr>
 <tr>
   <td><code>android.hardware.camera.flash</code></td>
   <td>Subfeature. The application uses the device camera's flash.</td>
+</tr>
+<tr>
+  <td><code>android.hardware.camera.front</code></td>
+  <td>Subfeature. The application uses a front-facing camera on the device.</td>
 </tr>
 
 <tr>
@@ -568,18 +580,40 @@ attribute, these subfeatures implicitly declare the
   <td>Subfeature. The application uses precise location coordinates obtained
 from a Global Positioning System receiver on the device. </td>
 </tr>
-
 <tr>
-  <td rowspan="4">Sensors</td>
+  <td>Microphone</td>
+  <td><code>android.hardware.microphone</code></td>
+  <td>The application uses a microphone on the device.
+  </td>
+  <td></td>
+</tr>
+<tr>
+  <td>Near Field Communications</td>
+  <td><code>android.hardware.nfc</td>
+  <td>The application uses NFC radio features in the device.</td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="6">Sensors</td>
   <td><code>android.hardware.sensor.accelerometer</code></td>
   <td>The application uses motion readings from an accelerometer on the
 device.</td>
   <td></td>
 </tr>
 <tr>
+  <td><code>android.hardware.sensor.barometer</code></td>
+  <td>The application uses the device's barometer.</td>
+  <td></td>
+</tr>
+<tr>
   <td><code>android.hardware.sensor.compass</code></td>
   <td>The application uses directional readings from a magnetometer (compass) on
 the device.</td>
+  <td></td>
+</tr>
+<tr>
+  <td><code>android.hardware.sensor.gyroscope</code></td>
+  <td>The application uses the device's gyroscope sensor.</td>
   <td></td>
 </tr>
 <tr>
@@ -592,14 +626,6 @@ the device.</td>
   <td>The application uses the device's proximity sensor.</td>
   <td></td>
 </tr>
-<tr>
-  <td>Microphone</td>
-  <td><code>android.hardware.microphone</code></td>
-  <td>The application uses a microphone on the device.
-  </td>
-  <td></td>
-</tr>
-
 <tr>
   <td rowspan="3">Telephony</td>
   <td><code>android.hardware.telephony</code></td>
@@ -622,14 +648,14 @@ device.</td>
 </tr>
 
 <tr>
-  <td rowspan="3">Touchscreen</td>
+  <td rowspan="4">Touchscreen</td>
   <td><code>android.hardware.touchscreen</code></td>
   <td>The application uses touchscreen capabilities on the device.</td>
   <td></td>
 </tr>
 <tr>
   <td><code>android.hardware.touchscreen.multitouch</code></td>
-  <td>The application uses basic two-point multitouch capabilities on the device
+  <td>Subfeature. The application uses basic two-point multitouch capabilities on the device
 screen.</td>
   <td>If declared with the <code>"android:required="true"</code> attribute, this
 subfeature implicitly declares the <code>android.hardware.touchscreen</code>
@@ -640,9 +666,15 @@ parent feature. </td>
   <td>Subfeature. The application uses advanced multipoint multitouch
 capabilities on the device screen, such as for tracking two or more points fully
 independently.</td>
-  <td>If declared with the <code>"android:required="true"</code> attribute, this
+  <td rowspan="2">If declared with the <code>"android:required="true"</code> attribute, this
 subfeature implicitly declares the
 <code>android.hardware.touchscreen.multitouch</code> parent feature. </td>
+</tr>
+<tr>
+  <td><code>android.hardware.touchscreen.multitouch.jazzhand</code></td>
+  <td>Subfeature. The application uses advanced multipoint multitouch
+capabilities on the device screen, for tracking up to five points fully
+independently.</td>
 </tr>
 
 <tr>
@@ -663,17 +695,33 @@ in a separate <code>&lt;uses-feature&gt;</code> element. </p>
 
 
   <table>
-    <tr> 
-       <th>Feature</th>
-       <th>Attribute Value</th> 
-       <th>Description</th>
-    </tr>
-    <tr>
-      <td>Live Wallpaper</td>
-      <td><code>android.software.live_wallpaper</code></td>
-      <td>The application uses or provides Live Wallpapers.
-      </td>
-    </tr>
+<tr> 
+  <th>Feature</th>
+  <th>Attribute Value</th> 
+  <th>Description</th>
+  <th>Comments</th>
+</tr>
+<tr>
+  <td>Live Wallpaper</td>
+  <td><code>android.software.live_wallpaper</code></td>
+  <td>The application uses or provides Live Wallpapers.</td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="2">SIP/VOIP</td>
+  <td><code>android.software.sip</code></td>
+  <td>The application uses SIP service on the device.
+  </td>
+  <td></td>
+</tr>
+<tr>
+  <td><code>android.software.sip.voip</code></td>
+  <td>Subfeature. The application uses SIP-based VOIP service on the device.
+  </td>
+  <td>If declared with the <code>"android:required="true"</code> attribute, this
+subfeature implicitly declares the <code>android.software.sip</code>
+parent feature.</td>
+</tr>
   </table>
 
 

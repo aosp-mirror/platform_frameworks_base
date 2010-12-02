@@ -220,25 +220,47 @@ public class SensorEvent {
      * </p>
      * 
      *  <h4>{@link android.hardware.Sensor#TYPE_GRAVITY Sensor.TYPE_GRAVITY}:</h4>
-     *  A three dimensional vector indicating the direction and magnitude of gravity.  Units
-     *  are m/s^2.  The coordinate system is the same as is used by the acceleration sensor.
+     *  <p>A three dimensional vector indicating the direction and magnitude of gravity.  Units
+     *  are m/s^2. The coordinate system is the same as is used by the acceleration sensor.</p>
+     *  <p><b>Note:</b> When the device is at rest, the output of the gravity sensor should be identical
+     *  to that of the accelerometer.</p>
      *
      *  <h4>{@link android.hardware.Sensor#TYPE_LINEAR_ACCELERATION Sensor.TYPE_LINEAR_ACCELERATION}:</h4>
      *  A three dimensional vector indicating acceleration along each device axis, not including
      *  gravity.  All values have units of m/s^2.  The coordinate system is the same as is used by the
-     * acceleration sensor.
+     *  acceleration sensor.
+     *  <p>The output of the accelerometer, gravity and  linear-acceleration sensors must obey the
+     *  following relation:</p>
+     *   <p><ul>acceleration = gravity + linear-acceleration</ul></p>
      *
      *  <h4>{@link android.hardware.Sensor#TYPE_ROTATION_VECTOR Sensor.TYPE_ROTATION_VECTOR}:</h4>
-     *  The rotation vector represents the orientation of the device as a combination of an angle
-     *  and an axis, in which the device has rotated through an angle theta around an axis
-     *  &lt;x, y, z>. The three elements of the rotation vector are
-     *  &lt;x*sin(theta/2), y*sin(theta/2), z*sin(theta/2)>, such that the magnitude of the rotation
-     *  vector is equal to sin(theta/2), and the direction of the rotation vector is equal to the
-     *  direction of the axis of rotation. The three elements of the rotation vector are equal to
-     *  the last three components of a unit quaternion
-     *  &lt;cos(theta/2), x*sin(theta/2), y*sin(theta/2), z*sin(theta/2)>.  Elements of the rotation
-     *  vector are unitless.  The x,y, and z axis are defined in the same way as the acceleration
-     *  sensor.
+     *  <p>The rotation vector represents the orientation of the device as a combination of an <i>angle</i>
+     *  and an <i>axis</i>, in which the device has rotated through an angle &#952 around an axis
+     *  &lt;x, y, z>.</p>
+     *  <p>The three elements of the rotation vector are
+     *  &lt;x*sin(&#952/2), y*sin(&#952/2), z*sin(&#952/2)>, such that the magnitude of the rotation
+     *  vector is equal to sin(&#952/2), and the direction of the rotation vector is equal to the
+     *  direction of the axis of rotation.</p>
+     *  </p>The three elements of the rotation vector are equal to
+     *  the last three components of a <b>unit</b> quaternion
+     *  &lt;cos(&#952/2), x*sin(&#952/2), y*sin(&#952/2), z*sin(&#952/2)>.</p>
+     *  <p>Elements of the rotation vector are unitless.
+     *  The x,y, and z axis are defined in the same way as the acceleration
+     *  sensor.</p>
+     * <ul>
+     * <p>
+     * values[0]: x*sin(&#952/2)
+     * </p>
+     * <p>
+     * values[1]: y*sin(&#952/2)
+     * </p>
+     * <p>
+     * values[2]: z*sin(&#952/2)
+     * </p>
+     * <p>
+     * values[3]: cos(&#952/2) <i>(optional: only if value.length = 4)</i>
+     * </p>
+     * </ul>
      *
      * <h4>{@link android.hardware.Sensor#TYPE_ORIENTATION
      * Sensor.TYPE_ORIENTATION}:</h4> All values are angles in degrees.
