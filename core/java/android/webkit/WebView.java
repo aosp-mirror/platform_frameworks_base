@@ -2473,15 +2473,14 @@ public class WebView extends AbsoluteLayout
     // Sets r to be our visible rectangle in content coordinates
     private void calcOurContentVisibleRect(Rect r) {
         calcOurVisibleRect(r);
-        // since we might overscroll, pin the rect to the bounds of the content
-        r.left = Math.max(viewToContentX(r.left), 0);
+        r.left = viewToContentX(r.left);
         // viewToContentY will remove the total height of the title bar.  Add
         // the visible height back in to account for the fact that if the title
         // bar is partially visible, the part of the visible rect which is
         // displaying our content is displaced by that amount.
-        r.top = Math.max(viewToContentY(r.top + getVisibleTitleHeight()), 0);
-        r.right = Math.min(viewToContentX(r.right), mContentWidth);
-        r.bottom = Math.min(viewToContentY(r.bottom), mContentHeight);
+        r.top = viewToContentY(r.top + getVisibleTitleHeight());
+        r.right = viewToContentX(r.right);
+        r.bottom = viewToContentY(r.bottom);
     }
 
     // Sets r to be our visible rectangle in content coordinates. We use this
@@ -2491,15 +2490,14 @@ public class WebView extends AbsoluteLayout
     private void calcOurContentVisibleRectF(RectF r) {
         Rect ri = new Rect(0,0,0,0);
         calcOurVisibleRect(ri);
-        // pin the rect to the bounds of the content
-        r.left = Math.max(viewToContentXf(ri.left), 0.0f);
+        r.left = viewToContentXf(ri.left);
         // viewToContentY will remove the total height of the title bar.  Add
         // the visible height back in to account for the fact that if the title
         // bar is partially visible, the part of the visible rect which is
         // displaying our content is displaced by that amount.
-        r.top = Math.max(viewToContentYf(ri.top + getVisibleTitleHeight()), 0.0f);
-        r.right = Math.min(viewToContentXf(ri.right), (float)mContentWidth);
-        r.bottom = Math.min(viewToContentYf(ri.bottom), (float)mContentHeight);
+        r.top = viewToContentYf(ri.top + getVisibleTitleHeight());
+        r.right = viewToContentXf(ri.right);
+        r.bottom = viewToContentYf(ri.bottom);
     }
 
     static class ViewSizeData {
