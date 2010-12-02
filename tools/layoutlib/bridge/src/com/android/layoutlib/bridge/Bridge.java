@@ -23,6 +23,7 @@ import com.android.layoutlib.api.IXmlPullParser;
 import com.android.layoutlib.api.LayoutBridge;
 import com.android.layoutlib.api.SceneParams;
 import com.android.layoutlib.api.SceneResult;
+import com.android.layoutlib.api.SceneResult.SceneStatus;
 import com.android.layoutlib.bridge.android.BridgeAssetManager;
 import com.android.layoutlib.bridge.impl.FontLoader;
 import com.android.layoutlib.bridge.impl.LayoutSceneImpl;
@@ -308,8 +309,13 @@ public final class Bridge extends LayoutBridge {
 
             return new BridgeLayoutScene(scene, lastResult);
         } catch (Throwable t) {
-            t.printStackTrace();
-            return new BridgeLayoutScene(null, new SceneResult("error!", t));
+            // get the real cause of the exception.
+            Throwable t2 = t;
+            while (t2.getCause() != null) {
+                t2 = t.getCause();
+            }
+            return new BridgeLayoutScene(null,
+                    new SceneResult(SceneStatus.ERROR_UNKNOWN, t2.getMessage(), t2));
         }
     }
 
