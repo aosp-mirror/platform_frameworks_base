@@ -36,6 +36,11 @@ SkiaColorFilter::~SkiaColorFilter() {
 
 SkiaColorMatrixFilter::SkiaColorMatrixFilter(SkColorFilter *skFilter, float* matrix, float* vector):
         SkiaColorFilter(skFilter, kColorMatrix, true), mMatrix(matrix), mVector(vector) {
+    // Skia uses the range [0..255] for the addition vector, but we need
+    // the [0..1] range to apply the vector in GLSL
+    for (int i = 0; i < 4; i++) {
+        mVector[i] /= 255.0f;
+    }
 }
 
 SkiaColorMatrixFilter::~SkiaColorMatrixFilter() {
