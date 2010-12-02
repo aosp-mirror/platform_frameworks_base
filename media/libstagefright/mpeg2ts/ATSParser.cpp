@@ -238,10 +238,15 @@ void ATSParser::Program::parseProgramMap(ABitReader *br) {
 }
 
 sp<MediaSource> ATSParser::Program::getSource(SourceType type) {
+    size_t index = (type == MPEG2ADTS_AUDIO) ? 0 : 0;
+
     for (size_t i = 0; i < mStreams.size(); ++i) {
         sp<MediaSource> source = mStreams.editValueAt(i)->getSource(type);
         if (source != NULL) {
-            return source;
+            if (index == 0) {
+                return source;
+            }
+            --index;
         }
     }
 
@@ -508,7 +513,10 @@ void ATSParser::Stream::onPayloadData(
     int64_t timeUs = mProgram->convertPTSToTimestamp(PTS);
 
     status_t err = mQueue.appendData(data, size, timeUs);
-    CHECK_EQ(err, (status_t)OK);
+
+    if (err != OK) {
+        return;
+    }
 
     sp<ABuffer> accessUnit;
     while ((accessUnit = mQueue.dequeueAccessUnit()) != NULL) {
