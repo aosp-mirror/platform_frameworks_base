@@ -131,7 +131,6 @@ public class WifiManager {
      *
      * @hide
      */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String WIFI_AP_STATE_CHANGED_ACTION =
         "android.net.wifi.WIFI_AP_STATE_CHANGED";
 
@@ -276,13 +275,12 @@ public class WifiManager {
      */
     public static final String EXTRA_SUPPLICANT_ERROR = "supplicantError";
     /**
-     * Broadcast intent action indicating that the supplicant configuration changed.
+     * Broadcast intent action indicating that the configured networks changed.
      * This can be as a result of adding/updating/deleting a network
      * @hide
      */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String SUPPLICANT_CONFIG_CHANGED_ACTION =
-        "android.net.wifi.supplicant.CONFIG_CHANGE";
+    public static final String CONFIGURED_NETWORKS_CHANGED_ACTION =
+        "android.net.wifi.CONFIGURED_NETWORKS_CHANGE";
     /**
      * An access point scan has completed, and results are available from the supplicant.
      * Call {@link #getScanResults()} to obtain the results.
@@ -301,12 +299,12 @@ public class WifiManager {
     public static final String EXTRA_NEW_RSSI = "newRssi";
 
     /**
-     * Broadcast intent action indicating that the IP configuration
+     * Broadcast intent action indicating that the link configuration
      * changed on wifi.
      * @hide
      */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String CONFIG_CHANGED_ACTION = "android.net.wifi.CONFIG_CHANGED";
+    public static final String LINK_CONFIGURATION_CHANGED_ACTION =
+        "android.net.wifi.LINK_CONFIGURATION_CHANGED";
 
     /**
      * The lookup key for a {@link android.net.LinkProperties} object associated with the

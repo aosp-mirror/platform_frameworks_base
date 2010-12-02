@@ -37,7 +37,6 @@ import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLED;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLING;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_FAILED;
 
-import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.net.LinkAddress;
@@ -47,6 +46,7 @@ import android.net.NetworkUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo.DetailedState;
 import android.net.LinkProperties;
+import android.net.wifi.NetworkUpdateResult;
 import android.os.Binder;
 import android.os.Message;
 import android.os.IBinder;
@@ -193,9 +193,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     static final int CMD_IP_CONFIG_SUCCESS                = 15;
     /* Indicates DHCP failed */
     static final int CMD_IP_CONFIG_FAILURE                = 16;
-    /* Re-configure interface */
-    static final int CMD_RECONFIGURE_IP                   = 17;
-
 
     /* Start the soft access point */
     static final int CMD_START_AP                         = 21;
@@ -1336,15 +1333,14 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     };
 
     private void sendScanResultsAvailableBroadcast() {
-        if (!ActivityManagerNative.isSystemReady()) return;
-
-        mContext.sendBroadcast(new Intent(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        Intent intent = new Intent(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        mContext.sendBroadcast(intent);
     }
 
     private void sendRssiChangeBroadcast(final int newRssi) {
-        if (!ActivityManagerNative.isSystemReady()) return;
-
         Intent intent = new Intent(WifiManager.RSSI_CHANGED_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.putExtra(WifiManager.EXTRA_NEW_RSSI, newRssi);
         mContext.sendBroadcast(intent);
     }
@@ -1360,18 +1356,16 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         mContext.sendStickyBroadcast(intent);
     }
 
-    /* TODO: Unused for now, will be used when ip change on connected network is handled */
-    private void sendConfigChangeBroadcast() {
-        if (!ActivityManagerNative.isSystemReady()) return;
-        Intent intent = new Intent(WifiManager.CONFIG_CHANGED_ACTION);
+    private void sendLinkConfigurationChangedBroadcast() {
+        Intent intent = new Intent(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.putExtra(WifiManager.EXTRA_LINK_PROPERTIES, mLinkProperties);
         mContext.sendBroadcast(intent);
     }
 
     private void sendSupplicantConnectionChangedBroadcast(boolean connected) {
-        if (!ActivityManagerNative.isSystemReady()) return;
-
         Intent intent = new Intent(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.putExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, connected);
         mContext.sendBroadcast(intent);
     }
@@ -1380,12 +1374,16 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * Record the detailed state of a network.
      * @param state the new @{code DetailedState}
      */
-    private void setDetailedState(NetworkInfo.DetailedState state) {
+    private void setNetworkDetailedState(NetworkInfo.DetailedState state) {
         Log.d(TAG, "setDetailed state, old ="
                 + mNetworkInfo.getDetailedState() + " and new state=" + state);
         if (state != mNetworkInfo.getDetailedState()) {
             mNetworkInfo.setDetailedState(state, null, null);
         }
+    }
+
+    private DetailedState getNetworkDetailedState() {
+        return mNetworkInfo.getDetailedState();
     }
 
     /**
@@ -1408,7 +1406,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         NetworkUtils.disableInterface(mInterfaceName);
 
         /* send event to CM & network change broadcast */
-        setDetailedState(DetailedState.DISCONNECTED);
+        setNetworkDetailedState(DetailedState.DISCONNECTED);
         sendNetworkStateChangeBroadcast(mLastBssid);
 
         /* Reset data structures */
@@ -1576,7 +1574,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_DISCONNECT:
                 case CMD_RECONNECT:
                 case CMD_REASSOCIATE:
-                case CMD_RECONFIGURE_IP:
                 case SUP_CONNECTION_EVENT:
                 case SUP_DISCONNECTION_EVENT:
                 case DRIVER_START_EVENT:
@@ -2415,7 +2412,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     mWifiInfo.setNetworkId(stateChangeResult.networkId);
                     mLastNetworkId = stateChangeResult.networkId;
                     /* send event to CM & network change broadcast */
-                    setDetailedState(DetailedState.OBTAINING_IPADDR);
+                    setNetworkDetailedState(DetailedState.OBTAINING_IPADDR);
                     sendNetworkStateChangeBroadcast(mLastBssid);
                     transitionTo(mConnectingState);
                     break;
@@ -2526,8 +2523,12 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                       mWifiInfo.setIpAddress(mDhcpInfo.ipAddress);
                   }
                   configureLinkProperties();
-                  setDetailedState(DetailedState.CONNECTED);
-                  sendNetworkStateChangeBroadcast(mLastBssid);
+                  if (getNetworkDetailedState() == DetailedState.CONNECTED) {
+                      sendLinkConfigurationChangedBroadcast();
+                  } else {
+                      setNetworkDetailedState(DetailedState.CONNECTED);
+                      sendNetworkStateChangeBroadcast(mLastBssid);
+                  }
                   //TODO: The framework is not detecting a DHCP renewal and a possible
                   //IP change. we should detect this and send out a config change broadcast
                   transitionTo(mConnectedState);
@@ -2565,6 +2566,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                       break;
                   }
                   return NOT_HANDLED;
+              case CMD_SAVE_NETWORK:
+                  deferMessage(message);
+                  break;
                   /* Ignore */
               case NETWORK_CONNECTION_EVENT:
                   break;
@@ -2580,9 +2584,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                   break;
                   /* Defer scan when IP is being fetched */
               case CMD_START_SCAN:
-                  deferMessage(message);
-                  break;
-              case CMD_RECONFIGURE_IP:
                   deferMessage(message);
                   break;
                   /* Defer any power mode changes since we must keep active power mode at DHCP */
@@ -2632,11 +2633,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     WifiNative.disconnectCommand();
                     transitionTo(mDisconnectingState);
                     break;
-                case CMD_RECONFIGURE_IP:
-                    Log.d(TAG,"Reconfiguring IP on connection");
-                    NetworkUtils.resetConnections(mInterfaceName);
-                    transitionTo(mConnectingState);
-                    break;
                 case CMD_STOP_DRIVER:
                     sendMessage(CMD_DISCONNECT);
                     deferMessage(message);
@@ -2663,6 +2659,22 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         break;
                     }
                     return NOT_HANDLED;
+                case CMD_SAVE_NETWORK:
+                    WifiConfiguration config = (WifiConfiguration) message.obj;
+                    NetworkUpdateResult result = WifiConfigStore.saveNetwork(config);
+                    if (mWifiInfo.getNetworkId() == result.getNetworkId()) {
+                        if (result.hasIpChanged()) {
+                            Log.d(TAG,"Reconfiguring IP on connection");
+                            NetworkUtils.resetConnections(mInterfaceName);
+                            transitionTo(mConnectingState);
+                        }
+                        if (result.hasProxyChanged()) {
+                            Log.d(TAG,"Reconfiguring proxy on connection");
+                            configureLinkProperties();
+                            sendLinkConfigurationChangedBroadcast();
+                        }
+                    }
+                    break;
                     /* Ignore */
                 case NETWORK_CONNECTION_EVENT:
                     break;
@@ -2767,7 +2779,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case SUPPLICANT_STATE_CHANGE_EVENT:
                     StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
                     SupplicantState state = (SupplicantState) stateChangeResult.state;
-                    setDetailedState(WifiInfo.getDetailedStateOf(state));
+                    setNetworkDetailedState(WifiInfo.getDetailedStateOf(state));
                     /* DriverStartedState does the rest of the handling */
                     return NOT_HANDLED;
                 default:

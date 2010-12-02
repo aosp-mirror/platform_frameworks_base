@@ -16,7 +16,6 @@
 
 package android.net.wifi;
 
-import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.Intent;
 import android.net.DhcpInfo;
@@ -28,6 +27,7 @@ import android.net.wifi.WifiConfiguration.IpAssignment;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiConfiguration.ProxySettings;
 import android.net.wifi.WifiConfiguration.Status;
+import android.net.wifi.NetworkUpdateResult;
 import static android.net.wifi.WifiConfiguration.INVALID_NETWORK_ID;
 import android.os.Environment;
 import android.text.TextUtils;
@@ -42,7 +42,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -178,7 +177,7 @@ class WifiConfigStore {
         }
 
         WifiNative.saveConfigCommand();
-        sendConfigChangeBroadcast();
+        sendConfiguredNetworksChangedBroadcast();
     }
 
     /**
@@ -194,7 +193,8 @@ class WifiConfigStore {
      */
     static void selectNetwork(WifiConfiguration config) {
         if (config != null) {
-            int netId = addOrUpdateNetworkNative(config);
+            NetworkUpdateResult result = addOrUpdateNetworkNative(config);
+            int netId = result.getNetworkId();
             if (netId != INVALID_NETWORK_ID) {
                 selectNetwork(netId);
             } else {
@@ -248,9 +248,10 @@ class WifiConfigStore {
      *
      * @param config WifiConfiguration to be saved
      */
-    static void saveNetwork(WifiConfiguration config) {
+    static NetworkUpdateResult saveNetwork(WifiConfiguration config) {
         boolean newNetwork = (config.networkId == INVALID_NETWORK_ID);
-        int netId = addOrUpdateNetworkNative(config);
+        NetworkUpdateResult result = addOrUpdateNetworkNative(config);
+        int netId = result.getNetworkId();
         /* enable a new network */
         if (newNetwork && netId != INVALID_NETWORK_ID) {
             WifiNative.enableNetworkCommand(netId, false);
@@ -259,7 +260,8 @@ class WifiConfigStore {
             }
         }
         WifiNative.saveConfigCommand();
-        sendConfigChangeBroadcast();
+        sendConfiguredNetworksChangedBroadcast();
+        return result;
     }
 
     /**
@@ -274,7 +276,7 @@ class WifiConfigStore {
                 sConfiguredNetworks.remove(netId);
             }
             writeIpAndProxyConfigurations();
-            sendConfigChangeBroadcast();
+            sendConfiguredNetworksChangedBroadcast();
         } else {
             Log.e(TAG, "Failed to remove network " + netId);
         }
@@ -289,9 +291,9 @@ class WifiConfigStore {
      * @param config wifi configuration to add/update
      */
     static int addOrUpdateNetwork(WifiConfiguration config) {
-        int ret = addOrUpdateNetworkNative(config);
-        sendConfigChangeBroadcast();
-        return ret;
+        NetworkUpdateResult result = addOrUpdateNetworkNative(config);
+        sendConfiguredNetworksChangedBroadcast();
+        return result.getNetworkId();
     }
 
     /**
@@ -307,7 +309,7 @@ class WifiConfigStore {
         synchronized (sConfiguredNetworks) {
             if (ret) sConfiguredNetworks.remove(netId);
         }
-        sendConfigChangeBroadcast();
+        sendConfiguredNetworksChangedBroadcast();
         return ret;
     }
 
@@ -321,7 +323,7 @@ class WifiConfigStore {
      */
     static boolean enableNetwork(int netId, boolean disableOthers) {
         boolean ret = enableNetworkWithoutBroadcast(netId, disableOthers);
-        sendConfigChangeBroadcast();
+        sendConfiguredNetworksChangedBroadcast();
         return ret;
     }
 
@@ -349,7 +351,7 @@ class WifiConfigStore {
             WifiConfiguration config = sConfiguredNetworks.get(netId);
             if (config != null) config.status = Status.DISABLED;
         }
-        sendConfigChangeBroadcast();
+        sendConfiguredNetworksChangedBroadcast();
         return ret;
     }
 
@@ -475,9 +477,9 @@ class WifiConfigStore {
         return false;
     }
 
-    private static void sendConfigChangeBroadcast() {
-        if (!ActivityManagerNative.isSystemReady()) return;
-        Intent intent = new Intent(WifiManager.SUPPLICANT_CONFIG_CHANGED_ACTION);
+    private static void sendConfiguredNetworksChangedBroadcast() {
+        Intent intent = new Intent(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         sContext.sendBroadcast(intent);
     }
 
@@ -522,7 +524,7 @@ class WifiConfigStore {
             }
         }
         readIpAndProxyConfigurations();
-        sendConfigChangeBroadcast();
+        sendConfiguredNetworksChangedBroadcast();
     }
 
     /* Mark all networks except specified netId as disabled */
@@ -748,7 +750,7 @@ class WifiConfigStore {
         }
     }
 
-    private static int addOrUpdateNetworkNative(WifiConfiguration config) {
+    private static NetworkUpdateResult addOrUpdateNetworkNative(WifiConfiguration config) {
         /*
          * If the supplied networkId is INVALID_NETWORK_ID, we create a new empty
          * network configuration. Otherwise, the networkId should
@@ -756,14 +758,14 @@ class WifiConfigStore {
          */
         int netId = config.networkId;
         boolean updateFailed = true;
-        boolean newNetwork = (netId == INVALID_NETWORK_ID);
         // networkId of INVALID_NETWORK_ID means we want to create a new network
+        boolean newNetwork = (netId == INVALID_NETWORK_ID);
 
         if (newNetwork) {
             netId = WifiNative.addNetworkCommand();
             if (netId < 0) {
                 Log.e(TAG, "Failed to add a network!");
-                return INVALID_NETWORK_ID;
+                return new NetworkUpdateResult(INVALID_NETWORK_ID);
           }
         }
 
@@ -937,7 +939,7 @@ class WifiConfigStore {
                         "Failed to set a network variable, removed network: "
                         + netId);
             }
-            return INVALID_NETWORK_ID;
+            return new NetworkUpdateResult(INVALID_NETWORK_ID);
         }
 
         /* An update of the network variables requires reading them
@@ -959,12 +961,15 @@ class WifiConfigStore {
             }
         }
         readNetworkVariables(sConfig);
-        writeIpAndProxyConfigurationsOnChange(sConfig, config);
-        return netId;
+
+        NetworkUpdateResult result = writeIpAndProxyConfigurationsOnChange(sConfig, config);
+        result.setNetworkId(netId);
+        return result;
     }
 
     /* Compare current and new configuration and write to file on change */
-    private static void writeIpAndProxyConfigurationsOnChange(WifiConfiguration currentConfig,
+    private static NetworkUpdateResult writeIpAndProxyConfigurationsOnChange(
+            WifiConfiguration currentConfig,
             WifiConfiguration newConfig) {
         boolean ipChanged = false;
         boolean proxyChanged = false;
@@ -1056,8 +1061,9 @@ class WifiConfigStore {
         if (ipChanged || proxyChanged) {
             currentConfig.linkProperties = linkProperties;
             writeIpAndProxyConfigurations();
-            sendConfigChangeBroadcast();
+            sendConfiguredNetworksChangedBroadcast();
         }
+        return new NetworkUpdateResult(ipChanged, proxyChanged);
     }
 
     private static void addIpSettingsFromConfig(LinkProperties linkProperties,
