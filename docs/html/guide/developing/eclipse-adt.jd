@@ -541,7 +541,6 @@ example library project declares the Activity <code>GameActivity</code>: </p>
     &lt;activity android:name="GameActivity" /&gt;
     ...
   &lt;/application&gt;
-  ...
 &lt;/manifest&gt;</pre>
 
 
@@ -611,7 +610,6 @@ like this: </p>
     &lt;activity android:name="com.example.android.tictactoe.library.GameActivity" /&gt;
     ...
   &lt;/application&gt;
-  ...
 &lt;/manifest&gt;</pre>
 
 <p>For more information about the manifest file, see the documentation for <a

@@ -120,9 +120,8 @@ specify:</p>
 
 <pre>&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     package=&quot;com.android.app.myapp&quot; &gt;
-
     &lt;uses-permission android:name=&quot;android.permission.RECEIVE_SMS&quot; /&gt;
-
+    ...
 &lt;/manifest&gt;</pre>
 
 <p>At application install time, permissions requested by the application are
@@ -175,13 +174,12 @@ of its activities could declare a permission for this operation as follows:</p>
 
 <pre>&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     package=&quot;com.me.app.myapp&quot; &gt;
-
     &lt;permission android:name=&quot;com.me.app.myapp.permission.DEADLY_ACTIVITY&quot;
         android:label=&quot;&#64;string/permlab_deadlyActivity&quot;
         android:description=&quot;&#64;string/permdesc_deadlyActivity&quot;
         android:permissionGroup=&quot;android.permission-group.COST_MONEY&quot;
         android:protectionLevel=&quot;dangerous&quot; /&gt;
-
+    ...
 &lt;/manifest&gt;</pre>
 
 <p>The {@link android.R.styleable#AndroidManifestPermission_protectionLevel

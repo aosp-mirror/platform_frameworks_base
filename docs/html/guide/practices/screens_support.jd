@@ -693,13 +693,13 @@ nine-patch images, which always takes place by default. </p>
 
 <pre>
 &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"&gt;
-    ...
     &lt;supports-screens
         android:smallScreens="true"
         android:normalScreens="true"
         android:largeScreens="true"
         android:xlargeScreens="true"
         android:anyDensity="true" /&gt;
+    ...
 &lt;/manifest&gt;
 </pre>
 <!--  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; android:resizeable="true" -->
