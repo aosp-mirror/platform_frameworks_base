@@ -89,6 +89,7 @@ import android.util.FloatMath;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ActionMode;
+import android.view.ActionMode.Callback;
 import android.view.ContextMenu;
 import android.view.DragEvent;
 import android.view.Gravity;
@@ -314,6 +315,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     Drawable mSelectHandleCenter;
 
     private int mLastDownPositionX, mLastDownPositionY;
+    private Callback mCustomSelectionActionModeCallback;
 
     /*
      * Kick-start the font cache for the zygote process (to pay the cost of
@@ -6869,7 +6871,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
 
                 if (mSelectAllOnFocus) {
-                    Selection.setSelection((Spannable) mText, 0, mText.length());
+                    selectAll();
                 }
 
                 mTouchFocusSelected = true;
@@ -7401,10 +7403,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return false;
         }
 
-        if (mText.length() > 0 && hasSelection()) {
-            if (mText instanceof Editable && mInput != null) {
-                return true;
-            }
+        if (mText.length() > 0 && hasSelection() && mText instanceof Editable && mInput != null) {
+            return true;
         }
 
         return false;
@@ -7524,13 +7524,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return (int) (range & 0x00000000FFFFFFFFL);
     }
 
+    private void selectAll() {
+        Selection.setSelection((Spannable) mText, 0, mText.length());
+    }
+
     private void selectCurrentWord() {
         if (hasPasswordTransformationMethod()) {
             // selectCurrentWord is not available on a password field and would return an
             // arbitrary 10-charater selection around pressed position. Select all instead.
             // Note that cut/copy menu entries are not available for passwords.
             // This is however useful to delete or paste to replace the entire content.
-            Selection.setSelection((Spannable) mText, 0, mText.length());
+            selectAll();
             return;
         }
 
@@ -7862,16 +7866,36 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Provides the callback used to start a selection action mode.
+     * If provided, this ActionMode.Callback will be used to create the ActionMode when text
+     * selection is initiated in this View.
      *
-     * @return A callback instance that will be used to start selection mode, or null if selection
-     * mode is not available.
+     * The standard implementation populates the menu with a subset of Select All, Cut, Copy and
+     * Paste actions, depending on what this View supports.
+     *
+     * A custom implementation can add new entries in the default menu in its
+     * {@link ActionMode.Callback#onPrepareActionMode(ActionMode, Menu)} method. The default actions
+     * can also be removed from the menu using {@link Menu#removeItem(int)} and passing
+     * {@link android.R.id#selectAll}, {@link android.R.id#cut}, {@link android.R.id#copy} or
+     * {@link android.R.id#paste} ids as parameters.
+     *
+     * Action click events should be handled by the custom implementation of
+     * {@link ActionMode.Callback#onActionItemClicked(ActionMode, MenuItem)}.
+     *
+     * Note that text selection mode is not started when a TextView receives focus and the
+     * {@link android.R.attr#selectAllOnFocus} flag has been set. The content is highlighted in
+     * that case, to allow for quick replacement.
      */
-    private ActionMode.Callback getActionModeCallback() {
-        if (canSelectText()) {
-            return new SelectionActionModeCallback();
-        }
-        return null;
+    public void setCustomSelectionActionModeCallback(ActionMode.Callback actionModeCallback) {
+        mCustomSelectionActionModeCallback = actionModeCallback;
+    }
+
+    /**
+     * Retrieves the value set in {@link #setCustomSelectionActionModeCallback}. Default is null.
+     *
+     * @return The current custom selection callback.
+     */
+    public ActionMode.Callback getCustomSelectionActionModeCallback() {
+        return mCustomSelectionActionModeCallback;
     }
 
     /**
@@ -7884,7 +7908,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return false;
         }
 
-        ActionMode.Callback actionModeCallback = getActionModeCallback();
+        selectCurrentWord();
+        ActionMode.Callback actionModeCallback = new SelectionActionModeCallback();
         if (actionModeCallback != null) {
             mSelectionActionMode = startActionMode(actionModeCallback);
             return mSelectionActionMode != null;
@@ -7950,6 +7975,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         sLastCutOrCopyTime = SystemClock.uptimeMillis();
     }
 
+    /**
+     * An ActionMode Callback class that is used to provide actions while in text selection mode.
+     *
+     * The default callback provides a subset of Select All, Cut, Copy and Paste actions, depending
+     * on which of these this TextView supports.
+     */
     private class SelectionActionModeCallback implements ActionMode.Callback {
 
         @Override
@@ -7968,48 +7999,47 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mode.setTitle(mContext.getString(com.android.internal.R.string.textSelectionCABTitle));
             mode.setSubtitle(null);
 
-            boolean atLeastOne = false;
-
             if (canSelectText()) {
-                selectCurrentWord();
-
                 menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
                     setAlphabeticShortcut('a').
                     setShowAsAction(
                             MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-                atLeastOne = true;
             }
 
             if (canCut()) {
                 menu.add(0, ID_CUT, 0, com.android.internal.R.string.cut).
-                    setIcon(styledAttributes.getResourceId(R.styleable.Theme_actionModeCutDrawable, 0)).
+                    setIcon(styledAttributes.getResourceId(
+                            R.styleable.Theme_actionModeCutDrawable, 0)).
                     setAlphabeticShortcut('x').
                     setShowAsAction(
                             MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-                atLeastOne = true;
             }
 
             if (canCopy()) {
                 menu.add(0, ID_COPY, 0, com.android.internal.R.string.copy).
-                    setIcon(styledAttributes.getResourceId(R.styleable.Theme_actionModeCopyDrawable, 0)).
+                    setIcon(styledAttributes.getResourceId(
+                            R.styleable.Theme_actionModeCopyDrawable, 0)).
                     setAlphabeticShortcut('c').
                     setShowAsAction(
                             MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-                atLeastOne = true;
             }
 
             if (canPaste()) {
                 menu.add(0, ID_PASTE, 0, com.android.internal.R.string.paste).
-                        setIcon(styledAttributes.getResourceId(R.styleable.Theme_actionModePasteDrawable, 0)).
+                        setIcon(styledAttributes.getResourceId(
+                                R.styleable.Theme_actionModePasteDrawable, 0)).
                         setAlphabeticShortcut('v').
                         setShowAsAction(
                                 MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-                atLeastOne = true;
             }
 
             styledAttributes.recycle();
 
-            if (atLeastOne) {
+            if (mCustomSelectionActionModeCallback != null) {
+                mCustomSelectionActionModeCallback.onCreateActionMode(mode, menu);
+            }
+
+            if (menu.hasVisibleItems() || mode.getCustomView() != null) {
                 getSelectionController().show();
                 return true;
             } else {
@@ -8019,15 +8049,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            if (mCustomSelectionActionModeCallback != null) {
+                return mCustomSelectionActionModeCallback.onPrepareActionMode(mode, menu);
+            }
             return true;
         }
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            if (mCustomSelectionActionModeCallback != null &&
+                 mCustomSelectionActionModeCallback.onActionItemClicked(mode, item)) {
+                return true;
+            }
+
             final int itemId = item.getItemId();
 
             if (itemId == ID_SELECT_ALL) {
-                Selection.setSelection((Spannable) mText, 0, mText.length());
+                selectAll();
                 // Update controller positions after selection change.
                 if (hasSelectionController()) {
                     getSelectionController().show();
@@ -8070,6 +8108,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
+            if (mCustomSelectionActionModeCallback != null) {
+                mCustomSelectionActionModeCallback.onDestroyActionMode(mode);
+            }
             Selection.setSelection((Spannable) mText, getSelectionStart());
             hideSelectionModifierCursorController();
             mSelectionActionMode = null;
