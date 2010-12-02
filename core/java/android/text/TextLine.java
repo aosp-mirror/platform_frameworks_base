@@ -663,6 +663,25 @@ class TextLine {
     }
 
     /**
+     * @param wp
+     */
+    private static void expandMetricsFromPaint(FontMetricsInt fmi, TextPaint wp) {
+        final int previousTop     = fmi.top;
+        final int previousAscent  = fmi.ascent;
+        final int previousDescent = fmi.descent;
+        final int previousBottom  = fmi.bottom;
+        final int previousLeading = fmi.leading;
+
+        wp.getFontMetricsInt(fmi);
+
+        fmi.top     = Math.min(fmi.top,     previousTop);
+        fmi.ascent  = Math.min(fmi.ascent,  previousAscent);
+        fmi.descent = Math.max(fmi.descent, previousDescent);
+        fmi.bottom  = Math.max(fmi.bottom,  previousBottom);
+        fmi.leading = Math.max(fmi.leading, previousLeading);
+    }
+
+    /**
      * Utility function for measuring and rendering text.  The text must
      * not include a tab or emoji.
      *
@@ -703,7 +722,7 @@ class TextLine {
         }
 
         if (fmi != null) {
-            wp.getFontMetricsInt(fmi);
+            expandMetricsFromPaint(fmi, wp);
         }
 
         if (c != null) {
