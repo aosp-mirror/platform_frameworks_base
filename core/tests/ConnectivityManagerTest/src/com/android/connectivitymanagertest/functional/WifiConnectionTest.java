@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiConfiguration.Status;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.ConnectivityManager;
@@ -42,6 +43,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -56,13 +58,14 @@ import java.util.Set;
 public class WifiConnectionTest
     extends ActivityInstrumentationTestCase2<ConnectivityManagerTestActivity> {
     private static final String TAG = "WifiConnectionTest";
-    private static final boolean DEBUG = true;
-    private static final String PKG_NAME = "com.android.connectivitymanagertests";
+    private static final boolean DEBUG = false;
     private List<WifiConfiguration> networks = new ArrayList<WifiConfiguration>();
     private ConnectivityManagerTestActivity mAct;
     private HashMap<String, DhcpInfo> hm = null;
     private ConnectivityManagerTestRunner mRunner;
     private ContentResolver cr;
+    private Set<WifiConfiguration> enabledNetworks = null;
+    private WifiManager mWifiManager = null;
 
     public WifiConnectionTest() {
         super(ConnectivityManagerTestActivity.class);
@@ -71,8 +74,12 @@ public class WifiConnectionTest
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        mAct = getActivity();
+        log("before we launch the test activity, we preserve all the configured networks.");
         mRunner = ((ConnectivityManagerTestRunner)getInstrumentation());
+        mWifiManager = (WifiManager) mRunner.getContext().getSystemService(Context.WIFI_SERVICE);
+        enabledNetworks = getEnabledNetworks(mWifiManager.getConfiguredNetworks());
+
+        mAct = getActivity();
         cr = mRunner.getContext().getContentResolver();
         networks = mAct.loadNetworkConfigurations();
         hm = mAct.getDhcpInfo();
@@ -83,21 +90,18 @@ public class WifiConnectionTest
 
         // enable Wifi and verify wpa_supplicant is started
         assertTrue("enable Wifi failed", mAct.enableWifi());
-        try {
-            Thread.sleep( 2 * ConnectivityManagerTestActivity.SHORT_TIMEOUT);
-        } catch (Exception e) {
-            fail("interrupted while waiting for WPA_SUPPLICANT to start");
-        }
+        sleep(2 * ConnectivityManagerTestActivity.SHORT_TIMEOUT,
+                "interrupted while waiting for WPA_SUPPLICANT to start");
         WifiInfo mConnection = mAct.mWifiManager.getConnectionInfo();
         assertNotNull(mConnection);
         assertTrue("wpa_supplicant is not started ", mAct.mWifiManager.pingSupplicant());
     }
 
     private void printNetworkConfigurations() {
-        Log.v(TAG, "==== print network configurations parsed from XML file ====");
-        Log.v(TAG, "number of access points: " + networks.size());
+        log("==== print network configurations parsed from XML file ====");
+        log("number of access points: " + networks.size());
         for (WifiConfiguration config : networks) {
-            Log.v(TAG, config.toString());
+            log(config.toString());
         }
     }
 
@@ -107,22 +111,62 @@ public class WifiConnectionTest
         } else {
             Set<Entry<String, DhcpInfo>> set = hm.entrySet();
             for (Entry<String, DhcpInfo> me: set) {
-               Log.v(TAG, "SSID: " + me.getKey());
+               log("SSID: " + me.getKey());
                DhcpInfo dhcp = me.getValue();
-               Log.v(TAG, "    dhcp: " + dhcp.toString());
-               Log.v(TAG, "IP: " + intToIpString(dhcp.ipAddress));
-               Log.v(TAG, "gateway: " + intToIpString(dhcp.gateway));
-               Log.v(TAG, "Netmask: " + intToIpString(dhcp.netmask));
-               Log.v(TAG, "DNS1: " + intToIpString(dhcp.dns1));
-               Log.v(TAG, "DNS2: " + intToIpString(dhcp.dns2));
+               log("IP: " + intToIpString(dhcp.ipAddress));
+               log("gateway: " + intToIpString(dhcp.gateway));
+               log("Netmask: " + intToIpString(dhcp.netmask));
+               log("DNS1: " + intToIpString(dhcp.dns1));
+               log("DNS2: " + intToIpString(dhcp.dns2));
             }
         }
     }
 
     @Override
     public void tearDown() throws Exception {
+        log("tear down");
         mAct.removeConfiguredNetworksAndDisableWifi();
+        reEnableNetworks(enabledNetworks);
+        mWifiManager.saveConfiguration();
         super.tearDown();
+    }
+
+    private Set<WifiConfiguration> getEnabledNetworks(List<WifiConfiguration> configuredNetworks) {
+        Set<WifiConfiguration> networks = new HashSet<WifiConfiguration>();
+        for (WifiConfiguration wifiConfig : configuredNetworks) {
+            if (wifiConfig.status == Status.ENABLED || wifiConfig.status == Status.CURRENT) {
+                networks.add(wifiConfig);
+                log("remembering enabled network " + wifiConfig.SSID +
+                        " status is " + wifiConfig.status);
+            }
+        }
+        return networks;
+    }
+
+    private void reEnableNetworks(Set<WifiConfiguration> enabledWifiConfig) {
+        if (!mWifiManager.isWifiEnabled()) {
+            log("reEnableNetworks: enable Wifi");
+            mWifiManager.setWifiEnabled(true);
+            sleep(ConnectivityManagerTestActivity.SHORT_TIMEOUT,
+                    "interruped while waiting for wifi to be enabled");
+        }
+        for (WifiConfiguration wifiConfig : enabledWifiConfig) {
+            log("recover wifi configuration: " + wifiConfig.toString());
+            int netId = mWifiManager.addNetwork(wifiConfig);
+            if (wifiConfig.status == Status.CURRENT) {
+                mWifiManager.enableNetwork(netId, true);
+                mWifiManager.reconnect();
+                sleep(ConnectivityManagerTestActivity.SHORT_TIMEOUT,
+                        String.format("interruped while connecting to %s", wifiConfig.SSID));
+                log("re-connecting to network " + wifiConfig.SSID);
+            }
+        }
+        List<WifiConfiguration> wifiConfigurations = mWifiManager.getConfiguredNetworks();
+        for (WifiConfiguration wifiConfig: wifiConfigurations) {
+            if (wifiConfig.status == Status.DISABLED) {
+                mWifiManager.enableNetwork(wifiConfig.networkId, false);
+            }
+        }
     }
 
     private String intToIpString(int i) {
@@ -130,6 +174,18 @@ public class WifiConnectionTest
                 ((i >> 8) & 0xFF) + "." +
                 ((i >> 16) & 0xFF) + "." +
                 ((i >> 24) & 0xFF));
+    }
+
+    private void sleep(long sometime, String errorMsg) {
+        try {
+            Thread.sleep(sometime);
+        } catch (InterruptedException e) {
+            fail(errorMsg);
+        }
+    }
+
+    private void log(String message) {
+        Log.v(TAG, message);
     }
     /**
      * Connect to the provided Wi-Fi network
@@ -164,26 +220,25 @@ public class WifiConnectionTest
         // step 2: verify Wifi state and network state;
         assertTrue(mAct.waitForWifiState(WifiManager.WIFI_STATE_ENABLED,
                 ConnectivityManagerTestActivity.SHORT_TIMEOUT));
+        // 802.1x requires long time for connection.
         assertTrue(mAct.waitForNetworkState(ConnectivityManager.TYPE_WIFI,
-                State.CONNECTED, ConnectivityManagerTestActivity.LONG_TIMEOUT));
+                State.CONNECTED, 2 * ConnectivityManagerTestActivity.LONG_TIMEOUT));
 
         // step 3: verify the current connected network is the given SSID
+        assertNotNull("Wifi connection returns null", mAct.mWifiManager.getConnectionInfo());
         if (DEBUG) {
-            Log.v(TAG, "config.SSID = " + config.SSID);
-            Log.v(TAG, "mAct.mWifiManager.getConnectionInfo.getSSID()" +
+            log("config.SSID = " + config.SSID);
+            log("mAct.mWifiManager.getConnectionInfo.getSSID()" +
                     mAct.mWifiManager.getConnectionInfo().getSSID());
         }
         assertTrue(config.SSID.contains(mAct.mWifiManager.getConnectionInfo().getSSID()));
-
-        // Maintain the connection for 50 seconds before switching
-        try {
-            Thread.sleep(mAct.LONG_TIMEOUT);
-        } catch (Exception e) {
-            fail("interrupted while waiting for WPA_SUPPLICANT to start");
-        }
-
         if (isStaticIP) {
             Settings.System.putInt(cr, Settings.System.WIFI_USE_STATIC_IP, 0);
+            Settings.System.putString(cr, Settings.System.WIFI_STATIC_IP, "");
+            Settings.System.putString(cr, Settings.System.WIFI_STATIC_GATEWAY, "");
+            Settings.System.putString(cr, Settings.System.WIFI_STATIC_NETMASK, "");
+            Settings.System.putString(cr, Settings.System.WIFI_STATIC_DNS1, "");
+            Settings.System.putString(cr, Settings.System.WIFI_STATIC_DNS2, "");
         }
     }
 
@@ -191,15 +246,11 @@ public class WifiConnectionTest
     public void testWifiConnections() {
         for (int i = 0; i < networks.size(); i++) {
             String ssid = networks.get(i).SSID;
-            Log.v(TAG, "-- start Wi-Fi connection test for SSID: " + ssid + " --");
+            log("-- START Wi-Fi connection test for SSID: " + ssid + " --");
             connectToWifi(networks.get(i));
-            mAct.removeConfiguredNetworksAndDisableWifi();
-            try {
-                Thread.sleep(4 * mAct.SHORT_TIMEOUT);
-            } catch (Exception e) {
-                fail("Interrupted while disabling wifi");
-            }
-            Log.v(TAG, "-- END Wi-Fi connection test for SSID: " + ssid + " --");
+            sleep(2 * ConnectivityManagerTestActivity.SHORT_TIMEOUT,
+                    String.format("Interrupted while connecting to ", ssid));
+            log("-- END Wi-Fi connection test for SSID: " + ssid + " --");
         }
     }
 }
