@@ -1602,7 +1602,6 @@
     </style>
 
     <style name="Widget.Holo.ActionMode" parent="Widget.ActionMode">
-        <item name="android:background">@android:drawable/cab_holo_dark</item>
         <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Subtitle</item>
     </style>
@@ -1886,7 +1885,6 @@
     </style>
 
     <style name="Widget.Holo.Light.ActionMode" parent="Widget.Holo.ActionMode">
-        <item name="android:background">@android:drawable/cab_holo_light</item>
         <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Subtitle</item>
     </style>

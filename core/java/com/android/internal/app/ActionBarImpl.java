@@ -22,6 +22,10 @@ import com.android.internal.view.menu.SubMenuBuilder;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarView;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
+import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorSet;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
@@ -36,6 +40,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.SpinnerAdapter;
 import android.widget.ViewAnimator;
@@ -58,7 +63,7 @@ public class ActionBarImpl extends ActionBar {
     private Activity mActivity;
     private Dialog mDialog;
 
-    private ViewAnimator mAnimatorView;
+    private FrameLayout mContainerView;
     private ActionBarView mActionView;
     private ActionBarContextView mUpperContextView;
     private LinearLayout mLowerContextView;
@@ -81,17 +86,52 @@ public class ActionBarImpl extends ActionBar {
 
     private int mContextDisplayMode;
 
-    private boolean mClosingContext;
-
     final Handler mHandler = new Handler();
-    final Runnable mCloseContext = new Runnable() {
-        public void run() {
-            mUpperContextView.closeMode();
-            if (mLowerContextView != null) {
-                mLowerContextView.removeAllViews();
+
+    private Animator mCurrentAnimation;
+
+    final AnimatorListener[] mAfterAnimation = new AnimatorListener[] {
+            new AnimatorListener() { // NORMAL_VIEW
+                @Override
+                public void onAnimationStart(Animator animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    if (mLowerContextView != null) {
+                        mLowerContextView.removeAllViews();
+                    }
+                    mCurrentAnimation = null;
+                    hideAllExcept(NORMAL_VIEW);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+                }
+            },
+            new AnimatorListener() { // CONTEXT_VIEW
+                @Override
+                public void onAnimationStart(Animator animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mCurrentAnimation = null;
+                    hideAllExcept(CONTEXT_VIEW);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+                }
             }
-            mClosingContext = false;
-        }
     };
 
     public ActionBarImpl(Activity activity) {
@@ -111,10 +151,10 @@ public class ActionBarImpl extends ActionBar {
                 com.android.internal.R.id.action_context_bar);
         mLowerContextView = (LinearLayout) decor.findViewById(
                 com.android.internal.R.id.lower_action_context_bar);
-        mAnimatorView = (ViewAnimator) decor.findViewById(
-                com.android.internal.R.id.action_bar_animator);
+        mContainerView = (FrameLayout) decor.findViewById(
+                com.android.internal.R.id.action_bar_container);
 
-        if (mActionView == null || mUpperContextView == null || mAnimatorView == null) {
+        if (mActionView == null || mUpperContextView == null || mContainerView == null) {
             throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
                     "with a compatible window decor layout");
         }
@@ -265,18 +305,11 @@ public class ActionBarImpl extends ActionBar {
             mActionMode.finish();
         }
 
-        // Don't wait for the close context mode animation to finish.
-        if (mClosingContext) {
-            mAnimatorView.clearAnimation();
-            mHandler.removeCallbacks(mCloseContext);
-            mCloseContext.run();
-        }
-
         ActionMode mode = new ActionModeImpl(callback);
         if (callback.onCreateActionMode(mode, mode.getMenu())) {
             mode.invalidate();
             mUpperContextView.initForMode(mode);
-            mAnimatorView.setDisplayedChild(CONTEXT_VIEW);
+            animateTo(CONTEXT_VIEW);
             if (mLowerContextView != null) {
                 // TODO animate this
                 mLowerContextView.setVisibility(View.VISIBLE);
@@ -412,17 +445,63 @@ public class ActionBarImpl extends ActionBar {
     @Override
     public void show() {
         // TODO animate!
-        mAnimatorView.setVisibility(View.VISIBLE);
+        mContainerView.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void hide() {
         // TODO animate!
-        mAnimatorView.setVisibility(View.GONE);
+        mContainerView.setVisibility(View.GONE);
     }
 
     public boolean isShowing() {
-        return mAnimatorView.getVisibility() == View.VISIBLE;
+        return mContainerView.getVisibility() == View.VISIBLE;
+    }
+
+    private long animateTo(int viewIndex) {
+        // Don't wait for the current animation to finish.
+        if (mCurrentAnimation != null) {
+            mCurrentAnimation.end();
+        }
+
+        AnimatorSet set = new AnimatorSet();
+
+        final View targetChild = mContainerView.getChildAt(viewIndex);
+        targetChild.setVisibility(View.VISIBLE);
+        AnimatorSet.Builder b = set.play(ObjectAnimator.ofFloat(targetChild, "alpha", 1));
+        if (viewIndex == NORMAL_VIEW) {
+            targetChild.setScaleY(0);
+            b.with(ObjectAnimator.ofFloat(targetChild, "scaleY", 1));
+        }
+
+        final int count = mContainerView.getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = mContainerView.getChildAt(i);
+            if (i == viewIndex) {
+                continue;
+            }
+
+            if (child.getVisibility() != View.GONE) {
+                ObjectAnimator a = ObjectAnimator.ofFloat(child, "alpha", 0);
+                b.with(a);
+                if (viewIndex == CONTEXT_VIEW) {
+                    b.with(ObjectAnimator.ofFloat(child, "scaleY", 0));
+                }
+            }
+        }
+
+        set.addListener(mAfterAnimation[viewIndex]);
+
+        mCurrentAnimation = set;
+        set.start();
+        return set.getDuration();
+    }
+
+    private void hideAllExcept(int viewIndex) {
+        final int count = mContainerView.getChildCount();
+        for (int i = 0; i < count; i++) {
+            mContainerView.getChildAt(i).setVisibility(i == viewIndex ? View.VISIBLE : View.GONE);
+        }
     }
 
     /**
@@ -458,12 +537,11 @@ public class ActionBarImpl extends ActionBar {
             }
 
             mCallback.onDestroyActionMode(this);
-            mAnimatorView.setDisplayedChild(NORMAL_VIEW);
+            mCallback = null;
+            animateTo(NORMAL_VIEW);
 
             // Clear out the context mode views after the animation finishes
-            mClosingContext = true;
-            mHandler.postDelayed(mCloseContext, mAnimatorView.getOutAnimation().getDuration());
-
+            mUpperContextView.closeMode();
             if (mLowerContextView != null && mLowerContextView.getVisibility() != View.GONE) {
                 // TODO Animate this
                 mLowerContextView.setVisibility(View.GONE);
@@ -520,13 +598,21 @@ public class ActionBarImpl extends ActionBar {
         }
 
         public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
-            return mCallback.onActionItemClicked(this, item);
+            if (mCallback != null) {
+                return mCallback.onActionItemClicked(this, item);
+            } else {
+                return false;
+            }
         }
 
         public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
         }
 
         public boolean onSubMenuSelected(SubMenuBuilder subMenu) {
+            if (mCallback == null) {
+                return false;
+            }
+
             if (!subMenu.hasVisibleItems()) {
                 return true;
             }
@@ -539,6 +625,9 @@ public class ActionBarImpl extends ActionBar {
         }
 
         public void onMenuModeChange(MenuBuilder menu) {
+            if (mCallback == null) {
+                return;
+            }
             invalidate();
             mUpperContextView.openOverflowMenu();
         }
