@@ -19,8 +19,8 @@ package android.media.videoeditor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+
+import android.media.videoeditor.VideoEditor.MediaProcessingProgressListener;
 
 
 /**
@@ -30,34 +30,19 @@ import java.lang.reflect.InvocationTargetException;
  * {@hide}
  */
 public class VideoEditorFactory {
-    // VideoEditor implementation classes
-    public static final String TEST_CLASS_IMPLEMENTATION
-            = "android.media.videoeditor.VideoEditorTestImpl";
-    public static final String DEFAULT_CLASS_IMPLEMENTATION
-            = "android.media.videoeditor.VideoEditorImpl";
-
     /**
      * This is the factory method for creating a new VideoEditor instance.
      *
      * @param projectPath The path where all VideoEditor internal
      *            files are stored. When a project is deleted the application is
      *            responsible for deleting the path and its contents.
-     * @param className The implementation class name
      *
      * @return The VideoEditor instance
      *
      * @throws IOException if path does not exist or if the path can
      *             not be accessed in read/write mode
-     * @throws IllegalStateException if a previous VideoEditor instance has not
-     *             been released
-     * @throws ClassNotFoundException, NoSuchMethodException,
-     *             InvocationTargetException, IllegalAccessException,
-     *             InstantiationException if the implementation class cannot
-     *             be instantiated.
      */
-    public static VideoEditor create(String projectPath, String className) throws IOException,
-            ClassNotFoundException, NoSuchMethodException, InvocationTargetException,
-            IllegalAccessException, InstantiationException {
+    public static VideoEditor create(String projectPath) throws IOException {
         // If the project path does not exist create it
         final File dir = new File(projectPath);
         if (!dir.exists()) {
@@ -72,14 +57,7 @@ public class VideoEditorFactory {
             }
         }
 
-        final Class<?> cls = Class.forName(className);
-        final Class<?> partypes[] = new Class[1];
-        partypes[0] = String.class;
-        final Constructor<?> ct = cls.getConstructor(partypes);
-        final Object arglist[] = new Object[1];
-        arglist[0] = projectPath;
-
-        return (VideoEditor)ct.newInstance(arglist);
+        return new VideoEditorImpl(projectPath);
     }
 
     /**
@@ -90,30 +68,19 @@ public class VideoEditorFactory {
      * @param projectPath The path where all VideoEditor internal files
      *            are stored. When a project is deleted the application is
      *            responsible for deleting the path and its contents.
-     * @param className The implementation class name
      * @param generatePreview if set to true the
-     *      {@link MediaEditor#generatePreview()} will be called internally to
-     *      generate any needed transitions.
+     *      {@link MediaEditor#generatePreview(MediaProcessingProgressListener listener)}
+     *      will be called internally to generate any needed transitions.
      *
      * @return The VideoEditor instance
      *
      * @throws IOException if path does not exist or if the path can
      *             not be accessed in read/write mode or if one of the resource
      *             media files cannot be retrieved
-     * @throws IllegalStateException if a previous VideoEditor instance has not
-     *             been released
      */
-    public static VideoEditor load(String projectPath, String className, boolean generatePreview)
-            throws IOException, ClassNotFoundException, NoSuchMethodException,
-            InvocationTargetException, IllegalAccessException, InstantiationException {
-        final Class<?> cls = Class.forName(className);
-        final Class<?> partypes[] = new Class[1];
-        partypes[0] = String.class;
-        final Constructor<?> ct = cls.getConstructor(partypes);
-        final Object arglist[] = new Object[1];
-        arglist[0] = projectPath;
-
-        final VideoEditor videoEditor = (VideoEditor)ct.newInstance(arglist);
+    public static VideoEditor load(String projectPath, boolean generatePreview)
+            throws IOException {
+        final VideoEditor videoEditor = new VideoEditorImpl(projectPath);
         if (generatePreview) {
             videoEditor.generatePreview(null);
         }
