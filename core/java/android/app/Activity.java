@@ -2363,7 +2363,11 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean onMenuOpened(int featureId, Menu menu) {
         if (featureId == Window.FEATURE_ACTION_BAR) {
-            mActionBar.dispatchMenuVisibilityChanged(true);
+            if (mActionBar != null) {
+                mActionBar.dispatchMenuVisibilityChanged(true);
+            } else {
+                Log.e(TAG, "Tried to open action bar menu with no action bar");
+            }
         }
         return true;
     }
