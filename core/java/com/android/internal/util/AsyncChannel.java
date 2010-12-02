@@ -95,7 +95,7 @@ public class AsyncChannel {
      *
      * msg.arg1 == 0 : STATUS_SUCCESSFUL
      *             1 : STATUS_BINDING_UNSUCCESSFUL
-     * msg.arg2 == token parameter
+     * msg.obj  == the AsyncChannel
      * msg.replyTo == dstMessenger if successful
      */
     public static final int CMD_CHANNEL_HALF_CONNECTED = -1;
@@ -136,7 +136,7 @@ public class AsyncChannel {
      *
      * msg.arg1 == 0 : STATUS_SUCCESSFUL
      *               : All other values signify failure and the channel state is indeterminate
-     * msg.arg2 == token parameter
+     * msg.obj  == the AsyncChannel
      * msg.replyTo = messenger disconnecting or null if it was never connected.
      */
     public static final int CMD_CHANNEL_DISCONNECTED = -5;
@@ -179,14 +179,12 @@ public class AsyncChannel {
      * @param dstPackageName is the destination package name
      * @param dstClassName is the fully qualified class name (i.e. contains
      *            package name)
-     * @param token unique id for this connection
      */
     private void connectSrcHandlerToPackage(
-            Context srcContext, Handler srcHandler, String dstPackageName, String dstClassName,
-            int token) {
+            Context srcContext, Handler srcHandler, String dstPackageName, String dstClassName) {
         if (DBG) log("connect srcHandler to dst Package & class E");
 
-        mConnection = new AsyncChannelConnection(token);
+        mConnection = new AsyncChannelConnection();
 
         /* Initialize the source information */
         mSrcContext = srcContext;
@@ -205,7 +203,7 @@ public class AsyncChannel {
         intent.setClassName(dstPackageName, dstClassName);
         boolean result = srcContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         if (!result) {
-            replyHalfConnected(STATUS_BINDING_UNSUCCESSFUL, token);
+            replyHalfConnected(STATUS_BINDING_UNSUCCESSFUL);
         }
 
         if (DBG) log("connect srcHandler to dst Package & class X result=" + result);
@@ -216,7 +214,7 @@ public class AsyncChannel {
      *
      * Sends a CMD_CHANNEL_HALF_CONNECTED message to srcHandler when complete.
      *      msg.arg1 = status
-     *      msg.arg2 = token
+     *      msg.obj = the AsyncChannel
      *
      * @param srcContext is the context of the source
      * @param srcHandler is the hander to receive CONNECTED & DISCONNECTED
@@ -224,10 +222,9 @@ public class AsyncChannel {
      * @param dstPackageName is the destination package name
      * @param dstClassName is the fully qualified class name (i.e. contains
      *            package name)
-     * @param token returned in msg.arg2
      */
     public void connect(Context srcContext, Handler srcHandler, String dstPackageName,
-            String dstClassName, int token) {
+            String dstClassName) {
         if (DBG) log("connect srcHandler to dst Package & class E");
 
         final class ConnectAsync implements Runnable {
@@ -235,25 +232,21 @@ public class AsyncChannel {
             Handler mSrcHdlr;
             String mDstPackageName;
             String mDstClassName;
-            int mToken;
 
             ConnectAsync(Context srcContext, Handler srcHandler, String dstPackageName,
-                    String dstClassName, int token) {
+                    String dstClassName) {
                 mSrcCtx = srcContext;
                 mSrcHdlr = srcHandler;
                 mDstPackageName = dstPackageName;
                 mDstClassName = dstClassName;
-                mToken = token;
             }
 
             public void run() {
-                connectSrcHandlerToPackage(mSrcCtx, mSrcHdlr, mDstPackageName, mDstClassName,
-                        mToken);
+                connectSrcHandlerToPackage(mSrcCtx, mSrcHdlr, mDstPackageName, mDstClassName);
             }
         }
 
-        ConnectAsync ca = new ConnectAsync(srcContext, srcHandler, dstPackageName, dstClassName,
-                token);
+        ConnectAsync ca = new ConnectAsync(srcContext, srcHandler, dstPackageName, dstClassName);
         new Thread(ca).start();
 
         if (DBG) log("connect srcHandler to dst Package & class X");
@@ -264,15 +257,14 @@ public class AsyncChannel {
      *
      * Sends a CMD_CHANNEL_HALF_CONNECTED message to srcHandler when complete.
      *      msg.arg1 = status
-     *      msg.arg2 = token
+     *      msg.obj = the AsyncChannel
      *
      * @param srcContext
      * @param srcHandler
      * @param klass is the class to send messages to.
-     * @param token returned in msg.arg2
      */
-    public void connect(Context srcContext, Handler srcHandler, Class<?> klass, int token) {
-        connect(srcContext, srcHandler, klass.getPackage().getName(), klass.getName(), token);
+    public void connect(Context srcContext, Handler srcHandler, Class<?> klass) {
+        connect(srcContext, srcHandler, klass.getPackage().getName(), klass.getName());
     }
 
     /**
@@ -280,14 +272,13 @@ public class AsyncChannel {
      *
      * Sends a CMD_CHANNEL_HALF_CONNECTED message to srcHandler when complete.
      *      msg.arg1 = status
-     *      msg.arg2 = token
+     *      msg.obj = the AsyncChannel
      *
      * @param srcContext
      * @param srcHandler
      * @param dstMessenger
-     * @param token returned in msg.arg2
      */
-    public void connect(Context srcContext, Handler srcHandler, Messenger dstMessenger, int token) {
+    public void connect(Context srcContext, Handler srcHandler, Messenger dstMessenger) {
         if (DBG) log("connect srcHandler to the dstMessenger  E");
 
         // Initialize source fields
@@ -301,7 +292,7 @@ public class AsyncChannel {
         if (DBG) log("tell source we are half connected");
 
         // Tell source we are half connected
-        replyHalfConnected(STATUS_SUCCESSFUL, token);
+        replyHalfConnected(STATUS_SUCCESSFUL);
 
         if (DBG) log("connect srcHandler to the dstMessenger X");
     }
@@ -311,16 +302,15 @@ public class AsyncChannel {
      *
      * Sends a CMD_CHANNEL_HALF_CONNECTED message to srcHandler when complete.
      *      msg.arg1 = status
-     *      msg.arg2 = token
+     *      msg.obj = the AsyncChannel
      *
      * @param srcContext is the context of the source
      * @param srcHandler is the hander to receive CONNECTED & DISCONNECTED
      *            messages
      * @param dstHandler is the hander to send messages to.
-     * @param token returned in msg.arg2
      */
-    public void connect(Context srcContext, Handler srcHandler, Handler dstHandler, int token) {
-        connect(srcContext, srcHandler, new Messenger(dstHandler), token);
+    public void connect(Context srcContext, Handler srcHandler, Handler dstHandler) {
+        connect(srcContext, srcHandler, new Messenger(dstHandler));
     }
 
     /**
@@ -328,14 +318,13 @@ public class AsyncChannel {
      *
      * Sends a CMD_CHANNEL_HALF_CONNECTED message to srcAsyncService when complete.
      *      msg.arg1 = status
-     *      msg.arg2 = token
+     *      msg.obj = the AsyncChannel
      *
      * @param srcAsyncService
      * @param dstMessenger
-     * @param token returned in msg.arg2
      */
-    public void connect(AsyncService srcAsyncService, Messenger dstMessenger, int token) {
-        connect(srcAsyncService, srcAsyncService.getHandler(), dstMessenger, token);
+    public void connect(AsyncService srcAsyncService, Messenger dstMessenger) {
+        connect(srcAsyncService, srcAsyncService.getHandler(), dstMessenger);
     }
 
     /**
@@ -351,15 +340,14 @@ public class AsyncChannel {
     /**
      * Disconnect
      */
-    public void disconnect(int token) {
+    public void disconnect() {
         if (mConnection != null) {
-            mConnection.setToken(token);
             mSrcContext.unbindService(mConnection);
         }
         if (mSrcHandler != null) {
             Message msg = mSrcHandler.obtainMessage(CMD_CHANNEL_DISCONNECTED);
             msg.arg1 = STATUS_SUCCESSFUL;
-            msg.arg2 = token;
+            msg.obj = this;
             msg.replyTo = mDstMessenger;
             mSrcHandler.sendMessage(msg);
         }
@@ -727,10 +715,10 @@ public class AsyncChannel {
      *
      * @param status to be stored in msg.arg1
      */
-    private void replyHalfConnected(int status, int token) {
+    private void replyHalfConnected(int status) {
         Message msg = mSrcHandler.obtainMessage(CMD_CHANNEL_HALF_CONNECTED);
         msg.arg1 = status;
-        msg.arg2 = token;
+        msg.obj = this;
         msg.replyTo = mDstMessenger;
         mSrcHandler.sendMessage(msg);
     }
@@ -739,28 +727,18 @@ public class AsyncChannel {
      * ServiceConnection to receive call backs.
      */
     class AsyncChannelConnection implements ServiceConnection {
-        private int mToken;
-
-        AsyncChannelConnection(int token) {
-            mToken = token;
-        }
-
-        /**
-         * @param token
-         */
-        public void setToken(int token) {
-            mToken = token;
+        AsyncChannelConnection() {
         }
 
         public void onServiceConnected(ComponentName className, IBinder service) {
             mDstMessenger = new Messenger(service);
-            replyHalfConnected(STATUS_SUCCESSFUL, mToken);
+            replyHalfConnected(STATUS_SUCCESSFUL);
         }
 
         public void onServiceDisconnected(ComponentName className) {
             Message msg = mSrcHandler.obtainMessage(CMD_CHANNEL_DISCONNECTED);
             msg.arg1 = STATUS_SUCCESSFUL;
-            msg.arg2 = mToken;
+            msg.obj = AsyncChannel.this;
             msg.replyTo = mDstMessenger;
             mSrcHandler.sendMessage(msg);
         }
