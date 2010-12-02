@@ -1055,7 +1055,7 @@ public class VideoEditorTestImpl implements VideoEditor {
     /*
      * {@inheritDoc}
      */
-    public void generatePreview() {
+    public void generatePreview(MediaProcessingProgressListener listener) {
         // Generate all the needed transitions
         for (Transition transition : mTransitions) {
             if (!transition.isGenerated()) {

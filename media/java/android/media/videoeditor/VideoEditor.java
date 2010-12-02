@@ -98,6 +98,31 @@ public interface VideoEditor {
     }
 
     /**
+     * This listener interface is used by the VideoEditor to emit export status
+     * notifications.
+     * {@link #generatePreview(MediaProcessingProgressListener listener)}
+     */
+    public interface MediaProcessingProgressListener {
+        // Values used for the action parameter
+        public static final int ACTION_ENCODE = 1;
+        public static final int ACTION_DECODE = 2;
+
+        /**
+         * This method notifies the listener of the progress status of
+         * processing a media object such as a Transition, AudioTrack or a
+         * media image item (when Ken Burns effect is applied).
+         * This method may be called maximum 100 times for one operation.
+         *
+         * @param object The object that is being processed such as a
+         *          Transition or AudioTrack
+         * @param action The type of processing being performed
+         * @param progress The progress in %. At the beginning of the operation,
+         *          this value is set to 0; at the end, the value is set to 100.
+         */
+        public void onProgress(Object item, int action, int progress);
+    }
+
+    /**
      * @return The path where the VideoEditor stores all files related to the
      * project
      */
@@ -496,8 +521,11 @@ public interface VideoEditor {
      * This method must be called after the aspect ratio of the project changes
      * and before startPreview is called. Note that this method may block for
      * an extensive period of time.
+     *
+     * @param listener The listener interface which will be used to notify
+     *  the caller of the progress of each storyboard item being processed.
      */
-    public void generatePreview();
+    public void generatePreview(MediaProcessingProgressListener listener);
 
     /**
      * Start the preview of all the storyboard items applied on all MediaItems

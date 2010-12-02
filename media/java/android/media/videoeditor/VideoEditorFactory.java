@@ -115,7 +115,7 @@ public class VideoEditorFactory {
 
         final VideoEditor videoEditor = (VideoEditor)ct.newInstance(arglist);
         if (generatePreview) {
-            videoEditor.generatePreview();
+            videoEditor.generatePreview(null);
         }
         return videoEditor;
     }
