@@ -27,6 +27,7 @@ import java.io.PrintStream;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ThreadFactory;
 
 import android.content.pm.PackageInfo;
 import android.util.Log;
@@ -43,27 +44,40 @@ public class SamplingProfilerIntegration {
 
     private static final boolean enabled;
     private static final Executor snapshotWriter;
-    private static final int samplingProfilerHz;
-
-    /** Whether or not we've created the snapshots dir. */
-    private static boolean dirMade = false;
+    private static final int samplingProfilerMilliseconds;
+    private static final int samplingProfilerDepth;
 
     /** Whether or not a snapshot is being persisted. */
     private static final AtomicBoolean pending = new AtomicBoolean(false);
 
     static {
-        samplingProfilerHz = SystemProperties.getInt("persist.sys.profiler_hz", 0);
-        // Disabling this for now, as it crashes when enabled server-side.  So adding
-        // a new property ("REALLY") for those wanting to test and fix it.
-        boolean really = SystemProperties.getInt("persist.sys.profiler_hz_REALLY", 0) > 0;
-        if (samplingProfilerHz > 0 && really) {
-            snapshotWriter = Executors.newSingleThreadExecutor();
-            enabled = true;
-            Log.i(TAG, "Profiler is enabled. Sampling Profiler Hz: " + samplingProfilerHz);
+        samplingProfilerMilliseconds = SystemProperties.getInt("persist.sys.profiler_ms", 0);
+        samplingProfilerDepth = SystemProperties.getInt("persist.sys.profiler_depth", 4);
+        if (samplingProfilerMilliseconds > 0) {
+            File dir = new File(SNAPSHOT_DIR);
+            dir.mkdirs();
+            // the directory needs to be writable to anybody to allow file writing
+            dir.setWritable(true, false);
+            // the directory needs to be executable to anybody to allow file creation
+            dir.setExecutable(true, false);
+            if (dir.isDirectory()) {
+                snapshotWriter = Executors.newSingleThreadExecutor(new ThreadFactory() {
+                        public Thread newThread(Runnable r) {
+                            return new Thread(r, TAG);
+                        }
+                    });
+                enabled = true;
+                Log.i(TAG, "Profiling enabled. Sampling interval ms: "
+                      + samplingProfilerMilliseconds);
+            } else {
+                snapshotWriter = null;
+                enabled = true;
+                Log.w(TAG, "Profiling setup failed. Could not create " + SNAPSHOT_DIR);
+            }
         } else {
             snapshotWriter = null;
             enabled = false;
-            Log.i(TAG, "Profiler is disabled.");
+            Log.i(TAG, "Profiling disabled.");
         }
     }
 
@@ -85,8 +99,8 @@ public class SamplingProfilerIntegration {
         }
         ThreadGroup group = Thread.currentThread().getThreadGroup();
         SamplingProfiler.ThreadSet threadSet = SamplingProfiler.newThreadGroupTheadSet(group);
-        INSTANCE = new SamplingProfiler(4, threadSet); // TODO parameter for depth
-        INSTANCE.start(1000/samplingProfilerHz);
+        INSTANCE = new SamplingProfiler(samplingProfilerDepth, threadSet);
+        INSTANCE.start(samplingProfilerMilliseconds);
     }
 
     /**
@@ -106,25 +120,8 @@ public class SamplingProfilerIntegration {
         if (pending.compareAndSet(false, true)) {
             snapshotWriter.execute(new Runnable() {
                 public void run() {
-                    if (!dirMade) {
-                        File dir = new File(SNAPSHOT_DIR);
-                        dir.mkdirs();
-                        // the directory needs to be writable to anybody
-                        dir.setWritable(true, false);
-                        // the directory needs to be executable to anybody
-                        // don't know why yet, but mode 723 would work, while
-                        // mode 722 throws FileNotFoundExecption at line 151
-                        dir.setExecutable(true, false);
-                        if (new File(SNAPSHOT_DIR).isDirectory()) {
-                            dirMade = true;
-                        } else {
-                            Log.w(TAG, "Creation of " + SNAPSHOT_DIR + " failed.");
-                            pending.set(false);
-                            return;
-                        }
-                    }
                     try {
-                        writeSnapshot(SNAPSHOT_DIR, processName, packageInfo);
+                        writeSnapshotFile(processName, packageInfo);
                     } finally {
                         pending.set(false);
                     }
@@ -140,7 +137,7 @@ public class SamplingProfilerIntegration {
         if (!enabled) {
             return;
         }
-        writeSnapshot("zygote", null);
+        writeSnapshotFile("zygote", null);
         INSTANCE.shutdown();
         INSTANCE = null;
     }
@@ -148,7 +145,7 @@ public class SamplingProfilerIntegration {
     /**
      * pass in PackageInfo to retrieve various values for snapshot header
      */
-    private static void writeSnapshot(String dir, String processName, PackageInfo packageInfo) {
+    private static void writeSnapshotFile(String processName, PackageInfo packageInfo) {
         if (!enabled) {
             return;
         }
@@ -161,7 +158,7 @@ public class SamplingProfilerIntegration {
          */
         long start = System.currentTimeMillis();
         String name = processName.replaceAll(":", ".");
-        String path = dir + "/" + name + "-" +System.currentTimeMillis() + ".snapshot";
+        String path = SNAPSHOT_DIR + "/" + name + "-" +System.currentTimeMillis() + ".snapshot";
         PrintStream out = null;
         try {
             out = new PrintStream(new BufferedOutputStream(new FileOutputStream(path)));
