@@ -88,6 +88,9 @@
         <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g>
     </string>
 
+    <!-- Separator for PLMN and SPN in network name. -->
+    <string name="status_bar_network_name_separator" translatable="false">"\n"</string>
+
     <!-- Recent Tasks dialog: title [CHAR LIMIT=30] -->
     <string name="recent_tasks_title">Recent</string>
     <!-- Recent Tasks dialog: message when there are no recent applications [CHAR LIMIT=NONE]-->

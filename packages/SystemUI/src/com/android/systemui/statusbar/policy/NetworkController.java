@@ -32,6 +32,7 @@ import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.provider.Settings;
+import android.provider.Telephony;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -65,6 +66,9 @@ public class NetworkController extends BroadcastReceiver {
     ServiceState mServiceState;
     SignalStrength mSignalStrength;
     int[] mDataIconList = TelephonyIcons.DATA_G[0];
+    String mNetworkName;
+    String mNetworkNameDefault;
+    String mNetworkNameSeparator;
     int mPhoneSignalIconId;
     int mDataDirectionIconId;
     int mDataSignalIconId;
@@ -116,7 +120,10 @@ public class NetworkController extends BroadcastReceiver {
                         | PhoneStateListener.LISTEN_DATA_ACTIVITY);
         mHspaDataDistinguishable = mContext.getResources().getBoolean(
                 R.bool.config_hspa_data_distinguishable);
-        
+        mNetworkNameSeparator = mContext.getString(R.string.status_bar_network_name_separator);
+        mNetworkNameDefault = mContext.getString(
+                com.android.internal.R.string.lockscreen_carrier_default);
+        mNetworkName = mNetworkNameDefault;
 
         // wifi
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -127,6 +134,9 @@ public class NetworkController extends BroadcastReceiver {
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        filter.addAction(Telephony.Intents.SPN_STRINGS_UPDATED_ACTION);
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
         context.registerReceiver(this, filter);
 
         // yuck
@@ -167,6 +177,12 @@ public class NetworkController extends BroadcastReceiver {
         } else if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
             updateSimState(intent);
             updateDataIcon();
+            refreshViews();
+        } else if (action.equals(Telephony.Intents.SPN_STRINGS_UPDATED_ACTION)) {
+            updateNetworkName(intent.getBooleanExtra(Telephony.Intents.EXTRA_SHOW_SPN, false),
+                        intent.getStringExtra(Telephony.Intents.EXTRA_SPN),
+                        intent.getBooleanExtra(Telephony.Intents.EXTRA_SHOW_PLMN, false),
+                        intent.getStringExtra(Telephony.Intents.EXTRA_PLMN));
             refreshViews();
         } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION) ||
                  action.equals(ConnectivityManager.INET_CONDITION_ACTION)) {
@@ -516,6 +532,31 @@ public class NetworkController extends BroadcastReceiver {
         mDataConnected = visible;
     }
 
+    void updateNetworkName(boolean showSpn, String spn, boolean showPlmn, String plmn) {
+        if (false) {
+            Slog.d("CarrierLabel", "updateNetworkName showSpn=" + showSpn + " spn=" + spn
+                    + " showPlmn=" + showPlmn + " plmn=" + plmn);
+        }
+        StringBuilder str = new StringBuilder();
+        boolean something = false;
+        if (showPlmn && plmn != null) {
+            str.append(plmn);
+            something = true;
+        }
+        if (showSpn && spn != null) {
+            if (something) {
+                str.append(mNetworkNameSeparator);
+            }
+            str.append(spn);
+            something = true;
+        }
+        if (something) {
+            mNetworkName = str.toString();
+        } else {
+            mNetworkName = mNetworkNameDefault;
+        }
+    }
+
     // ===== Wifi ===================================================================
 
     private void updateWifiState(Intent intent) {
@@ -618,14 +659,13 @@ public class NetworkController extends BroadcastReceiver {
             if (mWifiSsid == null) {
                 label = context.getString(R.string.status_bar_settings_signal_meter_wifi_nossid);
             } else {
-                label = context.getString(R.string.status_bar_settings_signal_meter_wifi_ssid_format,
-                                      mWifiSsid);
+                label = mWifiSsid;
             }
             combinedSignalIconId = mWifiIconId;
             dataTypeIconId = 0;
         } else {
             if (mDataConnected) {
-                label = context.getString(R.string.status_bar_settings_signal_meter_data_connected);
+                label = mNetworkName;
             } else {
                 label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
             }
