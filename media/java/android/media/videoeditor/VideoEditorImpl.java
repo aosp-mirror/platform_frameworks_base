@@ -39,7 +39,7 @@ import android.view.SurfaceHolder;
 /**
  * The VideoEditor implementation {@hide}
  */
-public class VideoEditorTestImpl implements VideoEditor {
+public class VideoEditorImpl implements VideoEditor {
     // Logging
     private static final String TAG = "VideoEditorImpl";
 
@@ -165,7 +165,7 @@ public class VideoEditorTestImpl implements VideoEditor {
                 if (mPositionMs >= mToMs) {
                     if (!mLoop) {
                         if (mListener != null) {
-                            mListener.onProgress(VideoEditorTestImpl.this, mPositionMs, true);
+                            mListener.onProgress(VideoEditorImpl.this, mPositionMs, true);
                         }
                         if (Log.isLoggable(TAG, Log.DEBUG)) {
                             Log.d(TAG, "PreviewThread.run playback complete");
@@ -174,13 +174,13 @@ public class VideoEditorTestImpl implements VideoEditor {
                     } else {
                         // Fire a notification for the end of the clip
                         if (mListener != null) {
-                            mListener.onProgress(VideoEditorTestImpl.this, mToMs, false);
+                            mListener.onProgress(VideoEditorImpl.this, mToMs, false);
                         }
 
                         // Rewind
                         mPositionMs = mFromMs;
                         if (mListener != null) {
-                            mListener.onProgress(VideoEditorTestImpl.this, mPositionMs, false);
+                            mListener.onProgress(VideoEditorImpl.this, mPositionMs, false);
                         }
                         if (Log.isLoggable(TAG, Log.DEBUG)) {
                             Log.d(TAG, "PreviewThread.run playback complete");
@@ -190,7 +190,7 @@ public class VideoEditorTestImpl implements VideoEditor {
                 } else {
                     if (frameCount == mCallbackAfterFrameCount) {
                         if (mListener != null) {
-                            mListener.onProgress(VideoEditorTestImpl.this, mPositionMs, false);
+                            mListener.onProgress(VideoEditorImpl.this, mPositionMs, false);
                         }
                         frameCount = 0;
                     }
@@ -222,7 +222,7 @@ public class VideoEditorTestImpl implements VideoEditor {
      *
      * @param projectPath
      */
-    public VideoEditorTestImpl(String projectPath) throws IOException {
+    public VideoEditorImpl(String projectPath) throws IOException {
         mProjectPath = projectPath;
         final File projectXml = new File(projectPath, PROJECT_FILENAME);
         if (projectXml.exists()) {
