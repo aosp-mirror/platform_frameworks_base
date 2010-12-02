@@ -1164,8 +1164,11 @@ status_t StagefrightRecorder::setupVideoEncoder(
     CHECK_EQ(client.connect(), OK);
 
     // Use software codec for time lapse
-    uint32_t encoder_flags = (mCaptureTimeLapse) ? OMXCodec::kPreferSoftwareCodecs : 0;
-    if (mIsMetaDataStoredInVideoBuffers) {
+    uint32_t encoder_flags = 0;
+    if (mCaptureTimeLapse) {
+        encoder_flags |= OMXCodec::kPreferSoftwareCodecs;
+    } else if (mIsMetaDataStoredInVideoBuffers) {
+        encoder_flags |= OMXCodec::kHardwareCodecsOnly;
         encoder_flags |= OMXCodec::kStoreMetaDataInVideoBuffers;
     }
     sp<MediaSource> encoder = OMXCodec::Create(
@@ -1173,6 +1176,11 @@ status_t StagefrightRecorder::setupVideoEncoder(
             true /* createEncoder */, cameraSource,
             NULL, encoder_flags);
     if (encoder == NULL) {
+        LOGW("Failed to create the encoder");
+        // When the encoder fails to be created, we need
+        // release the camera source due to the camera's lock
+        // and unlock mechanism.
+        cameraSource->stop();
         return UNKNOWN_ERROR;
     }
 
