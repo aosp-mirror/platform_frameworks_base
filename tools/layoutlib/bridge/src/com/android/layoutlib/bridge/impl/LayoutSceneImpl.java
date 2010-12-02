@@ -200,7 +200,7 @@ public class LayoutSceneImpl {
         mBlockParser = new BridgeXmlBlockParser(mParams.getLayoutDescription(),
                 mContext, false /* platformResourceFlag */);
 
-        return SceneResult.SUCCESS;
+        return SceneStatus.SUCCESS.getResult();
     }
 
     /**
@@ -342,7 +342,7 @@ public class LayoutSceneImpl {
                 mViewRoot.setBackgroundDrawable(d);
             }
 
-            return SceneResult.SUCCESS;
+            return SceneStatus.SUCCESS.getResult();
         } catch (PostInflateException e) {
             return new SceneResult(SceneStatus.ERROR_INFLATION, e.getMessage(), e);
         } catch (Throwable e) {
@@ -469,7 +469,7 @@ public class LayoutSceneImpl {
             System.out.println(String.format("rendering (ms): %03d", drawTime - preDrawTime));
 
             // success!
-            return SceneResult.SUCCESS;
+            return SceneStatus.SUCCESS.getResult();
         } catch (Throwable e) {
             // get the real cause of the exception.
             Throwable t = e;
@@ -520,7 +520,7 @@ public class LayoutSceneImpl {
 
                     new AnimationThread(this, anim, listener).start();
 
-                    return SceneResult.SUCCESS;
+                    return SceneStatus.SUCCESS.getResult();
                 }
             } catch (Exception e) {
                 // get the real cause of the exception.
@@ -537,13 +537,8 @@ public class LayoutSceneImpl {
     }
 
     public SceneResult insertChild(ViewGroup parentView, IXmlPullParser childXml,
-            View beforeSibling, IAnimationListener listener) {
+            int index, IAnimationListener listener) {
         checkLock();
-
-        int index = parentView.indexOfChild(beforeSibling);
-        if (beforeSibling != null && index == -1) {
-            throw new IllegalArgumentException("beforeSibling not in parentView");
-        }
 
         // create a block parser for the XML
         BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(childXml, mContext,
@@ -564,17 +559,17 @@ public class LayoutSceneImpl {
 
         invalidateRenderingSize();
 
-        return render();
+        SceneResult result = render();
+        if (result.isSuccess()) {
+            result.setData(child);
+        }
+
+        return result;
     }
 
-    public SceneResult moveChild(ViewGroup parentView, View childView, View beforeSibling,
+    public SceneResult moveChild(ViewGroup parentView, View childView, int index,
             IAnimationListener listener) {
         checkLock();
-
-        int index = parentView.indexOfChild(beforeSibling);
-        if (beforeSibling != null && index == -1) {
-            throw new IllegalArgumentException("beforeSibling not in parentView");
-        }
 
         try {
             ViewParent parent = childView.getParent();

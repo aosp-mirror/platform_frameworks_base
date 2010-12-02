@@ -292,14 +292,14 @@ public final class Bridge extends LayoutBridge {
     @Override
     public BridgeLayoutScene createScene(SceneParams params) {
         try {
-            SceneResult lastResult = SceneResult.SUCCESS;
+            SceneResult lastResult = SceneStatus.SUCCESS.getResult();
             LayoutSceneImpl scene = new LayoutSceneImpl(params);
             try {
                 prepareThread();
                 lastResult = scene.init(params.getTimeout());
-                if (lastResult == SceneResult.SUCCESS) {
+                if (lastResult.isSuccess()) {
                     lastResult = scene.inflate();
-                    if (lastResult == SceneResult.SUCCESS) {
+                    if (lastResult.isSuccess()) {
                         lastResult = scene.render();
                     }
                 }
