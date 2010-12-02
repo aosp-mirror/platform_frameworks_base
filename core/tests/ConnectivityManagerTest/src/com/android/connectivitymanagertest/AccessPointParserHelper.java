@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-
 /**
  * Help class to process configurations of access points saved in an XML file.
  * The configurations of an access point is included in tag
@@ -55,6 +54,9 @@ import java.util.List;
  *   <password>abcdefgh</password>
  *   </accesspoint>
  * </resources>
+ *
+ * Note:ssid and security have to be the first two tags
+ *      for static ip setting, tag "ip" should be listed before other fields: dns, gateway, netmask.
  */
 public class AccessPointParserHelper {
     private static final String KEYSTORE_SPACE = "keystore://";
@@ -186,6 +188,7 @@ public class AccessPointParserHelper {
                 networks.add(config);
                 if (mDhcpInfo != null) {
                     ssidToDhcpInfoHM.put(config.SSID, mDhcpInfo);
+                    mDhcpInfo = null;
                 }
             }
         }
@@ -214,6 +217,13 @@ public class AccessPointParserHelper {
                     case EAP:
                         config.allowedKeyManagement.set(KeyMgmt.WPA_EAP);
                         config.allowedKeyManagement.set(KeyMgmt.IEEE8021X);
+                        // Initialize other fields.
+                        config.phase2.setValue("");
+                        config.ca_cert.setValue("");
+                        config.client_cert.setValue("");
+                        config.private_key.setValue("");
+                        config.identity.setValue("");
+                        config.anonymous_identity.setValue("");
                         break;
                     default:
                         throw new SAXException();
