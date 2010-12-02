@@ -992,7 +992,12 @@ public class MediaScanner
 
     private boolean inScanDirectory(String path, String[] directories) {
         for (int i = 0; i < directories.length; i++) {
-            if (path.startsWith(directories[i])) {
+            String directory = directories[i];
+            if (mExternalStoragePath != null && directory.equals(mMediaStoragePath)) {
+                // database paths use external storage prefix
+                directory = mExternalStoragePath;
+            }
+            if (path.startsWith(directory)) {
                 return true;
             }
         }
