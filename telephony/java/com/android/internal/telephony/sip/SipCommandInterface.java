@@ -184,19 +184,12 @@ class SipCommandInterface extends BaseCommands implements CommandsInterface {
     public void writeSmsToRuim(int status, String pdu, Message response) {
     }
 
-    public void setupDefaultPDP(String apn, String user, String password,
-            Message result) {
-    }
-
-    public void deactivateDefaultPDP(int cid, Message result) {
-    }
-
     public void setupDataCall(String radioTechnology, String profile,
             String apn, String user, String password, String authType,
             Message result) {
     }
 
-    public void deactivateDataCall(int cid, Message result) {
+    public void deactivateDataCall(int cid, int reason, Message result) {
     }
 
     public void setRadioPower(boolean on, Message result) {
