@@ -19,14 +19,14 @@ package android.media;
 /**
  * Encapsulates the ObjectPropList dataset used by the GetObjectPropList command.
  * The fields of this class are read by JNI code in android_media_MtpDatabase.cpp
- *
- * {@hide}
  */
 
-public class MtpPropertyList {
+class MtpPropertyList {
 
     // number of results returned
-    public final int        mCount;
+    private int             mCount;
+    // maximum number of results
+    private final int       mMaxCount;
     // result code for GetObjectPropList
     public int              mResult;
     // list of object handles (first field in quadruplet)
@@ -41,18 +41,19 @@ public class MtpPropertyList {
     public String[]   mStringValues;
 
     // constructor only called from MtpDatabase
-    public MtpPropertyList(int count, int result) {
-        mCount = count;
+    public MtpPropertyList(int maxCount, int result) {
+        mMaxCount = maxCount;
         mResult = result;
-        mObjectHandles = new int[count];
-        mPropertyCodes = new int[count];
-        mDataTypes = new int[count];
+        mObjectHandles = new int[maxCount];
+        mPropertyCodes = new int[maxCount];
+        mDataTypes = new int[maxCount];
         // mLongValues and mStringValues are created lazily since both might not be necessary
     }
 
-    public void setProperty(int index, int handle, int property, int type, long value) {
+    public void append(int handle, int property, int type, long value) {
+        int index = mCount++;
         if (mLongValues == null) {
-            mLongValues = new long[mCount];
+            mLongValues = new long[mMaxCount];
         }
         mObjectHandles[index] = handle;
         mPropertyCodes[index] = property;
@@ -60,9 +61,10 @@ public class MtpPropertyList {
         mLongValues[index] = value;
     }
 
-    public void setProperty(int index, int handle, int property, String value) {
+    public void append(int handle, int property, String value) {
+        int index = mCount++;
         if (mStringValues == null) {
-            mStringValues = new String[mCount];
+            mStringValues = new String[mMaxCount];
         }
         mObjectHandles[index] = handle;
         mPropertyCodes[index] = property;

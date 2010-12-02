@@ -134,8 +134,7 @@ public:
     virtual MtpResponseCode         resetDeviceProperty(MtpDeviceProperty property);
 
     virtual MtpResponseCode         getObjectPropertyList(MtpObjectHandle handle,
-                                            MtpObjectFormat format,
-                                            MtpObjectProperty property,
+                                            uint32_t format, uint32_t property,
                                             int groupCode, int depth,
                                             MtpDataPacket& packet);
 
@@ -355,7 +354,7 @@ MtpResponseCode MyMtpDatabase::getObjectPropertyValue(MtpObjectHandle handle,
                                             MtpDataPacket& packet) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     jobject list = env->CallObjectMethod(mDatabase, method_getObjectPropertyList,
-                (jint)handle, 0, (jint)property, 0, 0);
+                (jlong)handle, 0, (jlong)property, 0, 0);
     MtpResponseCode result = env->GetIntField(list, field_mResult);
     int count = env->GetIntField(list, field_mCount);
     if (result == MTP_RESPONSE_OK && count != 1)
@@ -646,18 +645,19 @@ MtpResponseCode MyMtpDatabase::resetDeviceProperty(MtpDeviceProperty property) {
 }
 
 MtpResponseCode MyMtpDatabase::getObjectPropertyList(MtpObjectHandle handle,
-                                            MtpObjectFormat format,
-                                            MtpObjectProperty property,
+                                            uint32_t format, uint32_t property,
                                             int groupCode, int depth,
                                             MtpDataPacket& packet) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     jobject list = env->CallObjectMethod(mDatabase, method_getObjectPropertyList,
-                (jint)handle, (jint)format, (jint)property, (jint)groupCode, (jint)depth);
+                (jlong)handle, (jint)format, (jlong)property, (jint)groupCode, (jint)depth);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    if (!list)
+        return MTP_RESPONSE_GENERAL_ERROR;
     int count = env->GetIntField(list, field_mCount);
     MtpResponseCode result = env->GetIntField(list, field_mResult);
 
     packet.putUInt32(count);
-
     if (count > 0) {
         jintArray objectHandlesArray = (jintArray)env->GetObjectField(list, field_mObjectHandles);
         jintArray propertyCodesArray = (jintArray)env->GetObjectField(list, field_mPropertyCodes);
@@ -1042,7 +1042,7 @@ android_media_MtpDatabase_finalize(JNIEnv *env, jobject thiz)
 }
 
 static jstring
-android_media_MtpDatabase_format_date_time(JNIEnv *env, jobject thiz, jlong seconds)
+android_media_MtpPropertyGroup_format_date_time(JNIEnv *env, jobject thiz, jlong seconds)
 {
 #ifdef HAVE_ANDROID_OS
     char    date[20];
@@ -1055,11 +1055,14 @@ android_media_MtpDatabase_format_date_time(JNIEnv *env, jobject thiz, jlong seco
 
 // ----------------------------------------------------------------------------
 
-static JNINativeMethod gMethods[] = {
+static JNINativeMethod gMtpDatabaseMethods[] = {
     {"native_setup",            "()V",  (void *)android_media_MtpDatabase_setup},
     {"native_finalize",         "()V",  (void *)android_media_MtpDatabase_finalize},
+};
+
+static JNINativeMethod gMtpPropertyGroupMethods[] = {
     {"format_date_time",        "(J)Ljava/lang/String;",
-                                        (void *)android_media_MtpDatabase_format_date_time},
+                                        (void *)android_media_MtpPropertyGroup_format_date_time},
 };
 
 static const char* const kClassPathName = "android/media/MtpDatabase";
@@ -1131,7 +1134,7 @@ int register_android_media_MtpDatabase(JNIEnv *env)
         return -1;
     }
     method_getObjectPropertyList = env->GetMethodID(clazz, "getObjectPropertyList",
-            "(IIIII)Landroid/media/MtpPropertyList;");
+            "(JIJII)Landroid/media/MtpPropertyList;");
     if (method_getObjectPropertyList == NULL) {
         LOGE("Can't find getObjectPropertyList");
         return -1;
@@ -1220,6 +1223,10 @@ int register_android_media_MtpDatabase(JNIEnv *env)
         return -1;
     }
 
+    if (AndroidRuntime::registerNativeMethods(env,
+                "android/media/MtpDatabase", gMtpDatabaseMethods, NELEM(gMtpDatabaseMethods)))
+        return -1;
+
     return AndroidRuntime::registerNativeMethods(env,
-                "android/media/MtpDatabase", gMethods, NELEM(gMethods));
+                "android/media/MtpPropertyGroup", gMtpPropertyGroupMethods, NELEM(gMtpPropertyGroupMethods));
 }

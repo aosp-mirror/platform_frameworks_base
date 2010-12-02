@@ -536,8 +536,9 @@ MtpResponseCode MtpServer::doResetDevicePropValue() {
 MtpResponseCode MtpServer::doGetObjectPropList() {
 
     MtpObjectHandle handle = mRequest.getParameter(1);
-    MtpObjectFormat format = mRequest.getParameter(2);
-    MtpDeviceProperty property = mRequest.getParameter(3);
+    // use uint32_t so we can support 0xFFFFFFFF
+    uint32_t format = mRequest.getParameter(2);
+    uint32_t property = mRequest.getParameter(3);
     int groupCode = mRequest.getParameter(4);
     int depth = mRequest.getParameter(5);
    LOGD("GetObjectPropList %d format: %s property: %s group: %d depth: %d\n",
