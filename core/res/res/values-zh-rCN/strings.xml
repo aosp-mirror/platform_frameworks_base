@@ -482,10 +482,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"恢复出厂设置时，将擦除手机上的数据而不发送警告"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"设置设备全局代理"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"请设置在启用政策的情况下要使用的设备全局代理。只有第一设备管理员才可设置有效的全局代理。"</string>
-    <!-- no translation found for policylab_expirePassword (2314569545488269564) -->
-    <skip />
-    <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
-    <skip />
+    <string name="policylab_expirePassword" msgid="2314569545488269564">"设置密码有效期"</string>
+    <string name="policydesc_expirePassword" msgid="7276906351852798814">"控制屏幕锁定密码的使用期限"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"住宅"</item>
     <item msgid="869923650527136615">"手机"</item>
@@ -668,8 +666,7 @@
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />
-    <!-- no translation found for autofill_address_summary_separator (7483307893170324129) -->
-    <skip />
+    <string name="autofill_address_summary_separator" msgid="7483307893170324129">"， "</string>
     <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
     <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"读取浏览器的历史记录和书签"</string>
@@ -869,6 +866,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"正在发送大量短信。选择“确定”继续，或选择“取消”停止发送。"</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"确定"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"取消"</string>
+    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <skip />
     <string name="date_time_set" msgid="5777075614321087758">"设置"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"默认"</string>
     <string name="no_permissions" msgid="7283357728219338112">"不需要任何权限"</string>
@@ -876,8 +875,8 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"全部显示"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB 大容量存储设备"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB 已连接"</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"您已通过 USB 将手机连接至计算机。如果您要在计算机与 Android 手机的 USB 存储设备之间复制文件，请点击下面的按钮。"</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"您已通过 USB 将手机连接至计算机。如果您要在计算机与 Android 手机的 USB 存储设备之间复制文件，请点击下面的按钮。"</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"您已通过 USB 连接至计算机。如果您要在计算机与 Android 设备的 USB 存储设备之间复制文件，请触摸下面的按钮。"</string>
+    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"您已通过 USB 连接至计算机。如果您要在计算机和 Android 设备的 SD 卡之间复制文件，请触摸下面的按钮。"</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"打开 USB 存储设备"</string>
     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"使用 USB 存储设备作为 USB 大容量存储设备时出现问题。"</string>
     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"使用 SD 卡作为 USB 大容量存储设备时出现问题。"</string>

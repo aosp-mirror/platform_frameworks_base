@@ -482,10 +482,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Effacer les données du téléphone sans avertissement, en restaurant les valeurs d\'usine"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Définir le proxy global du mobile"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Indiquez le proxy global à utiliser pour ce mobile lorsque les règles sont activées. Seul l\'administrateur principal du mobile peut définir le proxy global utilisé."</string>
-    <!-- no translation found for policylab_expirePassword (2314569545488269564) -->
-    <skip />
-    <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
-    <skip />
+    <string name="policylab_expirePassword" msgid="2314569545488269564">"Définir date exp. mot de passe"</string>
+    <string name="policydesc_expirePassword" msgid="7276906351852798814">"Définir la fréquence de changement du mot de passe de verrouillage d\'écran"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domicile"</item>
     <item msgid="869923650527136615">"Mobile"</item>
@@ -668,8 +666,7 @@
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />
-    <!-- no translation found for autofill_address_summary_separator (7483307893170324129) -->
-    <skip />
+    <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
     <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"lire l\'historique et les favoris du navigateur"</string>
@@ -869,6 +866,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Vous êtes sur le point d\'envoyer un grand nombre de messages SMS. Sélectionnez OK pour continuer ou Annuler pour interrompre l\'envoi."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Annuler"</string>
+    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <skip />
     <string name="date_time_set" msgid="5777075614321087758">"Définir"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Par défaut"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Aucune autorisation requise"</string>
@@ -876,8 +875,8 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Tout afficher"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"Stockage de masse USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Connecté à l\'aide d\'un câble USB"</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Vous avez connecté votre téléphone à votre ordinateur à l\'aide d\'un câble USB. Sélectionnez le bouton ci-dessous pour copier des fichiers de votre ordinateur vers la mémoire de stockage USB de votre Android, ou inversement."</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Vous avez connecté votre téléphone à votre ordinateur à l\'aide d\'un câble USB. Sélectionnez le bouton ci-dessous pour copier des fichiers de votre ordinateur vers la mémoire de stockage USB de votre Android, ou inversement."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Vous êtes connecté à votre ordinateur via un câble USB. Appuyez sur le bouton ci-dessous pour copier des fichiers de votre ordinateur vers la mémoire de stockage USB de votre Android, ou inversement."</string>
+    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Vous êtes connecté à votre ordinateur via un câble USB. Appuyez sur le bouton ci-dessous pour copier des fichiers de votre ordinateur vers la carte SD de votre Android, ou inversement."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Activer la mémoire de stockage USB"</string>
     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Un problème est survenu lors de l\'utilisation de votre mémoire de stockage USB comme mémoire de stockage de masse."</string>
     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Un problème est survenu lors de l\'utilisation de votre carte SD comme mémoire de stockage de masse USB."</string>

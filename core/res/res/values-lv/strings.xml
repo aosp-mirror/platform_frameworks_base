@@ -925,6 +925,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Tiek sūtīts liels īsziņu skaits. Atlasiet Labi, lai turpinātu, vai Atcelt, lai apturētu sūtīšanu."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"Labi"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Atcelt"</string>
+    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <skip />
     <string name="date_time_set" msgid="5777075614321087758">"Iestatīt"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Noklusējums"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Atļaujas nav nepieciešamas."</string>

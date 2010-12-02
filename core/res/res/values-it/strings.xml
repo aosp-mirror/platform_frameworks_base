@@ -482,10 +482,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Cancella i dati del telefono senza preavviso eseguendo un ripristino dati di fabbrica"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Imposta il proxy globale del dispositivo"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Imposta il proxy globale del dispositivo in modo da utilizzarlo mentre la norma è attiva. Il proxy globale effettivo è impostabile solo dal primo amministratore del dispositivo."</string>
-    <!-- no translation found for policylab_expirePassword (2314569545488269564) -->
-    <skip />
-    <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
-    <skip />
+    <string name="policylab_expirePassword" msgid="2314569545488269564">"Imposta scadenza password"</string>
+    <string name="policydesc_expirePassword" msgid="7276906351852798814">"Stabilisci la scadenza della password di blocco dello schermo"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Cellulare"</item>
@@ -668,8 +666,7 @@
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />
-    <!-- no translation found for autofill_address_summary_separator (7483307893170324129) -->
-    <skip />
+    <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
     <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"lettura cronologia e segnalibri del browser"</string>
@@ -869,6 +866,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"È in corso l\'invio di numerosi SMS. Seleziona \"OK\" per continuare, oppure \"Annulla\" per interrompere l\'invio."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Annulla"</string>
+    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <skip />
     <string name="date_time_set" msgid="5777075614321087758">"Imposta"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Predefinito"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Nessuna autorizzazione richiesta"</string>
@@ -876,8 +875,8 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostra tutto"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"Archivio di massa USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB collegata"</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Il telefono è stato collegato al computer tramite USB. Seleziona il pulsante sottostante se desideri copiare file tra il computer e l\'archivio USB di Android."</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Il telefono è stato collegato al computer tramite USB. Seleziona il pulsante sottostante se desideri copiare file tra il computer e l\'archivio USB di Android."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Ti sei collegato al computer tramite USB. Tocca il pulsante sotto se desideri copiare file tra il computer e l\'archivio USB di Android."</string>
+    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Ti sei collegato al computer tramite USB. Tocca il pulsante sotto se desideri copiare file tra il computer e la scheda SD di Android."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Attiva archivio USB"</string>
     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Problema di utilizzo dell\'archivio USB come archivio di massa USB."</string>
     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Problema di utilizzo della scheda SD come archivio di massa USB."</string>
