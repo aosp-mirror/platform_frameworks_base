@@ -16,7 +16,6 @@
 
 package android.content.res;
 
-import android.os.MemoryFile;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
@@ -184,14 +183,9 @@ public class AssetFileDescriptor implements Parcelable {
 
         @Override
         public int read() throws IOException {
-            if (mRemaining >= 0) {
-                if (mRemaining == 0) return -1;
-                int res = super.read();
-                if (res >= 0) mRemaining--;
-                return res;
-            }
-            
-            return super.read();
+            byte[] buffer = new byte[1];
+            int result = read(buffer, 0, 1);
+            return result == -1 ? -1 : buffer[0] & 0xff;
         }
 
         @Override
@@ -209,16 +203,7 @@ public class AssetFileDescriptor implements Parcelable {
 
         @Override
         public int read(byte[] buffer) throws IOException {
-            if (mRemaining >= 0) {
-                if (mRemaining == 0) return -1;
-                int count = buffer.length;
-                if (count > mRemaining) count = (int)mRemaining;
-                int res = super.read(buffer, 0, count);
-                if (res >= 0) mRemaining -= res;
-                return res;
-            }
-            
-            return super.read(buffer);
+            return read(buffer, 0, buffer.length);
         }
 
         @Override
@@ -231,7 +216,6 @@ public class AssetFileDescriptor implements Parcelable {
                 return res;
             }
             
-            // TODO Auto-generated method stub
             return super.skip(count);
         }
 
