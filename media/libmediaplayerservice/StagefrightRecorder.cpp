@@ -366,6 +366,9 @@ status_t StagefrightRecorder::setParamMaxFileDurationUs(int64_t timeUs) {
         return BAD_VALUE;
     }
 
+    if (timeUs <= 15 * 1000000LL) {
+        LOGW("Target duration (%lld us) too short to be respected", timeUs);
+    }
     mMaxFileDurationUs = timeUs;
     return OK;
 }
@@ -376,6 +379,11 @@ status_t StagefrightRecorder::setParamMaxFileSizeBytes(int64_t bytes) {
         LOGE("Max file size is too small: %lld bytes", bytes);
         return BAD_VALUE;
     }
+
+    if (bytes <= 100 * 1024) {
+        LOGW("Target file size (%lld bytes) is too small to be respected", bytes);
+    }
+
     mMaxFileSizeBytes = bytes;
     return OK;
 }
