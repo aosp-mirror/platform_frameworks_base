@@ -5422,6 +5422,7 @@ public class WindowManagerService extends IWindowManager.Stub
         int deviceId = ev.getDeviceId();
         int scancode = ev.getScanCode();
         int source = ev.getSource();
+        int flags = ev.getFlags();
         
         if (source == InputDevice.SOURCE_UNKNOWN) {
             source = InputDevice.SOURCE_KEYBOARD;
@@ -5431,7 +5432,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (downTime == 0) downTime = eventTime;
 
         KeyEvent newEvent = new KeyEvent(downTime, eventTime, action, code, repeatCount, metaState,
-                deviceId, scancode, KeyEvent.FLAG_FROM_SYSTEM, source);
+                deviceId, scancode, flags | KeyEvent.FLAG_FROM_SYSTEM, source);
 
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
