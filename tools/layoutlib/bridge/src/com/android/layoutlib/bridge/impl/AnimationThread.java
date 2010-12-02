@@ -16,8 +16,10 @@
 
 package com.android.layoutlib.bridge.impl;
 
+import com.android.layoutlib.api.LayoutScene;
 import com.android.layoutlib.api.SceneResult;
 import com.android.layoutlib.api.LayoutScene.IAnimationListener;
+import com.android.layoutlib.api.SceneResult.SceneStatus;
 import com.android.layoutlib.bridge.Bridge;
 
 import android.animation.Animator;
@@ -76,6 +78,7 @@ public class AnimationThread extends Thread {
             mAnimator.start();
 
             // loop the animation
+            LayoutScene scene = mScene.getScene();
             do {
                 // get the next message.
                 MessageBundle bundle = mQueue.poll();
@@ -89,14 +92,14 @@ public class AnimationThread extends Thread {
                     try {
                         sleep(bundle.mUptimeMillis - currentTime);
                     } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
+                        // FIXME log/do something/sleep again?
                         e.printStackTrace();
                     }
                 }
 
                 // ready to do the work, acquire the scene.
                 SceneResult result = mScene.acquire(250);
-                if (result != SceneResult.SUCCESS) {
+                if (result.isSuccess() == false) {
                     mListener.done(result);
                     return;
                 }
@@ -105,15 +108,15 @@ public class AnimationThread extends Thread {
                 // the next message, so mQueue will have another one.
                 try {
                     bundle.mTarget.handleMessage(bundle.mMessage);
-                    if (mScene.render() == SceneResult.SUCCESS) {
-                        mListener.onNewFrame(mScene.getScene());
+                    if (mScene.render().isSuccess()) {
+                        mListener.onNewFrame(scene);
                     }
                 } finally {
                     mScene.release();
                 }
             } while (mQueue.size() > 0);
 
-            mListener.done(SceneResult.SUCCESS);
+            mListener.done(SceneStatus.SUCCESS.getResult());
         } finally {
             Handler_Delegate.setCallback(null);
             Bridge.cleanupThread();
