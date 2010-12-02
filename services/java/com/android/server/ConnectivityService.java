@@ -430,6 +430,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         mSettingsObserver = new SettingsObserver(mHandler, EVENT_APPLY_GLOBAL_HTTP_PROXY);
         mSettingsObserver.observe(mContext);
+
+        loadGlobalProxy();
     }
 
 
@@ -2089,7 +2091,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             ContentResolver res = mContext.getContentResolver();
             Settings.Secure.putString(res, Settings.Secure.GLOBAL_HTTP_PROXY_HOST, host);
             Settings.Secure.putInt(res, Settings.Secure.GLOBAL_HTTP_PROXY_PORT, port);
-            Settings.Secure.putString(res,Settings.Secure.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
+            Settings.Secure.putString(res, Settings.Secure.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
                     exclList);
         }
 
@@ -2097,6 +2099,20 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             proxyProperties = mDefaultProxy;
         }
         sendProxyBroadcast(proxyProperties);
+    }
+
+    private void loadGlobalProxy() {
+        ContentResolver res = mContext.getContentResolver();
+        String host = Settings.Secure.getString(res, Settings.Secure.GLOBAL_HTTP_PROXY_HOST);
+        int port = Settings.Secure.getInt(res, Settings.Secure.GLOBAL_HTTP_PROXY_PORT, 0);
+        String exclList = Settings.Secure.getString(res,
+                Settings.Secure.GLOBAL_HTTP_PROXY_EXCLUSION_LIST);
+        if (!TextUtils.isEmpty(host)) {
+            ProxyProperties proxyProperties = new ProxyProperties(host, port, exclList);
+            synchronized (mGlobalProxyLock) {
+                mGlobalProxy = proxyProperties;
+            }
+        }
     }
 
     public ProxyProperties getGlobalProxy() {
