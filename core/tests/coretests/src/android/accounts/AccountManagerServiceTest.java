@@ -16,30 +16,42 @@
 
 package android.accounts;
 
-import android.test.AndroidTestCase;
-import android.test.RenamingDelegatingContext;
-import android.test.IsolatedContext;
-import android.test.mock.MockContext;
-import android.test.mock.MockContentResolver;
-import android.content.*;
-import android.accounts.Account;
-import android.accounts.AccountManagerService;
+import android.app.Notification;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.RegisteredServicesCache.ServiceInfo;
+import android.content.pm.RegisteredServicesCacheListener;
 import android.os.Bundle;
+import android.os.Handler;
+import android.test.AndroidTestCase;
+import android.test.IsolatedContext;
+import android.test.RenamingDelegatingContext;
+import android.test.mock.MockContentResolver;
+import android.test.mock.MockContext;
+import android.test.mock.MockPackageManager;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 
 public class AccountManagerServiceTest extends AndroidTestCase {
+    private AccountManagerService mAms;
+
     @Override
     protected void setUp() throws Exception {
         final String filenamePrefix = "test.";
         MockContentResolver resolver = new MockContentResolver();
         RenamingDelegatingContext targetContextWrapper = new RenamingDelegatingContext(
-                new MockContext(), // The context that most methods are delegated to
+                new MyMockContext(), // The context that most methods are delegated to
                 getContext(), // The context that file methods are delegated to
                 filenamePrefix);
         Context context = new IsolatedContext(resolver, targetContextWrapper);
         setContext(context);
+        mAms = new MyAccountManagerService(getContext(),
+                new MyMockPackageManager(), new MockAccountAuthenticatorCache());
     }
 
     public class AccountSorter implements Comparator<Account> {
@@ -54,21 +66,20 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     public void testCheckAddAccount() throws Exception {
-        AccountManagerService ams = new AccountManagerService(getContext());
         Account a11 = new Account("account1", "type1");
         Account a21 = new Account("account2", "type1");
         Account a31 = new Account("account3", "type1");
         Account a12 = new Account("account1", "type2");
         Account a22 = new Account("account2", "type2");
         Account a32 = new Account("account3", "type2");
-        ams.addAccount(a11, "p11", null);
-        ams.addAccount(a12, "p12", null);
-        ams.addAccount(a21, "p21", null);
-        ams.addAccount(a22, "p22", null);
-        ams.addAccount(a31, "p31", null);
-        ams.addAccount(a32, "p32", null);
+        mAms.addAccount(a11, "p11", null);
+        mAms.addAccount(a12, "p12", null);
+        mAms.addAccount(a21, "p21", null);
+        mAms.addAccount(a22, "p22", null);
+        mAms.addAccount(a31, "p31", null);
+        mAms.addAccount(a32, "p32", null);
 
-        Account[] accounts = ams.getAccounts(null);
+        Account[] accounts = mAms.getAccounts(null);
         Arrays.sort(accounts, new AccountSorter());
         assertEquals(6, accounts.length);
         assertEquals(a11, accounts[0]);
@@ -78,16 +89,16 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertEquals(a22, accounts[4]);
         assertEquals(a32, accounts[5]);
 
-        accounts = ams.getAccountsByType("type1" );
+        accounts = mAms.getAccounts("type1" );
         Arrays.sort(accounts, new AccountSorter());
         assertEquals(3, accounts.length);
         assertEquals(a11, accounts[0]);
         assertEquals(a21, accounts[1]);
         assertEquals(a31, accounts[2]);
 
-        ams.removeAccount(null, a21);
+        mAms.removeAccount(a21);
 
-        accounts = ams.getAccountsByType("type1" );
+        accounts = mAms.getAccounts("type1" );
         Arrays.sort(accounts, new AccountSorter());
         assertEquals(2, accounts.length);
         assertEquals(a11, accounts[0]);
@@ -95,23 +106,21 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     public void testPasswords() throws Exception {
-        AccountManagerService ams = new AccountManagerService(getContext());
         Account a11 = new Account("account1", "type1");
         Account a12 = new Account("account1", "type2");
-        ams.addAccount(a11, "p11", null);
-        ams.addAccount(a12, "p12", null);
+        mAms.addAccount(a11, "p11", null);
+        mAms.addAccount(a12, "p12", null);
 
-        assertEquals("p11", ams.getPassword(a11));
-        assertEquals("p12", ams.getPassword(a12));
+        assertEquals("p11", mAms.getPassword(a11));
+        assertEquals("p12", mAms.getPassword(a12));
 
-        ams.setPassword(a11, "p11b");
+        mAms.setPassword(a11, "p11b");
 
-        assertEquals("p11b", ams.getPassword(a11));
-        assertEquals("p12", ams.getPassword(a12));
+        assertEquals("p11b", mAms.getPassword(a11));
+        assertEquals("p12", mAms.getPassword(a12));
     }
 
     public void testUserdata() throws Exception {
-        AccountManagerService ams = new AccountManagerService(getContext());
         Account a11 = new Account("account1", "type1");
         Bundle u11 = new Bundle();
         u11.putString("a", "a_a11");
@@ -122,57 +131,119 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         u12.putString("a", "a_a12");
         u12.putString("b", "b_a12");
         u12.putString("c", "c_a12");
-        ams.addAccount(a11, "p11", u11);
-        ams.addAccount(a12, "p12", u12);
+        mAms.addAccount(a11, "p11", u11);
+        mAms.addAccount(a12, "p12", u12);
 
-        assertEquals("a_a11", ams.getUserData(a11, "a"));
-        assertEquals("b_a11", ams.getUserData(a11, "b"));
-        assertEquals("c_a11", ams.getUserData(a11, "c"));
-        assertEquals("a_a12", ams.getUserData(a12, "a"));
-        assertEquals("b_a12", ams.getUserData(a12, "b"));
-        assertEquals("c_a12", ams.getUserData(a12, "c"));
+        assertEquals("a_a11", mAms.getUserData(a11, "a"));
+        assertEquals("b_a11", mAms.getUserData(a11, "b"));
+        assertEquals("c_a11", mAms.getUserData(a11, "c"));
+        assertEquals("a_a12", mAms.getUserData(a12, "a"));
+        assertEquals("b_a12", mAms.getUserData(a12, "b"));
+        assertEquals("c_a12", mAms.getUserData(a12, "c"));
 
-        ams.setUserData(a11, "b", "b_a11b");
+        mAms.setUserData(a11, "b", "b_a11b");
+        mAms.setUserData(a12, "c", null);
 
-        assertEquals("a_a11", ams.getUserData(a11, "a"));
-        assertEquals("b_a11b", ams.getUserData(a11, "b"));
-        assertEquals("c_a11", ams.getUserData(a11, "c"));
-        assertEquals("a_a12", ams.getUserData(a12, "a"));
-        assertEquals("b_a12", ams.getUserData(a12, "b"));
-        assertEquals("c_a12", ams.getUserData(a12, "c"));
+        assertEquals("a_a11", mAms.getUserData(a11, "a"));
+        assertEquals("b_a11b", mAms.getUserData(a11, "b"));
+        assertEquals("c_a11", mAms.getUserData(a11, "c"));
+        assertEquals("a_a12", mAms.getUserData(a12, "a"));
+        assertEquals("b_a12", mAms.getUserData(a12, "b"));
+        assertNull(mAms.getUserData(a12, "c"));
     }
 
     public void testAuthtokens() throws Exception {
-        AccountManagerService ams = new AccountManagerService(getContext());
         Account a11 = new Account("account1", "type1");
         Account a12 = new Account("account1", "type2");
-        ams.addAccount(a11, "p11", null);
-        ams.addAccount(a12, "p12", null);
+        mAms.addAccount(a11, "p11", null);
+        mAms.addAccount(a12, "p12", null);
 
-        ams.setAuthToken(a11, "att1", "a11_att1");
-        ams.setAuthToken(a11, "att2", "a11_att2");
-        ams.setAuthToken(a11, "att3", "a11_att3");
-        ams.setAuthToken(a12, "att1", "a12_att1");
-        ams.setAuthToken(a12, "att2", "a12_att2");
-        ams.setAuthToken(a12, "att3", "a12_att3");
+        mAms.setAuthToken(a11, "att1", "a11_att1");
+        mAms.setAuthToken(a11, "att2", "a11_att2");
+        mAms.setAuthToken(a11, "att3", "a11_att3");
+        mAms.setAuthToken(a12, "att1", "a12_att1");
+        mAms.setAuthToken(a12, "att2", "a12_att2");
+        mAms.setAuthToken(a12, "att3", "a12_att3");
 
-        assertEquals("a11_att1", ams.peekAuthToken(a11, "att1"));
-        assertEquals("a11_att2", ams.peekAuthToken(a11, "att2"));
-        assertEquals("a11_att3", ams.peekAuthToken(a11, "att3"));
-        assertEquals("a12_att1", ams.peekAuthToken(a12, "att1"));
-        assertEquals("a12_att2", ams.peekAuthToken(a12, "att2"));
-        assertEquals("a12_att3", ams.peekAuthToken(a12, "att3"));
+        assertEquals("a11_att1", mAms.peekAuthToken(a11, "att1"));
+        assertEquals("a11_att2", mAms.peekAuthToken(a11, "att2"));
+        assertEquals("a11_att3", mAms.peekAuthToken(a11, "att3"));
+        assertEquals("a12_att1", mAms.peekAuthToken(a12, "att1"));
+        assertEquals("a12_att2", mAms.peekAuthToken(a12, "att2"));
+        assertEquals("a12_att3", mAms.peekAuthToken(a12, "att3"));
 
-        ams.setAuthToken(a11, "att3", "a11_att3b");
-        ams.invalidateAuthToken(a12.type, "a12_att2");
+        mAms.setAuthToken(a11, "att3", "a11_att3b");
+        mAms.invalidateAuthToken(a12.type, "a12_att2");
 
-        assertEquals("a11_att1", ams.peekAuthToken(a11, "att1"));
-        assertEquals("a11_att2", ams.peekAuthToken(a11, "att2"));
-        assertEquals("a11_att3b", ams.peekAuthToken(a11, "att3"));
-        assertEquals("a12_att1", ams.peekAuthToken(a12, "att1"));
-        assertNull(ams.peekAuthToken(a12, "att2"));
-        assertEquals("a12_att3", ams.peekAuthToken(a12, "att3"));
+        assertEquals("a11_att1", mAms.peekAuthToken(a11, "att1"));
+        assertEquals("a11_att2", mAms.peekAuthToken(a11, "att2"));
+        assertEquals("a11_att3b", mAms.peekAuthToken(a11, "att3"));
+        assertEquals("a12_att1", mAms.peekAuthToken(a12, "att1"));
+        assertNull(mAms.peekAuthToken(a12, "att2"));
+        assertEquals("a12_att3", mAms.peekAuthToken(a12, "att3"));
 
-        assertNull(ams.readAuthTokenFromDatabase(a12, "att2"));
+        assertNull(mAms.peekAuthToken(a12, "att2"));
+    }
+
+    static public class MockAccountAuthenticatorCache implements IAccountAuthenticatorCache {
+        private ArrayList<ServiceInfo<AuthenticatorDescription>> mServices;
+
+        public MockAccountAuthenticatorCache() {
+            mServices = new ArrayList<ServiceInfo<AuthenticatorDescription>>();
+            AuthenticatorDescription d1 = new AuthenticatorDescription("type1", "p1", 0, 0, 0, 0);
+            AuthenticatorDescription d2 = new AuthenticatorDescription("type2", "p2", 0, 0, 0, 0);
+            mServices.add(new ServiceInfo<AuthenticatorDescription>(d1, null, 0));
+            mServices.add(new ServiceInfo<AuthenticatorDescription>(d2, null, 0));
+        }
+
+        public ServiceInfo<AuthenticatorDescription> getServiceInfo(AuthenticatorDescription type) {
+            for (ServiceInfo<AuthenticatorDescription> service : mServices) {
+                if (service.type.equals(type)) {
+                    return service;
+                }
+            }
+            return null;
+        }
+
+        public Collection<ServiceInfo<AuthenticatorDescription>> getAllServices() {
+            return mServices;
+        }
+
+        public void dump(final FileDescriptor fd, final PrintWriter fout, final String[] args) {
+        }
+
+        public void setListener(
+                final RegisteredServicesCacheListener<AuthenticatorDescription> listener,
+                final Handler handler) {
+        }
+    }
+
+    static public class MyMockContext extends MockContext {
+        @Override
+        public int checkCallingOrSelfPermission(final String permission) {
+            return PackageManager.PERMISSION_GRANTED;
+        }
+    }
+
+    static public class MyMockPackageManager extends MockPackageManager {
+        @Override
+        public int checkSignatures(final int uid1, final int uid2) {
+            return PackageManager.SIGNATURE_MATCH;
+        }
+    }
+
+    static public class MyAccountManagerService extends AccountManagerService {
+        public MyAccountManagerService(Context context, PackageManager packageManager,
+                IAccountAuthenticatorCache authenticatorCache) {
+            super(context, packageManager, authenticatorCache);
+        }
+
+        @Override
+        protected void installNotification(final int notificationId, final Notification n) {
+        }
+
+        @Override
+        protected void cancelNotification(final int id) {
+        }
     }
 }

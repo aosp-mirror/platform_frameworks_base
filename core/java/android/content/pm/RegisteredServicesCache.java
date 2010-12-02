@@ -182,7 +182,8 @@ public abstract class RegisteredServicesCache<V> {
         public final ComponentName componentName;
         public final int uid;
 
-        private ServiceInfo(V type, ComponentName componentName, int uid) {
+        /** @hide */
+        public ServiceInfo(V type, ComponentName componentName, int uid) {
             this.type = type;
             this.componentName = componentName;
             this.uid = uid;
