@@ -482,10 +482,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"De gegevens van de telefoon zonder waarschuwing wissen door de fabrieksinstellingen te herstellen"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Algemene proxy voor het apparaat instellen"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Stel de algemene proxy voor het apparaat in die moet worden gebruikt terwijl het beleid is geactiveerd. Alleen de eerste apparaatbeheerder stelt de algemene proxy in."</string>
-    <!-- no translation found for policylab_expirePassword (2314569545488269564) -->
-    <skip />
-    <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
-    <skip />
+    <string name="policylab_expirePassword" msgid="2314569545488269564">"Verval wachtwoord instellen"</string>
+    <string name="policydesc_expirePassword" msgid="7276906351852798814">"Beheren hoe lang het duurt voordat het wachtwoord voor schermvergrendeling moet worden gewijzigd"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Thuis"</item>
     <item msgid="869923650527136615">"Mobiel"</item>
@@ -668,8 +666,7 @@
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />
-    <!-- no translation found for autofill_address_summary_separator (7483307893170324129) -->
-    <skip />
+    <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
     <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"browsergeschiedenis en bladwijzers lezen"</string>
@@ -869,6 +866,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Er wordt een groot aantal SMS-berichten verzonden. Selecteer \'OK\' om door te gaan of \'Annuleren\' om de verzending te stoppen."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Annuleren"</string>
+    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <skip />
     <string name="date_time_set" msgid="5777075614321087758">"Instellen"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Standaard"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Geen machtigingen vereist"</string>
@@ -876,8 +875,8 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Alles weergeven"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB-massaopslag"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB-verbinding"</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"U heeft uw telefoon via USB op uw computer aangesloten. Selecteer de onderstaande knop als u bestanden tussen uw computer en de USB-opslag van uw Android wilt kopiëren."</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"U heeft uw telefoon via USB op uw computer aangesloten. Selecteer de onderstaande knop als u bestanden tussen uw computer en de USB-opslag van uw Android wilt kopiëren."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"U heeft uw telefoon via USB op uw computer aangesloten. Raak de onderstaande knop aan als u bestanden tussen uw computer en de USB-opslag van uw Android wilt kopiëren."</string>
+    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"U heeft uw telefoon via USB op uw computer aangesloten. Raak de onderstaande knop aan als u bestanden tussen uw computer en de SD-kaart van uw Android wilt kopiëren."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB-opslag inschakelen"</string>
     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Er is een probleem bij het gebruik van uw USB-opslag voor USB-massaopslag."</string>
     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Er is een probleem bij het gebruik van uw SD-kaart voor USB-massaopslag."</string>

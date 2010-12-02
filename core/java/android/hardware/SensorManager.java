@@ -1938,12 +1938,17 @@ public class SensorManager
      *  @param R an array of floats in which to store the rotation matrix
      */
     public static void getRotationMatrixFromVector(float[] R, float[] rotationVector) {
-        float q0 = (float)Math.sqrt(1 - rotationVector[0]*rotationVector[0] -
-                                    rotationVector[1]*rotationVector[1] -
-                                    rotationVector[2]*rotationVector[2]);
+
+        float q0;
         float q1 = rotationVector[0];
         float q2 = rotationVector[1];
         float q3 = rotationVector[2];
+
+        if (rotationVector.length == 4) {
+            q0 = rotationVector[3];
+        } else {
+            q0 = (float)Math.sqrt(1 - q1*q1 - q2*q2 - q3*q3);
+        }
 
         float sq_q1 = 2 * q1 * q1;
         float sq_q2 = 2 * q2 * q2;
@@ -1995,10 +2000,12 @@ public class SensorManager
      *  @param Q an array of floats in which to store the computed quaternion
      */
     public static void getQuaternionFromVector(float[] Q, float[] rv) {
-        float w = (float)Math.sqrt(1 - rv[0]*rv[0] - rv[1]*rv[1] - rv[2]*rv[2]);
-        //In this case, the w component of the quaternion is known to be a positive number
-
-        Q[0] = w;
+        if (rv.length == 4) {
+            Q[0] = rv[3];
+        } else {
+            //In this case, the w component of the quaternion is known to be a positive number
+            Q[0] = (float)Math.sqrt(1 - rv[0]*rv[0] - rv[1]*rv[1] - rv[2]*rv[2]);
+        }
         Q[1] = rv[0];
         Q[2] = rv[1];
         Q[3] = rv[2];

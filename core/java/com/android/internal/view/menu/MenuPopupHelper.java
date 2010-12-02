@@ -35,7 +35,7 @@ import java.lang.ref.WeakReference;
  * @hide
  */
 public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.OnKeyListener,
-        ViewTreeObserver.OnGlobalLayoutListener {
+        ViewTreeObserver.OnGlobalLayoutListener, PopupWindow.OnDismissListener {
     private static final String TAG = "MenuPopupHelper";
 
     private Context mContext;
@@ -45,12 +45,6 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     private WeakReference<View> mAnchorView;
     private boolean mOverflowOnly;
     private ViewTreeObserver mTreeObserver;
-
-    private PopupWindow.OnDismissListener mDismissListener = new PopupWindow.OnDismissListener() {
-        public void onDismiss() {
-            mPopup = null;
-        }
-    };
 
     public MenuPopupHelper(Context context, MenuBuilder menu) {
         this(context, menu, null, false);
@@ -77,7 +71,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     public void show() {
         mPopup = new ListPopupWindow(mContext, null, com.android.internal.R.attr.popupMenuStyle);
         mPopup.setOnItemClickListener(this);
-        mPopup.setOnDismissListener(mDismissListener);
+        mPopup.setOnDismissListener(this);
 
         final MenuAdapter adapter = mOverflowOnly ?
                 mMenu.getOverflowMenuAdapter(MenuBuilder.TYPE_POPUP) :
@@ -110,8 +104,12 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         if (isShowing()) {
             mPopup.dismiss();
         }
+    }
+
+    public void onDismiss() {
+        mPopup = null;
         if (mTreeObserver != null) {
-            mTreeObserver.removeGlobalOnLayoutListener(this);
+            mTreeObserver.removeGlobalOnLayoutListener(MenuPopupHelper.this);
             mTreeObserver = null;
         }
     }

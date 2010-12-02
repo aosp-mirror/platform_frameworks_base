@@ -122,7 +122,9 @@ class ScreenRotationAnimation {
         mSurface.unlockCanvasAndPost(c);
         Surface.closeTransaction();
 
-        screenshot.recycle();
+        if (screenshot != null) {
+            screenshot.recycle();
+        }
     }
 
     static int deltaRotation(int oldRotation, int newRotation) {

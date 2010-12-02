@@ -1060,7 +1060,6 @@
     </style>
 
     <style name="TextAppearance.Holo.Medium" parent="TextAppearance.Medium">
-        <item name="android:textLineHeight">24dip</item>
     </style>
 
     <style name="TextAppearance.Holo.Small" parent="TextAppearance.Small">
@@ -1304,6 +1303,10 @@
         <item name="android:paddingBottom">4dip</item>
     </style>
 
+    <style name="Widget.Holo.Button.Borderless">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+    </style>
+
     <style name="Widget.Holo.Button.Small">
         <item name="android:background">@android:drawable/btn_default_holo_dark</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
@@ -1333,7 +1336,7 @@
     <style name="Widget.Holo.ButtonGroup" parent="Widget.ButtonGroup">
         <item name="divider">?android:attr/dividerVertical</item>
         <item name="showDividers">middle</item>
-        <item name="android:background">@android:drawable/btn_default_holo_dark</item>
+        <item name="dividerPadding">8dip</item>
     </style>
 
     <style name="Widget.Holo.ButtonGroup.AlertDialog">
@@ -1701,7 +1704,7 @@
     <style name="Widget.Holo.Light.ListView.DropDown">
     </style>
 
-    <style name="Widget.Holo.Light.EditText" parent="Widget.EditText">
+    <style name="Widget.Holo.Light.EditText" parent="Widget.Holo.EditText">
     </style>
 
     <style name="Widget.Holo.Light.ExpandableListView" parent="Widget.ExpandableListView">
@@ -1924,6 +1927,11 @@
         <item name="bottomBright">@android:drawable/dialog_bottom_holo_dark</item>
         <item name="bottomMedium">@android:drawable/dialog_bottom_holo_dark</item>
         <item name="centerMedium">@android:drawable/dialog_middle_holo_dark</item>
+        <item name="layout">@android:layout/alert_dialog_holo</item>
+        <item name="listLayout">@android:layout/select_dialog_holo</item>
+        <item name="listItemLayout">@android:layout/select_dialog_item_holo</item>
+        <item name="multiChoiceItemLayout">@android:layout/select_dialog_multichoice_holo</item>
+        <item name="singleChoiceItemLayout">@android:layout/select_dialog_singlechoice_holo</item>
     </style>
 
     <style name="AlertDialog.Holo.Light">

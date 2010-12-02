@@ -314,6 +314,17 @@ public class WebView extends AbsoluteLayout
         implements ViewTreeObserver.OnGlobalFocusChangeListener,
         ViewGroup.OnHierarchyChangeListener {
 
+    private class InnerGlobalLayoutListener implements ViewTreeObserver.OnGlobalLayoutListener {
+        public void onGlobalLayout() {
+            if (isShown()) {
+                setGLRectViewport();
+            }
+        }
+    }
+
+    // The listener to capture global layout change event.
+    private InnerGlobalLayoutListener mListener = null;
+
     // if AUTO_REDRAW_HACK is true, then the CALL key will toggle redrawing
     // the screen all-the-time. Good for profiling our drawing code
     static private final boolean AUTO_REDRAW_HACK = false;
@@ -2253,13 +2264,6 @@ public class WebView extends AbsoluteLayout
      * @hide
      */
     public void setEmbeddedTitleBar(View v) {
-        if (null == v) {
-            // If one of our callbacks is holding onto the titlebar to replace
-            // it when its ActionMode ends, remove it.
-            if (mFindCallback != null) {
-                mFindCallback.setTitleBar(null);
-            }
-        }
         if (mTitleBar == v) return;
         if (mTitleBar != null) {
             removeView(mTitleBar);
@@ -2894,11 +2898,6 @@ public class WebView extends AbsoluteLayout
         setFindIsUp(true);
         mFindCallback.setWebView(this);
         View titleBar = mTitleBar;
-        // We do not want to show the embedded title bar during find or
-        // select, but keep track of it so that it can be replaced when the
-        // mode is exited.
-        setEmbeddedTitleBar(null);
-        mFindCallback.setTitleBar(titleBar);
         startActionMode(mFindCallback);
         if (text == null) {
             text = mLastFind;
@@ -3738,6 +3737,8 @@ public class WebView extends AbsoluteLayout
         if (mNativeClass != 0 && nativeWordSelection(x, y)) {
             nativeSetExtendSelection();
             mDrawSelectionPointer = false;
+            mSelectionStarted = true;
+            mTouchMode = TOUCH_DRAG_MODE;
             return true;
         }
         selectionDone();
@@ -4699,6 +4700,11 @@ public class WebView extends AbsoluteLayout
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         if (hasWindowFocus()) setActive(true);
+        final ViewTreeObserver treeObserver = getViewTreeObserver();
+        if (treeObserver != null && mListener == null) {
+            mListener = new InnerGlobalLayoutListener();
+            treeObserver.addOnGlobalLayoutListener(mListener);
+        }
     }
 
     @Override
@@ -4706,6 +4712,13 @@ public class WebView extends AbsoluteLayout
         clearHelpers();
         mZoomManager.dismissZoomPicker();
         if (hasWindowFocus()) setActive(false);
+
+        final ViewTreeObserver treeObserver = getViewTreeObserver();
+        if (treeObserver != null && mListener != null) {
+            treeObserver.removeGlobalOnLayoutListener(mListener);
+            mListener = null;
+        }
+
         super.onDetachedFromWindow();
     }
 
@@ -4846,13 +4859,19 @@ public class WebView extends AbsoluteLayout
     }
 
     void setGLRectViewport() {
-        View window = getRootView();
-        int[] location = new int[2];
-        getLocationInWindow(location);
-        mGLRectViewport = new Rect(location[0], window.getHeight()
-                             - (location[1] + getHeight()),
-                             location[0] + getWidth(),
-                             window.getHeight() - location[1]);
+        // Use the getGlobalVisibleRect() to get the intersection among the parents
+        Rect webViewRect = new Rect();
+        boolean visible = getGlobalVisibleRect(webViewRect);
+
+        // Then need to invert the Y axis, just for GL
+        View rootView = getRootView();
+        int rootViewHeight = rootView.getHeight();
+        int savedWebViewBottom = webViewRect.bottom;
+        webViewRect.bottom = rootViewHeight - webViewRect.top;
+        webViewRect.top = rootViewHeight - savedWebViewBottom;
+
+        // Store the viewport
+        mGLRectViewport = webViewRect;
     }
 
     /**
@@ -4988,10 +5007,10 @@ public class WebView extends AbsoluteLayout
         startTouch(detector.getFocusX(), detector.getFocusY(), mLastTouchTime);
     }
 
-    private void startScrollingLayer(float gestureX, float gestureY) {
+    private void startScrollingLayer(float x, float y) {
         if (mTouchMode != TOUCH_DRAG_LAYER_MODE) {
-            int contentX = viewToContentX((int) gestureX + mScrollX);
-            int contentY = viewToContentY((int) gestureY + mScrollY);
+            int contentX = viewToContentX((int) x + mScrollX);
+            int contentY = viewToContentY((int) y + mScrollY);
             mScrollingLayer = nativeScrollableLayer(contentX, contentY);
             if (mScrollingLayer != 0) {
                 mTouchMode = TOUCH_DRAG_LAYER_MODE;
@@ -5024,52 +5043,12 @@ public class WebView extends AbsoluteLayout
         float y = ev.getY();
         long eventTime = ev.getEventTime();
 
-        final ScaleGestureDetector detector =
-                mZoomManager.getMultiTouchGestureDetector();
-        boolean isScrollGesture = false;
-        // Set to the mid-point of a two-finger gesture used to detect if the
-        // user has touched a layer.
-        float gestureX = x;
-        float gestureY = y;
-        if (detector == null || !detector.isInProgress()) {
-            // The gesture for scrolling a layer is two fingers close together.
-            // FIXME: we may consider giving WebKit an option to handle
-            // multi-touch events later.
-            if (ev.getPointerCount() > 1) {
-                float dx = ev.getX(1) - ev.getX(0);
-                float dy = ev.getY(1) - ev.getY(0);
-                float dist = (dx * dx + dy * dy) *
-                        DRAG_LAYER_INVERSE_DENSITY_SQUARED;
-                // Use the approximate center to determine if the gesture is in
-                // a layer.
-                gestureX = ev.getX(0) + (dx * .5f);
-                gestureY = ev.getY(0) + (dy * .5f);
-                // Now use a consistent point for tracking movement.
-                if (ev.getX(0) < ev.getX(1)) {
-                    x = ev.getX(0);
-                    y = ev.getY(0);
-                } else {
-                    x = ev.getX(1);
-                    y = ev.getY(1);
-                }
-                action = ev.getActionMasked();
-                if (dist < DRAG_LAYER_FINGER_DISTANCE) {
-                    isScrollGesture = true;
-                } else if (mTouchMode == TOUCH_DRAG_LAYER_MODE) {
-                    // Fingers moved too far apart while dragging, the user
-                    // might be trying to zoom.
-                    mTouchMode = TOUCH_INIT_MODE;
-                }
-            }
-        }
-
-        // If the page disallows zoom, pass multi-touch events to webkit.
         // mDeferMultitouch is a hack for layout tests, where it is used to
         // force passing multi-touch events to webkit.
         // FIXME: always pass multi-touch events to webkit and remove everything
         // related to mDeferMultitouch.
         if (ev.getPointerCount() > 1 &&
-                (mDeferMultitouch || (!isScrollGesture && mZoomManager.isZoomScaleFixed()))) {
+                (mDeferMultitouch || mZoomManager.isZoomScaleFixed())) {
             if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "passing " + ev.getPointerCount() + " points to webkit");
             }
@@ -5077,8 +5056,11 @@ public class WebView extends AbsoluteLayout
             return true;
         }
 
+        final ScaleGestureDetector detector =
+                mZoomManager.getMultiTouchGestureDetector();
+
         if (mZoomManager.supportsMultiTouchZoom() && ev.getPointerCount() > 1 &&
-                mTouchMode != TOUCH_DRAG_LAYER_MODE && !isScrollGesture) {
+                mTouchMode != TOUCH_DRAG_LAYER_MODE) {
             if (!detector.isInProgress() &&
                     ev.getActionMasked() != MotionEvent.ACTION_POINTER_DOWN) {
                 // Insert a fake pointer down event in order to start
@@ -5368,9 +5350,7 @@ public class WebView extends AbsoluteLayout
                     deltaX = 0;
                     deltaY = 0;
 
-                    if (isScrollGesture) {
-                        startScrollingLayer(gestureX, gestureY);
-                    }
+                    startScrollingLayer(x, y);
                     startDrag();
                 }
 
@@ -5666,8 +5646,10 @@ public class WebView extends AbsoluteLayout
                 deltaY = viewToContentDimension(deltaY);
                 if (nativeScrollLayer(mScrollingLayer, deltaX, deltaY)) {
                     invalidate();
+                    return;
                 }
-                return;
+                // Switch to drag mode and fall through.
+                mTouchMode = TOUCH_DRAG_MODE;
             }
 
             final int oldX = mScrollX;

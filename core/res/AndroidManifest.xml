@@ -1013,7 +1013,7 @@
     <permission android:name="android.permission.SHUTDOWN"
         android:label="@string/permlab_shutdown"
         android:description="@string/permdesc_shutdown"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows an application to tell the activity manager to temporarily
          stop application switches, putting it into a special mode that

@@ -168,13 +168,13 @@ public abstract class ActionBar {
      * @param adapter An adapter that will provide views both to display
      *                the current navigation selection and populate views
      *                within the dropdown navigation menu.
-     * @param callback A NavigationCallback that will receive events when the user
+     * @param callback A OnNavigationListener that will receive events when the user
      *                 selects a navigation item.
      * @deprecated See setListNavigationCallbacks.
      */
     @Deprecated
     public abstract void setDropdownNavigationMode(SpinnerAdapter adapter,
-            NavigationCallback callback);
+            OnNavigationListener callback);
 
     /**
      * Set the adapter and navigation callback for list navigation mode.
@@ -182,17 +182,17 @@ public abstract class ActionBar {
      * The supplied adapter will provide views for the expanded list as well as
      * the currently selected item. (These may be displayed differently.)
      *
-     * The supplied NavigationCallback will alert the application when the user
+     * The supplied OnNavigationListener will alert the application when the user
      * changes the current list selection.
      *
      * @param adapter An adapter that will provide views both to display
      *                the current navigation selection and populate views
      *                within the dropdown navigation menu.
-     * @param callback A NavigationCallback that will receive events when the user
+     * @param callback An OnNavigationListener that will receive events when the user
      *                 selects a navigation item.
      */
     public abstract void setListNavigationCallbacks(SpinnerAdapter adapter,
-            NavigationCallback callback);
+            OnNavigationListener callback);
 
     /**
      * Set the action bar into dropdown navigation mode and supply an adapter that will
@@ -201,7 +201,7 @@ public abstract class ActionBar {
      * @param adapter An adapter that will provide views both to display the current
      *                navigation selection and populate views within the dropdown
      *                navigation menu.
-     * @param callback A NavigationCallback that will receive events when the user
+     * @param callback A OnNavigationListener that will receive events when the user
      *                 selects a navigation item.
      * @param defaultSelectedPosition Position within the provided adapter that should be
      *                                selected from the outset.
@@ -209,7 +209,7 @@ public abstract class ActionBar {
      */
     @Deprecated
     public abstract void setDropdownNavigationMode(SpinnerAdapter adapter,
-            NavigationCallback callback, int defaultSelectedPosition);
+            OnNavigationListener callback, int defaultSelectedPosition);
 
     /**
      * Set the selected navigation item in list or tabbed navigation modes.
@@ -532,9 +532,24 @@ public abstract class ActionBar {
     public abstract boolean isShowing();
 
     /**
-     * Callback interface for ActionBar navigation events. 
+     * Add a listener that will respond to menu visibility change events.
+     *
+     * @param listener The new listener to add
      */
-    public interface NavigationCallback {
+    public abstract void addOnMenuVisibilityListener(OnMenuVisibilityListener listener);
+
+    /**
+     * Remove a menu visibility listener. This listener will no longer receive menu
+     * visibility change events.
+     *
+     * @param listener A listener to remove that was previously added
+     */
+    public abstract void removeOnMenuVisibilityListener(OnMenuVisibilityListener listener);
+
+    /**
+     * Listener interface for ActionBar navigation events.
+     */
+    public interface OnNavigationListener {
         /**
          * This method is called whenever a navigation item in your action bar
          * is selected.
@@ -544,6 +559,21 @@ public abstract class ActionBar {
          * @return True if the event was handled, false otherwise.
          */
         public boolean onNavigationItemSelected(int itemPosition, long itemId);
+    }
+
+    /**
+     * Listener for receiving events when action bar menus are shown or hidden.
+     */
+    public interface OnMenuVisibilityListener {
+        /**
+         * Called when an action bar menu is shown or hidden. Applications may want to use
+         * this to tune auto-hiding behavior for the action bar or pause/resume video playback,
+         * gameplay, or other activity within the main content area.
+         *
+         * @param isVisible True if an action bar menu is now visible, false if no action bar
+         *                  menus are visible.
+         */
+        public void onMenuVisibilityChanged(boolean isVisible);
     }
 
     /**

@@ -169,7 +169,7 @@ public class ShirtPocket extends FrameLayout {
                         thumb = new DragThumbnailBuilder(mWindow.findViewById(R.id.preview));
                     }
 
-                    v.startDrag(clip, thumb, false);
+                    v.startDrag(clip, thumb, false, null);
 
                     // TODO: only discard the clipping if it was accepted
                     stash(null);

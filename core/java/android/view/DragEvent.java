@@ -29,6 +29,7 @@ public class DragEvent implements Parcelable {
     float mX, mY;
     ClipDescription mClipDescription;
     ClipData mClipData;
+    Object mLocalState;
     boolean mDragResult;
 
     private DragEvent mNext;
@@ -139,11 +140,11 @@ public static final int ACTION_DRAG_EXITED = 6;
     }
 
     static DragEvent obtain() {
-        return DragEvent.obtain(0, 0f, 0f, null, null, false);
+        return DragEvent.obtain(0, 0f, 0f, null, null, null, false);
     }
 
     /** @hide */
-    public static DragEvent obtain(int action, float x, float y,
+    public static DragEvent obtain(int action, float x, float y, Object localState,
             ClipDescription description, ClipData data, boolean result) {
         final DragEvent ev;
         synchronized (gRecyclerLock) {
@@ -167,7 +168,7 @@ public static final int ACTION_DRAG_EXITED = 6;
 
     /** @hide */
     public static DragEvent obtain(DragEvent source) {
-        return obtain(source.mAction, source.mX, source.mY,
+        return obtain(source.mAction, source.mX, source.mY, source.mLocalState,
                 source.mClipDescription, source.mClipData, source.mDragResult);
     }
 
@@ -218,6 +219,15 @@ public static final int ACTION_DRAG_EXITED = 6;
     }
 
     /**
+     * Provides the local state object passed as the {@code myLocalState} parameter to
+     * View.startDrag(). The object will always be null here if the application receiving
+     * the DragEvent is not the one that started the drag.
+     */
+    public Object getLocalState() {
+        return mLocalState;
+    }
+
+    /**
      * Provides an indication of whether the drag operation concluded successfully.
      * This method is only available on ACTION_DRAG_ENDED events.
      * @return {@code true} if the drag operation ended with an accepted drop; {@code false}
@@ -249,6 +259,7 @@ public static final int ACTION_DRAG_EXITED = 6;
 
         mClipData = null;
         mClipDescription = null;
+        mLocalState = null;
 
         synchronized (gRecyclerLock) {
             if (gRecyclerUsed < MAX_RECYCLED) {

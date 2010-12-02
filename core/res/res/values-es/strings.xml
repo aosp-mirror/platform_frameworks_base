@@ -482,10 +482,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Borrado de los datos del teléfono sin avisar restableciendo datos de fábrica"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Definir el servidor proxy global"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Define el servidor proxy global que se debe utilizar mientras la política esté habilitada. Solo el primer administrador de dispositivos define el servidor proxy global efectivo."</string>
-    <!-- no translation found for policylab_expirePassword (2314569545488269564) -->
-    <skip />
-    <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
-    <skip />
+    <string name="policylab_expirePassword" msgid="2314569545488269564">"Definir caducidad contraseña"</string>
+    <string name="policydesc_expirePassword" msgid="7276906351852798814">"Permite controlar cuándo se debe cambiar la contraseña de bloqueo de la pantalla."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Móvil"</item>
@@ -668,8 +666,7 @@
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />
-    <!-- no translation found for autofill_address_summary_separator (7483307893170324129) -->
-    <skip />
+    <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
     <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"leer información de marcadores y del historial del navegador"</string>
@@ -869,6 +866,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Se ha enviado un número elevado de mensajes SMS. Selecciona \"Aceptar\" para continuar o \"Cancelar\" para interrumpir el envío."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"Aceptar"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Cancelar"</string>
+    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <skip />
     <string name="date_time_set" msgid="5777075614321087758">"Establecer"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Predeterminado"</string>
     <string name="no_permissions" msgid="7283357728219338112">"No es necesario ningún permiso"</string>
@@ -876,8 +875,8 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostrar todos"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"Almacenamiento USB masivo"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Conectado por USB"</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Has conectado el teléfono al equipo mediante USB. Selecciona el botón situado debajo si deseas copiar archivos entre el equipo y el almacenamiento USB del teléfono con Android."</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Has conectado el teléfono al equipo mediante USB. Selecciona el botón situado debajo si deseas copiar archivos entre el equipo y el almacenamiento USB del teléfono con Android."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Has conectado el teléfono al equipo mediante USB. Toca el botón situado debajo si deseas copiar archivos entre el equipo y el almacenamiento USB del teléfono Android."</string>
+    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Has conectado el teléfono al equipo mediante USB. Toca el botón situado debajo si deseas copiar archivos entre el equipo y la tarjeta SD del teléfono Android."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Activar almacenamiento USB"</string>
     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Se ha producido un problema al utilizar el almacenamiento USB para el almacenamiento masivo USB."</string>
     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Se ha producido un problema al utilizar la tarjeta SD para el almacenamiento USB masivo."</string>

@@ -455,7 +455,7 @@ Action Bar.</p>
 <ol>
   <li>Create a {@link android.widget.SpinnerAdapter} that provides the
 list of selectable items for the list and the layout to use when drawing each item in the list.</li>
-  <li>Implement {@link android.app.ActionBar.NavigationCallback} to define the behavior when the
+  <li>Implement {@link android.app.ActionBar.OnNavigationListener} to define the behavior when the
 user selects an item from the list.</li>
   <li>Turn on navigation mode for the Action Bar with {@link
 android.app.ActionBar#setNavigationMode setNavigationMode()}. For example:
@@ -472,17 +472,17 @@ android.app.ActionBar#setListNavigationCallbacks setListNavigationCallbacks()}. 
 actionBar.setListNavigationCallbacks(mSpinnerAdapter, mNavigationCallback);
 </pre>
 <p>This method takes your {@link android.widget.SpinnerAdapter} and {@link
-android.app.ActionBar.NavigationCallback}. More about these next.</p>
+android.app.ActionBar.OnNavigationListener}. More about these next.</p>
 </li>
 </ol>
 
 <p>That's the basic setup. The {@link android.widget.SpinnerAdapter} and {@link
-android.app.ActionBar.NavigationCallback} is where most of the work is done. There are many ways 
+android.app.ActionBar.OnNavigationListener} is where most of the work is done. There are many ways
 you can implement these to define the functionality for your drop-down navigation. Implementing
 various types of {@link android.widget.SpinnerAdapter} is beyond the scope of this
 document&mdash;you should refer to the class refrence for more information about implementing it or
 extending an existing implementation. However, below is a simple example for a {@link
-android.widget.SpinnerAdapter} and {@link android.app.ActionBar.NavigationCallback} to get you
+android.widget.SpinnerAdapter} and {@link android.app.ActionBar.OnNavigationListener} to get you
 started.</p>
 
 
@@ -520,24 +520,24 @@ defined as a resource looks like this:</p>
 </pre>
 
 
-<h3 id="NavigationCallback">Example: simple NavigationCallback</h3>
+<h3 id="OnNavigationListener">Example: simple OnNavigationListener</h3>
 
-<p>Your implementation of {@link android.app.ActionBar.NavigationCallback} is where you handle
+<p>Your implementation of {@link android.app.ActionBar.OnNavigationListener} is where you handle
 fragment changes or other modifications to your activity when the user selects an item from the
 drop-down list. There's only one callback method to implement: {@link
-android.app.ActionBar.NavigationCallback#onNavigationItemSelected onNavigationItemSelected()}.</p>
+android.app.ActionBar.OnNavigationListener#onNavigationItemSelected onNavigationItemSelected()}.</p>
 
 <p>The {@link
-android.app.ActionBar.NavigationCallback#onNavigationItemSelected onNavigationItemSelected()}
+android.app.ActionBar.OnNavigationListener#onNavigationItemSelected onNavigationItemSelected()}
 method receives the position of the item in the list and an item ID provided by the {@link
 android.widget.SpinnerAdapter}.</p>
 
 <p>Here's an example that instantiates an anonymous implementation of {@link
-android.app.ActionBar.NavigationCallback}, which inserts a {@link android.app.Fragment} into the
+android.app.ActionBar.OnNavigationListener}, which inserts a {@link android.app.Fragment} into the
 layout container identified by {@code R.id.fragment_container}:</p>
 
 <pre>
-mNavigationCallback = new NavigationCallback() {
+mOnNavigationListener = new OnNavigationListener() {
   // Get the same strings provided for the drop-down's ArrayAdapter
   String[] strings = getResources().getStringArray(R.array.action_list);
 
@@ -556,7 +556,7 @@ mNavigationCallback = new NavigationCallback() {
 };
 </pre>
 
-<p>This instance of {@link android.app.ActionBar.NavigationCallback} can be given to {@link
+<p>This instance of {@link android.app.ActionBar.OnNavigationListener} can be given to {@link
 android.app.ActionBar#setListNavigationCallbacks setListNavigationCallbacks()}, in step 4 from
 above.</p>
 

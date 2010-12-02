@@ -16,11 +16,15 @@
 
 package com.android.layoutlib.bridge;
 
+import com.android.layoutlib.api.IXmlPullParser;
 import com.android.layoutlib.api.LayoutScene;
 import com.android.layoutlib.api.SceneParams;
 import com.android.layoutlib.api.SceneResult;
 import com.android.layoutlib.api.ViewInfo;
 import com.android.layoutlib.bridge.impl.LayoutSceneImpl;
+
+import android.view.View;
+import android.view.ViewGroup;
 
 import java.awt.image.BufferedImage;
 import java.util.Map;
@@ -92,13 +96,86 @@ public class BridgeLayoutScene extends LayoutScene {
     }
 
     @Override
-    public void dispose() {
-        // TODO Auto-generated method stub
+    public SceneResult insertChild(Object parentView, IXmlPullParser childXml, Object beforeSibling,
+            IAnimationListener listener) {
+        if (parentView instanceof ViewGroup == false) {
+            throw new IllegalArgumentException("parentView is not a ViewGroup");
+        }
+        if (beforeSibling != null && beforeSibling instanceof View == false) {
+            throw new IllegalArgumentException("beforeSibling is not a View");
+        }
 
+        try {
+            mScene.prepareThread();
+            mLastResult = mScene.acquire(SceneParams.DEFAULT_TIMEOUT);
+            if (mLastResult == SceneResult.SUCCESS) {
+                mLastResult = mScene.insertChild((ViewGroup) parentView, childXml,
+                        (View) beforeSibling, listener);
+            }
+        } finally {
+            mScene.release();
+            mScene.cleanupThread();
+        }
+
+        return mLastResult;
+    }
+
+
+    @Override
+    public SceneResult moveChild(Object parentView, Object childView, Object beforeSibling,
+            IAnimationListener listener) {
+        if (parentView instanceof ViewGroup == false) {
+            throw new IllegalArgumentException("parentView is not a ViewGroup");
+        }
+        if (childView instanceof View == false) {
+            throw new IllegalArgumentException("childView is not a View");
+        }
+        if (beforeSibling != null && beforeSibling instanceof View == false) {
+            throw new IllegalArgumentException("beforeSibling is not a View");
+        }
+
+        try {
+            mScene.prepareThread();
+            mLastResult = mScene.acquire(SceneParams.DEFAULT_TIMEOUT);
+            if (mLastResult == SceneResult.SUCCESS) {
+                mLastResult = mScene.moveChild((ViewGroup) parentView, (View) childView,
+                        (View) beforeSibling, listener);
+            }
+        } finally {
+            mScene.release();
+            mScene.cleanupThread();
+        }
+
+        return mLastResult;
+    }
+
+    @Override
+    public SceneResult removeChild(Object childView, IAnimationListener listener) {
+        if (childView instanceof View == false) {
+            throw new IllegalArgumentException("childView is not a View");
+        }
+
+        try {
+            mScene.prepareThread();
+            mLastResult = mScene.acquire(SceneParams.DEFAULT_TIMEOUT);
+            if (mLastResult == SceneResult.SUCCESS) {
+                mLastResult = mScene.removeChild((View) childView, listener);
+            }
+        } finally {
+            mScene.release();
+            mScene.cleanupThread();
+        }
+
+        return mLastResult;
+    }
+
+    @Override
+    public void dispose() {
     }
 
     /*package*/ BridgeLayoutScene(LayoutSceneImpl scene, SceneResult lastResult) {
         mScene = scene;
+        mScene.setScene(this);
         mLastResult = lastResult;
     }
 }

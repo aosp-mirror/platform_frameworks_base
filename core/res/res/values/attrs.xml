@@ -602,8 +602,11 @@
         <!-- Theme to use for alert dialogs spawned from this theme. -->
         <attr name="alertDialogTheme" format="reference" />
 
-        <!-- Drawable to use for vertical dividers. -->
+        <!-- Drawable to use for generic vertical dividers. -->
         <attr name="dividerVertical" format="reference" />
+
+        <!-- Drawable to use for generic horizontal dividers. -->
+        <attr name="dividerHorizontal" format="reference" />
 
         <!-- Style for button groups -->
         <attr name="buttonGroupStyle" format="reference" />
@@ -613,6 +616,9 @@
 
         <!-- Background drawable for standalone items that need focus/pressed states. -->
         <attr name="selectableItemBackground" format="reference" />
+
+        <!-- Style for buttons without an explicit border, often used in groups. -->
+        <attr name="borderlessButtonStyle" format="reference" />
 
         <!-- ============================ -->
         <!-- SearchView styles and assets -->
@@ -1293,6 +1299,11 @@
         <attr name="bottomBright" format="reference|color" />
         <attr name="bottomMedium" format="reference|color" />
         <attr name="centerMedium" format="reference|color" />
+        <attr name="layout" />
+        <attr name="listLayout" format="reference" />
+        <attr name="multiChoiceItemLayout" format="reference" />
+        <attr name="singleChoiceItemLayout" format="reference" />
+        <attr name="listItemLayout" format="reference" />
     </declare-styleable>
 
     <!-- Fragment animation class attributes. -->
@@ -2178,6 +2189,17 @@
              the minimum size of the largest child. If false, all children are
              measured normally. -->
         <attr name="measureWithLargestChild" format="boolean" />
+        <!-- Drawable to use as a vertical divider between buttons. -->
+        <attr name="divider" />
+        <!-- Setting for which dividers to show. -->
+        <attr name="showDividers">
+            <flag name="none" value="0" />
+            <flag name="beginning" value="1" />
+            <flag name="middle" value="2" />
+            <flag name="end" value="4" />
+        </attr>
+        <!-- Size of padding on either end of a divider. -->
+        <attr name="dividerPadding" format="dimension" />
     </declare-styleable>
     <declare-styleable name="ListView">
         <!-- Reference to an array resource that will populate the ListView.  For static content,
@@ -3418,21 +3440,18 @@
              greater than 0 or infinite. The default value is restart. -->
         <attr name="repeatMode"/>
         <!-- Value the animation starts from. -->
-        <attr name="valueFrom" format="float|integer"/>
+        <attr name="valueFrom" format="float|integer|color|dimension"/>
         <!-- Value the animation animates to. -->
-        <attr name="valueTo" format="float|integer"/>
+        <attr name="valueTo" format="float|integer|color|dimension"/>
         <!-- The type of valueFrom and valueTo. -->
         <attr name="valueType">
-            <!-- valueFrom and valueTo are floats. -->
+            <!-- valueFrom and valueTo are floats. This is the default value is valueType is
+                 unspecified. Note that if either valueFrom or valueTo represent colors
+                 (beginning with "#"), then this attribute is ignored and the color values are
+                 interpreted as integers. -->
             <enum name="floatType" value="0" />
             <!-- valueFrom and valueTo are integers. -->
             <enum name="intType"   value="1" />
-            <!-- valueFrom and valueTo are doubles. -->
-            <enum name="doubleType" value="2" />
-            <!-- valueFrom and valueTo are colors. -->
-            <enum name="colorType" value="3" />
-            <!-- valueFrom and valueTo are a custom type. -->
-            <enum name="customType" value="4" />
         </attr>
     </declare-styleable>
 
@@ -4550,11 +4569,7 @@
         <!-- Drawable to use as a background for buttons added to this group. -->
         <attr name="buttonBackground" format="reference" />
         <!-- Setting for which dividers to show. -->
-        <attr name="showDividers">
-            <flag name="beginning" value="1" />
-            <flag name="middle" value="2" />
-            <flag name="end" value="4" />
-        </attr>
+        <attr name="showDividers" />
     </declare-styleable>
 
     <declare-styleable name="ActionBar_LayoutParams">

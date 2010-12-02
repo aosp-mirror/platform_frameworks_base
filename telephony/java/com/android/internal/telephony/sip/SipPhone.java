@@ -659,12 +659,6 @@ public class SipPhone extends SipPhoneBase {
             @Override
             protected void onError(DisconnectCause cause) {
                 if (DEBUG) Log.d(LOG_TAG, "SIP error: " + cause);
-                if (mSipAudioCall.isInCall()
-                        && (cause != DisconnectCause.LOST_SIGNAL)) {
-                    // Don't end the call when in a call.
-                    return;
-                }
-
                 onCallEnded(cause);
             }
         };

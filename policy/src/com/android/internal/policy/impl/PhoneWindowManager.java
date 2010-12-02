@@ -1820,11 +1820,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         final IStatusBarService sbs = mStatusBarService;
                         if (mStatusBarService != null) {
                             try {
-                                if (changedFullscreen) {
-                                    sbs.setActiveWindowIsFullscreen(topIsFullscreenF);
-                                }
                                 if (changedMenu) {
                                     sbs.setMenuKeyVisible(topNeedsMenuF);
+                                }
+                                if (changedFullscreen) {
+                                    sbs.setActiveWindowIsFullscreen(topIsFullscreenF);
                                 }
                             } catch (RemoteException e) {
                                 // This should be impossible because we're in the same process.

@@ -3196,7 +3196,8 @@ public class ListView extends AbsListView {
         }
         mDivider = divider;
         mDividerIsOpaque = divider == null || divider.getOpacity() == PixelFormat.OPAQUE;
-        requestLayoutIfNecessary();
+        requestLayout();
+        invalidate();
     }
 
     /**
@@ -3214,7 +3215,8 @@ public class ListView extends AbsListView {
      */
     public void setDividerHeight(int height) {
         mDividerHeight = height;
-        requestLayoutIfNecessary();
+        requestLayout();
+        invalidate();
     }
 
     /**

@@ -92,6 +92,7 @@
 
         <item name="groupButtonBackground">@null</item>
         <item name="selectableItemBackground">@android:drawable/item_background</item>
+        <item name="borderlessButtonStyle">?android:attr/buttonStyle</item>
         <item name="homeAsUpIndicator">@android:drawable/ic_ab_back_holo_dark</item>
 
         <!-- List attributes -->
@@ -258,6 +259,7 @@
         <item name="actionBarSize">56dip</item>
 
         <item name="dividerVertical">@drawable/divider_vertical_dark</item>
+        <item name="dividerHorizontal">@drawable/divider_vertical_dark</item>
         <item name="buttonGroupStyle">@android:style/Widget.ButtonGroup</item>
 
         <!-- SearchView attributes -->
@@ -723,6 +725,7 @@
 
         <item name="groupButtonBackground">@android:drawable/group_button_background_holo_dark</item>
         <item name="selectableItemBackground">@android:drawable/item_background_holo_dark</item>
+        <item name="borderlessButtonStyle">@android:style/Widget.Holo.Button.Borderless</item>
         <item name="homeAsUpIndicator">@android:drawable/ic_ab_back_holo_dark</item>
 
         <!-- List attributes -->
@@ -883,6 +886,7 @@
         <item name="actionBarSize">56dip</item>
 
         <item name="dividerVertical">@drawable/divider_vertical_holo_dark</item>
+        <item name="dividerHorizontal">@drawable/divider_vertical_holo_dark</item>
         <item name="buttonGroupStyle">@android:style/Widget.Holo.ButtonGroup</item>
 
         <!-- SearchView attributes -->
@@ -1046,20 +1050,20 @@
         <item name="textSelectHandleWindowStyle">@android:style/Widget.Holo.TextSelectHandle</item>
 
         <!-- Widget styles -->
-        <item name="absListViewStyle">@android:style/Widget.Holo.AbsListView</item>
+        <item name="absListViewStyle">@android:style/Widget.Holo.Light.AbsListView</item>
         <item name="autoCompleteTextViewStyle">@android:style/Widget.Holo.Light.AutoCompleteTextView</item>
-        <item name="checkboxStyle">@android:style/Widget.Holo.CompoundButton.CheckBox</item>
+        <item name="checkboxStyle">@android:style/Widget.Holo.Light.CompoundButton.CheckBox</item>
         <item name="dropDownListViewStyle">@android:style/Widget.Holo.ListView.DropDown</item>
-        <item name="editTextStyle">@android:style/Widget.Holo.EditText</item>
-        <item name="expandableListViewStyle">@android:style/Widget.Holo.ExpandableListView</item>
-        <item name="expandableListViewWhiteStyle">@android:style/Widget.Holo.ExpandableListView.White</item>
-        <item name="galleryStyle">@android:style/Widget.Holo.Gallery</item>
-        <item name="gestureOverlayViewStyle">@android:style/Widget.Holo.GestureOverlayView</item>
-        <item name="gridViewStyle">@android:style/Widget.Holo.GridView</item>
-        <item name="imageButtonStyle">@android:style/Widget.Holo.ImageButton</item>
-        <item name="imageWellStyle">@android:style/Widget.Holo.ImageWell</item>
-        <item name="listViewStyle">@android:style/Widget.Holo.ListView</item>
-        <item name="listViewWhiteStyle">@android:style/Widget.Holo.ListView.White</item>
+        <item name="editTextStyle">@android:style/Widget.Holo.Light.EditText</item>
+        <item name="expandableListViewStyle">@android:style/Widget.Holo.Light.ExpandableListView</item>
+        <item name="expandableListViewWhiteStyle">@android:style/Widget.Holo.Light.ExpandableListView.White</item>
+        <item name="galleryStyle">@android:style/Widget.Holo.Light.Gallery</item>
+        <item name="gestureOverlayViewStyle">@android:style/Widget.Holo.Light.GestureOverlayView</item>
+        <item name="gridViewStyle">@android:style/Widget.Holo.Light.GridView</item>
+        <item name="imageButtonStyle">@android:style/Widget.Holo.Light.ImageButton</item>
+        <item name="imageWellStyle">@android:style/Widget.Holo.Light.ImageWell</item>
+        <item name="listViewStyle">@android:style/Widget.Holo.Light.ListView</item>
+        <item name="listViewWhiteStyle">@android:style/Widget.Holo.Light.ListView.White</item>
         <item name="popupWindowStyle">@android:style/Widget.Holo.Light.PopupWindow</item>
         <item name="progressBarStyle">@android:style/Widget.Holo.Light.ProgressBar</item>
         <item name="progressBarStyleHorizontal">@android:style/Widget.Holo.Light.ProgressBar.Horizontal</item>
@@ -1069,22 +1073,22 @@
         <item name="progressBarStyleInverse">@android:style/Widget.Holo.Light.ProgressBar.Inverse</item>
         <item name="progressBarStyleSmallInverse">@android:style/Widget.Holo.Light.ProgressBar.Small.Inverse</item>
         <item name="progressBarStyleLargeInverse">@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse</item>
-        <item name="seekBarStyle">@android:style/Widget.Holo.SeekBar</item>
-        <item name="ratingBarStyle">@android:style/Widget.Holo.RatingBar</item>
-        <item name="ratingBarStyleIndicator">@android:style/Widget.Holo.RatingBar.Indicator</item>
-        <item name="ratingBarStyleSmall">@android:style/Widget.Holo.RatingBar.Small</item>
-        <item name="radioButtonStyle">@android:style/Widget.Holo.CompoundButton.RadioButton</item>
-        <item name="scrollViewStyle">@android:style/Widget.Holo.ScrollView</item>
-        <item name="horizontalScrollViewStyle">@android:style/Widget.Holo.HorizontalScrollView</item>
+        <item name="seekBarStyle">@android:style/Widget.Holo.Light.SeekBar</item>
+        <item name="ratingBarStyle">@android:style/Widget.Holo.Light.RatingBar</item>
+        <item name="ratingBarStyleIndicator">@android:style/Widget.Holo.Light.RatingBar.Indicator</item>
+        <item name="ratingBarStyleSmall">@android:style/Widget.Holo.Light.RatingBar.Small</item>
+        <item name="radioButtonStyle">@android:style/Widget.Holo.Light.CompoundButton.RadioButton</item>
+        <item name="scrollViewStyle">@android:style/Widget.Holo.Light.ScrollView</item>
+        <item name="horizontalScrollViewStyle">@android:style/Widget.Holo.Light.HorizontalScrollView</item>
         <item name="spinnerStyle">?android:attr/dropDownSpinnerStyle</item>
         <item name="dropDownSpinnerStyle">@android:style/Widget.Holo.Light.Spinner.DropDown</item>
-        <item name="starStyle">@android:style/Widget.Holo.CompoundButton.Star</item>
-        <item name="tabWidgetStyle">@android:style/Widget.Holo.TabWidget</item>
-        <item name="textViewStyle">@android:style/Widget.Holo.TextView</item>
-        <item name="webTextViewStyle">@android:style/Widget.Holo.WebTextView</item>
-        <item name="webViewStyle">@android:style/Widget.Holo.WebView</item>
-        <item name="dropDownItemStyle">@android:style/Widget.Holo.DropDownItem</item>
-        <item name="spinnerDropDownItemStyle">@android:style/Widget.Holo.DropDownItem.Spinner</item>
+        <item name="starStyle">@android:style/Widget.Holo.Light.CompoundButton.Star</item>
+        <item name="tabWidgetStyle">@android:style/Widget.Holo.Light.TabWidget</item>
+        <item name="textViewStyle">@android:style/Widget.Holo.Light.TextView</item>
+        <item name="webTextViewStyle">@android:style/Widget.Holo.Light.WebTextView</item>
+        <item name="webViewStyle">@android:style/Widget.Holo.Light.WebView</item>
+        <item name="dropDownItemStyle">@android:style/Widget.Holo.Light.DropDownItem</item>
+        <item name="spinnerDropDownItemStyle">@android:style/Widget.Holo.Light.DropDownItem.Spinner</item>
         <item name="spinnerItemStyle">@android:style/Widget.Holo.TextView.SpinnerItem</item>
         <item name="dropDownHintAppearance">@android:style/TextAppearance.Holo.Widget.DropDownHint</item>
         <item name="keyboardViewStyle">@android:style/Widget.Holo.KeyboardView</item>
@@ -1128,6 +1132,7 @@
         <item name="actionBarSize">56dip</item>
 
         <item name="dividerVertical">@drawable/divider_vertical_holo_light</item>
+        <item name="dividerHorizontal">@drawable/divider_vertical_holo_light</item>
         <item name="buttonGroupStyle">@android:style/Widget.Holo.Light.ButtonGroup</item>
 
         <!-- SearchView attributes -->

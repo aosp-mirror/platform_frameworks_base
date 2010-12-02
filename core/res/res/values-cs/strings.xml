@@ -482,10 +482,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Bez upozornění smazat všechna data telefonu obnovením továrních dat"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Nastavit globální proxy server zařízení"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Vyberte globální proxy server, který se bude používat, když jsou zásady aktivní. Aktuální globální proxy server nastavuje pouze první správce zařízení."</string>
-    <!-- no translation found for policylab_expirePassword (2314569545488269564) -->
-    <skip />
-    <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
-    <skip />
+    <string name="policylab_expirePassword" msgid="2314569545488269564">"Nastavit konec platnosti hesla"</string>
+    <string name="policydesc_expirePassword" msgid="7276906351852798814">"Ovládání doby, po jejímž uplynutí je nutné změnit heslo pro odemknutí obrazovky"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domů"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -668,8 +666,7 @@
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />
-    <!-- no translation found for autofill_address_summary_separator (7483307893170324129) -->
-    <skip />
+    <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
     <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"čtení historie a záložek Prohlížeče"</string>
@@ -869,6 +866,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Je odesílán velký počet zpráv SMS. Vyberte OK, chcete-li pokračovat, nebo Zrušit, chcete-li odesílání ukončit."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Zrušit"</string>
+    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <skip />
     <string name="date_time_set" msgid="5777075614321087758">"Nastavit"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Výchozí"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Nejsou vyžadována žádná oprávnění"</string>
@@ -876,8 +875,8 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Zobrazit vše"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"Úložiště USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB připojeno"</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Připojili jste telefon k počítači pomocí rozhraní USB. Chcete-li kopírovat soubory z počítače do úložiště USB zařízení Android či obráceně, vyberte následující tlačítko."</string>
-    <!-- outdated translation 115779324551502062 -->     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Připojili jste telefon k počítači pomocí rozhraní USB. Chcete-li kopírovat soubory z počítače do úložiště USB zařízení Android či obráceně, vyberte následující tlačítko."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Připojili jste se k počítači pomocí rozhraní USB. Chcete-li kopírovat soubory z počítače do úložiště USB v zařízení Android či obráceně, stiskněte tlačítko níže."</string>
+    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Připojili jste se k počítači pomocí rozhraní USB. Chcete-li kopírovat soubory z počítače na kartu SD v zařízení Android či obráceně, stiskněte tlačítko níže."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Zapnout úložiště USB"</string>
     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Problém s použitím úložiště USB jako velkokapacitního úložiště."</string>
     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Problém s použitím karty SD jako velkokapacitního úložiště USB."</string>

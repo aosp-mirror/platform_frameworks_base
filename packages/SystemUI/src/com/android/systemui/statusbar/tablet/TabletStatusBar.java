@@ -114,6 +114,7 @@ public class TabletStatusBar extends StatusBar {
     NotificationPeekPanel mNotificationPeekWindow;
     ViewGroup mNotificationPeekRow;
     int mNotificationPeekIndex;
+    IBinder mNotificationPeekKey;
     LayoutTransition mNotificationPeekScrubLeft, mNotificationPeekScrubRight;
 
     int mNotificationPeekTapDuration;
@@ -344,9 +345,11 @@ public class TabletStatusBar extends StatusBar {
                     if (DEBUG) Slog.d(TAG, "opening notification peek window; arg=" + m.arg1);
                     if (m.arg1 >= 0) {
                         final int N = mNotns.size();
-                        if (mNotificationPeekIndex < N) {
+                        if (mNotificationPeekIndex >= 0 && mNotificationPeekIndex < N) {
                             NotificationData.Entry entry = mNotns.get(N-1-mNotificationPeekIndex);
                             entry.icon.setBackgroundColor(0);
+                            mNotificationPeekIndex = -1;
+                            mNotificationPeekKey = null;
                         }
 
                         final int peekIndex = m.arg1;
@@ -373,6 +376,7 @@ public class TabletStatusBar extends StatusBar {
                             mNotificationPanel.setVisibility(View.GONE);
 
                             mNotificationPeekIndex = peekIndex;
+                            mNotificationPeekKey = entry.key;
                         }
                     }
                     break;
@@ -381,10 +385,13 @@ public class TabletStatusBar extends StatusBar {
                     mNotificationPeekWindow.setVisibility(View.GONE);
                     mNotificationPeekRow.removeAllViews();
                     final int N = mNotns.size();
-                    if (mNotificationPeekIndex < N) {
+                    if (mNotificationPeekIndex >= 0 && mNotificationPeekIndex < N) {
                         NotificationData.Entry entry = mNotns.get(N-1-mNotificationPeekIndex);
                         entry.icon.setBackgroundColor(0);
                     }
+
+                    mNotificationPeekIndex = -1;
+                    mNotificationPeekKey = null;
                     break;
                 case MSG_OPEN_NOTIFICATION_PANEL:
                     if (DEBUG) Slog.d(TAG, "opening notifications panel");
@@ -647,6 +654,12 @@ public class TabletStatusBar extends StatusBar {
     // called by StatusBar
     @Override
     public void setLightsOn(boolean on) {
+        // Policy note: if the frontmost activity needs the menu key, we assume it is a legacy app
+        // that can't handle lights-out mode.
+        if (mMenuButton.getVisibility() == View.VISIBLE
+                || mMenuShadow.getVisibility() == View.VISIBLE) {
+            on = true;
+        }
         mHandler.removeMessages(MSG_SHOW_SHADOWS);
         mHandler.removeMessages(MSG_HIDE_SHADOWS);
         mHandler.sendEmptyMessage(on ? MSG_HIDE_SHADOWS : MSG_SHOW_SHADOWS);
@@ -657,6 +670,9 @@ public class TabletStatusBar extends StatusBar {
             Slog.d(TAG, (visible?"showing":"hiding") + " the MENU button");
         }
         mMenuButton.setVisibility(visible ? View.VISIBLE : View.GONE);
+
+        // See above re: lights-out policy for legacy apps.
+        if (visible) setLightsOn(true);
     }
 
     public void setIMEButtonVisible(IBinder token, boolean visible) {
@@ -814,6 +830,11 @@ public class TabletStatusBar extends StatusBar {
         // Remove the expanded view.
         ViewGroup rowParent = (ViewGroup)entry.row.getParent();
         if (rowParent != null) rowParent.removeView(entry.row);
+
+        if (key == mNotificationPeekKey) {
+            // must close the peek as well, since it's gone
+            mHandler.sendEmptyMessage(MSG_CLOSE_NOTIFICATION_PEEK);
+        }
         // Remove the icon.
 //        ViewGroup iconParent = (ViewGroup)entry.icon.getParent();
 //        if (iconParent != null) iconParent.removeView(entry.icon);

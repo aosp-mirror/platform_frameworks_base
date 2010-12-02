@@ -220,8 +220,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mTemporaryDetach;
     private boolean mDispatchTemporaryDetach;
 
-    private boolean mEatTouchRelease = false;
-    private boolean mScrolled = false;
+    private boolean mDiscardNextActionUp = false;
+    private boolean mIgnoreActionUpEvent = false;
 
     private Editable.Factory mEditableFactory = Editable.Factory.getInstance();
     private Spannable.Factory mSpannableFactory = Spannable.Factory.getInstance();
@@ -7002,26 +7002,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private void onTapUpEvent(int prevStart, int prevEnd) {
-        final int start = getSelectionStart();
-        final int end = getSelectionEnd();
-
-        if (start == end) {
-            if (start >= prevStart && start < prevEnd) {
-                // Restore previous selection
-                Selection.setSelection((Spannable)mText, prevStart, prevEnd);
-                return;
-            } else {
-                // Tapping outside stops selection mode, if any
-                stopSelectionActionMode();
-
-                if (hasInsertionController()) {
-                    getInsertionController().show();
-                }
-            }
-        }
-    }
-
     class CommitSelectionReceiver extends ResultReceiver {
         private final int mPrevStart, mPrevEnd;
 
@@ -7066,7 +7046,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // Reset this state; it will be re-set if super.onTouchEvent
             // causes focus to move to the view.
             mTouchFocusSelected = false;
-            mScrolled = false;
+            mIgnoreActionUpEvent = false;
         }
 
         final boolean superResult = super.onTouchEvent(event);
@@ -7076,8 +7056,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
          * move the selection away from whatever the menu action was
          * trying to affect.
          */
-        if (mEatTouchRelease && action == MotionEvent.ACTION_UP) {
-            mEatTouchRelease = false;
+        if (mDiscardNextActionUp && action == MotionEvent.ACTION_UP) {
+            mDiscardNextActionUp = false;
             return superResult;
         }
 
@@ -7106,7 +7086,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         mSelectionModifierCursorController.updatePosition();
                     }
                 }
-                if (action == MotionEvent.ACTION_UP && !mScrolled && isFocused()) {
+                if (action == MotionEvent.ACTION_UP && !mIgnoreActionUpEvent && isFocused()) {
                     InputMethodManager imm = (InputMethodManager)
                     getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
@@ -7117,13 +7097,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
 
                     if (!mTextIsSelectable) {
-                        // Selection in read-only text should not bring up the IME.
+                        // Show the IME, except when selecting in read-only text.
                         handled |= imm.showSoftInput(this, 0, csr) && (csr != null);
                     }
 
-                    // Cannot be done by CommitSelectionReceiver, which might not always be called,
-                    // for instance when dealing with an ExtractEditText.
-                    onTapUpEvent(oldSelStart, oldSelEnd);
+                    stopSelectionActionMode();
+                    if (hasInsertionController()) {
+                        getInsertionController().show();
+                    }
                 }
             }
 
@@ -7181,7 +7162,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public void cancelLongPress() {
         super.cancelLongPress();
-        mScrolled = true;
+        mIgnoreActionUpEvent = true;
     }
     
     @Override
@@ -7815,7 +7796,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public boolean performLongClick() {
         if (super.performLongClick()) {
-            mEatTouchRelease = true;
+            mDiscardNextActionUp = true;
             return true;
         }
 
@@ -7826,7 +7807,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             stopSelectionActionMode();
             Selection.setSelection((Spannable)mText, offset);
             getInsertionController().show(0);
-            mEatTouchRelease = true;
+            mDiscardNextActionUp = true;
             return true;
         }
 
@@ -7837,7 +7818,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final int end = getSelectionEnd();
                 CharSequence selectedText = mTransformed.subSequence(start, end);
                 ClipData data = ClipData.newPlainText(null, null, selectedText);
-                startDrag(data, getTextThumbnailBuilder(selectedText), false);
+                startDrag(data, getTextThumbnailBuilder(selectedText), false, null);
                 mDragSourcePositions = packRangeInLong(start, end);
                 stopSelectionActionMode();
             } else {
@@ -7845,13 +7826,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 getSelectionController().show();
             }
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-            mEatTouchRelease = true;
+            mDiscardNextActionUp = true;
             return true;
         }
 
         if (startSelectionActionMode()) {
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-            mEatTouchRelease = true;
+            mDiscardNextActionUp = true;
             return true;
         }
 
@@ -8763,7 +8744,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                         // Double tap detection
                         long duration = SystemClock.uptimeMillis() - mPreviousTapUpTime;
-                        if (duration <= ViewConfiguration.getDoubleTapTimeout()) {
+                        if (duration <= ViewConfiguration.getDoubleTapTimeout() &&
+                                isPositionOnText(x, y)) {
                             final int deltaX = x - mPreviousTapPositionX;
                             final int deltaY = y - mPreviousTapPositionY;
                             final int distanceSquared = deltaX * deltaX + deltaY * deltaY;
@@ -8772,6 +8754,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             final int slopSquared = doubleTapSlop * doubleTapSlop;
                             if (distanceSquared < slopSquared) {
                                 startSelectionActionMode();
+                                mDiscardNextActionUp = true;
                             }
                         }
 
@@ -8941,66 +8924,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 TextView.this.requestFocus();
                 return true;
 
-            case DragEvent.ACTION_DRAG_LOCATION: {
+            case DragEvent.ACTION_DRAG_LOCATION:
                 final int offset = getOffset((int) event.getX(), (int) event.getY());
                 Selection.setSelection((Spannable)mText, offset);
                 return true;
-            }
 
-            case DragEvent.ACTION_DROP: {
-                StringBuilder content = new StringBuilder("");
-                ClipData clipData = event.getClipData();
-                final int itemCount = clipData.getItemCount();
-                for (int i=0; i < itemCount; i++) {
-                    Item item = clipData.getItem(i);
-                    content.append(item.coerceToText(TextView.this.mContext));
-                }
-
-                final int offset = getOffset((int) event.getX(), (int) event.getY());
-
-                if (mDragSourcePositions != -1) {
-                    final int dragSourceStart = extractRangeStartFromLong(mDragSourcePositions);
-                    final int dragSourceEnd = extractRangeEndFromLong(mDragSourcePositions);
-                    if (offset >= dragSourceStart && offset < dragSourceEnd) {
-                        // A drop inside the original selection discards the drop.
-                        return true;
-                    }
-                }
-
-                final int originalLength = mText.length();
-                long minMax = prepareSpacesAroundPaste(offset, offset, content);
-                int min = extractRangeStartFromLong(minMax);
-                int max = extractRangeEndFromLong(minMax);
-
-                Selection.setSelection((Spannable) mText, max);
-                ((Editable) mText).replace(min, max, content);
-
-                if (mDragSourcePositions != -1) {
-                    int dragSourceStart = extractRangeStartFromLong(mDragSourcePositions);
-                    int dragSourceEnd = extractRangeEndFromLong(mDragSourcePositions);
-                    if (max <= dragSourceStart) {
-                        // Inserting text before selection has shifted positions
-                        final int shift = mText.length() - originalLength;
-                        dragSourceStart += shift;
-                        dragSourceEnd += shift;
-                    }
-
-                    // Delete original selection
-                    ((Editable) mText).delete(dragSourceStart, dragSourceEnd);
-
-                    // Make sure we do not leave two adjacent spaces.
-                    if ((dragSourceStart == 0 ||
-                            Character.isSpaceChar(mTransformed.charAt(dragSourceStart - 1))) &&
-                            (dragSourceStart == mText.length() ||
-                            Character.isSpaceChar(mTransformed.charAt(dragSourceStart)))) {
-                        final int pos = dragSourceStart == mText.length() ?
-                                dragSourceStart - 1 : dragSourceStart;
-                        ((Editable) mText).delete(pos, pos + 1);
-                    }
-                }
-
+            case DragEvent.ACTION_DROP:
+                onDrop(event);
                 return true;
-            }
 
             case DragEvent.ACTION_DRAG_ENDED:
                 mDragSourcePositions = -1;
@@ -9009,6 +8940,59 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case DragEvent.ACTION_DRAG_EXITED:
             default:
                 return true;
+        }
+    }
+
+    private void onDrop(DragEvent event) {
+        StringBuilder content = new StringBuilder("");
+        ClipData clipData = event.getClipData();
+        final int itemCount = clipData.getItemCount();
+        for (int i=0; i < itemCount; i++) {
+            Item item = clipData.getItem(i);
+            content.append(item.coerceToText(TextView.this.mContext));
+        }
+
+        final int offset = getOffset((int) event.getX(), (int) event.getY());
+
+        if (mDragSourcePositions != -1) {
+            final int dragSourceStart = extractRangeStartFromLong(mDragSourcePositions);
+            final int dragSourceEnd = extractRangeEndFromLong(mDragSourcePositions);
+            if (offset >= dragSourceStart && offset < dragSourceEnd) {
+                // A drop inside the original selection discards the drop.
+                return;
+            }
+        }
+
+        final int originalLength = mText.length();
+        long minMax = prepareSpacesAroundPaste(offset, offset, content);
+        int min = extractRangeStartFromLong(minMax);
+        int max = extractRangeEndFromLong(minMax);
+
+        Selection.setSelection((Spannable) mText, max);
+        ((Editable) mText).replace(min, max, content);
+
+        if (mDragSourcePositions != -1) {
+            int dragSourceStart = extractRangeStartFromLong(mDragSourcePositions);
+            int dragSourceEnd = extractRangeEndFromLong(mDragSourcePositions);
+            if (max <= dragSourceStart) {
+                // Inserting text before selection has shifted positions
+                final int shift = mText.length() - originalLength;
+                dragSourceStart += shift;
+                dragSourceEnd += shift;
+            }
+
+            // Delete original selection
+            ((Editable) mText).delete(dragSourceStart, dragSourceEnd);
+
+            // Make sure we do not leave two adjacent spaces.
+            if ((dragSourceStart == 0 ||
+                    Character.isSpaceChar(mTransformed.charAt(dragSourceStart - 1))) &&
+                    (dragSourceStart == mText.length() ||
+                    Character.isSpaceChar(mTransformed.charAt(dragSourceStart)))) {
+                final int pos = dragSourceStart == mText.length() ?
+                        dragSourceStart - 1 : dragSourceStart;
+                ((Editable) mText).delete(pos, pos + 1);
+            }
         }
     }
 

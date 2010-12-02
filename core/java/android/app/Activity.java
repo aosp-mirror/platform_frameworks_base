@@ -42,6 +42,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.text.Selection;
@@ -78,6 +79,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * An activity is a single, focused thing that the user can do.  Almost all
@@ -842,8 +844,6 @@ public class Activity extends ContextThemeWrapper
      * @see #onPostCreate
      */
     protected void onCreate(Bundle savedInstanceState) {
-        mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
-                com.android.internal.R.styleable.Window_windowNoDisplay, false);
         if (mLastNonConfigurationInstances != null) {
             mAllLoaderManagers = mLastNonConfigurationInstances.loaders;
         }
@@ -2362,6 +2362,9 @@ public class Activity extends ContextThemeWrapper
      * @return The default implementation returns true.
      */
     public boolean onMenuOpened(int featureId, Menu menu) {
+        if (featureId == Window.FEATURE_ACTION_BAR) {
+            mActionBar.dispatchMenuVisibilityChanged(true);
+        }
         return true;
     }
 
@@ -2392,7 +2395,7 @@ public class Activity extends ContextThemeWrapper
                     return true;
                 }
                 return mFragments.dispatchContextItemSelected(item);
-                
+
             default:
                 return false;
         }
@@ -2416,6 +2419,10 @@ public class Activity extends ContextThemeWrapper
                 
             case Window.FEATURE_CONTEXT_MENU:
                 onContextMenuClosed(menu);
+                break;
+
+            case Window.FEATURE_ACTION_BAR:
+                mActionBar.dispatchMenuVisibilityChanged(false);
                 break;
         }
     }
@@ -3502,6 +3509,22 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Cause this Activity to be recreated with a new instance.  This results
+     * in essentially the same flow as when the Activity is created due to
+     * a configuration change -- the current instance will go through its
+     * lifecycle to {@link #onDestroy} and a new instance then created after it.
+     */
+    public void recreate() {
+        if (mParent != null) {
+            throw new IllegalStateException("Can only be called on top-level activity");
+        }
+        if (Looper.myLooper() != mMainThread.getLooper()) {
+            throw new IllegalStateException("Must be called from main thread");
+        }
+        mMainThread.requestRelaunchActivity(mToken, null, null, 0, false, null, false);
+    }
+
+    /**
      * Call this when your activity is done and should be closed.  The
      * ActivityResult is propagated back to whoever launched you via
      * onActivityResult().
@@ -4255,6 +4278,8 @@ public class Activity extends ContextThemeWrapper
 
     final void performCreate(Bundle icicle) {
         onCreate(icicle);
+        mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
+                com.android.internal.R.styleable.Window_windowNoDisplay, false);
         mFragments.dispatchActivityCreated();
     }
     

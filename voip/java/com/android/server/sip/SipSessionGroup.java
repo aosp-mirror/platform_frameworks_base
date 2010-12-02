@@ -527,11 +527,14 @@ class SipSessionGroup implements SipListener {
         }
 
         public void answerCall(String sessionDescription, int timeout) {
-            try {
-                processCommand(new MakeCallCommand(mPeerProfile,
-                        sessionDescription, timeout));
-            } catch (SipException e) {
-                onError(e);
+            synchronized (SipSessionGroup.this) {
+                if (mPeerProfile == null) return;
+                try {
+                    processCommand(new MakeCallCommand(mPeerProfile,
+                            sessionDescription, timeout));
+                } catch (SipException e) {
+                    onError(e);
+                }
             }
         }
 
@@ -540,14 +543,11 @@ class SipSessionGroup implements SipListener {
         }
 
         public void changeCall(String sessionDescription, int timeout) {
-            doCommandAsync(new MakeCallCommand(mPeerProfile, sessionDescription,
-                    timeout));
-        }
-
-        public void changeCallWithTimeout(
-                String sessionDescription, int timeout) {
-            doCommandAsync(new MakeCallCommand(mPeerProfile, sessionDescription,
-                    timeout));
+            synchronized (SipSessionGroup.this) {
+                if (mPeerProfile == null) return;
+                doCommandAsync(new MakeCallCommand(mPeerProfile,
+                        sessionDescription, timeout));
+            }
         }
 
         public void register(int duration) {
@@ -1163,11 +1163,6 @@ class SipSessionGroup implements SipListener {
             mProxy.onCallEstablished(this, mPeerSessionDescription);
         }
 
-        private void fallbackToPreviousInCall(int errorCode, String message) {
-            mState = SipSession.State.IN_CALL;
-            mProxy.onCallChangeFailed(this, errorCode, message);
-        }
-
         private void endCallNormally() {
             reset();
             mProxy.onCallEnded(this);
@@ -1191,12 +1186,7 @@ class SipSessionGroup implements SipListener {
                     onRegistrationFailed(errorCode, message);
                     break;
                 default:
-                    if ((errorCode != SipErrorCode.DATA_CONNECTION_LOST)
-                            && mInCall) {
-                        fallbackToPreviousInCall(errorCode, message);
-                    } else {
-                        endCallOnError(errorCode, message);
-                    }
+                    endCallOnError(errorCode, message);
             }
         }
 

@@ -619,7 +619,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mDragInProgress && newWin.isPotentialDragTarget()) {
                 DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_STARTED,
                         touchX - newWin.mFrame.left, touchY - newWin.mFrame.top,
-                        desc, null, false);
+                        null, desc, null, false);
                 try {
                     newWin.mClient.dispatchDragEvent(event);
                     // track each window that we've notified that the drag is starting
@@ -659,7 +659,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.d(TAG, "broadcasting DRAG_ENDED");
             }
             DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED,
-                    0, 0, null, null, mDragResult);
+                    0, 0, null, null, null, mDragResult);
             for (WindowState ws: mNotifiedWindows) {
                 try {
                     ws.mClient.dispatchDragEvent(evt);
@@ -711,7 +711,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // force DRAG_EXITED_EVENT if appropriate
                     DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_EXITED,
                             x - mTargetWindow.mFrame.left, y - mTargetWindow.mFrame.top,
-                            null, null, false);
+                            null, null, null, false);
                     mTargetWindow.mClient.dispatchDragEvent(evt);
                     if (myPid != mTargetWindow.mSession.mPid) {
                         evt.recycle();
@@ -723,7 +723,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_LOCATION,
                             x - touchedWin.mFrame.left, y - touchedWin.mFrame.top,
-                            null, null, false);
+                            null, null, null, false);
                     touchedWin.mClient.dispatchDragEvent(evt);
                     if (myPid != touchedWin.mSession.mPid) {
                         evt.recycle();
@@ -754,7 +754,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final IBinder token = touchedWin.mClient.asBinder();
             DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DROP,
                     x - touchedWin.mFrame.left, y - touchedWin.mFrame.top,
-                    null, mData, false);
+                    null, null, mData, false);
             try {
                 touchedWin.mClient.dispatchDragEvent(evt);
 
@@ -6848,6 +6848,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (!mParentFrame.equals(pf)) {
+                //Slog.i(TAG, "Window " + this + " content frame from " + mParentFrame
+                //        + " to " + pf);
                 mParentFrame.set(pf);
                 mContentChanged = true;
             }
@@ -7734,12 +7736,10 @@ public class WindowManagerService extends IWindowManager.Stub
          * sense to call from performLayoutAndPlaceSurfacesLockedInner().)
          */
         boolean shouldAnimateMove() {
-            return mContentChanged && !mAnimating && !mLastHidden && !mDisplayFrozen
+            return mContentChanged && !mExiting && !mLastHidden && !mDisplayFrozen
                     && (mFrame.top != mLastFrame.top
                             || mFrame.left != mLastFrame.left)
-                    && (mAttachedWindow == null
-                            || (mAttachedWindow.mAnimation == null
-                                    && !mAttachedWindow.shouldAnimateMove()))
+                    && (mAttachedWindow == null || !mAttachedWindow.shouldAnimateMove())
                     && mPolicy.isScreenOn();
         }
 
@@ -9223,6 +9223,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (!gone || !win.mHaveFrame) {
                 if (!win.mLayoutAttached) {
                     if (initial) {
+                        //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
                         win.mContentChanged = false;
                     }
                     mPolicy.layoutWindowLw(win, win.mAttrs, null);
@@ -9257,6 +9258,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if ((win.mViewVisibility != View.GONE && win.mRelayoutCalled)
                         || !win.mHaveFrame) {
                     if (initial) {
+                        //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
                         win.mContentChanged = false;
                     }
                     mPolicy.layoutWindowLw(win, win.mAttrs, win.mAttachedWindow);
@@ -9455,7 +9457,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             w.setAnimation(a);
                             animDw = w.mLastFrame.left - w.mFrame.left;
                             animDh = w.mLastFrame.top - w.mFrame.top;
-                            w.mContentChanged = false;
                         }
 
                         // Execute animation.
@@ -10240,6 +10241,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (DEBUG_ORIENTATION) Slog.v(TAG,
                             "Orientation change skips hidden " + w);
                     w.mOrientationChanging = false;
+                }
+
+                if (w.mContentChanged) {
+                    //Slog.i(TAG, "Window " + this + " clearing mContentChanged - done placing");
+                    w.mContentChanged = false;
                 }
 
                 final boolean canBeSeen = w.isDisplayedLw();

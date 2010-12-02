@@ -224,6 +224,11 @@ public final class ActivityThread {
 
         boolean startsNotResumed;
         boolean isForward;
+        int pendingConfigChanges;
+        boolean onlyLocalRequest;
+
+        View mPendingRemoveWindow;
+        WindowManager mPendingRemoveWindowManager;
 
         ActivityClientRecord() {
             parent = null;
@@ -444,19 +449,8 @@ public final class ActivityThread {
         public final void scheduleRelaunchActivity(IBinder token,
                 List<ResultInfo> pendingResults, List<Intent> pendingNewIntents,
                 int configChanges, boolean notResumed, Configuration config) {
-            ActivityClientRecord r = new ActivityClientRecord();
-
-            r.token = token;
-            r.pendingResults = pendingResults;
-            r.pendingIntents = pendingNewIntents;
-            r.startsNotResumed = notResumed;
-            r.createdConfig = config;
-
-            synchronized (mPackages) {
-                mRelaunchingActivities.add(r);
-            }
-
-            queueOrSendMessage(H.RELAUNCH_ACTIVITY, r, configChanges);
+            requestRelaunchActivity(token, pendingResults, pendingNewIntents,
+                    configChanges, notResumed, config, true);
         }
 
         public final void scheduleNewIntent(List<Intent> intents, IBinder token) {
@@ -981,7 +975,7 @@ public final class ActivityThread {
                 } break;
                 case RELAUNCH_ACTIVITY: {
                     ActivityClientRecord r = (ActivityClientRecord)msg.obj;
-                    handleRelaunchActivity(r, msg.arg1);
+                    handleRelaunchActivity(r);
                 } break;
                 case PAUSE_ACTIVITY:
                     handlePauseActivity((IBinder)msg.obj, false, msg.arg1 != 0, msg.arg2);
@@ -2183,6 +2177,19 @@ public final class ActivityThread {
         return r;
     }
 
+    final void cleanUpPendingRemoveWindows(ActivityClientRecord r) {
+        if (r.mPendingRemoveWindow != null) {
+            r.mPendingRemoveWindowManager.removeViewImmediate(r.mPendingRemoveWindow);
+            IBinder wtoken = r.mPendingRemoveWindow.getWindowToken();
+            if (wtoken != null) {
+                WindowManagerImpl.getDefault().closeAll(wtoken,
+                        r.activity.getClass().getName(), "Activity");
+            }
+        }
+        r.mPendingRemoveWindow = null;
+        r.mPendingRemoveWindowManager = null;
+    }
+
     final void handleResumeActivity(IBinder token, boolean clearHide, boolean isForward) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
@@ -2235,6 +2242,9 @@ public final class ActivityThread {
                 r.hideForNow = true;
             }
 
+            // Get rid of anything left hanging around.
+            cleanUpPendingRemoveWindows(r);
+
             // The window is now visible if it has been added, we are not
             // simply finishing, and we are not starting another activity.
             if (!r.activity.mFinished && willBeVisible
@@ -2267,11 +2277,14 @@ public final class ActivityThread {
                 }
             }
 
-            r.nextIdle = mNewActivities;
-            mNewActivities = r;
-            if (localLOGV) Slog.v(
-                TAG, "Scheduling idle handler for " + r);
-            Looper.myQueue().addIdleHandler(new Idler());
+            if (!r.onlyLocalRequest) {
+                r.nextIdle = mNewActivities;
+                mNewActivities = r;
+                if (localLOGV) Slog.v(
+                    TAG, "Scheduling idle handler for " + r);
+                Looper.myQueue().addIdleHandler(new Idler());
+            }
+            r.onlyLocalRequest = false;
 
         } else {
             // If an exception was thrown when trying to resume, then
@@ -2728,6 +2741,7 @@ public final class ActivityThread {
         ActivityClientRecord r = performDestroyActivity(token, finishing,
                 configChanges, getNonConfigInstance);
         if (r != null) {
+            cleanUpPendingRemoveWindows(r);
             WindowManager wm = r.activity.getWindowManager();
             View v = r.activity.mDecor;
             if (v != null) {
@@ -2736,16 +2750,31 @@ public final class ActivityThread {
                 }
                 IBinder wtoken = v.getWindowToken();
                 if (r.activity.mWindowAdded) {
-                    wm.removeViewImmediate(v);
+                    if (r.onlyLocalRequest) {
+                        // Hold off on removing this until the new activity's
+                        // window is being added.
+                        r.mPendingRemoveWindow = v;
+                        r.mPendingRemoveWindowManager = wm;
+                    } else {
+                        wm.removeViewImmediate(v);
+                    }
                 }
-                if (wtoken != null) {
+                if (wtoken != null && r.mPendingRemoveWindow == null) {
                     WindowManagerImpl.getDefault().closeAll(wtoken,
                             r.activity.getClass().getName(), "Activity");
                 }
                 r.activity.mDecor = null;
             }
-            WindowManagerImpl.getDefault().closeAll(token,
-                    r.activity.getClass().getName(), "Activity");
+            if (r.mPendingRemoveWindow == null) {
+                // If we are delaying the removal of the activity window, then
+                // we can't clean up all windows here.  Note that we can't do
+                // so later either, which means any windows that aren't closed
+                // by the app will leak.  Well we try to warning them a lot
+                // about leaking windows, because that is a bug, so if they are
+                // using this recreate facility then they get to live with leaks.
+                WindowManagerImpl.getDefault().closeAll(token,
+                        r.activity.getClass().getName(), "Activity");
+            }
 
             // Mocked out contexts won't be participating in the normal
             // process lifecycle, but if we're running with a proper
@@ -2766,17 +2795,70 @@ public final class ActivityThread {
         }
     }
 
-    private final void handleRelaunchActivity(ActivityClientRecord tmp, int configChanges) {
+    public final void requestRelaunchActivity(IBinder token,
+            List<ResultInfo> pendingResults, List<Intent> pendingNewIntents,
+            int configChanges, boolean notResumed, Configuration config,
+            boolean fromServer) {
+        ActivityClientRecord target = null;
+
+        synchronized (mPackages) {
+            for (int i=0; i<mRelaunchingActivities.size(); i++) {
+                ActivityClientRecord r = mRelaunchingActivities.get(i);
+                if (r.token == token) {
+                    target = r;
+                    if (pendingResults != null) {
+                        if (r.pendingResults != null) {
+                            r.pendingResults.addAll(pendingResults);
+                        } else {
+                            r.pendingResults = pendingResults;
+                        }
+                    }
+                    if (pendingNewIntents != null) {
+                        if (r.pendingIntents != null) {
+                            r.pendingIntents.addAll(pendingNewIntents);
+                        } else {
+                            r.pendingIntents = pendingNewIntents;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            if (target == null) {
+                target = new ActivityClientRecord();
+                target.token = token;
+                target.pendingResults = pendingResults;
+                target.pendingIntents = pendingNewIntents;
+                if (!fromServer) {
+                    ActivityClientRecord existing = mActivities.get(token);
+                    if (existing != null) {
+                        target.startsNotResumed = existing.paused;
+                    }
+                    target.onlyLocalRequest = true;
+                }
+                mRelaunchingActivities.add(target);
+                queueOrSendMessage(H.RELAUNCH_ACTIVITY, target);
+            }
+
+            if (fromServer) {
+                target.startsNotResumed = notResumed;
+                target.onlyLocalRequest = false;
+            }
+            if (config != null) {
+                target.createdConfig = config;
+            }
+            target.pendingConfigChanges |= configChanges;
+        }
+    }
+
+    private final void handleRelaunchActivity(ActivityClientRecord tmp) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
 
         Configuration changedConfig = null;
+        int configChanges = 0;
 
-        if (DEBUG_CONFIGURATION) Slog.v(TAG, "Relaunching activity "
-                + tmp.token + " with configChanges=0x"
-                + Integer.toHexString(configChanges));
-        
         // First: make sure we have the most recent configuration and most
         // recent version of the activity, or skip it if some previous call
         // had taken a more recent version.
@@ -2788,6 +2870,7 @@ public final class ActivityThread {
                 ActivityClientRecord r = mRelaunchingActivities.get(i);
                 if (r.token == token) {
                     tmp = r;
+                    configChanges |= tmp.pendingConfigChanges;
                     mRelaunchingActivities.remove(i);
                     i--;
                     N--;
@@ -2798,6 +2881,10 @@ public final class ActivityThread {
                 if (DEBUG_CONFIGURATION) Slog.v(TAG, "Abort, activity not relaunching!");
                 return;
             }
+
+            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Relaunching activity "
+                    + tmp.token + " with configChanges=0x"
+                    + Integer.toHexString(configChanges));
 
             if (mPendingConfiguration != null) {
                 changedConfig = mPendingConfiguration;
@@ -2834,6 +2921,7 @@ public final class ActivityThread {
         }
 
         r.activity.mConfigChangeFlags |= configChanges;
+        r.onlyLocalRequest = tmp.onlyLocalRequest;
         Intent currentIntent = r.activity.mIntent;
 
         Bundle savedState = null;
