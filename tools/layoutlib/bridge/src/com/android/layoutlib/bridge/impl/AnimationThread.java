@@ -105,7 +105,7 @@ public class AnimationThread extends Thread {
                 try {
                     bundle.mTarget.handleMessage(bundle.mMessage);
                     if (mScene.render() == SceneResult.SUCCESS) {
-                        mListener.onNewFrame(mScene.getImage());
+                        mListener.onNewFrame(mScene.getScene());
                     }
                 } finally {
                     mScene.release();

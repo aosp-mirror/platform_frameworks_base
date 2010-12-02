@@ -24,13 +24,16 @@ import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.api.IProjectCallback;
 import com.android.layoutlib.api.IResourceValue;
 import com.android.layoutlib.api.IStyleResourceValue;
+import com.android.layoutlib.api.IXmlPullParser;
 import com.android.layoutlib.api.LayoutBridge;
+import com.android.layoutlib.api.LayoutScene;
 import com.android.layoutlib.api.SceneParams;
 import com.android.layoutlib.api.SceneResult;
 import com.android.layoutlib.api.ViewInfo;
 import com.android.layoutlib.api.IDensityBasedResourceValue.Density;
 import com.android.layoutlib.api.LayoutScene.IAnimationListener;
 import com.android.layoutlib.api.SceneParams.RenderingMode;
+import com.android.layoutlib.api.SceneResult.SceneStatus;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.android.BridgeContext;
@@ -53,6 +56,7 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.View.AttachInfo;
 import android.view.View.MeasureSpec;
 import android.widget.FrameLayout;
@@ -92,6 +96,7 @@ public class LayoutSceneImpl {
     private final SceneParams mParams;
 
     // scene state
+    private LayoutScene mScene;
     private BridgeContext mContext;
     private BridgeXmlBlockParser mBlockParser;
     private BridgeInflater mInflater;
@@ -362,7 +367,7 @@ public class LayoutSceneImpl {
 
             return SceneResult.SUCCESS;
         } catch (PostInflateException e) {
-            return new SceneResult("Error during post inflation process:\n" + e.getMessage());
+            return new SceneResult(SceneStatus.ERROR_INFLATION, e.getMessage(), e);
         } catch (Throwable e) {
             // get the real cause of the exception.
             Throwable t = e;
@@ -373,7 +378,7 @@ public class LayoutSceneImpl {
             // log it
             mParams.getLogger().error(t);
 
-            return new SceneResult("Unknown error during inflation.", t);
+            return new SceneResult(SceneStatus.ERROR_INFLATION, t.getMessage(), t);
         }
     }
 
@@ -391,7 +396,7 @@ public class LayoutSceneImpl {
         try {
             long current = System.currentTimeMillis();
             if (mViewRoot == null) {
-                return new SceneResult("Layout has not been inflated!");
+                return new SceneResult(SceneStatus.ERROR_NOT_INFLATED);
             }
             // measure the views
             int w_spec, h_spec;
@@ -487,7 +492,7 @@ public class LayoutSceneImpl {
             // log it
             mParams.getLogger().error(t);
 
-            return new SceneResult("Unknown error during rendering.", t);
+            return new SceneResult(SceneStatus.ERROR_UNKNOWN, t.getMessage(), t);
         }
     }
 
@@ -530,12 +535,74 @@ public class LayoutSceneImpl {
                     return SceneResult.SUCCESS;
                 }
             } catch (Exception e) {
-                e.printStackTrace();
-                return new SceneResult("", e);
+                // get the real cause of the exception.
+                Throwable t = e;
+                while (t.getCause() != null) {
+                    t = t.getCause();
+                }
+
+                return new SceneResult(SceneStatus.ERROR_UNKNOWN, t.getMessage(), t);
             }
         }
 
-        return new SceneResult("Failed to find animation");
+        return new SceneResult(SceneStatus.ERROR_ANIM_NOT_FOUND);
+    }
+
+    public SceneResult insertChild(ViewGroup parentView, IXmlPullParser childXml,
+            View beforeSibling, IAnimationListener listener) {
+        checkLock();
+
+        int index = parentView.indexOfChild(beforeSibling);
+        if (beforeSibling != null && index == -1) {
+            throw new IllegalArgumentException("beforeSibling not in parentView");
+        }
+
+        // create a block parser for the XML
+        BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(childXml, mContext,
+                false /* platformResourceFlag */);
+
+        // inflate the child without adding it to the root since we want to control where it'll
+        // get added. We do pass the parentView however to ensure that the layoutParams will
+        // be created correctly.
+        View child = mInflater.inflate(blockParser, parentView, false /*attachToRoot*/);
+
+        // add it to the parentView in the correct location
+        parentView.addView(child, index);
+
+        return render();
+    }
+
+    public SceneResult moveChild(ViewGroup parentView, View childView, View beforeSibling,
+            IAnimationListener listener) {
+        checkLock();
+
+        int index = parentView.indexOfChild(beforeSibling);
+        if (beforeSibling != null && index == -1) {
+            throw new IllegalArgumentException("beforeSibling not in parentView");
+        }
+
+        ViewParent parent = childView.getParent();
+        if (parent instanceof ViewGroup) {
+            ViewGroup parentGroup = (ViewGroup) parent;
+            parentGroup.removeView(childView);
+        }
+
+        // add it to the parentView in the correct location
+        parentView.addView(childView, index);
+
+        return render();
+    }
+
+    public SceneResult removeChild(View childView, IAnimationListener listener) {
+        checkLock();
+
+        ViewParent parent = childView.getParent();
+        if (parent instanceof ViewGroup) {
+            ViewGroup parentGroup = (ViewGroup) parent;
+            parentGroup.removeView(childView);
+        }
+
+        return render();
     }
 
     /**
@@ -914,5 +981,13 @@ public class LayoutSceneImpl {
 
     public Map<String, String> getDefaultViewPropertyValues(Object viewObject) {
         return mContext.getDefaultPropMap(viewObject);
+    }
+
+    public void setScene(LayoutScene scene) {
+        mScene = scene;
+    }
+
+    public LayoutScene getScene() {
+        return mScene;
     }
 }
