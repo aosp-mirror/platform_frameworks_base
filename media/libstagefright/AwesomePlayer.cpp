@@ -426,7 +426,8 @@ status_t AwesomePlayer::setDataSource_l(
         // Hack to support http live.
 
         size_t len = strlen(uri);
-        if (!strcasecmp(&uri[len - 5], ".m3u8")) {
+        if (!strcasecmp(&uri[len - 5], ".m3u8")
+                || strstr(&uri[7], "m3u8") != NULL) {
             mUri = "httplive://";
             mUri.append(&uri[7]);
         }
