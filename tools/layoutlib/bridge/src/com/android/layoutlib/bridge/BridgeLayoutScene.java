@@ -64,14 +64,14 @@ public class BridgeLayoutScene extends LayoutScene {
     @Override
     public SceneResult render(long timeout) {
         try {
-            mScene.prepareThread();
+            Bridge.prepareThread();
             mLastResult = mScene.acquire(timeout);
             if (mLastResult == SceneResult.SUCCESS) {
                 mLastResult = mScene.render();
             }
         } finally {
             mScene.release();
-            mScene.cleanupThread();
+            Bridge.cleanupThread();
         }
 
         return mLastResult;
@@ -81,7 +81,7 @@ public class BridgeLayoutScene extends LayoutScene {
     public SceneResult animate(Object targetObject, String animationName,
             boolean isFrameworkAnimation, IAnimationListener listener) {
         try {
-            mScene.prepareThread();
+            Bridge.prepareThread();
             mLastResult = mScene.acquire(SceneParams.DEFAULT_TIMEOUT);
             if (mLastResult == SceneResult.SUCCESS) {
                 mLastResult = mScene.animate(targetObject, animationName, isFrameworkAnimation,
@@ -89,7 +89,7 @@ public class BridgeLayoutScene extends LayoutScene {
             }
         } finally {
             mScene.release();
-            mScene.cleanupThread();
+            Bridge.cleanupThread();
         }
 
         return mLastResult;
@@ -106,7 +106,7 @@ public class BridgeLayoutScene extends LayoutScene {
         }
 
         try {
-            mScene.prepareThread();
+            Bridge.prepareThread();
             mLastResult = mScene.acquire(SceneParams.DEFAULT_TIMEOUT);
             if (mLastResult == SceneResult.SUCCESS) {
                 mLastResult = mScene.insertChild((ViewGroup) parentView, childXml,
@@ -114,7 +114,7 @@ public class BridgeLayoutScene extends LayoutScene {
             }
         } finally {
             mScene.release();
-            mScene.cleanupThread();
+            Bridge.cleanupThread();
         }
 
         return mLastResult;
@@ -135,7 +135,7 @@ public class BridgeLayoutScene extends LayoutScene {
         }
 
         try {
-            mScene.prepareThread();
+            Bridge.prepareThread();
             mLastResult = mScene.acquire(SceneParams.DEFAULT_TIMEOUT);
             if (mLastResult == SceneResult.SUCCESS) {
                 mLastResult = mScene.moveChild((ViewGroup) parentView, (View) childView,
@@ -143,7 +143,7 @@ public class BridgeLayoutScene extends LayoutScene {
             }
         } finally {
             mScene.release();
-            mScene.cleanupThread();
+            Bridge.cleanupThread();
         }
 
         return mLastResult;
@@ -156,14 +156,14 @@ public class BridgeLayoutScene extends LayoutScene {
         }
 
         try {
-            mScene.prepareThread();
+            Bridge.prepareThread();
             mLastResult = mScene.acquire(SceneParams.DEFAULT_TIMEOUT);
             if (mLastResult == SceneResult.SUCCESS) {
                 mLastResult = mScene.removeChild((View) childView, listener);
             }
         } finally {
             mScene.release();
-            mScene.cleanupThread();
+            Bridge.cleanupThread();
         }
 
         return mLastResult;

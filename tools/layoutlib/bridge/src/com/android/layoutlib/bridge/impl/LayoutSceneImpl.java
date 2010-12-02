@@ -51,7 +51,6 @@ import android.graphics.Canvas;
 import android.graphics.Canvas_Delegate;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
@@ -104,6 +103,9 @@ public class LayoutSceneImpl {
     private int mScreenOffset;
     private IResourceValue mWindowBackground;
     private FrameLayout mViewRoot;
+    private Canvas mCanvas;
+    private int mMeasuredScreenWidth = -1;
+    private int mMeasuredScreenHeight = -1;
 
     // information being returned through the API
     private BufferedImage mImage;
@@ -199,31 +201,6 @@ public class LayoutSceneImpl {
                 mContext, false /* platformResourceFlag */);
 
         return SceneResult.SUCCESS;
-    }
-
-    /**
-     * Prepares the current thread for rendering.
-     *
-     * Note that while this can be called several time, the first call to {@link #cleanupThread()}
-     * will do the clean-up, and make the thread unable to do further scene actions.
-     */
-    public void prepareThread() {
-        // we need to make sure the Looper has been initialized for this thread.
-        // this is required for View that creates Handler objects.
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-    }
-
-    /**
-     * Cleans up thread-specific data. After this, the thread cannot be used for scene actions.
-     * <p>
-     * Note that it doesn't matter how many times {@link #prepareThread()} was called, a single
-     * call to this will prevent the thread from doing further scene actions
-     */
-    public void cleanupThread() {
-        // clean up the looper
-        Looper.sThreadLocal.remove();
     }
 
     /**
@@ -389,96 +366,107 @@ public class LayoutSceneImpl {
      *
      * @throws IllegalStateException if the current context is different than the one owned by
      *      the scene, or if {@link #acquire(long)} was not called.
+     *
+     * @see SceneParams#getRenderingMode()
      */
     public SceneResult render() {
         checkLock();
 
         try {
-            long current = System.currentTimeMillis();
             if (mViewRoot == null) {
                 return new SceneResult(SceneStatus.ERROR_NOT_INFLATED);
             }
             // measure the views
             int w_spec, h_spec;
 
-            int renderScreenWidth = mParams.getScreenWidth();
-            int renderScreenHeight = mParams.getScreenHeight();
-
             RenderingMode renderingMode = mParams.getRenderingMode();
 
-            if (renderingMode != RenderingMode.NORMAL) {
-                // measure the full size needed by the layout.
-                w_spec = MeasureSpec.makeMeasureSpec(renderScreenWidth,
-                        renderingMode.isHorizExpand() ?
-                                MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
-                                : MeasureSpec.EXACTLY);
-                h_spec = MeasureSpec.makeMeasureSpec(renderScreenHeight - mScreenOffset,
-                        renderingMode.isVertExpand() ?
-                                MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
-                                : MeasureSpec.EXACTLY);
-                mViewRoot.measure(w_spec, h_spec);
+            // only do the screen measure when needed.
+            boolean newRenderSize = false;
+            if (mMeasuredScreenWidth == -1) {
+                newRenderSize = true;
+                mMeasuredScreenWidth = mParams.getScreenWidth();
+                mMeasuredScreenHeight = mParams.getScreenHeight();
 
-                if (renderingMode.isHorizExpand()) {
-                    int neededWidth = mViewRoot.getChildAt(0).getMeasuredWidth();
-                    if (neededWidth > renderScreenWidth) {
-                        renderScreenWidth = neededWidth;
+                if (renderingMode != RenderingMode.NORMAL) {
+                    // measure the full size needed by the layout.
+                    w_spec = MeasureSpec.makeMeasureSpec(mMeasuredScreenWidth,
+                            renderingMode.isHorizExpand() ?
+                                    MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
+                                    : MeasureSpec.EXACTLY);
+                    h_spec = MeasureSpec.makeMeasureSpec(mMeasuredScreenHeight - mScreenOffset,
+                            renderingMode.isVertExpand() ?
+                                    MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
+                                    : MeasureSpec.EXACTLY);
+                    mViewRoot.measure(w_spec, h_spec);
+
+                    if (renderingMode.isHorizExpand()) {
+                        int neededWidth = mViewRoot.getChildAt(0).getMeasuredWidth();
+                        if (neededWidth > mMeasuredScreenWidth) {
+                            mMeasuredScreenWidth = neededWidth;
+                        }
                     }
-                }
 
-                if (renderingMode.isVertExpand()) {
-                    int neededHeight = mViewRoot.getChildAt(0).getMeasuredHeight();
-                    if (neededHeight > renderScreenHeight - mScreenOffset) {
-                        renderScreenHeight = neededHeight + mScreenOffset;
+                    if (renderingMode.isVertExpand()) {
+                        int neededHeight = mViewRoot.getChildAt(0).getMeasuredHeight();
+                        if (neededHeight > mMeasuredScreenHeight - mScreenOffset) {
+                            mMeasuredScreenHeight = neededHeight + mScreenOffset;
+                        }
                     }
                 }
             }
 
             // remeasure with the size we need
             // This must always be done before the call to layout
-            w_spec = MeasureSpec.makeMeasureSpec(renderScreenWidth, MeasureSpec.EXACTLY);
-            h_spec = MeasureSpec.makeMeasureSpec(renderScreenHeight - mScreenOffset,
+            w_spec = MeasureSpec.makeMeasureSpec(mMeasuredScreenWidth, MeasureSpec.EXACTLY);
+            h_spec = MeasureSpec.makeMeasureSpec(mMeasuredScreenHeight - mScreenOffset,
                     MeasureSpec.EXACTLY);
             mViewRoot.measure(w_spec, h_spec);
 
             // now do the layout.
-            mViewRoot.layout(0, mScreenOffset, renderScreenWidth, renderScreenHeight);
+            mViewRoot.layout(0, mScreenOffset, mMeasuredScreenWidth, mMeasuredScreenHeight);
 
             // draw the views
             // create the BufferedImage into which the layout will be rendered.
-            if (mParams.getImageFactory() != null) {
-                mImage = mParams.getImageFactory().getImage(renderScreenWidth,
-                        renderScreenHeight - mScreenOffset);
-            } else {
-                mImage = new BufferedImage(renderScreenWidth, renderScreenHeight - mScreenOffset,
-                        BufferedImage.TYPE_INT_ARGB);
+            if (newRenderSize || mCanvas == null) {
+                if (mParams.getImageFactory() != null) {
+                    mImage = mParams.getImageFactory().getImage(mMeasuredScreenWidth,
+                            mMeasuredScreenHeight - mScreenOffset);
+                } else {
+                    mImage = new BufferedImage(mMeasuredScreenWidth,
+                            mMeasuredScreenHeight - mScreenOffset, BufferedImage.TYPE_INT_ARGB);
+                }
+
+                if (mParams.isCustomBackgroundEnabled()) {
+                    Graphics2D gc = mImage.createGraphics();
+                    gc.setColor(new Color(mParams.getCustomBackgroundColor(), true));
+                    gc.fillRect(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight - mScreenOffset);
+                    gc.dispose();
+                }
+
+                // create an Android bitmap around the BufferedImage
+                Bitmap bitmap = Bitmap_Delegate.createBitmap(mImage,
+                        true /*isMutable*/,
+                        Density.getEnum(mParams.getDensity()));
+
+                // create a Canvas around the Android bitmap
+                mCanvas = new Canvas(bitmap);
+                mCanvas.setDensity(mParams.getDensity());
             }
-
-            if (mParams.isCustomBackgroundEnabled()) {
-                Graphics2D gc = mImage.createGraphics();
-                gc.setColor(new Color(mParams.getCustomBackgroundColor(), true));
-                gc.fillRect(0, 0, renderScreenWidth, renderScreenHeight - mScreenOffset);
-                gc.dispose();
-            }
-
-            // create an Android bitmap around the BufferedImage
-            Bitmap bitmap = Bitmap_Delegate.createBitmap(mImage,
-                    true /*isMutable*/,
-                    Density.getEnum(mParams.getDensity()));
-
-            // create a Canvas around the Android bitmap
-            Canvas canvas = new Canvas(bitmap);
-            canvas.setDensity(mParams.getDensity());
 
             // to set the logger, get the native delegate
-            Canvas_Delegate canvasDelegate = Canvas_Delegate.getDelegate(canvas);
+            Canvas_Delegate canvasDelegate = Canvas_Delegate.getDelegate(mCanvas);
             canvasDelegate.setLogger(mParams.getLogger());
 
-            mViewRoot.draw(canvas);
-            canvasDelegate.dispose();
+            long preDrawTime = System.currentTimeMillis();
+
+            mViewRoot.draw(mCanvas);
+
+            long drawTime = System.currentTimeMillis();
 
             mViewInfo = visit(((ViewGroup)mViewRoot).getChildAt(0), mContext);
 
-            System.out.println("rendering (ms): " + (System.currentTimeMillis() - current));
+            System.out.println(String.format("rendering (ms): %03d", drawTime - preDrawTime));
 
             // success!
             return SceneResult.SUCCESS;
@@ -567,7 +555,14 @@ public class LayoutSceneImpl {
         View child = mInflater.inflate(blockParser, parentView, false /*attachToRoot*/);
 
         // add it to the parentView in the correct location
-        parentView.addView(child, index);
+        try {
+            parentView.addView(child, index);
+        } catch (UnsupportedOperationException e) {
+            // looks like this is a view class that doesn't support children manipulation!
+            return new SceneResult(SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN);
+        }
+
+        invalidateRenderingSize();
 
         return render();
     }
@@ -581,14 +576,21 @@ public class LayoutSceneImpl {
             throw new IllegalArgumentException("beforeSibling not in parentView");
         }
 
-        ViewParent parent = childView.getParent();
-        if (parent instanceof ViewGroup) {
-            ViewGroup parentGroup = (ViewGroup) parent;
-            parentGroup.removeView(childView);
+        try {
+            ViewParent parent = childView.getParent();
+            if (parent instanceof ViewGroup) {
+                ViewGroup parentGroup = (ViewGroup) parent;
+                parentGroup.removeView(childView);
+            }
+
+            // add it to the parentView in the correct location
+            parentView.addView(childView, index);
+        } catch (UnsupportedOperationException e) {
+            // looks like this is a view class that doesn't support children manipulation!
+            return new SceneResult(SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN);
         }
 
-        // add it to the parentView in the correct location
-        parentView.addView(childView, index);
+        invalidateRenderingSize();
 
         return render();
     }
@@ -596,11 +598,18 @@ public class LayoutSceneImpl {
     public SceneResult removeChild(View childView, IAnimationListener listener) {
         checkLock();
 
-        ViewParent parent = childView.getParent();
-        if (parent instanceof ViewGroup) {
-            ViewGroup parentGroup = (ViewGroup) parent;
-            parentGroup.removeView(childView);
+        try {
+            ViewParent parent = childView.getParent();
+            if (parent instanceof ViewGroup) {
+                ViewGroup parentGroup = (ViewGroup) parent;
+                parentGroup.removeView(childView);
+            }
+        } catch (UnsupportedOperationException e) {
+            // looks like this is a view class that doesn't support children manipulation!
+            return new SceneResult(SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN);
         }
+
+        invalidateRenderingSize();
 
         return render();
     }
@@ -969,6 +978,10 @@ public class LayoutSceneImpl {
         }
 
         return result;
+    }
+
+    private void invalidateRenderingSize() {
+        mMeasuredScreenWidth = mMeasuredScreenHeight = -1;
     }
 
     public BufferedImage getImage() {
