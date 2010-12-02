@@ -315,7 +315,7 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout,
                         // Throttle it!
 #if DEBUG_THROTTLING
                         LOGD("Throttling - Delaying motion event for "
-                                "device 0x%x, source 0x%08x by up to %0.3fms.",
+                                "device %d, source 0x%08x by up to %0.3fms.",
                                 deviceId, source, (nextTime - currentTime) * 0.000001);
 #endif
                         if (nextTime < *nextWakeupTime) {
@@ -704,7 +704,7 @@ bool InputDispatcher::dispatchKeyLocked(
 
 void InputDispatcher::logOutboundKeyDetailsLocked(const char* prefix, const KeyEntry* entry) {
 #if DEBUG_OUTBOUND_EVENT_DETAILS
-    LOGD("%seventTime=%lld, deviceId=0x%x, source=0x%x, policyFlags=0x%x, "
+    LOGD("%seventTime=%lld, deviceId=%d, source=0x%x, policyFlags=0x%x, "
             "action=0x%x, flags=0x%x, keyCode=0x%x, scanCode=0x%x, metaState=0x%x, "
             "repeatCount=%d, downTime=%lld",
             prefix,
@@ -767,7 +767,7 @@ bool InputDispatcher::dispatchMotionLocked(
 
 void InputDispatcher::logOutboundMotionDetailsLocked(const char* prefix, const MotionEntry* entry) {
 #if DEBUG_OUTBOUND_EVENT_DETAILS
-    LOGD("%seventTime=%lld, deviceId=0x%x, source=0x%x, policyFlags=0x%x, "
+    LOGD("%seventTime=%lld, deviceId=%d, source=0x%x, policyFlags=0x%x, "
             "action=0x%x, flags=0x%x, "
             "metaState=0x%x, edgeFlags=0x%x, xPrecision=%f, yPrecision=%f, downTime=%lld",
             prefix,
@@ -2072,7 +2072,7 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t sou
         uint32_t policyFlags, int32_t action, int32_t flags,
         int32_t keyCode, int32_t scanCode, int32_t metaState, nsecs_t downTime) {
 #if DEBUG_INBOUND_EVENT_DETAILS
-    LOGD("notifyKey - eventTime=%lld, deviceId=0x%x, source=0x%x, policyFlags=0x%x, action=0x%x, "
+    LOGD("notifyKey - eventTime=%lld, deviceId=%d, source=0x%x, policyFlags=0x%x, action=0x%x, "
             "flags=0x%x, keyCode=0x%x, scanCode=0x%x, metaState=0x%x, downTime=%lld",
             eventTime, deviceId, source, policyFlags, action, flags,
             keyCode, scanCode, metaState, downTime);
@@ -2120,7 +2120,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t 
         uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
         float xPrecision, float yPrecision, nsecs_t downTime) {
 #if DEBUG_INBOUND_EVENT_DETAILS
-    LOGD("notifyMotion - eventTime=%lld, deviceId=0x%x, source=0x%x, policyFlags=0x%x, "
+    LOGD("notifyMotion - eventTime=%lld, deviceId=%d, source=0x%x, policyFlags=0x%x, "
             "action=0x%x, flags=0x%x, metaState=0x%x, edgeFlags=0x%x, "
             "xPrecision=%f, yPrecision=%f, downTime=%lld",
             eventTime, deviceId, source, policyFlags, action, flags, metaState, edgeFlags,

@@ -42,7 +42,6 @@ class FakeInputReaderPolicy : public InputReaderPolicyInterface {
     KeyedVector<int32_t, DisplayInfo> mDisplayInfos;
     bool mFilterTouchEvents;
     bool mFilterJumpyTouchEvents;
-    KeyedVector<String8, Vector<VirtualKeyDefinition> > mVirtualKeyDefinitions;
     Vector<String8> mExcludedDeviceNames;
 
 protected:
@@ -75,15 +74,6 @@ public:
         mFilterJumpyTouchEvents = enabled;
     }
 
-    void addVirtualKeyDefinition(const String8& deviceName,
-            const VirtualKeyDefinition& definition) {
-        if (mVirtualKeyDefinitions.indexOfKey(deviceName) < 0) {
-            mVirtualKeyDefinitions.add(deviceName, Vector<VirtualKeyDefinition>());
-        }
-
-        mVirtualKeyDefinitions.editValueFor(deviceName).push(definition);
-    }
-
     void addExcludedDeviceName(const String8& deviceName) {
         mExcludedDeviceNames.push(deviceName);
     }
@@ -114,14 +104,6 @@ private:
 
     virtual bool filterJumpyTouchEvents() {
         return mFilterJumpyTouchEvents;
-    }
-
-    virtual void getVirtualKeyDefinitions(const String8& deviceName,
-            Vector<VirtualKeyDefinition>& outVirtualKeyDefinitions) {
-        ssize_t index = mVirtualKeyDefinitions.indexOfKey(deviceName);
-        if (index >= 0) {
-            outVirtualKeyDefinitions.appendVector(mVirtualKeyDefinitions.valueAt(index));
-        }
     }
 
     virtual void getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames) {
@@ -355,6 +337,7 @@ class FakeEventHub : public EventHubInterface {
         KeyedVector<int32_t, int32_t> switchStates;
         KeyedVector<int32_t, KeyInfo> keys;
         KeyedVector<int32_t, bool> leds;
+        Vector<VirtualKeyDefinition> virtualKeys;
 
         Device(const String8& name, uint32_t classes) :
                 name(name), classes(classes) {
@@ -446,6 +429,11 @@ public:
 
     Vector<String8>& getExcludedDevices() {
         return mExcludedDevices;
+    }
+
+    void addVirtualKeyDefinition(int32_t deviceId, const VirtualKeyDefinition& definition) {
+        Device* device = getDevice(deviceId);
+        device->virtualKeys.push(definition);
     }
 
     void enqueueEvent(nsecs_t when, int32_t deviceId, int32_t type,
@@ -600,6 +588,16 @@ private:
                         << "Attempted to set the state of an LED that the EventHub declared "
                         "was not present.  led=" << led;
             }
+        }
+    }
+
+    virtual void getVirtualKeyDefinitions(int32_t deviceId,
+            Vector<VirtualKeyDefinition>& outVirtualKeys) const {
+        outVirtualKeys.clear();
+
+        Device* device = getDevice(deviceId);
+        if (device) {
+            outVirtualKeys.appendVector(device->virtualKeys);
         }
     }
 
@@ -2147,8 +2145,8 @@ void TouchInputMapperTest::prepareDisplay(int32_t orientation) {
 }
 
 void TouchInputMapperTest::prepareVirtualKeys() {
-    mFakePolicy->addVirtualKeyDefinition(String8(DEVICE_NAME), VIRTUAL_KEYS[0]);
-    mFakePolicy->addVirtualKeyDefinition(String8(DEVICE_NAME), VIRTUAL_KEYS[1]);
+    mFakeEventHub->addVirtualKeyDefinition(DEVICE_ID, VIRTUAL_KEYS[0]);
+    mFakeEventHub->addVirtualKeyDefinition(DEVICE_ID, VIRTUAL_KEYS[1]);
     mFakeEventHub->addKey(DEVICE_ID, KEY_HOME, AKEYCODE_HOME, POLICY_FLAG_WAKE);
     mFakeEventHub->addKey(DEVICE_ID, KEY_MENU, AKEYCODE_MENU, POLICY_FLAG_WAKE);
 }

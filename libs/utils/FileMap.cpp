@@ -63,16 +63,18 @@ FileMap::~FileMap(void)
         free(mFileName);
     }
 #ifdef HAVE_POSIX_FILEMAP    
-    if (munmap(mBasePtr, mBaseLength) != 0) {
+    if (mBasePtr && munmap(mBasePtr, mBaseLength) != 0) {
         LOGD("munmap(%p, %d) failed\n", mBasePtr, (int) mBaseLength);
     }
 #endif
 #ifdef HAVE_WIN32_FILEMAP
-    if ( UnmapViewOfFile(mBasePtr) == 0) {
+    if (mBasePtr && UnmapViewOfFile(mBasePtr) == 0) {
         LOGD("UnmapViewOfFile(%p) failed, error = %ld\n", mBasePtr, 
               GetLastError() );
     }
-    CloseHandle(mFileMapping);
+    if (mFileMapping != INVALID_HANDLE_VALUE) {
+        CloseHandle(mFileMapping);
+    }
     CloseHandle(mFileHandle);
 #endif
 }

@@ -11,6 +11,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #include <ui/Input.h>
 
@@ -28,12 +29,16 @@ static const char* CONFIGURATION_FILE_EXTENSION[] = {
         ".kcm",
 };
 
+static bool isValidNameChar(char ch) {
+    return isascii(ch) && (isdigit(ch) || isalpha(ch) || ch == '-' || ch == '_');
+}
+
 static void appendInputDeviceConfigurationFileRelativePath(String8& path,
         const String8& name, InputDeviceConfigurationFileType type) {
     path.append(CONFIGURATION_FILE_DIR[type]);
     for (size_t i = 0; i < name.length(); i++) {
         char ch = name[i];
-        if (ch == ' ') {
+        if (!isValidNameChar(ch)) {
             ch = '_';
         }
         path.append(&ch, 1);
@@ -41,7 +46,37 @@ static void appendInputDeviceConfigurationFileRelativePath(String8& path,
     path.append(CONFIGURATION_FILE_EXTENSION[type]);
 }
 
-extern String8 getInputDeviceConfigurationFilePath(
+String8 getInputDeviceConfigurationFilePathByDeviceIdentifier(
+        const InputDeviceIdentifier& deviceIdentifier,
+        InputDeviceConfigurationFileType type) {
+    if (deviceIdentifier.vendor !=0 && deviceIdentifier.product != 0) {
+        if (deviceIdentifier.version != 0) {
+            // Try vendor product version.
+            String8 versionPath(getInputDeviceConfigurationFilePathByName(
+                    String8::format("Vendor_%04x_Product_%04x_Version_%04x",
+                            deviceIdentifier.vendor, deviceIdentifier.product,
+                            deviceIdentifier.version),
+                    type));
+            if (!versionPath.isEmpty()) {
+                return versionPath;
+            }
+        }
+
+        // Try vendor product.
+        String8 productPath(getInputDeviceConfigurationFilePathByName(
+                String8::format("Vendor_%04x_Product_%04x",
+                        deviceIdentifier.vendor, deviceIdentifier.product),
+                type));
+        if (!productPath.isEmpty()) {
+            return productPath;
+        }
+    }
+
+    // Try device name.
+    return getInputDeviceConfigurationFilePathByName(deviceIdentifier.name, type);
+}
+
+String8 getInputDeviceConfigurationFilePathByName(
         const String8& name, InputDeviceConfigurationFileType type) {
     // Search system repository.
     String8 path;

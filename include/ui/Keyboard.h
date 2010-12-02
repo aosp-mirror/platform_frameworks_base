@@ -33,30 +33,58 @@ enum {
     DEVICE_ID_VIRTUAL_KEYBOARD = -1,
 };
 
-struct KeyMapInfo {
+class KeyLayoutMap;
+class KeyCharacterMap;
+
+/**
+ * Loads the key layout map and key character map for a keyboard device.
+ */
+class KeyMap {
+public:
     String8 keyLayoutFile;
+    KeyLayoutMap* keyLayoutMap;
+
     String8 keyCharacterMapFile;
-    bool isDefaultKeyMap;
+    KeyCharacterMap* keyCharacterMap;
 
-    KeyMapInfo() : isDefaultKeyMap(false) {
+    KeyMap();
+    ~KeyMap();
+
+    status_t load(const InputDeviceIdentifier& deviceIdenfier,
+            const PropertyMap* deviceConfiguration);
+
+    inline bool haveKeyLayout() const {
+        return !keyLayoutFile.isEmpty();
     }
 
-    bool isComplete() {
-        return !keyLayoutFile.isEmpty() && !keyCharacterMapFile.isEmpty();
+    inline bool haveKeyCharacterMap() const {
+        return !keyCharacterMapFile.isEmpty();
     }
+
+    inline bool isComplete() const {
+        return haveKeyLayout() && haveKeyCharacterMap();
+    }
+
+private:
+    bool probeKeyMap(const InputDeviceIdentifier& deviceIdentifier, const String8& name);
+    status_t loadKeyLayout(const InputDeviceIdentifier& deviceIdentifier, const String8& name);
+    status_t loadKeyCharacterMap(const InputDeviceIdentifier& deviceIdentifier,
+            const String8& name);
+    String8 getPath(const InputDeviceIdentifier& deviceIdentifier,
+            const String8& name, InputDeviceConfigurationFileType type);
 };
 
 /**
- * Resolves the key map to use for a particular keyboard device.
+ * Returns true if the keyboard is eligible for use as a built-in keyboard.
  */
-extern status_t resolveKeyMap(const String8& deviceName,
-        const PropertyMap* deviceConfiguration, KeyMapInfo& outKeyMapInfo);
+extern bool isEligibleBuiltInKeyboard(const InputDeviceIdentifier& deviceIdentifier,
+        const PropertyMap* deviceConfiguration, const KeyMap* keyMap);
 
 /**
  * Sets keyboard system properties.
  */
-extern void setKeyboardProperties(int32_t deviceId, const String8& deviceName,
-        const KeyMapInfo& keyMapInfo);
+extern void setKeyboardProperties(int32_t deviceId, const InputDeviceIdentifier& deviceIdentifier,
+        const String8& keyLayoutFile, const String8& keyCharacterMapFile);
 
 /**
  * Clears keyboard system properties.

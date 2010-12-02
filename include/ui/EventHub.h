@@ -18,8 +18,11 @@
 #ifndef _RUNTIME_EVENT_HUB_H
 #define _RUNTIME_EVENT_HUB_H
 
-#include <android/input.h>
+#include <ui/Input.h>
 #include <ui/Keyboard.h>
+#include <ui/KeyLayoutMap.h>
+#include <ui/KeyCharacterMap.h>
+#include <ui/VirtualKeyMap.h>
 #include <utils/String8.h>
 #include <utils/threads.h>
 #include <utils/Log.h>
@@ -27,6 +30,7 @@
 #include <utils/List.h>
 #include <utils/Errors.h>
 #include <utils/PropertyMap.h>
+#include <utils/Vector.h>
 
 #include <linux/input.h>
 
@@ -58,8 +62,6 @@
 struct pollfd;
 
 namespace android {
-
-class KeyLayoutMap;
 
 /*
  * A raw event as retrieved from the EventHub.
@@ -194,6 +196,9 @@ public:
     virtual bool hasLed(int32_t deviceId, int32_t led) const = 0;
     virtual void setLedState(int32_t deviceId, int32_t led, bool on) = 0;
 
+    virtual void getVirtualKeyDefinitions(int32_t deviceId,
+            Vector<VirtualKeyDefinition>& outVirtualKeys) const = 0;
+
     virtual void dump(String8& dump) = 0;
 };
 
@@ -230,6 +235,9 @@ public:
     virtual bool hasLed(int32_t deviceId, int32_t led) const;
     virtual void setLedState(int32_t deviceId, int32_t led, bool on);
 
+    virtual void getVirtualKeyDefinitions(int32_t deviceId,
+            Vector<VirtualKeyDefinition>& outVirtualKeys) const;
+
     virtual void dump(String8& dump);
 
 protected:
@@ -238,78 +246,80 @@ protected:
 private:
     bool openPlatformInput(void);
 
-    int openDevice(const char *device);
-    int closeDevice(const char *device);
+    int openDevice(const char *devicePath);
+    int closeDevice(const char *devicePath);
     int scanDir(const char *dirname);
     int readNotify(int nfd);
 
     status_t mError;
 
-    struct device_t {
-        const int32_t   id;
-        const String8   path;
-        String8         name;
-        uint32_t        classes;
-        uint8_t*        keyBitmask;
-        KeyLayoutMap*   layoutMap;
-        String8         configurationFile;
-        PropertyMap*    configuration;
-        KeyMapInfo      keyMapInfo;
-        int             fd;
-        device_t*       next;
-        
-        device_t(int32_t _id, const char* _path, const char* name);
-        ~device_t();
+    struct Device {
+        Device* next;
+
+        int fd;
+        const int32_t id;
+        const String8 path;
+        const InputDeviceIdentifier identifier;
+
+        uint32_t classes;
+        uint8_t* keyBitmask;
+        String8 configurationFile;
+        PropertyMap* configuration;
+        VirtualKeyMap* virtualKeyMap;
+        KeyMap keyMap;
+
+        Device(int fd, int32_t id, const String8& path, const InputDeviceIdentifier& identifier);
+        ~Device();
+
+        void close();
     };
 
-    device_t* getDeviceLocked(int32_t deviceId) const;
-    bool hasKeycodeLocked(device_t* device, int keycode) const;
+    Device* getDeviceLocked(int32_t deviceId) const;
+    bool hasKeycodeLocked(Device* device, int keycode) const;
 
-    int32_t getScanCodeStateLocked(device_t* device, int32_t scanCode) const;
-    int32_t getKeyCodeStateLocked(device_t* device, int32_t keyCode) const;
-    int32_t getSwitchStateLocked(device_t* device, int32_t sw) const;
-    bool markSupportedKeyCodesLocked(device_t* device, size_t numCodes,
+    int32_t getScanCodeStateLocked(Device* device, int32_t scanCode) const;
+    int32_t getKeyCodeStateLocked(Device* device, int32_t keyCode) const;
+    int32_t getSwitchStateLocked(Device* device, int32_t sw) const;
+    bool markSupportedKeyCodesLocked(Device* device, size_t numCodes,
             const int32_t* keyCodes, uint8_t* outFlags) const;
 
-    void loadConfiguration(device_t* device);
-    void configureKeyMap(device_t* device);
-    void setKeyboardProperties(device_t* device, bool firstKeyboard);
-    void clearKeyboardProperties(device_t* device, bool firstKeyboard);
+    void loadConfiguration(Device* device);
+    status_t loadVirtualKeyMap(Device* device);
+    status_t loadKeyMap(Device* device);
+    void setKeyboardProperties(Device* device, bool builtInKeyboard);
+    void clearKeyboardProperties(Device* device, bool builtInKeyboard);
 
     // Protect all internal state.
-    mutable Mutex   mLock;
-    
-    bool            mHaveFirstKeyboard;
-    int32_t         mFirstKeyboardId; // the API is that the built-in keyboard is id 0, so map it
-    
-    struct device_ent {
-        device_t* device;
-        uint32_t seq;
-    };
-    device_ent      *mDevicesById;
-    int             mNumDevicesById;
-    
-    device_t        *mOpeningDevices;
-    device_t        *mClosingDevices;
-    
-    device_t        **mDevices;
-    struct pollfd   *mFDs;
-    int             mFDCount;
+    mutable Mutex mLock;
 
-    bool            mOpened;
-    bool            mNeedToSendFinishedDeviceScan;
-    List<String8>   mExcludedDevices;
+    // The actual id of the built-in keyboard, or -1 if none.
+    // EventHub remaps the built-in keyboard to id 0 externally as required by the API.
+    int32_t mBuiltInKeyboardId;
+
+    int32_t mNextDeviceId;
+
+    // Parallel arrays of fds and devices.
+    // First index is reserved for inotify.
+    Vector<struct pollfd> mFds;
+    Vector<Device*> mDevices;
+
+    Device *mOpeningDevices;
+    Device *mClosingDevices;
+
+    bool mOpened;
+    bool mNeedToSendFinishedDeviceScan;
+    List<String8> mExcludedDevices;
 
     // device ids that report particular switches.
 #ifdef EV_SW
-    int32_t         mSwitches[SW_MAX + 1];
+    int32_t mSwitches[SW_MAX + 1];
 #endif
 
     static const int INPUT_BUFFER_SIZE = 64;
     struct input_event mInputBufferData[INPUT_BUFFER_SIZE];
-    int32_t mInputBufferIndex;
-    int32_t mInputBufferCount;
-    int32_t mInputDeviceIndex;
+    size_t mInputBufferIndex;
+    size_t mInputBufferCount;
+    size_t mInputFdIndex;
 };
 
 }; // namespace android

@@ -12,18 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Warning: this is actually a product definition, to be inherited from
+#
+# Emulator keyboard configuration file #2.
+#
 
-include $(LOCAL_PATH)/common.mk
-
-PRODUCT_COPY_FILES := $(foreach file,$(keylayouts),\
-    frameworks/base/data/keyboards/$(file):system/usr/keylayout/$(file))
-
-PRODUCT_COPY_FILES += $(foreach file,$(keycharmaps),\
-    frameworks/base/data/keyboards/$(file):system/usr/keychars/$(file))
-
-PRODUCT_COPY_FILES += $(foreach file,$(keyconfigs),\
-    frameworks/base/data/keyboards/$(file):system/usr/idc/$(file))
-
-PRODUCT_PACKAGES := $(keylayouts) $(keycharmaps) $(keyconfigs)
+keyboard.layout = qwerty
+keyboard.characterMap = qwerty2
+keyboard.orientationAware = 1
+keyboard.builtIn = 1
 

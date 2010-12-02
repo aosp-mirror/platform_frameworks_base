@@ -56,20 +56,9 @@ static struct {
     jmethodID checkInjectEventsPermission;
     jmethodID filterTouchEvents;
     jmethodID filterJumpyTouchEvents;
-    jmethodID getVirtualKeyDefinitions;
     jmethodID getExcludedDeviceNames;
     jmethodID getMaxEventsPerSecond;
 } gCallbacksClassInfo;
-
-static struct {
-    jclass clazz;
-
-    jfieldID scanCode;
-    jfieldID centerX;
-    jfieldID centerY;
-    jfieldID width;
-    jfieldID height;
-} gVirtualKeyDefinitionClassInfo;
 
 static struct {
     jclass clazz;
@@ -176,8 +165,6 @@ public:
             int32_t* width, int32_t* height, int32_t* orientation);
     virtual bool filterTouchEvents();
     virtual bool filterJumpyTouchEvents();
-    virtual void getVirtualKeyDefinitions(const String8& deviceName,
-            Vector<VirtualKeyDefinition>& outVirtualKeyDefinitions);
     virtual void getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames);
 
     /* --- InputDispatcherPolicyInterface implementation --- */
@@ -440,41 +427,6 @@ bool NativeInputManager::filterJumpyTouchEvents() {
         mFilterJumpyTouchEvents = result ? 1 : 0;
     }
     return mFilterJumpyTouchEvents;
-}
-
-void NativeInputManager::getVirtualKeyDefinitions(const String8& deviceName,
-        Vector<VirtualKeyDefinition>& outVirtualKeyDefinitions) {
-    outVirtualKeyDefinitions.clear();
-
-    JNIEnv* env = jniEnv();
-
-    jstring deviceNameStr = env->NewStringUTF(deviceName.string());
-    if (! checkAndClearExceptionFromCallback(env, "getVirtualKeyDefinitions")) {
-        jobjectArray result = jobjectArray(env->CallObjectMethod(mCallbacksObj,
-                gCallbacksClassInfo.getVirtualKeyDefinitions, deviceNameStr));
-        if (! checkAndClearExceptionFromCallback(env, "getVirtualKeyDefinitions") && result) {
-            jsize length = env->GetArrayLength(result);
-            for (jsize i = 0; i < length; i++) {
-                jobject item = env->GetObjectArrayElement(result, i);
-
-                outVirtualKeyDefinitions.add();
-                outVirtualKeyDefinitions.editTop().scanCode =
-                        int32_t(env->GetIntField(item, gVirtualKeyDefinitionClassInfo.scanCode));
-                outVirtualKeyDefinitions.editTop().centerX =
-                        int32_t(env->GetIntField(item, gVirtualKeyDefinitionClassInfo.centerX));
-                outVirtualKeyDefinitions.editTop().centerY =
-                        int32_t(env->GetIntField(item, gVirtualKeyDefinitionClassInfo.centerY));
-                outVirtualKeyDefinitions.editTop().width =
-                        int32_t(env->GetIntField(item, gVirtualKeyDefinitionClassInfo.width));
-                outVirtualKeyDefinitions.editTop().height =
-                        int32_t(env->GetIntField(item, gVirtualKeyDefinitionClassInfo.height));
-
-                env->DeleteLocalRef(item);
-            }
-            env->DeleteLocalRef(result);
-        }
-        env->DeleteLocalRef(deviceNameStr);
-    }
 }
 
 void NativeInputManager::getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames) {
@@ -1366,35 +1318,11 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gCallbacksClassInfo.filterJumpyTouchEvents, gCallbacksClassInfo.clazz,
             "filterJumpyTouchEvents", "()Z");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getVirtualKeyDefinitions, gCallbacksClassInfo.clazz,
-            "getVirtualKeyDefinitions",
-            "(Ljava/lang/String;)[Lcom/android/server/InputManager$VirtualKeyDefinition;");
-
     GET_METHOD_ID(gCallbacksClassInfo.getExcludedDeviceNames, gCallbacksClassInfo.clazz,
             "getExcludedDeviceNames", "()[Ljava/lang/String;");
 
     GET_METHOD_ID(gCallbacksClassInfo.getMaxEventsPerSecond, gCallbacksClassInfo.clazz,
             "getMaxEventsPerSecond", "()I");
-
-    // VirtualKeyDefinition
-
-    FIND_CLASS(gVirtualKeyDefinitionClassInfo.clazz,
-            "com/android/server/InputManager$VirtualKeyDefinition");
-
-    GET_FIELD_ID(gVirtualKeyDefinitionClassInfo.scanCode, gVirtualKeyDefinitionClassInfo.clazz,
-            "scanCode", "I");
-
-    GET_FIELD_ID(gVirtualKeyDefinitionClassInfo.centerX, gVirtualKeyDefinitionClassInfo.clazz,
-            "centerX", "I");
-
-    GET_FIELD_ID(gVirtualKeyDefinitionClassInfo.centerY, gVirtualKeyDefinitionClassInfo.clazz,
-            "centerY", "I");
-
-    GET_FIELD_ID(gVirtualKeyDefinitionClassInfo.width, gVirtualKeyDefinitionClassInfo.clazz,
-            "width", "I");
-
-    GET_FIELD_ID(gVirtualKeyDefinitionClassInfo.height, gVirtualKeyDefinitionClassInfo.clazz,
-            "height", "I");
 
     // InputWindow
 
