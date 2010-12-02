@@ -648,6 +648,7 @@ public class WebView extends AbsoluteLayout
     static final int SAVE_WEBARCHIVE_FINISHED           = 132;
 
     static final int SET_AUTOFILLABLE                   = 133;
+    static final int AUTOFILL_COMPLETE                  = 134;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = SET_TOUCH_HIGHLIGHT_RECTS;
@@ -699,7 +700,8 @@ public class WebView extends AbsoluteLayout
         "SELECTION_STRING_CHANGED", //       = 130;
         "SET_TOUCH_HIGHLIGHT_RECTS", //      = 131;
         "SAVE_WEBARCHIVE_FINISHED", //       = 132;
-        "SET_AUTOFILLABLE" //                = 133;
+        "SET_AUTOFILLABLE", //               = 133;
+        "AUTOFILL_COMPLETE" //               = 134;
     };
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
@@ -7144,6 +7146,14 @@ public class WebView extends AbsoluteLayout
                     if (mWebTextView != null) {
                         mWebTextView.setAutoFillable(mAutoFillData.getQueryId());
                         rebuildWebTextView();
+                    }
+                    break;
+
+                case AUTOFILL_COMPLETE:
+                    if (mWebTextView != null) {
+                        // Clear the WebTextView adapter when AutoFill finishes
+                        // so that the drop down gets cleared.
+                        mWebTextView.setAdapterCustom(null);
                     }
                     break;
 
