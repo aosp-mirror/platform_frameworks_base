@@ -73,7 +73,7 @@ public final class NdefFormatable extends BasicTagTechnology {
                     // Should not happen
                     throw new IOException();
             }
-            errorCode = mTagService.write(serviceHandle, firstMessage);
+            errorCode = mTagService.ndefWrite(serviceHandle, firstMessage);
             switch (errorCode) {
                 case ErrorCodes.SUCCESS:
                     break;
