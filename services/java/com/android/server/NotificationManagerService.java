@@ -17,7 +17,6 @@
 package com.android.server;
 
 import com.android.internal.statusbar.StatusBarNotification;
-import com.android.server.StatusBarManagerService;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
@@ -41,12 +40,11 @@ import android.database.ContentObserver;
 import android.hardware.Usb;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.Power;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -55,8 +53,8 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.EventLog;
-import android.util.Slog;
 import android.util.Log;
+import android.util.Slog;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
@@ -158,8 +156,6 @@ public class NotificationManagerService extends INotificationManager.Stub
         final int id;
         final int uid;
         final int initialPid;
-        ITransientNotification callback;
-        int duration;
         final Notification notification;
         IBinder statusBarKey;
 
@@ -642,6 +638,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     // Notifications
     // ============================================================================
+    @Deprecated
     public void enqueueNotification(String pkg, int id, Notification notification, int[] idOut)
     {
         enqueueNotificationWithTag(pkg, null /* tag */, id, notification, idOut);
@@ -975,7 +972,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         }
     }
 
-
+    @Deprecated
     public void cancelNotification(String pkg, int id) {
         cancelNotificationWithTag(pkg, null /* tag */, id);
     }
@@ -1026,12 +1023,6 @@ public class NotificationManagerService extends INotificationManager.Stub
                 }
             }
 
-            updateLightsLocked();
-        }
-    }
-
-    private void updateLights() {
-        synchronized (mNotificationList) {
             updateLightsLocked();
         }
     }
