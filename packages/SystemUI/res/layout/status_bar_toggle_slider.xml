@@ -20,33 +20,35 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     >
-    <ToggleButton
+    <CheckBox
         android:id="@+id/toggle"
         android:layout_width="48dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:button="@drawable/status_bar_toggle_button"
         />
-    <view
-        class="com.android.systemui.statusbar.policy.ToggleSlider$Slider"
+    <SeekBar
         android:id="@+id/slider"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/toggle"
-        android:layout_alignParentTop="true"
+        android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:paddingLeft="20dp"
+        android:paddingRight="20dp"
         />
-        <!--
     <TextView
         android:id="@+id/label"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_alignLeft="@id/toggle"
         android:layout_alignRight="@id/toggle"
-        android:layout_alignParentBottom="true"
-        android:layout_below="@id/toggle"
+        android:layout_centerVertical="true"
         android:gravity="center"
+        android:paddingTop="26dp"
+        android:textColor="#666666"
+        android:textSize="12sp"
         />
-        -->
 </merge>

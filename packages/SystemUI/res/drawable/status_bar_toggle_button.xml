@@ -14,12 +14,10 @@
      limitations under the License.
 -->
 
-<resources>
-    <declare-styleable name="KeyButtonView">
-        <attr name="keyCode" format="integer" />
-    </declare-styleable>
-    <declare-styleable name="ToggleSlider">
-        <attr name="text" format="string" />
-    </declare-styleable>
-</resources>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true"
+         android:drawable="@*android:drawable/scrubber_primary_holo" />
+    <item
+         android:drawable="@*android:drawable/scrubber_track_holo_dark" />
+</selector>
 

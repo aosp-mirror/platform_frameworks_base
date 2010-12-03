@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Slog;
@@ -26,7 +27,7 @@ import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.ToggleButton;
+import android.widget.CompoundButton;
 
 import com.android.systemui.R;
 
@@ -38,24 +39,10 @@ public class ToggleSlider extends RelativeLayout
         public void onChanged(ToggleSlider v, boolean tracking, boolean checked, int value);
     }
 
-    public static class Slider extends SeekBar {
-        public Slider(Context context) {
-            this(context, null);
-        }
-
-        public Slider(Context context, AttributeSet attrs) {
-            super(context, attrs);
-        }
-
-        public Slider(Context context, AttributeSet attrs, int defStyle) {
-            super(context, attrs, defStyle);
-        }
-    }
-
     private Listener mListener;
     private boolean mTracking;
 
-    private ToggleButton mToggle;
+    private CompoundButton mToggle;
     private SeekBar mSlider;
     private TextView mLabel;
 
@@ -71,18 +58,21 @@ public class ToggleSlider extends RelativeLayout
         super(context, attrs, defStyle);
         View.inflate(context, R.layout.status_bar_toggle_slider, this);
 
-        mToggle = (ToggleButton)findViewById(R.id.toggle);
+        final Resources res = context.getResources();
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ToggleSlider,
+                defStyle, 0);
+
+        mToggle = (CompoundButton)findViewById(R.id.toggle);
         mToggle.setOnCheckedChangeListener(this);
-        mToggle.setTextOn("hi");
-        mToggle.setTextOff("hi");
+        mToggle.setBackgroundDrawable(res.getDrawable(R.drawable.status_bar_toggle_button));
 
         mSlider = (SeekBar)findViewById(R.id.slider);
         mSlider.setOnSeekBarChangeListener(this);
 
-        /*
         mLabel = (TextView)findViewById(R.id.label);
-        mLabel.setText("yo");
-        */
+        mLabel.setText(a.getString(R.styleable.ToggleSlider_text));
+
+        a.recycle();
     }
 
     public void onCheckedChanged(CompoundButton toggle, boolean checked) {
@@ -91,7 +81,7 @@ public class ToggleSlider extends RelativeLayout
         if (checked) {
             thumb = res.getDrawable(R.drawable.scrubber_control_disabled_holo);
         } else {
-            thumb = res.getDrawable(com.android.internal.R.drawable.scrubber_control_holo);
+            thumb = res.getDrawable(R.drawable.scrubber_control_holo);
         }
         mSlider.setThumb(thumb);
 
