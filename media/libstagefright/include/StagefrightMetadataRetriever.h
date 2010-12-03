@@ -35,7 +35,7 @@ struct StagefrightMetadataRetriever : public MediaMetadataRetrieverInterface {
     virtual status_t setDataSource(const char *url);
     virtual status_t setDataSource(int fd, int64_t offset, int64_t length);
 
-    virtual VideoFrame *captureFrame();
+    virtual VideoFrame *getFrameAtTime(int64_t timeUs, int option);
     virtual MediaAlbumArt *extractAlbumArt();
     virtual const char *extractMetadata(int keyCode);
 

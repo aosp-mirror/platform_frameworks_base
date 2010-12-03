@@ -532,7 +532,7 @@ public class CodecTest {
                 e.printStackTrace();
                 return false;
             }
-            Bitmap outThumbnail = mMediaMetadataRetriever.captureFrame();
+            Bitmap outThumbnail = mMediaMetadataRetriever.getFrameAtTime(-1);
 
             //Verify the thumbnail 
             Bitmap goldenBitmap = mBitmapFactory.decodeFile(goldenPath);

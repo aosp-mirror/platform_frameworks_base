@@ -596,21 +596,19 @@ int main(int argc, char **argv) {
             const char *filename = argv[k];
 
             CHECK_EQ(retriever->setDataSource(filename), (status_t)OK);
-            CHECK_EQ(retriever->setMode(
-                        METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL),
-                     (status_t)OK);
-
-            sp<IMemory> mem = retriever->captureFrame();
+            sp<IMemory> mem =
+                    retriever->getFrameAtTime(-1,
+                                    MediaSource::ReadOptions::SEEK_PREVIOUS_SYNC);
 
             if (mem != NULL) {
-                printf("captureFrame(%s) => OK\n", filename);
+                printf("getFrameAtTime(%s) => OK\n", filename);
             } else {
                 mem = retriever->extractAlbumArt();
 
                 if (mem != NULL) {
                     printf("extractAlbumArt(%s) => OK\n", filename);
                 } else {
-                    printf("both captureFrame and extractAlbumArt "
+                    printf("both getFrameAtTime and extractAlbumArt "
                            "failed on file '%s'.\n", filename);
                 }
             }

@@ -32,9 +32,7 @@ public:
     virtual void            disconnect() = 0;
     virtual status_t        setDataSource(const char* srcUrl) = 0;
     virtual status_t        setDataSource(int fd, int64_t offset, int64_t length) = 0;
-    virtual status_t        setMode(int mode) = 0;
-    virtual status_t        getMode(int* mode) const = 0;
-    virtual sp<IMemory>     captureFrame() = 0;
+    virtual sp<IMemory>     getFrameAtTime(int64_t timeUs, int option) = 0;
     virtual sp<IMemory>     extractAlbumArt() = 0;
     virtual const char*     extractMetadata(int keyCode) = 0;
 };
