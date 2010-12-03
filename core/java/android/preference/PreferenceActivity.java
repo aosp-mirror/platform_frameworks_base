@@ -29,6 +29,7 @@ import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
@@ -38,6 +39,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -259,12 +261,13 @@ public abstract class PreferenceActivity extends ListActivity implements
             // All view fields must be updated every time, because the view may be recycled 
             Header header = getItem(position);
             holder.icon.setImageResource(header.iconRes);
-            holder.title.setText(header.title);
-            if (TextUtils.isEmpty(header.summary)) {
-                holder.summary.setVisibility(View.GONE);
-            } else {
+            holder.title.setText(header.getTitle(getContext().getResources()));
+            CharSequence summary = header.getSummary(getContext().getResources());
+            if (!TextUtils.isEmpty(summary)) {
                 holder.summary.setVisibility(View.VISIBLE);
-                holder.summary.setText(header.summary);
+                holder.summary.setText(summary);
+            } else {
+                holder.summary.setVisibility(View.GONE);
             }
 
             return view;
@@ -291,10 +294,22 @@ public abstract class PreferenceActivity extends ListActivity implements
         public long id = HEADER_ID_UNDEFINED;
 
         /**
+         * Resource ID of title of the header that is shown to the user.
+         * @attr ref android.R.styleable#PreferenceHeader_title
+         */
+        public int titleRes;
+
+        /**
          * Title of the header that is shown to the user.
          * @attr ref android.R.styleable#PreferenceHeader_title
          */
         public CharSequence title;
+
+        /**
+         * Resource ID of optional summary describing what this header controls.
+         * @attr ref android.R.styleable#PreferenceHeader_summary
+         */
+        public int summaryRes;
 
         /**
          * Optional summary describing what this header controls.
@@ -303,10 +318,22 @@ public abstract class PreferenceActivity extends ListActivity implements
         public CharSequence summary;
 
         /**
+         * Resource ID of optional text to show as the title in the bread crumb.
+         * @attr ref android.R.styleable#PreferenceHeader_breadCrumbTitle
+         */
+        public int breadCrumbTitleRes;
+
+        /**
          * Optional text to show as the title in the bread crumb.
          * @attr ref android.R.styleable#PreferenceHeader_breadCrumbTitle
          */
         public CharSequence breadCrumbTitle;
+
+        /**
+         * Resource ID of optional text to show as the short title in the bread crumb.
+         * @attr ref android.R.styleable#PreferenceHeader_breadCrumbShortTitle
+         */
+        public int breadCrumbShortTitleRes;
 
         /**
          * Optional text to show as the short title in the bread crumb.
@@ -346,6 +373,55 @@ public abstract class PreferenceActivity extends ListActivity implements
         public Header() {
         }
 
+        /**
+         * Return the currently set title.  If {@link #titleRes} is set,
+         * this resource is loaded from <var>res</var> and returned.  Otherwise
+         * {@link #title} is returned.
+         */
+        public CharSequence getTitle(Resources res) {
+            if (titleRes != 0) {
+                return res.getText(titleRes);
+            }
+            return title;
+        }
+
+        /**
+         * Return the currently set summary.  If {@link #summaryRes} is set,
+         * this resource is loaded from <var>res</var> and returned.  Otherwise
+         * {@link #summary} is returned.
+         */
+        public CharSequence getSummary(Resources res) {
+            if (summaryRes != 0) {
+                return res.getText(summaryRes);
+            }
+            return title;
+        }
+
+        /**
+         * Return the currently set bread crumb title.  If {@link #breadCrumbTitleRes} is set,
+         * this resource is loaded from <var>res</var> and returned.  Otherwise
+         * {@link #breadCrumbTitle} is returned.
+         */
+        public CharSequence getBreadCrumbTitle(Resources res) {
+            if (breadCrumbTitleRes != 0) {
+                return res.getText(breadCrumbTitleRes);
+            }
+            return breadCrumbTitle;
+        }
+
+        /**
+         * Return the currently set bread crumb short title.  If
+         * {@link #breadCrumbShortTitleRes} is set,
+         * this resource is loaded from <var>res</var> and returned.  Otherwise
+         * {@link #breadCrumbShortTitle} is returned.
+         */
+        public CharSequence getBreadCrumbShortTitle(Resources res) {
+            if (breadCrumbShortTitleRes != 0) {
+                return res.getText(breadCrumbShortTitleRes);
+            }
+            return breadCrumbShortTitle;
+        }
+        
         @Override
         public int describeContents() {
             return 0;
@@ -354,9 +430,13 @@ public abstract class PreferenceActivity extends ListActivity implements
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeLong(id);
+            dest.writeInt(titleRes);
             TextUtils.writeToParcel(title, dest, flags);
+            dest.writeInt(summaryRes);
             TextUtils.writeToParcel(summary, dest, flags);
+            dest.writeInt(breadCrumbTitleRes);
             TextUtils.writeToParcel(breadCrumbTitle, dest, flags);
+            dest.writeInt(breadCrumbShortTitleRes);
             TextUtils.writeToParcel(breadCrumbShortTitle, dest, flags);
             dest.writeInt(iconRes);
             dest.writeString(fragment);
@@ -372,9 +452,13 @@ public abstract class PreferenceActivity extends ListActivity implements
 
         public void readFromParcel(Parcel in) {
             id = in.readLong();
+            titleRes = in.readInt();
             title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            summaryRes = in.readInt();
             summary = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            breadCrumbTitleRes = in.readInt();
             breadCrumbTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            breadCrumbShortTitleRes = in.readInt();
             breadCrumbShortTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             iconRes = in.readInt();
             fragment = in.readString();
@@ -670,14 +754,42 @@ public abstract class PreferenceActivity extends ListActivity implements
                     header.id = sa.getResourceId(
                             com.android.internal.R.styleable.PreferenceHeader_id,
                             (int)HEADER_ID_UNDEFINED);
-                    header.title = sa.getText(
+                    TypedValue tv = sa.peekValue(
                             com.android.internal.R.styleable.PreferenceHeader_title);
-                    header.summary = sa.getText(
+                    if (tv != null && tv.type == TypedValue.TYPE_STRING) {
+                        if (tv.resourceId != 0) {
+                            header.titleRes = tv.resourceId;
+                        } else {
+                            header.title = tv.string;
+                        }
+                    }
+                    tv = sa.peekValue(
                             com.android.internal.R.styleable.PreferenceHeader_summary);
-                    header.breadCrumbTitle = sa.getText(
+                    if (tv != null && tv.type == TypedValue.TYPE_STRING) {
+                        if (tv.resourceId != 0) {
+                            header.summaryRes = tv.resourceId;
+                        } else {
+                            header.summary = tv.string;
+                        }
+                    }
+                    tv = sa.peekValue(
                             com.android.internal.R.styleable.PreferenceHeader_breadCrumbTitle);
-                    header.breadCrumbShortTitle = sa.getText(
+                    if (tv != null && tv.type == TypedValue.TYPE_STRING) {
+                        if (tv.resourceId != 0) {
+                            header.breadCrumbTitleRes = tv.resourceId;
+                        } else {
+                            header.breadCrumbTitle = tv.string;
+                        }
+                    }
+                    tv = sa.peekValue(
                             com.android.internal.R.styleable.PreferenceHeader_breadCrumbShortTitle);
+                    if (tv != null && tv.type == TypedValue.TYPE_STRING) {
+                        if (tv.resourceId != 0) {
+                            header.breadCrumbShortTitleRes = tv.resourceId;
+                        } else {
+                            header.breadCrumbShortTitle = tv.string;
+                        }
+                    }
                     header.iconRes = sa.getResourceId(
                             com.android.internal.R.styleable.PreferenceHeader_icon, 0);
                     header.fragment = sa.getString(
@@ -893,10 +1005,10 @@ public abstract class PreferenceActivity extends ListActivity implements
             getListView().clearChoices();
         }
         if (header != null) {
-            CharSequence title = header.breadCrumbTitle;
-            if (title == null) title = header.title;
+            CharSequence title = header.getBreadCrumbTitle(getResources());
+            if (title == null) title = header.getTitle(getResources());
             if (title == null) title = getTitle();
-            showBreadCrumbs(title, header.breadCrumbShortTitle);
+            showBreadCrumbs(title, header.getBreadCrumbShortTitle(getResources()));
         } else {
             showBreadCrumbs(getTitle(), null);
         }
