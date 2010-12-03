@@ -594,12 +594,10 @@ public class SipAudioCall {
      */
     public void holdCall(int timeout) throws SipException {
         synchronized (this) {
-        if (mHold) return;
+            if (mHold) return;
             mSipSession.changeCall(createHoldOffer().encode(), timeout);
             mHold = true;
-
-            AudioGroup audioGroup = getAudioGroup();
-            if (audioGroup != null) audioGroup.setMode(AudioGroup.MODE_ON_HOLD);
+            setAudioGroupMode();
         }
     }
 
@@ -643,8 +641,7 @@ public class SipAudioCall {
             if (!mHold) return;
             mSipSession.changeCall(createContinueOffer().encode(), timeout);
             mHold = false;
-            AudioGroup audioGroup = getAudioGroup();
-            if (audioGroup != null) audioGroup.setMode(AudioGroup.MODE_NORMAL);
+            setAudioGroupMode();
         }
     }
 
@@ -765,13 +762,8 @@ public class SipAudioCall {
     /** Toggles mute. */
     public void toggleMute() {
         synchronized (this) {
-            AudioGroup audioGroup = getAudioGroup();
-            if (audioGroup != null) {
-                audioGroup.setMode(mMuted
-                        ? AudioGroup.MODE_NORMAL
-                        : AudioGroup.MODE_MUTED);
-                mMuted = !mMuted;
-            }
+            mMuted = !mMuted;
+            setAudioGroupMode();
         }
     }
 
@@ -790,12 +782,20 @@ public class SipAudioCall {
      * Puts the device to speaker mode.
      * <p class="note"><strong>Note:</strong> Requires the
      *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS} permission.</p>
+     *
+     * @param speakerMode set true to enable speaker mode; false to disable
      */
     public void setSpeakerMode(boolean speakerMode) {
         synchronized (this) {
             ((AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE))
                     .setSpeakerphoneOn(speakerMode);
+            setAudioGroupMode();
         }
+    }
+
+    private boolean isSpeakerOn() {
+        return ((AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE))
+                .isSpeakerphoneOn();
     }
 
     /**
@@ -874,7 +874,11 @@ public class SipAudioCall {
     /**
      * Sets the {@link AudioGroup} object which the {@link AudioStream} object
      * joins. If {@code audioGroup} is null, then the {@code AudioGroup} object
-     * will be dynamically created when needed.
+     * will be dynamically created when needed. Note that the mode of the
+     * {@code AudioGroup} is not changed according to the audio settings (i.e.,
+     * hold, mute, speaker phone) of this object. This is mainly used to merge
+     * multiple {@code SipAudioCall} objects to form a conference call. The
+     * settings of the first object (that merges others) override others'.
      *
      * @see #getAudioStream
      * @hide
@@ -990,16 +994,25 @@ public class SipAudioCall {
         // AudioGroup logic:
         AudioGroup audioGroup = getAudioGroup();
         if (mHold) {
-            if (audioGroup != null) {
-                audioGroup.setMode(AudioGroup.MODE_ON_HOLD);
-            }
             // don't create an AudioGroup here; doing so will fail if
             // there's another AudioGroup out there that's active
         } else {
             if (audioGroup == null) audioGroup = new AudioGroup();
             stream.join(audioGroup);
-            if (mMuted) {
+        }
+        setAudioGroupMode();
+    }
+
+    // set audio group mode based on current audio configuration
+    private void setAudioGroupMode() {
+        AudioGroup audioGroup = getAudioGroup();
+        if (audioGroup != null) {
+            if (mHold) {
+                audioGroup.setMode(AudioGroup.MODE_ON_HOLD);
+            } else if (mMuted) {
                 audioGroup.setMode(AudioGroup.MODE_MUTED);
+            } else if (isSpeakerOn()) {
+                audioGroup.setMode(AudioGroup.MODE_ECHO_SUPPRESSION);
             } else {
                 audioGroup.setMode(AudioGroup.MODE_NORMAL);
             }
