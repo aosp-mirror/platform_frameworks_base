@@ -335,7 +335,7 @@ public final class Bridge extends LayoutBridge {
                 t2 = t.getCause();
             }
             return new BridgeLayoutScene(null,
-                    new SceneResult(SceneStatus.ERROR_UNKNOWN, t2.getMessage(), t2));
+                    SceneStatus.ERROR_UNKNOWN.getResult(t2.getMessage(), t2));
         }
     }
 
