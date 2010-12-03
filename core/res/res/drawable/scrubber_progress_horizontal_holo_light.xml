@@ -15,11 +15,14 @@
 -->
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-
     <item android:id="@android:id/background"
-          android:drawable="@android:drawable/scrubber_track_holo_light" />
-    <item android:id="@android:id/secondaryProgress"
-          android:drawable="@android:drawable/scrubber_track_holo_light" />
-    <item android:id="@android:id/progress"
-          android:drawable="@android:drawable/scrubber_track_holo_light" />
+            android:drawable="@android:drawable/scrubber_track_holo_light" />
+    <item android:id="@android:id/secondaryProgress">
+        <scale android:scaleWidth="100%"
+                android:drawable="@android:drawable/scrubber_secondary_holo" />
+    </item>
+    <item android:id="@android:id/progress">
+        <scale android:scaleWidth="100%"
+                android:drawable="@android:drawable/scrubber_primary_holo" />
+    </item>
 </layer-list>
