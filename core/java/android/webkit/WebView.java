@@ -3492,10 +3492,14 @@ public class WebView extends AbsoluteLayout
      * <li> The Java object that is bound runs in another thread and not in
      * the thread that it was constructed in.</li>
      * </ul></p>
-     * @param obj The class instance to bind to Javascript
-     * @param interfaceName The name to used to expose the class in Javascript
+     * @param obj The class instance to bind to Javascript, null instances are
+     *            ignored.
+     * @param interfaceName The name to used to expose the class in JavaScript.
      */
     public void addJavascriptInterface(Object obj, String interfaceName) {
+        if (obj == null) {
+            return;
+        }
         WebViewCore.JSInterfaceData arg = new WebViewCore.JSInterfaceData();
         arg.mObject = obj;
         arg.mInterfaceName = interfaceName;
