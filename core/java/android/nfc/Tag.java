@@ -18,6 +18,7 @@ package android.nfc;
 
 import android.nfc.technology.IsoDep;
 import android.nfc.technology.MifareClassic;
+import android.nfc.technology.MifareUltralight;
 import android.nfc.technology.NfcV;
 import android.nfc.technology.Ndef;
 import android.nfc.technology.NfcA;
@@ -159,6 +160,9 @@ public class Tag implements Parcelable {
                 }
                 case TagTechnology.MIFARE_CLASSIC: {
                     return new MifareClassic(adapter, this, extras);
+                }
+                case TagTechnology.MIFARE_ULTRALIGHT: {
+                    return new MifareUltralight(adapter, this, extras);
                 }
 
                 default: {
