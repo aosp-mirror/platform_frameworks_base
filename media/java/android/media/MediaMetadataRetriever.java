@@ -71,12 +71,6 @@ public class MediaMetadataRetriever
     public native void setMode(int mode);
     
     /**
-     * @return the current mode of operation. A negative return value indicates
-     * some runtime error has occurred.
-     */
-    public native int getMode();
-
-    /**
      * Sets the data source (file pathname) to use. Call this
      * method before the rest of the methods in this class. This method may be
      * time-consuming.
@@ -190,13 +184,94 @@ public class MediaMetadataRetriever
 
     /**
      * Call this method after setDataSource(). This method finds a
-     * representative frame if successful and returns it as a bitmap. This is
-     * useful for generating a thumbnail for an input media source.
-     * 
+     * representative frame close to the given time position by considering
+     * the given option if possible, and returns it as a bitmap. This is
+     * useful for generating a thumbnail for an input data source or just
+     * obtain and display a frame at the given time position.
+     *
+     * @param timeUs The time position where the frame will be retrieved.
+     * When retrieving the frame at the given time position, there is no
+     * guarantee that the data source has a frame located at the position.
+     * When this happens, a frame nearby will be returned. If timeUs is
+     * negative, time position and option will ignored, and any frame
+     * that the implementation considers as representative may be returned.
+     *
+     * @param option a hint on how the frame is found. Use
+     * {@link OPTION_PREVIOUS_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp earlier than or the same as timeUs. Use
+     * {@link OPTION_NEXT_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp later than or the same as timeUs. Use
+     * {@link OPTION_CLOSEST_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp closest to or the same as timeUs. Use
+     * {@link OPTION_CLOSEST} if one wants to retrieve a frame that may
+     * or may not be a sync frame but is closest to or the same as timeUs.
+     * {@link OPTION_CLOSEST} often has larger performance overhead compared
+     * to the other options if there is no sync frame located at timeUs.
+     *
      * @return A Bitmap containing a representative video frame, which 
      *         can be null, if such a frame cannot be retrieved.
      */
-    public native Bitmap captureFrame();
+    public Bitmap getFrameAtTime(long timeUs, int option) {
+        if (option < OPTION_PREVIOUS_SYNC ||
+            option > OPTION_CLOSEST) {
+            throw new IllegalArgumentException("Unsupported option: " + option);
+        }
+
+        return _getFrameAtTime(timeUs, option);
+    }
+
+    /**
+     * Call this method after setDataSource(). This method finds a
+     * representative frame close to the given time position if possible,
+     * and returns it as a bitmap. This is useful for generating a thumbnail
+     * for an input data source. Call this method if one does not care
+     * how the frame is found as long as it is close to the given time;
+     * otherwise, please call {@link getFrameAtTime(long, int)}.
+     *
+     * @param timeUs The time position where the frame will be retrieved.
+     * When retrieving the frame at the given time position, there is no
+     * guarentee that the data source has a frame located at the position.
+     * When this happens, a frame nearby will be returned. If timeUs is
+     * negative, time position and option will ignored, and any frame
+     * that the implementation considers as representative may be returned.
+     *
+     * @return A Bitmap containing a representative video frame, which
+     *         can be null, if such a frame cannot be retrieved.
+     *
+     * @see #getFrameAtTime(long, int)
+     */
+    public Bitmap getFrameAtTime(long timeUs) {
+        return getFrameAtTime(timeUs, OPTION_CLOSEST_SYNC);
+    }
+
+    /**
+     * Call this method after setDataSource(). This method finds a
+     * representative frame at any time position if possible,
+     * and returns it as a bitmap. This is useful for generating a thumbnail
+     * for an input data source. Call this method if one does not
+     * care about where the frame is located; otherwise, please call
+     * {@link getFrameAtTime(long)} or {@link getFrameAtTime(long, int)}
+     *
+     * @return A Bitmap containing a representative video frame, which
+     *         can be null, if such a frame cannot be retrieved.
+     *
+     * @see #getFrameAtTime(long)
+     * @see #getFrameAtTime(long, int)
+     */
+    public Bitmap getFrameAtTime() {
+        return getFrameAtTime(-1, OPTION_CLOSEST_SYNC);
+    }
+
+    /**
+     * FIXME
+     * To be removed and replaced by getFrameAt().
+     */
+    public Bitmap captureFrame() {
+        return _getFrameAtTime(-1, OPTION_CLOSEST_SYNC);
+    }
+
+    private native Bitmap _getFrameAtTime(long timeUs, int option);
+
     
     /**
      * Call this method after setDataSource(). This method finds the optional
@@ -228,6 +303,20 @@ public class MediaMetadataRetriever
 
     public static final int MODE_GET_METADATA_ONLY  = 0x01;
     public static final int MODE_CAPTURE_FRAME_ONLY = 0x02;
+
+    /**
+     * Option used in method {@link getFrameAtTime(long, int)} to get a
+     * frame at a specified location.
+     *
+     * @see #getFrameAtTime(long, int)
+     */
+    /* Do not change these values without updating their counterparts
+     * in include/media/stagefright/MediaSource.h!
+     */
+    public static final int OPTION_PREVIOUS_SYNC    = 0x00;
+    public static final int OPTION_NEXT_SYNC        = 0x01;
+    public static final int OPTION_CLOSEST_SYNC     = 0x02;
+    public static final int OPTION_CLOSEST          = 0x03;
 
     /*
      * Do not change these values without updating their counterparts

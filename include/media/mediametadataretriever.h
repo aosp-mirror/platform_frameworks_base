@@ -81,8 +81,7 @@ public:
     status_t setDataSource(const char* dataSourceUrl);
     status_t setDataSource(int fd, int64_t offset, int64_t length);
     status_t setMode(int mode);
-    status_t getMode(int* mode);
-    sp<IMemory> captureFrame();
+    sp<IMemory> getFrameAtTime(int64_t timeUs, int option);
     sp<IMemory> extractAlbumArt();
     const char* extractMetadata(int keyCode);
 
