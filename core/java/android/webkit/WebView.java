@@ -2444,6 +2444,7 @@ public class WebView extends AbsoluteLayout
             mWebViewCore.sendMessage(EventHub.SET_SCROLL_OFFSET,
                     nativeMoveGeneration(), mUserScroll ? 1 : 0, pos);
             mLastVisibleRectSent = rect;
+            mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
         }
         Rect globalRect = new Rect();
         if (getGlobalVisibleRect(globalRect)
@@ -7574,6 +7575,7 @@ public class WebView extends AbsoluteLayout
         if (mNativeClass == 0) {
             return false;
         }
+        mInitialHitTestResult = null;
         mLastCursorTime = time;
         mLastCursorBounds = nativeGetCursorRingBounds();
         boolean keyHandled
