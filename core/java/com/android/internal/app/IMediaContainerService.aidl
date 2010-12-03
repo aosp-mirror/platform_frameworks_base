@@ -29,5 +29,6 @@ interface IMediaContainerService {
                 in ParcelFileDescriptor outStream);
     PackageInfoLite getMinimalPackageInfo(in Uri fileUri, int flags);
     boolean checkFreeStorage(boolean external, in Uri fileUri);
-    ObbInfo getObbInfo(String filename);
+    ObbInfo getObbInfo(in String filename);
+    long calculateDirectorySize(in String directory);
 }

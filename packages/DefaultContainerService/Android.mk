@@ -7,6 +7,10 @@ LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_PACKAGE_NAME := DefaultContainerService
 
+LOCAL_JNI_SHARED_LIBRARIES := libdefcontainer_jni
+
 LOCAL_CERTIFICATE := platform
 
 include $(BUILD_PACKAGE)
+
+include $(call all-makefiles-under,$(LOCAL_PATH))

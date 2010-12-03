@@ -163,6 +163,11 @@ public class DefaultContainerService extends IntentService {
                 return null;
             }
         }
+
+        @Override
+        public long calculateDirectorySize(String directory) throws RemoteException {
+            return MeasurementUtils.measureDirectory(directory);
+        }
     };
 
     public DefaultContainerService() {
