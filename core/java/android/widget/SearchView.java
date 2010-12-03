@@ -44,6 +44,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -76,6 +77,7 @@ public class SearchView extends LinearLayout {
     private OnCloseListener mOnCloseListener;
     private OnFocusChangeListener mOnQueryTextFocusChangeListener;
     private OnSuggestionSelectionListener mOnSuggestionListener;
+    private OnClickListener mOnSearchClickListener;
 
     private boolean mIconifiedByDefault;
     private boolean mIconified;
@@ -298,6 +300,27 @@ public class SearchView extends LinearLayout {
      */
     public void setOnSuggestionSelectionListener(OnSuggestionSelectionListener listener) {
         mOnSuggestionListener = listener;
+    }
+
+    /**
+     * Sets a listener to inform when the search button is pressed. This is only
+     * relevant when the text field is not visible by default. Calling #setIconified(false)
+     * can also cause this listener to be informed.
+     *
+     * @param listener the listener to inform when the search button is clicked or
+     * the text field is programmatically de-iconified.
+     */
+    public void setOnSearchClickListener(OnClickListener listener) {
+        mOnSearchClickListener = listener;
+    }
+
+    /**
+     * Returns the query string currently in the text field.
+     *
+     * @return the query string
+     */
+    public CharSequence getQuery() {
+        return mQueryTextView.getText();
     }
 
     /**
@@ -831,6 +854,9 @@ public class SearchView extends LinearLayout {
         mQueryTextView.requestFocus();
         updateViewsVisibility(false);
         setImeVisibility(true);
+        if (mOnSearchClickListener != null) {
+            mOnSearchClickListener.onClick(this);
+        }
     }
 
     private void onVoiceClicked() {
