@@ -42,6 +42,9 @@ Patch::Patch(const uint32_t xCount, const uint32_t yCount, const int8_t emptyQua
     mXDivs = new int32_t[mXCount];
     mYDivs = new int32_t[mYCount];
 
+    PATCH_LOGD("    patch: xCount = %d, yCount = %d, emptyQuads = %d, vertices = %d",
+            xCount, yCount, emptyQuads, verticesCount);
+
     glGenBuffers(1, &meshBuffer);
 }
 
@@ -208,7 +211,15 @@ void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, fl
 
 void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, float y2,
             float u1, float v1, float u2, float v2, uint32_t& quadCount) {
-    if (((mColorKey >> quadCount++) & 0x1) == 1) {
+    uint32_t oldQuadCount = quadCount;
+
+    // Degenerate quads are an artifact of our implementation and should not
+    // be taken into account when checking for transparent quads
+    if (x2 - x1 > 0.999f && y2 - y1 > 0.999f) {
+        quadCount++;
+    }
+
+    if (((mColorKey >> oldQuadCount) & 0x1) == 1) {
         return;
     }
 
