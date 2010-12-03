@@ -1436,8 +1436,6 @@
   <public type="layout" name="simple_list_item_activated_2" />
 
   <public type="style" name="Theme.WithActionBar" />
-  <public type="style" name="Widget.Spinner.DropDown" />
-  <public type="style" name="Widget.ActionButton" />
   <public type="style" name="Theme.Dialog.NoFrame" />
   <public type="style" name="Theme.NoTitleBar.OverlayActionModes" />
 
@@ -1445,32 +1443,31 @@
   <public type="style" name="Theme.Light.Holo" />
   <public type="style" name="Theme.Holo.NoActionBar" />
   <public type="style" name="Theme.Holo.NoActionBar.Fullscreen" />
-  <public type="style" name="Theme.Light.Holo.NoActionBar" />
-  <public type="style" name="Theme.Light.Holo.NoActionBar.Fullscreen" />
   <public type="style" name="Theme.Holo.Light" />
   <public type="style" name="Theme.Holo.Dialog" />
+  <public type="style" name="Theme.Holo.Dialog.NoActionBar" />
   <public type="style" name="Theme.Holo.Light.Dialog" />
-  <public type="style" name="Theme.Holo.Extended" />
-  <public type="style" name="Theme.Holo.Light.Extended" />
+  <public type="style" name="Theme.Holo.Light.Dialog.NoActionBar" />
   <public type="style" name="Theme.Holo.Dialog.Alert" />
   <public type="style" name="Theme.Holo.Light.Dialog.Alert" />
+  <public type="style" name="Theme.Holo.DialogWhenLarge" />
+  <public type="style" name="Theme.Holo.DialogWhenLarge.NoActionBar" />
+  <public type="style" name="Theme.Holo.Light.DialogWhenLarge" />
+  <public type="style" name="Theme.Holo.Light.DialogWhenLarge.NoActionBar" />
+  <public type="style" name="Theme.Holo.Wallpaper" />
+  <public type="style" name="Theme.Holo.Wallpaper.NoTitleBar" />
 
+  <public type="style" name="TextAppearance.Widget.PopupMenu.Large" />
+  <public type="style" name="TextAppearance.Widget.PopupMenu.Small" />
+
+  <public type="style" name="Widget.ActionBar" />
+  <public type="style" name="Widget.Spinner.DropDown" />
+  <public type="style" name="Widget.ActionButton" />
   <public type="style" name="Widget.ListPopupWindow" />
   <public type="style" name="Widget.PopupMenu" />
   <public type="style" name="Widget.ActionButton.Overflow" />
   <public type="style" name="Widget.ActionButton.CloseMode" />
-  <public type="style" name="TextAppearance.Widget.PopupMenu.Large" />
-  <public type="style" name="TextAppearance.Widget.PopupMenu.Small" />
   <public type="style" name="Widget.FragmentBreadCrumbs" />
-
-  <public type="style" name="Theme.Holo.DialogWhenLarge" />
-  <public type="style" name="Theme.Holo.Light.DialogWhenLarge" />
-  
-  <public type="style" name="Theme.Holo.Wallpaper" />
-  <public type="style" name="Theme.Holo.Wallpaper.NoTitleBar" />
-
-  <public type="style" name="Widget.ActionBar" />
-
   <public type="style" name="Widget.Holo" />
   <public type="style" name="Widget.Holo.Button" />
   <public type="style" name="Widget.Holo.Button.Small" />

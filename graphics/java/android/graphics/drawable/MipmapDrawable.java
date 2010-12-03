@@ -27,6 +27,9 @@ import android.util.AttributeSet;
 import java.io.IOException;
 
 /**
+ * @hide -- we are probably moving to do MipMaps in another way (more integrated
+ * with the resource system).
+ *
  * A resource that manages a number of alternate Drawables, and which actually draws the one which
  * size matches the most closely the drawing bounds. Providing several pre-scaled version of the
  * drawable helps minimizing the aliasing artifacts that can be introduced by the scaling.

@@ -17,8 +17,16 @@
 */
 -->
 <resources>
-    <style name="Theme.Holo.DialogWhenLarge" parent="@android:style/Theme.Holo.Dialog">
+    <style name="Theme.Holo.DialogWhenLarge"
+            parent="@android:style/Theme.Holo.Dialog">
     </style>
-    <style name="Theme.Holo.Light.DialogWhenLarge" parent="@android:style/Theme.Holo.Light.Dialog">
+    <style name="Theme.Holo.DialogWhenLarge.NoActionBar"
+            parent="@android:style/Theme.Holo.Dialog.NoActionBar">
+    </style>
+    <style name="Theme.Holo.Light.DialogWhenLarge"
+            parent="@android:style/Theme.Holo.Light.Dialog">
+    </style>
+    <style name="Theme.Holo.Light.DialogWhenLarge.NoActionBar"
+            parent="@android:style/Theme.Holo.Light.Dialog.NoActionBar">
     </style>
 </resources>

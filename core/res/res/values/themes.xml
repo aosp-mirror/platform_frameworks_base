@@ -1177,15 +1177,15 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
-    <!-- Variant of the holographic light theme with no action bar -->
-    <style name="Theme.Light.Holo.NoActionBar">
+    <!-- Variant of the holographic (light) theme with no action bar. -->
+    <style name="Theme.Holo.Light.NoActionBar">
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <!-- Variant of the holographic light theme that has no title bar and fills
+    <!-- Variant of the holographic (light) theme that has no title bar and fills
          the entire screen -->
-    <style name="Theme.Light.Holo.NoActionBar.Fullscreen">
+    <style name="Theme.Holo.Light.NoActionBar.Fullscreen">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
@@ -1218,6 +1218,12 @@
         <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Inverse</item>
     </style>
 
+    <!-- Variation of Theme.Holo.Dialog that does not include a title bar. -->
+    <style name="Theme.Holo.Dialog.NoActionBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
     <!-- Variation of Theme.Holo.Dialog that does not include a frame (or background).
          The view hierarchy of the dialog is responsible for drawing all of
          its pixels. -->
@@ -1244,8 +1250,14 @@
 
     <!-- Theme for a window that will be displayed either full-screen on
          smaller screens (small, normal) or as a dialog on larger screens
-         (large, xlarge) -->
+         (large, xlarge). -->
     <style name="Theme.Holo.DialogWhenLarge" parent="@android:style/Theme.Holo">
+    </style>
+
+    <!-- Theme for a window without a title bar that will be displayed either
+         full-screen on smaller screens (small, normal) or as a dialog on larger screens
+         (large, xlarge). -->
+    <style name="Theme.Holo.DialogWhenLarge.NoActionBar" parent="@android:style/Theme.Holo.NoActionBar">
     </style>
     
     <!-- Light holo dialog themes -->
@@ -1275,10 +1287,23 @@
         <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Light.Inverse</item>
     </style>
 
+    <!-- Variation of Theme.Holo.Light.Dialog that does not include a title bar. -->
+    <style name="Theme.Holo.Light.Dialog.NoActionBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
     <!-- Theme for a window that will be displayed either full-screen on
          smaller screens (small, normal) or as a dialog on larger screens
-         (large, xlarge) -->
+         (large, xlarge). -->
     <style name="Theme.Holo.Light.DialogWhenLarge" parent="@android:style/Theme.Holo.Light">
+    </style>
+
+    <!-- Theme for a window without an action bar that will be displayed either full-screen
+         on smaller screens (small, normal) or as a dialog on larger screens
+         (large, xlarge). -->
+    <style name="Theme.Holo.Light.DialogWhenLarge.NoActionBar"
+            parent="@android:style/Theme.Holo.Light.NoActionBar">
     </style>
 
     <!-- Holo light theme for alert dialog windows, which is used by the

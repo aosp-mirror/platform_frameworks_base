@@ -770,8 +770,10 @@ public abstract class Drawable {
             drawable = new StateListDrawable();
         } else if (name.equals("level-list")) {
             drawable = new LevelListDrawable();
+        /* Probably not doing this.
         } else if (name.equals("mipmap")) {
             drawable = new MipmapDrawable();
+        */
         } else if (name.equals("layer-list")) {
             drawable = new LayerDrawable();
         } else if (name.equals("transition")) {
