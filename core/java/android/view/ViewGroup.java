@@ -2349,9 +2349,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     child.draw(canvas);
                 }
             } else {
+                child.mPrivateFlags &= ~DIRTY_MASK;
                 ((HardwareCanvas) canvas).drawDisplayList(displayList);
             }
         } else if (cache != null) {
+            child.mPrivateFlags &= ~DIRTY_MASK;
             final Paint cachePaint = mCachePaint;
             if (alpha < 1.0f) {
                 cachePaint.setAlpha((int) (alpha * 255));
@@ -2583,6 +2585,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // addViewInner() will call child.requestLayout() when setting the new LayoutParams
         // therefore, we call requestLayout() on ourselves before, so that the child's request
         // will be blocked at our level
+        child.mPrivateFlags &= ~DIRTY_MASK;
         requestLayout();
         invalidate();
         addViewInner(child, index, params, false);
