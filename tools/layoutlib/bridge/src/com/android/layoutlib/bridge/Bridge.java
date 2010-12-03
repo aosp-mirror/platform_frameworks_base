@@ -16,6 +16,7 @@
 
 package com.android.layoutlib.bridge;
 
+import com.android.layoutlib.api.Capabilities;
 import com.android.layoutlib.api.ILayoutLog;
 import com.android.layoutlib.api.IProjectCallback;
 import com.android.layoutlib.api.IResourceValue;
@@ -40,6 +41,7 @@ import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
@@ -152,9 +154,17 @@ public final class Bridge extends LayoutBridge {
         }
     };
 
+    private EnumSet<Capabilities> mCapabilities;
+
+
     @Override
     public int getApiLevel() {
         return LayoutBridge.API_CURRENT;
+    }
+
+    @Override
+    public EnumSet<Capabilities> getCapabilities() {
+        return mCapabilities;
     }
 
     /*
@@ -164,6 +174,15 @@ public final class Bridge extends LayoutBridge {
     @Override
     public boolean init(String fontOsLocation, Map<String, Map<String, Integer>> enumValueMap) {
         sEnumValueMap = enumValueMap;
+
+        // don't use EnumSet.allOf(), because the bridge doesn't come with it's specific version
+        // of layoutlib_api. It is provided by the client which could have a more recent version
+        // with newer, unsupported capabilities.
+        mCapabilities = EnumSet.of(
+                Capabilities.RENDER,
+                Capabilities.VIEW_MANIPULATION,
+                Capabilities.ANIMATE);
+
 
         Finalizers.init();
 
