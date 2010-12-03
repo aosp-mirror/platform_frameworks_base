@@ -196,33 +196,16 @@ status_t MetadataRetrieverClient::setMode(int mode)
     return NO_ERROR;
 }
 
-status_t MetadataRetrieverClient::getMode(int* mode) const
+sp<IMemory> MetadataRetrieverClient::getFrameAtTime(int64_t timeUs, int option)
 {
-    LOGV("getMode");
-    Mutex::Autolock lock(mLock);
-
-    // TODO:
-    // This may not be necessary.
-    // If setDataSource() has not been called, return the cached value
-    // otherwise, return the value retrieved from the retriever
-    if (mRetriever == NULL) {
-        *mode = mMode;
-    } else {
-        mRetriever->getMode(mode);
-    }
-    return NO_ERROR;
-}
-
-sp<IMemory> MetadataRetrieverClient::captureFrame()
-{
-    LOGV("captureFrame");
+    LOGV("getFrameAtTime: time(%lld us) option(%d)", timeUs, option);
     Mutex::Autolock lock(mLock);
     mThumbnail.clear();
     if (mRetriever == NULL) {
         LOGE("retriever is not initialized");
         return NULL;
     }
-    VideoFrame *frame = mRetriever->captureFrame();
+    VideoFrame *frame = mRetriever->getFrameAtTime(timeUs, option);
     if (frame == NULL) {
         LOGE("failed to capture a video frame");
         return NULL;
