@@ -1818,6 +1818,7 @@ public class Paint {
         nativeGetCharArrayBounds(mNativePaint, text, index, count, bounds);
     }
     
+    @Override
     protected void finalize() throws Throwable {
         finalizer(mNativePaint);
     }
