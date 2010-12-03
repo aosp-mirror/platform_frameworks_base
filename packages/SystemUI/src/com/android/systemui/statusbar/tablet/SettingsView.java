@@ -31,13 +31,18 @@ import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.AirplaneModeController;
 import com.android.systemui.statusbar.policy.AutoRotateController;
+import com.android.systemui.statusbar.policy.BrightnessController;
 import com.android.systemui.statusbar.policy.DoNotDisturbController;
+import com.android.systemui.statusbar.policy.ToggleSlider;
+import com.android.systemui.statusbar.policy.VolumeController;
 
 public class SettingsView extends LinearLayout implements View.OnClickListener {
     static final String TAG = "SettingsView";
 
     AirplaneModeController mAirplane;
     AutoRotateController mRotate;
+    VolumeController mVolume;
+    BrightnessController mBrightness;
     DoNotDisturbController mDoNotDisturb;
 
     public SettingsView(Context context, AttributeSet attrs) {
@@ -59,6 +64,10 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
         findViewById(R.id.network).setOnClickListener(this);
         mRotate = new AutoRotateController(context,
                 (CompoundButton)findViewById(R.id.rotate_checkbox));
+        mVolume = new VolumeController(context,
+                (ToggleSlider)findViewById(R.id.volume));
+        mBrightness = new BrightnessController(context,
+                (ToggleSlider)findViewById(R.id.brightness));
         mDoNotDisturb = new DoNotDisturbController(context,
                 (CompoundButton)findViewById(R.id.do_not_disturb_checkbox));
         findViewById(R.id.settings).setOnClickListener(this);

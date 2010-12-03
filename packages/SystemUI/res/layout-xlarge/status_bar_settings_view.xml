@@ -104,6 +104,12 @@
                 style="@style/StatusBarPanelSettingsIcon"
                 android:src="@drawable/ic_sysbar_brightness"
                 />
+        <com.android.systemui.statusbar.policy.ToggleSlider
+                android:id="@+id/brightness"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                />
     </LinearLayout>
     <View style="@style/StatusBarPanelSettingsPanelSeparator" />
 
@@ -113,6 +119,12 @@
                 android:id="@+id/volume_icon"
                 style="@style/StatusBarPanelSettingsIcon"
                 android:src="@drawable/ic_sysbar_sound_on"
+                />
+        <com.android.systemui.statusbar.policy.ToggleSlider
+                android:id="@+id/volume"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 />
     </LinearLayout>
     <View style="@style/StatusBarPanelSettingsPanelSeparator" />
