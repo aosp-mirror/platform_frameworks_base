@@ -22,7 +22,6 @@ import com.android.layoutlib.api.LayoutScene.IAnimationListener;
 import com.android.layoutlib.api.SceneResult.SceneStatus;
 import com.android.layoutlib.bridge.Bridge;
 
-import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.os.Handler;
 import android.os.Handler_Delegate;
@@ -32,7 +31,19 @@ import android.os.Handler_Delegate.IHandlerCallback;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class AnimationThread extends Thread {
+/**
+ * Abstract animation thread.
+ * <p/>
+ * This does not actually start an animation, instead it fakes a looper that will play whatever
+ * animation is sending messages to its own {@link Handler}.
+ * <p/>
+ * Classes should implement {@link #preAnimation()} and {@link #postAnimation()}.
+ * <p/>
+ * If {@link #preAnimation()} does not start an animation something then the thread doesn't do
+ * anything.
+ *
+ */
+public abstract class AnimationThread extends Thread {
 
     private static class MessageBundle {
         final Handler mTarget;
@@ -47,16 +58,18 @@ public class AnimationThread extends Thread {
     }
 
     private final LayoutSceneImpl mScene;
-    private final Animator mAnimator;
 
     Queue<MessageBundle> mQueue = new LinkedList<MessageBundle>();
     private final IAnimationListener mListener;
 
-    public AnimationThread(LayoutSceneImpl scene, Animator animator, IAnimationListener listener) {
+    public AnimationThread(LayoutSceneImpl scene, String threadName, IAnimationListener listener) {
+        super(threadName);
         mScene = scene;
-        mAnimator = animator;
         mListener = listener;
     }
+
+    public abstract SceneResult preAnimation();
+    public abstract void postAnimation();
 
     @Override
     public void run() {
@@ -73,13 +86,20 @@ public class AnimationThread extends Thread {
                 }
             });
 
-            // start the animation. This will send a message to the handler right away, so
-            // mQueue is filled when this method returns.
-            mAnimator.start();
+            // call out to the pre-animation work, which should start an animation or more.
+            SceneResult result = preAnimation();
+            if (result.isSuccess() == false) {
+                mListener.done(result);
+            }
 
             // loop the animation
             LayoutScene scene = mScene.getScene();
             do {
+                // check early.
+                if (mListener.isCanceled()) {
+                    break;
+                }
+
                 // get the next message.
                 MessageBundle bundle = mQueue.poll();
                 if (bundle == null) {
@@ -97,8 +117,13 @@ public class AnimationThread extends Thread {
                     }
                 }
 
+                // check after sleeping.
+                if (mListener.isCanceled()) {
+                    break;
+                }
+
                 // ready to do the work, acquire the scene.
-                SceneResult result = mScene.acquire(250);
+                result = mScene.acquire(250);
                 if (result.isSuccess() == false) {
                     mListener.done(result);
                     return;
@@ -107,6 +132,11 @@ public class AnimationThread extends Thread {
                 // process the bundle. If the animation is not finished, this will enqueue
                 // the next message, so mQueue will have another one.
                 try {
+                    // check after acquiring in case it took a while.
+                    if (mListener.isCanceled()) {
+                        break;
+                    }
+
                     bundle.mTarget.handleMessage(bundle.mMessage);
                     if (mScene.render().isSuccess()) {
                         mListener.onNewFrame(scene);
@@ -114,10 +144,11 @@ public class AnimationThread extends Thread {
                 } finally {
                     mScene.release();
                 }
-            } while (mQueue.size() > 0);
+            } while (mListener.isCanceled() == false && mQueue.size() > 0);
 
             mListener.done(SceneStatus.SUCCESS.getResult());
         } finally {
+            postAnimation();
             Handler_Delegate.setCallback(null);
             Bridge.cleanupThread();
         }
