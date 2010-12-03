@@ -979,6 +979,7 @@ public class GridView extends AbsListView {
         determineColumns(childWidth);
 
         int childHeight = 0;
+        int childState = 0;
 
         mItemCount = mAdapter == null ? 0 : mAdapter.getCount();
         final int count = mItemCount;
@@ -1001,6 +1002,7 @@ public class GridView extends AbsListView {
             child.measure(childWidthSpec, childHeightSpec);
 
             childHeight = child.getMeasuredHeight();
+            childState = combineMeasuredStates(childState, child.getMeasuredState());
 
             if (mRecycler.shouldRecycleViewType(p.viewType)) {
                 mRecycler.addScrapView(child, -1);
@@ -1027,6 +1029,15 @@ public class GridView extends AbsListView {
                 }
             }
             heightSize = ourSize;
+        }
+
+        if (widthMode == MeasureSpec.AT_MOST && mRequestedNumColumns != AUTO_FIT) {
+            int ourSize = (mRequestedNumColumns*mColumnWidth)
+                    + ((mRequestedNumColumns-1)*mHorizontalSpacing)
+                    + mListPadding.left + mListPadding.right;
+            if (ourSize > widthSize) {
+                widthSize |= MEASURED_STATE_TOO_SMALL;
+            }
         }
 
         setMeasuredDimension(widthSize, heightSize);

@@ -223,8 +223,8 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
         preferredHeight = Math.max(preferredHeight, getSuggestedMinimumHeight());
         preferredWidth = Math.max(preferredWidth, getSuggestedMinimumWidth());
 
-        heightSize = resolveSize(preferredHeight, heightMeasureSpec);
-        widthSize = resolveSize(preferredWidth, widthMeasureSpec);
+        heightSize = resolveSizeAndState(preferredHeight, heightMeasureSpec, 0);
+        widthSize = resolveSizeAndState(preferredWidth, widthMeasureSpec, 0);
 
         setMeasuredDimension(widthSize, heightSize);
         mHeightMeasureSpec = heightMeasureSpec;

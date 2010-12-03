@@ -648,8 +648,8 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
     private void measureChildren() {
         final int count = getChildCount();
-        final int childWidth = mMeasuredWidth - mPaddingLeft - mPaddingRight;
-        final int childHeight = mMeasuredHeight - mPaddingTop - mPaddingBottom;
+        final int childWidth = getMeasuredWidth() - mPaddingLeft - mPaddingRight;
+        final int childHeight = getMeasuredHeight() - mPaddingTop - mPaddingBottom;
 
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
@@ -674,16 +674,28 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
             heightSpecSize = haveChildRefSize ? mReferenceChildHeight + mPaddingTop +
                     mPaddingBottom : 0;
         } else if (heightSpecMode == MeasureSpec.AT_MOST) {
-            heightSpecSize = haveChildRefSize ? Math.min(mReferenceChildHeight + mPaddingTop +
-                    mPaddingBottom, heightSpecSize) : 0;
+            if (haveChildRefSize) {
+                int height = mReferenceChildHeight + mPaddingTop + mPaddingBottom;
+                if (height > heightSpecSize) {
+                    heightSpecSize |= MEASURED_STATE_TOO_SMALL;
+                } else {
+                    heightSpecSize = height;
+                }
+            }
         }
 
         if (widthSpecMode == MeasureSpec.UNSPECIFIED) {
             widthSpecSize = haveChildRefSize ? mReferenceChildWidth + mPaddingLeft +
                     mPaddingRight : 0;
         } else if (heightSpecMode == MeasureSpec.AT_MOST) {
-            widthSpecSize = haveChildRefSize ? Math.min(mReferenceChildWidth + mPaddingLeft +
-                    mPaddingRight, widthSpecSize) : 0;
+            if (haveChildRefSize) {
+                int width = mReferenceChildWidth + mPaddingLeft + mPaddingRight;
+                if (width > widthSpecSize) {
+                    widthSpecSize |= MEASURED_STATE_TOO_SMALL;
+                } else {
+                    widthSpecSize = width;
+                }
+            }
         }
 
         setMeasuredDimension(widthSpecSize, heightSpecSize);

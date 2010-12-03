@@ -986,6 +986,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public static final int FOCUS_DOWN = 0x00000082;
 
     /**
+     * Bits of {@link #getMeasuredWidthAndState()} and
+     * {@link #getMeasuredWidthAndState()} that provide the actual measured size.
+     */
+    public static final int MEASURED_SIZE_MASK = 0x00ffffff;
+
+    /**
+     * Bits of {@link #getMeasuredWidthAndState()} and
+     * {@link #getMeasuredWidthAndState()} that provide the additional state bits.
+     */
+    public static final int MEASURED_STATE_MASK = 0xff000000;
+
+    /**
+     * Bit shift of {@link #MEASURED_STATE_MASK} to get to the height bits
+     * for functions that combine both width and height into a single int,
+     * such as {@link #getMeasuredState()} and the childState argument of
+     * {@link #resolveSizeAndState(int, int, int)}.
+     */
+    public static final int MEASURED_HEIGHT_STATE_SHIFT = 16;
+
+    /**
+     * Bit of {@link #getMeasuredWidthAndState()} and
+     * {@link #getMeasuredWidthAndState()} that indicates the measured size
+     * is smaller that the space the view would like to have.
+     */
+    public static final int MEASURED_STATE_TOO_SMALL = 0x01000000;
+
+    /**
      * Base View state sets
      */
     // Singles
@@ -1463,14 +1490,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "measurement")
-    protected int mMeasuredWidth;
+    /*package*/ int mMeasuredWidth;
 
     /**
      * Height as measured during measure pass.
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "measurement")
-    protected int mMeasuredHeight;
+    /*package*/ int mMeasuredHeight;
 
     /**
      * The view's identifier.
@@ -5212,25 +5239,64 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * The width of this view as measured in the most recent call to measure().
+     * Like {@link #getMeasuredWidthAndState()}, but only returns the
+     * raw width component (that is the result is masked by
+     * {@link #MEASURED_SIZE_MASK}).
+     *
+     * @return The raw measured width of this view.
+     */
+    public final int getMeasuredWidth() {
+        return mMeasuredWidth & MEASURED_SIZE_MASK;
+    }
+
+    /**
+     * Return the full width measurement information for this view as computed
+     * by the most recent call to {@link #measure}.  This result is a bit mask
+     * as defined by {@link #MEASURED_SIZE_MASK} and {@link #MEASURED_STATE_TOO_SMALL}.
      * This should be used during measurement and layout calculations only. Use
      * {@link #getWidth()} to see how wide a view is after layout.
      *
-     * @return The measured width of this view.
+     * @return The measured width of this view as a bit mask.
      */
-    public final int getMeasuredWidth() {
+    public final int getMeasuredWidthAndState() {
         return mMeasuredWidth;
     }
 
     /**
-     * The height of this view as measured in the most recent call to measure().
-     * This should be used during measurement and layout calculations only. Use
-     * {@link #getHeight()} to see how tall a view is after layout.
+     * Like {@link #getMeasuredHeightAndState()}, but only returns the
+     * raw width component (that is the result is masked by
+     * {@link #MEASURED_SIZE_MASK}).
      *
-     * @return The measured height of this view.
+     * @return The raw measured height of this view.
      */
     public final int getMeasuredHeight() {
+        return mMeasuredHeight & MEASURED_SIZE_MASK;
+    }
+
+    /**
+     * Return the full height measurement information for this view as computed
+     * by the most recent call to {@link #measure}.  This result is a bit mask
+     * as defined by {@link #MEASURED_SIZE_MASK} and {@link #MEASURED_STATE_TOO_SMALL}.
+     * This should be used during measurement and layout calculations only. Use
+     * {@link #getHeight()} to see how wide a view is after layout.
+     *
+     * @return The measured width of this view as a bit mask.
+     */
+    public final int getMeasuredHeightAndState() {
         return mMeasuredHeight;
+    }
+
+    /**
+     * Return only the state bits of {@link #getMeasuredWidthAndState()}
+     * and {@link #getMeasuredHeightAndState()}, combined into one integer.
+     * The width component is in the regular bits {@link #MEASURED_STATE_MASK}
+     * and the height component is at the shifted bits
+     * {@link #MEASURED_HEIGHT_STATE_SHIFT}>>{@link #MEASURED_STATE_MASK}.
+     */
+    public final int getMeasuredState() {
+        return (mMeasuredWidth&MEASURED_STATE_MASK)
+                | ((mMeasuredHeight>>MEASURED_HEIGHT_STATE_SHIFT)
+                        & (MEASURED_STATE_MASK>>MEASURED_HEIGHT_STATE_SHIFT));
     }
 
     /**
@@ -9690,8 +9756,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * measured width and measured height. Failing to do so will trigger an
      * exception at measurement time.</p>
      *
-     * @param measuredWidth the measured width of this view
-     * @param measuredHeight the measured height of this view
+     * @param measuredWidth The measured width of this view.  May be a complex
+     * bit mask as defined by {@link #MEASURED_SIZE_MASK} and
+     * {@link #MEASURED_STATE_TOO_SMALL}.
+     * @param measuredHeight The measured height of this view.  May be a complex
+     * bit mask as defined by {@link #MEASURED_SIZE_MASK} and
+     * {@link #MEASURED_STATE_TOO_SMALL}.
      */
     protected final void setMeasuredDimension(int measuredWidth, int measuredHeight) {
         mMeasuredWidth = measuredWidth;
@@ -9701,14 +9771,39 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Utility to reconcile a desired size with constraints imposed by a MeasureSpec.
-     * Will take the desired size, unless a different size is imposed by the constraints.
+     * Merge two states as returned by {@link #getMeasuredState()}.
+     * @param curState The current state as returned from a view or the result
+     * of combining multiple views.
+     * @param newState The new view state to combine.
+     * @return Returns a new integer reflecting the combination of the two
+     * states.
+     */
+    public static int combineMeasuredStates(int curState, int newState) {
+        return curState | newState;
+    }
+
+    /**
+     * Version of {@link #resolveSizeAndState(int, int, int)}
+     * returning only the {@link #MEASURED_SIZE_MASK} bits of the result.
+     */
+    public static int resolveSize(int size, int measureSpec) {
+        return resolveSizeAndState(size, measureSpec, 0) & MEASURED_SIZE_MASK;
+    }
+
+    /**
+     * Utility to reconcile a desired size and state, with constraints imposed
+     * by a MeasureSpec.  Will take the desired size, unless a different size
+     * is imposed by the constraints.  The returned value is a compound integer,
+     * with the resolved size in the {@link #MEASURED_SIZE_MASK} bits and
+     * optionally the bit {@link #MEASURED_STATE_TOO_SMALL} set if the resulting
+     * size is smaller than the size the view wants to be.
      *
      * @param size How big the view wants to be
      * @param measureSpec Constraints imposed by the parent
-     * @return The size this view should be.
+     * @return Size information bit mask as defined by
+     * {@link #MEASURED_SIZE_MASK} and {@link #MEASURED_STATE_TOO_SMALL}.
      */
-    public static int resolveSize(int size, int measureSpec) {
+    public static int resolveSizeAndState(int size, int measureSpec, int childMeasuredState) {
         int result = size;
         int specMode = MeasureSpec.getMode(measureSpec);
         int specSize =  MeasureSpec.getSize(measureSpec);
@@ -9717,13 +9812,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             result = size;
             break;
         case MeasureSpec.AT_MOST:
-            result = Math.min(size, specSize);
+            if (specSize < size) {
+                result = specSize | MEASURED_STATE_TOO_SMALL;
+            } else {
+                result = size;
+            }
             break;
         case MeasureSpec.EXACTLY:
             result = specSize;
             break;
         }
-        return result;
+        return result | (childMeasuredState&MEASURED_STATE_MASK);
     }
 
     /**

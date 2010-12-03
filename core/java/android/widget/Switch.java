@@ -359,10 +359,9 @@ public class Switch extends CompoundButton {
         mSwitchHeight = switchHeight;
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        final int measuredWidth = getMeasuredWidth();
         final int measuredHeight = getMeasuredHeight();
         if (measuredHeight < switchHeight) {
-            setMeasuredDimension(measuredWidth, switchHeight);
+            setMeasuredDimension(getMeasuredWidthAndState(), switchHeight);
         }
     }
 

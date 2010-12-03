@@ -281,7 +281,7 @@ public class StackView extends AdapterViewAnimator {
     }
 
     private void transformViewAtIndex(int index, View view) {
-        float maxPerpectiveShift = mMeasuredHeight * PERSPECTIVE_SHIFT_FACTOR;
+        float maxPerpectiveShift = getMeasuredHeight() * PERSPECTIVE_SHIFT_FACTOR;
 
         index = mMaxNumActiveViews - index - 1;
         if (index == mMaxNumActiveViews - 1) index--;
@@ -297,7 +297,7 @@ public class StackView extends AdapterViewAnimator {
         int stackDirection = (mStackMode == ITEMS_SLIDE_UP) ? 1 : -1;
         float perspectiveTranslation = -stackDirection * r * maxPerpectiveShift;
         float scaleShiftCorrection = stackDirection * (1 - scale) *
-                (mMeasuredHeight * (1 - PERSPECTIVE_SHIFT_FACTOR) / 2.0f);
+                (getMeasuredHeight() * (1 - PERSPECTIVE_SHIFT_FACTOR) / 2.0f);
         float transY = perspectiveTranslation + scaleShiftCorrection;
 
         PropertyValuesHolder translationY = PropertyValuesHolder.ofFloat("translationY", transY);
@@ -897,8 +897,8 @@ public class StackView extends AdapterViewAnimator {
 
     private void measureChildren() {
         final int count = getChildCount();
-        final int childWidth = mMeasuredWidth - mPaddingLeft - mPaddingRight;
-        final int childHeight = Math.round(mMeasuredHeight*(1-PERSPECTIVE_SHIFT_FACTOR))
+        final int childWidth = getMeasuredWidth() - mPaddingLeft - mPaddingRight;
+        final int childHeight = Math.round(getMeasuredHeight()*(1-PERSPECTIVE_SHIFT_FACTOR))
                 - mPaddingTop - mPaddingBottom;
 
         for (int i = 0; i < count; i++) {
@@ -925,17 +925,33 @@ public class StackView extends AdapterViewAnimator {
                     Math.round(mReferenceChildHeight * (1 + factor)) +
                     mPaddingTop + mPaddingBottom : 0;
         } else if (heightSpecMode == MeasureSpec.AT_MOST) {
-            heightSpecSize = haveChildRefSize ? Math.min(
-                    Math.round(mReferenceChildHeight * (1 + factor)) + mPaddingTop +
-                    mPaddingBottom, heightSpecSize) : 0;
+            if (haveChildRefSize) {
+                int height = Math.round(mReferenceChildHeight * (1 + factor))
+                        + mPaddingTop + mPaddingBottom;
+                if (height <= heightSpecSize) {
+                    heightSpecSize = height;
+                } else {
+                    heightSpecSize |= MEASURED_STATE_TOO_SMALL;
+                }
+            } else {
+                heightSpecSize = 0;
+            }
         }
 
         if (widthSpecMode == MeasureSpec.UNSPECIFIED) {
             widthSpecSize = haveChildRefSize ? mReferenceChildWidth + mPaddingLeft +
                     mPaddingRight : 0;
         } else if (heightSpecMode == MeasureSpec.AT_MOST) {
-            widthSpecSize = haveChildRefSize ? Math.min(mReferenceChildWidth + mPaddingLeft +
-                    mPaddingRight, widthSpecSize) : 0;
+            if (haveChildRefSize) {
+                int width = mReferenceChildWidth + mPaddingLeft + mPaddingRight;
+                if (width <= widthSpecSize) {
+                    widthSpecSize = width;
+                } else {
+                    widthSpecSize |= MEASURED_STATE_TOO_SMALL;
+                }
+            } else {
+                widthSpecSize = 0;
+            }
         }
 
         setMeasuredDimension(widthSpecSize, heightSpecSize);

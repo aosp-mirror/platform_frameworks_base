@@ -696,7 +696,7 @@ public class ImageView extends View {
                                             / desiredAspect) + ptop + pbottom;
                         if (newHeight <= heightSize) {
                             heightSize = newHeight;
-                        } 
+                        }
                     }
                 }
             }
@@ -711,8 +711,8 @@ public class ImageView extends View {
             w = Math.max(w, getSuggestedMinimumWidth());
             h = Math.max(h, getSuggestedMinimumHeight());
 
-            widthSize = resolveSize(w, widthMeasureSpec);
-            heightSize = resolveSize(h, heightMeasureSpec);
+            widthSize = resolveSizeAndState(w, widthMeasureSpec, 0);
+            heightSize = resolveSizeAndState(h, heightMeasureSpec, 0);
         }
 
         setMeasuredDimension(widthSize, heightSize);
