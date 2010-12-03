@@ -86,7 +86,7 @@ public class WifiStateTracker implements NetworkStateTracker {
         mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        filter.addAction(WifiManager.CONFIG_CHANGED_ACTION);
+        filter.addAction(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION);
 
         mWifiStateReceiver = new WifiStateReceiver();
         mContext.registerReceiver(mWifiStateReceiver, filter);
@@ -254,7 +254,7 @@ public class WifiStateTracker implements NetworkStateTracker {
                 }
                 Message msg = mCsHandler.obtainMessage(EVENT_STATE_CHANGED, mNetworkInfo);
                 msg.sendToTarget();
-            } else if (intent.getAction().equals(WifiManager.CONFIG_CHANGED_ACTION)) {
+            } else if (intent.getAction().equals(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION)) {
                 mLinkProperties = (LinkProperties) intent.getParcelableExtra(
                         WifiManager.EXTRA_LINK_PROPERTIES);
                 Message msg = mCsHandler.obtainMessage(EVENT_CONFIGURATION_CHANGED, mNetworkInfo);
