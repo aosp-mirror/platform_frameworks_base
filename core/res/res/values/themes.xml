@@ -563,6 +563,21 @@
         <item name="android:windowNoTitle">true</item>
     </style>
 
+    <!-- Default holo light theme for panel windows.  This removes all extraneous
+         window decorations, so you basically have an empty rectangle in which
+         to place your content.  It makes the window floating, with a transparent
+         background, and turns off dimming behind the window. -->
+    <style name="Theme.Holo.Light.Panel">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
     <!-- Default theme for input methods, which is used by the
          {@link android.inputmethodservice.InputMethodService} class.
          this inherits from Theme.NoTitleBar, but makes the background
@@ -577,7 +592,7 @@
     </style>
 
     <!-- Theme for the search input bar. -->
-    <style name="Theme.SearchBar" parent="Theme.Panel">
+    <style name="Theme.SearchBar" parent="Theme.Holo.Light.Panel">
         <item name="windowContentOverlay">@null</item>        
     </style>
     
