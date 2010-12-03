@@ -25,11 +25,18 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.AuthAlgorithm;
+import android.net.wifi.WifiConfiguration.IpAssignment;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
-
+import android.net.wifi.WifiConfiguration.ProxySettings;
+import android.net.LinkAddress;
+import android.net.LinkProperties;
 import android.util.Log;
+
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -38,7 +45,8 @@ import java.util.List;
  * The configurations of an access point is included in tag
  * <accesspoint></accesspoint>. The supported configuration includes: ssid,
  * security, eap, phase2, identity, password, anonymousidentity, cacert, usercert,
- * in which each is included in the corresponding tags. All access points have to be
+ * in which each is included in the corresponding tags. Static IP setting is also supported.
+ * Tags that can be used include: ip, gateway, netmask, dns1, dns2. All access points have to be
  * enclosed in tags of <resources></resources>.
  *
  * The following is a sample configuration file for an access point using EAP-PEAP with MSCHAP2.
@@ -52,6 +60,9 @@ import java.util.List;
  *   <password>abcdefgh</password>
  *   </accesspoint>
  * </resources>
+ *
+ * Note:ssid and security have to be the first two tags
+ *      for static ip setting, tag "ip" should be listed before other fields: dns, gateway, netmask.
  */
 public class AccessPointParserHelper {
     private static final String KEYSTORE_SPACE = "keystore://";
@@ -93,9 +104,11 @@ public class AccessPointParserHelper {
         boolean security = false;
         boolean password = false;
         boolean ip = false;
-        boolean subnetmask = false;
         boolean gateway = false;
-        boolean dns = false;
+        boolean networkprefix = false;
+        boolean netmask = false;
+        boolean dns1 = false;
+        boolean dns2 = false;
         boolean eap = false;
         boolean phase2 = false;
         boolean identity = false;
@@ -104,6 +117,8 @@ public class AccessPointParserHelper {
         boolean usercert = false;
         WifiConfiguration config = null;
         int securityType = NONE;
+        LinkProperties mLinkProperties = null;
+        InetAddress mInetAddr = null;
 
         @Override
         public void startElement(String uri, String localName, String tagName,
@@ -138,12 +153,37 @@ public class AccessPointParserHelper {
             if (tagName.equalsIgnoreCase("usercert")) {
                 usercert = true;
             }
+            if (tagName.equalsIgnoreCase("ip")) {
+                mLinkProperties = new LinkProperties();
+                ip = true;
+            }
+            if (tagName.equalsIgnoreCase("gateway")) {
+                gateway = true;
+            }
+            if (tagName.equalsIgnoreCase("networkprefixlength")) {
+                networkprefix = true;
+            }
+            if (tagName.equalsIgnoreCase("netmask")) {
+                netmask = true;
+            }
+            if (tagName.equalsIgnoreCase("dns1")) {
+                dns1 = true;
+            }
+            if (tagName.equalsIgnoreCase("dns2")) {
+                dns2 = true;
+            }
         }
 
         @Override
         public void endElement(String uri, String localName, String tagName) throws SAXException {
-            Log.v(TAG, "endElement: " + tagName);
             if (tagName.equalsIgnoreCase("accesspoint")) {
+                if (mLinkProperties != null) {
+                    config.ipAssignment = IpAssignment.STATIC;
+                    config.linkProperties = mLinkProperties;
+                } else {
+                    config.ipAssignment = IpAssignment.DHCP;
+                }
+                config.proxySettings = ProxySettings.NONE;
                 networks.add(config);
             }
         }
@@ -152,14 +192,11 @@ public class AccessPointParserHelper {
         public void characters(char ch[], int start, int length) throws SAXException {
             if (ssid) {
                 config.SSID = new String(ch, start, length);
-                Log.v(TAG, "ssid: " + config.SSID);
                 ssid = false;
             }
             if (security) {
                 String securityStr = (new String(ch, start, length)).toUpperCase();
-                Log.v(TAG, "security: " + securityStr);
                 securityType = getSecurityType(securityStr);
-                Log.v(TAG, "securityType = " + securityType);
                 switch (securityType) {
                     case NONE:
                         config.allowedKeyManagement.set(KeyMgmt.NONE);
@@ -175,6 +212,13 @@ public class AccessPointParserHelper {
                     case EAP:
                         config.allowedKeyManagement.set(KeyMgmt.WPA_EAP);
                         config.allowedKeyManagement.set(KeyMgmt.IEEE8021X);
+                        // Initialize other fields.
+                        config.phase2.setValue("");
+                        config.ca_cert.setValue("");
+                        config.client_cert.setValue("");
+                        config.private_key.setValue("");
+                        config.identity.setValue("");
+                        config.anonymous_identity.setValue("");
                         break;
                     default:
                         throw new SAXException();
@@ -187,7 +231,6 @@ public class AccessPointParserHelper {
                 if (len == 0) {
                     throw new SAXException();
                 }
-                Log.v(TAG, "passwordStr:" + passwordStr);
                 if (securityType == WEP) {
                     if ((len == 10 || len == 26 || len == 58) &&
                             passwordStr.matches("[0-9A-Fa-f]*")) {
@@ -242,21 +285,94 @@ public class AccessPointParserHelper {
                 config.client_cert.setValue(KEYSTORE_SPACE);
                 usercert = false;
             }
+            if (ip) {
+                try {
+                    String ipAddr = new String(ch, start, length);
+                    if (!InetAddress.isNumeric(ipAddr)) {
+                        throw new SAXException();
+                    }
+                    mInetAddr = InetAddress.getByName(ipAddr);
+                } catch (UnknownHostException e) {
+                    throw new SAXException();
+                }
+                ip = false;
+            }
+            if (gateway) {
+                try {
+                    String gwAddr = new String(ch, start, length);
+                    if (!InetAddress.isNumeric(gwAddr)) {
+                        throw new SAXException();
+                    }
+                    mLinkProperties.setGateway(InetAddress.getByName(gwAddr));
+                } catch (UnknownHostException e) {
+                    throw new SAXException();
+                }
+                gateway = false;
+            }
+            if (networkprefix) {
+                try {
+                    int nwPrefixLength = Integer.parseInt(new String(ch, start, length));
+                    if ((nwPrefixLength < 0) || (nwPrefixLength > 32)) {
+                        throw new SAXException();
+                    }
+                    mLinkProperties.addLinkAddress(new LinkAddress(mInetAddr, nwPrefixLength));
+                } catch (NumberFormatException e) {
+                    throw new SAXException();
+                }
+                networkprefix = false;
+            }
+            if (netmask) {
+                try {
+                    String netMaskStr = new String(ch, start, length);
+                    if (!InetAddress.isNumeric(netMaskStr)) {
+                        throw new SAXException();
+                    }
+                    InetAddress netMaskAddr = InetAddress.getByName(netMaskStr);
+                    mLinkProperties.addLinkAddress(new LinkAddress(mInetAddr, netMaskAddr));
+                } catch (UnknownHostException e) {
+                    throw new SAXException();
+                }
+                netmask = false;
+            }
+            if (dns1) {
+                try {
+                    String dnsAddr = new String(ch, start, length);
+                    if (!InetAddress.isNumeric(dnsAddr)) {
+                        throw new SAXException();
+                    }
+                    mLinkProperties.addDns(InetAddress.getByName(dnsAddr));
+                } catch (UnknownHostException e) {
+                    throw new SAXException();
+                }
+                dns1 = false;
+            }
+            if (dns2) {
+                try {
+                    String dnsAddr = new String(ch, start, length);
+                    if (!InetAddress.isNumeric(dnsAddr)) {
+                        throw new SAXException();
+                    }
+                    mLinkProperties.addDns(InetAddress.getByName(dnsAddr));
+                } catch (UnknownHostException e) {
+                    throw new SAXException();
+                }
+                dns2 = false;
+            }
         }
     };
 
-    public AccessPointParserHelper() {
-    }
-
     /**
-     * Process the accesspoint.xml file
-     * @return List of WifiConfiguration
-     * @throws Exception when parsing the XML file
+     * Process the InputStream in
+     * @param in is the InputStream that can be used for XML parsing
+     * @throws Exception
      */
-    public List<WifiConfiguration> processAccessPoint(InputStream in) throws Exception {
+    public AccessPointParserHelper(InputStream in) throws Exception {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser saxParser = factory.newSAXParser();
         saxParser.parse(in, mHandler);
+    }
+
+    public List<WifiConfiguration> getNetworkConfigurations() throws Exception {
         return networks;
     }
 }
