@@ -26,44 +26,16 @@
     <!-- Text to display underneath the graphical signal strength meter when
          no connection is available. [CHAR LIMIT=20] -->
     <string name="status_bar_settings_signal_meter_disconnected">
-        no internet connection
-    </string>
-
-    <!-- Text to display underneath the graphical signal strength meter when
-         it is displaying information about a connected, named Wi-Fi network.
-         [CHAR LIMIT=20] -->
-    <string name="status_bar_settings_signal_meter_wifi_ssid_format">
-        <xliff:g id="ssid">%s</xliff:g>
+        No Internet connection
     </string>
 
     <!-- Text to display underneath the graphical signal strength meter when
          it is displaying Wi-Fi status and Wi-Fi is connected to a network
          whose SSID is not available.
          [CHAR LIMIT=20] -->
-    <string name="status_bar_settings_signal_meter_wifi_nossid">
-        Wi-Fi: connected
-    </string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid">Wi-Fi connected</string>
 
-    <!-- Text to display underneath the graphical signal strength meter when
-         it is displaying Wi-Fi status and Wi-Fi is in the process of
-         connecting to a network.  [CHAR LIMIT=20] -->
-    <string name="status_bar_settings_signal_meter_wifi_connecting">
-        Wi-Fi: connecting…
-    </string>
- 
-    <!-- Text to display underneath the graphical signal strength meter when
-         it is displaying mobile data (3G) status and a network connection is
-         available.
-         [CHAR LIMIT=20] -->
-    <string name="status_bar_settings_signal_meter_data_connected">
-        Mobile data: connected
-    </string>
+    <!-- Separator for PLMN and SPN in network name. -->
+    <string name="status_bar_network_name_separator" translatable="false">" – "</string>
 
-    <!-- Text to display underneath the graphical signal strength meter when
-         it is displaying mobile data (3G) status and a network connection is
-         unavailable.
-         [CHAR LIMIT=20] -->
-    <string name="status_bar_settings_signal_meter_data_connecting">
-        Mobile data: connecting…
-    </string>
 </resources>
