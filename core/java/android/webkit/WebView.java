@@ -5354,7 +5354,6 @@ public class WebView extends AbsoluteLayout
                     deltaX = 0;
                     deltaY = 0;
 
-                    startScrollingLayer(x, y);
                     startDrag();
                 }
 
@@ -5423,6 +5422,7 @@ public class WebView extends AbsoluteLayout
                     mUserScroll = true;
                 }
 
+                startScrollingLayer(x, y);
                 doDrag(deltaX, deltaY);
 
                 // Turn off scrollbars when dragging a layer.
@@ -5529,6 +5529,7 @@ public class WebView extends AbsoluteLayout
                             break;
                         }
                     case TOUCH_DRAG_MODE:
+                    case TOUCH_DRAG_LAYER_MODE:
                         mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
                         mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
                         // if the user waits a while w/o moving before the
@@ -5560,7 +5561,6 @@ public class WebView extends AbsoluteLayout
                         invalidate();
                         // fall through
                     case TOUCH_DRAG_START_MODE:
-                    case TOUCH_DRAG_LAYER_MODE:
                         // TOUCH_DRAG_START_MODE should not happen for the real
                         // device as we almost certain will get a MOVE. But this
                         // is possible on emulator.
@@ -6115,10 +6115,12 @@ public class WebView extends AbsoluteLayout
         }
 
         if (mOverscrollDistance < mOverflingDistance) {
-            if (mScrollX == -mOverscrollDistance || mScrollX == maxX + mOverscrollDistance) {
+            if ((vx > 0 && mScrollX == -mOverscrollDistance) ||
+                    (vx < 0 && mScrollX == maxX + mOverscrollDistance)) {
                 vx = 0;
             }
-            if (mScrollY == -mOverscrollDistance || mScrollY == maxY + mOverscrollDistance) {
+            if ((vy > 0 && mScrollY == -mOverscrollDistance) ||
+                    (vy < 0 && mScrollY == maxY + mOverscrollDistance)) {
                 vy = 0;
             }
         }
@@ -6937,6 +6939,7 @@ public class WebView extends AbsoluteLayout
                                 int deltaY = pinLocY((int) (mScrollY
                                         + mLastDeferTouchY - y))
                                         - mScrollY;
+                                startScrollingLayer(x, y);
                                 doDrag(deltaX, deltaY);
                                 if (deltaX != 0) mLastDeferTouchX = x;
                                 if (deltaY != 0) mLastDeferTouchY = y;
