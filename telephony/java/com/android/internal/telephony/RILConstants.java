@@ -96,6 +96,10 @@ public interface RILConstants {
     int SETUP_DATA_AUTH_CHAP      = 2;
     int SETUP_DATA_AUTH_PAP_CHAP  = 3;
 
+    /* Deactivate data call reasons */
+    int DEACTIVATE_REASON_NONE = 0;
+    int DEACTIVATE_REASON_RADIO_OFF = 1;
+
 /*
 cat include/telephony/ril.h | \
    egrep '^#define' | \

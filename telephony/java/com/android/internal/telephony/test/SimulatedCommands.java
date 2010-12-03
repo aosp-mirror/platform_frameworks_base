@@ -954,20 +954,12 @@ public final class SimulatedCommands extends BaseCommands
         unimplemented(response);
     }
 
-    @Deprecated
-    public void setupDefaultPDP(String apn, String user, String password, Message result) {
-        unimplemented(result);
-    }
-
     public void setupDataCall(String radioTechnology, String profile, String apn, String user,
             String password, String authType, Message result) {
         unimplemented(result);
     }
 
-    public void deactivateDataCall(int cid, Message result) {unimplemented(result);}
-
-    @Deprecated
-    public void deactivateDefaultPDP(int cid, Message result) {unimplemented(result);}
+    public void deactivateDataCall(int cid, int reason, Message result) {unimplemented(result);}
 
     public void setPreferredNetworkType(int networkType , Message result) {
         mNetworkType = networkType;

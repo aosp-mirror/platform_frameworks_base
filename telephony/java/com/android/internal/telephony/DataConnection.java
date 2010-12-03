@@ -26,6 +26,7 @@ import android.net.LinkProperties;
 import android.os.AsyncResult;
 import android.os.Message;
 import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.EventLog;
 
 import java.net.InetAddress;
@@ -312,9 +313,19 @@ public abstract class DataConnection extends HierarchicalStateMachine {
      *          and is either a DisconnectParams or ConnectionParams.
      */
     private void tearDownData(Object o) {
+        int discReason = RILConstants.DEACTIVATE_REASON_NONE;
+        if ((o != null) && (o instanceof DisconnectParams)) {
+            DisconnectParams dp = (DisconnectParams)o;
+            Message m = dp.onCompletedMsg;
+            if ((m != null) && (m.obj != null) && (m.obj instanceof String)) {
+                String reason = (String)m.obj;
+                if (TextUtils.equals(reason, Phone.REASON_RADIO_TURNED_OFF))
+                    discReason = RILConstants.DEACTIVATE_REASON_RADIO_OFF;
+            }
+        }
         if (phone.mCM.getRadioState().isOn()) {
             if (DBG) log("tearDownData radio is on, call deactivateDataCall");
-            phone.mCM.deactivateDataCall(cid, obtainMessage(EVENT_DEACTIVATE_DONE, o));
+            phone.mCM.deactivateDataCall(cid, discReason, obtainMessage(EVENT_DEACTIVATE_DONE, o));
         } else {
             if (DBG) log("tearDownData radio is off sendMessage EVENT_DEACTIVATE_DONE immediately");
             AsyncResult ar = new AsyncResult(o, null, null);

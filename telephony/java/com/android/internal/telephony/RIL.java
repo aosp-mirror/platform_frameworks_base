@@ -1265,33 +1265,6 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     }
 
     /**
-     * @deprecated
-     */
-    public void
-    setupDefaultPDP(String apn, String user, String password, Message result) {
-        int radioTechnology;
-        int authType;
-        String profile = ""; //profile number, NULL for GSM/UMTS
-
-        radioTechnology = RILConstants.SETUP_DATA_TECH_GSM;
-        //TODO(): Add to the APN database, AuthType is set to CHAP/PAP
-        authType = (user != null) ? RILConstants.SETUP_DATA_AUTH_PAP_CHAP
-                : RILConstants.SETUP_DATA_AUTH_NONE;
-
-        setupDataCall(Integer.toString(radioTechnology), profile, apn, user,
-                password, Integer.toString(authType), result);
-
-    }
-
-    /**
-     * @deprecated
-     */
-    public void
-    deactivateDefaultPDP(int cid, Message result) {
-        deactivateDataCall(cid, result);
-    }
-
-    /**
      * The preferred new alternative to setupDefaultPDP that is
      * CDMA-compatible.
      *
@@ -1329,15 +1302,16 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     }
 
     public void
-    deactivateDataCall(int cid, Message result) {
+    deactivateDataCall(int cid, int reason, Message result) {
         RILRequest rr
                 = RILRequest.obtain(RIL_REQUEST_DEACTIVATE_DATA_CALL, result);
 
-        rr.mp.writeInt(1);
+        rr.mp.writeInt(2);
         rr.mp.writeString(Integer.toString(cid));
+        rr.mp.writeString(Integer.toString(reason));
 
         if (RILJ_LOGD) riljLog(rr.serialString() + "> " +
-                requestToString(rr.mRequest) + " " + cid);
+                requestToString(rr.mRequest) + " " + cid + " " + reason);
 
         send(rr);
     }
