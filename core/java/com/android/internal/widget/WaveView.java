@@ -146,16 +146,29 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
     }
 
     private void initDrawables() {
-        mUnlockRing = new DrawableHolder(createDrawable(R.drawable.unlock_ring))
-            .setX(mLockCenterX).setY(mLockCenterY).setScaleX(0.1f).setScaleY(0.1f).setAlpha(0.0f);
+        mUnlockRing = new DrawableHolder(createDrawable(R.drawable.unlock_ring));
+        mUnlockRing.setX(mLockCenterX);
+        mUnlockRing.setY(mLockCenterY);
+        mUnlockRing.setScaleX(0.1f);
+        mUnlockRing.setScaleY(0.1f);
+        mUnlockRing.setAlpha(0.0f);
+
         mDrawables.add(mUnlockRing);
 
-        mUnlockDefault = new DrawableHolder(createDrawable(R.drawable.unlock_default))
-            .setX(mLockCenterX).setY(mLockCenterY).setScaleX(0.1f).setScaleY(0.1f).setAlpha(0.0f);
+        mUnlockDefault = new DrawableHolder(createDrawable(R.drawable.unlock_default));
+        mUnlockDefault.setX(mLockCenterX);
+        mUnlockDefault.setY(mLockCenterY);
+        mUnlockDefault.setScaleX(0.1f);
+        mUnlockDefault.setScaleY(0.1f);
+        mUnlockDefault.setAlpha(0.0f);
         mDrawables.add(mUnlockDefault);
 
-        mUnlockHalo = new DrawableHolder(createDrawable(R.drawable.unlock_halo))
-            .setX(mLockCenterX).setY(mLockCenterY).setScaleX(0.1f).setScaleY(0.1f).setAlpha(0.0f);
+        mUnlockHalo = new DrawableHolder(createDrawable(R.drawable.unlock_halo));
+        mUnlockHalo.setX(mLockCenterX);
+        mUnlockHalo.setY(mLockCenterY);
+        mUnlockHalo.setScaleX(0.1f);
+        mUnlockHalo.setScaleY(0.1f);
+        mUnlockHalo.setAlpha(0.0f);
         mDrawables.add(mUnlockHalo);
 
         BitmapDrawable wave = createDrawable(R.drawable.unlock_wave);
@@ -202,8 +215,11 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
                 mUnlockDefault.removeAnimationFor("scaleX");
                 mUnlockDefault.removeAnimationFor("scaleY");
                 mUnlockDefault.removeAnimationFor("alpha");
-                mUnlockDefault.setX(mLockCenterX).setY(mLockCenterY).setScaleX(0.1f).setScaleY(0.1f)
-                        .setAlpha(0.0f);
+                mUnlockDefault.setX(mLockCenterX);
+                mUnlockDefault.setY(mLockCenterY);
+                mUnlockDefault.setScaleX(0.1f);
+                mUnlockDefault.setScaleY(0.1f);
+                mUnlockDefault.setAlpha(0.0f);
 
                 //TweenMax.to(unlockDefault, .5, { delay: .1, scaleX: 1, scaleY: 1,
                 // alpha: 1, overwrite: true, ease:Quint.easeOut   });
@@ -218,8 +234,11 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
                 mUnlockHalo.removeAnimationFor("scaleX");
                 mUnlockHalo.removeAnimationFor("scaleY");
                 mUnlockHalo.removeAnimationFor("alpha");
-                mUnlockHalo.setX(mLockCenterX).setY(mLockCenterY).setScaleX(0.1f).setScaleY(0.1f)
-                        .setAlpha(0.0f);
+                mUnlockHalo.setX(mLockCenterX);
+                mUnlockHalo.setY(mLockCenterY);
+                mUnlockHalo.setScaleX(0.1f);
+                mUnlockHalo.setScaleY(0.1f);
+                mUnlockHalo.setAlpha(0.0f);
 
                 //TweenMax.to(unlockHalo, .5, { x: lockX, y: lockY, scaleX: 1, scaleY: 1,
                 // alpha: 1  , overwrite: true, ease:Quint.easeOut   });
@@ -248,8 +267,11 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
                 mUnlockDefault.removeAnimationFor("scaleX");
                 mUnlockDefault.removeAnimationFor("scaleY");
                 mUnlockDefault.removeAnimationFor("alpha");
-                mUnlockDefault.setX(mLockCenterX + 182).setY(mLockCenterY).setScaleX(0.1f)
-                        .setScaleY(0.1f).setAlpha(0.0f);
+                mUnlockDefault.setX(mLockCenterX + 182);
+                mUnlockDefault.setY(mLockCenterY);
+                mUnlockDefault.setScaleX(0.1f);
+                mUnlockDefault.setScaleY(0.1f);
+                mUnlockDefault.setAlpha(0.0f);
 
                 //TweenMax.to(unlockDefault, 0.5, { delay: .1   , scaleX: 1, scaleY: 1,
                 // alpha: 1, ease:Quint.easeOut                        });
@@ -330,8 +352,11 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
                     mUnlockDefault.removeAnimationFor("scaleX");
                     mUnlockDefault.removeAnimationFor("scaleY");
                     mUnlockDefault.removeAnimationFor("alpha");
-                    mUnlockDefault.setX(ringX).setY(ringY).setScaleX(0.1f).setScaleY(0.1f)
-                            .setAlpha(0.0f);
+                    mUnlockDefault.setX(ringX);
+                    mUnlockDefault.setY(ringY);
+                    mUnlockDefault.setScaleX(0.1f);
+                    mUnlockDefault.setScaleY(0.1f);
+                    mUnlockDefault.setAlpha(0.0f);
 
                     //TweenMax.to(unlockDefault, .5, { x:ringX, y: ringY, scaleX: 1, scaleY: 1,
                     // alpha: 1  , ease: Quint.easeOut  , overwrite: true });
