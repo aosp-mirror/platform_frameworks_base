@@ -158,29 +158,24 @@ public class DrawableHolder implements AnimatorListener {
     }
 
 
-    public DrawableHolder setX(float value) {
+    public void setX(float value) {
         mX = value;
-        return this;
     }
 
-    public DrawableHolder setY(float value) {
+    public void setY(float value) {
         mY = value;
-        return this;
     }
 
-    public DrawableHolder setScaleX(float value) {
+    public void setScaleX(float value) {
         mScaleX = value;
-        return this;
     }
 
-    public DrawableHolder setScaleY(float value) {
+    public void setScaleY(float value) {
         mScaleY = value;
-        return this;
     }
 
-    public DrawableHolder setAlpha(float alpha) {
+    public void setAlpha(float alpha) {
         mAlpha = alpha;
-        return this;
     }
 
     public float getX() {
