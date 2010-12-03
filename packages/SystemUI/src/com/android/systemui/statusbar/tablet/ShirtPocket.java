@@ -81,7 +81,7 @@ public class ShirtPocket extends FrameLayout {
         mIcon.setImageResource(mClipping == null
                 ? R.drawable.ic_sysbar_pocket_hidden
                 : R.drawable.ic_sysbar_pocket_holding);
-        mIcon.setVisibility(mClipping == null ? View.INVISIBLE : View.VISIBLE);
+        mIcon.setVisibility(mClipping == null ? View.GONE : View.VISIBLE);
     }
     
     private void showWindow() {
