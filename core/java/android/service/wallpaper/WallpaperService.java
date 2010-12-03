@@ -857,7 +857,14 @@ public abstract class WallpaperService extends Service {
                 mEngine.dispatchPointer(event);
             }
         }
-        
+
+        public void dispatchWallpaperCommand(String action, int x, int y,
+                int z, Bundle extras) {
+            if (mEngine != null) {
+                mEngine.mWindow.dispatchWallpaperCommand(action, x, y, z, extras, false);
+            }
+        }
+
         public void destroy() {
             Message msg = mCaller.obtainMessage(DO_DETACH);
             mCaller.sendMessage(msg);
