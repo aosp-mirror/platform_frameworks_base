@@ -257,7 +257,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private ConnectivityService(Context context) {
-        if (DBG) Slog.v(TAG, "ConnectivityService starting up");
+        if (DBG) log("ConnectivityService starting up");
 
         HandlerThread handlerThread = new HandlerThread("ConnectivityServiceThread");
         handlerThread.start();
@@ -281,7 +281,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         try {
             mDefaultDns = InetAddress.getByName(dns);
         } catch (UnknownHostException e) {
-            Slog.e(TAG, "Error setting defaultDns using " + dns);
+            loge("Error setting defaultDns using " + dns);
         }
 
         mContext = context;
@@ -305,11 +305,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         for (String raString : raStrings) {
             RadioAttributes r = new RadioAttributes(raString);
             if (r.mType > ConnectivityManager.MAX_RADIO_TYPE) {
-                Slog.e(TAG, "Error in radioAttributes - ignoring attempt to define type " + r.mType);
+                loge("Error in radioAttributes - ignoring attempt to define type " + r.mType);
                 continue;
             }
             if (mRadioAttributes[r.mType] != null) {
-                Slog.e(TAG, "Error in radioAttributes - ignoring attempt to redefine type " +
+                loge("Error in radioAttributes - ignoring attempt to redefine type " +
                         r.mType);
                 continue;
             }
@@ -322,17 +322,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             try {
                 NetworkAttributes n = new NetworkAttributes(naString);
                 if (n.mType > ConnectivityManager.MAX_NETWORK_TYPE) {
-                    Slog.e(TAG, "Error in networkAttributes - ignoring attempt to define type " +
+                    loge("Error in networkAttributes - ignoring attempt to define type " +
                             n.mType);
                     continue;
                 }
                 if (mNetAttributes[n.mType] != null) {
-                    Slog.e(TAG, "Error in networkAttributes - ignoring attempt to redefine type " +
+                    loge("Error in networkAttributes - ignoring attempt to redefine type " +
                             n.mType);
                     continue;
                 }
                 if (mRadioAttributes[n.mRadio] == null) {
-                    Slog.e(TAG, "Error in networkAttributes - ignoring attempt to use undefined " +
+                    loge("Error in networkAttributes - ignoring attempt to use undefined " +
                             "radio " + n.mRadio + " in network type " + n.mType);
                     continue;
                 }
@@ -388,7 +388,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         for (int netType : mPriorityList) {
             switch (mNetAttributes[netType].mRadio) {
             case ConnectivityManager.TYPE_WIFI:
-                if (DBG) Slog.v(TAG, "Starting Wifi Service.");
+                if (DBG) log("Starting Wifi Service.");
                 WifiStateTracker wst = new WifiStateTracker();
                 WifiService wifiService = new WifiService(context);
                 ServiceManager.addService(Context.WIFI_SERVICE, wifiService);
@@ -405,12 +405,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         mNetAttributes[netType].mName);
                 mNetTrackers[netType].startMonitoring(context, mHandler);
                 if (noMobileData) {
-                    if (DBG) Slog.d(TAG, "tearing down Mobile networks due to setting");
+                    if (DBG) log("tearing down Mobile networks due to setting");
                     mNetTrackers[netType].teardown();
                 }
                 break;
             default:
-                Slog.e(TAG, "Trying to create a DataStateTracker for an unknown radio type " +
+                loge("Trying to create a DataStateTracker for an unknown radio type " +
                         mNetAttributes[netType].mRadio);
                 continue;
             }
@@ -499,8 +499,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (t != mNetworkPreference && mNetTrackers[t] != null &&
                     mNetTrackers[t].getNetworkInfo().isConnected()) {
                 if (DBG) {
-                    Slog.d(TAG, "tearing down " +
-                            mNetTrackers[t].getNetworkInfo() +
+                    log("tearing down " + mNetTrackers[t].getNetworkInfo() +
                             " in enforcePreference");
                 }
                 teardown(mNetTrackers[t]);
@@ -533,9 +532,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             NetworkStateTracker t = mNetTrackers[type];
             NetworkInfo info = t.getNetworkInfo();
             if (info.isConnected()) {
-                if (DBG && type != mActiveDefaultNetwork) Slog.e(TAG,
-                        "connected default network is not " +
-                        "mActiveDefaultNetwork!");
+                if (DBG && type != mActiveDefaultNetwork) {
+                    loge("connected default network is not mActiveDefaultNetwork!");
+                }
                 return info;
             }
         }
@@ -648,14 +647,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         public void binderDied() {
-            Slog.d(TAG, "ConnectivityService FeatureUser binderDied(" +
+            log("ConnectivityService FeatureUser binderDied(" +
                     mNetworkType + ", " + mFeature + ", " + mBinder + "), created " +
                     (System.currentTimeMillis() - mCreateTime) + " mSec ago");
             stopUsingNetworkFeature(this, false);
         }
 
         public void expire() {
-            Slog.d(TAG, "ConnectivityService FeatureUser expire(" +
+            log("ConnectivityService FeatureUser expire(" +
                     mNetworkType + ", " + mFeature + ", " + mBinder +"), created " +
                     (System.currentTimeMillis() - mCreateTime) + " mSec ago");
             stopUsingNetworkFeature(this, false);
@@ -671,8 +670,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     public int startUsingNetworkFeature(int networkType, String feature,
             IBinder binder) {
         if (DBG) {
-            Slog.d(TAG, "startUsingNetworkFeature for net " + networkType +
-                    ": " + feature);
+            log("startUsingNetworkFeature for net " + networkType + ": " + feature);
         }
         enforceChangePermission();
         if (!ConnectivityManager.isNetworkTypeValid(networkType) ||
@@ -686,7 +684,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         int usedNetworkType = networkType;
         if(networkType == ConnectivityManager.TYPE_MOBILE) {
             if (!getMobileDataEnabled()) {
-                if (DBG) Slog.d(TAG, "requested special network with data disabled - rejected");
+                if (DBG) log("requested special network with data disabled - rejected");
                 return Phone.APN_TYPE_NOT_AVAILABLE;
             }
             if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
@@ -708,7 +706,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 NetworkInfo ni = network.getNetworkInfo();
 
                 if (ni.isAvailable() == false) {
-                    if (DBG) Slog.d(TAG, "special network not available");
+                    if (DBG) log("special network not available");
                     return Phone.APN_TYPE_NOT_AVAILABLE;
                 }
 
@@ -728,17 +726,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (ni.isConnected() == true) {
                         // add the pid-specific dns
                         handleDnsConfigurationChange(networkType);
-                        if (DBG) Slog.d(TAG, "special network already active");
+                        if (DBG) log("special network already active");
                         return Phone.APN_ALREADY_ACTIVE;
                     }
-                    if (DBG) Slog.d(TAG, "special network already connecting");
+                    if (DBG) log("special network already connecting");
                     return Phone.APN_REQUEST_STARTED;
                 }
 
                 // check if the radio in play can make another contact
                 // assume if cannot for now
 
-                if (DBG) Slog.d(TAG, "reconnecting to special network");
+                if (DBG) log("reconnecting to special network");
                 network.reconnect();
                 return Phone.APN_REQUEST_STARTED;
             } else {
@@ -774,7 +772,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             return stopUsingNetworkFeature(u, true);
         } else {
             // none found!
-            if (DBG) Slog.d(TAG, "ignoring stopUsingNetworkFeature - not a live request");
+            if (DBG) log("ignoring stopUsingNetworkFeature - not a live request");
             return 1;
         }
     }
@@ -789,7 +787,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         boolean callTeardown = false;  // used to carry our decision outside of sync block
 
         if (DBG) {
-            Slog.d(TAG, "stopUsingNetworkFeature for net " + networkType +
+            log("stopUsingNetworkFeature for net " + networkType +
                     ": " + feature);
         }
 
@@ -802,7 +800,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         synchronized(this) {
             // check if this process still has an outstanding start request
             if (!mFeatureUsers.contains(u)) {
-                if (DBG) Slog.d(TAG, "ignoring - this process has no outstanding requests");
+                if (DBG) log("ignoring - this process has no outstanding requests");
                 return 1;
             }
             u.unlinkDeathRecipient();
@@ -820,7 +818,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (x.mUid == u.mUid && x.mPid == u.mPid &&
                             x.mNetworkType == u.mNetworkType &&
                             TextUtils.equals(x.mFeature, u.mFeature)) {
-                        if (DBG) Slog.d(TAG, "ignoring stopUsingNetworkFeature as dup is found");
+                        if (DBG) log("ignoring stopUsingNetworkFeature as dup is found");
                         return 1;
                     }
                 }
@@ -841,7 +839,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             tracker =  mNetTrackers[usedNetworkType];
             if (tracker == null) {
-                if (DBG) Slog.d(TAG, "ignoring - no known tracker for net type " + usedNetworkType);
+                if (DBG) log("ignoring - no known tracker for net type " + usedNetworkType);
                 return -1;
             }
             if (usedNetworkType != networkType) {
@@ -849,14 +847,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mNetRequestersPids[usedNetworkType].remove(currentPid);
                 reassessPidDns(pid, true);
                 if (mNetRequestersPids[usedNetworkType].size() != 0) {
-                    if (DBG) Slog.d(TAG, "not tearing down special network - " +
+                    if (DBG) log("not tearing down special network - " +
                            "others still using it");
                     return 1;
                 }
                 callTeardown = true;
             }
         }
-        if (DBG) Slog.d(TAG, "Doing network teardown");
+        if (DBG) log("Doing network teardown");
         if (callTeardown) {
             tracker.teardown();
             return 1;
@@ -905,7 +903,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (tracker == null || !tracker.getNetworkInfo().isConnected() ||
                 tracker.isTeardownRequested()) {
             if (DBG) {
-                Slog.d(TAG, "requestRouteToHostAddress on down network " +
+                log("requestRouteToHostAddress on down network " +
                            "(" + networkType + ") - dropped");
             }
             return false;
@@ -935,12 +933,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         String interfaceName = p.getInterfaceName();
 
         if (DBG) {
-            Slog.d(TAG, "Requested host route to " + hostAddress + "(" + interfaceName + ")");
+            log("Requested host route to " + hostAddress + "(" + interfaceName + ")");
         }
         if (interfaceName != null) {
             return NetworkUtils.addHostRoute(interfaceName, hostAddress, null);
         } else {
-            if (DBG) Slog.e(TAG, "addHostRoute failed due to null interface name");
+            if (DBG) loge("addHostRoute failed due to null interface name");
             return false;
         }
     }
@@ -982,7 +980,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         enforceAccessPermission();
         boolean retVal = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.MOBILE_DATA, 1) == 1;
-        if (DBG) Slog.d(TAG, "getMobileDataEnabled returning " + retVal);
+        if (DBG) log("getMobileDataEnabled returning " + retVal);
         return retVal;
     }
 
@@ -991,7 +989,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     public void setMobileDataEnabled(boolean enabled) {
         enforceChangePermission();
-        if (DBG) Slog.d(TAG, "setMobileDataEnabled(" + enabled + ")");
+        if (DBG) log("setMobileDataEnabled(" + enabled + ")");
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_SET_MOBILE_DATA,
             (enabled ? ENABLED : DISABLED), 0));
@@ -1006,7 +1004,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (enabled) {
             if (mNetTrackers[ConnectivityManager.TYPE_MOBILE] != null) {
                 if (DBG) {
-                    Slog.d(TAG, "starting up " + mNetTrackers[ConnectivityManager.TYPE_MOBILE]);
+                    log("starting up " + mNetTrackers[ConnectivityManager.TYPE_MOBILE]);
                 }
                 mNetTrackers[ConnectivityManager.TYPE_MOBILE].reconnect();
             }
@@ -1015,7 +1013,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 if (nt == null) continue;
                 int netType = nt.getNetworkInfo().getType();
                 if (mNetAttributes[netType].mRadio == ConnectivityManager.TYPE_MOBILE) {
-                    if (DBG) Slog.d(TAG, "tearing down " + nt);
+                    if (DBG) log("tearing down " + nt);
                     nt.teardown();
                 }
             }
@@ -1114,9 +1112,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (newNet != null) {
                 NetworkInfo switchTo = newNet.getNetworkInfo();
                 if (!switchTo.isConnected()) {
-                    // if the other net is connected they've already reset this and perhaps even gotten
-                    // a positive report we don't want to overwrite, but if not we need to clear this now
-                    // to turn our cellular sig strength white
+                    // if the other net is connected they've already reset this and perhaps even
+                    // gotten a positive report we don't want to overwrite, but if not we need to
+                    // clear this now to turn our cellular sig strength white
                     mDefaultInetConditionPublished = 0;
                 }
                 intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO, switchTo);
@@ -1159,7 +1157,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 if (mNetAttributes[checkType] == null) continue;
                 if (mNetAttributes[checkType].mRadio == ConnectivityManager.TYPE_MOBILE &&
                         noMobileData) {
-                    Slog.e(TAG, "not failing over to mobile type " + checkType +
+                    loge("not failing over to mobile type " + checkType +
                             " because Mobile Data Disabled");
                     continue;
                 }
@@ -1196,11 +1194,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                     if (DBG) {
                         if (switchTo.isConnected()) {
-                            Slog.v(TAG, "Switching to already connected " +
-                                    switchTo.getTypeName());
+                            log("Switching to already connected " + switchTo.getTypeName());
                         } else {
-                            Slog.v(TAG, "Attempting to switch to " +
-                                    switchTo.getTypeName());
+                            log("Attempting to switch to " + switchTo.getTypeName());
                         }
                     }
                 } else {
@@ -1209,7 +1205,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                    // report no failover
                 }
             } else {
-                Slog.e(TAG, "Network failover failing.");
+                loge("Network failover failing.");
             }
         }
 
@@ -1258,7 +1254,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         } else {
             reasonText = " (" + reason + ").";
         }
-        Slog.e(TAG, "Attempt to connect to " + info.getTypeName() + " failed" + reasonText);
+        loge("Attempt to connect to " + info.getTypeName() + " failed" + reasonText);
 
         Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
@@ -1343,19 +1339,22 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         mNetAttributes[type].mPriority) ||
                         mNetworkPreference == mActiveDefaultNetwork) {
                         // don't accept this one
-                        if (DBG) Slog.v(TAG, "Not broadcasting CONNECT_ACTION " +
+                        if (DBG) {
+                            log("Not broadcasting CONNECT_ACTION " +
                                 "to torn down network " + info.getTypeName());
+                        }
                         teardown(thisNet);
                         return;
                 } else {
                     // tear down the other
                     NetworkStateTracker otherNet =
                             mNetTrackers[mActiveDefaultNetwork];
-                    if (DBG) Slog.v(TAG, "Policy requires " +
-                            otherNet.getNetworkInfo().getTypeName() +
+                    if (DBG) {
+                        log("Policy requires " + otherNet.getNetworkInfo().getTypeName() +
                             " teardown");
+                    }
                     if (!teardown(otherNet)) {
-                        Slog.e(TAG, "Network declined teardown request");
+                        loge("Network declined teardown request");
                         return;
                     }
                 }
@@ -1423,13 +1422,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         String interfaceName = p.getInterfaceName();
 
         if (DBG) {
-            Slog.d(TAG, "addPrivateDnsRoutes for " + nt +
+            log("addPrivateDnsRoutes for " + nt +
                     "(" + interfaceName + ") - mPrivateDnsRouteSet = " + privateDnsRouteSet);
         }
         if (interfaceName != null && !privateDnsRouteSet) {
             Collection<InetAddress> dnsList = p.getDnses();
             for (InetAddress dns : dnsList) {
-                if (DBG) Slog.d(TAG, "  adding " + dns);
+                if (DBG) log("  adding " + dns);
                 NetworkUtils.addHostRoute(interfaceName, dns, null);
             }
             nt.privateDnsRouteSet(true);
@@ -1445,7 +1444,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         boolean privateDnsRouteSet = nt.isPrivateDnsRouteSet();
         if (interfaceName != null && privateDnsRouteSet) {
             if (DBG) {
-                Slog.d(TAG, "removePrivateDnsRoutes for " + nt.getNetworkInfo().getTypeName() +
+                log("removePrivateDnsRoutes for " + nt.getNetworkInfo().getTypeName() +
                         " (" + interfaceName + ")");
             }
             NetworkUtils.removeHostRoutes(interfaceName);
@@ -1463,7 +1462,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if ((interfaceName != null) && (defaultGatewayAddr != null )) {
             if (!NetworkUtils.addDefaultRoute(interfaceName, defaultGatewayAddr) && DBG) {
                 NetworkInfo networkInfo = nt.getNetworkInfo();
-                Slog.d(TAG, "addDefaultRoute for " + networkInfo.getTypeName() +
+                log("addDefaultRoute for " + networkInfo.getTypeName() +
                         " (" + interfaceName + "), GatewayAddr=" + defaultGatewayAddr);
             }
         }
@@ -1478,7 +1477,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (interfaceName != null) {
             if ((NetworkUtils.removeDefaultRoute(interfaceName) >= 0) && DBG) {
                 NetworkInfo networkInfo = nt.getNetworkInfo();
-                Slog.d(TAG, "removeDefaultRoute for " + networkInfo.getTypeName() + " (" +
+                log("removeDefaultRoute for " + networkInfo.getTypeName() + " (" +
                         interfaceName + ")");
             }
         }
@@ -1494,7 +1493,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         String bufferSizes = SystemProperties.get(key);
 
         if (bufferSizes.length() == 0) {
-            Slog.e(TAG, key + " not found in system properties. Using defaults");
+            loge(key + " not found in system properties. Using defaults");
 
             // Setting to default values so we won't be stuck to previous values
             key = "net.tcp.buffersize.default";
@@ -1504,7 +1503,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // Set values in kernel
         if (bufferSizes.length() != 0) {
             if (DBG) {
-                Slog.v(TAG, "Setting TCP values: [" + bufferSizes
+                log("Setting TCP values: [" + bufferSizes
                         + "] which comes from [" + key + "]");
             }
             setBufferSize(bufferSizes);
@@ -1531,10 +1530,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 stringToFile(prefix + "wmem_def", values[4]);
                 stringToFile(prefix + "wmem_max", values[5]);
             } else {
-                Slog.e(TAG, "Invalid buffersize string: " + bufferSizes);
+                loge("Invalid buffersize string: " + bufferSizes);
             }
         } catch (IOException e) {
-            Slog.e(TAG, "Can't set tcp buffer sizes:" + e);
+            loge("Can't set tcp buffer sizes:" + e);
         }
     }
 
@@ -1562,7 +1561,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private void reassessPidDns(int myPid, boolean doBump)
     {
-        if (DBG) Slog.d(TAG, "reassessPidDns for pid " + myPid);
+        if (DBG) log("reassessPidDns for pid " + myPid);
         for(int i : mPriorityList) {
             if (mNetAttributes[i].isDefault()) {
                 continue;
@@ -1638,21 +1637,21 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 int j = 1;
                 if (dnses.size() == 0 && mDefaultDns != null) {
                     if (DBG) {
-                        Slog.d(TAG, "no dns provided - using " + mDefaultDns.getHostAddress());
+                        log("no dns provided - using " + mDefaultDns.getHostAddress());
                     }
                     SystemProperties.set("net.dns1", mDefaultDns.getHostAddress());
                     j++;
                 } else {
                     for (InetAddress dns : dnses) {
                         if (DBG) {
-                            Slog.d(TAG, "adding dns " + dns + " for " +
+                            log("adding dns " + dns + " for " +
                                     nt.getNetworkInfo().getTypeName());
                         }
                         SystemProperties.set("net.dns" + j++, dns.getHostAddress());
                     }
                 }
                 for (int k=j ; k<mNumDnsEntries; k++) {
-                    if (DBG) Slog.d(TAG, "erasing net.dns" + k);
+                    if (DBG) log("erasing net.dns" + k);
                     SystemProperties.set("net.dns" + k, "");
                 }
                 mNumDnsEntries = j;
@@ -1762,7 +1761,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         if (DBG) {
                             // TODO - remove this after we validate the dropping doesn't break
                             // anything
-                            Slog.d(TAG, "Dropping ConnectivityChange for " +
+                            log("Dropping ConnectivityChange for " +
                                     info.getTypeName() + ": " +
                                     state + "/" + info.getDetailedState());
                         }
@@ -1770,7 +1769,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                     mNetAttributes[type].mLastState = state;
 
-                    if (DBG) Slog.d(TAG, "ConnectivityChange for " +
+                    if (DBG) log("ConnectivityChange for " +
                             info.getTypeName() + ": " +
                             state + "/" + info.getDetailedState());
 
@@ -1820,8 +1819,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         }
                     }
                     if (causedBy != null) {
-                        Slog.d(TAG, "NetTransition Wakelock for " +
-                                causedBy + " released by timeout");
+                        log("NetTransition Wakelock for " + causedBy + " released by timeout");
                     }
                     break;
                 case EVENT_RESTORE_DEFAULT_NETWORK:
@@ -1978,7 +1976,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     // 100 percent is full good, 0 is full bad.
     public void reportInetCondition(int networkType, int percentage) {
-        if (DBG) Slog.d(TAG, "reportNetworkCondition(" + networkType + ", " + percentage + ")");
+        if (DBG) log("reportNetworkCondition(" + networkType + ", " + percentage + ")");
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.STATUS_BAR,
                 "ConnectivityService");
@@ -2000,22 +1998,22 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void handleInetConditionChange(int netType, int condition) {
         if (DBG) {
-            Slog.d(TAG, "Inet connectivity change, net=" +
+            log("Inet connectivity change, net=" +
                     netType + ", condition=" + condition +
                     ",mActiveDefaultNetwork=" + mActiveDefaultNetwork);
         }
         if (mActiveDefaultNetwork == -1) {
-            if (DBG) Slog.d(TAG, "no active default network - aborting");
+            if (DBG) log("no active default network - aborting");
             return;
         }
         if (mActiveDefaultNetwork != netType) {
-            if (DBG) Slog.d(TAG, "given net not default - aborting");
+            if (DBG) log("given net not default - aborting");
             return;
         }
         mDefaultInetCondition = condition;
         int delay;
         if (mInetConditionChangeInFlight == false) {
-            if (DBG) Slog.d(TAG, "starting a change hold");
+            if (DBG) log("starting a change hold");
             // setup a new hold to debounce this
             if (mDefaultInetCondition > 50) {
                 delay = Settings.Secure.getInt(mContext.getContentResolver(),
@@ -2030,33 +2028,33 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         } else {
             // we've set the new condition, when this hold ends that will get
             // picked up
-            if (DBG) Slog.d(TAG, "currently in hold - not setting new end evt");
+            if (DBG) log("currently in hold - not setting new end evt");
         }
     }
 
     private void handleInetConditionHoldEnd(int netType, int sequence) {
         if (DBG) {
-            Slog.d(TAG, "Inet hold end, net=" + netType +
+            log("Inet hold end, net=" + netType +
                     ", condition =" + mDefaultInetCondition +
                     ", published condition =" + mDefaultInetConditionPublished);
         }
         mInetConditionChangeInFlight = false;
 
         if (mActiveDefaultNetwork == -1) {
-            if (DBG) Slog.d(TAG, "no active default network - aborting");
+            if (DBG) log("no active default network - aborting");
             return;
         }
         if (mDefaultConnectionSequence != sequence) {
-            if (DBG) Slog.d(TAG, "event hold for obsolete network - aborting");
+            if (DBG) log("event hold for obsolete network - aborting");
             return;
         }
         if (mDefaultInetConditionPublished == mDefaultInetCondition) {
-            if (DBG) Slog.d(TAG, "no change in condition - aborting");
+            if (DBG) log("no change in condition - aborting");
             return;
         }
         NetworkInfo networkInfo = mNetTrackers[mActiveDefaultNetwork].getNetworkInfo();
         if (networkInfo.isConnected() == false) {
-            if (DBG) Slog.d(TAG, "default network not connected - aborting");
+            if (DBG) log("default network not connected - aborting");
             return;
         }
         mDefaultInetConditionPublished = mDefaultInetCondition;
@@ -2133,7 +2131,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mDefaultProxy = null;
             }
         }
-        if (DBG) Slog.d(TAG, "changing default proxy to " + proxy);
+        if (DBG) log("changing default proxy to " + proxy);
         if ((proxy == null && mGlobalProxy == null) || proxy.equals(mGlobalProxy)) return;
         if (mGlobalProxy != null) return;
         sendProxyBroadcast(proxy);
@@ -2159,7 +2157,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void sendProxyBroadcast(ProxyProperties proxy) {
-        Slog.d(TAG, "sending Proxy Broadcast for " + proxy);
+        log("sending Proxy Broadcast for " + proxy);
         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
         intent.putExtra(Proxy.EXTRA_PROXY_INFO, proxy);
@@ -2185,5 +2183,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         public void onChange(boolean selfChange) {
             mHandler.obtainMessage(mWhat).sendToTarget();
         }
+    }
+
+    private void log(String s) {
+        Slog.d(TAG, s);
+    }
+
+    private void loge(String s) {
+        Slog.e(TAG, s);
     }
 }
