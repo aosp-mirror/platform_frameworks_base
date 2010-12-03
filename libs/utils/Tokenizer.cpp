@@ -35,16 +35,16 @@ static inline bool isDelimiter(char ch, const char* delimiters) {
     return strchr(delimiters, ch) != NULL;
 }
 
-
-Tokenizer::Tokenizer(const String8& filename, FileMap* fileMap,
-        const char* buffer, size_t length) :
-        mFilename(filename), mFileMap(fileMap), mBuffer(buffer), mLength(length),
-        mCurrent(buffer), mLineNumber(1) {
+Tokenizer::Tokenizer(const String8& filename, FileMap* fileMap, char* buffer, size_t length) :
+        mFilename(filename), mFileMap(fileMap),
+        mBuffer(buffer), mLength(length), mCurrent(buffer), mLineNumber(1) {
 }
 
 Tokenizer::~Tokenizer() {
     if (mFileMap) {
         mFileMap->release();
+    } else {
+        delete[] mBuffer;
     }
 }
 
@@ -63,22 +63,33 @@ status_t Tokenizer::open(const String8& filename, Tokenizer** outTokenizer) {
             LOGE("Error getting size of file '%s', %s.", filename.string(), strerror(errno));
         } else {
             size_t length = size_t(stat.st_size);
-            FileMap* fileMap = new FileMap();
-            if (!fileMap->create(NULL, fd, 0, length, true)) {
-                result = NO_MEMORY;
-                LOGE("Error mapping file '%s', %s.", filename.string(), strerror(errno));
-            } else {
-                fileMap->advise(FileMap::SEQUENTIAL);
 
-                *outTokenizer = new Tokenizer(filename, fileMap,
-                        static_cast<const char*>(fileMap->getDataPtr()), length);
-                if (!*outTokenizer) {
-                    result = NO_MEMORY;
-                    LOGE("Error allocating tokenizer for file=%s.", filename.string());
+            FileMap* fileMap = new FileMap();
+            char* buffer;
+            if (fileMap->create(NULL, fd, 0, length, true)) {
+                fileMap->advise(FileMap::SEQUENTIAL);
+                buffer = static_cast<char*>(fileMap->getDataPtr());
+            } else {
+                fileMap->release();
+                fileMap = NULL;
+
+                // Fall back to reading into a buffer since we can't mmap files in sysfs.
+                // The length we obtained from stat is wrong too (it will always be 4096)
+                // so we must trust that read will read the entire file.
+                buffer = new char[length];
+                ssize_t nrd = read(fd, buffer, length);
+                if (nrd < 0) {
+                    result = -errno;
+                    LOGE("Error reading file '%s', %s.", filename.string(), strerror(errno));
+                    delete[] buffer;
+                    buffer = NULL;
+                } else {
+                    length = size_t(nrd);
                 }
             }
-            if (result) {
-                fileMap->release();
+
+            if (!result) {
+                *outTokenizer = new Tokenizer(filename, fileMap, buffer, length);
             }
         }
         close(fd);

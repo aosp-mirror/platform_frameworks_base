@@ -497,6 +497,23 @@ private:
     KeyedVector<int32_t, MotionRange> mMotionRanges;
 };
 
+/*
+ * Identifies a device.
+ */
+struct InputDeviceIdentifier {
+    inline InputDeviceIdentifier() :
+            bus(0), vendor(0), product(0), version(0) {
+    }
+
+    String8 name;
+    String8 location;
+    String8 uniqueId;
+    uint16_t bus;
+    uint16_t vendor;
+    uint16_t product;
+    uint16_t version;
+};
+
 /* Types of input device configuration files. */
 enum InputDeviceConfigurationFileType {
     INPUT_DEVICE_CONFIGURATION_FILE_TYPE_CONFIGURATION = 0,     /* .idc file */
@@ -505,13 +522,28 @@ enum InputDeviceConfigurationFileType {
 };
 
 /*
- * Get the path of an input device configuration file, if one is available.
- * Spaces in the name are replaced with underscores.
+ * Gets the path of an input device configuration file, if one is available.
  * Considers both system provided and user installed configuration files.
+ *
+ * The device identifier is used to construct several default configuration file
+ * names to try based on the device name, vendor, product, and version.
  *
  * Returns an empty string if not found.
  */
-extern String8 getInputDeviceConfigurationFilePath(
+extern String8 getInputDeviceConfigurationFilePathByDeviceIdentifier(
+        const InputDeviceIdentifier& deviceIdentifier,
+        InputDeviceConfigurationFileType type);
+
+/*
+ * Gets the path of an input device configuration file, if one is available.
+ * Considers both system provided and user installed configuration files.
+ *
+ * The name is case-sensitive and is used to construct the filename to resolve.
+ * All characters except 'a'-'z', 'A'-'Z', '0'-'9', '-', and '_' are replaced by underscores.
+ *
+ * Returns an empty string if not found.
+ */
+extern String8 getInputDeviceConfigurationFilePathByName(
         const String8& name, InputDeviceConfigurationFileType type);
 
 } // namespace android

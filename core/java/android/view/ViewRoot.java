@@ -2611,6 +2611,10 @@ public final class ViewRoot extends Handler implements ViewParent,
             captureKeyLog("captureDispatchKeyEvent", event);
         }
 
+        // Make sure the fallback event policy sees all keys that will be delivered to the
+        // view hierarchy.
+        mFallbackEventHandler.preDispatchKeyEvent(event);
+
         // Deliver the key to the view hierarchy.
         if (mView.dispatchKeyEvent(event)) {
             finishKeyEvent(event, sendDone, true);

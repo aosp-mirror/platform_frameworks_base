@@ -35,17 +35,6 @@ namespace android {
 class InputDevice;
 class InputMapper;
 
-/* Describes a virtual key. */
-struct VirtualKeyDefinition {
-    int32_t scanCode;
-
-    // configured position data, specified in display coords
-    int32_t centerX;
-    int32_t centerY;
-    int32_t width;
-    int32_t height;
-};
-
 
 /*
  * Input reader policy interface.
@@ -85,10 +74,6 @@ public:
      * where touch coordinate data can get corrupted.
      */
     virtual bool filterJumpyTouchEvents() = 0;
-
-    /* Gets the configured virtual key definitions for an input device. */
-    virtual void getVirtualKeyDefinitions(const String8& deviceName,
-            Vector<VirtualKeyDefinition>& outVirtualKeyDefinitions) = 0;
 
     /* Gets the excluded device names for the platform. */
     virtual void getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames) = 0;

@@ -195,6 +195,24 @@ String8::~String8()
     SharedBuffer::bufferFromData(mString)->release();
 }
 
+String8 String8::format(const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+
+    String8 result(formatV(fmt, args));
+
+    va_end(args);
+    return result;
+}
+
+String8 String8::formatV(const char* fmt, va_list args)
+{
+    String8 result;
+    result.appendFormatV(fmt, args);
+    return result;
+}
+
 void String8::clear() {
     SharedBuffer::bufferFromData(mString)->release();
     mString = getEmptyString();
