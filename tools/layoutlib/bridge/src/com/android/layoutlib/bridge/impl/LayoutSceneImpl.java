@@ -38,6 +38,7 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeInflater;
+import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeWindow;
 import com.android.layoutlib.bridge.android.BridgeWindowSession;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
@@ -58,6 +59,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.View.AttachInfo;
 import android.view.View.MeasureSpec;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.TabHost;
 import android.widget.TabWidget;
@@ -568,9 +570,10 @@ public class LayoutSceneImpl {
     }
 
     public SceneResult moveChild(ViewGroup parentView, View childView, int index,
-            IAnimationListener listener) {
+            Map<String, String> layoutParamsMap, IAnimationListener listener) {
         checkLock();
 
+        LayoutParams layoutParams = null;
         try {
             ViewParent parent = childView.getParent();
             if (parent instanceof ViewGroup) {
@@ -579,7 +582,16 @@ public class LayoutSceneImpl {
             }
 
             // add it to the parentView in the correct location
-            parentView.addView(childView, index);
+
+            if (layoutParamsMap != null) {
+                // need to create a new LayoutParams object for the new parent.
+                layoutParams = parentView.generateLayoutParams(
+                        new BridgeLayoutParamsMapAttributes(layoutParamsMap));
+
+                parentView.addView(childView, index, layoutParams);
+            } else {
+                parentView.addView(childView, index);
+            }
         } catch (UnsupportedOperationException e) {
             // looks like this is a view class that doesn't support children manipulation!
             return new SceneResult(SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN);
@@ -587,7 +599,12 @@ public class LayoutSceneImpl {
 
         invalidateRenderingSize();
 
-        return render();
+        SceneResult result = render();
+        if (layoutParams != null && result.isSuccess()) {
+            result.setData(layoutParams);
+        }
+
+        return result;
     }
 
     public SceneResult removeChild(View childView, IAnimationListener listener) {

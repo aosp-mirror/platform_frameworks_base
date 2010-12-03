@@ -319,18 +319,14 @@ public final class BridgeContext extends Activity {
     public TypedArray obtainStyledAttributes(AttributeSet set, int[] attrs,
             int defStyleAttr, int defStyleRes) {
 
-        // Hint: for XmlPullParser, attach source //DEVICE_SRC/dalvik/libcore/xml/src/java
-        BridgeXmlBlockParser parser = null;
-        if (set instanceof BridgeXmlBlockParser) {
-            parser = (BridgeXmlBlockParser)set;
-        } else if (set != null) { // null parser is ok
-            // really this should not be happening since its instantiated in Bridge
-            mLogger.error("Parser is not a BridgeXmlBlockParser!");
-            return null;
-        }
-
         Map<String, String> defaultPropMap = null;
-        if (parser != null) {
+        boolean isPlatformFile = true;
+
+        // Hint: for XmlPullParser, attach source //DEVICE_SRC/dalvik/libcore/xml/src/java
+        if (set instanceof BridgeXmlBlockParser) {
+            BridgeXmlBlockParser parser = null;
+            parser = (BridgeXmlBlockParser)set;
+
             Object key = parser.getViewKey();
             if (key != null) {
                 defaultPropMap = mDefaultPropMaps.get(key);
@@ -339,21 +335,28 @@ public final class BridgeContext extends Activity {
                     mDefaultPropMaps.put(key, defaultPropMap);
                 }
             }
+
+        } else if (set instanceof BridgeLayoutParamsMapAttributes) {
+            // good, nothing to do.
+        } else if (set != null) { // null parser is ok
+            // really this should not be happening since its instantiated in Bridge
+            mLogger.error("Parser is not a BridgeXmlBlockParser!");
+            return null;
         }
 
         boolean[] frameworkAttributes = new boolean[1];
         TreeMap<Integer, String> styleNameMap = searchAttrs(attrs, frameworkAttributes);
 
         BridgeTypedArray ta = ((BridgeResources) mResources).newTypeArray(attrs.length,
-                parser != null ? parser.isPlatformFile() : true);
+                isPlatformFile);
 
         // resolve the defStyleAttr value into a IStyleResourceValue
         IStyleResourceValue defStyleValues = null;
 
         // look for a custom style.
         String customStyle = null;
-        if (parser != null) {
-            customStyle = parser.getAttributeValue(null /* namespace*/, "style");
+        if (set != null) {
+            customStyle = set.getAttributeValue(null /* namespace*/, "style");
         }
         if (customStyle != null) {
             IResourceValue item = findResValue(customStyle, false /*forceFrameworkOnly*/);
@@ -406,8 +409,8 @@ public final class BridgeContext extends Activity {
 
                 String name = styleAttribute.getValue();
                 String value = null;
-                if (parser != null) {
-                    value = parser.getAttributeValue(namespace, name);
+                if (set != null) {
+                    value = set.getAttributeValue(namespace, name);
                 }
 
                 // if there's no direct value for this attribute in the XML, we look for default
