@@ -3553,6 +3553,9 @@ public class WebView extends AbsoluteLayout
             // When drawing the title bar, move it horizontally to always show
             // at the top of the WebView.
             mTitleBar.offsetLeftAndRight(mScrollX - mTitleBar.getLeft());
+            int newTop = Math.min(0, mScrollY);
+            mTitleBar.setBottom(newTop + getTitleHeight());
+            mTitleBar.setTop(newTop);
         }
         return super.drawChild(canvas, child, drawingTime);
     }
