@@ -11344,8 +11344,12 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mToBottomApps.size() > 0) {
                 pw.print("  mToBottomApps="); pw.println(mToBottomApps);
             }
-            pw.print("  DisplayWidth="); pw.print(mDisplay.getWidth());
-                    pw.print(" DisplayHeight="); pw.println(mDisplay.getHeight());
+            if (mDisplay != null) {
+                pw.print("  DisplayWidth="); pw.print(mDisplay.getWidth());
+                        pw.print(" DisplayHeight="); pw.println(mDisplay.getHeight());
+            } else {
+                pw.println("  NO DISPLAY");
+            }
         }
     }
 
