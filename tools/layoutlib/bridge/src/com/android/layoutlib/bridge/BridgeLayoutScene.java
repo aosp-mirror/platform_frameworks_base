@@ -119,7 +119,7 @@ public class BridgeLayoutScene extends LayoutScene {
 
     @Override
     public SceneResult moveChild(Object parentView, Object childView, int index,
-            IAnimationListener listener) {
+            Map<String, String> layoutParams, IAnimationListener listener) {
         if (parentView instanceof ViewGroup == false) {
             throw new IllegalArgumentException("parentView is not a ViewGroup");
         }
