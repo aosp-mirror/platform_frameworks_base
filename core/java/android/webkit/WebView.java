@@ -1243,7 +1243,7 @@ public class WebView extends AbsoluteLayout
         if (!isVerticalScrollBarEnabled() || mOverlayVerticalScrollbar) {
             return getWidth();
         } else {
-            return getWidth() - getVerticalScrollbarWidth();
+            return Math.max(0, getWidth() - getVerticalScrollbarWidth());
         }
     }
 
