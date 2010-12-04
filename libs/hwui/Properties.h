@@ -25,6 +25,9 @@
  * the OpenGLRenderer.
  */
 
+// If turned on, layers drawn inside FBOs are optimized with regions
+#define RENDER_LAYERS_AS_REGIONS 0
+
 /**
  * Debug level for app developers.
  */
