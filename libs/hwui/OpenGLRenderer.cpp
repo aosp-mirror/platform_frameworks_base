@@ -936,7 +936,8 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
     const Patch* mesh = mCaches.patchCache.get(bitmap->width(), bitmap->height(),
             right - left, bottom - top, xDivs, yDivs, colors, width, height, numColors);
 
-    if (mesh) {
+    if (mesh && mesh->verticesCount > 0) {
+#if RENDER_LAYERS_AS_REGIONS
         // Mark the current layer dirty where we are going to draw the patch
         if ((mSnapshot->flags & Snapshot::kFlagFboTarget) &&
                 mSnapshot->region && mesh->hasEmptyQuads) {
@@ -947,14 +948,12 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
                         *mSnapshot->transform);
             }
         }
+#endif
 
         drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f,
                 mode, texture->blend, (GLvoid*) 0, (GLvoid*) gMeshTextureOffset,
                 GL_TRIANGLES, mesh->verticesCount, false, false, mesh->meshBuffer,
                 true, !mesh->hasEmptyQuads);
-    } else {
-        PATCH_LOGD("Invisible 9patch, ignoring (%.2f, %.2f, %.2f, %.2f)",
-                left, top, right, bottom);
     }
 }
 

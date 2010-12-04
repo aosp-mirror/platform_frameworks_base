@@ -51,18 +51,22 @@ struct Patch {
 
     GLuint meshBuffer;
     uint32_t verticesCount;
-    Vector<Rect> quads;
     bool hasEmptyQuads;
+#if RENDER_LAYERS_AS_REGIONS
+    Vector<Rect> quads;
+#endif
 
 private:
     TextureVertex* mVertices;
     bool mUploaded;
 
-    uint32_t mXCount;
     int32_t* mXDivs;
-    uint32_t mYCount;
     int32_t* mYDivs;
     uint32_t mColorKey;
+
+    uint32_t mXCount;
+    uint32_t mYCount;
+    int8_t mEmptyQuads;
 
     void copy(const int32_t* yDivs);
 
