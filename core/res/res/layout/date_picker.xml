@@ -19,45 +19,74 @@
 
 <!-- Layout of date picker-->
 
-<!-- Warning: everything within the parent is removed and re-ordered depending
-     on the date format selected by the user. -->
+<!-- Warning: everything within the "pickers" layout is removed and re-ordered
+     depending on the date format selected by the user.
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/parent"
-    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     android:layout_gravity="center_horizontal"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:orientation="horizontal"
+    android:gravity="center">
 
-    <!-- Month -->
-    <NumberPicker
-        android:id="@+id/month"
-        android:layout_width="80dip"
+    <LinearLayout android:id="@+id/pickers"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="1dip"
-        android:layout_marginRight="1dip"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        />
+        android:layout_marginRight="15dip"
+        android:layout_weight="0.5"
+        android:orientation="horizontal"
+        android:gravity="center">
 
-    <!-- Day -->
-    <NumberPicker
-        android:id="@+id/day"
-        android:layout_width="80dip"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="1dip"
-        android:layout_marginRight="1dip"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        />
+        <!-- Month -->
+        <NumberPicker
+            android:id="@+id/month"
+            android:layout_width="48dip"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dip"
+            android:layout_marginRight="15dip"
+            android:layout_marginTop="35dip"
+            android:layout_marginBottom="35dip"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            />
 
-    <!-- Year -->
-    <NumberPicker
-        android:id="@+id/year"
-        android:layout_width="95dip"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="1dip"
-        android:layout_marginRight="1dip"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        />
+        <!-- Day -->
+        <NumberPicker
+            android:id="@+id/day"
+            android:layout_width="48dip"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dip"
+            android:layout_marginRight="15dip"
+            android:layout_marginTop="35dip"
+            android:layout_marginBottom="35dip"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            />
+
+        <!-- Year -->
+        <NumberPicker
+            android:id="@+id/year"
+            android:layout_width="48dip"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dip"
+            android:layout_marginRight="15dip"
+            android:layout_marginTop="35dip"
+            android:layout_marginBottom="35dip"       
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            />
+
+    </LinearLayout>
+
+    <!-- mini-month day-picker -->
+      <DayPicker
+          android:id="@+id/mini_month_day_picker"
+          android:layout_width="200dip"
+          android:layout_height="230dip"
+          android:layout_marginLeft="15dip"
+          android:layout_weight="0.5"
+          android:focusable="true"
+          android:focusableInTouchMode="true"
+          />
+
 </LinearLayout>

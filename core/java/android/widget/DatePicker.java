@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -26,50 +28,44 @@ import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
-import android.widget.NumberPicker;
-import android.widget.NumberPicker.OnChangedListener;
+import android.widget.NumberPicker.OnChangeListener;
 
-import com.android.internal.R;
-
-import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
 /**
  * A view for selecting a month / year / day based on a calendar like layout.
- *
- * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-datepicker.html">Date Picker
- * tutorial</a>.</p>
- *
+ * <p>
+ * See the <a href="{@docRoot}
+ * resources/tutorials/views/hello-datepicker.html">Date Picker tutorial</a>.
+ * </p>
  * For a dialog using this view, see {@link android.app.DatePickerDialog}.
  */
 @Widget
 public class DatePicker extends FrameLayout {
 
     private static final int DEFAULT_START_YEAR = 1900;
+
     private static final int DEFAULT_END_YEAR = 2100;
 
-    // This ignores Undecimber, but we only support real Gregorian calendars.
-    private static final int NUMBER_OF_MONTHS = 12;
-
-    /* UI Components */
     private final NumberPicker mDayPicker;
+
     private final NumberPicker mMonthPicker;
+
     private final NumberPicker mYearPicker;
 
-    /**
-     * How we notify users the date has changed.
-     */
-    private OnDateChangedListener mOnDateChangedListener;
-    
-    private int mDay;
-    private int mMonth;
-    private int mYear;
+    private final DayPicker mMiniMonthDayPicker;
 
-    private Object mMonthUpdateLock = new Object();
-    private volatile Locale mMonthLocale;
-    private String[] mShortMonths;
+    private OnDateChangedListener mOnDateChangedListener;
+
+    private Locale mMonthLocale;
+
+    private final Calendar mTempCalendar = Calendar.getInstance();
+
+    private final int mNumberOfMonths = mTempCalendar.getActualMaximum(Calendar.MONTH) + 1;
+
+    private final String[] mShortMonths = new String[mNumberOfMonths];
 
     /**
      * The callback used to indicate the user changes the date.
@@ -80,7 +76,7 @@ public class DatePicker extends FrameLayout {
          * @param view The view associated with this listener.
          * @param year The year that was set.
          * @param monthOfYear The month that was set (0-11) for compatibility
-         *  with {@link java.util.Calendar}.
+         *            with {@link java.util.Calendar}.
          * @param dayOfMonth The day of the month that was set.
          */
         void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth);
@@ -89,7 +85,7 @@ public class DatePicker extends FrameLayout {
     public DatePicker(Context context) {
         this(context, null);
     }
-    
+
     public DatePicker(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
@@ -97,103 +93,85 @@ public class DatePicker extends FrameLayout {
     public DatePicker(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater) context
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.date_picker, this, true);
 
+        OnChangeListener onChangeListener = new OnChangeListener() {
+            public void onChanged(NumberPicker picker, int oldVal, int newVal) {
+                notifyDateChanged();
+                updateMiniMonth();
+            }
+        };
+
+        // day
         mDayPicker = (NumberPicker) findViewById(R.id.day);
         mDayPicker.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
         mDayPicker.setSpeed(100);
-        mDayPicker.setOnChangeListener(new OnChangedListener() {
-            public void onChanged(NumberPicker picker, int oldVal, int newVal) {
-                mDay = newVal;
-                notifyDateChanged();
-            }
-        });
+        mDayPicker.setOnChangeListener(onChangeListener);
+
+        // month
         mMonthPicker = (NumberPicker) findViewById(R.id.month);
-        mMonthPicker.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
-        final String[] months = getShortMonths();
-
-        /*
-         * If the user is in a locale where the month names are numeric,
-         * use just the number instead of the "month" character for
-         * consistency with the other fields.
-         */
-        if (months[0].startsWith("1")) {
-            for (int i = 0; i < months.length; i++) {
-                months[i] = String.valueOf(i + 1);
-            }
-            mMonthPicker.setRange(1, NUMBER_OF_MONTHS);
-        } else {
-            mMonthPicker.setRange(1, NUMBER_OF_MONTHS, months);
-        }
-
+        mMonthPicker.setRange(0, mNumberOfMonths - 1, getShortMonths());
         mMonthPicker.setSpeed(200);
-        mMonthPicker.setOnChangeListener(new OnChangedListener() {
-            public void onChanged(NumberPicker picker, int oldVal, int newVal) {
-                
-                /* We display the month 1-12 but store it 0-11 so always
-                 * subtract by one to ensure our internal state is always 0-11
-                 */
-                mMonth = newVal - 1;
-                // Adjust max day of the month
-                adjustMaxDay();
-                notifyDateChanged();
-                updateDaySpinner();
-            }
-        });
+        mMonthPicker.setOnChangeListener(onChangeListener);
+
+        // year
         mYearPicker = (NumberPicker) findViewById(R.id.year);
         mYearPicker.setSpeed(100);
-        mYearPicker.setOnChangeListener(new OnChangedListener() {
-            public void onChanged(NumberPicker picker, int oldVal, int newVal) {
-                mYear = newVal;
-                // Adjust max day for leap years if needed
-                adjustMaxDay();
-                notifyDateChanged();
-                updateDaySpinner();
-            }
-        });
-        
-        // attributes
+        mYearPicker.setOnChangeListener(onChangeListener);
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DatePicker);
-
         int mStartYear = a.getInt(R.styleable.DatePicker_startYear, DEFAULT_START_YEAR);
         int mEndYear = a.getInt(R.styleable.DatePicker_endYear, DEFAULT_END_YEAR);
         mYearPicker.setRange(mStartYear, mEndYear);
-        
         a.recycle();
+
+        // mini-month day-picker
+        mMiniMonthDayPicker = (DayPicker) findViewById(R.id.mini_month_day_picker);
+        mTempCalendar.clear();
+        mTempCalendar.set(mStartYear, 0, 1);
+        Calendar endRangeDate = (Calendar) mTempCalendar.clone();
+        endRangeDate.set(mEndYear, 11, 31);
+        mMiniMonthDayPicker.setRange(mTempCalendar, endRangeDate);
+        mMiniMonthDayPicker.setOnDateChangeListener(new DayPicker.OnSelectedDayChangeListener() {
+            public void onSelectedDayChange(DayPicker view, int year, int month, int monthDay) {
+                updateDate(year, month, monthDay);
+            }
+        });
         
         // initialize to current date
-        Calendar cal = Calendar.getInstance();
-        init(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH), null);
-        
+        mTempCalendar.setTimeInMillis(System.currentTimeMillis());
+        init(mTempCalendar.get(Calendar.YEAR), mTempCalendar.get(Calendar.MONTH),
+                mTempCalendar.get(Calendar.DAY_OF_MONTH), null);
+
         // re-order the number pickers to match the current date format
-        reorderPickers(months);
-        
-        if (!isEnabled()) {
-            setEnabled(false);
-        }
+        reorderPickers();
     }
-    
+
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
         mDayPicker.setEnabled(enabled);
         mMonthPicker.setEnabled(enabled);
         mYearPicker.setEnabled(enabled);
+        mMiniMonthDayPicker.setEnabled(enabled);
     }
 
-    private void reorderPickers(String[] months) {
+    /**
+     * Reorders the pickers according to the date format in the current locale.
+     */
+    private void reorderPickers() {
         java.text.DateFormat format;
         String order;
 
         /*
-         * If the user is in a locale where the medium date format is
-         * still numeric (Japanese and Czech, for example), respect
-         * the date format order setting.  Otherwise, use the order
-         * that the locale says is appropriate for a spelled-out date.
+         * If the user is in a locale where the medium date format is still
+         * numeric (Japanese and Czech, for example), respect the date format
+         * order setting. Otherwise, use the order that the locale says is
+         * appropriate for a spelled-out date.
          */
 
-        if (months[0].startsWith("1")) {
+        if (getShortMonths()[0].startsWith("1")) {
             format = DateFormat.getDateFormat(getContext());
         } else {
             format = DateFormat.getMediumDateFormat(getContext());
@@ -206,10 +184,11 @@ public class DatePicker extends FrameLayout {
             order = new String(DateFormat.getDateFormatOrder(getContext()));
         }
 
-        /* Remove the 3 pickers from their parent and then add them back in the
+        /*
+         * Remove the 3 pickers from their parent and then add them back in the
          * required order.
          */
-        LinearLayout parent = (LinearLayout) findViewById(R.id.parent);
+        LinearLayout parent = (LinearLayout) findViewById(R.id.pickers);
         parent.removeAllViews();
 
         boolean quoted = false;
@@ -230,7 +209,7 @@ public class DatePicker extends FrameLayout {
                     parent.addView(mMonthPicker);
                     didMonth = true;
                 } else if (c == DateFormat.YEAR && !didYear) {
-                    parent.addView (mYearPicker);
+                    parent.addView(mYearPicker);
                     didYear = true;
                 }
             }
@@ -248,40 +227,145 @@ public class DatePicker extends FrameLayout {
         }
     }
 
-    public void updateDate(int year, int monthOfYear, int dayOfMonth) {
-        if (mYear != year || mMonth != monthOfYear || mDay != dayOfMonth) {
-            mYear = year;
-            mMonth = monthOfYear;
-            mDay = dayOfMonth;
-            updateSpinners();
-            reorderPickers(getShortMonths());
+    /**
+     * Updates the current date.
+     *
+     * @param year The year.
+     * @param month The month which is <strong>starting from zero</strong>.
+     * @param dayOfMonth The day of the month.
+     */
+    public void updateDate(int year, int month, int dayOfMonth) {
+        if (mYearPicker.getCurrent() != year
+                || mDayPicker.getCurrent() != dayOfMonth
+                || mMonthPicker.getCurrent() != month) {
+            updatePickers(year, month, dayOfMonth);
+            updateMiniMonth();
             notifyDateChanged();
         }
     }
 
+    /**
+     * @return The short month abbreviations.
+     */
     private String[] getShortMonths() {
         final Locale currentLocale = Locale.getDefault();
-        if (currentLocale.equals(mMonthLocale) && mShortMonths != null) {
+        if (currentLocale.equals(mMonthLocale)) {
             return mShortMonths;
         } else {
-            synchronized (mMonthUpdateLock) {
-                if (!currentLocale.equals(mMonthLocale)) {
-                    mShortMonths = new String[NUMBER_OF_MONTHS];
-                    for (int i = 0; i < NUMBER_OF_MONTHS; i++) {
-                        mShortMonths[i] = DateUtils.getMonthString(Calendar.JANUARY + i,
-                                DateUtils.LENGTH_MEDIUM);
-                    }
-                    mMonthLocale = currentLocale;
-                }
+            for (int i = 0; i < mNumberOfMonths; i++) {
+                mShortMonths[i] = DateUtils.getMonthString(Calendar.JANUARY + i,
+                        DateUtils.LENGTH_MEDIUM);
             }
+            mMonthLocale = currentLocale;
             return mShortMonths;
         }
     }
 
+    // Override so we are in complete control of save / restore for this widget.
+    @Override
+    protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
+        dispatchThawSelfOnly(container);
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        return new SavedState(superState, mYearPicker.getCurrent(), mMonthPicker.getCurrent(),
+                mDayPicker.getCurrent());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        SavedState ss = (SavedState) state;
+        super.onRestoreInstanceState(ss.getSuperState());
+        updatePickers(ss.mYear, ss.mMonth, ss.mDay);
+    }
+
+    /**
+     * Initialize the state. If the provided values designate an inconsistent
+     * date the values are normalized before updating the pickers.
+     *
+     * @param year The initial year.
+     * @param monthOfYear The initial month <strong>starting from zero</strong>.
+     * @param dayOfMonth The initial day of the month.
+     * @param onDateChangedListener How user is notified date is changed by
+     *            user, can be null.
+     */
+    public void init(int year, int monthOfYear, int dayOfMonth,
+            OnDateChangedListener onDateChangedListener) {
+        mOnDateChangedListener = onDateChangedListener;
+        updateDate(year, monthOfYear, dayOfMonth);
+    }
+
+    /**
+     * Updates the pickers with the given <code>year</code>, <code>month</code>,
+     * and <code>dayOfMonth</code>. If the provided values designate an inconsistent
+     * date the values are normalized before updating the pickers.
+     */
+    private void updatePickers(int year, int month, int dayOfMonth) {
+        // make sure the date is normalized
+        mTempCalendar.clear();
+        mTempCalendar.set(year, month, dayOfMonth);
+        mYearPicker.setCurrent(mTempCalendar.get(Calendar.YEAR));
+        mMonthPicker.setCurrent(mTempCalendar.get(Calendar.MONTH));
+        mDayPicker.setRange(1, mTempCalendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        mDayPicker.setCurrent(mTempCalendar.get(Calendar.DAY_OF_MONTH));
+    }
+
+    /**
+     * Updates the mini-month with the given year, month, and day selected by the
+     * number pickers.
+     */
+    private void updateMiniMonth() {
+        Calendar selectedDay = mMiniMonthDayPicker.getSelectedDay();
+        if (selectedDay.get(Calendar.YEAR) != mYearPicker.getCurrent()
+                || selectedDay.get(Calendar.MONTH) != mMonthPicker.getCurrent()
+                || selectedDay.get(Calendar.DAY_OF_MONTH) != mDayPicker.getCurrent()) {
+            mMiniMonthDayPicker.goTo(mYearPicker.getCurrent(), mMonthPicker.getCurrent(),
+                    mDayPicker.getCurrent(), false, true, false);
+        }
+    }
+
+    /**
+     * @return The selected year.
+     */
+    public int getYear() {
+        return mYearPicker.getCurrent();
+    }
+
+    /**
+     * @return The selected month.
+     */
+    public int getMonth() {
+        return mMonthPicker.getCurrent();
+    }
+
+    /**
+     * @return The selected day of month.
+     */
+    public int getDayOfMonth() {
+        return mDayPicker.getCurrent();
+    }
+
+    /**
+     * Notifies the listener, if such, for a change in the selected date.
+     */
+    private void notifyDateChanged() {
+        if (mOnDateChangedListener != null) {
+            mOnDateChangedListener.onDateChanged(DatePicker.this, mYearPicker.getCurrent(),
+                    mMonthPicker.getCurrent(), mDayPicker.getCurrent());
+        }
+    }
+
+    /**
+     * Class for managing state storing/restoring.
+     */
     private static class SavedState extends BaseSavedState {
 
         private final int mYear;
+
         private final int mMonth;
+
         private final int mDay;
 
         /**
@@ -293,7 +377,7 @@ public class DatePicker extends FrameLayout {
             mMonth = month;
             mDay = day;
         }
-        
+
         /**
          * Constructor called from {@link #CREATOR}
          */
@@ -304,18 +388,6 @@ public class DatePicker extends FrameLayout {
             mDay = in.readInt();
         }
 
-        public int getYear() {
-            return mYear;
-        }
-
-        public int getMonth() {
-            return mMonth;
-        }
-
-        public int getDay() {
-            return mDay;
-        }
-
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             super.writeToParcel(dest, flags);
@@ -324,104 +396,17 @@ public class DatePicker extends FrameLayout {
             dest.writeInt(mDay);
         }
 
-        public static final Parcelable.Creator<SavedState> CREATOR =
-                new Creator<SavedState>() {
+        @SuppressWarnings("all")
+        // suppress unused and hiding
+        public static final Parcelable.Creator<SavedState> CREATOR = new Creator<SavedState>() {
 
-                    public SavedState createFromParcel(Parcel in) {
-                        return new SavedState(in);
-                    }
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
 
-                    public SavedState[] newArray(int size) {
-                        return new SavedState[size];
-                    }
-                };
-    }
-
-
-    /**
-     * Override so we are in complete control of save / restore for this widget.
-     */
-    @Override
-    protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
-        dispatchThawSelfOnly(container);
-    }
-
-    @Override
-    protected Parcelable onSaveInstanceState() {
-        Parcelable superState = super.onSaveInstanceState();
-        
-        return new SavedState(superState, mYear, mMonth, mDay);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Parcelable state) {
-        SavedState ss = (SavedState) state;
-        super.onRestoreInstanceState(ss.getSuperState());
-        mYear = ss.getYear();
-        mMonth = ss.getMonth();
-        mDay = ss.getDay();
-        updateSpinners();
-    }
-
-    /**
-     * Initialize the state.
-     * @param year The initial year.
-     * @param monthOfYear The initial month.
-     * @param dayOfMonth The initial day of the month.
-     * @param onDateChangedListener How user is notified date is changed by user, can be null.
-     */
-    public void init(int year, int monthOfYear, int dayOfMonth,
-            OnDateChangedListener onDateChangedListener) {
-        mYear = year;
-        mMonth = monthOfYear;
-        mDay = dayOfMonth;
-        mOnDateChangedListener = onDateChangedListener;
-        updateSpinners();
-    }
-
-    private void updateSpinners() {
-        updateDaySpinner();
-        mYearPicker.setCurrent(mYear);
-        
-        /* The month display uses 1-12 but our internal state stores it
-         * 0-11 so add one when setting the display.
-         */
-        mMonthPicker.setCurrent(mMonth + 1);
-    }
-
-    private void updateDaySpinner() {
-        Calendar cal = Calendar.getInstance();
-        cal.set(mYear, mMonth, mDay);
-        int max = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-        mDayPicker.setRange(1, max);
-        mDayPicker.setCurrent(mDay);
-    }
-
-    public int getYear() {
-        return mYear;
-    }
-
-    public int getMonth() {
-        return mMonth;
-    }
-
-    public int getDayOfMonth() {
-        return mDay;
-    }
-
-    private void adjustMaxDay(){
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.YEAR, mYear);
-        cal.set(Calendar.MONTH, mMonth);
-        int max = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-        if (mDay > max) {
-            mDay = max;
-        }
-    }
-
-    private void notifyDateChanged() {
-        if (mOnDateChangedListener != null) {
-            mOnDateChangedListener.onDateChanged(DatePicker.this, mYear, mMonth, mDay);
-        }
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
     }
 }

@@ -25,7 +25,7 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.NumberPicker.OnChangedListener;
+import android.widget.NumberPicker.OnChangeListener;
 
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
@@ -110,7 +110,7 @@ public class TimePicker extends FrameLayout {
 
         // hour
         mHourPicker = (NumberPicker) findViewById(R.id.hour);
-        mHourPicker.setOnChangeListener(new NumberPicker.OnChangedListener() {
+        mHourPicker.setOnChangeListener(new NumberPicker.OnChangeListener() {
             public void onChanged(NumberPicker spinner, int oldVal, int newVal) {
                 mCurrentHour = newVal;
                 if (!mIs24HourView) {
@@ -137,7 +137,7 @@ public class TimePicker extends FrameLayout {
         mMinutePicker.setRange(0, 59);
         mMinutePicker.setSpeed(100);
         mMinutePicker.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
-        mMinutePicker.setOnChangeListener(new NumberPicker.OnChangedListener() {
+        mMinutePicker.setOnChangeListener(new NumberPicker.OnChangeListener() {
             public void onChanged(NumberPicker spinner, int oldVal, int newVal) {
                 mCurrentMinute = newVal;
                 onTimeChanged();
@@ -146,7 +146,7 @@ public class TimePicker extends FrameLayout {
 
         // am/pm
         mAmPmPicker = (NumberPicker) findViewById(R.id.amPm);
-        mAmPmPicker.setOnChangeListener(new OnChangedListener() {
+        mAmPmPicker.setOnChangeListener(new OnChangeListener() {
             public void onChanged(NumberPicker picker, int oldVal, int newVal) {
                 picker.requestFocus();
                 if (mIsAm) {
@@ -184,7 +184,7 @@ public class TimePicker extends FrameLayout {
             setEnabled(false);
         }
     }
-    
+
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);

@@ -2295,6 +2295,8 @@
 
     <!-- The title of the time picker dialog. [CHAR LIMIT=NONE] -->
     <string name="time_picker_dialog_title">Set time</string>
+    <!-- The title of the date picker dialog. [CHAR LIMIT=NONE] -->
+    <string name="date_picker_dialog_title">Set date</string>
     <!-- Name of the button in the date/time picker to accept the date/time change -->
     <string name="date_time_set">Set</string>
 

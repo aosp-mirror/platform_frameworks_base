@@ -1567,6 +1567,6 @@
   <public type="style" name="Holo.Light.ButtonBar.AlertDialog" />
   <public type="style" name="Holo.SegmentedButton" />
   <public type="style" name="Holo.Light.SegmentedButton" />
-
   <public type="string" name="selectTextMode" />
+
 </resources>
