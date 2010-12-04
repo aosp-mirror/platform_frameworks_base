@@ -19,7 +19,7 @@
 #include <utils/Log.h>
 
 #include "include/MPEG2TSExtractor.h"
-#include "include/LiveSource.h"
+#include "include/LiveSession.h"
 #include "include/NuCachedSource2.h"
 
 #include <media/stagefright/DataSource.h>
@@ -82,8 +82,8 @@ sp<MetaData> MPEG2TSSource::getFormat() {
     sp<MetaData> meta = mImpl->getFormat();
 
     int64_t durationUs;
-    if (mExtractor->mLiveSource != NULL
-            && mExtractor->mLiveSource->getDuration(&durationUs)) {
+    if (mExtractor->mLiveSession != NULL
+            && mExtractor->mLiveSession->getDuration(&durationUs) == OK) {
         meta->setInt64(kKeyDuration, durationUs);
     }
 
@@ -226,32 +226,20 @@ status_t MPEG2TSExtractor::feedMore() {
     return OK;
 }
 
-void MPEG2TSExtractor::setLiveSource(const sp<LiveSource> &liveSource) {
+void MPEG2TSExtractor::setLiveSession(const sp<LiveSession> &liveSession) {
     Mutex::Autolock autoLock(mLock);
 
-    mLiveSource = liveSource;
+    mLiveSession = liveSession;
 }
 
 void MPEG2TSExtractor::seekTo(int64_t seekTimeUs) {
     Mutex::Autolock autoLock(mLock);
 
-    if (mLiveSource == NULL) {
+    if (mLiveSession == NULL) {
         return;
     }
 
-    if (mDataSource->flags() & DataSource::kIsCachingDataSource) {
-        static_cast<NuCachedSource2 *>(mDataSource.get())->suspend();
-    }
-
-    if (mLiveSource->seekTo(seekTimeUs)) {
-        mParser->signalDiscontinuity(true  /* isSeek */);
-        mOffset = 0;
-    }
-
-    if (mDataSource->flags() & DataSource::kIsCachingDataSource) {
-        static_cast<NuCachedSource2 *>(mDataSource.get())
-            ->clearCacheAndResume();
-    }
+    mLiveSession->seekTo(seekTimeUs);
 }
 
 uint32_t MPEG2TSExtractor::flags() const {
@@ -259,7 +247,7 @@ uint32_t MPEG2TSExtractor::flags() const {
 
     uint32_t flags = CAN_PAUSE;
 
-    if (mLiveSource != NULL && mLiveSource->isSeekable()) {
+    if (mLiveSession != NULL && mLiveSession->isSeekable()) {
         flags |= CAN_SEEK_FORWARD | CAN_SEEK_BACKWARD | CAN_SEEK;
     }
 

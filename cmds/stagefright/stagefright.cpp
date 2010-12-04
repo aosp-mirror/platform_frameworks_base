@@ -31,7 +31,7 @@
 #include <media/IMediaPlayerService.h>
 #include <media/stagefright/foundation/ALooper.h>
 #include "include/ARTSPController.h"
-#include "include/LiveSource.h"
+#include "include/LiveSession.h"
 #include "include/NuCachedSource2.h"
 #include <media/stagefright/AudioPlayer.h>
 #include <media/stagefright/DataSource.h>
@@ -560,6 +560,7 @@ int main(int argc, char **argv) {
 
     sp<ALooper> looper;
     sp<ARTSPController> rtspController;
+    sp<LiveSession> liveSession;
 
     int res;
     while ((res = getopt(argc, argv, "han:lm:b:ptsow:kx")) >= 0) {
@@ -852,8 +853,15 @@ int main(int argc, char **argv) {
                 String8 uri("http://");
                 uri.append(filename + 11);
 
-                dataSource = new LiveSource(uri.string());
-                dataSource = new NuCachedSource2(dataSource);
+                if (looper == NULL) {
+                    looper = new ALooper;
+                    looper->start();
+                }
+                liveSession = new LiveSession;
+                looper->registerHandler(liveSession);
+
+                liveSession->connect(uri.string());
+                dataSource = liveSession->getDataSource();
 
                 extractor =
                     MediaExtractor::Create(
