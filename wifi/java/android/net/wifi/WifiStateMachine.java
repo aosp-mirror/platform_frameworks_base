@@ -924,7 +924,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     /**
-     * TODO: doc
+     * Request a wakelock with connectivity service to
+     * keep the device awake until we hand-off from wifi
+     * to an alternate network
      */
     public void requestCmWakeLock() {
         sendMessage(CMD_REQUEST_CM_WAKELOCK);
@@ -2153,13 +2155,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     transitionTo(mDriverStoppingState);
                     mWakeLock.release();
                     break;
-                case CMD_REQUEST_CM_WAKELOCK:
-                    if (mCm == null) {
-                        mCm = (ConnectivityManager)mContext.getSystemService(
-                                Context.CONNECTIVITY_SERVICE);
-                    }
-                    mCm.requestNetworkTransitionWakelock(TAG);
-                    break;
                 case CMD_START_PACKET_FILTERING:
                     WifiNative.startPacketFiltering();
                     break;
@@ -2636,6 +2631,13 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_STOP_DRIVER:
                     sendMessage(CMD_DISCONNECT);
                     deferMessage(message);
+                    break;
+                case CMD_REQUEST_CM_WAKELOCK:
+                    if (mCm == null) {
+                        mCm = (ConnectivityManager)mContext.getSystemService(
+                                Context.CONNECTIVITY_SERVICE);
+                    }
+                    mCm.requestNetworkTransitionWakelock(TAG);
                     break;
                 case CMD_SET_SCAN_MODE:
                     if (message.arg1 == SCAN_ONLY_MODE) {
