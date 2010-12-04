@@ -102,6 +102,8 @@ public class StackView extends AdapterViewAnimator {
 
     private final Rect mTouchRect = new Rect();
 
+    private static final int MIN_TIME_BETWEEN_INTERACTION_AND_AUTOADVANCE = 5000;
+
     /**
      * These variables are all related to the current state of touch interaction
      * with the stack
@@ -124,6 +126,7 @@ public class StackView extends AdapterViewAnimator {
     private boolean mClickFeedbackIsValid = false;
     private StackSlider mStackSlider;
     private boolean mFirstLayoutHappened = false;
+    private long mLastInteractionTime = 0;
     private int mStackMode;
     private int mFramePadding;
     private final Rect stackInvalidateRect = new Rect();
@@ -581,6 +584,7 @@ public class StackView extends AdapterViewAnimator {
         int pointerIndex = ev.findPointerIndex(mActivePointerId);
         float newY = ev.getY(pointerIndex);
         int deltaY = (int) (newY - mInitialY);
+        mLastInteractionTime = System.currentTimeMillis();
 
         if (mVelocityTracker != null) {
             mVelocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
@@ -893,6 +897,15 @@ public class StackView extends AdapterViewAnimator {
 
         mDataChanged = false;
         onLayout();
+    }
+
+    @Override
+    public void advance() {
+        long timeSinceLastInteraction = System.currentTimeMillis() - mLastInteractionTime;
+        if (mSwipeGestureType == GESTURE_NONE &&
+                timeSinceLastInteraction > MIN_TIME_BETWEEN_INTERACTION_AND_AUTOADVANCE) {
+            showNext();
+        }
     }
 
     private void measureChildren() {
