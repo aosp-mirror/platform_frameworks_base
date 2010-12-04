@@ -22,97 +22,167 @@
 
 #include <ui/Keyboard.h>
 #include <ui/KeycodeLabels.h>
+#include <ui/KeyLayoutMap.h>
+#include <ui/KeyCharacterMap.h>
 #include <utils/Errors.h>
 #include <utils/Log.h>
 #include <cutils/properties.h>
 
 namespace android {
 
-static bool probeKeyMap(KeyMapInfo& keyMapInfo, const String8& keyMapName, bool defaultKeyMap) {
-    bool foundOne = false;
-    if (keyMapInfo.keyLayoutFile.isEmpty()) {
-        keyMapInfo.keyLayoutFile.setTo(getInputDeviceConfigurationFilePath(keyMapName,
-                INPUT_DEVICE_CONFIGURATION_FILE_TYPE_KEY_LAYOUT));
-        if (!keyMapInfo.keyLayoutFile.isEmpty()) {
-            foundOne = true;
-        }
-    }
+// --- KeyMap ---
 
-    if (keyMapInfo.keyCharacterMapFile.isEmpty()) {
-        keyMapInfo.keyCharacterMapFile.setTo(getInputDeviceConfigurationFilePath(keyMapName,
-                INPUT_DEVICE_CONFIGURATION_FILE_TYPE_KEY_CHARACTER_MAP));
-        if (!keyMapInfo.keyCharacterMapFile.isEmpty()) {
-            foundOne = true;
-        }
-    }
-
-    if (foundOne && defaultKeyMap) {
-        keyMapInfo.isDefaultKeyMap = true;
-    }
-    return keyMapInfo.isComplete();
+KeyMap::KeyMap() :
+        keyLayoutMap(NULL), keyCharacterMap(NULL) {
 }
 
-status_t resolveKeyMap(const String8& deviceName,
-        const PropertyMap* deviceConfiguration, KeyMapInfo& outKeyMapInfo) {
+KeyMap::~KeyMap() {
+    delete keyLayoutMap;
+    delete keyCharacterMap;
+}
+
+status_t KeyMap::load(const InputDeviceIdentifier& deviceIdenfifier,
+        const PropertyMap* deviceConfiguration) {
     // Use the configured key layout if available.
     if (deviceConfiguration) {
         String8 keyLayoutName;
         if (deviceConfiguration->tryGetProperty(String8("keyboard.layout"),
                 keyLayoutName)) {
-            outKeyMapInfo.keyLayoutFile.setTo(getInputDeviceConfigurationFilePath(
-                    keyLayoutName, INPUT_DEVICE_CONFIGURATION_FILE_TYPE_KEY_LAYOUT));
-            if (outKeyMapInfo.keyLayoutFile.isEmpty()) {
-                LOGW("Configuration for keyboard device '%s' requested keyboard layout '%s' but "
+            status_t status = loadKeyLayout(deviceIdenfifier, keyLayoutName);
+            if (status == NAME_NOT_FOUND) {
+                LOGE("Configuration for keyboard device '%s' requested keyboard layout '%s' but "
                         "it was not found.",
-                        deviceName.string(), keyLayoutName.string());
+                        deviceIdenfifier.name.string(), keyLayoutName.string());
             }
         }
 
         String8 keyCharacterMapName;
         if (deviceConfiguration->tryGetProperty(String8("keyboard.characterMap"),
                 keyCharacterMapName)) {
-            outKeyMapInfo.keyCharacterMapFile.setTo(getInputDeviceConfigurationFilePath(
-                    keyCharacterMapName, INPUT_DEVICE_CONFIGURATION_FILE_TYPE_KEY_CHARACTER_MAP));
-            if (outKeyMapInfo.keyCharacterMapFile.isEmpty()) {
-                LOGW("Configuration for keyboard device '%s' requested keyboard character "
+            status_t status = loadKeyCharacterMap(deviceIdenfifier, keyCharacterMapName);
+            if (status == NAME_NOT_FOUND) {
+                LOGE("Configuration for keyboard device '%s' requested keyboard character "
                         "map '%s' but it was not found.",
-                        deviceName.string(), keyCharacterMapName.string());
+                        deviceIdenfifier.name.string(), keyLayoutName.string());
             }
         }
 
-        if (outKeyMapInfo.isComplete()) {
+        if (isComplete()) {
             return OK;
         }
     }
 
-    // Try searching by device name.
-    if (probeKeyMap(outKeyMapInfo, deviceName, false)) {
+    // Try searching by device identifier.
+    if (probeKeyMap(deviceIdenfifier, String8::empty())) {
         return OK;
     }
 
     // Fall back on the Generic key map.
     // TODO Apply some additional heuristics here to figure out what kind of
-    //      generic key map to use (US English, etc.).
-    if (probeKeyMap(outKeyMapInfo, String8("Generic"), true)) {
+    //      generic key map to use (US English, etc.) for typical external keyboards.
+    if (probeKeyMap(deviceIdenfifier, String8("Generic"))) {
+        return OK;
+    }
+
+    // Try the Virtual key map as a last resort.
+    if (probeKeyMap(deviceIdenfifier, String8("Virtual"))) {
         return OK;
     }
 
     // Give up!
-    LOGE("Could not determine key map for device '%s' and the Generic key map was not found!",
-            deviceName.string());
-    outKeyMapInfo.isDefaultKeyMap = true;
+    LOGE("Could not determine key map for device '%s' and no default key maps were found!",
+            deviceIdenfifier.name.string());
     return NAME_NOT_FOUND;
 }
 
-void setKeyboardProperties(int32_t deviceId, const String8& deviceName,
-        const KeyMapInfo& keyMapInfo) {
+bool KeyMap::probeKeyMap(const InputDeviceIdentifier& deviceIdentifier,
+        const String8& keyMapName) {
+    if (!haveKeyLayout()) {
+        loadKeyLayout(deviceIdentifier, keyMapName);
+    }
+    if (!haveKeyCharacterMap()) {
+        loadKeyCharacterMap(deviceIdentifier, keyMapName);
+    }
+    return isComplete();
+}
+
+status_t KeyMap::loadKeyLayout(const InputDeviceIdentifier& deviceIdentifier,
+        const String8& name) {
+    String8 path(getPath(deviceIdentifier, name,
+            INPUT_DEVICE_CONFIGURATION_FILE_TYPE_KEY_LAYOUT));
+    if (path.isEmpty()) {
+        return NAME_NOT_FOUND;
+    }
+
+    KeyLayoutMap* map;
+    status_t status = KeyLayoutMap::load(path, &map);
+    if (status) {
+        return status;
+    }
+
+    keyLayoutFile.setTo(path);
+    keyLayoutMap = map;
+    return OK;
+}
+
+status_t KeyMap::loadKeyCharacterMap(const InputDeviceIdentifier& deviceIdentifier,
+        const String8& name) {
+    String8 path(getPath(deviceIdentifier, name,
+            INPUT_DEVICE_CONFIGURATION_FILE_TYPE_KEY_CHARACTER_MAP));
+    if (path.isEmpty()) {
+        return NAME_NOT_FOUND;
+    }
+
+    KeyCharacterMap* map;
+    status_t status = KeyCharacterMap::load(path, &map);
+    if (status) {
+        return status;
+    }
+
+    keyCharacterMapFile.setTo(path);
+    keyCharacterMap = map;
+    return OK;
+}
+
+String8 KeyMap::getPath(const InputDeviceIdentifier& deviceIdentifier,
+        const String8& name, InputDeviceConfigurationFileType type) {
+    return name.isEmpty()
+            ? getInputDeviceConfigurationFilePathByDeviceIdentifier(deviceIdentifier, type)
+            : getInputDeviceConfigurationFilePathByName(name, type);
+}
+
+
+// --- Global functions ---
+
+bool isEligibleBuiltInKeyboard(const InputDeviceIdentifier& deviceIdentifier,
+        const PropertyMap* deviceConfiguration, const KeyMap* keyMap) {
+    if (!keyMap->haveKeyCharacterMap()
+            || keyMap->keyCharacterMap->getKeyboardType()
+                    == KeyCharacterMap::KEYBOARD_TYPE_SPECIAL_FUNCTION) {
+        return false;
+    }
+
+    if (deviceConfiguration) {
+        bool builtIn = false;
+        if (deviceConfiguration->tryGetProperty(String8("keyboard.builtIn"), builtIn)
+                && builtIn) {
+            return true;
+        }
+    }
+
+    return strstr(deviceIdentifier.name.string(), "-keypad");
+}
+
+void setKeyboardProperties(int32_t deviceId,
+        const InputDeviceIdentifier& deviceIdentifier,
+        const String8& keyLayoutFile, const String8& keyCharacterMapFile) {
     char propName[PROPERTY_KEY_MAX];
     snprintf(propName, sizeof(propName), "hw.keyboards.%u.devname", deviceId);
-    property_set(propName, deviceName.string());
+    property_set(propName, deviceIdentifier.name.string());
     snprintf(propName, sizeof(propName), "hw.keyboards.%u.klfile", deviceId);
-    property_set(propName, keyMapInfo.keyLayoutFile.string());
+    property_set(propName, keyLayoutFile.string());
     snprintf(propName, sizeof(propName), "hw.keyboards.%u.kcmfile", deviceId);
-    property_set(propName, keyMapInfo.keyCharacterMapFile.string());
+    property_set(propName, keyCharacterMapFile.string());
 }
 
 void clearKeyboardProperties(int32_t deviceId) {
@@ -126,29 +196,24 @@ void clearKeyboardProperties(int32_t deviceId) {
 }
 
 status_t getKeyCharacterMapFile(int32_t deviceId, String8& outKeyCharacterMapFile) {
-    if (deviceId == DEVICE_ID_VIRTUAL_KEYBOARD) {
-        outKeyCharacterMapFile.setTo(getInputDeviceConfigurationFilePath(String8("Virtual"),
-                INPUT_DEVICE_CONFIGURATION_FILE_TYPE_KEY_CHARACTER_MAP));
-        if (!outKeyCharacterMapFile.isEmpty()) {
+    if (deviceId != DEVICE_ID_VIRTUAL_KEYBOARD) {
+        char propName[PROPERTY_KEY_MAX];
+        char fn[PROPERTY_VALUE_MAX];
+        snprintf(propName, sizeof(propName), "hw.keyboards.%u.kcmfile", deviceId);
+        if (property_get(propName, fn, "") > 0) {
+            outKeyCharacterMapFile.setTo(fn);
             return OK;
         }
     }
 
-    char propName[PROPERTY_KEY_MAX];
-    char fn[PROPERTY_VALUE_MAX];
-    snprintf(propName, sizeof(propName), "hw.keyboards.%u.kcmfile", deviceId);
-    if (property_get(propName, fn, "") > 0) {
-        outKeyCharacterMapFile.setTo(fn);
-        return OK;
-    }
-
-    outKeyCharacterMapFile.setTo(getInputDeviceConfigurationFilePath(String8("Generic"),
+    // Default to Virtual since the keyboard does not appear to be installed.
+    outKeyCharacterMapFile.setTo(getInputDeviceConfigurationFilePathByName(String8("Virtual"),
             INPUT_DEVICE_CONFIGURATION_FILE_TYPE_KEY_CHARACTER_MAP));
     if (!outKeyCharacterMapFile.isEmpty()) {
         return OK;
     }
 
-    LOGE("Can't find any key character map files (also tried Virtual and Generic key maps)");
+    LOGE("Can't find any key character map files including the Virtual key map!");
     return NAME_NOT_FOUND;
 }
 

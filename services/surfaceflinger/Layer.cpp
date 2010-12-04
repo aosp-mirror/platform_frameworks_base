@@ -231,7 +231,7 @@ void Layer::setPerFrameData(hwc_layer_t* hwcl) {
         hwcl->handle = NULL;
         return;
     }
-    hwcl->handle = const_cast<native_handle_t*>(buffer->handle);
+    hwcl->handle = buffer->handle;
     // TODO: set the crop value properly
     hwcl->sourceCrop.left   = 0;
     hwcl->sourceCrop.top    = 0;

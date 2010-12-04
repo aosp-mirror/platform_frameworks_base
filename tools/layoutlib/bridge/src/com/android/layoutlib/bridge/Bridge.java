@@ -16,6 +16,7 @@
 
 package com.android.layoutlib.bridge;
 
+import com.android.layoutlib.api.Capabilities;
 import com.android.layoutlib.api.ILayoutLog;
 import com.android.layoutlib.api.IProjectCallback;
 import com.android.layoutlib.api.IResourceValue;
@@ -33,12 +34,14 @@ import com.android.tools.layoutlib.create.OverrideMethod;
 
 import android.graphics.Bitmap;
 import android.graphics.Typeface_Delegate;
+import android.os.Looper;
 import android.util.Finalizers;
 
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
@@ -151,9 +154,17 @@ public final class Bridge extends LayoutBridge {
         }
     };
 
+    private EnumSet<Capabilities> mCapabilities;
+
+
     @Override
     public int getApiLevel() {
         return LayoutBridge.API_CURRENT;
+    }
+
+    @Override
+    public EnumSet<Capabilities> getCapabilities() {
+        return mCapabilities;
     }
 
     /*
@@ -163,6 +174,15 @@ public final class Bridge extends LayoutBridge {
     @Override
     public boolean init(String fontOsLocation, Map<String, Map<String, Integer>> enumValueMap) {
         sEnumValueMap = enumValueMap;
+
+        // don't use EnumSet.allOf(), because the bridge doesn't come with it's specific version
+        // of layoutlib_api. It is provided by the client which could have a more recent version
+        // with newer, unsupported capabilities.
+        mCapabilities = EnumSet.of(
+                Capabilities.RENDER,
+                Capabilities.VIEW_MANIPULATION,
+                Capabilities.ANIMATE);
+
 
         Finalizers.init();
 
@@ -291,20 +311,20 @@ public final class Bridge extends LayoutBridge {
     @Override
     public BridgeLayoutScene createScene(SceneParams params) {
         try {
-            SceneResult lastResult = SceneResult.SUCCESS;
+            SceneResult lastResult = SceneStatus.SUCCESS.getResult();
             LayoutSceneImpl scene = new LayoutSceneImpl(params);
             try {
-                scene.prepareThread();
+                prepareThread();
                 lastResult = scene.init(params.getTimeout());
-                if (lastResult == SceneResult.SUCCESS) {
+                if (lastResult.isSuccess()) {
                     lastResult = scene.inflate();
-                    if (lastResult == SceneResult.SUCCESS) {
+                    if (lastResult.isSuccess()) {
                         lastResult = scene.render();
                     }
                 }
             } finally {
                 scene.release();
-                scene.cleanupThread();
+                cleanupThread();
             }
 
             return new BridgeLayoutScene(scene, lastResult);
@@ -336,6 +356,31 @@ public final class Bridge extends LayoutBridge {
      */
     public static ReentrantLock getLock() {
         return sLock;
+    }
+
+    /**
+     * Prepares the current thread for rendering.
+     *
+     * Note that while this can be called several time, the first call to {@link #cleanupThread()}
+     * will do the clean-up, and make the thread unable to do further scene actions.
+     */
+    public static void prepareThread() {
+        // we need to make sure the Looper has been initialized for this thread.
+        // this is required for View that creates Handler objects.
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
+    }
+
+    /**
+     * Cleans up thread-specific data. After this, the thread cannot be used for scene actions.
+     * <p>
+     * Note that it doesn't matter how many times {@link #prepareThread()} was called, a single
+     * call to this will prevent the thread from doing further scene actions
+     */
+    public static void cleanupThread() {
+        // clean up the looper
+        Looper.sThreadLocal.remove();
     }
 
     /**

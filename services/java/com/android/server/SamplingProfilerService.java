@@ -88,7 +88,7 @@ public class SamplingProfilerService extends Binder {
     private void registerSettingObserver(Context context) {
         ContentResolver contentResolver = context.getContentResolver();
         contentResolver.registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.SAMPLING_PROFILER_HZ),
+                Settings.Secure.getUriFor(Settings.Secure.SAMPLING_PROFILER_MS),
                 false, new SamplingProfilerSettingsObserver(contentResolver));
     }
 
@@ -107,12 +107,11 @@ public class SamplingProfilerService extends Binder {
         }
         @Override
         public void onChange(boolean selfChange) {
-            Integer samplingProfilerHz = Settings.Secure.getInt(
-                    mContentResolver, Settings.Secure.SAMPLING_PROFILER_HZ, 0);
+            Integer samplingProfilerMs = Settings.Secure.getInt(
+                    mContentResolver, Settings.Secure.SAMPLING_PROFILER_MS, 0);
             // setting this secure property will start or stop sampling profiler,
-            // as well as adjust the frequency of taking snapshots.
-            SystemProperties.set("persist.sys.profiler_hz", samplingProfilerHz.toString());
+            // as well as adjust the the time between taking snapshots.
+            SystemProperties.set("persist.sys.profiler_ms", samplingProfilerMs.toString());
         }
     }
 }
-

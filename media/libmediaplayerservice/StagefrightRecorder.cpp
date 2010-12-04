@@ -366,6 +366,9 @@ status_t StagefrightRecorder::setParamMaxFileDurationUs(int64_t timeUs) {
         return BAD_VALUE;
     }
 
+    if (timeUs <= 15 * 1000000LL) {
+        LOGW("Target duration (%lld us) too short to be respected", timeUs);
+    }
     mMaxFileDurationUs = timeUs;
     return OK;
 }
@@ -376,6 +379,11 @@ status_t StagefrightRecorder::setParamMaxFileSizeBytes(int64_t bytes) {
         LOGE("Max file size is too small: %lld bytes", bytes);
         return BAD_VALUE;
     }
+
+    if (bytes <= 100 * 1024) {
+        LOGW("Target file size (%lld bytes) is too small to be respected", bytes);
+    }
+
     mMaxFileSizeBytes = bytes;
     return OK;
 }
@@ -1156,8 +1164,11 @@ status_t StagefrightRecorder::setupVideoEncoder(
     CHECK_EQ(client.connect(), OK);
 
     // Use software codec for time lapse
-    uint32_t encoder_flags = (mCaptureTimeLapse) ? OMXCodec::kPreferSoftwareCodecs : 0;
-    if (mIsMetaDataStoredInVideoBuffers) {
+    uint32_t encoder_flags = 0;
+    if (mCaptureTimeLapse) {
+        encoder_flags |= OMXCodec::kPreferSoftwareCodecs;
+    } else if (mIsMetaDataStoredInVideoBuffers) {
+        encoder_flags |= OMXCodec::kHardwareCodecsOnly;
         encoder_flags |= OMXCodec::kStoreMetaDataInVideoBuffers;
     }
     sp<MediaSource> encoder = OMXCodec::Create(
@@ -1165,6 +1176,11 @@ status_t StagefrightRecorder::setupVideoEncoder(
             true /* createEncoder */, cameraSource,
             NULL, encoder_flags);
     if (encoder == NULL) {
+        LOGW("Failed to create the encoder");
+        // When the encoder fails to be created, we need
+        // release the camera source due to the camera's lock
+        // and unlock mechanism.
+        cameraSource->stop();
         return UNKNOWN_ERROR;
     }
 

@@ -17,11 +17,13 @@
 
 <com.android.systemui.statusbar.tablet.SettingsView
         xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/status_bar_item_background"
         android:paddingLeft="16dp"
+        android:paddingRight="46dp"
         >
 
     <!-- Airplane mode -->
@@ -39,11 +41,12 @@
                 style="@style/StatusBarPanelSettingsContents"
                 android:text="@string/status_bar_settings_airplane"
                 />
-        <CheckBox
+        <Switch
                 android:id="@+id/airplane_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:layout_marginRight="5dp"
                 />
     </LinearLayout>
     <View style="@style/StatusBarPanelSettingsPanelSeparator" />
@@ -67,7 +70,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="top"
             android:layout_marginTop="16dp"
-            android:layout_marginRight="8dp"
+            android:layout_marginRight="2dp"
             android:src="@drawable/ic_notification_open"
             />
     </LinearLayout>
@@ -88,11 +91,12 @@
                 style="@style/StatusBarPanelSettingsContents"
                 android:text="@string/status_bar_settings_rotation_lock"
                 />
-        <CheckBox
+        <Switch
                 android:id="@+id/rotate_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:layout_marginRight="5dp"
                 />
     </LinearLayout>
     <View style="@style/StatusBarPanelSettingsPanelSeparator" />
@@ -104,6 +108,14 @@
                 style="@style/StatusBarPanelSettingsIcon"
                 android:src="@drawable/ic_sysbar_brightness"
                 />
+        <com.android.systemui.statusbar.policy.ToggleSlider
+                android:id="@+id/brightness"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_marginRight="2dp"
+                systemui:text="@string/status_bar_settings_auto_brightness_label"
+                />
     </LinearLayout>
     <View style="@style/StatusBarPanelSettingsPanelSeparator" />
 
@@ -113,6 +125,14 @@
                 android:id="@+id/volume_icon"
                 style="@style/StatusBarPanelSettingsIcon"
                 android:src="@drawable/ic_sysbar_sound_on"
+                />
+        <com.android.systemui.statusbar.policy.ToggleSlider
+                android:id="@+id/volume"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_marginRight="2dp"
+                systemui:text="@string/status_bar_settings_mute_label"
                 />
     </LinearLayout>
     <View style="@style/StatusBarPanelSettingsPanelSeparator" />
@@ -131,11 +151,12 @@
                 style="@style/StatusBarPanelSettingsContents"
                 android:text="@string/status_bar_settings_notifications"
                 />
-        <CheckBox
+        <Switch
                 android:id="@+id/do_not_disturb_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:layout_marginRight="5dp"
                 />
     </LinearLayout>
     <View style="@style/StatusBarPanelSettingsPanelSeparator" />
@@ -160,7 +181,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="top"
             android:layout_marginTop="16dp"
-            android:layout_marginRight="8dp"
+            android:layout_marginRight="2dp"
             android:src="@drawable/ic_notification_open"
             />
     </LinearLayout>

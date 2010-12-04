@@ -359,14 +359,6 @@ bool LiveSource::setupCipher() {
             return false;
         }
 
-        if (keyURI.size() >= 2
-                && keyURI.c_str()[0] == '"'
-                && keyURI.c_str()[keyURI.size() - 1] == '"') {
-            // Remove surrounding quotes.
-            AString tmp(keyURI, 1, keyURI.size() - 2);
-            keyURI = tmp;
-        }
-
         ssize_t index = mAESKeyForURI.indexOfKey(keyURI);
 
         sp<ABuffer> key;

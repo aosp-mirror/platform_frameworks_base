@@ -162,7 +162,7 @@ status_t M3UParser::parse(const void *_data, size_t size) {
                 if (mIsVariantPlaylist) {
                     return ERROR_MALFORMED;
                 }
-                err = parseCipherInfo(line, &itemMeta);
+                err = parseCipherInfo(line, &itemMeta, mBaseURI);
             } else if (line.startsWith("#EXT-X-ENDLIST")) {
                 mIsComplete = true;
             } else if (line.startsWith("#EXTINF")) {
@@ -298,7 +298,7 @@ status_t M3UParser::parseStreamInf(
 
 // static
 status_t M3UParser::parseCipherInfo(
-        const AString &line, sp<AMessage> *meta) {
+        const AString &line, sp<AMessage> *meta, const AString &baseURI) {
     ssize_t colonPos = line.find(":");
 
     if (colonPos < 0) {
@@ -336,6 +336,24 @@ status_t M3UParser::parseCipherInfo(
         if (key == "method" || key == "uri" || key == "iv") {
             if (meta->get() == NULL) {
                 *meta = new AMessage;
+            }
+
+            if (key == "uri") {
+                if (val.size() >= 2
+                        && val.c_str()[0] == '"'
+                        && val.c_str()[val.size() - 1] == '"') {
+                    // Remove surrounding quotes.
+                    AString tmp(val, 1, val.size() - 2);
+                    val = tmp;
+                }
+
+                AString absURI;
+                if (MakeURL(baseURI.c_str(), val.c_str(), &absURI)) {
+                    val = absURI;
+                } else {
+                    LOGE("failed to make absolute url for '%s'.",
+                         val.c_str());
+                }
             }
 
             key.insert(AString("cipher-"), 0);

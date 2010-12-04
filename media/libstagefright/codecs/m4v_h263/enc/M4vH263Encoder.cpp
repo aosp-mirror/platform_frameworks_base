@@ -178,7 +178,7 @@ M4vH263Encoder::M4vH263Encoder(
       mInputFrameData(NULL),
       mGroup(NULL) {
 
-    LOGV("Construct software M4vH263Encoder");
+    LOGI("Construct software M4vH263Encoder");
 
     mHandle = new tagvideoEncControls;
     memset(mHandle, 0, sizeof(tagvideoEncControls));

@@ -571,8 +571,11 @@ class BrowserFrame extends Handler {
             Iterator iter = mJSInterfaceMap.keySet().iterator();
             while (iter.hasNext())  {
                 String interfaceName = (String) iter.next();
-                nativeAddJavascriptInterface(nativeFramePointer,
-                        mJSInterfaceMap.get(interfaceName), interfaceName);
+                Object object = mJSInterfaceMap.get(interfaceName);
+                if (object != null) {
+                    nativeAddJavascriptInterface(nativeFramePointer,
+                            mJSInterfaceMap.get(interfaceName), interfaceName);
+                }
             }
         }
     }
@@ -595,6 +598,7 @@ class BrowserFrame extends Handler {
     }
 
     public void addJavascriptInterface(Object obj, String interfaceName) {
+        assert obj != null;
         if (mJSInterfaceMap == null) {
             mJSInterfaceMap = new HashMap<String, Object>();
         }

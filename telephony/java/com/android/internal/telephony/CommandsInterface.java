@@ -951,22 +951,6 @@ public interface CommandsInterface {
 
     void writeSmsToRuim(int status, String pdu, Message response);
 
-    /**
-     * @param apn
-     * @param user
-     * @param password
-     * @param response
-     */
-    @Deprecated
-    void setupDefaultPDP(String apn, String user, String password, Message response);
-
-    /**
-     * @param cid
-     * @param response
-     */
-    @Deprecated
-    void deactivateDefaultPDP(int cid, Message response);
-
     void setRadioPower(boolean on, Message response);
 
     void acknowledgeLastIncomingGsmSms(boolean success, int cause, Message response);
@@ -1354,10 +1338,12 @@ public interface CommandsInterface {
      *
      * @param cid
      *            The connection ID
+     * @param reason
+     *            Data disconnect reason.
      * @param result
      *            Callback message is empty on completion
      */
-    public void deactivateDataCall(int cid, Message result);
+    public void deactivateDataCall(int cid, int reason, Message result);
 
     /**
      * Activate or deactivate cell broadcast SMS for CDMA.

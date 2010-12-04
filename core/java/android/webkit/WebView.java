@@ -2444,6 +2444,7 @@ public class WebView extends AbsoluteLayout
             mWebViewCore.sendMessage(EventHub.SET_SCROLL_OFFSET,
                     nativeMoveGeneration(), mUserScroll ? 1 : 0, pos);
             mLastVisibleRectSent = rect;
+            mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
         }
         Rect globalRect = new Rect();
         if (getGlobalVisibleRect(globalRect)
@@ -3492,10 +3493,14 @@ public class WebView extends AbsoluteLayout
      * <li> The Java object that is bound runs in another thread and not in
      * the thread that it was constructed in.</li>
      * </ul></p>
-     * @param obj The class instance to bind to Javascript
-     * @param interfaceName The name to used to expose the class in Javascript
+     * @param obj The class instance to bind to Javascript, null instances are
+     *            ignored.
+     * @param interfaceName The name to used to expose the class in JavaScript.
      */
     public void addJavascriptInterface(Object obj, String interfaceName) {
+        if (obj == null) {
+            return;
+        }
         WebViewCore.JSInterfaceData arg = new WebViewCore.JSInterfaceData();
         arg.mObject = obj;
         arg.mInterfaceName = interfaceName;
@@ -5350,7 +5355,6 @@ public class WebView extends AbsoluteLayout
                     deltaX = 0;
                     deltaY = 0;
 
-                    startScrollingLayer(x, y);
                     startDrag();
                 }
 
@@ -5419,6 +5423,7 @@ public class WebView extends AbsoluteLayout
                     mUserScroll = true;
                 }
 
+                startScrollingLayer(x, y);
                 doDrag(deltaX, deltaY);
 
                 // Turn off scrollbars when dragging a layer.
@@ -5525,6 +5530,7 @@ public class WebView extends AbsoluteLayout
                             break;
                         }
                     case TOUCH_DRAG_MODE:
+                    case TOUCH_DRAG_LAYER_MODE:
                         mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
                         mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
                         // if the user waits a while w/o moving before the
@@ -5556,7 +5562,6 @@ public class WebView extends AbsoluteLayout
                         invalidate();
                         // fall through
                     case TOUCH_DRAG_START_MODE:
-                    case TOUCH_DRAG_LAYER_MODE:
                         // TOUCH_DRAG_START_MODE should not happen for the real
                         // device as we almost certain will get a MOVE. But this
                         // is possible on emulator.
@@ -6111,10 +6116,12 @@ public class WebView extends AbsoluteLayout
         }
 
         if (mOverscrollDistance < mOverflingDistance) {
-            if (mScrollX == -mOverscrollDistance || mScrollX == maxX + mOverscrollDistance) {
+            if ((vx > 0 && mScrollX == -mOverscrollDistance) ||
+                    (vx < 0 && mScrollX == maxX + mOverscrollDistance)) {
                 vx = 0;
             }
-            if (mScrollY == -mOverscrollDistance || mScrollY == maxY + mOverscrollDistance) {
+            if ((vy > 0 && mScrollY == -mOverscrollDistance) ||
+                    (vy < 0 && mScrollY == maxY + mOverscrollDistance)) {
                 vy = 0;
             }
         }
@@ -6933,6 +6940,7 @@ public class WebView extends AbsoluteLayout
                                 int deltaY = pinLocY((int) (mScrollY
                                         + mLastDeferTouchY - y))
                                         - mScrollY;
+                                startScrollingLayer(x, y);
                                 doDrag(deltaX, deltaY);
                                 if (deltaX != 0) mLastDeferTouchX = x;
                                 if (deltaY != 0) mLastDeferTouchY = y;
@@ -7567,6 +7575,7 @@ public class WebView extends AbsoluteLayout
         if (mNativeClass == 0) {
             return false;
         }
+        mInitialHitTestResult = null;
         mLastCursorTime = time;
         mLastCursorBounds = nativeGetCursorRingBounds();
         boolean keyHandled

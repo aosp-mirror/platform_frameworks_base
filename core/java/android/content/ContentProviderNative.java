@@ -110,16 +110,23 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
 
                     IBulkCursor bulkCursor = bulkQuery(url, projection, selection,
                             selectionArgs, sortOrder, observer, window);
-                    reply.writeNoException();
                     if (bulkCursor != null) {
-                        reply.writeStrongBinder(bulkCursor.asBinder());
-
+                        final IBinder binder = bulkCursor.asBinder();
                         if (wantsCursorMetadata) {
-                            reply.writeInt(bulkCursor.count());
-                            reply.writeInt(BulkCursorToCursorAdaptor.findRowIdColumnIndex(
-                                bulkCursor.getColumnNames()));
+                            final int count = bulkCursor.count();
+                            final int index = BulkCursorToCursorAdaptor.findRowIdColumnIndex(
+                                    bulkCursor.getColumnNames());
+
+                            reply.writeNoException();
+                            reply.writeStrongBinder(binder);
+                            reply.writeInt(count);
+                            reply.writeInt(index);
+                        } else {
+                            reply.writeNoException();
+                            reply.writeStrongBinder(binder);
                         }
                     } else {
+                        reply.writeNoException();
                         reply.writeStrongBinder(null);
                     }
 

@@ -67,7 +67,7 @@ private:
             const AString &line, sp<AMessage> *meta);
 
     static status_t parseCipherInfo(
-            const AString &line, sp<AMessage> *meta);
+            const AString &line, sp<AMessage> *meta, const AString &baseURI);
 
     static status_t ParseInt32(const char *s, int32_t *x);
 

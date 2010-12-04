@@ -55,9 +55,34 @@ status_t ElementaryStreamQueue::appendData(
         switch (mMode) {
             case H264:
             {
+#if 0
                 if (size < 4 || memcmp("\x00\x00\x00\x01", data, 4)) {
                     return ERROR_MALFORMED;
                 }
+#else
+                uint8_t *ptr = (uint8_t *)data;
+
+                ssize_t startOffset = -1;
+                for (size_t i = 0; i + 3 < size; ++i) {
+                    if (!memcmp("\x00\x00\x00\x01", &ptr[i], 4)) {
+                        startOffset = i;
+                        break;
+                    }
+                }
+
+                if (startOffset < 0) {
+                    return ERROR_MALFORMED;
+                }
+
+                if (startOffset > 0) {
+                    LOGI("found something resembling an H.264 syncword at "
+                         "offset %ld",
+                         startOffset);
+                }
+
+                data = &ptr[startOffset];
+                size -= startOffset;
+#endif
                 break;
             }
 
@@ -65,9 +90,31 @@ status_t ElementaryStreamQueue::appendData(
             {
                 uint8_t *ptr = (uint8_t *)data;
 
+#if 0
                 if (size < 2 || ptr[0] != 0xff || (ptr[1] >> 4) != 0x0f) {
                     return ERROR_MALFORMED;
                 }
+#else
+                ssize_t startOffset = -1;
+                for (size_t i = 0; i + 1 < size; ++i) {
+                    if (ptr[i] == 0xff && (ptr[i + 1] >> 4) == 0x0f) {
+                        startOffset = i;
+                        break;
+                    }
+                }
+
+                if (startOffset < 0) {
+                    return ERROR_MALFORMED;
+                }
+
+                if (startOffset > 0) {
+                    LOGI("found something resembling an AAC syncword at offset %ld",
+                         startOffset);
+                }
+
+                data = &ptr[startOffset];
+                size -= startOffset;
+#endif
                 break;
             }
 

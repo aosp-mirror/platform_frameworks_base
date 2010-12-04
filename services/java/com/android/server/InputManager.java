@@ -358,16 +358,6 @@ public class InputManager {
         }
     }
     
-    private static final class VirtualKeyDefinition {
-        public int scanCode;
-        
-        // configured position data, specified in display coords
-        public int centerX;
-        public int centerY;
-        public int width;
-        public int height;
-    }
-    
     /*
      * Callbacks from native.
      */
@@ -435,54 +425,6 @@ public class InputManager {
         public boolean filterJumpyTouchEvents() {
             return mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_filterJumpyTouchEvents);
-        }
-        
-        @SuppressWarnings("unused")
-        public VirtualKeyDefinition[] getVirtualKeyDefinitions(String deviceName) {
-            ArrayList<VirtualKeyDefinition> keys = new ArrayList<VirtualKeyDefinition>();
-            
-            try {
-                FileInputStream fis = new FileInputStream(
-                        "/sys/board_properties/virtualkeys." + deviceName);
-                InputStreamReader isr = new InputStreamReader(fis);
-                BufferedReader br = new BufferedReader(isr, 2048);
-                String str = br.readLine();
-                if (str != null) {
-                    String[] it = str.split(":");
-                    if (DEBUG_VIRTUAL_KEYS) Slog.v(TAG, "***** VIRTUAL KEYS: " + it);
-                    final int N = it.length-6;
-                    for (int i=0; i<=N; i+=6) {
-                        if (!"0x01".equals(it[i])) {
-                            Slog.w(TAG, "Unknown virtual key type at elem #"
-                                    + i + ": " + it[i] + " for device " + deviceName);
-                            continue;
-                        }
-                        try {
-                            VirtualKeyDefinition key = new VirtualKeyDefinition();
-                            key.scanCode = Integer.parseInt(it[i+1]);
-                            key.centerX = Integer.parseInt(it[i+2]);
-                            key.centerY = Integer.parseInt(it[i+3]);
-                            key.width = Integer.parseInt(it[i+4]);
-                            key.height = Integer.parseInt(it[i+5]);
-                            if (DEBUG_VIRTUAL_KEYS) Slog.v(TAG, "Virtual key "
-                                    + key.scanCode + ": center=" + key.centerX + ","
-                                    + key.centerY + " size=" + key.width + "x"
-                                    + key.height);
-                            keys.add(key);
-                        } catch (NumberFormatException e) {
-                            Slog.w(TAG, "Bad number in virtual key definition at region "
-                                    + i + " in: " + str + " for device " + deviceName, e);
-                        }
-                    }
-                }
-                br.close();
-            } catch (FileNotFoundException e) {
-                Slog.i(TAG, "No virtual keys found for device " + deviceName + ".");
-            } catch (IOException e) {
-                Slog.w(TAG, "Error reading virtual keys for device " + deviceName + ".", e);
-            }
-            
-            return keys.toArray(new VirtualKeyDefinition[keys.size()]);
         }
         
         @SuppressWarnings("unused")

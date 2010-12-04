@@ -20,10 +20,13 @@ import android.content.ContentUris;
 import android.net.Uri;
 import android.util.Log;
 
-
 /**
  * The PTP provider supports accessing content on PTP devices.
- * @hide
+ * Currently the provider supports:
+ * - enumerating the storage units, files and directories on PTP devices
+ * - deleting files and directories on PTP devices
+ * - importing a file from PTP device into the host device's storage
+ *   and adding it to the media provider
  */
 public final class Ptp
 {
@@ -36,6 +39,8 @@ public final class Ptp
 
     /**
      * Contains list of all PTP devices
+     * The BaseColumns._ID column contains a hardware specific identifier for the attached
+     * USB device, and is not guaranteed to be persistent across USB disconnects.
      */
     public static final class Device implements BaseColumns {
 
@@ -59,7 +64,8 @@ public final class Ptp
     }
 
     /**
-     * Contains list of storage units for an PTP device
+     * Contains list of storage units for an PTP device.
+     * The BaseColumns._ID column contains the PTP StorageID for the storage unit.
      */
     public static final class Storage implements BaseColumns {
 
@@ -85,7 +91,10 @@ public final class Ptp
     }
 
     /**
-     * Contains list of objects on an PTP device
+     * Contains list of objects on a PTP device.
+     * The columns in this table correspond directly to the ObjectInfo dataset
+     * described in the PTP specification (PIMA 15740:2000).
+     * The BaseColumns._ID column contains the object's PTP ObjectHandle.
      */
     public static final class Object implements BaseColumns {
 
@@ -135,14 +144,14 @@ public final class Ptp
         public static final String STORAGE_ID = "storage_id";
 
         /**
-         * The object's format.  Can be one of the FORMAT_* symbols below,
-         * or any of the valid PTP object formats as defined in the PTP specification.
+         * The object's format.  Can be any of the valid PTP object formats
+         * as defined in the PTP specification.
          * <P>Type: INTEGER</P>
          */
         public static final String FORMAT = "format";
 
         /**
-         * The protection status of the object.  See the PROTECTION_STATUS_*symbols below.
+         * The protection status of the object.
          * <P>Type: INTEGER</P>
          */
         public static final String PROTECTION_STATUS = "protection_status";
@@ -154,8 +163,8 @@ public final class Ptp
         public static final String SIZE = "size";
 
         /**
-         * The object's thumbnail format.  Can be one of the FORMAT_* symbols below,
-         * or any of the valid PTP object formats as defined in the PTP specification.
+         * The object's thumbnail format.  Can be any of the valid PTP object formats
+         * as defined in the PTP specification.
          * <P>Type: INTEGER</P>
          */
         public static final String THUMB_FORMAT = "thumb_format";
@@ -211,7 +220,6 @@ public final class Ptp
 
         /**
          * The association type for a container object.
-         * For folders this is typically {@link #ASSOCIATION_TYPE_GENERIC_FOLDER}
          * <P>Type: INTEGER</P>
          */
         public static final String ASSOCIATION_TYPE = "association_type";

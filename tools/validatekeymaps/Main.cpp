@@ -16,6 +16,7 @@
 
 #include <ui/KeyCharacterMap.h>
 #include <ui/KeyLayoutMap.h>
+#include <ui/VirtualKeyMap.h>
 #include <utils/String8.h>
 
 #include <stdio.h>
@@ -30,6 +31,7 @@ enum FileType {
     FILETYPE_UNKNOWN,
     FILETYPE_KEYLAYOUT,
     FILETYPE_KEYCHARACTERMAP,
+    FILETYPE_VIRTUALKEYDEFINITION,
 };
 
 
@@ -37,8 +39,10 @@ static void usage() {
     fprintf(stderr, "Keymap Validation Tool\n\n");
     fprintf(stderr, "Usage:\n");
     fprintf(stderr,
-        " %s [FILENAME.kl] [FILENAME.kcm] [...]\n"
-        "   Validates the specified key layout and/or key character map files.\n\n", gProgName);
+        " %s [*.kl] [*.kcm] [virtualkeys.*] [...]\n"
+        "   Validates the specified key layouts, key character maps \n"
+        "   or virtual key definitions.\n\n",
+        gProgName);
 }
 
 static FileType getFileType(const char* filename) {
@@ -51,6 +55,11 @@ static FileType getFileType(const char* filename) {
             return FILETYPE_KEYCHARACTERMAP;
         }
     }
+
+    if (strstr(filename, "virtualkeys.")) {
+        return FILETYPE_VIRTUALKEYDEFINITION;
+    }
+
     return FILETYPE_UNKNOWN;
 }
 
@@ -60,7 +69,7 @@ static bool validateFile(const char* filename) {
     FileType fileType = getFileType(filename);
     switch (fileType) {
     case FILETYPE_UNKNOWN:
-        fprintf(stderr, "File extension must be .kl or .kcm.\n\n");
+        fprintf(stderr, "Supported file types: *.kl, *.kcm, virtualkeys.*\n\n");
         return false;
 
     case FILETYPE_KEYLAYOUT: {
@@ -78,6 +87,16 @@ static bool validateFile(const char* filename) {
         status_t status = KeyCharacterMap::load(String8(filename), &map);
         if (status) {
             fprintf(stderr, "Error %d parsing key character map file.\n\n", status);
+            return false;
+        }
+        break;
+    }
+
+    case FILETYPE_VIRTUALKEYDEFINITION: {
+        VirtualKeyMap* map;
+        status_t status = VirtualKeyMap::load(String8(filename), &map);
+        if (status) {
+            fprintf(stderr, "Error %d parsing virtual key definition file.\n\n", status);
             return false;
         }
         break;

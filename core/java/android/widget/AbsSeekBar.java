@@ -85,6 +85,16 @@ public abstract class AbsSeekBar extends ProgressBar {
      * @param thumb Drawable representing the thumb
      */
     public void setThumb(Drawable thumb) {
+        boolean needUpdate;
+        // This way, calling setThumb again with the same bitmap will result in
+        // it recalcuating mThumbOffset (if for example it the bounds of the
+        // drawable changed)
+        if (mThumb != null && thumb != mThumb) {
+            mThumb.setCallback(null);
+            needUpdate = true;
+        } else {
+            needUpdate = false;
+        }
         if (thumb != null) {
             thumb.setCallback(this);
 
@@ -92,9 +102,25 @@ public abstract class AbsSeekBar extends ProgressBar {
             // such that the thumb will hang halfway off either edge of the
             // progress bar.
             mThumbOffset = thumb.getIntrinsicWidth() / 2;
+
+            // If we're updating get the new states
+            if (needUpdate &&
+                    (thumb.getIntrinsicWidth() != mThumb.getIntrinsicWidth()
+                        || thumb.getIntrinsicHeight() != mThumb.getIntrinsicHeight())) {
+                requestLayout();
+            }
         }
         mThumb = thumb;
         invalidate();
+        if (needUpdate) {
+            updateThumbPos(getWidth(), getHeight());
+            if (thumb.isStateful()) {
+                // Note that if the states are different this won't work.
+                // For now, let's consider that an app bug.
+                int[] state = getDrawableState();
+                thumb.setState(state);
+            }
+        }
     }
 
     /**
@@ -191,6 +217,10 @@ public abstract class AbsSeekBar extends ProgressBar {
     
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        updateThumbPos(w, h);
+    }
+
+    private void updateThumbPos(int w, int h) {
         Drawable d = getCurrentDrawable();
         Drawable thumb = mThumb;
         int thumbHeight = thumb == null ? 0 : thumb.getIntrinsicHeight();

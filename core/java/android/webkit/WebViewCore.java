@@ -500,7 +500,7 @@ final class WebViewCore {
     /**
      * Update the layers' content
      */
-    private native int nativeUpdateLayers();
+    private native int nativeUpdateLayers(Region invalRegion);
 
     private native boolean nativeFocusBoundsChanged();
 
@@ -1914,7 +1914,7 @@ final class WebViewCore {
             return;
         }
         DrawData draw = new DrawData();
-        draw.mBaseLayer = nativeUpdateLayers();
+        draw.mBaseLayer = nativeUpdateLayers(draw.mInvalRegion);
         webkitDraw(draw);
     }
 

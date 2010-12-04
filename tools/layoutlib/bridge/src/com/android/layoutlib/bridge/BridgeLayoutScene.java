@@ -64,14 +64,14 @@ public class BridgeLayoutScene extends LayoutScene {
     @Override
     public SceneResult render(long timeout) {
         try {
-            mScene.prepareThread();
+            Bridge.prepareThread();
             mLastResult = mScene.acquire(timeout);
-            if (mLastResult == SceneResult.SUCCESS) {
+            if (mLastResult.isSuccess()) {
                 mLastResult = mScene.render();
             }
         } finally {
             mScene.release();
-            mScene.cleanupThread();
+            Bridge.cleanupThread();
         }
 
         return mLastResult;
@@ -81,40 +81,36 @@ public class BridgeLayoutScene extends LayoutScene {
     public SceneResult animate(Object targetObject, String animationName,
             boolean isFrameworkAnimation, IAnimationListener listener) {
         try {
-            mScene.prepareThread();
+            Bridge.prepareThread();
             mLastResult = mScene.acquire(SceneParams.DEFAULT_TIMEOUT);
-            if (mLastResult == SceneResult.SUCCESS) {
+            if (mLastResult.isSuccess()) {
                 mLastResult = mScene.animate(targetObject, animationName, isFrameworkAnimation,
                         listener);
             }
         } finally {
             mScene.release();
-            mScene.cleanupThread();
+            Bridge.cleanupThread();
         }
 
         return mLastResult;
     }
 
     @Override
-    public SceneResult insertChild(Object parentView, IXmlPullParser childXml, Object beforeSibling,
+    public SceneResult insertChild(Object parentView, IXmlPullParser childXml, int index,
             IAnimationListener listener) {
         if (parentView instanceof ViewGroup == false) {
             throw new IllegalArgumentException("parentView is not a ViewGroup");
         }
-        if (beforeSibling != null && beforeSibling instanceof View == false) {
-            throw new IllegalArgumentException("beforeSibling is not a View");
-        }
 
         try {
-            mScene.prepareThread();
+            Bridge.prepareThread();
             mLastResult = mScene.acquire(SceneParams.DEFAULT_TIMEOUT);
-            if (mLastResult == SceneResult.SUCCESS) {
-                mLastResult = mScene.insertChild((ViewGroup) parentView, childXml,
-                        (View) beforeSibling, listener);
+            if (mLastResult.isSuccess()) {
+                mLastResult = mScene.insertChild((ViewGroup) parentView, childXml, index, listener);
             }
         } finally {
             mScene.release();
-            mScene.cleanupThread();
+            Bridge.cleanupThread();
         }
 
         return mLastResult;
@@ -122,28 +118,25 @@ public class BridgeLayoutScene extends LayoutScene {
 
 
     @Override
-    public SceneResult moveChild(Object parentView, Object childView, Object beforeSibling,
-            IAnimationListener listener) {
+    public SceneResult moveChild(Object parentView, Object childView, int index,
+            Map<String, String> layoutParams, IAnimationListener listener) {
         if (parentView instanceof ViewGroup == false) {
             throw new IllegalArgumentException("parentView is not a ViewGroup");
         }
         if (childView instanceof View == false) {
             throw new IllegalArgumentException("childView is not a View");
         }
-        if (beforeSibling != null && beforeSibling instanceof View == false) {
-            throw new IllegalArgumentException("beforeSibling is not a View");
-        }
 
         try {
-            mScene.prepareThread();
+            Bridge.prepareThread();
             mLastResult = mScene.acquire(SceneParams.DEFAULT_TIMEOUT);
-            if (mLastResult == SceneResult.SUCCESS) {
-                mLastResult = mScene.moveChild((ViewGroup) parentView, (View) childView,
-                        (View) beforeSibling, listener);
+            if (mLastResult.isSuccess()) {
+                mLastResult = mScene.moveChild((ViewGroup) parentView, (View) childView, index,
+                        listener);
             }
         } finally {
             mScene.release();
-            mScene.cleanupThread();
+            Bridge.cleanupThread();
         }
 
         return mLastResult;
@@ -156,14 +149,14 @@ public class BridgeLayoutScene extends LayoutScene {
         }
 
         try {
-            mScene.prepareThread();
+            Bridge.prepareThread();
             mLastResult = mScene.acquire(SceneParams.DEFAULT_TIMEOUT);
-            if (mLastResult == SceneResult.SUCCESS) {
+            if (mLastResult.isSuccess()) {
                 mLastResult = mScene.removeChild((View) childView, listener);
             }
         } finally {
             mScene.release();
-            mScene.cleanupThread();
+            Bridge.cleanupThread();
         }
 
         return mLastResult;

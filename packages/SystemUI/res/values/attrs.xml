@@ -18,5 +18,8 @@
     <declare-styleable name="KeyButtonView">
         <attr name="keyCode" format="integer" />
     </declare-styleable>
+    <declare-styleable name="ToggleSlider">
+        <attr name="text" format="string" />
+    </declare-styleable>
 </resources>
 

@@ -25,6 +25,7 @@
 #include <cutils/log.h>
 #include <ui/InputReader.h>
 #include <ui/Keyboard.h>
+#include <ui/VirtualKeyMap.h>
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -121,7 +122,7 @@ void InputReader::loopOnce() {
     mEventHub->getEvent(& rawEvent);
 
 #if DEBUG_RAW_EVENTS
-    LOGD("Input event: device=0x%x type=0x%x scancode=%d keycode=%d value=%d",
+    LOGD("Input event: device=%d type=0x%x scancode=%d keycode=%d value=%d",
             rawEvent.deviceId, rawEvent.type, rawEvent.scanCode, rawEvent.keyCode,
             rawEvent.value);
 #endif
@@ -157,9 +158,9 @@ void InputReader::addDevice(int32_t deviceId) {
     device->configure();
 
     if (device->isIgnored()) {
-        LOGI("Device added: id=0x%x, name=%s (ignored non-input device)", deviceId, name.string());
+        LOGI("Device added: id=%d, name='%s' (ignored non-input device)", deviceId, name.string());
     } else {
-        LOGI("Device added: id=0x%x, name=%s, sources=%08x", deviceId, name.string(),
+        LOGI("Device added: id=%d, name='%s', sources=0x%08x", deviceId, name.string(),
                 device->getSources());
     }
 
@@ -201,10 +202,10 @@ void InputReader::removeDevice(int32_t deviceId) {
     }
 
     if (device->isIgnored()) {
-        LOGI("Device removed: id=0x%x, name=%s (ignored non-input device)",
+        LOGI("Device removed: id=%d, name='%s' (ignored non-input device)",
                 device->getId(), device->getName().string());
     } else {
-        LOGI("Device removed: id=0x%x, name=%s, sources=%08x",
+        LOGI("Device removed: id=%d, name='%s', sources=0x%08x",
                 device->getId(), device->getName().string(), device->getSources());
     }
 
@@ -535,7 +536,7 @@ void InputDevice::dump(String8& dump) {
     InputDeviceInfo deviceInfo;
     getDeviceInfo(& deviceInfo);
 
-    dump.appendFormat(INDENT "Device 0x%x: %s\n", deviceInfo.getId(),
+    dump.appendFormat(INDENT "Device %d: %s\n", deviceInfo.getId(),
             deviceInfo.getName().string());
     dump.appendFormat(INDENT2 "Sources: 0x%08x\n", deviceInfo.getSources());
     dump.appendFormat(INDENT2 "KeyboardType: %d\n", deviceInfo.getKeyboardType());
@@ -1439,7 +1440,7 @@ bool TouchInputMapper::configureSurfaceLocked() {
 
     bool sizeChanged = mLocked.surfaceWidth != width || mLocked.surfaceHeight != height;
     if (sizeChanged) {
-        LOGI("Device reconfigured: id=0x%x, name=%s, display size is now %dx%d",
+        LOGI("Device reconfigured: id=%d, name='%s', display size is now %dx%d",
                 getDeviceId(), getDeviceName().string(), width, height);
 
         mLocked.surfaceWidth = width;
@@ -1651,9 +1652,8 @@ void TouchInputMapper::dumpSurfaceLocked(String8& dump) {
 void TouchInputMapper::configureVirtualKeysLocked() {
     assert(mRawAxes.x.valid && mRawAxes.y.valid);
 
-    // Note: getVirtualKeyDefinitions is non-reentrant so we can continue holding the lock.
     Vector<VirtualKeyDefinition> virtualKeyDefinitions;
-    getPolicy()->getVirtualKeyDefinitions(getDeviceName(), virtualKeyDefinitions);
+    getEventHub()->getVirtualKeyDefinitions(getDeviceId(), virtualKeyDefinitions);
 
     mLocked.virtualKeys.clear();
 

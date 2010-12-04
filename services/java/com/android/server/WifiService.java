@@ -197,7 +197,7 @@ public class WifiService extends IWifiManager.Stub {
         WifiServiceHandler(android.os.Looper looper, Context context) {
             super(looper);
             mWshChannel = new AsyncChannel();
-            mWshChannel.connect(context, this, mWifiStateMachine.getHandler(), 0);
+            mWshChannel.connect(context, this, mWifiStateMachine.getHandler());
         }
 
         @Override

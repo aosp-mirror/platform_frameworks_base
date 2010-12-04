@@ -2576,12 +2576,13 @@ public final class Settings {
         public static final String PARENTAL_CONTROL_REDIRECT_URL = "parental_control_redirect_url";
 
         /**
-         * A positive value indicates the frequency of SamplingProfiler
-         * taking snapshots in hertz. Zero value means SamplingProfiler is disabled.
+         * A positive value indicates how often the SamplingProfiler
+         * should take snapshots. Zero value means SamplingProfiler
+         * is disabled.
          *
          * @hide
          */
-        public static final String SAMPLING_PROFILER_HZ = "sampling_profiler_hz";
+        public static final String SAMPLING_PROFILER_MS = "sampling_profiler_ms";
 
         /**
          * Settings classname to launch when Settings is clicked from All
