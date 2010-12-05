@@ -16,4 +16,13 @@
 
 package android.nfc;
 
-parcelable NdefTag;
+/**
+ * {@hide}
+ */
+interface INfcSecureElement {
+    int openSecureElementConnection();
+    int closeSecureElementConnection(int nativeHandle);
+    byte[] exchangeAPDU(int nativeHandle, in byte[] data);
+    int[] getSecureElementTechList(int nativeHandle);
+    byte[] getSecureElementUid(int nativeHandle);
+}
