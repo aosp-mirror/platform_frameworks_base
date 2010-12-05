@@ -1,25 +1,26 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project Licensed under the Apache
- * License, Version 2.0 (the "License"); you may not use this file except in
- * compliance with the License. You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law
- * or agreed to in writing, software distributed under the License is
- * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package android.nfc;
 
-import java.lang.UnsupportedOperationException;
-
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.ActivityThread;
-import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.nfc.INfcAdapter;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -38,6 +39,12 @@ public final class NfcAdapter {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_TAG_DISCOVERED = "android.nfc.action.TAG_DISCOVERED";
+
+    /**
+     * Broadcast to only the activity that handles ACTION_TAG_DISCOVERED
+     * @hide
+     */
+    public static final String ACTION_TAG_LEFT_FIELD = "android.nfc.action.TAG_LOST";
 
     /**
      * Mandatory Tag extra for the ACTION_TAG intents.
@@ -170,6 +177,14 @@ public final class NfcAdapter {
     }
 
     /**
+     * Returns the binder interface to the service.
+     * @hide
+     */
+    public INfcAdapter getService() {
+        return mService;
+    }
+    
+    /**
      * Helper to check if this device has FEATURE_NFC, but without using
      * a context.
      * Equivalent to
@@ -230,8 +245,11 @@ public final class NfcAdapter {
         }
     }
 
-    /** NFC service dead - attempt best effort recovery */
-    /*package*/ void attemptDeadServiceRecovery(Exception e) {
+    /**
+     * NFC service dead - attempt best effort recovery
+     * @hide
+     */
+    public void attemptDeadServiceRecovery(Exception e) {
         Log.e(TAG, "NFC service dead - attempting to recover", e);
         INfcAdapter service = getServiceInterface();
         if (service == null) {
@@ -301,16 +319,41 @@ public final class NfcAdapter {
     }
 
     /**
-     * Create a raw tag connection to the default Target
+     * Set the NDEF Message that this NFC adapter should appear as to Tag
+     * readers.
+     * <p>
+     * Any Tag reader can read the contents of the local tag when it is in
+     * proximity, without any further user confirmation.
+     * <p>
+     * The implementation of this method must either
+     * <ul>
+     * <li>act as a passive tag containing this NDEF message
+     * <li>provide the NDEF message on over LLCP to peer NFC adapters
+     * </ul>
+     * The NDEF message is preserved across reboot.
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     *
+     * @param message NDEF message to make public
      * @hide
      */
-    public RawTagConnection createRawTagConnection(Tag tag) {
-        if (tag.mServiceHandle == 0) {
-            throw new IllegalArgumentException("mock tag cannot be used for connections");
-        }
+    public void setLocalNdefMessage(NdefMessage message) {
         try {
-            return new RawTagConnection(this, tag);
+            mService.localSet(message);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+        }
+    }
+
+    /**
+     * Get the NDEF Message that this adapter appears as to Tag readers.
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     *
+     * @return NDEF Message that is publicly readable
+     * @hide
+     */
+    public NdefMessage getLocalNdefMessage() {
+        try {
+            return mService.localGet();
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return null;
@@ -318,52 +361,14 @@ public final class NfcAdapter {
     }
 
     /**
-     * Create a raw tag connection to the specified Target
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     * Create an Nfc Secure Element Connection
      * @hide
      */
-    public RawTagConnection createRawTagConnection(Tag tag, String target) {
-        if (tag.mServiceHandle == 0) {
-            throw new IllegalArgumentException("mock tag cannot be used for connections");
-        }
+    public NfcSecureElement createNfcSecureElementConnection() {
         try {
-            return new RawTagConnection(this, tag, target);
+            return new NfcSecureElement(mService.getNfcSecureElementInterface());
         } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            return null;
-        }
-    }
-
-    /**
-     * Create an NDEF tag connection to the default Target
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     * @hide
-     */
-    public NdefTagConnection createNdefTagConnection(NdefTag tag) {
-        if (tag.mServiceHandle == 0) {
-            throw new IllegalArgumentException("mock tag cannot be used for connections");
-        }
-        try {
-            return new NdefTagConnection(this, tag);
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            return null;
-        }
-    }
-
-    /**
-     * Create an NDEF tag connection to the specified Target
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     * @hide
-     */
-    public NdefTagConnection createNdefTagConnection(NdefTag tag, String target) {
-        if (tag.mServiceHandle == 0) {
-            throw new IllegalArgumentException("mock tag cannot be used for connections");
-        }
-        try {
-            return new NdefTagConnection(this, tag, target);
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
+            Log.e(TAG, "createNfcSecureElementConnection failed", e);
             return null;
         }
     }
