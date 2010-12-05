@@ -1557,6 +1557,8 @@
   <public type="style" name="Widget.Holo.Light.ActionButton.CloseMode" />
   <public type="style" name="Widget.Holo.Light.ActionBar" />
   <public type="style" name="Widget.Holo.Button.Borderless" />
+  <public type="style" name="Widget.Holo.Tab" />
+  <public type="style" name="Widget.Holo.Light.Tab" />
 
   <public type="string" name="selectTextMode" />
 </resources>
