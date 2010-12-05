@@ -1595,6 +1595,9 @@
         <item name="android:paddingRight">16dip</item>
     </style>
 
+    <style name="Widget.Holo.Tab" parent="Widget.Holo.ActionBarView_TabView">
+    </style>
+
     <style name="Widget.Holo.ActionBarView_TabBar" parent="Widget.ActionBarView_TabBar">
     </style>
 
@@ -1879,6 +1882,9 @@
     </style>
 
     <style name="Widget.Holo.Light.ActionBarView_TabView" parent="Widget.Holo.ActionBarView_TabView">
+    </style>
+
+    <style name="Widget.Holo.Light.Tab" parent="Widget.Holo.Light.ActionBarView_TabView">
     </style>
 
     <style name="Widget.Holo.Light.ActionBarView_TabBar" parent="Widget.Holo.ActionBarView_TabBar">
