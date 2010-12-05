@@ -1590,6 +1590,9 @@
     </style>
 
     <style name="Widget.Holo.ActionBarView_TabView" parent="Widget.ActionBarView_TabView">
+        <item name="android:background">@drawable/tab_indicator_holo</item>
+        <item name="android:paddingLeft">16dip</item>
+        <item name="android:paddingRight">16dip</item>
     </style>
 
     <style name="Widget.Holo.ActionBarView_TabBar" parent="Widget.ActionBarView_TabBar">
@@ -1875,13 +1878,13 @@
         <item name="android:paddingRight">16dip</item>
     </style>
 
-    <style name="Widget.Holo.Light.ActionBarView_TabView" parent="Widget.ActionBarView_TabView">
+    <style name="Widget.Holo.Light.ActionBarView_TabView" parent="Widget.Holo.ActionBarView_TabView">
     </style>
 
-    <style name="Widget.Holo.Light.ActionBarView_TabBar" parent="Widget.ActionBarView_TabBar">
+    <style name="Widget.Holo.Light.ActionBarView_TabBar" parent="Widget.Holo.ActionBarView_TabBar">
     </style>
 
-    <style name="Widget.Holo.Light.ActionBarView_TabText" parent="Widget.ActionBarView_TabText">
+    <style name="Widget.Holo.Light.ActionBarView_TabText" parent="Widget.Holo.ActionBarView_TabText">
     </style>
 
     <style name="Widget.Holo.Light.ActionMode" parent="Widget.Holo.ActionMode">
