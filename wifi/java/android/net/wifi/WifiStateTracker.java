@@ -934,10 +934,8 @@ public class WifiStateTracker extends NetworkStateTracker {
                     resetConnections(true);
                 }
                 // When supplicant dies, kill the DHCP thread
-                if (mDhcpTarget != null) {
-                    mDhcpTarget.getLooper().quit();
-                    mDhcpTarget = null;
-                }
+                mDhcpTarget.getLooper().quit();
+
                 mContext.removeStickyBroadcast(new Intent(WifiManager.NETWORK_STATE_CHANGED_ACTION));
                 if (ActivityManagerNative.isSystemReady()) {
                     intent = new Intent(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
@@ -1408,10 +1406,9 @@ public class WifiStateTracker extends NetworkStateTracker {
         NetworkUtils.resetConnections(mInterfaceName);
 
         // Stop DHCP
-        if (mDhcpTarget != null) {
-            mDhcpTarget.setCancelCallback(true);
-            mDhcpTarget.removeMessages(EVENT_DHCP_START);
-        }
+        mDhcpTarget.setCancelCallback(true);
+        mDhcpTarget.removeMessages(EVENT_DHCP_START);
+
         if (!NetworkUtils.stopDhcp(mInterfaceName)) {
             Log.e(TAG, "Could not stop DHCP");
         }
