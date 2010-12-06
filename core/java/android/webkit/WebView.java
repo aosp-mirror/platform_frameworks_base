@@ -4828,6 +4828,11 @@ public class WebView extends AbsoluteLayout
     /* package */ void setFocusControllerActive(boolean active) {
         if (mWebViewCore == null) return;
         mWebViewCore.sendMessage(EventHub.SET_ACTIVE, active ? 1 : 0, 0);
+        // Need to send this message after the document regains focus.
+        if (active && mListBoxMessage != null) {
+            mWebViewCore.sendMessage(mListBoxMessage);
+            mListBoxMessage = null;
+        }
     }
 
     @Override
@@ -7429,8 +7434,10 @@ public class WebView extends AbsoluteLayout
                 listView.setOnItemClickListener(new OnItemClickListener() {
                     public void onItemClick(AdapterView parent, View v,
                             int position, long id) {
-                        mWebViewCore.sendMessage(
-                                EventHub.SINGLE_LISTBOX_CHOICE, (int)id, 0);
+                        // Rather than sending the message right away, send it
+                        // after the page regains focus.
+                        mListBoxMessage = Message.obtain(null,
+                                EventHub.SINGLE_LISTBOX_CHOICE, (int) id, 0);
                         mListBoxDialog.dismiss();
                         mListBoxDialog = null;
                     }
@@ -7454,6 +7461,8 @@ public class WebView extends AbsoluteLayout
             mListBoxDialog.show();
         }
     }
+
+    private Message mListBoxMessage;
 
     /*
      * Request a dropdown menu for a listbox with multiple selection.
