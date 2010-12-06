@@ -79,6 +79,9 @@ public final class AndroidHttpClient implements HttpClient {
     // Gzip of data shorter than this probably won't be worthwhile
     public static long DEFAULT_SYNC_MIN_GZIP_BYTES = 256;
 
+    // Default connection and socket timeout of 60 seconds.  Tweak to taste.
+    private static final int SOCKET_OPERATION_TIMEOUT = 60 * 1000;
+
     private static final String TAG = "AndroidHttpClient";
 
 
@@ -107,9 +110,8 @@ public final class AndroidHttpClient implements HttpClient {
         // and it's not worth it to pay the penalty of checking every time.
         HttpConnectionParams.setStaleCheckingEnabled(params, false);
 
-        // Default connection and socket timeout of 20 seconds.  Tweak to taste.
-        HttpConnectionParams.setConnectionTimeout(params, 20 * 1000);
-        HttpConnectionParams.setSoTimeout(params, 20 * 1000);
+        HttpConnectionParams.setConnectionTimeout(params, SOCKET_OPERATION_TIMEOUT);
+        HttpConnectionParams.setSoTimeout(params, SOCKET_OPERATION_TIMEOUT);
         HttpConnectionParams.setSocketBufferSize(params, 8192);
 
         // Don't handle redirects -- return them to the caller.  Our code
@@ -125,7 +127,8 @@ public final class AndroidHttpClient implements HttpClient {
         schemeRegistry.register(new Scheme("http",
                 PlainSocketFactory.getSocketFactory(), 80));
         schemeRegistry.register(new Scheme("https",
-                SSLCertificateSocketFactory.getHttpSocketFactory(30 * 1000, sessionCache), 443));
+                SSLCertificateSocketFactory.getHttpSocketFactory(
+                SOCKET_OPERATION_TIMEOUT, sessionCache), 443));
 
         ClientConnectionManager manager =
                 new ThreadSafeClientConnManager(params, schemeRegistry);
