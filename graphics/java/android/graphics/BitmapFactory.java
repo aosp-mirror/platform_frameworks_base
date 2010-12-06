@@ -210,7 +210,6 @@ public class BitmapFactory {
          * expense of the decoding speed. Currently the field only affects JPEG
          * decode, in the case of which a more accurate, but slightly slower,
          * IDCT method will be used instead.
-         * @hide
          */
         public boolean inPreferQualityOverSpeed;
 
