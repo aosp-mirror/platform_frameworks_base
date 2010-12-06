@@ -22,6 +22,7 @@
 
 namespace android {
 
+struct AMessage;
 struct IMemory;
 struct IStreamListener;
 
@@ -38,13 +39,14 @@ struct IStreamListener : public IInterface {
     DECLARE_META_INTERFACE(StreamListener);
 
     enum Command {
-        FLUSH,
+        EOS,
         DISCONTINUITY,
-        EOS
     };
 
     virtual void queueBuffer(size_t index, size_t size) = 0;
-    virtual void queueCommand(Command cmd) = 0;
+
+    virtual void issueCommand(
+            Command cmd, bool synchronous, const sp<AMessage> &msg = NULL) = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -23,6 +23,8 @@
 #include "ALooperRoster.h"
 #include "AString.h"
 
+#include <binder/Parcel.h>
+
 namespace android {
 
 AMessage::AMessage(uint32_t what, ALooper::handler_id target)
@@ -339,6 +341,138 @@ AString AMessage::debugString(int32_t indent) const {
     s.append("}");
 
     return s;
+}
+
+// static
+sp<AMessage> AMessage::FromParcel(const Parcel &parcel) {
+    int32_t what = parcel.readInt32();
+    sp<AMessage> msg = new AMessage(what);
+
+    msg->mNumItems = static_cast<size_t>(parcel.readInt32());
+
+    for (size_t i = 0; i < msg->mNumItems; ++i) {
+        Item *item = &msg->mItems[i];
+
+        item->mName = AAtomizer::Atomize(parcel.readCString());
+        item->mType = static_cast<Type>(parcel.readInt32());
+
+        switch (item->mType) {
+            case kTypeInt32:
+            {
+                item->u.int32Value = parcel.readInt32();
+                break;
+            }
+
+            case kTypeInt64:
+            {
+                item->u.int64Value = parcel.readInt64();
+                break;
+            }
+
+            case kTypeSize:
+            {
+                item->u.sizeValue = static_cast<size_t>(parcel.readInt32());
+                break;
+            }
+
+            case kTypeFloat:
+            {
+                item->u.floatValue = parcel.readFloat();
+                break;
+            }
+
+            case kTypeDouble:
+            {
+                item->u.doubleValue = parcel.readDouble();
+                break;
+            }
+
+            case kTypeString:
+            {
+                item->u.stringValue = new AString(parcel.readCString());
+                break;
+            }
+
+            case kTypeMessage:
+            {
+                sp<AMessage> subMsg = AMessage::FromParcel(parcel);
+                subMsg->incStrong(msg.get());
+
+                item->u.refValue = subMsg.get();
+                break;
+            }
+
+            default:
+            {
+                LOGE("This type of object cannot cross process boundaries.");
+                TRESPASS();
+            }
+        }
+    }
+
+    return msg;
+}
+
+void AMessage::writeToParcel(Parcel *parcel) const {
+    parcel->writeInt32(static_cast<int32_t>(mWhat));
+    parcel->writeInt32(static_cast<int32_t>(mNumItems));
+
+    for (size_t i = 0; i < mNumItems; ++i) {
+        const Item &item = mItems[i];
+
+        parcel->writeCString(item.mName);
+        parcel->writeInt32(static_cast<int32_t>(item.mType));
+
+        switch (item.mType) {
+            case kTypeInt32:
+            {
+                parcel->writeInt32(item.u.int32Value);
+                break;
+            }
+
+            case kTypeInt64:
+            {
+                parcel->writeInt64(item.u.int64Value);
+                break;
+            }
+
+            case kTypeSize:
+            {
+                parcel->writeInt32(static_cast<int32_t>(item.u.sizeValue));
+                break;
+            }
+
+            case kTypeFloat:
+            {
+                parcel->writeFloat(item.u.floatValue);
+                break;
+            }
+
+            case kTypeDouble:
+            {
+                parcel->writeDouble(item.u.doubleValue);
+                break;
+            }
+
+            case kTypeString:
+            {
+                parcel->writeCString(item.u.stringValue->c_str());
+                break;
+            }
+
+            case kTypeMessage:
+            {
+                static_cast<AMessage *>(item.u.refValue)->writeToParcel(parcel);
+                break;
+            }
+
+            default:
+            {
+                LOGE("This type of object cannot cross process boundaries.");
+                TRESPASS();
+            }
+        }
+    }
 }
 
 }  // namespace android
