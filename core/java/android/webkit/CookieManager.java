@@ -650,6 +650,32 @@ public final class CookieManager {
     }
 
     /**
+     * Whether cookies are accepted for file scheme URLs.
+     */
+    public static boolean allowFileSchemeCookies() {
+        if (JniUtil.useChromiumHttpStack()) {
+            return nativeAcceptFileSchemeCookies();
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Sets whether cookies are accepted for file scheme URLs.
+     *
+     * Use of cookies with file scheme URLs is potentially insecure. Do not use this feature unless
+     * you can be sure that no unintentional sharing of cookie data can take place.
+     * <p>
+     * Note that calls to this method will have no effect if made after a WebView or CookieManager
+     * instance has been created.
+     */
+    public static void setAcceptFileSchemeCookies(boolean accept) {
+        if (JniUtil.useChromiumHttpStack()) {
+            nativeSetAcceptFileSchemeCookies(accept);
+        }
+    }
+
+    /**
      * Package level api, called from CookieSyncManager
      *
      * Get a list of cookies which are updated since a given time.
@@ -1107,4 +1133,6 @@ public final class CookieManager {
     private static native void nativeSetAcceptCookie(boolean accept);
     private static native void nativeSetCookie(String url, String value);
     private static native void nativeFlushCookieStore();
+    private static native boolean nativeAcceptFileSchemeCookies();
+    private static native void nativeSetAcceptFileSchemeCookies(boolean accept);
 }
