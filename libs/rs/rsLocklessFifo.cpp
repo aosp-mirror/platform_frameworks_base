@@ -166,7 +166,7 @@ bool LocklessCommandFifo::makeSpaceNonBlocking(uint32_t bytes) {
     //dumpState("make space non-blocking");
     if ((mPut+bytes) > mEnd) {
         // Need to loop regardless of where get is.
-        if ((mGet > mPut) && (mBuffer+4 >= mGet)) {
+        if ((mGet > mPut) || (mBuffer+4 >= mGet)) {
             return false;
         }
 
@@ -189,7 +189,7 @@ void LocklessCommandFifo::makeSpace(uint32_t bytes) {
     //dumpState("make space");
     if ((mPut+bytes) > mEnd) {
         // Need to loop regardless of where get is.
-        while ((mGet > mPut) && (mBuffer+4 >= mGet)) {
+        while ((mGet > mPut) || (mBuffer+4 >= mGet)) {
             usleep(100);
         }
 
@@ -210,4 +210,3 @@ void LocklessCommandFifo::makeSpace(uint32_t bytes) {
 void LocklessCommandFifo::dumpState(const char *s) const {
     LOGV("%s %p  put %p, get %p,  buf %p,  end %p", s, this, mPut, mGet, mBuffer, mEnd);
 }
-
