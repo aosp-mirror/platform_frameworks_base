@@ -172,17 +172,19 @@ public final class CookieSyncManager extends WebSyncManager {
             Log.v(LOGTAG, "CookieSyncManager::syncFromRamToFlash STARTS");
         }
 
-        if (!CookieManager.getInstance().acceptCookie()) {
+        CookieManager manager = CookieManager.getInstance();
+
+        if (!manager.acceptCookie()) {
             return;
         }
 
-        ArrayList<Cookie> cookieList = CookieManager.getInstance()
-                .getUpdatedCookiesSince(mLastUpdate);
+        manager.flushCookieStore();
+
+        ArrayList<Cookie> cookieList = manager.getUpdatedCookiesSince(mLastUpdate);
         mLastUpdate = System.currentTimeMillis();
         syncFromRamToFlash(cookieList);
 
-        ArrayList<Cookie> lruList =
-                CookieManager.getInstance().deleteLRUDomain();
+        ArrayList<Cookie> lruList = manager.deleteLRUDomain();
         syncFromRamToFlash(lruList);
 
         if (DebugFlags.COOKIE_SYNC_MANAGER) {
