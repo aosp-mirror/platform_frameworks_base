@@ -16,25 +16,19 @@
 
 package android.app;
 
-import java.text.NumberFormat;
-import java.util.Date;
+import com.android.internal.R;
 
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.text.format.DateFormat;
-import android.text.format.DateUtils;
-import android.util.Slog;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import com.android.internal.R;
+import java.text.NumberFormat;
 
 /**
  * A class that represents how a persistent notification is to be presented to
@@ -46,8 +40,6 @@ import com.android.internal.R;
  */
 public class Notification implements Parcelable
 {
-    private static final String TAG = "Notification";
-
     /**
      * Use all default values (where applicable).
      */
@@ -402,6 +394,7 @@ public class Notification implements Parcelable
         }
     }
 
+    @Override
     public Notification clone() {
         Notification that = new Notification();
 
@@ -645,7 +638,10 @@ public class Notification implements Parcelable
 
         public Builder(Context context) {
             mContext = context;
+
+            // Set defaults to match the defaults of a Notification
             mWhen = System.currentTimeMillis();
+            mAudioStreamType = STREAM_DEFAULT;
         }
 
         public Builder setWhen(long when) {
