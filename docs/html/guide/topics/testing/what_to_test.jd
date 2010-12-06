@@ -79,6 +79,6 @@ page.title=What To Test
     <a href="{@docRoot}guide/developing/tools/emulator.html#netspeed">Network Speed Emulation</a>.
     To test GPS, you can use the emulator console and {@link android.location.LocationManager}. To
     learn more about the emulator console, please see
-    <a href="{@docRoot}/guide/developing/tools/emulator.html#console">
+    <a href="{@docRoot}guide/developing/tools/emulator.html#console">
     Using the Emulator Console</a>.
 </p>

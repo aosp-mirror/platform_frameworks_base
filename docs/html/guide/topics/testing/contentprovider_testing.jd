@@ -37,7 +37,7 @@ page.title=Content Provider Testing
       <ol>
         <li>
           <a
-          href="{@docRoot}guide/topics/testing/topics/testing_android.html">
+          href="{@docRoot}guide/topics/testing/testing_android.html">
           Testing Fundamentals</a>
         </li>
         <li>
@@ -123,7 +123,8 @@ page.title=Content Provider Testing
     The constructor then creates a {@link android.test.mock.MockContentResolver} to use as the
     resolver for the test. The {@link android.test.mock.MockContentResolver} class is described in
     detail in the section
-    <a href="{@docRoot}guide/topics/testing/test_android#MockObjectClasses">Mock object classes</a>.
+    <a href="{@docRoot}guide/topics/testing/testing_android.html#MockObjectClasses">Mock object
+classes</a>.
 </p>
 <p>
     Lastly, the constructor creates an instance of the provider under test. This is a normal
@@ -137,7 +138,7 @@ page.title=Content Provider Testing
     {@link android.test.ProviderTestCase2} uses {@link android.test.IsolatedContext} and
     {@link android.test.mock.MockContentResolver}, which are standard mock object classes. To
     learn more about them, please read
-    <a href="{@docRoot}guide/topics/testing/test_android#MockObjectClasses">
+    <a href="{@docRoot}guide/topics/testing/testing_android.html#MockObjectClasses">
     Testing Fundamentals</a>.
 </p>
 <h2 id="WhatToTest">What To Test</h2>
