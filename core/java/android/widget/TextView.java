@@ -8220,6 +8220,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             positionAtCursor();
             coords[0] += mPositionX;
             coords[1] += mPositionY;
+            coords[0] = Math.max(0, coords[0]);
+            final int screenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
+            coords[0] = Math.min(screenWidth - mContainer.getContentView().getMeasuredWidth(),
+                    coords[0]);
             mContainer.showAtLocation(TextView.this, Gravity.NO_GRAVITY, coords[0], coords[1]);
         }
 
@@ -8363,7 +8367,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mContainerPositionY = coords[1] + mPositionY;
             mContainer.showAtLocation(TextView.this, 0, mContainerPositionX, mContainerPositionY);
 
-            // Hide paste view when handle is moved.
+            // Hide paste view when handle is moved on screen.
             if (mPastePopupWindow != null) {
                 mPastePopupWindow.hide();
             }
@@ -8502,12 +8506,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mIsDragging = true;
                 if (mHasPastePopupWindow) {
                     mTouchTimer = SystemClock.uptimeMillis();
-                    if (mPastePopupWindow != null && mPastePopupWindow.isShowing()) {
-                        // Tapping on the handle again dismisses the displayed paste view,
-                        mPastePopupWindow.hide();
-                        // and makes sure the action up does not display the paste view.
-                        mTouchTimer = 0;
-                    }
                 }
                 break;
             }
@@ -8522,10 +8520,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 break;
             }
             case MotionEvent.ACTION_UP:
-                if (mPastePopupWindow != null) {
-                    // Will show the paste popup after a delay.
-                    mController.show();
-                    /* TEMP USER TEST: Display Paste as soon as handle is draggged
+                if (mHasPastePopupWindow) {
                     long delay = SystemClock.uptimeMillis() - mTouchTimer;
                     if (delay < ViewConfiguration.getTapTimeout()) {
                         final float touchOffsetX = ev.getRawX() - mPositionX;
@@ -8537,9 +8532,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         final int doubleTapSlop = viewConfiguration.getScaledDoubleTapSlop();
                         final int slopSquared = doubleTapSlop * doubleTapSlop;
                         if (distanceSquared < slopSquared) {
-                            showPastePopupWindow();
+                            if (mPastePopupWindow != null && mPastePopupWindow.isShowing()) {
+                                // Tapping on the handle dismisses the displayed paste view,
+                                mPastePopupWindow.hide();
+                            } else {
+                                ((InsertionPointCursorController) mController).show(0);
+                            }
                         }
-                    }*/
+                    } else {
+                        mController.show();
+                    }
                 }
                 mIsDragging = false;
                 break;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2008 The Android Open Source Project
+<!-- Copyright (C) 2010 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,34 +14,25 @@
      limitations under the License.
 -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@android:drawable/text_edit_paste_window">
-
-    <ImageView android:id="@+id/paste_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingLeft="16dip"
-        android:paddingRight="8dip"
-        android:paddingTop="8dip"
-        android:paddingBottom="8dip"
-        android:layout_centerVertical="true"
-        android:background="@android:drawable/ic_menu_paste_dark"
-    />
+    android:layout_height="wrap_content">
 
     <TextView android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="0dip"
+        android:paddingLeft="16dip"
         android:paddingRight="16dip"
         android:paddingTop="8dip"
         android:paddingBottom="8dip"
-        android:layout_centerVertical="true"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@android:string/pasteDisabled"
+        android:drawableLeft="@android:drawable/ic_menu_paste_dark"
+        android:drawablePadding="8dip"
+        android:gravity="center"
+        android:textAppearance="?android:attr/textAppearanceMediumInverse"
         android:textColor="@android:color/dim_foreground_dark_inverse_disabled"
-        android:layout_toRightOf="@id/paste_icon"
+        android:background="@android:drawable/text_edit_paste_window"
+        android:text="@android:string/pasteDisabled"
+        android:layout_marginBottom="12dip"
     />
 
-</RelativeLayout>
+</LinearLayout>
