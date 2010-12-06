@@ -16,7 +16,6 @@
 
 package com.android.layoutlib.bridge.android;
 
-import com.android.layoutlib.api.ILayoutLog;
 import com.android.layoutlib.api.IProjectCallback;
 import com.android.layoutlib.api.IResourceValue;
 import com.android.layoutlib.api.IStyleResourceValue;
@@ -97,7 +96,6 @@ public final class BridgeContext extends Activity {
     private BridgeInflater mInflater;
 
     private final IProjectCallback mProjectCallback;
-    private final ILayoutLog mLogger;
     private BridgeContentResolver mContentResolver;
 
     private final Stack<BridgeXmlBlockParser> mParserStack = new Stack<BridgeXmlBlockParser>();
@@ -122,11 +120,10 @@ public final class BridgeContext extends Activity {
             Map<String, Map<String, IResourceValue>> projectResources,
             Map<String, Map<String, IResourceValue>> frameworkResources,
             Map<IStyleResourceValue, IStyleResourceValue> styleInheritanceMap,
-            IProjectCallback projectCallback, ILayoutLog logger) {
+            IProjectCallback projectCallback) {
         mProjectKey = projectKey;
         mMetrics = metrics;
         mProjectCallback = projectCallback;
-        mLogger = logger;
 
         mThemeValues = currentTheme;
         mProjectResources = projectResources;
@@ -181,10 +178,6 @@ public final class BridgeContext extends Activity {
 
     public IProjectCallback getProjectCallback() {
         return mProjectCallback;
-    }
-
-    public ILayoutLog getLogger() {
-        return mLogger;
     }
 
     public Map<String, String> getDefaultPropMap(Object key) {
@@ -340,7 +333,7 @@ public final class BridgeContext extends Activity {
             // good, nothing to do.
         } else if (set != null) { // null parser is ok
             // really this should not be happening since its instantiated in Bridge
-            mLogger.error("Parser is not a BridgeXmlBlockParser!");
+            Bridge.getLog().error(null, "Parser is not a BridgeXmlBlockParser!");
             return null;
         }
 

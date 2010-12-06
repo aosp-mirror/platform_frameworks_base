@@ -174,11 +174,11 @@ public final class BridgeResources extends Resources {
                         return ColorStateList.createFromXml(this,
                                 new BridgeXmlBlockParser(parser, mContext, resValue.isFramework()));
                     } catch (XmlPullParserException e) {
-                        mContext.getLogger().error(e);
+                        Bridge.getLog().error(null, e);
                     } catch (FileNotFoundException e) {
                         // will not happen, since we pre-check
                     } catch (IOException e) {
-                        mContext.getLogger().error(e);
+                        Bridge.getLog().error(null, e);
                     }
 
                 } else {
@@ -245,7 +245,7 @@ public final class BridgeResources extends Resources {
                     return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
                 }
             } catch (XmlPullParserException e) {
-                mContext.getLogger().error(e);
+                Bridge.getLog().error(null, e);
                 // we'll return null below.
             } catch (FileNotFoundException e) {
                 // this shouldn't happen since we check above.
@@ -279,7 +279,7 @@ public final class BridgeResources extends Resources {
                     return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
                 }
             } catch (XmlPullParserException e) {
-                mContext.getLogger().error(e);
+                Bridge.getLog().error(null, e);
                 // we'll return null below.
             } catch (FileNotFoundException e) {
                 // this shouldn't happen since we check above.

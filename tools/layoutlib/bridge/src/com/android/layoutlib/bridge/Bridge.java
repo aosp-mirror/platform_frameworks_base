@@ -17,7 +17,7 @@
 package com.android.layoutlib.bridge;
 
 import com.android.layoutlib.api.Capabilities;
-import com.android.layoutlib.api.ILayoutLog;
+import com.android.layoutlib.api.LayoutLog;
 import com.android.layoutlib.api.IProjectCallback;
 import com.android.layoutlib.api.IResourceValue;
 import com.android.layoutlib.api.IXmlPullParser;
@@ -133,14 +133,16 @@ public final class Bridge extends LayoutBridge {
     private final static IntArray sIntArrayWrapper = new IntArray();
 
     /**
-     * A default logger than prints to stdout/stderr.
+     * A default log than prints to stdout/stderr.
      */
-    private final static ILayoutLog sDefaultLogger = new ILayoutLog() {
-        public void error(String message) {
+    private final static LayoutLog sDefaultLog = new LayoutLog() {
+        @Override
+        public void error(String tag, String message) {
             System.err.println(message);
         }
 
-        public void error(Throwable t) {
+        @Override
+        public void error(String tag, Throwable t) {
             String message = t.getMessage();
             if (message == null) {
                 message = t.getClass().getName();
@@ -149,10 +151,22 @@ public final class Bridge extends LayoutBridge {
             System.err.println(message);
         }
 
-        public void warning(String message) {
+        @Override
+        public void error(String tag, String message, Throwable throwable) {
+            System.err.println(message);
+        }
+
+        @Override
+        public void warning(String tag, String message) {
             System.out.println(message);
         }
     };
+
+    /**
+     * Current log.
+     */
+    private static LayoutLog sCurrentLog = sDefaultLog;
+
 
     private EnumSet<Capabilities> mCapabilities;
 
@@ -203,7 +217,7 @@ public final class Bridge extends LayoutBridge {
             OverrideMethod.setDefaultListener(new MethodAdapter() {
                 @Override
                 public void onInvokeV(String signature, boolean isNative, Object caller) {
-                    sDefaultLogger.error("Missing Stub: " + signature +
+                    sDefaultLog.error(null, "Missing Stub: " + signature +
                             (isNative ? " (native)" : ""));
 
                     if (debug.equalsIgnoreCase("throw")) {
@@ -311,7 +325,7 @@ public final class Bridge extends LayoutBridge {
     @Override
     public BridgeLayoutScene createScene(SceneParams params) {
         try {
-            SceneResult lastResult = SceneStatus.SUCCESS.getResult();
+            SceneResult lastResult = SceneStatus.SUCCESS.createResult();
             LayoutSceneImpl scene = new LayoutSceneImpl(params);
             try {
                 prepareThread();
@@ -335,7 +349,7 @@ public final class Bridge extends LayoutBridge {
                 t2 = t.getCause();
             }
             return new BridgeLayoutScene(null,
-                    SceneStatus.ERROR_UNKNOWN.getResult(t2.getMessage(), t2));
+                    SceneStatus.ERROR_UNKNOWN.createResult(t2.getMessage(), t2));
         }
     }
 
@@ -383,6 +397,23 @@ public final class Bridge extends LayoutBridge {
         Looper.sThreadLocal.remove();
     }
 
+    public static LayoutLog getLog() {
+        return sCurrentLog;
+    }
+
+    public static void setLog(LayoutLog log) {
+        // check only the thread currently owning the lock can do this.
+        if (sLock.isHeldByCurrentThread() == false) {
+            throw new IllegalStateException("scene must be acquired first. see #acquire(long)");
+        }
+
+        if (log != null) {
+            sCurrentLog = log;
+        } else {
+            sCurrentLog = sDefaultLog;
+        }
+    }
+
     /**
      * Returns details of a framework resource from its integer value.
      * @param value the integer value
@@ -391,7 +422,6 @@ public final class Bridge extends LayoutBridge {
      */
     public static String[] resolveResourceValue(int value) {
         return sRMap.get(value);
-
     }
 
     /**

@@ -205,7 +205,7 @@ public final class BridgeTypedArray extends TypedArray {
                 if (i != null) {
                     result |= i.intValue();
                 } else {
-                    mContext.getLogger().warning(String.format(
+                    Bridge.getLog().warning(null, String.format(
                             "Unknown constant \"%s\" in attribute \"%2$s\"",
                             keyword, mNames[index]));
                 }
@@ -235,7 +235,7 @@ public final class BridgeTypedArray extends TypedArray {
             try {
                 return Float.parseFloat(s);
             } catch (NumberFormatException e) {
-                mContext.getLogger().warning(String.format(
+                Bridge.getLog().warning(null, String.format(
                         "Unable to convert \"%s\" into a float in attribute \"%2$s\"",
                         s, mNames[index]));
 
@@ -267,7 +267,7 @@ public final class BridgeTypedArray extends TypedArray {
         try {
             return ResourceHelper.getColor(s);
         } catch (NumberFormatException e) {
-            mContext.getLogger().warning(String.format(
+            Bridge.getLog().warning(null, String.format(
                     "Unable to convert \"%s\" into a color in attribute \"%2$s\"",
                     s, mNames[index]));
 
@@ -322,13 +322,13 @@ public final class BridgeTypedArray extends TypedArray {
         } catch (Exception e) {
             // this is an error and not warning since the file existence is checked before
             // attempting to parse it.
-            mContext.getLogger().error(e);
+            Bridge.getLog().error(null, e);
 
             // return null below.
         }
 
         // looks like were unable to resolve the color value.
-        mContext.getLogger().warning(String.format(
+        Bridge.getLog().warning(null, String.format(
                 "Unable to resolve color value \"%1$s\" in attribute \"%2$s\"",
                 value, mNames[index]));
 
@@ -356,7 +356,7 @@ public final class BridgeTypedArray extends TypedArray {
             try {
                 return Integer.parseInt(s);
             } catch (NumberFormatException e) {
-                mContext.getLogger().warning(String.format(
+                Bridge.getLog().warning(null, String.format(
                         "Unable to convert \"%s\" into a integer in attribute \"%2$s\"",
                         s, mNames[index]));
 
@@ -405,7 +405,7 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         // looks like we were unable to resolve the dimension value
-        mContext.getLogger().warning(String.format(
+        Bridge.getLog().warning(null, String.format(
                 "Unable to resolve dimension value \"%1$s\" in attribute \"%2$s\"",
                 s, mNames[index]));
 
@@ -534,7 +534,7 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         // looks like we were unable to resolve the fraction value
-        mContext.getLogger().warning(String.format(
+        Bridge.getLog().warning(null, String.format(
                 "Unable to resolve fraction value \"%1$s\" in attribute \"%2$s\"",
                 value, mNames[index]));
 
@@ -641,7 +641,7 @@ public final class BridgeTypedArray extends TypedArray {
             return idValue.intValue();
         }
 
-        mContext.getLogger().warning(String.format(
+        Bridge.getLog().warning(null, String.format(
                 "Unable to resolve id \"%1$s\" for attribute \"%2$s\"", value, mNames[index]));
         return defValue;
     }
@@ -675,7 +675,7 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         // looks like we were unable to resolve the drawable
-        mContext.getLogger().warning(String.format(
+        Bridge.getLog().warning(null, String.format(
                 "Unable to resolve drawable \"%1$s\" in attribute \"%2$s\"", stringValue,
                 mNames[index]));
 
@@ -704,7 +704,7 @@ public final class BridgeTypedArray extends TypedArray {
             return new CharSequence[] { value };
         }
 
-        mContext.getLogger().warning(String.format(
+        Bridge.getLog().warning(null, String.format(
                 String.format("Unknown value for getTextArray(%d) => %s", //DEBUG
                 index, mData[index].getName())));
 

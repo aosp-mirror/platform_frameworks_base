@@ -146,7 +146,7 @@ public abstract class AnimationThread extends Thread {
                 }
             } while (mListener.isCanceled() == false && mQueue.size() > 0);
 
-            mListener.done(SceneStatus.SUCCESS.getResult());
+            mListener.done(SceneStatus.SUCCESS.createResult());
         } finally {
             postAnimation();
             Handler_Delegate.setCallback(null);
