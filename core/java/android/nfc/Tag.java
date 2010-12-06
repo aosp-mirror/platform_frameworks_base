@@ -154,6 +154,7 @@ public class Tag implements Parcelable {
                 case TagTechnology.NFC_V: {
                     return new NfcV(adapter, this, extras);
                 }
+                case TagTechnology.MIFARE_CLASSIC_NDEF:
                 case TagTechnology.TYPE_1:
                 case TagTechnology.TYPE_2:
                 case TagTechnology.TYPE_3:
