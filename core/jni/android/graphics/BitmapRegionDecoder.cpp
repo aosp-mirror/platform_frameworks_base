@@ -191,6 +191,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, SkBitmapRegionDecoder *b
     int sampleSize = 1;
     SkBitmap::Config prefConfig = SkBitmap::kNo_Config;
     bool doDither = true;
+    bool preferQualityOverSpeed = false;
 
     if (NULL != options) {
         sampleSize = env->GetIntField(options, gOptions_sampleSizeFieldID);
@@ -202,9 +203,12 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, SkBitmapRegionDecoder *b
         jobject jconfig = env->GetObjectField(options, gOptions_configFieldID);
         prefConfig = GraphicsJNI::getNativeBitmapConfig(env, jconfig);
         doDither = env->GetBooleanField(options, gOptions_ditherFieldID);
+        preferQualityOverSpeed = env->GetBooleanField(options,
+                gOptions_preferQualityOverSpeedFieldID);
     }
 
     decoder->setDitherImage(doDither);
+    decoder->setPreferQualityOverSpeed(preferQualityOverSpeed);
     SkBitmap*           bitmap = new SkBitmap;
     SkAutoTDelete<SkBitmap>       adb(bitmap);
     AutoDecoderCancel   adc(options, decoder);
