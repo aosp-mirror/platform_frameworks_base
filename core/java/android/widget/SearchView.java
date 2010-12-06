@@ -1271,7 +1271,7 @@ public class SearchView extends LinearLayout {
         public void onWindowFocusChanged(boolean hasWindowFocus) {
             super.onWindowFocusChanged(hasWindowFocus);
 
-            if (hasWindowFocus) {
+            if (hasWindowFocus && mSearchView.hasFocus() && getVisibility() == VISIBLE) {
                 InputMethodManager inputManager = (InputMethodManager) getContext()
                         .getSystemService(Context.INPUT_METHOD_SERVICE);
                 inputManager.showSoftInput(this, 0);
