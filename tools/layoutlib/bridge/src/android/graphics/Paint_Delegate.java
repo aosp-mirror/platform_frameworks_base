@@ -340,6 +340,7 @@ public class Paint_Delegate {
         }
 
         delegate.mTextSize = textSize;
+        delegate.updateFontObject();
     }
 
     /*package*/ static float getTextScaleX(Paint thisPaint) {
@@ -362,6 +363,7 @@ public class Paint_Delegate {
         }
 
         delegate.mTextScaleX = scaleX;
+        delegate.updateFontObject();
     }
 
     /*package*/ static float getTextSkewX(Paint thisPaint) {
@@ -384,6 +386,7 @@ public class Paint_Delegate {
         }
 
         delegate.mTextSkewX = skewX;
+        delegate.updateFontObject();
     }
 
     /*package*/ static float ascent(Paint thisPaint) {
@@ -662,14 +665,15 @@ public class Paint_Delegate {
             return 0;
         }
 
-        return delegate.mTypeface = typeface;
+        delegate.mTypeface = typeface;
+        delegate.updateFontObject();
+        return delegate.mTypeface;
     }
 
     /*package*/ static int native_setRasterizer(int native_object, int rasterizer) {
         // FIXME
         throw new UnsupportedOperationException();
     }
-
 
     /*package*/ static int native_getTextAlign(int native_object) {
         // get the delegate from the native int.
@@ -810,14 +814,10 @@ public class Paint_Delegate {
 
     private Paint_Delegate() {
         reset();
-
-        mTypeface = Typeface.sDefaults[0].native_instance;
-        updateFontObject();
     }
 
     private Paint_Delegate(Paint_Delegate paint) {
         set(paint);
-        updateFontObject();
     }
 
     private void set(Paint_Delegate paint) {
@@ -838,6 +838,7 @@ public class Paint_Delegate {
         mShader = paint.mShader;
         mPathEffect = paint.mPathEffect;
         mMaskFilter = paint.mMaskFilter;
+        updateFontObject();
     }
 
     private void reset() {
@@ -847,7 +848,7 @@ public class Paint_Delegate {
         mCap = 0;
         mJoin = 0;
         mTextAlign = 0;
-        mTypeface = 0;
+        mTypeface = Typeface.sDefaults[0].native_instance;
         mStrokeWidth = 1.f;
         mStrokeMiter = 2.f;
         mTextSize = 20.f;
@@ -858,6 +859,7 @@ public class Paint_Delegate {
         mShader = 0;
         mPathEffect = 0;
         mMaskFilter = 0;
+        updateFontObject();
     }
 
     /**
