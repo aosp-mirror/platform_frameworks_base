@@ -548,6 +548,9 @@
         <attr name="actionModeCopyDrawable" format="reference" />
         <!-- Drawable to use for the Paste action button in Contextual Action Bar -->
         <attr name="actionModePasteDrawable" format="reference" />
+
+        <!-- PopupWindow style to use for action modes when showing as a window overlay. -->
+        <attr name="actionModePopupWindowStyle" format="reference" />
         
         <!-- =================== -->
         <!-- Preference styles   -->
