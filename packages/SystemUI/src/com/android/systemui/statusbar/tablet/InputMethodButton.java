@@ -175,10 +175,12 @@ public class InputMethodButton extends ImageView {
                 icon = getShortcutInputMethodAndSubtypeDrawable();
                 break;
         }
-        if (icon == null) {
-            mIcon.setImageResource(R.drawable.ic_sysbar_ime_default);
-        } else {
-            mIcon.setImageDrawable(icon);
+        if (mIcon != null) {
+            if (icon == null) {
+                mIcon.setImageResource(R.drawable.ic_sysbar_ime_default);
+            } else {
+                mIcon.setImageDrawable(icon);
+            }
         }
     }
 
