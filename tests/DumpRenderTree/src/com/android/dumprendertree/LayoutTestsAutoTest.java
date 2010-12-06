@@ -20,6 +20,7 @@ import com.android.dumprendertree.TestShellActivity.DumpDataType;
 import com.android.dumprendertree.forwarder.AdbUtils;
 import com.android.dumprendertree.forwarder.ForwardService;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.test.ActivityInstrumentationTestCase2;
@@ -471,11 +472,14 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
 
     public void copyResultsAndRunnerAssetsToCache() {
         try {
-            String out_dir = getActivity().getApplicationContext().getCacheDir().getPath() + "/";
+            Context targetContext = getInstrumentation().getTargetContext();
+            File cacheDir = targetContext.getCacheDir();
 
             for( int i=0; i< LAYOUT_TESTS_RESULTS_REFERENCE_FILES.length; i++) {
-                InputStream in = getActivity().getAssets().open(LAYOUT_TESTS_RESULTS_REFERENCE_FILES[i]);
-                OutputStream out = new FileOutputStream(out_dir + LAYOUT_TESTS_RESULTS_REFERENCE_FILES[i]);
+                InputStream in = targetContext.getAssets().open(
+                        LAYOUT_TESTS_RESULTS_REFERENCE_FILES[i]);
+                OutputStream out = new FileOutputStream(new File(cacheDir,
+                        LAYOUT_TESTS_RESULTS_REFERENCE_FILES[i]));
 
                 byte[] buf = new byte[2048];
                 int len;
