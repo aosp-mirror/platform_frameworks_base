@@ -900,8 +900,8 @@
         <item name="actionBarStyle">@android:style/Widget.Holo.ActionBar</item>
         <item name="actionBarSize">56dip</item>
 
-        <item name="dividerVertical">@drawable/divider_vertical_holo_dark</item>
-        <item name="dividerHorizontal">@drawable/divider_vertical_holo_dark</item>
+        <item name="dividerVertical">?android:attr/listDivider</item>
+        <item name="dividerHorizontal">?android:attr/listDivider</item>
         <item name="buttonGroupStyle">@android:style/Widget.Holo.ButtonGroup</item>
 
         <!-- SearchView attributes -->
@@ -1146,8 +1146,8 @@
         <item name="actionBarStyle">@android:style/Widget.Holo.Light.ActionBar</item>
         <item name="actionBarSize">56dip</item>
 
-        <item name="dividerVertical">@drawable/divider_vertical_holo_light</item>
-        <item name="dividerHorizontal">@drawable/divider_vertical_holo_light</item>
+        <item name="dividerVertical">?android:attr/listDivider</item>
+        <item name="dividerHorizontal">?android:attr/listDivider</item>
         <item name="buttonGroupStyle">@android:style/Widget.Holo.Light.ButtonGroup</item>
 
         <!-- SearchView attributes -->

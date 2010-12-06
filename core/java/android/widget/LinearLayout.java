@@ -155,8 +155,8 @@ public class LinearLayout extends ViewGroup {
     public LinearLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        TypedArray a = 
-            context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.LinearLayout);
+        TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.LinearLayout, defStyle, 0);
 
         int index = a.getInt(com.android.internal.R.styleable.LinearLayout_orientation, -1);
         if (index >= 0) {

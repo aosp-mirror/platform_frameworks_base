@@ -4542,6 +4542,9 @@
         <attr name="indeterminateProgressStyle" format="reference" />
         <!-- Specifies the horizontal padding on either end for an embedded progress bar. -->
         <attr name="progressBarPadding" format="dimension" />
+        <!-- Specifies padding that should be applied to the left and right sides of
+             system-provided items in the bar. -->
+        <attr name="itemPadding" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="ActionMode">
