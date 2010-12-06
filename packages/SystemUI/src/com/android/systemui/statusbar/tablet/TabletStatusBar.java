@@ -165,6 +165,8 @@ public class TabletStatusBar extends StatusBar {
                 (ImageView)mNotificationPanel.findViewById(R.id.network_type));
         mNetworkController.addLabelView(
                 (TextView)mNotificationPanel.findViewById(R.id.network_text));
+        mNetworkController.addLabelView(
+                (TextView)mBarContents.findViewById(R.id.network_text));
 
         mStatusBarView.setIgnoreChildren(0, mNotificationTrigger, mNotificationPanel);
 
@@ -579,12 +581,28 @@ public class TabletStatusBar extends StatusBar {
         setAreThereNotifications();
     }
 
+    public void showClock(boolean show) {
+        View clock = mBarContents.findViewById(R.id.clock);
+        View network_text = mBarContents.findViewById(R.id.network_text);
+        if (clock != null) {
+            clock.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+        if (network_text != null) {
+            network_text.setVisibility((!show) ? View.VISIBLE : View.GONE);
+        }
+    }
+
     public void disable(int state) {
         int old = mDisabled;
         int diff = state ^ old;
         mDisabled = state;
 
         // act accordingly
+        if ((diff & StatusBarManager.DISABLE_CLOCK) != 0) {
+            boolean show = (state & StatusBarManager.DISABLE_CLOCK) == 0;
+            Slog.d(TAG, "DISABLE_CLOCK: " + (show ? "no" : "yes"));
+            showClock(show);
+        }
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state & StatusBarManager.DISABLE_EXPAND) != 0) {
                 Slog.d(TAG, "DISABLE_EXPAND: yes");

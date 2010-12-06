@@ -1100,7 +1100,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             boolean enable = !mShowing || (mHidden && !isSecure());
             mStatusBarManager.disable(enable ?
                          StatusBarManager.DISABLE_NONE :
-                         StatusBarManager.DISABLE_EXPAND);
+                         ( StatusBarManager.DISABLE_EXPAND
+                         | StatusBarManager.DISABLE_NAVIGATION
+                         | StatusBarManager.DISABLE_CLOCK));
         }
     }
 

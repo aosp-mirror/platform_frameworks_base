@@ -76,8 +76,23 @@
                         android:textColor="#2e2e2e" />
                 </com.android.systemui.statusbar.tablet.HoloClock>
 
+                <TextView
+                    android:id="@+id/network_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginRight="6dip"
+                    android:layout_marginLeft="6dip"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:visibility="gone"
+                    android:textSize="14dip"
+                    android:textColor="#606060"
+                    />
+
                 <LinearLayout
-                    android:layout_width="48dip"
+                    android:id="@+id/signal_battery_cluster"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:orientation="horizontal"
                     android:gravity="center"
