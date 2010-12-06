@@ -264,11 +264,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mHandler = new MyHandler(handlerThread.getLooper());
 
         // setup our unique device name
-        String id = Settings.Secure.getString(context.getContentResolver(),
-                Settings.Secure.ANDROID_ID);
-        if (id != null && id.length() > 0) {
-            String name = new String("android_").concat(id);
-            SystemProperties.set("net.hostname", name);
+        if (TextUtils.isEmpty(SystemProperties.get("net.hostname"))) {
+            String id = Settings.Secure.getString(context.getContentResolver(),
+                    Settings.Secure.ANDROID_ID);
+            if (id != null && id.length() > 0) {
+                String name = new String("android_").concat(id);
+                SystemProperties.set("net.hostname", name);
+            }
         }
 
         // read our default dns server ip
