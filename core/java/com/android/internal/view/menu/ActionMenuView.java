@@ -95,18 +95,12 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         TypedArray a = context.obtainStyledAttributes(com.android.internal.R.styleable.Theme);
         final int buttonStyle = a.getResourceId(
                 com.android.internal.R.styleable.Theme_actionButtonStyle, 0);
-        final int groupStyle = a.getResourceId(
-                com.android.internal.R.styleable.Theme_buttonGroupStyle, 0);
+        mDivider = a.getDrawable(com.android.internal.R.styleable.Theme_dividerVertical);
         a.recycle();
         
         a = context.obtainStyledAttributes(buttonStyle, com.android.internal.R.styleable.View);
         mButtonPaddingLeft = a.getDimension(com.android.internal.R.styleable.View_paddingLeft, 0);
         mButtonPaddingRight = a.getDimension(com.android.internal.R.styleable.View_paddingRight, 0);
-        a.recycle();
-        
-        a = context.obtainStyledAttributes(groupStyle,
-                com.android.internal.R.styleable.ButtonGroup);
-        mDivider = a.getDrawable(com.android.internal.R.styleable.ButtonGroup_divider);
         a.recycle();
         
         mDividerPadding = DIVIDER_PADDING * res.getDisplayMetrics().density;
