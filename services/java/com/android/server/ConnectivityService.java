@@ -2163,7 +2163,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
         intent.putExtra(Proxy.EXTRA_PROXY_INFO, proxy);
-        mContext.sendBroadcast(intent);
+        mContext.sendStickyBroadcast(intent);
     }
 
     private static class SettingsObserver extends ContentObserver {
