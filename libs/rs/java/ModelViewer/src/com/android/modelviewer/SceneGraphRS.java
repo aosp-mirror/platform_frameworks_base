@@ -210,7 +210,7 @@ public class SceneGraphRS {
         mScript.bind_gRobot2(mRobot2.mParent.mChildField);
         mScript.set_gRobot2Index(mRobot2.mIndexInParentGroup);
 
-        mRS.contextBindRootScript(mScript);
+        mRS.bindRootScript(mScript);
     }
 }
 

@@ -87,7 +87,7 @@ public class Program extends BaseObj {
         if ((slot < 0) || (slot >= mTextureCount)) {
             throw new IllegalArgumentException("Slot ID out of range.");
         }
-        if (va != null && va.getType().getFaces() &&
+        if (va != null && va.getType().hasFaces() &&
             mTextures[slot] != TextureType.TEXTURE_CUBE) {
             throw new IllegalArgumentException("Cannot bind cubemap to 2d texture slot");
         }

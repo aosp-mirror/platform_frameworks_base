@@ -63,7 +63,7 @@ public class RSTest extends Activity {
         // Ideally a game should implement onResume() and onPause()
         // to take appropriate action when the activity loses focus
         super.onResume();
-        mView.onResume();
+        mView.resume();
     }
 
     @Override
@@ -71,7 +71,7 @@ public class RSTest extends Activity {
         // Ideally a game should implement onResume() and onPause()
         // to take appropriate action when the activity loses focus
         super.onPause();
-        mView.onPause();
+        mView.pause();
     }
 
     static void log(String message) {

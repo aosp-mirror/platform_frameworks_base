@@ -53,8 +53,8 @@ public class RSTestView extends RSSurfaceView {
         super.surfaceChanged(holder, format, w, h);
         if (mRS == null) {
             RenderScriptGL.SurfaceConfig sc = new RenderScriptGL.SurfaceConfig();
-            mRS = createRenderScript(sc);
-            mRS.contextSetSurface(w, h, holder.getSurface());
+            mRS = createRenderScriptGL(sc);
+            mRS.setSurface(holder, w, h);
             mRender = new RSTestCore();
             mRender.init(mRS, getResources(), w, h);
         }
@@ -65,7 +65,7 @@ public class RSTestView extends RSSurfaceView {
         if(mRS != null) {
             mRender.cleanup();
             mRS = null;
-            destroyRenderScript();
+            destroyRenderScriptGL();
         }
     }
 

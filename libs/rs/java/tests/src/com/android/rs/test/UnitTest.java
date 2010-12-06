@@ -15,7 +15,7 @@
  */
 
 package com.android.rs.test;
-import android.renderscript.RenderScript.RSMessage;
+import android.renderscript.RenderScript.RSMessageHandler;
 import android.util.Log;
 
 public class UnitTest extends Thread {
@@ -53,7 +53,7 @@ public class UnitTest extends Thread {
         this (null);
     }
 
-    protected RSMessage mRsMessage = new RSMessage() {
+    protected RSMessageHandler mRsMessage = new RSMessageHandler() {
         public void run() {
             if (result == 0) {
                 switch (mID) {

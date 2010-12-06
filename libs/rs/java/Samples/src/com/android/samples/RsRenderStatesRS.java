@@ -396,7 +396,7 @@ public class RsRenderStatesRS {
         initProgramRaster();
         initCustomShaders();
 
-        mRS.contextBindRootScript(mScript);
+        mRS.bindRootScript(mScript);
     }
 }
 

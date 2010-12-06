@@ -45,6 +45,9 @@ public class RenderScriptGL extends RenderScript {
      * Class which is used to describe a pixel format for a graphical buffer.
      * This is used to describe the intended format of the display surface.
      *
+     * The configuration is described by pairs of minimum and preferred bit
+     * depths for each component within the config and additional structural
+     * information.
      */
     public static class SurfaceConfig {
         int mDepthMin       = 0;
@@ -81,38 +84,75 @@ public class RenderScriptGL extends RenderScript {
                 throw new RSIllegalArgumentException("Minimum value provided out of range.");
             }
             if (upref < umin) {
-                throw new RSIllegalArgumentException("Prefered must be >= Minimum.");
+                throw new RSIllegalArgumentException("preferred must be >= Minimum.");
             }
         }
 
-        public void setColor(int minimum, int prefered) {
-            validateRange(minimum, prefered, 5, 8);
+        /**
+         * Set the per-component bit depth for color (red, green, blue).  This
+         * configures the surface for an unsigned integer buffer type.
+         *
+         * @param minimum
+         * @param preferred
+         */
+        public void setColor(int minimum, int preferred) {
+            validateRange(minimum, preferred, 5, 8);
             mColorMin = minimum;
-            mColorPref = prefered;
+            mColorPref = preferred;
         }
-        public void setAlpha(int minimum, int prefered) {
-            validateRange(minimum, prefered, 0, 8);
+
+        /**
+         * Set the bit depth for alpha. This configures the surface for
+         * an unsigned integer buffer type.
+         *
+         * @param minimum
+         * @param preferred
+         */
+        public void setAlpha(int minimum, int preferred) {
+            validateRange(minimum, preferred, 0, 8);
             mAlphaMin = minimum;
-            mAlphaPref = prefered;
+            mAlphaPref = preferred;
         }
-        public void setDepth(int minimum, int prefered) {
-            validateRange(minimum, prefered, 0, 24);
+
+         /**
+         * Set the bit depth for the depth buffer. This configures the
+         * surface for an unsigned integer buffer type.  If a minimum of 0
+         * is specified then its possible no depth buffer will be
+         * allocated.
+         *
+         * @param minimum
+         * @param preferred
+         */
+        public void setDepth(int minimum, int preferred) {
+            validateRange(minimum, preferred, 0, 24);
             mDepthMin = minimum;
-            mDepthPref = prefered;
+            mDepthPref = preferred;
         }
-        public void setSamples(int minimum, int prefered, float Q) {
-            validateRange(minimum, prefered, 0, 24);
+
+        /**
+         * Configure the multisample rendering.
+         *
+         * @param minimum The required number of samples, must be at least 1.
+         * @param preferred The targe number of samples, must be at least
+         *                  minimum
+         * @param Q  The quality of samples, range 0-1.  Used to decide between
+         *           different formats which have the same number of samples but
+         *           different rendering quality.
+         */
+        public void setSamples(int minimum, int preferred, float Q) {
+            validateRange(minimum, preferred, 1, 32);
             if (Q < 0.0f || Q > 1.0f) {
                 throw new RSIllegalArgumentException("Quality out of 0-1 range.");
             }
             mSamplesMin = minimum;
-            mSamplesPref = prefered;
+            mSamplesPref = preferred;
             mSamplesQ = Q;
         }
     };
 
     SurfaceConfig mSurfaceConfig;
-
+/*
+    // Keep?
     public void configureSurface(SurfaceHolder sh) {
         if (mSurfaceConfig.mAlphaMin > 1) {
             sh.setFormat(PixelFormat.RGBA_8888);
@@ -123,7 +163,14 @@ public class RenderScriptGL extends RenderScript {
 
     public void checkSurface(SurfaceHolder sh) {
     }
+*/
 
+    /**
+     * Construct a new RenderScriptGL context.
+     *
+     *
+     * @param sc The desired format of the primart rendering surface.
+     */
     public RenderScriptGL(SurfaceConfig sc) {
         mSurfaceConfig = new SurfaceConfig(sc);
 
@@ -146,54 +193,113 @@ public class RenderScriptGL extends RenderScript {
         Element.initPredefined(this);
     }
 
-    public void contextSetSurface(int w, int h, Surface sur) {
-        mSurface = sur;
+    /**
+     * Bind an os surface
+     *
+     *
+     * @param w
+     * @param h
+     * @param sur
+     */
+    public void setSurface(SurfaceHolder sur, int w, int h) {
+        validate();
+        if (sur != null) {
+            mSurface = sur.getSurface();
+        } else {
+            mSurface = null;
+        }
         mWidth = w;
         mHeight = h;
-        validate();
         nContextSetSurface(w, h, mSurface);
     }
 
+    /**
+     * return the height of the last set surface.
+     *
+     * @return int
+     */
     public int getHeight() {
         return mHeight;
     }
 
+    /**
+     * return the width of the last set surface.
+     *
+     * @return int
+     */
     public int getWidth() {
         return mWidth;
     }
 
-    void pause() {
+    /**
+     * Temporarly halt calls to the root rendering script.
+     *
+     */
+    public void pause() {
         validate();
         nContextPause();
     }
 
-    void resume() {
+    /**
+     * Resume calls to the root rendering script.
+     *
+     */
+    public void resume() {
         validate();
         nContextResume();
     }
 
 
-    public void contextBindRootScript(Script s) {
+    /**
+     * Set the script to handle calls to render the primary surface.
+     *
+     * @param s Graphics script to process rendering requests.
+     */
+    public void bindRootScript(Script s) {
         validate();
         nContextBindRootScript(safeID(s));
     }
 
-    public void contextBindProgramStore(ProgramStore p) {
+    /**
+     * Set the default ProgramStore object seen as the parent state by the root
+     * rendering script.
+     *
+     * @param p
+     */
+    public void bindProgramStore(ProgramStore p) {
         validate();
         nContextBindProgramStore(safeID(p));
     }
 
-    public void contextBindProgramFragment(ProgramFragment p) {
+    /**
+     * Set the default ProgramFragment object seen as the parent state by the
+     * root rendering script.
+     *
+     * @param p
+     */
+    public void bindProgramFragment(ProgramFragment p) {
         validate();
         nContextBindProgramFragment(safeID(p));
     }
 
-    public void contextBindProgramRaster(ProgramRaster p) {
+    /**
+     * Set the default ProgramRaster object seen as the parent state by the
+     * root rendering script.
+     *
+     * @param p
+     */
+    public void bindProgramRaster(ProgramRaster p) {
         validate();
         nContextBindProgramRaster(safeID(p));
     }
 
-    public void contextBindProgramVertex(ProgramVertex p) {
+    /**
+     * Set the default ProgramVertex object seen as the parent state by the
+     * root rendering script.
+     *
+     * @param p
+     */
+    public void bindProgramVertex(ProgramVertex p) {
         validate();
         nContextBindProgramVertex(safeID(p));
     }

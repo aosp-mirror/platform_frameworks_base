@@ -94,21 +94,14 @@ public class Balls extends Activity implements SensorEventListener {
         // Ideally a game should implement onResume() and onPause()
         // to take appropriate action when the activity looses focus
         super.onResume();
-        mView.onResume();
+        mView.resume();
     }
 
     @Override
     protected void onPause() {
-        Log.e("rs", "onPause");
-
-        // Ideally a game should implement onResume() and onPause()
-        // to take appropriate action when the activity looses focus
         super.onPause();
-        mView.onPause();
-
-
-
-        //Runtime.getRuntime().exit(0);
+        mView.pause();
+        Runtime.getRuntime().exit(0);
     }
 
     @Override

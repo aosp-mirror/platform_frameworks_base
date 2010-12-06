@@ -63,7 +63,7 @@ public class BallsRS {
         sb.addInput(mPoints.getElement());
         ProgramVertex pvs = sb.create();
         pvs.bindConstants(mVpConsts.getAllocation(), 0);
-        mRS.contextBindProgramVertex(pvs);
+        mRS.bindProgramVertex(pvs);
     }
 
     private Allocation loadTexture(int id) {
@@ -118,14 +118,14 @@ public class BallsRS {
         mScript.set_gPFPoints(mPFPoints);
         createProgramVertex();
 
-        mRS.contextBindProgramStore(ProgramStore.BLEND_ADD_DEPTH_NO_DEPTH(mRS));
+        mRS.bindProgramStore(ProgramStore.BLEND_ADD_DEPTH_NO_DEPTH(mRS));
 
         mPhysicsScript.set_gMinPos(new Float2(5, 5));
         mPhysicsScript.set_gMaxPos(new Float2(width - 5, height - 5));
 
         mScript.invoke_initParts(width, height);
 
-        mRS.contextBindRootScript(mScript);
+        mRS.bindRootScript(mScript);
     }
 
     public void newTouchPosition(float x, float y, float pressure, int id) {

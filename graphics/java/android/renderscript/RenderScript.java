@@ -38,9 +38,9 @@ import android.view.Surface;
  **/
 public class RenderScript {
     static final String LOG_TAG = "RenderScript_jni";
-    protected static final boolean DEBUG  = false;
+    static final boolean DEBUG  = false;
     @SuppressWarnings({"UnusedDeclaration", "deprecation"})
-    protected static final boolean LOG_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
+    static final boolean LOG_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
 
 
 
@@ -49,8 +49,8 @@ public class RenderScript {
      * field offsets.
      */
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
-    protected static boolean sInitialized;
-    native protected static void _nInit();
+    static boolean sInitialized;
+    native static void _nInit();
 
 
     static {
@@ -183,9 +183,9 @@ public class RenderScript {
         rsnElementGetSubElements(mContext, id, IDs, names);
     }
 
-    native int rsnTypeCreate(int con, int eid, int[] dims, int[] vals);
-    synchronized int nTypeCreate(int eid, int[] dims, int[] vals) {
-        return rsnTypeCreate(mContext, eid, dims, vals);
+    native int rsnTypeCreate(int con, int eid, int x, int y, int z, boolean mips, boolean faces);
+    synchronized int nTypeCreate(int eid, int x, int y, int z, boolean mips, boolean faces) {
+        return rsnTypeCreate(mContext, eid, x, y, z, mips, faces);
     }
     native void rsnTypeGetNativeData(int con, int id, int[] typeData);
     synchronized void nTypeGetNativeData(int id, int[] typeData) {
@@ -525,10 +525,10 @@ public class RenderScript {
     }
 
 
-    protected int     mDev;
-    protected int     mContext;
+    int     mDev;
+    int     mContext;
     @SuppressWarnings({"FieldCanBeLocal"})
-    protected MessageThread mMessageThread;
+    MessageThread mMessageThread;
 
     Element mElement_U8;
     Element mElement_I8;
@@ -604,7 +604,7 @@ public class RenderScript {
      * in the script.
      *
      */
-    public static class RSMessage implements Runnable {
+    public static class RSMessageHandler implements Runnable {
         protected int[] mData;
         protected int mID;
         protected int mLength;
@@ -617,7 +617,14 @@ public class RenderScript {
      * sent from sendToClient by scripts from this context.
      *
      */
-    public RSMessage mMessageCallback = null;
+    RSMessageHandler mMessageCallback = null;
+
+    public void setMessageHandler(RSMessageHandler msg) {
+        mMessageCallback = msg;
+    }
+    public RSMessageHandler getMessageHandler() {
+        return mMessageCallback;
+    }
 
     /**
      * Runtime error base class.  An application should derive from this class
@@ -625,7 +632,7 @@ public class RenderScript {
      * the fields in this class will be filled and the run method called.
      *
      */
-    public static class RSAsyncError implements Runnable {
+    public static class RSErrorHandler implements Runnable {
         protected String mErrorMessage;
         protected int mErrorNum;
         public void run() {
@@ -639,7 +646,14 @@ public class RenderScript {
      * This will cause program termaination.
      *
      */
-    public RSAsyncError mErrorCallback = null;
+    RSErrorHandler mErrorCallback = null;
+
+    public void setErrorHandler(RSErrorHandler msg) {
+        mErrorCallback = msg;
+    }
+    public RSErrorHandler getErrorHandler() {
+        return mErrorCallback;
+    }
 
     /**
      * RenderScript worker threads priority enumeration.  The default value is
@@ -648,6 +662,7 @@ public class RenderScript {
      * processes.
      */
     public enum Priority {
+        // Remap these numbers to opaque...
         LOW (5),     //ANDROID_PRIORITY_BACKGROUND + 5
         NORMAL (-4);  //ANDROID_PRIORITY_DISPLAY
 
@@ -669,23 +684,23 @@ public class RenderScript {
      *
      * @param p New priority to be set.
      */
-    public void contextSetPriority(Priority p) {
+    public void setPriority(Priority p) {
         validate();
         nContextSetPriority(p.mID);
     }
 
-    protected static class MessageThread extends Thread {
+    static class MessageThread extends Thread {
         RenderScript mRS;
         boolean mRun = true;
-        int[] auxData = new int[2];
+        int[] mAuxData = new int[2];
 
-        public static final int RS_MESSAGE_TO_CLIENT_NONE = 0;
-        public static final int RS_MESSAGE_TO_CLIENT_EXCEPTION = 1;
-        public static final int RS_MESSAGE_TO_CLIENT_RESIZE = 2;
-        public static final int RS_MESSAGE_TO_CLIENT_ERROR = 3;
-        public static final int RS_MESSAGE_TO_CLIENT_USER = 4;
+        static final int RS_MESSAGE_TO_CLIENT_NONE = 0;
+        static final int RS_MESSAGE_TO_CLIENT_EXCEPTION = 1;
+        static final int RS_MESSAGE_TO_CLIENT_RESIZE = 2;
+        static final int RS_MESSAGE_TO_CLIENT_ERROR = 3;
+        static final int RS_MESSAGE_TO_CLIENT_USER = 4;
 
-        public static final int RS_ERROR_FATAL_UNKNOWN = 0x1000;
+        static final int RS_ERROR_FATAL_UNKNOWN = 0x1000;
 
         MessageThread(RenderScript rs) {
             super("RSMessageThread");
@@ -700,9 +715,9 @@ public class RenderScript {
             mRS.nContextInitToClient(mRS.mContext);
             while(mRun) {
                 rbuf[0] = 0;
-                int msg = mRS.nContextPeekMessage(mRS.mContext, auxData, true);
-                int size = auxData[1];
-                int subID = auxData[0];
+                int msg = mRS.nContextPeekMessage(mRS.mContext, mAuxData, true);
+                int size = mAuxData[1];
+                int subID = mAuxData[0];
 
                 if (msg == RS_MESSAGE_TO_CLIENT_USER) {
                     if ((size>>2) >= rbuf.length) {
@@ -775,12 +790,10 @@ public class RenderScript {
      * Print the currently available debugging information about the state of
      * the RS context to the log.
      *
-     *
-     * @param bits Currently ignored.
      */
-    public void contextDump(int bits) {
+    public void contextDump() {
         validate();
-        nContextDump(bits);
+        nContextDump(0);
     }
 
     /**
@@ -817,7 +830,7 @@ public class RenderScript {
         return mContext != 0;
     }
 
-    protected int safeID(BaseObj o) {
+    int safeID(BaseObj o) {
         if(o != null) {
             return o.getID();
         }
