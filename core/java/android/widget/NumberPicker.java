@@ -66,7 +66,8 @@ public class NumberPicker extends LinearLayout {
     public static final NumberPicker.Formatter TWO_DIGIT_FORMATTER =
             new NumberPicker.Formatter() {
                 final StringBuilder mBuilder = new StringBuilder();
-                final java.util.Formatter mFmt = new java.util.Formatter(mBuilder);
+                final java.util.Formatter mFmt = new java.util.Formatter(
+                        mBuilder, java.util.Locale.US);
                 final Object[] mArgs = new Object[1];
                 public String toString(int value) {
                     mArgs[0] = value;
