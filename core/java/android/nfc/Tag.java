@@ -113,6 +113,11 @@ public class Tag implements Parcelable {
     /**
      * Returns technologies present in the tag that this implementation understands,
      * or a zero length array if there are no supported technologies on this tag.
+     *
+     * The elements of the list are guaranteed be one of the constants defined in
+     * {@link TagTechnology}. 
+     *
+     * The ordering of the returned array is undefined and should not be relied upon.
      */
     public int[] getTechnologyList() { 
         return Arrays.copyOf(mTechList, mTechList.length);
