@@ -1079,7 +1079,15 @@ status_t StagefrightRecorder::setupCameraSource(
                 mCamera, mCameraId, videoSize, mFrameRate,
                 mPreviewSurface, true /*storeMetaDataInVideoBuffers*/);
     }
-    CHECK(*cameraSource != NULL);
+    if (*cameraSource == NULL) {
+        return UNKNOWN_ERROR;
+    }
+
+    if ((*cameraSource)->initCheck() != OK) {
+        (*cameraSource).clear();
+        *cameraSource = NULL;
+        return NO_INIT;
+    }
 
     // When frame rate is not set, the actual frame rate will be set to
     // the current frame rate being used.
