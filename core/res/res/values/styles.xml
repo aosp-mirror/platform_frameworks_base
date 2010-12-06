@@ -1386,9 +1386,11 @@
     </style>
 
     <style name="Widget.Holo.GridView" parent="Widget.GridView">
+        <item name="android:listSelector">?android:attr/selectableItemBackground</item>
     </style>
 
     <style name="Widget.Holo.ImageButton" parent="Widget.ImageButton">
+        <item name="android:background">@android:drawable/btn_default_holo_dark</item>
     </style>
 
     <style name="Widget.Holo.ImageButton.NumberPickerUpButton">
@@ -1728,10 +1730,11 @@
     <style name="Widget.Holo.Light.GestureOverlayView" parent="Widget.GestureOverlayView">
     </style>
 
-    <style name="Widget.Holo.Light.GridView" parent="Widget.GridView">
+    <style name="Widget.Holo.Light.GridView" parent="Widget.Holo.GridView">
     </style>
 
-    <style name="Widget.Holo.Light.ImageButton" parent="Widget.ImageButton">
+    <style name="Widget.Holo.Light.ImageButton" parent="Widget.Holo.ImageButton">
+        <item name="android:background">@android:drawable/btn_default_holo_light</item>
     </style>
 
     <style name="Widget.Holo.Light.ImageButton.NumberPickerUpButton" parent="Widget.Holo.Light.ImageButton.NumberPickerUpButton">
