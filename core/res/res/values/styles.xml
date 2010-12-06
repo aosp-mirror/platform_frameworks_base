@@ -1599,6 +1599,9 @@
     </style>
 
     <style name="Widget.Holo.ActionBarView_TabBar" parent="Widget.ActionBarView_TabBar">
+        <item name="divider">?android:attr/dividerVertical</item>
+        <item name="showDividers">beginning|end</item>
+        <item name="dividerPadding">8dip</item>
     </style>
 
     <style name="Widget.Holo.ActionBarView_TabText" parent="Widget.ActionBarView_TabText">
@@ -1624,6 +1627,7 @@
         <item name="android:progressBarStyle">@android:style/Widget.Holo.ProgressBar.Horizontal</item>
         <item name="android:indeterminateProgressStyle">@android:style/Widget.Holo.ProgressBar</item>
         <item name="android:progressBarPadding">32dip</item>
+        <item name="android:itemPadding">8dip</item>
     </style>
 
     <style name="Widget.Holo.CompoundButton.Switch">
