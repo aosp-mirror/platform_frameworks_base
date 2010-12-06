@@ -19,20 +19,26 @@ import com.android.internal.R;
 import com.android.internal.view.menu.ActionMenuView;
 import com.android.internal.view.menu.MenuBuilder;
 
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
  * @hide
  */
-public class ActionBarContextView extends ViewGroup {
+public class ActionBarContextView extends ViewGroup implements AnimatorListener {
     private int mContentHeight;
     
     private CharSequence mTitle;
@@ -46,6 +52,14 @@ public class ActionBarContextView extends ViewGroup {
     private int mTitleStyleRes;
     private int mSubtitleStyleRes;
     private ActionMenuView mMenuView;
+
+    private Animator mCurrentAnimation;
+    private boolean mAnimateInOnLayout;
+    private int mAnimationMode;
+
+    private static final int ANIMATE_IDLE = 0;
+    private static final int ANIMATE_IN = 1;
+    private static final int ANIMATE_OUT = 2;
     
     public ActionBarContextView(Context context) {
         this(context, null);
@@ -145,10 +159,14 @@ public class ActionBarContextView extends ViewGroup {
     }
 
     public void initForMode(final ActionMode mode) {
+        if (mCurrentAnimation != null && mCurrentAnimation.isRunning()) {
+            mCurrentAnimation.end();
+            killMode();
+        }
         if (mClose == null) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
-            inflater.inflate(R.layout.action_mode_close_item, this);
-            mClose = getChildAt(getChildCount() - 1);
+            mClose = inflater.inflate(R.layout.action_mode_close_item, this, false);
+            addView(mClose);
         } else {
             addView(mClose);
         }
@@ -165,9 +183,30 @@ public class ActionBarContextView extends ViewGroup {
         mMenuView.setOverflowReserved(true);
         mMenuView.updateChildren(false);
         addView(mMenuView);
+
+        mAnimateInOnLayout = true;
     }
 
     public void closeMode() {
+        if (mClose == null) {
+            killMode();
+            return;
+        }
+
+        mAnimationMode = ANIMATE_OUT;
+        finishAnimation();
+        mCurrentAnimation = makeOutAnimation();
+        mCurrentAnimation.start();
+    }
+
+    private void finishAnimation() {
+        if (mCurrentAnimation != null && mCurrentAnimation.isRunning()) {
+            mCurrentAnimation.end();
+        }
+    }
+
+    public void killMode() {
+        finishAnimation();
         removeAllViews();
         mCustomView = null;
         mMenuView = null;
@@ -279,6 +318,60 @@ public class ActionBarContextView extends ViewGroup {
         }
     }
 
+    private Animator makeInAnimation() {
+        mClose.setTranslationX(-mClose.getWidth());
+        ObjectAnimator buttonAnimator = ObjectAnimator.ofFloat(mClose, "translationX", 0);
+        buttonAnimator.setDuration(200);
+        buttonAnimator.addListener(this);
+        buttonAnimator.setInterpolator(new DecelerateInterpolator());
+
+        AnimatorSet set = new AnimatorSet();
+        AnimatorSet.Builder b = set.play(buttonAnimator);
+
+        if (mMenuView != null) {
+            final int count = mMenuView.getChildCount();
+            if (count > 0) {
+                for (int i = count - 1, j = 0; i >= 0; i--, j++) {
+                    View child = mMenuView.getChildAt(i);
+                    child.setScaleY(0);
+                    ObjectAnimator a = ObjectAnimator.ofFloat(child, "scaleY", 0, 1);
+                    a.setDuration(100);
+                    a.setStartDelay(j * 70);
+                    b.with(a);
+                }
+            }
+        }
+
+        return set;
+    }
+
+    private Animator makeOutAnimation() {
+        ObjectAnimator buttonAnimator = ObjectAnimator.ofFloat(mClose, "translationX",
+                0, -mClose.getWidth());
+        buttonAnimator.setDuration(200);
+        buttonAnimator.addListener(this);
+        buttonAnimator.setInterpolator(new DecelerateInterpolator());
+
+        AnimatorSet set = new AnimatorSet();
+        AnimatorSet.Builder b = set.play(buttonAnimator);
+
+        if (mMenuView != null) {
+            final int count = mMenuView.getChildCount();
+            if (count > 0) {
+                for (int i = 0; i < 0; i++) {
+                    View child = mMenuView.getChildAt(i);
+                    child.setScaleY(0);
+                    ObjectAnimator a = ObjectAnimator.ofFloat(child, "scaleY", 1, 0);
+                    a.setDuration(100);
+                    a.setStartDelay(i * 70);
+                    b.with(a);
+                }
+            }
+        }
+
+        return set;
+    }
+
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         int x = getPaddingLeft();
@@ -287,6 +380,13 @@ public class ActionBarContextView extends ViewGroup {
         
         if (mClose != null && mClose.getVisibility() != GONE) {
             x += positionChild(mClose, x, y, contentHeight);
+
+            if (mAnimateInOnLayout) {
+                mAnimationMode = ANIMATE_IN;
+                mCurrentAnimation = makeInAnimation();
+                mCurrentAnimation.start();
+                mAnimateInOnLayout = false;
+            }
         }
         
         if (mTitleLayout != null && mCustomView == null) {
@@ -332,5 +432,25 @@ public class ActionBarContextView extends ViewGroup {
         child.layout(x - childWidth, childTop, x, childTop + childHeight);
 
         return childWidth;
+    }
+
+    @Override
+    public void onAnimationStart(Animator animation) {
+    }
+
+    @Override
+    public void onAnimationEnd(Animator animation) {
+        if (mAnimationMode == ANIMATE_OUT) {
+            killMode();
+        }
+        mAnimationMode = ANIMATE_IDLE;
+    }
+
+    @Override
+    public void onAnimationCancel(Animator animation) {
+    }
+
+    @Override
+    public void onAnimationRepeat(Animator animation) {
     }
 }

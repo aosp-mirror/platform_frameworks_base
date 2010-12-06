@@ -681,10 +681,12 @@ int main(int argc, char **argv) {
                         METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL),
                      (status_t)OK);
 
-            sp<IMemory> mem = retriever->captureFrame();
+            sp<IMemory> mem =
+                    retriever->getFrameAtTime(-1,
+                                    MediaSource::ReadOptions::SEEK_PREVIOUS_SYNC);
 
             if (mem != NULL) {
-                printf("captureFrame(%s) => OK\n", filename);
+                printf("getFrameAtTime(%s) => OK\n", filename);
 
                 VideoFrame *frame = (VideoFrame *)mem->pointer();
 
@@ -704,7 +706,7 @@ int main(int argc, char **argv) {
                 if (mem != NULL) {
                     printf("extractAlbumArt(%s) => OK\n", filename);
                 } else {
-                    printf("both captureFrame and extractAlbumArt "
+                    printf("both getFrameAtTime and extractAlbumArt "
                            "failed on file '%s'.\n", filename);
                 }
             }

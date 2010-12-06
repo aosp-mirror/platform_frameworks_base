@@ -257,6 +257,7 @@
         <item name="actionModeCloseButtonStyle">@style/Widget.ActionButton.CloseMode</item>
         <item name="actionBarStyle">@android:style/Widget.ActionBar</item>
         <item name="actionBarSize">56dip</item>
+        <item name="actionModePopupWindowStyle">?android:attr/popupWindowStyle</item>
 
         <item name="dividerVertical">@drawable/divider_vertical_dark</item>
         <item name="dividerHorizontal">@drawable/divider_vertical_dark</item>
@@ -563,6 +564,21 @@
         <item name="android:windowNoTitle">true</item>
     </style>
 
+    <!-- Default holo light theme for panel windows.  This removes all extraneous
+         window decorations, so you basically have an empty rectangle in which
+         to place your content.  It makes the window floating, with a transparent
+         background, and turns off dimming behind the window. -->
+    <style name="Theme.Holo.Light.Panel">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
     <!-- Default theme for input methods, which is used by the
          {@link android.inputmethodservice.InputMethodService} class.
          this inherits from Theme.NoTitleBar, but makes the background
@@ -577,7 +593,7 @@
     </style>
 
     <!-- Theme for the search input bar. -->
-    <style name="Theme.SearchBar" parent="Theme.Panel">
+    <style name="Theme.SearchBar" parent="Theme.Holo.Light.Panel">
         <item name="windowContentOverlay">@null</item>        
     </style>
     
@@ -875,7 +891,7 @@
         <item name="actionDropDownStyle">@android:style/Widget.Holo.Spinner.DropDown.ActionBar</item>
         <item name="actionButtonStyle">@android:style/Widget.Holo.ActionButton</item>
         <item name="actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
-        <item name="actionModeBackground">@android:drawable/cab_holo_dark</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_holo_dark</item>
         <item name="actionModeCloseDrawable">@android:drawable/cab_ic_close_holo</item>
         <item name="actionBarTabStyle">@style/Widget.Holo.ActionBarView_TabView</item>
         <item name="actionBarTabBarStyle">@style/Widget.Holo.ActionBarView_TabBar</item>
@@ -884,9 +900,10 @@
         <item name="actionModeCloseButtonStyle">@style/Widget.Holo.ActionButton.CloseMode</item>
         <item name="actionBarStyle">@android:style/Widget.Holo.ActionBar</item>
         <item name="actionBarSize">56dip</item>
+        <item name="actionModePopupWindowStyle">@android:style/Widget.Holo.PopupWindow.ActionMode</item>
 
-        <item name="dividerVertical">@drawable/divider_vertical_holo_dark</item>
-        <item name="dividerHorizontal">@drawable/divider_vertical_holo_dark</item>
+        <item name="dividerVertical">?android:attr/listDivider</item>
+        <item name="dividerHorizontal">?android:attr/listDivider</item>
         <item name="buttonGroupStyle">@android:style/Widget.Holo.ButtonGroup</item>
 
         <!-- SearchView attributes -->
@@ -973,6 +990,7 @@
 
         <item name="groupButtonBackground">@android:drawable/group_button_background_holo_light</item>
         <item name="selectableItemBackground">@android:drawable/item_background_holo_light</item>
+        <item name="borderlessButtonStyle">@android:style/Widget.Holo.Light.Button.Borderless</item>
         <item name="homeAsUpIndicator">@android:drawable/ic_ab_back_holo_light</item>
 
         <!-- List attributes -->
@@ -1121,7 +1139,7 @@
         <item name="actionDropDownStyle">@android:style/Widget.Holo.Light.Spinner.DropDown.ActionBar</item>
         <item name="actionButtonStyle">@android:style/Widget.Holo.Light.ActionButton</item>
         <item name="actionOverflowButtonStyle">@android:style/Widget.Holo.Light.ActionButton.Overflow</item>
-        <item name="actionModeBackground">@android:drawable/cab_holo_light</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_holo_light</item>
         <item name="actionModeCloseDrawable">@android:drawable/cab_ic_close_holo</item>
         <item name="actionBarTabStyle">@style/Widget.Holo.Light.ActionBarView_TabView</item>
         <item name="actionBarTabBarStyle">@style/Widget.Holo.Light.ActionBarView_TabBar</item>
@@ -1130,9 +1148,10 @@
         <item name="actionModeCloseButtonStyle">@style/Widget.Holo.Light.ActionButton.CloseMode</item>
         <item name="actionBarStyle">@android:style/Widget.Holo.Light.ActionBar</item>
         <item name="actionBarSize">56dip</item>
+        <item name="actionModePopupWindowStyle">@android:style/Widget.Holo.Light.PopupWindow.ActionMode</item>
 
-        <item name="dividerVertical">@drawable/divider_vertical_holo_light</item>
-        <item name="dividerHorizontal">@drawable/divider_vertical_holo_light</item>
+        <item name="dividerVertical">?android:attr/listDivider</item>
+        <item name="dividerHorizontal">?android:attr/listDivider</item>
         <item name="buttonGroupStyle">@android:style/Widget.Holo.Light.ButtonGroup</item>
 
         <!-- SearchView attributes -->
@@ -1162,15 +1181,15 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
-    <!-- Variant of the holographic light theme with no action bar -->
-    <style name="Theme.Light.Holo.NoActionBar">
+    <!-- Variant of the holographic (light) theme with no action bar. -->
+    <style name="Theme.Holo.Light.NoActionBar">
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <!-- Variant of the holographic light theme that has no title bar and fills
+    <!-- Variant of the holographic (light) theme that has no title bar and fills
          the entire screen -->
-    <style name="Theme.Light.Holo.NoActionBar.Fullscreen">
+    <style name="Theme.Holo.Light.NoActionBar.Fullscreen">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
@@ -1197,10 +1216,17 @@
 
         <item name="android:colorBackgroundCacheHint">@null</item>
 
+        <item name="android:buttonGroupStyle">@android:style/Widget.Holo.ButtonGroup.AlertDialog</item>
         <item name="android:groupButtonBackground">?android:attr/selectableItemBackground</item>
         
         <item name="textAppearance">@android:style/TextAppearance.Holo</item>
         <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Inverse</item>
+    </style>
+
+    <!-- Variation of Theme.Holo.Dialog that does not include a title bar. -->
+    <style name="Theme.Holo.Dialog.NoActionBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
     <!-- Variation of Theme.Holo.Dialog that does not include a frame (or background).
@@ -1229,8 +1255,14 @@
 
     <!-- Theme for a window that will be displayed either full-screen on
          smaller screens (small, normal) or as a dialog on larger screens
-         (large, xlarge) -->
+         (large, xlarge). -->
     <style name="Theme.Holo.DialogWhenLarge" parent="@android:style/Theme.Holo">
+    </style>
+
+    <!-- Theme for a window without a title bar that will be displayed either
+         full-screen on smaller screens (small, normal) or as a dialog on larger screens
+         (large, xlarge). -->
+    <style name="Theme.Holo.DialogWhenLarge.NoActionBar" parent="@android:style/Theme.Holo.NoActionBar">
     </style>
     
     <!-- Light holo dialog themes -->
@@ -1251,19 +1283,34 @@
         <item name="android:windowAnimationStyle">@android:style/Animation.Holo.Dialog</item>
         <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
         <item name="android:windowActionBar">false</item>
+        <item name="android:windowActionModeOverlay">true</item>
 
         <item name="android:colorBackgroundCacheHint">@null</item>
 
+        <item name="android:buttonGroupStyle">@android:style/Widget.Holo.Light.ButtonGroup.AlertDialog</item>
         <item name="android:groupButtonBackground">?android:attr/selectableItemBackground</item>
 
         <item name="textAppearance">@android:style/TextAppearance.Holo.Light</item>
         <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Light.Inverse</item>
     </style>
 
+    <!-- Variation of Theme.Holo.Light.Dialog that does not include a title bar. -->
+    <style name="Theme.Holo.Light.Dialog.NoActionBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
     <!-- Theme for a window that will be displayed either full-screen on
          smaller screens (small, normal) or as a dialog on larger screens
-         (large, xlarge) -->
+         (large, xlarge). -->
     <style name="Theme.Holo.Light.DialogWhenLarge" parent="@android:style/Theme.Holo.Light">
+    </style>
+
+    <!-- Theme for a window without an action bar that will be displayed either full-screen
+         on smaller screens (small, normal) or as a dialog on larger screens
+         (large, xlarge). -->
+    <style name="Theme.Holo.Light.DialogWhenLarge.NoActionBar"
+            parent="@android:style/Theme.Holo.Light.NoActionBar">
     </style>
 
     <!-- Holo light theme for alert dialog windows, which is used by the

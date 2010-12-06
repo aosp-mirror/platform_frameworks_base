@@ -612,6 +612,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private int mDirection = 0;
 
     /**
+     * Tracked on measurement in transcript mode. Makes sure that we can still pin to
+     * the bottom correctly on resizes.
+     */
+    private boolean mForceTranscriptScroll;
+
+    /**
      * Interface definition for a callback to be invoked when the list or grid
      * has been scrolled.
      */
@@ -1693,6 +1699,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         listPadding.top = mSelectionTopPadding + mPaddingTop;
         listPadding.right = mSelectionRightPadding + mPaddingRight;
         listPadding.bottom = mSelectionBottomPadding + mPaddingBottom;
+
+        // Check if our previous measured size was at a point where we should scroll later.
+        if (mTranscriptMode == TRANSCRIPT_MODE_NORMAL) {
+            final int childCount = getChildCount();
+            final int listBottom = getBottom() - getPaddingBottom();
+            final View lastChild = getChildAt(childCount - 1);
+            final int lastBottom = lastChild != null ? lastChild.getBottom() : listBottom;
+            mForceTranscriptScroll = mFirstPosition + childCount >= mOldItemCount &&
+                    lastBottom <= listBottom;
+        }
     }
 
     /**
@@ -4398,8 +4414,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (mTranscriptMode == TRANSCRIPT_MODE_ALWAYS_SCROLL) {
                     mLayoutMode = LAYOUT_FORCE_BOTTOM;
                     return;
-                }
-                if (mTranscriptMode == TRANSCRIPT_MODE_NORMAL) {
+                } else if (mTranscriptMode == TRANSCRIPT_MODE_NORMAL) {
+                    if (mForceTranscriptScroll) {
+                        mForceTranscriptScroll = false;
+                        mLayoutMode = LAYOUT_FORCE_BOTTOM;
+                        return;
+                    }
                     final int childCount = getChildCount();
                     final int listBottom = getBottom() - getPaddingBottom();
                     final View lastChild = getChildAt(childCount - 1);

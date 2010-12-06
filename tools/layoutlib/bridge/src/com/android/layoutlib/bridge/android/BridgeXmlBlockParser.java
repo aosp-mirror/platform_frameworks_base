@@ -36,13 +36,13 @@ import java.io.Reader;
  */
 public class BridgeXmlBlockParser implements XmlResourceParser {
 
-    private XmlPullParser mParser;
-    private XmlPullAttributes mAttrib;
+    private final XmlPullParser mParser;
+    private final XmlPullAttributes mAttrib;
+    private final BridgeContext mContext;
+    private final boolean mPlatformFile;
 
     private boolean mStarted = false;
     private int mEventType = START_DOCUMENT;
-    private final boolean mPlatformFile;
-    private final BridgeContext mContext;
 
     /**
      * Builds a {@link BridgeXmlBlockParser}.

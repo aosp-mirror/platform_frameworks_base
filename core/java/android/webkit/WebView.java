@@ -648,6 +648,7 @@ public class WebView extends AbsoluteLayout
     static final int SAVE_WEBARCHIVE_FINISHED           = 132;
 
     static final int SET_AUTOFILLABLE                   = 133;
+    static final int AUTOFILL_COMPLETE                  = 134;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = SET_TOUCH_HIGHLIGHT_RECTS;
@@ -699,7 +700,8 @@ public class WebView extends AbsoluteLayout
         "SELECTION_STRING_CHANGED", //       = 130;
         "SET_TOUCH_HIGHLIGHT_RECTS", //      = 131;
         "SAVE_WEBARCHIVE_FINISHED", //       = 132;
-        "SET_AUTOFILLABLE" //                = 133;
+        "SET_AUTOFILLABLE", //               = 133;
+        "AUTOFILL_COMPLETE" //               = 134;
     };
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
@@ -1243,7 +1245,7 @@ public class WebView extends AbsoluteLayout
         if (!isVerticalScrollBarEnabled() || mOverlayVerticalScrollbar) {
             return getWidth();
         } else {
-            return getWidth() - getVerticalScrollbarWidth();
+            return Math.max(0, getWidth() - getVerticalScrollbarWidth());
         }
     }
 
@@ -2473,15 +2475,14 @@ public class WebView extends AbsoluteLayout
     // Sets r to be our visible rectangle in content coordinates
     private void calcOurContentVisibleRect(Rect r) {
         calcOurVisibleRect(r);
-        // since we might overscroll, pin the rect to the bounds of the content
-        r.left = Math.max(viewToContentX(r.left), 0);
+        r.left = viewToContentX(r.left);
         // viewToContentY will remove the total height of the title bar.  Add
         // the visible height back in to account for the fact that if the title
         // bar is partially visible, the part of the visible rect which is
         // displaying our content is displaced by that amount.
-        r.top = Math.max(viewToContentY(r.top + getVisibleTitleHeight()), 0);
-        r.right = Math.min(viewToContentX(r.right), mContentWidth);
-        r.bottom = Math.min(viewToContentY(r.bottom), mContentHeight);
+        r.top = viewToContentY(r.top + getVisibleTitleHeight());
+        r.right = viewToContentX(r.right);
+        r.bottom = viewToContentY(r.bottom);
     }
 
     // Sets r to be our visible rectangle in content coordinates. We use this
@@ -2491,15 +2492,14 @@ public class WebView extends AbsoluteLayout
     private void calcOurContentVisibleRectF(RectF r) {
         Rect ri = new Rect(0,0,0,0);
         calcOurVisibleRect(ri);
-        // pin the rect to the bounds of the content
-        r.left = Math.max(viewToContentXf(ri.left), 0.0f);
+        r.left = viewToContentXf(ri.left);
         // viewToContentY will remove the total height of the title bar.  Add
         // the visible height back in to account for the fact that if the title
         // bar is partially visible, the part of the visible rect which is
         // displaying our content is displaced by that amount.
-        r.top = Math.max(viewToContentYf(ri.top + getVisibleTitleHeight()), 0.0f);
-        r.right = Math.min(viewToContentXf(ri.right), (float)mContentWidth);
-        r.bottom = Math.min(viewToContentYf(ri.bottom), (float)mContentHeight);
+        r.top = viewToContentYf(ri.top + getVisibleTitleHeight());
+        r.right = viewToContentXf(ri.right);
+        r.bottom = viewToContentYf(ri.bottom);
     }
 
     static class ViewSizeData {
@@ -6472,6 +6472,8 @@ public class WebView extends AbsoluteLayout
                 if (measuredHeight > heightSize) {
                     measuredHeight = heightSize;
                     mHeightCanMeasure = false;
+                } else if (measuredHeight < heightSize) {
+                    measuredHeight |= MEASURED_STATE_TOO_SMALL;
                 }
             }
         } else {
@@ -6485,6 +6487,9 @@ public class WebView extends AbsoluteLayout
             mWidthCanMeasure = true;
             measuredWidth = contentWidth;
         } else {
+            if (measuredWidth < contentWidth) {
+                measuredWidth |= MEASURED_STATE_TOO_SMALL;
+            }
             mWidthCanMeasure = false;
         }
 
@@ -7141,6 +7146,14 @@ public class WebView extends AbsoluteLayout
                     if (mWebTextView != null) {
                         mWebTextView.setAutoFillable(mAutoFillData.getQueryId());
                         rebuildWebTextView();
+                    }
+                    break;
+
+                case AUTOFILL_COMPLETE:
+                    if (mWebTextView != null) {
+                        // Clear the WebTextView adapter when AutoFill finishes
+                        // so that the drop down gets cleared.
+                        mWebTextView.setAdapterCustom(null);
                     }
                     break;
 

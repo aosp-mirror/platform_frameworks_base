@@ -837,28 +837,23 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
                 if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": baseSize=" + baseSize);
                 if (baseSize != 0 && desiredWindowWidth > baseSize) {
-                    int maxHeight = (desiredWindowHeight*2)/3;
                     childWidthMeasureSpec = getRootMeasureSpec(baseSize, lp.width);
                     childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
                     host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
                     if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": measured ("
-                            + host.getWidth() + "," + host.getHeight() + ")");
-                    // Note: for now we are not taking into account height, since we
-                    // can't distinguish between places where it would be useful to
-                    // increase the width (text) vs. where it would not (a list).
-                    // Maybe we can just try the next size up, and see if that reduces
-                    // the height?
-                    if (host.getWidth() <= baseSize /*&& host.getHeight() <= maxHeight*/) {
+                            + host.getMeasuredWidth() + "," + host.getMeasuredHeight() + ")");
+                    if ((host.getMeasuredWidthAndState()&View.MEASURED_STATE_TOO_SMALL) == 0) {
                         goodMeasure = true;
                     } else {
                         // Didn't fit in that size... try expanding a bit.
                         baseSize = (baseSize+desiredWindowWidth)/2;
                         if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": next baseSize="
                                 + baseSize);
+                        childWidthMeasureSpec = getRootMeasureSpec(baseSize, lp.width);
                         host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
                         if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": measured ("
-                                + host.getWidth() + "," + host.getHeight() + ")");
-                        if (host.getWidth() <= baseSize /*&& host.getHeight() <= maxHeight*/) {
+                                + host.getMeasuredWidth() + "," + host.getMeasuredHeight() + ")");
+                        if ((host.getMeasuredWidthAndState()&View.MEASURED_STATE_TOO_SMALL) == 0) {
                             if (DEBUG_DIALOG) Log.v(TAG, "Good!");
                             goodMeasure = true;
                         }
@@ -924,7 +919,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
 
         boolean windowShouldResize = mLayoutRequested && windowSizeMayChange
-            && ((mWidth != host.mMeasuredWidth || mHeight != host.mMeasuredHeight)
+            && ((mWidth != host.getMeasuredWidth() || mHeight != host.getMeasuredHeight())
                 || (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT &&
                         frame.width() < desiredWindowWidth && frame.width() != mWidth)
                 || (lp.height == ViewGroup.LayoutParams.WRAP_CONTENT &&
@@ -971,8 +966,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                     }
                 }
                 if (DEBUG_LAYOUT) {
-                    Log.i(TAG, "host=w:" + host.mMeasuredWidth + ", h:" +
-                            host.mMeasuredHeight + ", params=" + params);
+                    Log.i(TAG, "host=w:" + host.getMeasuredWidth() + ", h:" +
+                            host.getMeasuredHeight() + ", params=" + params);
                 }
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
 
@@ -1112,15 +1107,15 @@ public final class ViewRoot extends Handler implements ViewParent,
 
             boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
                     (relayoutResult&WindowManagerImpl.RELAYOUT_IN_TOUCH_MODE) != 0);
-            if (focusChangedDueToTouchMode || mWidth != host.mMeasuredWidth
-                    || mHeight != host.mMeasuredHeight || contentInsetsChanged) {
+            if (focusChangedDueToTouchMode || mWidth != host.getMeasuredWidth()
+                    || mHeight != host.getMeasuredHeight() || contentInsetsChanged) {
                 childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width);
                 childHeightMeasureSpec = getRootMeasureSpec(mHeight, lp.height);
 
                 if (DEBUG_LAYOUT) Log.v(TAG, "Ooops, something changed!  mWidth="
-                        + mWidth + " measuredWidth=" + host.mMeasuredWidth
+                        + mWidth + " measuredWidth=" + host.getMeasuredWidth()
                         + " mHeight=" + mHeight
-                        + " measuredHeight" + host.mMeasuredHeight
+                        + " measuredHeight" + host.getMeasuredHeight()
                         + " coveredInsetsChanged=" + contentInsetsChanged);
 
                  // Ask host how big it wants to be
@@ -1129,8 +1124,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                 // Implementation of weights from WindowManager.LayoutParams
                 // We just grow the dimensions as needed and re-measure if
                 // needs be
-                int width = host.mMeasuredWidth;
-                int height = host.mMeasuredHeight;
+                int width = host.getMeasuredWidth();
+                int height = host.getMeasuredHeight();
                 boolean measureAgain = false;
 
                 if (lp.horizontalWeight > 0.0f) {
@@ -1165,12 +1160,12 @@ public final class ViewRoot extends Handler implements ViewParent,
             mScrollMayChange = true;
             if (DEBUG_ORIENTATION || DEBUG_LAYOUT) Log.v(
                 TAG, "Laying out " + host + " to (" +
-                host.mMeasuredWidth + ", " + host.mMeasuredHeight + ")");
+                host.getMeasuredWidth() + ", " + host.getMeasuredHeight() + ")");
             long startTime = 0L;
             if (ViewDebug.DEBUG_PROFILE_LAYOUT) {
                 startTime = SystemClock.elapsedRealtime();
             }
-            host.layout(0, 0, host.mMeasuredWidth, host.mMeasuredHeight);
+            host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());
 
             if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
                 if (!host.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_LAYOUT)) {
@@ -2808,8 +2803,8 @@ public final class ViewRoot extends Handler implements ViewParent,
         //Log.d(TAG, ">>>>>> CALLING relayout");
         int relayoutResult = sWindowSession.relayout(
                 mWindow, params,
-                (int) (mView.mMeasuredWidth * appScale + 0.5f),
-                (int) (mView.mMeasuredHeight * appScale + 0.5f),
+                (int) (mView.getMeasuredWidth() * appScale + 0.5f),
+                (int) (mView.getMeasuredHeight() * appScale + 0.5f),
                 viewVisibility, insetsPending, mWinFrame,
                 mPendingContentInsets, mPendingVisibleInsets,
                 mPendingConfiguration, mSurface);

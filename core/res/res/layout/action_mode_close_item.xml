@@ -14,18 +14,25 @@
      limitations under the License.
 -->
 
-<ButtonGroup xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_marginTop="12dip"
-             android:layout_marginBottom="12dip"
-             android:gravity="center"
-             android:showDividers="end"
-             android:background="?android:attr/selectableItemBackground">
-    <Button android:id="@+id/action_mode_close_button"
-            android:text="@string/action_mode_done"
-            android:paddingLeft="16dip"
-            android:paddingRight="16dip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-</ButtonGroup>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/action_mode_close_button"
+        android:background="@drawable/btn_cab_done"
+        android:focusable="true"
+        android:clickable="true"
+        android:paddingLeft="16dip"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+    <ImageView android:layout_width="48dip"
+               android:layout_height="wrap_content"
+               android:layout_gravity="center"
+               android:scaleType="center"
+               android:src="@drawable/ic_cab_close_holo" />
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_gravity="center"
+              android:layout_marginLeft="8dip"
+              android:layout_marginRight="16dip"
+              android:textAppearance="@android:style/TextAppearance.Holo.Medium"
+              android:textColor="@android:color/white"
+              android:text="@string/action_mode_done" />
+</LinearLayout>

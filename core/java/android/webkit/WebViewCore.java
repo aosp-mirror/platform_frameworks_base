@@ -1512,6 +1512,8 @@ final class WebViewCore {
 
                         case AUTOFILL_FORM:
                             nativeAutoFillForm(msg.arg1);
+                            mWebView.mPrivateHandler.obtainMessage(WebView.AUTOFILL_COMPLETE, null)
+                                    .sendToTarget();
                             break;
                     }
                 }

@@ -814,7 +814,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
      * @return Where the top of the child should be
      */
     private int calculateTop(View child, boolean duringLayout) {
-        int myHeight = duringLayout ? mMeasuredHeight : getHeight();
+        int myHeight = duringLayout ? getMeasuredHeight() : getHeight();
         int childHeight = duringLayout ? child.getMeasuredHeight() : child.getHeight(); 
         
         int childTop = 0;

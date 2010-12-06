@@ -15,6 +15,7 @@
 */
 
 #include "installd.h"
+#include <diskusage/dirsize.h>
 
 int install(const char *pkgname, int encrypted_fs_flag, uid_t uid, gid_t gid)
 {
@@ -325,55 +326,6 @@ int protect(char *pkgname, gid_t gid)
     }
 
     return 0;
-}
-
-static int64_t stat_size(struct stat *s)
-{
-    int64_t blksize = s->st_blksize;
-    int64_t size = s->st_size;
-
-    if (blksize) {
-            /* round up to filesystem block size */
-        size = (size + blksize - 1) & (~(blksize - 1));
-    }
-
-    return size;
-}
-
-static int64_t calculate_dir_size(int dfd)
-{
-    int64_t size = 0;
-    struct stat s;
-    DIR *d;
-    struct dirent *de;
-
-    d = fdopendir(dfd);
-    if (d == NULL) {
-        close(dfd);
-        return 0;
-    }
-
-    while ((de = readdir(d))) {
-        const char *name = de->d_name;
-        if (de->d_type == DT_DIR) {
-            int subfd;
-                /* always skip "." and ".." */
-            if (name[0] == '.') {
-                if (name[1] == 0) continue;
-                if ((name[1] == '.') && (name[2] == 0)) continue;
-            }
-            subfd = openat(dfd, name, O_RDONLY | O_DIRECTORY);
-            if (subfd >= 0) {
-                size += calculate_dir_size(subfd);
-            }
-        } else {
-            if (fstatat(dfd, name, &s, AT_SYMLINK_NOFOLLOW) == 0) {
-                size += stat_size(&s);
-            }
-        }
-    }
-    closedir(d);
-    return size;
 }
 
 int get_size(const char *pkgname, const char *apkpath,

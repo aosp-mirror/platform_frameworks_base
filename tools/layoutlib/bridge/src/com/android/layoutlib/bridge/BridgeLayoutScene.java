@@ -132,7 +132,7 @@ public class BridgeLayoutScene extends LayoutScene {
             mLastResult = mScene.acquire(SceneParams.DEFAULT_TIMEOUT);
             if (mLastResult.isSuccess()) {
                 mLastResult = mScene.moveChild((ViewGroup) parentView, (View) childView, index,
-                        listener);
+                        layoutParams, listener);
             }
         } finally {
             mScene.release();

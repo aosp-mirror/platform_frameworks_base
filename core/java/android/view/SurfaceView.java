@@ -282,8 +282,12 @@ public class SurfaceView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int width = getDefaultSize(mRequestedWidth, widthMeasureSpec);
-        int height = getDefaultSize(mRequestedHeight, heightMeasureSpec);
+        int width = mRequestedWidth >= 0
+                ? resolveSizeAndState(mRequestedWidth, widthMeasureSpec, 0)
+                : getDefaultSize(0, widthMeasureSpec);
+        int height = mRequestedHeight >= 0
+                ? resolveSizeAndState(mRequestedHeight, heightMeasureSpec, 0)
+                : getDefaultSize(0, heightMeasureSpec);
         setMeasuredDimension(width, height);
     }
     

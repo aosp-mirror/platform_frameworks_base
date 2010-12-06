@@ -110,6 +110,7 @@ public class FragmentBreadCrumbs extends ViewGroup
 
         int maxHeight = 0;
         int maxWidth = 0;
+        int measuredChildState = 0;
 
         // Find rightmost and bottom-most child
         for (int i = 0; i < count; i++) {
@@ -118,6 +119,8 @@ public class FragmentBreadCrumbs extends ViewGroup
                 measureChild(child, widthMeasureSpec, heightMeasureSpec);
                 maxWidth = Math.max(maxWidth, child.getMeasuredWidth());
                 maxHeight = Math.max(maxHeight, child.getMeasuredHeight());
+                measuredChildState = combineMeasuredStates(measuredChildState,
+                        child.getMeasuredState());
             }
         }
 
@@ -129,8 +132,9 @@ public class FragmentBreadCrumbs extends ViewGroup
         maxHeight = Math.max(maxHeight, getSuggestedMinimumHeight());
         maxWidth = Math.max(maxWidth, getSuggestedMinimumWidth());
 
-        setMeasuredDimension(resolveSize(maxWidth, widthMeasureSpec),
-                resolveSize(maxHeight, heightMeasureSpec));
+        setMeasuredDimension(resolveSizeAndState(maxWidth, widthMeasureSpec, measuredChildState),
+                resolveSizeAndState(maxHeight, heightMeasureSpec,
+                        measuredChildState<<MEASURED_HEIGHT_STATE_SHIFT));
     }
 
     @Override

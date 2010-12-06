@@ -18,8 +18,6 @@ package android.widget;
 
 import static android.widget.SuggestionsAdapter.getColumnString;
 
-import com.android.internal.R;
-
 import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
@@ -29,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.Cursor;
@@ -45,10 +44,13 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.TextView.OnEditorActionListener;
+
+import com.android.internal.R;
 
 import java.util.WeakHashMap;
 
@@ -75,6 +77,7 @@ public class SearchView extends LinearLayout {
     private OnCloseListener mOnCloseListener;
     private OnFocusChangeListener mOnQueryTextFocusChangeListener;
     private OnSuggestionSelectionListener mOnSuggestionListener;
+    private OnClickListener mOnSearchClickListener;
 
     private boolean mIconifiedByDefault;
     private boolean mIconified;
@@ -84,7 +87,7 @@ public class SearchView extends LinearLayout {
     private View mCloseButton;
     private View mSearchEditFrame;
     private View mVoiceButton;
-    private AutoCompleteTextView mQueryTextView;
+    private SearchAutoComplete mQueryTextView;
     private boolean mSubmitButtonEnabled;
     private CharSequence mQueryHint;
     private boolean mQueryRefinement;
@@ -181,7 +184,9 @@ public class SearchView extends LinearLayout {
         inflater.inflate(R.layout.search_view, this, true);
 
         mSearchButton = findViewById(R.id.search_button);
-        mQueryTextView = (AutoCompleteTextView) findViewById(R.id.search_src_text);
+        mQueryTextView = (SearchAutoComplete) findViewById(R.id.search_src_text);
+        mQueryTextView.setSearchView(this);
+
         mSearchEditFrame = findViewById(R.id.search_edit_frame);
         mSubmitButton = findViewById(R.id.search_go_btn);
         mCloseButton = findViewById(R.id.search_close_btn);
@@ -196,6 +201,7 @@ public class SearchView extends LinearLayout {
         mQueryTextView.setOnEditorActionListener(mOnEditorActionListener);
         mQueryTextView.setOnItemClickListener(mOnItemClickListener);
         mQueryTextView.setOnItemSelectedListener(mOnItemSelectedListener);
+        mQueryTextView.setOnKeyListener(mTextKeyListener);
         // Inform any listener of focus changes 
         mQueryTextView.setOnFocusChangeListener(new OnFocusChangeListener() {
 
@@ -294,6 +300,27 @@ public class SearchView extends LinearLayout {
      */
     public void setOnSuggestionSelectionListener(OnSuggestionSelectionListener listener) {
         mOnSuggestionListener = listener;
+    }
+
+    /**
+     * Sets a listener to inform when the search button is pressed. This is only
+     * relevant when the text field is not visible by default. Calling #setIconified(false)
+     * can also cause this listener to be informed.
+     *
+     * @param listener the listener to inform when the search button is clicked or
+     * the text field is programmatically de-iconified.
+     */
+    public void setOnSearchClickListener(OnClickListener listener) {
+        mOnSearchClickListener = listener;
+    }
+
+    /**
+     * Returns the query string currently in the text field.
+     *
+     * @return the query string
+     */
+    public CharSequence getQuery() {
+        return mQueryTextView.getText();
     }
 
     /**
@@ -558,6 +585,148 @@ public class SearchView extends LinearLayout {
         return super.onKeyDown(keyCode, event);
     }
 
+    /**
+     * React to the user typing "enter" or other hardwired keys while typing in
+     * the search box. This handles these special keys while the edit box has
+     * focus.
+     */
+    View.OnKeyListener mTextKeyListener = new View.OnKeyListener() {
+        public boolean onKey(View v, int keyCode, KeyEvent event) {
+            // guard against possible race conditions
+            if (mSearchable == null) {
+                return false;
+            }
+
+            if (DBG) {
+                Log.d(LOG_TAG, "mTextListener.onKey(" + keyCode + "," + event + "), selection: "
+                        + mQueryTextView.getListSelection());
+            }
+
+            // If a suggestion is selected, handle enter, search key, and action keys
+            // as presses on the selected suggestion
+            if (mQueryTextView.isPopupShowing()
+                    && mQueryTextView.getListSelection() != ListView.INVALID_POSITION) {
+                return onSuggestionsKey(v, keyCode, event);
+            }
+
+            // If there is text in the query box, handle enter, and action keys
+            // The search key is handled by the dialog's onKeyDown().
+            if (!mQueryTextView.isEmpty()) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
+                    v.cancelLongPress();
+
+                    // Launch as a regular search.
+                    launchQuerySearch(KeyEvent.KEYCODE_UNKNOWN, null, mQueryTextView.getText()
+                            .toString());
+                    return true;
+                }
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    SearchableInfo.ActionKeyInfo actionKey = mSearchable.findActionKey(keyCode);
+                    if ((actionKey != null) && (actionKey.getQueryActionMsg() != null)) {
+                        launchQuerySearch(keyCode, actionKey.getQueryActionMsg(), mQueryTextView
+                                .getText().toString());
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    };
+
+    /**
+     * React to the user typing while in the suggestions list. First, check for
+     * action keys. If not handled, try refocusing regular characters into the
+     * EditText.
+     */
+    private boolean onSuggestionsKey(View v, int keyCode, KeyEvent event) {
+        // guard against possible race conditions (late arrival after dismiss)
+        if (mSearchable == null) {
+            return false;
+        }
+        if (mSuggestionsAdapter == null) {
+            return false;
+        }
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+
+            // First, check for enter or search (both of which we'll treat as a
+            // "click")
+            if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_SEARCH) {
+                int position = mQueryTextView.getListSelection();
+                return onItemClicked(position, KeyEvent.KEYCODE_UNKNOWN, null);
+            }
+
+            // Next, check for left/right moves, which we use to "return" the
+            // user to the edit view
+            if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                // give "focus" to text editor, with cursor at the beginning if
+                // left key, at end if right key
+                // TODO: Reverse left/right for right-to-left languages, e.g.
+                // Arabic
+                int selPoint = (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) ? 0 : mQueryTextView
+                        .length();
+                mQueryTextView.setSelection(selPoint);
+                mQueryTextView.setListSelection(0);
+                mQueryTextView.clearListSelection();
+                mQueryTextView.ensureImeVisible(true);
+
+                return true;
+            }
+
+            // Next, check for an "up and out" move
+            if (keyCode == KeyEvent.KEYCODE_DPAD_UP && 0 == mQueryTextView.getListSelection()) {
+                // TODO: restoreUserQuery();
+                // let ACTV complete the move
+                return false;
+            }
+
+            // Next, check for an "action key"
+            SearchableInfo.ActionKeyInfo actionKey = mSearchable.findActionKey(keyCode);
+            if ((actionKey != null)
+                    && ((actionKey.getSuggestActionMsg() != null) || (actionKey
+                            .getSuggestActionMsgColumn() != null))) {
+                // launch suggestion using action key column
+                int position = mQueryTextView.getListSelection();
+                if (position != ListView.INVALID_POSITION) {
+                    Cursor c = mSuggestionsAdapter.getCursor();
+                    if (c.moveToPosition(position)) {
+                        final String actionMsg = getActionKeyMessage(c, actionKey);
+                        if (actionMsg != null && (actionMsg.length() > 0)) {
+                            return onItemClicked(position, keyCode, actionMsg);
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * For a given suggestion and a given cursor row, get the action message. If
+     * not provided by the specific row/column, also check for a single
+     * definition (for the action key).
+     *
+     * @param c The cursor providing suggestions
+     * @param actionKey The actionkey record being examined
+     *
+     * @return Returns a string, or null if no action key message for this
+     *         suggestion
+     */
+    private static String getActionKeyMessage(Cursor c, SearchableInfo.ActionKeyInfo actionKey) {
+        String result = null;
+        // check first in the cursor data, for a suggestion-specific message
+        final String column = actionKey.getSuggestActionMsgColumn();
+        if (column != null) {
+            result = SuggestionsAdapter.getColumnString(c, column);
+        }
+        // If the cursor didn't give us a message, see if there's a single
+        // message defined
+        // for the actionkey (for all suggestions)
+        if (result == null) {
+            result = actionKey.getSuggestActionMsg();
+        }
+        return result;
+    }
+
     private void updateQueryHint() {
         if (mQueryHint != null) {
             mQueryTextView.setHint(mQueryHint);
@@ -685,6 +854,9 @@ public class SearchView extends LinearLayout {
         mQueryTextView.requestFocus();
         updateViewsVisibility(false);
         setImeVisibility(true);
+        if (mOnSearchClickListener != null) {
+            mOnSearchClickListener.onClick(this);
+        }
     }
 
     private void onVoiceClicked() {
@@ -710,20 +882,34 @@ public class SearchView extends LinearLayout {
         }
     }
 
+    private boolean onItemClicked(int position, int actionKey, String actionMsg) {
+        if (mOnSuggestionListener == null
+                || !mOnSuggestionListener.onSuggestionClicked(position)) {
+            launchSuggestion(position, KeyEvent.KEYCODE_UNKNOWN, null);
+            setImeVisibility(false);
+            dismissSuggestions();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean onItemSelected(int position) {
+        if (mOnSuggestionListener == null
+                || !mOnSuggestionListener.onSuggestionSelected(position)) {
+            rewriteQueryFromSuggestion(position);
+            return true;
+        }
+        return false;
+    }
+
     private final OnItemClickListener mOnItemClickListener = new OnItemClickListener() {
 
         /**
          * Implements OnItemClickListener
          */
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if (DBG)
-                Log.d(LOG_TAG, "onItemClick() position " + position);
-            if (mOnSuggestionListener == null
-                    || !mOnSuggestionListener.onSuggestionClicked(position)) {
-                launchSuggestion(position, KeyEvent.KEYCODE_UNKNOWN, null);
-                setImeVisibility(false);
-                dismissSuggestions();
-            }
+            if (DBG) Log.d(LOG_TAG, "onItemClick() position " + position);
+            onItemClicked(position, KeyEvent.KEYCODE_UNKNOWN, null);
         }
     };
 
@@ -733,14 +919,8 @@ public class SearchView extends LinearLayout {
          * Implements OnItemSelectedListener
          */
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            if (DBG)
-                Log.d(LOG_TAG, "onItemSelected() position " + position);
-            // A suggestion has been selected, rewrite the query if possible,
-            // otherwise the restore the original query.
-            if (mOnSuggestionListener == null
-                    || !mOnSuggestionListener.onSuggestionSelected(position)) {
-                rewriteQueryFromSuggestion(position);
-            }
+            if (DBG) Log.d(LOG_TAG, "onItemSelected() position " + position);
+            SearchView.this.onItemSelected(position);
         }
 
         /**
@@ -1003,6 +1183,11 @@ public class SearchView extends LinearLayout {
         }
     }
 
+    static boolean isLandscapeMode(Context context) {
+        return context.getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE;
+    }
+
     /**
      * Callback to watch the text field for empty/non-empty
      */
@@ -1018,4 +1203,93 @@ public class SearchView extends LinearLayout {
         public void afterTextChanged(Editable s) {
         }
     };
+
+    /**
+     * Local subclass for AutoCompleteTextView.
+     * @hide
+     */
+    public static class SearchAutoComplete extends AutoCompleteTextView {
+
+        private int mThreshold;
+        private SearchView mSearchView;
+
+        public SearchAutoComplete(Context context) {
+            super(context);
+            mThreshold = getThreshold();
+        }
+
+        public SearchAutoComplete(Context context, AttributeSet attrs) {
+            super(context, attrs);
+            mThreshold = getThreshold();
+        }
+
+        public SearchAutoComplete(Context context, AttributeSet attrs, int defStyle) {
+            super(context, attrs, defStyle);
+            mThreshold = getThreshold();
+        }
+
+        void setSearchView(SearchView searchView) {
+            mSearchView = searchView;
+        }
+
+        @Override
+        public void setThreshold(int threshold) {
+            super.setThreshold(threshold);
+            mThreshold = threshold;
+        }
+
+        /**
+         * Returns true if the text field is empty, or contains only whitespace.
+         */
+        private boolean isEmpty() {
+            return TextUtils.getTrimmedLength(getText()) == 0;
+        }
+
+        /**
+         * We override this method to avoid replacing the query box text when a
+         * suggestion is clicked.
+         */
+        @Override
+        protected void replaceText(CharSequence text) {
+        }
+
+        /**
+         * We override this method to avoid an extra onItemClick being called on
+         * the drop-down's OnItemClickListener by
+         * {@link AutoCompleteTextView#onKeyUp(int, KeyEvent)} when an item is
+         * clicked with the trackball.
+         */
+        @Override
+        public void performCompletion() {
+        }
+
+        /**
+         * We override this method to be sure and show the soft keyboard if
+         * appropriate when the TextView has focus.
+         */
+        @Override
+        public void onWindowFocusChanged(boolean hasWindowFocus) {
+            super.onWindowFocusChanged(hasWindowFocus);
+
+            if (hasWindowFocus) {
+                InputMethodManager inputManager = (InputMethodManager) getContext()
+                        .getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.showSoftInput(this, 0);
+                // If in landscape mode, then make sure that
+                // the ime is in front of the dropdown.
+                if (isLandscapeMode(getContext())) {
+                    ensureImeVisible(true);
+                }
+            }
+        }
+
+        /**
+         * We override this method so that we can allow a threshold of zero,
+         * which ACTV does not.
+         */
+        @Override
+        public boolean enoughToFilter() {
+            return mThreshold <= 0 || super.enoughToFilter();
+        }
+    }
 }

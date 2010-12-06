@@ -167,12 +167,14 @@ public class ButtonGroup extends LinearLayout {
 
         if (getOrientation() == VERTICAL) {
             final int dividerSize = mDividerHeight * dividerCount;
-            setMeasuredDimension(getMeasuredWidth(),
-                    resolveSize(getMeasuredHeight() + dividerSize, heightMeasureSpec));
+            setMeasuredDimension(getMeasuredWidthAndState(),
+                    resolveSizeAndState(getMeasuredHeight() + dividerSize, heightMeasureSpec,
+                            getMeasuredHeightAndState()));
         } else {
             final int dividerSize = mDividerWidth * dividerCount;
-            setMeasuredDimension(resolveSize(getMeasuredWidth() + dividerSize, widthMeasureSpec),
-                    getMeasuredHeight());
+            setMeasuredDimension(resolveSizeAndState(getMeasuredWidth() + dividerSize,
+                            widthMeasureSpec, getMeasuredWidthAndState()),
+                    getMeasuredHeightAndState());
         }
     }
 

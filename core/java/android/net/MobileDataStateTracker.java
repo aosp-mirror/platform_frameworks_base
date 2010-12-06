@@ -32,7 +32,7 @@ import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkInfo;
 import android.net.LinkProperties;
 import android.telephony.TelephonyManager;
-import android.util.Log;
+import android.util.Slog;
 import android.text.TextUtils;
 
 /**
@@ -162,10 +162,11 @@ public class MobileDataStateTracker implements NetworkStateTracker {
             if (intent.getAction().equals(TelephonyIntents.
                     ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
                 String apnType = intent.getStringExtra(Phone.DATA_APN_TYPE_KEY);
-                if (VDBG) Log.d(TAG,
-                        String.format("Broadcast received: ACTION_ANY_DATA_CONNECTION_STATE_CHANGED"
-                                            + "mApnType=%s %s received apnType=%s",
-                        mApnType, TextUtils.equals(apnType, mApnType) ? "==" : "!=", apnType));
+                if (VDBG) {
+                    log(String.format("Broadcast received: ACTION_ANY_DATA_CONNECTION_STATE_CHANGED"
+                        + "mApnType=%s %s received apnType=%s", mApnType,
+                        TextUtils.equals(apnType, mApnType) ? "==" : "!=", apnType));
+                }
                 if (!TextUtils.equals(apnType, mApnType)) {
                     return;
                 }
@@ -177,10 +178,10 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 mNetworkInfo.setIsAvailable(!intent.getBooleanExtra(Phone.NETWORK_UNAVAILABLE_KEY,
                         false));
 
-                if (DBG) Log.d(TAG, mApnType + " Received state=" + state + ", old=" +
-                        mMobileDataState + ", reason=" +
-                        (reason == null ? "(unspecified)" : reason));
-
+                if (DBG) {
+                    log(mApnType + " Received state=" + state + ", old=" + mMobileDataState +
+                        ", reason=" + (reason == null ? "(unspecified)" : reason));
+                }
                 if (mMobileDataState != state) {
                     mMobileDataState = state;
                     switch (state) {
@@ -211,8 +212,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                                     }
                                 } catch (RemoteException e) {
                                     // just go ahead with the reset
-                                    Log.e(TAG, "Exception trying to contact ConnService: "
-                                            + e);
+                                    loge("Exception trying to contact ConnService: " + e);
                                 }
                             }
                             if (doReset && mLinkProperties != null) {
@@ -223,7 +223,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                             // can't do this here - ConnectivityService needs it to clear stuff
                             // it's ok though - just leave it to be refreshed next time
                             // we connect.
-                            //if (DBG) Log.d(TAG, "clearing mInterfaceName for "+ mApnType +
+                            //if (DBG) log("clearing mInterfaceName for "+ mApnType +
                             //        " as it DISCONNECTED");
                             //mInterfaceName = null;
                             //mDefaultGatewayAddr = 0;
@@ -238,13 +238,13 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                             mLinkProperties = intent.getParcelableExtra(
                                     Phone.DATA_LINK_PROPERTIES_KEY);
                             if (mLinkProperties == null) {
-                                Log.d(TAG, "CONNECTED event did not supply link properties.");
+                                log("CONNECTED event did not supply link properties.");
                                 mLinkProperties = new LinkProperties();
                             }
                             mLinkCapabilities = intent.getParcelableExtra(
                                     Phone.DATA_LINK_CAPABILITIES_KEY);
                             if (mLinkCapabilities == null) {
-                                Log.d(TAG, "CONNECTED event did not supply link capabilities.");
+                                log("CONNECTED event did not supply link capabilities.");
                                 mLinkCapabilities = new LinkCapabilities();
                             }
                             setDetailedState(DetailedState.CONNECTED, reason, apnName);
@@ -255,17 +255,22 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                     equals(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED)) {
                 String apnType = intent.getStringExtra(Phone.DATA_APN_TYPE_KEY);
                 if (!TextUtils.equals(apnType, mApnType)) {
-                    if (DBG) Log.d(TAG, String.format("Broadcast received: ACTION_ANY_DATA_CONNECTION_FAILED ignore, mApnType=%s != received apnType=%s",
-                            mApnType, apnType));
+                    if (DBG) {
+                        log(String.format(
+                                "Broadcast received: ACTION_ANY_DATA_CONNECTION_FAILED ignore, " +
+                                "mApnType=%s != received apnType=%s", mApnType, apnType));
+                    }
                     return;
                 }
                 String reason = intent.getStringExtra(Phone.FAILURE_REASON_KEY);
                 String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
-                if (DBG) Log.d(TAG, mApnType + "Received " + intent.getAction() +
-                        " broadcast" + reason == null ? "" : "(" + reason + ")");
+                if (DBG) {
+                    log(mApnType + "Received " + intent.getAction() +
+                                " broadcast" + reason == null ? "" : "(" + reason + ")");
+                }
                 setDetailedState(DetailedState.FAILED, reason, apnName);
             } else {
-                if (DBG) Log.d(TAG, "Broadcast received: ignore " + intent.getAction());
+                if (DBG) log("Broadcast received: ignore " + intent.getAction());
             }
         }
     }
@@ -335,7 +340,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
             networkTypeStr = "ehrpd";
             break;
         default:
-            Log.e(TAG, "unknown network type: " + tm.getNetworkType());
+            loge("unknown network type: " + tm.getNetworkType());
         }
         return "net.tcp.buffersize." + networkTypeStr;
     }
@@ -359,8 +364,9 @@ public class MobileDataStateTracker implements NetworkStateTracker {
      * if one was supplied. May be {@code null}.
      * @param extraInfo optional {@code String} providing extra information about the state change
      */
-    private void setDetailedState(NetworkInfo.DetailedState state, String reason, String extraInfo) {
-        if (DBG) Log.d(TAG, "setDetailed state, old ="
+    private void setDetailedState(NetworkInfo.DetailedState state, String reason,
+            String extraInfo) {
+        if (DBG) log("setDetailed state, old ="
                 + mNetworkInfo.getDetailedState() + " and new state=" + state);
         if (state != mNetworkInfo.getDetailedState()) {
             boolean wasConnecting = (mNetworkInfo.getState() == NetworkInfo.State.CONNECTING);
@@ -407,7 +413,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
             case Phone.APN_TYPE_NOT_AVAILABLE:
                 break;
             default:
-                Log.e(TAG, "Error in reconnect - unexpected response.");
+                loge("Error in reconnect - unexpected response.");
                 break;
         }
         return retValue;
@@ -426,8 +432,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
          */
         for (int retry = 0; retry < 2; retry++) {
             if (mPhoneService == null) {
-                Log.w(TAG,
-                    "Ignoring mobile radio request because could not acquire PhoneService");
+                log("Ignoring mobile radio request because could not acquire PhoneService");
                 break;
             }
 
@@ -438,7 +443,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
             }
         }
 
-        Log.w(TAG, "Could not set radio power to " + (turnOn ? "on" : "off"));
+        log("Could not set radio power to " + (turnOn ? "on" : "off"));
         return false;
     }
 
@@ -506,8 +511,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
          */
         for (int retry = 0; retry < 2; retry++) {
             if (mPhoneService == null) {
-                Log.w(TAG,
-                    "Ignoring feature request because could not acquire PhoneService");
+                log("Ignoring feature request because could not acquire PhoneService");
                 break;
             }
 
@@ -522,8 +526,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
             }
         }
 
-        Log.w(TAG, "Could not " + (enable ? "enable" : "disable")
-                + " APN type \"" + apnType + "\"");
+        log("Could not " + (enable ? "enable" : "disable") + " APN type \"" + apnType + "\"");
         return Phone.APN_REQUEST_FAILED;
     }
 
@@ -540,7 +543,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
             case ConnectivityManager.TYPE_MOBILE_HIPRI:
                 return Phone.APN_TYPE_HIPRI;
             default:
-                Log.e(TAG, "Error mapping networkType " + netType + " to apnType.");
+                loge("Error mapping networkType " + netType + " to apnType.");
                 return null;
         }
     }
@@ -557,5 +560,13 @@ public class MobileDataStateTracker implements NetworkStateTracker {
      */
     public LinkCapabilities getLinkCapabilities() {
         return new LinkCapabilities(mLinkCapabilities);
+    }
+
+    static private void log(String s) {
+        Slog.d(TAG, s);
+    }
+
+    static private void loge(String s) {
+        Slog.e(TAG, s);
     }
 }

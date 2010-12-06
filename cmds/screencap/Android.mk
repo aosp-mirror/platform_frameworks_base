@@ -8,11 +8,19 @@ LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libutils \
 	libbinder \
+	libskia \
     libui \
     libsurfaceflinger_client
 
 LOCAL_MODULE:= screencap
 
 LOCAL_MODULE_TAGS := optional
+
+LOCAL_C_INCLUDES += \
+	external/skia/include/core \
+	external/skia/include/effects \
+	external/skia/include/images \
+	external/skia/src/ports \
+	external/skia/include/utils
 
 include $(BUILD_EXECUTABLE)

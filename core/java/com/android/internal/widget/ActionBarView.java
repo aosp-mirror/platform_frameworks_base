@@ -90,6 +90,7 @@ public class ActionBarView extends ViewGroup {
     private TextView mTitleView;
     private TextView mSubtitleView;
     private Spinner mSpinner;
+    private LinearLayout mListNavLayout;
     private HorizontalScrollView mTabScrollView;
     private LinearLayout mTabLayout;
     private View mCustomNavView;
@@ -97,6 +98,7 @@ public class ActionBarView extends ViewGroup {
     private ProgressBar mIndeterminateProgressView;
 
     private int mProgressBarPadding;
+    private int mItemPadding;
     
     private int mTitleStyleRes;
     private int mSubtitleStyleRes;
@@ -193,6 +195,7 @@ public class ActionBarView extends ViewGroup {
                 R.styleable.ActionBar_indeterminateProgressStyle, 0);
 
         mProgressBarPadding = a.getDimensionPixelOffset(R.styleable.ActionBar_progressBarPadding, 0);
+        mItemPadding = a.getDimensionPixelOffset(R.styleable.ActionBar_itemPadding, 0);
 
         setDisplayOptions(a.getInt(R.styleable.ActionBar_displayOptions, DISPLAY_DEFAULT));
 
@@ -419,7 +422,7 @@ public class ActionBarView extends ViewGroup {
             switch (oldMode) {
             case ActionBar.NAVIGATION_MODE_LIST:
                 if (mSpinner != null) {
-                    removeView(mSpinner);
+                    removeView(mListNavLayout);
                 }
                 break;
             case ActionBar.NAVIGATION_MODE_TABS:
@@ -430,11 +433,21 @@ public class ActionBarView extends ViewGroup {
             
             switch (mode) {
             case ActionBar.NAVIGATION_MODE_LIST:
-                mSpinner = new Spinner(mContext, null,
-                        com.android.internal.R.attr.actionDropDownStyle);
-                mSpinner.setAdapter(mSpinnerAdapter);
+                if (mSpinner == null) {
+                    mSpinner = new Spinner(mContext, null,
+                            com.android.internal.R.attr.actionDropDownStyle);
+                    mListNavLayout = new LinearLayout(mContext, null,
+                            com.android.internal.R.attr.actionBarTabBarStyle);
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                            LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+                    params.gravity = Gravity.CENTER;
+                    mListNavLayout.addView(mSpinner, params);
+                }
+                if (mSpinner.getAdapter() != mSpinnerAdapter) {
+                    mSpinner.setAdapter(mSpinnerAdapter);
+                }
                 mSpinner.setOnItemSelectedListener(mNavItemSelectedListener);
-                addView(mSpinner);
+                addView(mListNavLayout);
                 break;
             case ActionBar.NAVIGATION_MODE_TABS:
                 ensureTabsExist();
@@ -631,24 +644,32 @@ public class ActionBarView extends ViewGroup {
             rightOfCenter -= mMenuView.getMeasuredWidth();
         }
 
-        if (mTitleLayout != null && (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0) {
+        boolean showTitle = mTitleLayout != null &&
+                (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0;
+        if (showTitle) {
             availableWidth = measureChildView(mTitleLayout, availableWidth, childSpecHeight, 0);
             leftOfCenter -= mTitleLayout.getMeasuredWidth();
         }
 
         switch (mNavigationMode) {
         case ActionBar.NAVIGATION_MODE_LIST:
-            if (mSpinner != null) {
-                mSpinner.measure(
+            if (mListNavLayout != null) {
+                final int itemPaddingSize = showTitle ? mItemPadding * 2 : mItemPadding;
+                availableWidth -= itemPaddingSize;
+                leftOfCenter -= itemPaddingSize;
+                mListNavLayout.measure(
                         MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
-                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
-                final int spinnerWidth = mSpinner.getMeasuredWidth();
-                availableWidth -= spinnerWidth;
-                leftOfCenter -= spinnerWidth;
+                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+                final int listNavWidth = mListNavLayout.getMeasuredWidth();
+                availableWidth -= listNavWidth;
+                leftOfCenter -= listNavWidth;
             }
             break;
         case ActionBar.NAVIGATION_MODE_TABS:
             if (mTabScrollView != null) {
+                final int itemPaddingSize = showTitle ? mItemPadding * 2 : mItemPadding;
+                availableWidth -= itemPaddingSize;
+                leftOfCenter -= itemPaddingSize;
                 mTabScrollView.measure(
                         MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
@@ -755,7 +776,9 @@ public class ActionBarView extends ViewGroup {
             x += positionChild(mHomeLayout, x, y, contentHeight);
         }
         
-        if (mTitleLayout != null && (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0) {
+        final boolean showTitle = mTitleLayout != null &&
+                (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0;
+        if (showTitle) {
             x += positionChild(mTitleLayout, x, y, contentHeight);
         }
 
@@ -763,13 +786,15 @@ public class ActionBarView extends ViewGroup {
         case ActionBar.NAVIGATION_MODE_STANDARD:
             break;
         case ActionBar.NAVIGATION_MODE_LIST:
-            if (mSpinner != null) {
-                x += positionChild(mSpinner, x, y, contentHeight);
+            if (mListNavLayout != null) {
+                if (showTitle) x += mItemPadding;
+                x += positionChild(mListNavLayout, x, y, contentHeight) + mItemPadding;
             }
             break;
         case ActionBar.NAVIGATION_MODE_TABS:
             if (mTabScrollView != null) {
-                x += positionChild(mTabScrollView, x, y, contentHeight);
+                if (showTitle) x += mItemPadding;
+                x += positionChild(mTabScrollView, x, y, contentHeight) + mItemPadding;
             }
             break;
         }

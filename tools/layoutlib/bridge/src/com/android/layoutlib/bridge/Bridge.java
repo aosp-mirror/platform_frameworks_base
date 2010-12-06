@@ -175,7 +175,7 @@ public final class Bridge extends LayoutBridge {
     public boolean init(String fontOsLocation, Map<String, Map<String, Integer>> enumValueMap) {
         sEnumValueMap = enumValueMap;
 
-        // don't use EnumSet.allOf(), because the bridge doesn't come with it's specific version
+        // don't use EnumSet.allOf(), because the bridge doesn't come with its specific version
         // of layoutlib_api. It is provided by the client which could have a more recent version
         // with newer, unsupported capabilities.
         mCapabilities = EnumSet.of(
@@ -335,7 +335,7 @@ public final class Bridge extends LayoutBridge {
                 t2 = t.getCause();
             }
             return new BridgeLayoutScene(null,
-                    new SceneResult(SceneStatus.ERROR_UNKNOWN, t2.getMessage(), t2));
+                    SceneStatus.ERROR_UNKNOWN.getResult(t2.getMessage(), t2));
         }
     }
 

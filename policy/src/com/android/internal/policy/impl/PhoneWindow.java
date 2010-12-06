@@ -1881,7 +1881,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (mActionModeView == null) {
                     if (hasFeature(FEATURE_ACTION_MODE_OVERLAY)) {
                         mActionModeView = new ActionBarContextView(mContext);
-                        mActionModePopup = new PopupWindow(mContext);
+                        mActionModePopup = new PopupWindow(mContext, null,
+                                com.android.internal.R.attr.actionModePopupWindowStyle);
                         mActionModePopup.setLayoutInScreenEnabled(true);
                         mActionModePopup.setClippingEnabled(false);
                         mActionModePopup.setContentView(mActionModeView);

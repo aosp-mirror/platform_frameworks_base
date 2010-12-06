@@ -82,8 +82,7 @@ enum {
     SET_DATA_SOURCE_URL,
     SET_DATA_SOURCE_FD,
     SET_MODE,
-    GET_MODE,
-    CAPTURE_FRAME,
+    GET_FRAME_AT_TIME,
     EXTRACT_ALBUM_ART,
     EXTRACT_METADATA,
 };
@@ -133,23 +132,17 @@ public:
         return reply.readInt32();
     }
 
-    status_t getMode(int* mode) const
+    sp<IMemory> getFrameAtTime(int64_t timeUs, int option)
     {
+        LOGV("getTimeAtTime: time(%lld us) and option(%d)", timeUs, option);
         Parcel data, reply;
         data.writeInterfaceToken(IMediaMetadataRetriever::getInterfaceDescriptor());
-        remote()->transact(GET_MODE, data, &reply);
-        *mode = reply.readInt32();
-        return reply.readInt32();
-    }
-
-    sp<IMemory> captureFrame()
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(IMediaMetadataRetriever::getInterfaceDescriptor());
+        data.writeInt64(timeUs);
+        data.writeInt32(option);
 #ifndef DISABLE_GROUP_SCHEDULE_HACK
         sendSchedPolicy(data);
 #endif
-        remote()->transact(CAPTURE_FRAME, data, &reply);
+        remote()->transact(GET_FRAME_AT_TIME, data, &reply);
         status_t ret = reply.readInt32();
         if (ret != NO_ERROR) {
             return NULL;
@@ -222,20 +215,15 @@ status_t BnMediaMetadataRetriever::onTransact(
             reply->writeInt32(setMode(mode));
             return NO_ERROR;
         } break;
-        case GET_MODE: {
+        case GET_FRAME_AT_TIME: {
             CHECK_INTERFACE(IMediaMetadataRetriever, data, reply);
-            int mode;
-            status_t status = getMode(&mode);
-            reply->writeInt32(mode);
-            reply->writeInt32(status);
-            return NO_ERROR;
-        } break;
-        case CAPTURE_FRAME: {
-            CHECK_INTERFACE(IMediaMetadataRetriever, data, reply);
+            int64_t timeUs = data.readInt64();
+            int option = data.readInt32();
+            LOGV("getTimeAtTime: time(%lld us) and option(%d)", timeUs, option);
 #ifndef DISABLE_GROUP_SCHEDULE_HACK
             setSchedPolicy(data);
 #endif
-            sp<IMemory> bitmap = captureFrame();
+            sp<IMemory> bitmap = getFrameAtTime(timeUs, option);
             if (bitmap != 0) {  // Don't send NULL across the binder interface
                 reply->writeInt32(NO_ERROR);
                 reply->writeStrongBinder(bitmap->asBinder());

@@ -311,8 +311,8 @@ public abstract class AbsSeekBar extends ProgressBar {
         dw += mPaddingLeft + mPaddingRight;
         dh += mPaddingTop + mPaddingBottom;
         
-        setMeasuredDimension(resolveSize(dw, widthMeasureSpec),
-                resolveSize(dh, heightMeasureSpec));
+        setMeasuredDimension(resolveSizeAndState(dw, widthMeasureSpec, 0),
+                resolveSizeAndState(dh, heightMeasureSpec, 0));
     }
     
     @Override

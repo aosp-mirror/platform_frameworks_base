@@ -548,6 +548,9 @@
         <attr name="actionModeCopyDrawable" format="reference" />
         <!-- Drawable to use for the Paste action button in Contextual Action Bar -->
         <attr name="actionModePasteDrawable" format="reference" />
+
+        <!-- PopupWindow style to use for action modes when showing as a window overlay. -->
+        <attr name="actionModePopupWindowStyle" format="reference" />
         
         <!-- =================== -->
         <!-- Preference styles   -->
@@ -4542,6 +4545,9 @@
         <attr name="indeterminateProgressStyle" format="reference" />
         <!-- Specifies the horizontal padding on either end for an embedded progress bar. -->
         <attr name="progressBarPadding" format="dimension" />
+        <!-- Specifies padding that should be applied to the left and right sides of
+             system-provided items in the bar. -->
+        <attr name="itemPadding" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="ActionMode">

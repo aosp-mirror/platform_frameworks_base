@@ -248,6 +248,7 @@ public class FrameLayout extends ViewGroup {
 
         int maxHeight = 0;
         int maxWidth = 0;
+        int childState = 0;
 
         // Find rightmost and bottommost child
         for (int i = 0; i < count; i++) {
@@ -256,6 +257,7 @@ public class FrameLayout extends ViewGroup {
                 measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
                 maxWidth = Math.max(maxWidth, child.getMeasuredWidth());
                 maxHeight = Math.max(maxHeight, child.getMeasuredHeight());
+                childState = combineMeasuredStates(childState, child.getMeasuredState());
             }
         }
 
@@ -274,8 +276,9 @@ public class FrameLayout extends ViewGroup {
             maxWidth = Math.max(maxWidth, drawable.getMinimumWidth());
         }
 
-        setMeasuredDimension(resolveSize(maxWidth, widthMeasureSpec),
-                resolveSize(maxHeight, heightMeasureSpec));
+        setMeasuredDimension(resolveSizeAndState(maxWidth, widthMeasureSpec, childState),
+                resolveSizeAndState(maxHeight, heightMeasureSpec,
+                        childState<<MEASURED_HEIGHT_STATE_SHIFT));
     }
  
     /**

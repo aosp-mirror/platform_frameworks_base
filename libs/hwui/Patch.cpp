@@ -22,6 +22,7 @@
 
 #include "Patch.h"
 #include "Caches.h"
+#include "Properties.h"
 
 namespace android {
 namespace uirenderer {
@@ -31,19 +32,22 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 Patch::Patch(const uint32_t xCount, const uint32_t yCount, const int8_t emptyQuads):
-        mXCount(xCount), mYCount(yCount) {
+        mXCount(xCount), mYCount(yCount), mEmptyQuads(emptyQuads) {
+    // Initialized with the maximum number of vertices we will need
     // 2 triangles per patch, 3 vertices per triangle
-    verticesCount = ((xCount + 1) * (yCount + 1) - emptyQuads) * 2 * 3;
-    mVertices = new TextureVertex[verticesCount];
-    hasEmptyQuads = emptyQuads > 0;
+    const int maxVertices = ((xCount + 1) * (yCount + 1) - emptyQuads) * 2 * 3;
+    mVertices = new TextureVertex[maxVertices];
     mUploaded = false;
+
+    verticesCount = 0;
+    hasEmptyQuads = emptyQuads > 0;
 
     mColorKey = 0;
     mXDivs = new int32_t[mXCount];
     mYDivs = new int32_t[mYCount];
 
-    PATCH_LOGD("    patch: xCount = %d, yCount = %d, emptyQuads = %d, vertices = %d",
-            xCount, yCount, emptyQuads, verticesCount);
+    PATCH_LOGD("    patch: xCount = %d, yCount = %d, emptyQuads = %d, max vertices = %d",
+            xCount, yCount, emptyQuads, maxVertices);
 
     glGenBuffers(1, &meshBuffer);
 }
@@ -104,7 +108,13 @@ bool Patch::matches(const int32_t* xDivs, const int32_t* yDivs, const uint32_t c
 
 void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
         float left, float top, float right, float bottom) {
+#if RENDER_LAYERS_AS_REGIONS
     if (hasEmptyQuads) quads.clear();
+#endif
+
+    // Reset the vertices count here, we will count exactly how many
+    // vertices we actually need when generating the quads
+    verticesCount = 0;
 
     const uint32_t xStretchCount = (mXCount + 1) >> 1;
     const uint32_t yStretchCount = (mYCount + 1) >> 1;
@@ -167,15 +177,19 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
     generateRow(vertex, y1, bottom - top, v1, 1.0f, stretchX, right - left,
             bitmapWidth, quadCount);
 
-    Caches::getInstance().bindMeshBuffer(meshBuffer);
-    if (!mUploaded) {
-        glBufferData(GL_ARRAY_BUFFER, sizeof(TextureVertex) * verticesCount,
-                mVertices, GL_DYNAMIC_DRAW);
-        mUploaded = true;
-    } else {
-        glBufferSubData(GL_ARRAY_BUFFER, 0,
-                sizeof(TextureVertex) * verticesCount, mVertices);
+    if (verticesCount > 0) {
+        Caches::getInstance().bindMeshBuffer(meshBuffer);
+        if (!mUploaded) {
+            glBufferData(GL_ARRAY_BUFFER, sizeof(TextureVertex) * verticesCount,
+                    mVertices, GL_DYNAMIC_DRAW);
+            mUploaded = true;
+        } else {
+            glBufferSubData(GL_ARRAY_BUFFER, 0,
+                    sizeof(TextureVertex) * verticesCount, mVertices);
+        }
     }
+
+    PATCH_LOGD("    patch: new vertices count = %d", verticesCount);
 }
 
 void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, float v2,
@@ -211,22 +225,24 @@ void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, fl
 
 void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, float y2,
             float u1, float v1, float u2, float v2, uint32_t& quadCount) {
-    uint32_t oldQuadCount = quadCount;
-
-    // Degenerate quads are an artifact of our implementation and should not
-    // be taken into account when checking for transparent quads
-    if (x2 - x1 > 0.999f && y2 - y1 > 0.999f) {
+    const uint32_t oldQuadCount = quadCount;
+    const bool valid = fabs(x2 - x1) > 0.9999f && fabs(y2 - y1) > 0.9999f;
+    if (valid) {
         quadCount++;
     }
 
-    if (((mColorKey >> oldQuadCount) & 0x1) == 1) {
+    // Skip degenerate and transparent (empty) quads
+    if (!valid || ((mColorKey >> oldQuadCount) & 0x1) == 1) {
         return;
     }
 
+#if RENDER_LAYERS_AS_REGIONS
+    // Record all non empty quads
     if (hasEmptyQuads) {
         Rect bounds(x1, y1, x2, y2);
         quads.add(bounds);
     }
+#endif
 
     // Left triangle
     TextureVertex::set(vertex++, x1, y1, u1, v1);
@@ -237,6 +253,15 @@ void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, f
     TextureVertex::set(vertex++, x1, y2, u1, v2);
     TextureVertex::set(vertex++, x2, y1, u2, v1);
     TextureVertex::set(vertex++, x2, y2, u2, v2);
+
+    // A quad is made of 2 triangles, 6 vertices
+    verticesCount += 6;
+
+#if DEBUG_PATCHES_VERTICES
+    PATCH_LOGD("    quad %d", oldQuadCount);
+    PATCH_LOGD("        left,  top    = %.2f, %.2f\t\tu1, v1 = %.2f, %.2f", x1, y1, u1, v1);
+    PATCH_LOGD("        right, bottom = %.2f, %.2f\t\tu2, v2 = %.2f, %.2f", x2, y2, u2, v2);
+#endif
 }
 
 }; // namespace uirenderer

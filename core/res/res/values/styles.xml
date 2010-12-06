@@ -204,6 +204,12 @@
     <!-- A special animation value used internally for popup windows. -->
     <style name="Animation.PopupWindow" />
 
+    <!-- Window animations used for action mode UI in overlay mode. -->
+    <style name="Animation.PopupWindow.ActionMode">
+        <item name="windowEnterAnimation">@anim/fade_in</item>
+        <item name="windowExitAnimation">@anim/fade_out</item>
+    </style>
+
     <!-- Status Bar Styles -->
 
     <style name="TextAppearance.StatusBar">
@@ -1340,7 +1346,7 @@
     </style>
 
     <style name="Widget.Holo.ButtonGroup.AlertDialog">
-        <item name="android:background">@android:drawable/dialog_divider_horizontal_holo_dark</item>
+        <item name="android:background">@null</item>
     </style>
 
     <style name="Widget.Holo.TextView" parent="Widget.TextView">
@@ -1386,9 +1392,11 @@
     </style>
 
     <style name="Widget.Holo.GridView" parent="Widget.GridView">
+        <item name="android:listSelector">?android:attr/selectableItemBackground</item>
     </style>
 
     <style name="Widget.Holo.ImageButton" parent="Widget.ImageButton">
+        <item name="android:background">@android:drawable/btn_default_holo_dark</item>
     </style>
 
     <style name="Widget.Holo.ImageButton.NumberPickerUpButton">
@@ -1424,6 +1432,11 @@
     </style>
 
     <style name="Widget.Holo.PopupWindow" parent="Widget.PopupWindow">
+    </style>
+
+    <style name="Widget.Holo.PopupWindow.ActionMode">
+        <item name="android:popupBackground">@android:color/black</item>
+        <item name="android:popupAnimationStyle">@android:style/Animation.PopupWindow.ActionMode</item>
     </style>
 
     <style name="Widget.Holo.ProgressBar" parent="Widget.ProgressBar">
@@ -1590,9 +1603,18 @@
     </style>
 
     <style name="Widget.Holo.ActionBarView_TabView" parent="Widget.ActionBarView_TabView">
+        <item name="android:background">@drawable/tab_indicator_holo</item>
+        <item name="android:paddingLeft">16dip</item>
+        <item name="android:paddingRight">16dip</item>
+    </style>
+
+    <style name="Widget.Holo.Tab" parent="Widget.Holo.ActionBarView_TabView">
     </style>
 
     <style name="Widget.Holo.ActionBarView_TabBar" parent="Widget.ActionBarView_TabBar">
+        <item name="divider">?android:attr/dividerVertical</item>
+        <item name="showDividers">beginning|end</item>
+        <item name="dividerPadding">8dip</item>
     </style>
 
     <style name="Widget.Holo.ActionBarView_TabText" parent="Widget.ActionBarView_TabText">
@@ -1602,7 +1624,6 @@
     </style>
 
     <style name="Widget.Holo.ActionMode" parent="Widget.ActionMode">
-        <item name="android:background">@android:drawable/cab_holo_dark</item>
         <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Subtitle</item>
     </style>
@@ -1619,6 +1640,7 @@
         <item name="android:progressBarStyle">@android:style/Widget.Holo.ProgressBar.Horizontal</item>
         <item name="android:indeterminateProgressStyle">@android:style/Widget.Holo.ProgressBar</item>
         <item name="android:progressBarPadding">32dip</item>
+        <item name="android:itemPadding">8dip</item>
     </style>
 
     <style name="Widget.Holo.CompoundButton.Switch">
@@ -1646,6 +1668,10 @@
         <item name="android:paddingRight">32dip</item>
         <item name="android:paddingTop">4dip</item>
         <item name="android:paddingBottom">4dip</item>
+    </style>
+
+    <style name="Widget.Holo.Light.Button.Borderless">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 
     <style name="Widget.Holo.Light.Button.Small">
@@ -1677,7 +1703,7 @@
     </style>
 
     <style name="Widget.Holo.Light.ButtonGroup.AlertDialog">
-        <item name="android:background">@android:drawable/dialog_divider_horizontal_holo_light</item>
+        <item name="android:background">@null</item>
     </style>
 
     <style name="Widget.Holo.Light.TextView" parent="Widget.TextView">
@@ -1719,10 +1745,11 @@
     <style name="Widget.Holo.Light.GestureOverlayView" parent="Widget.GestureOverlayView">
     </style>
 
-    <style name="Widget.Holo.Light.GridView" parent="Widget.GridView">
+    <style name="Widget.Holo.Light.GridView" parent="Widget.Holo.GridView">
     </style>
 
-    <style name="Widget.Holo.Light.ImageButton" parent="Widget.ImageButton">
+    <style name="Widget.Holo.Light.ImageButton" parent="Widget.Holo.ImageButton">
+        <item name="android:background">@android:drawable/btn_default_holo_light</item>
     </style>
 
     <style name="Widget.Holo.Light.ImageButton.NumberPickerUpButton" parent="Widget.Holo.Light.ImageButton.NumberPickerUpButton">
@@ -1746,6 +1773,11 @@
     </style>
 
     <style name="Widget.Holo.Light.PopupWindow" parent="Widget.PopupWindow">
+    </style>
+
+    <style name="Widget.Holo.Light.PopupWindow.ActionMode">
+        <item name="android:popupBackground">@android:color/white</item>
+        <item name="android:popupAnimationStyle">@android:style/Animation.PopupWindow.ActionMode</item>
     </style>
 
     <style name="Widget.Holo.Light.ProgressBar" parent="Widget.Holo.ProgressBar">
@@ -1876,17 +1908,19 @@
         <item name="android:paddingRight">16dip</item>
     </style>
 
-    <style name="Widget.Holo.Light.ActionBarView_TabView" parent="Widget.ActionBarView_TabView">
+    <style name="Widget.Holo.Light.ActionBarView_TabView" parent="Widget.Holo.ActionBarView_TabView">
     </style>
 
-    <style name="Widget.Holo.Light.ActionBarView_TabBar" parent="Widget.ActionBarView_TabBar">
+    <style name="Widget.Holo.Light.Tab" parent="Widget.Holo.Light.ActionBarView_TabView">
     </style>
 
-    <style name="Widget.Holo.Light.ActionBarView_TabText" parent="Widget.ActionBarView_TabText">
+    <style name="Widget.Holo.Light.ActionBarView_TabBar" parent="Widget.Holo.ActionBarView_TabBar">
+    </style>
+
+    <style name="Widget.Holo.Light.ActionBarView_TabText" parent="Widget.Holo.ActionBarView_TabText">
     </style>
 
     <style name="Widget.Holo.Light.ActionMode" parent="Widget.Holo.ActionMode">
-        <item name="android:background">@android:drawable/cab_holo_light</item>
         <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Subtitle</item>
     </style>

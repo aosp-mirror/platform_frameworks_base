@@ -338,8 +338,7 @@ public abstract class DialogPreference extends Preference implements
             return null;
         }
         
-        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
-                Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = LayoutInflater.from(mBuilder.getContext());
         return inflater.inflate(mDialogLayoutResId, null);
     }
     

@@ -357,7 +357,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
 
         // Position vertically based on gravity setting
         int childTop = mSpinnerPadding.top
-                + ((mMeasuredHeight - mSpinnerPadding.bottom - 
+                + ((getMeasuredHeight() - mSpinnerPadding.bottom -
                         mSpinnerPadding.top - child.getMeasuredHeight()) / 2);
         int childBottom = childTop + child.getMeasuredHeight();
 

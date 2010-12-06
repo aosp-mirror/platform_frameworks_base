@@ -33,8 +33,7 @@ public:
     virtual status_t    setDataSource(const char *url) = 0;
     virtual status_t    setDataSource(int fd, int64_t offset, int64_t length) = 0;
     virtual status_t    setMode(int mode) = 0;
-    virtual status_t    getMode(int* mode) const = 0;
-    virtual VideoFrame* captureFrame() = 0;
+    virtual VideoFrame* getFrameAtTime(int64_t timeUs, int option) = 0;
     virtual MediaAlbumArt* extractAlbumArt() = 0;
     virtual const char* extractMetadata(int keyCode) = 0;
 };
@@ -67,7 +66,7 @@ public:
                         }
 
     virtual status_t    getMode(int* mode) const { *mode = mMode; return NO_ERROR; }
-    virtual VideoFrame* captureFrame() { return NULL; }
+    virtual VideoFrame* getFrameAtTime(int64_t timeUs, int option) { return NULL; }
     virtual MediaAlbumArt* extractAlbumArt() { return NULL; }
     virtual const char* extractMetadata(int keyCode) { return NULL; }
 

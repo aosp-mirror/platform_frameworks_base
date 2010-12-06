@@ -38,12 +38,14 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeInflater;
+import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeWindow;
 import com.android.layoutlib.bridge.android.BridgeWindowSession;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 
+import android.animation.Animator;
 import android.animation.AnimatorInflater;
-import android.animation.ObjectAnimator;
+import android.animation.LayoutTransition;
 import android.app.Fragment_Delegate;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
@@ -55,9 +57,9 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.view.View.AttachInfo;
 import android.view.View.MeasureSpec;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.TabHost;
 import android.widget.TabWidget;
@@ -344,7 +346,7 @@ public class LayoutSceneImpl {
 
             return SceneStatus.SUCCESS.getResult();
         } catch (PostInflateException e) {
-            return new SceneResult(SceneStatus.ERROR_INFLATION, e.getMessage(), e);
+            return SceneStatus.ERROR_INFLATION.getResult(e.getMessage(), e);
         } catch (Throwable e) {
             // get the real cause of the exception.
             Throwable t = e;
@@ -355,7 +357,7 @@ public class LayoutSceneImpl {
             // log it
             mParams.getLogger().error(t);
 
-            return new SceneResult(SceneStatus.ERROR_INFLATION, t.getMessage(), t);
+            return SceneStatus.ERROR_INFLATION.getResult(t.getMessage(), t);
         }
     }
 
@@ -368,13 +370,14 @@ public class LayoutSceneImpl {
      *      the scene, or if {@link #acquire(long)} was not called.
      *
      * @see SceneParams#getRenderingMode()
+     * @see LayoutScene#render(long)
      */
     public SceneResult render() {
         checkLock();
 
         try {
             if (mViewRoot == null) {
-                return new SceneResult(SceneStatus.ERROR_NOT_INFLATED);
+                return SceneStatus.ERROR_NOT_INFLATED.getResult();
             }
             // measure the views
             int w_spec, h_spec;
@@ -480,7 +483,7 @@ public class LayoutSceneImpl {
             // log it
             mParams.getLogger().error(t);
 
-            return new SceneResult(SceneStatus.ERROR_UNKNOWN, t.getMessage(), t);
+            return SceneStatus.ERROR_UNKNOWN.getResult(t.getMessage(), t);
         }
     }
 
@@ -491,6 +494,8 @@ public class LayoutSceneImpl {
      *
      * @throws IllegalStateException if the current context is different than the one owned by
      *      the scene, or if {@link #acquire(long)} was not called.
+     *
+     * @see LayoutScene#animate(Object, String, boolean, IAnimationListener)
      */
     public SceneResult animate(Object targetObject, String animationName,
             boolean isFrameworkAnimation, IAnimationListener listener) {
@@ -513,12 +518,11 @@ public class LayoutSceneImpl {
 
         if (animationResource != null) {
             try {
-                ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(
-                        mContext, animationId);
+                Animator anim = AnimatorInflater.loadAnimator(mContext, animationId);
                 if (anim != null) {
                     anim.setTarget(targetObject);
 
-                    new AnimationThread(this, anim, listener).start();
+                    new PlayAnimationThread(anim, this, animationName, listener).start();
 
                     return SceneStatus.SUCCESS.getResult();
                 }
@@ -529,15 +533,25 @@ public class LayoutSceneImpl {
                     t = t.getCause();
                 }
 
-                return new SceneResult(SceneStatus.ERROR_UNKNOWN, t.getMessage(), t);
+                return SceneStatus.ERROR_UNKNOWN.getResult(t.getMessage(), t);
             }
         }
 
-        return new SceneResult(SceneStatus.ERROR_ANIM_NOT_FOUND);
+        return SceneStatus.ERROR_ANIM_NOT_FOUND.getResult();
     }
 
-    public SceneResult insertChild(ViewGroup parentView, IXmlPullParser childXml,
-            int index, IAnimationListener listener) {
+    /**
+     * Insert a new child into an existing parent.
+     * <p>
+     * {@link #acquire(long)} must have been called before this.
+     *
+     * @throws IllegalStateException if the current context is different than the one owned by
+     *      the scene, or if {@link #acquire(long)} was not called.
+     *
+     * @see LayoutScene#insertChild(Object, IXmlPullParser, int, IAnimationListener)
+     */
+    public SceneResult insertChild(final ViewGroup parentView, IXmlPullParser childXml,
+            final int index, IAnimationListener listener) {
         checkLock();
 
         // create a block parser for the XML
@@ -547,66 +561,214 @@ public class LayoutSceneImpl {
         // inflate the child without adding it to the root since we want to control where it'll
         // get added. We do pass the parentView however to ensure that the layoutParams will
         // be created correctly.
-        View child = mInflater.inflate(blockParser, parentView, false /*attachToRoot*/);
-
-        // add it to the parentView in the correct location
-        try {
-            parentView.addView(child, index);
-        } catch (UnsupportedOperationException e) {
-            // looks like this is a view class that doesn't support children manipulation!
-            return new SceneResult(SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN);
-        }
+        final View child = mInflater.inflate(blockParser, parentView, false /*attachToRoot*/);
 
         invalidateRenderingSize();
 
-        SceneResult result = render();
+        if (listener != null) {
+            new AnimationThread(this, "insertChild", listener) {
+
+                @Override
+                public SceneResult preAnimation() {
+                    parentView.setLayoutTransition(new LayoutTransition());
+                    return addView(parentView, child, index);
+                }
+
+                @Override
+                public void postAnimation() {
+                    parentView.setLayoutTransition(null);
+                }
+            }.start();
+
+            // always return success since the real status will come through the listener.
+            return SceneStatus.SUCCESS.getResult(child);
+        }
+
+        // add it to the parentView in the correct location
+        SceneResult result = addView(parentView, child, index);
+        if (result.isSuccess() == false) {
+            return result;
+        }
+
+        result = render();
         if (result.isSuccess()) {
-            result.setData(child);
+            result = result.getCopyWithData(child);
         }
 
         return result;
     }
 
-    public SceneResult moveChild(ViewGroup parentView, View childView, int index,
-            IAnimationListener listener) {
-        checkLock();
-
+    /**
+     * Adds a given view to a given parent at a given index.
+     *
+     * @param parent the parent to receive the view
+     * @param view the view to add to the parent
+     * @param index the index where to do the add.
+     *
+     * @return a SceneResult with {@link SceneStatus#SUCCESS} or
+     *     {@link SceneStatus#ERROR_VIEWGROUP_NO_CHILDREN} if the given parent doesn't support
+     *     adding views.
+     */
+    private SceneResult addView(ViewGroup parent, View view, int index) {
         try {
-            ViewParent parent = childView.getParent();
-            if (parent instanceof ViewGroup) {
-                ViewGroup parentGroup = (ViewGroup) parent;
-                parentGroup.removeView(childView);
-            }
-
-            // add it to the parentView in the correct location
-            parentView.addView(childView, index);
+            parent.addView(view, index);
+            return SceneStatus.SUCCESS.getResult();
         } catch (UnsupportedOperationException e) {
             // looks like this is a view class that doesn't support children manipulation!
-            return new SceneResult(SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN);
+            return SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN.getResult();
         }
+    }
+
+    /**
+     * Moves a view to a new parent at a given location
+     * <p>
+     * {@link #acquire(long)} must have been called before this.
+     *
+     * @throws IllegalStateException if the current context is different than the one owned by
+     *      the scene, or if {@link #acquire(long)} was not called.
+     *
+     * @see LayoutScene#moveChild(Object, Object, int, Map, IAnimationListener)
+     */
+    public SceneResult moveChild(final ViewGroup parentView, final View childView, final int index,
+            Map<String, String> layoutParamsMap, IAnimationListener listener) {
+        checkLock();
 
         invalidateRenderingSize();
+
+        LayoutParams layoutParams = null;
+        if (layoutParamsMap != null) {
+            // need to create a new LayoutParams object for the new parent.
+            layoutParams = parentView.generateLayoutParams(
+                    new BridgeLayoutParamsMapAttributes(layoutParamsMap));
+        }
+
+        if (listener != null) {
+            final LayoutParams params = layoutParams;
+            new AnimationThread(this, "moveChild", listener) {
+
+                @Override
+                public SceneResult preAnimation() {
+                    parentView.setLayoutTransition(new LayoutTransition());
+                    return moveView(parentView, childView, index, params);
+                }
+
+                @Override
+                public void postAnimation() {
+                    parentView.setLayoutTransition(null);
+                }
+            }.start();
+
+            // always return success since the real status will come through the listener.
+            return SceneStatus.SUCCESS.getResult(layoutParams);
+        }
+
+        SceneResult result = moveView(parentView, childView, index, layoutParams);
+        if (result.isSuccess() == false) {
+            return result;
+        }
+
+        result = render();
+        if (layoutParams != null && result.isSuccess()) {
+            result = result.getCopyWithData(layoutParams);
+        }
+
+        return result;
+    }
+
+    /**
+     * Moves a View from its current parent to a new given parent at a new given location, with
+     * an optional new {@link LayoutParams} instance
+     *
+     * @param parent the new parent
+     * @param view the view to move
+     * @param index the new location in the new parent
+     * @param params an option (can be null) {@link LayoutParams} instance.
+     *
+     * @return a SceneResult with {@link SceneStatus#SUCCESS} or
+     *     {@link SceneStatus#ERROR_VIEWGROUP_NO_CHILDREN} if the given parent doesn't support
+     *     adding views.
+     */
+    private SceneResult moveView(ViewGroup parent, View view, int index, LayoutParams params) {
+        try {
+            ViewGroup previousParent = (ViewGroup) view.getParent();
+            previousParent.removeView(view);
+
+            // add it to the parentView in the correct location
+
+            if (params != null) {
+                parent.addView(view, index, params);
+            } else {
+                parent.addView(view, index);
+            }
+
+            return SceneStatus.SUCCESS.getResult();
+        } catch (UnsupportedOperationException e) {
+            // looks like this is a view class that doesn't support children manipulation!
+            return SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN.getResult();
+        }
+    }
+
+    /**
+     * Removes a child from its current parent.
+     * <p>
+     * {@link #acquire(long)} must have been called before this.
+     *
+     * @throws IllegalStateException if the current context is different than the one owned by
+     *      the scene, or if {@link #acquire(long)} was not called.
+     *
+     * @see LayoutScene#removeChild(Object, IAnimationListener)
+     */
+    public SceneResult removeChild(final View childView, IAnimationListener listener) {
+        checkLock();
+
+        invalidateRenderingSize();
+
+        final ViewGroup parent = (ViewGroup) childView.getParent();
+
+        if (listener != null) {
+            new AnimationThread(this, "moveChild", listener) {
+
+                @Override
+                public SceneResult preAnimation() {
+                    parent.setLayoutTransition(new LayoutTransition());
+                    return removeView(parent, childView);
+                }
+
+                @Override
+                public void postAnimation() {
+                    parent.setLayoutTransition(null);
+                }
+            }.start();
+
+            // always return success since the real status will come through the listener.
+            return SceneStatus.SUCCESS.getResult();
+        }
+
+        SceneResult result = removeView(parent, childView);
+        if (result.isSuccess() == false) {
+            return result;
+        }
 
         return render();
     }
 
-    public SceneResult removeChild(View childView, IAnimationListener listener) {
-        checkLock();
-
+    /**
+     * Removes a given view from its current parent.
+     *
+     * @param view the view to remove from its parent
+     *
+     * @return a SceneResult with {@link SceneStatus#SUCCESS} or
+     *     {@link SceneStatus#ERROR_VIEWGROUP_NO_CHILDREN} if the given parent doesn't support
+     *     adding views.
+     */
+    private SceneResult removeView(ViewGroup parent, View view) {
         try {
-            ViewParent parent = childView.getParent();
-            if (parent instanceof ViewGroup) {
-                ViewGroup parentGroup = (ViewGroup) parent;
-                parentGroup.removeView(childView);
-            }
+            parent.removeView(view);
+            return SceneStatus.SUCCESS.getResult();
         } catch (UnsupportedOperationException e) {
             // looks like this is a view class that doesn't support children manipulation!
-            return new SceneResult(SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN);
+            return SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN.getResult();
         }
-
-        invalidateRenderingSize();
-
-        return render();
     }
 
     /**
