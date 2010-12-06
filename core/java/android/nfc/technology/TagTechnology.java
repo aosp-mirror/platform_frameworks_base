@@ -77,7 +77,7 @@ public interface TagTechnology {
     public static final int MIFARE_CLASSIC_NDEF = 201;
 
     /**
-     * A Mifare Ultralight tag
+     * This object is an instance of {@link MifareUltralight}
      */
     public static final int MIFARE_ULTRALIGHT = 202;
 
