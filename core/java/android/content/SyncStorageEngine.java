@@ -1927,9 +1927,13 @@ public class SyncStorageEngine extends Handler {
                 }
                 AuthorityInfo authority = mAuthorities.get(authorityId);
                 if (authority != null) {
-                    Bundle extras = null;
+                    Bundle extras;
                     if (flatExtras != null) {
                         extras = unflattenBundle(flatExtras);
+                    } else {
+                        // if we are unable to parse the extras for whatever reason convert this
+                        // to a regular sync by creating an empty extras
+                        extras = new Bundle();
                     }
                     PendingOperation op = new PendingOperation(
                             authority.account, syncSource,
