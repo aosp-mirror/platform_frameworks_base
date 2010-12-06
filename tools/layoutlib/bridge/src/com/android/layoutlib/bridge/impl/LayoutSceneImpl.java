@@ -50,7 +50,6 @@ import android.app.Fragment_Delegate;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
 import android.graphics.Canvas;
-import android.graphics.Canvas_Delegate;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.DisplayMetrics;
@@ -174,7 +173,7 @@ public class LayoutSceneImpl {
         // build the context
         mContext = new BridgeContext(mParams.getProjectKey(), metrics, mCurrentTheme,
                 mParams.getProjectResources(), mParams.getFrameworkResources(),
-                styleParentMap, mParams.getProjectCallback(), mParams.getLogger());
+                styleParentMap, mParams.getProjectCallback());
 
         // set the current rendering context
         sCurrentContext = mContext;
@@ -202,7 +201,7 @@ public class LayoutSceneImpl {
         mBlockParser = new BridgeXmlBlockParser(mParams.getLayoutDescription(),
                 mContext, false /* platformResourceFlag */);
 
-        return SceneStatus.SUCCESS.getResult();
+        return SceneStatus.SUCCESS.createResult();
     }
 
     /**
@@ -243,8 +242,9 @@ public class LayoutSceneImpl {
         // scene
         mContext.initResources();
         sCurrentContext = mContext;
+        Bridge.setLog(mParams.getLog());
 
-        return SUCCESS.getResult();
+        return SUCCESS.createResult();
     }
 
     /**
@@ -267,10 +267,10 @@ public class LayoutSceneImpl {
                 boolean acquired = lock.tryLock(timeout, TimeUnit.MILLISECONDS);
 
                 if (acquired == false) {
-                    return ERROR_TIMEOUT.getResult();
+                    return ERROR_TIMEOUT.createResult();
                 }
             } catch (InterruptedException e) {
-                return ERROR_LOCK_INTERRUPTED.getResult();
+                return ERROR_LOCK_INTERRUPTED.createResult();
             }
         } else {
             // This thread holds the lock already. Checks that this wasn't for a different context.
@@ -279,7 +279,7 @@ public class LayoutSceneImpl {
             if (mContext != sCurrentContext) {
                 throw new IllegalStateException("Acquiring different scenes from same thread without releases");
             }
-            return SUCCESS.getResult();
+            return SUCCESS.createResult();
         }
 
         return null;
@@ -297,6 +297,7 @@ public class LayoutSceneImpl {
         if (lock.isHeldByCurrentThread()) {
             // Make sure to remove static references, otherwise we could not unload the lib
             mContext.disposeResources();
+            Bridge.setLog(null);
             sCurrentContext = null;
 
             lock.unlock();
@@ -344,9 +345,9 @@ public class LayoutSceneImpl {
                 mViewRoot.setBackgroundDrawable(d);
             }
 
-            return SceneStatus.SUCCESS.getResult();
+            return SceneStatus.SUCCESS.createResult();
         } catch (PostInflateException e) {
-            return SceneStatus.ERROR_INFLATION.getResult(e.getMessage(), e);
+            return SceneStatus.ERROR_INFLATION.createResult(e.getMessage(), e);
         } catch (Throwable e) {
             // get the real cause of the exception.
             Throwable t = e;
@@ -355,9 +356,9 @@ public class LayoutSceneImpl {
             }
 
             // log it
-            mParams.getLogger().error(t);
+            mParams.getLog().error("Scene inflate failed", t);
 
-            return SceneStatus.ERROR_INFLATION.getResult(t.getMessage(), t);
+            return SceneStatus.ERROR_INFLATION.createResult(t.getMessage(), t);
         }
     }
 
@@ -377,7 +378,7 @@ public class LayoutSceneImpl {
 
         try {
             if (mViewRoot == null) {
-                return SceneStatus.ERROR_NOT_INFLATED.getResult();
+                return SceneStatus.ERROR_NOT_INFLATED.createResult();
             }
             // measure the views
             int w_spec, h_spec;
@@ -457,10 +458,6 @@ public class LayoutSceneImpl {
                 mCanvas.setDensity(mParams.getDensity());
             }
 
-            // to set the logger, get the native delegate
-            Canvas_Delegate canvasDelegate = Canvas_Delegate.getDelegate(mCanvas);
-            canvasDelegate.setLogger(mParams.getLogger());
-
             long preDrawTime = System.currentTimeMillis();
 
             mViewRoot.draw(mCanvas);
@@ -472,7 +469,7 @@ public class LayoutSceneImpl {
             System.out.println(String.format("rendering (ms): %03d", drawTime - preDrawTime));
 
             // success!
-            return SceneStatus.SUCCESS.getResult();
+            return SceneStatus.SUCCESS.createResult();
         } catch (Throwable e) {
             // get the real cause of the exception.
             Throwable t = e;
@@ -481,9 +478,9 @@ public class LayoutSceneImpl {
             }
 
             // log it
-            mParams.getLogger().error(t);
+            mParams.getLog().error("Scene Render failed", t);
 
-            return SceneStatus.ERROR_UNKNOWN.getResult(t.getMessage(), t);
+            return SceneStatus.ERROR_UNKNOWN.createResult(t.getMessage(), t);
         }
     }
 
@@ -524,7 +521,7 @@ public class LayoutSceneImpl {
 
                     new PlayAnimationThread(anim, this, animationName, listener).start();
 
-                    return SceneStatus.SUCCESS.getResult();
+                    return SceneStatus.SUCCESS.createResult();
                 }
             } catch (Exception e) {
                 // get the real cause of the exception.
@@ -533,11 +530,11 @@ public class LayoutSceneImpl {
                     t = t.getCause();
                 }
 
-                return SceneStatus.ERROR_UNKNOWN.getResult(t.getMessage(), t);
+                return SceneStatus.ERROR_UNKNOWN.createResult(t.getMessage(), t);
             }
         }
 
-        return SceneStatus.ERROR_ANIM_NOT_FOUND.getResult();
+        return SceneStatus.ERROR_ANIM_NOT_FOUND.createResult();
     }
 
     /**
@@ -581,7 +578,7 @@ public class LayoutSceneImpl {
             }.start();
 
             // always return success since the real status will come through the listener.
-            return SceneStatus.SUCCESS.getResult(child);
+            return SceneStatus.SUCCESS.createResult(child);
         }
 
         // add it to the parentView in the correct location
@@ -612,10 +609,10 @@ public class LayoutSceneImpl {
     private SceneResult addView(ViewGroup parent, View view, int index) {
         try {
             parent.addView(view, index);
-            return SceneStatus.SUCCESS.getResult();
+            return SceneStatus.SUCCESS.createResult();
         } catch (UnsupportedOperationException e) {
             // looks like this is a view class that doesn't support children manipulation!
-            return SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN.getResult();
+            return SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN.createResult();
         }
     }
 
@@ -659,7 +656,7 @@ public class LayoutSceneImpl {
             }.start();
 
             // always return success since the real status will come through the listener.
-            return SceneStatus.SUCCESS.getResult(layoutParams);
+            return SceneStatus.SUCCESS.createResult(layoutParams);
         }
 
         SceneResult result = moveView(parentView, childView, index, layoutParams);
@@ -701,10 +698,10 @@ public class LayoutSceneImpl {
                 parent.addView(view, index);
             }
 
-            return SceneStatus.SUCCESS.getResult();
+            return SceneStatus.SUCCESS.createResult();
         } catch (UnsupportedOperationException e) {
             // looks like this is a view class that doesn't support children manipulation!
-            return SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN.getResult();
+            return SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN.createResult();
         }
     }
 
@@ -741,7 +738,7 @@ public class LayoutSceneImpl {
             }.start();
 
             // always return success since the real status will come through the listener.
-            return SceneStatus.SUCCESS.getResult();
+            return SceneStatus.SUCCESS.createResult();
         }
 
         SceneResult result = removeView(parent, childView);
@@ -764,10 +761,10 @@ public class LayoutSceneImpl {
     private SceneResult removeView(ViewGroup parent, View view) {
         try {
             parent.removeView(view);
-            return SceneStatus.SUCCESS.getResult();
+            return SceneStatus.SUCCESS.createResult();
         } catch (UnsupportedOperationException e) {
             // looks like this is a view class that doesn't support children manipulation!
-            return SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN.getResult();
+            return SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN.createResult();
         }
     }
 
@@ -927,7 +924,7 @@ public class LayoutSceneImpl {
             return (IStyleResourceValue)parent;
         }
 
-        mParams.getLogger().error(
+        mParams.getLog().error(null,
                 String.format("Unable to resolve parent style name: %s", parentName));
 
         return null;

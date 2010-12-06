@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.api.IDensityBasedResourceValue.Density;
+import com.android.layoutlib.bridge.Bridge;
 
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -448,7 +449,9 @@ public class BitmapFactory {
         Bitmap  bm;
 
         if (is instanceof AssetManager.AssetInputStream) {
-            // FIXME: log this.
+            Bridge.getLog().error(null,
+                    "Bitmap.decodeStream: " +
+                    "InputStream is unsupported (AssetManager.AssetInputStream)");
             return null;
         } else {
             // pass some temp storage down to the native code. 1024 is made up,

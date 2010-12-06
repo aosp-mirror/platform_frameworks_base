@@ -16,7 +16,7 @@
 
 package android.graphics;
 
-import com.android.layoutlib.api.ILayoutLog;
+import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.layoutlib.bridge.impl.Stack;
 
@@ -59,7 +59,6 @@ public class Canvas_Delegate {
     // ---- delegate data ----
     private BufferedImage mBufferedImage;
     private final Stack<Graphics2D> mGraphicsStack = new Stack<Graphics2D>();
-    private ILayoutLog mLogger;
 
     // ---- Public Helper methods ----
 
@@ -75,14 +74,6 @@ public class Canvas_Delegate {
      */
     public static Canvas_Delegate getDelegate(int native_canvas) {
         return sManager.getDelegate(native_canvas);
-    }
-
-    /**
-     * Sets the layoutlib logger into the canvas.
-     * @param logger
-     */
-    public void setLogger(ILayoutLog logger) {
-        mLogger = logger;
     }
 
     /**
@@ -408,10 +399,11 @@ public class Canvas_Delegate {
         // give it to the graphics2D as a new matrix replacing all previous transform
         g.setTransform(matrixTx);
 
-        // FIXME: log
-//        if (mLogger != null && matrixDelegate.hasPerspective()) {
-//            mLogger.warning("android.graphics.Canvas#setMatrix(android.graphics.Matrix) only supports affine transformations in the Layout Editor.");
-//        }
+        if (matrixDelegate.hasPerspective()) {
+            Bridge.getLog().warning(null,
+                    "android.graphics.Canvas#setMatrix(android.graphics.Matrix) only " +
+                    "supports affine transformations in the Layout Preview.");
+        }
     }
 
     /*package*/ static boolean native_clipRect(int nCanvas,
@@ -1042,11 +1034,10 @@ public class Canvas_Delegate {
                 g.setPaint(shaderPaint);
                 useColorPaint = false;
             } else {
-                if (mLogger != null) {
-                    mLogger.warning(String.format(
-                            "Shader '%1$s' is not supported in the Layout Editor.",
+                Bridge.getLog().warning(null,
+                        String.format(
+                            "Shader '%1$s' is not supported in the Layout Preview.",
                             shaderDelegate.getClass().getCanonicalName()));
-                }
             }
         }
 
@@ -1089,10 +1080,11 @@ public class Canvas_Delegate {
             g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
 
             // if xfermode wasn't null, then it's something we don't support. log it.
-            if (mLogger != null && xfermodeDelegate != null) {
-                mLogger.warning(String.format(
-                        "Xfermode '%1$s' is not supported in the Layout Editor.",
-                        xfermodeDelegate.getClass().getCanonicalName()));
+            if (xfermodeDelegate != null) {
+                Bridge.getLog().warning(null,
+                        String.format(
+                            "Xfermode '%1$s' is not supported in the Layout Preview.",
+                            xfermodeDelegate.getClass().getCanonicalName()));
             }
         }
 
