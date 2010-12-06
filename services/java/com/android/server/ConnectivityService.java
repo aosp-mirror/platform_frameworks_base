@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
+import android.net.DummyDataStateTracker;
 import android.net.IConnectivityManager;
 import android.net.MobileDataStateTracker;
 import android.net.NetworkInfo;
@@ -410,6 +411,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (DBG) log("tearing down Mobile networks due to setting");
                     mNetTrackers[netType].teardown();
                 }
+                break;
+            case ConnectivityManager.TYPE_DUMMY:
+                mNetTrackers[netType] = new DummyDataStateTracker(netType,
+                        mNetAttributes[netType].mName);
+                mNetTrackers[netType].startMonitoring(context, mHandler);
                 break;
             default:
                 loge("Trying to create a DataStateTracker for an unknown radio type " +

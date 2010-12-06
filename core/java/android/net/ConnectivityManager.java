@@ -212,10 +212,13 @@ public class ConnectivityManager
      * default connections.
      */
     public static final int TYPE_WIMAX       = 6;
+
+    /** {@hide} */
+    public static final int TYPE_DUMMY       = 7;
     /** {@hide} TODO: Need to adjust this for WiMAX. */
     public static final int MAX_RADIO_TYPE   = TYPE_WIFI;
     /** {@hide} TODO: Need to adjust this for WiMAX. */
-    public static final int MAX_NETWORK_TYPE = TYPE_MOBILE_HIPRI;
+    public static final int MAX_NETWORK_TYPE = TYPE_DUMMY;
 
     public static final int DEFAULT_NETWORK_PREFERENCE = TYPE_WIFI;
 
