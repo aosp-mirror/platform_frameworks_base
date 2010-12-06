@@ -2145,6 +2145,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     Log.d(TAG, "set frequency band " + band);
                     if (WifiNative.setBandCommand(band)) {
                         mFrequencyBand.set(band);
+                        //Fetch the latest scan results when frequency band is set
+                        startScan(true);
                     } else {
                         Log.e(TAG, "Failed to set frequency band " + band);
                     }
