@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -52,6 +53,17 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
     final TextView[] mIcons = new TextView[NUM_BUTTONS];
     View mNoAppsText;
     IntentFilter mBroadcastIntentFilter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+
+    Handler mHandler = new Handler();
+    Runnable mCleanup = new Runnable() {
+        public void run() {
+            // dump extra memory we're hanging on to
+            for (TextView icon: mIcons) {
+                icon.setCompoundDrawables(null, null, null, null);
+                icon.setTag(null);
+            }
+        }
+    };
 
     private int mIconSize;
 
@@ -144,6 +156,8 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
 
         // receive broadcasts
         getContext().registerReceiver(mBroadcastReceiver, mBroadcastIntentFilter);
+
+        mHandler.removeCallbacks(mCleanup);
     }
 
     /**
@@ -153,18 +167,14 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
     public void onStop() {
         super.onStop();
 
-        // dump extra memory we're hanging on to
-        for (TextView icon: mIcons) {
-            icon.setCompoundDrawables(null, null, null, null);
-            icon.setTag(null);
-        }
-
         if (sStatusBar != null) {
             sStatusBar.disable(StatusBarManager.DISABLE_NONE);
         }
 
         // stop receiving broadcasts
         getContext().unregisterReceiver(mBroadcastReceiver);
+
+        mHandler.postDelayed(mCleanup, 100);
      }
 
     /**
