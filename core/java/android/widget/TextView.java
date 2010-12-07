@@ -319,6 +319,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private int mLastDownPositionX, mLastDownPositionY;
     private Callback mCustomSelectionActionModeCallback;
 
+    private final int mSquaredTouchSlopDistance;
+
     /*
      * Kick-start the font cache for the zygote process (to pay the cost of
      * initializing freetype for our default font only once).
@@ -1009,6 +1011,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         setLongClickable(longClickable);
 
         prepareCursorControllers();
+
+        final ViewConfiguration viewConfiguration = ViewConfiguration.get(context);
+        final int touchSlop = viewConfiguration.getScaledTouchSlop();
+        mSquaredTouchSlopDistance = touchSlop * touchSlop;
     }
 
     private void setTypefaceByIndex(int typefaceIndex, int styleIndex) {
@@ -8402,14 +8408,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private float mTouchOffsetY;
         private int mLastParentX;
         private int mLastParentY;
+        private float mDownPositionX, mDownPositionY;
         private int mContainerPositionX, mContainerPositionY;
         private long mTouchTimer;
-        private boolean mHasPastePopupWindow = false;
+        private boolean mIsInsertionHandle = false;
         private PastePopupMenu mPastePopupWindow;
+        private LongPressCallback mLongPressCallback;
 
         public static final int LEFT = 0;
         public static final int CENTER = 1;
         public static final int RIGHT = 2;
+
+        class LongPressCallback implements Runnable {
+            public void run() {
+                mController.hide();
+                startSelectionActionMode();
+            }
+        }
 
         public HandleView(CursorController controller, int pos) {
             super(TextView.this.mContext);
@@ -8457,7 +8472,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mDrawable = mSelectHandleCenter;
                 handleWidth = mDrawable.getIntrinsicWidth();
                 mHotspotX = handleWidth / 2;
-                mHasPastePopupWindow = true;
+                mIsInsertionHandle = true;
                 break;
             }
             }
@@ -8616,20 +8631,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public boolean onTouchEvent(MotionEvent ev) {
             switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
-                final float rawX = ev.getRawX();
-                final float rawY = ev.getRawY();
-                mTouchToWindowOffsetX = rawX - mPositionX;
-                mTouchToWindowOffsetY = rawY - mPositionY;
+                mDownPositionX = ev.getRawX();
+                mDownPositionY = ev.getRawY();
+                mTouchToWindowOffsetX = mDownPositionX - mPositionX;
+                mTouchToWindowOffsetY = mDownPositionY - mPositionY;
                 final int[] coords = mTempCoords;
                 TextView.this.getLocationInWindow(coords);
                 mLastParentX = coords[0];
                 mLastParentY = coords[1];
                 mIsDragging = true;
-                if (mHasPastePopupWindow) {
+                if (mIsInsertionHandle) {
                     mTouchTimer = SystemClock.uptimeMillis();
+                    if (mLongPressCallback == null) {
+                        mLongPressCallback = new LongPressCallback();
+                    }
+                    postDelayed(mLongPressCallback, ViewConfiguration.getLongPressTimeout());
                 }
                 break;
             }
+
             case MotionEvent.ACTION_MOVE: {
                 final float rawX = ev.getRawX();
                 final float rawY = ev.getRawY();
@@ -8638,35 +8658,37 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 mController.updatePosition(this, Math.round(newPosX), Math.round(newPosY));
 
+                if (mIsInsertionHandle) {
+                    final float dx = rawX - mDownPositionX;
+                    final float dy = rawY - mDownPositionY;
+                    final float distanceSquared = dx * dx + dy * dy;
+                    if (distanceSquared >= mSquaredTouchSlopDistance) {
+                        removeCallbacks(mLongPressCallback);
+                    }
+                }
                 break;
             }
+
             case MotionEvent.ACTION_UP:
-                if (mHasPastePopupWindow) {
+                if (mIsInsertionHandle) {
+                    removeCallbacks(mLongPressCallback);
                     long delay = SystemClock.uptimeMillis() - mTouchTimer;
                     if (delay < ViewConfiguration.getTapTimeout()) {
-                        final float touchOffsetX = ev.getRawX() - mPositionX;
-                        final float touchOffsetY = ev.getRawY() - mPositionY;
-                        final float dx = touchOffsetX - mTouchToWindowOffsetX;
-                        final float dy = touchOffsetY - mTouchToWindowOffsetY;
-                        final float distanceSquared = dx * dx + dy * dy;
-                        final ViewConfiguration viewConfiguration = ViewConfiguration.get(getContext());
-                        final int doubleTapSlop = viewConfiguration.getScaledDoubleTapSlop();
-                        final int slopSquared = doubleTapSlop * doubleTapSlop;
-                        if (distanceSquared < slopSquared) {
-                            if (mPastePopupWindow != null && mPastePopupWindow.isShowing()) {
-                                // Tapping on the handle dismisses the displayed paste view,
-                                mPastePopupWindow.hide();
-                            } else {
-                                ((InsertionPointCursorController) mController).show(0);
-                            }
+                        if (mPastePopupWindow != null && mPastePopupWindow.isShowing()) {
+                            // Tapping on the handle dismisses the displayed paste view,
+                            mPastePopupWindow.hide();
+                        } else {
+                            ((InsertionPointCursorController) mController).show(0);
                         }
-                    } else {
-                        mController.show();
                     }
                 }
                 mIsDragging = false;
                 break;
+
             case MotionEvent.ACTION_CANCEL:
+                if (mIsInsertionHandle) {
+                    removeCallbacks(mLongPressCallback);
+                }
                 mIsDragging = false;
             }
             return true;
@@ -8696,7 +8718,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         void showPastePopupWindow() {
-            if (mHasPastePopupWindow) {
+            if (mIsInsertionHandle) {
                 if (mPastePopupWindow == null) {
                     // Lazy initialisation: create when actually shown only.
                     mPastePopupWindow = new PastePopupMenu();
@@ -8924,10 +8946,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             final int deltaX = x - mPreviousTapPositionX;
                             final int deltaY = y - mPreviousTapPositionY;
                             final int distanceSquared = deltaX * deltaX + deltaY * deltaY;
-                            final int doubleTapSlop =
-                                ViewConfiguration.get(getContext()).getScaledDoubleTapSlop();
-                            final int slopSquared = doubleTapSlop * doubleTapSlop;
-                            if (distanceSquared < slopSquared) {
+                            if (distanceSquared < mSquaredTouchSlopDistance) {
                                 startSelectionActionMode();
                                 mDiscardNextActionUp = true;
                             }
