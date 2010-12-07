@@ -803,7 +803,7 @@ public abstract class Context {
      *
      * @param intent The Intent to broadcast; all receivers matching this
      *               Intent will receive the broadcast.
-     * @param receiverPermission (optional) String naming a permissions that
+     * @param receiverPermission (optional) String naming a permission that
      *               a receiver must hold in order to receive your broadcast.
      *               If null, no permission is required.
      *
