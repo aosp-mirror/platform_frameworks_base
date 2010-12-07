@@ -208,7 +208,7 @@ public class ProgramFragment extends Program {
                 Element.Builder b = new Element.Builder(mRS);
                 b.add(Element.F32_4(mRS), "Color");
                 Type.Builder typeBuilder = new Type.Builder(mRS, b.create());
-                typeBuilder.add(Dimension.X, 1);
+                typeBuilder.setX(1);
                 constType = typeBuilder.create();
                 addConstant(constType);
             }
@@ -220,7 +220,7 @@ public class ProgramFragment extends Program {
                 Allocation constantData = Allocation.createTyped(mRS,constType);
                 float[] data = new float[4];
                 data[0] = data[1] = data[2] = data[3] = 1.0f;
-                constantData.data(data);
+                constantData.copyFrom(data);
                 pf.bindConstants(constantData, 0);
             }
             return pf;

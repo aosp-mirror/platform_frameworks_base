@@ -174,7 +174,7 @@ public class Mesh extends BaseObj {
 
         Type newType(Element e, int size) {
             Type.Builder tb = new Type.Builder(mRS, e);
-            tb.add(Dimension.X, size);
+            tb.setX(size);
             return tb.create();
         }
 
@@ -466,12 +466,12 @@ public class Mesh extends BaseObj {
 
             Mesh sm = smb.create();
 
-            sm.getVertexAllocation(0).data(mVtxData);
+            sm.getVertexAllocation(0).copyFrom(mVtxData);
             if(uploadToBufferObject) {
                 sm.getVertexAllocation(0).uploadToBufferObject();
             }
 
-            sm.getIndexAllocation(0).data(mIndexData);
+            sm.getIndexAllocation(0).copyFrom(mIndexData);
             sm.getIndexAllocation(0).uploadToBufferObject();
 
             return sm;

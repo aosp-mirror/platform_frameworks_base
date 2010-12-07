@@ -89,7 +89,7 @@ public class UT_primitives extends UnitTest {
     public void run() {
         RenderScript pRS = RenderScript.create();
         ScriptC_primitives s = new ScriptC_primitives(pRS, mRes, R.raw.primitives);
-        pRS.mMessageCallback = mRsMessage;
+        pRS.setMessageHandler(mRsMessage);
         if (!initializeGlobals(s)) {
             // initializeGlobals failed
             result = -1;

@@ -272,33 +272,12 @@ namespace renderscript {
 }
 }
 
-RsType rsaTypeCreate(RsContext con, RsElement _e, uint32_t dimCount,
-                     const RsDimension *dims, const uint32_t *vals) {
+RsType rsaTypeCreate(RsContext con, RsElement _e, uint32_t dimX,
+                     uint32_t dimY, uint32_t dimZ, bool mips, bool faces) {
     Context *rsc = static_cast<Context *>(con);
     Element *e = static_cast<Element *>(_e);
-    TypeState * stc = &rsc->mStateType;
 
-    uint32_t dimX = 0;
-    uint32_t dimY = 0;
-    uint32_t dimZ = 0;
-    uint32_t dimLOD = 0;
-    uint32_t dimFaces = 0;
-
-    for (uint32_t ct=0; ct < dimCount; ct++) {
-        switch (dims[ct]) {
-        case RS_DIMENSION_X: dimX = vals[ct]; break;
-        case RS_DIMENSION_Y: dimY = vals[ct]; break;
-        case RS_DIMENSION_Z: dimZ = vals[ct]; break;
-        case RS_DIMENSION_LOD: dimLOD = vals[ct]; break;
-        case RS_DIMENSION_FACE: dimFaces = vals[ct]; break;
-
-        default:
-            LOGE("rsaTypeCreate: Bad dimension");
-            rsAssert(0);
-        }
-    }
-
-    return Type::getType(rsc, e, dimX, dimY, dimZ, dimLOD, dimFaces);
+    return Type::getType(rsc, e, dimX, dimY, dimZ, mips, faces);
 }
 
 void rsaTypeGetNativeData(RsContext con, RsType type, uint32_t *typeData, uint32_t typeDataSize) {

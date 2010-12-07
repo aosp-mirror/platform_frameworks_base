@@ -160,7 +160,7 @@ public class SimpleModelRS {
 
         initTextAllocation();
 
-        mRS.contextBindRootScript(mScript);
+        mRS.bindRootScript(mScript);
     }
 }
 

@@ -95,7 +95,7 @@ public class ProgramVertex extends Program {
             b.add(Element.MATRIX4X4(rs), "MVP");
 
             Type.Builder typeBuilder = new Type.Builder(rs, b.create());
-            typeBuilder.add(Dimension.X, 1);
+            typeBuilder.setX(1);
             return typeBuilder.create();
         }
 
@@ -153,7 +153,7 @@ public class ProgramVertex extends Program {
             Type constInputType = ProgramVertex.Builder.getConstantInputType(rs);
             mAlloc = Allocation.createTyped(rs, constInputType);
             int bufferSize = constInputType.getElement().getSizeBytes()*
-                             constInputType.getElementCount();
+                             constInputType.getCount();
             mIOBuffer = new FieldPacker(bufferSize);
             loadModelview(new Matrix4f());
             loadProjection(new Matrix4f());
@@ -170,7 +170,7 @@ public class ProgramVertex extends Program {
             for(int i = 0; i < 16; i ++) {
                 mIOBuffer.addF32(m.mMat[i]);
             }
-            mAlloc.data(mIOBuffer.getData());
+            mAlloc.copyFrom(mIOBuffer.getData());
         }
 
         public void loadModelview(Matrix4f m) {

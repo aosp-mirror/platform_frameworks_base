@@ -29,8 +29,8 @@ public class UT_rstypes extends UnitTest {
 
     public void run() {
         RenderScript pRS = RenderScript.create();
-        ScriptC_rstypes s = new ScriptC_rstypes(pRS, mRes, R.raw.rstypes, true);
-        pRS.mMessageCallback = mRsMessage;
+        ScriptC_rstypes s = new ScriptC_rstypes(pRS, mRes, R.raw.rstypes);
+        pRS.setMessageHandler(mRsMessage);
         s.invoke_test_rstypes(0, 0);
         pRS.finish();
         waitForMessage();

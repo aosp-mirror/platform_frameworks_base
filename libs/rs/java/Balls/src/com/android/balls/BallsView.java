@@ -53,8 +53,8 @@ public class BallsView extends RSSurfaceView {
         super.surfaceChanged(holder, format, w, h);
         if (mRS == null) {
             RenderScriptGL.SurfaceConfig sc = new RenderScriptGL.SurfaceConfig();
-            mRS = createRenderScript(sc);
-            mRS.contextSetSurface(w, h, holder.getSurface());
+            mRS = createRenderScriptGL(sc);
+            mRS.setSurface(holder, w, h);
             mRender = new BallsRS();
             mRender.init(mRS, getResources(), w, h);
         }
@@ -65,7 +65,7 @@ public class BallsView extends RSSurfaceView {
     protected void onDetachedFromWindow() {
         if(mRS != null) {
             mRS = null;
-            destroyRenderScript();
+            destroyRenderScriptGL();
         }
     }
 

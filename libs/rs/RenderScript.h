@@ -328,8 +328,7 @@ void rsaElementGetNativeData(RsContext, RsElement, uint32_t *elemData, uint32_t 
 void rsaElementGetSubElements(RsContext, RsElement, uint32_t *ids, const char **names, uint32_t dataSize);
 
 // Async commands for returning new IDS
-RsType rsaTypeCreate(RsContext, RsElement, uint32_t dimCount,
-                     const RsDimension *dims, const uint32_t *vals);
+RsType rsaTypeCreate(RsContext, RsElement, uint32_t dimX, uint32_t dimY, uint32_t dimZ, bool mips, bool faces);
 RsAllocation rsaAllocationCreateTyped(RsContext rsc, RsType vtype);
 RsAllocation rsaAllocationCreateFromBitmap(RsContext con, uint32_t w, uint32_t h, RsElement _dst, RsElement _src,  bool genMips, const void *data);
 RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, uint32_t w, uint32_t h, RsElement _dst, RsElement _src,  bool genMips, const void *data);

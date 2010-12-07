@@ -36,7 +36,7 @@ public class FountainRS {
 
         ProgramFragment.Builder pfb = new ProgramFragment.Builder(rs);
         pfb.setVaryingColor(true);
-        rs.contextBindProgramFragment(pfb.create());
+        rs.bindProgramFragment(pfb.create());
 
         ScriptField_Point points = new ScriptField_Point(mRS, PART_COUNT);
 
@@ -48,7 +48,7 @@ public class FountainRS {
         mScript = new ScriptC_fountain(mRS, mRes, R.raw.fountain);
         mScript.set_partMesh(sm);
         mScript.bind_point(points);
-        mRS.contextBindRootScript(mScript);
+        mRS.bindRootScript(mScript);
     }
 
     boolean holdingColor[] = new boolean[10];

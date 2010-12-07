@@ -53,8 +53,8 @@ public class FountainView extends RSSurfaceView {
         super.surfaceChanged(holder, format, w, h);
         if (mRS == null) {
             RenderScriptGL.SurfaceConfig sc = new RenderScriptGL.SurfaceConfig();
-            mRS = createRenderScript(sc);
-            mRS.contextSetSurface(w, h, holder.getSurface());
+            mRS = createRenderScriptGL(sc);
+            mRS.setSurface(holder, w, h);
             mRender = new FountainRS();
             mRender.init(mRS, getResources(), w, h);
         }
@@ -64,7 +64,7 @@ public class FountainView extends RSSurfaceView {
     protected void onDetachedFromWindow() {
         if (mRS != null) {
             mRS = null;
-            destroyRenderScript();
+            destroyRenderScriptGL();
         }
     }
 

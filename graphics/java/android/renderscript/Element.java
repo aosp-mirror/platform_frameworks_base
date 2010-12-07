@@ -477,10 +477,6 @@ public class Element extends BaseObj {
 
     }
 
-    public void destroy() {
-        super.destroy();
-    }
-
     /**
      * Create a custom Element of the specified DataType.  The DataKind will be
      * set to USER and the vector size to 1 indicating non-vector.
@@ -489,7 +485,7 @@ public class Element extends BaseObj {
      * @param dt The DataType for the new element.
      * @return Element
      */
-    public static Element createUser(RenderScript rs, DataType dt) {
+    static Element createUser(RenderScript rs, DataType dt) {
         DataKind dk = DataKind.USER;
         boolean norm = false;
         int vecSize = 1;
@@ -510,7 +506,7 @@ public class Element extends BaseObj {
      */
     public static Element createVector(RenderScript rs, DataType dt, int size) {
         if (size < 2 || size > 4) {
-            throw new RSIllegalArgumentException("Vector size out of rance 2-4.");
+            throw new RSIllegalArgumentException("Vector size out of range 2-4.");
         }
         DataKind dk = DataKind.USER;
         boolean norm = false;
@@ -603,7 +599,7 @@ public class Element extends BaseObj {
          * @param name
          * @param arraySize
          */
-        public void add(Element element, String name, int arraySize) {
+        public Builder add(Element element, String name, int arraySize) {
             if (arraySize < 1) {
                 throw new RSIllegalArgumentException("Array size cannot be less than 1.");
             }
@@ -622,6 +618,7 @@ public class Element extends BaseObj {
             mElementNames[mCount] = name;
             mArraySizes[mCount] = arraySize;
             mCount++;
+            return this;
         }
 
         /**
@@ -630,8 +627,8 @@ public class Element extends BaseObj {
          * @param element
          * @param name
          */
-        public void add(Element element, String name) {
-            add(element, name, 1);
+        public Builder add(Element element, String name) {
+            return add(element, name, 1);
         }
 
         /**

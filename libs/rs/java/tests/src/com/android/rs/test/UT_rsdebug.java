@@ -30,7 +30,7 @@ public class UT_rsdebug extends UnitTest {
     public void run() {
         RenderScript pRS = RenderScript.create();
         ScriptC_rsdebug s = new ScriptC_rsdebug(pRS, mRes, R.raw.rsdebug);
-        pRS.mMessageCallback = mRsMessage;
+        pRS.setMessageHandler(mRsMessage);
         s.invoke_test_rsdebug(0, 0);
         pRS.finish();
         waitForMessage();

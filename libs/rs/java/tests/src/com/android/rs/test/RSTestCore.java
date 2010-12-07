@@ -95,7 +95,7 @@ public class RSTestCore {
         mFont = Font.createFromFamily(mRS, mRes, "serif", Font.Style.BOLD, 8);
         mScript.set_gFont(mFont);
 
-        mRS.contextBindRootScript(mScript);
+        mRS.bindRootScript(mScript);
 
         test_iter = unitTests.listIterator();
         refreshTestResults(); /* Kick off the first test */
@@ -148,7 +148,7 @@ public class RSTestCore {
             mListAllocs.copyAll();
 
             mScript.bind_gList(mListAllocs);
-            mRS.contextBindRootScript(mScript);
+            mRS.bindRootScript(mScript);
         }
     }
 
