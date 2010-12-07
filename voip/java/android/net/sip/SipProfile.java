@@ -20,6 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.text.ParseException;
 import javax.sip.InvalidArgumentException;
@@ -40,12 +41,15 @@ import javax.sip.address.URI;
 public class SipProfile implements Parcelable, Serializable, Cloneable {
     private static final long serialVersionUID = 1L;
     private static final int DEFAULT_PORT = 5060;
+    private static final String TCP = "TCP";
+    private static final String UDP = "UDP";
     private Address mAddress;
     private String mProxyAddress;
     private String mPassword;
     private String mDomain;
-    private String mProtocol = ListeningPoint.UDP;
+    private String mProtocol = UDP;
     private String mProfileName;
+    private int mPort = DEFAULT_PORT;
     private boolean mSendKeepAlive = false;
     private boolean mAutoRegistration = true;
     private transient int mCallingUid = 0;
@@ -95,6 +99,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
             mUri.setUserPassword(profile.getPassword());
             mDisplayName = profile.getDisplayName();
             mProxyAddress = profile.getProxyAddress();
+            mProfile.mPort = profile.getPort();
         }
 
         /**
@@ -171,12 +176,11 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
          * @throws IllegalArgumentException if the port number is out of range
          */
         public Builder setPort(int port) throws IllegalArgumentException {
-            try {
-                mUri.setPort(port);
-                return this;
-            } catch (InvalidArgumentException e) {
-                throw new IllegalArgumentException(e);
+            if ((port > 65535) || (port < 1000)) {
+                throw new IllegalArgumentException("incorrect port arugment");
             }
+            mProfile.mPort = port;
+            return this;
         }
 
         /**
@@ -193,7 +197,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
                 throw new NullPointerException("protocol cannot be null");
             }
             protocol = protocol.toUpperCase();
-            if (!protocol.equals("UDP") && !protocol.equals("TCP")) {
+            if (!protocol.equals(UDP) && !protocol.equals(TCP)) {
                 throw new IllegalArgumentException(
                         "unsupported protocol: " + protocol);
             }
@@ -258,13 +262,22 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
             mProfile.mPassword = mUri.getUserPassword();
             mUri.setUserPassword(null);
             try {
-                mProfile.mAddress = mAddressFactory.createAddress(
-                        mDisplayName, mUri);
                 if (!TextUtils.isEmpty(mProxyAddress)) {
                     SipURI uri = (SipURI)
                             mAddressFactory.createURI(fix(mProxyAddress));
                     mProfile.mProxyAddress = uri.getHost();
+                } else {
+                    if (!mProfile.mProtocol.equals(UDP)) {
+                        mUri.setTransportParam(mProfile.mProtocol);
+                    }
+                    if (mProfile.mPort != DEFAULT_PORT) {
+                        mUri.setPort(mProfile.mPort);
+                    }
                 }
+                mProfile.mAddress = mAddressFactory.createAddress(
+                        mDisplayName, mUri);
+            } catch (InvalidArgumentException e) {
+                throw new RuntimeException(e);
             } catch (ParseException e) {
                 // must not occur
                 throw new RuntimeException(e);
@@ -286,6 +299,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
         mSendKeepAlive = (in.readInt() == 0) ? false : true;
         mAutoRegistration = (in.readInt() == 0) ? false : true;
         mCallingUid = in.readInt();
+        mPort = in.readInt();
     }
 
     @Override
@@ -299,6 +313,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
         out.writeInt(mSendKeepAlive ? 1 : 0);
         out.writeInt(mAutoRegistration ? 1 : 0);
         out.writeInt(mCallingUid);
+        out.writeInt(mPort);
     }
 
     @Override
@@ -322,7 +337,13 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
      * @return the SIP URI string of this profile
      */
     public String getUriString() {
-        return mAddress.getURI().toString();
+        // We need to return the sip uri domain instead of
+        // the SIP URI with transport, port information if
+        // the outbound proxy address exists.
+        if (!TextUtils.isEmpty(mProxyAddress)) {
+            return "sip:" + getUserName() + "@" + mDomain;
+        }
+        return getUri().toString();
     }
 
     /**
@@ -377,8 +398,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
      * @return the port number of the SIP server
      */
     public int getPort() {
-        int port = getUri().getPort();
-        return (port == -1) ? DEFAULT_PORT : port;
+        return mPort;
     }
 
     /**
@@ -440,5 +460,11 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
      */
     public int getCallingUid() {
         return mCallingUid;
+    }
+
+    private Object readResolve() throws ObjectStreamException {
+        // For compatibility.
+        if (mPort == 0) mPort = DEFAULT_PORT;
+        return this;
     }
 }
