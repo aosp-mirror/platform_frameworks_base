@@ -72,6 +72,14 @@ Started</a></li>
       </li>
     </ul>
     <ul>
+      <li class="toggle-list">
+      <div><a href="<?cs var:toroot ?>sdk/android-2.3.html">
+      <span class="en">Android 2.3 Platform</span></a> <span class="new">new!</span></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>sdk/android-2.3-highlights.html">Platform Highlights</a></li> 
+          <li><a href="<?cs var:toroot ?>sdk/api_diff/9/changes.html">API Differences Report &raquo;</a></li> 
+        </ul>
+      </li>
       <li><a href="<?cs var:toroot ?>sdk/android-2.2.html">Android 2.2 Platform</a></li>
       <li><a href="<?cs var:toroot ?>sdk/android-2.1.html">Android 2.1 Platform</a></li>
       <li><a href="<?cs var:toroot ?>sdk/android-1.6.html">Android 1.6 Platform</a></li>
@@ -104,7 +112,7 @@ Started</a></li>
       <span style="display:none" class="zh-TW"></span>
       </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">ADT 8.0
+      <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">ADT 8.0.0
       <span style="display:none" class="de"></span>
       <span style="display:none" class="es"></span>
       <span style="display:none" class="fr"></span>
@@ -126,7 +134,7 @@ Started</a></li>
       <span style="display:none" class="zh-TW"></span>
     </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Download the Android NDK, r5</a>
+      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Android NDK, r5</a>
         <span class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>sdk/ndk/overview.html">What is the NDK?</a></li>
     </ul>
