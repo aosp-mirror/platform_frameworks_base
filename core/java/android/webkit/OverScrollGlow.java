@@ -168,18 +168,18 @@ public class OverScrollGlow {
         if (!mEdgeGlowTop.isFinished()) {
             final int restoreCount = canvas.save();
 
-            canvas.translate(-width / 2 + scrollX, Math.min(0, scrollY));
-            mEdgeGlowTop.setSize(width * 2, height);
+            canvas.translate(scrollX, mHostView.getVisibleTitleHeight() + Math.min(0, scrollY));
+            mEdgeGlowTop.setSize(width, height);
             invalidateForGlow |= mEdgeGlowTop.draw(canvas);
             canvas.restoreToCount(restoreCount);
         }
         if (!mEdgeGlowBottom.isFinished()) {
             final int restoreCount = canvas.save();
 
-            canvas.translate(-width / 2 + scrollX,
-                    Math.max(mHostView.computeMaxScrollY(), scrollY) + height);
+            canvas.translate(-width + scrollX, Math.max(mHostView.computeMaxScrollY(), scrollY)
+                    + height);
             canvas.rotate(180, width, 0);
-            mEdgeGlowBottom.setSize(width * 2, height);
+            mEdgeGlowBottom.setSize(width, height);
             invalidateForGlow |= mEdgeGlowBottom.draw(canvas);
             canvas.restoreToCount(restoreCount);
         }
@@ -187,8 +187,8 @@ public class OverScrollGlow {
             final int restoreCount = canvas.save();
 
             canvas.rotate(270);
-            canvas.translate(-height * 1.5f - scrollY, Math.min(0, scrollX));
-            mEdgeGlowLeft.setSize(height * 2, width);
+            canvas.translate(-height - scrollY, Math.min(0, scrollX));
+            mEdgeGlowLeft.setSize(height, width);
             invalidateForGlow |= mEdgeGlowLeft.draw(canvas);
             canvas.restoreToCount(restoreCount);
         }
@@ -196,9 +196,9 @@ public class OverScrollGlow {
             final int restoreCount = canvas.save();
 
             canvas.rotate(90);
-            canvas.translate(-height / 2 + scrollY,
+            canvas.translate(scrollY,
                     -(Math.max(mHostView.computeMaxScrollX(), scrollX) + width));
-            mEdgeGlowRight.setSize(height * 2, width);
+            mEdgeGlowRight.setSize(height, width);
             invalidateForGlow |= mEdgeGlowRight.draw(canvas);
             canvas.restoreToCount(restoreCount);
         }
