@@ -160,6 +160,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         /** Create the default connection */
         createDataConnection(Phone.APN_TYPE_DEFAULT);
+        broadcastMessenger();
     }
 
     @Override

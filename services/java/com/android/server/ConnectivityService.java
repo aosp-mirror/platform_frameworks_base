@@ -387,7 +387,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
          * the number of different network types is not going
          * to change very often.
          */
-        boolean noMobileData = !getMobileDataEnabled();
         for (int netType : mPriorityList) {
             switch (mNetAttributes[netType].mRadio) {
             case ConnectivityManager.TYPE_WIFI:
@@ -407,10 +406,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mNetTrackers[netType] = new MobileDataStateTracker(netType,
                         mNetAttributes[netType].mName);
                 mNetTrackers[netType].startMonitoring(context, mHandler);
-                if (noMobileData) {
-                    if (DBG) log("tearing down Mobile networks due to setting");
-                    mNetTrackers[netType].teardown();
-                }
                 break;
             case ConnectivityManager.TYPE_DUMMY:
                 mNetTrackers[netType] = new DummyDataStateTracker(netType,
@@ -691,10 +686,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // TODO - move this into the MobileDataStateTracker
         int usedNetworkType = networkType;
         if(networkType == ConnectivityManager.TYPE_MOBILE) {
-            if (!getMobileDataEnabled()) {
-                if (DBG) log("requested special network with data disabled - rejected");
-                return Phone.APN_TYPE_NOT_AVAILABLE;
-            }
             if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
                 usedNetworkType = ConnectivityManager.TYPE_MOBILE_MMS;
             } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
@@ -985,6 +976,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * @see ConnectivityManager#getMobileDataEnabled()
      */
     public boolean getMobileDataEnabled() {
+        // TODO: This detail should probably be in DataConnectionTracker's
+        //       which is where we store the value and maybe make this
+        //       asynchronous.
         enforceAccessPermission();
         boolean retVal = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.MOBILE_DATA, 1) == 1;
@@ -1004,40 +998,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void handleSetMobileData(boolean enabled) {
-        if (getMobileDataEnabled() == enabled) return;
-
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.MOBILE_DATA, enabled ? 1 : 0);
-
-        if (enabled) {
-            if (mNetTrackers[ConnectivityManager.TYPE_MOBILE] != null) {
-                if (DBG) {
-                    log("starting up " + mNetTrackers[ConnectivityManager.TYPE_MOBILE]);
-                }
-                mNetTrackers[ConnectivityManager.TYPE_MOBILE].reconnect();
+        if (mNetTrackers[ConnectivityManager.TYPE_MOBILE] != null) {
+            if (DBG) {
+                Slog.d(TAG, mNetTrackers[ConnectivityManager.TYPE_MOBILE].toString() + enabled);
             }
-        } else {
-            for (NetworkStateTracker nt : mNetTrackers) {
-                if (nt == null) continue;
-                int netType = nt.getNetworkInfo().getType();
-                if (mNetAttributes[netType].mRadio == ConnectivityManager.TYPE_MOBILE) {
-                    if (DBG) log("tearing down " + nt);
-                    nt.teardown();
-                }
-            }
+            mNetTrackers[ConnectivityManager.TYPE_MOBILE].setDataEnable(enabled);
         }
-    }
-
-    private int getNumConnectedNetworks() {
-        int numConnectedNets = 0;
-
-        for (NetworkStateTracker nt : mNetTrackers) {
-            if (nt != null && nt.getNetworkInfo().isConnected() &&
-                    !nt.isTeardownRequested()) {
-                ++numConnectedNets;
-            }
-        }
-        return numConnectedNets;
     }
 
     private void enforceAccessPermission() {
@@ -1159,16 +1125,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
             int newType = -1;
             int newPriority = -1;
-            boolean noMobileData = !getMobileDataEnabled();
             for (int checkType=0; checkType <= ConnectivityManager.MAX_NETWORK_TYPE; checkType++) {
                 if (checkType == prevNetType) continue;
                 if (mNetAttributes[checkType] == null) continue;
-                if (mNetAttributes[checkType].mRadio == ConnectivityManager.TYPE_MOBILE &&
-                        noMobileData) {
-                    loge("not failing over to mobile type " + checkType +
-                            " because Mobile Data Disabled");
-                    continue;
-                }
                 if (mNetAttributes[checkType].isDefault()) {
                     /* TODO - if we have multiple nets we could use
                      * we may want to put more thought into which we choose
