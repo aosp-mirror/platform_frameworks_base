@@ -76,6 +76,8 @@ public class FrameLayout extends ViewGroup {
 
     boolean mForegroundBoundsChanged = false;
     
+    private static final int DEFAULT_CHILD_GRAVITY = Gravity.TOP | Gravity.LEFT;
+
     public FrameLayout(Context context) {
         super(context);
     }
@@ -307,41 +309,42 @@ public class FrameLayout extends ViewGroup {
                 int childLeft = parentLeft;
                 int childTop = parentTop;
 
-                final int gravity = lp.gravity;
+                int gravity = lp.gravity;
+                if (gravity == -1) {
+                    gravity = DEFAULT_CHILD_GRAVITY;
+                }
 
-                if (gravity != -1) {
-                    final int horizontalGravity = gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
-                    final int verticalGravity = gravity & Gravity.VERTICAL_GRAVITY_MASK;
+                final int horizontalGravity = gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
+                final int verticalGravity = gravity & Gravity.VERTICAL_GRAVITY_MASK;
 
-                    switch (horizontalGravity) {
-                        case Gravity.LEFT:
-                            childLeft = parentLeft + lp.leftMargin;
-                            break;
-                        case Gravity.CENTER_HORIZONTAL:
-                            childLeft = parentLeft + (parentRight - parentLeft - width) / 2 +
-                                    lp.leftMargin - lp.rightMargin;
-                            break;
-                        case Gravity.RIGHT:
-                            childLeft = parentRight - width - lp.rightMargin;
-                            break;
-                        default:
-                            childLeft = parentLeft + lp.leftMargin;
-                    }
+                switch (horizontalGravity) {
+                    case Gravity.LEFT:
+                        childLeft = parentLeft + lp.leftMargin;
+                        break;
+                    case Gravity.CENTER_HORIZONTAL:
+                        childLeft = parentLeft + (parentRight - parentLeft - width) / 2 +
+                        lp.leftMargin - lp.rightMargin;
+                        break;
+                    case Gravity.RIGHT:
+                        childLeft = parentRight - width - lp.rightMargin;
+                        break;
+                    default:
+                        childLeft = parentLeft + lp.leftMargin;
+                }
 
-                    switch (verticalGravity) {
-                        case Gravity.TOP:
-                            childTop = parentTop + lp.topMargin;
-                            break;
-                        case Gravity.CENTER_VERTICAL:
-                            childTop = parentTop + (parentBottom - parentTop - height) / 2 +
-                                    lp.topMargin - lp.bottomMargin;
-                            break;
-                        case Gravity.BOTTOM:
-                            childTop = parentBottom - height - lp.bottomMargin;
-                            break;
-                        default:
-                            childTop = parentTop + lp.topMargin;
-                    }
+                switch (verticalGravity) {
+                    case Gravity.TOP:
+                        childTop = parentTop + lp.topMargin;
+                        break;
+                    case Gravity.CENTER_VERTICAL:
+                        childTop = parentTop + (parentBottom - parentTop - height) / 2 +
+                        lp.topMargin - lp.bottomMargin;
+                        break;
+                    case Gravity.BOTTOM:
+                        childTop = parentBottom - height - lp.bottomMargin;
+                        break;
+                    default:
+                        childTop = parentTop + lp.topMargin;
                 }
 
                 child.layout(childLeft, childTop, childLeft + width, childTop + height);
