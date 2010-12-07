@@ -6742,7 +6742,7 @@ public class WebView extends AbsoluteLayout
                         mSentAutoScrollMessage = false;
                         break;
                     }
-                    scrollBy(mAutoScrollX, mAutoScrollY);
+                    pinScrollBy(mAutoScrollX, mAutoScrollY, true, 0);
                     sendEmptyMessageDelayed(
                             SCROLL_SELECT_TEXT, SELECT_SCROLL_INTERVAL);
                     break;
