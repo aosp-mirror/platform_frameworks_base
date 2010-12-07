@@ -108,7 +108,6 @@ public class TabletStatusBar extends StatusBar {
     View mRecentButton;
 
     InputMethodButton mInputMethodSwitchButton;
-    InputMethodButton mInputMethodShortcutButton;
 
     NotificationPanel mNotificationPanel;
     NotificationPeekPanel mNotificationPeekWindow;
@@ -304,7 +303,6 @@ public class TabletStatusBar extends StatusBar {
 
         // The bar contents buttons
         mInputMethodSwitchButton = (InputMethodButton) sb.findViewById(R.id.imeSwitchButton);
-        mInputMethodShortcutButton = (InputMethodButton) sb.findViewById(R.id.imeShortcutButton);
 
         // "shadows" of the status bar features, for lights-out mode
         mBackShadow = sb.findViewById(R.id.back_shadow);
@@ -698,7 +696,6 @@ public class TabletStatusBar extends StatusBar {
             Slog.d(TAG, (visible?"showing":"hiding") + " the IME button");
         }
         mInputMethodSwitchButton.setIMEButtonVisible(token, visible);
-        mInputMethodShortcutButton.setIMEButtonVisible(token, visible);
         mBackButton.setImageResource(
                 visible ? R.drawable.ic_sysbar_back_ime : R.drawable.ic_sysbar_back);
     }
