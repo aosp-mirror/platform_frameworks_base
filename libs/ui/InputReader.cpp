@@ -745,17 +745,6 @@ KeyboardInputMapper::~KeyboardInputMapper() {
 void KeyboardInputMapper::initializeLocked() {
     mLocked.metaState = AMETA_NONE;
     mLocked.downTime = 0;
-
-    initializeLedStateLocked(mLocked.capsLockLedState, LED_CAPSL);
-    initializeLedStateLocked(mLocked.numLockLedState, LED_NUML);
-    initializeLedStateLocked(mLocked.scrollLockLedState, LED_SCROLLL);
-
-    updateLedStateLocked(true);
-}
-
-void KeyboardInputMapper::initializeLedStateLocked(LockedState::LedState& ledState, int32_t led) {
-    ledState.avail = getEventHub()->hasLed(getDeviceId(), led);
-    ledState.on = false;
 }
 
 uint32_t KeyboardInputMapper::getSources() {
@@ -786,6 +775,12 @@ void KeyboardInputMapper::configure() {
 
     // Configure basic parameters.
     configureParameters();
+
+    // Reset LEDs.
+    {
+        AutoMutex _l(mLock);
+        resetLedStateLocked();
+    }
 }
 
 void KeyboardInputMapper::configureParameters() {
@@ -813,6 +808,7 @@ void KeyboardInputMapper::reset() {
             // Synthesize key up event on reset if keys are currently down.
             if (mLocked.keyDowns.isEmpty()) {
                 initializeLocked();
+                resetLedStateLocked();
                 break; // done
             }
 
@@ -953,6 +949,19 @@ int32_t KeyboardInputMapper::getMetaState() {
     } // release lock
 }
 
+void KeyboardInputMapper::resetLedStateLocked() {
+    initializeLedStateLocked(mLocked.capsLockLedState, LED_CAPSL);
+    initializeLedStateLocked(mLocked.numLockLedState, LED_NUML);
+    initializeLedStateLocked(mLocked.scrollLockLedState, LED_SCROLLL);
+
+    updateLedStateLocked(true);
+}
+
+void KeyboardInputMapper::initializeLedStateLocked(LockedState::LedState& ledState, int32_t led) {
+    ledState.avail = getEventHub()->hasLed(getDeviceId(), led);
+    ledState.on = false;
+}
+
 void KeyboardInputMapper::updateLedStateLocked(bool reset) {
     updateLedStateForModifierLocked(mLocked.capsLockLedState, LED_CAPSL,
             AMETA_CAPS_LOCK_ON, reset);
@@ -966,7 +975,7 @@ void KeyboardInputMapper::updateLedStateForModifierLocked(LockedState::LedState&
         int32_t led, int32_t modifier, bool reset) {
     if (ledState.avail) {
         bool desiredState = (mLocked.metaState & modifier) != 0;
-        if (ledState.on != desiredState) {
+        if (reset || ledState.on != desiredState) {
             getEventHub()->setLedState(getDeviceId(), led, desiredState);
             ledState.on = desiredState;
         }

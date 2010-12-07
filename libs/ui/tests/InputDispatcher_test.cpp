@@ -66,7 +66,7 @@ private:
     }
 
     virtual bool dispatchUnhandledKey(const sp<InputChannel>& inputChannel,
-            const KeyEvent* keyEvent, uint32_t policyFlags) {
+            const KeyEvent* keyEvent, uint32_t policyFlags, KeyEvent* outFallbackKeyEvent) {
         return false;
     }
 

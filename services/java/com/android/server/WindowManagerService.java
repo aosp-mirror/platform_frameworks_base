@@ -5844,7 +5844,7 @@ public class WindowManagerService extends IWindowManager.Stub
         
         /* Provides an opportunity for the window manager policy to process a key that
          * the application did not handle. */
-        public boolean dispatchUnhandledKey(
+        public KeyEvent dispatchUnhandledKey(
                 InputChannel focus, KeyEvent event, int policyFlags) {
             WindowState windowState = getWindowStateForInputChannel(focus);
             return mPolicy.dispatchUnhandledKey(windowState, event, policyFlags);

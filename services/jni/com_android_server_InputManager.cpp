@@ -183,7 +183,7 @@ public:
     virtual bool interceptKeyBeforeDispatching(const sp<InputChannel>& inputChannel,
             const KeyEvent* keyEvent, uint32_t policyFlags);
     virtual bool dispatchUnhandledKey(const sp<InputChannel>& inputChannel,
-            const KeyEvent* keyEvent, uint32_t policyFlags);
+            const KeyEvent* keyEvent, uint32_t policyFlags, KeyEvent* outFallbackKeyEvent);
     virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType);
     virtual bool checkInjectEventsPermissionNonReentrant(
             int32_t injectorPid, int32_t injectorUid);
@@ -813,7 +813,7 @@ bool NativeInputManager::interceptKeyBeforeDispatching(const sp<InputChannel>& i
     // - Ignore untrusted events and pass them along.
     // - Filter normal events and trusted injected events through the window manager policy to
     //   handle the HOME key and the like.
-    bool result;
+    bool result = false;
     if (policyFlags & POLICY_FLAG_TRUSTED) {
         JNIEnv* env = jniEnv();
 
@@ -830,21 +830,17 @@ bool NativeInputManager::interceptKeyBeforeDispatching(const sp<InputChannel>& i
             result = consumed && !error;
         } else {
             LOGE("Failed to obtain key event object for interceptKeyBeforeDispatching.");
-            result = false;
         }
-
         env->DeleteLocalRef(inputChannelObj);
-    } else {
-        result = false;
     }
     return result;
 }
 
 bool NativeInputManager::dispatchUnhandledKey(const sp<InputChannel>& inputChannel,
-        const KeyEvent* keyEvent, uint32_t policyFlags) {
+        const KeyEvent* keyEvent, uint32_t policyFlags, KeyEvent* outFallbackKeyEvent) {
     // Policy:
     // - Ignore untrusted events and do not perform default handling.
-    bool result;
+    bool result = false;
     if (policyFlags & POLICY_FLAG_TRUSTED) {
         JNIEnv* env = jniEnv();
 
@@ -852,21 +848,26 @@ bool NativeInputManager::dispatchUnhandledKey(const sp<InputChannel>& inputChann
         jobject inputChannelObj = getInputChannelObjLocal(env, inputChannel);
         jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
         if (keyEventObj) {
-            jboolean handled = env->CallBooleanMethod(mCallbacksObj,
+            jobject fallbackKeyEventObj = env->CallObjectMethod(mCallbacksObj,
                     gCallbacksClassInfo.dispatchUnhandledKey,
                     inputChannelObj, keyEventObj, policyFlags);
-            bool error = checkAndClearExceptionFromCallback(env, "dispatchUnhandledKey");
+            checkAndClearExceptionFromCallback(env, "dispatchUnhandledKey");
             android_view_KeyEvent_recycle(env, keyEventObj);
             env->DeleteLocalRef(keyEventObj);
-            result = handled && !error;
+
+            if (fallbackKeyEventObj) {
+                // Note: outFallbackKeyEvent may be the same object as keyEvent.
+                if (!android_view_KeyEvent_toNative(env, fallbackKeyEventObj,
+                        outFallbackKeyEvent)) {
+                    result = true;
+                }
+                android_view_KeyEvent_recycle(env, fallbackKeyEventObj);
+                env->DeleteLocalRef(fallbackKeyEventObj);
+            }
         } else {
             LOGE("Failed to obtain key event object for dispatchUnhandledKey.");
-            result = false;
         }
-
         env->DeleteLocalRef(inputChannelObj);
-    } else {
-        result = false;
     }
     return result;
 }
@@ -1307,7 +1308,8 @@ int register_android_server_InputManager(JNIEnv* env) {
             "(Landroid/view/InputChannel;Landroid/view/KeyEvent;I)Z");
 
     GET_METHOD_ID(gCallbacksClassInfo.dispatchUnhandledKey, gCallbacksClassInfo.clazz,
-            "dispatchUnhandledKey", "(Landroid/view/InputChannel;Landroid/view/KeyEvent;I)Z");
+            "dispatchUnhandledKey",
+            "(Landroid/view/InputChannel;Landroid/view/KeyEvent;I)Landroid/view/KeyEvent;");
 
     GET_METHOD_ID(gCallbacksClassInfo.checkInjectEventsPermission, gCallbacksClassInfo.clazz,
             "checkInjectEventsPermission", "(II)Z");

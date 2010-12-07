@@ -230,6 +230,7 @@ enum {
     AKEYCODE_PROG_GREEN      = 184,
     AKEYCODE_PROG_YELLOW     = 185,
     AKEYCODE_PROG_BLUE       = 186,
+    AKEYCODE_APP_SWITCH      = 187,
 
     // NOTE: If you add a new keycode here you must also add it to several other files.
     //       Refer to frameworks/base/core/java/android/view/KeyEvent.java for the full list.

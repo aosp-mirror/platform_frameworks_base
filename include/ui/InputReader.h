@@ -402,7 +402,6 @@ private:
     } mLocked;
 
     void initializeLocked();
-    void initializeLedStateLocked(LockedState::LedState& ledState, int32_t led);
 
     void configureParameters();
     void dumpParameters(String8& dump);
@@ -414,6 +413,8 @@ private:
 
     ssize_t findKeyDownLocked(int32_t scanCode);
 
+    void resetLedStateLocked();
+    void initializeLedStateLocked(LockedState::LedState& ledState, int32_t led);
     void updateLedStateLocked(bool reset);
     void updateLedStateForModifierLocked(LockedState::LedState& ledState, int32_t led,
             int32_t modifier, bool reset);

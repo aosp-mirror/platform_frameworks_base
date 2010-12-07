@@ -51,11 +51,11 @@ LOCAL_SRC_FILES:= \
 	android_view_InputChannel.cpp \
 	android_view_InputQueue.cpp \
 	android_view_KeyEvent.cpp \
+	android_view_KeyCharacterMap.cpp \
 	android_view_GLES20Canvas.cpp \
 	android_view_MotionEvent.cpp \
 	android_text_AndroidCharacter.cpp \
 	android_text_AndroidBidi.cpp \
-	android_text_KeyCharacterMap.cpp \
 	android_os_Debug.cpp \
 	android_os_FileUtils.cpp \
 	android_os_MemoryFile.cpp \

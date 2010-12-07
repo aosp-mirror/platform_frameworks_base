@@ -501,7 +501,7 @@ status_t InputPublisher::sendDispatchSignal() {
     return mChannel->sendSignal(INPUT_SIGNAL_DISPATCH);
 }
 
-status_t InputPublisher::receiveFinishedSignal(bool& outHandled) {
+status_t InputPublisher::receiveFinishedSignal(bool* outHandled) {
 #if DEBUG_TRANSPORT_ACTIONS
     LOGD("channel '%s' publisher ~ receiveFinishedSignal",
             mChannel->getName().string());
@@ -510,13 +510,13 @@ status_t InputPublisher::receiveFinishedSignal(bool& outHandled) {
     char signal;
     status_t result = mChannel->receiveSignal(& signal);
     if (result) {
-        outHandled = false;
+        *outHandled = false;
         return result;
     }
     if (signal == INPUT_SIGNAL_FINISHED_HANDLED) {
-        outHandled = true;
+        *outHandled = true;
     } else if (signal == INPUT_SIGNAL_FINISHED_UNHANDLED) {
-        outHandled = false;
+        *outHandled = false;
     } else {
         LOGE("channel '%s' publisher ~ Received unexpected signal '%c' from consumer",
                 mChannel->getName().string(), signal);
