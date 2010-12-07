@@ -954,11 +954,11 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
                 mSnapshot->region && mesh->hasEmptyQuads) {
             const size_t count = mesh->quads.size();
             for (size_t i = 0; i < count; i++) {
-                Rect bounds = mesh->quads.itemAt(i);
+                const Rect& bounds = mesh->quads.itemAt(i);
                 if (pureTranslate) {
                     const float x = (int) floorf(bounds.left + 0.5f);
                     const float y = (int) floorf(bounds.top + 0.5f);
-                    dirtyLayer(x, y, x + bounds.getWidth(), y + bounds.getBottom(),
+                    dirtyLayer(x, y, x + bounds.getWidth(), y + bounds.getHeight(),
                             *mSnapshot->transform);
                 } else {
                     dirtyLayer(bounds.left, bounds.top, bounds.right, bounds.bottom,
