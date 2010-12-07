@@ -176,7 +176,7 @@ public class WifiStressTest
             writeOutput(String.format("scan iteration %d out of %d",
                     i, mScanIterations));
             writeOutput(String.format("average scanning time is %d", averageScanTime));
-            writeOutput(String.format("scanning quality is %d out of %d",
+            writeOutput(String.format("ssid appear %d out of %d scan iterations",
                     ssidAppearInScanResultsCount, mScanIterations));
             long startTime = System.currentTimeMillis();
             mAct.scanResultAvailable = false;
