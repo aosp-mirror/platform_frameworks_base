@@ -532,10 +532,6 @@ class ContextImpl extends Context {
         throw new RuntimeException("Not supported in system context");
     }
 
-    static File makeBackupFile(File prefsFile) {
-        return new File(prefsFile.getPath() + ".bak");
-    }
-
     public File getSharedPrefsFile(String name) {
         return makeFilename(getPreferencesDir(), name + ".xml");
     }
@@ -543,54 +539,19 @@ class ContextImpl extends Context {
     @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
         SharedPreferencesImpl sp;
-        File prefsFile;
-        boolean needInitialLoad = false;
         synchronized (sSharedPrefs) {
             sp = sSharedPrefs.get(name);
-            if (sp != null && !sp.hasFileChangedUnexpectedly()) {
-                return sp;
-            }
-            prefsFile = getSharedPrefsFile(name);
             if (sp == null) {
-                sp = new SharedPreferencesImpl(prefsFile, mode, null);
+                File prefsFile = getSharedPrefsFile(name);
+                sp = new SharedPreferencesImpl(prefsFile, mode);
                 sSharedPrefs.put(name, sp);
-                needInitialLoad = true;
-            }
-        }
-
-        synchronized (sp) {
-            if (needInitialLoad && sp.isLoaded()) {
-                // lost the race to load; another thread handled it
                 return sp;
             }
-            File backup = makeBackupFile(prefsFile);
-            if (backup.exists()) {
-                prefsFile.delete();
-                backup.renameTo(prefsFile);
-            }
-
-            // Debugging
-            if (prefsFile.exists() && !prefsFile.canRead()) {
-                Log.w(TAG, "Attempt to read preferences file " + prefsFile + " without permission");
-            }
-
-            Map map = null;
-            FileStatus stat = new FileStatus();
-            if (FileUtils.getFileStatus(prefsFile.getPath(), stat) && prefsFile.canRead()) {
-                try {
-                    FileInputStream str = new FileInputStream(prefsFile);
-                    map = XmlUtils.readMapXml(str);
-                    str.close();
-                } catch (XmlPullParserException e) {
-                    Log.w(TAG, "getSharedPreferences", e);
-                } catch (FileNotFoundException e) {
-                    Log.w(TAG, "getSharedPreferences", e);
-                } catch (IOException e) {
-                    Log.w(TAG, "getSharedPreferences", e);
-                }
-            }
-            sp.replace(map, stat);
         }
+        // If somebody else (some other process) changed the prefs
+        // file behind our back, we reload it.  This has been the
+        // historical (if undocumented) behavior.
+        sp.startReloadIfChangedUnexpectedly();
         return sp;
     }
 
