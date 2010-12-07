@@ -1532,7 +1532,7 @@ public class SensorManager
      * </ul>
      *
      * <p>
-     * <center><img src="../../../images/axis_device_inverted.png"
+     * <center><img src="../../../images/axis_globe_inverted.png"
      * alt="Inverted world coordinate-system diagram." border="0" /></center>
      * </p>
      * <p>
