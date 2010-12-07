@@ -6510,6 +6510,9 @@ public class WebView extends AbsoluteLayout
     public boolean requestChildRectangleOnScreen(View child,
                                                  Rect rect,
                                                  boolean immediate) {
+        if (mNativeClass == 0) {
+            return false;
+        }
         // don't scroll while in zoom animation. When it is done, we will adjust
         // the necessary components (e.g., WebTextView if it is in editing mode)
         if (mZoomManager.isFixedLengthAnimationInProgress()) {
