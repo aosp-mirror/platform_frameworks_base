@@ -35,6 +35,14 @@
             android:layout_alignParentRight="true"
             android:orientation="horizontal"
             >
+            <com.android.systemui.statusbar.tablet.InputMethodButton
+                android:id="@+id/imeSwitchButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="8dip"
+                android:src="@drawable/ic_sysbar_ime_default"
+                android:visibility="invisible"
+                />
             <com.android.systemui.statusbar.tablet.NotificationIconArea
                 android:id="@+id/notificationIcons"
                 android:layout_width="wrap_content"
@@ -191,22 +199,6 @@
                     android:visibility="gone"
                     />
             </com.android.systemui.statusbar.tablet.ShirtPocket>
-            <com.android.systemui.statusbar.tablet.InputMethodButton
-                android:id="@+id/imeSwitchButton"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="8dip"
-                android:src="@drawable/ic_sysbar_ime_default"
-                android:visibility="invisible"
-                />
-            <com.android.systemui.statusbar.tablet.InputMethodButton
-                android:id="@+id/imeShortcutButton"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="8dip"
-                android:src="@drawable/ic_sysbar_ime_default"
-                android:visibility="invisible"
-                />
         </LinearLayout>
 
         <!-- lights out mode: "shadow" views -->
