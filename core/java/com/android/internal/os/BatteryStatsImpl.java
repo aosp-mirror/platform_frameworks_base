@@ -3077,13 +3077,18 @@ public final class BatteryStatsImpl extends BatteryStats {
                 }
             }
 
-            void readExcessivePowerFromParcelLocked(Parcel in) {
+            boolean readExcessivePowerFromParcelLocked(Parcel in) {
                 final int N = in.readInt();
                 if (N == 0) {
                     mExcessivePower = null;
-                    return;
+                    return true;
                 }
 
+                if (N > 10000) {
+                    Slog.w(TAG, "File corrupt: too many excessive power entries " + N);
+                    return false;
+                }
+                
                 mExcessivePower = new ArrayList<ExcessivePower>();
                 for (int i=0; i<N; i++) {
                     ExcessivePower ew = new ExcessivePower();
@@ -3092,6 +3097,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     ew.usedTime = in.readLong();
                     mExcessivePower.add(ew);
                 }
+                return true;
             }
 
             void writeToParcelLocked(Parcel out) {
@@ -4687,7 +4693,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             
             int NW = in.readInt();
-            if (NW > 10000) {
+            if (NW > 100) {
                 Slog.w(TAG, "File corrupt: too many wake locks " + NW);
                 return;
             }
@@ -4705,7 +4711,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
 
             int NP = in.readInt();
-            if (NP > 10000) {
+            if (NP > 1000) {
                 Slog.w(TAG, "File corrupt: too many sensors " + NP);
                 return;
             }
@@ -4718,7 +4724,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
 
             NP = in.readInt();
-            if (NP > 10000) {
+            if (NP > 1000) {
                 Slog.w(TAG, "File corrupt: too many processes " + NP);
                 return;
             }
@@ -4729,6 +4735,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                 p.mSystemTime = p.mLoadedSystemTime = in.readLong();
                 p.mStarts = p.mLoadedStarts = in.readInt();
                 int NSB = in.readInt();
+                if (NSB > 100) {
+                    Slog.w(TAG, "File corrupt: too many speed bins " + NSB);
+                    return;
+                }
                 p.mSpeedBins = new SamplingCounter[NSB];
                 for (int i=0; i<NSB; i++) {
                     if (in.readInt() != 0) {
@@ -4736,7 +4746,9 @@ public final class BatteryStatsImpl extends BatteryStats {
                         p.mSpeedBins[i].readSummaryFromParcelLocked(in);
                     }
                 }
-                p.readExcessivePowerFromParcelLocked(in);
+                if (!p.readExcessivePowerFromParcelLocked(in)) {
+                    return;
+                }
             }
 
             NP = in.readInt();
@@ -4749,6 +4761,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                 Uid.Pkg p = u.getPackageStatsLocked(pkgName);
                 p.mWakeups = p.mLoadedWakeups = in.readInt();
                 final int NS = in.readInt();
+                if (NS > 1000) {
+                    Slog.w(TAG, "File corrupt: too many services " + NS);
+                    return;
+                }
                 for (int is = 0; is < NS; is++) {
                     String servName = in.readString();
                     Uid.Pkg.Serv s = u.getServiceStatsLocked(pkgName, servName);
