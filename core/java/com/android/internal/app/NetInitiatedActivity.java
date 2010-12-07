@@ -26,6 +26,8 @@ import android.os.Bundle;
 import android.widget.Toast;
 import android.util.Log;
 import android.location.LocationManager;
+
+import com.android.internal.R;
 import com.android.internal.location.GpsNetInitiatedHandler;
 
 /**
@@ -41,10 +43,6 @@ public class NetInitiatedActivity extends AlertActivity implements DialogInterfa
 
     private static final int POSITIVE_BUTTON = AlertDialog.BUTTON_POSITIVE;
     private static final int NEGATIVE_BUTTON = AlertDialog.BUTTON_NEGATIVE;
-
-    // Dialog button text
-    public static final String BUTTON_TEXT_ACCEPT = "Accept";
-    public static final String BUTTON_TEXT_DENY = "Deny";
 
     // Received ID from intent, -1 when no notification is in progress
     private int notificationId = -1;
@@ -67,12 +65,13 @@ public class NetInitiatedActivity extends AlertActivity implements DialogInterfa
         // Set up the "dialog"
         final Intent intent = getIntent();
         final AlertController.AlertParams p = mAlertParams;
+        Context context = getApplicationContext();
         p.mIconId = com.android.internal.R.drawable.ic_dialog_usb;
         p.mTitle = intent.getStringExtra(GpsNetInitiatedHandler.NI_INTENT_KEY_TITLE);
         p.mMessage = intent.getStringExtra(GpsNetInitiatedHandler.NI_INTENT_KEY_MESSAGE);
-        p.mPositiveButtonText = BUTTON_TEXT_ACCEPT;
+        p.mPositiveButtonText = String.format(context.getString(R.string.gpsVerifYes));
         p.mPositiveButtonListener = this;
-        p.mNegativeButtonText = BUTTON_TEXT_DENY;
+        p.mNegativeButtonText = String.format(context.getString(R.string.gpsVerifNo));
         p.mNegativeButtonListener = this;
 
         notificationId = intent.getIntExtra(GpsNetInitiatedHandler.NI_INTENT_KEY_NOTIF_ID, -1);
