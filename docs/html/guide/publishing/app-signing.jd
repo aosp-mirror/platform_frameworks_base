@@ -563,7 +563,7 @@ and align, as discussed above. Once the wizard has compiled and signed your pack
 it will also perfom package alignment with {@code zipalign}.
 Because the Export Wizard uses both Keytool and Jarsigner, you should
 ensure that they are accessible on your computer, as described above
-in the <a href=#setup">Basic Setup for Signing</a>.</p>
+in the <a href="#setup">Basic Setup for Signing</a>.</p>
 
 <p>To create a signed and aligned .apk in Eclipse:</p>
 

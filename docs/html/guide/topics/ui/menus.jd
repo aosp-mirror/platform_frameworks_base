@@ -515,7 +515,7 @@ set is visible.</p>
 Checkable menu items are intended to be used only on a per-session basis and not saved after the
 application is destroyed. If you have application settings that you would like to save for the user,
 you should store the data using <a
-href="#{@docRoot}guide/topics/data/data-storage.html#pref">Shared Preferences</a>.</p>
+href="{@docRoot}guide/topics/data/data-storage.html#pref">Shared Preferences</a>.</p>
 
 
 <h3 id="shortcuts">Shortcut keys</h3>

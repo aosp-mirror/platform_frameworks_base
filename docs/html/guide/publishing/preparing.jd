@@ -89,7 +89,7 @@ application</h3>
 <p>To protect your person, organization, and intellectual property, you may want
 to provide an End User License Agreement (EULA) with your application. 
 
-<h3 id="eula">3. Consider adding support for Android Market Licensing</h3>
+<h3>3. Consider adding support for Android Market Licensing</h3>
 
 <p>If you are publishing a paid application through Android Market, consider
 adding support for Android Market Licensing. Licensing lets you control access
