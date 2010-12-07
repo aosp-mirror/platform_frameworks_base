@@ -3933,6 +3933,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             hideError();
         }
 
+        if (mBlink != null) {
+            mBlink.cancel();
+        }
         hideControllers();
     }
 
@@ -6282,11 +6285,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mCursorVisible = visible;
         invalidate();
 
-        if (visible) {
-            makeBlink();
-        } else if (mBlink != null) {
-            mBlink.removeCallbacks(mBlink);
-        }
+        makeBlink();
 
         // InsertionPointCursorController depends on mCursorVisible
         prepareCursorControllers();
@@ -6782,7 +6781,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void makeBlink() {
-        if (!mCursorVisible) {
+        if (!mCursorVisible || !isTextEditable()) {
             if (mBlink != null) {
                 mBlink.removeCallbacks(mBlink);
             }
@@ -7134,6 +7133,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mLayout != null;
 
         if (!mInsertionControllerEnabled) {
+            hideInsertionPointCursorController();
             mInsertionPointCursorController = null;
         }
 
