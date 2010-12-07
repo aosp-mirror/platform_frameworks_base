@@ -19,6 +19,7 @@ package android.animation;
 import android.util.Log;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 /**
  * This subclass of {@link ValueAnimator} provides support for animating properties on target objects.
@@ -31,6 +32,7 @@ import java.lang.reflect.Method;
  *
  */
 public final class ObjectAnimator extends ValueAnimator {
+    private static final boolean DBG = false;
 
     // The target object on which the property exists, set in the constructor
     private Object mTarget;
@@ -263,6 +265,21 @@ public final class ObjectAnimator extends ValueAnimator {
         } else {
             super.setObjectValues(values);
         }
+    }
+
+    @Override
+    public void start() {
+        if (DBG) {
+            Log.d("ObjectAnimator", "Anim target, duration" + mTarget + ", " + getDuration());
+            for (int i = 0; i < mValues.length; ++i) {
+                PropertyValuesHolder pvh = mValues[i];
+                ArrayList<Keyframe> keyframes = pvh.mKeyframeSet.mKeyframes;
+                Log.d("ObjectAnimator", "   Values[" + i + "]: " +
+                    pvh.getPropertyName() + ", " + keyframes.get(0).getValue() + ", " +
+                    keyframes.get(pvh.mKeyframeSet.mNumKeyframes - 1).getValue());
+            }
+        }
+        super.start();
     }
 
     /**

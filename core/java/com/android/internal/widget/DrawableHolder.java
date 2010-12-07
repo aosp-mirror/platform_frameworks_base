@@ -87,15 +87,12 @@ public class DrawableHolder implements AnimatorListener {
      * @param property
      */
     public void removeAnimationFor(String property) {
-        ArrayList<ObjectAnimator> removalList = new ArrayList<ObjectAnimator>();
-        for (ObjectAnimator currentAnim : mAnimators) {
+        ArrayList<ObjectAnimator> removalList = (ArrayList<ObjectAnimator>)mAnimators.clone();
+        for (ObjectAnimator currentAnim : removalList) {
             if (property.equals(currentAnim.getPropertyName())) {
                 currentAnim.cancel();
-                removalList.add(currentAnim);
             }
         }
-        if (DBG) Log.v(TAG, "Remove list size: " + removalList.size());
-        mAnimators.removeAll(removalList);
     }
 
     /**
