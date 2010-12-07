@@ -599,13 +599,20 @@ class BrowserFrame extends Handler {
 
     public void addJavascriptInterface(Object obj, String interfaceName) {
         assert obj != null;
+        removeJavascriptInterface(interfaceName);
         if (mJSInterfaceMap == null) {
             mJSInterfaceMap = new HashMap<String, Object>();
+        }
+        mJSInterfaceMap.put(interfaceName, obj);
+    }
+
+    public void removeJavascriptInterface(String interfaceName) {
+        if (mJSInterfaceMap == null) {
+            return;
         }
         if (mJSInterfaceMap.containsKey(interfaceName)) {
             mJSInterfaceMap.remove(interfaceName);
         }
-        mJSInterfaceMap.put(interfaceName, obj);
     }
 
     /**

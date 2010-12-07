@@ -3523,7 +3523,8 @@ public class WebView extends AbsoluteLayout
      * </ul></p>
      * @param obj The class instance to bind to Javascript, null instances are
      *            ignored.
-     * @param interfaceName The name to used to expose the class in JavaScript.
+     * @param interfaceName The name to used to expose the instance in
+     *                      JavaScript.
      */
     public void addJavascriptInterface(Object obj, String interfaceName) {
         if (obj == null) {
@@ -3533,6 +3534,16 @@ public class WebView extends AbsoluteLayout
         arg.mObject = obj;
         arg.mInterfaceName = interfaceName;
         mWebViewCore.sendMessage(EventHub.ADD_JS_INTERFACE, arg);
+    }
+
+    /**
+     * Removes a previously added JavaScript interface with the given name.
+     * @param interfaceName The name of the interface to remove.
+     */
+    public void removeJavascriptInterface(String interfaceName) {
+        WebViewCore.JSInterfaceData arg = new WebViewCore.JSInterfaceData();
+        arg.mInterfaceName = interfaceName;
+        mWebViewCore.sendMessage(EventHub.REMOVE_JS_INTERFACE, arg);
     }
 
     /**

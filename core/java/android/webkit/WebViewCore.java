@@ -852,6 +852,7 @@ final class WebViewCore {
             "VALID_NODE_BOUNDS", // = 146
             "SAVE_WEBARCHIVE", // = 147
             "WEBKIT_DRAW_LAYERS", // = 148;
+            "REMOVE_JS_INTERFACE", // = 149;
         };
 
     class EventHub {
@@ -924,6 +925,8 @@ final class WebViewCore {
 
         // Update layers
         static final int WEBKIT_DRAW_LAYERS = 148;
+
+        static final int REMOVE_JS_INTERFACE = 149;
 
         // Network-based messaging
         static final int CLEAR_SSL_PREF_TABLE = 150;
@@ -1287,6 +1290,12 @@ final class WebViewCore {
                         case ADD_JS_INTERFACE:
                             JSInterfaceData jsData = (JSInterfaceData) msg.obj;
                             mBrowserFrame.addJavascriptInterface(jsData.mObject,
+                                    jsData.mInterfaceName);
+                            break;
+
+                        case REMOVE_JS_INTERFACE:
+                            jsData = (JSInterfaceData) msg.obj;
+                            mBrowserFrame.removeJavascriptInterface(
                                     jsData.mInterfaceName);
                             break;
 
