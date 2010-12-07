@@ -103,6 +103,8 @@ public:
         multiply(u);
     }
 
+    bool isPureTranslate();
+
     bool changesBounds();
 
     void copyTo(float* v) const;
