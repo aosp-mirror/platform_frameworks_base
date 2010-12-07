@@ -330,12 +330,47 @@ MtpObjectHandle MtpDevice::getStorageID(MtpObjectHandle handle) {
         return -1;
 }
 
+MtpObjectPropertyList* MtpDevice::getObjectPropsSupported(MtpObjectFormat format) {
+    Mutex::Autolock autoLock(mMutex);
+
+    mRequest.reset();
+    mRequest.setParameter(1, format);
+    if (!sendRequest(MTP_OPERATION_GET_OBJECT_PROPS_SUPPORTED))
+        return NULL;
+    if (!readData())
+        return NULL;
+    MtpResponseCode ret = readResponse();
+    if (ret == MTP_RESPONSE_OK) {
+        return mData.getAUInt16();
+    }
+    return NULL;
+
+}
+
 MtpProperty* MtpDevice::getDevicePropDesc(MtpDeviceProperty code) {
     Mutex::Autolock autoLock(mMutex);
 
     mRequest.reset();
     mRequest.setParameter(1, code);
     if (!sendRequest(MTP_OPERATION_GET_DEVICE_PROP_DESC))
+        return NULL;
+    if (!readData())
+        return NULL;
+    MtpResponseCode ret = readResponse();
+    if (ret == MTP_RESPONSE_OK) {
+        MtpProperty* property = new MtpProperty;
+        property->read(mData);
+        return property;
+    }
+    return NULL;
+}
+
+MtpProperty* MtpDevice::getObjectPropDesc(MtpObjectProperty code) {
+    Mutex::Autolock autoLock(mMutex);
+
+    mRequest.reset();
+    mRequest.setParameter(1, code);
+    if (!sendRequest(MTP_OPERATION_GET_OBJECT_PROP_DESC))
         return NULL;
     if (!readData())
         return NULL;
