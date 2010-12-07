@@ -67,6 +67,11 @@ public interface TagTechnology {
     public static final int TYPE_4 = 104;
 
     /**
+     * This object is an instance of {@link NdefFormatable}
+     */
+    public static final int NDEF_FORMATABLE = 110;
+
+    /**
      * This object is an instance of {@link MifareClassic}
      */
     public static final int MIFARE_CLASSIC = 200;
