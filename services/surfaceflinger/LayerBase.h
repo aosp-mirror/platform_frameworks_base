@@ -185,7 +185,9 @@ public:
     /**
      * needsLinearFiltering - true if this surface needs filtering
      */
-    virtual bool needsFiltering() const { return mNeedsFiltering; }
+    virtual bool needsFiltering() const {
+        return (!(mFlags & DisplayHardware::SLOW_CONFIG)) && mNeedsFiltering;
+    }
 
     /**
      * isSecure - true if this surface is secure, that is if it prevents

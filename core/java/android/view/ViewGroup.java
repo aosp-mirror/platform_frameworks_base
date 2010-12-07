@@ -3304,7 +3304,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         boolean noneOfTheChildrenAreTransparent = true;
         for (int i = 0; i < count; i++) {
             final View child = children[i];
-            if ((child.mViewFlags & VISIBILITY_MASK) != GONE || child.getAnimation() != null) {
+            if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null) {
                 if (!child.gatherTransparentRegion(region)) {
                     noneOfTheChildrenAreTransparent = false;
                 }
