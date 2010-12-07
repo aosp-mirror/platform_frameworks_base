@@ -339,7 +339,7 @@ the feature as shown below.</p>
 <p class="caution">It's important to understand that the permissions that you
 request in <code>&lt;uses-permission&gt;</code> elements can directly affect how
 Android Market filters your application. The reference section <a
-href="#permissions-features">Permissions that Imply Feature Requirements</a>,
+href="#permissions">Permissions that Imply Feature Requirements</a>,
 below, lists the full set of permissions that imply feature requirements and
 therefore trigger filtering.</p>
 
