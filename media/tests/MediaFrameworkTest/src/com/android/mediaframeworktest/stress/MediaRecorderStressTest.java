@@ -386,8 +386,8 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
                 output.write(", " + i);
             }
         } catch (Exception e) {
+            Log.v(TAG, e.toString());
             assertTrue("record and playback", false);
-                Log.v(TAG, e.toString());
         }
         output.write("\n\n");
         output.close();
