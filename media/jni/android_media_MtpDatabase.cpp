@@ -860,8 +860,9 @@ static const PropertyTableEntry   kObjectPropertyTable[] = {
 };
 
 static const PropertyTableEntry   kDevicePropertyTable[] = {
-    {   MTP_DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER,     MTP_TYPE_STR },
-    {   MTP_DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME,        MTP_TYPE_STR },
+    {   MTP_DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER,    MTP_TYPE_STR },
+    {   MTP_DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME,       MTP_TYPE_STR },
+    {   MTP_DEVICE_PROPERTY_IMAGE_SIZE,                 MTP_TYPE_STR },
 };
 
 bool MyMtpDatabase::getObjectPropertyInfo(MtpObjectProperty property, int& type) {
@@ -973,31 +974,35 @@ MtpProperty* MyMtpDatabase::getObjectPropertyDesc(MtpObjectProperty property,
 }
 
 MtpProperty* MyMtpDatabase::getDevicePropertyDesc(MtpDeviceProperty property) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
     MtpProperty* result = NULL;
+    bool writable = false;
+
     switch (property) {
         case MTP_DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER:
         case MTP_DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME:
-        {
-            // writeable string properties
-            result = new MtpProperty(property, MTP_TYPE_STR, true);
+            writable = true;
+            // fall through
+        case MTP_DEVICE_PROPERTY_IMAGE_SIZE:
+            result = new MtpProperty(property, MTP_TYPE_STR, writable);
 
-            // set current value
-            JNIEnv* env = AndroidRuntime::getJNIEnv();
+            // get current value
             jint ret = env->CallIntMethod(mDatabase, method_getDeviceProperty,
                         (jint)property, mLongBuffer, mStringBuffer);
             if (ret == MTP_RESPONSE_OK) {
                 jchar* str = env->GetCharArrayElements(mStringBuffer, 0);
                 result->setCurrentValue(str);
+                // for read-only properties it is safe to assume current value is default value
+                if (!writable)
+                    result->setDefaultValue(str);
                 env->ReleaseCharArrayElements(mStringBuffer, str, 0);
             } else {
                 LOGE("unable to read device property, response: %04X", ret);
             }
-
-            checkAndClearExceptionFromCallback(env, __FUNCTION__);
             break;
-        }
     }
 
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return result;
 }
 
