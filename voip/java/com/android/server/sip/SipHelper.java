@@ -215,8 +215,9 @@ class SipHelper {
             String tag) throws ParseException, SipException {
         FromHeader fromHeader = createFromHeader(userProfile, tag);
         ToHeader toHeader = createToHeader(userProfile);
-        SipURI requestURI = mAddressFactory.createSipURI("sip:"
-                + userProfile.getSipDomain());
+        SipURI requestURI = mAddressFactory.createSipURI(
+                userProfile.getUriString().replaceFirst(
+                userProfile.getUserName() + "@", ""));
         List<ViaHeader> viaHeaders = createViaHeaders();
         CallIdHeader callIdHeader = createCallIdHeader();
         CSeqHeader cSeqHeader = createCSeqHeader(requestType);
