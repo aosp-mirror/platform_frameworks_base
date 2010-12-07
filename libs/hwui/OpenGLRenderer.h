@@ -294,9 +294,10 @@ private:
      * @param y The y coordinate of the shadow
      * @param mode The blending mode
      * @param alpha The alpha value
+     * @param ignoreTransforms True if the coordinates are already in screen space
      */
     void setupShadow(const ShadowTexture* texture, float x, float y, SkXfermode::Mode mode,
-            float alpha);
+            float alpha, bool ignoreTransforms = false);
 
     /**
      * Prepares the renderer to draw the specified Alpha8 texture as a rectangle.
@@ -349,7 +350,7 @@ private:
     void setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t height,
             GLuint& textureUnit, float x, float y, float r, float g, float b, float a,
             SkXfermode::Mode mode, bool transforms, bool applyFilters,
-            GLvoid* vertices, GLvoid* texCoords, GLuint vbo = 0);
+            GLvoid* vertices, GLvoid* texCoords, GLuint vbo = 0, bool ignoreTransform = false);
 
     /**
      * Draws text underline and strike-through if needed.
