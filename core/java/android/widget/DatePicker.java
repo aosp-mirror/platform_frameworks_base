@@ -28,7 +28,7 @@ import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
-import android.widget.NumberPicker.OnChangeListener;
+import android.widget.NumberPicker.OnChangedListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -97,7 +97,7 @@ public class DatePicker extends FrameLayout {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.date_picker, this, true);
 
-        OnChangeListener onChangeListener = new OnChangeListener() {
+        OnChangedListener onChangeListener = new OnChangedListener() {
             public void onChanged(NumberPicker picker, int oldVal, int newVal) {
                 notifyDateChanged();
                 updateMiniMonth();
