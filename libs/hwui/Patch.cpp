@@ -35,7 +35,7 @@ Patch::Patch(const uint32_t xCount, const uint32_t yCount, const int8_t emptyQua
         mXCount(xCount), mYCount(yCount), mEmptyQuads(emptyQuads) {
     // Initialized with the maximum number of vertices we will need
     // 2 triangles per patch, 3 vertices per triangle
-    const int maxVertices = ((xCount + 1) * (yCount + 1) - emptyQuads) * 2 * 3;
+    uint32_t maxVertices = ((xCount + 1) * (yCount + 1) - emptyQuads) * 2 * 3;
     mVertices = new TextureVertex[maxVertices];
     mUploaded = false;
 
@@ -160,7 +160,7 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
         float y2 = 0.0f;
         if (i & 1) {
             const float segment = stepY - previousStepY;
-            y2 = y1 + segment * stretchY;
+            y2 = y1 + floorf(segment * stretchY + 0.5f);
         } else {
             y2 = y1 + stepY - previousStepY;
         }
@@ -206,7 +206,7 @@ void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, fl
         float x2 = 0.0f;
         if (i & 1) {
             const float segment = stepX - previousStepX;
-            x2 = x1 + segment * stretchX;
+            x2 = x1 + floorf(segment * stretchX + 0.5f);
         } else {
             x2 = x1 + stepX - previousStepX;
         }
@@ -226,7 +226,7 @@ void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, fl
 void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, float y2,
             float u1, float v1, float u2, float v2, uint32_t& quadCount) {
     const uint32_t oldQuadCount = quadCount;
-    const bool valid = fabs(x2 - x1) > 0.9999f && fabs(y2 - y1) > 0.9999f;
+    const bool valid = x2 - x1 > 0.9999f && y2 - y1 > 0.9999f;
     if (valid) {
         quadCount++;
     }
