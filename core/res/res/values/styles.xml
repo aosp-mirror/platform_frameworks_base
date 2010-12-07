@@ -238,6 +238,11 @@
         <item name="android:textColor">#ff272727</item>
     </style>
 
+    <!-- @hide -->
+    <style name="TextAppearance.Small.DayPickerWeekDayView">
+        <item name="android:textStyle">bold</item>
+    </style>
+
     <!-- Widget Styles -->
 
     <style name="Widget">
@@ -468,21 +473,35 @@
         <item name="android:background">@android:drawable/btn_default</item>
     </style>
 
+    <!-- @hide -->
+    <style name="Widget.DayPickerWeekView">
+        <item name="android:selectionBackgroundColor">#330099FF</item>
+        <item name="android:focusedMonthDateColor">#FFFFFFFF</item>
+        <item name="android:otherMonthDateColor">#66FFFFFF</item>
+        <item name="android:weekNumberColor">#33FFFFFF</item>
+        <item name="android:gridLinesColor">#19FFFFFF</item>
+        <item name="selectedDayLine">@android:drawable/simple_week_dayline_holo_light</item>
+    </style>
+
+    <!-- @hide -->
     <style name="Widget.NumberPicker">
         <item name="android:orientation">vertical</item>
         <item name="android:fadingEdge">vertical</item>
         <item name="android:fadingEdgeLength">50dip</item>
-        <item name="android:solidColor">?android:attr/colorBackground</item>
+        <item name="android:solidColor">@android:color/transparent</item>
     </style>
 
+    <!-- @hide -->
     <style name="Widget.ImageButton.NumberPickerUpButton">
         <item name="android:background">@android:drawable/timepicker_up_btn</item>
     </style>
 
+    <!-- @hide -->
     <style name="Widget.ImageButton.NumberPickerDownButton">
         <item name="android:background">@android:drawable/timepicker_down_btn</item>
     </style>
 
+    <!-- @hide -->
     <style name="Widget.EditText.NumberPickerInputText">
         <item name="android:textAppearance">@style/TextAppearance.Large.Inverse.NumberPickerInputText</item>
         <item name="android:gravity">center</item>
@@ -834,6 +853,7 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <!-- @hide -->
     <style name="TextAppearance.Large.Inverse.NumberPickerInputText">
         <item name="android:textColor">@android:color/primary_text_light</item>
         <item name="android:textSize">30sp</item>
@@ -1200,6 +1220,11 @@
         <item name="android:textSize">18sp</item>
     </style>
 
+    <!-- @hide -->
+    <style name="TextAppearance.Holo.DayPickerWeekDayView" parent="TextAppearance.Small.DayPickerWeekDayView">
+        <item name="android:textColor">#505050</item>
+    </style>
+
     <!-- Light text styles -->
     <style name="TextAppearance.Holo.Light" parent="TextAppearance.Holo">
     </style>
@@ -1294,6 +1319,10 @@
 
     <style name="TextAppearance.Holo.Light.DialogWindowTitle">
         <item name="android:textSize">18sp</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="TextAppearance.Holo.Light.DayPickerWeekDayView" parent="TextAppearance.Small.DayPickerWeekDayView">
     </style>
 
     <!-- Widget Styles -->
@@ -1406,22 +1435,35 @@
         <item name="android:listSelector">?android:attr/selectableItemBackground</item>
     </style>
 
+    <!-- @hide -->
+    <style name="Widget.Holo.DayPickerWeekView">
+        <item name="android:selectionBackgroundColor">#330099FF</item>
+        <item name="android:focusedMonthDateColor">#FFFFFFFF</item>
+        <item name="android:otherMonthDateColor">#66FFFFFF</item>
+        <item name="android:weekNumberColor">#33FFFFFF</item>
+        <item name="android:gridLinesColor">#19FFFFFF</item>
+        <item name="selectedDayLine">@android:drawable/simple_week_dayline_holo_light</item>
+    </style>
+
     <style name="Widget.Holo.ImageButton" parent="Widget.ImageButton">
         <item name="android:background">@android:drawable/btn_default_holo_dark</item>
     </style>
 
+    <!-- @hide -->
     <style name="Widget.Holo.ImageButton.NumberPickerUpButton">
         <item name="android:background">@null</item>
         <item name="android:paddingBottom">26sp</item>
         <item name="android:src">@android:drawable/timepicker_up_btn_holo_dark</item>
     </style>
 
+    <!-- @hide -->
     <style name="Widget.Holo.ImageButton.NumberPickerDownButton">
         <item name="android:background">@null</item>
         <item name="android:paddingTop">26sp</item>
         <item name="android:src">@android:drawable/timepicker_down_btn_holo_dark</item>
     </style>
 
+    <!-- @hide -->
     <style name="Widget.Holo.EditText.NumberPickerInputText">
         <item name="android:paddingTop">13sp</item>
         <item name="android:paddingBottom">13sp</item>
@@ -1767,14 +1809,21 @@
         <item name="android:background">@android:drawable/btn_default_holo_light</item>
     </style>
 
+    <!-- @hide -->
+    <style name="Widget.Holo.Light.DayPickerWeekView" parent="Widget.DayPickerWeekView">
+    </style>
+
+    <!-- @hide -->
     <style name="Widget.Holo.Light.ImageButton.NumberPickerUpButton" parent="Widget.Holo.Light.ImageButton.NumberPickerUpButton">
         <item name="android:background">@android:drawable/timepicker_up_btn_holo_light</item>
     </style>
 
+    <!-- @hide -->
     <style name="Widget.Holo.Light.ImageButton.NumberPickerDownButton" parent="Widget.Holo.ImageButton.NumberPickerDownButton">
         <item name="android:background">@android:drawable/timepicker_down_btn_holo_light</item>
     </style>
 
+    <!-- @hide -->
     <style name="Widget.Holo.Light.EditText.NumberPickerInputText" parent="Widget.Holo.EditText.NumberPickerInputText">
     </style>
 

@@ -30,8 +30,8 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.Paint.Align;
+import android.graphics.Rect;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
@@ -41,11 +41,11 @@ import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.LayoutInflater.Filter;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.LayoutInflater.Filter;
 import android.view.animation.OvershootInterpolator;
 import android.view.inputmethod.InputMethodManager;
 
@@ -166,7 +166,12 @@ public class NumberPicker extends LinearLayout {
     /**
      * Listener to be notified upon current value change.
      */
-    private OnChangedListener mListener;
+    private OnChangeListener mOnChangeListener;
+
+    /**
+     * Listener to be notified upon scroll state change.
+     */
+    private OnScrollListener mOnScrollListener;
 
     /**
      * Formatter for for displaying the current value.
@@ -308,15 +313,50 @@ public class NumberPicker extends LinearLayout {
     private final Rect mTempRect = new Rect();
 
     /**
+     * The current scroll state of the number picker.
+     */
+    private int mScrollState = OnScrollListener.SCROLL_STATE_IDLE;
+
+    /**
      * The callback interface used to indicate the number value has changed.
      */
-    public interface OnChangedListener {
+    public interface OnChangeListener {
         /**
          * @param picker The NumberPicker associated with this listener.
          * @param oldVal The previous value.
          * @param newVal The new value.
          */
         void onChanged(NumberPicker picker, int oldVal, int newVal);
+    }
+
+    /**
+     * Interface for listening to the picker scroll state.
+     */
+    public interface OnScrollListener {
+
+        /**
+         * The view is not scrolling.
+         */
+        public static int SCROLL_STATE_IDLE = 0;
+
+        /**
+         * The user is scrolling using touch, and their finger is still on the screen.
+         */
+        public static int SCROLL_STATE_TOUCH_SCROLL = 1;
+
+        /**
+         * The user had previously been scrolling using touch and performed a fling.
+         */
+        public static int SCROLL_STATE_FLING = 2;
+
+        /**
+         * Callback method to be invoked while the number picker is being scrolled.
+         *
+         * @param view The view whose scroll state is being reported
+         * @param scrollState The current scroll state. One of {@link #SCROLL_STATE_IDLE},
+         * {@link #SCROLL_STATE_TOUCH_SCROLL} or {@link #SCROLL_STATE_IDLE}.
+         */
+        public void onScrollStateChanged(NumberPicker view, int scrollState);
     }
 
     /**
@@ -492,11 +532,15 @@ public class NumberPicker extends LinearLayout {
                 mBeginEditOnUpEvent = false;
                 mAdjustScrollerOnUpEvent = true;
                 if (mDrawSelectorWheel) {
-                    mBeginEditOnUpEvent = mFlingScroller.isFinished()
+                    boolean scrollersFinished = mFlingScroller.isFinished()
                             && mAdjustScroller.isFinished();
+                    if (!scrollersFinished) {
+                        mFlingScroller.forceFinished(true);
+                        mAdjustScroller.forceFinished(true);
+                        tryNotifyScrollListener(OnScrollListener.SCROLL_STATE_IDLE);
+                    }
+                    mBeginEditOnUpEvent = scrollersFinished;
                     mAdjustScrollerOnUpEvent = true;
-                    mFlingScroller.forceFinished(true);
-                    mAdjustScroller.forceFinished(true);
                     hideInputControls();
                     return true;
                 }
@@ -512,6 +556,7 @@ public class NumberPicker extends LinearLayout {
                 int deltaDownY = (int) Math.abs(currentMoveY - mLastDownEventY);
                 if (deltaDownY > mTouchSlop) {
                     mBeginEditOnUpEvent = false;
+                    tryNotifyScrollListener(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
                     setDrawSelectorWheel(true);
                     hideInputControls();
                     return true;
@@ -531,10 +576,12 @@ public class NumberPicker extends LinearLayout {
         switch (action) {
             case MotionEvent.ACTION_MOVE:
                 float currentMoveY = ev.getY();
-                if (mBeginEditOnUpEvent) {
+                if (mBeginEditOnUpEvent
+                        || mScrollState != OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
                     int deltaDownY = (int) Math.abs(currentMoveY - mLastDownEventY);
                     if (deltaDownY > mTouchSlop) {
                         mBeginEditOnUpEvent = false;
+                        tryNotifyScrollListener(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
                     }
                 }
                 int deltaMoveY = (int) (currentMoveY - mLastMotionEventY);
@@ -550,6 +597,7 @@ public class NumberPicker extends LinearLayout {
                     InputMethodManager imm = (InputMethodManager) getContext().getSystemService(
                             Context.INPUT_METHOD_SERVICE);
                     imm.showSoftInput(mInputText, 0);
+                    mInputText.setSelection(0, mInputText.getText().length());
                     return true;
                 }
                 VelocityTracker velocityTracker = mVelocityTracker;
@@ -557,6 +605,7 @@ public class NumberPicker extends LinearLayout {
                 int initialVelocity = (int) velocityTracker.getYVelocity();
                 if (Math.abs(initialVelocity) > mMinimumFlingVelocity) {
                     fling(initialVelocity);
+                    tryNotifyScrollListener(OnScrollListener.SCROLL_STATE_FLING);
                 } else {
                     if (mAdjustScrollerOnUpEvent) {
                         if (mFlingScroller.isFinished() && mAdjustScroller.isFinished()) {
@@ -689,10 +738,19 @@ public class NumberPicker extends LinearLayout {
     /**
      * Set the callback that indicates the number has been adjusted by the user.
      *
-     * @param listener the callback, should not be null.
+     * @param onChangeListener the callback, should not be null.
      */
-    public void setOnChangeListener(OnChangedListener listener) {
-        mListener = listener;
+    public void setOnChangeListener(OnChangeListener onChangeListener) {
+        mOnChangeListener = onChangeListener;
+    }
+
+    /**
+     * Set the callback that in notified for scroll state changes.
+     *
+     * @param onScrollListener the callback, should not be null.
+     */
+    public void setOnScrollListener(OnScrollListener onScrollListener) {
+        mOnScrollListener = onScrollListener;
     }
 
     /**
@@ -966,9 +1024,21 @@ public class NumberPicker extends LinearLayout {
     private void onScrollerFinished(Scroller scroller) {
         if (scroller == mFlingScroller) {
             postAdjustScrollerCommand(0);
+            tryNotifyScrollListener(OnScrollListener.SCROLL_STATE_IDLE);
         } else {
             showInputControls();
             updateInputTextView();
+        }
+    }
+
+    /**
+     * Notifies the scroll listener for the given <code>scrollState</code>
+     * if the scroll state differs from the current scroll state.
+     */
+    private void tryNotifyScrollListener(int scrollState) {
+        if (mOnScrollListener != null && mScrollState != scrollState) {
+            mScrollState = scrollState;
+            mOnScrollListener.onScrollStateChanged(this, scrollState);
         }
     }
 
@@ -1118,7 +1188,8 @@ public class NumberPicker extends LinearLayout {
             scrollSelectorValue = "";
         } else {
             if (mDisplayedValues != null) {
-                scrollSelectorValue = mDisplayedValues[selectorIndex];
+                int displayedValueIndex = selectorIndex - mStart;
+                scrollSelectorValue = mDisplayedValues[displayedValueIndex];
             } else {
                 scrollSelectorValue = formatNumber(selectorIndex);
             }
@@ -1167,8 +1238,8 @@ public class NumberPicker extends LinearLayout {
      * NumberPicker.
      */
     private void notifyChange(int previous, int current) {
-        if (mListener != null) {
-            mListener.onChanged(this, previous, mCurrent);
+        if (mOnChangeListener != null) {
+            mOnChangeListener.onChanged(this, previous, mCurrent);
         }
     }
 
