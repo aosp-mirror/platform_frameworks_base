@@ -44,6 +44,9 @@ public final class Ndef extends BasicTagTechnology {
     public static final int NDEF_MODE_WRITE_MANY = 4;
     public static final int NDEF_MODE_UNKNOWN = 5;
 
+    /** @hide */
+    public static final String EXTRA_NDEF_MSG = "ndefmsg";
+
     /**
      * Internal constructor, to be used by NfcAdapter
      * @hide
