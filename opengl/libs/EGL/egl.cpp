@@ -40,6 +40,8 @@
 #include <utils/KeyedVector.h>
 #include <utils/String8.h>
 
+#include <ui/egl/android_natives.h>
+
 #include "hooks.h"
 #include "egl_impl.h"
 #include "Loader.h"
@@ -196,15 +198,16 @@ struct egl_surface_t : public egl_object_t
 {
     typedef egl_object_t::LocalRef<egl_surface_t, EGLSurface> Ref;
 
-    egl_surface_t(EGLDisplay dpy, EGLSurface surface, EGLConfig config,
-            int impl, egl_connection_t const* cnx) 
-    : dpy(dpy), surface(surface), config(config), impl(impl), cnx(cnx) {
+    egl_surface_t(EGLDisplay dpy, EGLConfig config, EGLNativeWindowType win,
+            EGLSurface surface, int impl, egl_connection_t const* cnx)
+    : dpy(dpy), surface(surface), config(config), win(win), impl(impl), cnx(cnx) {
     }
     ~egl_surface_t() {
     }
     EGLDisplay                  dpy;
     EGLSurface                  surface;
     EGLConfig                   config;
+    sp<ANativeWindow>           win;
     int                         impl;
     egl_connection_t const*     cnx;
 };
@@ -984,11 +987,22 @@ EGLSurface eglCreateWindowSurface(  EGLDisplay dpy, EGLConfig config,
     egl_display_t const* dp = 0;
     egl_connection_t* cnx = validate_display_config(dpy, config, dp);
     if (cnx) {
+        EGLDisplay iDpy = dp->disp[ dp->configs[intptr_t(config)].impl ].dpy;
+        EGLConfig iConfig = dp->configs[intptr_t(config)].config;
+        EGLint format;
+
+        // set the native window's buffers format to match this config
+        if (cnx->egl.eglGetConfigAttrib(iDpy,
+                iConfig, EGL_NATIVE_VISUAL_ID, &format)) {
+            if (format != 0) {
+                native_window_set_buffers_geometry(window, 0, 0, format);
+            }
+        }
+
         EGLSurface surface = cnx->egl.eglCreateWindowSurface(
-                dp->disp[ dp->configs[intptr_t(config)].impl ].dpy,
-                dp->configs[intptr_t(config)].config, window, attrib_list);
+                iDpy, iConfig, window, attrib_list);
         if (surface != EGL_NO_SURFACE) {
-            egl_surface_t* s = new egl_surface_t(dpy, surface, config,
+            egl_surface_t* s = new egl_surface_t(dpy, config, window, surface,
                     dp->configs[intptr_t(config)].impl, cnx);
             return s;
         }
@@ -1007,7 +1021,7 @@ EGLSurface eglCreatePixmapSurface(  EGLDisplay dpy, EGLConfig config,
                 dp->disp[ dp->configs[intptr_t(config)].impl ].dpy,
                 dp->configs[intptr_t(config)].config, pixmap, attrib_list);
         if (surface != EGL_NO_SURFACE) {
-            egl_surface_t* s = new egl_surface_t(dpy, surface, config,
+            egl_surface_t* s = new egl_surface_t(dpy, config, NULL, surface,
                     dp->configs[intptr_t(config)].impl, cnx);
             return s;
         }
@@ -1025,7 +1039,7 @@ EGLSurface eglCreatePbufferSurface( EGLDisplay dpy, EGLConfig config,
                 dp->disp[ dp->configs[intptr_t(config)].impl ].dpy,
                 dp->configs[intptr_t(config)].config, attrib_list);
         if (surface != EGL_NO_SURFACE) {
-            egl_surface_t* s = new egl_surface_t(dpy, surface, config,
+            egl_surface_t* s = new egl_surface_t(dpy, config, NULL, surface,
                     dp->configs[intptr_t(config)].impl, cnx);
             return s;
         }
@@ -1046,6 +1060,9 @@ EGLBoolean eglDestroySurface(EGLDisplay dpy, EGLSurface surface)
     EGLBoolean result = s->cnx->egl.eglDestroySurface(
             dp->disp[s->impl].dpy, s->surface);
     if (result == EGL_TRUE) {
+        if (s->win != NULL) {
+            native_window_set_buffers_geometry(s->win.get(), 0, 0, 0);
+        }
         _s.terminate();
     }
     return result;
