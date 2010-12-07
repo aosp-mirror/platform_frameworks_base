@@ -1116,6 +1116,8 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     }
 
     // TODO: Handle paint->getTextScaleX()
+    const float oldX = x;
+    const float oldY = y;
     const bool pureTranslate = mSnapshot->transform->isPureTranslate();
     if (pureTranslate) {
         x = (int) floorf(x + mSnapshot->transform->getTranslateX() + 0.5f);
@@ -1194,7 +1196,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
 
-    drawTextDecorations(text, bytesCount, length, x, y, paint);
+    drawTextDecorations(text, bytesCount, length, oldX, oldY, paint);
 }
 
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
