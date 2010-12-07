@@ -434,9 +434,9 @@ public class WebView extends AbsoluteLayout
     private float mLastVelX;
     private float mLastVelY;
 
-    // A pointer to the native scrollable layer when dragging layers.  Only
-    // valid when mTouchMode is TOUCH_DRAG_LAYER_MODE.
+    // The id of the native layer being scrolled.
     private int mScrollingLayer;
+    private Rect mScrollingLayerRect = new Rect();
 
     // only trigger accelerated fling if the new velocity is at least
     // MINIMUM_VELOCITY_RATIO_FOR_ACCELERATION times of the previous velocity
@@ -2646,6 +2646,15 @@ public class WebView extends AbsoluteLayout
     @Override
     protected void onOverScrolled(int scrollX, int scrollY, boolean clampedX,
             boolean clampedY) {
+        // Special-case layer scrolling so that we do not trigger normal scroll
+        // updating.
+        if (mTouchMode == TOUCH_DRAG_LAYER_MODE) {
+            nativeScrollLayer(mScrollingLayer, scrollX, scrollY);
+            mScrollingLayerRect.left = scrollX;
+            mScrollingLayerRect.top = scrollY;
+            invalidate();
+            return;
+        }
         mInOverScrollMode = false;
         int maxX = computeMaxScrollX();
         int maxY = computeMaxScrollY();
@@ -3048,18 +3057,37 @@ public class WebView extends AbsoluteLayout
             invalidate();  // So we draw again
 
             if (!mScroller.isFinished()) {
-                final int rangeX = computeMaxScrollX();
-                final int rangeY = computeMaxScrollY();
+                int rangeX = computeMaxScrollX();
+                int rangeY = computeMaxScrollY();
+                int overflingDistance = mOverflingDistance;
+
+                // Use the layer's scroll data if needed.
+                if (mTouchMode == TOUCH_DRAG_LAYER_MODE) {
+                    oldX = mScrollingLayerRect.left;
+                    oldY = mScrollingLayerRect.top;
+                    rangeX = mScrollingLayerRect.right;
+                    rangeY = mScrollingLayerRect.bottom;
+                    // No overscrolling for layers.
+                    overflingDistance = 0;
+                }
+
                 overScrollBy(x - oldX, y - oldY, oldX, oldY,
                         rangeX, rangeY,
-                        mOverflingDistance, mOverflingDistance, false);
+                        overflingDistance, overflingDistance, false);
 
                 if (mOverScrollGlow != null) {
                     mOverScrollGlow.absorbGlow(x, y, oldX, oldY, rangeX, rangeY);
                 }
             } else {
-                mScrollX = x;
-                mScrollY = y;
+                if (mTouchMode != TOUCH_DRAG_LAYER_MODE) {
+                    mScrollX = x;
+                    mScrollY = y;
+                } else {
+                    // Update the layer position instead of WebView.
+                    nativeScrollLayer(mScrollingLayer, x, y);
+                    mScrollingLayerRect.left = x;
+                    mScrollingLayerRect.top = y;
+                }
                 abortAnimation();
                 mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
                 WebViewCore.resumePriority();
@@ -5020,14 +5048,15 @@ public class WebView extends AbsoluteLayout
         startTouch(detector.getFocusX(), detector.getFocusY(), mLastTouchTime);
     }
 
+    // See if there is a layer at x, y and switch to TOUCH_DRAG_LAYER_MODE if a
+    // layer is found.
     private void startScrollingLayer(float x, float y) {
-        if (mTouchMode != TOUCH_DRAG_LAYER_MODE) {
-            int contentX = viewToContentX((int) x + mScrollX);
-            int contentY = viewToContentY((int) y + mScrollY);
-            mScrollingLayer = nativeScrollableLayer(contentX, contentY);
-            if (mScrollingLayer != 0) {
-                mTouchMode = TOUCH_DRAG_LAYER_MODE;
-            }
+        int contentX = viewToContentX((int) x + mScrollX);
+        int contentY = viewToContentY((int) y + mScrollY);
+        mScrollingLayer = nativeScrollableLayer(contentX, contentY,
+                mScrollingLayerRect);
+        if (mScrollingLayer != 0) {
+            mTouchMode = TOUCH_DRAG_LAYER_MODE;
         }
     }
 
@@ -5072,8 +5101,7 @@ public class WebView extends AbsoluteLayout
         final ScaleGestureDetector detector =
                 mZoomManager.getMultiTouchGestureDetector();
 
-        if (mZoomManager.supportsMultiTouchZoom() && ev.getPointerCount() > 1 &&
-                mTouchMode != TOUCH_DRAG_LAYER_MODE) {
+        if (mZoomManager.supportsMultiTouchZoom() && ev.getPointerCount() > 1) {
             if (!detector.isInProgress() &&
                     ev.getActionMasked() != MotionEvent.ACTION_POINTER_DOWN) {
                 // Insert a fake pointer down event in order to start
@@ -5303,7 +5331,7 @@ public class WebView extends AbsoluteLayout
                     if (parent != null) {
                         parent.requestDisallowInterceptTouchEvent(true);
                     }
-                    int layer = nativeScrollableLayer(contentX, contentY);
+                    int layer = nativeScrollableLayer(contentX, contentY, mScrollingLayerRect);
                     if (layer == 0) {
                         mAutoScrollX = x <= SELECT_SCROLL ? -SELECT_SCROLL
                             : x >= getViewWidth() - SELECT_SCROLL
@@ -5363,6 +5391,7 @@ public class WebView extends AbsoluteLayout
                     deltaX = 0;
                     deltaY = 0;
 
+                    startScrollingLayer(x, y);
                     startDrag();
                 }
 
@@ -5431,7 +5460,6 @@ public class WebView extends AbsoluteLayout
                     mUserScroll = true;
                 }
 
-                startScrollingLayer(x, y);
                 doDrag(deltaX, deltaY);
 
                 // Turn off scrollbars when dragging a layer.
@@ -5654,21 +5682,47 @@ public class WebView extends AbsoluteLayout
 
     private void doDrag(int deltaX, int deltaY) {
         if ((deltaX | deltaY) != 0) {
-            if (mTouchMode == TOUCH_DRAG_LAYER_MODE) {
-                deltaX = viewToContentDimension(deltaX);
-                deltaY = viewToContentDimension(deltaY);
-                if (nativeScrollLayer(mScrollingLayer, deltaX, deltaY)) {
-                    invalidate();
-                    return;
-                }
-                // Switch to drag mode and fall through.
-                mTouchMode = TOUCH_DRAG_MODE;
-            }
+            int oldX = mScrollX;
+            int oldY = mScrollY;
+            int rangeX = computeMaxScrollX();
+            int rangeY = computeMaxScrollY();
+            int overscrollDistance = mOverscrollDistance;
 
-            final int oldX = mScrollX;
-            final int oldY = mScrollY;
-            final int rangeX = computeMaxScrollX();
-            final int rangeY = computeMaxScrollY();
+            // Check for the original scrolling layer in case we change
+            // directions.  mTouchMode might be TOUCH_DRAG_MODE if we have
+            // reached the edge of a layer but mScrollingLayer will be non-zero
+            // if we initiated the drag on a layer.
+            if (mScrollingLayer != 0) {
+                final int contentX = viewToContentDimension(deltaX);
+                final int contentY = viewToContentDimension(deltaY);
+
+                // Check the scrolling bounds to see if we will actually do any
+                // scrolling.  The rectangle is in document coordinates.
+                final int maxX = mScrollingLayerRect.right;
+                final int maxY = mScrollingLayerRect.bottom;
+                final int resultX = Math.max(0,
+                        Math.min(mScrollingLayerRect.left + contentX, maxX));
+                final int resultY = Math.max(0,
+                        Math.min(mScrollingLayerRect.top + contentY, maxY));
+
+                if (resultX != mScrollingLayerRect.left ||
+                        resultY != mScrollingLayerRect.top) {
+                    // In case we switched to dragging the page.
+                    mTouchMode = TOUCH_DRAG_LAYER_MODE;
+                    deltaX = contentX;
+                    deltaY = contentY;
+                    oldX = mScrollingLayerRect.left;
+                    oldY = mScrollingLayerRect.top;
+                    rangeX = maxX;
+                    rangeY = maxY;
+                } else {
+                    // Scroll the main page if we are not going to scroll the
+                    // layer.  This does not reset mScrollingLayer in case the
+                    // user changes directions and the layer can scroll the
+                    // other way.
+                    mTouchMode = TOUCH_DRAG_MODE;
+                }
+            }
 
             if (mOverScrollGlow != null) {
                 mOverScrollGlow.setOverScrollDeltas(deltaX, deltaY);
@@ -6067,6 +6121,21 @@ public class WebView extends AbsoluteLayout
         int vx = (int) mVelocityTracker.getXVelocity();
         int vy = (int) mVelocityTracker.getYVelocity();
 
+        int scrollX = mScrollX;
+        int scrollY = mScrollY;
+        int overscrollDistance = mOverscrollDistance;
+        int overflingDistance = mOverflingDistance;
+
+        // Use the layer's scroll data if applicable.
+        if (mTouchMode == TOUCH_DRAG_LAYER_MODE) {
+            scrollX = mScrollingLayerRect.left;
+            scrollY = mScrollingLayerRect.top;
+            maxX = mScrollingLayerRect.right;
+            maxY = mScrollingLayerRect.bottom;
+            // No overscrolling for layers.
+            overscrollDistance = overflingDistance = 0;
+        }
+
         if (mSnapScrollMode != SNAP_NONE) {
             if ((mSnapScrollMode & SNAP_X) == SNAP_X) {
                 vy = 0;
@@ -6084,8 +6153,7 @@ public class WebView extends AbsoluteLayout
             if (!mSelectingText) {
                 WebViewCore.resumeUpdatePicture(mWebViewCore);
             }
-            if (mScroller.springBack(mScrollX, mScrollY, 0, computeMaxScrollX(),
-                    0, computeMaxScrollY())) {
+            if (mScroller.springBack(scrollX, scrollY, 0, maxX, 0, maxY)) {
                 invalidate();
             }
             return;
@@ -6112,24 +6180,25 @@ public class WebView extends AbsoluteLayout
                     + " current=" + currentVelocity
                     + " vx=" + vx + " vy=" + vy
                     + " maxX=" + maxX + " maxY=" + maxY
-                    + " mScrollX=" + mScrollX + " mScrollY=" + mScrollY);
+                    + " scrollX=" + scrollX + " scrollY=" + scrollY
+                    + " layer=" + mScrollingLayer);
         }
 
         // Allow sloppy flings without overscrolling at the edges.
-        if ((mScrollX == 0 || mScrollX == maxX) && Math.abs(vx) < Math.abs(vy)) {
+        if ((scrollX == 0 || scrollX == maxX) && Math.abs(vx) < Math.abs(vy)) {
             vx = 0;
         }
-        if ((mScrollY == 0 || mScrollY == maxY) && Math.abs(vy) < Math.abs(vx)) {
+        if ((scrollY == 0 || scrollY == maxY) && Math.abs(vy) < Math.abs(vx)) {
             vy = 0;
         }
 
-        if (mOverscrollDistance < mOverflingDistance) {
-            if ((vx > 0 && mScrollX == -mOverscrollDistance) ||
-                    (vx < 0 && mScrollX == maxX + mOverscrollDistance)) {
+        if (overscrollDistance < overflingDistance) {
+            if ((vx > 0 && scrollX == -overscrollDistance) ||
+                    (vx < 0 && scrollX == maxX + overscrollDistance)) {
                 vx = 0;
             }
-            if ((vy > 0 && mScrollY == -mOverscrollDistance) ||
-                    (vy < 0 && mScrollY == maxY + mOverscrollDistance)) {
+            if ((vy > 0 && scrollY == -overscrollDistance) ||
+                    (vy < 0 && scrollY == maxY + overscrollDistance)) {
                 vy = 0;
             }
         }
@@ -6139,8 +6208,8 @@ public class WebView extends AbsoluteLayout
         mLastVelocity = velocity;
 
         // no horizontal overscroll if the content just fits
-        mScroller.fling(mScrollX, mScrollY, -vx, -vy, 0, maxX, 0, maxY,
-                maxX == 0 ? 0 : mOverflingDistance, mOverflingDistance);
+        mScroller.fling(scrollX, scrollY, -vx, -vy, 0, maxX, 0, maxY,
+                maxX == 0 ? 0 : overflingDistance, overflingDistance);
         // Duration is calculated based on velocity. With range boundaries and overscroll
         // we may not know how long the final animation will take. (Hence the deprecation
         // warning on the call below.) It's not a big deal for scroll bars but if webcore
@@ -6948,6 +7017,7 @@ public class WebView extends AbsoluteLayout
                                     mDeferTouchMode = TOUCH_DRAG_MODE;
                                     mLastDeferTouchX = x;
                                     mLastDeferTouchY = y;
+                                    startScrollingLayer(x, y);
                                     startDrag();
                                 }
                                 int deltaX = pinLocX((int) (mScrollX
@@ -6956,7 +7026,6 @@ public class WebView extends AbsoluteLayout
                                 int deltaY = pinLocY((int) (mScrollY
                                         + mLastDeferTouchY - y))
                                         - mScrollY;
-                                startScrollingLayer(x, y);
                                 doDrag(deltaX, deltaY);
                                 if (deltaX != 0) mLastDeferTouchX = x;
                                 if (deltaY != 0) mLastDeferTouchY = y;
@@ -7852,6 +7921,6 @@ public class WebView extends AbsoluteLayout
     native int nativeGetBlockLeftEdge(int x, int y, float scale);
 
     // Returns a pointer to the scrollable LayerAndroid at the given point.
-    private native int      nativeScrollableLayer(int x, int y);
+    private native int      nativeScrollableLayer(int x, int y, Rect scrollRect);
     private native boolean  nativeScrollLayer(int layer, int dx, int dy);
 }
