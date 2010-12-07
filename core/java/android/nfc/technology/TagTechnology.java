@@ -49,22 +49,7 @@ public interface TagTechnology {
     /**
      * This object is an instance of {@link Ndef}
      */
-    public static final int TYPE_1 = 101;
-
-    /**
-     * This object is an instance of {@link Ndef}
-     */
-    public static final int TYPE_2 = 102;
-
-    /**
-     * This object is an instance of {@link Ndef}
-     */
-    public static final int TYPE_3 = 103;
-
-    /**
-     * This object is an instance of {@link Ndef}
-     */
-    public static final int TYPE_4 = 104;
+    public static final int NDEF = 101;
 
     /**
      * This object is an instance of {@link NdefFormatable}
