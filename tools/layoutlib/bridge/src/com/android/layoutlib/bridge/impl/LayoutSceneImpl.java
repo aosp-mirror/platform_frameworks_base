@@ -458,15 +458,9 @@ public class LayoutSceneImpl {
                 mCanvas.setDensity(mParams.getDensity());
             }
 
-            long preDrawTime = System.currentTimeMillis();
-
             mViewRoot.draw(mCanvas);
 
-            long drawTime = System.currentTimeMillis();
-
             mViewInfo = visit(((ViewGroup)mViewRoot).getChildAt(0), mContext);
-
-            System.out.println(String.format("rendering (ms): %03d", drawTime - preDrawTime));
 
             // success!
             return SceneStatus.SUCCESS.createResult();

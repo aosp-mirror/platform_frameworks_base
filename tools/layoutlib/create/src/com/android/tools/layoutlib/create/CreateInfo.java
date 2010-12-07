@@ -105,6 +105,7 @@ public final class CreateInfo implements ICreateInfo {
      * The list of classes on which to delegate all native methods.
      */
     private final static String[] DELEGATE_CLASS_NATIVES = new String[] {
+        "android.animation.PropertyValuesHolder",
         "android.graphics.Bitmap",
         "android.graphics.Canvas",
         "android.graphics.DashPathEffect",
