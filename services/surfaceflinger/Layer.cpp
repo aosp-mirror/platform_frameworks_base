@@ -57,7 +57,8 @@ Layer::Layer(SurfaceFlinger* flinger,
         mSecure(false),
         mTextureManager(),
         mBufferManager(mTextureManager),
-        mWidth(0), mHeight(0), mNeedsScaling(false), mFixedSize(false)
+        mWidth(0), mHeight(0), mNeedsScaling(false), mFixedSize(false),
+        mBypassState(false)
 {
 }
 
@@ -251,6 +252,29 @@ void Layer::onDraw(const Region& clip) const
         }
         return;
     }
+
+#ifdef USE_COMPOSITION_BYPASS
+    sp<GraphicBuffer> buffer(mBufferManager.getActiveBuffer());
+    if ((buffer != NULL) && (buffer->transform)) {
+        // Here we have a "bypass" buffer, but we need to composite it
+        // most likely because it's not fullscreen anymore.
+        // Since the buffer may have a transformation applied by the client
+        // we need to inverse this transformation here.
+
+        // calculate the inverse of the buffer transform
+        const uint32_t mask = HAL_TRANSFORM_FLIP_V | HAL_TRANSFORM_FLIP_H;
+        const uint32_t bufferTransformInverse = buffer->transform ^ mask;
+
+        // To accomplish the inverse transform, we use "mBufferTransform"
+        // which is not used by Layer.cpp
+        const_cast<Layer*>(this)->mBufferTransform = bufferTransformInverse;
+        drawWithOpenGL(clip, tex);
+        // reset to "no transfrom"
+        const_cast<Layer*>(this)->mBufferTransform = 0;
+        return;
+    }
+#endif
+
     drawWithOpenGL(clip, tex);
 }
 
@@ -311,10 +335,11 @@ sp<GraphicBuffer> Layer::requestBuffer(int index,
      * buffer 'index' as our front buffer.
      */
 
-    status_t err = NO_ERROR;
-    uint32_t w, h, f;
+    uint32_t w, h, f, bypass;
     { // scope for the lock
         Mutex::Autolock _l(mLock);
+
+        bypass = mBypassState;
 
         // zero means default
         mFixedSize = reqWidth && reqHeight;
@@ -340,9 +365,40 @@ sp<GraphicBuffer> Layer::requestBuffer(int index,
     // here we have to reallocate a new buffer because the buffer could be
     // used as the front buffer, or by a client in our process
     // (eg: status bar), and we can't release the handle under its feet.
-    const uint32_t effectiveUsage = getEffectiveUsage(usage);
-    buffer = new GraphicBuffer(w, h, f, effectiveUsage);
-    err = buffer->initCheck();
+    uint32_t effectiveUsage = getEffectiveUsage(usage);
+
+    status_t err = NO_MEMORY;
+
+#ifdef USE_COMPOSITION_BYPASS
+    if (!mSecure && bypass && (effectiveUsage & GRALLOC_USAGE_HW_RENDER)) {
+        // always allocate a buffer matching the screen size. the size
+        // may be different from (w,h) if the buffer is rotated.
+        const DisplayHardware& hw(graphicPlane(0).displayHardware());
+        int32_t w = hw.getWidth();
+        int32_t h = hw.getHeight();
+        int32_t f = hw.getFormat();
+
+        buffer = new GraphicBuffer(w, h, f, effectiveUsage | GRALLOC_USAGE_HW_FB);
+        err = buffer->initCheck();
+        buffer->transform = uint8_t(getOrientation());
+
+        if (err != NO_ERROR) {
+            // allocation didn't succeed, probably because an older bypass
+            // window hasn't released all its resources yet.
+            ClientRef::Access sharedClient(mUserClientRef);
+            SharedBufferServer* lcblk(sharedClient.get());
+            if (lcblk) {
+                // all buffers need reallocation
+                lcblk->reallocateAll();
+            }
+        }
+    }
+#endif
+
+    if (err != NO_ERROR) {
+        buffer = new GraphicBuffer(w, h, f, effectiveUsage);
+        err = buffer->initCheck();
+    }
 
     if (err || buffer->handle == 0) {
         GraphicBuffer::dumpAllocationsToSystemLog();
@@ -387,6 +443,27 @@ uint32_t Layer::getEffectiveUsage(uint32_t usage) const
         usage |= GraphicBuffer::USAGE_HW_TEXTURE;
     }
     return usage;
+}
+
+bool Layer::setBypass(bool enable)
+{
+    Mutex::Autolock _l(mLock);
+
+    if (mNeedsScaling || mNeedsFiltering) {
+        return false;
+    }
+
+    if (mBypassState != enable) {
+        mBypassState = enable;
+        ClientRef::Access sharedClient(mUserClientRef);
+        SharedBufferServer* lcblk(sharedClient.get());
+        if (lcblk) {
+            // all buffers need reallocation
+            lcblk->reallocateAll();
+        }
+    }
+
+    return true;
 }
 
 uint32_t Layer::doTransaction(uint32_t flags)
@@ -639,9 +716,9 @@ void Layer::dump(String8& result, char* buffer, size_t SIZE) const
     snprintf(buffer, SIZE,
             "      "
             "format=%2d, [%3ux%3u:%3u] [%3ux%3u:%3u],"
-            " freezeLock=%p, dq-q-time=%u us\n",
+            " freezeLock=%p, bypass=%d, dq-q-time=%u us\n",
             mFormat, w0, h0, s0, w1, h1, s1,
-            getFreezeLock().get(), totalTime);
+            getFreezeLock().get(), mBypassState, totalTime);
 
     result.append(buffer);
 }

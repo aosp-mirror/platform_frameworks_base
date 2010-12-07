@@ -35,6 +35,7 @@
 
 #include <pixelflinger/pixelflinger.h>
 
+#include "DisplayHardware/DisplayHardware.h"
 #include "Transform.h"
 
 namespace android {
@@ -117,6 +118,11 @@ public:
     virtual void draw(const Region& clip) const;
     virtual void drawForSreenShot() const;
     
+    /**
+     * bypass mode
+     */
+    virtual bool setBypass(bool enable) { return false; }
+
     /**
      * onDraw - draws the surface.
      */
