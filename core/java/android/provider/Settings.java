@@ -977,6 +977,9 @@ public final class Settings {
         public static float getFloat(ContentResolver cr, String name)
                 throws SettingNotFoundException {
             String v = getString(cr, name);
+            if (v == null) {
+                throw new SettingNotFoundException(name);
+            }
             try {
                 return Float.parseFloat(v);
             } catch (NumberFormatException e) {
@@ -1577,7 +1580,7 @@ public final class Settings {
          * Default screen rotation when no other policy applies.
          * When {@link #ACCELEROMETER_ROTATION} is zero and no on-screen Activity expresses a
          * preference, this rotation value will be used. Must be one of the
-         * {@link android.view.Surface#ROTATION_0 Surface rotation constants}. 
+         * {@link android.view.Surface#ROTATION_0 Surface rotation constants}.
          *
          * @see Display#getRotation
          */
@@ -2296,6 +2299,9 @@ public final class Settings {
         public static float getFloat(ContentResolver cr, String name)
                 throws SettingNotFoundException {
             String v = getString(cr, name);
+            if (v == null) {
+                throw new SettingNotFoundException(name);
+            }
             try {
                 return Float.parseFloat(v);
             } catch (NumberFormatException e) {
