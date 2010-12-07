@@ -96,6 +96,9 @@ public final class AnimatorSet extends Animator {
     // The amount of time in ms to delay starting the animation after start() is called
     private long mStartDelay = 0;
 
+    // Animator used for a nonzero startDelay
+    private ValueAnimator mDelayAnim = null;
+
 
     // How long the child animations should last in ms. The default value is negative, which
     // simply means that there is no duration set on the AnimatorSet. When a real duration is
@@ -276,6 +279,19 @@ public final class AnimatorSet extends Animator {
                 listener.onAnimationCancel(this);
             }
         }
+        if (mDelayAnim != null && mDelayAnim.isRunning()) {
+            // If we're currently in the startDelay period, just cancel that animator and
+            // send out the end event to all listeners
+            mDelayAnim.cancel();
+            if (mListeners != null) {
+                ArrayList<AnimatorListener> tmpListeners =
+                        (ArrayList<AnimatorListener>) mListeners.clone();
+                for (AnimatorListener listener : tmpListeners) {
+                    listener.onAnimationEnd(this);
+                }
+            }
+            return;
+        }
         if (mSortedNodes.size() > 0) {
             for (Node node : mSortedNodes) {
                 node.animation.cancel();
@@ -301,6 +317,9 @@ public final class AnimatorSet extends Animator {
                 }
                 node.animation.addListener(mSetListener);
             }
+        }
+        if (mDelayAnim != null) {
+            mDelayAnim.cancel();
         }
         if (mSortedNodes.size() > 0) {
             for (Node node : mSortedNodes) {
@@ -411,12 +430,25 @@ public final class AnimatorSet extends Animator {
         // contains the animation nodes in the correct order.
         sortNodes();
 
+        int numSortedNodes = mSortedNodes.size();
+        for (int i = 0; i < numSortedNodes; ++i) {
+            Node node = mSortedNodes.get(i);
+            // First, clear out the old listeners
+            ArrayList<AnimatorListener> oldListeners = node.animation.getListeners();
+            if (oldListeners != null && oldListeners.size() > 0) {
+                for (AnimatorListener listener : oldListeners) {
+                    if (listener instanceof DependencyListener) {
+                        node.animation.removeListener(listener);
+                    }
+                }
+            }
+        }
+
         // nodesToStart holds the list of nodes to be started immediately. We don't want to
         // start the animations in the loop directly because we first need to set up
         // dependencies on all of the nodes. For example, we don't want to start an animation
         // when some other animation also wants to start when the first animation begins.
         final ArrayList<Node> nodesToStart = new ArrayList<Node>();
-        int numSortedNodes = mSortedNodes.size();
         for (int i = 0; i < numSortedNodes; ++i) {
             Node node = mSortedNodes.get(i);
             if (mSetListener == null) {
@@ -443,19 +475,25 @@ public final class AnimatorSet extends Animator {
             }
         } else {
             // TODO: Need to cancel out of the delay appropriately
-            ValueAnimator delayAnim = ValueAnimator.ofFloat(0f, 1f);
-            delayAnim.setDuration(mStartDelay);
-            delayAnim.addListener(new AnimatorListenerAdapter() {
+            mDelayAnim = ValueAnimator.ofFloat(0f, 1f);
+            mDelayAnim.setDuration(mStartDelay);
+            mDelayAnim.addListener(new AnimatorListenerAdapter() {
+                boolean canceled = false;
+                public void onAnimationCancel(Animator anim) {
+                    canceled = true;
+                }
                 public void onAnimationEnd(Animator anim) {
-                    int numNodes = nodesToStart.size();
-                    for (int i = 0; i < numNodes; ++i) {
-                        Node node = nodesToStart.get(i);
-                        node.animation.start();
-                        mPlayingSet.add(node.animation);
+                    if (!canceled) {
+                        int numNodes = nodesToStart.size();
+                        for (int i = 0; i < numNodes; ++i) {
+                            Node node = nodesToStart.get(i);
+                            node.animation.start();
+                            mPlayingSet.add(node.animation);
+                        }
                     }
                 }
             });
-            delayAnim.start();
+            mDelayAnim.start();
         }
         if (mListeners != null) {
             ArrayList<AnimatorListener> tmpListeners =

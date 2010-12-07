@@ -544,67 +544,6 @@ public class PropertyValuesHolder implements Cloneable {
     }
 
     /**
-     * Sets the <code>Method</code> that is called with the animated values calculated
-     * during the animation. Setting the setter method is an alternative to supplying a
-     * {@link #setPropertyName(String) propertyName} from which the method is derived. This
-     * approach is more direct, and is especially useful when a function must be called that does
-     * not correspond to the convention of <code>setName()</code>. For example, if a function
-     * called <code>offset()</code> is to be called with the animated values, there is no way
-     * to tell <code>ObjectAnimator</code> how to call that function simply through a property
-     * name, so a setter method should be supplied instead.
-     *
-     * <p>Note that the setter function must take the same parameter type as the
-     * <code>valueFrom</code> and <code>valueTo</code> properties, otherwise the call to
-     * the setter function will fail.</p>
-     *
-     * @param setter The setter method that should be called with the animated values.
-     */
-    public void setSetter(Method setter) {
-        mSetter = setter;
-    }
-
-    /**
-     * Gets the <code>Method</code> that is called with the animated values calculated
-     * during the animation.
-     */
-    public Method getSetter() {
-        return mSetter;
-    }
-
-    /**
-     * Sets the <code>Method</code> that is called to get unsupplied <code>valueFrom</code> or
-     * <code>valueTo</code> properties. Setting the getter method is an alternative to supplying a
-     * {@link #setPropertyName(String) propertyName} from which the method is derived. This
-     * approach is more direct, and is especially useful when a function must be called that does
-     * not correspond to the convention of <code>setName()</code>. For example, if a function
-     * called <code>offset()</code> is to be called to get an initial value, there is no way
-     * to tell <code>ObjectAnimator</code> how to call that function simply through a property
-     * name, so a getter method should be supplied instead.
-     *
-     * <p>Note that the getter method is only called whether supplied here or derived
-     * from the property name, if one of <code>valueFrom</code> or <code>valueTo</code> are
-     * null. If both of those values are non-null, then there is no need to get one of the
-     * values and the getter is not called.
-     *
-     * <p>Note that the getter function must return the same parameter type as the
-     * <code>valueFrom</code> and <code>valueTo</code> properties (whichever of them are
-     * non-null), otherwise the call to the getter function will fail.</p>
-     *
-     * @param getter The getter method that should be called to get initial animation values.
-     */
-    public void setGetter(Method getter) {
-        mGetter = getter;
-    }
-
-    /**
-     * Gets the <code>Method</code> that is called to get unsupplied <code>valueFrom</code> or
-     * <code>valueTo</code> properties.
-     */
-    public Method getGetter() {
-        return mGetter;
-    }
-
-    /**
      * Sets the name of the property that will be animated. This name is used to derive
      * a setter function that will be called to set animated values.
      * For example, a property name of <code>foo</code> will result
