@@ -1497,7 +1497,7 @@ public class PhoneNumberUtils
             // searches through the comma-separated list for a match,
             // return true if one is found.
             for (String emergencyNum : numbers.split(",")) {
-                if (emergencyNum.equals(number)) {
+                if (number.startsWith(emergencyNum)) {
                     return true;
                 }
             }
@@ -1506,7 +1506,7 @@ public class PhoneNumberUtils
         }
 
         //no ecclist system property, so use our own list.
-        return (number.equals("112") || number.equals("911"));
+        return (number.startsWith("112") || number.startsWith("911"));
     }
 
     /**
