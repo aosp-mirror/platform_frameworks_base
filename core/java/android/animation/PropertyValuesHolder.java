@@ -178,9 +178,8 @@ public class PropertyValuesHolder implements Cloneable {
      * on the object. Also, if any value is null, the value will be filled in when the animation
      * starts in the same way. This mechanism of automatically getting null values only works
      * if the PropertyValuesHolder object is used in conjunction
-     * {@link ObjectAnimator}, and with a getter function either
-     * derived automatically from <code>propertyName</code> or set explicitly via
-     * {@link #setGetter(java.lang.reflect.Method)}, since otherwise PropertyValuesHolder has
+     * {@link ObjectAnimator}, and with a getter function
+     * derived automatically from <code>propertyName</code>, since otherwise PropertyValuesHolder has
      * no way of determining what the value should be.
      * @param propertyName The name of the property associated with this set of values. This
      * can be the actual property name to be used when using a ObjectAnimator object, or
@@ -210,9 +209,8 @@ public class PropertyValuesHolder implements Cloneable {
      * on the object. Also, if any value is null, the value will be filled in when the animation
      * starts in the same way. This mechanism of automatically getting null values only works
      * if the PropertyValuesHolder object is used in conjunction
-     * {@link ObjectAnimator}, and with a getter function either
-     * derived automatically from <code>propertyName</code> or set explicitly via
-     * {@link #setGetter(java.lang.reflect.Method)}, since otherwise PropertyValuesHolder has
+     * {@link ObjectAnimator}, and with a getter function
+     * derived automatically from <code>propertyName</code>, since otherwise PropertyValuesHolder has
      * no way of determining what the value should be.
      *
      * @param values One or more values that the animation will animate between.
@@ -229,9 +227,8 @@ public class PropertyValuesHolder implements Cloneable {
      * on the object. Also, if any value is null, the value will be filled in when the animation
      * starts in the same way. This mechanism of automatically getting null values only works
      * if the PropertyValuesHolder object is used in conjunction
-     * {@link ObjectAnimator}, and with a getter function either
-     * derived automatically from <code>propertyName</code> or set explicitly via
-     * {@link #setGetter(java.lang.reflect.Method)}, since otherwise PropertyValuesHolder has
+     * {@link ObjectAnimator}, and with a getter function
+     * derived automatically from <code>propertyName</code>, since otherwise PropertyValuesHolder has
      * no way of determining what the value should be.
      *
      * @param values One or more values that the animation will animate between.
@@ -263,9 +260,8 @@ public class PropertyValuesHolder implements Cloneable {
      * on the object. Also, if any value is null, the value will be filled in when the animation
      * starts in the same way. This mechanism of automatically getting null values only works
      * if the PropertyValuesHolder object is used in conjunction
-     * {@link ObjectAnimator}, and with a getter function either
-     * derived automatically from <code>propertyName</code> or set explicitly via
-     * {@link #setGetter(java.lang.reflect.Method)}, since otherwise PropertyValuesHolder has
+     * {@link ObjectAnimator}, and with a getter function
+     * derived automatically from <code>propertyName</code>, since otherwise PropertyValuesHolder has
      * no way of determining what the value should be.
      * 
      * @param values One or more values that the animation will animate between.
