@@ -580,7 +580,7 @@ class ZoomManager {
         mInvZoomOverviewWidth = 1.0f / width;
     }
 
-    private float getZoomOverviewScale() {
+    /* package */ float getZoomOverviewScale() {
         return mWebView.getViewWidth() * mInvZoomOverviewWidth;
     }
 
@@ -672,7 +672,10 @@ class ZoomManager {
         }
 
         public boolean onScale(ScaleGestureDetector detector) {
-            float scale = Math.round(detector.getScaleFactor() * mActualScale * 100) * 0.01f;
+            // Prevent scaling beyond overview scale.
+            float scale = Math.max(
+                Math.round(detector.getScaleFactor() * mActualScale * 100) * 0.01f,
+                getZoomOverviewScale());
             if (willScaleTriggerZoom(scale)) {
                 mPinchToZoomAnimating = true;
                 // limit the scale change per step
