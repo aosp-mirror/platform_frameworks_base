@@ -36,23 +36,21 @@ import java.io.IOException;
  */
 public final class MifareClassic extends BasicTagTechnology {
     /**
-     * The well-known, default factory MIFARE read key.
+     * The well-known, default MIFARE read key.
      * Use this key to effectively make the payload in this sector
      * public.
      */
-    public static final byte[] DEFAULT_KEY_FACTORY =
+    public static final byte[] KEY_DEFAULT =
             {(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF};
-    public static final byte[] DEFAULT_KEY_ZERO =
-            {(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00};
     /**
      * The well-known, default Mifare Application Directory read key.
      */
-    public static final byte[] DEFAULT_KEY_MAD =
+    public static final byte[] KEY_MIFARE_APPLICATION_DIRECTORY =
             {(byte)0xA0,(byte)0xA1,(byte)0xA2,(byte)0xA3,(byte)0xA4,(byte)0xA5};
     /**
      * The well-known, default read key for NDEF data on a Mifare Classic
      */
-    public static final byte[] DEFAULT_KEY_NFC_FORUM =
+    public static final byte[] KEY_NFC_FORUM =
             {(byte)0xD3,(byte)0xF7,(byte)0xD3,(byte)0xF7,(byte)0xD3,(byte)0xF7};
 
     public static final int TYPE_CLASSIC = 0;
