@@ -16,7 +16,6 @@
 
 package android.app;
 
-import android.app.ActionBar.Tab;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -39,7 +38,7 @@ public abstract class ActionBar {
     /**
      * Standard navigation mode. Consists of either a logo or icon
      * and title text with an optional subtitle. Clicking any of these elements
-     * will dispatch onActionItemSelected to the registered Callback with
+     * will dispatch onOptionsItemSelected to the host Activity with
      * a MenuItem with item ID android.R.id.home.
      */
     public static final int NAVIGATION_MODE_STANDARD = 0;

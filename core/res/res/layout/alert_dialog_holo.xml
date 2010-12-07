@@ -110,7 +110,7 @@
         android:showDividers="beginning"
         android:dividerPadding="16dip">
         <LinearLayout
-            style="?android:attr/buttonGroupStyle"
+            style="?android:attr/buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -128,21 +128,21 @@
                 android:layout_gravity="left"
                 android:layout_weight="1"
                 android:maxLines="2"
-                style="?android:attr/borderlessButtonStyle"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_height="wrap_content" />
             <Button android:id="@+id/button3"
                 android:layout_width="0dip"
                 android:layout_gravity="center_horizontal"
                 android:layout_weight="1"
                 android:maxLines="2"
-                style="?android:attr/borderlessButtonStyle"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_height="wrap_content" />
             <Button android:id="@+id/button2"
                 android:layout_width="0dip"
                 android:layout_gravity="right"
                 android:layout_weight="1"
                 android:maxLines="2"
-                style="?android:attr/borderlessButtonStyle"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_height="wrap_content" />
             <LinearLayout android:id="@+id/rightSpacer"
                 android:layout_width="0dip"

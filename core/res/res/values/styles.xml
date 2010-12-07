@@ -937,6 +937,14 @@
         <item name="android:background">@android:drawable/bottom_bar</item>
     </style>
 
+    <!-- Style you can use with a container (typically a horizontal
+         LinearLayout) to get a "segmented button" background and spacing. -->
+    <style name="SegmentedButton">
+        <item name="android:background">@android:drawable/btn_default</item>
+        <item name="android:divider">?android:attr/dividerVertical</item>
+        <item name="android:showDividers">middle</item>
+    </style>
+
     <!-- Style for the small popup windows that contain text selection anchors. -->
     <style name="Widget.TextSelectHandle">
         <item name="android:popupAnimationStyle">@android:style/Animation.TextSelectHandle</item>
@@ -1042,11 +1050,6 @@
     <style name="TextAppearance.Widget.PopupMenu.Small">
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@android:color/secondary_text_light</item>
-    </style>
-
-    <style name="Widget.ButtonGroup">
-        <item name="buttonBackground">?android:attr/groupButtonBackground</item>
-        <item name="showDividers"></item>
     </style>
 
     <!-- Begin Holo theme styles -->
@@ -1298,6 +1301,9 @@
     <style name="Widget.Holo" parent="Widget">
     </style>
 
+    <style name="Holo" />
+    <style name="Holo.Light" />
+
     <style name="Widget.Holo.Button" parent="Widget.Button">
         <item name="android:background">@android:drawable/btn_default_holo_dark</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
@@ -1339,13 +1345,18 @@
         <item name="android:paddingRight">24dip</item>
     </style>
 
-    <style name="Widget.Holo.ButtonGroup" parent="Widget.ButtonGroup">
+    <style name="Holo.ButtonBar" parent="ButtonBar">
         <item name="divider">?android:attr/dividerVertical</item>
         <item name="showDividers">middle</item>
         <item name="dividerPadding">8dip</item>
+        <item name="background">@android:drawable/btn_default_holo_dark</item>
     </style>
 
-    <style name="Widget.Holo.ButtonGroup.AlertDialog">
+    <style name="Holo.SegmentedButton">
+        <item name="android:background">@android:drawable/btn_default_holo_dark</item>
+    </style>
+
+    <style name="Holo.ButtonBar.AlertDialog">
         <item name="android:background">@null</item>
     </style>
 
@@ -1698,12 +1709,16 @@
         <item name="android:paddingRight">24dip</item>
     </style>
 
-    <style name="Widget.Holo.Light.ButtonGroup" parent="Widget.Holo.ButtonGroup">
+    <style name="Holo.Light.ButtonBar" parent="Holo.ButtonBar">
         <item name="android:background">@android:drawable/btn_default_holo_light</item>
     </style>
 
-    <style name="Widget.Holo.Light.ButtonGroup.AlertDialog">
+    <style name="Holo.Light.ButtonBar.AlertDialog">
         <item name="android:background">@null</item>
+    </style>
+
+    <style name="Holo.Light.SegmentedButton">
+        <item name="android:background">@android:drawable/btn_default_holo_light</item>
     </style>
 
     <style name="Widget.Holo.Light.TextView" parent="Widget.TextView">

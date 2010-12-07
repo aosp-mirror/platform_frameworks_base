@@ -90,7 +90,6 @@
 
         <item name="buttonStyleToggle">@android:style/Widget.Button.Toggle</item>
 
-        <item name="groupButtonBackground">@null</item>
         <item name="selectableItemBackground">@android:drawable/item_background</item>
         <item name="borderlessButtonStyle">?android:attr/buttonStyle</item>
         <item name="homeAsUpIndicator">@android:drawable/ic_ab_back_holo_dark</item>
@@ -145,7 +144,6 @@
         <item name="alertDialogStyle">@android:style/AlertDialog</item>
         <item name="dialogTheme">@android:style/Theme.Dialog</item>
         <item name="alertDialogTheme">@android:style/Theme.Dialog.Alert</item>
-        <item name="alertDialogButtonGroupStyle">?android:attr/buttonGroupStyle</item>
         <item name="alertDialogCenterButtons">true</item>
         
         <!-- Panel attributes -->
@@ -261,7 +259,9 @@
 
         <item name="dividerVertical">@drawable/divider_vertical_dark</item>
         <item name="dividerHorizontal">@drawable/divider_vertical_dark</item>
-        <item name="buttonGroupStyle">@android:style/Widget.ButtonGroup</item>
+        <item name="buttonBarStyle">@android:style/ButtonBar</item>
+        <item name="buttonBarButtonStyle">?android:attr/buttonStyle</item>
+        <item name="segmentedButtonStyle">@android:style/SegmentedButton</item>
 
         <!-- SearchView attributes -->
         <item name="searchDropdownBackground">@android:drawable/spinner_dropdown_background</item>
@@ -739,7 +739,6 @@
         <item name="buttonStyleToggle">@android:style/Widget.Holo.Button.Toggle</item>
         <item name="switchStyle">@android:style/Widget.Holo.CompoundButton.Switch</item>
 
-        <item name="groupButtonBackground">@android:drawable/group_button_background_holo_dark</item>
         <item name="selectableItemBackground">@android:drawable/item_background_holo_dark</item>
         <item name="borderlessButtonStyle">@android:style/Widget.Holo.Button.Borderless</item>
         <item name="homeAsUpIndicator">@android:drawable/ic_ab_back_holo_dark</item>
@@ -793,7 +792,6 @@
         <item name="alertDialogStyle">@android:style/AlertDialog.Holo</item>
         <item name="dialogTheme">@android:style/Theme.Holo.Dialog</item>
         <item name="alertDialogTheme">@android:style/Theme.Holo.Dialog.Alert</item>
-        <item name="alertDialogButtonGroupStyle">@android:style/Widget.Holo.ButtonGroup.AlertDialog</item>
         <item name="alertDialogCenterButtons">false</item>
         
         <!-- Panel attributes -->
@@ -904,7 +902,9 @@
 
         <item name="dividerVertical">?android:attr/listDivider</item>
         <item name="dividerHorizontal">?android:attr/listDivider</item>
-        <item name="buttonGroupStyle">@android:style/Widget.Holo.ButtonGroup</item>
+        <item name="buttonBarStyle">@android:style/Holo.ButtonBar</item>
+        <item name="buttonBarButtonStyle">?android:attr/borderlessButtonStyle</item>
+        <item name="segmentedButtonStyle">@android:style/Holo.SegmentedButton</item>
 
         <!-- SearchView attributes -->
         <item name="searchDropdownBackground">@android:drawable/search_dropdown_dark</item>
@@ -988,7 +988,6 @@
 
         <item name="buttonStyleToggle">@android:style/Widget.Holo.Light.Button.Toggle</item>
 
-        <item name="groupButtonBackground">@android:drawable/group_button_background_holo_light</item>
         <item name="selectableItemBackground">@android:drawable/item_background_holo_light</item>
         <item name="borderlessButtonStyle">@android:style/Widget.Holo.Light.Button.Borderless</item>
         <item name="homeAsUpIndicator">@android:drawable/ic_ab_back_holo_light</item>
@@ -1042,7 +1041,6 @@
         <item name="alertDialogStyle">@android:style/AlertDialog.Holo.Light</item>
         <item name="dialogTheme">@android:style/Theme.Holo.Light.Dialog</item>
         <item name="alertDialogTheme">@android:style/Theme.Holo.Light.Dialog.Alert</item>
-        <item name="alertDialogButtonGroupStyle">@android:style/Widget.Holo.Light.ButtonGroup.AlertDialog</item>
         
         <!-- Panel attributes -->
         <item name="panelBackground">@android:drawable/menu_background</item>
@@ -1152,7 +1150,9 @@
 
         <item name="dividerVertical">?android:attr/listDivider</item>
         <item name="dividerHorizontal">?android:attr/listDivider</item>
-        <item name="buttonGroupStyle">@android:style/Widget.Holo.Light.ButtonGroup</item>
+        <item name="buttonBarStyle">@android:style/Holo.Light.ButtonBar</item>
+        <item name="buttonBarButtonStyle">?android:attr/borderlessButtonStyle</item>
+        <item name="segmentedButtonStyle">@android:style/Holo.Light.SegmentedButton</item>
 
         <!-- SearchView attributes -->
         <item name="searchDropdownBackground">@android:drawable/search_dropdown_light</item>
@@ -1216,8 +1216,7 @@
 
         <item name="android:colorBackgroundCacheHint">@null</item>
 
-        <item name="android:buttonGroupStyle">@android:style/Widget.Holo.ButtonGroup.AlertDialog</item>
-        <item name="android:groupButtonBackground">?android:attr/selectableItemBackground</item>
+        <item name="android:buttonBarStyle">@android:style/Holo.ButtonBar.AlertDialog</item>
         
         <item name="textAppearance">@android:style/TextAppearance.Holo</item>
         <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Inverse</item>
@@ -1287,8 +1286,7 @@
 
         <item name="android:colorBackgroundCacheHint">@null</item>
 
-        <item name="android:buttonGroupStyle">@android:style/Widget.Holo.Light.ButtonGroup.AlertDialog</item>
-        <item name="android:groupButtonBackground">?android:attr/selectableItemBackground</item>
+        <item name="android:buttonBarStyle">@android:style/Holo.Light.ButtonBar.AlertDialog</item>
 
         <item name="textAppearance">@android:style/TextAppearance.Holo.Light</item>
         <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Light.Inverse</item>
