@@ -18,14 +18,7 @@ LOCAL_C_INCLUDES:= \
 
 LOCAL_SHARED_LIBRARIES := \
         libbinder         \
-        libmedia          \
         libutils          \
-        libcutils         \
-        libui             \
-        libsonivox        \
-        libvorbisidec     \
-        libsurfaceflinger_client \
-        libcamera_client
 
 LOCAL_CFLAGS += -Wno-multichar
 

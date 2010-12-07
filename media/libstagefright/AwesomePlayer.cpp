@@ -50,6 +50,7 @@
 #include <surfaceflinger/Surface.h>
 
 #include <media/stagefright/foundation/ALooper.h>
+#include <media/stagefright/foundation/AMessage.h>
 #include "include/LiveSession.h"
 
 #define USE_SURFACE_ALLOC 1
@@ -170,7 +171,9 @@ struct QueueListener : public BnStreamListener {
     void clearOwner();
 
     virtual void queueBuffer(size_t index, size_t size);
-    virtual void queueCommand(Command cmd);
+
+    virtual void issueCommand(
+            Command cmd, bool synchronous, const sp<AMessage> &msg);
 
 private:
     Mutex mLock;
@@ -188,7 +191,11 @@ struct QueueDataSource : public DataSource {
     virtual ssize_t readAt(off64_t offset, void *data, size_t size);
 
     virtual void queueBuffer(size_t index, size_t size);
-    virtual void queueCommand(IStreamListener::Command cmd);
+
+    virtual void issueCommand(
+            IStreamListener::Command cmd,
+            bool synchronous,
+            const sp<AMessage> &msg);
 
 protected:
     virtual ~QueueDataSource();
@@ -198,7 +205,12 @@ private:
         kNumBuffers = 16
     };
 
-    struct BufferInfo {
+    struct QueueEntry {
+        bool mIsCommand;
+
+        IStreamListener::Command mCommand;
+        sp<AMessage> mCommandMessage;
+
         size_t mIndex;
         size_t mOffset;
         size_t mSize;
@@ -212,7 +224,7 @@ private:
     sp<MemoryDealer> mDealer;
     Vector<sp<IMemory> > mBuffers;
 
-    List<BufferInfo> mFilledBuffers;
+    List<QueueEntry> mQueue;
 
     off64_t mPosition;
     bool mEOS;
@@ -227,7 +239,7 @@ QueueDataSource::QueueDataSource(const sp<IStreamSource> &source)
     mListener = new QueueListener(this);
     mSource->setListener(mListener);
 
-    static const size_t kBufferSize = 8192;
+    static const size_t kBufferSize = (8192 / 188) * 188;
 
     mDealer = new MemoryDealer(kNumBuffers * kBufferSize);
     for (size_t i = 0; i < kNumBuffers; ++i) {
@@ -246,10 +258,6 @@ QueueDataSource::QueueDataSource(const sp<IStreamSource> &source)
 QueueDataSource::~QueueDataSource() {
     Mutex::Autolock autoLock(mLock);
 
-    while (mFilledBuffers.size() < kNumBuffers && !mEOS) {
-        mCondition.wait(mLock);
-    }
-
     mListener->clearOwner();
 }
 
@@ -264,40 +272,69 @@ ssize_t QueueDataSource::readAt(off64_t offset, void *data, size_t size) {
 
     Mutex::Autolock autoLock(mLock);
 
+    if (mEOS) {
+        return ERROR_END_OF_STREAM;
+    }
+
     size_t sizeDone = 0;
 
     while (sizeDone < size) {
-        while (mFilledBuffers.empty() && !mEOS) {
+        while (mQueue.empty()) {
             mCondition.wait(mLock);
         }
 
-        if (mFilledBuffers.empty()) {
-            if (sizeDone > 0) {
-                mPosition += sizeDone;
-                return sizeDone;
+        QueueEntry &entry = *mQueue.begin();
+
+        if (entry.mIsCommand) {
+            switch (entry.mCommand) {
+                case IStreamListener::EOS:
+                {
+                    mEOS = true;
+
+                    if (sizeDone > 0) {
+                        offset += sizeDone;
+                        return sizeDone;
+                    } else {
+                        return ERROR_END_OF_STREAM;
+                    }
+                    break;
+                }
+
+                case IStreamListener::DISCONTINUITY:
+                {
+                    CHECK_EQ(size, 188u);
+                    CHECK_EQ(sizeDone, 0u);
+
+                    memset(data, 0, size);
+                    sizeDone = size;
+                    break;
+                }
+
+                default:
+                    break;
             }
-            return ERROR_END_OF_STREAM;
+
+            mQueue.erase(mQueue.begin());
+            continue;
         }
 
-        BufferInfo &info = *mFilledBuffers.begin();
-
         size_t copy = size - sizeDone;
-        if (copy > info.mSize) {
-            copy = info.mSize;
+        if (copy > entry.mSize) {
+            copy = entry.mSize;
         }
 
         memcpy((uint8_t *)data + sizeDone,
-               (const uint8_t *)mBuffers.itemAt(info.mIndex)->pointer()
-                    + info.mOffset,
+               (const uint8_t *)mBuffers.itemAt(entry.mIndex)->pointer()
+                    + entry.mOffset,
                copy);
 
-        info.mSize -= copy;
-        info.mOffset += copy;
+        entry.mSize -= copy;
+        entry.mOffset += copy;
         sizeDone += copy;
 
-        if (info.mSize == 0) {
-            mSource->onBufferAvailable(info.mIndex);
-            mFilledBuffers.erase(mFilledBuffers.begin());
+        if (entry.mSize == 0) {
+            mSource->onBufferAvailable(entry.mIndex);
+            mQueue.erase(mQueue.begin());
         }
     }
 
@@ -312,22 +349,31 @@ void QueueDataSource::queueBuffer(size_t index, size_t size) {
     CHECK_LT(index, mBuffers.size());
     CHECK_LE(size, mBuffers.itemAt(index)->size());
 
-    BufferInfo info;
-    info.mIndex = index;
-    info.mSize = size;
-    info.mOffset = 0;
+    QueueEntry entry;
+    entry.mIsCommand = false;
+    entry.mIndex = index;
+    entry.mSize = size;
+    entry.mOffset = 0;
 
-    mFilledBuffers.push_back(info);
+    mQueue.push_back(entry);
     mCondition.signal();
 }
 
-void QueueDataSource::queueCommand(IStreamListener::Command cmd) {
+void QueueDataSource::issueCommand(
+        IStreamListener::Command cmd,
+        bool synchronous,
+        const sp<AMessage> &msg) {
     Mutex::Autolock autoLock(mLock);
 
-    if (cmd == IStreamListener::EOS) {
-        mEOS = true;
-        mCondition.signal();
-    }
+    CHECK(!synchronous);
+
+    QueueEntry entry;
+    entry.mIsCommand = true;
+    entry.mCommand = cmd;
+    entry.mCommandMessage = msg;
+    mQueue.push_back(entry);
+
+    mCondition.signal();
 }
 
 void QueueListener::clearOwner() {
@@ -343,12 +389,13 @@ void QueueListener::queueBuffer(size_t index, size_t size) {
     mOwner->queueBuffer(index, size);
 }
 
-void QueueListener::queueCommand(Command cmd) {
+void QueueListener::issueCommand(
+        Command cmd, bool synchronous, const sp<AMessage> &msg) {
     Mutex::Autolock autoLock(mLock);
     if (mOwner == NULL) {
         return;
     }
-    mOwner->queueCommand(cmd);
+    mOwner->issueCommand(cmd, synchronous, msg);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -469,18 +516,9 @@ status_t AwesomePlayer::setDataSource(const sp<IStreamSource> &source) {
     reset_l();
 
     sp<DataSource> dataSource = new QueueDataSource(source);
-
-#if 0
-    sp<MediaExtractor> extractor =
-        MediaExtractor::Create(dataSource, MEDIA_MIMETYPE_CONTAINER_MPEG2TS);
+    sp<MediaExtractor> extractor = new MPEG2TSExtractor(dataSource);
 
     return setDataSource_l(extractor);
-#else
-    sp<NuCachedSource2> cached = new NuCachedSource2(dataSource);
-    dataSource = cached;
-
-    return setDataSource_l(dataSource);
-#endif
 }
 
 status_t AwesomePlayer::setDataSource_l(

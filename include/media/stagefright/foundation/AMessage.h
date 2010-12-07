@@ -26,9 +26,13 @@
 namespace android {
 
 struct AString;
+struct Parcel;
 
 struct AMessage : public RefBase {
     AMessage(uint32_t what = 0, ALooper::handler_id target = 0);
+
+    static sp<AMessage> FromParcel(const Parcel &parcel);
+    void writeToParcel(Parcel *parcel) const;
 
     void setWhat(uint32_t what);
     uint32_t what() const;
