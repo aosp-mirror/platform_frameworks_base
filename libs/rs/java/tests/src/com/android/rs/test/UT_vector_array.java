@@ -30,7 +30,7 @@ public class UT_vector_array extends UnitTest {
     public void run() {
         RenderScript pRS = RenderScript.create();
         ScriptC_vector_array s = new ScriptC_vector_array(pRS, mRes, R.raw.vector_array);
-        pRS.mMessageCallback = mRsMessage;
+        pRS.setMessageHandler(mRsMessage);
         s.invoke_vector_array_test();
         pRS.finish();
         waitForMessage();

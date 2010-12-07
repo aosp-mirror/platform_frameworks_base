@@ -21,7 +21,7 @@
 #define TRANSFORM_ROTATE 2
 #define TRANSFORM_SCALE 3
 
-typedef struct __attribute__((packed, aligned(4))) {
+typedef struct __attribute__((packed, aligned(4))) SgTransform {
     rs_matrix4x4 globalMat;
     rs_matrix4x4 localMat;
 

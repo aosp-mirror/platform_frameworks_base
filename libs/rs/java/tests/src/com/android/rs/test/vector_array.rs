@@ -14,7 +14,7 @@
 
 #include "shared.rsh"
 
-typedef struct {
+typedef struct float3Struct{
     float3 arr[2];
 } float3Struct;
 

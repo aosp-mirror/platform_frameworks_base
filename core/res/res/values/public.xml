@@ -1360,8 +1360,6 @@
   <public type="attr" name="alertDialogTheme" />
   <public type="attr" name="textLineHeight" />
   <public type="attr" name="dividerVertical" />
-  <public type="attr" name="buttonGroupStyle" />
-  <public type="attr" name="alertDialogButtonGroupStyle" />
   <public type="attr" name="homeAsUpIndicator" />
   <public type="attr" name="enterFadeDuration" />
   <public type="attr" name="exitFadeDuration" />
@@ -1397,6 +1395,9 @@
   <public type="attr" name="borderlessButtonStyle" />
   <public type="attr" name="dividerHorizontal" />
   <public type="attr" name="itemPadding" />
+  <public type="attr" name="buttonBarStyle" />
+  <public type="attr" name="buttonBarButtonStyle" />
+  <public type="attr" name="segmentedButtonStyle" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
@@ -1560,6 +1561,12 @@
   <public type="style" name="Widget.Holo.Button.Borderless" />
   <public type="style" name="Widget.Holo.Tab" />
   <public type="style" name="Widget.Holo.Light.Tab" />
+  <public type="style" name="Holo.ButtonBar" />
+  <public type="style" name="Holo.Light.ButtonBar" />
+  <public type="style" name="Holo.ButtonBar.AlertDialog" />
+  <public type="style" name="Holo.Light.ButtonBar.AlertDialog" />
+  <public type="style" name="Holo.SegmentedButton" />
+  <public type="style" name="Holo.Light.SegmentedButton" />
 
   <public type="string" name="selectTextMode" />
 </resources>

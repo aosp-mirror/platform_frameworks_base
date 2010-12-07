@@ -179,8 +179,7 @@ NuCachedSource2::NuCachedSource2(const sp<DataSource> &source)
       mFinalStatus(OK),
       mLastAccessPos(0),
       mFetching(true),
-      mLastFetchTimeUs(-1),
-      mSuspended(false) {
+      mLastFetchTimeUs(-1) {
     mLooper->setName("NuCachedSource2");
     mLooper->registerHandler(mReflector);
     mLooper->start();
@@ -220,12 +219,6 @@ void NuCachedSource2::onMessageReceived(const sp<AMessage> &msg) {
         case kWhatRead:
         {
             onRead(msg);
-            break;
-        }
-
-        case kWhatSuspend:
-        {
-            onSuspend();
             break;
         }
 
@@ -270,7 +263,6 @@ void NuCachedSource2::onFetch() {
 
     bool keepAlive =
         !mFetching
-            && !mSuspended
             && mFinalStatus == OK
             && ALooper::GetNowUs() >= mLastFetchTimeUs + kKeepAliveIntervalUs;
 
@@ -287,7 +279,7 @@ void NuCachedSource2::onFetch() {
             LOGI("Cache full, done prefetching for now");
             mFetching = false;
         }
-    } else if (!mSuspended) {
+    } else {
         Mutex::Autolock autoLock(mLock);
         restartPrefetcherIfNecessary_l();
     }
@@ -476,40 +468,6 @@ status_t NuCachedSource2::seekInternal_l(off64_t offset) {
     mFetching = true;
 
     return OK;
-}
-
-void NuCachedSource2::clearCacheAndResume() {
-    LOGV("clearCacheAndResume");
-
-    Mutex::Autolock autoLock(mLock);
-
-    CHECK(mSuspended);
-
-    mCacheOffset = 0;
-    mFinalStatus = OK;
-    mLastAccessPos = 0;
-    mLastFetchTimeUs = -1;
-
-    size_t totalSize = mCache->totalSize();
-    CHECK_EQ(mCache->releaseFromStart(totalSize), totalSize);
-
-    mFetching = true;
-    mSuspended = false;
-}
-
-void NuCachedSource2::suspend() {
-    (new AMessage(kWhatSuspend, mReflector->id()))->post();
-
-    while (!mSuspended) {
-        usleep(10000);
-    }
-}
-
-void NuCachedSource2::onSuspend() {
-    Mutex::Autolock autoLock(mLock);
-
-    mFetching = false;
-    mSuspended = true;
 }
 
 void NuCachedSource2::resumeFetchingIfNecessary() {

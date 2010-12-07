@@ -38,7 +38,8 @@ import java.io.IOException;
  * @hide
  */
 /* package private */ class AccountAuthenticatorCache
-        extends RegisteredServicesCache<AuthenticatorDescription> {
+        extends RegisteredServicesCache<AuthenticatorDescription> 
+        implements IAccountAuthenticatorCache {
     private static final String TAG = "Account";
     private static final MySerializer sSerializer = new MySerializer();
 

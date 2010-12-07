@@ -38,7 +38,7 @@ public class PlayAnimationThread extends AnimationThread {
         // the queue is filled when this method returns.
         mAnimator.start();
 
-        return SceneStatus.SUCCESS.getResult();
+        return SceneStatus.SUCCESS.createResult();
     }
 
     @Override

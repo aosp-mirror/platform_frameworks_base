@@ -611,11 +611,15 @@
         <!-- Drawable to use for generic horizontal dividers. -->
         <attr name="dividerHorizontal" format="reference" />
 
-        <!-- Style for button groups -->
-        <attr name="buttonGroupStyle" format="reference" />
+        <!-- Style for button bars -->
+        <attr name="buttonBarStyle" format="reference" />
 
-        <!-- Drawable for group button backgrounds -->
-        <attr name="groupButtonBackground" format="reference" />
+        <!-- Style for buttons within button bars -->
+        <attr name="buttonBarButtonStyle" format="reference" />
+
+        <!-- Style for segmented buttons - a container that houses several buttons
+             with the appearance of a singel button broken into segments. -->
+        <attr name="segmentedButtonStyle" format="reference" />
 
         <!-- Background drawable for standalone items that need focus/pressed states. -->
         <attr name="selectableItemBackground" format="reference" />
@@ -4567,15 +4571,6 @@
         <attr name="iconifiedByDefault" format="boolean"/>
         <!-- An optional maximum width of the SearchView. -->
         <attr name="maxWidth" />
-    </declare-styleable>
-
-    <declare-styleable name="ButtonGroup">
-        <!-- Drawable to use as a vertical divider between buttons. -->
-        <attr name="divider" />
-        <!-- Drawable to use as a background for buttons added to this group. -->
-        <attr name="buttonBackground" format="reference" />
-        <!-- Setting for which dividers to show. -->
-        <attr name="showDividers" />
     </declare-styleable>
 
     <declare-styleable name="ActionBar_LayoutParams">

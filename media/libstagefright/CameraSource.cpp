@@ -130,13 +130,6 @@ CameraSource *CameraSource::CreateFromCamera(
     CameraSource *source = new CameraSource(camera, cameraId,
                     videoSize, frameRate, surface,
                     storeMetaDataInVideoBuffers);
-
-    if (source != NULL) {
-        if (source->initCheck() != OK) {
-            delete source;
-            return NULL;
-        }
-    }
     return source;
 }
 
@@ -293,6 +286,7 @@ status_t CameraSource::configureCamera(
     if (width != -1 && height != -1) {
         if (!isVideoSizeSupported(width, height, sizes)) {
             LOGE("Video dimension (%dx%d) is unsupported", width, height);
+            releaseCamera();
             return BAD_VALUE;
         }
         if (isSetVideoSizeSupportedByCamera) {
@@ -306,6 +300,7 @@ status_t CameraSource::configureCamera(
         // If one and only one of the width and height is -1
         // we reject such a request.
         LOGE("Requested video size (%dx%d) is not supported", width, height);
+        releaseCamera();
         return BAD_VALUE;
     } else {  // width == -1 && height == -1
         // Do not configure the camera.
@@ -323,6 +318,7 @@ status_t CameraSource::configureCamera(
         if (strstr(supportedFrameRates, buf) == NULL) {
             LOGE("Requested frame rate (%d) is not supported: %s",
                 frameRate, supportedFrameRates);
+            releaseCamera();
             return BAD_VALUE;
         }
 
@@ -561,6 +557,18 @@ void CameraSource::stopCameraRecording() {
     mCamera->stopRecording();
 }
 
+void CameraSource::releaseCamera() {
+    LOGV("releaseCamera");
+    if ((mCameraFlags & FLAGS_HOT_CAMERA) == 0) {
+        LOGV("Camera was cold when we started, stopping preview");
+        mCamera->stopPreview();
+    }
+    mCamera->unlock();
+    mCamera.clear();
+    mCamera = 0;
+    mCameraFlags = 0;
+}
+
 status_t CameraSource::stop() {
     LOGV("stop");
     Mutex::Autolock autoLock(mLock);
@@ -575,16 +583,7 @@ status_t CameraSource::stop() {
                 mFramesBeingEncoded.size());
         mFrameCompleteCondition.wait(mLock);
     }
-
-    LOGV("Disconnect camera");
-    if ((mCameraFlags & FLAGS_HOT_CAMERA) == 0) {
-        LOGV("Camera was cold when we started, stopping preview");
-        mCamera->stopPreview();
-    }
-    mCamera->unlock();
-    mCamera.clear();
-    mCamera = 0;
-    mCameraFlags = 0;
+    releaseCamera();
     IPCThreadState::self()->restoreCallingIdentity(token);
 
     if (mCollectStats) {

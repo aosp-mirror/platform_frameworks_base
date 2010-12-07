@@ -56,7 +56,7 @@ public class SceneGraph extends Activity {
         // Ideally a game should implement onResume() and onPause()
         // to take appropriate action when the activity looses focus
         super.onResume();
-        mView.onResume();
+        mView.resume();
     }
 
     @Override
@@ -64,7 +64,7 @@ public class SceneGraph extends Activity {
         // Ideally a game should implement onResume() and onPause()
         // to take appropriate action when the activity looses focus
         super.onPause();
-        mView.onPause();
+        mView.pause();
     }
 
 }

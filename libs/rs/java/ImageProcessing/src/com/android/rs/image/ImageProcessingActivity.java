@@ -78,7 +78,7 @@ public class ImageProcessingActivity extends Activity
     private SurfaceView mSurfaceView;
     private ImageView mDisplayView;
 
-    class FilterCallback extends RenderScript.RSMessage {
+    class FilterCallback extends RenderScript.RSMessageHandler {
         private Runnable mAction = new Runnable() {
             public void run() {
                 mDisplayView.invalidate();
@@ -363,14 +363,14 @@ public class ImageProcessingActivity extends Activity
 
     private void createScript() {
         mRS = RenderScript.create();
-        mRS.mMessageCallback = new FilterCallback();
+        mRS.setMessageHandler(new FilterCallback());
 
         mInPixelsAllocation = Allocation.createBitmapRef(mRS, mBitmapIn);
         mOutPixelsAllocation = Allocation.createBitmapRef(mRS, mBitmapOut);
 
         Type.Builder tb = new Type.Builder(mRS, Element.F32_4(mRS));
-        tb.add(android.renderscript.Dimension.X, mBitmapIn.getWidth());
-        tb.add(android.renderscript.Dimension.Y, mBitmapIn.getHeight());
+        tb.setX(mBitmapIn.getWidth());
+        tb.setY(mBitmapIn.getHeight());
         mScratchPixelsAllocation1 = Allocation.createTyped(mRS, tb.create());
         mScratchPixelsAllocation2 = Allocation.createTyped(mRS, tb.create());
 

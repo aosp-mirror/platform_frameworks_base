@@ -45,7 +45,8 @@ public class InputMethodButton extends ImageView {
     private static final boolean DEBUG = false;
 
     private static final int ID_IME_SWITCH_BUTTON = R.id.imeSwitchButton;
-    private static final int ID_IME_SHORTCUT_BUTTON = R.id.imeShortcutButton;
+    // IME shortcut button is disabled.
+    private static final int ID_IME_SHORTCUT_BUTTON = 0;
 
     // other services we wish to talk to
     private final InputMethodManager mImm;

@@ -49,6 +49,33 @@ void ElementaryStreamQueue::clear() {
     mFormat.clear();
 }
 
+static bool IsSeeminglyValidADTSHeader(const uint8_t *ptr, size_t size) {
+    if (size < 3) {
+        // Not enough data to verify header.
+        return false;
+    }
+
+    if (ptr[0] != 0xff || (ptr[1] >> 4) != 0x0f) {
+        return false;
+    }
+
+    unsigned layer = (ptr[1] >> 1) & 3;
+
+    if (layer != 0) {
+        return false;
+    }
+
+    unsigned ID = (ptr[1] >> 3) & 1;
+    unsigned profile_ObjectType = ptr[2] >> 6;
+
+    if (ID == 1 && profile_ObjectType == 3) {
+        // MPEG-2 profile 3 is reserved.
+        return false;
+    }
+
+    return true;
+}
+
 status_t ElementaryStreamQueue::appendData(
         const void *data, size_t size, int64_t timeUs) {
     if (mBuffer == NULL || mBuffer->size() == 0) {
@@ -96,8 +123,8 @@ status_t ElementaryStreamQueue::appendData(
                 }
 #else
                 ssize_t startOffset = -1;
-                for (size_t i = 0; i + 1 < size; ++i) {
-                    if (ptr[i] == 0xff && (ptr[i + 1] >> 4) == 0x0f) {
+                for (size_t i = 0; i < size; ++i) {
+                    if (IsSeeminglyValidADTSHeader(&ptr[i], size - i)) {
                         startOffset = i;
                         break;
                     }

@@ -456,7 +456,7 @@ void NuHTTPDataSource::applyTimeoutResponse() {
 bool NuHTTPDataSource::estimateBandwidth(int32_t *bandwidth_bps) {
     Mutex::Autolock autoLock(mLock);
 
-    if (mNumBandwidthHistoryItems < 10) {
+    if (mNumBandwidthHistoryItems < 2) {
         return false;
     }
 

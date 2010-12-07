@@ -173,22 +173,23 @@ public class StatusBarTest extends TestActivity
                 mStatusBarManager.disable(StatusBarManager.DISABLE_NAVIGATION);
             }
         },
+        new Test("Disable Clock") {
+            public void run() {
+                mStatusBarManager.disable(StatusBarManager.DISABLE_CLOCK);
+            }
+        },
         new Test("Disable everything in 3 sec") {
             public void run() {
                 mHandler.postDelayed(new Runnable() {
                         public void run() {
-                            mStatusBarManager.disable(StatusBarManager.DISABLE_EXPAND
-                                    | StatusBarManager.DISABLE_NOTIFICATION_ICONS
-                                    | StatusBarManager.DISABLE_NOTIFICATION_ALERTS
-                                    | StatusBarManager.DISABLE_SYSTEM_INFO
-                                    | StatusBarManager.DISABLE_NAVIGATION);
+                            mStatusBarManager.disable(~StatusBarManager.DISABLE_NONE);
                         }
                     }, 3000);
             }
         },
         new Test("Enable everything") {
             public void run() {
-                mStatusBarManager.disable(0);
+                mStatusBarManager.disable(StatusBarManager.DISABLE_NONE);
             }
         },
         new Test("Enable everything in 3 sec.") {

@@ -386,7 +386,9 @@ public class SipPhone extends SipPhoneBase {
         Connection dial(String originalNumber) throws SipException {
             String calleeSipUri = originalNumber;
             if (!calleeSipUri.contains("@")) {
-                calleeSipUri += "@" + getSipDomain(mProfile);
+                calleeSipUri = mProfile.getUriString().replaceFirst(
+                        mProfile.getUserName() + "@",
+                        calleeSipUri + "@");
             }
             try {
                 SipProfile callee =

@@ -2,9 +2,10 @@ LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES:=       \
-        LiveSource.cpp  \
-        M3UParser.cpp   \
+LOCAL_SRC_FILES:=               \
+        LiveDataSource.cpp      \
+        LiveSession.cpp         \
+        M3UParser.cpp           \
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \

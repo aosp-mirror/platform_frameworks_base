@@ -48,11 +48,17 @@ class BaseObj {
      *
      * @return int
      */
-    public int getID() {
+    int getID() {
         if (mDestroyed) {
             throw new RSInvalidStateException("using a destroyed object.");
         }
         return mID;
+    }
+
+    void checkValid() {
+        if (mID == 0) {
+            throw new RSIllegalArgumentException("Invalid object.");
+        }
     }
 
     private int mID;

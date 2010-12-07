@@ -45,6 +45,8 @@ struct UDPPusher;
 class DrmManagerClinet;
 class DecryptHandle;
 
+struct LiveSession;
+
 struct AwesomeRenderer : public RefBase {
     AwesomeRenderer() {}
 
@@ -192,6 +194,8 @@ private:
     sp<ARTSPController> mRTSPController;
     sp<ARTPSession> mRTPSession;
     sp<UDPPusher> mRTPPusher, mRTCPPusher;
+
+    sp<LiveSession> mLiveSession;
 
     DrmManagerClient *mDrmManagerClient;
     DecryptHandle *mDecryptHandle;

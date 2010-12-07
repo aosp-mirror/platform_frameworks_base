@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.ninepatch.NinePatchChunk;
 
@@ -71,7 +72,7 @@ public class NinePatch_Delegate {
             oos = new ObjectOutputStream(baos);
             oos.writeObject(chunk);
         } catch (IOException e) {
-            //FIXME log this.
+            Bridge.getLog().error("Failed to serialize NinePatchChunk.", e);
             return null;
         } finally {
             if (oos != null) {
@@ -205,10 +206,10 @@ public class NinePatch_Delegate {
                     sChunkCache.put(array, new SoftReference<NinePatchChunk>(chunk));
                 }
             } catch (IOException e) {
-                // FIXME: log this
+                Bridge.getLog().error("Failed to deserialize NinePatchChunk content.", e);
                 return null;
             } catch (ClassNotFoundException e) {
-                // FIXME: log this
+                Bridge.getLog().error("Failed to deserialize NinePatchChunk class.", e);
                 return null;
             } finally {
                 if (ois != null) {

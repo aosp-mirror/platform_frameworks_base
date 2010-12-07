@@ -17,8 +17,8 @@
 package com.android.layoutlib.bridge.impl;
 
 import com.android.layoutlib.api.IDensityBasedResourceValue;
-import com.android.layoutlib.api.IDensityBasedResourceValue.Density;
 import com.android.layoutlib.api.IResourceValue;
+import com.android.layoutlib.api.IDensityBasedResourceValue.Density;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
@@ -188,11 +188,11 @@ public final class ResourceHelper {
                             new BridgeXmlBlockParser(parser, context, isFramework));
                     return d;
                 } catch (XmlPullParserException e) {
-                    context.getLogger().error(e);
+                    Bridge.getLog().error(null, e);
                 } catch (FileNotFoundException e) {
                     // will not happen, since we pre-check
                 } catch (IOException e) {
-                    context.getLogger().error(e);
+                    Bridge.getLog().error(null, e);
                 }
             }
 

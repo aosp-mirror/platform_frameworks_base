@@ -848,9 +848,7 @@ RsAllocation rsaAllocationCreateFromBitmap(RsContext con, uint32_t w, uint32_t h
     const Element *dst = static_cast<const Element *>(_dst);
 
     //LOGE("%p rsi_AllocationCreateFromBitmap %i %i %i", rsc, w, h, genMips);
-    RsDimension dims[] = {RS_DIMENSION_X, RS_DIMENSION_Y, RS_DIMENSION_LOD};
-    uint32_t dimValues[] = {w, h, genMips};
-    RsType type = rsaTypeCreate(rsc, _dst, 3, dims, dimValues);
+    RsType type = rsaTypeCreate(rsc, _dst, w, h, 0, genMips, false);
 
     RsAllocation vTexAlloc = rsaAllocationCreateTyped(rsc, type);
     Allocation *texAlloc = static_cast<Allocation *>(vTexAlloc);
@@ -888,9 +886,7 @@ RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, uint32_t w, uint32
     // Cubemap allocation's faces should be Width by Width each.
     // Source data should have 6 * Width by Width pixels
     // Error checking is done in the java layer
-    RsDimension dims[] = {RS_DIMENSION_X, RS_DIMENSION_Y, RS_DIMENSION_LOD, RS_DIMENSION_FACE};
-    uint32_t dimValues[] = {w, w, genMips, true};
-    RsType type = rsaTypeCreate(rsc, _dst, 4, dims, dimValues);
+    RsType type = rsaTypeCreate(rsc, _dst, w, h, 0, genMips, true);
 
     RsAllocation vTexAlloc = rsaAllocationCreateTyped(rsc, type);
     Allocation *texAlloc = static_cast<Allocation *>(vTexAlloc);

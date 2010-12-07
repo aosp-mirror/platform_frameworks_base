@@ -357,19 +357,13 @@ nElementGetSubElements(JNIEnv *_env, jobject _this, RsContext con, jint id, jint
 // -----------------------------------
 
 static int
-nTypeCreate(JNIEnv *_env, jobject _this, RsContext con, RsElement eid, jintArray _dims, jintArray _dimValues)
+nTypeCreate(JNIEnv *_env, jobject _this, RsContext con, RsElement eid,
+            jint dimx, jint dimy, jint dimz, jboolean mips, jboolean faces)
 {
-    int count = _env->GetArrayLength(_dims);
-    LOG_API("nTypeCreate, con(%p)", con);
+    LOG_API("nTypeCreate, con(%p) eid(%p), x(%i), y(%i), z(%i), mips(%i), faces(%i)",
+            con, eid, dimx, dimy, dimz, mips, faces);
 
-    jint *dimPtr = _env->GetIntArrayElements(_dims, NULL);
-    jint *dimValPtr = _env->GetIntArrayElements(_dimValues, NULL);
-
-    jint id = (jint)rsaTypeCreate(con, (RsElement)eid, count,
-                                  (RsDimension *)dimPtr, (uint32_t *)dimValPtr);
-
-    _env->ReleaseIntArrayElements(_dims, dimPtr, JNI_ABORT);
-    _env->ReleaseIntArrayElements(_dimValues, dimValPtr, JNI_ABORT);
+    jint id = (jint)rsaTypeCreate(con, (RsElement)eid, dimx, dimy, dimz, mips, faces);
     return (jint)id;
 }
 
@@ -1316,7 +1310,7 @@ static JNINativeMethod methods[] = {
 {"rsnElementGetNativeData",          "(II[I)V",                               (void*)nElementGetNativeData },
 {"rsnElementGetSubElements",         "(II[I[Ljava/lang/String;)V",            (void*)nElementGetSubElements },
 
-{"rsnTypeCreate",                    "(II[I[I)I",                             (void*)nTypeCreate },
+{"rsnTypeCreate",                    "(IIIIIZZ)I",                            (void*)nTypeCreate },
 {"rsnTypeGetNativeData",             "(II[I)V",                               (void*)nTypeGetNativeData },
 
 {"rsnAllocationCreateTyped",         "(II)I",                                 (void*)nAllocationCreateTyped },

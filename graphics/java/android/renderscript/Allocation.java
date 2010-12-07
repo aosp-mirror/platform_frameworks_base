@@ -84,24 +84,38 @@ public class Allocation extends BaseObj {
         mRS.nAllocationUploadToBufferObject(getID());
     }
 
-    public void data(int[] d) {
+
+    public void copyFrom(BaseObj[] d) {
         mRS.validate();
-        subData1D(0, mType.getElementCount(), d);
-    }
-    public void data(short[] d) {
-        mRS.validate();
-        subData1D(0, mType.getElementCount(), d);
-    }
-    public void data(byte[] d) {
-        mRS.validate();
-        subData1D(0, mType.getElementCount(), d);
-    }
-    public void data(float[] d) {
-        mRS.validate();
-        subData1D(0, mType.getElementCount(), d);
+        if (d.length != mType.getCount()) {
+            throw new RSIllegalArgumentException("Array size mismatch, allocation sizeX = " +
+                                                 mType.getCount() + ", array length = " + d.length);
+        }
+        int i[] = new int[d.length];
+        for (int ct=0; ct < d.length; ct++) {
+            i[ct] = d[ct].getID();
+        }
+        subData1D(0, mType.getCount(), i);
     }
 
-    public void updateFromBitmap(Bitmap b) {
+    public void copyFrom(int[] d) {
+        mRS.validate();
+        subData1D(0, mType.getCount(), d);
+    }
+    public void copyFrom(short[] d) {
+        mRS.validate();
+        subData1D(0, mType.getCount(), d);
+    }
+    public void copyFrom(byte[] d) {
+        mRS.validate();
+        subData1D(0, mType.getCount(), d);
+    }
+    public void copyFrom(float[] d) {
+        mRS.validate();
+        subData1D(0, mType.getCount(), d);
+    }
+
+    public void copyFrom(Bitmap b) {
 
         mRS.validate();
         if(mType.getX() != b.getWidth() ||
@@ -153,8 +167,8 @@ public class Allocation extends BaseObj {
         if(count < 1) {
             throw new RSIllegalArgumentException("Count must be >= 1.");
         }
-        if((off + count) > mType.getElementCount()) {
-            throw new RSIllegalArgumentException("Overflow, Available count " + mType.getElementCount() +
+        if((off + count) > mType.getCount()) {
+            throw new RSIllegalArgumentException("Overflow, Available count " + mType.getCount() +
                                                ", got " + count + " at offset " + off + ".");
         }
         if((len) < dataSize) {
@@ -205,7 +219,7 @@ public class Allocation extends BaseObj {
     }
 
     public synchronized void resize(int dimX) {
-        if ((mType.getY() > 0)|| (mType.getZ() > 0) || mType.getFaces() || mType.getLOD()) {
+        if ((mType.getY() > 0)|| (mType.getZ() > 0) || mType.hasFaces() || mType.hasMipmaps()) {
             throw new RSInvalidStateException("Resize only support for 1D allocations at this time.");
         }
         mRS.nAllocationResize1D(getID(), dimX);
@@ -340,7 +354,7 @@ public class Allocation extends BaseObj {
 
         rs.validate();
         Type.Builder b = new Type.Builder(rs, e);
-        b.add(Dimension.X, count);
+        b.setX(count);
         Type t = b.create();
 
         int id = rs.nAllocationCreateTyped(t.getID());
@@ -370,11 +384,9 @@ public class Allocation extends BaseObj {
     static private Type typeFromBitmap(RenderScript rs, Bitmap b, boolean mip) {
         Element e = elementFromBitmap(rs, b);
         Type.Builder tb = new Type.Builder(rs, e);
-        tb.add(Dimension.X, b.getWidth());
-        tb.add(Dimension.Y, b.getHeight());
-        if (mip) {
-            tb.add(Dimension.LOD, 1);
-        }
+        tb.setX(b.getWidth());
+        tb.setY(b.getHeight());
+        tb.setMipmaps(mip);
         return tb.create();
     }
 
@@ -414,12 +426,10 @@ public class Allocation extends BaseObj {
 
         Element e = elementFromBitmap(rs, b);
         Type.Builder tb = new Type.Builder(rs, e);
-        tb.add(Dimension.X, width);
-        tb.add(Dimension.Y, width);
-        tb.add(Dimension.FACE, 1);
-        if (genMips) {
-            tb.add(Dimension.LOD, 1);
-        }
+        tb.setX(width);
+        tb.setY(width);
+        tb.setFaces(true);
+        tb.setMipmaps(genMips);
         Type t = tb.create();
 
         int id = rs.nAllocationCubeCreateFromBitmap(dstFmt.getID(), genMips, b);
@@ -477,7 +487,7 @@ public class Allocation extends BaseObj {
         try {
             allocArray = str.getBytes("UTF-8");
             Allocation alloc = Allocation.createSized(rs, Element.U8(rs), allocArray.length);
-            alloc.data(allocArray);
+            alloc.copyFrom(allocArray);
             return alloc;
         }
         catch (Exception e) {

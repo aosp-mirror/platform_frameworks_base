@@ -31,6 +31,9 @@ import android.graphics.BitmapFactory;
 /**
  * @hide
  *
+ * Sampler object which defines how data is extracted from textures.  Samplers
+ * are attached to Program objects (currently only fragment) when those objects
+ * need to access texture data.
  **/
 public class Sampler extends BaseObj {
     public enum Value {
@@ -50,6 +53,14 @@ public class Sampler extends BaseObj {
         super(id, rs);
     }
 
+    /**
+     * Retrieve a sampler with min and mag set to nearest and wrap modes set to
+     * clamp.
+     *
+     * @param rs
+     *
+     * @return Sampler
+     */
     public static Sampler CLAMP_NEAREST(RenderScript rs) {
         if(rs.mSampler_CLAMP_NEAREST == null) {
             Builder b = new Builder(rs);
@@ -62,6 +73,14 @@ public class Sampler extends BaseObj {
         return rs.mSampler_CLAMP_NEAREST;
     }
 
+    /**
+     * Retrieve a sampler with min and mag set to linear and wrap modes set to
+     * clamp.
+     *
+     * @param rs
+     *
+     * @return Sampler
+     */
     public static Sampler CLAMP_LINEAR(RenderScript rs) {
         if(rs.mSampler_CLAMP_LINEAR == null) {
             Builder b = new Builder(rs);
@@ -74,6 +93,14 @@ public class Sampler extends BaseObj {
         return rs.mSampler_CLAMP_LINEAR;
     }
 
+    /**
+     * Retrieve a sampler with ag set to linear, min linear mipmap linear, and
+     * to and wrap modes set to clamp.
+     *
+     * @param rs
+     *
+     * @return Sampler
+     */
     public static Sampler CLAMP_LINEAR_MIP_LINEAR(RenderScript rs) {
         if(rs.mSampler_CLAMP_LINEAR_MIP_LINEAR == null) {
             Builder b = new Builder(rs);
@@ -86,6 +113,14 @@ public class Sampler extends BaseObj {
         return rs.mSampler_CLAMP_LINEAR_MIP_LINEAR;
     }
 
+    /**
+     * Retrieve a sampler with min and mag set to nearest and wrap modes set to
+     * wrap.
+     *
+     * @param rs
+     *
+     * @return Sampler
+     */
     public static Sampler WRAP_NEAREST(RenderScript rs) {
         if(rs.mSampler_WRAP_NEAREST == null) {
             Builder b = new Builder(rs);
@@ -98,6 +133,14 @@ public class Sampler extends BaseObj {
         return rs.mSampler_WRAP_NEAREST;
     }
 
+    /**
+     * Retrieve a sampler with min and mag set to nearest and wrap modes set to
+     * wrap.
+     *
+     * @param rs
+     *
+     * @return Sampler
+     */
     public static Sampler WRAP_LINEAR(RenderScript rs) {
         if(rs.mSampler_WRAP_LINEAR == null) {
             Builder b = new Builder(rs);
@@ -110,6 +153,14 @@ public class Sampler extends BaseObj {
         return rs.mSampler_WRAP_LINEAR;
     }
 
+    /**
+     * Retrieve a sampler with ag set to linear, min linear mipmap linear, and
+     * to and wrap modes set to wrap.
+     *
+     * @param rs
+     *
+     * @return Sampler
+     */
     public static Sampler WRAP_LINEAR_MIP_LINEAR(RenderScript rs) {
         if(rs.mSampler_WRAP_LINEAR_MIP_LINEAR == null) {
             Builder b = new Builder(rs);
@@ -123,6 +174,11 @@ public class Sampler extends BaseObj {
     }
 
 
+    /**
+     * Builder for creating non-standard samplers.  Usefull if mix and match of
+     * wrap modes is necesary or if anisotropic filtering is desired.
+     *
+     */
     public static class Builder {
         RenderScript mRS;
         Value mMin;

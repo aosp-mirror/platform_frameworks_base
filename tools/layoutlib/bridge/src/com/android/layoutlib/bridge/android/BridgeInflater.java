@@ -178,7 +178,7 @@ public final class BridgeInflater extends LayoutInflater {
 
                         return inflate(bridgeParser, root);
                     } catch (Exception e) {
-                        bridgeContext.getLogger().error(e);
+                        Bridge.getLog().error(null, e);
                         // return null below.
                     }
                 }

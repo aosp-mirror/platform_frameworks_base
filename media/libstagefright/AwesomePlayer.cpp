@@ -22,7 +22,6 @@
 
 #include "include/ARTSPController.h"
 #include "include/AwesomePlayer.h"
-#include "include/LiveSource.h"
 #include "include/SoftwareRenderer.h"
 #include "include/NuCachedSource2.h"
 #include "include/ThrottledSource.h"
@@ -51,6 +50,7 @@
 #include <surfaceflinger/Surface.h>
 
 #include <media/stagefright/foundation/ALooper.h>
+#include "include/LiveSession.h"
 
 #define USE_SURFACE_ALLOC 1
 
@@ -632,6 +632,11 @@ void AwesomePlayer::reset_l() {
     if (mRTSPController != NULL) {
         mRTSPController->disconnect();
         mRTSPController.clear();
+    }
+
+    if (mLiveSession != NULL) {
+        mLiveSession->disconnect();
+        mLiveSession.clear();
     }
 
     mRTPPusher.clear();
@@ -1659,16 +1664,23 @@ status_t AwesomePlayer::finishSetDataSource_l() {
         String8 uri("http://");
         uri.append(mUri.string() + 11);
 
-        sp<LiveSource> liveSource = new LiveSource(uri.string());
+        if (mLooper == NULL) {
+            mLooper = new ALooper;
+            mLooper->setName("httplive");
+            mLooper->start();
+        }
 
-        mCachedSource = new NuCachedSource2(liveSource);
-        dataSource = mCachedSource;
+        mLiveSession = new LiveSession;
+        mLooper->registerHandler(mLiveSession);
+
+        mLiveSession->connect(uri.string());
+        dataSource = mLiveSession->getDataSource();
 
         sp<MediaExtractor> extractor =
             MediaExtractor::Create(dataSource, MEDIA_MIMETYPE_CONTAINER_MPEG2TS);
 
         static_cast<MPEG2TSExtractor *>(extractor.get())
-            ->setLiveSource(liveSource);
+            ->setLiveSession(mLiveSession);
 
         return setDataSource_l(extractor);
     } else if (!strncmp("rtsp://gtalk/", mUri.string(), 13)) {

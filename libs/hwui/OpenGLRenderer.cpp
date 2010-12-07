@@ -909,9 +909,19 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    drawTextureMesh(dstLeft, dstTop, dstRight, dstBottom, texture->id, alpha / 255.0f,
-            mode, texture->blend, &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
-            GL_TRIANGLE_STRIP, gMeshCount);
+    if (mSnapshot->transform->isPureTranslate()) {
+        const float x = (int) floorf(dstLeft + mSnapshot->transform->getTranslateX() + 0.5f);
+        const float y = (int) floorf(dstTop + mSnapshot->transform->getTranslateY() + 0.5f);
+
+        drawTextureMesh(x, y, x + (dstRight - dstLeft), y + (dstBottom - dstTop),
+                texture->id, alpha / 255.0f, mode, texture->blend,
+                &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
+                GL_TRIANGLE_STRIP, gMeshCount, false, true);
+    } else {
+        drawTextureMesh(dstLeft, dstTop, dstRight, dstBottom, texture->id, alpha / 255.0f,
+                mode, texture->blend, &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
+                GL_TRIANGLE_STRIP, gMeshCount);
+    }
 
     resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
 }
@@ -937,6 +947,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
             right - left, bottom - top, xDivs, yDivs, colors, width, height, numColors);
 
     if (mesh && mesh->verticesCount > 0) {
+        const bool pureTranslate = mSnapshot->transform->isPureTranslate();
 #if RENDER_LAYERS_AS_REGIONS
         // Mark the current layer dirty where we are going to draw the patch
         if ((mSnapshot->flags & Snapshot::kFlagFboTarget) &&
@@ -944,16 +955,33 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
             const size_t count = mesh->quads.size();
             for (size_t i = 0; i < count; i++) {
                 Rect bounds = mesh->quads.itemAt(i);
-                dirtyLayer(bounds.left, bounds.top, bounds.right, bounds.bottom,
-                        *mSnapshot->transform);
+                if (pureTranslate) {
+                    const float x = (int) floorf(bounds.left + 0.5f);
+                    const float y = (int) floorf(bounds.top + 0.5f);
+                    dirtyLayer(x, y, x + bounds.getWidth(), y + bounds.getBottom(),
+                            *mSnapshot->transform);
+                } else {
+                    dirtyLayer(bounds.left, bounds.top, bounds.right, bounds.bottom,
+                            *mSnapshot->transform);
+                }
             }
         }
 #endif
 
-        drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f,
-                mode, texture->blend, (GLvoid*) 0, (GLvoid*) gMeshTextureOffset,
-                GL_TRIANGLES, mesh->verticesCount, false, false, mesh->meshBuffer,
-                true, !mesh->hasEmptyQuads);
+        if (pureTranslate) {
+            const float x = (int) floorf(left + mSnapshot->transform->getTranslateX() + 0.5f);
+            const float y = (int) floorf(top + mSnapshot->transform->getTranslateY() + 0.5f);
+
+            drawTextureMesh(x, y, x + right - left, y + bottom - top, texture->id, alpha / 255.0f,
+                    mode, texture->blend, (GLvoid*) 0, (GLvoid*) gMeshTextureOffset,
+                    GL_TRIANGLES, mesh->verticesCount, false, true, mesh->meshBuffer,
+                    true, !mesh->hasEmptyQuads);
+        } else {
+            drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f,
+                    mode, texture->blend, (GLvoid*) 0, (GLvoid*) gMeshTextureOffset,
+                    GL_TRIANGLES, mesh->verticesCount, false, false, mesh->meshBuffer,
+                    true, !mesh->hasEmptyQuads);
+        }
     }
 }
 
@@ -1087,6 +1115,15 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
             break;
     }
 
+    // TODO: Handle paint->getTextScaleX()
+    const float oldX = x;
+    const float oldY = y;
+    const bool pureTranslate = mSnapshot->transform->isPureTranslate();
+    if (pureTranslate) {
+        x = (int) floorf(x + mSnapshot->transform->getTranslateX() + 0.5f);
+        y = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
+    }
+
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
@@ -1110,7 +1147,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
                 count, mShadowRadius);
         const AutoTexture autoCleanup(shadow);
 
-        setupShadow(shadow, x, y, mode, a);
+        setupShadow(shadow, x, y, mode, a, pureTranslate);
 
         // Draw the mesh
         glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
@@ -1120,14 +1157,17 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     GLuint textureUnit = 0;
     glActiveTexture(gTextureUnits[textureUnit]);
 
-    // Assume that the modelView matrix does not force scales, rotates, etc.
-    const bool linearFilter = mSnapshot->transform->changesBounds();
+    // Pick the appropriate texture filtering
+    bool linearFilter = mSnapshot->transform->changesBounds();
+    if (pureTranslate && !linearFilter) {
+        linearFilter = fabs(y - (int) y) > 0.0f || fabs(x - (int) x) > 0.0f;
+    }
 
     // Dimensions are set to (0,0), the layer (if any) won't be dirtied
     setupTextureAlpha8(fontRenderer.getTexture(linearFilter), 0, 0, textureUnit,
-            x, y, r, g, b, a, mode, false, true, NULL, NULL);
+            x, y, r, g, b, a, mode, false, true, NULL, NULL, 0, pureTranslate);
 
-    const Rect& clip = mSnapshot->getLocalClip();
+    const Rect* clip = pureTranslate ? mSnapshot->clipRect : &mSnapshot->getLocalClip();
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
 #if RENDER_LAYERS_AS_REGIONS
@@ -1137,11 +1177,13 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 #endif
 
     mCaches.unbindMeshBuffer();
-    if (fontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y,
+    if (fontRenderer.renderText(paint, clip, text, 0, bytesCount, count, x, y,
             hasLayer ? &bounds : NULL)) {
 #if RENDER_LAYERS_AS_REGIONS
         if (hasLayer) {
-            mSnapshot->transform->mapRect(bounds);
+            if (!pureTranslate) {
+                mSnapshot->transform->mapRect(bounds);
+            }
             bounds.intersect(*mSnapshot->clipRect);
             bounds.snapToPixelBoundaries();
 
@@ -1154,7 +1196,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
 
-    drawTextDecorations(text, bytesCount, length, x, y, paint);
+    drawTextDecorations(text, bytesCount, length, oldX, oldY, paint);
 }
 
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
@@ -1241,7 +1283,7 @@ void OpenGLRenderer::setupShadow(float radius, float dx, float dy, int color) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setupShadow(const ShadowTexture* texture, float x, float y,
-        SkXfermode::Mode mode, float alpha) {
+        SkXfermode::Mode mode, float alpha, bool ignoreTransforms) {
     const float sx = x - texture->left + mShadowDx;
     const float sy = y - texture->top + mShadowDy;
 
@@ -1252,7 +1294,9 @@ void OpenGLRenderer::setupShadow(const ShadowTexture* texture, float x, float y,
     const GLfloat b = a * ((mShadowColor      ) & 0xFF) / 255.0f;
 
     GLuint textureUnit = 0;
-    setupTextureAlpha8(texture, textureUnit, sx, sy, r, g, b, a, mode, true, false);
+    setupTextureAlpha8(texture->id, texture->width, texture->height, textureUnit,
+            sx, sy, r, g, b, a, mode, true, false,
+            (GLvoid*) 0, (GLvoid*) gMeshTextureOffset, 0, ignoreTransforms);
 }
 
 void OpenGLRenderer::setupTextureAlpha8(const Texture* texture, GLuint& textureUnit,
@@ -1273,7 +1317,7 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
 void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t height,
         GLuint& textureUnit, float x, float y, float r, float g, float b, float a,
         SkXfermode::Mode mode, bool transforms, bool applyFilters,
-        GLvoid* vertices, GLvoid* texCoords, GLuint vbo) {
+        GLvoid* vertices, GLvoid* texCoords, GLuint vbo, bool ignoreTransform) {
      // Describe the required shaders
      ProgramDescription description;
      description.hasTexture = true;
@@ -1321,9 +1365,14 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
          mModelView.loadIdentity();
      }
 
-     mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
+     mat4 t;
+     if (!ignoreTransform) {
+         t.load(*mSnapshot->transform);
+     }
+
+     mCaches.currentProgram->set(mOrthoMatrix, mModelView, t);
      if (width > 0 && height > 0) {
-         dirtyLayer(x, y, x + width, y + height, *mSnapshot->transform);
+         dirtyLayer(x, y, x + width, y + height, t);
      }
 
      if (setColor) {
@@ -1334,6 +1383,9 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
      if (applyFilters) {
          // Setup attributes and uniforms required by the shaders
          if (mShader) {
+             if (ignoreTransform) {
+                 mModelView.loadInverse(*mSnapshot->transform);
+             }
              mShader->setupProgram(mCaches.currentProgram, mModelView, *mSnapshot, &textureUnit);
          }
          if (mColorFilter) {
@@ -1473,7 +1525,11 @@ void OpenGLRenderer::setupColorRect(float left, float top, float right, float bo
 
     // Setup attributes and uniforms required by the shaders
     if (mShader) {
-        if (ignoreMatrix) mModelView.loadIdentity();
+        if (ignoreMatrix) {
+            mModelView.loadIdentity();
+        } else if (ignoreTransform) {
+            mModelView.loadInverse(*mSnapshot->transform);
+        }
         mShader->setupProgram(mCaches.currentProgram, mModelView, *mSnapshot, &textureUnit);
     }
     if (mColorFilter) {
@@ -1489,9 +1545,18 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
 
     setTextureWrapModes(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
-    drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f, mode,
-            texture->blend, (GLvoid*) NULL, (GLvoid*) gMeshTextureOffset,
-            GL_TRIANGLE_STRIP, gMeshCount);
+    if (mSnapshot->transform->isPureTranslate()) {
+        const float x = (int) floorf(left + mSnapshot->transform->getTranslateX() + 0.5f);
+        const float y = (int) floorf(top + mSnapshot->transform->getTranslateY() + 0.5f);
+
+        drawTextureMesh(x, y, x + texture->width, y + texture->height, texture->id,
+                alpha / 255.0f, mode, texture->blend, (GLvoid*) NULL,
+                (GLvoid*) gMeshTextureOffset, GL_TRIANGLE_STRIP, gMeshCount, false, true);
+    } else {
+        drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f, mode,
+                texture->blend, (GLvoid*) NULL, (GLvoid*) gMeshTextureOffset,
+                GL_TRIANGLE_STRIP, gMeshCount);
+    }
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,

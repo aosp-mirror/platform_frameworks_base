@@ -121,11 +121,11 @@ LOCAL_SRC_FILES += \
 	core/java/android/nfc/ILlcpConnectionlessSocket.aidl \
 	core/java/android/nfc/ILlcpServiceSocket.aidl \
 	core/java/android/nfc/ILlcpSocket.aidl \
-	core/java/android/nfc/INdefTag.aidl \
 	core/java/android/nfc/INfcAdapter.aidl \
 	core/java/android/nfc/INfcTag.aidl \
 	core/java/android/nfc/IP2pInitiator.aidl \
 	core/java/android/nfc/IP2pTarget.aidl \
+    core/java/android/nfc/INfcSecureElement.aidl \
 	core/java/android/os/IHardwareService.aidl \
 	core/java/android/os/IMessenger.aidl \
 	core/java/android/os/INetworkManagementService.aidl \
@@ -254,7 +254,6 @@ aidl_files := \
 	frameworks/base/core/java/android/nfc/NdefMessage.aidl \
 	frameworks/base/core/java/android/nfc/NdefRecord.aidl \
 	frameworks/base/core/java/android/nfc/Tag.aidl \
-	frameworks/base/core/java/android/nfc/NdefTag.aidl \
 	frameworks/base/core/java/android/os/Bundle.aidl \
 	frameworks/base/core/java/android/os/DropBoxManager.aidl \
 	frameworks/base/core/java/android/os/ParcelFileDescriptor.aidl \

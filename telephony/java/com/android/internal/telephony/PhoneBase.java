@@ -115,6 +115,7 @@ public abstract class PhoneBase extends Handler implements Phone {
     int mCallRingContinueToken = 0;
     int mCallRingDelay;
     public boolean mIsTheCurrentActivePhone = true;
+    boolean mIsVoiceCapable = true;
 
     /**
      * Set a system property, unless we're in unit test mode
@@ -204,6 +205,15 @@ public abstract class PhoneBase extends Handler implements Phone {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         mDnsCheckDisabled = sp.getBoolean(DNS_SERVER_CHECK_DISABLED_KEY, false);
         mCM.setOnCallRing(this, EVENT_CALL_RING, null);
+
+        /* "Voice capable" means that this device supports circuit-switched
+        * (i.e. voice) phone calls over the telephony network, and is allowed
+        * to display the in-call UI while a cellular voice call is active.
+        * This will be false on "data only" devices which can't make voice
+        * calls and don't support any in-call UI.
+        */
+        mIsVoiceCapable = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_voice_capable);
 
         /**
          *  Some RIL's don't always send RIL_UNSOL_CALL_RING so it needs
@@ -1006,6 +1016,8 @@ public abstract class PhoneBase extends Handler implements Phone {
      * version scoped to their packages
      */
     protected void notifyNewRingingConnectionP(Connection cn) {
+        if (!mIsVoiceCapable)
+            return;
         AsyncResult ar = new AsyncResult(null, cn, null);
         mNewRingingConnectionRegistrants.notifyRegistrants(ar);
     }
@@ -1014,6 +1026,8 @@ public abstract class PhoneBase extends Handler implements Phone {
      * Notify registrants of a RING event.
      */
     private void notifyIncomingRing() {
+        if (!mIsVoiceCapable)
+            return;
         AsyncResult ar = new AsyncResult(null, this, null);
         mIncomingRingRegistrants.notifyRegistrants(ar);
     }
@@ -1022,7 +1036,8 @@ public abstract class PhoneBase extends Handler implements Phone {
      * Send the incoming call Ring notification if conditions are right.
      */
     private void sendIncomingCallRingNotification(int token) {
-        if (!mDoesRilSendMultipleCallRing && (token == mCallRingContinueToken)) {
+        if (mIsVoiceCapable && !mDoesRilSendMultipleCallRing &&
+                (token == mCallRingContinueToken)) {
             Log.d(LOG_TAG, "Sending notifyIncomingRing");
             notifyIncomingRing();
             sendMessageDelayed(
@@ -1031,7 +1046,8 @@ public abstract class PhoneBase extends Handler implements Phone {
             Log.d(LOG_TAG, "Ignoring ring notification request,"
                     + " mDoesRilSendMultipleCallRing=" + mDoesRilSendMultipleCallRing
                     + " token=" + token
-                    + " mCallRingContinueToken=" + mCallRingContinueToken);
+                    + " mCallRingContinueToken=" + mCallRingContinueToken
+                    + " mIsVoiceCapable=" + mIsVoiceCapable);
         }
     }
 

@@ -215,6 +215,8 @@ private:
     status_t checkFrameRate(const CameraParameters& params,
                     int32_t frameRate);
 
+    void releaseCamera();
+
     CameraSource(const CameraSource &);
     CameraSource &operator=(const CameraSource &);
 };

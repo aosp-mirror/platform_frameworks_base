@@ -866,7 +866,8 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * </pre>
      */
     public static class InstructionCount {
-        private static final int NUM_INSTR = OpcodeInfo.MAXIMUM_VALUE + 1;
+        private static final int NUM_INSTR =
+            OpcodeInfo.MAXIMUM_PACKED_VALUE + 1;
 
         private int[] mCounts;
 

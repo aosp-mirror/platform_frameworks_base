@@ -55,8 +55,8 @@ public class SceneGraphView extends RSSurfaceView {
         if (mRS == null) {
             RenderScriptGL.SurfaceConfig sc = new RenderScriptGL.SurfaceConfig();
             sc.setDepth(16, 24);
-            mRS = createRenderScript(sc);
-            mRS.contextSetSurface(w, h, holder.getSurface());
+            mRS = createRenderScriptGL(sc);
+            mRS.setSurface(holder, w, h);
             mRender = new SceneGraphRS();
             mRender.init(mRS, getResources(), w, h);
         }
@@ -66,7 +66,7 @@ public class SceneGraphView extends RSSurfaceView {
     protected void onDetachedFromWindow() {
         if (mRS != null) {
             mRS = null;
-            destroyRenderScript();
+            destroyRenderScriptGL();
         }
     }
 

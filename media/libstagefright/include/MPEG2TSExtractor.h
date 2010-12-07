@@ -15,7 +15,7 @@ struct ATSParser;
 struct DataSource;
 struct MPEG2TSSource;
 struct String8;
-struct LiveSource;
+struct LiveSession;
 
 struct MPEG2TSExtractor : public MediaExtractor {
     MPEG2TSExtractor(const sp<DataSource> &source);
@@ -28,7 +28,7 @@ struct MPEG2TSExtractor : public MediaExtractor {
 
     virtual uint32_t flags() const;
 
-    void setLiveSource(const sp<LiveSource> &liveSource);
+    void setLiveSession(const sp<LiveSession> &liveSession);
     void seekTo(int64_t seekTimeUs);
 
 private:
@@ -37,7 +37,7 @@ private:
     mutable Mutex mLock;
 
     sp<DataSource> mDataSource;
-    sp<LiveSource> mLiveSource;
+    sp<LiveSession> mLiveSession;
 
     sp<ATSParser> mParser;
 

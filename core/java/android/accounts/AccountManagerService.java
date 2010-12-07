@@ -16,6 +16,10 @@
 
 package android.accounts;
 
+import com.android.internal.R;
+import com.android.internal.telephony.ITelephony;
+import com.android.internal.telephony.TelephonyIntents;
+
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -57,15 +61,12 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
-import com.android.internal.R;
-import com.android.internal.telephony.ITelephony;
-import com.android.internal.telephony.TelephonyIntents;
 
 /**
  * A system service that provides  account, password, and authtoken management for all
@@ -91,13 +92,15 @@ public class AccountManagerService
 
     private final Context mContext;
 
+    private final PackageManager mPackageManager;
+
     private HandlerThread mMessageThread;
     private final MessageHandler mMessageHandler;
 
     // Messages that can be sent on mHandler
     private static final int MESSAGE_TIMED_OUT = 3;
 
-    private final AccountAuthenticatorCache mAuthenticatorCache;
+    private final IAccountAuthenticatorCache mAuthenticatorCache;
     private final DatabaseHelper mOpenHelper;
     private final SimWatcher mSimWatcher;
 
@@ -129,8 +132,6 @@ public class AccountManagerService
     private static final String META_KEY = "key";
     private static final String META_VALUE = "value";
 
-    private static final String[] ACCOUNT_NAME_TYPE_PROJECTION =
-            new String[]{ACCOUNTS_ID, ACCOUNTS_NAME, ACCOUNTS_TYPE};
     private static final String[] ACCOUNT_TYPE_COUNT_PROJECTION =
             new String[] { ACCOUNTS_TYPE, ACCOUNTS_TYPE_COUNT};
     private static final Intent ACCOUNTS_CHANGED_INTENT;
@@ -142,6 +143,15 @@ public class AccountManagerService
             + " AND " + GRANTS_AUTH_TOKEN_TYPE + "=?"
             + " AND " + ACCOUNTS_NAME + "=?"
             + " AND " + ACCOUNTS_TYPE + "=?";
+
+    private static final String SELECTION_AUTHTOKENS_BY_ACCOUNT =
+            AUTHTOKENS_ACCOUNTS_ID + "=(select _id FROM accounts WHERE name=? AND type=?)";
+    private static final String[] COLUMNS_AUTHTOKENS_TYPE_AND_AUTHTOKEN = {AUTHTOKENS_TYPE,
+            AUTHTOKENS_AUTHTOKEN};
+
+    private static final String SELECTION_USERDATA_BY_ACCOUNT =
+            EXTRAS_ACCOUNTS_ID + "=(select _id FROM accounts WHERE name=? AND type=?)";
+    private static final String[] COLUMNS_EXTRAS_KEY_AND_VALUE = {EXTRAS_KEY, EXTRAS_VALUE};
 
     private final LinkedHashMap<String, Session> mSessions = new LinkedHashMap<String, Session>();
     private final AtomicInteger mNotificationIds = new AtomicInteger(1);
@@ -163,6 +173,16 @@ public class AccountManagerService
         ACCOUNTS_CHANGED_INTENT.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
     }
 
+    private final Object mCacheLock = new Object();
+    /** protected by the {@link #mCacheLock} */
+    private final HashMap<String, Account[]> mAccountCache = new HashMap<String, Account[]>();
+    /** protected by the {@link #mCacheLock} */
+    private HashMap<Account, HashMap<String, String>> mUserDataCache =
+            new HashMap<Account, HashMap<String, String>>();
+    /** protected by the {@link #mCacheLock} */
+    private HashMap<Account, HashMap<String, String>> mAuthTokenCache =
+            new HashMap<Account, HashMap<String, String>>();
+
     /**
      * This should only be called by system code. One should only call this after the service
      * has started.
@@ -173,47 +193,14 @@ public class AccountManagerService
         return sThis.get();
     }
 
-    public class AuthTokenKey {
-        public final Account mAccount;
-        public final String mAuthTokenType;
-        private final int mHashCode;
-
-        public AuthTokenKey(Account account, String authTokenType) {
-            mAccount = account;
-            mAuthTokenType = authTokenType;
-            mHashCode = computeHashCode();
-        }
-
-        public boolean equals(Object o) {
-            if (o == this) {
-                return true;
-            }
-            if (!(o instanceof AuthTokenKey)) {
-                return false;
-            }
-            AuthTokenKey other = (AuthTokenKey)o;
-            if (!mAccount.equals(other.mAccount)) {
-                return false;
-            }
-            return (mAuthTokenType == null)
-                    ? other.mAuthTokenType == null
-                    : mAuthTokenType.equals(other.mAuthTokenType);
-        }
-
-        private int computeHashCode() {
-            int result = 17;
-            result = 31 * result + mAccount.hashCode();
-            result = 31 * result + ((mAuthTokenType == null) ? 0 : mAuthTokenType.hashCode());
-            return result;
-        }
-
-        public int hashCode() {
-            return mHashCode;
-        }
+    public AccountManagerService(Context context) {
+        this(context, context.getPackageManager(), new AccountAuthenticatorCache(context));
     }
 
-    public AccountManagerService(Context context) {
+    public AccountManagerService(Context context, PackageManager packageManager,
+            IAccountAuthenticatorCache authenticatorCache) {
         mContext = context;
+        mPackageManager = packageManager;
 
         mOpenHelper = new DatabaseHelper(mContext);
 
@@ -221,32 +208,58 @@ public class AccountManagerService
         mMessageThread.start();
         mMessageHandler = new MessageHandler(mMessageThread.getLooper());
 
-        mAuthenticatorCache = new AccountAuthenticatorCache(mContext);
+        mAuthenticatorCache = authenticatorCache;
         mAuthenticatorCache.setListener(this, null /* Handler */);
 
         mSimWatcher = new SimWatcher(mContext);
         sThis.set(this);
 
-        validateAccounts();
+        validateAccountsAndPopulateCache();
     }
 
-    private void validateAccounts() {
+    private void validateAccountsAndPopulateCache() {
         boolean accountDeleted = false;
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Cursor cursor = db.query(TABLE_ACCOUNTS,
                 new String[]{ACCOUNTS_ID, ACCOUNTS_TYPE, ACCOUNTS_NAME},
                 null, null, null, null, null);
         try {
-            while (cursor.moveToNext()) {
-                final long accountId = cursor.getLong(0);
-                final String accountType = cursor.getString(1);
-                final String accountName = cursor.getString(2);
-                if (mAuthenticatorCache.getServiceInfo(AuthenticatorDescription.newKey(accountType))
-                        == null) {
-                    Log.d(TAG, "deleting account " + accountName + " because type "
-                            + accountType + " no longer has a registered authenticator");
-                    db.delete(TABLE_ACCOUNTS, ACCOUNTS_ID + "=" + accountId, null);
-                    accountDeleted = true;
+            synchronized (mCacheLock) {
+                mAccountCache.clear();
+                final HashMap<String, ArrayList<String>> accountNamesByType =
+                        new HashMap<String, ArrayList<String>>();
+                while (cursor.moveToNext()) {
+                    final long accountId = cursor.getLong(0);
+                    final String accountType = cursor.getString(1);
+                    final String accountName = cursor.getString(2);
+                    if (mAuthenticatorCache.getServiceInfo(
+                            AuthenticatorDescription.newKey(accountType)) == null) {
+                        Log.d(TAG, "deleting account " + accountName + " because type "
+                                + accountType + " no longer has a registered authenticator");
+                        db.delete(TABLE_ACCOUNTS, ACCOUNTS_ID + "=" + accountId, null);
+                        accountDeleted = true;
+                        final Account account = new Account(accountName, accountType);
+                        mUserDataCache.remove(account);
+                        mAuthTokenCache.remove(account);
+                    } else {
+                        ArrayList<String> accountNames = accountNamesByType.get(accountType);
+                        if (accountNames == null) {
+                            accountNames = new ArrayList<String>();
+                            accountNamesByType.put(accountType, accountNames);
+                        }
+                        accountNames.add(accountName);
+                    }
+                }
+                for (HashMap.Entry<String, ArrayList<String>> cur : accountNamesByType.entrySet()) {
+                    final String accountType = cur.getKey();
+                    final ArrayList<String> accountNames = cur.getValue();
+                    final Account[] accountsForType = new Account[accountNames.size()];
+                    int i = 0;
+                    for (String accountName : accountNames) {
+                        accountsForType[i] = new Account(accountName, accountType);
+                        ++i;
+                    }
+                    mAccountCache.put(accountType, accountsForType);
                 }
             }
         } finally {
@@ -258,30 +271,15 @@ public class AccountManagerService
     }
 
     public void onServiceChanged(AuthenticatorDescription desc, boolean removed) {
-        boolean accountDeleted = false;
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        Cursor cursor = db.query(TABLE_ACCOUNTS,
-                new String[]{ACCOUNTS_ID, ACCOUNTS_TYPE, ACCOUNTS_NAME},
-                ACCOUNTS_TYPE + "=?", new String[]{desc.type}, null, null, null);
-        try {
-            while (cursor.moveToNext()) {
-                final long accountId = cursor.getLong(0);
-                final String accountType = cursor.getString(1);
-                final String accountName = cursor.getString(2);
-                Log.d(TAG, "deleting account " + accountName + " because type "
-                        + accountType + " no longer has a registered authenticator");
-                db.delete(TABLE_ACCOUNTS, ACCOUNTS_ID + "=" + accountId, null);
-                accountDeleted = true;
-            }
-        } finally {
-            cursor.close();
-            if (accountDeleted) {
-                sendAccountsChangedBroadcast();
-            }
-        }
+        validateAccountsAndPopulateCache();
     }
 
     public String getPassword(Account account) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "getPassword: " + account
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         if (account == null) throw new IllegalArgumentException("account is null");
         checkAuthenticateAccountsPermission(account);
 
@@ -313,39 +311,29 @@ public class AccountManagerService
     }
 
     public String getUserData(Account account, String key) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "getUserData: " + account
+                    + ", key " + key
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         if (account == null) throw new IllegalArgumentException("account is null");
         if (key == null) throw new IllegalArgumentException("key is null");
         checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
         try {
-            return readUserDataFromDatabase(account, key);
+            return readUserDataFromCache(account, key);
         } finally {
             restoreCallingIdentity(identityToken);
         }
     }
 
-    private String readUserDataFromDatabase(Account account, String key) {
-        if (account == null) {
-            return null;
-        }
-
-        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_EXTRAS, new String[]{EXTRAS_VALUE},
-                EXTRAS_ACCOUNTS_ID
-                        + "=(select _id FROM accounts WHERE name=? AND type=?) AND "
-                        + EXTRAS_KEY + "=?",
-                new String[]{account.name, account.type, key}, null, null, null);
-        try {
-            if (cursor.moveToNext()) {
-                return cursor.getString(0);
-            }
-            return null;
-        } finally {
-            cursor.close();
-        }
-    }
-
     public AuthenticatorDescription[] getAuthenticatorTypes() {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "getAuthenticatorTypes: "
+                    + "caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         long identityToken = clearCallingIdentity();
         try {
             Collection<AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription>>
@@ -364,27 +352,12 @@ public class AccountManagerService
         }
     }
 
-    public Account[] getAccountsByType(String accountType) {
-        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-
-        final String selection = accountType == null ? null : (ACCOUNTS_TYPE + "=?");
-        final String[] selectionArgs = accountType == null ? null : new String[]{accountType};
-        Cursor cursor = db.query(TABLE_ACCOUNTS, ACCOUNT_NAME_TYPE_PROJECTION,
-                selection, selectionArgs, null, null, null);
-        try {
-            int i = 0;
-            Account[] accounts = new Account[cursor.getCount()];
-            while (cursor.moveToNext()) {
-                accounts[i] = new Account(cursor.getString(1), cursor.getString(2));
-                i++;
-            }
-            return accounts;
-        } finally {
-            cursor.close();
-        }
-    }
-
     public boolean addAccount(Account account, String password, Bundle extras) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "addAccount: " + account
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         if (account == null) throw new IllegalArgumentException("account is null");
         checkAuthenticateAccountsPermission(account);
 
@@ -417,6 +390,8 @@ public class AccountManagerService
                             + " WHERE " + ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
                     new String[]{account.name, account.type});
             if (numMatches > 0) {
+                Log.w(TAG, "insertAccountIntoDatabase: " + account
+                        + ", skipping since the account already exists");
                 return false;
             }
             ContentValues values = new ContentValues();
@@ -425,17 +400,22 @@ public class AccountManagerService
             values.put(ACCOUNTS_PASSWORD, password);
             long accountId = db.insert(TABLE_ACCOUNTS, ACCOUNTS_NAME, values);
             if (accountId < 0) {
+                Log.w(TAG, "insertAccountIntoDatabase: " + account
+                        + ", skipping the DB insert failed");
                 return false;
             }
             if (extras != null) {
                 for (String key : extras.keySet()) {
                     final String value = extras.getString(key);
                     if (insertExtra(db, accountId, key, value) < 0) {
+                        Log.w(TAG, "insertAccountIntoDatabase: " + account
+                                + ", skipping since insertExtra failed for key " + key);
                         return false;
                     }
                 }
             }
             db.setTransactionSuccessful();
+            insertAccountIntoCache(account);
         } finally {
             db.endTransaction();
         }
@@ -455,6 +435,13 @@ public class AccountManagerService
 
     public void hasFeatures(IAccountManagerResponse response,
             Account account, String[] features) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "hasFeatures: " + account
+                    + ", response " + response
+                    + ", features " + stringArrayToString(features)
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         if (response == null) throw new IllegalArgumentException("response is null");
         if (account == null) throw new IllegalArgumentException("account is null");
         if (features == null) throw new IllegalArgumentException("features is null");
@@ -495,6 +482,10 @@ public class AccountManagerService
                         onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, "null bundle");
                         return;
                     }
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, getClass().getSimpleName() + " calling onResult() on response "
+                                + response);
+                    }
                     final Bundle newResult = new Bundle();
                     newResult.putBoolean(AccountManager.KEY_BOOLEAN_RESULT,
                             result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false));
@@ -516,6 +507,12 @@ public class AccountManagerService
     }
 
     public void removeAccount(IAccountManagerResponse response, Account account) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "removeAccount: " + account
+                    + ", response " + response
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         if (response == null) throw new IllegalArgumentException("response is null");
         if (account == null) throw new IllegalArgumentException("account is null");
         checkManageAccountsPermission();
@@ -565,6 +562,10 @@ public class AccountManagerService
                 }
                 IAccountManagerResponse response = getResponseAndClose();
                 if (response != null) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, getClass().getSimpleName() + " calling onResult() on response "
+                                + response);
+                    }
                     Bundle result2 = new Bundle();
                     result2.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, removalAllowed);
                     try {
@@ -578,14 +579,20 @@ public class AccountManagerService
         }
     }
 
-    private void removeAccount(Account account) {
+    protected void removeAccount(Account account) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.delete(TABLE_ACCOUNTS, ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
                 new String[]{account.name, account.type});
+        removeAccountFromCache(account);
         sendAccountsChangedBroadcast();
     }
 
     public void invalidateAuthToken(String accountType, String authToken) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "invalidateAuthToken: accountType " + accountType
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
         if (authToken == null) throw new IllegalArgumentException("authToken is null");
         checkManageAccountsOrUseCredentialsPermissions();
@@ -625,6 +632,7 @@ public class AccountManagerService
                 String accountName = cursor.getString(1);
                 String authTokenType = cursor.getString(2);
                 db.delete(TABLE_AUTHTOKENS, AUTHTOKENS_ID + "=" + authTokenId, null);
+                writeAuthTokenIntoCache(new Account(accountName, accountType), authTokenType, null);
             }
         } finally {
             cursor.close();
@@ -652,6 +660,7 @@ public class AccountManagerService
             values.put(AUTHTOKENS_AUTHTOKEN, authToken);
             if (db.insert(TABLE_AUTHTOKENS, AUTHTOKENS_AUTHTOKEN, values) >= 0) {
                 db.setTransactionSuccessful();
+                writeAuthTokenIntoCache(account, type, authToken);
                 return true;
             }
             return false;
@@ -660,39 +669,31 @@ public class AccountManagerService
         }
     }
 
-    public String readAuthTokenFromDatabase(Account account, String authTokenType) {
-        if (account == null || authTokenType == null) {
-            return null;
-        }
-        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_AUTHTOKENS, new String[]{AUTHTOKENS_AUTHTOKEN},
-                AUTHTOKENS_ACCOUNTS_ID + "=(select _id FROM accounts WHERE name=? AND type=?) AND "
-                        + AUTHTOKENS_TYPE + "=?",
-                new String[]{account.name, account.type, authTokenType},
-                null, null, null);
-        try {
-            if (cursor.moveToNext()) {
-                return cursor.getString(0);
-            }
-            return null;
-        } finally {
-            cursor.close();
-        }
-    }
-
     public String peekAuthToken(Account account, String authTokenType) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "peekAuthToken: " + account
+                    + ", authTokenType " + authTokenType
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         if (account == null) throw new IllegalArgumentException("account is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
         try {
-            return readAuthTokenFromDatabase(account, authTokenType);
+            return readAuthTokenFromCache(account, authTokenType);
         } finally {
             restoreCallingIdentity(identityToken);
         }
     }
 
     public void setAuthToken(Account account, String authTokenType, String authToken) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "setAuthToken: " + account
+                    + ", authTokenType " + authTokenType
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         if (account == null) throw new IllegalArgumentException("account is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         checkAuthenticateAccountsPermission(account);
@@ -705,6 +706,11 @@ public class AccountManagerService
     }
 
     public void setPassword(Account account, String password) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "setAuthToken: " + account
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         if (account == null) throw new IllegalArgumentException("account is null");
         checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
@@ -738,10 +744,17 @@ public class AccountManagerService
     }
 
     private void sendAccountsChangedBroadcast() {
+        Log.i(TAG, "the accounts changed, sending broadcast of "
+                + ACCOUNTS_CHANGED_INTENT.getAction());
         mContext.sendBroadcast(ACCOUNTS_CHANGED_INTENT);
     }
 
     public void clearPassword(Account account) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "clearPassword: " + account
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         if (account == null) throw new IllegalArgumentException("account is null");
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
@@ -753,13 +766,16 @@ public class AccountManagerService
     }
 
     public void setUserData(Account account, String key, String value) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "setUserData: " + account
+                    + ", key " + key
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         if (key == null) throw new IllegalArgumentException("key is null");
         if (account == null) throw new IllegalArgumentException("account is null");
         checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
-        if (account == null) {
-            return;
-        }
         if (account.type.equals(GOOGLE_ACCOUNT_TYPE) && key.equals("broadcast")) {
             sendAccountsChangedBroadcast();
             return;
@@ -797,12 +813,20 @@ public class AccountManagerService
 
             }
             db.setTransactionSuccessful();
+            writeUserDataIntoCache(account, key, value);
         } finally {
             db.endTransaction();
         }
     }
 
     private void onResult(IAccountManagerResponse response, Bundle result) {
+        if (result == null) {
+            Log.e(TAG, "the result is unexpectedly null", new Exception());
+        }
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, getClass().getSimpleName() + " calling onResult() on response "
+                    + response);
+        }
         try {
             response.onResult(result);
         } catch (RemoteException e) {
@@ -817,6 +841,15 @@ public class AccountManagerService
     public void getAuthToken(IAccountManagerResponse response, final Account account,
             final String authTokenType, final boolean notifyOnAuthFailure,
             final boolean expectActivityLaunch, final Bundle loginOptions) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "getAuthToken: " + account
+                    + ", response " + response
+                    + ", authTokenType " + authTokenType
+                    + ", notifyOnAuthFailure " + notifyOnAuthFailure
+                    + ", expectActivityLaunch " + expectActivityLaunch
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         if (response == null) throw new IllegalArgumentException("response is null");
         if (account == null) throw new IllegalArgumentException("account is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
@@ -829,7 +862,7 @@ public class AccountManagerService
             // if the caller has permission, do the peek. otherwise go the more expensive
             // route of starting a Session
             if (permissionGranted) {
-                String authToken = readAuthTokenFromDatabase(account, authTokenType);
+                String authToken = readAuthTokenFromCache(account, authTokenType);
                 if (authToken != null) {
                     Bundle result = new Bundle();
                     result.putString(AccountManager.KEY_AUTHTOKEN, authToken);
@@ -920,8 +953,7 @@ public class AccountManagerService
         n.setLatestEventInfo(mContext,
                 title, subtitle,
                 PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT));
-        ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
-                .notify(getCredentialPermissionNotificationId(account, authTokenType, uid), n);
+        installNotification(getCredentialPermissionNotificationId(account, authTokenType, uid), n);
     }
 
     private Intent newGrantCredentialsPermissionIntent(Account account, int uid,
@@ -952,7 +984,7 @@ public class AccountManagerService
         intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_ACCOUNT_TYPE_LABEL,
                         authContext.getString(serviceInfo.type.labelId));
         intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_PACKAGES,
-                        mContext.getPackageManager().getPackagesForUid(uid));
+                        mPackageManager.getPackagesForUid(uid));
         intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_REQUESTING_UID, uid);
         return intent;
     }
@@ -985,10 +1017,18 @@ public class AccountManagerService
         return id;
     }
 
-
     public void addAcount(final IAccountManagerResponse response, final String accountType,
             final String authTokenType, final String[] requiredFeatures,
             final boolean expectActivityLaunch, final Bundle options) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "addAccount: accountType " + accountType
+                    + ", response " + response
+                    + ", authTokenType " + authTokenType
+                    + ", requiredFeatures " + stringArrayToString(requiredFeatures)
+                    + ", expectActivityLaunch " + expectActivityLaunch
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         if (response == null) throw new IllegalArgumentException("response is null");
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
         checkManageAccountsPermission();
@@ -1017,6 +1057,13 @@ public class AccountManagerService
 
     public void confirmCredentials(IAccountManagerResponse response,
             final Account account, final Bundle options, final boolean expectActivityLaunch) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "confirmCredentials: " + account
+                    + ", response " + response
+                    + ", expectActivityLaunch " + expectActivityLaunch
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         if (response == null) throw new IllegalArgumentException("response is null");
         if (account == null) throw new IllegalArgumentException("account is null");
         checkManageAccountsPermission();
@@ -1040,6 +1087,14 @@ public class AccountManagerService
     public void updateCredentials(IAccountManagerResponse response, final Account account,
             final String authTokenType, final boolean expectActivityLaunch,
             final Bundle loginOptions) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "updateCredentials: " + account
+                    + ", response " + response
+                    + ", authTokenType " + authTokenType
+                    + ", expectActivityLaunch " + expectActivityLaunch
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         if (response == null) throw new IllegalArgumentException("response is null");
         if (account == null) throw new IllegalArgumentException("account is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
@@ -1066,6 +1121,13 @@ public class AccountManagerService
 
     public void editProperties(IAccountManagerResponse response, final String accountType,
             final boolean expectActivityLaunch) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "editProperties: accountType " + accountType
+                    + ", response " + response
+                    + ", expectActivityLaunch " + expectActivityLaunch
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         if (response == null) throw new IllegalArgumentException("response is null");
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
         checkManageAccountsPermission();
@@ -1100,7 +1162,7 @@ public class AccountManagerService
         }
 
         public void run() throws RemoteException {
-            mAccountsOfType = getAccountsByType(mAccountType);
+            mAccountsOfType = getAccountsByTypeFromCache(mAccountType);
             // check whether each account matches the requested features
             mAccountsWithFeatures = new ArrayList<Account>(mAccountsOfType.length);
             mCurrentAccount = 0;
@@ -1154,6 +1216,10 @@ public class AccountManagerService
                     for (int i = 0; i < accounts.length; i++) {
                         accounts[i] = mAccountsWithFeatures.get(i);
                     }
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, getClass().getSimpleName() + " calling onResult() on response "
+                                + response);
+                    }
                     Bundle result = new Bundle();
                     result.putParcelableArray(AccountManager.KEY_ACCOUNTS, accounts);
                     response.onResult(result);
@@ -1174,10 +1240,15 @@ public class AccountManagerService
     }
 
     public Account[] getAccounts(String type) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "getAccounts: accountType " + type
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         checkReadAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
-            return getAccountsByType(type);
+            return getAccountsByTypeFromCache(type);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -1185,23 +1256,20 @@ public class AccountManagerService
 
     public void getAccountsByFeatures(IAccountManagerResponse response,
             String type, String[] features) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "getAccounts: accountType " + type
+                    + ", response " + response
+                    + ", features " + stringArrayToString(features)
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
         if (response == null) throw new IllegalArgumentException("response is null");
         if (type == null) throw new IllegalArgumentException("accountType is null");
         checkReadAccountsPermission();
-        if (features != null && type == null) {
-            if (response != null) {
-                try {
-                    response.onError(AccountManager.ERROR_CODE_BAD_ARGUMENTS, "type is null");
-                } catch (RemoteException e) {
-                    // ignore this
-                }
-            }
-            return;
-        }
         long identityToken = clearCallingIdentity();
         try {
             if (features == null || features.length == 0) {
-                Account[] accounts = getAccountsByType(type);
+                Account[] accounts = getAccountsByTypeFromCache(type);
                 Bundle result = new Bundle();
                 result.putParcelableArray(AccountManager.KEY_ACCOUNTS, accounts);
                 onResult(response, result);
@@ -1397,11 +1465,19 @@ public class AccountManagerService
             if (response != null) {
                 try {
                     if (result == null) {
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG, getClass().getSimpleName()
+                                    + " calling onError() on response " + response);
+                        }
                         response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
                                 "null bundle returned");
                     } else {
                         if (mStripAuthTokenFromResult) {
                             result.remove(AccountManager.KEY_AUTHTOKEN);
+                        }
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG, getClass().getSimpleName()
+                                    + " calling onResult() on response " + response);
                         }
                         response.onResult(result);
                     }
@@ -1420,13 +1496,11 @@ public class AccountManagerService
 
         public void onError(int errorCode, String errorMessage) {
             mNumErrors++;
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "Session.onError: " + errorCode + ", " + errorMessage);
-            }
             IAccountManagerResponse response = getResponseAndClose();
             if (response != null) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "Session.onError: responding");
+                    Log.v(TAG, getClass().getSimpleName()
+                            + " calling onError() on response " + response);
                 }
                 try {
                     response.onError(errorCode, errorMessage);
@@ -1744,7 +1818,7 @@ public class AccountManagerService
                 }
             }
         } else {
-            Account[] accounts = getAccountsByType(null /* type */);
+            Account[] accounts = getAccountsByTypeFromCache(null /* type */);
             fout.println("Accounts: " + accounts.length);
             for (Account account : accounts) {
                 fout.println("  " + account);
@@ -1786,15 +1860,19 @@ public class AccountManagerService
                         String.format(notificationTitleFormat, account.name),
                         message, PendingIntent.getActivity(
                         mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT));
-                ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
-                        .notify(notificationId, n);
+                installNotification(notificationId, n);
             }
         } finally {
             restoreCallingIdentity(identityToken);
         }
     }
 
-    private void cancelNotification(int id) {
+    protected void installNotification(final int notificationId, final Notification n) {
+        ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
+                .notify(notificationId, n);
+    }
+
+    protected void cancelNotification(int id) {
         long identityToken = clearCallingIdentity();
         try {
             ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
@@ -1811,24 +1889,24 @@ public class AccountManagerService
         for (String perm : permissions) {
             if (mContext.checkCallingOrSelfPermission(perm) == PackageManager.PERMISSION_GRANTED) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "caller uid " + uid + " has " + perm);
+                    Log.v(TAG, "  caller uid " + uid + " has " + perm);
                 }
                 return;
             }
         }
 
         String msg = "caller uid " + uid + " lacks any of " + TextUtils.join(",", permissions);
-        Log.w(TAG, msg);
+        Log.w(TAG, "  " + msg);
         throw new SecurityException(msg);
     }
 
     private boolean inSystemImage(int callerUid) {
-        String[] packages = mContext.getPackageManager().getPackagesForUid(callerUid);
+        String[] packages = mPackageManager.getPackagesForUid(callerUid);
         for (String name : packages) {
             try {
-                PackageInfo packageInfo =
-                        mContext.getPackageManager().getPackageInfo(name, 0 /* flags */);
-                if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                PackageInfo packageInfo = mPackageManager.getPackageInfo(name, 0 /* flags */);
+                if (packageInfo != null
+                        && (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
                     return true;
                 }
             } catch (PackageManager.NameNotFoundException e) {
@@ -1846,7 +1924,7 @@ public class AccountManagerService
                 && hasExplicitlyGrantedPermission(account, authTokenType);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "checkGrantsOrCallingUidAgainstAuthenticator: caller uid "
-                    + callerUid + ", account " + account
+                    + callerUid + ", " + account
                     + ": is authenticator? " + fromAuthenticator
                     + ", has explicit permission? " + hasExplicitGrants);
         }
@@ -1858,7 +1936,7 @@ public class AccountManagerService
                 mAuthenticatorCache.getAllServices()) {
             if (serviceInfo.type.type.equals(accountType)) {
                 return (serviceInfo.uid == callingUid) ||
-                        (mContext.getPackageManager().checkSignatures(serviceInfo.uid, callingUid)
+                        (mPackageManager.checkSignatures(serviceInfo.uid, callingUid)
                                 == PackageManager.SIGNATURE_MATCH);
             }
         }
@@ -1974,5 +2052,171 @@ public class AccountManagerService
             db.endTransaction();
         }
         cancelNotification(getCredentialPermissionNotificationId(account, authTokenType, uid));
+    }
+
+    static final private String stringArrayToString(String[] value) {
+        return value != null ? ("[" + TextUtils.join(",", value) + "]") : null;
+    }
+
+    private void removeAccountFromCache(Account account) {
+        synchronized (mCacheLock) {
+            final Account[] oldAccountsForType = mAccountCache.get(account.type);
+            if (oldAccountsForType != null) {
+                ArrayList<Account> newAccountsList = new ArrayList<Account>();
+                for (Account curAccount : oldAccountsForType) {
+                    if (!curAccount.equals(account)) {
+                        newAccountsList.add(curAccount);
+                    }
+                }
+                if (newAccountsList.isEmpty()) {
+                    mAccountCache.remove(account.type);
+                } else {
+                    Account[] newAccountsForType = new Account[newAccountsList.size()];
+                    newAccountsForType = newAccountsList.toArray(newAccountsForType);
+                    mAccountCache.put(account.type, newAccountsForType);
+                }
+            }
+            mUserDataCache.remove(account);
+            mAuthTokenCache.remove(account);
+        }
+    }
+
+    /**
+     * This assumes that the caller has already checked that the account is not already present.
+     */
+    private void insertAccountIntoCache(Account account) {
+        synchronized (mCacheLock) {
+            Account[] accountsForType = mAccountCache.get(account.type);
+            int oldLength = (accountsForType != null) ? accountsForType.length : 0;
+            Account[] newAccountsForType = new Account[oldLength + 1];
+            if (accountsForType != null) {
+                System.arraycopy(accountsForType, 0, newAccountsForType, 0, oldLength);
+            }
+            newAccountsForType[oldLength] = account;
+            mAccountCache.put(account.type, newAccountsForType);
+        }
+    }
+
+    protected Account[] getAccountsByTypeFromCache(String accountType) {
+        synchronized (mCacheLock) {
+            if (accountType != null) {
+                final Account[] accounts = mAccountCache.get(accountType);
+                if (accounts == null) {
+                    return EMPTY_ACCOUNT_ARRAY;
+                } else {
+                    return Arrays.copyOf(accounts, accounts.length);
+                }
+            } else {
+                int totalLength = 0;
+                for (Account[] accounts : mAccountCache.values()) {
+                    totalLength += accounts.length;
+                }
+                if (totalLength == 0) {
+                    return EMPTY_ACCOUNT_ARRAY;
+                }
+                Account[] accounts = new Account[totalLength];
+                totalLength = 0;
+                for (Account[] accountsOfType : mAccountCache.values()) {
+                    System.arraycopy(accountsOfType, 0, accounts, totalLength,
+                            accountsOfType.length);
+                    totalLength += accountsOfType.length;
+                }
+                return accounts;
+            }
+        }
+    }
+
+    protected void writeUserDataIntoCache(Account account, String key, String value) {
+        synchronized (mCacheLock) {
+            HashMap<String, String> userDataForAccount = mUserDataCache.get(account);
+            if (userDataForAccount == null) {
+                userDataForAccount = readUserDataForAccountFromDatabase(account);
+                mUserDataCache.put(account, userDataForAccount);
+            }
+            if (value == null) {
+                userDataForAccount.remove(key);
+            } else {
+                userDataForAccount.put(key, value);
+            }
+        }
+    }
+
+    protected void writeAuthTokenIntoCache(Account account, String key, String value) {
+        synchronized (mCacheLock) {
+            HashMap<String, String> authTokensForAccount = mAuthTokenCache.get(account);
+            if (authTokensForAccount == null) {
+                authTokensForAccount = readAuthTokensForAccountFromDatabase(account);
+                mAuthTokenCache.put(account, authTokensForAccount);
+            }
+            if (value == null) {
+                authTokensForAccount.remove(key);
+            } else {
+                authTokensForAccount.put(key, value);
+            }
+        }
+    }
+
+    protected String readAuthTokenFromCache(Account account, String authTokenType) {
+        synchronized (mCacheLock) {
+            HashMap<String, String> authTokensForAccount = mAuthTokenCache.get(account);
+            if (authTokensForAccount == null) {
+                // need to populate the cache for this account
+                authTokensForAccount = readAuthTokensForAccountFromDatabase(account);
+                mAuthTokenCache.put(account, authTokensForAccount);
+            }
+            return authTokensForAccount.get(authTokenType);
+        }
+    }
+
+    protected String readUserDataFromCache(Account account, String key) {
+        synchronized (mCacheLock) {
+            HashMap<String, String> userDataForAccount = mUserDataCache.get(account);
+            if (userDataForAccount == null) {
+                // need to populate the cache for this account
+                userDataForAccount = readUserDataForAccountFromDatabase(account);
+                mUserDataCache.put(account, userDataForAccount);
+            }
+            return userDataForAccount.get(key);
+        }
+    }
+
+    protected HashMap<String, String> readUserDataForAccountFromDatabase(Account account) {
+        HashMap<String, String> userDataForAccount = new HashMap<String, String>();
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_EXTRAS,
+                COLUMNS_EXTRAS_KEY_AND_VALUE,
+                SELECTION_USERDATA_BY_ACCOUNT,
+                new String[]{account.name, account.type},
+                null, null, null);
+        try {
+            while (cursor.moveToNext()) {
+                final String tmpkey = cursor.getString(0);
+                final String value = cursor.getString(1);
+                userDataForAccount.put(tmpkey, value);
+            }
+        } finally {
+            cursor.close();
+        }
+        return userDataForAccount;
+    }
+
+    protected HashMap<String, String> readAuthTokensForAccountFromDatabase(Account account) {
+        HashMap<String, String> authTokensForAccount = new HashMap<String, String>();
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_AUTHTOKENS,
+                COLUMNS_AUTHTOKENS_TYPE_AND_AUTHTOKEN,
+                SELECTION_AUTHTOKENS_BY_ACCOUNT,
+                new String[]{account.name, account.type},
+                null, null, null);
+        try {
+            while (cursor.moveToNext()) {
+                final String type = cursor.getString(0);
+                final String authToken = cursor.getString(1);
+                authTokensForAccount.put(type, authToken);
+            }
+        } finally {
+            cursor.close();
+        }
+        return authTokensForAccount;
     }
 }

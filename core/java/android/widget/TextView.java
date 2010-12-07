@@ -7797,6 +7797,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return new DragThumbnailBuilder(thumbnail);
     }
 
+    private static class DragLocalState {
+        public TextView sourceTextView;
+        public int start, end;
+
+        public DragLocalState(TextView sourceTextView, int start, int end) {
+            this.sourceTextView = sourceTextView;
+            this.start = start;
+            this.end = end;
+        }
+    }
+
     @Override
     public boolean performLongClick() {
         if (super.performLongClick()) {
@@ -7822,8 +7833,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final int end = getSelectionEnd();
                 CharSequence selectedText = mTransformed.subSequence(start, end);
                 ClipData data = ClipData.newPlainText(null, null, selectedText);
-                startDrag(data, getTextThumbnailBuilder(selectedText), false, null);
-                mDragSourcePositions = packRangeInLong(start, end);
+                DragLocalState localState = new DragLocalState(this, start, end);
+                startDrag(data, getTextThumbnailBuilder(selectedText), false, localState);
                 stopSelectionActionMode();
             } else {
                 selectCurrentWord();
@@ -8209,6 +8220,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             positionAtCursor();
             coords[0] += mPositionX;
             coords[1] += mPositionY;
+            coords[0] = Math.max(0, coords[0]);
+            final int screenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
+            coords[0] = Math.min(screenWidth - mContainer.getContentView().getMeasuredWidth(),
+                    coords[0]);
             mContainer.showAtLocation(TextView.this, Gravity.NO_GRAVITY, coords[0], coords[1]);
         }
 
@@ -8352,7 +8367,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mContainerPositionY = coords[1] + mPositionY;
             mContainer.showAtLocation(TextView.this, 0, mContainerPositionX, mContainerPositionY);
 
-            // Hide paste view when handle is moved.
+            // Hide paste view when handle is moved on screen.
             if (mPastePopupWindow != null) {
                 mPastePopupWindow.hide();
             }
@@ -8491,12 +8506,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mIsDragging = true;
                 if (mHasPastePopupWindow) {
                     mTouchTimer = SystemClock.uptimeMillis();
-                    if (mPastePopupWindow != null && mPastePopupWindow.isShowing()) {
-                        // Tapping on the handle again dismisses the displayed paste view,
-                        mPastePopupWindow.hide();
-                        // and makes sure the action up does not display the paste view.
-                        mTouchTimer = 0;
-                    }
                 }
                 break;
             }
@@ -8511,10 +8520,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 break;
             }
             case MotionEvent.ACTION_UP:
-                if (mPastePopupWindow != null) {
-                    // Will show the paste popup after a delay.
-                    mController.show();
-                    /* TEMP USER TEST: Display Paste as soon as handle is draggged
+                if (mHasPastePopupWindow) {
                     long delay = SystemClock.uptimeMillis() - mTouchTimer;
                     if (delay < ViewConfiguration.getTapTimeout()) {
                         final float touchOffsetX = ev.getRawX() - mPositionX;
@@ -8526,9 +8532,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         final int doubleTapSlop = viewConfiguration.getScaledDoubleTapSlop();
                         final int slopSquared = doubleTapSlop * doubleTapSlop;
                         if (distanceSquared < slopSquared) {
-                            showPastePopupWindow();
+                            if (mPastePopupWindow != null && mPastePopupWindow.isShowing()) {
+                                // Tapping on the handle dismisses the displayed paste view,
+                                mPastePopupWindow.hide();
+                            } else {
+                                ((InsertionPointCursorController) mController).show(0);
+                            }
                         }
-                    }*/
+                    } else {
+                        mController.show();
+                    }
                 }
                 mIsDragging = false;
                 break;
@@ -8975,9 +8988,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return true;
 
             case DragEvent.ACTION_DRAG_ENDED:
-                mDragSourcePositions = -1;
-                return true;
-
             case DragEvent.ACTION_DRAG_EXITED:
             default:
                 return true;
@@ -8995,10 +9005,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         final int offset = getOffset((int) event.getX(), (int) event.getY());
 
-        if (mDragSourcePositions != -1) {
-            final int dragSourceStart = extractRangeStartFromLong(mDragSourcePositions);
-            final int dragSourceEnd = extractRangeEndFromLong(mDragSourcePositions);
-            if (offset >= dragSourceStart && offset < dragSourceEnd) {
+        Object localState = event.getLocalState();
+        DragLocalState dragLocalState = null;
+        if (localState instanceof DragLocalState) {
+            dragLocalState = (DragLocalState) localState;
+        }
+        boolean dragDropIntoItself = dragLocalState != null &&
+                dragLocalState.sourceTextView == this;
+
+        if (dragDropIntoItself) {
+            if (offset >= dragLocalState.start && offset < dragLocalState.end) {
                 // A drop inside the original selection discards the drop.
                 return;
             }
@@ -9012,9 +9028,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         Selection.setSelection((Spannable) mText, max);
         ((Editable) mText).replace(min, max, content);
 
-        if (mDragSourcePositions != -1) {
-            int dragSourceStart = extractRangeStartFromLong(mDragSourcePositions);
-            int dragSourceEnd = extractRangeEndFromLong(mDragSourcePositions);
+        if (dragDropIntoItself) {
+            int dragSourceStart = dragLocalState.start;
+            int dragSourceEnd = dragLocalState.end;
             if (max <= dragSourceStart) {
                 // Inserting text before selection has shifted positions
                 final int shift = mText.length() - originalLength;
@@ -9198,8 +9214,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private InputFilter[] mFilters = NO_FILTERS;
     private static final Spanned EMPTY_SPANNED = new SpannedString("");
     private static int DRAG_THUMBNAIL_MAX_TEXT_LENGTH = 20;
-    // A packed range containing the drag source if it occured in that TextView. -1 otherwise.
-    private long mDragSourcePositions = -1;
     // System wide time for last cut or copy action.
     private static long sLastCutOrCopyTime;
 }

@@ -253,7 +253,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
     }
     
     //Format: QVGA h263
-    @LargeTest
+    @Suppress
     public void testQVGAH263() throws Exception {  
         boolean videoRecordedResult = false;
         recordVideo(15, 320, 240, MediaRecorder.VideoEncoder.H263, 
@@ -263,7 +263,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
     }
     
     //Format: SQVGA h263
-    @LargeTest
+    @Suppress
     public void testSQVGAH263() throws Exception {  
         boolean videoRecordedResult = false;
         recordVideo(15, 240, 160, MediaRecorder.VideoEncoder.H263, 
@@ -341,7 +341,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
         assertTrue("HVGAMP4", videoRecordedResult);
     }
      
-    @LargeTest
+    @Suppress
     public void testQVGAMP4() throws Exception {  
         boolean videoRecordedResult = false;
         recordVideo(15, 320, 240, MediaRecorder.VideoEncoder.MPEG_4_SP, 
@@ -350,7 +350,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
         assertTrue("QVGAMP4", videoRecordedResult);
     }
     
-    @LargeTest
+    @Suppress
     public void testSQVGAMP4() throws Exception {  
         boolean videoRecordedResult = false;
         recordVideo(15, 240, 160, MediaRecorder.VideoEncoder.MPEG_4_SP, 

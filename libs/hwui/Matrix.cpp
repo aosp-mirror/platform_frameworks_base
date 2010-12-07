@@ -62,6 +62,11 @@ bool Matrix4::changesBounds() {
              ALMOST_EQUAL(data[10], 1.0f));
 }
 
+bool Matrix4::isPureTranslate() {
+    return mSimpleMatrix &&
+            ALMOST_EQUAL(data[kScaleX], 1.0f) && ALMOST_EQUAL(data[kScaleY], 1.0f);
+}
+
 void Matrix4::load(const float* v) {
     memcpy(data, v, sizeof(data));
     mSimpleMatrix = false;

@@ -19,6 +19,7 @@ package com.android.dumprendertree;
 import dalvik.system.VMRuntime;
 
 import android.app.Instrumentation;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Debug;
@@ -27,6 +28,7 @@ import android.os.Process;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -202,14 +204,14 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
 
     public void copyRunnerAssetsToCache() {
         try {
-            String out_dir = getActivity().getApplicationContext()
-                .getCacheDir().getPath() + "/";
+            Context targetContext = getInstrumentation().getTargetContext();
+            File cacheDir = targetContext.getCacheDir();
 
             for( int i=0; i< LOAD_TEST_RUNNER_FILES.length; i++) {
-                InputStream in = getActivity().getAssets().open(
+                InputStream in = targetContext.getAssets().open(
                         LOAD_TEST_RUNNER_FILES[i]);
                 OutputStream out = new FileOutputStream(
-                        out_dir + LOAD_TEST_RUNNER_FILES[i]);
+                        new File(cacheDir, LOAD_TEST_RUNNER_FILES[i]));
 
                 byte[] buf = new byte[2048];
                 int len;
