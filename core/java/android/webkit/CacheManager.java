@@ -196,7 +196,7 @@ public final class CacheManager {
             }
             FileUtils.setPermissions(
                     mBaseDir.toString(),
-                    FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
+                    FileUtils.S_IRWXU | FileUtils.S_IRWXG,
                     -1, -1);
             // If we did create the directory, we need to flush 
             // the cache database. The directory could be recreated
