@@ -88,11 +88,14 @@ public:
     status_t lock(uint32_t usage, const Rect& rect, void** vaddr);
     status_t lock(GGLSurface* surface, uint32_t usage);
     status_t unlock();
-    
+
     android_native_buffer_t* getNativeBuffer() const;
     
     void setIndex(int index);
     int getIndex() const;
+
+    // for debugging
+    static void dumpAllocationsToSystemLog();
 
 private:
     virtual ~GraphicBuffer();

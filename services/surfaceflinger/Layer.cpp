@@ -347,6 +347,7 @@ sp<GraphicBuffer> Layer::requestBuffer(int index,
     err = buffer->initCheck();
 
     if (err || buffer->handle == 0) {
+        GraphicBuffer::dumpAllocationsToSystemLog();
         LOGE_IF(err || buffer->handle == 0,
                 "Layer::requestBuffer(this=%p), index=%d, w=%d, h=%d failed (%s)",
                 this, index, w, h, strerror(-err));
