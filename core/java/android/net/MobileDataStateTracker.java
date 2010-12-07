@@ -20,14 +20,21 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.ServiceManager;
+
+import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.util.AsyncChannel;
+
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkInfo;
 import android.net.LinkProperties;
@@ -66,6 +73,10 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     // DEFAULT and HIPRI are the same connection.  If we're one of these we need to check if
     // the other is also disconnected before we reset sockets
     private boolean mIsDefaultOrHipri = false;
+
+    private Handler mHandler;
+    private AsyncChannel mDataConnectionTrackerAc;
+    private Messenger mMessenger;
 
     /**
      * Create a new MobileDataStateTracker
@@ -107,12 +118,52 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         mTarget = target;
         mContext = context;
 
+        HandlerThread handlerThread = new HandlerThread("ConnectivityServiceThread");
+        handlerThread.start();
+        mHandler = new MdstHandler(handlerThread.getLooper(), this);
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
+        filter.addAction(DataConnectionTracker.ACTION_DATA_CONNECTION_TRACKER_MESSENGER);
 
         mContext.registerReceiver(new MobileDataStateReceiver(), filter);
         mMobileDataState = Phone.DataState.DISCONNECTED;
+    }
+
+    static class MdstHandler extends Handler {
+        private MobileDataStateTracker mMdst;
+
+        MdstHandler(Looper looper, MobileDataStateTracker mdst) {
+            super(looper);
+            mMdst = mdst;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
+                    if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
+                        if (DBG) {
+                            mMdst.log("MdstHandler connected");
+                        }
+                        mMdst.mDataConnectionTrackerAc = (AsyncChannel) msg.obj;
+                    } else {
+                        if (DBG) {
+                            mMdst.log("MdstHandler %s NOT connected error=" + msg.arg1);
+                        }
+                    }
+                    break;
+                case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
+                    mMdst.log("Disconnected from DataStateTracker");
+                    mMdst.mDataConnectionTrackerAc = null;
+                    break;
+                default: {
+                    mMdst.log("Ignorning unknown message=" + msg);
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -179,7 +230,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                         false));
 
                 if (DBG) {
-                    log(mApnType + " Received state=" + state + ", old=" + mMobileDataState +
+                    log("Received state=" + state + ", old=" + mMobileDataState +
                         ", reason=" + (reason == null ? "(unspecified)" : reason));
                 }
                 if (mMobileDataState != state) {
@@ -265,10 +316,16 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 String reason = intent.getStringExtra(Phone.FAILURE_REASON_KEY);
                 String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
                 if (DBG) {
-                    log(mApnType + "Received " + intent.getAction() +
+                    log("Received " + intent.getAction() +
                                 " broadcast" + reason == null ? "" : "(" + reason + ")");
                 }
                 setDetailedState(DetailedState.FAILED, reason, apnName);
+            } else if (intent.getAction().
+                    equals(DataConnectionTracker.ACTION_DATA_CONNECTION_TRACKER_MESSENGER)) {
+                if (DBG) log(mApnType + " got ACTION_DATA_CONNECTION_TRACKER_MESSENGER");
+                mMessenger = intent.getParcelableExtra(DataConnectionTracker.EXTRA_MESSENGER);
+                AsyncChannel ac = new AsyncChannel();
+                ac.connect(mContext, MobileDataStateTracker.this.mHandler, mMessenger);
             } else {
                 if (DBG) log("Broadcast received: ignore " + intent.getAction());
             }
@@ -488,6 +545,20 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         return -1;
     }
 
+    /**
+     * @param enabled
+     */
+    public void setDataEnable(boolean enabled) {
+        try {
+            log("setDataEnable: E enabled=" + enabled);
+            mDataConnectionTrackerAc.sendMessage(DataConnectionTracker.CMD_SET_DATA_ENABLE,
+                    enabled ? DataConnectionTracker.ENABLED : DataConnectionTracker.DISABLED);
+            log("setDataEnable: X enabled=" + enabled);
+        } catch (Exception e) {
+            log("setDataEnable: X mAc was null" + e);
+        }
+    }
+
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer("Mobile data state: ");
@@ -543,7 +614,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
             case ConnectivityManager.TYPE_MOBILE_HIPRI:
                 return Phone.APN_TYPE_HIPRI;
             default:
-                loge("Error mapping networkType " + netType + " to apnType.");
+                sloge("Error mapping networkType " + netType + " to apnType.");
                 return null;
         }
     }
@@ -562,11 +633,15 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         return new LinkCapabilities(mLinkCapabilities);
     }
 
-    static private void log(String s) {
-        Slog.d(TAG, s);
+    private void log(String s) {
+        Slog.d(TAG, mApnType + ": " + s);
     }
 
-    static private void loge(String s) {
+    private void loge(String s) {
+        Slog.e(TAG, mApnType + ": " + s);
+    }
+
+    static private void sloge(String s) {
         Slog.e(TAG, s);
     }
 }

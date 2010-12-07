@@ -189,6 +189,9 @@ public class DummyDataStateTracker implements NetworkStateTracker {
         return -1;
     }
 
+    public void setDataEnable(boolean enabled) {
+    }
+
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer("Dummy data state: none, dummy!");

@@ -113,6 +113,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         mDataConnectionTracker = this;
 
         createAllDataConnectionList();
+        broadcastMessenger();
     }
 
     @Override

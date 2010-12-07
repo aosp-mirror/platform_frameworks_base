@@ -30,6 +30,7 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Messenger;
 import android.os.ServiceManager;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -81,6 +82,10 @@ public abstract class DataConnectionTracker extends Handler {
         DORMANT
     }
 
+    public static String ACTION_DATA_CONNECTION_TRACKER_MESSENGER =
+        "com.android.internal.telephony";
+    public static String EXTRA_MESSENGER = "EXTRA_MESSENGER";
+
     /***** Event Codes *****/
     protected static final int EVENT_DATA_SETUP_COMPLETE = 1;
     protected static final int EVENT_RADIO_AVAILABLE = 3;
@@ -113,6 +118,8 @@ public abstract class DataConnectionTracker extends Handler {
     protected static final int EVENT_SET_INTERNAL_DATA_ENABLE = 37;
     protected static final int EVENT_RESET_DONE = 38;
 
+    public static final int CMD_SET_DATA_ENABLE = 39;
+
     /***** Constants *****/
 
     protected static final int APN_INVALID_ID = -1;
@@ -123,12 +130,17 @@ public abstract class DataConnectionTracker extends Handler {
     protected static final int APN_HIPRI_ID = 4;
     protected static final int APN_NUM_TYPES = 5;
 
-    protected static final int DISABLED = 0;
-    protected static final int ENABLED = 1;
+    public static final int DISABLED = 0;
+    public static final int ENABLED = 1;
 
     // responds to the setInternalDataEnabled call - used internally to turn off data
     // for example during emergency calls
     protected boolean mInternalDataEnabled = true;
+
+    // responds to public (user) API to enable/disable data use
+    // independent of mInternalDataEnabled and requests for APN access
+    // persisted
+    protected boolean mDataEnabled = true;
 
     protected boolean[] dataEnabled = new boolean[APN_NUM_TYPES];
 
@@ -289,6 +301,9 @@ public abstract class DataConnectionTracker extends Handler {
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
 
+        mDataEnabled = Settings.Secure.getInt(mPhone.getContext().getContentResolver(),
+                Settings.Secure.MOBILE_DATA, 1) == 1;
+
         // TODO: Why is this registering the phone as the receiver of the intent
         //       and not its own handler?
         mPhone.getContext().registerReceiver(mIntentReceiver, filter, null, mPhone);
@@ -296,16 +311,8 @@ public abstract class DataConnectionTracker extends Handler {
         // This preference tells us 1) initial condition for "dataEnabled",
         // and 2) whether the RIL will setup the baseband to auto-PS attach.
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mPhone.getContext());
-        boolean dataEnabledSetting = true;
-        try {
-            dataEnabledSetting = IConnectivityManager.Stub.asInterface(ServiceManager.
-                    getService(Context.CONNECTIVITY_SERVICE)).getMobileDataEnabled();
-        } catch (Exception e) {
-            // nothing to do - use the old behavior and leave data on
-        }
         dataEnabled[APN_DEFAULT_ID] =
-                !sp.getBoolean(PhoneBase.DATA_DISABLED_ON_BOOT_KEY, false) &&
-                dataEnabledSetting;
+                !sp.getBoolean(PhoneBase.DATA_DISABLED_ON_BOOT_KEY, false);
         if (dataEnabled[APN_DEFAULT_ID]) {
             enabledCount++;
         }
@@ -314,6 +321,12 @@ public abstract class DataConnectionTracker extends Handler {
 
     public void dispose() {
         mPhone.getContext().unregisterReceiver(this.mIntentReceiver);
+    }
+
+    protected void broadcastMessenger() {
+        Intent intent = new Intent(ACTION_DATA_CONNECTION_TRACKER_MESSENGER);
+        intent.putExtra(EXTRA_MESSENGER, new Messenger(this));
+        mPhone.getContext().sendBroadcast(intent);
     }
 
     public Activity getActivity() {
@@ -490,14 +503,20 @@ public abstract class DataConnectionTracker extends Handler {
                 onCleanUpConnection(tearDown, (String) msg.obj);
                 break;
 
-            case EVENT_SET_INTERNAL_DATA_ENABLE:
+            case EVENT_SET_INTERNAL_DATA_ENABLE: {
                 boolean enabled = (msg.arg1 == ENABLED) ? true : false;
                 onSetInternalDataEnabled(enabled);
                 break;
-
+            }
             case EVENT_RESET_DONE:
                 onResetDone((AsyncResult) msg.obj);
                 break;
+            case CMD_SET_DATA_ENABLE: {
+                log("CMD_SET_DATA_ENABLE msg=" + msg);
+                boolean enabled = (msg.arg1 == ENABLED) ? true : false;
+                onSetDataEnabled(enabled);
+                break;
+            }
 
             default:
                 Log.e("DATA", "Unidentified event = " + msg.what);
@@ -512,7 +531,7 @@ public abstract class DataConnectionTracker extends Handler {
      *         {@code true} otherwise.
      */
     public synchronized boolean getAnyDataEnabled() {
-        return (mInternalDataEnabled && (enabledCount != 0));
+        return (mInternalDataEnabled && mDataEnabled && (enabledCount != 0));
     }
 
     protected abstract void startNetStatPoll();
@@ -828,11 +847,6 @@ public abstract class DataConnectionTracker extends Handler {
      * Prevent mobile data connections from being established, or once again
      * allow mobile data connections. If the state toggles, then either tear
      * down or set up data, as appropriate to match the new state.
-     * <p>
-     * This operation only affects the default APN, and if the same APN is
-     * currently being used for MMS traffic, the teardown will not happen even
-     * when {@code enable} is {@code false}.
-     * </p>
      *
      * @param enable indicates whether to enable ({@code true}) or disable (
      *            {@code false}) data
@@ -849,15 +863,41 @@ public abstract class DataConnectionTracker extends Handler {
     }
 
     protected void onSetInternalDataEnabled(boolean enable) {
+        boolean prevEnabled = getAnyDataEnabled();
         if (mInternalDataEnabled != enable) {
             synchronized (this) {
                 mInternalDataEnabled = enable;
             }
-            if (enable) {
-                mRetryMgr.resetRetryCount();
-                onTrySetupData(Phone.REASON_DATA_ENABLED);
-            } else {
-                onCleanUpConnection(true, Phone.REASON_DATA_DISABLED);
+            if (prevEnabled != getAnyDataEnabled()) {
+                if (!prevEnabled) {
+                    mRetryMgr.resetRetryCount();
+                    onTrySetupData(Phone.REASON_DATA_ENABLED);
+                } else {
+                    onCleanUpConnection(true, Phone.REASON_DATA_DISABLED);
+                }
+            }
+        }
+    }
+
+    public synchronized boolean getDataEnabled() {
+        return mDataEnabled;
+    }
+
+    protected void onSetDataEnabled(boolean enable) {
+        boolean prevEnabled = getAnyDataEnabled();
+        if (mDataEnabled != enable) {
+            synchronized (this) {
+                mDataEnabled = enable;
+            }
+            Settings.Secure.putInt(mPhone.getContext().getContentResolver(),
+                    Settings.Secure.MOBILE_DATA, enable ? 1 : 0);
+            if (prevEnabled != getAnyDataEnabled()) {
+                if (!prevEnabled) {
+                    mRetryMgr.resetRetryCount();
+                    onTrySetupData(Phone.REASON_DATA_ENABLED);
+                } else {
+                    onCleanUpConnection(true, Phone.REASON_DATA_DISABLED);
+                }
             }
         }
     }
