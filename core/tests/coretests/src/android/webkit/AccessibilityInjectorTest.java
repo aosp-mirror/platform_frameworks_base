@@ -45,7 +45,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
     private static final long TIMEOUT_WAIT_FOR_SELECTION_STRING = 1000;
 
     /** The timeout to wait for accessibility and the mock service to be enabled. */
-    private static final long TIMEOUT_ENABLE_ACCESSIBILITY_AND_MOCK_SERVICE = 500;
+    private static final long TIMEOUT_ENABLE_ACCESSIBILITY_AND_MOCK_SERVICE = 1000;
 
     /** The count of tests to detect when to shut down the service. */
     private static final int TEST_CASE_COUNT = 8;
