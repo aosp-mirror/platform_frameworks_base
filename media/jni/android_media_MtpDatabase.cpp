@@ -933,6 +933,9 @@ MtpProperty* MyMtpDatabase::getObjectPropertyDesc(MtpObjectProperty property,
     MtpProperty* result = NULL;
     switch (property) {
         case MTP_PROPERTY_OBJECT_FORMAT:
+            // use format as default value
+            result = new MtpProperty(property, MTP_TYPE_UINT16, false, format);
+            break;
         case MTP_PROPERTY_PROTECTION_STATUS:
         case MTP_PROPERTY_TRACK:
             result = new MtpProperty(property, MTP_TYPE_UINT16);
