@@ -1056,17 +1056,20 @@ final class WebViewCore {
                             break;
 
                         case LOAD_URL: {
+                            CookieManager.getInstance().waitForCookieOperationsToComplete();
                             GetUrlData param = (GetUrlData) msg.obj;
                             loadUrl(param.mUrl, param.mExtraHeaders);
                             break;
                         }
 
                         case POST_URL: {
+                            CookieManager.getInstance().waitForCookieOperationsToComplete();
                             PostUrlData param = (PostUrlData) msg.obj;
                             mBrowserFrame.postUrl(param.mUrl, param.mPostData);
                             break;
                         }
                         case LOAD_DATA:
+                            CookieManager.getInstance().waitForCookieOperationsToComplete();
                             BaseUrlData loadParams = (BaseUrlData) msg.obj;
                             String baseUrl = loadParams.mBaseUrl;
                             if (baseUrl != null) {

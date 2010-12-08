@@ -19,6 +19,7 @@ package android.webkit;
 import android.net.ParseException;
 import android.net.WebAddress;
 import android.net.http.AndroidHttpClient;
+import android.os.AsyncTask;
 import android.util.Log;
 
 
@@ -101,6 +102,8 @@ public final class CookieManager {
     // TODO: Remove this if/when we permanently switch to the Chromium HTTP stack
     // http:/b/3118772
     private static Boolean sUseChromiumHttpStack;
+
+    private int pendingCookieOperations = 0;
 
     /**
      * This contains a list of 2nd-level domains that aren't allowed to have
@@ -523,12 +526,37 @@ public final class CookieManager {
         }
     }
 
+    synchronized void waitForCookieOperationsToComplete() {
+        while (pendingCookieOperations > 0) {
+            try {
+                wait();
+            } catch (InterruptedException e) { }
+        }
+    }
+
+    private synchronized void signalCookieOperationsComplete() {
+        pendingCookieOperations--;
+        assert pendingCookieOperations > -1;
+        notify();
+    }
+
+    private synchronized void signalCookieOperationsStart() {
+        pendingCookieOperations++;
+    }
+
     /**
      * Remove all session cookies, which are cookies without expiration date
      */
     public void removeSessionCookie() {
+        signalCookieOperationsStart();
         if (useChromiumHttpStack()) {
-            nativeRemoveSessionCookie();
+            new AsyncTask<Void, Void, Void>() {
+                protected Void doInBackground(Void... none) {
+                    nativeRemoveSessionCookie();
+                    signalCookieOperationsComplete();
+                    return null;
+                }
+            }.execute();
             return;
         }
 
@@ -548,6 +576,7 @@ public final class CookieManager {
                         }
                     }
                     CookieSyncManager.getInstance().clearSessionCookies();
+                    signalCookieOperationsComplete();
                 }
             }
         };
