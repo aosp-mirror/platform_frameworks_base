@@ -28,7 +28,7 @@ import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
-import android.widget.NumberPicker.OnChangedListener;
+import android.widget.NumberPicker.OnChangeListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -97,8 +97,8 @@ public class DatePicker extends FrameLayout {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.date_picker, this, true);
 
-        OnChangedListener onChangeListener = new OnChangedListener() {
-            public void onChanged(NumberPicker picker, int oldVal, int newVal) {
+        OnChangeListener onChangeListener = new OnChangeListener() {
+            public void onChange(NumberPicker picker, int oldVal, int newVal) {
                 notifyDateChanged();
                 updateMiniMonth();
             }
@@ -107,18 +107,18 @@ public class DatePicker extends FrameLayout {
         // day
         mDayPicker = (NumberPicker) findViewById(R.id.day);
         mDayPicker.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
-        mDayPicker.setSpeed(100);
+        mDayPicker.setOnLongPressUpdateInterval(100);
         mDayPicker.setOnChangeListener(onChangeListener);
 
         // month
         mMonthPicker = (NumberPicker) findViewById(R.id.month);
         mMonthPicker.setRange(0, mNumberOfMonths - 1, getShortMonths());
-        mMonthPicker.setSpeed(200);
+        mMonthPicker.setOnLongPressUpdateInterval(200);
         mMonthPicker.setOnChangeListener(onChangeListener);
 
         // year
         mYearPicker = (NumberPicker) findViewById(R.id.year);
-        mYearPicker.setSpeed(100);
+        mYearPicker.setOnLongPressUpdateInterval(100);
         mYearPicker.setOnChangeListener(onChangeListener);
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DatePicker);
         int mStartYear = a.getInt(R.styleable.DatePicker_startYear, DEFAULT_START_YEAR);
