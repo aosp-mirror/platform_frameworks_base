@@ -173,14 +173,17 @@ static jboolean android_net_wifi_wpsPbcCommand(JNIEnv* env, jobject clazz, jstri
     return doBooleanCommand(cmdstr, "OK");
 }
 
-static jboolean android_net_wifi_wpsPinFromAccessPointCommand(JNIEnv* env, jobject clazz, jstring bssid, int apPin)
+static jboolean android_net_wifi_wpsPinFromAccessPointCommand(JNIEnv* env, jobject clazz,
+        jstring bssid, jstring apPin)
 {
     char cmdstr[BUF_SIZE];
     jboolean isCopy;
 
     const char *bssidStr = env->GetStringUTFChars(bssid, &isCopy);
-    int numWritten = snprintf(cmdstr, sizeof(cmdstr), "WPS_REG %s %d", bssidStr, apPin);
+    const char *apPinStr = env->GetStringUTFChars(apPin, &isCopy);
+    int numWritten = snprintf(cmdstr, sizeof(cmdstr), "WPS_REG %s %s", bssidStr, apPinStr);
     env->ReleaseStringUTFChars(bssid, bssidStr);
+    env->ReleaseStringUTFChars(apPin, apPinStr);
 
     if ((numWritten == -1) || (numWritten >= (int)sizeof(cmdstr))) {
         return false;
@@ -188,7 +191,7 @@ static jboolean android_net_wifi_wpsPinFromAccessPointCommand(JNIEnv* env, jobje
     return doBooleanCommand(cmdstr, "OK");
 }
 
-static jint android_net_wifi_wpsPinFromDeviceCommand(JNIEnv* env, jobject clazz, jstring bssid)
+static jstring android_net_wifi_wpsPinFromDeviceCommand(JNIEnv* env, jobject clazz, jstring bssid)
 {
     char cmdstr[BUF_SIZE];
     jboolean isCopy;
@@ -198,9 +201,9 @@ static jint android_net_wifi_wpsPinFromDeviceCommand(JNIEnv* env, jobject clazz,
     env->ReleaseStringUTFChars(bssid, bssidStr);
 
     if ((numWritten == -1) || (numWritten >= (int)sizeof(cmdstr))) {
-        return -1;
+        return NULL;
     }
-    return doIntCommand(cmdstr);
+    return doStringCommand(env, cmdstr);
 }
 
 static jboolean android_net_wifi_setCountryCodeCommand(JNIEnv* env, jobject clazz, jstring country)
@@ -648,9 +651,9 @@ static JNINativeMethod gWifiMethods[] = {
     { "addToBlacklistCommand", "(Ljava/lang/String;)Z", (void*) android_net_wifi_addToBlacklistCommand },
     { "clearBlacklistCommand", "()Z", (void*) android_net_wifi_clearBlacklistCommand },
     { "startWpsPbcCommand", "(Ljava/lang/String;)Z", (void*) android_net_wifi_wpsPbcCommand },
-    { "startWpsWithPinFromAccessPointCommand", "(Ljava/lang/String;I)Z",
+    { "startWpsWithPinFromAccessPointCommand", "(Ljava/lang/String;Ljava/lang/String;)Z",
         (void*) android_net_wifi_wpsPinFromAccessPointCommand },
-    { "startWpsWithPinFromDeviceCommand", "(Ljava/lang/String;)I",
+    { "startWpsWithPinFromDeviceCommand", "(Ljava/lang/String;)Ljava/lang/String;",
         (void*) android_net_wifi_wpsPinFromDeviceCommand },
     { "setSuspendOptimizationsCommand", "(Z)Z",
         (void*) android_net_wifi_setSuspendOptimizationsCommand},

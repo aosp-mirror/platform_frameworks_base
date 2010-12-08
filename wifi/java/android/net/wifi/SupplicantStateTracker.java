@@ -32,7 +32,6 @@ import android.util.Log;
  * that is based on these state changes:
  * - detect a failed WPA handshake that loops indefinitely
  * - password failure handling
- * - Enable networks after a WPS success/failure
  */
 class SupplicantStateTracker extends HierarchicalStateMachine {
 
@@ -48,10 +47,6 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
 
     /* Maximum retries on a password failure notification */
     private static final int MAX_RETRIES_ON_PASSWORD_FAILURE = 2;
-
-    /* Track if WPS was started since we need to re-enable networks
-     * and load configuration afterwards */
-    private boolean mWpsStarted = false;
 
     private Context mContext;
 
@@ -156,11 +151,6 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
                     mPasswordFailuresCount++;
                     mAuthFailureInSupplicantBroadcast = true;
                     break;
-                case WifiStateMachine.CMD_START_WPS_PBC:
-                case WifiStateMachine.CMD_START_WPS_PIN_FROM_AP:
-                case WifiStateMachine.CMD_START_WPS_PIN_FROM_DEVICE:
-                    mWpsStarted = true;
-                    break;
                 case WifiStateMachine.SUPPLICANT_STATE_CHANGE_EVENT:
                     StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
                     sendSupplicantStateChangedBroadcast(stateChangeResult,
@@ -192,12 +182,6 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
         @Override
          public void enter() {
              if (DBG) Log.d(TAG, getName() + "\n");
-             /* A failed WPS connection */
-             if (mWpsStarted) {
-                 Log.e(TAG, "WPS set up failed, enabling other networks");
-                 WifiConfigStore.enableAllNetworks();
-                 mWpsStarted = false;
-             }
              mWifiStateMachine.setNetworkAvailable(false);
          }
         @Override
@@ -289,13 +273,6 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
              if (DBG) Log.d(TAG, getName() + "\n");
              /* Reset password failure count */
              mPasswordFailuresCount = 0;
-
-             /* A successful WPS connection */
-             if (mWpsStarted) {
-                 WifiConfigStore.enableAllNetworks();
-                 WifiConfigStore.loadConfiguredNetworks();
-                 mWpsStarted = false;
-             }
          }
         @Override
         public boolean processMessage(Message message) {
