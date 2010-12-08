@@ -466,6 +466,18 @@ bool Layer::setBypass(bool enable)
     return true;
 }
 
+void Layer::updateBuffersOrientation()
+{
+    sp<GraphicBuffer> buffer(getBypassBuffer());
+    if (buffer != NULL && mOrientation != buffer->transform) {
+        ClientRef::Access sharedClient(mUserClientRef);
+        SharedBufferServer* lcblk(sharedClient.get());
+        if (lcblk) { // all buffers need reallocation
+            lcblk->reallocateAll();
+        }
+    }
+}
+
 uint32_t Layer::doTransaction(uint32_t flags)
 {
     const Layer::State& front(drawingState());

@@ -725,8 +725,12 @@ void SurfaceFlinger::setBypassLayer(const sp<LayerBase>& layer)
 {
     // if this layer is already the bypass layer, do nothing
     sp<Layer> cur(mBypassLayer.promote());
-    if (mBypassLayer == layer)
+    if (mBypassLayer == layer) {
+        if (cur != NULL) {
+            cur->updateBuffersOrientation();
+        }
         return;
+    }
 
     // clear the current bypass layer
     mBypassLayer.clear();
