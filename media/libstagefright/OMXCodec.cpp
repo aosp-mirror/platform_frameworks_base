@@ -1650,8 +1650,7 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
         }
 
         info.mBuffer = buffer;
-        info.mOwnedByComponent = false;
-        info.mOwnedByNativeWindow = false;
+        info.mStatus = OWNED_BY_US;
         info.mMem = mem;
         info.mMediaBuffer = NULL;
 
@@ -1759,8 +1758,7 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
         info.mData = NULL;
         info.mSize = def.nBufferSize;
         info.mBuffer = bufferId;
-        info.mOwnedByComponent = false;
-        info.mOwnedByNativeWindow = false;
+        info.mStatus = OWNED_BY_US;
         info.mMem = NULL;
         info.mMediaBuffer = new MediaBuffer(graphicBuffer);
         info.mMediaBuffer->setObserver(this);
@@ -1794,7 +1792,7 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
 }
 
 status_t OMXCodec::cancelBufferToNativeWindow(BufferInfo *info) {
-    CHECK(!info->mOwnedByNativeWindow);
+    CHECK_EQ((int)info->mStatus, (int)OWNED_BY_US);
     CODEC_LOGV("Calling cancelBuffer on buffer %p", info->mBuffer);
     int err = mNativeWindow->cancelBuffer(
         mNativeWindow.get(), info->mMediaBuffer->graphicBuffer().get());
@@ -1804,7 +1802,7 @@ status_t OMXCodec::cancelBufferToNativeWindow(BufferInfo *info) {
       setState(ERROR);
       return err;
     }
-    info->mOwnedByNativeWindow = true;
+    info->mStatus = OWNED_BY_NATIVE_WINDOW;
     return OK;
 }
 
@@ -1839,8 +1837,8 @@ OMXCodec::BufferInfo* OMXCodec::dequeueBufferFromNativeWindow() {
     }
 
     // The native window no longer owns the buffer.
-    CHECK(bufInfo->mOwnedByNativeWindow);
-    bufInfo->mOwnedByNativeWindow = false;
+    CHECK_EQ((int)bufInfo->mStatus, (int)OWNED_BY_NATIVE_WINDOW);
+    bufInfo->mStatus = OWNED_BY_US;
 
     return bufInfo;
 }
@@ -1871,13 +1869,13 @@ void OMXCodec::on_message(const omx_message &msg) {
             }
 
             CHECK(i < buffers->size());
-            if (!(*buffers)[i].mOwnedByComponent) {
+            if ((*buffers)[i].mStatus != OWNED_BY_COMPONENT) {
                 LOGW("We already own input buffer %p, yet received "
                      "an EMPTY_BUFFER_DONE.", buffer);
             }
 
             BufferInfo* info = &buffers->editItemAt(i);
-            info->mOwnedByComponent = false;
+            info->mStatus = OWNED_BY_US;
 
             // Buffer could not be released until empty buffer done is called.
             if (info->mMediaBuffer != NULL) {
@@ -1926,12 +1924,12 @@ void OMXCodec::on_message(const omx_message &msg) {
             CHECK(i < buffers->size());
             BufferInfo *info = &buffers->editItemAt(i);
 
-            if (!info->mOwnedByComponent) {
+            if (info->mStatus != OWNED_BY_COMPONENT) {
                 LOGW("We already own output buffer %p, yet received "
                      "a FILL_BUFFER_DONE.", buffer);
             }
 
-            info->mOwnedByComponent = false;
+            info->mStatus = OWNED_BY_US;
 
             if (mPortStatus[kPortIndexOutput] == DISABLING) {
                 CODEC_LOGV("Port is disabled, freeing buffer %p", buffer);
@@ -2400,7 +2398,7 @@ void OMXCodec::onStateChange(OMX_STATETYPE newState) {
 size_t OMXCodec::countBuffersWeOwn(const Vector<BufferInfo> &buffers) {
     size_t n = 0;
     for (size_t i = 0; i < buffers.size(); ++i) {
-        if (!buffers[i].mOwnedByComponent) {
+        if (buffers[i].mStatus != OWNED_BY_COMPONENT) {
             ++n;
         }
     }
@@ -2417,11 +2415,12 @@ status_t OMXCodec::freeBuffersOnPort(
     for (size_t i = buffers->size(); i-- > 0;) {
         BufferInfo *info = &buffers->editItemAt(i);
 
-        if (onlyThoseWeOwn && info->mOwnedByComponent) {
+        if (onlyThoseWeOwn && info->mStatus == OWNED_BY_COMPONENT) {
             continue;
         }
 
-        CHECK_EQ((int)info->mOwnedByComponent, (int)false);
+        CHECK(info->mStatus == OWNED_BY_US
+                || info->mStatus == OWNED_BY_NATIVE_WINDOW);
 
         CODEC_LOGV("freeing buffer %p on port %ld", info->mBuffer, portIndex);
 
@@ -2454,7 +2453,7 @@ status_t OMXCodec::freeBuffer(OMX_U32 portIndex, size_t bufIndex) {
 
         // Cancel the buffer if it belongs to an ANativeWindow.
         sp<GraphicBuffer> graphicBuffer = info->mMediaBuffer->graphicBuffer();
-        if (!info->mOwnedByNativeWindow && graphicBuffer != 0) {
+        if (info->mStatus == OWNED_BY_US && graphicBuffer != 0) {
             err = cancelBufferToNativeWindow(info);
         }
 
@@ -2559,7 +2558,7 @@ void OMXCodec::fillOutputBuffers() {
     Vector<BufferInfo> *buffers = &mPortBuffers[kPortIndexOutput];
     for (size_t i = 0; i < buffers->size(); ++i) {
         BufferInfo *info = &buffers->editItemAt(i);
-        if (!info->mOwnedByNativeWindow) {
+        if (info->mStatus == OWNED_BY_US) {
             fillOutputBuffer(&buffers->editItemAt(i));
         }
     }
@@ -2570,15 +2569,17 @@ void OMXCodec::drainInputBuffers() {
 
     Vector<BufferInfo> *buffers = &mPortBuffers[kPortIndexInput];
     for (size_t i = 0; i < buffers->size(); ++i) {
-        drainInputBuffer(&buffers->editItemAt(i));
+        if (!drainInputBuffer(&buffers->editItemAt(i))) {
+            break;
+        }
     }
 }
 
-void OMXCodec::drainInputBuffer(BufferInfo *info) {
-    CHECK_EQ((int)info->mOwnedByComponent, (int)false);
+bool OMXCodec::drainInputBuffer(BufferInfo *info) {
+    CHECK_EQ((int)info->mStatus, (int)OWNED_BY_US);
 
     if (mSignalledEOS) {
-        return;
+        return false;
     }
 
     if (mCodecSpecificDataIndex < mCodecSpecificData.size()) {
@@ -2614,14 +2615,14 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
                 0);
         CHECK_EQ(err, (status_t)OK);
 
-        info->mOwnedByComponent = true;
+        info->mStatus = OWNED_BY_COMPONENT;
 
         ++mCodecSpecificDataIndex;
-        return;
+        return true;
     }
 
     if (mPaused) {
-        return;
+        return false;
     }
 
     status_t err;
@@ -2631,6 +2632,7 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
 
     size_t offset = 0;
     int32_t n = 0;
+
     for (;;) {
         MediaBuffer *srcBuffer;
         MediaSource::ReadOptions options;
@@ -2689,7 +2691,7 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
                 srcBuffer = NULL;
 
                 setState(ERROR);
-                return;
+                return false;
             }
 
             mLeftOverBuffer = srcBuffer;
@@ -2699,9 +2701,15 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
         bool releaseBuffer = true;
         if (mIsEncoder && (mQuirks & kAvoidMemcopyInputRecordingFrames)) {
             CHECK(mOMXLivesLocally && offset == 0);
-            OMX_BUFFERHEADERTYPE *header = (OMX_BUFFERHEADERTYPE *) info->mBuffer;
+
+            OMX_BUFFERHEADERTYPE *header =
+                (OMX_BUFFERHEADERTYPE *)info->mBuffer;
+
             CHECK(header->pBuffer == info->mData);
-            header->pBuffer = (OMX_U8 *) srcBuffer->data() + srcBuffer->range_offset();
+
+            header->pBuffer =
+                (OMX_U8 *)srcBuffer->data() + srcBuffer->range_offset();
+
             releaseBuffer = false;
             info->mMediaBuffer = srcBuffer;
         } else {
@@ -2710,7 +2718,8 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
                 info->mMediaBuffer = srcBuffer;
             }
             memcpy((uint8_t *)info->mData + offset,
-                    (const uint8_t *)srcBuffer->data() + srcBuffer->range_offset(),
+                    (const uint8_t *)srcBuffer->data()
+                        + srcBuffer->range_offset(),
                     srcBuffer->range_length());
         }
 
@@ -2766,10 +2775,10 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
 
     if (err != OK) {
         setState(ERROR);
-        return;
+        return false;
     }
 
-    info->mOwnedByComponent = true;
+    info->mStatus = OWNED_BY_COMPONENT;
 
     // This component does not ever signal the EOS flag on output buffers,
     // Thanks for nothing.
@@ -2777,10 +2786,12 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
         mNoMoreOutputData = true;
         mBufferFilled.signal();
     }
+
+    return true;
 }
 
 void OMXCodec::fillOutputBuffer(BufferInfo *info) {
-    CHECK_EQ((int)info->mOwnedByComponent, (int)false);
+    CHECK_EQ((int)info->mStatus, (int)OWNED_BY_US);
 
     if (mNoMoreOutputData) {
         CODEC_LOGV("There is no more output data available, not "
@@ -2793,7 +2804,6 @@ void OMXCodec::fillOutputBuffer(BufferInfo *info) {
         if (graphicBuffer != 0) {
             // When using a native buffer we need to lock the buffer before
             // giving it to OMX.
-            CHECK(!info->mOwnedByNativeWindow);
             CODEC_LOGV("Calling lockBuffer on %p", info->mBuffer);
             int err = mNativeWindow->lockBuffer(mNativeWindow.get(),
                     graphicBuffer.get());
@@ -2816,19 +2826,20 @@ void OMXCodec::fillOutputBuffer(BufferInfo *info) {
         return;
     }
 
-    info->mOwnedByComponent = true;
+    info->mStatus = OWNED_BY_COMPONENT;
 }
 
-void OMXCodec::drainInputBuffer(IOMX::buffer_id buffer) {
+bool OMXCodec::drainInputBuffer(IOMX::buffer_id buffer) {
     Vector<BufferInfo> *buffers = &mPortBuffers[kPortIndexInput];
     for (size_t i = 0; i < buffers->size(); ++i) {
         if ((*buffers)[i].mBuffer == buffer) {
-            drainInputBuffer(&buffers->editItemAt(i));
-            return;
+            return drainInputBuffer(&buffers->editItemAt(i));
         }
     }
 
     CHECK(!"should not be here.");
+
+    return false;
 }
 
 void OMXCodec::fillOutputBuffer(IOMX::buffer_id buffer) {
@@ -3374,6 +3385,9 @@ status_t OMXCodec::read(
     mFilledBuffers.erase(mFilledBuffers.begin());
 
     BufferInfo *info = &mPortBuffers[kPortIndexOutput].editItemAt(index);
+    CHECK_EQ((int)info->mStatus, (int)OWNED_BY_US);
+    info->mStatus = OWNED_BY_CLIENT;
+
     info->mMediaBuffer->add_ref();
     *buffer = info->mMediaBuffer;
 
@@ -3389,6 +3403,10 @@ void OMXCodec::signalBufferReturned(MediaBuffer *buffer) {
 
         if (info->mMediaBuffer == buffer) {
             CHECK_EQ((int)mPortStatus[kPortIndexOutput], (int)ENABLED);
+            CHECK_EQ((int)info->mStatus, (int)OWNED_BY_CLIENT);
+
+            info->mStatus = OWNED_BY_US;
+
             if (buffer->graphicBuffer() == 0) {
                 fillOutputBuffer(info);
             } else {
@@ -3402,9 +3420,9 @@ void OMXCodec::signalBufferReturned(MediaBuffer *buffer) {
                     if (err < 0) {
                         return;
                     }
-                } else {
-                    info->mOwnedByNativeWindow = true;
                 }
+
+                info->mStatus = OWNED_BY_NATIVE_WINDOW;
 
                 // Dequeue the next buffer from the native window.
                 BufferInfo *nextBufInfo = dequeueBufferFromNativeWindow();
