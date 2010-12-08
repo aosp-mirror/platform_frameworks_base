@@ -144,7 +144,10 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
             static_cast<MediaSource::ReadOptions::SeekMode>(seekMode);
 
     int64_t thumbNailTime;
-    if (frameTimeUs < 0 && trackMeta->findInt64(kKeyThumbnailTime, &thumbNailTime)) {
+    if (frameTimeUs < 0) {
+        if (!trackMeta->findInt64(kKeyThumbnailTime, &thumbNailTime)) {
+            thumbNailTime = 0;
+        }
         options.setSeekTo(thumbNailTime, mode);
     } else {
         thumbNailTime = -1;
