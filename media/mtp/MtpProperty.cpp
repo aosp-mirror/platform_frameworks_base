@@ -122,9 +122,8 @@ MtpProperty::~MtpProperty() {
 }
 
 void MtpProperty::read(MtpDataPacket& packet) {
-    bool deviceProp = isDeviceProperty();
-
     mCode = packet.getUInt16();
+    bool deviceProp = isDeviceProperty();
     mType = packet.getUInt16();
     mWriteable = (packet.getUInt8() == 1);
     switch (mType) {
