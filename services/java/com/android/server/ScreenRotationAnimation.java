@@ -152,6 +152,27 @@ class ScreenRotationAnimation {
         }
     }
 
+    public static void createRotationMatrix(int rotation, int width, int height,
+            Matrix outMatrix) {
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                outMatrix.reset();
+                break;
+            case Surface.ROTATION_90:
+                outMatrix.setRotate(90, 0, 0);
+                outMatrix.postTranslate(height, 0);
+                break;
+            case Surface.ROTATION_180:
+                outMatrix.setRotate(180, 0, 0);
+                outMatrix.postTranslate(width, height);
+                break;
+            case Surface.ROTATION_270:
+                outMatrix.setRotate(270, 0, 0);
+                outMatrix.postTranslate(0, width);
+                break;
+        }
+    }
+
     // Must be called while in a transaction.
     public void setRotation(int rotation) {
         mCurRotation = rotation;
@@ -160,23 +181,7 @@ class ScreenRotationAnimation {
         // to the snapshot to make it stay in the same original position
         // with the current screen rotation.
         int delta = deltaRotation(rotation, mSnapshotRotation);
-        switch (delta) {
-            case Surface.ROTATION_0:
-                mSnapshotInitialMatrix.reset();
-                break;
-            case Surface.ROTATION_90:
-                mSnapshotInitialMatrix.setRotate(90, 0, 0);
-                mSnapshotInitialMatrix.postTranslate(mHeight, 0);
-                break;
-            case Surface.ROTATION_180:
-                mSnapshotInitialMatrix.setRotate(180, 0, 0);
-                mSnapshotInitialMatrix.postTranslate(mWidth, mHeight);
-                break;
-            case Surface.ROTATION_270:
-                mSnapshotInitialMatrix.setRotate(270, 0, 0);
-                mSnapshotInitialMatrix.postTranslate(0, mWidth);
-                break;
-        }
+        createRotationMatrix(delta, mWidth, mHeight, mSnapshotInitialMatrix);
 
         if (DEBUG) Slog.v(TAG, "**** ROTATION: " + delta);
         setSnapshotTransform(mSnapshotInitialMatrix, 1.0f);

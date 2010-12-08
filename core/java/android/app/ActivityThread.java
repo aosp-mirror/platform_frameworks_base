@@ -239,6 +239,14 @@ public final class ActivityThread {
             nextIdle = null;
         }
 
+        public boolean isPreHoneycomb() {
+            if (activity != null) {
+                return activity.getApplicationInfo().targetSdkVersion
+                        < android.os.Build.VERSION_CODES.HONEYCOMB;
+            }
+            return false;
+        }
+
         public String toString() {
             ComponentName componentName = intent.getComponent();
             return "ActivityRecord{"
@@ -2299,39 +2307,42 @@ public final class ActivityThread {
 
     private int mThumbnailWidth = -1;
     private int mThumbnailHeight = -1;
+    private Bitmap mAvailThumbnailBitmap = null;
+    private Canvas mThumbnailCanvas = null;
 
     private final Bitmap createThumbnailBitmap(ActivityClientRecord r) {
-        Bitmap thumbnail = null;
+        Bitmap thumbnail = mAvailThumbnailBitmap;
         try {
-            int w = mThumbnailWidth;
-            int h;
-            if (w < 0) {
-                Resources res = r.activity.getResources();
-                mThumbnailHeight = h =
-                    res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_height);
+            if (thumbnail == null) {
+                int w = mThumbnailWidth;
+                int h;
+                if (w < 0) {
+                    Resources res = r.activity.getResources();
+                    mThumbnailHeight = h =
+                        res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_height);
 
-                mThumbnailWidth = w =
-                    res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_width);
-            } else {
-                h = mThumbnailHeight;
+                    mThumbnailWidth = w =
+                        res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_width);
+                } else {
+                    h = mThumbnailHeight;
+                }
+
+                // On platforms where we don't want thumbnails, set dims to (0,0)
+                if ((w > 0) && (h > 0)) {
+                    thumbnail = Bitmap.createBitmap(w, h, THUMBNAIL_FORMAT);
+                    thumbnail.eraseColor(0);
+                }
             }
 
-            // On platforms where we don't want thumbnails, set dims to (0,0)
-            if ((w > 0) && (h > 0)) {
-                View topView = r.activity.getWindow().getDecorView();
+            Canvas cv = mThumbnailCanvas;
+            if (cv == null) {
+                mThumbnailCanvas = cv = new Canvas();
+            }
 
-                // Maximize bitmap by capturing in native aspect.
-                if (topView.getWidth() >= topView.getHeight()) {
-                    thumbnail = Bitmap.createBitmap(w, h, THUMBNAIL_FORMAT);
-                } else {
-                    thumbnail = Bitmap.createBitmap(h, w, THUMBNAIL_FORMAT);
-                }
-
-                thumbnail.eraseColor(0);
-                Canvas cv = new Canvas(thumbnail);
-                if (!r.activity.onCreateThumbnail(thumbnail, cv)) {
-                    thumbnail = null;
-                }
+            cv.setBitmap(thumbnail);
+            if (!r.activity.onCreateThumbnail(thumbnail, cv)) {
+                mAvailThumbnailBitmap = thumbnail;
+                thumbnail = null;
             }
 
         } catch (Exception e) {
@@ -2357,14 +2368,14 @@ public final class ActivityThread {
             }
 
             r.activity.mConfigChangeFlags |= configChanges;
-            Bundle state = performPauseActivity(token, finished, true);
+            performPauseActivity(token, finished, r.isPreHoneycomb());
 
             // Make sure any pending writes are now committed.
             QueuedWork.waitToFinish();
             
             // Tell the activity manager we have paused.
             try {
-                ActivityManagerNative.getDefault().activityPaused(token, state);
+                ActivityManagerNative.getDefault().activityPaused(token);
             } catch (RemoteException ex) {
             }
         }
@@ -2404,6 +2415,8 @@ public final class ActivityThread {
                 state = new Bundle();
                 mInstrumentation.callActivityOnSaveInstanceState(r.activity, state);
                 r.state = state;
+            } else {
+                r.state = null;
             }
             // Now we are idle.
             r.activity.mCalled = false;
@@ -2430,9 +2443,9 @@ public final class ActivityThread {
         return state;
     }
 
-    final void performStopActivity(IBinder token) {
+    final void performStopActivity(IBinder token, boolean saveState) {
         ActivityClientRecord r = mActivities.get(token);
-        performStopActivityInner(r, null, false);
+        performStopActivityInner(r, null, false, saveState);
     }
 
     private static class StopInfo {
@@ -2447,9 +2460,18 @@ public final class ActivityThread {
         }
     }
 
+    /**
+     * Core implementation of stopping an activity.  Note this is a little
+     * tricky because the server's meaning of stop is slightly different
+     * than our client -- for the server, stop means to save state and give
+     * it the result when it is done, but the window may still be visible.
+     * For the client, we want to call onStop()/onStart() to indicate when
+     * the activity's UI visibillity changes.
+     */
     private final void performStopActivityInner(ActivityClientRecord r,
-            StopInfo info, boolean keepShown) {
+            StopInfo info, boolean keepShown, boolean saveState) {
         if (localLOGV) Slog.v(TAG, "Performing stop of " + r);
+        Bundle state = null;
         if (r != null) {
             if (!keepShown && r.stopped) {
                 if (r.activity.mFinished) {
@@ -2476,6 +2498,17 @@ public final class ActivityThread {
                                 + r.intent.getComponent().toShortString()
                                 + ": " + e.toString(), e);
                     }
+                }
+            }
+
+            // Next have the activity save its current state and managed dialogs...
+            if (!r.activity.mFinished && saveState) {
+                if (r.state == null) {
+                    state = new Bundle();
+                    mInstrumentation.callActivityOnSaveInstanceState(r.activity, state);
+                    r.state = state;
+                } else {
+                    state = r.state;
                 }
             }
 
@@ -2530,7 +2563,7 @@ public final class ActivityThread {
         r.activity.mConfigChangeFlags |= configChanges;
 
         StopInfo info = new StopInfo();
-        performStopActivityInner(r, info, show);
+        performStopActivityInner(r, info, show, true);
 
         if (localLOGV) Slog.v(
             TAG, "Finishing stop of " + r + ": show=" + show
@@ -2541,7 +2574,7 @@ public final class ActivityThread {
         // Tell activity manager we have been stopped.
         try {
             ActivityManagerNative.getDefault().activityStopped(
-                r.token, info.thumbnail, info.description);
+                r.token, r.state, info.thumbnail, info.description);
         } catch (RemoteException ex) {
         }
     }
@@ -2557,7 +2590,7 @@ public final class ActivityThread {
     private final void handleWindowVisibility(IBinder token, boolean show) {
         ActivityClientRecord r = mActivities.get(token);
         if (!show && !r.stopped) {
-            performStopActivityInner(r, null, show);
+            performStopActivityInner(r, null, show, false);
         } else if (show && r.stopped) {
             // If we are getting ready to gc after going to the background, well
             // we are back active so skip it.
@@ -2650,9 +2683,6 @@ public final class ActivityThread {
             r.activity.mConfigChangeFlags |= configChanges;
             if (finishing) {
                 r.activity.mFinished = true;
-            }
-            if (getNonConfigInstance) {
-                r.activity.mChangingConfigurations = true;
             }
             if (!r.paused) {
                 try {
@@ -2924,9 +2954,11 @@ public final class ActivityThread {
         r.onlyLocalRequest = tmp.onlyLocalRequest;
         Intent currentIntent = r.activity.mIntent;
 
+        r.activity.mChangingConfigurations = true;
+
         Bundle savedState = null;
         if (!r.paused) {
-            savedState = performPauseActivity(r.token, false, true);
+            savedState = performPauseActivity(r.token, false, r.isPreHoneycomb());
         }
 
         handleDestroyActivity(r.token, false, configChanges, true);

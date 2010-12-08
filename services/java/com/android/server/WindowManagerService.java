@@ -60,6 +60,7 @@ import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -4920,6 +4921,90 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void setStrictModeVisualIndicatorPreference(String value) {
         SystemProperties.set(StrictMode.VISUAL_PROPERTY, value);
+    }
+
+    public Bitmap screenshotApplications(int maxWidth, int maxHeight) {
+        if (!checkCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
+                "screenshotApplications()")) {
+            throw new SecurityException("Requires READ_FRAME_BUFFER permission");
+        }
+
+        Bitmap rawss;
+
+        final Rect frame = new Rect();
+
+        float scale;
+        int sw, sh, dw, dh;
+        int rot;
+
+        synchronized(mWindowMap) {
+            long ident = Binder.clearCallingIdentity();
+
+            int aboveAppLayer = mPolicy.windowTypeToLayerLw(
+                    WindowManager.LayoutParams.TYPE_APPLICATION) * TYPE_LAYER_MULTIPLIER
+                    + TYPE_LAYER_OFFSET;
+            aboveAppLayer += TYPE_LAYER_MULTIPLIER;
+
+            // Figure out the part of the screen that is actually the app.
+            for (int i=0; i<mWindows.size(); i++) {
+                WindowState ws = mWindows.get(i);
+                if (ws.mSurface == null) {
+                    continue;
+                }
+                if (ws.mLayer >= aboveAppLayer) {
+                    break;
+                }
+                final Rect wf = ws.mFrame;
+                final Rect cr = ws.mContentInsets;
+                int left = wf.left + cr.left;
+                int top = wf.top + cr.top;
+                int right = wf.right - cr.right;
+                int bottom = wf.bottom - cr.bottom;
+                frame.union(left, top, right, bottom);
+            }
+            Binder.restoreCallingIdentity(ident);
+
+            if (frame.isEmpty()) {
+                return null;
+            }
+
+            // The screenshot API does not apply the current screen rotation.
+            rot = mDisplay.getRotation();
+            int fw = frame.width();
+            int fh = frame.height();
+
+            // First try reducing to fit in x dimension.
+            scale = maxWidth/(float)fw;
+            sw = maxWidth;
+            sh = (int)(fh*scale);
+            if (sh > maxHeight) {
+                // y dimension became too long; constrain by that.
+                scale = maxHeight/(float)fh;
+                sw = (int)(fw*scale);
+                sh = maxHeight;
+            }
+
+            // The screen shot will contain the entire screen.
+            dw = (int)(mDisplay.getWidth()*scale);
+            dh = (int)(mDisplay.getHeight()*scale);
+            if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
+                int tmp = dw;
+                dw = dh;
+                dh = tmp;
+                rot = (rot == Surface.ROTATION_90) ? Surface.ROTATION_270 : Surface.ROTATION_90;
+            }
+            rawss = Surface.screenshot(dw, dh);
+        }
+
+        Bitmap bm = Bitmap.createBitmap(sw, sh, rawss.getConfig());
+        Matrix matrix = new Matrix();
+        ScreenRotationAnimation.createRotationMatrix(rot, dw, dh, matrix);
+        matrix.postTranslate(-(int)(frame.left*scale), -(int)(frame.top*scale));
+        Canvas canvas = new Canvas(bm);
+        canvas.drawBitmap(rawss, matrix, null);
+
+        rawss.recycle();
+        return bm;
     }
 
     public void freezeRotation() {

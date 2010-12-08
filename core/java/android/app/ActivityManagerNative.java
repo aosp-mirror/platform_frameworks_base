@@ -359,8 +359,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case ACTIVITY_PAUSED_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
-            Bundle map = data.readBundle();
-            activityPaused(token, map);
+            activityPaused(token);
             reply.writeNoException();
             return true;
         }
@@ -368,10 +367,11 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case ACTIVITY_STOPPED_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
+            Bundle map = data.readBundle();
             Bitmap thumbnail = data.readInt() != 0
                 ? Bitmap.CREATOR.createFromParcel(data) : null;
             CharSequence description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(data);
-            activityStopped(token, thumbnail, description);
+            activityStopped(token, map, thumbnail, description);
             reply.writeNoException();
             return true;
         }
@@ -1688,25 +1688,25 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
     }
-    public void activityPaused(IBinder token, Bundle state) throws RemoteException
+    public void activityPaused(IBinder token) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(ACTIVITY_PAUSED_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+    public void activityStopped(IBinder token, Bundle state,
+            Bitmap thumbnail, CharSequence description) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
         data.writeBundle(state);
-        mRemote.transact(ACTIVITY_PAUSED_TRANSACTION, data, reply, 0);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
-    }
-    public void activityStopped(IBinder token,
-                                Bitmap thumbnail, CharSequence description) throws RemoteException
-    {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeStrongBinder(token);
         if (thumbnail != null) {
             data.writeInt(1);
             thumbnail.writeToParcel(data, 0);
