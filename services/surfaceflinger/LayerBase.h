@@ -37,6 +37,7 @@
 
 #include <hardware/hwcomposer.h>
 
+#include "DisplayHardware/DisplayHardware.h"
 #include "Transform.h"
 
 namespace android {
