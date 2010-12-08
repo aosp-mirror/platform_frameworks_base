@@ -402,7 +402,7 @@ public class InputManager {
         }
         
         @SuppressWarnings("unused")
-        public boolean dispatchUnhandledKey(InputChannel focus,
+        public KeyEvent dispatchUnhandledKey(InputChannel focus,
                 KeyEvent event, int policyFlags) {
             return mWindowManagerService.mInputMonitor.dispatchUnhandledKey(
                     focus, event, policyFlags);

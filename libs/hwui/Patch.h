@@ -52,9 +52,7 @@ struct Patch {
     GLuint meshBuffer;
     uint32_t verticesCount;
     bool hasEmptyQuads;
-#if RENDER_LAYERS_AS_REGIONS
     Vector<Rect> quads;
-#endif
 
 private:
     TextureVertex* mVertices;

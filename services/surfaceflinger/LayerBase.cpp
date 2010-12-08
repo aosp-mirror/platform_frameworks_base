@@ -216,14 +216,10 @@ uint32_t LayerBase::doTransaction(uint32_t flags)
         flags |= eVisibleRegion;
         this->contentDirty = true;
 
-        mNeedsFiltering = false;
-        if (!(mFlags & DisplayHardware::SLOW_CONFIG)) {
-            // we may use linear filtering, if the matrix scales us
-            const uint8_t type = temp.transform.getType();
-            if (!temp.transform.preserveRects() || (type >= Transform::SCALE)) {
-                mNeedsFiltering = true;
-            }
-        }
+        // we may use linear filtering, if the matrix scales us
+        const uint8_t type = temp.transform.getType();
+        mNeedsFiltering = (!temp.transform.preserveRects() ||
+                (type >= Transform::SCALE));
     }
 
     // Commit the transaction

@@ -123,7 +123,7 @@ void InputPublisherAndConsumerTest::PublishAndConsumeKeyEvent() {
             << "consumer sendFinishedSignal should return OK";
 
     bool handled = false;
-    status = mPublisher->receiveFinishedSignal(handled);
+    status = mPublisher->receiveFinishedSignal(&handled);
     ASSERT_EQ(OK, status)
             << "publisher receiveFinishedSignal should return OK";
     ASSERT_TRUE(handled)
@@ -287,7 +287,7 @@ void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent(
             << "consumer sendFinishedSignal should return OK";
 
     bool handled = true;
-    status = mPublisher->receiveFinishedSignal(handled);
+    status = mPublisher->receiveFinishedSignal(&handled);
     ASSERT_EQ(OK, status)
             << "publisher receiveFinishedSignal should return OK";
     ASSERT_FALSE(handled)

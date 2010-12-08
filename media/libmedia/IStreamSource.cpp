@@ -19,6 +19,7 @@
 #include <utils/Log.h>
 
 #include <media/IStreamSource.h>
+#include <media/stagefright/foundation/AMessage.h>
 
 #include <binder/IMemory.h>
 #include <binder/Parcel.h>
@@ -33,7 +34,7 @@ enum {
 
     // IStreamListener
     QUEUE_BUFFER,
-    QUEUE_COMMAND,
+    ISSUE_COMMAND,
 };
 
 struct BpStreamSource : public BpInterface<IStreamSource> {
@@ -125,12 +126,21 @@ struct BpStreamListener : public BpInterface<IStreamListener> {
         remote()->transact(QUEUE_BUFFER, data, &reply, IBinder::FLAG_ONEWAY);
     }
 
-    virtual void queueCommand(Command cmd) {
+    virtual void issueCommand(
+            Command cmd, bool synchronous, const sp<AMessage> &msg) {
         Parcel data, reply;
         data.writeInterfaceToken(IStreamListener::getInterfaceDescriptor());
         data.writeInt32(static_cast<int32_t>(cmd));
+        data.writeInt32(static_cast<int32_t>(synchronous));
 
-        remote()->transact(QUEUE_COMMAND, data, &reply, IBinder::FLAG_ONEWAY);
+        if (msg != NULL) {
+            data.writeInt32(1);
+            msg->writeToParcel(&data);
+        } else {
+            data.writeInt32(0);
+        }
+
+        remote()->transact(ISSUE_COMMAND, data, &reply, IBinder::FLAG_ONEWAY);
     }
 };
 
@@ -149,12 +159,20 @@ status_t BnStreamListener::onTransact(
             break;
         }
 
-        case QUEUE_COMMAND:
+        case ISSUE_COMMAND:
         {
             CHECK_INTERFACE(IStreamListener, data, reply);
             Command cmd = static_cast<Command>(data.readInt32());
 
-            queueCommand(cmd);
+            bool synchronous = static_cast<bool>(data.readInt32());
+
+            sp<AMessage> msg;
+
+            if (data.readInt32()) {
+                msg = AMessage::FromParcel(data);
+            }
+
+            issueCommand(cmd, synchronous, msg);
             break;
         }
 

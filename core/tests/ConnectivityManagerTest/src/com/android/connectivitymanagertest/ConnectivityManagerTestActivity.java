@@ -76,6 +76,7 @@ public class ConnectivityManagerTestActivity extends Activity {
     public String mBssid;
     public String mPowerSsid = "GoogleGuest"; //Default power SSID
     private Context mContext;
+    public boolean scanResultAvailable = false;
 
     /*
      * Control Wifi States
@@ -142,6 +143,7 @@ public class ConnectivityManagerTestActivity extends Activity {
             String action = intent.getAction();
             Log.v("WifiReceiver", "onReceive() is calleld with " + intent);
             if (action.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
+                log("scan results are available");
                 notifyScanResult();
             } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
                 mWifiNetworkInfo =
@@ -174,6 +176,7 @@ public class ConnectivityManagerTestActivity extends Activity {
 
     public ConnectivityManagerTestActivity() {
         mState = State.UNKNOWN;
+        scanResultAvailable = false;
     }
 
     @Override
@@ -267,6 +270,7 @@ public class ConnectivityManagerTestActivity extends Activity {
     private void notifyScanResult() {
         synchronized (this) {
             log("notify that scan results are available");
+            scanResultAvailable = true;
             this.notify();
         }
     }
@@ -328,6 +332,8 @@ public class ConnectivityManagerTestActivity extends Activity {
         long startTime = System.currentTimeMillis();
         while (true) {
             if ((System.currentTimeMillis() - startTime) > timeout) {
+                log("waitForNetworkState time out, the state of network type " + networkType +
+                        " is: " + mCM.getNetworkInfo(networkType).getState());
                 if (mCM.getNetworkInfo(networkType).getState() != expectedState) {
                     return false;
                 } else {

@@ -144,6 +144,8 @@ public class KeyCharacterMap {
     private static native void nativeDispose(int ptr);
 
     private static native char nativeGetCharacter(int ptr, int keyCode, int metaState);
+    private static native boolean nativeGetFallbackAction(int ptr, int keyCode, int metaState,
+            FallbackAction outFallbackAction);
     private static native char nativeGetNumber(int ptr, int keyCode);
     private static native char nativeGetMatch(int ptr, int keyCode, char[] chars, int metaState);
     private static native char nativeGetDisplayLabel(int ptr, int keyCode);
@@ -206,20 +208,43 @@ public class KeyCharacterMap {
      * @return The associated character or combining accent, or 0 if none.
      */
     public int get(int keyCode, int metaState) {
-        if ((metaState & MetaKeyKeyListener.META_CAP_LOCKED) != 0) {
-            metaState |= KeyEvent.META_CAPS_LOCK_ON;
-        }
-        if ((metaState & MetaKeyKeyListener.META_ALT_LOCKED) != 0) {
-            metaState |= KeyEvent.META_ALT_ON;
-        }
-
+        metaState = applyLockedModifiers(metaState);
         char ch = nativeGetCharacter(mPtr, keyCode, metaState);
+
         int map = COMBINING.get(ch);
         if (map != 0) {
             return map;
         } else {
             return ch;
         }
+    }
+
+    /**
+     * Gets the fallback action to perform if the application does not
+     * handle the specified key.
+     * <p>
+     * When an application does not handle a particular key, the system may
+     * translate the key to an alternate fallback key (specified in the
+     * fallback action) and dispatch it to the application.
+     * The event containing the fallback key is flagged
+     * with {@link KeyEvent#FLAG_FALLBACK}.
+     * </p>
+     *
+     * @param keyCode The key code.
+     * @param metaState The meta key modifier state.
+     * @param outFallbackAction The fallback action object to populate.
+     * @return True if a fallback action was found, false otherwise.
+     *
+     * @hide
+     */
+    public boolean getFallbackAction(int keyCode, int metaState,
+            FallbackAction outFallbackAction) {
+        if (outFallbackAction == null) {
+            throw new IllegalArgumentException("fallbackAction must not be null");
+        }
+
+        metaState = applyLockedModifiers(metaState);
+        return nativeGetFallbackAction(mPtr, keyCode, metaState, outFallbackAction);
     }
 
     /**
@@ -277,6 +302,8 @@ public class KeyCharacterMap {
         if (chars == null) {
             throw new IllegalArgumentException("chars must not be null.");
         }
+
+        metaState = applyLockedModifiers(metaState);
         return nativeGetMatch(mPtr, keyCode, chars, metaState);
     }
 
@@ -509,6 +536,16 @@ public class KeyCharacterMap {
         return ret;
     }
 
+    private static int applyLockedModifiers(int metaState) {
+        if ((metaState & MetaKeyKeyListener.META_CAP_LOCKED) != 0) {
+            metaState |= KeyEvent.META_CAPS_LOCK_ON;
+        }
+        if ((metaState & MetaKeyKeyListener.META_ALT_LOCKED) != 0) {
+            metaState |= KeyEvent.META_ALT_ON;
+        }
+        return metaState;
+    }
+
     /**
      * Maps Unicode combining diacritical to display-form dead key
      * (display character shifted left 16 bits).
@@ -669,5 +706,15 @@ public class KeyCharacterMap {
         public KeyCharacterMapUnavailableException(String msg) {
             super(msg);
         }
+    }
+
+    /**
+     * Specifies a substitute key code and meta state as a fallback action
+     * for an unhandled key.
+     * @hide
+     */
+    public static final class FallbackAction {
+        public int keyCode;
+        public int metaState;
     }
 }

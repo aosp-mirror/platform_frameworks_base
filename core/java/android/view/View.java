@@ -556,7 +556,7 @@ import java.util.WeakHashMap;
  * improve the security of views that provide access to sensitive functionality.
  * </p><p>
  * To enable touch filtering, call {@link #setFilterTouchesWhenObscured} or set the
- * andoird:filterTouchesWhenObscured attribute to true.  When enabled, the framework
+ * android:filterTouchesWhenObscured layout attribute to true.  When enabled, the framework
  * will discard touches that are received whenever the view's window is obscured by
  * another visible window.  As a result, the view will not receive touches whenever a
  * toast, dialog or other window appears above the view's window.

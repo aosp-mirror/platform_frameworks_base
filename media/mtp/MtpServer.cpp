@@ -423,7 +423,7 @@ MtpResponseCode MtpServer::doGetObjectPropsSupported() {
     if (!mSessionOpen)
         return MTP_RESPONSE_SESSION_NOT_OPEN;
     MtpObjectFormat format = mRequest.getParameter(1);
-    MtpDevicePropertyList* properties = mDatabase->getSupportedObjectProperties(format);
+    MtpObjectPropertyList* properties = mDatabase->getSupportedObjectProperties(format);
     mData.putAUInt16(properties);
     delete properties;
     return MTP_RESPONSE_OK;

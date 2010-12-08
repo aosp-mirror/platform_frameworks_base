@@ -44,12 +44,25 @@ public final class Ndef extends BasicTagTechnology {
     public static final int NDEF_MODE_WRITE_MANY = 4;
     public static final int NDEF_MODE_UNKNOWN = 5;
 
+    /** @hide */
+    public static final String EXTRA_NDEF_MSG = "ndefmsg";
+
+    /** @hide */
+    public static final String EXTRA_NDEF_MAXLENGTH = "ndefmaxlength";
+
+    private final int maxNdefSize;
+
     /**
      * Internal constructor, to be used by NfcAdapter
      * @hide
      */
     public Ndef(NfcAdapter adapter, Tag tag, int tech, Bundle extras) throws RemoteException {
         super(adapter, tag, tech);
+        if (extras != null) {
+            maxNdefSize = extras.getInt(EXTRA_NDEF_MAXLENGTH);
+        } else {
+            maxNdefSize = 0;  //TODO: throw exception
+        }
     }
 
     /**
@@ -92,7 +105,7 @@ public final class Ndef extends BasicTagTechnology {
      * Get maximum NDEF message size in bytes
      */
     public int getSize() {
-        throw new UnsupportedOperationException();
+        return maxNdefSize;
     }
 
     /**

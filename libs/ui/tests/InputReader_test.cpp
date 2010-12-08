@@ -1137,6 +1137,7 @@ protected:
         mFakeDispatcher = new FakeInputDispatcher();
         mFakeContext = new FakeInputReaderContext(mFakeEventHub, mFakePolicy, mFakeDispatcher);
 
+        mFakeEventHub->addDevice(DEVICE_ID, String8(DEVICE_NAME), 0);
         mDevice = new InputDevice(mFakeContext, DEVICE_ID, String8(DEVICE_NAME));
     }
 
@@ -1753,7 +1754,7 @@ TEST_F(KeyboardInputMapperTest, Process_LockedKeysShouldToggleMetaStateAndLeds) 
     process(mapper, ARBITRARY_TIME, DEVICE_ID,
             EV_KEY, KEY_CAPSLOCK, AKEYCODE_CAPS_LOCK, 1, 0);
     process(mapper, ARBITRARY_TIME, DEVICE_ID,
-            EV_KEY, KEY_CAPSLOCK, AKEYCODE_CAPS_LOCK, 1, 0);
+            EV_KEY, KEY_CAPSLOCK, AKEYCODE_CAPS_LOCK, 0, 0);
     ASSERT_FALSE(mFakeEventHub->getLedState(DEVICE_ID, LED_CAPSL));
     ASSERT_TRUE(mFakeEventHub->getLedState(DEVICE_ID, LED_NUML));
     ASSERT_FALSE(mFakeEventHub->getLedState(DEVICE_ID, LED_SCROLLL));
@@ -2225,19 +2226,19 @@ void SingleTouchInputMapperTest::processSync(SingleTouchInputMapper* mapper) {
 }
 
 
-TEST_F(SingleTouchInputMapperTest, GetSources_WhenDisplayTypeIsTouchPad_ReturnsTouchPad) {
+TEST_F(SingleTouchInputMapperTest, GetSources_WhenDeviceTypeIsTouchPad_ReturnsTouchPad) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     prepareAxes(POSITION);
-    addConfigurationProperty("touch.displayType", "touchPad");
+    addConfigurationProperty("touch.deviceType", "touchPad");
     addMapperAndConfigure(mapper);
 
     ASSERT_EQ(AINPUT_SOURCE_TOUCHPAD, mapper->getSources());
 }
 
-TEST_F(SingleTouchInputMapperTest, GetSources_WhenDisplayTypeIsTouchScreen_ReturnsTouchScreen) {
+TEST_F(SingleTouchInputMapperTest, GetSources_WhenDeviceTypeIsTouchScreen_ReturnsTouchScreen) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     prepareAxes(POSITION);
-    addConfigurationProperty("touch.displayType", "touchScreen");
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     addMapperAndConfigure(mapper);
 
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, mapper->getSources());

@@ -26,7 +26,7 @@
          of it a dark color.
     -->
     <style name="Theme">
-    
+
         <item name="colorForeground">@android:color/bright_foreground_dark</item>
         <item name="colorForegroundInverse">@android:color/bright_foreground_dark_inverse</item>
         <item name="colorBackground">@android:color/background_dark</item>
@@ -279,6 +279,12 @@
         <item name="numberPickerDownButtonStyle">@style/Widget.ImageButton.NumberPickerDownButton</item>
         <item name="numberPickerInputTextStyle">@style/Widget.EditText.NumberPickerInputText</item>
         <item name="numberPickerStyle">@style/Widget.NumberPicker</item>
+
+        <!-- DayPicker$WeekView style-->
+        <item name="dayPickerWeekViewStyle">@style/Widget.DayPickerWeekView</item>
+
+        <!-- DayPickerWeekDayView style-->
+        <item name="dayPickerWeekDayViewStyle">@style/TextAppearance.Small.DayPickerWeekDayView</item>
 
     </style>
 
@@ -917,6 +923,12 @@
         <item name="numberPickerDownButtonStyle">@style/Widget.Holo.ImageButton.NumberPickerDownButton</item>
         <item name="numberPickerInputTextStyle">@style/Widget.Holo.EditText.NumberPickerInputText</item>
 
+        <!-- DayPicker$WeekView style-->
+        <item name="dayPickerWeekViewStyle">@style/Widget.Holo.DayPickerWeekView</item>
+
+        <!-- DayPickerWeekDayView style-->
+        <item name="dayPickerWeekDayViewStyle">@style/TextAppearance.Holo.DayPickerWeekDayView</item>
+
     </style>
 
     <!-- New Honeycomb holographic theme. Light version.  The widgets in the
@@ -1161,6 +1173,12 @@
         <item name="numberPickerUpButtonStyle">@style/Widget.Holo.Light.ImageButton.NumberPickerUpButton</item>
         <item name="numberPickerDownButtonStyle">@style/Widget.Holo.Light.ImageButton.NumberPickerDownButton</item>
         <item name="numberPickerInputTextStyle">@style/Widget.Holo.Light.EditText.NumberPickerInputText</item>
+
+        <!-- DayPicker$WeekView style-->
+        <item name="dayPickerWeekViewStyle">@style/Widget.Holo.Light.DayPickerWeekView</item>
+
+        <!-- DayPickerWeekDayView style-->
+        <item name="dayPickerWeekDayViewStyle">@style/TextAppearance.Holo.Light.DayPickerWeekDayView</item>
 
     </style>
 

@@ -233,6 +233,7 @@ private:
     uint32_t mReqWidth;
     uint32_t mReqHeight;
     uint32_t mReqFormat;
+    bool mNeedsScaling;
     bool mFixedSize;
 };
 

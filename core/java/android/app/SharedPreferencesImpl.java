@@ -25,9 +25,12 @@ import android.util.Log;
 import com.google.android.collect.Maps;
 import com.android.internal.util.XmlUtils;
 
+import dalvik.system.BlockGuard;
+
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -61,32 +64,88 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
     private final Object mWritingToDiskLock = new Object();
     private static final Object mContent = new Object();
-    private final WeakHashMap<OnSharedPreferenceChangeListener, Object> mListeners;
+    private final WeakHashMap<OnSharedPreferenceChangeListener, Object> mListeners =
+            new WeakHashMap<OnSharedPreferenceChangeListener, Object>();
 
-    SharedPreferencesImpl(
-        File file, int mode, Map initialContents) {
+    SharedPreferencesImpl(File file, int mode) {
         mFile = file;
-        mBackupFile = ContextImpl.makeBackupFile(file);
+        mBackupFile = makeBackupFile(file);
         mMode = mode;
-        mLoaded = initialContents != null;
-        mMap = initialContents != null ? initialContents : new HashMap<String, Object>();
-        FileStatus stat = new FileStatus();
-        if (FileUtils.getFileStatus(file.getPath(), stat)) {
-            mStatTimestamp = stat.mtime;
-        }
-        mListeners = new WeakHashMap<OnSharedPreferenceChangeListener, Object>();
+        mLoaded = false;
+        mMap = null;
+        startLoadFromDisk();
     }
 
-    // Has this SharedPreferences ever had values assigned to it?
-    boolean isLoaded() {
+    private void startLoadFromDisk() {
         synchronized (this) {
-            return mLoaded;
+            mLoaded = false;
+        }
+        new Thread("SharedPreferencesImpl-load") {
+            public void run() {
+                synchronized (SharedPreferencesImpl.this) {
+                    loadFromDiskLocked();
+                }
+            }
+        }.start();
+    }
+
+    private void loadFromDiskLocked() {
+        if (mLoaded) {
+            return;
+        }
+        if (mBackupFile.exists()) {
+            mFile.delete();
+            mBackupFile.renameTo(mFile);
+        }
+
+        // Debugging
+        if (mFile.exists() && !mFile.canRead()) {
+            Log.w(TAG, "Attempt to read preferences file " + mFile + " without permission");
+        }
+
+        Map map = null;
+        FileStatus stat = new FileStatus();
+        if (FileUtils.getFileStatus(mFile.getPath(), stat) && mFile.canRead()) {
+            try {
+                FileInputStream str = new FileInputStream(mFile);
+                map = XmlUtils.readMapXml(str);
+                str.close();
+            } catch (XmlPullParserException e) {
+                Log.w(TAG, "getSharedPreferences", e);
+            } catch (FileNotFoundException e) {
+                Log.w(TAG, "getSharedPreferences", e);
+            } catch (IOException e) {
+                Log.w(TAG, "getSharedPreferences", e);
+            }
+        }
+        mLoaded = true;
+        if (map != null) {
+            mMap = map;
+            mStatTimestamp = stat.mtime;
+            mStatSize = stat.size;
+        } else {
+            mMap = new HashMap<String, Object>();
+        }
+        notifyAll();
+    }
+
+    private static File makeBackupFile(File prefsFile) {
+        return new File(prefsFile.getPath() + ".bak");
+    }
+
+    void startReloadIfChangedUnexpectedly() {
+        synchronized (this) {
+            // TODO: wait for any pending writes to disk?
+            if (!hasFileChangedUnexpectedly()) {
+                return;
+            }
+            startLoadFromDisk();
         }
     }
 
     // Has the file changed out from under us?  i.e. writes that
     // we didn't instigate.
-    public boolean hasFileChangedUnexpectedly() {
+    private boolean hasFileChangedUnexpectedly() {
         synchronized (this) {
             if (mDiskWritesInFlight > 0) {
                 // If we know we caused it, it's not unexpected.
@@ -103,19 +162,6 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
     }
 
-    /*package*/ void replace(Map newContents, FileStatus stat) {
-        synchronized (this) {
-            mLoaded = true;
-            if (newContents != null) {
-                mMap = newContents;
-            }
-            if (stat != null) {
-                mStatTimestamp = stat.mtime;
-                mStatSize = stat.size;
-            }
-        }
-    }
-
     public void registerOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
         synchronized(this) {
             mListeners.put(listener, mContent);
@@ -128,8 +174,24 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
     }
 
+    private void awaitLoadedLocked() {
+        if (!mLoaded) {
+            // Raise an explicit StrictMode onReadFromDisk for this
+            // thread, since the real read will be in a different
+            // thread and otherwise ignored by StrictMode.
+            BlockGuard.getThreadPolicy().onReadFromDisk();
+        }
+        while (!mLoaded) {
+            try {
+                wait();
+            } catch (InterruptedException unused) {
+            }
+        }
+    }
+
     public Map<String, ?> getAll() {
-        synchronized(this) {
+        synchronized (this) {
+            awaitLoadedLocked();
             //noinspection unchecked
             return new HashMap<String, Object>(mMap);
         }
@@ -137,6 +199,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
     public String getString(String key, String defValue) {
         synchronized (this) {
+            awaitLoadedLocked();
             String v = (String)mMap.get(key);
             return v != null ? v : defValue;
         }
@@ -144,6 +207,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
     public Set<String> getStringSet(String key, Set<String> defValues) {
         synchronized (this) {
+            awaitLoadedLocked();
             Set<String> v = (Set<String>) mMap.get(key);
             return v != null ? v : defValues;
         }
@@ -151,24 +215,28 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
     public int getInt(String key, int defValue) {
         synchronized (this) {
+            awaitLoadedLocked();
             Integer v = (Integer)mMap.get(key);
             return v != null ? v : defValue;
         }
     }
     public long getLong(String key, long defValue) {
         synchronized (this) {
+            awaitLoadedLocked();
             Long v = (Long)mMap.get(key);
             return v != null ? v : defValue;
         }
     }
     public float getFloat(String key, float defValue) {
         synchronized (this) {
+            awaitLoadedLocked();
             Float v = (Float)mMap.get(key);
             return v != null ? v : defValue;
         }
     }
     public boolean getBoolean(String key, boolean defValue) {
         synchronized (this) {
+            awaitLoadedLocked();
             Boolean v = (Boolean)mMap.get(key);
             return v != null ? v : defValue;
         }
@@ -176,11 +244,23 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
     public boolean contains(String key) {
         synchronized (this) {
+            awaitLoadedLocked();
             return mMap.containsKey(key);
         }
     }
 
     public Editor edit() {
+        // TODO: remove the need to call awaitLoadedLocked() when
+        // requesting an editor.  will require some work on the
+        // Editor, but then we should be able to do:
+        //
+        //      context.getSharedPreferences(..).edit().putString(..).apply()
+        //
+        // ... all without blocking.
+        synchronized (this) {
+            awaitLoadedLocked();
+        }
+
         return new EditorImpl();
     }
 

@@ -23,9 +23,9 @@ import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarView;
 
 import android.animation.Animator;
-import android.animation.ObjectAnimator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
@@ -40,10 +40,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.SpinnerAdapter;
-import android.widget.ViewAnimator;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -67,6 +67,7 @@ public class ActionBarImpl extends ActionBar {
     private ActionBarView mActionView;
     private ActionBarContextView mUpperContextView;
     private LinearLayout mLowerContextView;
+    private View mContentView;
 
     private ArrayList<TabImpl> mTabs = new ArrayList<TabImpl>();
 
@@ -88,7 +89,7 @@ public class ActionBarImpl extends ActionBar {
 
     final Handler mHandler = new Handler();
 
-    private Animator mCurrentAnimation;
+    private Animator mCurrentAnim;
 
     final AnimatorListener[] mAfterAnimation = new AnimatorListener[] {
             new AnimatorListener() { // NORMAL_VIEW
@@ -101,7 +102,7 @@ public class ActionBarImpl extends ActionBar {
                     if (mLowerContextView != null) {
                         mLowerContextView.removeAllViews();
                     }
-                    mCurrentAnimation = null;
+                    mCurrentAnim = null;
                     hideAllExcept(NORMAL_VIEW);
                 }
 
@@ -120,7 +121,7 @@ public class ActionBarImpl extends ActionBar {
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    mCurrentAnimation = null;
+                    mCurrentAnim = null;
                     hideAllExcept(CONTEXT_VIEW);
                 }
 
@@ -134,9 +135,56 @@ public class ActionBarImpl extends ActionBar {
             }
     };
 
+    final AnimatorListener mHideListener = new AnimatorListener() {
+        @Override
+        public void onAnimationStart(Animator animation) {
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            if (mContentView != null) {
+                mContentView.setTranslationY(0);
+            }
+            mContainerView.setVisibility(View.GONE);
+            mCurrentAnim = null;
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+        }
+    };
+
+    final AnimatorListener mShowListener = new AnimatorListener() {
+        @Override
+        public void onAnimationStart(Animator animation) {
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            mCurrentAnim = null;
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+        }
+    };
+
     public ActionBarImpl(Activity activity) {
         mActivity = activity;
-        init(activity.getWindow().getDecorView());
+        Window window = activity.getWindow();
+        View decor = window.getDecorView();
+        init(decor);
+        if (!mActivity.getWindow().hasFeature(Window.FEATURE_ACTION_BAR_OVERLAY)) {
+            mContentView = decor.findViewById(android.R.id.content);
+        }
     }
 
     public ActionBarImpl(Dialog dialog) {
@@ -444,14 +492,45 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void show() {
-        // TODO animate!
+        if (mCurrentAnim != null) {
+            mCurrentAnim.end();
+        }
+        if (mContainerView.getVisibility() == View.VISIBLE) {
+            return;
+        }
         mContainerView.setVisibility(View.VISIBLE);
+        mContainerView.setAlpha(0);
+        mContainerView.setTranslationY(-mContainerView.getHeight());
+        AnimatorSet anim = new AnimatorSet();
+        AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mContainerView, "translationY", 0))
+            .with(ObjectAnimator.ofFloat(mContainerView, "alpha", 1));
+        if (mContentView != null) {
+            b.with(ObjectAnimator.ofFloat(mContentView, "translationY", -mContainerView.getHeight(), 0));
+        }
+        anim.addListener(mShowListener);
+        mCurrentAnim = anim;
+        anim.start();
     }
 
     @Override
     public void hide() {
-        // TODO animate!
-        mContainerView.setVisibility(View.GONE);
+        if (mCurrentAnim != null) {
+            mCurrentAnim.end();
+        }
+        if (mContainerView.getVisibility() == View.GONE) {
+            return;
+        }
+        mContainerView.setAlpha(1);
+        AnimatorSet anim = new AnimatorSet();
+        AnimatorSet.Builder b = anim.play(
+                ObjectAnimator.ofFloat(mContainerView, "translationY", -mContainerView.getHeight()))
+            .with(ObjectAnimator.ofFloat(mContainerView, "alpha", 0));
+        if (mContentView != null) {
+            b.with(ObjectAnimator.ofFloat(mContentView, "translationY", 0, -mContainerView.getHeight()));
+        }
+        anim.addListener(mHideListener);
+        mCurrentAnim = anim;
+        anim.start();
     }
 
     public boolean isShowing() {
@@ -459,10 +538,7 @@ public class ActionBarImpl extends ActionBar {
     }
 
     private long animateTo(int viewIndex) {
-        // Don't wait for the current animation to finish.
-        if (mCurrentAnimation != null) {
-            mCurrentAnimation.end();
-        }
+        show();
 
         AnimatorSet set = new AnimatorSet();
 
@@ -492,7 +568,7 @@ public class ActionBarImpl extends ActionBar {
 
         set.addListener(mAfterAnimation[viewIndex]);
 
-        mCurrentAnimation = set;
+        mCurrentAnim = set;
         set.start();
         return set.getDuration();
     }

@@ -31,6 +31,8 @@ import android.provider.MediaStore.Files;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.MediaColumns;
 import android.util.Log;
+import android.view.Display;
+import android.view.WindowManager;
 
 import java.io.File;
 import java.util.HashMap;
@@ -460,6 +462,7 @@ public class MtpDatabase {
         return new int[] {
             MtpConstants.DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER,
             MtpConstants.DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME,
+            MtpConstants.DEVICE_PROPERTY_IMAGE_SIZE,
         };
     }
 
@@ -592,9 +595,21 @@ public class MtpDatabase {
                         c.close();
                     }
                 }
-        }
 
-        return MtpConstants.RESPONSE_DEVICE_PROP_NOT_SUPPORTED;
+            case MtpConstants.DEVICE_PROPERTY_IMAGE_SIZE:
+                // use screen size as max image size
+                Display display = ((WindowManager)mContext.getSystemService(
+                        Context.WINDOW_SERVICE)).getDefaultDisplay();
+                int width = display.getWidth();
+                int height = display.getHeight();
+                String imageSize = Integer.toString(width) + "x" +  Integer.toString(height);
+                imageSize.getChars(0, imageSize.length(), outStringValue, 0);
+                outStringValue[imageSize.length()] = 0;
+                return MtpConstants.RESPONSE_OK;
+
+            default:
+                return MtpConstants.RESPONSE_DEVICE_PROP_NOT_SUPPORTED;
+        }
     }
 
     private int setDeviceProperty(int property, long intValue, String stringValue) {

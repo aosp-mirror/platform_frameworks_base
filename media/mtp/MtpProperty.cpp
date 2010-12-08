@@ -17,6 +17,7 @@
 #define LOG_TAG "MtpProperty"
 
 #include "MtpDataPacket.h"
+#include "MtpDebug.h"
 #include "MtpProperty.h"
 #include "MtpStringBuffer.h"
 #include "MtpUtils.h"
@@ -121,9 +122,8 @@ MtpProperty::~MtpProperty() {
 }
 
 void MtpProperty::read(MtpDataPacket& packet) {
-    bool deviceProp = isDeviceProperty();
-
     mCode = packet.getUInt16();
+    bool deviceProp = isDeviceProperty();
     mType = packet.getUInt16();
     mWriteable = (packet.getUInt8() == 1);
     switch (mType) {
@@ -317,9 +317,93 @@ void MtpProperty::setFormDateTime() {
 }
 
 void MtpProperty::print() {
-    LOGV("MtpProperty %04X\n", mCode);
-    LOGV("    type %04X\n", mType);
-    LOGV("    writeable %s\n", (mWriteable ? "true" : "false"));
+    MtpString buffer;
+    bool deviceProp = isDeviceProperty();
+    if (deviceProp)
+        LOGI("    %s (%04X)", MtpDebug::getDevicePropCodeName(mCode), mCode);
+    else
+        LOGI("    %s (%04X)", MtpDebug::getObjectPropCodeName(mCode), mCode);
+    LOGI("    type %04X", mType);
+    LOGI("    writeable %s", (mWriteable ? "true" : "false"));
+    buffer = "    default value: ";
+    print(mDefaultValue, buffer);
+    LOGI("%s", (const char *)buffer);
+    if (deviceProp) {
+        buffer = "    current value: ";
+        print(mCurrentValue, buffer);
+        LOGI("%s", (const char *)buffer);
+    }
+    switch (mFormFlag) {
+        case kFormNone:
+            break;
+        case kFormRange:
+            buffer = "    Range (";
+            print(mMinimumValue, buffer);
+            buffer += ", ";
+            print(mMaximumValue, buffer);
+            buffer += ", ";
+            print(mStepSize, buffer);
+            LOGI("%s", (const char *)buffer);
+            break;
+        case kFormEnum:
+            buffer = "    Enum { ";
+            for (int i = 0; i < mEnumLength; i++) {
+                print(mEnumValues[i], buffer);
+                buffer += " ";
+            }
+            buffer += "}";
+            LOGI("%s", (const char *)buffer);
+            break;
+        case kFormDateTime:
+            LOGI("    DateTime\n");
+            break;
+        default:
+            LOGI("    form %d\n", mFormFlag);
+            break;
+    }
+}
+
+void MtpProperty::print(MtpPropertyValue& value, MtpString& buffer) {
+    switch (mType) {
+        case MTP_TYPE_INT8:
+            buffer.appendFormat("%d", value.u.i8);
+            break;
+        case MTP_TYPE_UINT8:
+            buffer.appendFormat("%d", value.u.u8);
+            break;
+        case MTP_TYPE_INT16:
+            buffer.appendFormat("%d", value.u.i16);
+            break;
+        case MTP_TYPE_UINT16:
+            buffer.appendFormat("%d", value.u.u16);
+            break;
+        case MTP_TYPE_INT32:
+            buffer.appendFormat("%d", value.u.i32);
+            break;
+        case MTP_TYPE_UINT32:
+            buffer.appendFormat("%d", value.u.u32);
+            break;
+        case MTP_TYPE_INT64:
+            buffer.appendFormat("%lld", value.u.i64);
+            break;
+        case MTP_TYPE_UINT64:
+            buffer.appendFormat("%lld", value.u.u64);
+            break;
+        case MTP_TYPE_INT128:
+            buffer.appendFormat("%08X%08X%08X%08X", value.u.i128[0], value.u.i128[1],
+                    value.u.i128[2], value.u.i128[3]);
+            break;
+        case MTP_TYPE_UINT128:
+            buffer.appendFormat("%08X%08X%08X%08X", value.u.u128[0], value.u.u128[1],
+                    value.u.u128[2], value.u.u128[3]);
+            break;
+        case MTP_TYPE_STR:
+            buffer.appendFormat("%s", value.str);
+            break;
+        default:
+            LOGE("unsupported type for MtpProperty::print\n");
+            break;
+    }
 }
 
 void MtpProperty::readValue(MtpDataPacket& packet, MtpPropertyValue& value) {

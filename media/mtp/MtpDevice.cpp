@@ -63,17 +63,13 @@ void MtpDevice::initialize() {
     openSession();
     mDeviceInfo = getDeviceInfo();
     if (mDeviceInfo) {
-        mDeviceInfo->print();
-
         if (mDeviceInfo->mDeviceProperties) {
             int count = mDeviceInfo->mDeviceProperties->size();
             for (int i = 0; i < count; i++) {
                 MtpDeviceProperty propCode = (*mDeviceInfo->mDeviceProperties)[i];
                 MtpProperty* property = getDevicePropDesc(propCode);
-                if (property) {
-                    property->print();
+                if (property)
                     mDeviceProperties.push(property);
-                }
             }
         }
     }
@@ -84,6 +80,45 @@ void MtpDevice::close() {
         usb_device_release_interface(mDevice, mInterface);
         usb_device_close(mDevice);
         mDevice = NULL;
+    }
+}
+
+void MtpDevice::print() {
+    if (mDeviceInfo) {
+        mDeviceInfo->print();
+
+        if (mDeviceInfo->mDeviceProperties) {
+            LOGI("***** DEVICE PROPERTIES *****\n");
+            int count = mDeviceInfo->mDeviceProperties->size();
+            for (int i = 0; i < count; i++) {
+                MtpDeviceProperty propCode = (*mDeviceInfo->mDeviceProperties)[i];
+                MtpProperty* property = getDevicePropDesc(propCode);
+                if (property) {
+                    property->print();
+                }
+            }
+        }
+    }
+
+    if (mDeviceInfo->mPlaybackFormats) {
+            LOGI("***** OBJECT PROPERTIES *****\n");
+        int count = mDeviceInfo->mPlaybackFormats->size();
+        for (int i = 0; i < count; i++) {
+            MtpObjectFormat format = (*mDeviceInfo->mPlaybackFormats)[i];
+            LOGI("*** FORMAT: %s\n", MtpDebug::getFormatCodeName(format));
+            MtpObjectPropertyList* props = getObjectPropsSupported(format);
+            if (props) {
+                for (int j = 0; j < props->size(); j++) {
+                    MtpObjectProperty prop = (*props)[j];
+                    MtpProperty* property = getObjectPropDesc(prop, format);
+                    if (property)
+                        property->print();
+                    else
+                        LOGE("could not fetch property: %s",
+                                MtpDebug::getObjectPropCodeName(prop));
+                }
+            }
+        }
     }
 }
 
@@ -330,12 +365,48 @@ MtpObjectHandle MtpDevice::getStorageID(MtpObjectHandle handle) {
         return -1;
 }
 
+MtpObjectPropertyList* MtpDevice::getObjectPropsSupported(MtpObjectFormat format) {
+    Mutex::Autolock autoLock(mMutex);
+
+    mRequest.reset();
+    mRequest.setParameter(1, format);
+    if (!sendRequest(MTP_OPERATION_GET_OBJECT_PROPS_SUPPORTED))
+        return NULL;
+    if (!readData())
+        return NULL;
+    MtpResponseCode ret = readResponse();
+    if (ret == MTP_RESPONSE_OK) {
+        return mData.getAUInt16();
+    }
+    return NULL;
+
+}
+
 MtpProperty* MtpDevice::getDevicePropDesc(MtpDeviceProperty code) {
     Mutex::Autolock autoLock(mMutex);
 
     mRequest.reset();
     mRequest.setParameter(1, code);
     if (!sendRequest(MTP_OPERATION_GET_DEVICE_PROP_DESC))
+        return NULL;
+    if (!readData())
+        return NULL;
+    MtpResponseCode ret = readResponse();
+    if (ret == MTP_RESPONSE_OK) {
+        MtpProperty* property = new MtpProperty;
+        property->read(mData);
+        return property;
+    }
+    return NULL;
+}
+
+MtpProperty* MtpDevice::getObjectPropDesc(MtpObjectProperty code, MtpObjectFormat format) {
+    Mutex::Autolock autoLock(mMutex);
+
+    mRequest.reset();
+    mRequest.setParameter(1, code);
+    mRequest.setParameter(2, format);
+    if (!sendRequest(MTP_OPERATION_GET_OBJECT_PROP_DESC))
         return NULL;
     if (!readData())
         return NULL;

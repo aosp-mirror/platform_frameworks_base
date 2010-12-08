@@ -62,9 +62,7 @@ public class ValueAnimator extends Animator {
      */
     private static final int STOPPED    = 0; // Not yet playing
     private static final int RUNNING    = 1; // Playing normally
-    private static final int CANCELED   = 2; // cancel() called - need to end it
-    private static final int ENDED      = 3; // end() called - need to end it
-    private static final int SEEKED     = 4; // Seeked to some time value
+    private static final int SEEKED     = 2; // Seeked to some time value
 
     /**
      * Internal variables
@@ -178,7 +176,7 @@ public class ValueAnimator extends Animator {
      * Flag that represents the current state of the animation. Used to figure out when to start
      * an animation (if state == STOPPED). Also used to end an animation that
      * has been cancel()'d or end()'d since the last animation frame. Possible values are
-     * STOPPED, RUNNING, ENDED, CANCELED.
+     * STOPPED, RUNNING, SEEKED.
      */
     private int mPlayingState = STOPPED;
 
@@ -581,8 +579,7 @@ public class ValueAnimator extends Animator {
                         for (int i = 0; i < count; ++i) {
                             ValueAnimator anim = pendingCopy.get(i);
                             // If the animation has a startDelay, place it on the delayed list
-                            if (anim.mStartDelay == 0 || anim.mPlayingState == ENDED ||
-                                    anim.mPlayingState == CANCELED) {
+                            if (anim.mStartDelay == 0) {
                                 anim.startAnimation();
                             } else {
                                 delayedAnims.add(anim);
@@ -619,14 +616,28 @@ public class ValueAnimator extends Animator {
                     // Now process all active animations. The return value from animationFrame()
                     // tells the handler whether it should now be ended
                     int numAnims = animations.size();
-                    for (int i = 0; i < numAnims; ++i) {
+                    int i = 0;
+                    while (i < numAnims) {
                         ValueAnimator anim = animations.get(i);
                         if (anim.animationFrame(currentTime)) {
                             endingAnims.add(anim);
                         }
+                        if (animations.size() == numAnims) {
+                            ++i;
+                        } else {
+                            // An animation might be canceled or ended by client code
+                            // during the animation frame. Check to see if this happened by
+                            // seeing whether the current index is the same as it was before
+                            // calling animationFrame(). Another approach would be to copy
+                            // animations to a temporary list and process that list instead,
+                            // but that entails garbage and processing overhead that would
+                            // be nice to avoid.
+                            --numAnims;
+                            endingAnims.remove(anim);
+                        }
                     }
                     if (endingAnims.size() > 0) {
-                        for (int i = 0; i < endingAnims.size(); ++i) {
+                        for (i = 0; i < endingAnims.size(); ++i) {
                             endingAnims.get(i).endAnimation();
                         }
                         endingAnims.clear();
@@ -918,9 +929,7 @@ public class ValueAnimator extends Animator {
         // to run
         if (mPlayingState != STOPPED || sPendingAnimations.get().contains(this) ||
                 sDelayedAnims.get().contains(this)) {
-            // Just set the CANCELED flag - this causes the animation to end the next time a frame
-            // is processed.
-            mPlayingState = CANCELED;
+            endAnimation();
         }
     }
 
@@ -929,23 +938,21 @@ public class ValueAnimator extends Animator {
         if (!sAnimations.get().contains(this) && !sPendingAnimations.get().contains(this)) {
             // Special case if the animation has not yet started; get it ready for ending
             mStartedDelay = false;
-            sPendingAnimations.get().add(this);
-            AnimationHandler animationHandler = sAnimationHandler.get();
-            if (animationHandler == null) {
-                animationHandler = new AnimationHandler();
-                sAnimationHandler.set(animationHandler);
-            }
-            animationHandler.sendEmptyMessage(ANIMATION_START);
+            startAnimation();
         }
-        // Just set the ENDED flag - this causes the animation to end the next time a frame
-        // is processed.
-        mPlayingState = ENDED;
+        // The final value set on the target varies, depending on whether the animation
+        // was supposed to repeat an odd number of times
+        if (mRepeatCount > 0 && (mRepeatCount & 0x01) == 1) {
+            animateValue(0f);
+        } else {
+            animateValue(1f);
+        }
+        endAnimation();
     }
 
     @Override
     public boolean isRunning() {
-        // ENDED or CANCELED indicate that it has been ended or canceled, but not processed yet
-        return (mPlayingState == RUNNING || mPlayingState == ENDED || mPlayingState == CANCELED);
+        return (mPlayingState == RUNNING);
     }
 
     /**
@@ -973,6 +980,8 @@ public class ValueAnimator extends Animator {
      */
     private void endAnimation() {
         sAnimations.get().remove(this);
+        sPendingAnimations.get().remove(this);
+        sDelayedAnims.get().remove(this);
         mPlayingState = STOPPED;
         if (mListeners != null) {
             ArrayList<AnimatorListener> tmpListeners =
@@ -1014,10 +1023,6 @@ public class ValueAnimator extends Animator {
      * should be added to the set of active animations.
      */
     private boolean delayedAnimationFrame(long currentTime) {
-        if (mPlayingState == CANCELED || mPlayingState == ENDED) {
-            // end the delay, process an animation frame to actually cancel it
-            return true;
-        }
         if (!mStartedDelay) {
             mStartedDelay = true;
             mDelayStartTime = currentTime;
@@ -1087,19 +1092,6 @@ public class ValueAnimator extends Animator {
                 fraction = 1f - fraction;
             }
             animateValue(fraction);
-            break;
-        case ENDED:
-            // The final value set on the target varies, depending on whether the animation
-            // was supposed to repeat an odd number of times
-            if (mRepeatCount > 0 && (mRepeatCount & 0x01) == 1) {
-                animateValue(0f);
-            } else {
-                animateValue(1f);
-            }
-            // Fall through to set done flag
-        case CANCELED:
-            done = true;
-            mPlayingState = STOPPED;
             break;
         }
 

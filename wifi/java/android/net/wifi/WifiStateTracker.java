@@ -170,6 +170,13 @@ public class WifiStateTracker implements NetworkStateTracker {
     }
 
     /**
+     * @param enabled
+     */
+    public void setDataEnable(boolean enabled) {
+        android.util.Log.d(TAG, "setDataEnabled: IGNORING enabled=" + enabled);
+    }
+
+    /**
      * Check if private DNS route is set for the network
      */
     public boolean isPrivateDnsRouteSet() {

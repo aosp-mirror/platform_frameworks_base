@@ -70,6 +70,13 @@ public:
     }
 
     /**
+     * Indicates whether this program was correctly compiled and linked.
+     */
+    inline bool isInitialized() const {
+        return mInitialized;
+    }
+
+    /**
      * Binds the program with the specified projection, modelView and
      * transform matrices.
      */
@@ -126,6 +133,7 @@ private:
     KeyedVector<const char*, int> uniforms;
 
     bool mUse;
+    bool mInitialized;
 }; // class Program
 
 }; // namespace uirenderer

@@ -58,7 +58,7 @@ Layer::Layer(SurfaceFlinger* flinger,
         mSecure(false),
         mTextureManager(),
         mBufferManager(mTextureManager),
-        mWidth(0), mHeight(0), mFixedSize(false)
+        mWidth(0), mHeight(0), mNeedsScaling(false), mFixedSize(false)
 {
 }
 
@@ -274,13 +274,10 @@ slowpath:
 
 void Layer::drawForSreenShot() const
 {
-    bool currentFixedSize = mFixedSize;
-    bool currentBlending = mNeedsBlending;
-    const_cast<Layer*>(this)->mFixedSize = false;
-    const_cast<Layer*>(this)->mFixedSize = true;
+    const bool currentFiltering = mNeedsFiltering;
+    const_cast<Layer*>(this)->mNeedsFiltering = true;
     LayerBase::drawForSreenShot();
-    const_cast<Layer*>(this)->mFixedSize = currentFixedSize;
-    const_cast<Layer*>(this)->mNeedsBlending = currentBlending;
+    const_cast<Layer*>(this)->mNeedsFiltering = currentFiltering;
 }
 
 void Layer::onDraw(const Region& clip) const
@@ -318,11 +315,10 @@ void Layer::onDraw(const Region& clip) const
 bool Layer::needsFiltering() const
 {
     if (!(mFlags & DisplayHardware::SLOW_CONFIG)) {
-        // NOTE: there is a race here, because mFixedSize is updated in a
-        // binder transaction. however, it doesn't really matter since it is
-        // evaluated each time we draw. To be perfectly correct, this flag
-        // would have to be associated with a buffer.
-        if (mFixedSize)
+        // if our buffer is not the same size than ourselves,
+        // we need filtering.
+        Mutex::Autolock _l(mLock);
+        if (mNeedsScaling)
             return true;
     }
     return LayerBase::needsFiltering();
@@ -396,6 +392,7 @@ sp<GraphicBuffer> Layer::requestBuffer(int index,
             mReqHeight = reqHeight;
             mReqFormat = reqFormat;
             mFixedSize = fixedSize;
+            mNeedsScaling = mWidth != mReqWidth || mHeight != mReqHeight;
 
             lcblk->reallocateAllExcept(index);
         }
@@ -409,6 +406,7 @@ sp<GraphicBuffer> Layer::requestBuffer(int index,
     err = buffer->initCheck();
 
     if (err || buffer->handle == 0) {
+        GraphicBuffer::dumpAllocationsToSystemLog();
         LOGE_IF(err || buffer->handle == 0,
                 "Layer::requestBuffer(this=%p), index=%d, w=%d, h=%d failed (%s)",
                 this, index, w, h, strerror(-err));
@@ -518,6 +516,7 @@ void Layer::setBufferSize(uint32_t w, uint32_t h) {
     Mutex::Autolock _l(mLock);
     mWidth = w;
     mHeight = h;
+    mNeedsScaling = mWidth != mReqWidth || mHeight != mReqHeight;
 }
 
 bool Layer::isFixedSize() const {

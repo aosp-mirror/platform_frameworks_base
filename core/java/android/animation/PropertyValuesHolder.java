@@ -178,9 +178,8 @@ public class PropertyValuesHolder implements Cloneable {
      * on the object. Also, if any value is null, the value will be filled in when the animation
      * starts in the same way. This mechanism of automatically getting null values only works
      * if the PropertyValuesHolder object is used in conjunction
-     * {@link ObjectAnimator}, and with a getter function either
-     * derived automatically from <code>propertyName</code> or set explicitly via
-     * {@link #setGetter(java.lang.reflect.Method)}, since otherwise PropertyValuesHolder has
+     * {@link ObjectAnimator}, and with a getter function
+     * derived automatically from <code>propertyName</code>, since otherwise PropertyValuesHolder has
      * no way of determining what the value should be.
      * @param propertyName The name of the property associated with this set of values. This
      * can be the actual property name to be used when using a ObjectAnimator object, or
@@ -210,9 +209,8 @@ public class PropertyValuesHolder implements Cloneable {
      * on the object. Also, if any value is null, the value will be filled in when the animation
      * starts in the same way. This mechanism of automatically getting null values only works
      * if the PropertyValuesHolder object is used in conjunction
-     * {@link ObjectAnimator}, and with a getter function either
-     * derived automatically from <code>propertyName</code> or set explicitly via
-     * {@link #setGetter(java.lang.reflect.Method)}, since otherwise PropertyValuesHolder has
+     * {@link ObjectAnimator}, and with a getter function
+     * derived automatically from <code>propertyName</code>, since otherwise PropertyValuesHolder has
      * no way of determining what the value should be.
      *
      * @param values One or more values that the animation will animate between.
@@ -229,9 +227,8 @@ public class PropertyValuesHolder implements Cloneable {
      * on the object. Also, if any value is null, the value will be filled in when the animation
      * starts in the same way. This mechanism of automatically getting null values only works
      * if the PropertyValuesHolder object is used in conjunction
-     * {@link ObjectAnimator}, and with a getter function either
-     * derived automatically from <code>propertyName</code> or set explicitly via
-     * {@link #setGetter(java.lang.reflect.Method)}, since otherwise PropertyValuesHolder has
+     * {@link ObjectAnimator}, and with a getter function
+     * derived automatically from <code>propertyName</code>, since otherwise PropertyValuesHolder has
      * no way of determining what the value should be.
      *
      * @param values One or more values that the animation will animate between.
@@ -263,9 +260,8 @@ public class PropertyValuesHolder implements Cloneable {
      * on the object. Also, if any value is null, the value will be filled in when the animation
      * starts in the same way. This mechanism of automatically getting null values only works
      * if the PropertyValuesHolder object is used in conjunction
-     * {@link ObjectAnimator}, and with a getter function either
-     * derived automatically from <code>propertyName</code> or set explicitly via
-     * {@link #setGetter(java.lang.reflect.Method)}, since otherwise PropertyValuesHolder has
+     * {@link ObjectAnimator}, and with a getter function
+     * derived automatically from <code>propertyName</code>, since otherwise PropertyValuesHolder has
      * no way of determining what the value should be.
      * 
      * @param values One or more values that the animation will animate between.
@@ -329,7 +325,7 @@ public class PropertyValuesHolder implements Cloneable {
             // If we got here, then no appropriate function was found
             Log.e("PropertyValuesHolder",
                     "Couldn't find setter/getter for property " + mPropertyName +
-                            "with value type "+ mValueType);
+                            " with value type "+ mValueType);
         }
 
         return returnVal;
@@ -541,67 +537,6 @@ public class PropertyValuesHolder implements Cloneable {
      */
     void calculateValue(float fraction) {
         mAnimatedValue = mKeyframeSet.getValue(fraction);
-    }
-
-    /**
-     * Sets the <code>Method</code> that is called with the animated values calculated
-     * during the animation. Setting the setter method is an alternative to supplying a
-     * {@link #setPropertyName(String) propertyName} from which the method is derived. This
-     * approach is more direct, and is especially useful when a function must be called that does
-     * not correspond to the convention of <code>setName()</code>. For example, if a function
-     * called <code>offset()</code> is to be called with the animated values, there is no way
-     * to tell <code>ObjectAnimator</code> how to call that function simply through a property
-     * name, so a setter method should be supplied instead.
-     *
-     * <p>Note that the setter function must take the same parameter type as the
-     * <code>valueFrom</code> and <code>valueTo</code> properties, otherwise the call to
-     * the setter function will fail.</p>
-     *
-     * @param setter The setter method that should be called with the animated values.
-     */
-    public void setSetter(Method setter) {
-        mSetter = setter;
-    }
-
-    /**
-     * Gets the <code>Method</code> that is called with the animated values calculated
-     * during the animation.
-     */
-    public Method getSetter() {
-        return mSetter;
-    }
-
-    /**
-     * Sets the <code>Method</code> that is called to get unsupplied <code>valueFrom</code> or
-     * <code>valueTo</code> properties. Setting the getter method is an alternative to supplying a
-     * {@link #setPropertyName(String) propertyName} from which the method is derived. This
-     * approach is more direct, and is especially useful when a function must be called that does
-     * not correspond to the convention of <code>setName()</code>. For example, if a function
-     * called <code>offset()</code> is to be called to get an initial value, there is no way
-     * to tell <code>ObjectAnimator</code> how to call that function simply through a property
-     * name, so a getter method should be supplied instead.
-     *
-     * <p>Note that the getter method is only called whether supplied here or derived
-     * from the property name, if one of <code>valueFrom</code> or <code>valueTo</code> are
-     * null. If both of those values are non-null, then there is no need to get one of the
-     * values and the getter is not called.
-     *
-     * <p>Note that the getter function must return the same parameter type as the
-     * <code>valueFrom</code> and <code>valueTo</code> properties (whichever of them are
-     * non-null), otherwise the call to the getter function will fail.</p>
-     *
-     * @param getter The getter method that should be called to get initial animation values.
-     */
-    public void setGetter(Method getter) {
-        mGetter = getter;
-    }
-
-    /**
-     * Gets the <code>Method</code> that is called to get unsupplied <code>valueFrom</code> or
-     * <code>valueTo</code> properties.
-     */
-    public Method getGetter() {
-        return mGetter;
     }
 
     /**

@@ -378,6 +378,12 @@ void ScriptCState::clear(Context *rsc) {
 static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name) {
     const ScriptCState::SymbolTable_t *sym;
     ScriptC *s = (ScriptC *)pContext;
+    if (!strcmp(name, "__isThreadable")) {
+      return (BCCvoid*) s->mEnviroment.mIsThreadable;
+    } else if (!strcmp(name, "__clearThreadable")) {
+      s->mEnviroment.mIsThreadable = false;
+      return NULL;
+    }
     sym = ScriptCState::lookupSymbol(name);
     if (!sym) {
         sym = ScriptCState::lookupSymbolCL(name);

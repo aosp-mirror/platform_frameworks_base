@@ -104,7 +104,7 @@ key 111   FORWARD_DEL
 key 113   VOLUME_MUTE
 key 114   VOLUME_DOWN
 key 115   VOLUME_UP
-# key 120  switch applications
+key 120   APP_SWITCH
 key 125   META_LEFT
 key 126   META_RIGHT
 key 161   MEDIA_EJECT

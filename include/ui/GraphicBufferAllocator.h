@@ -68,6 +68,7 @@ public:
     status_t free(buffer_handle_t handle);
 
     void dump(String8& res) const;
+    static void dumpToSystemLog();
 
 private:
     struct alloc_rec_t {

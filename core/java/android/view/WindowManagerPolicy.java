@@ -587,9 +587,10 @@ public interface WindowManagerPolicy {
      *            event will normally go.
      * @param event The key event.
      * @param policyFlags The policy flags associated with the key.
-     * @return Returns true if the policy consumed the event.
+     * @return Returns an alternate key event to redispatch as a fallback, or null to give up.
+     * The caller is responsible for recycling the key event.
      */
-    public boolean dispatchUnhandledKey(WindowState win, KeyEvent event, int policyFlags);
+    public KeyEvent dispatchUnhandledKey(WindowState win, KeyEvent event, int policyFlags);
 
     /**
      * Called when layout of the windows is about to start.

@@ -21,6 +21,7 @@ import android.nfc.technology.MifareClassic;
 import android.nfc.technology.MifareUltralight;
 import android.nfc.technology.NfcV;
 import android.nfc.technology.Ndef;
+import android.nfc.technology.NdefFormatable;
 import android.nfc.technology.NfcA;
 import android.nfc.technology.NfcB;
 import android.nfc.technology.NfcF;
@@ -154,12 +155,11 @@ public class Tag implements Parcelable {
                 case TagTechnology.NFC_V: {
                     return new NfcV(adapter, this, extras);
                 }
-                case TagTechnology.MIFARE_CLASSIC_NDEF:
-                case TagTechnology.TYPE_1:
-                case TagTechnology.TYPE_2:
-                case TagTechnology.TYPE_3:
-                case TagTechnology.TYPE_4: {
+                case TagTechnology.NDEF: {
                     return new Ndef(adapter, this, tech, extras);
+                }
+                case TagTechnology.NDEF_FORMATABLE: {
+                    return new NdefFormatable(adapter, this, tech, extras);
                 }
                 case TagTechnology.NFC_F: {
                     return new NfcF(adapter, this, extras);

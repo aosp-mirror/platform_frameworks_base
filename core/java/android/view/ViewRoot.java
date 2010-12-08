@@ -1101,7 +1101,9 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
             }
 
-            if (hwInitialized || (windowShouldResize && mAttachInfo.mHardwareRenderer != null)) {
+            if (hwInitialized || (windowShouldResize &&
+                    mAttachInfo.mHardwareRenderer != null &&
+                    mAttachInfo.mHardwareRenderer.isEnabled())) {
                 mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight);
             }
 
@@ -2308,21 +2310,23 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
 
         final int action = event.getAction();
-        final int metastate = event.getMetaState();
+        final int metaState = event.getMetaState();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 x.reset(2);
                 y.reset(2);
                 deliverKeyEvent(new KeyEvent(curTime, curTime,
-                        KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER,
-                        0, metastate), false);
+                        KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER, 0, metaState,
+                        KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
+                        InputDevice.SOURCE_KEYBOARD), false);
                 break;
             case MotionEvent.ACTION_UP:
                 x.reset(2);
                 y.reset(2);
                 deliverKeyEvent(new KeyEvent(curTime, curTime,
-                        KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER,
-                        0, metastate), false);
+                        KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER, 0, metaState,
+                        KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
+                        InputDevice.SOURCE_KEYBOARD), false);
                 break;
         }
 
@@ -2372,9 +2376,11 @@ public final class ViewRoot extends Handler implements ViewParent,
                 if (DEBUG_TRACKBALL) Log.v("foo", "Delivering fake DPAD: "
                         + keycode);
                 movement--;
+                int repeatCount = accelMovement - movement;
                 deliverKeyEvent(new KeyEvent(curTime, curTime,
-                        KeyEvent.ACTION_MULTIPLE, keycode,
-                        accelMovement-movement, metastate), false);
+                        KeyEvent.ACTION_MULTIPLE, keycode, repeatCount, metaState,
+                        KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
+                        InputDevice.SOURCE_KEYBOARD), false);
             }
             while (movement > 0) {
                 if (DEBUG_TRACKBALL) Log.v("foo", "Delivering fake DPAD: "
@@ -2382,10 +2388,14 @@ public final class ViewRoot extends Handler implements ViewParent,
                 movement--;
                 curTime = SystemClock.uptimeMillis();
                 deliverKeyEvent(new KeyEvent(curTime, curTime,
-                        KeyEvent.ACTION_DOWN, keycode, 0, event.getMetaState()), false);
+                        KeyEvent.ACTION_DOWN, keycode, 0, metaState,
+                        KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
+                        InputDevice.SOURCE_KEYBOARD), false);
                 deliverKeyEvent(new KeyEvent(curTime, curTime,
-                        KeyEvent.ACTION_UP, keycode, 0, metastate), false);
-            }
+                        KeyEvent.ACTION_UP, keycode, 0, metaState,
+                        KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
+                        InputDevice.SOURCE_KEYBOARD), false);
+                }
             mLastTrackballTime = curTime;
         }
 

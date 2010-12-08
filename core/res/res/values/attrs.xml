@@ -503,15 +503,22 @@
         <attr name="listPopupWindowStyle" format="reference" />
         <!-- Default PopupMenu style. -->
         <attr name="popupMenuStyle" format="reference" />
-        <!-- NumberPicker up button style -->
+
+        <!-- @hide NumberPicker up button style -->
         <attr name="numberPickerUpButtonStyle" format="reference" />
-        <!-- NumberPicker down button style -->
+        <!-- @hide NumberPicker down button style -->
         <attr name="numberPickerDownButtonStyle" format="reference" />
-        <!-- NumberPicker input text style -->
+        <!-- @hide NumberPicker input text style -->
         <attr name="numberPickerInputTextStyle" format="reference" />
 
-        <!-- NumberPicker the fading edge length of the selector wheel -->
+        <!-- @hide NumberPicker the fading edge length of the selector wheel -->
         <attr name="numberPickerStyle" format="reference" />
+
+        <!-- @hide DayPicker$WeekView style-->
+        <attr name="dayPickerWeekViewStyle" format="reference" />
+
+        <!-- @hide DayPickerDayView style-->
+        <attr name="dayPickerWeekDayViewStyle" format="reference" />
 
         <!-- =================== -->
         <!-- Action bar styles   -->
@@ -1260,6 +1267,7 @@
         <enum name="KEYCODE_PROG_GREEN" value="184" />
         <enum name="KEYCODE_PROG_YELLOW" value="185" />
         <enum name="KEYCODE_PROG_BLUE" value="186" />
+        <enum name="KEYCODE_APP_SWITCH" value="187" />
     </attr>
 
     <!-- ***************************************************************** -->
@@ -2940,6 +2948,16 @@
         <attr name="minorWeightMin" format="float" />
         <attr name="majorWeightMax" format="float" />
         <attr name="minorWeightMax" format="float" />
+    </declare-styleable>
+
+    <!-- @hide -->
+    <declare-styleable name="DayPickerWeekView">
+        <attr name="selectionBackgroundColor" format="color|reference" />
+        <attr name="focusedMonthDateColor" format="color|reference" />
+        <attr name="otherMonthDateColor" format="color|reference" />
+        <attr name="weekNumberColor" format="color|reference" />
+        <attr name="gridLinesColor" format="color|reference" />
+        <attr name="selectedDayLine" format="reference" />
     </declare-styleable>
 
     <!-- @hide -->

@@ -42,7 +42,9 @@ key C {
     label:                              'C'
     base:                               'c'
     shift, capslock:                    'C'
-    ctrl, alt, meta:                    none
+    alt:                                '\u00e7'
+    shift+alt:                          '\u00c7'
+    ctrl, meta:                         none
 }
 
 key D {
@@ -56,7 +58,8 @@ key E {
     label:                              'E'
     base:                               'e'
     shift, capslock:                    'E'
-    ctrl, alt, meta:                    none
+    alt:                                '\u0301'
+    ctrl, meta:                         none
 }
 
 key F {
@@ -84,7 +87,8 @@ key I {
     label:                              'I'
     base:                               'i'
     shift, capslock:                    'I'
-    ctrl, alt, meta:                    none
+    alt:                                '\u0302'
+    ctrl, meta:                         none
 }
 
 key J {
@@ -119,7 +123,8 @@ key N {
     label:                              'N'
     base:                               'n'
     shift, capslock:                    'N'
-    ctrl, alt, meta:                    none
+    alt:                                '\u0303'
+    ctrl, meta:                         none
 }
 
 key O {
@@ -154,7 +159,8 @@ key S {
     label:                              'S'
     base:                               's'
     shift, capslock:                    'S'
-    ctrl, alt, meta:                    none
+    alt:                                '\u00df'
+    ctrl, meta:                         none
 }
 
 key T {
@@ -168,7 +174,8 @@ key U {
     label:                              'U'
     base:                               'u'
     shift, capslock:                    'U'
-    ctrl, alt, meta:                    none
+    alt:                                '\u0308'
+    ctrl, meta:                         none
 }
 
 key V {
@@ -253,6 +260,7 @@ key 6 {
     base:                               '6'
     shift:                              '^'
     ctrl, alt, meta:                    none
+    alt+shift:                          '\u0302'
 }
 
 key 7 {
@@ -279,7 +287,8 @@ key 9 {
 key SPACE {
     label:                              ' '
     base:                               ' '
-    ctrl, alt, meta:                    none
+    ctrl, alt:                          none
+    meta:                               fallback SEARCH
 }
 
 key ENTER {
@@ -291,7 +300,8 @@ key ENTER {
 key TAB {
     label:                              '\t'
     base:                               '\t'
-    ctrl, alt, meta:                    none
+    ctrl, alt:                          none
+    meta:                               fallback APP_SWITCH
 }
 
 key COMMA {
@@ -319,7 +329,9 @@ key GRAVE {
     label, number:                      '`'
     base:                               '`'
     shift:                              '~'
-    ctrl, alt, meta:                    none
+    alt:                                '\u0300'
+    alt+shift:                          '\u0303'
+    ctrl, meta:                         none
 }
 
 key MINUS {
@@ -524,4 +536,12 @@ key POUND {
 key PLUS {
     label, number:                      '+'
     base:                               '+'
+}
+
+### Non-printing keys ###
+
+key ESCAPE {
+    base:                               fallback BACK
+    meta:                               fallback HOME
+    alt:                                fallback MENU
 }

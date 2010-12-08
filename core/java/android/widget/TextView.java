@@ -3933,6 +3933,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             hideError();
         }
 
+        if (mBlink != null) {
+            mBlink.cancel();
+        }
         hideControllers();
     }
 
@@ -6282,11 +6285,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mCursorVisible = visible;
         invalidate();
 
-        if (visible) {
-            makeBlink();
-        } else if (mBlink != null) {
-            mBlink.removeCallbacks(mBlink);
-        }
+        makeBlink();
 
         // InsertionPointCursorController depends on mCursorVisible
         prepareCursorControllers();
@@ -6782,7 +6781,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void makeBlink() {
-        if (!mCursorVisible) {
+        if (!mCursorVisible || !isTextEditable()) {
             if (mBlink != null) {
                 mBlink.removeCallbacks(mBlink);
             }
@@ -7134,6 +7133,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mLayout != null;
 
         if (!mInsertionControllerEnabled) {
+            hideInsertionPointCursorController();
             mInsertionPointCursorController = null;
         }
 
@@ -7388,14 +7388,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private boolean canSelectText() {
-        return textCanBeSelected() && mText.length() != 0;
+        return hasSelectionController() && mText.length() != 0;
     }
 
     private boolean textCanBeSelected() {
         // prepareCursorController() relies on this method.
         // If you change this condition, make sure prepareCursorController is called anywhere
         // the value of this condition might be changed.
-        return (mText instanceof Spannable && mMovement != null && mMovement.canSelectArbitrarily());
+        return mText instanceof Spannable && mMovement != null && mMovement.canSelectArbitrarily();
     }
 
     private boolean canCut() {
@@ -7529,6 +7529,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void selectCurrentWord() {
+        if (!canSelectText()) {
+            return;
+        }
+
         if (hasPasswordTransformationMethod()) {
             // selectCurrentWord is not available on a password field and would return an
             // arbitrary 10-charater selection around pressed position. Select all instead.
@@ -7544,7 +7548,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             minOffset = getSelectionStart();
             maxOffset = getSelectionEnd();
         } else {
-            // selectionModifierCursorController is guaranteed to exist at that point
             SelectionModifierCursorController selectionController = getSelectionController();
             minOffset = selectionController.getMinTouchOffset();
             maxOffset = selectionController.getMaxTouchOffset();
@@ -7921,12 +7924,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         selectCurrentWord();
         ActionMode.Callback actionModeCallback = new SelectionActionModeCallback();
-        if (actionModeCallback != null) {
-            mSelectionActionMode = startActionMode(actionModeCallback);
-            return mSelectionActionMode != null;
-        }
-
-        return false;
+        mSelectionActionMode = startActionMode(actionModeCallback);
+        return mSelectionActionMode != null;
     }
 
     /**

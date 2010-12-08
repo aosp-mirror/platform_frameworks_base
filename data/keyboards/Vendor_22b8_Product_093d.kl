@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#
+# Motorola Bluetooth Wireless Keyboard.
+#
+
 key 1     BACK
 key 2     1
 key 3     2

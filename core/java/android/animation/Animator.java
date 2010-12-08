@@ -36,22 +36,36 @@ public abstract class Animator implements Cloneable {
      * this call, because all animation events are posted to a central timing loop so that animation
      * times are all synchronized on a single timing pulse on the UI thread. So the animation will
      * start the next time that event handler processes events.
+     *
+     * <p>The animation started by calling this method will be run on the thread that called
+     * this method. This thread should have a Looper on it (a runtime exception will be thrown if
+     * this is not the case). Also, if the animation will animate
+     * properties of objects in the view hierarchy, then the calling thread should be the UI
+     * thread for that view hierarchy.</p>
+     *
      */
     public void start() {
     }
 
     /**
      * Cancels the animation. Unlike {@link #end()}, <code>cancel()</code> causes the animation to
-     * stop in its tracks, sending an {@link android.animation.Animator.AnimatorListener#onAnimationCancel(Animator)} to
-     * its listeners, followed by an {@link android.animation.Animator.AnimatorListener#onAnimationEnd(Animator)} message.
+     * stop in its tracks, sending an
+     * {@link android.animation.Animator.AnimatorListener#onAnimationCancel(Animator)} to
+     * its listeners, followed by an
+     * {@link android.animation.Animator.AnimatorListener#onAnimationEnd(Animator)} message.
+     *
+     * <p>This method must be called on the thread that is running the animation.</p>
      */
     public void cancel() {
     }
 
     /**
      * Ends the animation. This causes the animation to assign the end value of the property being
-     * animated, then calling the {@link android.animation.Animator.AnimatorListener#onAnimationEnd(Animator)} method on
+     * animated, then calling the
+     * {@link android.animation.Animator.AnimatorListener#onAnimationEnd(Animator)} method on
      * its listeners.
+     *
+     * <p>This method must be called on the thread that is running the animation.</p>
      */
     public void end() {
     }

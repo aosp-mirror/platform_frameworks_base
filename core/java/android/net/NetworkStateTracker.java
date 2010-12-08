@@ -169,6 +169,11 @@ public interface NetworkStateTracker {
     public int stopUsingNetworkFeature(String feature, int callingPid, int callingUid);
 
     /**
+     * @param enabled
+     */
+    public void setDataEnable(boolean enabled);
+
+    /**
      * -------------------------------------------------------------
      * Storage API used by ConnectivityService for saving
      * Network specific information.
@@ -204,5 +209,4 @@ public interface NetworkStateTracker {
      * Indicate tear down requested from connectivity
      */
     public void setTeardownRequested(boolean isRequested);
-
 }

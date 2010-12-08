@@ -67,6 +67,7 @@ public:
 
     void                    initialize();
     void                    close();
+    void                    print();
     const char*             getDeviceName();
 
     bool                    openSession();
@@ -85,7 +86,10 @@ public:
     MtpObjectHandle         getParent(MtpObjectHandle handle);
     MtpObjectHandle         getStorageID(MtpObjectHandle handle);
 
+    MtpObjectPropertyList*  getObjectPropsSupported(MtpObjectFormat format);
+
     MtpProperty*            getDevicePropDesc(MtpDeviceProperty code);
+    MtpProperty*            getObjectPropDesc(MtpObjectProperty code, MtpObjectFormat format);
 
     bool                   readObject(MtpObjectHandle handle, const char* destPath, int group,
                                     int perm);

@@ -256,7 +256,7 @@ public:
      * Returns WOULD_BLOCK if there is no signal present.
      * Other errors probably indicate that the channel is broken.
      */
-    status_t receiveFinishedSignal(bool& outHandled);
+    status_t receiveFinishedSignal(bool* outHandled);
 
 private:
     sp<InputChannel> mChannel;
