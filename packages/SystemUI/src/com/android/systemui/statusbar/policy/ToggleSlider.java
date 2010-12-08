@@ -24,10 +24,10 @@ import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.CompoundButton;
 
 import com.android.systemui.R;
 
@@ -77,13 +77,18 @@ public class ToggleSlider extends RelativeLayout
 
     public void onCheckedChanged(CompoundButton toggle, boolean checked) {
         Drawable thumb;
+        Drawable slider;
         final Resources res = getContext().getResources();
         if (checked) {
             thumb = res.getDrawable(R.drawable.scrubber_control_disabled_holo);
+            slider = res.getDrawable(R.drawable.status_bar_settings_slider_disabled);
         } else {
             thumb = res.getDrawable(R.drawable.scrubber_control_holo);
+            slider = res.getDrawable(
+                    com.android.internal.R.drawable.scrubber_progress_horizontal_holo_dark);
         }
         mSlider.setThumb(thumb);
+        mSlider.setProgressDrawable(slider);
 
         if (mListener != null) {
             mListener.onChanged(this, mTracking, checked, mSlider.getProgress());
