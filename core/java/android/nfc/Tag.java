@@ -127,7 +127,7 @@ public class Tag implements Parcelable {
     /**
      * Returns the technology, or null if not present
      */
-    public TagTechnology getTechnology(int tech) {
+    public TagTechnology getTechnology(NfcAdapter adapter, int tech) {
         int pos = -1;
         for (int idx = 0; idx < mTechList.length; idx++) {
           if (mTechList[idx] == tech) {
@@ -140,7 +140,6 @@ public class Tag implements Parcelable {
         }
 
         Bundle extras = mTechExtras[pos];
-        NfcAdapter adapter = NfcAdapter.getDefaultAdapter();
         try {
             switch (tech) {
                 case TagTechnology.NFC_A: {

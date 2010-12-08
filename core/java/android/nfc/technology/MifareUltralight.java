@@ -16,12 +16,12 @@
 
 package android.nfc.technology;
 
+import java.io.IOException;
+
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.RemoteException;
-
-import java.io.IOException;
 
 /**
  * Concrete class for TagTechnology.MIFARE_ULTRALIGHT
@@ -39,7 +39,7 @@ public final class MifareUltralight extends BasicTagTechnology {
     public static final int TYPE_ULTRALIGHT_C = 2;
     public static final int TYPE_UNKNOWN = 10;
 
-		private static final int NXP_MANUFACTURER_ID = 0x04;
+    private static final int NXP_MANUFACTURER_ID = 0x04;
 
     private int mType;
 
@@ -47,13 +47,13 @@ public final class MifareUltralight extends BasicTagTechnology {
         super(adapter, tag, TagTechnology.MIFARE_ULTRALIGHT);
 
         // Check if this could actually be a Mifare
-        NfcA a = (NfcA) tag.getTechnology(TagTechnology.NFC_A);
+        NfcA a = (NfcA) tag.getTechnology(adapter, TagTechnology.NFC_A);
 
         mType = TYPE_UNKNOWN;
 
         if( a.getSak() == 0x00 && tag.getId()[0] == NXP_MANUFACTURER_ID ) {
-					// could be UL or UL-C
-					mType = TYPE_ULTRALIGHT;
+            // could be UL or UL-C
+            mType = TYPE_ULTRALIGHT;
         }
     }
 
@@ -73,9 +73,9 @@ public final class MifareUltralight extends BasicTagTechnology {
     /**
      * @throws IOException
      */
-/*
+    /*
     public byte[] readOTP();
     public void writePage(int block, byte[] data);
     public void writeBlock(int block, byte[] data);
-*/
+     */
 }
