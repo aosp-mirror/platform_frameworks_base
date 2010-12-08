@@ -110,7 +110,7 @@ void MtpDevice::print() {
             if (props) {
                 for (int j = 0; j < props->size(); j++) {
                     MtpObjectProperty prop = (*props)[j];
-                    MtpProperty* property = getObjectPropDesc(prop);
+                    MtpProperty* property = getObjectPropDesc(prop, format);
                     if (property)
                         property->print();
                     else
@@ -400,11 +400,12 @@ MtpProperty* MtpDevice::getDevicePropDesc(MtpDeviceProperty code) {
     return NULL;
 }
 
-MtpProperty* MtpDevice::getObjectPropDesc(MtpObjectProperty code) {
+MtpProperty* MtpDevice::getObjectPropDesc(MtpObjectProperty code, MtpObjectFormat format) {
     Mutex::Autolock autoLock(mMutex);
 
     mRequest.reset();
     mRequest.setParameter(1, code);
+    mRequest.setParameter(2, format);
     if (!sendRequest(MTP_OPERATION_GET_OBJECT_PROP_DESC))
         return NULL;
     if (!readData())
