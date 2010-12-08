@@ -21,6 +21,7 @@ import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.view.IApplicationToken;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
@@ -182,4 +183,9 @@ interface IWindowManager
 	 * @hide
 	 */
 	void thawRotation();
+
+	/**
+	 * Create a screenshot of the applications currently displayed.
+	 */
+	Bitmap screenshotApplications(int maxWidth, int maxHeight);
 }
