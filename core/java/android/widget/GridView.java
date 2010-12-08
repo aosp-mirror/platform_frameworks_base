@@ -889,10 +889,11 @@ public class GridView extends AbsListView {
         return sel;
     }
 
-    private void determineColumns(int availableSpace) {
+    private boolean determineColumns(int availableSpace) {
         final int requestedHorizontalSpacing = mRequestedHorizontalSpacing;
         final int stretchMode = mStretchMode;
         final int requestedColumnWidth = mRequestedColumnWidth;
+        boolean didNotInitiallyFit = false;
         
         if (mRequestedNumColumns == AUTO_FIT) {
             if (requestedColumnWidth > 0) {
@@ -922,6 +923,11 @@ public class GridView extends AbsListView {
         default:
             int spaceLeftOver = availableSpace - (mNumColumns * requestedColumnWidth) -
                     ((mNumColumns - 1) * requestedHorizontalSpacing);
+
+            if (spaceLeftOver < 0) {
+                didNotInitiallyFit = true;
+            }
+
             switch (stretchMode) {
             case STRETCH_COLUMN_WIDTH:
                 // Stretch the columns
@@ -954,6 +960,7 @@ public class GridView extends AbsListView {
 
             break;
         }
+        return didNotInitiallyFit;
     }
 
     @Override
@@ -976,7 +983,7 @@ public class GridView extends AbsListView {
         }
         
         int childWidth = widthSize - mListPadding.left - mListPadding.right;
-        determineColumns(childWidth);
+        boolean didNotInitiallyFit = determineColumns(childWidth);
 
         int childHeight = 0;
         int childState = 0;
@@ -1035,7 +1042,7 @@ public class GridView extends AbsListView {
             int ourSize = (mRequestedNumColumns*mColumnWidth)
                     + ((mRequestedNumColumns-1)*mHorizontalSpacing)
                     + mListPadding.left + mListPadding.right;
-            if (ourSize > widthSize) {
+            if (ourSize > widthSize || didNotInitiallyFit) {
                 widthSize |= MEASURED_STATE_TOO_SMALL;
             }
         }
