@@ -1267,6 +1267,7 @@
         <enum name="KEYCODE_PROG_GREEN" value="184" />
         <enum name="KEYCODE_PROG_YELLOW" value="185" />
         <enum name="KEYCODE_PROG_BLUE" value="186" />
+        <enum name="KEYCODE_APP_SWITCH" value="187" />
     </attr>
 
     <!-- ***************************************************************** -->

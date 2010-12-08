@@ -306,9 +306,10 @@ public:
     virtual bool interceptKeyBeforeDispatching(const sp<InputChannel>& inputChannel,
             const KeyEvent* keyEvent, uint32_t policyFlags) = 0;
 
-    /* Allows the policy a chance to perform default processing for an unhandled key. */
+    /* Allows the policy a chance to perform default processing for an unhandled key.
+     * Returns an alternate keycode to redispatch as a fallback, or 0 to give up. */
     virtual bool dispatchUnhandledKey(const sp<InputChannel>& inputChannel,
-            const KeyEvent* keyEvent, uint32_t policyFlags) = 0;
+            const KeyEvent* keyEvent, uint32_t policyFlags, KeyEvent* outFallbackKeyEvent) = 0;
 
     /* Notifies the policy about switch events.
      */
@@ -735,6 +736,7 @@ private:
             CANCEL_ALL_EVENTS = 0,
             CANCEL_POINTER_EVENTS = 1,
             CANCEL_NON_POINTER_EVENTS = 2,
+            CANCEL_FALLBACK_EVENTS = 3,
         };
 
         InputState();
@@ -771,6 +773,7 @@ private:
             int32_t source;
             int32_t keyCode;
             int32_t scanCode;
+            int32_t flags;
             nsecs_t downTime;
         };
 
@@ -790,7 +793,10 @@ private:
         Vector<KeyMemento> mKeyMementos;
         Vector<MotionMemento> mMotionMementos;
 
-        static bool shouldCancelEvent(int32_t eventSource, CancelationOptions options);
+        static bool shouldCancelKey(const KeyMemento& memento,
+                CancelationOptions options);
+        static bool shouldCancelMotion(const MotionMemento& memento,
+                CancelationOptions options);
     };
 
     /* Manages the dispatch state associated with a single input channel. */

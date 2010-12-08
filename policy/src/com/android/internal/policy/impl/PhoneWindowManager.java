@@ -133,6 +133,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean DEBUG = false;
     static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
     static final boolean DEBUG_LAYOUT = false;
+    static final boolean DEBUG_FALLBACK = false;
     static final boolean SHOW_STARTING_ANIMATIONS = true;
     static final boolean SHOW_PROCESSES_ON_ALT_MENU = false;
 
@@ -315,8 +316,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Intent mHomeIntent;
     Intent mCarDockIntent;
     Intent mDeskDockIntent;
-    boolean mSearchKeyPressed;
-    boolean mConsumeSearchKeyUp;
+    int mShortcutKeyPressed = -1;
+    boolean mConsumeShortcutKeyUp;
     boolean mShowMenuKey = false; // track FLAG_NEEDS_MENU_KEY on frontmost window
 
     // support for activating the lock screen while the screen is on
@@ -344,6 +345,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     ShortcutManager mShortcutManager;
     PowerManager.WakeLock mBroadcastWakeLock;
+
+    final KeyCharacterMap.FallbackAction mFallbackAction = new KeyCharacterMap.FallbackAction();
 
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
@@ -1228,56 +1231,44 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     + repeatCount + " keyguardOn=" + keyguardOn + " mHomePressed=" + mHomePressed);
         }
 
-        // Clear a pending HOME longpress if the user releases Home
-        // TODO: This could probably be inside the next bit of logic, but that code
-        // turned out to be a bit fragile so I'm doing it here explicitly, for now.
-        if ((keyCode == KeyEvent.KEYCODE_HOME) && !down) {
-            mHandler.removeCallbacks(mHomeLongPress);
-        }
-
-        // If the HOME button is currently being held, then we do special
-        // chording with it.
-        if (mHomePressed) {
-            
-            // If we have released the home key, and didn't do anything else
-            // while it was pressed, then it is time to go home!
-            if (keyCode == KeyEvent.KEYCODE_HOME) {
-                if (!down) {
-                    mHomePressed = false;
-                    
-                    if (!canceled) {
-                        // If an incoming call is ringing, HOME is totally disabled.
-                        // (The user is already on the InCallScreen at this point,
-                        // and his ONLY options are to answer or reject the call.)
-                        boolean incomingRinging = false;
-                        try {
-                            ITelephony telephonyService = getTelephonyService();
-                            if (telephonyService != null) {
-                                incomingRinging = telephonyService.isRinging();
-                            }
-                        } catch (RemoteException ex) {
-                            Log.w(TAG, "RemoteException from getPhoneInterface()", ex);
-                        }
-        
-                        if (incomingRinging) {
-                            Log.i(TAG, "Ignoring HOME; there's a ringing incoming call.");
-                        } else {
-                            launchHomeFromHotKey();
-                        }
-                    } else {
-                        Log.i(TAG, "Ignoring HOME; event canceled.");
-                    }
-                }
-            }
-            
-            return true;
-        }
-        
         // First we always handle the home key here, so applications
         // can never break it, although if keyguard is on, we do let
         // it handle it, because that gives us the correct 5 second
         // timeout.
         if (keyCode == KeyEvent.KEYCODE_HOME) {
+            // Clear a pending HOME longpress if the user releases Home
+            if (!down) {
+                mHandler.removeCallbacks(mHomeLongPress);
+            }
+
+            // If we have released the home key, and didn't do anything else
+            // while it was pressed, then it is time to go home!
+            if (mHomePressed && !down) {
+                mHomePressed = false;
+                if (!canceled) {
+                    // If an incoming call is ringing, HOME is totally disabled.
+                    // (The user is already on the InCallScreen at this point,
+                    // and his ONLY options are to answer or reject the call.)
+                    boolean incomingRinging = false;
+                    try {
+                        ITelephony telephonyService = getTelephonyService();
+                        if (telephonyService != null) {
+                            incomingRinging = telephonyService.isRinging();
+                        }
+                    } catch (RemoteException ex) {
+                        Log.w(TAG, "RemoteException from getPhoneInterface()", ex);
+                    }
+
+                    if (incomingRinging) {
+                        Log.i(TAG, "Ignoring HOME; there's a ringing incoming call.");
+                    } else {
+                        launchHomeFromHotKey();
+                    }
+                } else {
+                    Log.i(TAG, "Ignoring HOME; event canceled.");
+                }
+                return true;
+            }
 
             // If a system window has focus, then it doesn't make sense
             // right now to interact with applications.
@@ -1334,21 +1325,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (keyCode == KeyEvent.KEYCODE_SEARCH) {
             if (down) {
                 if (repeatCount == 0) {
-                    mSearchKeyPressed = true;
+                    mShortcutKeyPressed = keyCode;
+                    mConsumeShortcutKeyUp = false;
                 }
-            } else {
-                mSearchKeyPressed = false;
+            } else if (keyCode == mShortcutKeyPressed) {
+                mShortcutKeyPressed = -1;
                 
-                if (mConsumeSearchKeyUp) {
+                if (mConsumeShortcutKeyUp) {
                     // Consume the up-event
-                    mConsumeSearchKeyUp = false;
+                    mConsumeShortcutKeyUp = false;
                     return true;
                 }
             }
+        } else if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
+            if (!down) {
+                showRecentAppsDialog();
+            }
+            return true;
         }
         
-        // Shortcuts are invoked through Search+key, so intercept those here
-        if (mSearchKeyPressed) {
+        // Shortcuts are invoked through Search+key or Meta+key, so intercept those here
+        if ((mShortcutKeyPressed != -1 && !mConsumeShortcutKeyUp)
+                || (metaState & KeyEvent.META_META_ON) != 0) {
             if (down && repeatCount == 0 && !keyguardOn) {
                 Intent shortcutIntent = mShortcutManager.getIntent(event);
                 if (shortcutIntent != null) {
@@ -1359,7 +1357,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                      * We launched an app, so the up-event of the search key
                      * should be consumed
                      */
-                    mConsumeSearchKeyUp = true;
+                    if (mShortcutKeyPressed != -1) {
+                        mConsumeShortcutKeyUp = true;
+                    }
                     return true;
                 }
             }
@@ -1370,8 +1370,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public boolean dispatchUnhandledKey(WindowState win, KeyEvent event, int policyFlags) {
-        if (false) {
+    public KeyEvent dispatchUnhandledKey(WindowState win, KeyEvent event, int policyFlags) {
+        if (DEBUG_FALLBACK) {
             Slog.d(TAG, "Unhandled key: win=" + win + ", action=" + event.getAction()
                     + ", flags=" + event.getFlags()
                     + ", keyCode=" + event.getKeyCode()
@@ -1380,7 +1380,42 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     + ", repeatCount=" + event.getRepeatCount()
                     + ", policyFlags=" + policyFlags);
         }
-        return false;
+
+        if ((event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
+            final KeyCharacterMap kcm = event.getKeyCharacterMap();
+            boolean fallback = kcm.getFallbackAction(event.getKeyCode(), event.getMetaState(),
+                    mFallbackAction);
+
+            if (fallback) {
+                if (DEBUG_FALLBACK) {
+                    Slog.d(TAG, "Fallback: keyCode=" + mFallbackAction.keyCode
+                            + " metaState=" + Integer.toHexString(mFallbackAction.metaState));
+                }
+
+                int flags = event.getFlags() | KeyEvent.FLAG_FALLBACK;
+                KeyEvent fallbackEvent = KeyEvent.obtain(
+                        event.getDownTime(), event.getEventTime(),
+                        event.getAction(), mFallbackAction.keyCode,
+                        event.getRepeatCount(), mFallbackAction.metaState,
+                        event.getDeviceId(), event.getScanCode(),
+                        flags, event.getSource(), null);
+                int actions = interceptKeyBeforeQueueing(fallbackEvent, policyFlags, true);
+                if ((actions & ACTION_PASS_TO_USER) != 0) {
+                    if (!interceptKeyBeforeDispatching(win, fallbackEvent, policyFlags)) {
+                        if (DEBUG_FALLBACK) {
+                            Slog.d(TAG, "Performing fallback.");
+                        }
+                        return fallbackEvent;
+                    }
+                }
+                fallbackEvent.recycle();
+            }
+        }
+
+        if (DEBUG_FALLBACK) {
+            Slog.d(TAG, "No fallback.");
+        }
+        return null;
     }
 
     /**

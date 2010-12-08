@@ -141,9 +141,8 @@ int32_t KeyCharacterMap::getKeyboardType() const {
 
 char16_t KeyCharacterMap::getDisplayLabel(int32_t keyCode) const {
     char16_t result = 0;
-    ssize_t index = mKeys.indexOfKey(keyCode);
-    if (index >= 0) {
-        const Key* key = mKeys.valueAt(index);
+    const Key* key;
+    if (getKey(keyCode, &key)) {
         result = key->label;
     }
 #if DEBUG_MAPPING
@@ -154,9 +153,8 @@ char16_t KeyCharacterMap::getDisplayLabel(int32_t keyCode) const {
 
 char16_t KeyCharacterMap::getNumber(int32_t keyCode) const {
     char16_t result = 0;
-    ssize_t index = mKeys.indexOfKey(keyCode);
-    if (index >= 0) {
-        const Key* key = mKeys.valueAt(index);
+    const Key* key;
+    if (getKey(keyCode, &key)) {
         result = key->number;
     }
 #if DEBUG_MAPPING
@@ -167,15 +165,10 @@ char16_t KeyCharacterMap::getNumber(int32_t keyCode) const {
 
 char16_t KeyCharacterMap::getCharacter(int32_t keyCode, int32_t metaState) const {
     char16_t result = 0;
-    ssize_t index = mKeys.indexOfKey(keyCode);
-    if (index >= 0) {
-        const Key* key = mKeys.valueAt(index);
-        for (const Behavior* behavior = key->firstBehavior; behavior; behavior = behavior->next) {
-            if ((behavior->metaState & metaState) == behavior->metaState) {
-                result = behavior->character;
-                break;
-            }
-        }
+    const Key* key;
+    const Behavior* behavior;
+    if (getKeyBehavior(keyCode, metaState, &key, &behavior)) {
+        result = behavior->character;
     }
 #if DEBUG_MAPPING
     LOGD("getCharacter: keyCode=%d, metaState=0x%08x ~ Result %d.", keyCode, metaState, result);
@@ -183,13 +176,33 @@ char16_t KeyCharacterMap::getCharacter(int32_t keyCode, int32_t metaState) const
     return result;
 }
 
+bool KeyCharacterMap::getFallbackAction(int32_t keyCode, int32_t metaState,
+        FallbackAction* outFallbackAction) const {
+    outFallbackAction->keyCode = 0;
+    outFallbackAction->metaState = 0;
+
+    bool result = false;
+    const Key* key;
+    const Behavior* behavior;
+    if (getKeyBehavior(keyCode, metaState, &key, &behavior)) {
+        outFallbackAction->keyCode = behavior->fallbackKeyCode;
+        outFallbackAction->metaState = metaState & ~behavior->metaState;
+        result = true;
+    }
+#if DEBUG_MAPPING
+    LOGD("getFallbackKeyCode: keyCode=%d, metaState=0x%08x ~ Result %s, "
+            "fallback keyCode=%d, fallback metaState=0x%08x.",
+            keyCode, metaState, result ? "true" : "false",
+            outFallbackAction->keyCode, outFallbackAction->metaState);
+#endif
+    return result;
+}
+
 char16_t KeyCharacterMap::getMatch(int32_t keyCode, const char16_t* chars, size_t numChars,
         int32_t metaState) const {
     char16_t result = 0;
-    ssize_t index = mKeys.indexOfKey(keyCode);
-    if (index >= 0) {
-        const Key* key = mKeys.valueAt(index);
-
+    const Key* key;
+    if (getKey(keyCode, &key)) {
         // Try to find the most general behavior that maps to this character.
         // For example, the base key behavior will usually be last in the list.
         // However, if we find a perfect meta state match for one behavior then use that one.
@@ -238,7 +251,7 @@ bool KeyCharacterMap::getEvents(int32_t deviceId, const char16_t* chars, size_t 
     }
 #if DEBUG_MAPPING
     LOGD("getEvents: deviceId=%d, chars=[%s] ~ Generated %d events.",
-            deviceId, toString(chars, numChars).string(), outEvents.size());
+            deviceId, toString(chars, numChars).string(), int32_t(outEvents.size()));
     for (size_t i = 0; i < outEvents.size(); i++) {
         LOGD("  Key: keyCode=%d, metaState=0x%08x, %s.",
                 outEvents[i].getKeyCode(), outEvents[i].getMetaState(),
@@ -246,6 +259,32 @@ bool KeyCharacterMap::getEvents(int32_t deviceId, const char16_t* chars, size_t 
     }
 #endif
     return true;
+}
+
+bool KeyCharacterMap::getKey(int32_t keyCode, const Key** outKey) const {
+    ssize_t index = mKeys.indexOfKey(keyCode);
+    if (index >= 0) {
+        *outKey = mKeys.valueAt(index);
+        return true;
+    }
+    return false;
+}
+
+bool KeyCharacterMap::getKeyBehavior(int32_t keyCode, int32_t metaState,
+        const Key** outKey, const Behavior** outBehavior) const {
+    const Key* key;
+    if (getKey(keyCode, &key)) {
+        const Behavior* behavior = key->firstBehavior;
+        while (behavior) {
+            if ((behavior->metaState & metaState) == behavior->metaState) {
+                *outKey = key;
+                *outBehavior = behavior;
+                return true;
+            }
+            behavior = behavior->next;
+        }
+    }
+    return false;
 }
 
 bool KeyCharacterMap::findKey(char16_t ch, int32_t* outKeyCode, int32_t* outMetaState) const {

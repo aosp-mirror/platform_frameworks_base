@@ -211,6 +211,7 @@ static const KeycodeLabel KEYCODES[] = {
     { "PROG_GREEN", 184 },
     { "PROG_YELLOW", 185 },
     { "PROG_BLUE", 186 },
+    { "APP_SWITCH", 187 },
 
     // NOTE: If you add a new keycode here you must also add it to several other files.
     //       Refer to frameworks/base/core/java/android/view/KeyEvent.java for the full list.

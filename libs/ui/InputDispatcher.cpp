@@ -1884,7 +1884,7 @@ int InputDispatcher::handleReceiveCallback(int receiveFd, int events, void* data
         }
 
         bool handled = false;
-        status_t status = connection->inputPublisher.receiveFinishedSignal(handled);
+        status_t status = connection->inputPublisher.receiveFinishedSignal(&handled);
         if (status) {
             LOGE("channel '%s' ~ Failed to receive finished signal.  status=%d",
                     connection->getInputChannelName(), status);
@@ -3039,21 +3039,57 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
     sp<Connection> connection = commandEntry->connection;
     bool handled = commandEntry->handled;
 
-    if (!handled && !connection->outboundQueue.isEmpty()) {
+    if (!connection->outboundQueue.isEmpty()) {
         DispatchEntry* dispatchEntry = connection->outboundQueue.headSentinel.next;
         if (dispatchEntry->inProgress
                 && dispatchEntry->hasForegroundTarget()
                 && dispatchEntry->eventEntry->type == EventEntry::TYPE_KEY) {
             KeyEntry* keyEntry = static_cast<KeyEntry*>(dispatchEntry->eventEntry);
-            KeyEvent event;
-            initializeKeyEvent(&event, keyEntry);
+            if (!(keyEntry->flags & AKEY_EVENT_FLAG_FALLBACK)) {
+                if (handled) {
+                    // If the application handled a non-fallback key, then immediately
+                    // cancel all fallback keys previously dispatched to the application.
+                    // This behavior will prevent chording with fallback keys (so they cannot
+                    // be used as modifiers) but it will ensure that fallback keys do not
+                    // get stuck.  This takes care of the case where the application does not handle
+                    // the original DOWN so we generate a fallback DOWN but it does handle
+                    // the original UP in which case we would not generate the fallback UP.
+                    synthesizeCancelationEventsForConnectionLocked(connection,
+                            InputState::CANCEL_FALLBACK_EVENTS,
+                            "Application handled a non-fallback event.");
+                } else {
+                    // If the application did not handle a non-fallback key, then ask
+                    // the policy what to do with it.  We might generate a fallback key
+                    // event here.
+                    KeyEvent event;
+                    initializeKeyEvent(&event, keyEntry);
 
-            mLock.unlock();
+                    mLock.unlock();
 
-            mPolicy->dispatchUnhandledKey(connection->inputChannel,
-                    &event, keyEntry->policyFlags);
+                    bool fallback = mPolicy->dispatchUnhandledKey(connection->inputChannel,
+                            &event, keyEntry->policyFlags, &event);
 
-            mLock.lock();
+                    mLock.lock();
+
+                    if (fallback) {
+                        // Restart the dispatch cycle using the fallback key.
+                        keyEntry->eventTime = event.getEventTime();
+                        keyEntry->deviceId = event.getDeviceId();
+                        keyEntry->source = event.getSource();
+                        keyEntry->flags = event.getFlags() | AKEY_EVENT_FLAG_FALLBACK;
+                        keyEntry->keyCode = event.getKeyCode();
+                        keyEntry->scanCode = event.getScanCode();
+                        keyEntry->metaState = event.getMetaState();
+                        keyEntry->repeatCount = event.getRepeatCount();
+                        keyEntry->downTime = event.getDownTime();
+                        keyEntry->syntheticRepeat = false;
+
+                        dispatchEntry->inProgress = false;
+                        startDispatchCycleLocked(now(), connection);
+                        return;
+                    }
+                }
+            }
         }
     }
 
@@ -3371,6 +3407,7 @@ InputDispatcher::InputState::Consistency InputDispatcher::InputState::trackKey(
         memento.source = entry->source;
         memento.keyCode = entry->keyCode;
         memento.scanCode = entry->scanCode;
+        memento.flags = entry->flags;
         memento.downTime = entry->downTime;
         return CONSISTENT;
     }
@@ -3453,10 +3490,10 @@ void InputDispatcher::InputState::synthesizeCancelationEvents(nsecs_t currentTim
         CancelationOptions options) {
     for (size_t i = 0; i < mKeyMementos.size(); ) {
         const KeyMemento& memento = mKeyMementos.itemAt(i);
-        if (shouldCancelEvent(memento.source, options)) {
+        if (shouldCancelKey(memento, options)) {
             outEvents.push(allocator->obtainKeyEntry(currentTime,
                     memento.deviceId, memento.source, 0,
-                    AKEY_EVENT_ACTION_UP, AKEY_EVENT_FLAG_CANCELED,
+                    AKEY_EVENT_ACTION_UP, memento.flags | AKEY_EVENT_FLAG_CANCELED,
                     memento.keyCode, memento.scanCode, 0, 0, memento.downTime));
             mKeyMementos.removeAt(i);
         } else {
@@ -3466,7 +3503,7 @@ void InputDispatcher::InputState::synthesizeCancelationEvents(nsecs_t currentTim
 
     for (size_t i = 0; i < mMotionMementos.size(); ) {
         const MotionMemento& memento = mMotionMementos.itemAt(i);
-        if (shouldCancelEvent(memento.source, options)) {
+        if (shouldCancelMotion(memento, options)) {
             outEvents.push(allocator->obtainMotionEntry(currentTime,
                     memento.deviceId, memento.source, 0,
                     AMOTION_EVENT_ACTION_CANCEL, 0, 0, 0,
@@ -3502,15 +3539,30 @@ void InputDispatcher::InputState::copyPointerStateTo(InputState& other) const {
     }
 }
 
-bool InputDispatcher::InputState::shouldCancelEvent(int32_t eventSource,
+bool InputDispatcher::InputState::shouldCancelKey(const KeyMemento& memento,
         CancelationOptions options) {
     switch (options) {
-    case CANCEL_POINTER_EVENTS:
-        return eventSource & AINPUT_SOURCE_CLASS_POINTER;
+    case CANCEL_ALL_EVENTS:
     case CANCEL_NON_POINTER_EVENTS:
-        return !(eventSource & AINPUT_SOURCE_CLASS_POINTER);
-    default:
         return true;
+    case CANCEL_FALLBACK_EVENTS:
+        return memento.flags & AKEY_EVENT_FLAG_FALLBACK;
+    default:
+        return false;
+    }
+}
+
+bool InputDispatcher::InputState::shouldCancelMotion(const MotionMemento& memento,
+        CancelationOptions options) {
+    switch (options) {
+    case CANCEL_ALL_EVENTS:
+        return true;
+    case CANCEL_POINTER_EVENTS:
+        return memento.source & AINPUT_SOURCE_CLASS_POINTER;
+    case CANCEL_NON_POINTER_EVENTS:
+        return !(memento.source & AINPUT_SOURCE_CLASS_POINTER);
+    default:
+        return false;
     }
 }
 
