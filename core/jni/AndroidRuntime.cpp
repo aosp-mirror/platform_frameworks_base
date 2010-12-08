@@ -353,31 +353,10 @@ status_t AndroidRuntime::callMain(
  */
 jclass AndroidRuntime::findClass(JNIEnv* env, const char* className)
 {
-    char* convName = NULL;
-
     if (env->ExceptionCheck()) {
-        LOGE("ERROR: exception pending on entry to findClass()\n");
+        LOGE("ERROR: exception pending on entry to findClass()");
         return NULL;
     }
-
-    /*
-     * JNI FindClass uses class names with slashes, but ClassLoader.loadClass
-     * uses the dotted "binary name" format.  We don't need to convert the
-     * name with the new approach.
-     */
-#if 0
-    /* (convName only created if necessary -- use className) */
-    for (char* cp = const_cast<char*>(className); *cp != '\0'; cp++) {
-        if (*cp == '.') {
-            if (convName == NULL) {
-                convName = strdup(className);
-                cp = convName + (cp-className);
-                className = convName;
-            }
-            *cp = '/';
-        }
-    }
-#endif
 
     /*
      * This is a little awkward because the JNI FindClass call uses the
@@ -394,7 +373,6 @@ jclass AndroidRuntime::findClass(JNIEnv* env, const char* className)
      * have to do things the hard way.
      */
     jclass cls = NULL;
-    //cls = env->FindClass(className);
 
     jclass javaLangClassLoader;
     jmethodID getSystemClassLoader, loadClass;
@@ -416,24 +394,21 @@ jclass AndroidRuntime::findClass(JNIEnv* env, const char* className)
     /* create an object for the class name string; alloc could fail */
     strClassName = env->NewStringUTF(className);
     if (env->ExceptionCheck()) {
-        LOGE("ERROR: unable to convert '%s' to string\n", className);
-        goto bail;
+        LOGE("ERROR: unable to convert '%s' to string", className);
+        return NULL;
     }
-    LOGV("system class loader is %p, loading %p (%s)\n",
+    LOGV("system class loader is %p, loading %p (%s)",
         systemClassLoader, strClassName, className);
 
     /* try to find the named class */
     cls = (jclass) env->CallObjectMethod(systemClassLoader, loadClass,
                         strClassName);
     if (env->ExceptionCheck()) {
-        LOGE("ERROR: unable to load class '%s' from %p\n",
+        LOGE("ERROR: unable to load class '%s' from %p",
             className, systemClassLoader);
-        cls = NULL;
-        goto bail;
+        return NULL;
     }
 
-bail:
-    free(convName);
     return cls;
 }
 
