@@ -251,7 +251,7 @@
 
     <style name="Widget.AbsListView">
         <item name="android:scrollbars">vertical</item>
-        <item name="android:fadingEdge">none</item>
+        <item name="android:fadingEdge">vertical</item>
     </style>
 
     <style name="Widget.GestureOverlayView">
