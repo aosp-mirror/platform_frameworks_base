@@ -26,39 +26,53 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 Program::Program(const char* vertex, const char* fragment) {
+    mInitialized = false;
+
     vertexShader = buildShader(vertex, GL_VERTEX_SHADER);
-    fragmentShader = buildShader(fragment, GL_FRAGMENT_SHADER);
+    if (vertexShader) {
 
-    id = glCreateProgram();
-    glAttachShader(id, vertexShader);
-    glAttachShader(id, fragmentShader);
-    glLinkProgram(id);
+        fragmentShader = buildShader(fragment, GL_FRAGMENT_SHADER);
+        if (fragmentShader) {
 
-    GLint status;
-    glGetProgramiv(id, GL_LINK_STATUS, &status);
-    if (status != GL_TRUE) {
-        GLint infoLen = 0;
-        glGetProgramiv(id, GL_INFO_LOG_LENGTH, &infoLen);
-        if (infoLen > 1) {
-            GLchar log[infoLen];
-            glGetProgramInfoLog(id, infoLen, 0, &log[0]);
-            LOGE("Error while linking shaders: %s", log);
+            id = glCreateProgram();
+            glAttachShader(id, vertexShader);
+            glAttachShader(id, fragmentShader);
+            glLinkProgram(id);
+
+            GLint status;
+            glGetProgramiv(id, GL_LINK_STATUS, &status);
+            if (status != GL_TRUE) {
+                LOGE("Error while linking shaders:");
+                GLint infoLen = 0;
+                glGetProgramiv(id, GL_INFO_LOG_LENGTH, &infoLen);
+                if (infoLen > 1) {
+                    GLchar log[infoLen];
+                    glGetProgramInfoLog(id, infoLen, 0, &log[0]);
+                    LOGE("%s", log);
+                }
+                glDeleteShader(vertexShader);
+                glDeleteShader(fragmentShader);
+                glDeleteProgram(id);
+            } else {
+                mInitialized = true;
+            }
         }
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-        glDeleteProgram(id);
     }
 
     mUse = false;
 
-    position = addAttrib("position");
-    transform = addUniform("transform");
+    if (mInitialized) {
+        position = addAttrib("position");
+        transform = addUniform("transform");
+    }
 }
 
 Program::~Program() {
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-    glDeleteProgram(id);
+    if (mInitialized) {
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+        glDeleteProgram(id);
+    }
 }
 
 int Program::addAttrib(const char* name) {
@@ -103,6 +117,7 @@ GLuint Program::buildShader(const char* source, GLenum type) {
         glGetShaderInfoLog(shader, sizeof(log), 0, &log[0]);
         LOGE("Error while compiling shader: %s", log);
         glDeleteShader(shader);
+        return 0;
     }
 
     return shader;

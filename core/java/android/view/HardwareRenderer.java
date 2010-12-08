@@ -50,7 +50,7 @@ public abstract class HardwareRenderer {
     private boolean mRequested = true;
 
     /**
-     * Indicates that the current process cannot use hardware rendering.
+     * Invoke this method to disable hardware rendering in the current process.
      * 
      * @hide
      */
@@ -207,7 +207,7 @@ public abstract class HardwareRenderer {
         EGLSurface mEglSurface;
         
         GL mGl;
-        GLES20Canvas mCanvas;
+        HardwareCanvas mCanvas;
 
         final int mGlVersion;
         final boolean mTranslucent;
@@ -279,12 +279,15 @@ public abstract class HardwareRenderer {
                     if (error != EGL11.EGL_CONTEXT_LOST) {
                         // we'll try again if it was context lost
                         setRequested(false);
+                    } else {
+                        Log.w(LOG_TAG, "Mountain View, we've had a problem here. " 
+                                + "Switching back to software rendering.");
                     }
                     Log.w(LOG_TAG, "EGL error: " + getEGLErrorString(error));
                 }
             }
         }
-        
+
         @Override
         boolean initialize(SurfaceHolder holder) {
             if (isRequested() && !isEnabled()) {
@@ -651,6 +654,14 @@ public abstract class HardwareRenderer {
         @Override
         void onPostDraw() {
             mGlCanvas.onPostDraw();
+        }
+
+        @Override
+        void destroy(boolean full) {
+            super.destroy(full);
+            if (full && mGlCanvas != null) {
+                mGlCanvas = null;
+            }
         }
 
         @Override
