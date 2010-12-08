@@ -94,6 +94,7 @@ public:
     void                setFormDateTime();
 
     void                print();
+    void                print(MtpPropertyValue& value, MtpString& buffer);
 
     inline bool         isDeviceProperty() const {
                             return (   ((mCode & 0xF000) == 0x5000)

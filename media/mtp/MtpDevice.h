@@ -67,6 +67,7 @@ public:
 
     void                    initialize();
     void                    close();
+    void                    print();
     const char*             getDeviceName();
 
     bool                    openSession();

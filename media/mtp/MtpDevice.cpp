@@ -63,17 +63,13 @@ void MtpDevice::initialize() {
     openSession();
     mDeviceInfo = getDeviceInfo();
     if (mDeviceInfo) {
-        mDeviceInfo->print();
-
         if (mDeviceInfo->mDeviceProperties) {
             int count = mDeviceInfo->mDeviceProperties->size();
             for (int i = 0; i < count; i++) {
                 MtpDeviceProperty propCode = (*mDeviceInfo->mDeviceProperties)[i];
                 MtpProperty* property = getDevicePropDesc(propCode);
-                if (property) {
-                    property->print();
+                if (property)
                     mDeviceProperties.push(property);
-                }
             }
         }
     }
@@ -84,6 +80,45 @@ void MtpDevice::close() {
         usb_device_release_interface(mDevice, mInterface);
         usb_device_close(mDevice);
         mDevice = NULL;
+    }
+}
+
+void MtpDevice::print() {
+    if (mDeviceInfo) {
+        mDeviceInfo->print();
+
+        if (mDeviceInfo->mDeviceProperties) {
+            LOGI("***** DEVICE PROPERTIES *****\n");
+            int count = mDeviceInfo->mDeviceProperties->size();
+            for (int i = 0; i < count; i++) {
+                MtpDeviceProperty propCode = (*mDeviceInfo->mDeviceProperties)[i];
+                MtpProperty* property = getDevicePropDesc(propCode);
+                if (property) {
+                    property->print();
+                }
+            }
+        }
+    }
+
+    if (mDeviceInfo->mPlaybackFormats) {
+            LOGI("***** OBJECT PROPERTIES *****\n");
+        int count = mDeviceInfo->mPlaybackFormats->size();
+        for (int i = 0; i < count; i++) {
+            MtpObjectFormat format = (*mDeviceInfo->mPlaybackFormats)[i];
+            LOGI("*** FORMAT: %s\n", MtpDebug::getFormatCodeName(format));
+            MtpObjectPropertyList* props = getObjectPropsSupported(format);
+            if (props) {
+                for (int j = 0; j < props->size(); j++) {
+                    MtpObjectProperty prop = (*props)[j];
+                    MtpProperty* property = getObjectPropDesc(prop);
+                    if (property)
+                        property->print();
+                    else
+                        LOGE("could not fetch property: %s",
+                                MtpDebug::getObjectPropCodeName(prop));
+                }
+            }
+        }
     }
 }
 
