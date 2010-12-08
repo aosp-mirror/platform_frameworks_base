@@ -325,7 +325,7 @@ public class PropertyValuesHolder implements Cloneable {
             // If we got here, then no appropriate function was found
             Log.e("PropertyValuesHolder",
                     "Couldn't find setter/getter for property " + mPropertyName +
-                            "with value type "+ mValueType);
+                            " with value type "+ mValueType);
         }
 
         return returnVal;
