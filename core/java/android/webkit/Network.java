@@ -73,7 +73,7 @@ class Network {
      * SSL error handler: takes care of synchronization of multiple async
      * loaders with SSL-related problems.
      */
-    private SslErrorHandler mSslErrorHandler;
+    private SslErrorHandlerImpl mSslErrorHandler;
 
     /**
      * HTTP authentication handler: takes care of synchronization of HTTP
@@ -157,7 +157,7 @@ class Network {
                     getName().equals(WebViewCore.THREAD_NAME));
         }
         mContext = context;
-        mSslErrorHandler = new SslErrorHandler();
+        mSslErrorHandler = new SslErrorHandlerImpl();
         mHttpAuthHandler = new HttpAuthHandlerImpl(this);
 
         mRequestQueue = new RequestQueue(context);
