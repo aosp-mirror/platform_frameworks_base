@@ -114,6 +114,11 @@ status_t GraphicBuffer::initCheck() const {
     return mInitCheck;
 }
 
+void GraphicBuffer::dumpAllocationsToSystemLog()
+{
+    GraphicBufferAllocator::dumpToSystemLog();
+}
+
 android_native_buffer_t* GraphicBuffer::getNativeBuffer() const
 {
     return static_cast<android_native_buffer_t*>(
