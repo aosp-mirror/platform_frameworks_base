@@ -626,14 +626,16 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     mOptions.add(opt);
     //options[curOpt++].optionString = "-verbose:class";
 
+    /*
+     * The default starting and maximum size of the heap.  Larger
+     * values should be specified in a product property override.
+     */
     strcpy(heapstartsizeOptsBuf, "-Xms");
-    property_get("dalvik.vm.heapstartsize", heapstartsizeOptsBuf+4, "2m");
+    property_get("dalvik.vm.heapstartsize", heapstartsizeOptsBuf+4, "4m");
     opt.optionString = heapstartsizeOptsBuf;
     mOptions.add(opt);
-
     strcpy(heapsizeOptsBuf, "-Xmx");
     property_get("dalvik.vm.heapsize", heapsizeOptsBuf+4, "16m");
-    //LOGI("Heap size: %s", heapsizeOptsBuf);
     opt.optionString = heapsizeOptsBuf;
     mOptions.add(opt);
 
