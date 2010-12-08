@@ -298,6 +298,8 @@ ProgramCache::~ProgramCache() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ProgramCache::clear() {
+    PROGRAM_LOGD("Clearing program cache");
+
     size_t count = mCache.size();
     for (size_t i = 0; i < count; i++) {
         delete mCache.valueAt(i);
