@@ -56,7 +56,37 @@ public final class NdefFormatable extends BasicTagTechnology {
      * Formats a tag as NDEF, if possible. You may supply a first
      * NdefMessage to be written on the tag.
      */
-    public void format(NdefMessage firstMessage) throws IOException {
-      throw new UnsupportedOperationException();
+    public void format(NdefMessage firstMessage) throws IOException, FormatException {
+        try {
+            byte[] DEFAULT_KEY = {(byte)0xFF,(byte)0xFF,(byte)0xFF,
+                                  (byte)0xFF,(byte)0xFF,(byte)0xFF};
+            int serviceHandle = mTag.getServiceHandle();
+            int errorCode = mTagService.formatNdef(serviceHandle, DEFAULT_KEY);
+            switch (errorCode) {
+                case ErrorCodes.SUCCESS:
+                    break;
+                case ErrorCodes.ERROR_IO:
+                    throw new IOException();
+                case ErrorCodes.ERROR_INVALID_PARAM:
+                    throw new FormatException();
+                default:
+                    // Should not happen
+                    throw new IOException();
+            }
+            errorCode = mTagService.write(serviceHandle, firstMessage);
+            switch (errorCode) {
+                case ErrorCodes.SUCCESS:
+                    break;
+                case ErrorCodes.ERROR_IO:
+                    throw new IOException();
+                case ErrorCodes.ERROR_INVALID_PARAM:
+                    throw new FormatException();
+                default:
+                    // Should not happen
+                    throw new IOException();
+            }
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+        }
     }
 }
