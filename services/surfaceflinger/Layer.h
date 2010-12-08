@@ -83,6 +83,8 @@ public:
     virtual void onRemoved();
     virtual bool setBypass(bool enable);
 
+    void updateBuffersOrientation();
+
     inline sp<GraphicBuffer> getBypassBuffer() const {
         return mBufferManager.getActiveBuffer(); }
 
