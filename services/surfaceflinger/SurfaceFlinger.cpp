@@ -48,7 +48,6 @@
 #include "GLExtensions.h"
 #include "Layer.h"
 #include "LayerBlur.h"
-#include "LayerBuffer.h"
 #include "LayerDim.h"
 #include "SurfaceFlinger.h"
 
@@ -117,11 +116,6 @@ void SurfaceFlinger::init()
 SurfaceFlinger::~SurfaceFlinger()
 {
     glDeleteTextures(1, &mWormholeTexName);
-}
-
-overlay_control_device_t* SurfaceFlinger::getOverlayEngine() const
-{
-    return graphicPlane(0).displayHardware().getOverlayEngine();
 }
 
 sp<IMemoryHeap> SurfaceFlinger::getCblk() const
@@ -1228,15 +1222,8 @@ sp<ISurface> SurfaceFlinger::createSurface(const sp<Client>& client, int pid,
     sp<Layer> normalLayer;
     switch (flags & eFXSurfaceMask) {
         case eFXSurfaceNormal:
-#if HAS_PUSH_BUFFERS
-            if (UNLIKELY(flags & ePushBuffers)) {
-                layer = createPushBuffersSurface(client, d, w, h, flags);
-            } else
-#endif
-            {
-                normalLayer = createNormalSurface(client, d, w, h, flags, format);
-                layer = normalLayer;
-            }
+            normalLayer = createNormalSurface(client, d, w, h, flags, format);
+            layer = normalLayer;
             break;
         case eFXSurfaceBlur:
             layer = createBlurSurface(client, d, w, h, flags);
@@ -1318,15 +1305,6 @@ sp<LayerDim> SurfaceFlinger::createDimSurface(
         uint32_t w, uint32_t h, uint32_t flags)
 {
     sp<LayerDim> layer = new LayerDim(this, display, client);
-    layer->initStates(w, h, flags);
-    return layer;
-}
-
-sp<LayerBuffer> SurfaceFlinger::createPushBuffersSurface(
-        const sp<Client>& client, DisplayID display,
-        uint32_t w, uint32_t h, uint32_t flags)
-{
-    sp<LayerBuffer> layer = new LayerBuffer(this, display, client);
     layer->initStates(w, h, flags);
     return layer;
 }

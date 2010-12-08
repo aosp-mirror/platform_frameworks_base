@@ -34,18 +34,15 @@ namespace android {
 
 typedef int32_t    SurfaceID;
 
-class IMemoryHeap;
-class OverlayRef;
 class GraphicBuffer;
 
 class ISurface : public IInterface
 {
 protected:
     enum {
-        REGISTER_BUFFERS = IBinder::FIRST_CALL_TRANSACTION,
-        UNREGISTER_BUFFERS,
-        POST_BUFFER, // one-way transaction
-        CREATE_OVERLAY,
+        RESERVED0 = IBinder::FIRST_CALL_TRANSACTION,
+        RESERVED1,
+        RESERVED2,
         REQUEST_BUFFER,
         SET_BUFFER_COUNT,
     };
@@ -66,49 +63,6 @@ public:
      * sets the number of buffers dequeuable for this surface.
      */
     virtual status_t setBufferCount(int bufferCount) = 0;
-    
-    // ------------------------------------------------------------------------
-    // Deprecated...
-    // ------------------------------------------------------------------------
-
-    class BufferHeap {
-    public:
-        enum {
-            /* rotate source image */
-            ROT_0     = 0,
-            ROT_90    = HAL_TRANSFORM_ROT_90,
-            ROT_180   = HAL_TRANSFORM_ROT_180,
-            ROT_270   = HAL_TRANSFORM_ROT_270,
-        };
-        BufferHeap();
-        
-        BufferHeap(uint32_t w, uint32_t h,
-                int32_t hor_stride, int32_t ver_stride, 
-                PixelFormat format, const sp<IMemoryHeap>& heap);
-        
-        BufferHeap(uint32_t w, uint32_t h,
-                int32_t hor_stride, int32_t ver_stride, 
-                PixelFormat format, uint32_t transform, uint32_t flags,
-                const sp<IMemoryHeap>& heap);
-        
-        ~BufferHeap(); 
-        
-        uint32_t w;
-        uint32_t h;
-        int32_t hor_stride;
-        int32_t ver_stride;
-        PixelFormat format;
-        uint32_t transform;
-        uint32_t flags;
-        sp<IMemoryHeap> heap;
-    };
-    
-    virtual status_t registerBuffers(const BufferHeap& buffers) = 0;
-    virtual void postBuffer(ssize_t offset) = 0; // one-way
-    virtual void unregisterBuffers() = 0;
-    
-    virtual sp<OverlayRef> createOverlay(
-            uint32_t w, uint32_t h, int32_t format, int32_t orientation) = 0;
 };
 
 // ----------------------------------------------------------------------------

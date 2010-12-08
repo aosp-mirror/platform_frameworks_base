@@ -31,7 +31,6 @@
 #include <media/AudioSystem.h>
 #include <media/mediaplayer.h>
 #include <surfaceflinger/ISurface.h>
-#include <ui/Overlay.h>
 #include <utils/Errors.h>
 #include <utils/Log.h>
 #include <utils/String16.h>
@@ -306,7 +305,6 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
     mCameraId = cameraId;
     mCameraFacing = cameraFacing;
     mClientPid = clientPid;
-    mUseOverlay = mHardware->useOverlay();
     mMsgEnabled = 0;
     mHardware->setCallbacks(notifyCallback,
                             dataCallback,
@@ -317,24 +315,14 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
     enableMsgType(CAMERA_MSG_ERROR |
                   CAMERA_MSG_ZOOM |
                   CAMERA_MSG_FOCUS);
-    mOverlayW = 0;
-    mOverlayH = 0;
 
     // Callback is disabled by default
     mPreviewCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
     mOrientation = getOrientation(0, mCameraFacing == CAMERA_FACING_FRONT);
-    mOrientationChanged = false;
     mPlayShutterSound = true;
     cameraService->setCameraBusy(cameraId);
     cameraService->loadSound();
     LOG1("Client::Client X (pid %d)", callingPid);
-}
-
-static void *unregister_surface(void *arg) {
-    ISurface *surface = (ISurface *)arg;
-    surface->unregisterBuffers();
-    IPCThreadState::self()->flushCommands();
-    return NULL;
 }
 
 // tear down the client
@@ -455,10 +443,7 @@ void CameraService::Client::disconnect() {
     mHardware->cancelPicture();
     // Release the hardware resources.
     mHardware->release();
-    // Release the held overlay resources.
-    if (mUseOverlay) {
-        mOverlayRef = 0;
-    }
+
     // Release the held ANativeWindow resources.
     if (mPreviewWindow != 0) {
         mPreviewWindow = 0;
@@ -491,12 +476,6 @@ status_t CameraService::Client::setPreviewDisplay(const sp<Surface>& surface) {
 
     if (mSurface != 0) {
         LOG1("clearing old preview surface %p", mSurface.get());
-        if (mUseOverlay) {
-            // Force the destruction of any previous overlay
-            sp<Overlay> dummy;
-            mHardware->setOverlay(dummy);
-            mOverlayRef = 0;
-        }
     }
     if (surface != 0) {
         mSurface = getISurface(surface);
@@ -504,67 +483,15 @@ status_t CameraService::Client::setPreviewDisplay(const sp<Surface>& surface) {
         mSurface = 0;
     }
     mPreviewWindow = surface;
-    mOverlayRef = 0;
-    // If preview has been already started, set overlay or register preview
+    // If preview has been already started, register preview
     // buffers now.
     if (mHardware->previewEnabled()) {
-        if (mUseOverlay) {
-            result = setOverlay();
-        } else if (mPreviewWindow != 0) {
+        if (mPreviewWindow != 0) {
             native_window_set_buffers_transform(mPreviewWindow.get(),
                                                 mOrientation);
             result = mHardware->setPreviewWindow(mPreviewWindow);
         }
     }
-
-    return result;
-}
-
-status_t CameraService::Client::setOverlay() {
-    int w, h;
-    CameraParameters params(mHardware->getParameters());
-    params.getPreviewSize(&w, &h);
-
-    if (w != mOverlayW || h != mOverlayH || mOrientationChanged) {
-        // Force the destruction of any previous overlay
-        sp<Overlay> dummy;
-        mHardware->setOverlay(dummy);
-        mOverlayRef = 0;
-        mOrientationChanged = false;
-    }
-
-    status_t result = NO_ERROR;
-    if (mSurface == 0) {
-        result = mHardware->setOverlay(NULL);
-    } else {
-        if (mOverlayRef == 0) {
-            // FIXME:
-            // Surfaceflinger may hold onto the previous overlay reference for some
-            // time after we try to destroy it. retry a few times. In the future, we
-            // should make the destroy call block, or possibly specify that we can
-            // wait in the createOverlay call if the previous overlay is in the
-            // process of being destroyed.
-            for (int retry = 0; retry < 50; ++retry) {
-                mOverlayRef = mSurface->createOverlay(w, h, OVERLAY_FORMAT_DEFAULT,
-                                                      mOrientation);
-                if (mOverlayRef != 0) break;
-                LOGW("Overlay create failed - retrying");
-                usleep(20000);
-            }
-            if (mOverlayRef == 0) {
-                LOGE("Overlay Creation Failed!");
-                return -EINVAL;
-            }
-            result = mHardware->setOverlay(new Overlay(mOverlayRef));
-        }
-    }
-    if (result != NO_ERROR) {
-        LOGE("mHardware->setOverlay() failed with status %d\n", result);
-        return result;
-    }
-
-    mOverlayW = w;
-    mOverlayH = h;
 
     return result;
 }
@@ -630,21 +557,13 @@ status_t CameraService::Client::startPreviewMode() {
         return NO_ERROR;
     }
 
-    if (mUseOverlay) {
-        // If preview display has been set, set overlay now.
-        if (mSurface != 0) {
-            result = setOverlay();
-        }
-        if (result != NO_ERROR) return result;
-        result = mHardware->startPreview();
-    } else {
-        if (mPreviewWindow != 0) {
-            native_window_set_buffers_transform(mPreviewWindow.get(),
-                                                mOrientation);
-        }
-        mHardware->setPreviewWindow(mPreviewWindow);
-        result = mHardware->startPreview();
+    if (mPreviewWindow != 0) {
+        native_window_set_buffers_transform(mPreviewWindow.get(),
+                mOrientation);
     }
+    mHardware->setPreviewWindow(mPreviewWindow);
+    result = mHardware->startPreview();
+
     return result;
 }
 
@@ -853,7 +772,6 @@ status_t CameraService::Client::sendCommand(int32_t cmd, int32_t arg1, int32_t a
 
         if (mOrientation != orientation) {
             mOrientation = orientation;
-            if (mOverlayRef != 0) mOrientationChanged = true;
         }
         return OK;
     } else if (cmd == CAMERA_CMD_ENABLE_SHUTTER_SOUND) {
@@ -1047,7 +965,7 @@ void CameraService::Client::handleShutter(image_rect_type *size) {
 
     // It takes some time before yuvPicture callback to be called.
     // Register the buffer for raw image here to reduce latency.
-    if (mSurface != 0 && !mUseOverlay) {
+    if (mSurface != 0) {
         int w, h;
         CameraParameters params(mHardware->getParameters());
         if (size == NULL) {
@@ -1059,11 +977,6 @@ void CameraService::Client::handleShutter(image_rect_type *size) {
             h &= ~1;
             LOG1("Snapshot image width=%d, height=%d", w, h);
         }
-        // FIXME: don't use hardcoded format constants here
-        ISurface::BufferHeap buffers(w, h, w, h,
-            HAL_PIXEL_FORMAT_YCrCb_420_SP, mOrientation, 0,
-            mHardware->getRawHeap());
-
         IPCThreadState::self()->flushCommands();
     }
 

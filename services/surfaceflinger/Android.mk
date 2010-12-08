@@ -10,7 +10,6 @@ LOCAL_SRC_FILES:= \
     GLExtensions.cpp \
     Layer.cpp \
     LayerBase.cpp \
-    LayerBuffer.cpp \
     LayerBlur.cpp \
     LayerDim.cpp \
     MessageQueue.cpp \
@@ -22,7 +21,7 @@ LOCAL_CFLAGS:= -DLOG_TAG=\"SurfaceFlinger\"
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 
 ifeq ($(TARGET_BOARD_PLATFORM), omap3)
-	LOCAL_CFLAGS += -DNO_RGBX_8888 -DHAS_PUSH_BUFFERS
+	LOCAL_CFLAGS += -DNO_RGBX_8888
 endif
 ifeq ($(TARGET_BOARD_PLATFORM), s5pc110)
 	LOCAL_CFLAGS += -DHAS_CONTEXT_PRIORITY

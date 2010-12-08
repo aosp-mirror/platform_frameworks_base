@@ -27,7 +27,6 @@
 #include <utils/RefBase.h>
 
 #include <ui/Region.h>
-#include <ui/Overlay.h>
 
 #include <surfaceflinger/ISurfaceComposerClient.h>
 #include <private/surfaceflinger/SharedBufferStack.h>
@@ -313,12 +312,6 @@ public:
         virtual sp<GraphicBuffer> requestBuffer(int bufferIdx,
                 uint32_t w, uint32_t h, uint32_t format, uint32_t usage);
         virtual status_t setBufferCount(int bufferCount);
-
-        virtual status_t registerBuffers(const ISurface::BufferHeap& buffers); 
-        virtual void postBuffer(ssize_t offset);
-        virtual void unregisterBuffers();
-        virtual sp<OverlayRef> createOverlay(uint32_t w, uint32_t h,
-                int32_t format, int32_t orientation);
 
     protected:
         friend class LayerBaseClient;

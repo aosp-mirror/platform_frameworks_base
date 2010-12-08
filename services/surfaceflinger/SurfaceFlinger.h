@@ -50,7 +50,6 @@ class FreezeLock;
 class Layer;
 class LayerBlur;
 class LayerDim;
-class LayerBuffer;
 
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
 #define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
@@ -207,8 +206,6 @@ public:
             void                        screenReleased(DisplayID dpy);
             void                        screenAcquired(DisplayID dpy);
 
-            overlay_control_device_t* getOverlayEngine() const;
-
     status_t removeLayer(const sp<LayerBase>& layer);
     status_t addLayer(const sp<LayerBase>& layer);
     status_t invalidateLayerVisibility(const sp<LayerBase>& layer);
@@ -218,7 +215,6 @@ public:
 private:
     friend class Client;
     friend class LayerBase;
-    friend class LayerBuffer;
     friend class LayerBaseClient;
     friend class LayerBaseClient::Surface;
     friend class Layer;
@@ -241,10 +237,6 @@ private:
             uint32_t w, uint32_t h, uint32_t flags);
 
     sp<LayerDim> createDimSurface(
-            const sp<Client>& client, DisplayID display,
-            uint32_t w, uint32_t h, uint32_t flags);
-
-    sp<LayerBuffer> createPushBuffersSurface(
             const sp<Client>& client, DisplayID display,
             uint32_t w, uint32_t h, uint32_t flags);
 

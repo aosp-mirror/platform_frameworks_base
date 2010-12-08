@@ -610,21 +610,6 @@ sp<LayerBaseClient> LayerBaseClient::Surface::getOwner() const {
 status_t LayerBaseClient::Surface::onTransact(
         uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
-    switch (code) {
-        case REGISTER_BUFFERS:
-        case UNREGISTER_BUFFERS:
-        case CREATE_OVERLAY:
-        {
-            if (!mFlinger->mAccessSurfaceFlinger.checkCalling()) {
-                IPCThreadState* ipc = IPCThreadState::self();
-                const int pid = ipc->getCallingPid();
-                const int uid = ipc->getCallingUid();
-                LOGE("Permission Denial: "
-                        "can't access SurfaceFlinger pid=%d, uid=%d", pid, uid);
-                return PERMISSION_DENIED;
-            }
-        }
-    }
     return BnSurface::onTransact(code, data, reply, flags);
 }
 
@@ -638,26 +623,6 @@ status_t LayerBaseClient::Surface::setBufferCount(int bufferCount)
 {
     return INVALID_OPERATION;
 }
-
-status_t LayerBaseClient::Surface::registerBuffers(
-        const ISurface::BufferHeap& buffers) 
-{ 
-    return INVALID_OPERATION; 
-}
-
-void LayerBaseClient::Surface::postBuffer(ssize_t offset) 
-{
-}
-
-void LayerBaseClient::Surface::unregisterBuffers() 
-{
-}
-
-sp<OverlayRef> LayerBaseClient::Surface::createOverlay(
-        uint32_t w, uint32_t h, int32_t format, int32_t orientation)
-{
-    return NULL;
-};
 
 // ---------------------------------------------------------------------------
 

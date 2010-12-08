@@ -36,7 +36,6 @@
 
 #include "DisplayHardware/DisplayHardware.h"
 
-#include <hardware/overlay.h>
 #include <hardware/gralloc.h>
 
 #include "GLExtensions.h"
@@ -103,12 +102,6 @@ void DisplayHardware::init(uint32_t dpy)
     mDpiX = mNativeWindow->xdpi;
     mDpiY = mNativeWindow->ydpi;
     mRefreshRate = fbDev->fps;
-
-    mOverlayEngine = NULL;
-    hw_module_t const* module;
-    if (hw_get_module(OVERLAY_HARDWARE_MODULE_ID, &module) == 0) {
-        overlay_control_open(module, &mOverlayEngine);
-    }
 
     EGLint w, h, dummy;
     EGLint numConfigs=0;
@@ -296,7 +289,6 @@ void DisplayHardware::fini()
 {
     eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglTerminate(mDisplay);
-    overlay_control_close(mOverlayEngine);
 }
 
 void DisplayHardware::releaseScreen() const

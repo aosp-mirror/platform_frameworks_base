@@ -388,31 +388,22 @@ public interface WindowManager extends ViewManager {
         public static final int LAST_SYSTEM_WINDOW      = 2999;
         
         /**
-         * Specifies what type of memory buffers should be used by this window.
-         * Default is normal.
-         * 
-         * @see #MEMORY_TYPE_NORMAL
-         * @see #MEMORY_TYPE_PUSH_BUFFERS
+         * @deprecated this is ignored
          */
+        @Deprecated
         public int memoryType;
 
-        /** Memory type: The window's surface is allocated in main memory. */
+        /** @deprecated this is ignored, this value is set automatically when needed. */
+        @Deprecated
         public static final int MEMORY_TYPE_NORMAL = 0;
-        /** Memory type: The window's surface is configured to be accessible
-         * by DMA engines and hardware accelerators.
-         * @deprecated this is ignored, this value is set automatically when needed.
-         */
+        /** @deprecated this is ignored, this value is set automatically when needed. */
         @Deprecated
         public static final int MEMORY_TYPE_HARDWARE = 1;
-        /** Memory type: The window's surface is configured to be accessible
-         * by graphics accelerators. 
-         * @deprecated this is ignored, this value is set automatically when needed.
-         */
+        /** @deprecated this is ignored, this value is set automatically when needed. */
         @Deprecated
         public static final int MEMORY_TYPE_GPU = 2;
-        /** Memory type: The window's surface doesn't own its buffers and
-         * therefore cannot be locked. Instead the buffers are pushed to
-         * it through native binder calls. */
+        /** @deprecated this is ignored, this value is set automatically when needed. */
+        @Deprecated
         public static final int MEMORY_TYPE_PUSH_BUFFERS = 3;
 
         /**
@@ -994,7 +985,6 @@ public interface WindowManager extends ViewManager {
             out.writeInt(x);
             out.writeInt(y);
             out.writeInt(type);
-            out.writeInt(memoryType);
             out.writeInt(flags);
             out.writeInt(softInputMode);
             out.writeInt(gravity);
@@ -1030,7 +1020,6 @@ public interface WindowManager extends ViewManager {
             x = in.readInt();
             y = in.readInt();
             type = in.readInt();
-            memoryType = in.readInt();
             flags = in.readInt();
             softInputMode = in.readInt();
             gravity = in.readInt();
@@ -1105,10 +1094,6 @@ public interface WindowManager extends ViewManager {
             if (type != o.type) {
                 type = o.type;
                 changes |= TYPE_CHANGED;
-            }
-            if (memoryType != o.memoryType) {
-                memoryType = o.memoryType;
-                changes |= MEMORY_TYPE_CHANGED;
             }
             if (flags != o.flags) {
                 flags = o.flags;

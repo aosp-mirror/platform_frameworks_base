@@ -42,7 +42,6 @@ public:
         eDestroyBackbuffer  = 0x00000020,
         eSecure             = 0x00000080,
         eNonPremultiplied   = 0x00000100,
-        ePushBuffers        = 0x00000200,
         eOpaque             = 0x00000400,
 
         eFXSurfaceNormal    = 0x00000000,
