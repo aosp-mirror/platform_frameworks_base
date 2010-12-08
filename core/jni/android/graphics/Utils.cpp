@@ -20,8 +20,8 @@
 using namespace android;
 
 bool AssetStreamAdaptor::rewind() {
-    off_t pos = fAsset->seek(0, SEEK_SET);
-    if (pos == (off_t)-1) {
+    off64_t pos = fAsset->seek(0, SEEK_SET);
+    if (pos == (off64_t)-1) {
         SkDebugf("----- fAsset->seek(rewind) failed\n");
         return false;
     }
@@ -38,12 +38,12 @@ size_t AssetStreamAdaptor::read(void* buffer, size_t size) {
         // asset->seek returns new total offset
         // we want to return amount that was skipped
 
-        off_t oldOffset = fAsset->seek(0, SEEK_CUR);
+        off64_t oldOffset = fAsset->seek(0, SEEK_CUR);
         if (-1 == oldOffset) {
             SkDebugf("---- fAsset->seek(oldOffset) failed\n");
             return 0;
         }
-        off_t newOffset = fAsset->seek(size, SEEK_CUR);
+        off64_t newOffset = fAsset->seek(size, SEEK_CUR);
         if (-1 == newOffset) {
             SkDebugf("---- fAsset->seek(%d) failed\n", size);
             return 0;

@@ -461,7 +461,7 @@ ssize_t processJarFiles(Bundle* bundle, ZipFile* zip)
         ZipFile jar;
         err = jar.open(jars[i], ZipFile::kOpenReadOnly);
         if (err != 0) {
-            fprintf(stderr, "ERROR: unable to open '%s' as a zip file: %zd\n",
+            fprintf(stderr, "ERROR: unable to open '%s' as a zip file: %d\n",
                 jars[i], err);
             return err;
         }

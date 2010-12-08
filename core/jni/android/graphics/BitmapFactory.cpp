@@ -322,12 +322,12 @@ static jobject nativeDecodeStream(JNIEnv* env, jobject clazz,
 }
 
 static ssize_t getFDSize(int fd) {
-    off_t curr = ::lseek(fd, 0, SEEK_CUR);
+    off64_t curr = ::lseek64(fd, 0, SEEK_CUR);
     if (curr < 0) {
         return 0;
     }
     size_t size = ::lseek(fd, 0, SEEK_END);
-    ::lseek(fd, curr, SEEK_SET);
+    ::lseek64(fd, curr, SEEK_SET);
     return size;
 }
 
@@ -374,8 +374,8 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz,
  */
 static SkStream* copyAssetToStream(Asset* asset) {
     // if we could "ref/reopen" the asset, we may not need to copy it here
-    off_t size = asset->seek(0, SEEK_SET);
-    if ((off_t)-1 == size) {
+    off64_t size = asset->seek(0, SEEK_SET);
+    if ((off64_t)-1 == size) {
         SkDebugf("---- copyAsset: asset rewind failed\n");
         return NULL;
     }
@@ -388,7 +388,7 @@ static SkStream* copyAssetToStream(Asset* asset) {
 
     SkStream* stream = new SkMemoryStream(size);
     void* data = const_cast<void*>(stream->getMemoryBase());
-    off_t len = asset->read(data, size);
+    off64_t len = asset->read(data, size);
     if (len != size) {
         SkDebugf("---- copyAsset: asset->read(%d) returned %d\n", size, len);
         delete stream;

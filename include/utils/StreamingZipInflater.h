@@ -21,6 +21,8 @@
 #include <inttypes.h>
 #include <zlib.h>
 
+#include <utils/Compat.h>
+
 namespace android {
 
 class StreamingZipInflater {
@@ -29,7 +31,7 @@ public:
     static const size_t OUTPUT_CHUNK_SIZE = 64 * 1024;
 
     // Flavor that pages in the compressed data from a fd
-    StreamingZipInflater(int fd, off_t compDataStart, size_t uncompSize, size_t compSize);
+    StreamingZipInflater(int fd, off64_t compDataStart, size_t uncompSize, size_t compSize);
 
     // Flavor that gets the compressed data from an in-memory buffer
     StreamingZipInflater(class FileMap* dataMap, size_t uncompSize);
@@ -43,7 +45,7 @@ public:
     // seeking backwards requires uncompressing fom the beginning, so is very
     // expensive.  seeking forwards only requires uncompressing from the current
     // position to the destination.
-    off_t seekAbsolute(off_t absoluteInputPosition);
+    off64_t seekAbsolute(off64_t absoluteInputPosition);
 
 private:
     void initInflateState();
@@ -51,7 +53,7 @@ private:
 
     // where to find the uncompressed data
     int mFd;
-    off_t mInFileStart;         // where the compressed data lives in the file
+    off64_t mInFileStart;         // where the compressed data lives in the file
     class FileMap* mDataMap;
 
     z_stream mInflateState;
@@ -63,7 +65,7 @@ private:
     size_t mOutTotalSize;       // total uncompressed size of the blob
 
     // current output state bookkeeping
-    off_t mOutCurPosition;      // current position in total offset
+    off64_t mOutCurPosition;      // current position in total offset
     size_t mOutLastDecoded;     // last decoded byte + 1 in mOutbuf
     size_t mOutDeliverable;     // next undelivered byte of decoded output in mOutBuf
 

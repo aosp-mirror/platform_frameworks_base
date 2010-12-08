@@ -24,6 +24,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <utils/Compat.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -48,7 +50,7 @@ extern ZipEntryCRO ZipFileCRO_findEntryByName(ZipFileCRO zip,
 
 extern bool ZipFileCRO_getEntryInfo(ZipFileCRO zip, ZipEntryCRO entry,
         int* pMethod, size_t* pUncompLen,
-        size_t* pCompLen, off_t* pOffset, long* pModWhen, long* pCrc32);
+        size_t* pCompLen, off64_t* pOffset, long* pModWhen, long* pCrc32);
 
 extern bool ZipFileCRO_uncompressEntry(ZipFileCRO zip, ZipEntryCRO entry, int fd);
 
