@@ -576,6 +576,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char dexoptFlagsBuf[PROPERTY_VALUE_MAX];
     char enableAssertBuf[sizeof("-ea:")-1 + PROPERTY_VALUE_MAX];
     char jniOptsBuf[sizeof("-Xjniopts:")-1 + PROPERTY_VALUE_MAX];
+    char heapstartsizeOptsBuf[sizeof("-Xms")-1 + PROPERTY_VALUE_MAX];
     char heapsizeOptsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
     char extraOptsBuf[PROPERTY_VALUE_MAX];
     char* stackTraceFile = NULL;
@@ -649,6 +650,11 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     opt.optionString = "-verbose:gc";
     mOptions.add(opt);
     //options[curOpt++].optionString = "-verbose:class";
+
+    strcpy(heapstartsizeOptsBuf, "-Xms");
+    property_get("dalvik.vm.heapstartsize", heapstartsizeOptsBuf+4, "2m");
+    opt.optionString = heapstartsizeOptsBuf;
+    mOptions.add(opt);
 
     strcpy(heapsizeOptsBuf, "-Xmx");
     property_get("dalvik.vm.heapsize", heapsizeOptsBuf+4, "16m");
