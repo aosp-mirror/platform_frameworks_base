@@ -264,6 +264,17 @@ public class AudioService extends IAudioService.Stub {
     // Bluetooth headset device
     private BluetoothDevice mBluetoothHeadsetDevice;
 
+    // Indicate if SCO audio connection is currently active and if the initiator is
+    // audio service (internal) or bluetooth headset (external)
+    private int mScoAudioState;
+    // SCO audio state is not active
+    private static final int SCO_STATE_INACTIVE = 0;
+    // SCO audio state is active or starting due to a local request to start a virtual call
+    private static final int SCO_STATE_ACTIVE_INTERNAL = 1;
+    // SCO audio state is active due to an action in BT handsfree (either voice recognition or
+    // in call audio)
+    private static final int SCO_STATE_ACTIVE_EXTERNAL = 2;
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -315,6 +326,7 @@ public class AudioService extends IAudioService.Stub {
         intentFilter.addAction(Intent.ACTION_USB_ANLG_HEADSET_PLUG);
         intentFilter.addAction(Intent.ACTION_USB_DGTL_HEADSET_PLUG);
         intentFilter.addAction(Intent.ACTION_HDMI_AUDIO_PLUG);
+        intentFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
         context.registerReceiver(mReceiver, intentFilter);
 
         // Register for media button intent broadcasts.
@@ -692,6 +704,19 @@ public class AudioService extends IAudioService.Stub {
                         if (AudioService.this.mMode != mode) {
                             if (AudioSystem.setPhoneState(mode) == AudioSystem.AUDIO_STATUS_OK) {
                                 AudioService.this.mMode = mode;
+                                if (mode != AudioSystem.MODE_NORMAL) {
+                                    synchronized(mScoClients) {
+                                        checkScoAudioState();
+                                        if (mScoAudioState == SCO_STATE_ACTIVE_EXTERNAL) {
+                                            mBluetoothHeadset.stopVoiceRecognition(
+                                                    mBluetoothHeadsetDevice);
+                                            mBluetoothHeadset.stopVirtualVoiceCall(
+                                                    mBluetoothHeadsetDevice);
+                                        } else {
+                                            clearAllScoClients(mCb, true);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -761,8 +786,18 @@ public class AudioService extends IAudioService.Stub {
                         hdlr.setMode(mode);
                     }
 
+                    // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
+                    // SCO connections not started by the application changing the mode
                     if (mode != AudioSystem.MODE_NORMAL) {
-                        clearAllScoClients();
+                        synchronized(mScoClients) {
+                            checkScoAudioState();
+                            if (mScoAudioState == SCO_STATE_ACTIVE_EXTERNAL) {
+                                mBluetoothHeadset.stopVoiceRecognition(mBluetoothHeadsetDevice);
+                                mBluetoothHeadset.stopVirtualVoiceCall(mBluetoothHeadsetDevice);
+                            } else {
+                                clearAllScoClients(cb, true);
+                            }
+                        }
                     }
                 }
             }
@@ -1077,15 +1112,36 @@ public class AudioService extends IAudioService.Stub {
         }
 
         private void requestScoState(int state) {
+            if (mBluetoothHeadset == null) {
+                return;
+            }
+
+            checkScoAudioState();
+
             if (totalCount() == 0 &&
-                mBluetoothHeadsetDevice != null &&
-                AudioService.this.mMode == AudioSystem.MODE_NORMAL) {
-                if (state == BluetoothHeadset.STATE_AUDIO_CONNECTED) {
-                    mBluetoothHeadset.startVoiceRecognition(mBluetoothHeadsetDevice);
-                } else {
-                    mBluetoothHeadset.stopVoiceRecognition(mBluetoothHeadsetDevice);
+                mBluetoothHeadsetDevice != null) {
+                // Accept SCO audio activation only in NORMAL audio mode or if the mode is
+                // currently controlled by the same client.
+                if ((AudioService.this.mMode == AudioSystem.MODE_NORMAL ||
+                        mSetModeDeathHandlers.get(0).getBinder() == mCb) &&
+                        state == BluetoothHeadset.STATE_AUDIO_CONNECTED &&
+                        mScoAudioState == SCO_STATE_INACTIVE) {
+                    mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
+                    mBluetoothHeadset.startVirtualVoiceCall(mBluetoothHeadsetDevice);
+                } else if (state == BluetoothHeadset.STATE_AUDIO_DISCONNECTED &&
+                        mScoAudioState == SCO_STATE_ACTIVE_INTERNAL){
+                    mBluetoothHeadset.stopVirtualVoiceCall(mBluetoothHeadsetDevice);
                 }
             }
+        }
+    }
+
+    private void checkScoAudioState() {
+        if (mBluetoothHeadset != null && mBluetoothHeadsetDevice != null &&
+                mScoAudioState != SCO_STATE_ACTIVE_INTERNAL &&
+                mBluetoothHeadset.getAudioState(mBluetoothHeadsetDevice)
+                != BluetoothHeadset.STATE_AUDIO_DISCONNECTED) {
+            mScoAudioState = SCO_STATE_ACTIVE_EXTERNAL;
         }
     }
 
@@ -1104,11 +1160,12 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    public void clearAllScoClients() {
+    public void clearAllScoClients(IBinder exceptBinder, boolean stopSco) {
         synchronized(mScoClients) {
             int size = mScoClients.size();
             for (int i = 0; i < size; i++) {
-                mScoClients.get(i).clearCount(false);
+                if (mScoClients.get(i).getBinder() != exceptBinder)
+                    mScoClients.get(i).clearCount(stopSco);
             }
         }
     }
@@ -1116,22 +1173,27 @@ public class AudioService extends IAudioService.Stub {
     private BluetoothProfile.ServiceListener mBluetoothProfileServiceListener =
         new BluetoothProfile.ServiceListener() {
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            mBluetoothHeadset = (BluetoothHeadset) proxy;
-            List<BluetoothDevice> deviceList = mBluetoothHeadset.getConnectedDevices();
-            if (deviceList.size() > 0) {
-                mBluetoothHeadsetDevice = deviceList.get(0);
-            } else {
-                mBluetoothHeadsetDevice = null;
+            synchronized (mScoClients) {
+                mBluetoothHeadset = (BluetoothHeadset) proxy;
+                List<BluetoothDevice> deviceList = mBluetoothHeadset.getConnectedDevices();
+                if (deviceList.size() > 0) {
+                    mBluetoothHeadsetDevice = deviceList.get(0);
+                } else {
+                    mBluetoothHeadsetDevice = null;
+                }
             }
         }
         public void onServiceDisconnected(int profile) {
-            if (mBluetoothHeadset != null) {
-                List<BluetoothDevice> devices = mBluetoothHeadset.getConnectedDevices();
-                if (devices.size() == 0) {
-                    mBluetoothHeadsetDevice = null;
-                    clearAllScoClients();
+            synchronized (mScoClients) {
+                if (mBluetoothHeadset != null) {
+                    List<BluetoothDevice> devices = mBluetoothHeadset.getConnectedDevices();
+                    if (devices.size() == 0) {
+                        mBluetoothHeadsetDevice = null;
+                        clearAllScoClients(null, false);
+                        mScoAudioState = SCO_STATE_INACTIVE;
+                    }
+                    mBluetoothHeadset = null;
                 }
-                mBluetoothHeadset = null;
             }
         }
     };
@@ -1892,19 +1954,22 @@ public class AudioService extends IAudioService.Stub {
                 boolean isConnected = (mConnectedDevices.containsKey(device) &&
                                        mConnectedDevices.get(device).equals(address));
 
-                if (isConnected && state != BluetoothProfile.STATE_CONNECTED) {
-                    AudioSystem.setDeviceConnectionState(device,
-                                                         AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                                                         address);
-                    mConnectedDevices.remove(device);
-                    mBluetoothHeadsetDevice = null;
-                    clearAllScoClients();
-                } else if (!isConnected && state == BluetoothProfile.STATE_CONNECTED) {
-                    AudioSystem.setDeviceConnectionState(device,
-                                                         AudioSystem.DEVICE_STATE_AVAILABLE,
-                                                         address);
-                    mConnectedDevices.put(new Integer(device), address);
-                    mBluetoothHeadsetDevice = btDevice;
+                synchronized (mScoClients) {
+                    if (isConnected && state != BluetoothProfile.STATE_CONNECTED) {
+                        AudioSystem.setDeviceConnectionState(device,
+                                                             AudioSystem.DEVICE_STATE_UNAVAILABLE,
+                                                             address);
+                        mConnectedDevices.remove(device);
+                        mBluetoothHeadsetDevice = null;
+                        clearAllScoClients(null, false);
+                        mScoAudioState = SCO_STATE_INACTIVE;
+                    } else if (!isConnected && state == BluetoothProfile.STATE_CONNECTED) {
+                        AudioSystem.setDeviceConnectionState(device,
+                                                             AudioSystem.DEVICE_STATE_AVAILABLE,
+                                                             address);
+                        mConnectedDevices.put(new Integer(device), address);
+                        mBluetoothHeadsetDevice = btDevice;
+                    }
                 }
             } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
                 int state = intent.getIntExtra("state", 0);
@@ -1965,31 +2030,44 @@ public class AudioService extends IAudioService.Stub {
                     mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET), "");
                 }
             } else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
-                int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, -1);
+                boolean broadcast = false;
+                int audioState = AudioManager.SCO_AUDIO_STATE_ERROR;
                 synchronized (mScoClients) {
-                    if (!mScoClients.isEmpty()) {
-                        switch (state) {
-                        case BluetoothHeadset.STATE_AUDIO_CONNECTED:
-                            state = AudioManager.SCO_AUDIO_STATE_CONNECTED;
-                            break;
-                        case BluetoothHeadset.STATE_AUDIO_DISCONNECTED:
-                            state = AudioManager.SCO_AUDIO_STATE_DISCONNECTED;
-                            break;
-                        case BluetoothHeadset.STATE_AUDIO_CONNECTING:
-                            // Todo(): Handle this, ignore for now as a public
-                            // API will break.
-                            break;
-                        default:
-                            state = AudioManager.SCO_AUDIO_STATE_ERROR;
-                            break;
+                    int btState = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, -1);
+                    if (!mScoClients.isEmpty() && mScoAudioState == SCO_STATE_ACTIVE_INTERNAL) {
+                        broadcast = true;
+                    }
+                    switch (btState) {
+                    case BluetoothHeadset.STATE_AUDIO_CONNECTED:
+                        audioState = AudioManager.SCO_AUDIO_STATE_CONNECTED;
+                        if (mScoAudioState != SCO_STATE_ACTIVE_INTERNAL) {
+                            mScoAudioState = SCO_STATE_ACTIVE_EXTERNAL;
                         }
-                        if (state != AudioManager.SCO_AUDIO_STATE_ERROR) {
-                            Intent newIntent = new Intent(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED);
-                            newIntent.putExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, state);
-                            mContext.sendStickyBroadcast(newIntent);
+                        break;
+                    case BluetoothHeadset.STATE_AUDIO_DISCONNECTED:
+                        audioState = AudioManager.SCO_AUDIO_STATE_DISCONNECTED;
+                        mScoAudioState = SCO_STATE_INACTIVE;
+                        break;
+                    case BluetoothHeadset.STATE_AUDIO_CONNECTING:
+                        if (mScoAudioState != SCO_STATE_ACTIVE_INTERNAL) {
+                            mScoAudioState = SCO_STATE_ACTIVE_EXTERNAL;
                         }
+                    default:
+                        // do not broadcast CONNECTING or invalid state
+                        broadcast = false;
+                        break;
                     }
                 }
+                if (broadcast) {
+                    Intent newIntent = new Intent(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED);
+                    newIntent.putExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, audioState);
+                    mContext.sendStickyBroadcast(newIntent);
+                }
+            } else if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
+                Intent newIntent = new Intent(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED);
+                newIntent.putExtra(AudioManager.EXTRA_SCO_AUDIO_STATE,
+                        AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
+                mContext.sendStickyBroadcast(newIntent);
             }
         }
     }
