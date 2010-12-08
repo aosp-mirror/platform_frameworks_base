@@ -62,7 +62,13 @@ public class WallpaperManager {
      */
     public static final String ACTION_LIVE_WALLPAPER_CHOOSER
             = "android.service.wallpaper.LIVE_WALLPAPER_CHOOSER";
-    
+
+    /**
+     * Manifest entry for activities that respond to {@link Intent#ACTION_SET_WALLPAPER}
+     * which allows them to provide a custom large icon associated with this action.
+     */
+    public static final String WALLPAPER_PREVIEW_META_DATA = "android.wallpaper.preview";
+
     /**
      * Command for {@link #sendWallpaperCommand}: reported by the wallpaper
      * host when the user taps on an empty area (not performing an action

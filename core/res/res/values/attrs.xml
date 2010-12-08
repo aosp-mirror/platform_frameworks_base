@@ -4282,6 +4282,18 @@
     </declare-styleable>
 
     <!-- =============================== -->
+    <!-- Wallpaper preview attributes    -->
+    <!-- =============================== -->
+    <eat-comment />
+
+    <!-- Use <code>wallpaper-preview</code> as the root tag of the XML resource that
+         describes a wallpaper preview. -->
+    <declare-styleable name="WallpaperPreviewInfo">
+        <!-- A resource id of a static drawable. -->
+        <attr name="staticWallpaperPreview" format="reference" />
+    </declare-styleable>
+
+    <!-- =============================== -->
     <!-- App package class attributes -->
     <!-- =============================== -->
     <eat-comment />
