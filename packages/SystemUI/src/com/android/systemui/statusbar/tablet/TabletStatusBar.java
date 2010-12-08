@@ -40,11 +40,14 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.Gravity;
+import android.view.IWindowManager;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -84,6 +87,9 @@ public class TabletStatusBar extends StatusBar {
     public static final int MSG_SHOW_SHADOWS = 1031;
     public static final int MSG_RESTORE_SHADOWS = 1032;
 
+    // Fitts' Law assistance for LatinIME; TODO: replace with a more general approach
+    private static final boolean FAKE_SPACE_BAR = true;
+
     private static final int MAX_IMAGE_LEVEL = 10000;
     private static final boolean USE_2D_RECENTS = true;
 
@@ -92,6 +98,8 @@ public class TabletStatusBar extends StatusBar {
     int mIconSize;
 
     H mHandler = new H();
+
+    IWindowManager mWindowManager;
 
     // tracking all current notifications
     private NotificationData mNotns = new NotificationData();
@@ -133,6 +141,9 @@ public class TabletStatusBar extends StatusBar {
     NotificationIconArea.IconLayout mIconLayout;
 
     TabletTicker mTicker;
+
+    View mFakeSpaceBar;
+    KeyEvent mSpaceBarKeyEvent = null;
 
     // for disabling the status bar
     int mDisabled = 0;
@@ -252,6 +263,9 @@ public class TabletStatusBar extends StatusBar {
     protected View makeStatusBarView() {
         final Context context = mContext;
         final Resources res = context.getResources();
+        
+        mWindowManager = IWindowManager.Stub.asInterface(
+                ServiceManager.getService(Context.WINDOW_SERVICE));
 
         mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
 
@@ -303,6 +317,9 @@ public class TabletStatusBar extends StatusBar {
 
         // The bar contents buttons
         mInputMethodSwitchButton = (InputMethodButton) sb.findViewById(R.id.imeSwitchButton);
+
+        // for redirecting errant bar taps to the IME
+        mFakeSpaceBar = sb.findViewById(R.id.fake_space_bar);
 
         // "shadows" of the status bar features, for lights-out mode
         mBackShadow = sb.findViewById(R.id.back_shadow);
@@ -698,6 +715,9 @@ public class TabletStatusBar extends StatusBar {
         mInputMethodSwitchButton.setIMEButtonVisible(token, visible);
         mBackButton.setImageResource(
                 visible ? R.drawable.ic_sysbar_back_ime : R.drawable.ic_sysbar_back);
+        if (FAKE_SPACE_BAR) {
+            mFakeSpaceBar.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
     }
 
     private boolean isImmersive() {
@@ -736,6 +756,14 @@ public class TabletStatusBar extends StatusBar {
             mBarService.onNotificationError(n.pkg, n.tag, n.id, n.uid, n.initialPid, message);
         } catch (RemoteException ex) {
             // The end is nigh.
+        }
+    }
+
+    private void sendKey(KeyEvent key) {
+        try {
+            if (DEBUG) Slog.d(TAG, "injecting key event: " + key);
+            mWindowManager.injectInputEventNoWait(key);
+        } catch (RemoteException ex) {
         }
     }
 

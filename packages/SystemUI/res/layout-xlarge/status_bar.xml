@@ -264,5 +264,17 @@
                 android:visibility="gone"
                 />
         </RelativeLayout>
+
+        <!-- fake space bar zone -->
+        <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/fake_space_bar"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:paddingLeft="8dip"
+            android:paddingRight="8dip"
+            android:layout_toRightOf="@+id/navigationArea"
+            android:layout_toLeftOf="@+id/notificationArea"
+            android:visibility="gone"
+            systemui:keyCode="62"
+            />
     </RelativeLayout>
 </com.android.systemui.statusbar.tablet.TabletStatusBarView>
