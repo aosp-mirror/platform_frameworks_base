@@ -19,6 +19,16 @@ package android.bluetooth;
 import android.content.Context;
 import android.test.InstrumentationTestCase;
 
+/**
+ * Stress test suite for Bluetooth related functions.
+ *
+ * Includes tests for enabling/disabling bluetooth, enabling/disabling discoverable mode,
+ * starting/stopping scans, connecting/disconnecting to HFP, A2DP, HID, PAN profiles, and verifying
+ * that remote connections/disconnections occur for the PAN profile.
+ * <p>
+ * This test suite uses {@link android.bluetooth.BluetoothTestRunner} to for parameters such as the
+ * number of iterations and the addresses of remote Bluetooth devices.
+ */
 public class BluetoothStressTest extends InstrumentationTestCase {
     private static final String TAG = "BluetoothStressTest";
     private static final String OUTPUT_FILE = "BluetoothStressTestOutput.txt";
@@ -40,6 +50,9 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         mTestUtils.close();
     }
 
+    /**
+     * Stress test for enabling and disabling Bluetooth.
+     */
     public void testEnable() {
         int iterations = BluetoothTestRunner.sEnableIterations;
         if (iterations == 0) {
@@ -55,6 +68,9 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         }
     }
 
+    /**
+     * Stress test for putting the device in and taking the device out of discoverable mode.
+     */
     public void testDiscoverable() {
         int iterations = BluetoothTestRunner.sDiscoverableIterations;
         if (iterations == 0) {
@@ -73,6 +89,9 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         mTestUtils.disable(adapter);
     }
 
+    /**
+     * Stress test for starting and stopping Bluetooth scans.
+     */
     public void testScan() {
         int iterations = BluetoothTestRunner.sScanIterations;
         if (iterations == 0) {
@@ -91,6 +110,30 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         mTestUtils.disable(adapter);
     }
 
+    /**
+     * Stress test for enabling and disabling the PAN NAP profile.
+     */
+    public void testEnablePan() {
+        int iterations = BluetoothTestRunner.sEnablePanIterations;
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        mTestUtils.enable(adapter);
+
+        for (int i = 0; i < iterations; i++) {
+            mTestUtils.writeOutput("testEnablePan iteration " + (i + 1) + " of "
+                    + iterations);
+            mTestUtils.enablePan(adapter);
+            mTestUtils.disablePan(adapter);
+        }
+
+        mTestUtils.disable(adapter);
+    }
+
+    /**
+     * Stress test for pairing and unpairing with a remote device.
+     * <p>
+     * In this test, the local device initiates pairing with a remote device, and then unpairs with
+     * the device after the pairing has successfully completed.
+     */
     public void testPair() {
         int iterations = BluetoothTestRunner.sPairIterations;
         if (iterations == 0) {
@@ -110,6 +153,12 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         mTestUtils.disable(adapter);
     }
 
+    /**
+     * Stress test for accepting a pairing request and unpairing with a remote device.
+     * <p>
+     * In this test, the local device waits for a pairing request from a remote device.  It accepts
+     * the request and then unpairs after the paring has successfully completed.
+     */
     public void testAcceptPair() {
         int iterations = BluetoothTestRunner.sPairIterations;
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
@@ -125,6 +174,12 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         mTestUtils.disable(adapter);
     }
 
+    /**
+     * Stress test for connecting and disconnecting with an A2DP source.
+     * <p>
+     * In this test, the local device plays the role of an A2DP sink, and initiates connections and
+     * disconnections with an A2DP source.
+     */
     public void testConnectA2dp() {
         int iterations = BluetoothTestRunner.sConnectA2dpIterations;
         if (iterations == 0) {
@@ -143,10 +198,16 @@ public class BluetoothStressTest extends InstrumentationTestCase {
             mTestUtils.disconnectProfile(adapter, device, BluetoothProfile.A2DP);
         }
 
-        // TODO: Unpair from device if device can accept pairing after unpairing
+        mTestUtils.unpair(adapter, device);
         mTestUtils.disable(adapter);
     }
 
+    /**
+     * Stress test for connecting and disconnecting the HFP with a hands free device.
+     * <p>
+     * In this test, the local device plays the role of an HFP audio gateway, and initiates
+     * connections and disconnections with a hands free device.
+     */
     public void testConnectHeadset() {
         int iterations = BluetoothTestRunner.sConnectHeadsetIterations;
         if (iterations == 0) {
@@ -165,7 +226,94 @@ public class BluetoothStressTest extends InstrumentationTestCase {
             mTestUtils.disconnectProfile(adapter, device, BluetoothProfile.HEADSET);
         }
 
-        // TODO: Unpair from device if device can accept pairing after unpairing
+        mTestUtils.unpair(adapter, device);
+        mTestUtils.disable(adapter);
+    }
+
+    /**
+     * Stress test for connecting and disconnecting with a HID device.
+     * <p>
+     * In this test, the local device plays the role of a HID host, and initiates connections and
+     * disconnections with a HID device.
+     */
+    public void testConnectInput() {
+        int iterations = BluetoothTestRunner.sConnectInputIterations;
+        if (iterations == 0) {
+            return;
+        }
+
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sInputAddress);
+        mTestUtils.enable(adapter);
+        mTestUtils.pair(adapter, device, BluetoothTestRunner.sPairPasskey,
+                BluetoothTestRunner.sPairPin);
+
+        for (int i = 0; i < iterations; i++) {
+            mTestUtils.writeOutput("connectInput iteration " + (i + 1) + " of " + iterations);
+            mTestUtils.connectInput(adapter, device);
+            mTestUtils.disconnectInput(adapter, device);
+        }
+
+        mTestUtils.unpair(adapter, device);
+        mTestUtils.disable(adapter);
+    }
+
+    /**
+     * Stress test for connecting and disconnecting with a PAN NAP.
+     * <p>
+     * In this test, the local device plays the role of a PANU, and initiates connections and
+     * disconnections with a NAP.
+     */
+    public void testConnectPan() {
+        int iterations = BluetoothTestRunner.sConnectPanIterations;
+        if (iterations == 0) {
+            return;
+        }
+
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sPanAddress);
+        mTestUtils.enable(adapter);
+        mTestUtils.pair(adapter, device, BluetoothTestRunner.sPairPasskey,
+                BluetoothTestRunner.sPairPin);
+
+        for (int i = 0; i < iterations; i++) {
+            mTestUtils.writeOutput("connectPan iteration " + (i + 1) + " of " + iterations);
+            mTestUtils.connectPan(adapter, device);
+            mTestUtils.disconnectPan(adapter, device);
+        }
+
+        mTestUtils.unpair(adapter, device);
+        mTestUtils.disable(adapter);
+    }
+
+    /**
+     * Stress test for verifying a PANU connecting and disconnecting with the device.
+     * <p>
+     * In this test, the local device plays the role of a NAP which a remote PANU connects and
+     * disconnects from.
+     */
+    public void testIncomingPanConnection() {
+        int iterations = BluetoothTestRunner.sConnectPanIterations;
+        if (iterations == 0) {
+            return;
+        }
+
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sPanAddress);
+        mTestUtils.enable(adapter);
+        mTestUtils.enablePan(adapter);
+        mTestUtils.acceptPair(adapter, device, BluetoothTestRunner.sPairPasskey,
+                BluetoothTestRunner.sPairPin);
+
+        for (int i = 0; i < iterations; i++) {
+            mTestUtils.writeOutput("incomingPanConnection iteration " + (i + 1) + " of "
+                    + iterations);
+            mTestUtils.incomingPanConnection(adapter, device);
+            mTestUtils.incomingPanDisconnection(adapter, device);
+        }
+
+        mTestUtils.unpair(adapter, device);
+        mTestUtils.disablePan(adapter);
         mTestUtils.disable(adapter);
     }
 }
