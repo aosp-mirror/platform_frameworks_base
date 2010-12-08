@@ -89,7 +89,7 @@ public:
     MtpObjectPropertyList*  getObjectPropsSupported(MtpObjectFormat format);
 
     MtpProperty*            getDevicePropDesc(MtpDeviceProperty code);
-    MtpProperty*            getObjectPropDesc(MtpObjectProperty code);
+    MtpProperty*            getObjectPropDesc(MtpObjectProperty code, MtpObjectFormat format);
 
     bool                   readObject(MtpObjectHandle handle, const char* destPath, int group,
                                     int perm);
