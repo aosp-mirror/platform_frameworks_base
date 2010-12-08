@@ -873,7 +873,8 @@ public class SyncManager implements OnAccountsUpdateListener {
     /**
      * @hide
      */
-    class ActiveSyncContext extends ISyncContext.Stub implements ServiceConnection {
+    class ActiveSyncContext extends ISyncContext.Stub
+            implements ServiceConnection, IBinder.DeathRecipient {
         final SyncOperation mSyncOperation;
         final long mHistoryRowId;
         ISyncAdapter mSyncAdapter;
@@ -883,6 +884,7 @@ public class SyncManager implements OnAccountsUpdateListener {
         final PowerManager.WakeLock mSyncWakeLock;
         final int mSyncAdapterUid;
         SyncInfo mSyncInfo;
+        boolean mIsLinkedToDeath = false;
 
         /**
          * Create an ActiveSyncContext for an impending sync and grab the wakelock for that
@@ -983,6 +985,11 @@ public class SyncManager implements OnAccountsUpdateListener {
             StringBuilder sb = new StringBuilder();
             toString(sb);
             return sb.toString();
+        }
+
+        @Override
+        public void binderDied() {
+            sendSyncFinishedOrCanceledMessage(this, null);
         }
     }
 
@@ -1798,11 +1805,14 @@ public class SyncManager implements OnAccountsUpdateListener {
             return true;
         }
 
-        private void runBoundToSyncAdapter(ActiveSyncContext activeSyncContext,
+        private void runBoundToSyncAdapter(final ActiveSyncContext activeSyncContext,
               ISyncAdapter syncAdapter) {
             activeSyncContext.mSyncAdapter = syncAdapter;
             final SyncOperation syncOperation = activeSyncContext.mSyncOperation;
             try {
+                activeSyncContext.mIsLinkedToDeath = true;
+                syncAdapter.asBinder().linkToDeath(activeSyncContext, 0);
+
                 syncAdapter.startSync(activeSyncContext, syncOperation.authority,
                         syncOperation.account, syncOperation.extras);
             } catch (RemoteException remoteExc) {
@@ -1842,6 +1852,11 @@ public class SyncManager implements OnAccountsUpdateListener {
         private void runSyncFinishedOrCanceledLocked(SyncResult syncResult,
                 ActiveSyncContext activeSyncContext) {
             boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
+
+            if (activeSyncContext.mIsLinkedToDeath) {
+                activeSyncContext.mSyncAdapter.asBinder().unlinkToDeath(activeSyncContext, 0);
+                activeSyncContext.mIsLinkedToDeath = false;
+            }
             closeActiveSyncContext(activeSyncContext);
 
             final SyncOperation syncOperation = activeSyncContext.mSyncOperation;
