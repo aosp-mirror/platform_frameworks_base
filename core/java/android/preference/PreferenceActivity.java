@@ -394,7 +394,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             if (summaryRes != 0) {
                 return res.getText(summaryRes);
             }
-            return title;
+            return summary;
         }
 
         /**
