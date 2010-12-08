@@ -75,12 +75,13 @@ interface IDevicePolicyManager {
     ComponentName setGlobalProxy(in ComponentName admin, String proxySpec, String exclusionList);
     ComponentName getGlobalProxyAdmin();
     
-    void setActiveAdmin(in ComponentName policyReceiver);
+    void setActiveAdmin(in ComponentName policyReceiver, boolean refreshing);
     boolean isAdminActive(in ComponentName policyReceiver);
     List<ComponentName> getActiveAdmins();
     boolean packageHasActiveAdmins(String packageName);
     void getRemoveWarning(in ComponentName policyReceiver, in RemoteCallback result);
     void removeActiveAdmin(in ComponentName policyReceiver);
+    boolean hasGrantedPolicy(in ComponentName policyReceiver, int usesPolicy);
     
     void setActivePasswordState(int quality, int length, int letters, int uppercase, int lowercase,
         int numbers, int symbols, int nonletter);
