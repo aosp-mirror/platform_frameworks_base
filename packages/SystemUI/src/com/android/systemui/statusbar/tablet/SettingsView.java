@@ -99,6 +99,9 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
     // ----------------------------
     private void onClickNetwork() {
         Slog.d(TAG, "onClickNetwork");
+        getContext().startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        getStatusBarManager().collapse();
     }
 
     // Settings

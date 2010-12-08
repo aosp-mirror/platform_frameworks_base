@@ -74,6 +74,9 @@
     <!-- Name of the button that links to the Settings app. [CHAR LIMIT=NONE] -->
     <string name="status_bar_settings_settings_button">Settings</string>
 
+    <!-- Name of the button that links to the Wifi settings screen. [CHAR LIMIT=NONE] -->
+    <string name="status_bar_settings_wifi_button">Wi-Fi</string>
+
     <!-- Label in the system panel for airplane mode (all radios are turned off)[CHAR LIMIT=30] -->
     <string name="status_bar_settings_airplane">Airplane mode</string>
 
