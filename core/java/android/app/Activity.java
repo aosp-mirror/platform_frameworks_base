@@ -1403,6 +1403,8 @@ public class Activity extends ContextThemeWrapper
     public void onConfigurationChanged(Configuration newConfig) {
         mCalled = true;
 
+        mFragments.dispatchConfigurationChanged(newConfig);
+
         if (mWindow != null) {
             // Pass the configuration changed event to the window
             mWindow.onConfigurationChanged(newConfig);
@@ -1566,6 +1568,7 @@ public class Activity extends ContextThemeWrapper
     
     public void onLowMemory() {
         mCalled = true;
+        mFragments.dispatchLowMemory();
     }
     
     /**
