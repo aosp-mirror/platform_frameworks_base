@@ -41,7 +41,7 @@ public class PropertyValuesHolder implements Cloneable {
     /**
      * The setter function, if needed. ObjectAnimator hands off this functionality to
      * PropertyValuesHolder, since it holds all of the per-property information. This
-     * property can be manually set via setSetter(). Otherwise, it is automatically
+     * property is automatically
      * derived when the animation starts in setupSetterAndGetter() if using ObjectAnimator.
      */
     Method mSetter = null;
@@ -49,7 +49,7 @@ public class PropertyValuesHolder implements Cloneable {
     /**
      * The getter function, if needed. ObjectAnimator hands off this functionality to
      * PropertyValuesHolder, since it holds all of the per-property information. This
-     * property can be manually set via setSetter(). Otherwise, it is automatically
+     * property is automatically
      * derived when the animation starts in setupSetterAndGetter() if using ObjectAnimator.
      * The getter is only derived and used if one of the values is null.
      */

@@ -32,6 +32,9 @@ jfieldID gOptions_widthFieldID;
 jfieldID gOptions_heightFieldID;
 jfieldID gOptions_mimeFieldID;
 jfieldID gOptions_mCancelID;
+jfieldID gOptions_bitmapFieldID;
+jclass gBitmap_class;
+jfieldID gBitmap_nativeBitmapFieldID;
 
 static jclass gFileDescriptor_class;
 static jfieldID gFileDescriptor_descriptor;
@@ -187,6 +190,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
                         (allowPurgeable && optionsPurgeable(env, options));
     bool reportSizeToVM = optionsReportSizeToVM(env, options);
     bool preferQualityOverSpeed = false;
+    jobject javaBitmap = NULL;
     
     if (NULL != options) {
         sampleSize = env->GetIntField(options, gOptions_sampleSizeFieldID);
@@ -203,6 +207,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         doDither = env->GetBooleanField(options, gOptions_ditherFieldID);
         preferQualityOverSpeed = env->GetBooleanField(options,
                 gOptions_preferQualityOverSpeedFieldID);
+        javaBitmap = env->GetObjectField(options, gOptions_bitmapFieldID);
     }
 
     SkImageDecoder* decoder = SkImageDecoder::Factory(stream);
@@ -216,7 +221,14 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
 
     NinePatchPeeker     peeker(decoder);
     JavaPixelAllocator  javaAllocator(env, reportSizeToVM);
-    SkBitmap*           bitmap = new SkBitmap;
+    SkBitmap*           bitmap;
+    if (javaBitmap == NULL) {
+        bitmap = new SkBitmap;
+    } else {
+        bitmap = (SkBitmap *) env->GetIntField(javaBitmap, gBitmap_nativeBitmapFieldID);
+        // config of supplied bitmap overrules config set in options
+        prefConfig = bitmap->getConfig();
+    }
     Res_png_9patch      dummy9Patch;
 
     SkAutoTDelete<SkImageDecoder>   add(decoder);
@@ -233,14 +245,14 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     // happens earlier than AutoDecoderCancel object is added
     // to the gAutoDecoderCancelMutex linked list.
     if (NULL != options && env->GetBooleanField(options, gOptions_mCancelID)) {
-        return nullObjectReturn("gOptions_mCancelID");;
+        return nullObjectReturn("gOptions_mCancelID");
     }
 
     SkImageDecoder::Mode decodeMode = mode;
     if (isPurgeable) {
         decodeMode = SkImageDecoder::kDecodeBounds_Mode;
     }
-    if (!decoder->decode(stream, bitmap, prefConfig, decodeMode)) {
+    if (!decoder->decode(stream, bitmap, prefConfig, decodeMode, javaBitmap != NULL)) {
         return nullObjectReturn("decoder->decode returned false");
     }
 
@@ -301,6 +313,11 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     }
     // promise we will never change our pixels (great for sharing and pictures)
     pr->setImmutable();
+
+    if (javaBitmap != NULL) {
+        // If a java bitmap was passed in for reuse, pass it back
+        return javaBitmap;
+    }
     // now create the java bitmap
     return GraphicsJNI::createBitmap(env, bitmap, false, ninePatchChunk);
 }
@@ -554,6 +571,8 @@ static jfieldID getFieldIDCheck(JNIEnv* env, jclass clazz,
 int register_android_graphics_BitmapFactory(JNIEnv* env);
 int register_android_graphics_BitmapFactory(JNIEnv* env) {
     gOptions_class = make_globalref(env, "android/graphics/BitmapFactory$Options");
+    gOptions_bitmapFieldID = getFieldIDCheck(env, gOptions_class, "inBitmap",
+        "Landroid/graphics/Bitmap;");
     gOptions_justBoundsFieldID = getFieldIDCheck(env, gOptions_class, "inJustDecodeBounds", "Z");
     gOptions_sampleSizeFieldID = getFieldIDCheck(env, gOptions_class, "inSampleSize", "I");
     gOptions_configFieldID = getFieldIDCheck(env, gOptions_class, "inPreferredConfig",
@@ -569,6 +588,8 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     gOptions_mimeFieldID = getFieldIDCheck(env, gOptions_class, "outMimeType", "Ljava/lang/String;");
     gOptions_mCancelID = getFieldIDCheck(env, gOptions_class, "mCancel", "Z");
 
+    gBitmap_class = make_globalref(env, "android/graphics/Bitmap");
+    gBitmap_nativeBitmapFieldID = getFieldIDCheck(env, gBitmap_class, "mNativeBitmap", "I");
     gFileDescriptor_class = make_globalref(env, "java/io/FileDescriptor");
     gFileDescriptor_descriptor = getFieldIDCheck(env, gFileDescriptor_class, "descriptor", "I");
 
