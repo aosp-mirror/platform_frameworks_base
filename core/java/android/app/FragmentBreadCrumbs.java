@@ -41,6 +41,7 @@ public class FragmentBreadCrumbs extends ViewGroup
     Activity mActivity;
     LayoutInflater mInflater;
     LinearLayout mContainer;
+    int mMaxVisible = -1;
 
     // Hahah
     BackStackRecord mTopEntry;
@@ -71,6 +72,14 @@ public class FragmentBreadCrumbs extends ViewGroup
         a.getFragmentManager().addOnBackStackChangedListener(this);
         updateCrumbs();
         setLayoutTransition(new LayoutTransition());
+    }
+
+    /**
+     * The maximum number of crumbs to show.
+     * @hide
+     */
+    public void setMaxVisible(int visibleCrumbs) {
+        mMaxVisible = visibleCrumbs;
     }
 
     /**
@@ -160,17 +169,17 @@ public class FragmentBreadCrumbs extends ViewGroup
                 }
             }
             if (viewI >= numViews) {
-                View item = mInflater.inflate(
+                final View item = mInflater.inflate(
                         com.android.internal.R.layout.fragment_bread_crumb_item,
                         this, false);
-                TextView text = (TextView)item.findViewById(com.android.internal.R.id.title);
+                final TextView text = (TextView) item.findViewById(com.android.internal.R.id.title);
                 text.setText(bse.getBreadCrumbTitle());
-                item.setTag(bse);
+                text.setTag(bse);
                 if (viewI == 0) {
-                    text.setCompoundDrawables(null, null, null, null);
+                    item.findViewById(com.android.internal.R.id.left_icon).setVisibility(View.GONE);
                 }
                 mContainer.addView(item);
-                item.setOnClickListener(mOnClickListener);
+                text.setOnClickListener(mOnClickListener);
             }
         }
         int viewI = mTopEntry != null ? numEntries + 1 : numEntries;
@@ -178,6 +187,20 @@ public class FragmentBreadCrumbs extends ViewGroup
         while (numViews > viewI) {
             mContainer.removeViewAt(numViews-1);
             numViews--;
+        }
+        // Adjust the visibility and availability of the bread crumbs and divider
+        for (int i = 0; i < numViews; i++) {
+            final View child = mContainer.getChildAt(i);
+            // Disable the last one
+            child.findViewById(com.android.internal.R.id.title).setEnabled(i < numViews - 1);
+            if (mMaxVisible > 0) {
+                // Make only the last mMaxVisible crumbs visible
+                child.setVisibility(i < numViews - mMaxVisible ? View.GONE : View.VISIBLE);
+                final View leftIcon = child.findViewById(com.android.internal.R.id.left_icon);
+                // Remove the divider for all but the last mMaxVisible - 1
+                leftIcon.setVisibility(i > numViews - mMaxVisible && i != 0 ? View.VISIBLE
+                        : View.GONE);
+            }
         }
     }
 
