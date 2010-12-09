@@ -1381,7 +1381,7 @@
         <item name="background">@android:drawable/btn_default_holo_dark</item>
     </style>
 
-    <style name="Holo.SegmentedButton">
+    <style name="Holo.SegmentedButton" parent="SegmentedButton">
         <item name="android:background">@android:drawable/btn_default_holo_dark</item>
     </style>
 
@@ -1759,7 +1759,7 @@
         <item name="android:background">@null</item>
     </style>
 
-    <style name="Holo.Light.SegmentedButton">
+    <style name="Holo.Light.SegmentedButton" parent="SegmentedButton">
         <item name="android:background">@android:drawable/btn_default_holo_light</item>
     </style>
 
