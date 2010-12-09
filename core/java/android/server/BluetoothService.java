@@ -57,17 +57,12 @@ import android.util.Log;
 import android.util.Pair;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataInputStream;
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -95,7 +90,7 @@ public class BluetoothService extends IBluetooth.Stub {
     private ParcelUuid[] mAdapterUuids;
 
     private BluetoothAdapter mAdapter;  // constant after init()
-    private final BondState mBondState = new BondState();  // local cache of bondings
+    private final BluetoothBondState mBondState;  // local cache of bondings
     private final IBatteryStats mBatteryStats;
     private final Context mContext;
 
@@ -129,9 +124,8 @@ public class BluetoothService extends IBluetooth.Stub {
             BluetoothUuid.HSP,
             BluetoothUuid.ObexObjectPush };
 
-    // TODO(): Optimize all these string handling
-    private final Map<String, String> mAdapterProperties;
-    private final HashMap<String, Map<String, String>> mDeviceProperties;
+    private final BluetoothAdapterProperties mAdapterProperties;
+    private final BluetoothDeviceProperties mDeviceProperties;
 
     private final HashMap<String, Map<ParcelUuid, Integer>> mDeviceServiceChannelCache;
     private final ArrayList<String> mUuidIntentTracker;
@@ -203,8 +197,9 @@ public class BluetoothService extends IBluetooth.Stub {
         mBluetoothState = BluetoothAdapter.STATE_OFF;
         mIsDiscovering = false;
 
-        mAdapterProperties = new HashMap<String, String>();
-        mDeviceProperties = new HashMap<String, Map<String,String>>();
+        mBondState = new BluetoothBondState(context, this);
+        mAdapterProperties = new BluetoothAdapterProperties(context, this);
+        mDeviceProperties = new BluetoothDeviceProperties(this);
 
         mDeviceServiceChannelCache = new HashMap<String, Map<ParcelUuid, Integer>>();
         mDeviceOobData = new HashMap<String, Pair<byte[], byte[]>>();
@@ -242,12 +237,13 @@ public class BluetoothService extends IBluetooth.Stub {
                 mDockAddress = dockAddress;
                 return mDockAddress;
             } else {
-                log("CheckBluetoothAddress failed for car dock address:" + dockAddress);
+                Log.e(TAG, "CheckBluetoothAddress failed for car dock address: "
+                        + dockAddress);
             }
         } catch (FileNotFoundException e) {
-            log("FileNotFoundException while trying to read dock address");
+            Log.e(TAG, "FileNotFoundException while trying to read dock address");
         } catch (IOException e) {
-            log("IOException while trying to read dock address");
+            Log.e(TAG, "IOException while trying to read dock address");
         } finally {
             if (file != null) {
                 try {
@@ -274,9 +270,9 @@ public class BluetoothService extends IBluetooth.Stub {
             out.write(mDockPin);
             return true;
         } catch (FileNotFoundException e) {
-            log("FileNotFoundException while trying to write dock pairing pin");
+            Log.e(TAG, "FileNotFoundException while trying to write dock pairing pin");
         } catch (IOException e) {
-            log("IOException while while trying to write dock pairing pin");
+            Log.e(TAG, "IOException while while trying to write dock pairing pin");
         } finally {
             if (out != null) {
                 try {
@@ -327,6 +323,9 @@ public class BluetoothService extends IBluetooth.Stub {
         return mBluetoothState;
     }
 
+    int getBluetoothStateInternal() {
+        return mBluetoothState;
+    }
 
     /**
      * Bring down bluetooth and disable BT in settings. Returns true on success.
@@ -486,7 +485,7 @@ public class BluetoothService extends IBluetooth.Stub {
             return;
         }
 
-        if (DBG) log("Bluetooth state " + mBluetoothState + " -> " + state);
+        if (DBG) Log.d(TAG, "Bluetooth state " + mBluetoothState + " -> " + state);
 
         Intent intent = new Intent(BluetoothAdapter.ACTION_STATE_CHANGED);
         intent.putExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, mBluetoothState);
@@ -537,7 +536,7 @@ public class BluetoothService extends IBluetooth.Stub {
                 boolean running = false;
                 while ((retryCount-- > 0) && !running) {
                     mEventLoop.start();
-                    // it may take a momement for the other thread to do its
+                    // it may take a moment for the other thread to do its
                     // thing.  Check periodically for a while.
                     int pollCount = 5;
                     while ((pollCount-- > 0) && !running) {
@@ -551,7 +550,7 @@ public class BluetoothService extends IBluetooth.Stub {
                     }
                 }
                 if (!running) {
-                    log("bt EnableThread giving up");
+                    Log.e(TAG, "bt EnableThread giving up");
                     res = false;
                     disableNative();
                 }
@@ -635,6 +634,7 @@ public class BluetoothService extends IBluetooth.Stub {
             if (mAdapterUuids != null &&
                     BluetoothUuid.containsAllUuids(adapterUuids, mAdapterUuids)) {
                 setBluetoothState(BluetoothAdapter.STATE_ON);
+                autoConnect();
                 String[] propVal = {"Pairable", getProperty("Pairable")};
                 mEventLoop.onPropertyChanged(propVal);
 
@@ -730,316 +730,8 @@ public class BluetoothService extends IBluetooth.Stub {
         mBondState.attempt(address);
     }
 
-    /** local cache of bonding state.
-    /* we keep our own state to track the intermediate state BONDING, which
-    /* bluez does not track.
-     * All addresses must be passed in upper case.
-     */
-    public class BondState {
-        private final HashMap<String, Integer> mState = new HashMap<String, Integer>();
-        private final HashMap<String, Integer> mPinAttempt = new HashMap<String, Integer>();
-
-        private static final String AUTO_PAIRING_BLACKLIST =
-            "/etc/bluetooth/auto_pairing.conf";
-        private static final String DYNAMIC_AUTO_PAIRING_BLACKLIST =
-            "/data/misc/bluetooth/dynamic_auto_pairing.conf";
-        private ArrayList<String>  mAutoPairingAddressBlacklist;
-        private ArrayList<String> mAutoPairingExactNameBlacklist;
-        private ArrayList<String> mAutoPairingPartialNameBlacklist;
-        private ArrayList<String> mAutoPairingFixedPinZerosKeyboardList;
-        // Addresses added to blacklist dynamically based on usage.
-        private ArrayList<String> mAutoPairingDynamicAddressBlacklist;
-
-
-        // If this is an outgoing connection, store the address.
-        // There can be only 1 pending outgoing connection at a time,
-        private String mPendingOutgoingBonding;
-
-        private synchronized void setPendingOutgoingBonding(String address) {
-            mPendingOutgoingBonding = address;
-        }
-
-        public synchronized String getPendingOutgoingBonding() {
-            return mPendingOutgoingBonding;
-        }
-
-        public synchronized void loadBondState() {
-            if (mBluetoothState != BluetoothAdapter.STATE_TURNING_ON) {
-                return;
-            }
-            String []bonds = null;
-            String val = getPropertyInternal("Devices");
-            if (val != null) {
-                bonds = val.split(",");
-            }
-            if (bonds == null) {
-                return;
-            }
-            mState.clear();
-            if (DBG) log("found " + bonds.length + " bonded devices");
-            for (String device : bonds) {
-                mState.put(getAddressFromObjectPath(device).toUpperCase(),
-                        BluetoothDevice.BOND_BONDED);
-            }
-        }
-
-        public synchronized void setBondState(String address, int state) {
-            setBondState(address, state, 0);
-        }
-
-        /** reason is ignored unless state == BOND_NOT_BONDED */
-        public synchronized void setBondState(String address, int state, int reason) {
-            int oldState = getBondState(address);
-            if (oldState == state) {
-                return;
-            }
-
-            // Check if this was an pending outgoing bonding.
-            // If yes, reset the state.
-            if (oldState == BluetoothDevice.BOND_BONDING) {
-                if (address.equals(mPendingOutgoingBonding)) {
-                    mPendingOutgoingBonding = null;
-                }
-            }
-
-            if (state == BluetoothDevice.BOND_BONDED) {
-                addProfileState(address);
-            } else if (state == BluetoothDevice.BOND_NONE) {
-                removeProfileState(address);
-            }
-
-            // HID is handled by BluetoothService, other profiles
-            // will be handled by their respective services.
-            mBluetoothInputProfileHandler.setInitialInputDevicePriority(
-                    mAdapter.getRemoteDevice(address), state);
-
-            if (DBG) log(address + " bond state " + oldState + " -> " + state + " (" +
-                         reason + ")");
-            Intent intent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-            intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
-            intent.putExtra(BluetoothDevice.EXTRA_BOND_STATE, state);
-            intent.putExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, oldState);
-            if (state == BluetoothDevice.BOND_NONE) {
-                if (reason <= 0) {
-                    Log.w(TAG, "setBondState() called to unbond device, but reason code is " +
-                          "invalid. Overriding reason code with BOND_RESULT_REMOVED");
-                    reason = BluetoothDevice.UNBOND_REASON_REMOVED;
-                }
-                intent.putExtra(BluetoothDevice.EXTRA_REASON, reason);
-                mState.remove(address);
-            } else {
-                mState.put(address, state);
-            }
-
-            mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-        }
-
-        public boolean isAutoPairingBlacklisted(String address) {
-            if (mAutoPairingAddressBlacklist != null) {
-                for (String blacklistAddress : mAutoPairingAddressBlacklist) {
-                    if (address.startsWith(blacklistAddress)) return true;
-                }
-            }
-
-            if (mAutoPairingDynamicAddressBlacklist != null) {
-                for (String blacklistAddress: mAutoPairingDynamicAddressBlacklist) {
-                    if (address.equals(blacklistAddress)) return true;
-                }
-            }
-            String name = getRemoteName(address);
-            if (name != null) {
-                if (mAutoPairingExactNameBlacklist != null) {
-                    for (String blacklistName : mAutoPairingExactNameBlacklist) {
-                        if (name.equals(blacklistName)) return true;
-                    }
-                }
-
-                if (mAutoPairingPartialNameBlacklist != null) {
-                    for (String blacklistName : mAutoPairingPartialNameBlacklist) {
-                        if (name.startsWith(blacklistName)) return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        public boolean isFixedPinZerosAutoPairKeyboard(String address) {
-            // Note: the meaning of blacklist is reversed in this case.
-            // If its in the list, we can go ahead and auto pair since
-            // by default keyboard should have a variable PIN that we don't
-            // auto pair using 0000.
-            if (mAutoPairingFixedPinZerosKeyboardList != null) {
-                for (String blacklistAddress : mAutoPairingFixedPinZerosKeyboardList) {
-                    if (address.startsWith(blacklistAddress)) return true;
-                }
-            }
-            return false;
-        }
-
-        public synchronized int getBondState(String address) {
-            Integer state = mState.get(address);
-            if (state == null) {
-                return BluetoothDevice.BOND_NONE;
-            }
-            return state.intValue();
-        }
-
-        /*package*/ synchronized String[] listInState(int state) {
-            ArrayList<String> result = new ArrayList<String>(mState.size());
-            for (Map.Entry<String, Integer> e : mState.entrySet()) {
-                if (e.getValue().intValue() == state) {
-                    result.add(e.getKey());
-                }
-            }
-            return result.toArray(new String[result.size()]);
-        }
-
-        public synchronized void addAutoPairingFailure(String address) {
-            if (mAutoPairingDynamicAddressBlacklist == null) {
-                mAutoPairingDynamicAddressBlacklist = new ArrayList<String>();
-            }
-
-            updateAutoPairingData(address);
-            mAutoPairingDynamicAddressBlacklist.add(address);
-        }
-
-        public synchronized boolean isAutoPairingAttemptsInProgress(String address) {
-            return getAttempt(address) != 0;
-        }
-
-        public synchronized void clearPinAttempts(String address) {
-            mPinAttempt.remove(address);
-        }
-
-        public synchronized boolean hasAutoPairingFailed(String address) {
-            if (mAutoPairingDynamicAddressBlacklist == null) return false;
-
-            return mAutoPairingDynamicAddressBlacklist.contains(address);
-        }
-
-        public synchronized int getAttempt(String address) {
-            Integer attempt = mPinAttempt.get(address);
-            if (attempt == null) {
-                return 0;
-            }
-            return attempt.intValue();
-        }
-
-        public synchronized void attempt(String address) {
-            Integer attempt = mPinAttempt.get(address);
-            int newAttempt;
-            if (attempt == null) {
-                newAttempt = 1;
-            } else {
-                newAttempt = attempt.intValue() + 1;
-            }
-            mPinAttempt.put(address, new Integer(newAttempt));
-        }
-
-        private void copyAutoPairingData() {
-            File file = null;
-            FileInputStream in = null;
-            FileOutputStream out = null;
-            try {
-                file = new File(DYNAMIC_AUTO_PAIRING_BLACKLIST);
-
-                in = new FileInputStream(AUTO_PAIRING_BLACKLIST);
-                out= new FileOutputStream(DYNAMIC_AUTO_PAIRING_BLACKLIST);
-
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = in.read(buf)) > 0) {
-                    out.write(buf, 0, len);
-                }
-            } catch (FileNotFoundException e) {
-                log("FileNotFoundException: in copyAutoPairingData");
-            } catch (IOException e) {
-                log("IOException: in copyAutoPairingData");
-            } finally {
-                 try {
-                     if (in != null) in.close();
-                     if (out != null) out.close();
-                 } catch (IOException e) {}
-            }
-        }
-
-        public void readAutoPairingData() {
-            if (mAutoPairingAddressBlacklist != null) return;
-            copyAutoPairingData();
-            FileInputStream fstream = null;
-            try {
-                fstream = new FileInputStream(DYNAMIC_AUTO_PAIRING_BLACKLIST);
-                DataInputStream in = new DataInputStream(fstream);
-                BufferedReader file = new BufferedReader(new InputStreamReader(in));
-                String line;
-                while((line = file.readLine()) != null) {
-                    line = line.trim();
-                    if (line.length() == 0 || line.startsWith("//")) continue;
-                    String[] value = line.split("=");
-                    if (value != null && value.length == 2) {
-                        String[] val = value[1].split(",");
-                        if (value[0].equalsIgnoreCase("AddressBlacklist")) {
-                            mAutoPairingAddressBlacklist =
-                                new ArrayList<String>(Arrays.asList(val));
-                        } else if (value[0].equalsIgnoreCase("ExactNameBlacklist")) {
-                            mAutoPairingExactNameBlacklist =
-                                new ArrayList<String>(Arrays.asList(val));
-                        } else if (value[0].equalsIgnoreCase("PartialNameBlacklist")) {
-                            mAutoPairingPartialNameBlacklist =
-                                new ArrayList<String>(Arrays.asList(val));
-                        } else if (value[0].equalsIgnoreCase("FixedPinZerosKeyboardBlacklist")) {
-                            mAutoPairingFixedPinZerosKeyboardList =
-                                new ArrayList<String>(Arrays.asList(val));
-                        } else if (value[0].equalsIgnoreCase("DynamicAddressBlacklist")) {
-                            mAutoPairingDynamicAddressBlacklist =
-                                new ArrayList<String>(Arrays.asList(val));
-                        } else {
-                            Log.e(TAG, "Error parsing Auto pairing blacklist file");
-                        }
-                    }
-                }
-            } catch (FileNotFoundException e) {
-                log("FileNotFoundException: readAutoPairingData" + e.toString());
-            } catch (IOException e) {
-                log("IOException: readAutoPairingData" + e.toString());
-            } finally {
-                if (fstream != null) {
-                    try {
-                        fstream.close();
-                    } catch (IOException e) {
-                        // Ignore
-                    }
-                }
-            }
-        }
-
-        // This function adds a bluetooth address to the auto pairing blacklist
-        // file. These addresses are added to DynamicAddressBlacklistSection
-        private void updateAutoPairingData(String address) {
-            BufferedWriter out = null;
-            try {
-                out = new BufferedWriter(new FileWriter(DYNAMIC_AUTO_PAIRING_BLACKLIST, true));
-                StringBuilder str = new StringBuilder();
-                if (mAutoPairingDynamicAddressBlacklist.size() == 0) {
-                    str.append("DynamicAddressBlacklist=");
-                }
-                str.append(address);
-                str.append(",");
-                out.write(str.toString());
-            } catch (FileNotFoundException e) {
-                log("FileNotFoundException: updateAutoPairingData" + e.toString());
-            } catch (IOException e) {
-                log("IOException: updateAutoPairingData" + e.toString());
-            } finally {
-                if (out != null) {
-                    try {
-                        out.close();
-                    } catch (IOException e) {
-                        // Ignore
-                    }
-                }
-            }
-        }
+    /*package*/ BluetoothDevice getRemoteDevice(String address) {
+        return mAdapter.getRemoteDevice(address);
     }
 
     private static String toBondStateString(int bondState) {
@@ -1053,56 +745,6 @@ public class BluetoothService extends IBluetooth.Stub {
         default:
             return "??????";
         }
-    }
-
-    /*package*/ synchronized boolean isAdapterPropertiesEmpty() {
-        return mAdapterProperties.isEmpty();
-    }
-
-    /*package*/synchronized void getAllProperties() {
-
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        mAdapterProperties.clear();
-
-        String properties[] = (String [])getAdapterPropertiesNative();
-        // The String Array consists of key-value pairs.
-        if (properties == null) {
-            Log.e(TAG, "*Error*: GetAdapterProperties returned NULL");
-            return;
-        }
-
-        for (int i = 0; i < properties.length; i++) {
-            String name = properties[i];
-            String newValue = null;
-            int len;
-            if (name == null) {
-                Log.e(TAG, "Error:Adapter Property at index" + i + "is null");
-                continue;
-            }
-            if (name.equals("Devices") || name.equals("UUIDs")) {
-                StringBuilder str = new StringBuilder();
-                len = Integer.valueOf(properties[++i]);
-                for (int j = 0; j < len; j++) {
-                    str.append(properties[++i]);
-                    str.append(",");
-                }
-                if (len > 0) {
-                    newValue = str.toString();
-                }
-            } else {
-                newValue = properties[++i];
-            }
-            mAdapterProperties.put(name, newValue);
-        }
-
-        // Add adapter object path property.
-        String adapterPath = getAdapterPathNative();
-        if (adapterPath != null)
-            mAdapterProperties.put("ObjectPath", adapterPath + "/dev_");
-    }
-
-    /* package */ synchronized void setProperty(String name, String value) {
-        mAdapterProperties.put(name, value);
     }
 
     public synchronized boolean setName(String name) {
@@ -1154,8 +796,8 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean setScanMode(int mode, int duration) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS,
                                                 "Need WRITE_SECURE_SETTINGS permission");
-        boolean pairable = false;
-        boolean discoverable = false;
+        boolean pairable;
+        boolean discoverable;
 
         switch (mode) {
         case BluetoothAdapter.SCAN_MODE_NONE:
@@ -1183,14 +825,27 @@ public class BluetoothService extends IBluetooth.Stub {
 
     /*package*/ synchronized String getProperty(String name) {
         if (!isEnabledInternal()) return null;
-        return getPropertyInternal(name);
+        return mAdapterProperties.getProperty(name);
     }
 
-    /*package*/ synchronized String getPropertyInternal(String name) {
-        if (!mAdapterProperties.isEmpty())
-            return mAdapterProperties.get(name);
-        getAllProperties();
-        return mAdapterProperties.get(name);
+    BluetoothAdapterProperties getAdapterProperties() {
+        return mAdapterProperties;
+    }
+
+    BluetoothDeviceProperties getDeviceProperties() {
+        return mDeviceProperties;
+    }
+
+    boolean isRemoteDeviceInCache(String address) {
+        return mDeviceProperties.isInCache(address);
+    }
+
+    void setRemoteDeviceProperty(String address, String name, String value) {
+        mDeviceProperties.setProperty(address, name, value);
+    }
+
+    void updateRemoteDevicePropertiesCache(String address) {
+        mDeviceProperties.updateCache(address);
     }
 
     public synchronized String getAddress() {
@@ -1239,7 +894,7 @@ public class BluetoothService extends IBluetooth.Stub {
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return null;
         }
-        return getRemoteDeviceProperty(address, "Name");
+        return mDeviceProperties.getProperty(address, "Name");
     }
 
     /**
@@ -1305,7 +960,7 @@ public class BluetoothService extends IBluetooth.Stub {
         address = address.toUpperCase();
 
         if (mBondState.getPendingOutgoingBonding() != null) {
-            log("Ignoring createBond(): another device is bonding");
+            Log.d(TAG, "Ignoring createBond(): another device is bonding");
             // a different device is currently bonding, fail
             return false;
         }
@@ -1314,13 +969,13 @@ public class BluetoothService extends IBluetooth.Stub {
         // pairing exponential back-off attempts.
         if (!mBondState.isAutoPairingAttemptsInProgress(address) &&
                 mBondState.getBondState(address) != BluetoothDevice.BOND_NONE) {
-            log("Ignoring createBond(): this device is already bonding or bonded");
+            Log.d(TAG, "Ignoring createBond(): this device is already bonding or bonded");
             return false;
         }
 
         if (address.equals(mDockAddress)) {
             if (!writeDockPin()) {
-                log("Error while writing Pin for the dock");
+                Log.e(TAG, "Error while writing Pin for the dock");
                 return false;
             }
         }
@@ -1364,8 +1019,8 @@ public class BluetoothService extends IBluetooth.Stub {
         Pair <byte[], byte[]> value = new Pair<byte[], byte[]>(hash, randomizer);
 
         if (DBG) {
-            log("Setting out of band data for:" + address + ":" +
-              Arrays.toString(hash) + ":" + Arrays.toString(randomizer));
+            Log.d(TAG, "Setting out of band data for: " + address + ":" +
+                  Arrays.toString(hash) + ":" + Arrays.toString(randomizer));
         }
 
         mDeviceOobData.put(address, value);
@@ -1453,7 +1108,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     public synchronized boolean isBluetoothDock(String address) {
         SharedPreferences sp = mContext.getSharedPreferences(SHARED_PREFERENCES_NAME,
-                mContext.MODE_PRIVATE);
+                Context.MODE_PRIVATE);
 
         return sp.contains(SHARED_PREFERENCE_DOCK_ADDRESS + address);
     }
@@ -1463,85 +1118,6 @@ public class BluetoothService extends IBluetooth.Stub {
 
         String objectPath = getObjectPathFromAddress(address);
         return (String [])getDevicePropertiesNative(objectPath);
-    }
-
-    /*package*/ synchronized String getRemoteDeviceProperty(String address, String property) {
-        Map<String, String> properties = mDeviceProperties.get(address);
-        if (properties != null) {
-            return properties.get(property);
-        } else {
-            // Query for remote device properties, again.
-            // We will need to reload the cache when we switch Bluetooth on / off
-            // or if we crash.
-            if (updateRemoteDevicePropertiesCache(address))
-                return getRemoteDeviceProperty(address, property);
-        }
-        Log.e(TAG, "getRemoteDeviceProperty: " + property + " not present: " + address);
-        return null;
-    }
-
-    /* package */ synchronized boolean updateRemoteDevicePropertiesCache(String address) {
-        String[] propValues = getRemoteDeviceProperties(address);
-        if (propValues != null) {
-            addRemoteDeviceProperties(address, propValues);
-            return true;
-        }
-        return false;
-    }
-
-    /* package */ synchronized void addRemoteDeviceProperties(String address, String[] properties) {
-        /*
-         * We get a DeviceFound signal every time RSSI changes or name changes.
-         * Don't create a new Map object every time */
-        Map<String, String> propertyValues = mDeviceProperties.get(address);
-        if (propertyValues == null) {
-            propertyValues = new HashMap<String, String>();
-        }
-
-        for (int i = 0; i < properties.length; i++) {
-            String name = properties[i];
-            String newValue = null;
-            int len;
-            if (name == null) {
-                Log.e(TAG, "Error: Remote Device Property at index" + i + "is null");
-                continue;
-            }
-            if (name.equals("UUIDs") || name.equals("Nodes")) {
-                StringBuilder str = new StringBuilder();
-                len = Integer.valueOf(properties[++i]);
-                for (int j = 0; j < len; j++) {
-                    str.append(properties[++i]);
-                    str.append(",");
-                }
-                if (len > 0) {
-                    newValue = str.toString();
-                }
-            } else {
-                newValue = properties[++i];
-            }
-
-            propertyValues.put(name, newValue);
-        }
-        mDeviceProperties.put(address, propertyValues);
-
-        // We have added a new remote device or updated its properties.
-        // Also update the serviceChannel cache.
-        updateDeviceServiceChannelCache(address);
-    }
-
-    /* package */ void removeRemoteDeviceProperties(String address) {
-        mDeviceProperties.remove(address);
-    }
-
-    /* package */ synchronized void setRemoteDeviceProperty(String address, String name,
-                                                              String value) {
-        Map <String, String> propVal = mDeviceProperties.get(address);
-        if (propVal != null) {
-            propVal.put(name, value);
-            mDeviceProperties.put(address, propVal);
-        } else {
-            Log.e(TAG, "setRemoteDeviceProperty for a device not in cache:" + address);
-        }
     }
 
     /**
@@ -1558,8 +1134,8 @@ public class BluetoothService extends IBluetooth.Stub {
 
         if (!isEnabledInternal()) return false;
 
-        return setDevicePropertyBooleanNative(getObjectPathFromAddress(address), "Trusted",
-                value ? 1 : 0);
+        return setDevicePropertyBooleanNative(
+                getObjectPathFromAddress(address), "Trusted", value ? 1 : 0);
     }
 
     /**
@@ -1567,7 +1143,7 @@ public class BluetoothService extends IBluetooth.Stub {
      * Note: this value may be
      * retrieved from cache if we retrieved the data before *
      *
-     * @return boolean to indicate trust or untrust state
+     * @return boolean to indicate trusted or untrusted state
      */
     public synchronized boolean getTrustState(String address) {
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
@@ -1575,11 +1151,11 @@ public class BluetoothService extends IBluetooth.Stub {
             return false;
         }
 
-        String val = getRemoteDeviceProperty(address, "Trusted");
+        String val = mDeviceProperties.getProperty(address, "Trusted");
         if (val == null) {
             return false;
         } else {
-            return val.equals("true") ? true : false;
+            return val.equals("true");
         }
     }
 
@@ -1598,7 +1174,7 @@ public class BluetoothService extends IBluetooth.Stub {
             mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
             return BluetoothClass.ERROR;
         }
-        String val = getRemoteDeviceProperty(address, "Class");
+        String val = mDeviceProperties.getProperty(address, "Class");
         if (val == null)
             return BluetoothClass.ERROR;
         else {
@@ -1620,8 +1196,8 @@ public class BluetoothService extends IBluetooth.Stub {
         return getUuidFromCache(address);
     }
 
-    private ParcelUuid[] getUuidFromCache(String address) {
-        String value = getRemoteDeviceProperty(address, "UUIDs");
+    ParcelUuid[] getUuidFromCache(String address) {
+        String value = mDeviceProperties.getProperty(address, "UUIDs");
         if (value == null) return null;
 
         String[] uuidStrings = null;
@@ -1672,7 +1248,7 @@ public class BluetoothService extends IBluetooth.Stub {
         boolean ret;
         // Just do the SDP if the device is already  created and UUIDs are not
         // NULL, else create the device and then do SDP.
-        if (isRemoteDeviceInCache(address) && getRemoteUuids(address) != null) {
+        if (mDeviceProperties.isInCache(address) && getRemoteUuids(address) != null) {
             String path = getObjectPathFromAddress(address);
             if (path == null) return false;
 
@@ -1712,7 +1288,7 @@ public class BluetoothService extends IBluetooth.Stub {
         }
         // Check if we are recovering from a crash.
         if (mDeviceProperties.isEmpty()) {
-            if (!updateRemoteDevicePropertiesCache(address))
+            if (mDeviceProperties.updateCache(address) == null)
                 return -1;
         }
 
@@ -1833,13 +1409,13 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     /*package*/ void updateDeviceServiceChannelCache(String address) {
-        ParcelUuid[] deviceUuids = getRemoteUuids(address);
+        if (DBG) Log.d(TAG, "updateDeviceServiceChannelCache(" + address + ")");
+
         // We are storing the rfcomm channel numbers only for the uuids
         // we are interested in.
-        int channel;
-        if (DBG) log("updateDeviceServiceChannelCache(" + address + ")");
+        ParcelUuid[] deviceUuids = getRemoteUuids(address);
 
-        ArrayList<ParcelUuid> applicationUuids = new ArrayList();
+        ArrayList<ParcelUuid> applicationUuids = new ArrayList<ParcelUuid>();
 
         synchronized (this) {
             for (RemoteService service : mUuidCallbackTracker.keySet()) {
@@ -1849,24 +1425,22 @@ public class BluetoothService extends IBluetooth.Stub {
             }
         }
 
-        Map <ParcelUuid, Integer> value = new HashMap<ParcelUuid, Integer>();
+        Map <ParcelUuid, Integer> uuidToChannelMap = new HashMap<ParcelUuid, Integer>();
 
         // Retrieve RFCOMM channel for default uuids
         for (ParcelUuid uuid : RFCOMM_UUIDS) {
             if (BluetoothUuid.isUuidPresent(deviceUuids, uuid)) {
-                channel = getDeviceServiceChannelNative(getObjectPathFromAddress(address),
-                        uuid.toString(), 0x0004);
-                if (DBG) log("\tuuid(system): " + uuid + " " + channel);
-                value.put(uuid, channel);
+                int channel = getDeviceServiceChannelForUuid(address, uuid);
+                uuidToChannelMap.put(uuid, channel);
+                if (DBG) Log.d(TAG, "\tuuid(system): " + uuid + " " + channel);
             }
         }
         // Retrieve RFCOMM channel for application requested uuids
         for (ParcelUuid uuid : applicationUuids) {
             if (BluetoothUuid.isUuidPresent(deviceUuids, uuid)) {
-                channel = getDeviceServiceChannelNative(getObjectPathFromAddress(address),
-                        uuid.toString(), 0x0004);
-                if (DBG) log("\tuuid(application): " + uuid + " " + channel);
-                value.put(uuid, channel);
+                int channel = getDeviceServiceChannelForUuid(address, uuid);
+                uuidToChannelMap.put(uuid, channel);
+                if (DBG) Log.d(TAG, "\tuuid(application): " + uuid + " " + channel);
             }
         }
 
@@ -1876,13 +1450,11 @@ public class BluetoothService extends IBluetooth.Stub {
                     iter.hasNext();) {
                 RemoteService service = iter.next();
                 if (service.address.equals(address)) {
-                    channel = -1;
-                    if (value.get(service.uuid) != null) {
-                        channel = value.get(service.uuid);
-                    }
-                    if (channel != -1) {
-                        if (DBG) log("Making callback for " + service.uuid + " with result " +
-                                channel);
+                    if (uuidToChannelMap.containsKey(service.uuid)) {
+                        int channel = uuidToChannelMap.get(service.uuid);
+
+                        if (DBG) Log.d(TAG, "Making callback for " + service.uuid +
+                                    " with result " + channel);
                         IBluetoothCallback callback = mUuidCallbackTracker.get(service);
                         if (callback != null) {
                             try {
@@ -1896,8 +1468,14 @@ public class BluetoothService extends IBluetooth.Stub {
             }
 
             // Update cache
-            mDeviceServiceChannelCache.put(address, value);
+            mDeviceServiceChannelCache.put(address, uuidToChannelMap);
         }
+    }
+
+    private int getDeviceServiceChannelForUuid(String address,
+            ParcelUuid uuid) {
+        return getDeviceServiceChannelNative(getObjectPathFromAddress(address),
+                uuid.toString(), 0x0004);
     }
 
     /**
@@ -1921,7 +1499,7 @@ public class BluetoothService extends IBluetooth.Stub {
         int handle = addRfcommServiceRecordNative(serviceName,
                 uuid.getUuid().getMostSignificantBits(), uuid.getUuid().getLeastSignificantBits(),
                 (short)channel);
-        if (DBG) log("new handle " + Integer.toHexString(handle));
+        if (DBG) Log.d(TAG, "new handle " + Integer.toHexString(handle));
         if (handle == -1) {
             return -1;
         }
@@ -1944,8 +1522,8 @@ public class BluetoothService extends IBluetooth.Stub {
         Integer handleInt = new Integer(handle);
         Integer owner = mServiceRecordToPid.get(handleInt);
         if (owner != null && pid == owner.intValue()) {
-            if (DBG) log("Removing service record " + Integer.toHexString(handle) + " for pid " +
-                    pid);
+            if (DBG) Log.d(TAG, "Removing service record " +
+                Integer.toHexString(handle) + " for pid " + pid);
             mServiceRecordToPid.remove(handleInt);
             removeServiceRecordNative(handle);
         }
@@ -1960,7 +1538,7 @@ public class BluetoothService extends IBluetooth.Stub {
         }
         public void binderDied() {
             synchronized (BluetoothService.this) {
-                if (DBG) log("Tracked app " + pid + " died");
+                if (DBG) Log.d(TAG, "Tracked app " + pid + " died");
                 checkAndRemoveRecord(handle, pid);
             }
         }
@@ -2033,10 +1611,7 @@ public class BluetoothService extends IBluetooth.Stub {
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
         intent.putExtra(BluetoothDevice.EXTRA_UUID, uuid);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
-
-        if (mUuidIntentTracker.contains(address))
-            mUuidIntentTracker.remove(address);
-
+        mUuidIntentTracker.remove(address);
     }
 
     /*package*/ synchronized void makeServiceChannelCallbacks(String address) {
@@ -2044,8 +1619,8 @@ public class BluetoothService extends IBluetooth.Stub {
                 iter.hasNext();) {
             RemoteService service = iter.next();
             if (service.address.equals(address)) {
-                if (DBG) log("Cleaning up failed UUID channel lookup: " + service.address +
-                        " " + service.uuid);
+                if (DBG) Log.d(TAG, "Cleaning up failed UUID channel lookup: "
+                    + service.address + " " + service.uuid);
                 IBluetoothCallback callback = mUuidCallbackTracker.get(service);
                 if (callback != null) {
                     try {
@@ -2060,18 +1635,9 @@ public class BluetoothService extends IBluetooth.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        switch(mBluetoothState) {
-        case BluetoothAdapter.STATE_OFF:
-            pw.println("Bluetooth OFF\n");
+        dumpBluetoothState(pw);
+        if (mBluetoothState != BluetoothAdapter.STATE_ON) {
             return;
-        case BluetoothAdapter.STATE_TURNING_ON:
-            pw.println("Bluetooth TURNING ON\n");
-            return;
-        case BluetoothAdapter.STATE_TURNING_OFF:
-            pw.println("Bluetooth TURNING OFF\n");
-            return;
-        case BluetoothAdapter.STATE_ON:
-            pw.println("Bluetooth ON\n");
         }
 
         pw.println("mIsAirplaneSensitive = " + mIsAirplaneSensitive);
@@ -2088,58 +1654,15 @@ public class BluetoothService extends IBluetooth.Stub {
         mAdapter.getProfileProxy(mContext,
                 mBluetoothProfileServiceListener, BluetoothProfile.PAN);
 
-        pw.println("\n--Known devices--");
-        for (String address : mDeviceProperties.keySet()) {
-            int bondState = mBondState.getBondState(address);
-            pw.printf("%s %10s (%d) %s\n", address,
-                       toBondStateString(bondState),
-                       mBondState.getAttempt(address),
-                       getRemoteName(address));
-
-            Map<ParcelUuid, Integer> uuidChannels = mDeviceServiceChannelCache.get(address);
-            if (uuidChannels == null) {
-                pw.println("\tuuids = null");
-            } else {
-                for (ParcelUuid uuid : uuidChannels.keySet()) {
-                    Integer channel = uuidChannels.get(uuid);
-                    if (channel == null) {
-                        pw.println("\t" + uuid);
-                    } else {
-                        pw.println("\t" + uuid + " RFCOMM channel = " + channel);
-                    }
-                }
-            }
-            for (RemoteService service : mUuidCallbackTracker.keySet()) {
-                if (service.address.equals(address)) {
-                    pw.println("\tPENDING CALLBACK: " + service.uuid);
-                }
-            }
-        }
-
-        String value = getProperty("Devices");
-        String[] devicesObjectPath = null;
-        if (value != null) {
-            devicesObjectPath = value.split(",");
-        }
-        pw.println("\n--ACL connected devices--");
-        if (devicesObjectPath != null) {
-            for (String device : devicesObjectPath) {
-                pw.println(getAddressFromObjectPath(device));
-            }
-        }
-
-        dumpHeadsetProfile(pw);
+        dumpKnownDevices(pw);
+        dumpAclConnectedDevices(pw);
+        dumpHeadsetService(pw);
         dumpInputDeviceProfile(pw);
         dumpPanProfile(pw);
-
-        pw.println("\n--Application Service Records--");
-        for (Integer handle : mServiceRecordToPid.keySet()) {
-            Integer pid = mServiceRecordToPid.get(handle);
-            pw.println("\tpid " + pid + " handle " + Integer.toHexString(handle));
-        }
+        dumpApplicationServiceRecords(pw);
     }
 
-    private void dumpHeadsetProfile(PrintWriter pw) {
+    private void dumpHeadsetService(PrintWriter pw) {
         pw.println("\n--Headset Service--");
         if (mBluetoothHeadset != null) {
             List<BluetoothDevice> deviceList = mBluetoothHeadset.getConnectedDevices();
@@ -2147,22 +1670,8 @@ public class BluetoothService extends IBluetooth.Stub {
                 pw.println("No headsets connected");
             } else {
                 BluetoothDevice device = deviceList.get(0);
-                pw.println("getConnectedDevices[0] = " + device);
-
-                switch (mBluetoothHeadset.getConnectionState(device)) {
-                    case BluetoothHeadset.STATE_CONNECTING:
-                        pw.println("getConnectionState() = STATE_CONNECTING");
-                        break;
-                    case BluetoothHeadset.STATE_CONNECTED:
-                        pw.println("getConnectionState() = STATE_CONNECTED");
-                        break;
-                    case BluetoothHeadset.STATE_DISCONNECTING:
-                        pw.println("getConnectionState() = STATE_DISCONNECTING");
-                        break;
-                    case BluetoothHeadset.STATE_AUDIO_CONNECTED:
-                        pw.println("getConnectionState() = STATE_AUDIO_CONNECTED");
-                        break;
-                }
+                pw.println("\ngetConnectedDevices[0] = " + device);
+                dumpHeadsetConnectionState(pw, device);
                 pw.println("getBatteryUsageHint() = " +
                              mBluetoothHeadset.getBatteryUsageHint(device));
             }
@@ -2248,7 +1757,92 @@ public class BluetoothService extends IBluetooth.Stub {
                 pw.println(device);
             }
         }
+    }
+
+    private void dumpHeadsetConnectionState(PrintWriter pw,
+            BluetoothDevice device) {
+        switch (mBluetoothHeadset.getConnectionState(device)) {
+            case BluetoothHeadset.STATE_CONNECTING:
+                pw.println("getConnectionState() = STATE_CONNECTING");
+                break;
+            case BluetoothHeadset.STATE_CONNECTED:
+                pw.println("getConnectionState() = STATE_CONNECTED");
+                break;
+            case BluetoothHeadset.STATE_DISCONNECTING:
+                pw.println("getConnectionState() = STATE_DISCONNECTING");
+                break;
+            case BluetoothHeadset.STATE_AUDIO_CONNECTED:
+                pw.println("getConnectionState() = STATE_AUDIO_CONNECTED");
+                break;
+        }
+    }
+
+    private void dumpApplicationServiceRecords(PrintWriter pw) {
+        pw.println("\n--Application Service Records--");
+        for (Integer handle : mServiceRecordToPid.keySet()) {
+            Integer pid = mServiceRecordToPid.get(handle);
+            pw.println("\tpid " + pid + " handle " + Integer.toHexString(handle));
+        }
         mAdapter.closeProfileProxy(BluetoothProfile.PAN, mBluetoothHeadset);
+    }
+
+    private void dumpAclConnectedDevices(PrintWriter pw) {
+        String[] devicesObjectPath = getKnownDevices();
+        pw.println("\n--ACL connected devices--");
+        if (devicesObjectPath != null) {
+            for (String device : devicesObjectPath) {
+                pw.println(getAddressFromObjectPath(device));
+            }
+        }
+    }
+
+    private void dumpKnownDevices(PrintWriter pw) {
+        pw.println("\n--Known devices--");
+        for (String address : mDeviceProperties.keySet()) {
+            int bondState = mBondState.getBondState(address);
+            pw.printf("%s %10s (%d) %s\n", address,
+                       toBondStateString(bondState),
+                       mBondState.getAttempt(address),
+                       getRemoteName(address));
+
+            Map<ParcelUuid, Integer> uuidChannels = mDeviceServiceChannelCache.get(address);
+            if (uuidChannels == null) {
+                pw.println("\tuuids = null");
+            } else {
+                for (ParcelUuid uuid : uuidChannels.keySet()) {
+                    Integer channel = uuidChannels.get(uuid);
+                    if (channel == null) {
+                        pw.println("\t" + uuid);
+                    } else {
+                        pw.println("\t" + uuid + " RFCOMM channel = " + channel);
+                    }
+                }
+            }
+            for (RemoteService service : mUuidCallbackTracker.keySet()) {
+                if (service.address.equals(address)) {
+                    pw.println("\tPENDING CALLBACK: " + service.uuid);
+                }
+            }
+        }
+    }
+
+    private void dumpBluetoothState(PrintWriter pw) {
+        switch(mBluetoothState) {
+        case BluetoothAdapter.STATE_OFF:
+            pw.println("Bluetooth OFF\n");
+            break;
+        case BluetoothAdapter.STATE_TURNING_ON:
+            pw.println("Bluetooth TURNING ON\n");
+            break;
+        case BluetoothAdapter.STATE_TURNING_OFF:
+            pw.println("Bluetooth TURNING OFF\n");
+            break;
+        case BluetoothAdapter.STATE_ON:
+            pw.println("Bluetooth ON\n");
+            break;
+        default:
+            pw.println("Bluetooth UNKNOWN STATE " + mBluetoothState);
+        }
     }
 
     private BluetoothProfile.ServiceListener mBluetoothProfileServiceListener =
@@ -2295,7 +1889,7 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     /*package*/ String getAddressFromObjectPath(String objectPath) {
-        String adapterObjectPath = getPropertyInternal("ObjectPath");
+        String adapterObjectPath = mAdapterProperties.getObjectPath();
         if (adapterObjectPath == null || objectPath == null) {
             Log.e(TAG, "getAddressFromObjectPath: AdapterObjectPath:" + adapterObjectPath +
                     "  or deviceObjectPath:" + objectPath + " is null");
@@ -2315,7 +1909,7 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     /*package*/ String getObjectPathFromAddress(String address) {
-        String path = getPropertyInternal("ObjectPath");
+        String path = mAdapterProperties.getObjectPath();
         if (path == null) {
             Log.e(TAG, "Error: Object Path is null");
             return null;
@@ -2328,7 +1922,7 @@ public class BluetoothService extends IBluetooth.Stub {
         String path = getObjectPathFromAddress(address);
         boolean result = setLinkTimeoutNative(path, num_slots);
 
-        if (!result) log("Set Link Timeout to:" + num_slots + " slots failed");
+        if (!result) Log.d(TAG, "Set Link Timeout to " + num_slots + " slots failed");
     }
 
     /**** Handlers for PAN  Profile ****/
@@ -2448,10 +2042,6 @@ public class BluetoothService extends IBluetooth.Stub {
         mBluetoothInputProfileHandler.handleInputDevicePropertyChange(address, connected);
     }
 
-    /*package*/ boolean isRemoteDeviceInCache(String address) {
-        return (mDeviceProperties.get(address) != null);
-    }
-
     public boolean connectHeadset(String address) {
         if (getBondState(address) != BluetoothDevice.BOND_BONDED) return false;
 
@@ -2508,7 +2098,7 @@ public class BluetoothService extends IBluetooth.Stub {
         return false;
     }
 
-    private BluetoothDeviceProfileState addProfileState(String address) {
+    BluetoothDeviceProfileState addProfileState(String address) {
         BluetoothDeviceProfileState state = mDeviceProfileState.get(address);
         if (state != null) return state;
 
@@ -2518,26 +2108,47 @@ public class BluetoothService extends IBluetooth.Stub {
         return state;
     }
 
-    private void removeProfileState(String address) {
+    void removeProfileState(String address) {
         mDeviceProfileState.remove(address);
     }
 
+    synchronized String[] getKnownDevices() {
+        String[] bonds = null;
+        String val = getProperty("Devices");
+        if (val != null) {
+            bonds = val.split(",");
+        }
+        return bonds;
+    }
+
     private void initProfileState() {
-        String []bonds = null;
-        String val = getPropertyInternal("Devices");
+        String[] bonds = null;
+        String val = mAdapterProperties.getProperty("Devices");
         if (val != null) {
             bonds = val.split(",");
         }
         if (bonds == null) {
             return;
         }
-
         for (String path : bonds) {
             String address = getAddressFromObjectPath(path);
             BluetoothDeviceProfileState state = addProfileState(address);
-            Message msg = new Message();
-            msg.what = BluetoothDeviceProfileState.AUTO_CONNECT_PROFILES;
-            state.sendMessage(msg);
+        }
+    }
+
+    private void autoConnect() {
+        String[] bonds = getKnownDevices();
+        if (bonds == null) {
+            return;
+        }
+        for (String path : bonds) {
+            String address = getAddressFromObjectPath(path);
+            BluetoothDeviceProfileState state = mDeviceProfileState.get(address);
+            if (state != null) {
+                Message msg = new Message();
+                msg.what = BluetoothDeviceProfileState.AUTO_CONNECT_PROFILES;
+                state.sendMessage(msg);
+            }
         }
     }
 
@@ -2585,78 +2196,91 @@ public class BluetoothService extends IBluetooth.Stub {
 
     public synchronized void sendConnectionStateChange(BluetoothDevice device, int state,
                                                         int prevState) {
-        if (updateCountersAndCheckForConnectionStateChange(device, state, prevState)) {
-            state = translateToAdapterConnectionState(state);
-            prevState = translateToAdapterConnectionState(prevState);
+        // Since this is a binder call check if Bluetooth is on still
+        if (mBluetoothState == BluetoothAdapter.STATE_OFF) return;
+
+        if (updateCountersAndCheckForConnectionStateChange(state, prevState)) {
+            if (!validateProfileConnectionState(state) ||
+                    !validateProfileConnectionState(prevState)) {
+                // Previously, an invalid state was broadcast anyway,
+                // with the invalid state converted to -1 in the intent.
+                // Better to log an error and not send an intent with
+                // invalid contents or set mAdapterConnectionState to -1.
+                Log.e(TAG, "Error in sendConnectionStateChange: "
+                        + "prevState " + prevState + " state " + state);
+                return;
+            }
 
             mAdapterConnectionState = state;
 
             Intent intent = new Intent(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
             intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
-            intent.putExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, state);
-            intent.putExtra(BluetoothAdapter.EXTRA_PREVIOUS_CONNECTION_STATE, prevState);
+            intent.putExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
+                    convertToAdapterState(state));
+            intent.putExtra(BluetoothAdapter.EXTRA_PREVIOUS_CONNECTION_STATE,
+                    convertToAdapterState(prevState));
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-            log("CONNECTION_STATE_CHANGE: " + device + ": " + prevState + "-> " + state);
+            Log.d(TAG, "CONNECTION_STATE_CHANGE: " + device + ": "
+                    + prevState + " -> " + state);
         }
     }
 
-    private int translateToAdapterConnectionState(int state) {
+    private boolean validateProfileConnectionState(int state) {
+        return (state == BluetoothProfile.STATE_DISCONNECTED ||
+                state == BluetoothProfile.STATE_CONNECTING ||
+                state == BluetoothProfile.STATE_CONNECTED ||
+                state == BluetoothProfile.STATE_DISCONNECTING);
+    }
+
+    private int convertToAdapterState(int state) {
         switch (state) {
+            case BluetoothProfile.STATE_DISCONNECTED:
+                return BluetoothAdapter.STATE_DISCONNECTED;
+            case BluetoothProfile.STATE_DISCONNECTING:
+                return BluetoothAdapter.STATE_DISCONNECTING;
+            case BluetoothProfile.STATE_CONNECTED:
+                return BluetoothAdapter.STATE_CONNECTED;
             case BluetoothProfile.STATE_CONNECTING:
                 return BluetoothAdapter.STATE_CONNECTING;
-            case BluetoothProfile.STATE_CONNECTED:
-              return BluetoothAdapter.STATE_CONNECTED;
-            case BluetoothProfile.STATE_DISCONNECTING:
-              return BluetoothAdapter.STATE_DISCONNECTING;
-            case BluetoothProfile.STATE_DISCONNECTED:
-              return BluetoothAdapter.STATE_DISCONNECTED;
-            default:
-              Log.e(TAG, "Error in getAdapterConnectionState");
-              return -1;
         }
+        Log.e(TAG, "Error in convertToAdapterState");
+        return -1;
     }
 
-    private boolean updateCountersAndCheckForConnectionStateChange(BluetoothDevice device,
-                                                                   int state,
-                                                                   int prevState) {
+    private boolean updateCountersAndCheckForConnectionStateChange(int state, int prevState) {
+        switch (prevState) {
+            case BluetoothProfile.STATE_CONNECTING:
+                mProfilesConnecting--;
+                break;
+
+            case BluetoothProfile.STATE_CONNECTED:
+                mProfilesConnected--;
+                break;
+
+            case BluetoothProfile.STATE_DISCONNECTING:
+                mProfilesDisconnecting--;
+                break;
+        }
+
         switch (state) {
             case BluetoothProfile.STATE_CONNECTING:
                 mProfilesConnecting++;
-                if (prevState == BluetoothAdapter.STATE_DISCONNECTING) mProfilesDisconnecting--;
-                if (mProfilesConnected > 0 || mProfilesConnecting > 1) return false;
+                return (mProfilesConnected == 0 && mProfilesConnecting == 1);
 
-                break;
             case BluetoothProfile.STATE_CONNECTED:
-                if (prevState == BluetoothAdapter.STATE_CONNECTING) mProfilesConnecting--;
-                if (prevState == BluetoothAdapter.STATE_DISCONNECTING) mProfilesDisconnecting--;
-
                 mProfilesConnected++;
+                return (mProfilesConnected == 1);
 
-                if (mProfilesConnected > 1) return false;
-                break;
             case BluetoothProfile.STATE_DISCONNECTING:
                 mProfilesDisconnecting++;
-                mProfilesConnected--;
+                return (mProfilesConnected == 0 && mProfilesDisconnecting == 1);
 
-                if (mProfilesConnected > 0 || mProfilesDisconnecting > 1) return false;
-
-                break;
             case BluetoothProfile.STATE_DISCONNECTED:
-                if (prevState == BluetoothAdapter.STATE_CONNECTING) mProfilesConnecting--;
-                if (prevState == BluetoothAdapter.STATE_DISCONNECTING) mProfilesDisconnecting--;
+                return (mProfilesConnected == 0 && mProfilesConnecting == 0);
 
-                if (prevState == BluetoothAdapter.STATE_CONNECTED) {
-                    mProfilesConnected--;
-                }
-
-                if (mProfilesConnected  > 0 || mProfilesConnecting > 0) return false;
-                break;
+            default:
+                return true;
         }
-        return true;
-    }
-
-    private static void log(String msg) {
-        Log.d(TAG, msg);
     }
 
     private native static void classInitNative();
@@ -2664,13 +2288,13 @@ public class BluetoothService extends IBluetooth.Stub {
     private native boolean setupNativeDataNative();
     private native boolean tearDownNativeDataNative();
     private native void cleanupNativeDataNative();
-    private native String getAdapterPathNative();
+    /*package*/ native String getAdapterPathNative();
 
     private native int isEnabledNative();
     private native int enableNative();
     private native int disableNative();
 
-    private native Object[] getAdapterPropertiesNative();
+    /*package*/ native Object[] getAdapterPropertiesNative();
     private native Object[] getDevicePropertiesNative(String objectPath);
     private native boolean setAdapterPropertyStringNative(String key, String value);
     private native boolean setAdapterPropertyIntegerNative(String key, int value);

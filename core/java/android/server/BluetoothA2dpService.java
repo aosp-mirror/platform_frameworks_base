@@ -16,7 +16,7 @@
 
 /**
  * TODO: Move this to services.jar
- * and make the contructor package private again.
+ * and make the constructor package private again.
  * @hide
  */
 
@@ -56,8 +56,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     private static final String BLUETOOTH_ENABLED = "bluetooth_enabled";
 
     private static final String PROPERTY_STATE = "State";
-
-    private static int mSinkCount;
 
     private final Context mContext;
     private final IntentFilter mIntentFilter;
@@ -128,7 +126,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         }
     };
 
-
     private boolean isPhoneDocked(BluetoothDevice device) {
         // This works only because these broadcast intents are "sticky"
         Intent i = mContext.registerReceiver(null, new IntentFilter(Intent.ACTION_DOCK_EVENT));
@@ -184,7 +181,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         }
     }
 
-    private int convertBluezSinkStringtoState(String value) {
+    private int convertBluezSinkStringToState(String value) {
         if (value.equalsIgnoreCase("disconnected"))
             return BluetoothA2dp.STATE_DISCONNECTED;
         if (value.equalsIgnoreCase("connecting"))
@@ -204,7 +201,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         return false;
     }
 
-    private synchronized boolean addAudioSink (BluetoothDevice device) {
+    private synchronized boolean addAudioSink(BluetoothDevice device) {
         String path = mBluetoothService.getObjectPathFromAddress(device.getAddress());
         String propValues[] = (String []) getSinkPropertiesNative(path);
         if (propValues == null) {
@@ -215,7 +212,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         // Properties are name-value pairs
         for (int i = 0; i < propValues.length; i+=2) {
             if (propValues[i].equals(PROPERTY_STATE)) {
-                state = new Integer(convertBluezSinkStringtoState(propValues[i+1]));
+                state = new Integer(convertBluezSinkStringToState(propValues[i+1]));
                 break;
             }
         }
@@ -226,7 +223,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
 
     private synchronized void onBluetoothEnable() {
         String devices = mBluetoothService.getProperty("Devices");
-        mSinkCount = 0;
         if (devices != null) {
             String [] paths = devices.split(",");
             for (String path: paths) {
@@ -274,18 +270,18 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     private synchronized boolean isConnectSinkFeasible(BluetoothDevice device) {
         if (!mBluetoothService.isEnabled() || !isSinkDevice(device) ||
                 getPriority(device) == BluetoothA2dp.PRIORITY_OFF) {
-                return false;
-            }
+            return false;
+        }
 
-            if (mAudioDevices.get(device) == null && !addAudioSink(device)) {
-                return false;
-            }
+        if (mAudioDevices.get(device) == null && !addAudioSink(device)) {
+            return false;
+        }
 
-            String path = mBluetoothService.getObjectPathFromAddress(device.getAddress());
-            if (path == null) {
-                return false;
-            }
-            return true;
+        String path = mBluetoothService.getObjectPathFromAddress(device.getAddress());
+        if (path == null) {
+            return false;
+        }
+        return true;
     }
 
     public synchronized boolean isA2dpPlaying(BluetoothDevice device) {
@@ -467,7 +463,15 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                 Settings.Secure.getBluetoothA2dpSinkPriorityKey(device.getAddress()), priority);
     }
 
-    private synchronized void onSinkPropertyChanged(String path, String []propValues) {
+    /**
+     * Called by native code on a PropertyChanged signal from
+     * org.bluez.AudioSink.
+     *
+     * @param path the object path for the changed device
+     * @param propValues a string array containing the key and one or more
+     *  values.
+     */
+    private synchronized void onSinkPropertyChanged(String path, String[] propValues) {
         if (!mBluetoothService.isEnabled()) {
             return;
         }
@@ -482,7 +486,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         BluetoothDevice device = mAdapter.getRemoteDevice(address);
 
         if (name.equals(PROPERTY_STATE)) {
-            int state = convertBluezSinkStringtoState(propValues[1]);
+            int state = convertBluezSinkStringToState(propValues[1]);
             log("A2DP: onSinkPropertyChanged newState is: " + state + "mPlayingA2dpDevice: " + mPlayingA2dpDevice);
 
             if (mAudioDevices.get(device) == null) {
@@ -508,12 +512,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
 
     private void handleSinkStateChange(BluetoothDevice device, int prevState, int state) {
         if (state != prevState) {
-            if (state == BluetoothA2dp.STATE_DISCONNECTED ||
-                    state == BluetoothA2dp.STATE_DISCONNECTING) {
-                mSinkCount--;
-            } else if (state == BluetoothA2dp.STATE_CONNECTED) {
-                mSinkCount ++;
-            }
             mAudioDevices.put(device, state);
 
             checkSinkSuspendState(state);
@@ -577,6 +575,13 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         return result;
     }
 
+    /**
+     * Called by native code for the async response to a Connect
+     * method call to org.bluez.AudioSink.
+     *
+     * @param deviceObjectPath the object path for the connecting device
+     * @param result true on success; false on error
+     */
     private void onConnectSinkResult(String deviceObjectPath, boolean result) {
         // If the call was a success, ignore we will update the state
         // when we a Sink Property Change
