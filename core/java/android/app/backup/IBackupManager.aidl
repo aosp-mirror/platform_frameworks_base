@@ -17,6 +17,7 @@
 package android.app.backup;
 
 import android.app.backup.IRestoreSession;
+import android.content.Intent;
 
 /**
  * Direct interface to the Backup Manager Service that applications invoke on.  The only
@@ -142,6 +143,27 @@ interface IBackupManager {
      *   the current transport setting and the method returns null.
      */
     String selectBackupTransport(String transport);
+
+    /**
+     * Get the configuration Intent, if any, from the given transport.  Callers must
+     * hold the android.permission.BACKUP permission in order to use this method.
+     *
+     * @param transport The name of the transport to query.
+     * @return An Intent to use with Activity#startActivity() to bring up the configuration
+     *   UI supplied by the transport.  If the transport has no configuration UI, it should
+     *   return {@code null} here.
+     */
+    Intent getConfigurationIntent(String transport);
+
+    /**
+     * Get the destination string supplied by the given transport.  Callers must
+     * hold the android.permission.BACKUP permission in order to use this method.
+     *
+     * @param transport The name of the transport to query.
+     * @return A string describing the current backup destination.  This string is used
+     *   verbatim by the Settings UI as the summary text of the "configure..." item.
+     */
+    String getDestinationString(String transport);
 
     /**
      * Begin a restore session.  Either or both of packageName and transportID
