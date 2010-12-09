@@ -1164,7 +1164,7 @@ status_t StagefrightRecorder::setupVideoEncoder(
         // set appropriate level for the software AVCEncoder.
         if ((width * height >= 921600) // 720p
                 || (videoBitRate >= 20000000)) {
-            enc_meta->setInt32(kKeyVideoLevel, 50);
+            enc_meta->setInt32(kKeyVideoLevel, OMX_VIDEO_AVCLevel5);
         }
     }
 

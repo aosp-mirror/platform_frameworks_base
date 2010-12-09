@@ -72,7 +72,7 @@ CameraSourceTimeLapse::CameraSourceTimeLapse(
       mLastTimeLapseFrameRealTimestampUs(0),
       mSkipCurrentFrame(false) {
 
-    LOGV("starting time lapse mode");
+    LOGD("starting time lapse mode: %lld us", mTimeBetweenTimeLapseFrameCaptureUs);
     mVideoWidth = videoSize.width;
     mVideoHeight = videoSize.height;
 
@@ -116,9 +116,9 @@ void CameraSourceTimeLapse::startQuickReadReturns() {
 }
 
 bool CameraSourceTimeLapse::trySettingPreviewSize(int32_t width, int32_t height) {
+    LOGV("trySettingPreviewSize: %dx%d", width, height);
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
     String8 s = mCamera->getParameters();
-    IPCThreadState::self()->restoreCallingIdentity(token);
 
     CameraParameters params(s);
     Vector<Size> supportedSizes;
@@ -134,17 +134,24 @@ bool CameraSourceTimeLapse::trySettingPreviewSize(int32_t width, int32_t height)
         }
     }
 
+    bool isSuccessful = false;
     if (previewSizeSupported) {
         LOGV("Video size (%d, %d) is a supported preview size", width, height);
         params.setPreviewSize(width, height);
-        CHECK(mCamera->setParameters(params.flatten()));
-        return true;
+        if (mCamera->setParameters(params.flatten()) == OK) {
+            isSuccessful = true;
+        } else {
+            LOGE("Failed to set preview size to %dx%d", width, height);
+            isSuccessful = false;
+        }
     }
 
-    return false;
+    IPCThreadState::self()->restoreCallingIdentity(token);
+    return isSuccessful;
 }
 
 bool CameraSourceTimeLapse::setPictureSizeToClosestSupported(int32_t width, int32_t height) {
+    LOGV("setPictureSizeToClosestSupported: %dx%d", width, height);
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
     String8 s = mCamera->getParameters();
     IPCThreadState::self()->restoreCallingIdentity(token);
@@ -277,7 +284,6 @@ void CameraSourceTimeLapse::startCameraRecording() {
 
         int64_t token = IPCThreadState::self()->clearCallingIdentity();
         String8 s = mCamera->getParameters();
-        IPCThreadState::self()->restoreCallingIdentity(token);
 
         CameraParameters params(s);
         params.setPictureSize(mPictureWidth, mPictureHeight);
@@ -288,6 +294,7 @@ void CameraSourceTimeLapse::startCameraRecording() {
         // disable shutter sound and play the recording sound.
         mCamera->sendCommand(CAMERA_CMD_ENABLE_SHUTTER_SOUND, 0, 0);
         mCamera->sendCommand(CAMERA_CMD_PLAY_RECORDING_SOUND, 0, 0);
+        IPCThreadState::self()->restoreCallingIdentity(token);
 
         // create a thread which takes pictures in a loop
         pthread_attr_t attr;
