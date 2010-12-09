@@ -48,7 +48,6 @@ class Client;
 class DisplayHardware;
 class FreezeLock;
 class Layer;
-class LayerBlur;
 class LayerDim;
 
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
@@ -218,7 +217,6 @@ private:
     friend class LayerBaseClient;
     friend class LayerBaseClient::Surface;
     friend class Layer;
-    friend class LayerBlur;
     friend class LayerDim;
 
     sp<ISurface> createSurface(const sp<Client>& client,
@@ -231,10 +229,6 @@ private:
             const sp<Client>& client, DisplayID display,
             uint32_t w, uint32_t h, uint32_t flags,
             PixelFormat& format);
-
-    sp<LayerBlur> createBlurSurface(
-            const sp<Client>& client, DisplayID display,
-            uint32_t w, uint32_t h, uint32_t flags);
 
     sp<LayerDim> createDimSurface(
             const sp<Client>& client, DisplayID display,

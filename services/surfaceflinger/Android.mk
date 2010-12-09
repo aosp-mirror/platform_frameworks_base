@@ -6,11 +6,9 @@ LOCAL_SRC_FILES:= \
     DisplayHardware/DisplayHardware.cpp \
     DisplayHardware/DisplayHardwareBase.cpp \
     DisplayHardware/HWComposer.cpp \
-    BlurFilter.cpp.arm \
     GLExtensions.cpp \
     Layer.cpp \
     LayerBase.cpp \
-    LayerBlur.cpp \
     LayerDim.cpp \
     MessageQueue.cpp \
     SurfaceFlinger.cpp \

@@ -47,7 +47,6 @@
 #include "clz.h"
 #include "GLExtensions.h"
 #include "Layer.h"
-#include "LayerBlur.h"
 #include "LayerDim.h"
 #include "SurfaceFlinger.h"
 
@@ -1226,8 +1225,8 @@ sp<ISurface> SurfaceFlinger::createSurface(const sp<Client>& client, int pid,
             layer = normalLayer;
             break;
         case eFXSurfaceBlur:
-            layer = createBlurSurface(client, d, w, h, flags);
-            break;
+            // for now we treat Blur as Dim, until we can implement it
+            // efficiently.
         case eFXSurfaceDim:
             layer = createDimSurface(client, d, w, h, flags);
             break;
@@ -1288,15 +1287,6 @@ sp<Layer> SurfaceFlinger::createNormalSurface(
         LOGE("createNormalSurfaceLocked() failed (%s)", strerror(-err));
         layer.clear();
     }
-    return layer;
-}
-
-sp<LayerBlur> SurfaceFlinger::createBlurSurface(
-        const sp<Client>& client, DisplayID display,
-        uint32_t w, uint32_t h, uint32_t flags)
-{
-    sp<LayerBlur> layer = new LayerBlur(this, display, client);
-    layer->initStates(w, h, flags);
     return layer;
 }
 
