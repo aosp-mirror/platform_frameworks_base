@@ -76,10 +76,11 @@ public class MtpDatabase {
             Files.FileColumns._ID, // 0
             Files.FileColumns.DATA, // 1
     };
-    private static final String[] PATH_SIZE_PROJECTION = new String[] {
+    private static final String[] PATH_SIZE_FORMAT_PROJECTION = new String[] {
             Files.FileColumns._ID, // 0
             Files.FileColumns.DATA, // 1
             Files.FileColumns.SIZE, // 2
+            Files.FileColumns.FORMAT, // 3
     };
     private static final String[] OBJECT_INFO_PROJECTION = new String[] {
             Files.FileColumns._ID, // 0
@@ -670,24 +671,26 @@ public class MtpDatabase {
         return false;
     }
 
-    private int getObjectFilePath(int handle, char[] outFilePath, long[] outFileLength) {
+    private int getObjectFilePath(int handle, char[] outFilePath, long[] outFileLengthFormat) {
         Log.d(TAG, "getObjectFilePath: " + handle);
         if (handle == 0) {
             // special case root directory
             mMediaStoragePath.getChars(0, mMediaStoragePath.length(), outFilePath, 0);
             outFilePath[mMediaStoragePath.length()] = 0;
-            outFileLength[0] = 0;
+            outFileLengthFormat[0] = 0;
+            outFileLengthFormat[1] = MtpConstants.FORMAT_ASSOCIATION;
             return MtpConstants.RESPONSE_OK;
         }
         Cursor c = null;
         try {
-            c = mMediaProvider.query(mObjectsUri, PATH_SIZE_PROJECTION,
+            c = mMediaProvider.query(mObjectsUri, PATH_SIZE_FORMAT_PROJECTION,
                             ID_WHERE, new String[] {  Integer.toString(handle) }, null);
             if (c != null && c.moveToNext()) {
                 String path = externalToMediaPath(c.getString(1));
                 path.getChars(0, path.length(), outFilePath, 0);
                 outFilePath[path.length()] = 0;
-                outFileLength[0] = c.getLong(2);
+                outFileLengthFormat[0] = c.getLong(2);
+                outFileLengthFormat[1] = c.getLong(3);
                 return MtpConstants.RESPONSE_OK;
             } else {
                 return MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE;
