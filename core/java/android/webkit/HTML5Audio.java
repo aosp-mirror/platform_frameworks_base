@@ -179,7 +179,7 @@ class HTML5Audio extends Handler
     }
 
     private void play() {
-        if ((mState == ERROR || mState == IDLE) && mUrl != null) {
+        if ((mState >= ERROR && mState < PREPARED) && mUrl != null) {
             resetMediaPlayer();
             setDataSource(mUrl);
             mAskToPlay = true;
