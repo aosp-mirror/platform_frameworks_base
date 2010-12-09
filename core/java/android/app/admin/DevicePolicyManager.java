@@ -43,17 +43,12 @@ import java.util.List;
  */
 public class DevicePolicyManager {
     private static String TAG = "DevicePolicyManager";
-    private static boolean DEBUG = false;
-    private static boolean localLOGV = DEBUG || android.util.Config.LOGV;
 
     private final Context mContext;
     private final IDevicePolicyManager mService;
 
-    private final Handler mHandler;
-
     private DevicePolicyManager(Context context, Handler handler) {
         mContext = context;
-        mHandler = handler;
         mService = IDevicePolicyManager.Stub.asInterface(
                 ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
     }
@@ -74,6 +69,11 @@ public class DevicePolicyManager {
      * <p>You can optionally include the {@link #EXTRA_ADD_EXPLANATION}
      * field to provide the user with additional explanation (in addition
      * to your component's description) about what is being added.
+     *
+     * <p>If your administrator is already active, this will ordinarily return immediately (without
+     * user intervention).  However, if your administrator has been updated and is requesting
+     * additional uses-policy flags, the user will be presented with the new list.  New policies
+     * will not be available to the updated administrator until the user has accepted the new list.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_ADD_DEVICE_ADMIN
@@ -176,6 +176,26 @@ public class DevicePolicyManager {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
         }
+    }
+
+    /**
+     * Returns true if an administrator has been granted a particular device policy.  This can
+     * be used to check if the administrator was activated under an earlier set of policies,
+     * but requires additional policies after an upgrade.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.  Must be
+     * an active administrator, or an exception will be thrown.
+     * @param usesPolicy Which uses-policy to check, as defined in {@link DeviceAdminInfo}.
+     */
+    public boolean hasGrantedPolicy(ComponentName admin, int usesPolicy) {
+        if (mService != null) {
+            try {
+                return mService.hasGrantedPolicy(admin, usesPolicy);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
     }
 
     /**
@@ -1075,10 +1095,10 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    public void setActiveAdmin(ComponentName policyReceiver) {
+    public void setActiveAdmin(ComponentName policyReceiver, boolean refreshing) {
         if (mService != null) {
             try {
-                mService.setActiveAdmin(policyReceiver);
+                mService.setActiveAdmin(policyReceiver, refreshing);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -1086,6 +1106,7 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns the DeviceAdminInfo as defined by the administrator's package info & meta-data
      * @hide
      */
     public DeviceAdminInfo getAdminInfo(ComponentName cn) {
