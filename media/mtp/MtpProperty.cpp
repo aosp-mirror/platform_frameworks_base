@@ -343,6 +343,7 @@ void MtpProperty::print() {
             print(mMaximumValue, buffer);
             buffer += ", ";
             print(mStepSize, buffer);
+            buffer += ")";
             LOGI("%s", (const char *)buffer);
             break;
         case kFormEnum:

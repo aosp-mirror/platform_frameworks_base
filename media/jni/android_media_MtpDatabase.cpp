@@ -142,8 +142,9 @@ public:
                                             MtpDataPacket& packet);
 
     virtual MtpResponseCode         getObjectFilePath(MtpObjectHandle handle,
-                                            MtpString& filePath,
-                                            int64_t& fileLength);
+                                            MtpString& outFilePath,
+                                            int64_t& outFileLength,
+                                            MtpObjectFormat& outFormat);
     virtual MtpResponseCode         deleteFile(MtpObjectHandle handle);
 
     bool                            getObjectPropertyInfo(MtpObjectProperty property, int& type);
@@ -801,8 +802,9 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
 }
 
 MtpResponseCode MyMtpDatabase::getObjectFilePath(MtpObjectHandle handle,
-                                            MtpString& filePath,
-                                            int64_t& fileLength) {
+                                            MtpString& outFilePath,
+                                            int64_t& outFileLength,
+                                            MtpObjectFormat& outFormat) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     jint result = env->CallIntMethod(mDatabase, method_getObjectFilePath,
                 (jint)handle, mStringBuffer, mLongBuffer);
@@ -812,11 +814,12 @@ MtpResponseCode MyMtpDatabase::getObjectFilePath(MtpObjectHandle handle,
     }
 
     jchar* str = env->GetCharArrayElements(mStringBuffer, 0);
-    filePath.setTo(str, strlen16(str));
+    outFilePath.setTo(str, strlen16(str));
     env->ReleaseCharArrayElements(mStringBuffer, str, 0);
 
     jlong* longValues = env->GetLongArrayElements(mLongBuffer, 0);
-    fileLength = longValues[0];
+    outFileLength = longValues[0];
+    outFormat = longValues[1];
     env->ReleaseLongArrayElements(mLongBuffer, longValues, 0);
     
     checkAndClearExceptionFromCallback(env, __FUNCTION__);

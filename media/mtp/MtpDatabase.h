@@ -85,8 +85,9 @@ public:
                                             MtpDataPacket& packet) = 0;
 
     virtual MtpResponseCode         getObjectFilePath(MtpObjectHandle handle,
-                                            MtpString& filePath,
-                                            int64_t& fileLength) = 0;
+                                            MtpString& outFilePath,
+                                            int64_t& outFileLength,
+                                            MtpObjectFormat& outFormat) = 0;
 
     virtual MtpResponseCode         deleteFile(MtpObjectHandle handle) = 0;
 

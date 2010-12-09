@@ -112,8 +112,10 @@ void MtpServer::addStorage(const char* filePath) {
 }
 
 MtpStorage* MtpServer::getStorage(MtpStorageID id) {
+    if (id == 0)
+        return mStorages[0];
     for (int i = 0; i < mStorages.size(); i++) {
-        MtpStorage* storage =  mStorages[i];
+        MtpStorage* storage = mStorages[i];
         if (storage->getStorageID() == id)
             return storage;
     }
@@ -557,7 +559,8 @@ MtpResponseCode MtpServer::doGetObject() {
     MtpObjectHandle handle = mRequest.getParameter(1);
     MtpString pathBuf;
     int64_t fileLength;
-    int result = mDatabase->getObjectFilePath(handle, pathBuf, fileLength);
+    MtpObjectFormat format;
+    int result = mDatabase->getObjectFilePath(handle, pathBuf, fileLength, format);
     if (result != MTP_RESPONSE_OK)
         return result;
 
@@ -593,7 +596,8 @@ MtpResponseCode MtpServer::doGetPartialObject() {
     uint32_t length = mRequest.getParameter(3);
     MtpString pathBuf;
     int64_t fileLength;
-    int result = mDatabase->getObjectFilePath(handle, pathBuf, fileLength);
+    MtpObjectFormat format;
+    int result = mDatabase->getObjectFilePath(handle, pathBuf, fileLength, format);
     if (result != MTP_RESPONSE_OK)
         return result;
     if (offset + length > fileLength)
@@ -639,10 +643,13 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
         path = storage->getPath();
         parent = 0;
     } else {
-        int64_t dummy;
-        int result = mDatabase->getObjectFilePath(parent, path, dummy);
+        int64_t length;
+        MtpObjectFormat format;
+        int result = mDatabase->getObjectFilePath(parent, path, length, format);
         if (result != MTP_RESPONSE_OK)
             return result;
+        if (format != MTP_FORMAT_ASSOCIATION)
+            return MTP_RESPONSE_INVALID_PARENT_OBJECT;
     }
 
     // read only the fields we need
@@ -675,6 +682,10 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
     if (path[path.size() - 1] != '/')
         path += "/";
     path += (const char *)name;
+
+    // file should not already exist
+    if (access(path, R_OK) == 0)
+        return MTP_RESPONSE_GENERAL_ERROR;
 
     MtpObjectHandle handle = mDatabase->beginSendObject((const char*)path,
             format, parent, storageID, mSendObjectFileSize, modifiedTime);
@@ -835,7 +846,7 @@ MtpResponseCode MtpServer::doDeleteObject() {
 
     MtpString filePath;
     int64_t fileLength;
-    int result = mDatabase->getObjectFilePath(handle, filePath, fileLength);
+    int result = mDatabase->getObjectFilePath(handle, filePath, fileLength, format);
     if (result == MTP_RESPONSE_OK) {
         LOGV("deleting %s", (const char *)filePath);
         deletePath((const char *)filePath);
