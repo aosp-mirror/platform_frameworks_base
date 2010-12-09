@@ -22,12 +22,14 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.NinePatchDrawable;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.util.TypedValue;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.AbsListView.OnScrollListener;
 
 /**
@@ -47,9 +49,38 @@ class FastScroller {
     private static final int STATE_DRAGGING = 3;
     // Scroll thumb fading out due to inactivity timeout
     private static final int STATE_EXIT = 4;
+
+    private static final int[] PRESSED_STATES = new int[] {
+        android.R.attr.state_pressed
+    };
+
+    private static final int[] DEFAULT_STATES = new int[0];
+
+    private static final int[] ATTRS = new int[] {
+        android.R.attr.textColorPrimary,
+        com.android.internal.R.attr.fastScrollThumbDrawable,
+        com.android.internal.R.attr.fastScrollTrackDrawable,
+        com.android.internal.R.attr.fastScrollPreviewBackgroundLeft,
+        com.android.internal.R.attr.fastScrollPreviewBackgroundRight,
+        com.android.internal.R.attr.fastScrollOverlayPosition
+    };
+
+    private static final int PRIMARY_TEXT_COLOR = 0;
+    private static final int THUMB_DRAWABLE = 1;
+    private static final int TRACK_DRAWABLE = 2;
+    private static final int PREVIEW_BACKGROUND_LEFT = 3;
+    private static final int PREVIEW_BACKGROUND_RIGHT = 4;
+    private static final int OVERLAY_POSITION = 5;
+
+    private static final int OVERLAY_FLOATING = 0;
+    private static final int OVERLAY_AT_THUMB = 1;
     
     private Drawable mThumbDrawable;
     private Drawable mOverlayDrawable;
+    private Drawable mTrackDrawable;
+
+    private Drawable mOverlayDrawableLeft;
+    private Drawable mOverlayDrawableRight;
 
     private int mThumbH;
     private int mThumbW;
@@ -80,9 +111,62 @@ class FastScroller {
 
     private boolean mChangedBounds;
     
+    private int mPosition;
+
+    private boolean mAlwaysShow;
+
+    private int mOverlayPosition;
+
+    private static final int FADE_TIMEOUT = 1500;
+
+    private final Rect mTmpRect = new Rect();
+
     public FastScroller(Context context, AbsListView listView) {
         mList = listView;
         init(context);
+    }
+
+    public void setAlwaysShow(boolean alwaysShow) {
+        mAlwaysShow = alwaysShow;
+        if (alwaysShow) {
+            mHandler.removeCallbacks(mScrollFade);
+            setState(STATE_VISIBLE);
+        } else if (mState == STATE_VISIBLE) {
+            mHandler.postDelayed(mScrollFade, FADE_TIMEOUT);
+        }
+    }
+
+    public boolean isAlwaysShowEnabled() {
+        return mAlwaysShow;
+    }
+
+    private void refreshDrawableState() {
+        int[] state = mState == STATE_DRAGGING ? PRESSED_STATES : DEFAULT_STATES;
+
+        if (mThumbDrawable != null && mThumbDrawable.isStateful()) {
+            mThumbDrawable.setState(state);
+        }
+        if (mTrackDrawable != null && mTrackDrawable.isStateful()) {
+            mTrackDrawable.setState(state);
+        }
+    }
+
+    public void setScrollbarPosition(int position) {
+        mPosition = position;
+        switch (position) {
+            default:
+            case View.SCROLLBAR_POSITION_DEFAULT:
+            case View.SCROLLBAR_POSITION_RIGHT:
+                mOverlayDrawable = mOverlayDrawableRight;
+                break;
+            case View.SCROLLBAR_POSITION_LEFT:
+                mOverlayDrawable = mOverlayDrawableLeft;
+                break;
+        }
+    }
+
+    public int getWidth() {
+        return mThumbW;
     }
 
     public void setState(int state) {
@@ -105,6 +189,7 @@ class FastScroller {
                 break;
         }
         mState = state;
+        refreshDrawableState();
     }
     
     public int getState() {
@@ -114,27 +199,42 @@ class FastScroller {
     private void resetThumbPos() {
         final int viewWidth = mList.getWidth();
         // Bounds are always top right. Y coordinate get's translated during draw
-        mThumbDrawable.setBounds(viewWidth - mThumbW, 0, viewWidth, mThumbH);
+        switch (mPosition) {
+            case View.SCROLLBAR_POSITION_DEFAULT:
+            case View.SCROLLBAR_POSITION_RIGHT:
+                mThumbDrawable.setBounds(viewWidth - mThumbW, 0, viewWidth, mThumbH);
+                break;
+            case View.SCROLLBAR_POSITION_LEFT:
+                mThumbDrawable.setBounds(0, 0, mThumbW, mThumbH);
+                break;
+        }
         mThumbDrawable.setAlpha(ScrollFade.ALPHA_MAX);
     }
     
     private void useThumbDrawable(Context context, Drawable drawable) {
         mThumbDrawable = drawable;
-        mThumbW = context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.fastscroll_thumb_width);
-        mThumbH = context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.fastscroll_thumb_height);
+        if (drawable instanceof NinePatchDrawable) {
+            mThumbW = context.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.fastscroll_thumb_width);
+            mThumbH = context.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.fastscroll_thumb_height);
+        } else {
+            mThumbW = drawable.getIntrinsicWidth();
+            mThumbH = drawable.getIntrinsicHeight();
+        }
         mChangedBounds = true;
     }
 
     private void init(Context context) {
         // Get both the scrollbar states drawables
         final Resources res = context.getResources();
-        useThumbDrawable(context, res.getDrawable(
-                com.android.internal.R.drawable.scrollbar_handle_accelerated_anim2));
+        TypedArray ta = context.getTheme().obtainStyledAttributes(ATTRS);
+        useThumbDrawable(context, ta.getDrawable(ta.getIndex(THUMB_DRAWABLE)));
+        mTrackDrawable = ta.getDrawable(ta.getIndex(TRACK_DRAWABLE));
         
-        mOverlayDrawable = res.getDrawable(
-                com.android.internal.R.drawable.menu_submenu_background);
+        mOverlayDrawableLeft = ta.getDrawable(ta.getIndex(PREVIEW_BACKGROUND_LEFT));
+        mOverlayDrawableRight = ta.getDrawable(ta.getIndex(PREVIEW_BACKGROUND_RIGHT));
+        mOverlayPosition = ta.getInt(ta.getIndex(OVERLAY_POSITION), OVERLAY_FLOATING);
         
         mScrollCompleted = true;
 
@@ -148,9 +248,8 @@ class FastScroller {
         mPaint.setAntiAlias(true);
         mPaint.setTextAlign(Paint.Align.CENTER);
         mPaint.setTextSize(mOverlaySize / 2);
-        TypedArray ta = context.getTheme().obtainStyledAttributes(new int[] { 
-                android.R.attr.textColorPrimary });
-        ColorStateList textColor = ta.getColorStateList(ta.getIndex(0));
+
+        ColorStateList textColor = ta.getColorStateList(ta.getIndex(PRIMARY_TEXT_COLOR));
         int textColorNormal = textColor.getDefaultColor();
         mPaint.setColor(textColorNormal);
         mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -161,6 +260,11 @@ class FastScroller {
         }
         
         mState = STATE_NONE;
+        refreshDrawableState();
+
+        ta.recycle();
+
+        setScrollbarPosition(mList.getVerticalScrollbarPosition());
     }
     
     void stop() {
@@ -188,9 +292,26 @@ class FastScroller {
             if (alpha < ScrollFade.ALPHA_MAX / 2) {
                 mThumbDrawable.setAlpha(alpha * 2);
             }
-            int left = viewWidth - (mThumbW * alpha) / ScrollFade.ALPHA_MAX;
-            mThumbDrawable.setBounds(left, 0, viewWidth, mThumbH);
+            int left = 0;
+            switch (mPosition) {
+                case View.SCROLLBAR_POSITION_DEFAULT:
+                case View.SCROLLBAR_POSITION_RIGHT:
+                    left = viewWidth - (mThumbW * alpha) / ScrollFade.ALPHA_MAX;
+                    break;
+                case View.SCROLLBAR_POSITION_LEFT:
+                    left = -mThumbW + (mThumbW * alpha) / ScrollFade.ALPHA_MAX;
+                    break;
+            }
+            mThumbDrawable.setBounds(left, 0, left + mThumbW, mThumbH);
             mChangedBounds = true;
+        }
+
+        if (mTrackDrawable != null) {
+            final int left = mThumbDrawable.getBounds().left;
+            final int trackWidth = mTrackDrawable.getIntrinsicWidth();
+            final int trackLeft = (left + mThumbW) / 2 - trackWidth / 2;
+            mTrackDrawable.setBounds(trackLeft, 0, trackLeft + trackWidth, mList.getHeight());
+            mTrackDrawable.draw(canvas);
         }
 
         canvas.translate(0, y);
@@ -199,12 +320,45 @@ class FastScroller {
 
         // If user is dragging the scroll bar, draw the alphabet overlay
         if (mState == STATE_DRAGGING && mDrawOverlay) {
+            if (mOverlayPosition == OVERLAY_AT_THUMB) {
+                int left = 0;
+                switch (mPosition) {
+                    default:
+                    case View.SCROLLBAR_POSITION_DEFAULT:
+                    case View.SCROLLBAR_POSITION_RIGHT:
+                        left = Math.max(0,
+                                mThumbDrawable.getBounds().left - mThumbW - mOverlaySize);
+                        break;
+                    case View.SCROLLBAR_POSITION_LEFT:
+                        left = Math.min(mThumbDrawable.getBounds().right + mThumbW,
+                                mList.getWidth() - mOverlaySize);
+                        break;
+                }
+
+                int top = Math.max(0,
+                        Math.min(y + (mThumbH - mOverlaySize) / 2, mList.getHeight() - mOverlaySize));
+
+                final RectF pos = mOverlayPos;
+                pos.left = left;
+                pos.right = pos.left + mOverlaySize;
+                pos.top = top;
+                pos.bottom = pos.top + mOverlaySize;
+                if (mOverlayDrawable != null) {
+                    mOverlayDrawable.setBounds((int) pos.left, (int) pos.top,
+                            (int) pos.right, (int) pos.bottom);
+                }
+            }
             mOverlayDrawable.draw(canvas);
             final Paint paint = mPaint;
             float descent = paint.descent();
             final RectF rectF = mOverlayPos;
-            canvas.drawText(mSectionText, (int) (rectF.left + rectF.right) / 2,
-                    (int) (rectF.bottom + rectF.top) / 2 + mOverlaySize / 4 - descent, paint);
+            final Rect tmpRect = mTmpRect;
+            mOverlayDrawable.getPadding(tmpRect);
+            final int hOff = (tmpRect.right - tmpRect.left) / 2;
+            final int vOff = (tmpRect.bottom - tmpRect.top) / 2;
+            canvas.drawText(mSectionText, (int) (rectF.left + rectF.right) / 2 - hOff,
+                    (int) (rectF.bottom + rectF.top) / 2 + mOverlaySize / 4 - descent - vOff,
+                    paint);
         } else if (mState == STATE_EXIT) {
             if (alpha == 0) { // Done with exit
                 setState(STATE_NONE);
@@ -216,16 +370,27 @@ class FastScroller {
 
     void onSizeChanged(int w, int h, int oldw, int oldh) {
         if (mThumbDrawable != null) {
-            mThumbDrawable.setBounds(w - mThumbW, 0, w, mThumbH);
+            switch (mPosition) {
+                default:
+                case View.SCROLLBAR_POSITION_DEFAULT:
+                case View.SCROLLBAR_POSITION_RIGHT:
+                    mThumbDrawable.setBounds(w - mThumbW, 0, w, mThumbH);
+                    break;
+                case View.SCROLLBAR_POSITION_LEFT:
+                    mThumbDrawable.setBounds(0, 0, mThumbW, mThumbH);
+                    break;
+            }
         }
-        final RectF pos = mOverlayPos;
-        pos.left = (w - mOverlaySize) / 2;
-        pos.right = pos.left + mOverlaySize;
-        pos.top = h / 10; // 10% from top
-        pos.bottom = pos.top + mOverlaySize;
-        if (mOverlayDrawable != null) {
-            mOverlayDrawable.setBounds((int) pos.left, (int) pos.top,
-                (int) pos.right, (int) pos.bottom);
+        if (mOverlayPosition == OVERLAY_FLOATING) {
+            final RectF pos = mOverlayPos;
+            pos.left = (w - mOverlaySize) / 2;
+            pos.right = pos.left + mOverlaySize;
+            pos.top = h / 10; // 10% from top
+            pos.bottom = pos.top + mOverlaySize;
+            if (mOverlayDrawable != null) {
+                mOverlayDrawable.setBounds((int) pos.left, (int) pos.top,
+                        (int) pos.right, (int) pos.bottom);
+            }
         }
     }
     
@@ -257,7 +422,9 @@ class FastScroller {
         mVisibleItem = firstVisibleItem;
         if (mState != STATE_DRAGGING) {
             setState(STATE_VISIBLE);
-            mHandler.postDelayed(mScrollFade, 1500);
+            if (!mAlwaysShow) {
+                mHandler.postDelayed(mScrollFade, FADE_TIMEOUT);
+            }
         }
     }
 
@@ -454,7 +621,11 @@ class FastScroller {
                 setState(STATE_VISIBLE);
                 final Handler handler = mHandler;
                 handler.removeCallbacks(mScrollFade);
-                handler.postDelayed(mScrollFade, 1000);
+                if (!mAlwaysShow) {
+                    handler.postDelayed(mScrollFade, 1000);
+                }
+
+                mList.invalidate();
                 return true;
             }
         } else if (action == MotionEvent.ACTION_MOVE) {
@@ -482,7 +653,20 @@ class FastScroller {
     }
 
     boolean isPointInside(float x, float y) {
-        return x > mList.getWidth() - mThumbW && y >= mThumbY && y <= mThumbY + mThumbH;
+        boolean inTrack = false;
+        switch (mPosition) {
+            default:
+            case View.SCROLLBAR_POSITION_DEFAULT:
+            case View.SCROLLBAR_POSITION_RIGHT:
+                inTrack = x > mList.getWidth() - mThumbW;
+                break;
+            case View.SCROLLBAR_POSITION_LEFT:
+                inTrack = x < mThumbW;
+                break;
+        }
+
+        // Allow taps in the track to start moving.
+        return inTrack && (mTrackDrawable != null || y >= mThumbY && y <= mThumbY + mThumbH);
     }
 
     public class ScrollFade implements Runnable {

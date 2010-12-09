@@ -519,6 +519,21 @@
         <!-- @hide DayPickerDayView style-->
         <attr name="dayPickerWeekDayViewStyle" format="reference" />
 
+        <!-- Fast scroller styles -->
+        <!-- @hide -->
+        <attr name="fastScrollThumbDrawable" format="reference" />
+        <!-- @hide -->
+        <attr name="fastScrollPreviewBackgroundRight" format="reference" />
+        <!-- @hide -->
+        <attr name="fastScrollPreviewBackgroundLeft" format="reference" />
+        <!-- @hide -->
+        <attr name="fastScrollTrackDrawable" format="reference" />
+        <!-- @hide -->
+        <attr name="fastScrollOverlayPosition">
+            <enum name="floating" value="0" />
+            <enum name="atThumb" value="1" />
+        </attr>
+
         <!-- =================== -->
         <!-- Action bar styles   -->
         <!-- =================== -->
@@ -1735,6 +1750,15 @@
         <!-- scale of the view in the y direction. -->
         <attr name="scaleY" format="float" />
 
+        <!-- Determines which side the vertical scroll bar should be placed on. -->
+        <attr name="verticalScrollbarPosition">
+            <!-- Place the scroll bar wherever the system default determines. -->
+            <enum name="defaultPosition" value="0" />
+            <!-- Place the scroll bar on the left. -->
+            <enum name="left" value="1" />
+            <!-- Place the scroll bar on the right. -->
+            <enum name="right" value="2" />
+        </attr>
     </declare-styleable>
 
     <!-- Attributes that can be used with a {@link android.view.ViewGroup} or any
@@ -2004,6 +2028,10 @@
             <!-- The list allows multiple choices in a custom selection mode. -->
             <enum name="multipleChoiceModal" value="3" />
         </attr>
+
+        <!-- When set to true, the list will always show the fast scroll interface.
+             This setting implies fastScrollEnabled. -->
+        <attr name="fastScrollAlwaysVisible" format="boolean" />
     </declare-styleable>
     <declare-styleable name="AbsSpinner">
         <!-- Reference to an array resource that will populate the Spinner.  For static content,
