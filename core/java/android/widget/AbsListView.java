@@ -3144,9 +3144,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final int width = getWidth();
                 final int height = getHeight();
 
-                canvas.translate(-width, 0);
-                canvas.rotate(-180, width, 0);
-                canvas.translate(0, -height);
+                canvas.translate(-width, Math.max(height, scrollY + mLastPositionDistanceGuess));
+                canvas.rotate(180, width, 0);
                 mEdgeGlowBottom.setSize(width, height);
                 if (mEdgeGlowBottom.draw(canvas)) {
                     invalidate();
