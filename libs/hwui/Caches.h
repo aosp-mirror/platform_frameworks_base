@@ -34,7 +34,6 @@
 #include "PathCache.h"
 #include "TextDropShadowCache.h"
 #include "FboCache.h"
-#include "Line.h"
 #include "ResourceCache.h"
 
 namespace android {
@@ -157,8 +156,6 @@ public:
     FboCache fboCache;
     GammaFontRenderer fontRenderer;
     ResourceCache resourceCache;
-
-    Line line;
 
 private:
     DebugLevel mDebugLevel;
