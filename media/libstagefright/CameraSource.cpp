@@ -576,13 +576,13 @@ status_t CameraSource::stop() {
     mFrameAvailableCondition.signal();
 
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
-    stopCameraRecording();
     releaseQueuedFrames();
     while (!mFramesBeingEncoded.empty()) {
         LOGI("Waiting for outstanding frames being encoded: %d",
                 mFramesBeingEncoded.size());
         mFrameCompleteCondition.wait(mLock);
     }
+    stopCameraRecording();
     releaseCamera();
     IPCThreadState::self()->restoreCallingIdentity(token);
 
@@ -602,7 +602,9 @@ status_t CameraSource::stop() {
 }
 
 void CameraSource::releaseRecordingFrame(const sp<IMemory>& frame) {
-    mCamera->releaseRecordingFrame(frame);
+    if (mCamera != NULL) {
+        mCamera->releaseRecordingFrame(frame);
+    }
 }
 
 void CameraSource::releaseQueuedFrames() {
