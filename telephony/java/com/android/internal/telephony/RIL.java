@@ -360,6 +360,11 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                             rr.onError(GENERIC_FAILURE, null);
                             rr.release();
                         }
+                    } finally {
+                        // Note: We are "Done" only if there are no outstanding
+                        // requests or replies. Thus this code path will only release
+                        // the wake lock on errors.
+                        releaseWakeLockIfDone();
                     }
 
                     if (!alreadySubtracted) {
@@ -2043,6 +2048,12 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     private void
     send(RILRequest rr) {
         Message msg;
+
+        if (mSocket == null) {
+            rr.onError(RADIO_NOT_AVAILABLE, null);
+            rr.release();
+            return;
+        }
 
         msg = mSender.obtainMessage(EVENT_SEND, rr);
 
