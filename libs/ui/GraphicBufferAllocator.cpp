@@ -24,8 +24,6 @@
 
 #include <ui/GraphicBufferAllocator.h>
 
-#include <private/ui/sw_gralloc_handle.h>
-
 namespace android {
 // ---------------------------------------------------------------------------
 
@@ -95,11 +93,7 @@ status_t GraphicBufferAllocator::alloc(uint32_t w, uint32_t h, PixelFormat forma
     // we have a h/w allocator and h/w buffer is requested
     status_t err; 
     
-    if (usage & GRALLOC_USAGE_HW_MASK) {
-        err = mAllocDev->alloc(mAllocDev, w, h, format, usage, handle, stride);
-    } else {
-        err = sw_gralloc_handle_t::alloc(w, h, format, usage, handle, stride);
-    }
+    err = mAllocDev->alloc(mAllocDev, w, h, format, usage, handle, stride);
 
     LOGW_IF(err, "alloc(%u, %u, %d, %08x, ...) failed %d (%s)",
             w, h, format, usage, err, strerror(-err));
@@ -123,11 +117,8 @@ status_t GraphicBufferAllocator::alloc(uint32_t w, uint32_t h, PixelFormat forma
 status_t GraphicBufferAllocator::free(buffer_handle_t handle)
 {
     status_t err;
-    if (sw_gralloc_handle_t::validate(handle) < 0) {
-        err = mAllocDev->free(mAllocDev, handle);
-    } else {
-        err = sw_gralloc_handle_t::free((sw_gralloc_handle_t*)handle);
-    }
+
+    err = mAllocDev->free(mAllocDev, handle);
 
     LOGW_IF(err, "free(...) failed %d (%s)", err, strerror(-err));
     if (err == NO_ERROR) {
