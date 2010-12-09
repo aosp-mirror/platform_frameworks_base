@@ -2334,15 +2334,17 @@ public final class ActivityThread {
                 }
             }
 
-            Canvas cv = mThumbnailCanvas;
-            if (cv == null) {
-                mThumbnailCanvas = cv = new Canvas();
-            }
-
-            cv.setBitmap(thumbnail);
-            if (!r.activity.onCreateThumbnail(thumbnail, cv)) {
-                mAvailThumbnailBitmap = thumbnail;
-                thumbnail = null;
+            if (thumbnail != null) {
+                Canvas cv = mThumbnailCanvas;
+                if (cv == null) {
+                    mThumbnailCanvas = cv = new Canvas();
+                }
+    
+                cv.setBitmap(thumbnail);
+                if (!r.activity.onCreateThumbnail(thumbnail, cv)) {
+                    mAvailThumbnailBitmap = thumbnail;
+                    thumbnail = null;
+                }
             }
 
         } catch (Exception e) {
