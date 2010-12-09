@@ -204,7 +204,8 @@ void Layer::setGeometry(hwc_layer_t* hwcl)
         return;
     }
 
-    hwcl->transform = mOrientation;
+    Transform tr(Transform(mOrientation) * Transform(mBufferTransform));
+    hwcl->transform = tr.getOrientation();
 
     if (needsBlending()) {
         hwcl->blending = mPremultipliedAlpha ?
