@@ -84,7 +84,10 @@ public class Surface implements Parcelable {
      * of the surface must be pushed by an external entity. This is type
      * of surface can be used for efficient camera preview or movie
      * play back.
+     *
+     * @deprecated not support by the system anymore
      */
+    @Deprecated
     public static final int PUSH_BUFFERS        = 0x00000200;
     /**
      * Indicates that the surface must be considered opaque, even if its

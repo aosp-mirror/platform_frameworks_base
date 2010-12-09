@@ -40,7 +40,7 @@ ZipEntryCRO ZipFileCRO_findEntryByName(ZipFileCRO zipToken,
 
 bool ZipFileCRO_getEntryInfo(ZipFileCRO zipToken, ZipEntryRO entryToken,
         int* pMethod, size_t* pUncompLen,
-        size_t* pCompLen, off_t* pOffset, long* pModWhen, long* pCrc32) {
+        size_t* pCompLen, off64_t* pOffset, long* pModWhen, long* pCrc32) {
     ZipFileRO* zip = (ZipFileRO*)zipToken;
     ZipEntryRO entry = (ZipEntryRO)entryToken;
     return zip->getEntryInfo(entry, pMethod, pUncompLen, pCompLen, pOffset,

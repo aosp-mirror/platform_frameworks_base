@@ -20,19 +20,12 @@
 
 <com.android.systemui.statusbar.tablet.RecentAppsPanel
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:layout_width="wrap_content"
-    android:background="@drawable/sysbar_panel_recents_bg"
+    android:layout_marginBottom="48dip"
+    android:background="@drawable/recents_bg_protect_tile"
+    android:id="@+id/recents_bg_protect"
     android:orientation="vertical">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/recent_tasks_app_label"
-        android:textSize="22dip"
-        android:drawableLeft="@drawable/app_icon"
-        android:layout_margin="10dip"
-    />
 
     <TextView android:id="@+id/recents_no_recents"
         android:layout_width="match_parent"
@@ -40,14 +33,24 @@
         android:text="@string/recent_tasks_empty"
         android:textSize="22dip"
         android:gravity="center_horizontal|center_vertical"
-        android:visibility="gone"
-        android:layout_margin="10dip">
+        android:visibility="gone">
     </TextView>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+    />
+
     <LinearLayout android:id="@+id/recents_container"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="16dip"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="100dip"
+        android:background="@drawable/recents_blue_glow"
     />
 
 </com.android.systemui.statusbar.tablet.RecentAppsPanel>

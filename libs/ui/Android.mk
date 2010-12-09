@@ -54,8 +54,6 @@ LOCAL_SRC_FILES:= \
 	InputManager.cpp \
 	InputReader.cpp \
 	InputTransport.cpp \
-	IOverlay.cpp \
-	Overlay.cpp \
 	PixelFormat.cpp \
 	Rect.cpp \
 	Region.cpp
@@ -64,7 +62,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libutils \
 	libEGL \
-	libbinder \
 	libpixelflinger \
 	libhardware \
 	libhardware_legacy

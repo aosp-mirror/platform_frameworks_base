@@ -35,6 +35,9 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <assert.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 using namespace android;
 
@@ -62,7 +65,7 @@ String8 Asset::getAssetAllocations()
         if (cur->isAllocated()) {
             res.append("    ");
             res.append(cur->getAssetSource());
-            off_t size = (cur->getLength()+512)/1024;
+            off64_t size = (cur->getLength()+512)/1024;
             char buf[64];
             sprintf(buf, ": %dK\n", (int)size);
             res.append(buf);
@@ -119,7 +122,7 @@ Asset::~Asset(void)
 {
     _FileAsset* pAsset;
     status_t result;
-    off_t length;
+    off64_t length;
     int fd;
 
     fd = open(fileName, O_RDONLY | O_BINARY);
@@ -132,12 +135,26 @@ Asset::~Asset(void)
      * always open things read-only it doesn't really matter, so there's
      * no value in incurring the extra overhead of an fstat() call.
      */
-    length = lseek(fd, 0, SEEK_END);
+    // TODO(kroot): replace this with fstat despite the plea above.
+#if 1
+    length = lseek64(fd, 0, SEEK_END);
     if (length < 0) {
         ::close(fd);
         return NULL;
     }
-    (void) lseek(fd, 0, SEEK_SET);
+    (void) lseek64(fd, 0, SEEK_SET);
+#else
+    struct stat st;
+    if (fstat(fd, &st) < 0) {
+        ::close(fd);
+        return NULL;
+    }
+
+    if (!S_ISREG(st.st_mode)) {
+        ::close(fd);
+        return NULL;
+    }
+#endif
 
     pAsset = new _FileAsset;
     result = pAsset->openChunk(fileName, fd, 0, length);
@@ -162,7 +179,7 @@ Asset::~Asset(void)
 {
     _CompressedAsset* pAsset;
     status_t result;
-    off_t fileLen;
+    off64_t fileLen;
     bool scanResult;
     long offset;
     int method;
@@ -215,7 +232,7 @@ Asset::~Asset(void)
 /*
  * Create a new Asset from part of an open file.
  */
-/*static*/ Asset* Asset::createFromFileSegment(int fd, off_t offset,
+/*static*/ Asset* Asset::createFromFileSegment(int fd, off64_t offset,
     size_t length, AccessMode mode)
 {
     _FileAsset* pAsset;
@@ -233,7 +250,7 @@ Asset::~Asset(void)
 /*
  * Create a new Asset from compressed data in an open file.
  */
-/*static*/ Asset* Asset::createFromCompressedData(int fd, off_t offset,
+/*static*/ Asset* Asset::createFromCompressedData(int fd, off64_t offset,
     int compressionMethod, size_t uncompressedLen, size_t compressedLen,
     AccessMode mode)
 {
@@ -295,9 +312,9 @@ Asset::~Asset(void)
  *
  * Returns the new chunk offset, or -1 if the seek is illegal.
  */
-off_t Asset::handleSeek(off_t offset, int whence, off_t curPosn, off_t maxPosn)
+off64_t Asset::handleSeek(off64_t offset, int whence, off64_t curPosn, off64_t maxPosn)
 {
-    off_t newOffset;
+    off64_t newOffset;
 
     switch (whence) {
     case SEEK_SET:
@@ -311,15 +328,15 @@ off_t Asset::handleSeek(off_t offset, int whence, off_t curPosn, off_t maxPosn)
         break;
     default:
         LOGW("unexpected whence %d\n", whence);
-        // this was happening due to an off_t size mismatch
+        // this was happening due to an off64_t size mismatch
         assert(false);
-        return (off_t) -1;
+        return (off64_t) -1;
     }
 
     if (newOffset < 0 || newOffset > maxPosn) {
         LOGW("seek out of range: want %ld, end=%ld\n",
             (long) newOffset, (long) maxPosn);
-        return (off_t) -1;
+        return (off64_t) -1;
     }
 
     return newOffset;
@@ -353,7 +370,7 @@ _FileAsset::~_FileAsset(void)
  *
  * Zero-length chunks are allowed.
  */
-status_t _FileAsset::openChunk(const char* fileName, int fd, off_t offset, size_t length)
+status_t _FileAsset::openChunk(const char* fileName, int fd, off64_t offset, size_t length)
 {
     assert(mFp == NULL);    // no reopen
     assert(mMap == NULL);
@@ -363,15 +380,15 @@ status_t _FileAsset::openChunk(const char* fileName, int fd, off_t offset, size_
     /*
      * Seek to end to get file length.
      */
-    off_t fileLength;
-    fileLength = lseek(fd, 0, SEEK_END);
-    if (fileLength == (off_t) -1) {
+    off64_t fileLength;
+    fileLength = lseek64(fd, 0, SEEK_END);
+    if (fileLength == (off64_t) -1) {
         // probably a bad file descriptor
         LOGD("failed lseek (errno=%d)\n", errno);
         return UNKNOWN_ERROR;
     }
 
-    if ((off_t) (offset + length) > fileLength) {
+    if ((off64_t) (offset + length) > fileLength) {
         LOGD("start (%ld) + len (%ld) > end (%ld)\n",
             (long) offset, (long) length, (long) fileLength);
         return BAD_INDEX;
@@ -482,21 +499,21 @@ ssize_t _FileAsset::read(void* buf, size_t count)
 /*
  * Seek to a new position.
  */
-off_t _FileAsset::seek(off_t offset, int whence)
+off64_t _FileAsset::seek(off64_t offset, int whence)
 {
-    off_t newPosn;
-    long actualOffset;
+    off64_t newPosn;
+    off64_t actualOffset;
 
     // compute new position within chunk
     newPosn = handleSeek(offset, whence, mOffset, mLength);
-    if (newPosn == (off_t) -1)
+    if (newPosn == (off64_t) -1)
         return newPosn;
 
-    actualOffset = (long) (mStart + newPosn);
+    actualOffset = mStart + newPosn;
 
     if (mFp != NULL) {
         if (fseek(mFp, (long) actualOffset, SEEK_SET) != 0)
-            return (off_t) -1;
+            return (off64_t) -1;
     }
 
     mOffset = actualOffset - mStart;
@@ -603,7 +620,7 @@ const void* _FileAsset::getBuffer(bool wordAligned)
     }
 }
 
-int _FileAsset::openFileDescriptor(off_t* outStart, off_t* outLength) const
+int _FileAsset::openFileDescriptor(off64_t* outStart, off64_t* outLength) const
 {
     if (mMap != NULL) {
         const char* fname = mMap->getFileName();
@@ -678,7 +695,7 @@ _CompressedAsset::~_CompressedAsset(void)
  * This currently just sets up some values and returns.  On the first
  * read, we expand the entire file into a buffer and return data from it.
  */
-status_t _CompressedAsset::openChunk(int fd, off_t offset,
+status_t _CompressedAsset::openChunk(int fd, off64_t offset,
     int compressionMethod, size_t uncompressedLen, size_t compressedLen)
 {
     assert(mFd < 0);        // no re-open
@@ -782,13 +799,13 @@ ssize_t _CompressedAsset::read(void* buf, size_t count)
  * expensive, because it requires plowing through a bunch of compressed
  * data.
  */
-off_t _CompressedAsset::seek(off_t offset, int whence)
+off64_t _CompressedAsset::seek(off64_t offset, int whence)
 {
-    off_t newPosn;
+    off64_t newPosn;
 
     // compute new position within chunk
     newPosn = handleSeek(offset, whence, mOffset, mUncompressedLen);
-    if (newPosn == (off_t) -1)
+    if (newPosn == (off64_t) -1)
         return newPosn;
 
     if (mZipInflater) {

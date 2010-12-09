@@ -322,8 +322,19 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    private class InnerScrollChangedListener implements ViewTreeObserver.OnScrollChangedListener {
+        public void onScrollChanged() {
+            if (isShown()) {
+                setGLRectViewport();
+            }
+        }
+    }
+
     // The listener to capture global layout change event.
-    private InnerGlobalLayoutListener mListener = null;
+    private InnerGlobalLayoutListener mGlobalLayoutListener = null;
+
+    // The listener to capture scroll event.
+    private InnerScrollChangedListener mScrollChangedListener = null;
 
     // if AUTO_REDRAW_HACK is true, then the CALL key will toggle redrawing
     // the screen all-the-time. Good for profiling our drawing code
@@ -4746,9 +4757,15 @@ public class WebView extends AbsoluteLayout
         super.onAttachedToWindow();
         if (hasWindowFocus()) setActive(true);
         final ViewTreeObserver treeObserver = getViewTreeObserver();
-        if (treeObserver != null && mListener == null) {
-            mListener = new InnerGlobalLayoutListener();
-            treeObserver.addOnGlobalLayoutListener(mListener);
+        if (treeObserver != null) {
+            if (mGlobalLayoutListener == null) {
+                mGlobalLayoutListener = new InnerGlobalLayoutListener();
+                treeObserver.addOnGlobalLayoutListener(mGlobalLayoutListener);
+            }
+            if (mScrollChangedListener == null) {
+                mScrollChangedListener = new InnerScrollChangedListener();
+                treeObserver.addOnScrollChangedListener(mScrollChangedListener);
+            }
         }
     }
 
@@ -4759,9 +4776,15 @@ public class WebView extends AbsoluteLayout
         if (hasWindowFocus()) setActive(false);
 
         final ViewTreeObserver treeObserver = getViewTreeObserver();
-        if (treeObserver != null && mListener != null) {
-            treeObserver.removeGlobalOnLayoutListener(mListener);
-            mListener = null;
+        if (treeObserver != null) {
+            if (mGlobalLayoutListener != null) {
+                treeObserver.removeGlobalOnLayoutListener(mGlobalLayoutListener);
+                mGlobalLayoutListener = null;
+            }
+            if (mScrollChangedListener != null) {
+                treeObserver.removeOnScrollChangedListener(mScrollChangedListener);
+                mScrollChangedListener = null;
+            }
         }
 
         super.onDetachedFromWindow();
@@ -6742,7 +6765,7 @@ public class WebView extends AbsoluteLayout
                         mSentAutoScrollMessage = false;
                         break;
                     }
-                    scrollBy(mAutoScrollX, mAutoScrollY);
+                    pinScrollBy(mAutoScrollX, mAutoScrollY, true, 0);
                     sendEmptyMessageDelayed(
                             SCROLL_SELECT_TEXT, SELECT_SCROLL_INTERVAL);
                     break;

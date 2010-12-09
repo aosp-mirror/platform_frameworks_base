@@ -21,6 +21,7 @@ import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentBreadCrumbs;
 import android.app.FragmentManager;
@@ -170,7 +171,7 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     private FrameLayout mListFooter;
 
-    private View mPrefsContainer;
+    private ViewGroup mPrefsContainer;
 
     private FragmentBreadCrumbs mFragmentBreadCrumbs;
 
@@ -394,7 +395,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             if (summaryRes != 0) {
                 return res.getText(summaryRes);
             }
-            return title;
+            return summary;
         }
 
         /**
@@ -490,7 +491,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         setContentView(com.android.internal.R.layout.preference_list_content);
 
         mListFooter = (FrameLayout)findViewById(com.android.internal.R.id.list_footer);
-        mPrefsContainer = findViewById(com.android.internal.R.id.prefs);
+        mPrefsContainer = (ViewGroup) findViewById(com.android.internal.R.id.prefs_frame);
         boolean hidingHeaders = onIsHidingHeaders();
         mSinglePane = hidingHeaders || !onIsMultiPane();
         String initialFragment = getIntent().getStringExtra(EXTRA_SHOW_FRAGMENT);
@@ -558,7 +559,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             // of preferences" mode.
             setContentView(com.android.internal.R.layout.preference_list_content_single);
             mListFooter = (FrameLayout) findViewById(com.android.internal.R.id.list_footer);
-            mPrefsContainer = findViewById(com.android.internal.R.id.prefs);
+            mPrefsContainer = (ViewGroup) findViewById(com.android.internal.R.id.prefs);
             mPreferenceManager = new PreferenceManager(this, FIRST_REQUEST_CODE);
             mPreferenceManager.setOnPreferenceTreeClickListener(this);
         }
@@ -989,9 +990,16 @@ public abstract class PreferenceActivity extends ListActivity implements
      */
     public void showBreadCrumbs(CharSequence title, CharSequence shortTitle) {
         if (mFragmentBreadCrumbs == null) {
-            mFragmentBreadCrumbs = new FragmentBreadCrumbs(this);
+            mFragmentBreadCrumbs = (FragmentBreadCrumbs) findViewById(android.R.id.title);
+            if (mFragmentBreadCrumbs == null) {
+                mFragmentBreadCrumbs = new FragmentBreadCrumbs(this);
+                ActionBar actionBar = getActionBar();
+                if (actionBar != null) {
+                    actionBar.setCustomNavigationMode(mFragmentBreadCrumbs);
+                }
+            }
+            mFragmentBreadCrumbs.setMaxVisible(2);
             mFragmentBreadCrumbs.setActivity(this);
-            getActionBar().setCustomNavigationMode(mFragmentBreadCrumbs);
         }
         mFragmentBreadCrumbs.setTitle(title, shortTitle);
     }

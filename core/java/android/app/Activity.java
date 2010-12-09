@@ -297,7 +297,7 @@ import java.util.List;
  *             <p>Followed by either <code>onResume()</code> if the activity
  *             returns back to the front, or <code>onStop()</code> if it becomes
  *             invisible to the user.</td>
- *         <td align="center"><font color="#800000"><strong>Yes</strong></font></td>
+ *         <td align="center"><font color="#800000"><strong>Pre-{@link android.os.Build.VERSION_CODES#HONEYCOMB}</strong></font></td>
  *         <td align="center"><code>onResume()</code> or<br>
  *                 <code>onStop()</code></td>
  *     </tr>
@@ -346,6 +346,14 @@ import java.util.List;
  * persistent data in {@link #onPause} instead of {@link #onSaveInstanceState}
  * because the later is not part of the lifecycle callbacks, so will not
  * be called in every situation as described in its documentation.</p>
+ *
+ * <p class="note">Be aware that these semantics will change slightly between
+ * applications targeting platforms starting with {@link android.os.Build.VERSION_CODES#HONEYCOMB}
+ * vs. those targeting prior platforms.  Starting with Honeycomb, an application
+ * is not in the killable state until its {@link #onStop} has returned.  This
+ * impacts when {@link #onSaveInstanceState(Bundle)} may be called (it may be
+ * safely called after {@link #onPause()} and allows and application to safely
+ * wait until {@link #onStop()} to save persistent state.</p>
  *
  * <p>For those methods that are not marked as being killable, the activity's
  * process will not be killed by the system starting from the time the method
@@ -489,7 +497,7 @@ import java.util.List;
  * paused.  Note this implies
  * that the user pressing BACK from your activity does <em>not</em>
  * mean "cancel" -- it means to leave the activity with its current contents
- * saved away.  Cancelling edits in an activity must be provided through
+ * saved away.  Canceling edits in an activity must be provided through
  * some other mechanism, such as an explicit "revert" or "undo" option.</p>
  *
  * <p>See the {@linkplain android.content.ContentProvider content package} for
@@ -1255,11 +1263,8 @@ public class Activity extends ContextThemeWrapper
      * can use the given <var>canvas</var>, which is configured to draw into the
      * bitmap, for rendering if desired.
      * 
-     * <p>The default implementation renders the Screen's current view
-     * hierarchy into the canvas to generate a thumbnail.
-     * 
-     * <p>If you return false, the bitmap will be filled with a default
-     * thumbnail.
+     * <p>The default implementation returns fails and does not draw a thumbnail;
+     * this will result in the platform creating its own thumbnail if needed.
      * 
      * @param outBitmap The bitmap to contain the thumbnail.
      * @param canvas Can be used to render into the bitmap.
@@ -1272,40 +1277,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onPause
      */
     public boolean onCreateThumbnail(Bitmap outBitmap, Canvas canvas) {
-        if (mDecor == null) {
-            return false;
-        }
-
-        int paddingLeft = 0;
-        int paddingRight = 0;
-        int paddingTop = 0;
-        int paddingBottom = 0;
-
-        // Find System window and use padding so we ignore space reserved for decorations
-        // like the status bar and such.
-        final FrameLayout top = (FrameLayout) mDecor;
-        for (int i = 0; i < top.getChildCount(); i++) {
-            View child = top.getChildAt(i);
-            if (child.isFitsSystemWindowsFlagSet()) {
-                paddingLeft = child.getPaddingLeft();
-                paddingRight = child.getPaddingRight();
-                paddingTop = child.getPaddingTop();
-                paddingBottom = child.getPaddingBottom();
-                break;
-            }
-        }
-        
-        final int visibleWidth = mDecor.getWidth() - paddingLeft - paddingRight;
-        final int visibleHeight = mDecor.getHeight() - paddingTop - paddingBottom;
-
-        canvas.save();
-        canvas.scale( (float) outBitmap.getWidth() / visibleWidth,
-                (float) outBitmap.getHeight() / visibleHeight);
-        canvas.translate(-paddingLeft, -paddingTop);
-        mDecor.draw(canvas);
-        canvas.restore();
-
-        return true;
+        return false;
     }
 
     /**
@@ -1430,6 +1402,8 @@ public class Activity extends ContextThemeWrapper
      */
     public void onConfigurationChanged(Configuration newConfig) {
         mCalled = true;
+
+        mFragments.dispatchConfigurationChanged(newConfig);
 
         if (mWindow != null) {
             // Pass the configuration changed event to the window
@@ -1594,6 +1568,7 @@ public class Activity extends ContextThemeWrapper
     
     public void onLowMemory() {
         mCalled = true;
+        mFragments.dispatchLowMemory();
     }
     
     /**

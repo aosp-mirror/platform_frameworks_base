@@ -261,8 +261,7 @@
 
         <activity
                 android:name="LinesActivity"
-                android:label="_Lines"
-                android:hardwareAccelerated="true">
+                android:label="_Lines">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

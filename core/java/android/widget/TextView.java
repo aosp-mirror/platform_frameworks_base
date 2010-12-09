@@ -7103,7 +7103,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
 
                     stopSelectionActionMode();
-                    if (hasInsertionController()) {
+                    boolean selectAllGotFocus = mSelectAllOnFocus && mTouchFocusSelected;
+                    if (hasInsertionController() && !selectAllGotFocus) {
                         getInsertionController().show();
                     }
                 }

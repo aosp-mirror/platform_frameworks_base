@@ -126,7 +126,7 @@ public class RsListRS {
         mListAllocs = new ScriptField_ListAllocs_s(mRS, DATA_LIST.length);
         for (int i = 0; i < DATA_LIST.length; i ++) {
             ScriptField_ListAllocs_s.Item listElem = new ScriptField_ListAllocs_s.Item();
-            listElem.text = Allocation.createFromString(mRS, DATA_LIST[i]);
+            listElem.text = Allocation.createFromString(mRS, DATA_LIST[i], Allocation.USAGE_SCRIPT);
             mListAllocs.set(listElem, i, false);
         }
 

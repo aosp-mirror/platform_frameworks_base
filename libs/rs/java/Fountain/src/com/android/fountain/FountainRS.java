@@ -38,7 +38,8 @@ public class FountainRS {
         pfb.setVaryingColor(true);
         rs.bindProgramFragment(pfb.create());
 
-        ScriptField_Point points = new ScriptField_Point(mRS, PART_COUNT);
+        ScriptField_Point points = new ScriptField_Point(mRS, PART_COUNT);//
+ //                                                        Allocation.USAGE_GRAPHICS_VERTEX);
 
         Mesh.AllocationBuilder smb = new Mesh.AllocationBuilder(mRS);
         smb.addVertexAllocation(points.getAllocation());

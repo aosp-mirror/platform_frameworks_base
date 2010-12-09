@@ -19,41 +19,63 @@
 -->
 
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
-    android:layout_width="wrap_content"
-    android:orientation="horizontal"
-    android:layout_margin="10dip">
+    android:layout_width="156dip">
 
     <ImageView android:id="@+id/app_thumbnail"
-        android:layout_width="88dip"
-        android:layout_height="56dip"
-        android:layout_margin="10dip"
-        android:background="#80808080">
-    </ImageView>
-
-    <LinearLayout
-        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="10dip"
-        android:layout_marginBottom="10dip"
-        android:layout_marginRight="10dip">
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="105dip"
+        android:scaleType="center"
+        android:background="@drawable/recents_thumbnail_bg"
+    />
 
-        <ImageView android:id="@+id/app_icon"
-            android:layout_width="23dip"
-            android:layout_height="23dip"
-            android:gravity="bottom"
-            android:layout_margin="5dip"
-            />
+    <ImageView android:id="@+id/app_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="123dip"
+        android:layout_marginTop="16dip"
+    />
 
-        <TextView android:id="@+id/app_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="22dip"
-        />
+    <View android:id="@+id/recents_callout_line"
+        android:layout_width="97dip"
+        android:layout_height="1dip"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="61dip"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="16dip"
+        android:layout_toLeftOf="@id/app_thumbnail"
+        android:layout_marginRight="3dip"
+        android:background="@drawable/recents_callout_line"
+    />
 
-    </LinearLayout>
+    <TextView android:id="@+id/app_label"
+        android:layout_width="113dip"
+        android:layout_height="wrap_content"
+        android:textSize="18dip"
+        android:fadingEdge="none"
+        android:fadingEdgeLength="0dp"
+        android:scrollHorizontally="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="16dip"
+        android:layout_marginTop="32dip"
+    />
 
-</LinearLayout>
+    <TextView android:id="@+id/app_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18dip"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="16dip"
+        android:layout_marginTop="61dip"
+    />
+
+</RelativeLayout>

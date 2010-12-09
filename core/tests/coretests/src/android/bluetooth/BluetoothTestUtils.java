@@ -113,7 +113,7 @@ public class BluetoothTestUtils extends Assert {
         protected void setFiredFlag(int flag) {
             synchronized (this) {
                 mFiredFlags |= flag;
-                if (mFiredFlags == mExpectedFlags) {
+                if ((mFiredFlags & mExpectedFlags) == mExpectedFlags) {
                     mCompletedTime = System.currentTimeMillis();
                 }
             }

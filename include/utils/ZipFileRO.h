@@ -30,6 +30,7 @@
 #ifndef __LIBS_ZIPFILERO_H
 #define __LIBS_ZIPFILERO_H
 
+#include <utils/Compat.h>
 #include <utils/Errors.h>
 #include <utils/FileMap.h>
 #include <utils/threads.h>
@@ -128,7 +129,7 @@ public:
      * appears to be bad.
      */
     bool getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
-        size_t* pCompLen, off_t* pOffset, long* pModWhen, long* pCrc32) const;
+        size_t* pCompLen, off64_t* pOffset, long* pModWhen, long* pCrc32) const;
 
     /*
      * Create a new FileMap object that maps a subset of the archive.  For
@@ -231,7 +232,7 @@ private:
     int         mNumEntries;
 
     /* CD directory offset in the Zip archive */
-    off_t       mDirectoryOffset;
+    off64_t     mDirectoryOffset;
 
     /*
      * We know how many entries are in the Zip archive, so we have a

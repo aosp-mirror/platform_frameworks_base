@@ -130,7 +130,6 @@ private:
 
         // these are internal functions used to set up preview buffers
         status_t                registerPreviewBuffers();
-        status_t                setOverlay();
 
         // camera operation mode
         enum camera_mode {
@@ -175,14 +174,8 @@ private:
         int                             mCameraFacing;   // immutable after constructor
         pid_t                           mClientPid;
         sp<CameraHardwareInterface>     mHardware;       // cleared after disconnect()
-        bool                            mUseOverlay;     // immutable after constructor
-        sp<OverlayRef>                  mOverlayRef;
-        int                             mOverlayW;
-        int                             mOverlayH;
         int                             mPreviewCallbackFlag;
         int                             mOrientation;     // Current display orientation
-        // True if display orientation has been changed. This is only used in overlay.
-        int                             mOrientationChanged;
         bool                            mPlayShutterSound;
 
         // Ensures atomicity among the public methods

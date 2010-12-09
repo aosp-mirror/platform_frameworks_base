@@ -161,9 +161,9 @@ int do_add_service(struct binder_state *bs,
     si = find_svc(s, len);
     if (si) {
         if (si->ptr) {
-            LOGE("add_service('%s',%p) uid=%d - ALREADY REGISTERED\n",
+            LOGE("add_service('%s',%p) uid=%d - ALREADY REGISTERED, OVERRIDE\n",
                  str8(s), ptr, uid);
-            return -1;
+            svcinfo_death(bs, si);
         }
         si->ptr = ptr;
     } else {

@@ -3780,21 +3780,21 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
     
-    public final void activityPaused(IBinder token, Bundle icicle) {
+    public final void activityPaused(IBinder token) {
+        final long origId = Binder.clearCallingIdentity();
+        mMainStack.activityPaused(token, false);
+        Binder.restoreCallingIdentity(origId);
+    }
+
+    public final void activityStopped(IBinder token, Bundle icicle, Bitmap thumbnail,
+            CharSequence description) {
+        if (localLOGV) Slog.v(
+            TAG, "Activity stopped: token=" + token);
+
         // Refuse possible leaked file descriptors
         if (icicle != null && icicle.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Bundle");
         }
-
-        final long origId = Binder.clearCallingIdentity();
-        mMainStack.activityPaused(token, icicle, false);
-        Binder.restoreCallingIdentity(origId);
-    }
-
-    public final void activityStopped(IBinder token, Bitmap thumbnail,
-            CharSequence description) {
-        if (localLOGV) Slog.v(
-            TAG, "Activity stopped: token=" + token);
 
         ActivityRecord r = null;
 
@@ -3804,7 +3804,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             int index = mMainStack.indexOfTokenLocked(token);
             if (index >= 0) {
                 r = (ActivityRecord)mMainStack.mHistory.get(index);
-                r.thumbnail = thumbnail;
+                r.icicle = icicle;
+                r.haveState = true;
+                if (thumbnail != null) {
+                    r.thumbnail = thumbnail;
+                }
                 r.description = description;
                 r.stopped = true;
                 r.state = ActivityState.STOPPED;
@@ -4822,6 +4826,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 throw new SecurityException(msg);
             }
 
+            final boolean canReadFb = checkCallingPermission(
+                    android.Manifest.permission.READ_FRAME_BUFFER)
+                    == PackageManager.PERMISSION_GRANTED;
+
             int pos = mMainStack.mHistory.size()-1;
             ActivityRecord next =
                 pos >= 0 ? (ActivityRecord)mMainStack.mHistory.get(pos) : null;
@@ -4866,7 +4874,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                     ci.id = curTask.taskId;
                     ci.baseActivity = r.intent.getComponent();
                     ci.topActivity = top.intent.getComponent();
-                    ci.thumbnail = top.thumbnail;
+                    if (canReadFb) {
+                        if (top.thumbnail != null) {
+                            ci.thumbnail = top.thumbnail;
+                        } else if (top.state == ActivityState.RESUMED) {
+                            ci.thumbnail = top.stack.screenshotActivities();
+                        }
+                    }
                     ci.description = topDescription;
                     ci.numActivities = numActivities;
                     ci.numRunning = numRunning;
@@ -11806,7 +11820,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         } else if (app == mHeavyWeightProcess) {
             // We don't want to kill the current heavy-weight process.
             adj = HEAVY_WEIGHT_APP_ADJ;
-            schedGroup = Process.THREAD_GROUP_DEFAULT;
+            schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
             app.adjType = "heavy";
         } else if (app == mHomeProcess) {
             // This process is hosting what we currently consider to be the
@@ -11822,13 +11836,19 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.adjType = "bg-activities";
             N = app.activities.size();
             for (int j=0; j<N; j++) {
-                if (app.activities.get(j).visible) {
+                ActivityRecord r = app.activities.get(j);
+                if (r.visible) {
                     // This app has a visible activity!
                     app.hidden = false;
                     adj = VISIBLE_APP_ADJ;
                     schedGroup = Process.THREAD_GROUP_DEFAULT;
                     app.adjType = "visible";
                     break;
+                } else if (r.state == ActivityState.PAUSING
+                        || r.state == ActivityState.PAUSED
+                        || r.state == ActivityState.STOPPING) {
+                    adj = PERCEPTIBLE_APP_ADJ;
+                    app.adjType = "stopping";
                 }
             }
         } else {

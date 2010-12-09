@@ -28,8 +28,6 @@
 
 namespace android {
 
-class Overlay;
-
 /**
  *  The size of image for display.
  */
@@ -128,12 +126,6 @@ public:
      * Start preview mode.
      */
     virtual status_t    startPreview() = 0;
-
-    /**
-     * Only used if overlays are used for camera preview.
-     */
-    virtual bool         useOverlay() {return false;}
-    virtual status_t     setOverlay(const sp<Overlay> &overlay) {return BAD_VALUE;}
 
     /**
      * Stop a previously started preview.

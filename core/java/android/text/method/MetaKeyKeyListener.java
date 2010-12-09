@@ -105,10 +105,6 @@ public abstract class MetaKeyKeyListener {
      */
     public static final int META_SELECTING = KeyEvent.META_SELECTING;
 
-    private static final int META_SHIFT_ON_AND_LOCKED = META_SHIFT_ON | META_CAP_LOCKED;
-    private static final int META_ALT_ON_AND_LOCKED = META_ALT_ON | META_ALT_LOCKED;
-    private static final int META_SYM_ON_AND_LOCKED = META_SYM_ON | META_SYM_LOCKED;
-
     // These bits are privately used by the meta key key listener.
     // They are deliberately assigned values outside of the representable range of an 'int'
     // so as not to conflict with any meta key states publicly defined by KeyEvent.
@@ -565,13 +561,13 @@ public abstract class MetaKeyKeyListener {
      * {@link #META_ALT_ON} or {@link #META_SYM_ON}.
      */
     public long clearMetaKeyState(long state, int which) {
-        if ((which & META_SHIFT_ON_AND_LOCKED) == META_SHIFT_ON_AND_LOCKED) {
+        if ((which & META_SHIFT_ON) != 0 && (state & META_CAP_LOCKED) != 0) {
             state &= ~META_SHIFT_MASK;
         }
-        if ((which & META_ALT_ON_AND_LOCKED) == META_ALT_ON_AND_LOCKED) {
+        if ((which & META_ALT_ON) != 0 && (state & META_ALT_LOCKED) != 0) {
             state &= ~META_ALT_MASK;
         }
-        if ((which & META_SYM_ON_AND_LOCKED) == META_SYM_ON_AND_LOCKED) {
+        if ((which & META_SYM_ON) != 0 && (state & META_SYM_LOCKED) != 0) {
             state &= ~META_SYM_MASK;
         }
         return state;

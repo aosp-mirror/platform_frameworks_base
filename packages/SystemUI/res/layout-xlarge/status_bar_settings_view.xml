@@ -64,6 +64,7 @@
         <TextView
                 android:id="@+id/network_label"
                 style="@style/StatusBarPanelSettingsContents"
+                android:text="@string/status_bar_settings_wifi_button"
                 />
         <ImageView
             android:layout_width="wrap_content"

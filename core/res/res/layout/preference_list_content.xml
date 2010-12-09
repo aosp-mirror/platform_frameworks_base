@@ -56,7 +56,8 @@
 
         </LinearLayout>
 
-        <android.preference.PreferenceFrameLayout android:id="@+id/prefs"
+        <LinearLayout
+                android:id="@+id/prefs_frame"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight="20"
@@ -65,7 +66,35 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
                 android:background="?attr/preferencePanelBackground"
-                android:visibility="gone" />
+                android:orientation="vertical"
+                android:visibility="gone" >
+
+            <!-- Breadcrumb inserted here -->
+            <android.app.FragmentBreadCrumbs
+                android:id="@android:id/title"
+                android:layout_height="72dip"
+                android:layout_width="match_parent"
+                android:paddingTop="16dip"
+                android:paddingBottom="8dip"
+                android:gravity="center_vertical|left"
+                android:layout_marginLeft="48dip"
+                android:layout_marginRight="48dip"
+                />
+
+            <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="1dip"
+                    android:paddingLeft="32dip"
+                    android:paddingRight="32dip"
+                    android:src="#404040"
+                />
+            <android.preference.PreferenceFrameLayout android:id="@+id/prefs"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dip"
+                    android:layout_weight="1"
+                    android:layout_marginTop="-1dip"
+                />
+        </LinearLayout>
     </LinearLayout>
 
     <RelativeLayout android:id="@+id/button_bar"

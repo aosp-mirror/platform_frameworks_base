@@ -1398,6 +1398,7 @@
   <public type="attr" name="buttonBarStyle" />
   <public type="attr" name="buttonBarButtonStyle" />
   <public type="attr" name="segmentedButtonStyle" />
+  <public type="attr" name="staticWallpaperPreview" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />

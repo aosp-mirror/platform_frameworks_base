@@ -119,10 +119,10 @@ public interface IActivityManager extends IInterface {
     public void attachApplication(IApplicationThread app) throws RemoteException;
     /* oneway */
     public void activityIdle(IBinder token, Configuration config) throws RemoteException;
-    public void activityPaused(IBinder token, Bundle state) throws RemoteException;
+    public void activityPaused(IBinder token) throws RemoteException;
     /* oneway */
-    public void activityStopped(IBinder token,
-                                Bitmap thumbnail, CharSequence description) throws RemoteException;
+    public void activityStopped(IBinder token, Bundle state,
+            Bitmap thumbnail, CharSequence description) throws RemoteException;
     /* oneway */
     public void activityDestroyed(IBinder token) throws RemoteException;
     public String getCallingPackage(IBinder token) throws RemoteException;

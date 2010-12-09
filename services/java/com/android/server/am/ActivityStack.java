@@ -46,6 +46,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -237,6 +239,9 @@ public class ActivityStack {
     
     long mInitialStartTime = 0;
     
+    int mThumbnailWidth = -1;
+    int mThumbnailHeight = -1;
+
     static final int PAUSE_TIMEOUT_MSG = 9;
     static final int IDLE_TIMEOUT_MSG = 10;
     static final int IDLE_NOW_MSG = 11;
@@ -256,7 +261,7 @@ public class ActivityStack {
                     // We don't at this point know if the activity is fullscreen,
                     // so we need to be conservative and assume it isn't.
                     Slog.w(TAG, "Activity pause timeout for " + token);
-                    activityPaused(token, null, true);
+                    activityPaused(token, true);
                 } break;
                 case IDLE_TIMEOUT_MSG: {
                     if (mService.mDidDexOpt) {
@@ -564,8 +569,6 @@ public class ActivityStack {
             // As part of the process of launching, ActivityThread also performs
             // a resume.
             r.state = ActivityState.RESUMED;
-            r.icicle = null;
-            r.haveState = false;
             r.stopped = false;
             mResumedActivity = r;
             r.task.touchActiveTime();
@@ -579,6 +582,9 @@ public class ActivityStack {
             r.state = ActivityState.STOPPED;
             r.stopped = true;
         }
+
+        r.icicle = null;
+        r.haveState = false;
 
         // Launch the new version setup screen if needed.  We do this -after-
         // launching the initial activity (that is, home), so that it can have
@@ -644,6 +650,23 @@ public class ActivityStack {
         }
     }
     
+    public final Bitmap screenshotActivities() {
+        Resources res = mService.mContext.getResources();
+        int w = mThumbnailWidth;
+        int h = mThumbnailHeight;
+        if (w < 0) {
+            mThumbnailWidth = w =
+                res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_width);
+            mThumbnailHeight = h =
+                res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_height);
+        }
+
+        if (w > 0) {
+            return mService.mWindowManager.screenshotApplications(w, h);
+        }
+        return null;
+    }
+
     private final void startPausingLocked(boolean userLeaving, boolean uiSleeping) {
         if (mPausingActivity != null) {
             RuntimeException e = new RuntimeException();
@@ -663,6 +686,7 @@ public class ActivityStack {
         mLastPausedActivity = prev;
         prev.state = ActivityState.PAUSING;
         prev.task.touchActiveTime();
+        prev.thumbnail = screenshotActivities();
 
         mService.updateCpuStats();
         
@@ -726,10 +750,9 @@ public class ActivityStack {
         }
     }
     
-    final void activityPaused(IBinder token, Bundle icicle, boolean timeout) {
+    final void activityPaused(IBinder token, boolean timeout) {
         if (DEBUG_PAUSE) Slog.v(
-            TAG, "Activity paused: token=" + token + ", icicle=" + icicle
-            + ", timeout=" + timeout);
+            TAG, "Activity paused: token=" + token + ", timeout=" + timeout);
 
         ActivityRecord r = null;
 
@@ -737,10 +760,6 @@ public class ActivityStack {
             int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 r = (ActivityRecord)mHistory.get(index);
-                if (!timeout) {
-                    r.icicle = icicle;
-                    r.haveState = true;
-                }
                 mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
                 if (mPausingActivity == r) {
                     r.state = ActivityState.PAUSED;

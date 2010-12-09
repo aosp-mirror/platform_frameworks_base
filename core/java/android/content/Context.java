@@ -145,7 +145,7 @@ public abstract class Context {
      * tied to the lifetime of the process rather than the current component.
      *
      * <p>Consider for example how this interacts with
-     * {@ #registerReceiver(BroadcastReceiver, IntentFilter)}:
+     * {@link #registerReceiver(BroadcastReceiver, IntentFilter)}:
      * <ul>
      * <li> <p>If used from an Activity context, the receiver is being registered
      * within that activity.  This means that you are expected to unregister

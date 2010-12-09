@@ -36,6 +36,8 @@ public class LinesActivity extends Activity {
     }
 
     static class LinesView extends View {
+        private static final boolean LINE_AA = false;
+
         private final Bitmap mBitmap1;
         private final Paint mSmallPaint;
         private final Paint mMediumPaint;
@@ -43,6 +45,7 @@ public class LinesActivity extends Activity {
         private final BitmapShader mShader;
         private final float[] mPoints;
         private final Paint mAlphaPaint;
+        private final Paint mHairLinePaint;
 
         LinesView(Context c) {
             super(c);
@@ -50,25 +53,30 @@ public class LinesActivity extends Activity {
             mBitmap1 = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset1);
 
             mSmallPaint = new Paint();
-            mSmallPaint.setAntiAlias(true);
+            mSmallPaint.setAntiAlias(LINE_AA);
             mSmallPaint.setColor(0xffff0000);
             mSmallPaint.setStrokeWidth(1.0f);
 
             mMediumPaint = new Paint();
-            mMediumPaint.setAntiAlias(true);
+            mMediumPaint.setAntiAlias(LINE_AA);
             mMediumPaint.setColor(0xff0000ff);
             mMediumPaint.setStrokeWidth(4.0f);
 
             mLargePaint = new Paint();
-            mLargePaint.setAntiAlias(true);
+            mLargePaint.setAntiAlias(LINE_AA);
             mLargePaint.setColor(0xff00ff00);
             mLargePaint.setStrokeWidth(15.0f);
 
             mAlphaPaint = new Paint();
-            mAlphaPaint.setAntiAlias(true);
+            mAlphaPaint.setAntiAlias(LINE_AA);
             mAlphaPaint.setColor(0x7fff0050);
             mAlphaPaint.setStrokeWidth(10.0f);
             
+            mHairLinePaint = new Paint();
+            mHairLinePaint.setAntiAlias(LINE_AA);
+            mHairLinePaint.setColor(0xff0000ff);
+            mHairLinePaint.setStrokeWidth(0.0f);
+
             mShader = new BitmapShader(mBitmap1, BitmapShader.TileMode.MIRROR,
                     BitmapShader.TileMode.MIRROR);
 
@@ -100,7 +108,7 @@ public class LinesActivity extends Activity {
 
             mSmallPaint.setAntiAlias(false);
             canvas.drawLine(0.0f, 0.0f, 400.0f, 0.0f, mSmallPaint);
-            mSmallPaint.setAntiAlias(true);
+            mSmallPaint.setAntiAlias(LINE_AA);
             canvas.drawLine(0.0f, 0.0f, 0.0f, 400.0f, mSmallPaint);
             canvas.drawLine(0.0f, 400.0f, 400.0f, 400.0f, mSmallPaint);
             
@@ -109,6 +117,12 @@ public class LinesActivity extends Activity {
             canvas.drawLines(mPoints, mAlphaPaint);
             mAlphaPaint.setShader(null);
 
+            canvas.restore();
+            
+            canvas.scale(10.0f, 10.0f);
+            canvas.drawLine(50.0f, 40.0f, 10.0f, 40.0f, mSmallPaint);
+            canvas.drawLine(10.0f, 50.0f, 50.0f, 50.0f, mSmallPaint);
+            canvas.drawLine(10.0f, 60.0f, 50.0f, 60.0f, mHairLinePaint);
             canvas.restore();
         }
     }

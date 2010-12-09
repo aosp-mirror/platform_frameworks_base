@@ -72,8 +72,8 @@ public:
 
 	virtual bool rewind()
     {
-        off_t pos = fAsset->seek(0, SEEK_SET);
-        return pos != (off_t)-1;
+        off64_t pos = fAsset->seek(0, SEEK_SET);
+        return pos != (off64_t)-1;
     }
     
 	virtual size_t read(void* buffer, size_t size)
@@ -88,10 +88,10 @@ public:
             // asset->seek returns new total offset
             // we want to return amount that was skipped
             
-            off_t oldOffset = fAsset->seek(0, SEEK_CUR);
+            off64_t oldOffset = fAsset->seek(0, SEEK_CUR);
             if (-1 == oldOffset)
                 return 0;
-            off_t newOffset = fAsset->seek(size, SEEK_CUR);
+            off64_t newOffset = fAsset->seek(size, SEEK_CUR);
             if (-1 == newOffset)
                 return 0;
             

@@ -192,29 +192,34 @@ public class RenderScript {
         rsnTypeGetNativeData(mContext, id, typeData);
     }
 
-    native int  rsnAllocationCreateTyped(int con, int type);
-    synchronized int nAllocationCreateTyped(int type) {
-        return rsnAllocationCreateTyped(mContext, type);
+    native int  rsnAllocationCreateTyped(int con, int type, int usage);
+    synchronized int nAllocationCreateTyped(int type, int usage) {
+        return rsnAllocationCreateTyped(mContext, type, usage);
     }
-    native void  rsnAllocationUpdateFromBitmap(int con, int alloc, Bitmap bmp);
-    synchronized void nAllocationUpdateFromBitmap(int alloc, Bitmap bmp) {
-        rsnAllocationUpdateFromBitmap(mContext, alloc, bmp);
+    native int  rsnAllocationCreateFromBitmap(int con, int type, int mip, Bitmap bmp, int usage);
+    synchronized int nAllocationCreateFromBitmap(int type, int mip, Bitmap bmp, int usage) {
+        return rsnAllocationCreateFromBitmap(mContext, type, mip, bmp, usage);
     }
-    native int  rsnAllocationCreateFromBitmap(int con, int dstFmt, boolean genMips, Bitmap bmp);
-    synchronized int nAllocationCreateFromBitmap(int dstFmt, boolean genMips, Bitmap bmp) {
-        return rsnAllocationCreateFromBitmap(mContext, dstFmt, genMips, bmp);
-    }
-    native int  rsnAllocationCubeCreateFromBitmap(int con, int dstFmt, boolean genMips, Bitmap bmp);
-    synchronized int nAllocationCubeCreateFromBitmap(int dstFmt, boolean genMips, Bitmap bmp) {
-        return rsnAllocationCubeCreateFromBitmap(mContext, dstFmt, genMips, bmp);
+    native int  rsnAllocationCubeCreateFromBitmap(int con, int type, int mip, Bitmap bmp, int usage);
+    synchronized int nAllocationCubeCreateFromBitmap(int type, int mip, Bitmap bmp, int usage) {
+        return rsnAllocationCubeCreateFromBitmap(mContext, type, mip, bmp, usage);
     }
     native int  rsnAllocationCreateBitmapRef(int con, int type, Bitmap bmp);
     synchronized int nAllocationCreateBitmapRef(int type, Bitmap bmp) {
         return rsnAllocationCreateBitmapRef(mContext, type, bmp);
     }
-    native int  rsnAllocationCreateFromAssetStream(int con, int dstFmt, boolean genMips, int assetStream);
-    synchronized int nAllocationCreateFromAssetStream(int dstFmt, boolean genMips, int assetStream) {
-        return rsnAllocationCreateFromAssetStream(mContext, dstFmt, genMips, assetStream);
+    native int  rsnAllocationCreateFromAssetStream(int con, int mips, int assetStream, int usage);
+    synchronized int nAllocationCreateFromAssetStream(int mips, int assetStream, int usage) {
+        return rsnAllocationCreateFromAssetStream(mContext, mips, assetStream, usage);
+    }
+
+    native void rsnAllocationSyncAll(int con, int alloc, int src);
+    synchronized void nAllocationSyncAll(int alloc, int src) {
+        rsnAllocationSyncAll(mContext, alloc, src);
+    }
+    native void  rsnAllocationUpdateFromBitmap(int con, int alloc, Bitmap bmp);
+    synchronized void nAllocationUpdateFromBitmap(int alloc, Bitmap bmp) {
+        rsnAllocationUpdateFromBitmap(mContext, alloc, bmp);
     }
 
     native void rsnAllocationUploadToTexture(int con, int alloc, boolean genMips, int baseMioLevel);

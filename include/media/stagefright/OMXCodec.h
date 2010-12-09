@@ -121,10 +121,16 @@ private:
         kOutputBuffersAreUnreadable           = 8192,
     };
 
+    enum BufferStatus {
+        OWNED_BY_US,
+        OWNED_BY_COMPONENT,
+        OWNED_BY_NATIVE_WINDOW,
+        OWNED_BY_CLIENT,
+    };
+
     struct BufferInfo {
         IOMX::buffer_id mBuffer;
-        bool mOwnedByComponent;
-        bool mOwnedByNativeWindow;
+        BufferStatus mStatus;
         sp<IMemory> mMem;
         size_t mSize;
         void *mData;
@@ -248,9 +254,9 @@ private:
 
     status_t freeBuffer(OMX_U32 portIndex, size_t bufIndex);
 
-    void drainInputBuffer(IOMX::buffer_id buffer);
+    bool drainInputBuffer(IOMX::buffer_id buffer);
     void fillOutputBuffer(IOMX::buffer_id buffer);
-    void drainInputBuffer(BufferInfo *info);
+    bool drainInputBuffer(BufferInfo *info);
     void fillOutputBuffer(BufferInfo *info);
 
     void drainInputBuffers();

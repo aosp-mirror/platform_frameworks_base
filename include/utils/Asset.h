@@ -23,9 +23,11 @@
 
 #include <stdio.h>
 #include <sys/types.h>
-#include "FileMap.h"
-#include "String8.h"
-#include "Errors.h"
+
+#include <utils/Compat.h>
+#include <utils/Errors.h>
+#include <utils/FileMap.h>
+#include <utils/String8.h>
 
 namespace android {
 
@@ -69,10 +71,10 @@ public:
 
     /*
      * Seek to the specified offset.  "whence" uses the same values as
-     * lseek/fseek.  Returns the new position on success, or (off_t) -1
+     * lseek/fseek.  Returns the new position on success, or (off64_t) -1
      * on failure.
      */
-    virtual off_t seek(off_t offset, int whence) = 0;
+    virtual off64_t seek(off64_t offset, int whence) = 0;
 
     /*
      * Close the asset, freeing all associated resources.
@@ -87,26 +89,26 @@ public:
     /*
      * Get the total amount of data that can be read.
      */
-    virtual off_t getLength(void) const = 0;
+    virtual off64_t getLength(void) const = 0;
 
     /*
      * Get the total amount of data that can be read from the current position.
      */
-    virtual off_t getRemainingLength(void) const = 0;
+    virtual off64_t getRemainingLength(void) const = 0;
 
     /*
      * Open a new file descriptor that can be used to read this asset.
      * Returns -1 if you can not use the file descriptor (for example if the
      * asset is compressed).
      */
-    virtual int openFileDescriptor(off_t* outStart, off_t* outLength) const = 0;
-    
+    virtual int openFileDescriptor(off64_t* outStart, off64_t* outLength) const = 0;
+
     /*
      * Return whether this asset's buffer is allocated in RAM (not mmapped).
      * Note: not virtual so it is safe to call even when being destroyed.
      */
     virtual bool isAllocated(void) const { return false; }
-    
+
     /*
      * Get a string identifying the asset's source.  This might be a full
      * path, it might be a colon-separated list of identifiers.
@@ -120,7 +122,7 @@ protected:
     Asset(void);        // constructor; only invoked indirectly
 
     /* handle common seek() housekeeping */
-    off_t handleSeek(off_t offset, int whence, off_t curPosn, off_t maxPosn);
+    off64_t handleSeek(off64_t offset, int whence, off64_t curPosn, off64_t maxPosn);
 
     /* set the asset source string */
     void setAssetSource(const String8& path) { mAssetSource = path; }
@@ -153,7 +155,7 @@ private:
      *
      * The asset takes ownership of the file descriptor.
      */
-    static Asset* createFromFileSegment(int fd, off_t offset, size_t length,
+    static Asset* createFromFileSegment(int fd, off64_t offset, size_t length,
         AccessMode mode);
 
     /*
@@ -166,7 +168,7 @@ private:
      * This may not verify the validity of the compressed data until first
      * use.
      */
-    static Asset* createFromCompressedData(int fd, off_t offset,
+    static Asset* createFromCompressedData(int fd, off64_t offset,
         int compressionMethod, size_t compressedLength,
         size_t uncompressedLength, AccessMode mode);
 #endif
@@ -221,7 +223,7 @@ public:
      *
      * On success, the object takes ownership of "fd".
      */
-    status_t openChunk(const char* fileName, int fd, off_t offset, size_t length);
+    status_t openChunk(const char* fileName, int fd, off64_t offset, size_t length);
 
     /*
      * Use a memory-mapped region.
@@ -234,18 +236,18 @@ public:
      * Standard Asset interfaces.
      */
     virtual ssize_t read(void* buf, size_t count);
-    virtual off_t seek(off_t offset, int whence);
+    virtual off64_t seek(off64_t offset, int whence);
     virtual void close(void);
     virtual const void* getBuffer(bool wordAligned);
-    virtual off_t getLength(void) const { return mLength; }
-    virtual off_t getRemainingLength(void) const { return mLength-mOffset; }
-    virtual int openFileDescriptor(off_t* outStart, off_t* outLength) const;
+    virtual off64_t getLength(void) const { return mLength; }
+    virtual off64_t getRemainingLength(void) const { return mLength-mOffset; }
+    virtual int openFileDescriptor(off64_t* outStart, off64_t* outLength) const;
     virtual bool isAllocated(void) const { return mBuf != NULL; }
 
 private:
-    off_t       mStart;         // absolute file offset of start of chunk
-    off_t       mLength;        // length of the chunk
-    off_t       mOffset;        // current local offset, 0 == mStart
+    off64_t     mStart;         // absolute file offset of start of chunk
+    off64_t     mLength;        // length of the chunk
+    off64_t     mOffset;        // current local offset, 0 == mStart
     FILE*       mFp;            // for read/seek
     char*       mFileName;      // for opening
 
@@ -276,7 +278,7 @@ public:
      *
      * On success, the object takes ownership of "fd".
      */
-    status_t openChunk(int fd, off_t offset, int compressionMethod,
+    status_t openChunk(int fd, off64_t offset, int compressionMethod,
         size_t uncompressedLen, size_t compressedLen);
 
     /*
@@ -291,19 +293,19 @@ public:
      * Standard Asset interfaces.
      */
     virtual ssize_t read(void* buf, size_t count);
-    virtual off_t seek(off_t offset, int whence);
+    virtual off64_t seek(off64_t offset, int whence);
     virtual void close(void);
     virtual const void* getBuffer(bool wordAligned);
-    virtual off_t getLength(void) const { return mUncompressedLen; }
-    virtual off_t getRemainingLength(void) const { return mUncompressedLen-mOffset; }
-    virtual int openFileDescriptor(off_t* outStart, off_t* outLength) const { return -1; }
+    virtual off64_t getLength(void) const { return mUncompressedLen; }
+    virtual off64_t getRemainingLength(void) const { return mUncompressedLen-mOffset; }
+    virtual int openFileDescriptor(off64_t* outStart, off64_t* outLength) const { return -1; }
     virtual bool isAllocated(void) const { return mBuf != NULL; }
 
 private:
-    off_t       mStart;         // offset to start of compressed data
-    off_t       mCompressedLen; // length of the compressed data
-    off_t       mUncompressedLen; // length of the uncompressed data
-    off_t       mOffset;        // current offset, 0 == start of uncomp data
+    off64_t     mStart;         // offset to start of compressed data
+    off64_t     mCompressedLen; // length of the compressed data
+    off64_t     mUncompressedLen; // length of the uncompressed data
+    off64_t     mOffset;        // current offset, 0 == start of uncomp data
 
     FileMap*    mMap;           // for memory-mapped input
     int         mFd;            // for file input

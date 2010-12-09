@@ -16,13 +16,12 @@
 
 package android.preference;
 
+import android.app.FragmentBreadCrumbs;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.FrameLayout;
-import android.widget.FrameLayout.LayoutParams;
 
 /**
  * @hide
@@ -36,7 +35,7 @@ public class PreferenceFrameLayout extends FrameLayout {
     private final int mBorderBottom;
     private final int mBorderLeft;
     private final int mBorderRight;
-    private boolean mPaddingApplied = false;
+    private boolean mPaddingApplied;
 
     public PreferenceFrameLayout(Context context) {
         this(context, null);
@@ -70,7 +69,6 @@ public class PreferenceFrameLayout extends FrameLayout {
                 com.android.internal.R.styleable.PreferenceFrameLayout_borderRight,
                 defaultRightPadding);
 
-
         a.recycle();
     }
 
@@ -89,7 +87,9 @@ public class PreferenceFrameLayout extends FrameLayout {
         int borderLeft = getPaddingLeft();
         int borderRight = getPaddingRight();
 
-        LayoutParams layoutParams = (PreferenceFrameLayout.LayoutParams) child.getLayoutParams();
+        android.view.ViewGroup.LayoutParams params = child.getLayoutParams();
+        LayoutParams layoutParams = params instanceof PreferenceFrameLayout.LayoutParams
+            ? (PreferenceFrameLayout.LayoutParams) child.getLayoutParams() : null;
         // Check on the id of the child before adding it.
         if (layoutParams != null && layoutParams.removeBorders) {
             if (mPaddingApplied) {

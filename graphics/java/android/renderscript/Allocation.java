@@ -33,6 +33,15 @@ import android.util.TypedValue;
 public class Allocation extends BaseObj {
     Type mType;
     Bitmap mBitmap;
+    int mUsage;
+
+    public static final int USAGE_SCRIPT = 0x0001;
+    public static final int USAGE_GRAPHICS_TEXTURE = 0x0002;
+    public static final int USAGE_GRAPHICS_VERTEX = 0x0004;
+    public static final int USAGE_GRAPHICS_CONSTANTS = 0x0008;
+
+    private static final int USAGE_ALL = 0x000F;
+
 
     public enum CubemapLayout {
         VERTICAL_FACE_LIST (0),
@@ -46,13 +55,23 @@ public class Allocation extends BaseObj {
         }
     }
 
-    Allocation(int id, RenderScript rs, Type t) {
-        super(id, rs);
-        mType = t;
+    public enum MipmapGenerationControl {
+        MIPMAP_NONE(0),
+        MIPMAP_FULL(1),
+        MIPMAP_ON_SYNC_TO_TEXTURE(2);
+
+        int mID;
+        MipmapGenerationControl(int id) {
+            mID = id;
+        }
     }
 
-    Allocation(int id, RenderScript rs) {
+    Allocation(int id, RenderScript rs, Type t, int usage) {
         super(id, rs);
+        if (usage > USAGE_ALL) {
+            throw new RSIllegalArgumentException("Unknown usage specified.");
+        }
+        mType = t;
     }
 
     @Override
@@ -67,6 +86,20 @@ public class Allocation extends BaseObj {
 
     public Type getType() {
         return mType;
+    }
+
+    public void syncAll(int srcLocation) {
+        switch (srcLocation) {
+        case USAGE_SCRIPT:
+        case USAGE_GRAPHICS_CONSTANTS:
+        case USAGE_GRAPHICS_TEXTURE:
+        case USAGE_GRAPHICS_VERTEX:
+            break;
+        default:
+            throw new RSIllegalArgumentException("Source must be exactly one usage type.");
+        }
+        mRS.validate();
+        mRS.nAllocationSyncAll(getID(), srcLocation);
     }
 
     public void uploadToTexture(int baseMipLevel) {
@@ -242,6 +275,7 @@ public class Allocation extends BaseObj {
     }
     */
 
+    /*
     public class Adapter1D extends BaseObj {
         Adapter1D(int id, RenderScript rs) {
             super(id, rs);
@@ -282,6 +316,7 @@ public class Allocation extends BaseObj {
         mRS.nAdapter1DBindAllocation(id, getID());
         return new Adapter1D(id, mRS);
     }
+    */
 
 
     public class Adapter2D extends BaseObj {
@@ -336,32 +371,38 @@ public class Allocation extends BaseObj {
         mBitmapOptions.inScaled = false;
     }
 
-    static public Allocation createTyped(RenderScript rs, Type type) {
-
+    static public Allocation createTyped(RenderScript rs, Type type, int usage) {
         rs.validate();
-        if(type.getID() == 0) {
+        if (type.getID() == 0) {
             throw new RSInvalidStateException("Bad Type");
         }
-        int id = rs.nAllocationCreateTyped(type.getID());
-        if(id == 0) {
+        int id = rs.nAllocationCreateTyped(type.getID(), usage);
+        if (id == 0) {
             throw new RSRuntimeException("Allocation creation failed.");
         }
-        return new Allocation(id, rs, type);
+        return new Allocation(id, rs, type, usage);
     }
 
-    static public Allocation createSized(RenderScript rs, Element e, int count)
-        throws IllegalArgumentException {
+    static public Allocation createTyped(RenderScript rs, Type type) {
+        return createTyped(rs, type, USAGE_ALL);
+    }
 
+    static public Allocation createSized(RenderScript rs, Element e,
+                                         int count, int usage) {
         rs.validate();
         Type.Builder b = new Type.Builder(rs, e);
         b.setX(count);
         Type t = b.create();
 
-        int id = rs.nAllocationCreateTyped(t.getID());
-        if(id == 0) {
+        int id = rs.nAllocationCreateTyped(t.getID(), usage);
+        if (id == 0) {
             throw new RSRuntimeException("Allocation creation failed.");
         }
-        return new Allocation(id, rs, t);
+        return new Allocation(id, rs, t, usage);
+    }
+
+    static public Allocation createSized(RenderScript rs, Element e, int count) {
+        return createSized(rs, e, count, USAGE_ALL);
     }
 
     static private Element elementFromBitmap(RenderScript rs, Bitmap b) {
@@ -381,32 +422,44 @@ public class Allocation extends BaseObj {
         throw new RSInvalidStateException("Bad bitmap type: " + bc);
     }
 
-    static private Type typeFromBitmap(RenderScript rs, Bitmap b, boolean mip) {
+    static private Type typeFromBitmap(RenderScript rs, Bitmap b,
+                                       MipmapGenerationControl mip) {
         Element e = elementFromBitmap(rs, b);
         Type.Builder tb = new Type.Builder(rs, e);
         tb.setX(b.getWidth());
         tb.setY(b.getHeight());
-        tb.setMipmaps(mip);
+        tb.setMipmaps(mip == MipmapGenerationControl.MIPMAP_FULL);
         return tb.create();
     }
 
     static public Allocation createFromBitmap(RenderScript rs, Bitmap b,
-                                              Element dstFmt, boolean genMips) {
+                                              MipmapGenerationControl mips,
+                                              int usage) {
         rs.validate();
-        Type t = typeFromBitmap(rs, b, genMips);
+        Type t = typeFromBitmap(rs, b, mips);
 
-        int id = rs.nAllocationCreateFromBitmap(dstFmt.getID(), genMips, b);
-        if(id == 0) {
+        int id = rs.nAllocationCreateFromBitmap(t.getID(), mips.mID, b, usage);
+        if (id == 0) {
             throw new RSRuntimeException("Load failed.");
         }
-        return new Allocation(id, rs, t);
+        return new Allocation(id, rs, t, usage);
+    }
+
+    static public Allocation createFromBitmap(RenderScript rs, Bitmap b,
+                                              Element dstFmt, boolean genMips) {
+        MipmapGenerationControl mc = MipmapGenerationControl.MIPMAP_NONE;
+        if (genMips) {
+            mc = MipmapGenerationControl.MIPMAP_ON_SYNC_TO_TEXTURE;
+        }
+        return createFromBitmap(rs, b, mc, USAGE_ALL);
     }
 
     static public Allocation createCubemapFromBitmap(RenderScript rs, Bitmap b,
-                                                     Element dstFmt,
-                                                     boolean genMips,
-                                                     CubemapLayout layout) {
+                                                     MipmapGenerationControl mips,
+                                                     CubemapLayout layout,
+                                                     int usage) {
         rs.validate();
+
         int height = b.getHeight();
         int width = b.getWidth();
 
@@ -429,64 +482,76 @@ public class Allocation extends BaseObj {
         tb.setX(width);
         tb.setY(width);
         tb.setFaces(true);
-        tb.setMipmaps(genMips);
+        tb.setMipmaps(mips == MipmapGenerationControl.MIPMAP_FULL);
         Type t = tb.create();
 
-        int id = rs.nAllocationCubeCreateFromBitmap(dstFmt.getID(), genMips, b);
+        int id = rs.nAllocationCubeCreateFromBitmap(t.getID(), mips.mID, b, usage);
         if(id == 0) {
             throw new RSRuntimeException("Load failed for bitmap " + b + " element " + e);
         }
-        return new Allocation(id, rs, t);
+        return new Allocation(id, rs, t, usage);
     }
+
+    static public Allocation createCubemapFromBitmap(RenderScript rs, Bitmap b,
+                                                     Element dstFmt,
+                                                     boolean genMips,
+                                                     CubemapLayout layout) {
+        MipmapGenerationControl mc = MipmapGenerationControl.MIPMAP_NONE;
+        if (genMips) {
+            mc = MipmapGenerationControl.MIPMAP_ON_SYNC_TO_TEXTURE;
+        }
+        return createCubemapFromBitmap(rs, b, mc, layout, USAGE_ALL);
+    }
+
 
     static public Allocation createBitmapRef(RenderScript rs, Bitmap b) {
 
         rs.validate();
-        Type t = typeFromBitmap(rs, b, false);
+        Type t = typeFromBitmap(rs, b, MipmapGenerationControl.MIPMAP_NONE);
 
         int id = rs.nAllocationCreateBitmapRef(t.getID(), b);
         if(id == 0) {
             throw new RSRuntimeException("Load failed.");
         }
 
-        Allocation a = new Allocation(id, rs, t);
+        Allocation a = new Allocation(id, rs, t, USAGE_SCRIPT);
         a.mBitmap = b;
         return a;
     }
 
-    static public Allocation createFromBitmapResource(RenderScript rs, Resources res, int id, Element dstFmt, boolean genMips) {
+    static public Allocation createFromBitmapResource(RenderScript rs,
+                                                      Resources res,
+                                                      int id,
+                                                      MipmapGenerationControl mips,
+                                                      int usage) {
 
         rs.validate();
-        InputStream is = null;
-        try {
-            final TypedValue value = new TypedValue();
-            is = res.openRawResource(id, value);
-
-            int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
-            int aId = rs.nAllocationCreateFromAssetStream(dstFmt.getID(), genMips, asset);
-
-            if (aId == 0) {
-                throw new RSRuntimeException("Load failed.");
-            }
-            Allocation alloc = new Allocation(aId, rs, null);
-            alloc.updateFromNative();
-            return alloc;
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
-        }
+        Bitmap b = BitmapFactory.decodeResource(res, id);
+        Allocation alloc = createFromBitmap(rs, b, mips, usage);
+        b.recycle();
+        return alloc;
     }
 
-    static public Allocation createFromString(RenderScript rs, String str) {
+    static public Allocation createFromBitmapResource(RenderScript rs,
+                                                      Resources res,
+                                                      int id,
+                                                      Element dstFmt,
+                                                      boolean genMips) {
+        MipmapGenerationControl mc = MipmapGenerationControl.MIPMAP_NONE;
+        if (genMips) {
+            mc = MipmapGenerationControl.MIPMAP_ON_SYNC_TO_TEXTURE;
+        }
+        return createFromBitmapResource(rs, res, id, mc, USAGE_ALL);
+    }
+
+    static public Allocation createFromString(RenderScript rs,
+                                              String str,
+                                              int usage) {
+        rs.validate();
         byte[] allocArray = null;
         try {
             allocArray = str.getBytes("UTF-8");
-            Allocation alloc = Allocation.createSized(rs, Element.U8(rs), allocArray.length);
+            Allocation alloc = Allocation.createSized(rs, Element.U8(rs), allocArray.length, usage);
             alloc.copyFrom(allocArray);
             return alloc;
         }

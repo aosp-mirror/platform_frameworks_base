@@ -261,7 +261,7 @@ void ProgramVertexState::init(Context *rsc) {
 
     ProgramVertex *pv = new ProgramVertex(rsc, shaderString.string(),
                                           shaderString.length(), tmp, 4);
-    Allocation *alloc = new Allocation(rsc, inputType);
+    Allocation *alloc = new Allocation(rsc, inputType, RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS);
     pv->bindAllocation(rsc, alloc, 0);
 
     mDefaultAlloc.set(alloc);

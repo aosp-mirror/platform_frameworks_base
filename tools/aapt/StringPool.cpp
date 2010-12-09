@@ -30,7 +30,7 @@ void printStringPool(const ResStringPool* pool)
             str = String8(pool->stringAt(s, &len)).string();
         }
 
-        printf("String #%d: %s\n", s, str);
+        printf("String #%zd: %s\n", s, str);
     }
 }
 

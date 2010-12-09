@@ -204,7 +204,7 @@ void ProgramFragmentState::init(Context *rsc) {
     tmp[0] = RS_PROGRAM_PARAM_CONSTANT;
     tmp[1] = (uint32_t)inputType;
 
-    Allocation *constAlloc = new Allocation(rsc, inputType);
+    Allocation *constAlloc = new Allocation(rsc, inputType, RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS);
     ProgramFragment *pf = new ProgramFragment(rsc, shaderString.string(),
                                               shaderString.length(), tmp, 2);
     pf->bindAllocation(rsc, constAlloc, 0);

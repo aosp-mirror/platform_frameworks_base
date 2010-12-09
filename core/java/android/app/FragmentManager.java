@@ -19,6 +19,7 @@ package android.app;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1415,6 +1416,28 @@ final class FragmentManagerImpl extends FragmentManager {
         mActivity = null;
     }
     
+    public void dispatchConfigurationChanged(Configuration newConfig) {
+        if (mActive != null) {
+            for (int i=0; i<mAdded.size(); i++) {
+                Fragment f = mAdded.get(i);
+                if (f != null) {
+                    f.onConfigurationChanged(newConfig);
+                }
+            }
+        }
+    }
+
+    public void dispatchLowMemory() {
+        if (mActive != null) {
+            for (int i=0; i<mAdded.size(); i++) {
+                Fragment f = mAdded.get(i);
+                if (f != null) {
+                    f.onLowMemory();
+                }
+            }
+        }
+    }
+
     public boolean dispatchCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         boolean show = false;
         ArrayList<Fragment> newMenus = null;

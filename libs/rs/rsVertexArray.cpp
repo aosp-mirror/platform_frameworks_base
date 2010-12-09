@@ -81,7 +81,7 @@ void VertexArray::setupGL2(const Context *rsc,
                            class VertexArrayState *state,
                            ShaderCache *sc) const {
     rsc->checkError("VertexArray::setupGL2 start");
-    for (uint32_t ct=1; ct <= 0xf/*state->mLastEnableCount*/; ct++) {
+    for (uint32_t ct=1; ct <= state->mLastEnableCount; ct++) {
         glDisableVertexAttribArray(ct);
     }
 

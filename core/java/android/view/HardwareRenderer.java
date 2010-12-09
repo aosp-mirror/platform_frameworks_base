@@ -184,7 +184,7 @@ public abstract class HardwareRenderer {
     }
 
     /**
-     * Indicates whether hardware acceleration is currently request but not
+     * Indicates whether hardware acceleration is currently requested but not
      * necessarily enabled yet.
      * 
      * @return True to request hardware acceleration, false otherwise.
@@ -275,16 +275,19 @@ public abstract class HardwareRenderer {
                 if (error != EGL10.EGL_SUCCESS) {
                     // something bad has happened revert to
                     // normal rendering.
-                    destroy(true);
-                    if (error != EGL11.EGL_CONTEXT_LOST) {
-                        // we'll try again if it was context lost
-                        setRequested(false);
-                    } else {
-                        Log.w(LOG_TAG, "Mountain View, we've had a problem here. " 
-                                + "Switching back to software rendering.");
-                    }
+                    fallback(error != EGL11.EGL_CONTEXT_LOST);
                     Log.w(LOG_TAG, "EGL error: " + getEGLErrorString(error));
                 }
+            }
+        }
+
+        private void fallback(boolean fallback) {
+            destroy(true);
+            if (fallback) {
+                // we'll try again if it was context lost
+                setRequested(false);
+                Log.w(LOG_TAG, "Mountain View, we've had a problem here. " 
+                        + "Switching back to software rendering.");
             }
         }
 
@@ -509,8 +512,9 @@ public abstract class HardwareRenderer {
             if (sEgl.eglGetCurrentContext() != sEglContext ||
                     sEgl.eglGetCurrentSurface(EGL10.EGL_DRAW) != mEglSurface) {
                 if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, sEglContext)) {
-                    throw new RuntimeException("eglMakeCurrent failed "
-                            + getEGLErrorString(sEgl.eglGetError()));
+                    fallback(true);
+                    Log.e(LOG_TAG, "eglMakeCurrent failed " +
+                            getEGLErrorString(sEgl.eglGetError()));
                 }
             }
         }

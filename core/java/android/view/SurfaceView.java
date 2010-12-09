@@ -145,7 +145,6 @@ public class SurfaceView extends View {
      * compatibility with applications assuming this format.
      */
     int mRequestedFormat = PixelFormat.RGB_565;
-    int mRequestedType = -1;
 
     boolean mHaveFrame = false;
     boolean mDestroyReportNeeded = false;
@@ -158,7 +157,6 @@ public class SurfaceView extends View {
     int mWidth = -1;
     int mHeight = -1;
     int mFormat = -1;
-    int mType = -1;
     final Rect mSurfaceFrame = new Rect();
     int mLastSurfaceWidth = -1, mLastSurfaceHeight = -1;
     boolean mUpdateWindowNeeded;
@@ -428,9 +426,9 @@ public class SurfaceView extends View {
         final boolean sizeChanged = mWidth != myWidth || mHeight != myHeight;
         final boolean visibleChanged = mVisible != mRequestedVisible
                 || mNewSurfaceNeeded;
-        final boolean typeChanged = mType != mRequestedType;
+
         if (force || creating || formatChanged || sizeChanged || visibleChanged
-            || typeChanged || mLeft != mLocation[0] || mTop != mLocation[1]
+            || mLeft != mLocation[0] || mTop != mLocation[1]
             || mUpdateWindowNeeded || mReportDrawNeeded || redrawNeeded) {
 
             if (localLOGV) Log.i(TAG, "Changes: creating=" + creating
@@ -446,7 +444,6 @@ public class SurfaceView extends View {
                 mWidth = myWidth;
                 mHeight = myHeight;
                 mFormat = mRequestedFormat;
-                mType = mRequestedType;
 
                 // Scaling/Translate window's layout here because mLayout is not used elsewhere.
                 
@@ -470,8 +467,6 @@ public class SurfaceView extends View {
                 if (!getContext().getResources().getCompatibilityInfo().supportsScreen()) {
                     mLayout.flags |= WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
                 }
-
-                mLayout.memoryType = mRequestedType;
 
                 if (mWindow == null) {
                     mWindow = new MyWindow(this);
@@ -716,24 +711,11 @@ public class SurfaceView extends View {
             }
         }
 
-        public void setType(int type) {
-            switch (type) {
-            case SURFACE_TYPE_HARDWARE:
-            case SURFACE_TYPE_GPU:
-                // these are deprecated, treat as "NORMAL"
-                type = SURFACE_TYPE_NORMAL;
-                break;
-            }
-            switch (type) {
-            case SURFACE_TYPE_NORMAL:
-            case SURFACE_TYPE_PUSH_BUFFERS:
-                mRequestedType = type;
-                if (mWindow != null) {
-                    updateWindow(false, false);
-                }
-                break;
-            }
-        }
+        /**
+         * @deprecated setType is now ignored.
+         */
+        @Deprecated
+        public void setType(int type) { }
 
         public void setKeepScreenOn(boolean screenOn) {
             Message msg = mHandler.obtainMessage(KEEP_SCREEN_ON_MSG);
@@ -750,10 +732,6 @@ public class SurfaceView extends View {
         }
 
         private final Canvas internalLockCanvas(Rect dirty) {
-            if (mType == SURFACE_TYPE_PUSH_BUFFERS) {
-                throw new BadSurfaceTypeException(
-                        "Surface type is SURFACE_TYPE_PUSH_BUFFERS");
-            }
             mSurfaceLock.lock();
 
             if (localLOGV) Log.i(TAG, "Locking canvas... stopped="

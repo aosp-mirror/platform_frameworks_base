@@ -176,7 +176,7 @@ public class LocalActivityManager {
                 }
                 if (desiredState == CREATED) {
                     if (localLOGV) Log.v(TAG, r.id + ": stopping");
-                    mActivityThread.performStopActivity(r);
+                    mActivityThread.performStopActivity(r, false);
                     r.curState = CREATED;
                 }
                 return;
@@ -191,7 +191,7 @@ public class LocalActivityManager {
                     if (localLOGV) Log.v(TAG, r.id + ": pausing");
                     performPause(r, mFinishing);
                     if (localLOGV) Log.v(TAG, r.id + ": stopping");
-                    mActivityThread.performStopActivity(r);
+                    mActivityThread.performStopActivity(r, false);
                     r.curState = CREATED;
                 }
                 return;

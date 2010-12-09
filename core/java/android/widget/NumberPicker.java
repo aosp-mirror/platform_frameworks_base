@@ -843,10 +843,14 @@ public class NumberPicker extends LinearLayout {
      * @see #setWrapSelectorWheel(boolean)
      */
     public void setRange(int start, int end, String[] displayedValues, boolean wrapSelectorWheel) {
+        if (start == mStart && end == mEnd) {
+            return;
+        }
+
         if (start < 0 || end < 0) {
             throw new IllegalArgumentException("start and end must be > 0");
         }
-
+        
         mDisplayedValues = displayedValues;
         mStart = start;
         mEnd = end;
@@ -863,8 +867,7 @@ public class NumberPicker extends LinearLayout {
             mInputText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
         }
 
-        // make sure cached string representations are dropped
-        mSelectorIndexToStringCache.clear();
+        resetSelectorIndices();
     }
 
     /**
@@ -876,6 +879,9 @@ public class NumberPicker extends LinearLayout {
      *             of the number picker.
      */
     public void setCurrent(int current) {
+        if (mCurrent == current) {
+            return;
+        }
         if (current < mStart || current > mEnd) {
             throw new IllegalArgumentException("current should be >= start and <= end");
         }
@@ -1007,6 +1013,18 @@ public class NumberPicker extends LinearLayout {
             String scrollSelectorValue = mSelectorIndexToStringCache.get(selectorIndex);
             canvas.drawText(scrollSelectorValue, x, y, mSelectorPaint);
             y += mSelectorElementHeight;
+        }
+    }
+
+    /**
+     * Resets the selector indices and clear the cached
+     * string representation of these indices.
+     */
+    private void resetSelectorIndices() {
+        mSelectorIndexToStringCache.clear();
+        int[] selectorIdices = getSelectorIndices();
+        for (int i = 0; i < selectorIdices.length; i++) {
+            selectorIdices[i] = Integer.MIN_VALUE; 
         }
     }
 
@@ -1177,9 +1195,9 @@ public class NumberPicker extends LinearLayout {
      */
     private int getWrappedSelectorIndex(int selectorIndex) {
         if (selectorIndex > mEnd) {
-            return (Math.abs(selectorIndex) - mEnd);
+            return mStart + selectorIndex - mEnd - 1;
         } else if (selectorIndex < mStart) {
-            return (mEnd - Math.abs(selectorIndex));
+            return mEnd + selectorIndex - mStart + 1;
         }
         return selectorIndex;
     }

@@ -33,8 +33,6 @@
 
 #include "DisplayHardware/DisplayHardwareBase.h"
 
-struct overlay_control_device_t;
-
 namespace android {
 
 class FramebufferNativeWindow;
@@ -78,7 +76,8 @@ public:
 
     uint32_t getPageFlipCount() const;
     EGLDisplay getEGLDisplay() const { return mDisplay; }
-    overlay_control_device_t* getOverlayEngine() const { return mOverlayEngine; }
+
+    void dump(String8& res) const;
 
     // Hardware Composer
     HWComposer& getHwComposer() const;
@@ -115,7 +114,6 @@ private:
     HWComposer*     mHwc;
 
     sp<FramebufferNativeWindow> mNativeWindow;
-    overlay_control_device_t* mOverlayEngine;
 };
 
 }; // namespace android

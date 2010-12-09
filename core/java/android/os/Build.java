@@ -200,6 +200,8 @@ public class Build {
          * <ul>
          * <li> The default theme for applications is now dark holographic:
          *      {@link android.R.style#Theme_Holo}.
+         * <li> The activity lifecycle has changed slightly as per
+         * {@link android.app.Activity}.
          * </ul>
          */
         public static final int HONEYCOMB = CUR_DEVELOPMENT;

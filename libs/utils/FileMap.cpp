@@ -88,11 +88,12 @@ FileMap::~FileMap(void)
  *
  * Returns "false" on failure.
  */
-bool FileMap::create(const char* origFileName, int fd, off_t offset, size_t length, bool readOnly)
+bool FileMap::create(const char* origFileName, int fd, off64_t offset, size_t length,
+        bool readOnly)
 {
 #ifdef HAVE_WIN32_FILEMAP
     int     adjust;
-    off_t   adjOffset;
+    off64_t adjOffset;
     size_t  adjLength;
 
     if (mPageSize == -1) {
@@ -131,7 +132,7 @@ bool FileMap::create(const char* origFileName, int fd, off_t offset, size_t leng
 #endif
 #ifdef HAVE_POSIX_FILEMAP
     int     prot, flags, adjust;
-    off_t   adjOffset;
+    off64_t adjOffset;
     size_t  adjLength;
 
     void* ptr;

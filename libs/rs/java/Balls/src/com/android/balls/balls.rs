@@ -14,7 +14,7 @@ rs_mesh arcMesh;
 
 typedef struct __attribute__((packed, aligned(4))) Point {
     float2 position;
-    uchar4 color;
+    //uchar4 color;
     float size;
 } Point_t;
 Point_t *point;
@@ -42,8 +42,14 @@ void initParts(int w, int h)
         balls1[ct].position.y = rsRand(0.f, (float)h);
         balls1[ct].delta.x = 0.f;
         balls1[ct].delta.y = 0.f;
-        balls1[ct].arcID = -1;
-        balls1[ct].color = 0.f;
+        //balls1[ct].arcID = -1;
+        //balls1[ct].color = 0.f;
+        balls1[ct].size = 1.f;
+
+        float r = rsRand(100.f);
+        if (r > 90.f) {
+            balls1[ct].size += pow(10.f, rsRand(0.f, 2.f)) * 0.07;
+        }
     }
 }
 
@@ -73,9 +79,9 @@ int root() {
     uint32_t arcIdx = 0;
     for (uint32_t ct=0; ct < bc.dimX; ct++) {
         point[ct].position = bout[ct].position;
-        point[ct].color = rsPackColorTo8888(bout[ct].color);
-        point[ct].size = 6.f + bout[ct].color.g * 6.f;
-
+        ///point[ct].color = 0xff;//rsPackColorTo8888(bout[ct].color);
+        point[ct].size = 6.f /*+ bout[ct].color.g * 6.f*/ * bout[ct].size;
+/*
         if (bout[ct].arcID >= 0) {
             arc[arcIdx].position = bout[ct].position;
             arc[arcIdx].color.r = min(bout[ct].arcStr, 1.f) * 0xff;
@@ -86,11 +92,12 @@ int root() {
             arc[arcIdx+1].color = arc[arcIdx].color;
             arcIdx += 2;
         }
+        */
     }
 
     frame++;
-    rsgBindProgramFragment(gPFLines);
-    rsgDrawMesh(arcMesh, 0, 0, arcIdx);
+    //rsgBindProgramFragment(gPFLines);
+    //rsgDrawMesh(arcMesh, 0, 0, arcIdx);
     rsgBindProgramFragment(gPFPoints);
     rsgDrawMesh(partMesh);
     rsClearObject(&bc.ain);

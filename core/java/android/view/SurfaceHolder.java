@@ -18,10 +18,6 @@ package android.view;
 
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import static android.view.WindowManager.LayoutParams.MEMORY_TYPE_NORMAL;
-import static android.view.WindowManager.LayoutParams.MEMORY_TYPE_HARDWARE;
-import static android.view.WindowManager.LayoutParams.MEMORY_TYPE_GPU;
-import static android.view.WindowManager.LayoutParams.MEMORY_TYPE_PUSH_BUFFERS;
 
 /**
  * Abstract interface to someone holding a display surface.  Allows you to
@@ -34,30 +30,19 @@ import static android.view.WindowManager.LayoutParams.MEMORY_TYPE_PUSH_BUFFERS;
  * {@link #lockCanvas} and {@link Callback#surfaceCreated Callback.surfaceCreated}.
  */
 public interface SurfaceHolder {
-    /**
-     * Surface type.
-     * 
-     * @see #SURFACE_TYPE_NORMAL
-     * @see #SURFACE_TYPE_PUSH_BUFFERS
-     */
-    
-    /** Surface type: creates a regular surface, usually in main, non
-     * contiguous, cached/buffered RAM. */
-    public static final int SURFACE_TYPE_NORMAL = MEMORY_TYPE_NORMAL;
-    /** Surface type: creates a suited to be used with DMA engines and
-     * hardware accelerators. 
-     * @deprecated this is ignored, this value is set automatically when needed.
-     */
+
+    /** @deprecated this is ignored, this value is set automatically when needed. */
     @Deprecated
-    public static final int SURFACE_TYPE_HARDWARE = MEMORY_TYPE_HARDWARE;
-    /** Surface type: creates a surface suited to be used with the GPU 
-     * @deprecated this is ignored, this value is set automatically when needed.
-     */
+    public static final int SURFACE_TYPE_NORMAL = 0;
+    /** @deprecated this is ignored, this value is set automatically when needed. */
     @Deprecated
-    public static final int SURFACE_TYPE_GPU = MEMORY_TYPE_GPU;
-    /** Surface type: creates a "push" surface, that is a surface that 
-     * doesn't owns its buffers. With such a surface lockCanvas will fail. */
-    public static final int SURFACE_TYPE_PUSH_BUFFERS = MEMORY_TYPE_PUSH_BUFFERS;
+    public static final int SURFACE_TYPE_HARDWARE = 1;
+    /** @deprecated this is ignored, this value is set automatically when needed. */
+    @Deprecated
+    public static final int SURFACE_TYPE_GPU = 2;
+    /** @deprecated this is ignored, this value is set automatically when needed. */
+    @Deprecated
+    public static final int SURFACE_TYPE_PUSH_BUFFERS = 3;
 
     /**
      * Exception that is thrown from {@link #lockCanvas} when called on a Surface
@@ -160,10 +145,11 @@ public interface SurfaceHolder {
     public boolean isCreating();
     
     /**
-     * Sets the surface's type. 
-     * 
-     * @param type The surface's memory type.
+     * Sets the surface's type.
+     *  
+     * @deprecated this is ignored, this value is set automatically when needed.
      */
+    @Deprecated
     public void setType(int type);
 
     /**
