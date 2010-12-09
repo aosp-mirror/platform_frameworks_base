@@ -161,7 +161,7 @@ public class TabletStatusBar extends StatusBar {
         // Notification Panel
         mNotificationPanel = (NotificationPanel)View.inflate(context,
                 R.layout.status_bar_notification_panel, null);
-        mNotificationPanel.setVisibility(View.GONE);
+        mNotificationPanel.show(false, false);
         mNotificationPanel.setOnTouchListener(
                 new TouchOutsideListener(MSG_CLOSE_NOTIFICATION_PANEL, mNotificationPanel));
 
@@ -186,10 +186,14 @@ public class TabletStatusBar extends StatusBar {
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
         lp.setTitle("NotificationPanel");
+        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
+                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
+        lp.windowAnimations = com.android.internal.R.style.Animation; // == no animation
 
         WindowManagerImpl.getDefault().addView(mNotificationPanel, lp);
 
@@ -391,7 +395,7 @@ public class TabletStatusBar extends StatusBar {
                             mNotificationPeekRow.addView(copy.row);
 
                             mNotificationPeekWindow.setVisibility(View.VISIBLE);
-                            mNotificationPanel.setVisibility(View.GONE);
+                            mNotificationPanel.show(false, true);
 
                             mNotificationPeekIndex = peekIndex;
                             mNotificationPeekKey = entry.key;
@@ -413,9 +417,9 @@ public class TabletStatusBar extends StatusBar {
                     break;
                 case MSG_OPEN_NOTIFICATION_PANEL:
                     if (DEBUG) Slog.d(TAG, "opening notifications panel");
-                    if (mNotificationPanel.getVisibility() == View.GONE) {
+                    if (!mNotificationPanel.isShowing()) {
                         mNotificationPeekWindow.setVisibility(View.GONE);
-                        mNotificationPanel.setVisibility(View.VISIBLE);
+                        mNotificationPanel.show(true, true);
                         // synchronize with current shadow state
                         mShadowController.hideElement(mNotificationArea);
                         mTicker.halt();
@@ -423,8 +427,8 @@ public class TabletStatusBar extends StatusBar {
                     break;
                 case MSG_CLOSE_NOTIFICATION_PANEL:
                     if (DEBUG) Slog.d(TAG, "closing notifications panel");
-                    if (mNotificationPanel.getVisibility() == View.VISIBLE) {
-                        mNotificationPanel.setVisibility(View.GONE);
+                    if (mNotificationPanel.isShowing()) {
+                        mNotificationPanel.show(false, true);
                         // synchronize with current shadow state
                         mShadowController.showElement(mNotificationArea);
                     }
@@ -459,8 +463,7 @@ public class TabletStatusBar extends StatusBar {
         if (mNotificationTrigger == null) return;
 
         int resId;
-        boolean panel = (mNotificationPanel != null 
-                && mNotificationPanel.getVisibility() == View.VISIBLE);
+        boolean panel = (mNotificationPanel != null && mNotificationPanel.isShowing();
         if (!mNotificationsOn) {
             resId = R.drawable.ic_sysbar_noti_dnd;
         } else if (mNotns.size() > 0) {
@@ -658,7 +661,7 @@ public class TabletStatusBar extends StatusBar {
 
     private void tick(IBinder key, StatusBarNotification n) {
         // Don't show the ticker when the windowshade is open.
-        if (mNotificationPanel.getVisibility() == View.VISIBLE) {
+        if (mNotificationPanel.isShowing()) {
             return;
         }
         // Show the ticker if one is requested. Also don't do this
@@ -786,7 +789,7 @@ public class TabletStatusBar extends StatusBar {
                 mIconLayout.setVisibility(View.VISIBLE); // TODO: animation
                 refreshNotificationTrigger();
             } else {
-                int msg = (mNotificationPanel.getVisibility() == View.GONE)
+                int msg = !mNotificationPanel.isShowing()
                     ? MSG_OPEN_NOTIFICATION_PANEL
                     : MSG_CLOSE_NOTIFICATION_PANEL;
                 mHandler.removeMessages(msg);
@@ -895,7 +898,7 @@ public class TabletStatusBar extends StatusBar {
 
         public boolean onTouch(View v, MotionEvent event) {
             boolean peeking = mNotificationPeekWindow.getVisibility() != View.GONE;
-            boolean panelShowing = mNotificationPanel.getVisibility() != View.GONE;
+            boolean panelShowing = mNotificationPanel.isShowing();
             if (panelShowing) return false;
 
             switch (event.getAction()) {

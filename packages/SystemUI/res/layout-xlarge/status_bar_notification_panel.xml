@@ -17,161 +17,178 @@
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
 <com.android.systemui.statusbar.tablet.NotificationPanel
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:animateLayoutChanges="true"
-    android:paddingTop="32dp"
-    android:paddingBottom="@dimen/status_bar_panel_bottom_offset"
     android:orientation="vertical"
     android:gravity="right"
+    android:paddingTop="32dp"
     >
 
-    <com.android.systemui.statusbar.tablet.NotificationTitleArea
-        android:id="@+id/title_area"
-        android:layout_height="160dp"
-        android:layout_width="384dp"
-        android:layout_marginLeft="24dp"
-        android:paddingTop="20dp"
-        android:orientation="vertical"
-        android:animateLayoutChanges="true"
-        >
-
-        <com.android.systemui.statusbar.tablet.HoloClock
-            android:id="@+id/clock"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:layout_alignParentTop="true"
-            android:layout_marginRight="40dip"
-            android:layout_marginBottom="4dip"
-            >
-            <TextView android:id="@+id/time_bg"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="right"
-                android:singleLine="true"
-                android:textSize="90dip"
-                android:textColor="#999999" />
-            <TextView android:id="@+id/time_fg"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="right"
-                android:singleLine="true"
-                android:textSize="90dip"
-                android:textColor="#666666" />
-        </com.android.systemui.statusbar.tablet.HoloClock>
-
-        <com.android.systemui.statusbar.policy.DateView
-            android:id="@+id/date"
-            style="@style/StatusBarNotificationText"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:layout_below="@id/clock"
-            android:layout_marginTop="4dp"
-            android:layout_marginRight="48dp"
-            android:gravity="right"
-            />
-
-        <ImageView
-            android:id="@+id/battery"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@id/date"
-            android:layout_marginLeft="48dp"
-            android:layout_marginTop="18dp"
-            android:layout_marginRight="8dp"
-            android:baseline="15dp"
-            />
-
-        <TextView
-            android:id="@+id/battery_text"
-            style="@style/StatusBarNotificationText"
-            android:layout_width="56dp"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/battery"
-            android:layout_alignBaseline="@id/battery"
-            android:singleLine="true"
-            android:text="@string/status_bar_settings_settings_button"
-            />
-
-        <ImageView
-            android:id="@+id/network_signal"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_toRightOf="@id/battery_text"
-            android:layout_alignBaseline="@id/battery"
-            android:layout_marginRight="8dp"
-            android:baseline="15dp"
-            />
-
-        <ImageView
-            android:id="@+id/network_type"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_toRightOf="@id/battery_text"
-            android:layout_alignBaseline="@id/battery"
-            android:layout_marginRight="8dp"
-            android:baseline="15dp"
-            />
-
-        <TextView
-            android:id="@+id/network_text"
-            style="@style/StatusBarNotificationText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/network_signal"
-            android:layout_alignBaseline="@id/battery"
-            android:singleLine="true"
-            android:text="@string/status_bar_settings_settings_button"
-            />
-
-        <ImageView
-            android:id="@+id/settings_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@id/battery"
-            android:layout_alignParentRight="true"
-            android:paddingRight="16dp"
-            android:src="@drawable/ic_notification_open"
-            android:baseline="21dp"
-            />
-
-        <ImageView
-            android:id="@+id/notification_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignBaseline="@id/battery"
-            android:paddingRight="16dp"
-            android:visibility="invisible"
-            android:src="@drawable/status_bar_veto"
-            android:baseline="21dp"
-            />
-    </com.android.systemui.statusbar.tablet.NotificationTitleArea>
-
-    <FrameLayout
-        android:id="@+id/content_frame"
+    <LinearLayout
+        android:id="@+id/content_parent"
         android:layout_height="wrap_content"
-        android:layout_width="408dp"
+        android:layout_width="wrap_content"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical"
         >
-        <ScrollView
-            android:id="@+id/notificationScroller"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
+
+        <com.android.systemui.statusbar.tablet.NotificationTitleArea
+            android:id="@+id/title_area"
+            android:layout_height="160dp"
+            android:layout_width="384dp"
+            android:layout_marginLeft="24dp"
+            android:paddingTop="20dp"
+            android:orientation="vertical"
+            android:animateLayoutChanges="true"
             >
-            <LinearLayout 
-                android:id="@+id/content"
-                android:layout_width="match_parent"
+
+            <com.android.systemui.statusbar.tablet.HoloClock
+                android:id="@+id/clock"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal|bottom"
-                android:animateLayoutChanges="true"
-                android:animationCache="false"
-                android:orientation="vertical"
-                android:clickable="true"
-                android:focusable="true"
-                android:descendantFocusability="afterDescendants"
+                android:layout_width="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_marginRight="40dip"
+                android:layout_marginBottom="4dip"
                 >
-            </LinearLayout>
-        </ScrollView>
-    </FrameLayout>
+                <TextView android:id="@+id/time_bg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:singleLine="true"
+                    android:textSize="90dip"
+                    android:textColor="#999999" />
+                <TextView android:id="@+id/time_fg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:singleLine="true"
+                    android:textSize="90dip"
+                    android:textColor="#666666" />
+            </com.android.systemui.statusbar.tablet.HoloClock>
+
+            <com.android.systemui.statusbar.policy.DateView
+                android:id="@+id/date"
+                style="@style/StatusBarNotificationText"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_below="@id/clock"
+                android:layout_marginTop="4dp"
+                android:layout_marginRight="48dp"
+                android:gravity="right"
+                />
+
+            <ImageView
+                android:id="@+id/battery"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@id/date"
+                android:layout_marginLeft="48dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginRight="8dp"
+                android:baseline="15dp"
+                />
+
+            <TextView
+                android:id="@+id/battery_text"
+                style="@style/StatusBarNotificationText"
+                android:layout_width="56dp"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/battery"
+                android:layout_alignBaseline="@id/battery"
+                android:singleLine="true"
+                android:text="@string/status_bar_settings_settings_button"
+                />
+
+            <ImageView
+                android:id="@+id/network_signal"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_toRightOf="@id/battery_text"
+                android:layout_alignBaseline="@id/battery"
+                android:layout_marginRight="8dp"
+                android:baseline="15dp"
+                />
+
+            <ImageView
+                android:id="@+id/network_type"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_toRightOf="@id/battery_text"
+                android:layout_alignBaseline="@id/battery"
+                android:layout_marginRight="8dp"
+                android:baseline="15dp"
+                />
+
+            <TextView
+                android:id="@+id/network_text"
+                style="@style/StatusBarNotificationText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/network_signal"
+                android:layout_alignBaseline="@id/battery"
+                android:singleLine="true"
+                android:text="@string/status_bar_settings_settings_button"
+                />
+
+            <ImageView
+                android:id="@+id/settings_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@id/battery"
+                android:layout_alignParentRight="true"
+                android:paddingRight="16dp"
+                android:src="@drawable/ic_notification_open"
+                android:baseline="21dp"
+                />
+
+            <ImageView
+                android:id="@+id/notification_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignBaseline="@id/battery"
+                android:paddingRight="16dp"
+                android:visibility="invisible"
+                android:src="@drawable/status_bar_veto"
+                android:baseline="21dp"
+                />
+        </com.android.systemui.statusbar.tablet.NotificationTitleArea>
+
+        <LinearLayout
+            android:id="@+id/content_frame"
+            android:layout_height="wrap_content"
+            android:layout_width="408dp"
+            android:orientation="vertical"
+            >
+            <ScrollView
+                android:id="@+id/notificationScroller"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                >
+                <com.android.systemui.statusbar.tablet.NotificationLinearLayout
+                    android:id="@+id/content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal|bottom"
+                    android:animateLayoutChanges="true"
+                    android:animationCache="false"
+                    android:orientation="vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:descendantFocusability="afterDescendants"
+                    systemui:insetLeft="16dp"
+                    >
+                </com.android.systemui.statusbar.tablet.NotificationLinearLayout>
+            </ScrollView>
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/status_bar_panel_bottom_offset"
+                android:layout_marginLeft="16dp"
+                android:src="@drawable/notify_item_glow_bottom"
+                />
+        </LinearLayout>
+    </LinearLayout>
 </com.android.systemui.statusbar.tablet.NotificationPanel>
