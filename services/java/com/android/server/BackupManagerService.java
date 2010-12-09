@@ -2344,6 +2344,55 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+    // Supply the configuration Intent for the given transport.  If the name is not one
+    // of the available transports, or if the transport does not supply any configuration
+    // UI, the method returns null.
+    public Intent getConfigurationIntent(String transportName) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
+                "getConfigurationIntent");
+
+        synchronized (mTransports) {
+            final IBackupTransport transport = mTransports.get(transportName);
+            if (transport != null) {
+                try {
+                    final Intent intent = transport.configurationIntent();
+                    if (DEBUG) Slog.d(TAG, "getConfigurationIntent() returning config intent "
+                            + intent);
+                    return intent;
+                } catch (RemoteException e) {
+                    /* fall through to return null */
+                }
+            }
+        }
+
+        return null;
+    }
+
+    // Supply the configuration summary string for the given transport.  If the name is
+    // not one of the available transports, or if the transport does not supply any
+    // summary / destination string, the method can return null.
+    //
+    // This string is used VERBATIM as the summary text of the relevant Settings item!
+    public String getDestinationString(String transportName) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
+                "getConfigurationIntent");
+
+        synchronized (mTransports) {
+            final IBackupTransport transport = mTransports.get(transportName);
+            if (transport != null) {
+                try {
+                    final String text = transport.currentDestinationString();
+                    if (DEBUG) Slog.d(TAG, "getDestinationString() returning " + text);
+                    return text;
+                } catch (RemoteException e) {
+                    /* fall through to return null */
+                }
+            }
+        }
+
+        return null;
+    }
+
     // Callback: a requested backup agent has been instantiated.  This should only
     // be called from the Activity Manager.
     public void agentConnected(String packageName, IBinder agentBinder) {
