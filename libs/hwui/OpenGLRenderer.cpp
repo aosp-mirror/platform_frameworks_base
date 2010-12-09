@@ -30,6 +30,7 @@
 
 #include "OpenGLRenderer.h"
 #include "DisplayListRenderer.h"
+#include "Vector.h"
 
 namespace android {
 namespace uirenderer {
@@ -989,6 +990,12 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     // TODO: Should do quickReject for each line
     if (mSnapshot->invisible) return;
 
+    const bool isAA = paint->isAntiAlias();
+    const float strokeWidth = paint->getStrokeWidth() * 0.5f;
+    // A stroke width of 0 has a special meaningin Skia:
+    // it draws an unscaled 1px wide line
+    const bool isHairLine = paint->getStrokeWidth() == 0.0f;
+
     setupDraw();
 
     int alpha;
@@ -1001,59 +1008,105 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
     const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
 
-    const bool isAA = paint->isAntiAlias();
-    if (isAA) {
-        GLuint textureUnit = 0;
-        glActiveTexture(gTextureUnits[textureUnit]);
-        setupTextureAlpha8(mCaches.line.getTexture(), 0, 0, textureUnit, 0.0f, 0.0f, r, g, b, a,
-                mode, false, true, (GLvoid*) 0, (GLvoid*) gMeshTextureOffset,
-                mCaches.line.getMeshBuffer());
+    // Used only with AA lines
+    GLuint textureUnit = 0;
+
+    // Describe the required shaders
+    ProgramDescription description;
+    const bool setColor = description.setColor(r, g, b, a);
+
+    if (mShader) {
+        mShader->describe(description, mCaches.extensions);
+    }
+    if (mColorFilter) {
+        mColorFilter->describe(description, mCaches.extensions);
+    }
+
+    // Setup the blending mode
+    chooseBlending(a < 1.0f || (mShader && mShader->blend()), mode, description);
+
+    // We're not drawing with VBOs here
+    mCaches.unbindMeshBuffer();
+
+    int verticesCount = count >> 2;
+    if (!isHairLine) {
+        // TODO: AA needs more vertices
+        verticesCount *= 6;
     } else {
-        setupColorRect(0.0f, 0.0f, 1.0f, 1.0f, r, g, b, a, mode, false, true);
+        // TODO: AA will be different
+        verticesCount *= 2;
     }
 
-    const float strokeWidth = paint->getStrokeWidth();
-    const GLsizei elementsCount = isAA ? mCaches.line.getElementsCount() : gMeshCount;
-    const GLenum drawMode = isAA ? GL_TRIANGLES : GL_TRIANGLE_STRIP;
+    TextureVertex lines[verticesCount];
+    TextureVertex* vertex = &lines[0];
 
-    for (int i = 0; i < count; i += 4) {
-        float tx = 0.0f;
-        float ty = 0.0f;
+    glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
+            gMeshStride, vertex);
 
-        if (isAA) {
-            mCaches.line.update(points[i], points[i + 1], points[i + 2], points[i + 3],
-                    strokeWidth, tx, ty);
-        } else {
-            ty = strokeWidth <= 1.0f ? 0.0f : -strokeWidth * 0.5f;
-        }
+    mModelView.loadIdentity();
 
-        const float dx = points[i + 2] - points[i];
-        const float dy = points[i + 3] - points[i + 1];
-        const float mag = sqrtf(dx * dx + dy * dy);
-        const float angle = acos(dx / mag);
+    // Build and use the appropriate shader
+    useProgram(mCaches.programCache.get(description));
+    mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
 
-        mModelView.loadTranslate(points[i], points[i + 1], 0.0f);
-        if (angle > MIN_ANGLE || angle < -MIN_ANGLE) {
-            mModelView.rotate(angle * RAD_TO_DEG, 0.0f, 0.0f, 1.0f);
-        }
-        mModelView.translate(tx, ty, 0.0f);
-        if (!isAA) {
-            float length = mCaches.line.getLength(points[i], points[i + 1],
-                    points[i + 2], points[i + 3]);
-            mModelView.scale(length, strokeWidth, 1.0f);
-        }
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
-        // TODO: Add bounds to the layer's region
-
-        if (mShader) {
-            mShader->updateTransforms(mCaches.currentProgram, mModelView, *mSnapshot);
-        }
-
-        glDrawArrays(drawMode, 0, elementsCount);
+    if (!mShader || (mShader && setColor)) {
+        mCaches.currentProgram->setColor(r, g, b, a);
     }
 
-    if (isAA) {
-        glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
+    if (mShader) {
+        mShader->setupProgram(mCaches.currentProgram, mModelView, *mSnapshot, &textureUnit);
+    }
+    if (mColorFilter) {
+        mColorFilter->setupProgram(mCaches.currentProgram);
+    }
+
+    if (!isHairLine) {
+        // TODO: Handle the AA case
+        for (int i = 0; i < count; i += 4) {
+            // a = start point, b = end point
+            vec2 a(points[i], points[i + 1]);
+            vec2 b(points[i + 2], points[i + 3]);
+
+            // Bias to snap to the same pixels as Skia
+            a += 0.375;
+            b += 0.375;
+
+            // Find the normal to the line
+            vec2 n = (b - a).copyNormalized() * strokeWidth;
+            float x = n.x;
+            n.x = -n.y;
+            n.y = x;
+
+            // Four corners of the rectangle defining a thick line
+            vec2 p1 = a - n;
+            vec2 p2 = a + n;
+            vec2 p3 = b + n;
+            vec2 p4 = b - n;
+
+            // Draw the line as 2 triangles, could be optimized
+            // by using only 4 vertices and the correct indices
+            // Also we should probably used non textured vertices
+            // when line AA is disabled to save on bandwidth
+            TextureVertex::set(vertex++, p1.x, p1.y, 0.0f, 0.0f);
+            TextureVertex::set(vertex++, p2.x, p2.y, 0.0f, 0.0f);
+            TextureVertex::set(vertex++, p3.x, p3.y, 0.0f, 0.0f);
+            TextureVertex::set(vertex++, p1.x, p1.y, 0.0f, 0.0f);
+            TextureVertex::set(vertex++, p3.x, p3.y, 0.0f, 0.0f);
+            TextureVertex::set(vertex++, p4.x, p4.y, 0.0f, 0.0f);
+
+            // TODO: Mark the dirty regions when RENDER_LAYERS_AS_REGIONS is set
+        }
+
+        // GL_LINE does not give the result we want to match Skia
+        glDrawArrays(GL_TRIANGLES, 0, verticesCount);
+    } else {
+        // TODO: Handle the AA case
+        for (int i = 0; i < count; i += 4) {
+            TextureVertex::set(vertex++, points[i], points[i + 1], 0.0f, 0.0f);
+            TextureVertex::set(vertex++, points[i + 2], points[i + 3], 0.0f, 0.0f);
+        }
+        glLineWidth(1.0f);
+        glDrawArrays(GL_LINES, 0, verticesCount);
     }
 }
 
