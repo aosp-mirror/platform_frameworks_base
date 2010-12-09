@@ -112,6 +112,13 @@ public:
 
     /**
      * Disable a message, or a set of messages.
+     *
+     * Once received a call to disableMsgType(CAMERA_MSG_VIDEO_FRAME), camera hal
+     * should not rely on its client to call releaseRecordingFrame() to release
+     * video recording frames sent out by the cameral hal before and after the
+     * disableMsgType(CAMERA_MSG_VIDEO_FRAME) call. Camera hal clients must not
+     * modify/access any video recording frame after calling
+     * disableMsgType(CAMERA_MSG_VIDEO_FRAME).
      */
     virtual void        disableMsgType(int32_t msgType) = 0;
 
@@ -216,7 +223,11 @@ public:
     /**
      * Start record mode. When a record image is available a CAMERA_MSG_VIDEO_FRAME
      * message is sent with the corresponding frame. Every record frame must be released
-     * by calling releaseRecordingFrame().
+     * by a cameral hal client via releaseRecordingFrame() before the client calls
+     * disableMsgType(CAMERA_MSG_VIDEO_FRAME). After the client calls
+     * disableMsgType(CAMERA_MSG_VIDEO_FRAME), it is camera hal's responsibility
+     * to manage the life-cycle of the video recording frames, and the client must
+     * not modify/access any video recording frames.
      */
     virtual status_t    startRecording() = 0;
 
@@ -232,6 +243,13 @@ public:
 
     /**
      * Release a record frame previously returned by CAMERA_MSG_VIDEO_FRAME.
+     *
+     * It is camera hal client's responsibility to release video recording
+     * frames sent out by the camera hal before the camera hal receives
+     * a call to disableMsgType(CAMERA_MSG_VIDEO_FRAME). After it receives
+     * the call to disableMsgType(CAMERA_MSG_VIDEO_FRAME), it is camera hal's
+     * responsibility of managing the life-cycle of the video recording
+     * frames.
      */
     virtual void        releaseRecordingFrame(const sp<IMemory>& mem) = 0;
 
