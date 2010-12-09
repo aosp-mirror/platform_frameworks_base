@@ -47,6 +47,9 @@ ContextSetPriority {
 	param int32_t priority
 	}
 
+ContextDestroy {
+}
+
 AssignName {
 	param void *obj
 	param const char *name

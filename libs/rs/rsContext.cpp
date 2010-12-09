@@ -1019,6 +1019,10 @@ void rsi_ContextDump(Context *rsc, int32_t bits) {
     ObjectBase::dumpAll(rsc);
 }
 
+void rsi_ContextDestroy(Context *rsc) {
+    delete rsc;
+}
+
 }
 }
 
@@ -1036,11 +1040,6 @@ RsContext rsContextCreateGL(RsDevice vdev, uint32_t version, RsSurfaceConfig sc)
     Context *rsc = Context::createContext(dev, &sc);
     LOGV("rsContextCreateGL ret %p ", rsc);
     return rsc;
-}
-
-void rsContextDestroy(RsContext vrsc) {
-    Context * rsc = static_cast<Context *>(vrsc);
-    delete rsc;
 }
 
 RsMessageToClientType rsContextPeekMessage(RsContext vrsc, size_t *receiveLen, uint32_t *subID, bool wait) {
