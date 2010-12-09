@@ -16,13 +16,12 @@
 
 package android.preference;
 
+import android.app.FragmentBreadCrumbs;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.FrameLayout;
-import android.widget.FrameLayout.LayoutParams;
 
 /**
  * @hide
@@ -36,7 +35,7 @@ public class PreferenceFrameLayout extends FrameLayout {
     private final int mBorderBottom;
     private final int mBorderLeft;
     private final int mBorderRight;
-    private boolean mPaddingApplied = false;
+    private boolean mPaddingApplied;
 
     public PreferenceFrameLayout(Context context) {
         this(context, null);
@@ -69,7 +68,6 @@ public class PreferenceFrameLayout extends FrameLayout {
         mBorderRight = a.getDimensionPixelSize(
                 com.android.internal.R.styleable.PreferenceFrameLayout_borderRight,
                 defaultRightPadding);
-
 
         a.recycle();
     }
