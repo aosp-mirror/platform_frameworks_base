@@ -2415,8 +2415,6 @@ public final class ActivityThread {
                 state = new Bundle();
                 mInstrumentation.callActivityOnSaveInstanceState(r.activity, state);
                 r.state = state;
-            } else {
-                r.state = null;
             }
             // Now we are idle.
             r.activity.mCalled = false;
@@ -2956,9 +2954,13 @@ public final class ActivityThread {
 
         r.activity.mChangingConfigurations = true;
 
-        Bundle savedState = null;
+        // Need to ensure state is saved.
         if (!r.paused) {
-            savedState = performPauseActivity(r.token, false, r.isPreHoneycomb());
+            performPauseActivity(r.token, false, r.isPreHoneycomb());
+        }
+        if (r.state == null && !r.stopped && !r.isPreHoneycomb()) {
+            r.state = new Bundle();
+            mInstrumentation.callActivityOnSaveInstanceState(r.activity, r.state);
         }
 
         handleDestroyActivity(r.token, false, configChanges, true);
@@ -2983,9 +2985,6 @@ public final class ActivityThread {
             }
         }
         r.startsNotResumed = tmp.startsNotResumed;
-        if (savedState != null) {
-            r.state = savedState;
-        }
 
         handleLaunchActivity(r, currentIntent);
     }
