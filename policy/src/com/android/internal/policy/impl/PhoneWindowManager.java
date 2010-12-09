@@ -1344,11 +1344,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return true;
         }
         
-        // Shortcuts are invoked through Search+key or Meta+key, so intercept those here
-        if ((mShortcutKeyPressed != -1 && !mConsumeShortcutKeyUp)
-                || (metaState & KeyEvent.META_META_ON) != 0) {
+        // Shortcuts are invoked through Search+key, so intercept those here
+        if (mShortcutKeyPressed != -1 && !mConsumeShortcutKeyUp) {
             if (down && repeatCount == 0 && !keyguardOn) {
-                Intent shortcutIntent = mShortcutManager.getIntent(event);
+                final KeyCharacterMap kcm = event.getKeyCharacterMap();
+                Intent shortcutIntent = mShortcutManager.getIntent(kcm, keyCode, metaState);
                 if (shortcutIntent != null) {
                     shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(shortcutIntent);
@@ -1382,11 +1382,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if ((event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
+            // Invoke shortcuts using Meta as a fallback.
             final KeyCharacterMap kcm = event.getKeyCharacterMap();
-            boolean fallback = kcm.getFallbackAction(event.getKeyCode(), event.getMetaState(),
-                    mFallbackAction);
+            final int keyCode = event.getKeyCode();
+            final int metaState = event.getMetaState();
+            if ((metaState & KeyEvent.META_META_ON) != 0) {
+                Intent shortcutIntent = mShortcutManager.getIntent(kcm, keyCode,
+                        metaState & ~(KeyEvent.META_META_ON
+                                | KeyEvent.META_META_LEFT_ON | KeyEvent.META_META_RIGHT_ON));
+                if (shortcutIntent != null) {
+                    shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivity(shortcutIntent);
+                    return null;
+                }
+            }
 
-            if (fallback) {
+            // Check for fallback actions.
+            if (kcm.getFallbackAction(keyCode, metaState, mFallbackAction)) {
                 if (DEBUG_FALLBACK) {
                     Slog.d(TAG, "Fallback: keyCode=" + mFallbackAction.keyCode
                             + " metaState=" + Integer.toHexString(mFallbackAction.metaState));

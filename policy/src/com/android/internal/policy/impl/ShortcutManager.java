@@ -101,18 +101,30 @@ class ShortcutManager extends ContentObserver {
      * This will first try an exact match (with modifiers), and then try a
      * match without modifiers (primary character on a key).
      * 
-     * @param event The key event of the key that was pressed.
+     * @param kcm The key character map of the device on which the key was pressed.
+     * @param keyCode The key code.
+     * @param metaState The meta state, omitting any modifiers that were used
+     * to invoke the shortcut.
      * @return The intent that matches the shortcut, or null if not found.
      */
-    public Intent getIntent(KeyEvent event) {
-        // First try the exact keycode (with modifiers)
-        int shortcut = event.getUnicodeChar();
-        Intent intent = shortcut != 0 ? mShortcutIntents.get(shortcut) : null; 
-        if (intent != null) return intent;
+    public Intent getIntent(KeyCharacterMap kcm, int keyCode, int metaState) {
+        Intent intent = null;
 
-        // Next try the keycode without modifiers (the primary character on that key)
-        shortcut = Character.toLowerCase(event.getUnicodeChar(0));
-        return shortcut != 0 ? mShortcutIntents.get(shortcut) : null;
+        // First try the exact keycode (with modifiers).
+        int shortcut = kcm.get(keyCode, metaState);
+        if (shortcut != 0) {
+            intent = mShortcutIntents.get(shortcut);
+        }
+
+        // Next try the primary character on that key.
+        if (intent == null) {
+            shortcut = Character.toLowerCase(kcm.getDisplayLabel(keyCode));
+            if (shortcut != 0) {
+                intent = mShortcutIntents.get(shortcut);
+            }
+        }
+
+        return intent;
     }
 
 }
