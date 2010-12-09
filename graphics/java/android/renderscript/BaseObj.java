@@ -52,6 +52,9 @@ class BaseObj {
         if (mDestroyed) {
             throw new RSInvalidStateException("using a destroyed object.");
         }
+        if (mID == 0) {
+            throw new RSRuntimeException("Internal error: Object id 0.");
+        }
         return mID;
     }
 

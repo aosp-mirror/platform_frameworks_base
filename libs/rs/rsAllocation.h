@@ -29,7 +29,7 @@ class Allocation : public ObjectBase {
     // The graphics equilivent of malloc.  The allocation contains a structure of elements.
 
 public:
-    Allocation(Context *rsc, const Type *);
+    Allocation(Context *rsc, const Type *, uint32_t usages);
     Allocation(Context *rsc, const Type *, void *bmp, void *callbackData, RsBitmapCallback_t callback);
 
     virtual ~Allocation();
@@ -43,6 +43,8 @@ public:
 
     void * getPtr() const {return mPtr;}
     const Type * getType() const {return mType.get();}
+
+    void syncAll(Context *rsc, RsAllocationUsageType src);
 
     void deferedUploadToTexture(const Context *rsc, bool genMipmap, uint32_t lodOffset);
     void uploadToTexture(const Context *rsc);
@@ -84,7 +86,7 @@ public:
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_ALLOCATION; }
     static Allocation *createFromStream(Context *rsc, IStream *stream);
 
-    virtual void uploadCheck(const Context *rsc);
+    virtual void uploadCheck(Context *rsc);
 
     bool getIsTexture() const {return mIsTexture;}
     bool getIsBufferObject() const {return mIsVertexBuffer;}
@@ -111,6 +113,8 @@ protected:
     bool mCpuRead;
     bool mGpuWrite;
     bool mGpuRead;
+
+    uint32_t mUsageFlags;
 
     // more usage hint data from the application
     // which can be used by a driver to pick the best memory type.

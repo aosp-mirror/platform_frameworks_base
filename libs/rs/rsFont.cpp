@@ -501,7 +501,8 @@ void FontState::initRenderState() {
     tmp[2] = RS_PROGRAM_PARAM_TEXTURE_TYPE;
     tmp[3] = RS_TEXTURE_2D;
 
-    mFontShaderFConstant.set(new Allocation(mRSC, inputType));
+    mFontShaderFConstant.set(new Allocation(mRSC, inputType,
+                                            RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS));
     ProgramFragment *pf = new ProgramFragment(mRSC, shaderString.string(),
                                               shaderString.length(), tmp, 4);
     mFontShaderF.set(pf);
@@ -526,7 +527,7 @@ void FontState::initTextTexture() {
     // We will allocate a texture to initially hold 32 character bitmaps
     Type *texType = Type::getType(mRSC, alphaElem, 1024, 256, 0, false, false);
 
-    Allocation *cacheAlloc = new Allocation(mRSC, texType);
+    Allocation *cacheAlloc = new Allocation(mRSC, texType, RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE);
     mTextTexture.set(cacheAlloc);
     mTextTexture->deferedUploadToTexture(mRSC, false, 0);
 
@@ -554,7 +555,7 @@ void FontState::initVertexArrayBuffers() {
     uint32_t numIndicies = mMaxNumberOfQuads * 6;
     Type *indexType = Type::getType(mRSC, indexElem, numIndicies, 0, 0, false, false);
 
-    Allocation *indexAlloc = new Allocation(mRSC, indexType);
+    Allocation *indexAlloc = new Allocation(mRSC, indexType, RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_VERTEX);
     uint16_t *indexPtr = (uint16_t*)indexAlloc->getPtr();
 
     // Four verts, two triangles , six indices per quad
@@ -586,7 +587,7 @@ void FontState::initVertexArrayBuffers() {
                                          mMaxNumberOfQuads * 4,
                                          0, 0, false, false);
 
-    Allocation *vertexAlloc = new Allocation(mRSC, vertexDataType);
+    Allocation *vertexAlloc = new Allocation(mRSC, vertexDataType, RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_VERTEX);
     mTextMeshPtr = (float*)vertexAlloc->getPtr();
 
     mVertexArray.set(vertexAlloc);

@@ -119,7 +119,11 @@ public class Script extends BaseObj {
         protected Allocation mAllocation;
 
         protected void init(RenderScript rs, int dimx) {
-            mAllocation = Allocation.createSized(rs, mElement, dimx);
+            mAllocation = Allocation.createSized(rs, mElement, dimx, Allocation.USAGE_SCRIPT);
+        }
+
+        protected void init(RenderScript rs, int dimx, int usages) {
+            mAllocation = Allocation.createSized(rs, mElement, dimx, Allocation.USAGE_SCRIPT | usages);
         }
 
         protected FieldBase() {

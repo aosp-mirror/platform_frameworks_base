@@ -30,17 +30,21 @@ void root(const Ball_t *ballIn, Ball_t *ballOut, const BallControl_t *ctl, uint3
         float2 vec2 = vec * vec;
         float len2 = vec2.x + vec2.y;
 
-        if (len2 < 1000) {
-            if (len2 > (4*4)) {
+        if (len2 < 10000) {
+            //float minDist = ballIn->size + bPtr[xin].size;
+            float forceScale = ballIn->size * bPtr[xin].size;
+            forceScale *= forceScale;
+
+            if (len2 > 16 /* (minDist*minDist)*/)  {
                 // Repulsion
                 float len = sqrt(len2);
-                if (len < arcInvStr) {
-                    arcInvStr = len;
-                    arcID = xin;
-                }
-                fv -= (vec / (len * len * len)) * 20000.f;
+                //if (len < arcInvStr) {
+                    //arcInvStr = len;
+                    //arcID = xin;
+                //}
+                fv -= (vec / (len * len * len)) * 20000.f * forceScale;
             } else {
-                if (len2 < 0.1) {
+                if (len2 < 1) {
                     if (xin == x) {
                         continue;
                     }
@@ -51,9 +55,9 @@ void root(const Ball_t *ballIn, Ball_t *ballOut, const BallControl_t *ctl, uint3
                     } else {
                         ballOut->position.x -= 1.f;
                     }
-                    ballOut->color.rgb = 1.f;
-                    ballOut->arcID = -1;
-                    ballOut->arcStr = 0;
+                    //ballOut->color.rgb = 1.f;
+                    //ballOut->arcID = -1;
+                    //ballOut->arcStr = 0;
                     return;
                 }
                 // Collision
@@ -70,57 +74,76 @@ void root(const Ball_t *ballIn, Ball_t *ballOut, const BallControl_t *ctl, uint3
         }
     }
 
-    fv -= gGravityVector;
+    fv /= ballIn->size * ballIn->size * ballIn->size;
+    fv -= gGravityVector * 4.f;
     fv *= ctl->dt;
 
-    {
+    if (touchPressure > 0.1f) {
         float2 tp = {touchX, touchY};
         float2 vec = tp - ballIn->position;
         float2 vec2 = vec * vec;
-        float len2 = vec2.x + vec2.y;
+        float len2 = max(2.f, vec2.x + vec2.y);
+        fv -= (vec / len2) * touchPressure * 400.f;
+    }
 
-        if (len2 > 0.2) {
-            float len = sqrt(len2);
-            fv -= (vec / (len * len)) * touchPressure * 1000.f;
+    ballOut->delta = (ballIn->delta * (1.f - 0.004f)) + fv;
+    ballOut->position = ballIn->position + (ballOut->delta * ctl->dt);
+
+    const float wallForce = 400.f;
+    if (ballOut->position.x > (gMaxPos.x - 20.f)) {
+        float d = gMaxPos.x - ballOut->position.x;
+        if (d < 0.f) {
+            if (ballOut->delta.x > 0) {
+                ballOut->delta.x *= -0.7;
+            }
+            ballOut->position.x = gMaxPos.x;
+        } else {
+            ballOut->delta.x -= min(wallForce / (d * d), 10.f);
         }
     }
 
-    ballOut->delta = ballIn->delta * 0.998f;
-    ballOut->position = ballIn->position;
-
-    ballOut->delta += fv;
-    ballOut->position += ballOut->delta * ctl->dt;
-
-    if (ballOut->position.x > gMaxPos.x) {
-        if (ballOut->delta.x > 0) {
-            ballOut->delta.x *= -0.7;
+    if (ballOut->position.x < (gMinPos.x + 20.f)) {
+        float d = ballOut->position.x - gMinPos.x;
+        if (d < 0.f) {
+            if (ballOut->delta.x < 0) {
+                ballOut->delta.x *= -0.7;
+            }
+            ballOut->position.x = gMinPos.x + 1.f;
+        } else {
+            ballOut->delta.x += min(wallForce / (d * d), 10.f);
         }
-        ballOut->position.x = gMaxPos.x;
-    }
-    if (ballOut->position.y > gMaxPos.y) {
-        if (ballOut->delta.y > 0) {
-            ballOut->delta.y *= -0.7;
-        }
-        ballOut->position.y = gMaxPos.y - 1.f;
-    }
-    if (ballOut->position.x < gMinPos.x) {
-        if (ballOut->delta.x < 0) {
-            ballOut->delta.x *= -0.7;
-        }
-        ballOut->position.x = gMinPos.x + 1.f;
-    }
-    if (ballOut->position.y < gMinPos.y) {
-        if (ballOut->delta.y < 0) {
-            ballOut->delta.y *= -0.7;
-        }
-        ballOut->position.y = gMinPos.y + 1.f;
     }
 
-    ballOut->color.b = 1.f;
-    ballOut->color.r = min(sqrt(length(ballOut->delta)) * 0.1f, 1.f);
-    ballOut->color.g = min(sqrt(length(fv) * 0.1f), 1.f);
-    ballOut->arcID = arcID;
-    ballOut->arcStr = 8 / arcInvStr;
+    if (ballOut->position.y > (gMaxPos.y - 20.f)) {
+        float d = gMaxPos.y - ballOut->position.y;
+        if (d < 0.f) {
+            if (ballOut->delta.y > 0) {
+                ballOut->delta.y *= -0.7;
+            }
+            ballOut->position.y = gMaxPos.y;
+        } else {
+            ballOut->delta.y -= min(wallForce / (d * d), 10.f);
+        }
+    }
+
+    if (ballOut->position.y < (gMinPos.y + 20.f)) {
+        float d = ballOut->position.y - gMinPos.y;
+        if (d < 0.f) {
+            if (ballOut->delta.y < 0) {
+                ballOut->delta.y *= -0.7;
+            }
+            ballOut->position.y = gMinPos.y + 1.f;
+        } else {
+            ballOut->delta.y += min(wallForce / (d * d * d), 10.f);
+        }
+    }
+
+    //ballOut->color.b = 1.f;
+    //ballOut->color.r = min(sqrt(length(ballOut->delta)) * 0.1f, 1.f);
+    //ballOut->color.g = min(sqrt(length(fv) * 0.1f), 1.f);
+    //ballOut->arcID = arcID;
+    //ballOut->arcStr = 8 / arcInvStr;
+    ballOut->size = ballIn->size;
 
     //rsDebug("physics pos out", ballOut->position);
 }

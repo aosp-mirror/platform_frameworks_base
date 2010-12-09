@@ -82,7 +82,7 @@ public class RSTestCore {
         mListAllocs = new ScriptField_ListAllocs_s(mRS, uta.length);
         for (int i = 0; i < uta.length; i++) {
             ScriptField_ListAllocs_s.Item listElem = new ScriptField_ListAllocs_s.Item();
-            listElem.text = Allocation.createFromString(mRS, uta[i].name);
+            listElem.text = Allocation.createFromString(mRS, uta[i].name, Allocation.USAGE_SCRIPT);
             listElem.result = uta[i].result;
             mListAllocs.set(listElem, i, false);
             uta[i].setItem(listElem);
