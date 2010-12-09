@@ -1211,6 +1211,8 @@ void AwesomePlayer::onVideoEvent() {
                         }
 
                         // fall through
+                    } else {
+                        continue;
                     }
                 }
 
