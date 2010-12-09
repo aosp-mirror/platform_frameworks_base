@@ -164,9 +164,16 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
-     * Default implementation does nothing.
+     * Default implementation does nothing and returns false.
      */
     public boolean commitCompletion(CompletionInfo text) {
+        return false;
+    }
+
+    /**
+     * Default implementation does nothing and returns false.
+     */
+    public boolean commitCorrection(CorrectionInfo correctionInfo) {
         return false;
     }
 

@@ -19,6 +19,7 @@ package com.android.internal.view;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
+import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.ExtractedTextRequest;
 
 import com.android.internal.view.IInputContextCallback;
@@ -47,6 +48,8 @@ import com.android.internal.view.IInputContextCallback;
     void commitText(CharSequence text, int newCursorPosition);
 
     void commitCompletion(in CompletionInfo completion);
+
+    void commitCorrection(in CorrectionInfo correction);
 
     void setSelection(int start, int end);
     
