@@ -99,8 +99,8 @@ public class DatePicker extends FrameLayout {
 
         OnChangeListener onChangeListener = new OnChangeListener() {
             public void onChange(NumberPicker picker, int oldVal, int newVal) {
-                notifyDateChanged();
-                updateMiniMonth();
+                updateDateUnchecked(mYearPicker.getCurrent(), mMonthPicker.getCurrent(),
+                        mDayPicker.getCurrent());
             }
         };
 
@@ -135,7 +135,7 @@ public class DatePicker extends FrameLayout {
         mMiniMonthDayPicker.setRange(mTempCalendar, endRangeDate);
         mMiniMonthDayPicker.setOnDateChangeListener(new DayPicker.OnSelectedDayChangeListener() {
             public void onSelectedDayChange(DayPicker view, int year, int month, int monthDay) {
-                updateDate(year, month, monthDay);
+                updateDateUnchecked(year, month, monthDay);
             }
         });
         
@@ -238,26 +238,7 @@ public class DatePicker extends FrameLayout {
         if (mYearPicker.getCurrent() != year
                 || mDayPicker.getCurrent() != dayOfMonth
                 || mMonthPicker.getCurrent() != month) {
-            updatePickers(year, month, dayOfMonth);
-            updateMiniMonth();
-            notifyDateChanged();
-        }
-    }
-
-    /**
-     * @return The short month abbreviations.
-     */
-    private String[] getShortMonths() {
-        final Locale currentLocale = Locale.getDefault();
-        if (currentLocale.equals(mMonthLocale)) {
-            return mShortMonths;
-        } else {
-            for (int i = 0; i < mNumberOfMonths; i++) {
-                mShortMonths[i] = DateUtils.getMonthString(Calendar.JANUARY + i,
-                        DateUtils.LENGTH_MEDIUM);
-            }
-            mMonthLocale = currentLocale;
-            return mShortMonths;
+            updateDateUnchecked(year, month, dayOfMonth);
         }
     }
 
@@ -298,14 +279,46 @@ public class DatePicker extends FrameLayout {
     }
 
     /**
+     * Updates the current date.
+     *
+     * @param year The year.
+     * @param month The month which is <strong>starting from zero</strong>.
+     * @param dayOfMonth The day of the month.
+     */
+    private void updateDateUnchecked(int year, int month, int dayOfMonth) {
+        updatePickers(year, month, dayOfMonth);
+        updateMiniMonth();
+        notifyDateChanged();
+    }
+
+    /**
+     * @return The short month abbreviations.
+     */
+    private String[] getShortMonths() {
+        final Locale currentLocale = Locale.getDefault();
+        if (currentLocale.equals(mMonthLocale)) {
+            return mShortMonths;
+        } else {
+            for (int i = 0; i < mNumberOfMonths; i++) {
+                mShortMonths[i] = DateUtils.getMonthString(Calendar.JANUARY + i,
+                        DateUtils.LENGTH_MEDIUM);
+            }
+            mMonthLocale = currentLocale;
+            return mShortMonths;
+        }
+    }
+
+    /**
      * Updates the pickers with the given <code>year</code>, <code>month</code>,
      * and <code>dayOfMonth</code>. If the provided values designate an inconsistent
      * date the values are normalized before updating the pickers.
      */
     private void updatePickers(int year, int month, int dayOfMonth) {
-        // make sure the date is normalized
-        mTempCalendar.clear();
-        mTempCalendar.set(year, month, dayOfMonth);
+        // larger fields are not updated and the day is adjusted without wrapping
+        mTempCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        mTempCalendar.roll(Calendar.MONTH, month - mTempCalendar.get(Calendar.MONTH));
+        mTempCalendar.roll(Calendar.YEAR, year - mTempCalendar.get(Calendar.YEAR));
+
         mYearPicker.setCurrent(mTempCalendar.get(Calendar.YEAR));
         mMonthPicker.setCurrent(mTempCalendar.get(Calendar.MONTH));
         mDayPicker.setRange(1, mTempCalendar.getActualMaximum(Calendar.DAY_OF_MONTH));
