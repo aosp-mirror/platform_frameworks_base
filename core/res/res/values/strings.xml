@@ -2622,6 +2622,8 @@
     <string name="share">Share</string>
     <!-- ActionBar action to use the current selection to open the Find on page functionality [CHAR LIMIT=10]-->
     <string name="find">Find</string>
+    <!-- ActionBar action to use the current selection to perform a web search [CHAR-LIMIT=16] -->
+    <string name="websearch">Web Search</string>
 
     <!-- Network positioning notification ticker. The name of the user (e.g. John Doe) who sent
          the request is shown as a dynamic string. -->
