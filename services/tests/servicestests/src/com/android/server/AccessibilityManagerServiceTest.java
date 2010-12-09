@@ -61,11 +61,6 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     private static final long TIMEOUT_TEST_NOTIFICATION_TIMEOUT = 300;
 
     /**
-     * The package name.
-     */
-    private static String sPackageName;
-
-    /**
      * The interface used to talk to the tested service.
      */
     private IAccessibilityManager mManagerService;
@@ -73,8 +68,15 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     @Override
     public void setContext(Context context) {
         super.setContext(context);
-        if (sPackageName == null) {
-            sPackageName = context.getPackageName();
+        if (MyFirstMockAccessibilityService.sComponentName == null) {
+            MyFirstMockAccessibilityService.sComponentName = new ComponentName(
+                    context.getPackageName(), MyFirstMockAccessibilityService.class.getName())
+                    .flattenToShortString();
+        }
+        if (MySecondMockAccessibilityService.sComponentName == null) {
+            MySecondMockAccessibilityService.sComponentName = new ComponentName(
+                    context.getPackageName(), MySecondMockAccessibilityService.class.getName())
+                    .flattenToShortString();
         }
     }
 
@@ -683,10 +685,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         /**
          * The service {@link ComponentName} flattened as a string.
          */
-        static final String sComponentName = new ComponentName(
-                sPackageName,
-                MyFirstMockAccessibilityService.class.getName()
-                ).flattenToShortString();
+        static String sComponentName;
 
         /**
          * Handle to the service instance.
@@ -709,10 +708,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         /**
          * The service {@link ComponentName} flattened as a string.
          */
-        static final String sComponentName = new ComponentName(
-                sPackageName,
-                MySecondMockAccessibilityService.class.getName()
-                ).flattenToShortString();
+        static String sComponentName;
 
         /**
          * Handle to the service instance.
