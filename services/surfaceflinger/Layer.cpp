@@ -233,11 +233,18 @@ void Layer::setPerFrameData(hwc_layer_t* hwcl) {
         return;
     }
     hwcl->handle = buffer->handle;
-    // TODO: set the crop value properly
-    hwcl->sourceCrop.left   = 0;
-    hwcl->sourceCrop.top    = 0;
-    hwcl->sourceCrop.right  = buffer->width;
-    hwcl->sourceCrop.bottom = buffer->height;
+
+    if (!mBufferCrop.isEmpty()) {
+        hwcl->sourceCrop.left   = mBufferCrop.left;
+        hwcl->sourceCrop.top    = mBufferCrop.top;
+        hwcl->sourceCrop.right  = mBufferCrop.right;
+        hwcl->sourceCrop.bottom = mBufferCrop.bottom;
+    } else {
+        hwcl->sourceCrop.left   = 0;
+        hwcl->sourceCrop.top    = 0;
+        hwcl->sourceCrop.right  = buffer->width;
+        hwcl->sourceCrop.bottom = buffer->height;
+    }
 }
 
 void Layer::reloadTexture(const Region& dirty)
