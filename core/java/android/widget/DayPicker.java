@@ -278,14 +278,14 @@ public class DayPicker extends FrameLayout {
      *
      * @hide
      */
-    protected Calendar mStartRangeDate = Calendar.getInstance();
+    protected Calendar mRangeStartDate = Calendar.getInstance();
 
     /**
      * The end date of the range supported by this picker.
      *
      * @hide
      */
-    protected Calendar mEndRangeDate = Calendar.getInstance();
+    protected Calendar mRangeEndDate = Calendar.getInstance();
 
     /**
      * String for formatting the month name in the title text view.
@@ -341,10 +341,10 @@ public class DayPicker extends FrameLayout {
         }
 
         // set default range
-        mStartRangeDate.clear();
-        mStartRangeDate.set(1900, 0, 1);
-        mEndRangeDate.clear();
-        mEndRangeDate.set(2100, 0, 1);
+        mRangeStartDate.clear();
+        mRangeStartDate.set(1900, 0, 1);
+        mRangeEndDate.clear();
+        mRangeEndDate.set(2100, 0, 1);
 
         setUpHeader();
         updateHeader();
@@ -367,14 +367,16 @@ public class DayPicker extends FrameLayout {
      */
     public void setRange(Calendar startRangeDate, Calendar endRangeDate) {
         boolean doSetupAdapter = false;
-        if (mStartRangeDate.get(Calendar.DAY_OF_YEAR) != startRangeDate.get(Calendar.DAY_OF_YEAR)
-                || mStartRangeDate.get(Calendar.YEAR) != startRangeDate.get(Calendar.YEAR)) {
-            mStartRangeDate = startRangeDate;
+        if (mRangeStartDate.get(Calendar.DAY_OF_YEAR) != startRangeDate.get(Calendar.DAY_OF_YEAR)
+                || mRangeStartDate.get(Calendar.YEAR) != startRangeDate.get(Calendar.YEAR)) {
+            mRangeStartDate.setTimeInMillis(startRangeDate.getTimeInMillis());
+            mRangeStartDate.setTimeZone(startRangeDate.getTimeZone());
             doSetupAdapter = true;
         }
-        if (mEndRangeDate.get(Calendar.DAY_OF_YEAR) != endRangeDate.get(Calendar.DAY_OF_YEAR)
-                || mEndRangeDate.get(Calendar.YEAR) != endRangeDate.get(Calendar.YEAR)) {
-            mEndRangeDate = endRangeDate;
+        if (mRangeEndDate.get(Calendar.DAY_OF_YEAR) != endRangeDate.get(Calendar.DAY_OF_YEAR)
+                || mRangeEndDate.get(Calendar.YEAR) != endRangeDate.get(Calendar.YEAR)) {
+            mRangeEndDate.setTimeInMillis(endRangeDate.getTimeInMillis());
+            mRangeEndDate.setTimeZone(endRangeDate.getTimeZone());
             doSetupAdapter = true;
             
         }
@@ -398,7 +400,7 @@ public class DayPicker extends FrameLayout {
      * @return The selected day.
      */
     public Calendar getSelectedDay() {
-        return mAdapter.mSelectedDay;
+        return (Calendar) mAdapter.mSelectedDay.clone();
     }
 
     /**
@@ -524,6 +526,11 @@ public class DayPicker extends FrameLayout {
      * @param setSelected Whether to set the given time as selected
      * @param forceScroll Whether to recenter even if the time is already
      *            visible.
+     *
+     * @throws IllegalArgumentException of the provided date is before the
+     *        range start of after the range end.
+     *
+     * @see #setRange(Calendar, Calendar)
      */
     public void goTo(int year, int month, int dayOfMonth, boolean animate, boolean setSelected,
             boolean forceScroll) {
@@ -538,20 +545,23 @@ public class DayPicker extends FrameLayout {
      * the time is at the top of the view. If the new time is already in view
      * the list will not be scrolled unless forceScroll is true. This time may
      * optionally be highlighted as selected as well.
-     * 
+     *
      * @param date The time to move to.
      * @param animate Whether to scroll to the given time or just redraw at the
      *            new location.
      * @param setSelected Whether to set the given time as selected.
      * @param forceScroll Whether to recenter even if the time is already
      *            visible.
+     *
+     * @throws IllegalArgumentException of the provided date is before the
+     *        range start of after the range end.
+     *
+     * @see #setRange(Calendar, Calendar)
      */
     public void goTo(Calendar date, boolean animate, boolean setSelected, boolean forceScroll) {
-        long timeInMillis = date.getTimeInMillis();
-        if (timeInMillis < mStartRangeDate.getTimeInMillis()
-                || timeInMillis > mEndRangeDate.getTimeInMillis()) {
-            throw new IllegalArgumentException("Time not between " + mStartRangeDate.getTime()
-                    + " and " + mEndRangeDate.getTime());
+        if (date.before(mRangeStartDate) || date.after(mRangeEndDate)) { 
+            throw new IllegalArgumentException("Time not between " + mRangeStartDate.getTime()
+                    + " and " + mRangeEndDate.getTime());
         }
         // Find the first and last entirely visible weeks
         int firstFullyVisiblePosition = mListView.getFirstVisiblePosition();
@@ -698,16 +708,16 @@ public class DayPicker extends FrameLayout {
      * @hide
      */
     protected int getWeeksDelta(Calendar toDate) {
-        if (toDate.before(mStartRangeDate)) {
-            throw new IllegalArgumentException("fromDate: " + mStartRangeDate.getTime()
+        if (toDate.before(mRangeStartDate)) {
+            throw new IllegalArgumentException("fromDate: " + mRangeStartDate.getTime()
                     + " does not precede toDate: " + toDate.getTime());
         }
-        int fromDateDayOfWeek = mStartRangeDate.get(Calendar.DAY_OF_WEEK);
+        int fromDateDayOfWeek = mRangeStartDate.get(Calendar.DAY_OF_WEEK);
         long diff = (fromDateDayOfWeek - toDate.getFirstDayOfWeek()) * MILLIS_IN_DAY;
         if (diff < 0) {
             diff = diff + MILLIS_IN_WEEK;
         }
-        long refDay = mStartRangeDate.getTimeInMillis() - diff;
+        long refDay = mRangeStartDate.getTimeInMillis() - diff;
         return (int) ((toDate.getTimeInMillis() - refDay) / MILLIS_IN_WEEK);
     }
 
@@ -864,7 +874,7 @@ public class DayPicker extends FrameLayout {
         protected void init() {
             mGestureDetector = new GestureDetector(mContext, new CalendarGestureListener());
             mSelectedWeek = getWeeksDelta(mSelectedDay);
-            mTotalWeekCount = getWeeksDelta(mEndRangeDate);
+            mTotalWeekCount = getWeeksDelta(mRangeEndDate);
         }
 
         /**
