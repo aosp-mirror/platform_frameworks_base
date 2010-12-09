@@ -73,7 +73,6 @@ public:
     RsSurfaceConfig mUserSurfaceConfig;
 
     //bool setupCheck();
-    bool checkDriver() const {return false;}
 
     ProgramFragment * getDefaultProgramFragment() const {
         return NULL;

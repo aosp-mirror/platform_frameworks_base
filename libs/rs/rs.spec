@@ -151,6 +151,11 @@ AllocationRead {
 	param void * data
 	}
 
+AllocationSyncAll {
+	param RsAllocation va
+	param RsAllocationUsageType src
+}
+
 Adapter1DCreate {
 	ret RsAdapter1D
 	}

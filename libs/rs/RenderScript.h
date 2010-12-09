@@ -96,6 +96,20 @@ void rsContextDeinitToClient(RsContext);
 #define RS_MAX_ATTRIBS 16
 
 
+enum RsAllocationUsageType {
+    RS_ALLOCATION_USAGE_SCRIPT = 0x0001,
+    RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE = 0x0002,
+    RS_ALLOCATION_USAGE_GRAPHICS_VERTEX = 0x0004,
+    RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS = 0x0008,
+
+    RS_ALLOCATION_USAGE_ALL = 0x000F
+};
+
+enum RsAllocationMipmapGenerationControl {
+    RS_MIPMAP_NONE = 0,
+    RS_MIPMAP_FULL = 1,
+    RS_MIPMAP_TEXTURE_ONLY = 2
+};
 
 enum RsDataType {
     RS_TYPE_NONE,
@@ -328,10 +342,17 @@ void rsaElementGetNativeData(RsContext, RsElement, uint32_t *elemData, uint32_t 
 void rsaElementGetSubElements(RsContext, RsElement, uint32_t *ids, const char **names, uint32_t dataSize);
 
 // Async commands for returning new IDS
-RsType rsaTypeCreate(RsContext, RsElement, uint32_t dimX, uint32_t dimY, uint32_t dimZ, bool mips, bool faces);
-RsAllocation rsaAllocationCreateTyped(RsContext rsc, RsType vtype);
-RsAllocation rsaAllocationCreateFromBitmap(RsContext con, uint32_t w, uint32_t h, RsElement _dst, RsElement _src,  bool genMips, const void *data);
-RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, uint32_t w, uint32_t h, RsElement _dst, RsElement _src,  bool genMips, const void *data);
+RsType rsaTypeCreate(RsContext, RsElement, uint32_t dimX, uint32_t dimY,
+                     uint32_t dimZ, bool mips, bool faces);
+RsAllocation rsaAllocationCreateTyped(RsContext rsc, RsType vtype,
+                                      RsAllocationMipmapGenerationControl mips,
+                                      uint32_t usages);
+RsAllocation rsaAllocationCreateFromBitmap(RsContext con, RsType vtype,
+                                           RsAllocationMipmapGenerationControl mips,
+                                           const void *data, uint32_t usages);
+RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, RsType vtype,
+                                               RsAllocationMipmapGenerationControl mips,
+                                               const void *data, uint32_t usages);
 
 #ifndef NO_RS_FUNCS
 #include "rsgApiFuncDecl.h"

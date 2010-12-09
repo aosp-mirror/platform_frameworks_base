@@ -132,7 +132,6 @@ public:
 
     bool setupCheck();
     void setupProgramStore();
-    bool checkDriver() const {return mEGL.mSurface != 0;}
 
     void pause();
     void resume();

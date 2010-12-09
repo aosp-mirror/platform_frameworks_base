@@ -315,7 +315,7 @@ public class RsRenderStatesRS {
         mFontSerifBoldItalic = Font.createFromFamily(mRS, mRes, "serif", Font.Style.BOLD_ITALIC, 8);
         mFontMono = Font.createFromFamily(mRS, mRes, "mono", Font.Style.NORMAL, 8);
 
-        mTextAlloc = Allocation.createFromString(mRS, "String from allocation");
+        mTextAlloc = Allocation.createFromString(mRS, "String from allocation", Allocation.USAGE_SCRIPT);
 
         mScript.set_gFontSans(mFontSans);
         mScript.set_gFontSerif(mFontSerif);

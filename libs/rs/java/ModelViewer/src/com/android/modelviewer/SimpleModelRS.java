@@ -132,7 +132,7 @@ public class SimpleModelRS {
 
     private void initTextAllocation() {
         String allocString = "Displaying file: R.raw.robot";
-        mTextAlloc = Allocation.createFromString(mRS, allocString);
+        mTextAlloc = Allocation.createFromString(mRS, allocString, Allocation.USAGE_SCRIPT);
         mScript.set_gTextAlloc(mTextAlloc);
     }
 

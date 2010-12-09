@@ -388,10 +388,10 @@ nTypeGetNativeData(JNIEnv *_env, jobject _this, RsContext con, jint id, jintArra
 // -----------------------------------
 
 static jint
-nAllocationCreateTyped(JNIEnv *_env, jobject _this, RsContext con, jint e)
+nAllocationCreateTyped(JNIEnv *_env, jobject _this, RsContext con, jint type, jint mips, jint usage)
 {
-    LOG_API("nAllocationCreateTyped, con(%p), e(%p)", con, (RsElement)e);
-    return (jint) rsaAllocationCreateTyped(con, (RsElement)e);
+    LOG_API("nAllocationCreateTyped, con(%p), type(%p), mip(%i), usage(%i)", con, (RsElement)type, mip, usage);
+    return (jint) rsaAllocationCreateTyped(con, (RsType)type, (RsAllocationMipmapGenerationControl)mips, (uint32_t)usage);
 }
 
 static void
@@ -406,6 +406,13 @@ nAllocationUploadToBufferObject(JNIEnv *_env, jobject _this, RsContext con, jint
 {
     LOG_API("nAllocationUploadToBufferObject, con(%p), a(%p)", con, (RsAllocation)a);
     rsAllocationUploadToBufferObject(con, (RsAllocation)a);
+}
+
+static void
+nAllocationSyncAll(JNIEnv *_env, jobject _this, RsContext con, jint a, jint bits)
+{
+    LOG_API("nAllocationSyncAll, con(%p), a(%p), bits(0x%08x)", con, (RsAllocation)a, bits);
+    rsAllocationSyncAll(con, (RsAllocation)a, (RsAllocationUsageType)bits);
 }
 
 static RsElement SkBitmapToPredefined(SkBitmap::Config cfg)
@@ -429,45 +436,31 @@ static RsElement SkBitmapToPredefined(SkBitmap::Config cfg)
 }
 
 static int
-nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint dstFmt, jboolean genMips, jobject jbitmap)
+nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint type, jint mip, jobject jbitmap, jint usage)
 {
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)_env->GetIntField(jbitmap, gNativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
-    SkBitmap::Config config = bitmap.getConfig();
 
-    RsElement e = SkBitmapToPredefined(config);
-    if (e) {
-        bitmap.lockPixels();
-        const int w = bitmap.width();
-        const int h = bitmap.height();
-        const void* ptr = bitmap.getPixels();
-        jint id = (jint)rsaAllocationCreateFromBitmap(con, w, h, (RsElement)dstFmt, e, genMips, ptr);
-        bitmap.unlockPixels();
-        return id;
-    }
-    return 0;
+    bitmap.lockPixels();
+    const void* ptr = bitmap.getPixels();
+    jint id = (jint)rsaAllocationCreateFromBitmap(con, (RsType)type, (RsAllocationMipmapGenerationControl)mip, ptr, usage);
+    bitmap.unlockPixels();
+    return id;
 }
 
 static int
-nAllocationCubeCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint dstFmt, jboolean genMips, jobject jbitmap)
+nAllocationCubeCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint type, jint mip, jobject jbitmap, jint usage)
 {
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)_env->GetIntField(jbitmap, gNativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
-    SkBitmap::Config config = bitmap.getConfig();
 
-    RsElement e = SkBitmapToPredefined(config);
-    if (e) {
-        bitmap.lockPixels();
-        const int w = bitmap.width();
-        const int h = bitmap.height();
-        const void* ptr = bitmap.getPixels();
-        jint id = (jint)rsaAllocationCubeCreateFromBitmap(con, w, h, (RsElement)dstFmt, e, genMips, ptr);
-        bitmap.unlockPixels();
-        return id;
-    }
-    return 0;
+    bitmap.lockPixels();
+    const void* ptr = bitmap.getPixels();
+    jint id = (jint)rsaAllocationCubeCreateFromBitmap(con, (RsType)type, (RsAllocationMipmapGenerationControl)mip, ptr, usage);
+    bitmap.unlockPixels();
+    return id;
 }
 
 static void
@@ -507,8 +500,9 @@ nAllocationCreateBitmapRef(JNIEnv *_env, jobject _this, RsContext con, jint type
 }
 
 static int
-nAllocationCreateFromAssetStream(JNIEnv *_env, jobject _this, RsContext con, jint dstFmt, jboolean genMips, jint native_asset)
+nAllocationCreateFromAssetStream(JNIEnv *_env, jobject _this, RsContext con, jint dstFmt, jboolean genMips, jint native_asset, jint usage)
 {
+    /*
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
     SkBitmap bitmap;
     SkImageDecoder::DecodeMemory(asset->getBuffer(false), asset->getLength(),
@@ -523,10 +517,11 @@ nAllocationCreateFromAssetStream(JNIEnv *_env, jobject _this, RsContext con, jin
         const int w = bitmap.width();
         const int h = bitmap.height();
         const void* ptr = bitmap.getPixels();
-        jint id = (jint)rsaAllocationCreateFromBitmap(con, w, h, (RsElement)dstFmt, e, genMips, ptr);
+        jint id = (jint)rsaAllocationCreateFromBitmap(con, w, h, (RsElement)dstFmt, e, genMips, ptr, usage);
         bitmap.unlockPixels();
         return id;
     }
+    */
     return 0;
 }
 
@@ -1313,14 +1308,16 @@ static JNINativeMethod methods[] = {
 {"rsnTypeCreate",                    "(IIIIIZZ)I",                            (void*)nTypeCreate },
 {"rsnTypeGetNativeData",             "(II[I)V",                               (void*)nTypeGetNativeData },
 
-{"rsnAllocationCreateTyped",         "(II)I",                                 (void*)nAllocationCreateTyped },
-{"rsnAllocationUpdateFromBitmap",    "(IILandroid/graphics/Bitmap;)V",        (void*)nAllocationUpdateFromBitmap },
-{"rsnAllocationCreateFromBitmap",    "(IIZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmap },
-{"rsnAllocationCubeCreateFromBitmap","(IIZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCubeCreateFromBitmap },
+{"rsnAllocationCreateTyped",         "(III)I",                                (void*)nAllocationCreateTyped },
+{"rsnAllocationCreateFromBitmap",    "(IIILandroid/graphics/Bitmap;I)I",      (void*)nAllocationCreateFromBitmap },
+{"rsnAllocationCubeCreateFromBitmap","(IIILandroid/graphics/Bitmap;I)I",      (void*)nAllocationCubeCreateFromBitmap },
 {"rsnAllocationCreateBitmapRef",     "(IILandroid/graphics/Bitmap;)I",        (void*)nAllocationCreateBitmapRef },
-{"rsnAllocationCreateFromAssetStream","(IIZI)I",                              (void*)nAllocationCreateFromAssetStream },
+{"rsnAllocationCreateFromAssetStream","(IIII)I",                              (void*)nAllocationCreateFromAssetStream },
+
+{"rsnAllocationUpdateFromBitmap",    "(IILandroid/graphics/Bitmap;)V",        (void*)nAllocationUpdateFromBitmap },
 {"rsnAllocationUploadToTexture",     "(IIZI)V",                               (void*)nAllocationUploadToTexture },
 {"rsnAllocationUploadToBufferObject","(II)V",                                 (void*)nAllocationUploadToBufferObject },
+{"rsnAllocationSyncAll",             "(III)V",                                (void*)nAllocationSyncAll },
 {"rsnAllocationSubData1D",           "(IIII[II)V",                            (void*)nAllocationSubData1D_i },
 {"rsnAllocationSubData1D",           "(IIII[SI)V",                            (void*)nAllocationSubData1D_s },
 {"rsnAllocationSubData1D",           "(IIII[BI)V",                            (void*)nAllocationSubData1D_b },

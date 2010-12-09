@@ -31,8 +31,10 @@
 using namespace android;
 using namespace android::renderscript;
 
-Allocation::Allocation(Context *rsc, const Type *type) : ObjectBase(rsc) {
+Allocation::Allocation(Context *rsc, const Type *type, uint32_t usages) : ObjectBase(rsc) {
     init(rsc, type);
+
+    mUsageFlags = usages;
 
     mPtr = malloc(mType->getSizeBytes());
     if (mType->getElement()->getHasReferences()) {
@@ -47,6 +49,8 @@ Allocation::Allocation(Context *rsc, const Type *type, void *bmp,
                        void *callbackData, RsBitmapCallback_t callback)
                        : ObjectBase(rsc) {
     init(rsc, type);
+
+    mUsageFlags = RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE;
 
     mPtr = bmp;
     mUserBitmapCallback = callback;
@@ -137,15 +141,22 @@ uint32_t Allocation::getGLTarget() const {
     return 0;
 }
 
+void Allocation::syncAll(Context *rsc, RsAllocationUsageType src) {
+    rsAssert(src == RS_ALLOCATION_USAGE_SCRIPT);
+
+    if (mIsTexture) {
+        uploadToTexture(rsc);
+    }
+    if (mIsVertexBuffer) {
+        uploadToBufferObject(rsc);
+    }
+
+    mUploadDefered = false;
+}
 
 void Allocation::uploadToTexture(const Context *rsc) {
 
     mIsTexture = true;
-    if (!rsc->checkDriver()) {
-        mUploadDefered = true;
-        return;
-    }
-
     GLenum type = mType->getElement()->getComponent().getGLType();
     GLenum format = mType->getElement()->getComponent().getGLFormat();
 
@@ -255,10 +266,6 @@ void Allocation::uploadToBufferObject(const Context *rsc) {
     rsAssert(!mType->getDimZ());
 
     mIsVertexBuffer = true;
-    if (!rsc->checkDriver()) {
-        mUploadDefered = true;
-        return;
-    }
 
     if (!mBufferID) {
         glGenBuffers(1, &mBufferID);
@@ -275,15 +282,9 @@ void Allocation::uploadToBufferObject(const Context *rsc) {
     rsc->checkError("Allocation::uploadToBufferObject");
 }
 
-void Allocation::uploadCheck(const Context *rsc) {
+void Allocation::uploadCheck(Context *rsc) {
     if (mUploadDefered) {
-        mUploadDefered = false;
-        if (mIsVertexBuffer) {
-            uploadToBufferObject(rsc);
-        }
-        if (mIsTexture) {
-            uploadToTexture(rsc);
-        }
+        syncAll(rsc, RS_ALLOCATION_USAGE_SCRIPT);
     }
 }
 
@@ -516,7 +517,7 @@ Allocation *Allocation::createFromStream(Context *rsc, IStream *stream) {
         return NULL;
     }
 
-    Allocation *alloc = new Allocation(rsc, type);
+    Allocation *alloc = new Allocation(rsc, type, RS_ALLOCATION_USAGE_ALL);
     alloc->setName(name.string(), name.size());
 
     // Read in all of our allocation data
@@ -748,6 +749,11 @@ static ElementConverter_t pickConverter(const Element *dst, const Element *src) 
 
 #ifndef ANDROID_RS_BUILD_FOR_HOST
 
+void rsi_AllocationSyncAll(Context *rsc, RsAllocation va, RsAllocationUsageType src) {
+    Allocation *a = static_cast<Allocation *>(va);
+    a->syncAll(rsc, src);
+}
+
 RsAllocation rsi_AllocationCreateBitmapRef(Context *rsc, RsType vtype,
                                            void *bmp, void *callbackData,
                                            RsBitmapCallback_t callback) {
@@ -835,60 +841,53 @@ const void * rsaAllocationGetType(RsContext con, RsAllocation va) {
     return a->getType();
 }
 
-RsAllocation rsaAllocationCreateTyped(RsContext con, RsType vtype) {
+RsAllocation rsaAllocationCreateTyped(RsContext con, RsType vtype,
+                                      RsAllocationMipmapGenerationControl mips,
+                                      uint32_t usages) {
     Context *rsc = static_cast<Context *>(con);
-    Allocation * alloc = new Allocation(rsc, static_cast<Type *>(vtype));
+    Allocation * alloc = new Allocation(rsc, static_cast<Type *>(vtype), usages);
     alloc->incUserRef();
     return alloc;
 }
 
-RsAllocation rsaAllocationCreateFromBitmap(RsContext con, uint32_t w, uint32_t h, RsElement _dst, RsElement _src,  bool genMips, const void *data) {
+
+RsAllocation rsaAllocationCreateFromBitmap(RsContext con, RsType vtype,
+                                           RsAllocationMipmapGenerationControl mips,
+                                           const void *data, uint32_t usages) {
     Context *rsc = static_cast<Context *>(con);
-    const Element *src = static_cast<const Element *>(_src);
-    const Element *dst = static_cast<const Element *>(_dst);
+    Type *t = static_cast<Type *>(vtype);
 
-    //LOGE("%p rsi_AllocationCreateFromBitmap %i %i %i", rsc, w, h, genMips);
-    RsType type = rsaTypeCreate(rsc, _dst, w, h, 0, genMips, false);
-
-    RsAllocation vTexAlloc = rsaAllocationCreateTyped(rsc, type);
+    RsAllocation vTexAlloc = rsaAllocationCreateTyped(rsc, vtype, mips, usages);
     Allocation *texAlloc = static_cast<Allocation *>(vTexAlloc);
     if (texAlloc == NULL) {
         LOGE("Memory allocation failure");
         return NULL;
     }
 
-    ElementConverter_t cvt = pickConverter(dst, src);
-    if (cvt) {
-        cvt(texAlloc->getPtr(), data, w * h);
-        if (genMips) {
-            Adapter2D adapt(rsc, texAlloc);
-            Adapter2D adapt2(rsc, texAlloc);
-            for (uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
-                adapt.setLOD(lod);
-                adapt2.setLOD(lod + 1);
-                mip(adapt2, adapt);
-            }
+    memcpy(texAlloc->getPtr(), data, t->getDimX() * t->getDimY() * t->getElementSizeBytes());
+    if (mips == RS_MIPMAP_FULL) {
+        Adapter2D adapt(rsc, texAlloc);
+        Adapter2D adapt2(rsc, texAlloc);
+        for (uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
+            adapt.setLOD(lod);
+            adapt2.setLOD(lod + 1);
+            mip(adapt2, adapt);
         }
-    } else {
-        rsc->setError(RS_ERROR_BAD_VALUE, "Unsupported bitmap format");
-        delete texAlloc;
-        return NULL;
     }
 
     return texAlloc;
 }
 
-RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, uint32_t w, uint32_t h, RsElement _dst, RsElement _src,  bool genMips, const void *data) {
+RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, RsType vtype,
+                                               RsAllocationMipmapGenerationControl mips,
+                                               const void *data, uint32_t usages) {
     Context *rsc = static_cast<Context *>(con);
-    const Element *src = static_cast<const Element *>(_src);
-    const Element *dst = static_cast<const Element *>(_dst);
+    Type *t = static_cast<Type *>(vtype);
 
     // Cubemap allocation's faces should be Width by Width each.
     // Source data should have 6 * Width by Width pixels
     // Error checking is done in the java layer
-    RsType type = rsaTypeCreate(rsc, _dst, w, h, 0, genMips, true);
-
-    RsAllocation vTexAlloc = rsaAllocationCreateTyped(rsc, type);
+    RsAllocation vTexAlloc = rsaAllocationCreateTyped(rsc, t, mips, usages);
     Allocation *texAlloc = static_cast<Allocation *>(vTexAlloc);
     if (texAlloc == NULL) {
         LOGE("Memory allocation failure");
@@ -896,33 +895,27 @@ RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, uint32_t w, uint32
     }
 
     uint8_t *sourcePtr = (uint8_t*)data;
-    ElementConverter_t cvt = pickConverter(dst, src);
-    if (cvt) {
-        for (uint32_t face = 0; face < 6; face ++) {
-            Adapter2D faceAdapter(rsc, texAlloc);
-            faceAdapter.setFace(face);
+    for (uint32_t face = 0; face < 6; face ++) {
+        Adapter2D faceAdapter(rsc, texAlloc);
+        faceAdapter.setFace(face);
 
-            cvt(faceAdapter.getElement(0, 0), sourcePtr, w * w);
+        size_t cpySize = t->getDimX() * t->getDimX() * t->getElementSizeBytes();
+        memcpy(faceAdapter.getElement(0, 0), sourcePtr, cpySize);
 
-            // Move the data pointer to the next cube face
-            sourcePtr += w * w * src->getSizeBytes();
+        // Move the data pointer to the next cube face
+        sourcePtr += cpySize;
 
-            if (genMips) {
-                Adapter2D adapt(rsc, texAlloc);
-                Adapter2D adapt2(rsc, texAlloc);
-                adapt.setFace(face);
-                adapt2.setFace(face);
-                for (uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
-                    adapt.setLOD(lod);
-                    adapt2.setLOD(lod + 1);
-                    mip(adapt2, adapt);
-                }
+        if (mips == RS_MIPMAP_FULL) {
+            Adapter2D adapt(rsc, texAlloc);
+            Adapter2D adapt2(rsc, texAlloc);
+            adapt.setFace(face);
+            adapt2.setFace(face);
+            for (uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
+                adapt.setLOD(lod);
+                adapt2.setLOD(lod + 1);
+                mip(adapt2, adapt);
             }
         }
-    } else {
-        rsc->setError(RS_ERROR_BAD_VALUE, "Unsupported bitmap format");
-        delete texAlloc;
-        return NULL;
     }
 
     return texAlloc;
