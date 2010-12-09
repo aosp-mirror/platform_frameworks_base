@@ -89,7 +89,9 @@ public class PreferenceFrameLayout extends FrameLayout {
         int borderLeft = getPaddingLeft();
         int borderRight = getPaddingRight();
 
-        LayoutParams layoutParams = (PreferenceFrameLayout.LayoutParams) child.getLayoutParams();
+        android.view.ViewGroup.LayoutParams params = child.getLayoutParams();
+        LayoutParams layoutParams = params instanceof PreferenceFrameLayout.LayoutParams
+            ? (PreferenceFrameLayout.LayoutParams) child.getLayoutParams() : null;
         // Check on the id of the child before adding it.
         if (layoutParams != null && layoutParams.removeBorders) {
             if (mPaddingApplied) {

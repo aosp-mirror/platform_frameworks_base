@@ -21,6 +21,7 @@ import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentBreadCrumbs;
 import android.app.FragmentManager;
@@ -991,7 +992,11 @@ public abstract class PreferenceActivity extends ListActivity implements
         if (mFragmentBreadCrumbs == null) {
             mFragmentBreadCrumbs = new FragmentBreadCrumbs(this);
             mFragmentBreadCrumbs.setActivity(this);
-            getActionBar().setCustomNavigationMode(mFragmentBreadCrumbs);
+
+            ActionBar actionBar = getActionBar();
+            if (actionBar != null) {
+                actionBar.setCustomNavigationMode(mFragmentBreadCrumbs);
+            }
         }
         mFragmentBreadCrumbs.setTitle(title, shortTitle);
     }
