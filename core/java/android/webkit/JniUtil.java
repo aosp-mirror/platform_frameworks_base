@@ -19,9 +19,12 @@ package android.webkit;
 import android.content.Context;
 
 class JniUtil {
+    private JniUtil() {} // Utility class, do not instantiate.
+
     // Used by the Chromium HTTP stack.
     private static String sDatabaseDirectory;
     private static String sCacheDirectory;
+    private static Boolean sUseChromiumHttpStack;
 
     private static boolean initialized = false;
 
@@ -58,4 +61,19 @@ class JniUtil {
         checkIntialized();
         return sCacheDirectory;
     }
+
+    /**
+     * Returns true if we're using the Chromium HTTP stack.
+     *
+     * TODO: Remove this if/when we permanently switch to the Chromium HTTP stack
+     * http:/b/3118772
+     */
+    static boolean useChromiumHttpStack() {
+        if (sUseChromiumHttpStack == null) {
+            sUseChromiumHttpStack = nativeUseChromiumHttpStack();
+        }
+        return sUseChromiumHttpStack;
+    }
+
+    private static native boolean nativeUseChromiumHttpStack();
 }
