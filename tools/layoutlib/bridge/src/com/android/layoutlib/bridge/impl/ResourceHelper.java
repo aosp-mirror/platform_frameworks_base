@@ -16,9 +16,9 @@
 
 package com.android.layoutlib.bridge.impl;
 
-import com.android.layoutlib.api.IDensityBasedResourceValue;
-import com.android.layoutlib.api.IResourceValue;
-import com.android.layoutlib.api.IDensityBasedResourceValue.Density;
+import com.android.layoutlib.api.DensityBasedResourceValue;
+import com.android.layoutlib.api.ResourceDensity;
+import com.android.layoutlib.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
@@ -113,7 +113,7 @@ public final class ResourceHelper {
      * @param isFramework indicates whether the resource is a framework resources.
      * Framework resources are cached, and loaded only once.
      */
-    public static Drawable getDrawable(IResourceValue value, BridgeContext context,
+    public static Drawable getDrawable(ResourceValue value, BridgeContext context,
             boolean isFramework) {
         Drawable d = null;
 
@@ -143,9 +143,10 @@ public final class ResourceHelper {
                             }
 
                             if (bitmap == null) {
-                                Density density = Density.MEDIUM;
-                                if (value instanceof IDensityBasedResourceValue) {
-                                    density = ((IDensityBasedResourceValue)value).getDensity();
+                                ResourceDensity density = ResourceDensity.MEDIUM;
+                                if (value instanceof DensityBasedResourceValue) {
+                                    density =
+                                        ((DensityBasedResourceValue)value).getResourceDensity();
                                 }
 
                                 bitmap = Bitmap_Delegate.createBitmap(ninePatch.getImage(),
@@ -205,9 +206,9 @@ public final class ResourceHelper {
                             isFramework ? null : context.getProjectKey());
 
                     if (bitmap == null) {
-                        Density density = Density.MEDIUM;
-                        if (value instanceof IDensityBasedResourceValue) {
-                            density = ((IDensityBasedResourceValue)value).getDensity();
+                        ResourceDensity density = ResourceDensity.MEDIUM;
+                        if (value instanceof DensityBasedResourceValue) {
+                            density = ((DensityBasedResourceValue)value).getResourceDensity();
                         }
 
                         bitmap = Bitmap_Delegate.createBitmap(bmpFile, false /*isMutable*/,

@@ -22,15 +22,15 @@ import static com.android.layoutlib.api.SceneResult.SceneStatus.SUCCESS;
 
 import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.api.IProjectCallback;
-import com.android.layoutlib.api.IResourceValue;
-import com.android.layoutlib.api.IStyleResourceValue;
 import com.android.layoutlib.api.IXmlPullParser;
 import com.android.layoutlib.api.LayoutBridge;
 import com.android.layoutlib.api.LayoutScene;
+import com.android.layoutlib.api.ResourceDensity;
+import com.android.layoutlib.api.ResourceValue;
 import com.android.layoutlib.api.SceneParams;
 import com.android.layoutlib.api.SceneResult;
+import com.android.layoutlib.api.StyleResourceValue;
 import com.android.layoutlib.api.ViewInfo;
-import com.android.layoutlib.api.IDensityBasedResourceValue.Density;
 import com.android.layoutlib.api.LayoutScene.IAnimationListener;
 import com.android.layoutlib.api.SceneParams.RenderingMode;
 import com.android.layoutlib.api.SceneResult.SceneStatus;
@@ -100,9 +100,9 @@ public class LayoutSceneImpl {
     private BridgeContext mContext;
     private BridgeXmlBlockParser mBlockParser;
     private BridgeInflater mInflater;
-    private IStyleResourceValue mCurrentTheme;
+    private StyleResourceValue mCurrentTheme;
     private int mScreenOffset;
-    private IResourceValue mWindowBackground;
+    private ResourceValue mWindowBackground;
     private FrameLayout mViewRoot;
     private Canvas mCanvas;
     private int mMeasuredScreenWidth = -1;
@@ -163,8 +163,8 @@ public class LayoutSceneImpl {
         metrics.ydpi = mParams.getYdpi();
 
         // find the current theme and compute the style inheritance map
-        Map<IStyleResourceValue, IStyleResourceValue> styleParentMap =
-            new HashMap<IStyleResourceValue, IStyleResourceValue>();
+        Map<StyleResourceValue, StyleResourceValue> styleParentMap =
+            new HashMap<StyleResourceValue, StyleResourceValue>();
 
         mCurrentTheme = computeStyleMaps(mParams.getThemeName(), mParams.getIsProjectTheme(),
                 mParams.getProjectResources().get(BridgeConstants.RES_STYLE),
@@ -451,7 +451,7 @@ public class LayoutSceneImpl {
                 // create an Android bitmap around the BufferedImage
                 Bitmap bitmap = Bitmap_Delegate.createBitmap(mImage,
                         true /*isMutable*/,
-                        Density.getEnum(mParams.getDensity()));
+                        ResourceDensity.getEnum(mParams.getDensity()));
 
                 // create a Canvas around the Android bitmap
                 mCanvas = new Canvas(bitmap);
@@ -493,7 +493,7 @@ public class LayoutSceneImpl {
         checkLock();
 
         // find the animation file.
-        IResourceValue animationResource = null;
+        ResourceValue animationResource = null;
         int animationId = 0;
         if (isFrameworkAnimation) {
             animationResource = mContext.getFrameworkResource("anim", animationName);
@@ -791,14 +791,14 @@ public class LayoutSceneImpl {
      * @param outInheritanceMap the map of style inheritance. This is filled by the method
      * @return the {@link IStyleResourceValue} matching <var>themeName</var>
      */
-    private IStyleResourceValue computeStyleMaps(
+    private StyleResourceValue computeStyleMaps(
             String themeName, boolean isProjectTheme, Map<String,
-            IResourceValue> inProjectStyleMap, Map<String, IResourceValue> inFrameworkStyleMap,
-            Map<IStyleResourceValue, IStyleResourceValue> outInheritanceMap) {
+            ResourceValue> inProjectStyleMap, Map<String, ResourceValue> inFrameworkStyleMap,
+            Map<StyleResourceValue, StyleResourceValue> outInheritanceMap) {
 
         if (inProjectStyleMap != null && inFrameworkStyleMap != null) {
             // first, get the theme
-            IResourceValue theme = null;
+            ResourceValue theme = null;
 
             // project theme names have been prepended with a *
             if (isProjectTheme) {
@@ -807,7 +807,7 @@ public class LayoutSceneImpl {
                 theme = inFrameworkStyleMap.get(themeName);
             }
 
-            if (theme instanceof IStyleResourceValue) {
+            if (theme instanceof StyleResourceValue) {
                 // compute the inheritance map for both the project and framework styles
                 computeStyleInheritance(inProjectStyleMap.values(), inProjectStyleMap,
                         inFrameworkStyleMap, outInheritanceMap);
@@ -820,7 +820,7 @@ public class LayoutSceneImpl {
                 computeStyleInheritance(inFrameworkStyleMap.values(), null /*inProjectStyleMap */,
                         inFrameworkStyleMap, outInheritanceMap);
 
-                return (IStyleResourceValue)theme;
+                return (StyleResourceValue)theme;
             }
         }
 
@@ -834,14 +834,14 @@ public class LayoutSceneImpl {
      * @param inFrameworkStyleMap the map of framework styles.
      * @param outInheritanceMap the map of style inheritance. This is filled by the method.
      */
-    private void computeStyleInheritance(Collection<IResourceValue> styles,
-            Map<String, IResourceValue> inProjectStyleMap,
-            Map<String, IResourceValue> inFrameworkStyleMap,
-            Map<IStyleResourceValue, IStyleResourceValue> outInheritanceMap) {
-        for (IResourceValue value : styles) {
-            if (value instanceof IStyleResourceValue) {
-                IStyleResourceValue style = (IStyleResourceValue)value;
-                IStyleResourceValue parentStyle = null;
+    private void computeStyleInheritance(Collection<ResourceValue> styles,
+            Map<String, ResourceValue> inProjectStyleMap,
+            Map<String, ResourceValue> inFrameworkStyleMap,
+            Map<StyleResourceValue, StyleResourceValue> outInheritanceMap) {
+        for (ResourceValue value : styles) {
+            if (value instanceof StyleResourceValue) {
+                StyleResourceValue style = (StyleResourceValue)value;
+                StyleResourceValue parentStyle = null;
 
                 // first look for a specified parent.
                 String parentName = style.getParentStyle();
@@ -875,9 +875,9 @@ public class LayoutSceneImpl {
      * @param inFrameworkStyleMap the framework style map.
      * @return The matching {@link IStyleResourceValue} object or <code>null</code> if not found.
      */
-    private IStyleResourceValue getStyle(String parentName,
-            Map<String, IResourceValue> inProjectStyleMap,
-            Map<String, IResourceValue> inFrameworkStyleMap) {
+    private StyleResourceValue getStyle(String parentName,
+            Map<String, ResourceValue> inProjectStyleMap,
+            Map<String, ResourceValue> inFrameworkStyleMap) {
         boolean frameworkOnly = false;
 
         String name = parentName;
@@ -901,7 +901,7 @@ public class LayoutSceneImpl {
             return null;
         }
 
-        IResourceValue parent = null;
+        ResourceValue parent = null;
 
         // if allowed, search in the project resources.
         if (frameworkOnly == false && inProjectStyleMap != null) {
@@ -914,8 +914,8 @@ public class LayoutSceneImpl {
         }
 
         // make sure the result is the proper class type and return it.
-        if (parent instanceof IStyleResourceValue) {
-            return (IStyleResourceValue)parent;
+        if (parent instanceof StyleResourceValue) {
+            return (StyleResourceValue)parent;
         }
 
         mParams.getLog().error(null,
@@ -944,12 +944,12 @@ public class LayoutSceneImpl {
      * @param context The context
      * @return the pixel height offset
      */
-    private int getScreenOffset(Map<String, Map<String, IResourceValue>> frameworkResources,
-            IStyleResourceValue currentTheme, BridgeContext context) {
+    private int getScreenOffset(Map<String, Map<String, ResourceValue>> frameworkResources,
+            StyleResourceValue currentTheme, BridgeContext context) {
         int offset = 0;
 
         // get the title bar flag from the current theme.
-        IResourceValue value = context.findItemInStyle(currentTheme, "windowNoTitle");
+        ResourceValue value = context.findItemInStyle(currentTheme, "windowNoTitle");
 
         // because it may reference something else, we resolve it.
         value = context.resolveResValue(value);
@@ -991,7 +991,7 @@ public class LayoutSceneImpl {
             int defaultOffset = DEFAULT_STATUS_BAR_HEIGHT;
 
             // get the real value, first the list of Dimensions from the framework map
-            Map<String, IResourceValue> dimens = frameworkResources.get(BridgeConstants.RES_DIMEN);
+            Map<String, ResourceValue> dimens = frameworkResources.get(BridgeConstants.RES_DIMEN);
 
             // now get the value
             value = dimens.get("status_bar_height");

@@ -17,7 +17,7 @@
 package com.android.layoutlib.bridge.android;
 
 import com.android.layoutlib.api.IProjectCallback;
-import com.android.layoutlib.api.IResourceValue;
+import com.android.layoutlib.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
@@ -98,7 +98,7 @@ public final class BridgeResources extends Resources {
         return new BridgeTypedArray(this, mContext, numEntries, platformFile);
     }
 
-    private IResourceValue getResourceValue(int id, boolean[] platformResFlag_out) {
+    private ResourceValue getResourceValue(int id, boolean[] platformResFlag_out) {
         // first get the String related to this id in the framework
         String[] resourceInfo = Bridge.resolveResourceValue(id);
 
@@ -122,7 +122,7 @@ public final class BridgeResources extends Resources {
 
     @Override
     public Drawable getDrawable(int id) throws NotFoundException {
-        IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
             return ResourceHelper.getDrawable(value, mContext, value.isFramework());
@@ -137,7 +137,7 @@ public final class BridgeResources extends Resources {
 
     @Override
     public int getColor(int id) throws NotFoundException {
-        IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
             try {
@@ -156,7 +156,7 @@ public final class BridgeResources extends Resources {
 
     @Override
     public ColorStateList getColorStateList(int id) throws NotFoundException {
-        IResourceValue resValue = getResourceValue(id, mPlatformResourceFlag);
+        ResourceValue resValue = getResourceValue(id, mPlatformResourceFlag);
 
         if (resValue != null) {
             String value = resValue.getValue();
@@ -202,7 +202,7 @@ public final class BridgeResources extends Resources {
 
     @Override
     public CharSequence getText(int id) throws NotFoundException {
-        IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
             return value.getValue();
@@ -217,7 +217,7 @@ public final class BridgeResources extends Resources {
 
     @Override
     public XmlResourceParser getLayout(int id) throws NotFoundException {
-        IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
             XmlPullParser parser = null;
@@ -262,7 +262,7 @@ public final class BridgeResources extends Resources {
 
     @Override
     public XmlResourceParser getAnimation(int id) throws NotFoundException {
-        IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
             XmlPullParser parser = null;
@@ -308,7 +308,7 @@ public final class BridgeResources extends Resources {
 
     @Override
     public float getDimension(int id) throws NotFoundException {
-        IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
             String v = value.getValue();
@@ -337,7 +337,7 @@ public final class BridgeResources extends Resources {
 
     @Override
     public int getDimensionPixelOffset(int id) throws NotFoundException {
-        IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
             String v = value.getValue();
@@ -359,7 +359,7 @@ public final class BridgeResources extends Resources {
 
     @Override
     public int getDimensionPixelSize(int id) throws NotFoundException {
-        IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
             String v = value.getValue();
@@ -381,7 +381,7 @@ public final class BridgeResources extends Resources {
 
     @Override
     public int getInteger(int id) throws NotFoundException {
-        IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null && value.getValue() != null) {
             String v = value.getValue();
@@ -436,7 +436,7 @@ public final class BridgeResources extends Resources {
 
     @Override
     public String getString(int id) throws NotFoundException {
-        IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null && value.getValue() != null) {
             return value.getValue();
@@ -452,7 +452,7 @@ public final class BridgeResources extends Resources {
     @Override
     public void getValue(int id, TypedValue outValue, boolean resolveRefs)
             throws NotFoundException {
-        IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
             String v = value.getValue();
@@ -481,7 +481,7 @@ public final class BridgeResources extends Resources {
 
     @Override
     public XmlResourceParser getXml(int id) throws NotFoundException {
-        IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
             String v = value.getValue();
@@ -545,7 +545,7 @@ public final class BridgeResources extends Resources {
 
     @Override
     public InputStream openRawResource(int id) throws NotFoundException {
-        IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
             String v = value.getValue();

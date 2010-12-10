@@ -16,7 +16,7 @@
 
 package android.graphics;
 
-import com.android.layoutlib.api.IDensityBasedResourceValue.Density;
+import com.android.layoutlib.api.ResourceDensity;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
 import android.graphics.Bitmap.Config;
@@ -83,12 +83,12 @@ public class Bitmap_Delegate {
      * @see Bitmap#isMutable()
      * @see Bitmap#getDensity()
      */
-    public static Bitmap createBitmap(File input, boolean isMutable, Density density)
+    public static Bitmap createBitmap(File input, boolean isMutable, ResourceDensity density)
             throws IOException {
         // create a delegate with the content of the file.
         Bitmap_Delegate delegate = new Bitmap_Delegate(ImageIO.read(input));
 
-        return createBitmap(delegate, isMutable, density.getValue());
+        return createBitmap(delegate, isMutable, density.getDpi());
     }
 
     /**
@@ -101,12 +101,12 @@ public class Bitmap_Delegate {
      * @see Bitmap#isMutable()
      * @see Bitmap#getDensity()
      */
-    public static Bitmap createBitmap(InputStream input, boolean isMutable, Density density)
+    public static Bitmap createBitmap(InputStream input, boolean isMutable, ResourceDensity density)
             throws IOException {
         // create a delegate with the content of the stream.
         Bitmap_Delegate delegate = new Bitmap_Delegate(ImageIO.read(input));
 
-        return createBitmap(delegate, isMutable, density.getValue());
+        return createBitmap(delegate, isMutable, density.getDpi());
     }
 
     /**
@@ -119,12 +119,12 @@ public class Bitmap_Delegate {
      * @see Bitmap#isMutable()
      * @see Bitmap#getDensity()
      */
-    public static Bitmap createBitmap(BufferedImage image, boolean isMutable, Density density)
-            throws IOException {
+    public static Bitmap createBitmap(BufferedImage image, boolean isMutable,
+            ResourceDensity density) throws IOException {
         // create a delegate with the given image.
         Bitmap_Delegate delegate = new Bitmap_Delegate(image);
 
-        return createBitmap(delegate, isMutable, density.getValue());
+        return createBitmap(delegate, isMutable, density.getDpi());
     }
 
     /**
