@@ -990,6 +990,9 @@ public abstract class PreferenceActivity extends ListActivity implements
      */
     public void showBreadCrumbs(CharSequence title, CharSequence shortTitle) {
         if (mFragmentBreadCrumbs == null) {
+            View crumbs = findViewById(android.R.id.title);
+            // For screens with a different kind of title, don't create breadcrumbs.
+            if (!(crumbs instanceof FragmentBreadCrumbs)) return;
             mFragmentBreadCrumbs = (FragmentBreadCrumbs) findViewById(android.R.id.title);
             if (mFragmentBreadCrumbs == null) {
                 mFragmentBreadCrumbs = new FragmentBreadCrumbs(this);
