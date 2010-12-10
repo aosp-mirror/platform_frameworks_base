@@ -1167,7 +1167,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     public int getVerticalScrollbarWidth() {
-        if (isEnabled()) {
+        if (isFastScrollAlwaysVisible()) {
             return Math.max(super.getVerticalScrollbarWidth(), mFastScroller.getWidth());
         }
         return super.getVerticalScrollbarWidth();
