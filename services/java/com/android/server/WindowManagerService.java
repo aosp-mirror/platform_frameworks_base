@@ -327,18 +327,6 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<AppWindowToken> mFinishedStarting = new ArrayList<AppWindowToken>();
 
     /**
-     * This was the app token that was used to retrieve the last enter
-     * animation.  It will be used for the next exit animation.
-     */
-    AppWindowToken mLastEnterAnimToken;
-
-    /**
-     * These were the layout params used to retrieve the last enter animation.
-     * They will be used for the next exit animation.
-     */
-    LayoutParams mLastEnterAnimParams;
-
-    /**
      * Z-ordered (bottom-most first) list of all Window objects.
      */
     final ArrayList<WindowState> mWindows = new ArrayList<WindowState>();
@@ -3663,7 +3651,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void prepareAppTransition(int transit) {
+    public void prepareAppTransition(int transit, boolean alwaysKeepCurrent) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "prepareAppTransition()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3677,14 +3665,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (mNextAppTransition == WindowManagerPolicy.TRANSIT_UNSET
                         || mNextAppTransition == WindowManagerPolicy.TRANSIT_NONE) {
                     mNextAppTransition = transit;
-                } else if (transit == WindowManagerPolicy.TRANSIT_TASK_OPEN
-                        && mNextAppTransition == WindowManagerPolicy.TRANSIT_TASK_CLOSE) {
-                    // Opening a new task always supersedes a close for the anim.
-                    mNextAppTransition = transit;
-                } else if (transit == WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN
-                        && mNextAppTransition == WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE) {
-                    // Opening a new activity always supersedes a close for the anim.
-                    mNextAppTransition = transit;
+                } else if (!alwaysKeepCurrent) {
+                    if (transit == WindowManagerPolicy.TRANSIT_TASK_OPEN
+                            && mNextAppTransition == WindowManagerPolicy.TRANSIT_TASK_CLOSE) {
+                        // Opening a new task always supersedes a close for the anim.
+                        mNextAppTransition = transit;
+                    } else if (transit == WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN
+                            && mNextAppTransition == WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE) {
+                        // Opening a new activity always supersedes a close for the anim.
+                        mNextAppTransition = transit;
+                    }
                 }
                 mAppTransitionReady = false;
                 mAppTransitionTimeout = false;
@@ -4237,10 +4227,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     wtoken.animating = false;
                 }
                 mAppTokens.remove(wtoken);
-                if (mLastEnterAnimToken == wtoken) {
-                    mLastEnterAnimToken = null;
-                    mLastEnterAnimParams = null;
-                }
                 wtoken.removed = true;
                 if (wtoken.startingData != null) {
                     startingToken = wtoken;
@@ -6713,6 +6699,7 @@ public class WindowManagerService extends IWindowManager.Stub
         int mTouchableInsets = ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 
         // Current transformation being applied.
+        boolean mHaveMatrix;
         float mDsDx=1, mDtDx=0, mDsDy=0, mDtDy=1;
         float mLastDsDx=1, mLastDtDx=0, mLastDsDy=0, mLastDtDy=1;
         float mHScale=1, mVScale=1;
@@ -7598,6 +7585,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // since it is already included in the transformation.
                 //Slog.i(TAG, "Transform: " + matrix);
 
+                mHaveMatrix = true;
                 tmpMatrix.getValues(tmpFloats);
                 mDsDx = tmpFloats[Matrix.MSCALE_X];
                 mDtDx = tmpFloats[Matrix.MSKEW_Y];
@@ -7649,6 +7637,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mShownFrame.offset(mXOffset, mYOffset);
             }
             mShownAlpha = mAlpha;
+            mHaveMatrix = false;
             mDsDx = 1;
             mDtDx = 0;
             mDsDy = 0;
@@ -8064,11 +8053,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" mVisibleInsets="); mVisibleInsets.printShortString(pw);
                     pw.print(" last="); mLastVisibleInsets.printShortString(pw);
                     pw.println();
-            if (mShownAlpha != 1 || mAlpha != 1 || mLastAlpha != 1) {
-                pw.print(prefix); pw.print("mShownAlpha="); pw.print(mShownAlpha);
-                        pw.print(" mAlpha="); pw.print(mAlpha);
-                        pw.print(" mLastAlpha="); pw.println(mLastAlpha);
-            }
             if (mAnimating || mLocalAnimating || mAnimationIsEntrance
                     || mAnimation != null) {
                 pw.print(prefix); pw.print("mAnimating="); pw.print(mAnimating);
@@ -8082,6 +8066,17 @@ public class WindowManagerService extends IWindowManager.Stub
                         pw.print(" hasLocal="); pw.print(mHasLocalTransformation);
                         pw.print(" "); mTransformation.printShortString(pw);
                         pw.println();
+            }
+            if (mShownAlpha != 1 || mAlpha != 1 || mLastAlpha != 1) {
+                pw.print(prefix); pw.print("mShownAlpha="); pw.print(mShownAlpha);
+                        pw.print(" mAlpha="); pw.print(mAlpha);
+                        pw.print(" mLastAlpha="); pw.println(mLastAlpha);
+            }
+            if (mHaveMatrix) {
+                pw.print(prefix); pw.print("mDsDx="); pw.print(mDsDx);
+                        pw.print(" mDtDx="); pw.print(mDtDx);
+                        pw.print(" mDsDy="); pw.print(mDsDy);
+                        pw.print(" mDtDy="); pw.println(mDtDy);
             }
             pw.print(prefix); pw.print("mDrawPending="); pw.print(mDrawPending);
                     pw.print(" mCommitDrawPending="); pw.print(mCommitDrawPending);
@@ -8543,13 +8538,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print(prefix); pw.print("animating="); pw.print(animating);
                         pw.print(" animation="); pw.println(animation);
             }
+            if (hasTransformation) {
+                pw.print(prefix); pw.print("XForm: ");
+                        transformation.printShortString(pw);
+                        pw.println();
+            }
             if (animLayerAdjustment != 0) {
                 pw.print(prefix); pw.print("animLayerAdjustment="); pw.println(animLayerAdjustment);
-            }
-            if (hasTransformation) {
-                pw.print(prefix); pw.print("hasTransformation="); pw.print(hasTransformation);
-                        pw.print(" transformation="); transformation.printShortString(pw);
-                        pw.println();
             }
             if (startingData != null || removed || firstWindowDrawn) {
                 pw.print(prefix); pw.print("startingData="); pw.print(startingData);
@@ -9854,15 +9849,6 @@ public class WindowManagerService extends IWindowManager.Stub
                                     "New transit into wallpaper: " + transit);
                         }
 
-                        if ((transit&WindowManagerPolicy.TRANSIT_ENTER_MASK) != 0) {
-                            mLastEnterAnimToken = animToken;
-                            mLastEnterAnimParams = animLp;
-                        } else if (mLastEnterAnimParams != null) {
-                            animLp = mLastEnterAnimParams;
-                            mLastEnterAnimToken = null;
-                            mLastEnterAnimParams = null;
-                        }
-
                         // If all closing windows are obscured, then there is
                         // no need to do an animation.  This is the case, for
                         // example, when this transition is being done behind
@@ -10585,10 +10571,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 token.animating = false;
                 mAppTokens.remove(token);
                 mExitingAppTokens.remove(i);
-                if (mLastEnterAnimToken == token) {
-                    mLastEnterAnimToken = null;
-                    mLastEnterAnimParams = null;
-                }
             }
         }
 
@@ -11409,10 +11391,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);
                     pw.print(", mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);
-            if (mLastEnterAnimToken != null || mLastEnterAnimToken != null) {
-                pw.print("  mLastEnterAnimToken="); pw.print(mLastEnterAnimToken);
-                        pw.print(", mLastEnterAnimParams="); pw.println(mLastEnterAnimParams);
-            }
             if (mOpeningApps.size() > 0) {
                 pw.print("  mOpeningApps="); pw.println(mOpeningApps);
             }
