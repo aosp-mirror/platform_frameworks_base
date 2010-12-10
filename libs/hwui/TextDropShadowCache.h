@@ -21,6 +21,9 @@
 
 #include <SkPaint.h>
 
+#include <utils/String8.h>
+
+#include "utils/Compare.h"
 #include "utils/GenerationCache.h"
 #include "FontRenderer.h"
 #include "Texture.h"
@@ -29,20 +32,20 @@ namespace android {
 namespace uirenderer {
 
 struct ShadowText {
-    ShadowText() {
-        text = NULL;
+    ShadowText(): radius(0), len(0), hash(0), textSize(0.0f), typeface(NULL) {
     }
 
     ShadowText(SkPaint* paint, uint32_t radius, uint32_t len, const char* srcText):
             radius(radius), len(len) {
-        text = new char[len];
-        memcpy(text, srcText, len);
+        // The source text we receive is in UTF-16, convert to UTF-8
+        str.setTo((const char16_t*) srcText, len >> 1);
 
         textSize = paint->getTextSize();
         typeface = paint->getTypeface();
 
         hash = 0;
         uint32_t multiplier = 1;
+        const char* text = str.string();
         for (uint32_t i = 0; i < len; i++) {
             hash += text[i] * multiplier;
             uint32_t shifted = multiplier << 5;
@@ -52,13 +55,10 @@ struct ShadowText {
 
     ShadowText(const ShadowText& shadow):
             radius(shadow.radius), len(shadow.len), hash(shadow.hash),
-            textSize(shadow.textSize), typeface(shadow.typeface) {
-        text = new char[shadow.len];
-        memcpy(text, shadow.text, shadow.len);
+            textSize(shadow.textSize), typeface(shadow.typeface), str(shadow.str) {
     }
 
     ~ShadowText() {
-        delete[] text;
     }
 
     uint32_t radius;
@@ -66,20 +66,16 @@ struct ShadowText {
     uint32_t hash;
     float textSize;
     SkTypeface* typeface;
-    char *text;
+    String8 str;
 
     bool operator<(const ShadowText& rhs) const {
-        if (hash < rhs.hash) return true;
-        else if (hash == rhs.hash) {
-            if (len < rhs.len) return true;
-            else if (len == rhs.len) {
-                if (radius < rhs.radius) return true;
-                else if (radius == rhs.radius) {
-                    if (textSize < rhs.textSize) return true;
-                    else if (textSize == rhs.textSize) {
+        LTE_INT(hash) {
+            LTE_INT(len) {
+                LTE_INT(radius) {
+                    LTE_FLOAT(textSize) {
                         if (typeface < rhs.typeface) return true;
                         else if (typeface == rhs.typeface) {
-                            return strncmp(text, rhs.text, len) < 0;
+                            return str.compare(rhs.str) < 0;
                         }
                     }
                 }
@@ -138,11 +134,14 @@ public:
     uint32_t getSize();
 
 private:
+    void init();
+
     GenerationCache<ShadowText, ShadowTexture*> mCache;
 
     uint32_t mSize;
     uint32_t mMaxSize;
     FontRenderer* mRenderer;
+    bool mDebugEnabled;
 }; // class TextDropShadowCache
 
 }; // namespace uirenderer

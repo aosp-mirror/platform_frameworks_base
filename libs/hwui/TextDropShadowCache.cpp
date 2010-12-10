@@ -37,17 +37,22 @@ TextDropShadowCache::TextDropShadowCache():
         LOGD("  Using default drop shadow cache size of %.2fMB", DEFAULT_DROP_SHADOW_CACHE_SIZE);
     }
 
-    mCache.setOnEntryRemovedListener(this);
+    init();
 }
 
 TextDropShadowCache::TextDropShadowCache(uint32_t maxByteSize):
         mCache(GenerationCache<ShadowText, ShadowTexture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(maxByteSize) {
-    mCache.setOnEntryRemovedListener(this);
+    init();
 }
 
 TextDropShadowCache::~TextDropShadowCache() {
     mCache.clear();
+}
+
+void TextDropShadowCache::init() {
+    mCache.setOnEntryRemovedListener(this);
+    mDebugEnabled = readDebugLevel() & kDebugMoreCaches;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -75,8 +80,11 @@ void TextDropShadowCache::setMaxSize(uint32_t maxSize) {
 
 void TextDropShadowCache::operator()(ShadowText& text, ShadowTexture*& texture) {
     if (texture) {
-        const uint32_t size = texture->width * texture->height;
-        mSize -= size;
+        mSize -= texture->bitmapSize;
+
+        if (mDebugEnabled) {
+            LOGD("Shadow texture deleted, size = %d", texture->bitmapSize);
+        }
 
         glDeleteTextures(1, &texture->id);
         delete texture;
@@ -109,6 +117,8 @@ ShadowTexture* TextDropShadowCache::get(SkPaint* paint, const char* text, uint32
         texture->blend = true;
 
         const uint32_t size = shadow.width * shadow.height;
+        texture->bitmapSize = size;
+
         // Don't even try to cache a bitmap that's bigger than the cache
         if (size < mMaxSize) {
             while (mSize + size > mMaxSize) {
@@ -132,6 +142,9 @@ ShadowTexture* TextDropShadowCache::get(SkPaint* paint, const char* text, uint32
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
         if (size < mMaxSize) {
+            if (mDebugEnabled) {
+                LOGD("Shadow texture created, size = %d", texture->bitmapSize);
+            }
             mSize += size;
             mCache.put(entry, texture);
         } else {
