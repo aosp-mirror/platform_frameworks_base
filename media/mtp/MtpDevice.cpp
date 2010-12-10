@@ -49,7 +49,8 @@ MtpDevice::MtpDevice(struct usb_device* device, int interface,
         mDeviceInfo(NULL),
         mID(usb_device_get_unique_id(device)),
         mSessionID(0),
-        mTransactionID(0)
+        mTransactionID(0),
+        mReceivedResponse(false)
 {
 }
 
@@ -513,6 +514,7 @@ fail:
 
 bool MtpDevice::sendRequest(MtpOperationCode operation) {
     LOGV("sendRequest: %s\n", MtpDebug::getOperationCodeName(operation));
+    mReceivedResponse = false;
     mRequest.setOperationCode(operation);
     if (mTransactionID > 0)
         mRequest.setTransactionID(mTransactionID++);
@@ -535,6 +537,14 @@ bool MtpDevice::readData() {
     int ret = mData.read(mEndpointIn);
     LOGV("readData returned %d\n", ret);
     if (ret >= MTP_CONTAINER_HEADER_SIZE) {
+        if (mData.getContainerType() == MTP_CONTAINER_TYPE_RESPONSE) {
+            LOGD("got response packet instead of data packet");
+            // we got a response packet rather than data
+            // copy it to mResponse
+            mResponse.copyFrom(mData);
+            mReceivedResponse = true;
+            return false;
+        }
         mData.dump();
         return true;
     }
@@ -552,12 +562,15 @@ bool MtpDevice::writeDataHeader(MtpOperationCode operation, int dataLength) {
 
 MtpResponseCode MtpDevice::readResponse() {
     LOGV("readResponse\n");
+    if (mReceivedResponse) {
+        mReceivedResponse = false;
+        return mResponse.getResponseCode();
+    }
     int ret = mResponse.read(mEndpointIn);
     if (ret >= MTP_CONTAINER_HEADER_SIZE) {
         mResponse.dump();
         return mResponse.getResponseCode();
-    }
-    else {
+    } else {
         LOGD("readResponse failed\n");
         return -1;
     }
