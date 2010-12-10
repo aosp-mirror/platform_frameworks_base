@@ -17,8 +17,8 @@
 package com.android.layoutlib.bridge.android;
 
 import com.android.internal.util.XmlUtils;
-import com.android.layoutlib.api.IResourceValue;
-import com.android.layoutlib.api.IStyleResourceValue;
+import com.android.layoutlib.api.ResourceValue;
+import com.android.layoutlib.api.StyleResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
@@ -45,7 +45,7 @@ public final class BridgeTypedArray extends TypedArray {
 
     private BridgeResources mResources;
     private BridgeContext mContext;
-    private IResourceValue[] mData;
+    private ResourceValue[] mData;
     private String[] mNames;
     private final boolean mPlatformFile;
 
@@ -55,12 +55,12 @@ public final class BridgeTypedArray extends TypedArray {
         mResources = resources;
         mContext = context;
         mPlatformFile = platformFile;
-        mData = new IResourceValue[len];
+        mData = new ResourceValue[len];
         mNames = new String[len];
     }
 
     /** A bridge-specific method that sets a value in the type array */
-    public void bridgeSetValue(int index, String name, IResourceValue value) {
+    public void bridgeSetValue(int index, String name, ResourceValue value) {
         mData[index] = value;
         mNames[index] = name;
     }
@@ -75,7 +75,7 @@ public final class BridgeTypedArray extends TypedArray {
         // fills TypedArray.mIndices which is used to implement getIndexCount/getIndexAt
         // first count the array size
         int count = 0;
-        for (IResourceValue data : mData) {
+        for (ResourceValue data : mData) {
             if (data != null) {
                 count++;
             }
@@ -558,7 +558,7 @@ public final class BridgeTypedArray extends TypedArray {
     @Override
     public int getResourceId(int index, int defValue) {
         // get the IResource for this index
-        IResourceValue resValue = mData[index];
+        ResourceValue resValue = mData[index];
 
         // no data, return the default value.
         if (resValue == null) {
@@ -566,9 +566,9 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         // check if this is a style resource
-        if (resValue instanceof IStyleResourceValue) {
+        if (resValue instanceof StyleResourceValue) {
             // get the id that will represent this style.
-            return mContext.getDynamicIdByStyle((IStyleResourceValue)resValue);
+            return mContext.getDynamicIdByStyle((StyleResourceValue)resValue);
         }
 
         // if the attribute was a reference to an id, and not a declaration of an id (@+id), then
@@ -662,7 +662,7 @@ public final class BridgeTypedArray extends TypedArray {
             return null;
         }
 
-        IResourceValue value = mData[index];
+        ResourceValue value = mData[index];
         String stringValue = value.getValue();
         if (stringValue == null || BridgeConstants.REFERENCE_NULL.equals(stringValue)) {
             return null;

@@ -16,7 +16,7 @@
 
 package com.android.layoutlib.bridge.android;
 
-import com.android.layoutlib.api.IResourceValue;
+import com.android.layoutlib.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 
@@ -102,7 +102,7 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
 
     private int resolveResourceValue(String value, int defaultValue) {
         // now look for this particular value
-        IResourceValue resource = mContext.resolveResValue(
+        ResourceValue resource = mContext.resolveResValue(
                 mContext.findResValue(value, mPlatformFile));
 
         if (resource != null) {

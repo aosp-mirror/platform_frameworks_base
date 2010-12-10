@@ -17,12 +17,11 @@
 package com.android.layoutlib.bridge.android;
 
 import com.android.layoutlib.api.IProjectCallback;
-import com.android.layoutlib.api.IResourceValue;
-import com.android.layoutlib.api.IStyleResourceValue;
+import com.android.layoutlib.api.ResourceValue;
+import com.android.layoutlib.api.StyleResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.Stack;
-import com.android.layoutlib.bridge.impl.TempResourceValue;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -76,19 +75,19 @@ public final class BridgeContext extends Activity {
     private Resources mResources;
     private Theme mTheme;
     private final HashMap<View, Object> mViewKeyMap = new HashMap<View, Object>();
-    private final IStyleResourceValue mThemeValues;
+    private final StyleResourceValue mThemeValues;
     private final Object mProjectKey;
     private final DisplayMetrics mMetrics;
-    private final Map<String, Map<String, IResourceValue>> mProjectResources;
-    private final Map<String, Map<String, IResourceValue>> mFrameworkResources;
-    private final Map<IStyleResourceValue, IStyleResourceValue> mStyleInheritanceMap;
+    private final Map<String, Map<String, ResourceValue>> mProjectResources;
+    private final Map<String, Map<String, ResourceValue>> mFrameworkResources;
+    private final Map<StyleResourceValue, StyleResourceValue> mStyleInheritanceMap;
 
     private final Map<Object, Map<String, String>> mDefaultPropMaps =
         new IdentityHashMap<Object, Map<String,String>>();
 
     // maps for dynamically generated id representing style objects (IStyleResourceValue)
-    private Map<Integer, IStyleResourceValue> mDynamicIdToStyleMap;
-    private Map<IStyleResourceValue, Integer> mStyleToDynamicIdMap;
+    private Map<Integer, StyleResourceValue> mDynamicIdToStyleMap;
+    private Map<StyleResourceValue, Integer> mStyleToDynamicIdMap;
     private int mDynamicIdGenerator = 0x01030000; // Base id for framework R.style
 
     // cache for TypedArray generated from IStyleResourceValue object
@@ -116,10 +115,10 @@ public final class BridgeContext extends Activity {
      * @param projectCallback
      */
     public BridgeContext(Object projectKey, DisplayMetrics metrics,
-            IStyleResourceValue currentTheme,
-            Map<String, Map<String, IResourceValue>> projectResources,
-            Map<String, Map<String, IResourceValue>> frameworkResources,
-            Map<IStyleResourceValue, IStyleResourceValue> styleInheritanceMap,
+            StyleResourceValue currentTheme,
+            Map<String, Map<String, ResourceValue>> projectResources,
+            Map<String, Map<String, ResourceValue>> frameworkResources,
+            Map<StyleResourceValue, StyleResourceValue> styleInheritanceMap,
             IProjectCallback projectCallback) {
         mProjectKey = projectKey;
         mMetrics = metrics;
@@ -267,7 +266,7 @@ public final class BridgeContext extends Activity {
     public final TypedArray obtainStyledAttributes(int resid, int[] attrs)
             throws Resources.NotFoundException {
         // get the IStyleResourceValue based on the resId;
-        IStyleResourceValue style = getStyleByDynamicId(resid);
+        StyleResourceValue style = getStyleByDynamicId(resid);
 
         if (style == null) {
             throw new Resources.NotFoundException();
@@ -344,7 +343,7 @@ public final class BridgeContext extends Activity {
                 isPlatformFile);
 
         // resolve the defStyleAttr value into a IStyleResourceValue
-        IStyleResourceValue defStyleValues = null;
+        StyleResourceValue defStyleValues = null;
 
         // look for a custom style.
         String customStyle = null;
@@ -352,10 +351,10 @@ public final class BridgeContext extends Activity {
             customStyle = set.getAttributeValue(null /* namespace*/, "style");
         }
         if (customStyle != null) {
-            IResourceValue item = findResValue(customStyle, false /*forceFrameworkOnly*/);
+            ResourceValue item = findResValue(customStyle, false /*forceFrameworkOnly*/);
 
-            if (item instanceof IStyleResourceValue) {
-                defStyleValues = (IStyleResourceValue)item;
+            if (item instanceof StyleResourceValue) {
+                defStyleValues = (StyleResourceValue)item;
             }
         }
 
@@ -369,14 +368,14 @@ public final class BridgeContext extends Activity {
 
             // look for the style in the current theme, and its parent:
             if (mThemeValues != null) {
-                IResourceValue item = findItemInStyle(mThemeValues, defStyleName);
+                ResourceValue item = findItemInStyle(mThemeValues, defStyleName);
 
                 if (item != null) {
                     // item is a reference to a style entry. Search for it.
                     item = findResValue(item.getValue(), false /*forceFrameworkOnly*/);
 
-                    if (item instanceof IStyleResourceValue) {
-                        defStyleValues = (IStyleResourceValue)item;
+                    if (item instanceof StyleResourceValue) {
+                        defStyleValues = (StyleResourceValue)item;
                     }
                 } else {
                     // TODO: log the error properly
@@ -409,7 +408,7 @@ public final class BridgeContext extends Activity {
                 // if there's no direct value for this attribute in the XML, we look for default
                 // values in the widget defStyle, and then in the theme.
                 if (value == null) {
-                    IResourceValue resValue = null;
+                    ResourceValue resValue = null;
 
                     // look for the value in the defStyle first (and its parent if needed)
                     if (defStyleValues != null) {
@@ -460,7 +459,7 @@ public final class BridgeContext extends Activity {
      * values found in the given style.
      * @see #obtainStyledAttributes(int, int[])
      */
-    private BridgeTypedArray createStyleBasedTypedArray(IStyleResourceValue style, int[] attrs)
+    private BridgeTypedArray createStyleBasedTypedArray(StyleResourceValue style, int[] attrs)
             throws Resources.NotFoundException {
         TreeMap<Integer, String> styleNameMap = searchAttrs(attrs, null);
 
@@ -475,7 +474,7 @@ public final class BridgeContext extends Activity {
             String name = styleAttribute.getValue();
 
             // get the value from the style, or its parent styles.
-            IResourceValue resValue = findItemInStyle(style, name);
+            ResourceValue resValue = findItemInStyle(style, name);
 
             // resolve it to make sure there are no references left.
             ta.bridgeSetValue(index, name, resolveResValue(resValue));
@@ -502,18 +501,19 @@ public final class BridgeContext extends Activity {
      * @param value the resource value, or reference to resolve
      * @return the resolved resource value or <code>null</code> if it failed to resolve it.
      */
-    private IResourceValue resolveValue(String type, String name, String value) {
+    private ResourceValue resolveValue(String type, String name, String value) {
         if (value == null) {
             return null;
         }
 
         // get the IResourceValue referenced by this value
-        IResourceValue resValue = findResValue(value, false /*forceFrameworkOnly*/);
+        ResourceValue resValue = findResValue(value, false /*forceFrameworkOnly*/);
 
         // if resValue is null, but value is not null, this means it was not a reference.
-        // we return the name/value wrapper in a IResourceValue
+        // we return the name/value wrapper in a IResourceValue. the isFramework flag doesn't
+        // matter.
         if (resValue == null) {
-            return new TempResourceValue(type, name, value);
+            return new ResourceValue(type, name, value, false /*isFramework*/);
         }
 
         // we resolved a first reference, but we need to make sure this isn't a reference also.
@@ -533,18 +533,18 @@ public final class BridgeContext extends Activity {
      * @param value the value containing the reference to resolve.
      * @return a {@link IResourceValue} object or <code>null</code>
      */
-    public IResourceValue resolveResValue(IResourceValue value) {
+    public ResourceValue resolveResValue(ResourceValue value) {
         if (value == null) {
             return null;
         }
 
         // if the resource value is a style, we simply return it.
-        if (value instanceof IStyleResourceValue) {
+        if (value instanceof StyleResourceValue) {
             return value;
         }
 
         // else attempt to find another IResourceValue referenced by this one.
-        IResourceValue resolvedValue = findResValue(value.getValue(), value.isFramework());
+        ResourceValue resolvedValue = findResValue(value.getValue(), value.isFramework());
 
         // if the value did not reference anything, then we simply return the input value
         if (resolvedValue == null) {
@@ -575,7 +575,7 @@ public final class BridgeContext extends Activity {
      *      resource even if the reference does not include the android: prefix.
      * @return a {@link IResourceValue} or <code>null</code>.
      */
-    IResourceValue findResValue(String reference, boolean forceFrameworkOnly) {
+    ResourceValue findResValue(String reference, boolean forceFrameworkOnly) {
         if (reference == null) {
             return null;
         }
@@ -672,15 +672,15 @@ public final class BridgeContext extends Activity {
      * @param frameworkOnly if <code>true</code>, the method does not search in the
      * project resources
      */
-    private IResourceValue findResValue(String resType, String resName, boolean frameworkOnly) {
+    private ResourceValue findResValue(String resType, String resName, boolean frameworkOnly) {
         // map of IResouceValue for the given type
-        Map<String, IResourceValue> typeMap;
+        Map<String, ResourceValue> typeMap;
 
         // if allowed, search in the project resources first.
         if (frameworkOnly == false) {
             typeMap = mProjectResources.get(resType);
             if (typeMap != null) {
-                IResourceValue item = typeMap.get(resName);
+                ResourceValue item = typeMap.get(resName);
                 if (item != null) {
                     return item;
                 }
@@ -690,7 +690,7 @@ public final class BridgeContext extends Activity {
         // now search in the framework resources.
         typeMap = mFrameworkResources.get(resType);
         if (typeMap != null) {
-            IResourceValue item = typeMap.get(resName);
+            ResourceValue item = typeMap.get(resName);
             if (item != null) {
                 return item;
             }
@@ -705,7 +705,7 @@ public final class BridgeContext extends Activity {
      * @param resourceType the type of the resource
      * @param resourceName the name of the resource
      */
-    public IResourceValue getFrameworkResource(String resourceType, String resourceName) {
+    public ResourceValue getFrameworkResource(String resourceType, String resourceName) {
         return getResource(resourceType, resourceName, mFrameworkResources);
     }
 
@@ -714,15 +714,15 @@ public final class BridgeContext extends Activity {
      * @param resourceType the type of the resource
      * @param resourceName the name of the resource
      */
-    public IResourceValue getProjectResource(String resourceType, String resourceName) {
+    public ResourceValue getProjectResource(String resourceType, String resourceName) {
         return getResource(resourceType, resourceName, mProjectResources);
     }
 
-    IResourceValue getResource(String resourceType, String resourceName,
-            Map<String, Map<String, IResourceValue>> resourceRepository) {
-        Map<String, IResourceValue> typeMap = resourceRepository.get(resourceType);
+    ResourceValue getResource(String resourceType, String resourceName,
+            Map<String, Map<String, ResourceValue>> resourceRepository) {
+        Map<String, ResourceValue> typeMap = resourceRepository.get(resourceType);
         if (typeMap != null) {
-            IResourceValue item = typeMap.get(resourceName);
+            ResourceValue item = typeMap.get(resourceName);
             if (item != null) {
                 item = resolveResValue(item);
                 return item;
@@ -741,12 +741,12 @@ public final class BridgeContext extends Activity {
      * @param itemName the name of the item to search for.
      * @return the {@link IResourceValue} object or <code>null</code>
      */
-    public IResourceValue findItemInStyle(IStyleResourceValue style, String itemName) {
-        IResourceValue item = style.findItem(itemName);
+    public ResourceValue findItemInStyle(StyleResourceValue style, String itemName) {
+        ResourceValue item = style.findValue(itemName);
 
         // if we didn't find it, we look in the parent style (if applicable)
         if (item == null && mStyleInheritanceMap != null) {
-            IStyleResourceValue parentStyle = mStyleInheritanceMap.get(style);
+            StyleResourceValue parentStyle = mStyleInheritanceMap.get(style);
             if (parentStyle != null) {
                 return findItemInStyle(parentStyle, itemName);
             }
@@ -837,11 +837,11 @@ public final class BridgeContext extends Activity {
         return null;
     }
 
-    int getDynamicIdByStyle(IStyleResourceValue resValue) {
+    int getDynamicIdByStyle(StyleResourceValue resValue) {
         if (mDynamicIdToStyleMap == null) {
             // create the maps.
-            mDynamicIdToStyleMap = new HashMap<Integer, IStyleResourceValue>();
-            mStyleToDynamicIdMap = new HashMap<IStyleResourceValue, Integer>();
+            mDynamicIdToStyleMap = new HashMap<Integer, StyleResourceValue>();
+            mStyleToDynamicIdMap = new HashMap<StyleResourceValue, Integer>();
         }
 
         // look for an existing id
@@ -859,7 +859,7 @@ public final class BridgeContext extends Activity {
         return id;
     }
 
-    private IStyleResourceValue getStyleByDynamicId(int i) {
+    private StyleResourceValue getStyleByDynamicId(int i) {
         if (mDynamicIdToStyleMap != null) {
             return mDynamicIdToStyleMap.get(i);
         }
