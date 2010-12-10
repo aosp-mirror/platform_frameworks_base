@@ -156,6 +156,9 @@ public abstract class SMSDispatcher extends Handler {
     protected boolean mStorageAvailable = true;
     protected boolean mReportMemoryStatusPending = false;
 
+    /* Flag indicating whether the current device allows sms service */
+    protected boolean mSmsCapable = true;
+
     protected static int getNextConcatenatedRef() {
         sConcatenatedRef += 1;
         return sConcatenatedRef;
@@ -249,6 +252,9 @@ public abstract class SMSDispatcher extends Handler {
         filter.addAction(Intent.ACTION_DEVICE_STORAGE_FULL);
         filter.addAction(Intent.ACTION_DEVICE_STORAGE_NOT_FULL);
         mContext.registerReceiver(mResultReceiver, filter);
+
+        mSmsCapable = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_sms_capable);
     }
 
     public void dispose() {
@@ -682,6 +688,7 @@ public abstract class SMSDispatcher extends Handler {
      *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
      *  <code>RESULT_ERROR_RADIO_OFF</code><br>
      *  <code>RESULT_ERROR_NULL_PDU</code><br>
+     *  <code>RESULT_ERROR_NO_SERVICE</code><br>.
      *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> the sentIntent may include
      *  the extra "errorCode" containing a radio technology specific value,
      *  generally only useful for troubleshooting.<br>
@@ -709,6 +716,7 @@ public abstract class SMSDispatcher extends Handler {
      *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
      *  <code>RESULT_ERROR_RADIO_OFF</code><br>
      *  <code>RESULT_ERROR_NULL_PDU</code><br>
+     *  <code>RESULT_ERROR_NO_SERVICE</code><br>.
      *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> the sentIntent may include
      *  the extra "errorCode" containing a radio technology specific value,
      *  generally only useful for troubleshooting.<br>
@@ -737,7 +745,8 @@ public abstract class SMSDispatcher extends Handler {
      *   or one of these errors:
      *   <code>RESULT_ERROR_GENERIC_FAILURE</code>
      *   <code>RESULT_ERROR_RADIO_OFF</code>
-     *   <code>RESULT_ERROR_NULL_PDU</code>.
+     *   <code>RESULT_ERROR_NULL_PDU</code>
+     *   <code>RESULT_ERROR_NO_SERVICE</code>.
      *  The per-application based SMS control checks sentIntent. If sentIntent
      *  is NULL the caller will be checked against all unknown applications,
      *  which cause smaller number of SMS to be sent in checking period.
@@ -763,7 +772,8 @@ public abstract class SMSDispatcher extends Handler {
      *  or one of these errors:
      *  <code>RESULT_ERROR_GENERIC_FAILURE</code>
      *  <code>RESULT_ERROR_RADIO_OFF</code>
-     *  <code>RESULT_ERROR_NULL_PDU</code>.
+     *  <code>RESULT_ERROR_NULL_PDU</code>
+     *  <code>RESULT_ERROR_NO_SERVICE</code>.
      *  The per-application based SMS control checks sentIntent. If sentIntent
      *  is NULL the caller will be checked against all unknown applications,
      *  which cause smaller number of SMS to be sent in checking period.
@@ -773,6 +783,16 @@ public abstract class SMSDispatcher extends Handler {
      */
     protected void sendRawPdu(byte[] smsc, byte[] pdu, PendingIntent sentIntent,
             PendingIntent deliveryIntent) {
+        if (!mSmsCapable) {
+            if (sentIntent != null) {
+                try {
+                    sentIntent.send(RESULT_ERROR_NO_SERVICE);
+                } catch (CanceledException ex) {}
+            }
+            Log.d(TAG, "Device does not support sms service.");
+            return;
+        }
+
         if (pdu == null) {
             if (sentIntent != null) {
                 try {

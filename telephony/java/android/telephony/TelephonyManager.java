@@ -954,4 +954,20 @@ public class TelephonyManager {
         return mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_voice_capable);
     }
+
+    /**
+     * @return true if the current device supports sms service.
+     * <p>
+     * If true, this means that the device supports both sending and
+     * receiving sms via the telephony network.
+     * <p>
+     * Note: Voicemail waiting sms, cell broadcasting sms, and MMS are
+     *       disabled when device doesn't support sms.
+     *
+     * @hide pending API review
+     */
+    public boolean isSmsCapable() {
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_sms_capable);
+    }
 }
