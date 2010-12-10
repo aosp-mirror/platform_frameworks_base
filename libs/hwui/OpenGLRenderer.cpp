@@ -385,11 +385,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     if (bounds.isEmpty() || bounds.getWidth() > mCaches.maxTextureSize ||
             bounds.getHeight() > mCaches.maxTextureSize) {
-        if (fboLayer) {
-            snapshot->invisible = true;
-        } else {
-            snapshot->empty = true;
-        }
+        snapshot->empty = fboLayer;
     } else {
         snapshot->invisible = snapshot->invisible || (alpha <= ALPHA_THRESHOLD && fboLayer);
     }
