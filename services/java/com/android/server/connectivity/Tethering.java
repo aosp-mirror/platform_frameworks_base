@@ -26,7 +26,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.hardware.Usb;
+import android.hardware.UsbManager;
 import android.net.ConnectivityManager;
 import android.net.InterfaceConfiguration;
 import android.net.IConnectivityManager;
@@ -159,7 +159,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
         mStateReceiver = new StateReceiver();
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Usb.ACTION_USB_STATE);
+        filter.addAction(UsbManager.ACTION_USB_STATE);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(Intent.ACTION_BOOT_COMPLETED);
         mContext.registerReceiver(mStateReceiver, filter);
@@ -492,10 +492,10 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private class StateReceiver extends BroadcastReceiver {
         public void onReceive(Context content, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(Usb.ACTION_USB_STATE)) {
+            if (action.equals(UsbManager.ACTION_USB_STATE)) {
                 // process connect events immediately, but delay handling disconnects
                 // to debounce USB configuration changes
-                boolean connected = intent.getExtras().getBoolean(Usb.USB_CONNECTED);
+                boolean connected = intent.getExtras().getBoolean(UsbManager.USB_CONNECTED);
                 Message msg = Message.obtain(mUsbHandler, USB_STATE_CHANGE,
                         (connected ? USB_CONNECTED : USB_DISCONNECTED), 0);
                 mUsbHandler.removeMessages(USB_STATE_CHANGE);

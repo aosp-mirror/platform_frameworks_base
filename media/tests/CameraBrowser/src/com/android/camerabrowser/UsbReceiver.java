@@ -19,7 +19,7 @@ package com.android.camerabrowser;
 import android.content.Context;
 import android.content.Intent;
 import android.content.BroadcastReceiver;
-import android.hardware.Usb;
+import android.hardware.UsbManager;
 import android.net.Uri;
 import android.util.Log;
 
@@ -30,7 +30,7 @@ public class UsbReceiver extends BroadcastReceiver
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "onReceive " + intent);
-        if (Usb.ACTION_USB_CAMERA_ATTACHED.equals(intent.getAction())) {
+        if (UsbManager.ACTION_USB_CAMERA_ATTACHED.equals(intent.getAction())) {
             Uri uri = intent.getData();
             intent = new Intent(context, StorageBrowser.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

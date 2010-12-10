@@ -30,7 +30,7 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.hardware.Usb;
+import android.hardware.UsbManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -82,7 +82,7 @@ public class UsbStorageActivity extends Activity
     private BroadcastReceiver mUsbStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Usb.ACTION_USB_STATE)) {
+            if (intent.getAction().equals(UsbManager.ACTION_USB_STATE)) {
                 handleUsbStateChanged(intent);
             }
         }
@@ -168,7 +168,7 @@ public class UsbStorageActivity extends Activity
         super.onResume();
 
         mStorageManager.registerListener(mStorageListener);
-        registerReceiver(mUsbStateReceiver, new IntentFilter(Usb.ACTION_USB_STATE));
+        registerReceiver(mUsbStateReceiver, new IntentFilter(UsbManager.ACTION_USB_STATE));
         try {
             mAsyncStorageHandler.post(new Runnable() {
                 @Override
@@ -192,7 +192,7 @@ public class UsbStorageActivity extends Activity
     }
 
     private void handleUsbStateChanged(Intent intent) {
-        boolean connected = intent.getExtras().getBoolean(Usb.USB_CONNECTED);
+        boolean connected = intent.getExtras().getBoolean(UsbManager.USB_CONNECTED);
         if (!connected) {
             // It was disconnected from the plug, so finish
             finish();
