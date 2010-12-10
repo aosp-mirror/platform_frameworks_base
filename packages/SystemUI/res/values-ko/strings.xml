@@ -19,8 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_label (4489004083283879149) -->
-    <skip />
+    <!-- outdated translation 7164937344850004466 -->     <string name="app_label" msgid="4489004083283879149">"시스템 UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"지우기"</string>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"알림 없음"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"진행 중"</string>
