@@ -150,6 +150,16 @@ public final class StrictMode {
      */
     public static final int DETECT_NETWORK = 0x04;  // for ThreadPolicy
 
+    /**
+     * For StrictMode.noteSlowCall()
+     *
+     * @hide
+     */
+    public static final int DETECT_CUSTOM = 0x08;  // for ThreadPolicy
+
+    private static final int ALL_THREAD_DETECT_BITS =
+            DETECT_DISK_WRITE | DETECT_DISK_READ | DETECT_NETWORK | DETECT_CUSTOM;
+
     // Process-policy:
 
     /**
@@ -309,14 +319,14 @@ public final class StrictMode {
              * disk operations but will likely expand in future releases.
              */
             public Builder detectAll() {
-                return enable(DETECT_DISK_WRITE | DETECT_DISK_READ | DETECT_NETWORK);
+                return enable(ALL_THREAD_DETECT_BITS);
             }
 
             /**
              * Disable the detection of everything.
              */
             public Builder permitAll() {
-                return disable(DETECT_DISK_WRITE | DETECT_DISK_READ | DETECT_NETWORK);
+                return disable(ALL_THREAD_DETECT_BITS);
             }
 
             /**
@@ -345,6 +355,20 @@ public final class StrictMode {
              */
             public Builder permitDiskReads() {
                 return disable(DETECT_DISK_READ);
+            }
+
+            /**
+             * Enable detection of disk reads.
+             */
+            public Builder detectCustomSlowCalls() {
+                return enable(DETECT_CUSTOM);
+            }
+
+            /**
+             * Enable detection of disk reads.
+             */
+            public Builder permitCustomSlowCalls() {
+                return enable(DETECT_CUSTOM);
             }
 
             /**
@@ -663,6 +687,12 @@ public final class StrictMode {
         }
     }
 
+    private static class StrictModeCustomViolation extends BlockGuard.BlockGuardPolicyException {
+        public StrictModeCustomViolation(int policyMask, String name) {
+            super(policyMask, DETECT_CUSTOM, name);
+        }
+    }
+
     /**
      * Returns the bitmask of the current thread's policy.
      *
@@ -678,6 +708,10 @@ public final class StrictMode {
      * Returns the current thread's policy.
      */
     public static ThreadPolicy getThreadPolicy() {
+        // TODO: this was a last minute Gingerbread API change (to
+        // introduce VmPolicy cleanly) but this isn't particularly
+        // optimal for users who might call this method often.  This
+        // should be in a thread-local and not allocate on each call.
         return new ThreadPolicy(getThreadPolicyMask());
     }
 
@@ -799,7 +833,9 @@ public final class StrictMode {
      * getMessage() String value.  Kinda gross, but least
      * invasive.  :/
      *
-     * Input is of form "policy=137 violation=64"
+     * Input is of the following forms:
+     *     "policy=137 violation=64"
+     *     "policy=137 violation=64 msg=Arbitrary text"
      *
      * Returns 0 on failure, which is a valid policy, but not a
      * valid policy during a violation (else there must've been
@@ -832,7 +868,12 @@ public final class StrictMode {
         if (violationIndex == -1) {
             return 0;
         }
-        String violationString = message.substring(violationIndex + 10);
+        int numberStartIndex = violationIndex + "violation=".length();
+        int numberEndIndex = message.indexOf(' ', numberStartIndex);
+        if (numberEndIndex == -1) {
+            numberEndIndex = message.length();
+        }
+        String violationString = message.substring(numberStartIndex, numberEndIndex);
         try {
             return Integer.valueOf(violationString).intValue();
         } catch (NumberFormatException e) {
@@ -889,6 +930,19 @@ public final class StrictMode {
                 return;
             }
             BlockGuard.BlockGuardPolicyException e = new StrictModeDiskWriteViolation(mPolicyMask);
+            e.fillInStackTrace();
+            startHandlingViolationException(e);
+        }
+
+        // Not part of BlockGuard.Policy; just part of StrictMode:
+        void onCustomSlowCall(String name) {
+            if ((mPolicyMask & DETECT_CUSTOM) == 0) {
+                return;
+            }
+            if (tooManyViolationsThisLoop()) {
+                return;
+            }
+            BlockGuard.BlockGuardPolicyException e = new StrictModeCustomViolation(mPolicyMask, name);
             e.fillInStackTrace();
             startHandlingViolationException(e);
         }
@@ -1229,8 +1283,7 @@ public final class StrictMode {
                                    .penaltyLog()
                                    .build());
         StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-                               .detectLeakedSqlLiteObjects()
-                               .detectLeakedClosableObjects()
+                               .detectAll()
                                .penaltyLog()
                                .build());
     }
@@ -1525,6 +1578,23 @@ public final class StrictMode {
         return span;
     }
 
+    /**
+     * For code to note that it's slow.  This is a no-op unless the
+     * current thread's {@link android.os.StrictMode.ThreadPolicy} has
+     * {@link android.os.StrictMode.ThreadPolicy.Builder#detectCustomSlowCalls}
+     * enabled.
+     *
+     * @param name a short string for the exception stack trace that's
+     *             built if when this fires.
+     */
+    public static void noteSlowCall(String name) {
+        BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
+        if (!(policy instanceof AndroidBlockGuardPolicy)) {
+            // StrictMode not enabled.
+            return;
+        }
+        ((AndroidBlockGuardPolicy) policy).onCustomSlowCall(name);
+    }
 
     /**
      * Parcelable that gets sent in Binder call headers back to callers
