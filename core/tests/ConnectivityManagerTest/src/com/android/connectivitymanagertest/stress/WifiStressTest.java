@@ -169,15 +169,18 @@ public class WifiStressTest
     public void testWifiScanning() {
         int scanTimeSum = 0;
         int i;
-        int averageScanTime = 0;
         int ssidAppearInScanResultsCount = 0; // count times of given ssid appear in scan results.
         for (i = 0; i < mScanIterations; i++) {
             log("testWifiScanning: iteration: " + i);
-            writeOutput(String.format("scan iteration %d out of %d",
+            int averageScanTime = 0;
+            if (i > 0) {
+                averageScanTime = scanTimeSum/i;
+            }
+            writeOutput(String.format("iteration %d out of %d",
                     i, mScanIterations));
             writeOutput(String.format("average scanning time is %d", averageScanTime));
             writeOutput(String.format("ssid appear %d out of %d scan iterations",
-                    ssidAppearInScanResultsCount, mScanIterations));
+                    ssidAppearInScanResultsCount, i));
             long startTime = System.currentTimeMillis();
             mAct.scanResultAvailable = false;
             assertTrue("start scan failed", mAct.mWifiManager.startScanActive());
@@ -196,8 +199,6 @@ public class WifiStressTest
                     if (mAct.scanResultAvailable) {
                         long scanTime = (System.currentTimeMillis() - startTime);
                         scanTimeSum += scanTime;
-                        averageScanTime = scanTimeSum/mScanIterations;
-                        log("average scanning time: " + averageScanTime);
                         break;
                     }
                 }
@@ -224,9 +225,9 @@ public class WifiStressTest
             }
         }
         if (i == mScanIterations) {
-            writeOutput(String.format("scan iteration %d out of %d",
+            writeOutput(String.format("iteration %d out of %d",
                     i, mScanIterations));
-            writeOutput(String.format("average scanning time is %d", averageScanTime));
+            writeOutput(String.format("average scanning time is %d", scanTimeSum/mScanIterations));
             writeOutput(String.format("ssid appear %d out of %d scan iterations",
                     ssidAppearInScanResultsCount, mScanIterations));
         }
@@ -269,7 +270,7 @@ public class WifiStressTest
             // 1. Put device into sleep
             // 2. Wait for the device to sleep for sometime, very 3G is connected
             // 3. Wake up the device
-            writeOutput(String.format("reconnection after sleep iteration %d out of %d",
+            writeOutput(String.format("iteration %d out of %d",
                     i, mReconnectIterations));
             log("iteration: " + i);
             turnScreenOff();
@@ -294,7 +295,7 @@ public class WifiStressTest
                     ConnectivityManagerTestActivity.LONG_TIMEOUT));
         }
         if (i == mReconnectIterations) {
-            writeOutput(String.format("reconnection after sleep iteration %d out of %d",
+            writeOutput(String.format("iteration %d out of %d",
                     i, mReconnectIterations));
         }
     }

@@ -43,7 +43,7 @@ public class WifiApStress
     private final static String TAG = "WifiApStress";
     private static String NETWORK_ID = "AndroidAPTest";
     private static String PASSWD = "androidwifi";
-    private final static String OUTPUT_FILE = "WifiApStressOutput.txt";
+    private final static String OUTPUT_FILE = "WifiStressTestOutput.txt";
     private ConnectivityManagerTestActivity mAct;
     private int iterations;
     private PowerManager.WakeLock mWakelock = null;
@@ -75,8 +75,7 @@ public class WifiApStress
         // write the total number of iterations into output file
         mOutputWriter = new BufferedWriter(new FileWriter(new File(
                 Environment.getExternalStorageDirectory(), OUTPUT_FILE)));
-        mOutputWriter.write(String.format("iteration %d out of %d"
-                + "\n", mLastIteration, iterations));
+        mOutputWriter.write(String.format("iteration %d out of %d\n", mLastIteration, iterations));
         mOutputWriter.flush();
         mOutputWriter.close();
         super.tearDown();
