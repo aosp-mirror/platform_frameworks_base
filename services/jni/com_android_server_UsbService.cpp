@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "UsbObserver"
+#define LOG_TAG "UsbService"
 #include "utils/Log.h"
 
 #include "jni.h"
@@ -134,7 +134,7 @@ static int usb_device_removed(const char *devname, void* client_data) {
     return 0;
 }
 
-static void android_server_UsbObserver_monitorUsbHostBus(JNIEnv *env, jobject thiz)
+static void android_server_UsbService_monitorUsbHostBus(JNIEnv *env, jobject thiz)
 {
     struct usb_host_context* context = usb_host_init();
     if (!context) {
@@ -146,14 +146,14 @@ static void android_server_UsbObserver_monitorUsbHostBus(JNIEnv *env, jobject th
 }
 
 static JNINativeMethod method_table[] = {
-    { "monitorUsbHostBus", "()V", (void*)android_server_UsbObserver_monitorUsbHostBus }
+    { "monitorUsbHostBus", "()V", (void*)android_server_UsbService_monitorUsbHostBus }
 };
 
-int register_android_server_UsbObserver(JNIEnv *env)
+int register_android_server_UsbService(JNIEnv *env)
 {
-    jclass clazz = env->FindClass("com/android/server/UsbObserver");
+    jclass clazz = env->FindClass("com/android/server/UsbService");
     if (clazz == NULL) {
-        LOGE("Can't find com/android/server/UsbObserver");
+        LOGE("Can't find com/android/server/UsbService");
         return -1;
     }
     method_usbCameraAdded = env->GetMethodID(clazz, "usbCameraAdded", "(I)V");
@@ -167,7 +167,7 @@ int register_android_server_UsbObserver(JNIEnv *env)
         return -1;
     }
 
-    return jniRegisterNativeMethods(env, "com/android/server/UsbObserver",
+    return jniRegisterNativeMethods(env, "com/android/server/UsbService",
             method_table, NELEM(method_table));
 }
 

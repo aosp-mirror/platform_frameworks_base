@@ -19,7 +19,7 @@ package com.android.server;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.Usb;
+import android.hardware.UsbManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
@@ -35,10 +35,10 @@ import java.io.FileReader;
 import java.util.ArrayList;
 
 /**
- * <p>UsbObserver monitors for changes to USB state.
+ * <p>UsbService monitors for changes to USB state.
  */
-class UsbObserver extends UEventObserver {
-    private static final String TAG = UsbObserver.class.getSimpleName();
+class UsbService {
+    private static final String TAG = UsbService.class.getSimpleName();
     private static final boolean LOG = false;
 
     private static final String USB_CONFIGURATION_MATCH = "DEVPATH=/devices/virtual/switch/usb_configuration";
@@ -61,58 +61,61 @@ class UsbObserver extends UEventObserver {
 
     private PowerManagerService mPowerManager;
 
-    public UsbObserver(Context context) {
-        mContext = context;
-        init();  // set initial status
+    private final UEventObserver mUEventObserver = new UEventObserver() {
+        @Override
+        public void onUEvent(UEventObserver.UEvent event) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Slog.v(TAG, "USB UEVENT: " + event.toString());
+            }
 
-        startObserving(USB_CONFIGURATION_MATCH);
-        startObserving(USB_FUNCTIONS_MATCH);
-    }
-
-    @Override
-    public void onUEvent(UEventObserver.UEvent event) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Slog.v(TAG, "USB UEVENT: " + event.toString());
-        }
-
-        synchronized (this) {
-            String switchState = event.get("SWITCH_STATE");
-            if (switchState != null) {
-                try {
-                    int newConfig = Integer.parseInt(switchState);
-                    if (newConfig != mUsbConfig) {
-                        mPreviousUsbConfig = mUsbConfig;
-                        mUsbConfig = newConfig;
-                        // trigger an Intent broadcast
-                        if (mSystemReady) {
-                            update();
+            synchronized (this) {
+                String switchState = event.get("SWITCH_STATE");
+                if (switchState != null) {
+                    try {
+                        int newConfig = Integer.parseInt(switchState);
+                        if (newConfig != mUsbConfig) {
+                            mPreviousUsbConfig = mUsbConfig;
+                            mUsbConfig = newConfig;
+                            // trigger an Intent broadcast
+                            if (mSystemReady) {
+                                update();
+                            }
                         }
+                    } catch (NumberFormatException e) {
+                        Slog.e(TAG, "Could not parse switch state from event " + event);
                     }
-                } catch (NumberFormatException e) {
-                    Slog.e(TAG, "Could not parse switch state from event " + event);
-                }
-            } else {
-                String function = event.get("FUNCTION");
-                String enabledStr = event.get("ENABLED");
-                if (function != null && enabledStr != null) {
-                    // Note: we do not broadcast a change when a function is enabled or disabled.
-                    // We just record the state change for the next broadcast.
-                    boolean enabled = "1".equals(enabledStr);
-                    if (enabled) {
-                        if (!mEnabledFunctions.contains(function)) {
-                            mEnabledFunctions.add(function);
+                } else {
+                    String function = event.get("FUNCTION");
+                    String enabledStr = event.get("ENABLED");
+                    if (function != null && enabledStr != null) {
+                        // Note: we do not broadcast a change when a function is enabled or disabled.
+                        // We just record the state change for the next broadcast.
+                        boolean enabled = "1".equals(enabledStr);
+                        if (enabled) {
+                            if (!mEnabledFunctions.contains(function)) {
+                                mEnabledFunctions.add(function);
+                            }
+                            mDisabledFunctions.remove(function);
+                        } else {
+                            if (!mDisabledFunctions.contains(function)) {
+                                mDisabledFunctions.add(function);
+                            }
+                            mEnabledFunctions.remove(function);
                         }
-                        mDisabledFunctions.remove(function);
-                    } else {
-                        if (!mDisabledFunctions.contains(function)) {
-                            mDisabledFunctions.add(function);
-                        }
-                        mEnabledFunctions.remove(function);
                     }
                 }
             }
         }
+    };
+
+    public UsbService(Context context) {
+        mContext = context;
+        init();  // set initial status
+
+        mUEventObserver.startObserving(USB_CONFIGURATION_MATCH);
+        mUEventObserver.startObserving(USB_FUNCTIONS_MATCH);
     }
+
     private final void init() {
         char[] buffer = new char[1024];
 
@@ -154,7 +157,7 @@ class UsbObserver extends UEventObserver {
 
     // called from JNI in monitorUsbHostBus()
     private void usbCameraAdded(int deviceID) {
-        Intent intent = new Intent(Usb.ACTION_USB_CAMERA_ATTACHED,
+        Intent intent = new Intent(UsbManager.ACTION_USB_CAMERA_ATTACHED,
                                 Ptp.Device.getContentUri(deviceID));
         Log.d(TAG, "usbCameraAdded, sending " + intent);
         mContext.sendBroadcast(intent);
@@ -162,7 +165,7 @@ class UsbObserver extends UEventObserver {
 
     // called from JNI in monitorUsbHostBus()
     private void usbCameraRemoved(int deviceID) {
-        Intent intent = new Intent(Usb.ACTION_USB_CAMERA_DETACHED,
+        Intent intent = new Intent(UsbManager.ACTION_USB_CAMERA_DETACHED,
                                 Ptp.Device.getContentUri(deviceID));
         Log.d(TAG, "usbCameraRemoved, sending " + intent);
         mContext.sendBroadcast(intent);
@@ -176,7 +179,7 @@ class UsbObserver extends UEventObserver {
                 monitorUsbHostBus();
             }
         };
-        new Thread(null, runnable, "UsbObserver host thread").start();
+        new Thread(null, runnable, "UsbService host thread").start();
     }
 
     void systemReady() {
@@ -200,10 +203,10 @@ class UsbObserver extends UEventObserver {
         private void addEnabledFunctions(Intent intent) {
             // include state of all USB functions in our extras
             for (int i = 0; i < mEnabledFunctions.size(); i++) {
-                intent.putExtra(mEnabledFunctions.get(i), Usb.USB_FUNCTION_ENABLED);
+                intent.putExtra(mEnabledFunctions.get(i), UsbManager.USB_FUNCTION_ENABLED);
             }
             for (int i = 0; i < mDisabledFunctions.size(); i++) {
-                intent.putExtra(mDisabledFunctions.get(i), Usb.USB_FUNCTION_DISABLED);
+                intent.putExtra(mDisabledFunctions.get(i), UsbManager.USB_FUNCTION_DISABLED);
             }
         }
 
@@ -224,17 +227,17 @@ class UsbObserver extends UEventObserver {
                         Intent intent;
                         boolean usbConnected = (mUsbConfig != 0);
                         if (usbConnected) {
-                            intent = new Intent(Usb.ACTION_USB_CONNECTED);
+                            intent = new Intent(UsbManager.ACTION_USB_CONNECTED);
                             addEnabledFunctions(intent);
                         } else {
-                            intent = new Intent(Usb.ACTION_USB_DISCONNECTED);
+                            intent = new Intent(UsbManager.ACTION_USB_DISCONNECTED);
                         }
                         mContext.sendBroadcast(intent);
 
                         // send a sticky broadcast for clients interested in both connect and disconnect
-                        intent = new Intent(Usb.ACTION_USB_STATE);
+                        intent = new Intent(UsbManager.ACTION_USB_STATE);
                         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-                        intent.putExtra(Usb.USB_CONNECTED, usbConnected);
+                        intent.putExtra(UsbManager.USB_CONNECTED, usbConnected);
                         addEnabledFunctions(intent);
                         mContext.sendStickyBroadcast(intent);
                     }
