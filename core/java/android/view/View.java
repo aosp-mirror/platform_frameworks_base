@@ -1967,6 +1967,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     int mUserPaddingBottom;
 
     /**
+     * Cache the paddingLeft set by the user to append to the scrollbar's size.
+     */
+    @ViewDebug.ExportedProperty(category = "padding")
+    int mUserPaddingLeft;
+
+    /**
      * @hide
      */
     int mOldWidthMeasureSpec = Integer.MIN_VALUE;
@@ -2115,6 +2121,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      */
     boolean mCanAcceptDrop;
+
+    /**
+     * Position of the vertical scroll bar.
+     */
+    private int mVerticalScrollbarPosition;
+
+    /**
+     * Position the scroll bar at the default position as determined by the system.
+     */
+    public static final int SCROLLBAR_POSITION_DEFAULT = 0;
+
+    /**
+     * Position the scroll bar along the left edge.
+     */
+    public static final int SCROLLBAR_POSITION_LEFT = 1;
+
+    /**
+     * Position the scroll bar along the right edge.
+     */
+    public static final int SCROLLBAR_POSITION_RIGHT = 2;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -2448,6 +2474,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 case R.styleable.View_overScrollMode:
                     overScrollMode = a.getInt(attr, OVER_SCROLL_IF_CONTENT_SCROLLS);
                     break;
+                case R.styleable.View_verticalScrollbarPosition:
+                    mVerticalScrollbarPosition = a.getInt(attr, SCROLLBAR_POSITION_DEFAULT);
+                    break;
             }
         }
 
@@ -2705,6 +2734,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (mScrollCache == null) {
             mScrollCache = new ScrollabilityCache(ViewConfiguration.get(mContext), this);
         }
+    }
+
+    /**
+     * Set the position of the vertical scroll bar. Should be one of
+     * {@link #SCROLLBAR_POSITION_DEFAULT}, {@link #SCROLLBAR_POSITION_LEFT} or
+     * {@link #SCROLLBAR_POSITION_RIGHT}.
+     *
+     * @param position Where the vertical scroll bar should be positioned.
+     */
+    public void setVerticalScrollbarPosition(int position) {
+        if (mVerticalScrollbarPosition != position) {
+            mVerticalScrollbarPosition = position;
+            computeOpaqueFlags();
+            recomputePadding();
+        }
+    }
+
+    /**
+     * @return The position where the vertical scroll bar will show, if applicable.
+     * @see #setVerticalScrollbarPosition(int)
+     */
+    public int getVerticalScrollbarPosition() {
+        return mVerticalScrollbarPosition;
     }
 
     /**
@@ -6421,6 +6473,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mPrivateFlags &= ~DRAWING_CACHE_VALID;
             final ViewParent p = mParent;
             final AttachInfo ai = mAttachInfo;
+            if (p != null && ai != null && ai.mHardwareAccelerated) {
+                // fast-track for GL-enabled applications; just invalidate the whole hierarchy
+                // with a null dirty rect, which tells the ViewRoot to redraw everything
+                p.invalidateChild(this, null);
+                return;
+            }
             if (p != null && ai != null) {
                 final int scrollX = mScrollX;
                 final int scrollY = mScrollY;
@@ -6536,7 +6594,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 (mAlpha >= 1.0f - ViewConfiguration.ALPHA_THRESHOLD);
     }
 
-    private void computeOpaqueFlags() {
+    /**
+     * @hide
+     */
+    protected void computeOpaqueFlags() {
         // Opaque if:
         //   - Has a background
         //   - Background is opaque
@@ -6923,8 +6984,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
     }
 
-    private void recomputePadding() {
-        setPadding(mPaddingLeft, mPaddingTop, mUserPaddingRight, mUserPaddingBottom);
+    /**
+     * @hide
+     */
+    protected void recomputePadding() {
+        setPadding(mUserPaddingLeft, mPaddingTop, mUserPaddingRight, mUserPaddingBottom);
     }
     
     /**
@@ -7207,8 +7271,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     scrollBar.setParameters(computeVerticalScrollRange(),
                                             computeVerticalScrollOffset(),
                                             computeVerticalScrollExtent(), true);
-                    // TODO: Deal with RTL languages to position scrollbar on left
-                    left = scrollX + width - size - (mUserPaddingRight & inside);
+                    switch (mVerticalScrollbarPosition) {
+                        default:
+                        case SCROLLBAR_POSITION_DEFAULT:
+                        case SCROLLBAR_POSITION_RIGHT:
+                            left = scrollX + width - size - (mUserPaddingRight & inside);
+                            break;
+                        case SCROLLBAR_POSITION_LEFT:
+                            left = scrollX + (mUserPaddingLeft & inside);
+                            break;
+                    }
                     top = scrollY + (mPaddingTop & inside);
                     right = left + size;
                     bottom = scrollY + height - (mUserPaddingBottom & inside);
@@ -8997,6 +9069,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setPadding(int left, int top, int right, int bottom) {
         boolean changed = false;
 
+        mUserPaddingLeft = left;
         mUserPaddingRight = right;
         mUserPaddingBottom = bottom;
 
@@ -9004,12 +9077,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         // Common case is there are no scroll bars.
         if ((viewFlags & (SCROLLBARS_VERTICAL|SCROLLBARS_HORIZONTAL)) != 0) {
-            // TODO: Deal with RTL languages to adjust left padding instead of right.
             if ((viewFlags & SCROLLBARS_VERTICAL) != 0) {
-                right += (viewFlags & SCROLLBARS_INSET_MASK) == 0
+                // TODO Determine what to do with SCROLLBAR_POSITION_DEFAULT based on RTL settings.
+                final int offset = (viewFlags & SCROLLBARS_INSET_MASK) == 0
                         ? 0 : getVerticalScrollbarWidth();
+                switch (mVerticalScrollbarPosition) {
+                    case SCROLLBAR_POSITION_DEFAULT:
+                    case SCROLLBAR_POSITION_RIGHT:
+                        right += offset;
+                        break;
+                    case SCROLLBAR_POSITION_LEFT:
+                        left += offset;
+                        break;
+                }
             }
-            if ((viewFlags & SCROLLBARS_HORIZONTAL) == 0) {
+            if ((viewFlags & SCROLLBARS_HORIZONTAL) != 0) {
                 bottom += (viewFlags & SCROLLBARS_INSET_MASK) == 0
                         ? 0 : getHorizontalScrollbarHeight();
             }

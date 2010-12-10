@@ -21,7 +21,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.hardware.Usb;
+import android.hardware.UsbManager;
 import android.net.Uri;
 
 public class DeviceDisconnectedReceiver extends BroadcastReceiver {
@@ -33,7 +33,7 @@ public class DeviceDisconnectedReceiver extends BroadcastReceiver {
         mActivity = activity;
         mDeviceID = deviceID;
 
-     IntentFilter filter = new IntentFilter(Usb.ACTION_USB_CAMERA_DETACHED);
+     IntentFilter filter = new IntentFilter(UsbManager.ACTION_USB_CAMERA_DETACHED);
      filter.addDataScheme("content");
      activity.registerReceiver(this, filter);
     }

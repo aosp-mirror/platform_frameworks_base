@@ -25,7 +25,7 @@ import java.io.IOException;
  * Class for accessing USB state information.
  * @hide
  */
-public class Usb {
+public class UsbManager {
    /**
      * Broadcast Action:  A broadcast for USB connected events.
      *

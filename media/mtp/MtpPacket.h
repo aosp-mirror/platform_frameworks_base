@@ -43,9 +43,12 @@ public:
 
     void                allocate(int length);
     void                dump();
+    void                copyFrom(const MtpPacket& src);
 
     uint16_t            getContainerCode() const;
     void                setContainerCode(uint16_t code);
+
+    uint16_t            getContainerType() const;
 
     MtpTransactionID    getTransactionID() const;
     void                setTransactionID(MtpTransactionID id);

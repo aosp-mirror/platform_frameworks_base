@@ -576,13 +576,13 @@ status_t CameraSource::stop() {
     mFrameAvailableCondition.signal();
 
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
-    stopCameraRecording();
     releaseQueuedFrames();
     while (!mFramesBeingEncoded.empty()) {
         LOGI("Waiting for outstanding frames being encoded: %d",
                 mFramesBeingEncoded.size());
         mFrameCompleteCondition.wait(mLock);
     }
+    stopCameraRecording();
     releaseCamera();
     IPCThreadState::self()->restoreCallingIdentity(token);
 
@@ -592,12 +592,19 @@ status_t CameraSource::stop() {
                 mLastFrameTimestampUs - mFirstFrameTimeUs);
     }
 
+    if (mNumGlitches > 0) {
+        LOGW("%d long delays between neighboring video frames during",
+                mNumGlitches);
+    }
+
     CHECK_EQ(mNumFramesReceived, mNumFramesEncoded + mNumFramesDropped);
     return OK;
 }
 
 void CameraSource::releaseRecordingFrame(const sp<IMemory>& frame) {
-    mCamera->releaseRecordingFrame(frame);
+    if (mCamera != NULL) {
+        mCamera->releaseRecordingFrame(frame);
+    }
 }
 
 void CameraSource::releaseQueuedFrames() {
@@ -712,7 +719,7 @@ void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
     if (mNumFramesReceived > 0 &&
         timestampUs - mLastFrameTimestampUs > mGlitchDurationThresholdUs) {
         if (mNumGlitches % 10 == 0) {  // Don't spam the log
-            LOGW("Long delay detected in video recording");
+            LOGV("Long delay detected in video recording");
         }
         ++mNumGlitches;
     }

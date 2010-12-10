@@ -22,6 +22,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -47,10 +48,11 @@ public abstract class AbstractThreadedSyncAdapter {
     private final ISyncAdapterImpl mISyncAdapterImpl;
 
     // all accesses to this member variable must be synchronized on mSyncThreadLock
-    private SyncThread mSyncThread;
+    private final HashMap<Account, SyncThread> mSyncThreads = new HashMap<Account, SyncThread>();
     private final Object mSyncThreadLock = new Object();
 
     private final boolean mAutoInitialize;
+    private boolean mAllowParallelSyncs;
 
     /**
      * Creates an {@link AbstractThreadedSyncAdapter}.
@@ -62,15 +64,40 @@ public abstract class AbstractThreadedSyncAdapter {
      * is currently set to <0.
      */
     public AbstractThreadedSyncAdapter(Context context, boolean autoInitialize) {
+        this(context, autoInitialize, false /* allowParallelSyncs */);
+    }
+
+    /**
+     * Creates an {@link AbstractThreadedSyncAdapter}.
+     * @param context the {@link android.content.Context} that this is running within.
+     * @param autoInitialize if true then sync requests that have
+     * {@link ContentResolver#SYNC_EXTRAS_INITIALIZE} set will be internally handled by
+     * {@link AbstractThreadedSyncAdapter} by calling
+     * {@link ContentResolver#setIsSyncable(android.accounts.Account, String, int)} with 1 if it
+     * is currently set to <0.
+     * @param allowParallelSyncs if true then allow syncs for different accounts to run
+     * at the same time, each in their own thread. This must be consistent with the setting
+     * in the SyncAdapter's configuration file.
+     */
+    public AbstractThreadedSyncAdapter(Context context,
+            boolean autoInitialize, boolean allowParallelSyncs) {
         mContext = context;
         mISyncAdapterImpl = new ISyncAdapterImpl();
         mNumSyncStarts = new AtomicInteger(0);
-        mSyncThread = null;
         mAutoInitialize = autoInitialize;
+        mAllowParallelSyncs = allowParallelSyncs;
     }
 
     public Context getContext() {
         return mContext;
+    }
+
+    private Account toSyncKey(Account account) {
+        if (mAllowParallelSyncs) {
+            return account;
+        } else {
+            return null;
+        }
     }
 
     private class ISyncAdapterImpl extends ISyncAdapter.Stub {
@@ -79,10 +106,11 @@ public abstract class AbstractThreadedSyncAdapter {
             final SyncContext syncContextClient = new SyncContext(syncContext);
 
             boolean alreadyInProgress;
-            // synchronize to make sure that mSyncThread doesn't change between when we
+            // synchronize to make sure that mSyncThreads doesn't change between when we
             // check it and when we use it
+            final Account threadsKey = toSyncKey(account);
             synchronized (mSyncThreadLock) {
-                if (mSyncThread == null) {
+                if (!mSyncThreads.containsKey(threadsKey)) {
                     if (mAutoInitialize
                             && extras != null
                             && extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false)) {
@@ -92,10 +120,11 @@ public abstract class AbstractThreadedSyncAdapter {
                         syncContextClient.onFinished(new SyncResult());
                         return;
                     }
-                    mSyncThread = new SyncThread(
+                    SyncThread syncThread = new SyncThread(
                             "SyncAdapterThread-" + mNumSyncStarts.incrementAndGet(),
                             syncContextClient, authority, account, extras);
-                    mSyncThread.start();
+                    mSyncThreads.put(threadsKey, syncThread);
+                    syncThread.start();
                     alreadyInProgress = false;
                 } else {
                     alreadyInProgress = true;
@@ -110,15 +139,23 @@ public abstract class AbstractThreadedSyncAdapter {
         }
 
         public void cancelSync(ISyncContext syncContext) {
-            // synchronize to make sure that mSyncThread doesn't change between when we
+            // synchronize to make sure that mSyncThreads doesn't change between when we
             // check it and when we use it
-            final SyncThread syncThread;
+            SyncThread info = null;
             synchronized (mSyncThreadLock) {
-                syncThread = mSyncThread;
+                for (SyncThread current : mSyncThreads.values()) {
+                    if (current.mSyncContext.getSyncContextBinder() == syncContext.asBinder()) {
+                        info = current;
+                        break;
+                    }
+                }
             }
-            if (syncThread != null
-                    && syncThread.mSyncContext.getSyncContextBinder() == syncContext.asBinder()) {
-                onSyncCanceled();
+            if (info != null) {
+                if (mAllowParallelSyncs) {
+                    onSyncCanceled(info);
+                } else {
+                    onSyncCanceled();
+                }
             }
         }
 
@@ -139,6 +176,7 @@ public abstract class AbstractThreadedSyncAdapter {
         private final String mAuthority;
         private final Account mAccount;
         private final Bundle mExtras;
+        private final Account mThreadsKey;
 
         private SyncThread(String name, SyncContext syncContext, String authority,
                 Account account, Bundle extras) {
@@ -147,6 +185,7 @@ public abstract class AbstractThreadedSyncAdapter {
             mAuthority = authority;
             mAccount = account;
             mExtras = extras;
+            mThreadsKey = toSyncKey(account);
         }
 
         public void run() {
@@ -174,9 +213,9 @@ public abstract class AbstractThreadedSyncAdapter {
                     mSyncContext.onFinished(syncResult);
                 }
                 // synchronize so that the assignment will be seen by other threads
-                // that also synchronize accesses to mSyncThread
+                // that also synchronize accesses to mSyncThreads
                 synchronized (mSyncThreadLock) {
-                    mSyncThread = null;
+                    mSyncThreads.remove(mThreadsKey);
                 }
             }
         }
@@ -212,15 +251,30 @@ public abstract class AbstractThreadedSyncAdapter {
      * Indicates that a sync operation has been canceled. This will be invoked on a separate
      * thread than the sync thread and so you must consider the multi-threaded implications
      * of the work that you do in this method.
-     *
+     * <p>
+     * This will only be invoked when the SyncAdapter indicates that it doesn't support
+     * parallel syncs.
      */
     public void onSyncCanceled() {
         final SyncThread syncThread;
         synchronized (mSyncThreadLock) {
-            syncThread = mSyncThread;
+            syncThread = mSyncThreads.get(null);
         }
         if (syncThread != null) {
             syncThread.interrupt();
         }
+    }
+
+    /**
+     * Indicates that a sync operation has been canceled. This will be invoked on a separate
+     * thread than the sync thread and so you must consider the multi-threaded implications
+     * of the work that you do in this method.
+     * <p>
+     * This will only be invoked when the SyncAdapter indicates that it does support
+     * parallel syncs.
+     * @param thread the Thread of the sync that is to be canceled.
+     */
+    public void onSyncCanceled(Thread thread) {
+        thread.interrupt();
     }
 }

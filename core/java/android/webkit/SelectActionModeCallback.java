@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import android.app.SearchManager;
+import android.content.Intent;
 import android.provider.Browser;
 import android.webkit.WebView;
 import android.view.ActionMode;
@@ -73,6 +75,12 @@ class SelectActionModeCallback implements ActionMode.Callback {
                 String sel= mWebView.getSelection();
                 mode.finish();
                 mWebView.showFindDialog(sel);
+                break;
+            case com.android.internal.R.id.websearch:
+                mode.finish();
+                Intent i = new Intent(Intent.ACTION_WEB_SEARCH);
+                i.putExtra(SearchManager.QUERY, mWebView.getSelection());
+                mWebView.getContext().startActivity(i);
                 break;
 
             default:

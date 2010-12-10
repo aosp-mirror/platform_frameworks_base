@@ -84,6 +84,13 @@ void MtpPacket::dump() {
     LOGV("\n");
 }
 
+void MtpPacket::copyFrom(const MtpPacket& src) {
+    int length = src.mPacketSize;
+    allocate(length);
+    mPacketSize = length;
+    memcpy(mBuffer, src.mBuffer, length);
+}
+
 uint16_t MtpPacket::getUInt16(int offset) const {
     return ((uint16_t)mBuffer[offset + 1] << 8) | (uint16_t)mBuffer[offset];
 }
@@ -111,6 +118,10 @@ uint16_t MtpPacket::getContainerCode() const {
 
 void MtpPacket::setContainerCode(uint16_t code) {
     putUInt16(MTP_CONTAINER_CODE_OFFSET, code);
+}
+
+uint16_t MtpPacket::getContainerType() const {
+    return getUInt16(MTP_CONTAINER_TYPE_OFFSET);
 }
 
 MtpTransactionID MtpPacket::getTransactionID() const {

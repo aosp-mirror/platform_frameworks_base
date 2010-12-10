@@ -27,6 +27,8 @@ import android.util.Log;
  * - deleting files and directories on PTP devices
  * - importing a file from PTP device into the host device's storage
  *   and adding it to the media provider
+ *
+ * @hide
  */
 public final class Ptp
 {

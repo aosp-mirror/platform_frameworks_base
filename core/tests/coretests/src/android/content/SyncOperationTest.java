@@ -47,7 +47,8 @@ public class SyncOperationTest extends AndroidTestCase {
                 b1,
                 100,
                 1000,
-                10000);
+                10000,
+                false);
 
         // Same as op1 but different time infos
         SyncOperation op2 = new SyncOperation(account1,
@@ -56,7 +57,8 @@ public class SyncOperationTest extends AndroidTestCase {
                 b1,
                 200,
                 2000,
-                20000);
+                20000,
+                false);
 
         // Same as op1 but different authority
         SyncOperation op3 = new SyncOperation(account1,
@@ -65,7 +67,8 @@ public class SyncOperationTest extends AndroidTestCase {
                 b1,
                 100,
                 1000,
-                10000);
+                10000,
+                false);
 
         // Same as op1 but different account
         SyncOperation op4 = new SyncOperation(account2,
@@ -74,7 +77,8 @@ public class SyncOperationTest extends AndroidTestCase {
                 b1,
                 100,
                 1000,
-                10000);
+                10000,
+                false);
 
         // Same as op1 but different bundle
         SyncOperation op5 = new SyncOperation(account1,
@@ -83,7 +87,8 @@ public class SyncOperationTest extends AndroidTestCase {
                 b2,
                 100,
                 1000,
-                10000);
+                10000,
+                false);
 
         assertEquals(op1.key, op2.key);
         assertNotSame(op1.key, op3.key);

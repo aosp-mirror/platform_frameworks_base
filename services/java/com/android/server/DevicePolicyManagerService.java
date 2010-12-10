@@ -816,7 +816,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    public void setActiveAdmin(ComponentName adminReceiver) {
+    /**
+     * @param adminReceiver The admin to add
+     * @param refreshing true = update an active admin, no error
+     */
+    public void setActiveAdmin(ComponentName adminReceiver, boolean refreshing) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
 
@@ -827,15 +831,29 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
             try {
-                if (getActiveAdminUncheckedLocked(adminReceiver) != null) {
+                if (!refreshing && getActiveAdminUncheckedLocked(adminReceiver) != null) {
                     throw new IllegalArgumentException("Admin is already added");
                 }
-                ActiveAdmin admin = new ActiveAdmin(info);
-                mAdminMap.put(adminReceiver, admin);
-                mAdminList.add(admin);
+                ActiveAdmin newAdmin = new ActiveAdmin(info);
+                mAdminMap.put(adminReceiver, newAdmin);
+                int replaceIndex = -1;
+                if (refreshing) {
+                    final int N = mAdminList.size();
+                    for (int i=0; i < N; i++) {
+                        ActiveAdmin oldAdmin = mAdminList.get(i);
+                        if (oldAdmin.info.getComponent().equals(adminReceiver)) {
+                            replaceIndex = i;
+                            break;
+                        }
+                    }
+                }
+                if (replaceIndex == -1) {
+                    mAdminList.add(newAdmin);
+                } else {
+                    mAdminList.set(replaceIndex, newAdmin);
+                }
                 saveSettingsLocked();
-                sendAdminCommandLocked(admin,
-                        DeviceAdminReceiver.ACTION_DEVICE_ADMIN_ENABLED);
+                sendAdminCommandLocked(newAdmin, DeviceAdminReceiver.ACTION_DEVICE_ADMIN_ENABLED);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -845,6 +863,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public boolean isAdminActive(ComponentName adminReceiver) {
         synchronized (this) {
             return getActiveAdminUncheckedLocked(adminReceiver) != null;
+        }
+    }
+
+    public boolean hasGrantedPolicy(ComponentName adminReceiver, int policyId) {
+        synchronized (this) {
+            ActiveAdmin administrator = getActiveAdminUncheckedLocked(adminReceiver);
+            if (administrator == null) {
+                throw new SecurityException("No active admin " + adminReceiver);
+            }
+            return administrator.info.usesPolicy(policyId);
         }
     }
 

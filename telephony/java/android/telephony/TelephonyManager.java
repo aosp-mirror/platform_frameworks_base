@@ -477,6 +477,8 @@ public class TelephonyManager {
                 return "LTE";
             case NETWORK_TYPE_EHRPD:
                 return "CDMA - eHRPD";
+            case NETWORK_TYPE_IDEN:
+                return "iDEN";
             default:
                 return "UNKNOWN";
         }

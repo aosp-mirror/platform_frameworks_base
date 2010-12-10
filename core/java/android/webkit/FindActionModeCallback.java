@@ -182,6 +182,11 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
 
     @Override
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        if (mWebView == null) {
+            throw new AssertionError(
+                    "No WebView for FindActionModeCallback::onActionItemClicked");
+        }
+        mInput.hideSoftInputFromWindow(mWebView.getWindowToken(), 0);
         if (!mMatchesFound) {
             findAll();
             return true;

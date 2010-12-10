@@ -41,7 +41,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="8dip"
                 android:src="@drawable/ic_sysbar_ime_default"
-                android:visibility="invisible"
+                android:visibility="gone"
                 />
             <com.android.systemui.statusbar.tablet.NotificationIconArea
                 android:id="@+id/notificationIcons"

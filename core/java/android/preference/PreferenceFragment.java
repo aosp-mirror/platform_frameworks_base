@@ -194,6 +194,7 @@ public abstract class PreferenceFragment extends Fragment implements
     public void onDestroy() {
         super.onDestroy();
         mPreferenceManager.dispatchActivityDestroy();
+        mPreferenceManager.setOnPreferenceTreeClickListener(null);
     }
 
     @Override

@@ -60,7 +60,14 @@ import java.io.IOException;
             final boolean supportsUploading =
                     sa.getBoolean(com.android.internal.R.styleable.SyncAdapter_supportsUploading,
                             true);
-            return new SyncAdapterType(authority, accountType, userVisible, supportsUploading);
+            final boolean isAlwaysSyncable =
+                    sa.getBoolean(com.android.internal.R.styleable.SyncAdapter_isAlwaysSyncable,
+                            false);
+            final boolean allowParallelSyncs =
+                    sa.getBoolean(com.android.internal.R.styleable.SyncAdapter_allowParallelSyncs,
+                            false);
+            return new SyncAdapterType(authority, accountType, userVisible, supportsUploading,
+		    isAlwaysSyncable, allowParallelSyncs);
         } finally {
             sa.recycle();
         }
@@ -71,7 +78,7 @@ import java.io.IOException;
             out.attribute(null, "authority", item.authority);
             out.attribute(null, "accountType", item.accountType);
         }
-    
+
         public SyncAdapterType createFromXml(XmlPullParser parser)
                 throws IOException, XmlPullParserException {
             final String authority = parser.getAttributeValue(null, "authority");

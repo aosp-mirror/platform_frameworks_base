@@ -53,6 +53,8 @@ private:
     MtpRequestPacket        mRequest;
     MtpDataPacket           mData;
     MtpResponsePacket       mResponse;
+    // set to true if we received a response packet instead of a data packet
+    bool                    mReceivedResponse;
 
     // to ensure only one MTP transaction at a time
     Mutex                   mMutex;

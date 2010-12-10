@@ -34,5 +34,10 @@
         android:title="@string/find"
         android:showAsAction="always|withText"
         />
+    <item android:id="@+id/websearch"
+        android:icon="@drawable/ic_menu_search"
+        android:title="@string/websearch"
+        android:showAsAction="always|withText"
+        />
 </menu>
 

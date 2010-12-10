@@ -43,6 +43,26 @@ public class BitmapFactory {
         }
 
         /**
+         * If set, decode methods that take the Options object will attempt to
+         * reuse this bitmap when loading content. This is a hint to the decoder
+         * only, and the decoder may choose to create a new Bitmap instead. The
+         * current implementation necessitates that the reused bitmap be of the
+         * same size as the source content and in jpeg format (whether as a
+         * resource or as a stream). The {@link android.graphics.Bitmap.Config
+         * configuration} of the reused bitmap will override the setting of
+         * {@link #inPreferredConfig}, if set.
+         *
+         * <p>You should still always use the returned Bitmap of the decode
+         * method and not assume that reusing the bitmap worked, due to the
+         * constraints outlined above and failure situations that can occur.
+         * Checking whether the return value matches the value of the inBitmap
+         * set in the Options structure is a way to see if the bitmap was reused,
+         * but in all cases you should use the returned Bitmap to make sure
+         * that you are using the bitmap that was used as the decode destination.</p>
+         */
+        public Bitmap inBitmap;
+
+        /**
          * If set to true, the decoder will return null (no bitmap), but
          * the out... fields will still be set, allowing the caller to query
          * the bitmap without having to allocate the memory for its pixels.

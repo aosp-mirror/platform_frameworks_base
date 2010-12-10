@@ -744,6 +744,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         setChoiceMode(a.getInt(R.styleable.AbsListView_choiceMode, CHOICE_MODE_NONE));
+        setFastScrollAlwaysVisible(
+                a.getBoolean(R.styleable.AbsListView_fastScrollAlwaysVisible, false));
 
         a.recycle();
     }
@@ -1129,6 +1131,49 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
+     * Set whether or not the fast scroller should always be shown in place of the
+     * standard scrollbars. Fast scrollers shown in this way will not fade out and will
+     * be a permanent fixture within the list. Best combined with an inset scroll bar style
+     * that will ensure enough padding. This will enable fast scrolling if it is not
+     * already enabled.
+     *
+     * @param alwaysShow true if the fast scroller should always be displayed.
+     * @see #setScrollBarStyle(int)
+     * @see #setFastScrollEnabled(boolean)
+     */
+    public void setFastScrollAlwaysVisible(boolean alwaysShow) {
+        if (alwaysShow && !mFastScrollEnabled) {
+            setFastScrollEnabled(true);
+        }
+
+        if (mFastScroller != null) {
+            mFastScroller.setAlwaysShow(alwaysShow);
+        }
+
+        computeOpaqueFlags();
+        recomputePadding();
+    }
+
+    /**
+     * Returns true if the fast scroller is set to always show on this view rather than
+     * fade out when not in use.
+     *
+     * @return true if the fast scroller will always show.
+     * @see #setFastScrollAlwaysVisible(boolean)
+     */
+    public boolean isFastScrollAlwaysVisible() {
+        return mFastScrollEnabled && mFastScroller.isAlwaysShowEnabled();
+    }
+
+    @Override
+    public int getVerticalScrollbarWidth() {
+        if (isFastScrollAlwaysVisible()) {
+            return Math.max(super.getVerticalScrollbarWidth(), mFastScroller.getWidth());
+        }
+        return super.getVerticalScrollbarWidth();
+    }
+
+    /**
      * Returns the current state of the fast scroll feature.
      * @see #setFastScrollEnabled(boolean)
      * @return true if fast scroll is enabled, false otherwise
@@ -1136,6 +1181,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     @ViewDebug.ExportedProperty
     public boolean isFastScrollEnabled() {
         return mFastScrollEnabled;
+    }
+
+    @Override
+    public void setVerticalScrollbarPosition(int position) {
+        super.setVerticalScrollbarPosition(position);
+        if (mFastScroller != null) {
+            mFastScroller.setScrollbarPosition(position);
+        }
     }
 
     /**
@@ -1966,6 +2019,31 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             canvas.restoreToCount(saveCount);
             mGroupFlags |= CLIP_TO_PADDING_MASK;
         }
+    }
+
+    @Override
+    protected boolean isPaddingOffsetRequired() {
+        return (mGroupFlags & CLIP_TO_PADDING_MASK) != CLIP_TO_PADDING_MASK;
+    }
+
+    @Override
+    protected int getLeftPaddingOffset() {
+        return (mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK ? 0 : -mPaddingLeft;
+    }
+
+    @Override
+    protected int getTopPaddingOffset() {
+        return (mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK ? 0 : -mPaddingTop;
+    }
+
+    @Override
+    protected int getRightPaddingOffset() {
+        return (mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK ? 0 : mPaddingRight;
+    }
+
+    @Override
+    protected int getBottomPaddingOffset() {
+        return (mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK ? 0 : mPaddingBottom;
     }
 
     @Override
@@ -3144,9 +3222,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final int width = getWidth();
                 final int height = getHeight();
 
-                canvas.translate(-width, 0);
-                canvas.rotate(-180, width, 0);
-                canvas.translate(0, -height);
+                canvas.translate(-width, Math.max(height, scrollY + mLastPositionDistanceGuess));
+                canvas.rotate(180, width, 0);
                 mEdgeGlowBottom.setSize(width, height);
                 if (mEdgeGlowBottom.draw(canvas)) {
                     invalidate();
