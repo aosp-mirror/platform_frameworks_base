@@ -114,6 +114,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
+import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -5057,6 +5058,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void onCommitCompletion(CompletionInfo text) {
     }
 
+    /**
+     * Called by the framework in response to a text auto-correction (such as fixing a typo using a
+     * a dictionnary) from the current input method, provided by it calling
+     * {@link InputConnection#commitCorrection} InputConnection.commitCorrection()}. The default
+     * implementation flashes the background of the corrected word to provide feedback to the user.
+     *
+     * @param info The auto correct info about the text that was corrected.
+     */
+    public void onCommitCorrection(CorrectionInfo info) {
+        // TODO
+    }
+
     public void beginBatchEdit() {
         mInBatchEditControllers = true;
         final InputMethodState ims = mInputMethodState;
@@ -6572,8 +6585,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Not private so it can be called from an inner class without going
      * through a thunk.
      */
-    void handleTextChanged(CharSequence buffer, int start,
-            int before, int after) {
+    void handleTextChanged(CharSequence buffer, int start, int before, int after) {
         final InputMethodState ims = mInputMethodState;
         if (ims == null || ims.mBatchEditNesting == 0) {
             updateAfterEdit();
@@ -6603,8 +6615,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Not private so it can be called from an inner class without going
      * through a thunk.
      */
-    void spanChange(Spanned buf, Object what, int oldStart, int newStart,
-            int oldEnd, int newEnd) {
+    void spanChange(Spanned buf, Object what, int oldStart, int newStart, int oldEnd, int newEnd) {
         // XXX Make the start and end move together if this ends up
         // spending too much time invalidating.
 

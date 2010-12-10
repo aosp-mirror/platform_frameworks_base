@@ -87,6 +87,10 @@ public class InputConnectionWrapper implements InputConnection {
         return mTarget.commitCompletion(text);
     }
 
+    public boolean commitCorrection(CorrectionInfo correctionInfo) {
+        return mTarget.commitCorrection(correctionInfo);
+    }
+
     public boolean setSelection(int start, int end) {
         return mTarget.setSelection(start, end);
     }
