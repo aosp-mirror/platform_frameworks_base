@@ -1401,6 +1401,8 @@
   <public type="attr" name="staticWallpaperPreview" />
   <public type="attr" name="allowParallelSyncs" />
   <public type="attr" name="isAlwaysSyncable" />
+  <public type="attr" name="verticalScrollbarPosition" />
+  <public type="attr" name="fastScrollAlwaysVisible" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />

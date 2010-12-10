@@ -286,6 +286,11 @@
         <!-- DayPickerWeekDayView style-->
         <item name="dayPickerWeekDayViewStyle">@style/TextAppearance.Small.DayPickerWeekDayView</item>
 
+        <item name="fastScrollThumbDrawable">@android:drawable/scrollbar_handle_accelerated_anim2</item>
+        <item name="fastScrollPreviewBackgroundRight">@android:drawable/menu_submenu_background</item>
+        <item name="fastScrollPreviewBackgroundLeft">@android:drawable/menu_submenu_background</item>
+        <item name="fastScrollOverlayPosition">floating</item>
+
     </style>
 
     <!-- Variant of the default (dark) theme with no title bar -->
@@ -812,8 +817,8 @@
         <item name="scrollbarFadeDuration">250</item>
         <item name="scrollbarDefaultDelayBeforeFade">300</item> 
         <item name="scrollbarSize">10dip</item>
-        <item name="scrollbarThumbHorizontal">@android:drawable/scrollbar_handle_horizontal</item>
-        <item name="scrollbarThumbVertical">@android:drawable/scrollbar_handle_vertical</item>
+        <item name="scrollbarThumbHorizontal">@android:drawable/scrollbar_handle_holo_dark</item>
+        <item name="scrollbarThumbVertical">@android:drawable/scrollbar_handle_holo_dark</item>
         <item name="scrollbarTrackHorizontal">@null</item>
         <item name="scrollbarTrackVertical">@null</item>
 
@@ -928,6 +933,12 @@
 
         <!-- DayPickerWeekDayView style-->
         <item name="dayPickerWeekDayViewStyle">@style/TextAppearance.Holo.DayPickerWeekDayView</item>
+
+        <item name="fastScrollThumbDrawable">@android:drawable/fastscroll_thumb_holo</item>
+        <item name="fastScrollPreviewBackgroundLeft">@android:drawable/fastscroll_label_left_holo_dark</item>
+        <item name="fastScrollPreviewBackgroundRight">@android:drawable/fastscroll_label_right_holo_dark</item>
+        <item name="fastScrollTrackDrawable">@android:drawable/fastscroll_track_holo_dark</item>
+        <item name="fastScrollOverlayPosition">atThumb</item>
 
     </style>
 
@@ -1066,8 +1077,8 @@
         <item name="scrollbarFadeDuration">250</item>
         <item name="scrollbarDefaultDelayBeforeFade">300</item>
         <item name="scrollbarSize">10dip</item>
-        <item name="scrollbarThumbHorizontal">@android:drawable/scrollbar_handle_horizontal</item>
-        <item name="scrollbarThumbVertical">@android:drawable/scrollbar_handle_vertical</item>
+        <item name="scrollbarThumbHorizontal">@android:drawable/scrollbar_handle_holo_light</item>
+        <item name="scrollbarThumbVertical">@android:drawable/scrollbar_handle_holo_light</item>
         <item name="scrollbarTrackHorizontal">@null</item>
         <item name="scrollbarTrackVertical">@null</item>
 
@@ -1179,6 +1190,12 @@
 
         <!-- DayPickerWeekDayView style-->
         <item name="dayPickerWeekDayViewStyle">@style/TextAppearance.Holo.Light.DayPickerWeekDayView</item>
+
+        <item name="fastScrollThumbDrawable">@android:drawable/fastscroll_thumb_holo</item>
+        <item name="fastScrollPreviewBackgroundLeft">@android:drawable/fastscroll_label_left_holo_light</item>
+        <item name="fastScrollPreviewBackgroundRight">@android:drawable/fastscroll_label_right_holo_light</item>
+        <item name="fastScrollTrackDrawable">@android:drawable/fastscroll_track_holo_light</item>
+        <item name="fastScrollOverlayPosition">atThumb</item>
 
     </style>
 
