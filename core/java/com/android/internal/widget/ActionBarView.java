@@ -183,11 +183,6 @@ public class ActionBarView extends ViewGroup {
         mHomeAsUpView = mHomeLayout.findViewById(com.android.internal.R.id.up);
         mIconView = (ImageView) mHomeLayout.findViewById(com.android.internal.R.id.home);
         
-        Drawable background = a.getDrawable(R.styleable.ActionBar_background);
-        if (background != null) {
-            setBackgroundDrawable(background);
-        }
-        
         mTitleStyleRes = a.getResourceId(R.styleable.ActionBar_titleTextStyle, 0);
         mSubtitleStyleRes = a.getResourceId(R.styleable.ActionBar_subtitleTextStyle, 0);
         mProgressStyle = a.getResourceId(R.styleable.ActionBar_progressBarStyle, 0);

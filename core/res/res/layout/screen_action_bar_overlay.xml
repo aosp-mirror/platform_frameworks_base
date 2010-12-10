@@ -24,9 +24,10 @@ the Action Bar enabled overlaying application content.
     <FrameLayout android:id="@android:id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-    <FrameLayout android:id="@+id/action_bar_container"
+    <com.android.internal.widget.ActionBarContainer android:id="@+id/action_bar_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="?android:attr/actionBarStyle"
         android:gravity="top">
         <com.android.internal.widget.ActionBarView
             android:id="@+id/action_bar"
@@ -39,7 +40,7 @@ the Action Bar enabled overlaying application content.
             android:layout_height="wrap_content"
             android:visibility="gone"
             style="?android:attr/actionModeStyle" />
-    </FrameLayout>
+    </com.android.internal.widget.ActionBarContainer>
     <ImageView android:src="?android:attr/windowContentOverlay"
                android:scaleType="fitXY"
                android:layout_width="match_parent"
