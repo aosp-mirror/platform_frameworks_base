@@ -592,6 +592,11 @@ status_t CameraSource::stop() {
                 mLastFrameTimestampUs - mFirstFrameTimeUs);
     }
 
+    if (mNumGlitches > 0) {
+        LOGW("%d long delays between neighboring video frames during",
+                mNumGlitches);
+    }
+
     CHECK_EQ(mNumFramesReceived, mNumFramesEncoded + mNumFramesDropped);
     return OK;
 }
@@ -712,7 +717,7 @@ void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
     if (mNumFramesReceived > 0 &&
         timestampUs - mLastFrameTimestampUs > mGlitchDurationThresholdUs) {
         if (mNumGlitches % 10 == 0) {  // Don't spam the log
-            LOGW("Long delay detected in video recording");
+            LOGV("Long delay detected in video recording");
         }
         ++mNumGlitches;
     }
