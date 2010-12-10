@@ -126,8 +126,8 @@
     <color name="hint_foreground_holo_light">#808080</color>
     <color name="highlight_background_holo">#cc475925</color>
     <color name="highlight_background_inverse_holo">#ccd2e461</color>
-    <color name="highlighted_text_holo_dark">#cc475925</color>
-    <color name="highlighted_text_holo_light">#ccd2e461</color>
+    <color name="highlighted_text_holo_dark">#9983CC39</color>
+    <color name="highlighted_text_holo_light">#9983CC39</color>
     <color name="link_text_holo_dark">#5c5cff</color>
     <color name="link_text_holo_light">#0000ee</color>
 
