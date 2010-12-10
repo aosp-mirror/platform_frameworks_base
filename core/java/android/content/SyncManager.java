@@ -735,14 +735,24 @@ public class SyncManager implements OnAccountsUpdateListener {
 
         final Pair<Long, Long> previousSettings =
                 mSyncStorageEngine.getBackoff(op.account, op.authority);
-        long newDelayInMs;
-        if (previousSettings == null || previousSettings.second <= 0) {
+        long newDelayInMs = -1;
+        if (previousSettings != null) {
+            // don't increase backoff before current backoff is expired. This will happen for op's
+            // with ignoreBackoff set.
+            if (now < previousSettings.first) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "Still in backoff, do not increase it. "
+                        + "Remaining: " + ((previousSettings.first - now) / 1000) + " seconds.");
+                }
+                return;
+            }
+            // Subsequent delays are the double of the previous delay
+            newDelayInMs = previousSettings.second * 2;
+        }
+        if (newDelayInMs <= 0) {
             // The initial delay is the jitterized INITIAL_SYNC_RETRY_TIME_IN_MS
             newDelayInMs = jitterize(INITIAL_SYNC_RETRY_TIME_IN_MS,
                     (long)(INITIAL_SYNC_RETRY_TIME_IN_MS * 1.1));
-        } else {
-            // Subsequent delays are the double of the previous delay
-            newDelayInMs = previousSettings.second * 2;
         }
 
         // Cap the delay
