@@ -199,7 +199,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             child = getChildAt(0);
         } else if (mAdapter != null && mAdapter.getCount() > 0) {
             child = makeAndAddView(0);
-            // TODO: We should probably put the child in the recycler
+            mRecycler.put(0, child);
+            removeAllViewsInLayout();
         }
 
         if (child != null) {
