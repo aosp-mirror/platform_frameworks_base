@@ -39,7 +39,8 @@
 enum DebugLevel {
     kDebugDisabled = 0,
     kDebugMemory = 1,
-    kDebugCaches = 2
+    kDebugCaches = 2,
+    kDebugMoreCaches = 3
 };
 
 // These properties are defined in mega-bytes

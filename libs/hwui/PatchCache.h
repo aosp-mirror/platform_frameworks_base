@@ -19,6 +19,7 @@
 
 #include <utils/KeyedVector.h>
 
+#include "utils/Compare.h"
 #include "Debug.h"
 #include "Patch.h"
 
