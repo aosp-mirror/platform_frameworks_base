@@ -485,10 +485,13 @@ status_t CameraSource::init(
     // check earlier by calling mCamera->setParameters().
     CHECK_EQ(OK, mCamera->setPreviewDisplay(mSurface));
 
+    // By default, do not store metadata in video buffers
     mIsMetaDataStoredInVideoBuffers = false;
-    if (storeMetaDataInVideoBuffers &&
-        OK == mCamera->storeMetaDataInBuffers(true)) {
-        mIsMetaDataStoredInVideoBuffers = true;
+    mCamera->storeMetaDataInBuffers(false);
+    if (storeMetaDataInVideoBuffers) {
+        if (OK == mCamera->storeMetaDataInBuffers(true)) {
+            mIsMetaDataStoredInVideoBuffers = true;
+        }
     }
 
     IPCThreadState::self()->restoreCallingIdentity(token);
