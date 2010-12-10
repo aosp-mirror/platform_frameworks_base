@@ -268,7 +268,7 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
     const GLuint previousFbo = mSnapshot->fbo;
     const int count = saveSnapshot(flags);
 
-    if (!mSnapshot->invisible) {
+    if (!mSnapshot->isIgnored()) {
         int alpha = 255;
         SkXfermode::Mode mode;
 
@@ -385,13 +385,17 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     if (bounds.isEmpty() || bounds.getWidth() > mCaches.maxTextureSize ||
             bounds.getHeight() > mCaches.maxTextureSize) {
-        snapshot->invisible = true;
+        if (fboLayer) {
+            snapshot->invisible = true;
+        } else {
+            snapshot->empty = true;
+        }
     } else {
         snapshot->invisible = snapshot->invisible || (alpha <= ALPHA_THRESHOLD && fboLayer);
     }
 
     // Bail out if we won't draw in this snapshot
-    if (snapshot->invisible) {
+    if (snapshot->invisible || snapshot->empty) {
         return false;
     }
 
@@ -731,7 +735,7 @@ void OpenGLRenderer::setupDraw() {
 }
 
 void OpenGLRenderer::clearLayerRegions() {
-    if (mLayers.size() == 0 || mSnapshot->invisible) return;
+    if (mLayers.size() == 0 || mSnapshot->isIgnored()) return;
 
     Rect clipRect(*mSnapshot->clipRect);
     clipRect.snapToPixelBoundaries();
@@ -809,7 +813,7 @@ const Rect& OpenGLRenderer::getClipBounds() {
 }
 
 bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom) {
-    if (mSnapshot->invisible) {
+    if (mSnapshot->isIgnored()) {
         return true;
     }
 
@@ -988,7 +992,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
 
 void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     // TODO: Should do quickReject for each line
-    if (mSnapshot->invisible) return;
+    if (mSnapshot->isIgnored()) return;
 
     const bool isAA = paint->isAntiAlias();
     const float strokeWidth = paint->getStrokeWidth() * 0.5f;
@@ -1112,7 +1116,7 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
     // No need to check against the clip, we fill the clip region
-    if (mSnapshot->invisible) return;
+    if (mSnapshot->isIgnored()) return;
 
     Rect& clip(*mSnapshot->clipRect);
     clip.snapToPixelBoundaries();
@@ -1150,7 +1154,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     if (text == NULL || count == 0 || (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
         return;
     }
-    if (mSnapshot->invisible) return;
+    if (mSnapshot->isIgnored()) return;
 
     paint->setAntiAlias(true);
 
@@ -1253,7 +1257,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 }
 
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
-    if (mSnapshot->invisible) return;
+    if (mSnapshot->isIgnored()) return;
 
     GLuint textureUnit = 0;
     glActiveTexture(gTextureUnits[textureUnit]);
