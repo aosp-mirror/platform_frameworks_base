@@ -270,8 +270,18 @@
       </li>
     </ul>
   </li>
-
-
+  <!-- Webinar section -->
+  <li>
+    <h2><span class="en">Webinars</span></h2>
+    <ul>
+      <li><a href="<?cs var:toroot ?>resources/webinars/webinar-watch.html">
+            <span class="en">Watch a Webinar</span>
+          </a></li>     
+      <li><a href="<?cs var:toroot ?>resources/webinars/webinar-upcoming.html">
+            <span class="en">Upcoming Schedule</span>
+          </a></li>
+    </ul>
+  </li>
 
   <li>
     <h2><span class="en">More</span>
