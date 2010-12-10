@@ -32,6 +32,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -4334,6 +4335,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         */
 
         final InputMethodState ims = mInputMethodState;
+        final int cursorOffsetVertical = voffsetCursor - voffsetText;
         if (ims != null && ims.mBatchEditNesting == 0) {
             InputMethodManager imm = InputMethodManager.peekInstance();
             if (imm != null) {
@@ -4364,7 +4366,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     canvas.getMatrix().mapPoints(ims.mTmpOffset);
                     ims.mTmpRectF.offset(ims.mTmpOffset[0], ims.mTmpOffset[1]);
     
-                    ims.mTmpRectF.offset(0, voffsetCursor - voffsetText);
+                    ims.mTmpRectF.offset(0, cursorOffsetVertical);
     
                     ims.mCursorRectInWindow.set((int)(ims.mTmpRectF.left + 0.5),
                             (int)(ims.mTmpRectF.top + 0.5),
@@ -4378,11 +4380,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        layout.draw(canvas, highlight, mHighlightPaint, voffsetCursor - voffsetText);
+        if (mCorrectionHighlighter != null) {
+            mCorrectionHighlighter.draw(canvas, cursorOffsetVertical);
+        }
+
+        layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
 
         if (mMarquee != null && mMarquee.shouldDrawGhost()) {
             canvas.translate((int) mMarquee.getGhostOffset(), 0.0f);
-            layout.draw(canvas, highlight, mHighlightPaint, voffsetCursor - voffsetText);
+            layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
         }
 
         /*  Comment out until we decide what to do about animations
@@ -5067,7 +5073,104 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @param info The auto correct info about the text that was corrected.
      */
     public void onCommitCorrection(CorrectionInfo info) {
-        // TODO
+        if (mCorrectionHighlighter == null) {
+            mCorrectionHighlighter = new CorrectionHighlighter();
+        } else {
+            mCorrectionHighlighter.invalidate(false);
+        }
+
+        mCorrectionHighlighter.highlight(info);
+    }
+
+    private class CorrectionHighlighter {
+        private final Path mPath = new Path();
+        private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private int mStart, mEnd;
+        private long mFadingStartTime;
+        private final static int FADE_OUT_DURATION = 400;
+
+        public CorrectionHighlighter() {
+            mPaint.setCompatibilityScaling(getResources().getCompatibilityInfo().applicationScale);
+            mPaint.setStyle(Paint.Style.FILL);
+        }
+
+        public void highlight(CorrectionInfo info) {
+            mStart = info.getOffset();
+            mEnd = mStart + info.getNewText().length();
+            mFadingStartTime = SystemClock.uptimeMillis();
+
+            if (mStart < 0 || mEnd < 0) {
+                stopAnimation();
+            }
+        }
+
+        public void draw(Canvas canvas, int cursorOffsetVertical) {
+            if (updatePath() && updatePaint()) {
+                if (cursorOffsetVertical != 0) {
+                    canvas.translate(0, cursorOffsetVertical);
+                }
+
+                canvas.drawPath(mPath, mPaint);
+
+                if (cursorOffsetVertical != 0) {
+                    canvas.translate(0, -cursorOffsetVertical);
+                }
+                invalidate(true);
+            } else {
+                stopAnimation();
+                invalidate(false);
+            }
+        }
+
+        private boolean updatePaint() {
+            final long duration = SystemClock.uptimeMillis() - mFadingStartTime;
+            if (duration > FADE_OUT_DURATION) return false;
+
+            final float coef = 1.0f - (float) duration / FADE_OUT_DURATION;
+            final int highlightColorAlpha = Color.alpha(mHighlightColor);
+            final int color = (mHighlightColor & 0x00FFFFFF) +
+                    ((int) (highlightColorAlpha * coef) << 24);
+            mPaint.setColor(color);
+            return true;
+        }
+
+        private boolean updatePath() {
+            final Layout layout = TextView.this.mLayout;
+            if (layout == null) return false;
+
+            // Update in case text is edited while the animation is run
+            final int length = mText.length();
+            int start = Math.min(length, mStart);
+            int end = Math.min(length, mEnd);
+
+            mPath.reset();
+            TextView.this.mLayout.getSelectionPath(start, end, mPath);
+            return true;
+        }
+
+        private void invalidate(boolean delayed) {
+            if (TextView.this.mLayout == null) return;
+
+            synchronized (sTempRect) {
+                mPath.computeBounds(sTempRect, false);
+
+                int left = getCompoundPaddingLeft();
+                int top = getExtendedPaddingTop() + getVerticalOffset(true);
+
+                if (delayed) {
+                    TextView.this.postInvalidateDelayed(16, // 60 Hz update
+                            left + (int) sTempRect.left, top + (int) sTempRect.top,
+                            left + (int) sTempRect.right, top + (int) sTempRect.bottom);
+                } else {
+                    TextView.this.postInvalidate((int) sTempRect.left, (int) sTempRect.top,
+                            (int) sTempRect.right, (int) sTempRect.bottom);
+                }
+            }
+        }
+
+        private void stopAnimation() {
+            TextView.this.mCorrectionHighlighter = null;
+        }
     }
 
     public void beginBatchEdit() {
@@ -9227,4 +9330,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static int DRAG_THUMBNAIL_MAX_TEXT_LENGTH = 20;
     // System wide time for last cut or copy action.
     private static long sLastCutOrCopyTime;
+    // Used to highlight a word when it is corrected by the IME
+    private CorrectionHighlighter mCorrectionHighlighter;
 }
