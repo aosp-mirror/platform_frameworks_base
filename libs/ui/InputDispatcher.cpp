@@ -908,9 +908,11 @@ void InputDispatcher::resumeAfterTargetsNotReadyTimeoutLocked(nsecs_t newTimeout
             ssize_t connectionIndex = getConnectionIndexLocked(inputChannel);
             if (connectionIndex >= 0) {
                 sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
-                synthesizeCancelationEventsForConnectionLocked(
-                        connection, InputState::CANCEL_ALL_EVENTS,
-                        "application not responding");
+                if (connection->status == Connection::STATUS_NORMAL) {
+                    synthesizeCancelationEventsForConnectionLocked(
+                            connection, InputState::CANCEL_ALL_EVENTS,
+                            "application not responding");
+                }
             }
         }
     }
@@ -3056,7 +3058,7 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
                     // the original UP in which case we would not generate the fallback UP.
                     synthesizeCancelationEventsForConnectionLocked(connection,
                             InputState::CANCEL_FALLBACK_EVENTS,
-                            "Application handled a non-fallback event.");
+                            "application handled a non-fallback event, canceling all fallback events");
                 } else {
                     // If the application did not handle a non-fallback key, then ask
                     // the policy what to do with it.  We might generate a fallback key
@@ -3070,6 +3072,12 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
                             &event, keyEntry->policyFlags, &event);
 
                     mLock.lock();
+
+                    if (connection->status != Connection::STATUS_NORMAL) {
+                        return;
+                    }
+
+                    assert(connection->outboundQueue.headSentinel.next == dispatchEntry);
 
                     if (fallback) {
                         // Restart the dispatch cycle using the fallback key.
