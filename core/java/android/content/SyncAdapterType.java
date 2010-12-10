@@ -33,7 +33,6 @@ public class SyncAdapterType implements Parcelable {
     private final boolean isAlwaysSyncable;
     private final boolean allowParallelSyncs;
 
-    /** @hide */
     public SyncAdapterType(String authority, String accountType, boolean userVisible,
             boolean supportsUploading) {
         if (TextUtils.isEmpty(authority)) {
