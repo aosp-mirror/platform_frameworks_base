@@ -520,15 +520,20 @@
         <attr name="dayPickerWeekDayViewStyle" format="reference" />
 
         <!-- Fast scroller styles -->
-        <!-- @hide -->
+        <eat-comment />
+
+        <!-- Drawable to use as the fast scroll thumb. -->
         <attr name="fastScrollThumbDrawable" format="reference" />
-        <!-- @hide -->
+        <!-- Drawable to use as the fast scroll index preview window background
+             when shown on the right. -->
         <attr name="fastScrollPreviewBackgroundRight" format="reference" />
-        <!-- @hide -->
+        <!-- Drawable to use as the fast scroll index preview window background
+             when shown on the left. -->
         <attr name="fastScrollPreviewBackgroundLeft" format="reference" />
-        <!-- @hide -->
+        <!-- Drawable to use as the track for the fast scroll thumb.
+             This may be null. -->
         <attr name="fastScrollTrackDrawable" format="reference" />
-        <!-- @hide -->
+        <!-- Position of the fast scroll index overlay window. -->
         <attr name="fastScrollOverlayPosition">
             <enum name="floating" value="0" />
             <enum name="atThumb" value="1" />
