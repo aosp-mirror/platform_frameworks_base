@@ -125,10 +125,10 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"同期"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"同期"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"<xliff:g id="CONTENT_TYPE">%s</xliff:g>での削除が多すぎます。"</string>
-    <!-- outdated translation 6632412458436461203 -->     <string name="low_memory" product="tablet" msgid="2292820184396262278">"電話のメモリがいっぱいです。ファイルを削除してメモリを解放してください。"</string>
+    <string name="low_memory" product="tablet" msgid="2292820184396262278">"タブレットのストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
     <string name="low_memory" product="default" msgid="6632412458436461203">"電話のメモリがいっぱいです。ファイルを削除してメモリを解放してください。"</string>
     <string name="me" msgid="6545696007631404292">"自分"</string>
-    <!-- outdated translation 1319919075463988638 -->     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"携帯電話オプション"</string>
+    <string name="power_dialog" product="tablet" msgid="8545351420865202853">"タブレットオプション"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"携帯電話オプション"</string>
     <string name="silent_mode" msgid="7167703389802618663">"マナーモード"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"ワイヤレス接続をONにする"</string>
@@ -136,13 +136,13 @@
     <string name="screen_lock" msgid="799094655496098153">"画面をロック"</string>
     <string name="power_off" msgid="4266614107412865048">"電源を切る"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"シャットダウン中..."</string>
-    <!-- outdated translation 649792175242821353 -->     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"携帯電話の電源を切ります。"</string>
+    <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"タブレットの電源をOFFにします。"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"携帯電話の電源を切ります。"</string>
     <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
     <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"新着"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"最近使ったアプリケーションはありません。"</string>
-    <!-- outdated translation 2406416831541615258 -->     <string name="global_actions" product="tablet" msgid="408477140088053665">"携帯電話オプション"</string>
+    <string name="global_actions" product="tablet" msgid="408477140088053665">"タブレットオプション"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"携帯電話オプション"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"画面ロック"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"電源を切る"</string>
@@ -159,7 +159,7 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"送受信したメッセージ"</string>
     <string name="permgroupdesc_messages" msgid="7045736972019211994">"SMS、メールなどのメッセージの読み書き"</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"個人情報"</string>
-    <!-- outdated translation 5488050357388806068 -->     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"端末の連絡先とカレンダーに直接アクセス"</string>
+    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"タブレットの連絡先とカレンダーに直接アクセス"</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"端末の連絡先とカレンダーに直接アクセス"</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"現在地"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"現在地を追跡"</string>
@@ -193,10 +193,10 @@
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMSメッセージの送信"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"SMSメッセージの送信をアプリケーションに許可します。悪意のあるアプリケーションが確認なしでメッセージを送信し、料金が発生する恐れがあります。"</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"SMSの読み取り"</string>
-    <!-- outdated translation 3002170087197294591 -->     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"携帯電話やSIMカードに保存したSMSメッセージの読み取りをアプリケーションに許可します。悪意のあるアプリケーションが機密メッセージを読み取る恐れがあります。"</string>
+    <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"タブレットやSIMカードに保存されているSMSメッセージの読み取りをアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、機密メッセージが読み取られる恐れがあります。"</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"携帯電話やSIMカードに保存したSMSメッセージの読み取りをアプリケーションに許可します。悪意のあるアプリケーションが機密メッセージを読み取る恐れがあります。"</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"SMSの編集"</string>
-    <!-- outdated translation 6299398896177548095 -->     <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"携帯電話やSIMカードに保存したSMSメッセージへの書き込みをアプリケーションに許可します。悪意のあるアプリケーションがメッセージを削除する恐れがあります。"</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"タブレットやSIMカードに保存されているSMSメッセージへの書き込みをアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、メッセージが削除される恐れがあります。"</string>
     <string name="permdesc_writeSms" product="default" msgid="6299398896177548095">"携帯電話やSIMカードに保存したSMSメッセージへの書き込みをアプリケーションに許可します。悪意のあるアプリケーションがメッセージを削除する恐れがあります。"</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"WAPの受信"</string>
     <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"WAPメッセージの受信と処理をアプリケーションに許可します。悪意のあるアプリケーションがメッセージを監視したり、表示せずに削除する恐れがあります。"</string>
@@ -223,7 +223,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"アプリケーションの切り替えを禁止する"</string>
     <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"ユーザーが別のアプリケーションに切り替えられないようにします。"</string>
     <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"起動中のすべてのアプリケーションの監視と制御"</string>
-    <!-- outdated translation 3228701938345388092 -->     <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"システムが起動する操作の監視と制御をアプリケーションに許可します。悪意のあるアプリケーションがシステムを完全に破壊する恐れがあります。この許可は開発にのみ必要で、携帯電話の通常の使用にはまったく必要ありません。"</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"システムアクティビティの監視と制御をアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、システム全体のセキュリティが侵害される恐れがあります。この許可は開発時にのみ必要で、通常の使用では必要ありません。"</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"パッケージ削除ブロードキャストの送信"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"アプリケーションパッケージの削除の通知を配信することをアプリケーションに許可します。悪意のあるアプリケーションが他の実行中のアプリケーションを強制終了する恐れがあります。"</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"SMS受信ブロードキャストの送信"</string>
@@ -241,13 +241,13 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"未許可のウィンドウの表示"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"内部システムのユーザーインターフェースで使用するためのウィンドウ作成を許可します。通常のアプリケーションでは使用しません。"</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"システムレベルの警告の表示"</string>
-    <!-- outdated translation 5109622689323490558 -->     <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"システムの警告ウィンドウの表示をアプリケーションに許可します。悪意のあるアプリケーションが携帯電話の画面全体を偽装する恐れがあります。"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"システムの警告ウィンドウの表示をアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、画面全体が偽装される恐れがあります。"</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"アニメーションのプリセット速度の変更"</string>
     <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"いつでもアニメーション全般の速度を変更する (アニメーションを速くまたは遅くする) ことをアプリケーションに許可します。"</string>
     <string name="permlab_manageAppTokens" msgid="17124341698093865">"アプリケーショントークンの管理"</string>
     <string name="permdesc_manageAppTokens" msgid="977127907524195988">"通常のZ-orderingを回避して、独自のトークンを作成、管理することをアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"キーを押してボタンをコントロール"</string>
-    <!-- outdated translation 3946098050410874715 -->     <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"入力イベント (キーを押すなど) を別のアプリケーションに伝えることをアプリケーションに許可します。これにより悪意のあるアプリケーションが、携帯電話を乗っ取る恐れがあります。"</string>
+    <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"入力イベント（キーを押すなど）を別のアプリケーションに伝えることをアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、タブレットが乗っ取られる恐れがあります。"</string>
     <string name="permdesc_injectEvents" product="default" msgid="3946098050410874715">"入力イベント (キーを押すなど) を別のアプリケーションに伝えることをアプリケーションに許可します。これにより悪意のあるアプリケーションが、携帯電話を乗っ取る恐れがあります。"</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"入力や操作の記録"</string>
     <string name="permdesc_readInputState" msgid="5132879321450325445">"別のアプリケーションへの入力（パスワードなど）でもキー入力を監視することをアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
@@ -274,18 +274,18 @@
     <string name="permlab_installPackages" msgid="335800214119051089">"アプリケーションを直接インストール"</string>
     <string name="permdesc_installPackages" msgid="526669220850066132">"Androidパッケージのインストール/更新をアプリケーションに許可します。悪意のあるアプリケーションが、勝手に強力な権限を持つ新しいアプリケーションを追加する恐れがあります。"</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"アプリケーションキャッシュデータの削除"</string>
-    <!-- outdated translation 7740465694193671402 -->     <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"アプリケーションのキャッシュディレクトリからファイルを削除して携帯電話のメモリを解放することをアプリケーションに許可します。通常、アクセスはシステムプロセスのみに制限されます。"</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"アプリケーションのキャッシュディレクトリからファイルを削除してタブレットのストレージの空き領域を増やすことをアプリケーションに許可します。通常、アクセスはシステムプロセスのみに制限されます。"</string>
     <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"アプリケーションのキャッシュディレクトリからファイルを削除して携帯電話のメモリを解放することをアプリケーションに許可します。通常、アクセスはシステムプロセスのみに制限されます。"</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"アプリケーションリソースの移動"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"内部と外部のメディア間でのアプリケーションリソースの移動をアプリケーションに許可します。"</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"機密ログデータの読み取り"</string>
-    <!-- outdated translation 8896449437464867766 -->     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"システムの各種ログファイルの読み取りをアプリケーションに許可します。許可すると端末の使用状況に関する全般的な情報が読み取られます。この情報には個人情報や機密情報が含まれる場合があります。"</string>
+    <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"システムの各種ログファイルの読み取りをアプリケーションに許可します。許可するとタブレットの使用状況に関する全般的な情報が読み取られます。この情報には個人情報や機密情報が含まれる場合があります。"</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"システムの各種ログファイルの読み取りをアプリケーションに許可します。許可すると端末の使用状況に関する全般的な情報が読み取られます。この情報には個人情報や機密情報が含まれる場合があります。"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"diagが所有するリソースの読み書き"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"diagグループが所有するリソース（例:/dev内のファイル）への読み書きをアプリケーションに許可します。システムの安定性とセキュリティに影響する恐れがあります。メーカー/オペレーターによるハードウェア固有の診断以外には使用しないでください。"</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"アプリケーションのコンポーネントを有効/無効にする"</string>
-    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"別アプリケーションのコンポーネントの有効/無効を変更することをアプリケーションに許可します。これにより悪意のあるアプリケーションが、携帯電話の重要な機能を無効にする恐れがあります。アプリケーションコンポーネントが利用できない、整合性が取れない、または不安定な状態になる恐れがあるので、許可には注意が必要です。"</string>
-    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"別アプリケーションのコンポーネントの有効/無効を変更することをアプリケーションに許可します。これにより悪意のあるアプリケーションが、携帯電話の重要な機能を無効にする恐れがあります。アプリケーションコンポーネントが利用できない、整合性が取れない、または不安定な状態になる恐れがあるので、許可には注意が必要です。"</string>
+    <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"別アプリケーションのコンポーネントの有効/無効を変更することをアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、タブレットの重要な機能が無効にされる恐れがあります。アプリケーションコンポーネントが利用できなくなる、整合性が取れなくなる、または不安定な状態になる恐れがあるので許可には注意が必要です。"</string>
+    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"別アプリケーションのコンポーネントの有効/無効を変更することをアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、タブレットの重要な機能が無効にされる恐れがあります。アプリケーションコンポーネントが利用できなくなる、整合性が取れなくなる、または不安定な状態になる恐れがあるので許可には注意が必要です。"</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"優先アプリケーションの設定"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"優先アプリケーションを変更することをアプリケーションに許可します。悪意のあるアプリケーションが実行中のアプリケーションを密かに変更し、既存のアプリケーションになりすまして非公開データを収集する恐れがあります。"</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"システムの全般設定の変更"</string>
@@ -295,19 +295,19 @@
     <string name="permlab_writeGservices" msgid="2149426664226152185">"Googleサービスの地図の変更"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"Googleサービスマップの変更をアプリケーションに許可します。通常のアプリケーションでは使用しません。"</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"起動時に自動的に開始"</string>
-    <!-- outdated translation 698336728415008796 -->     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"システムの起動後に自動的に起動することをアプリケーションに許可します。携帯電話の起動に時間がかかるようになり、アプリケーションが常に実行されるために携帯電話の全体的な動作が遅くなります。"</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"システムの起動後に自動的に起動することをアプリケーションに許可します。許可するとタブレットの起動時間が長くなったり、アプリケーションが常に実行されるためタブレット全体の動作が遅くなったりする恐れがあります。"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="698336728415008796">"システムの起動後に自動的に起動することをアプリケーションに許可します。携帯電話の起動に時間がかかるようになり、アプリケーションが常に実行されるために携帯電話の全体的な動作が遅くなります。"</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"stickyブロードキャストの配信"</string>
-    <!-- outdated translation 1920045289234052219 -->     <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"配信が終了してもメモリに残るようなstickyブロードキャストをアプリケーションに許可します。悪意のあるアプリケーションがメモリを使いすぎて、携帯電話の動作が遅くなったり、不安定になる恐れがあります。"</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、メモリの使用量が増えてタブレットの動作が遅くなったり不安定になったりする恐れがあります。"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"配信が終了してもメモリに残るようなstickyブロードキャストをアプリケーションに許可します。悪意のあるアプリケーションがメモリを使いすぎて、携帯電話の動作が遅くなったり、不安定になる恐れがあります。"</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"連絡先データの読み取り"</string>
-    <!-- outdated translation 3371591512896545975 -->     <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"端末に保存した連絡先（アドレス）データの読み取りをアプリケーションに許可します。悪意のあるアプリケーションがデータを他人に送信する恐れがあります。"</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"タブレットに保存されている連絡先（アドレス）データの読み取りをアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、データが他人に送信される恐れがあります。"</string>
     <string name="permdesc_readContacts" product="default" msgid="3371591512896545975">"端末に保存した連絡先（アドレス）データの読み取りをアプリケーションに許可します。悪意のあるアプリケーションがデータを他人に送信する恐れがあります。"</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"連絡先データの書き込み"</string>
-    <!-- outdated translation 3924383579108183601 -->     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"端末に保存した連絡先（アドレス）データの変更をアプリケーションに許可します。悪意のあるアプリケーションが連絡先データを消去/変更する恐れがあります。"</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"タブレットに保存されている連絡先（アドレス）データの変更をアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、連絡先データが消去または変更される恐れがあります。"</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"端末に保存した連絡先（アドレス）データの変更をアプリケーションに許可します。悪意のあるアプリケーションが連絡先データを消去/変更する恐れがあります。"</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"カレンダーの予定の読み取り"</string>
-    <!-- outdated translation 5533029139652095734 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"端末に保存したカレンダーの予定の読み取りをアプリケーションに許可します。悪意のあるアプリケーションがカレンダーの予定を他人に送信する恐れがあります。"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"タブレットに保存されているカレンダーの予定の読み取りをアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、カレンダーの予定が他人に送信される恐れがあります。"</string>
     <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"端末に保存したカレンダーの予定の読み取りをアプリケーションに許可します。悪意のあるアプリケーションがカレンダーの予定を他人に送信する恐れがあります。"</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"カレンダーの予定の追加や変更を行い、ゲストにメールを送信する"</string>
     <string name="permdesc_writeCalendar" msgid="2988871373544154221">"カレンダーの予定の追加や変更をアプリケーションに許可します。ゲストにメールが送信される場合もあります。悪意のあるアプリケーションがこの機能を利用し、イベントを削除または変更したりゲストにメールを送信したりする可能性があります。"</string>
@@ -318,10 +318,10 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"位置情報提供元のインストールを許可する"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"テスト用に仮の位置情報を作成します。これにより悪意のあるアプリケーションが、GPSやネットワークプロバイダなどから返される本当の位置情報や状況を改ざんしたり、端末の現在地を監視して外部に報告したりする恐れがあります。"</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"精細な位置情報（GPS）"</string>
-    <!-- outdated translation 7411213317434337331 -->     <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"GPSなど携帯電話の位置情報にアクセスします（可能な場合）。今いる場所が悪意のあるアプリケーションに検出されたり、バッテリーの消費が増える恐れがあります。"</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"タブレット内のGPSなど、正確な位置を特定できる位置情報がある場合はその情報にアクセスします。この許可を悪意のあるアプリケーションに利用されると、ユーザーの現在地が特定されたり、電池の消費量が増えたりする恐れがあります。"</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"GPSなど携帯電話の位置情報にアクセスします（可能な場合）。今いる場所が悪意のあるアプリケーションに検出されたり、バッテリーの消費が増える恐れがあります。"</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"おおよその位置情報（ネットワーク基地局）"</string>
-    <!-- outdated translation 8235655958070862293 -->     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"セルラーネットワークデータベースなど、携帯電話のおおよその位置を特定する情報源が利用可能な場合にアクセスします。これにより悪意のあるアプリケーションが、ユーザーのおおよその位置を特定できる恐れがあります。"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"セルラーネットワークデータベースなど、タブレットのおおよその位置を特定できる位置情報がある場合はその情報にアクセスします。この許可を悪意のあるアプリケーションに利用されると、ユーザーのおおよその現在地が特定される恐れがあります。"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8235655958070862293">"セルラーネットワークデータベースなど、携帯電話のおおよその位置を特定する情報源が利用可能な場合にアクセスします。これにより悪意のあるアプリケーションが、ユーザーのおおよその位置を特定できる恐れがあります。"</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"SurfaceFlingerへのアクセス"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"SurfaceFlingerの低レベルの機能の使用をアプリケーションに許可します。"</string>
@@ -333,13 +333,13 @@
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"オーディオ録音パスへのアクセスをアプリケーションに許可します。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"写真と動画の撮影"</string>
     <string name="permdesc_camera" msgid="6004878235852154239">"カメラでの写真と動画の撮影をアプリケーションに許可します。許可すると、カメラがとらえている画像をアプリケーションがいつでも取得できるようになります。"</string>
-    <!-- outdated translation 8337817093326370537 -->     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"端末を永続的に無効にする"</string>
+    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"タブレットを完全に無効化"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"端末を永続的に無効にする"</string>
-    <!-- outdated translation 5569526552607599221 -->     <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"携帯電話全体を永続的に無効にすることをアプリケーションに許可します。この許可は非常に危険です。"</string>
+    <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"タブレット全体を完全に無効にすることをアプリケーションに許可します｡この許可は非常に危険です。"</string>
     <string name="permdesc_brick" product="default" msgid="5569526552607599221">"携帯電話全体を永続的に無効にすることをアプリケーションに許可します。この許可は非常に危険です。"</string>
-    <!-- outdated translation 2898560872462638242 -->     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"端末の再起動"</string>
+    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"タブレットの強制再起動"</string>
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"端末の再起動"</string>
-    <!-- outdated translation 7914933292815491782 -->     <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"端末の強制的な再起動をアプリケーションに許可します。"</string>
+    <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"タブレットの強制的な再起動をアプリケーションに許可します。"</string>
     <string name="permdesc_reboot" product="default" msgid="7914933292815491782">"端末の強制的な再起動をアプリケーションに許可します。"</string>
     <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"ファイルシステムのマウントとマウント解除"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"リムーバブルメモリのファイルシステムのマウントとマウント解除をアプリケーションに許可します。"</string>
@@ -367,7 +367,7 @@
     <string name="permdesc_callPhone" msgid="3369867353692722456">"電話番号の自動発信をアプリケーションに許可します。悪意のあるアプリケーションが意図しない電話をかけて料金が発生する恐れがあります。緊急通報への発信は許可しません。"</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"電話番号発信"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"緊急通報を含めあらゆる電話番号に自動発信することをアプリケーションに許可します。悪意のあるアプリケーションが緊急サービスに不正な通報をする恐れがあります。"</string>
-    <!-- outdated translation 5604848095315421425 -->     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"CDMA携帯電話のセットアップを直接開始"</string>
+    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"CDMAタブレットのセットアップを直接開始"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA携帯電話のセットアップを直接開始"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"アプリケーションにCDMAプロビジョニングの開始を許可します。悪意のあるアプリケーションが不要なCDMAプロビジョニングを開始する恐れがあります。"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"位置情報の更新通知"</string>
@@ -380,16 +380,16 @@
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"端末の電話機能のコントロールをアプリケーションに許可します。アプリケーションは、ネットワークの切り替え、携帯電話の無線通信のオン/オフなどを通知せずに行うことができます。"</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"携帯のステータスとIDの読み取り"</string>
     <string name="permdesc_readPhoneState" msgid="188877305147626781">"端末の電話機能へのアクセスをアプリケーションに許可します。この権限が許可されたアプリケーションでは、この携帯の電話番号やシリアル番号、通話中かどうか、通話相手の電話番号などを特定できます。"</string>
-    <!-- outdated translation 573480187941496130 -->     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"端末のスリープを無効にする"</string>
+    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"タブレットのスリープを無効化"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"端末のスリープを無効にする"</string>
-    <!-- outdated translation 7584036471227467099 -->     <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"端末のスリープを無効にすることをアプリケーションに許可します。"</string>
+    <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"タブレットのスリープを無効にすることをアプリケーションに許可します。"</string>
     <string name="permdesc_wakeLock" product="default" msgid="7584036471227467099">"端末のスリープを無効にすることをアプリケーションに許可します。"</string>
-    <!-- outdated translation 4928622470980943206 -->     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"電源のON/OFF"</string>
+    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"タブレットの電源ON/OFF"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"電源のON/OFF"</string>
-    <!-- outdated translation 4577331933252444818 -->     <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"携帯電話の電源のオン/オフをアプリケーションに許可します。"</string>
+    <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"タブレットの電源のON/OFFをアプリケーションに許可します。"</string>
     <string name="permdesc_devicePower" product="default" msgid="4577331933252444818">"携帯電話の電源のオン/オフをアプリケーションに許可します。"</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"出荷時試験モードでの実行"</string>
-    <!-- outdated translation 8136644990319244802 -->     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"携帯電話のハードウェアへのアクセスを完全に許可して、低レベルのメーカーテストとして実行します。メーカーのテストモードで携帯電話を使用するときのみ利用できます。"</string>
+    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"タブレットハードウェアへのアクセスを完全に許可して、低レベルのメーカーテストを実行します。メーカーのテストモードでタブレットを使用する場合にのみ利用できます。"</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"携帯電話のハードウェアへのアクセスを完全に許可して、低レベルのメーカーテストとして実行します。メーカーのテストモードで携帯電話を使用するときのみ利用できます。"</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"壁紙の設定"</string>
     <string name="permdesc_setWallpaper" msgid="6417041752170585837">"システムの壁紙の設定をアプリケーションに許可します。"</string>
@@ -398,15 +398,15 @@
     <string name="permlab_masterClear" msgid="2315750423139697397">"システムを出荷時設定にリセット"</string>
     <string name="permdesc_masterClear" msgid="5033465107545174514">"データ、設定、インストールしたアプリケーションをすべて消去して、完全に出荷時の設定にシステムをリセットすることをアプリケーションに許可します。"</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"時刻の設定"</string>
-    <!-- outdated translation 667294309287080045 -->     <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"携帯電話の時刻の変更をアプリケーションに許可します。"</string>
+    <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"タブレットの時刻の変更をアプリケーションに許可します。"</string>
     <string name="permdesc_setTime" product="default" msgid="667294309287080045">"携帯電話の時刻の変更をアプリケーションに許可します。"</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"タイムゾーンの設定"</string>
-    <!-- outdated translation 1902540227418179364 -->     <string name="permdesc_setTimeZone" product="tablet" msgid="2522877107613885139">"端末のタイムゾーンの変更をアプリケーションに許可します。"</string>
+    <string name="permdesc_setTimeZone" product="tablet" msgid="2522877107613885139">"タブレットのタイムゾーンの変更をアプリケーションに許可します。"</string>
     <string name="permdesc_setTimeZone" product="default" msgid="1902540227418179364">"端末のタイムゾーンの変更をアプリケーションに許可します。"</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"AccountManagerServiceとして機能"</string>
     <string name="permdesc_accountManagerService" msgid="6056903274106394752">"AccountAuthenticatorsの呼び出しをアプリケーションに許可します"</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"既知のアカウントの取得"</string>
-    <!-- outdated translation 6839262446413155394 -->     <string name="permdesc_getAccounts" product="tablet" msgid="857622793935544694">"端末内にあるアカウントのリストの取得をアプリケーションに許可します。"</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="857622793935544694">"タブレット内にあるアカウントのリストの取得をアプリケーションに許可します。"</string>
     <string name="permdesc_getAccounts" product="default" msgid="6839262446413155394">"端末内にあるアカウントのリストの取得をアプリケーションに許可します。"</string>
     <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"アカウント認証システムとして機能"</string>
     <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"アカウントの作成、パスワードの取得や設定など、AccountManagerのアカウント認証機能の使用をアプリケーションに許可します。"</string>
@@ -433,10 +433,10 @@
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fiマルチキャストの受信を許可する"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"端末を直接の宛先とはしていないパケットの受信をアプリケーションに許可します。近隣で提供中のサービスを検出したい場合に便利です。マルチキャスト以外のモードよりも電力を消費します。"</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"Bluetoothの管理"</string>
-    <!-- outdated translation 7256289774667054555 -->     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"このBluetooth端末の設定、およびリモート端末を検出してペアに設定することをアプリケーションに許可します。"</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"このBluetoothタブレットを設定することや、リモート端末を検出してペアに設定することをアプリケーションに許可します。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"このBluetooth端末の設定、およびリモート端末を検出してペアに設定することをアプリケーションに許可します。"</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth接続の作成"</string>
-    <!-- outdated translation 762515380679392945 -->     <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"このBluetooth端末の設定表示、および別の端末をペアとして設定し接続を承認することをアプリケーションに許可します。"</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"このBluetoothタブレットの設定を表示することや、別の端末をペアとして設定し接続を承認することをアプリケーションに許可します。"</string>
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"このBluetooth端末の設定表示、および別の端末をペアとして設定し接続を承認することをアプリケーションに許可します。"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"NFCの管理"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"NFCタグ、カード、リーダーとの通信をアプリケーションに許可します。"</string>
@@ -471,14 +471,14 @@
     <string name="policylab_limitPassword" msgid="4497420728857585791">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"画面ロック解除パスワードの長さと使用できる文字数を制御する"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"画面ロック解除試行の監視"</string>
-    <!-- outdated translation 7227578260165172673 -->     <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"画面ロック解除のために入力されたパスワードが間違っていた回数を監視し、回数が多すぎる場合は端末をロックするか、端末内のデータをすべて削除します。"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"画面ロック解除のために入力されたパスワードが間違っていた回数を監視し、回数が多すぎる場合はタブレットをロックするか、タブレット内のデータをすべて削除します。"</string>
     <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"画面ロック解除のために入力されたパスワードが間違っていた回数を監視し、回数が多すぎる場合は端末をロックするか、端末内のデータをすべて削除します。"</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"画面ロック解除パスワードの変更"</string>
     <string name="policydesc_resetPassword" msgid="5391240616981297361">"画面ロック解除パスワードの変更"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"画面のロック"</string>
     <string name="policydesc_forceLock" msgid="5696964126226028442">"画面をロックする方法とタイミングを制御する"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"すべてのデータを消去"</string>
-    <!-- outdated translation 7669895333814222586 -->     <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"警告せずにデータの初期化を実行して端末内のデータを消去します。"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"警告せずにデータの初期化を実行してタブレット内のデータを消去します。"</string>
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"警告せずにデータの初期化を実行して端末内のデータを消去します。"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"端末のグローバルプロキシを設定"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"ポリシーが有効になっている場合は端末のグローバルプロキシが使用されるように設定します。有効なグローバルプロキシを設定できるのは最初のデバイス管理者だけです。"</string>
@@ -618,7 +618,7 @@
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"充電してください。"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"SIMカードが挿入されていません"</string>
-    <!-- outdated translation 2186920585695169078 -->     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"SIMカードが挿入されていません"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"タブレット内にSIMカードがありません。"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"SIMカードが挿入されていません"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"SIMカードを挿入してください。"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"緊急通報のみ"</string>
@@ -630,8 +630,7 @@
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"ロック解除のパターンは<xliff:g id="NUMBER_0">%d</xliff:g>回とも正しく指定されていません。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒後にもう一度指定してください。"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"入力したパスワードは<xliff:g id="NUMBER_0">%d</xliff:g>回とも正しくありませんでした。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒後にもう一度入力してください。"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"入力したPINは<xliff:g id="NUMBER_0">%d</xliff:g>回とも正しくありませんでした。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒後にもう一度入力してください。"</string>
-    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (8687762517114904651) -->
-    <skip />
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、タブレットのロック解除にGoogleへのログインが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"指定したパターンは<xliff:g id="NUMBER_0">%d</xliff:g>回とも正しくありません。あと<xliff:g id="NUMBER_1">%d</xliff:g>回指定に失敗すると、携帯電話のロックの解除にGoogleへのログインが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒後にもう一度指定してください。"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g>秒後にやり直してください。"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"パターンを忘れた場合"</string>
@@ -661,8 +660,7 @@
     <string name="save_password_label" msgid="6860261758665825069">"確認"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"ヒント: ダブルタップで拡大/縮小できます。"</string>
     <!-- outdated translation 8940110866775097494 -->     <string name="autofill_this_form" msgid="1272247532604569872">"このフォームを自動入力"</string>
-    <!-- no translation found for setup_autofill (8154593408885654044) -->
-    <skip />
+    <string name="setup_autofill" msgid="8154593408885654044">"自動入力設定"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />
@@ -672,7 +670,7 @@
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"ブラウザの履歴とブックマークを読み取る"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"ブラウザでアクセスしたすべてのURLおよびブラウザのすべてのブックマークの読み取りをアプリケーションに許可します。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"ブラウザの履歴とブックマークを書き込む"</string>
-    <!-- outdated translation 945571990357114950 -->     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"携帯電話に保存されているブラウザの履歴やブックマークの修正をアプリケーショに許可します。これにより悪意のあるアプリケーションが、ブラウザのデータを消去または変更する恐れがあります。"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"タブレットに保存されているブラウザの履歴やブックマークの変更をアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、ブラウザのデータが消去または変更される恐れがあります。"</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"携帯電話に保存されているブラウザの履歴やブックマークの修正をアプリケーショに許可します。これにより悪意のあるアプリケーションが、ブラウザのデータを消去または変更する恐れがあります。"</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"アラームの設定"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"インストール済みアラームアプリケーションのアラーム設定をアプリケーションに許可します。この機能が実装されていないアラームアプリケーションもあります。"</string>
@@ -798,7 +796,7 @@
     <string name="inputMethod" msgid="1653630062304567879">"入力方法"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"テキスト操作"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"空き容量低下"</string>
-    <!-- outdated translation 635106544616378836 -->     <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"携帯電話の空き容量が少なくなっています。"</string>
+    <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"タブレットのストレージ空き容量が少なくなっています。"</string>
     <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"携帯電話の空き容量が少なくなっています。"</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"キャンセル"</string>
@@ -866,7 +864,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"大量のSMSメッセージを送信しようとしています。[OK]で送信、[キャンセル]で中止します。"</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"キャンセル"</string>
-    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"時刻設定"</string>
+    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
     <skip />
     <string name="date_time_set" msgid="5777075614321087758">"設定"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"端末既定"</string>
@@ -999,4 +998,14 @@
     <string name="media_unknown_state" msgid="729192782197290385">"外部メディアの状態は不明です。"</string>
     <string name="share" msgid="1778686618230011964">"共有"</string>
     <string name="find" msgid="4808270900322985960">"検索"</string>
+    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
+    <skip />
+    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
+    <skip />
+    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
+    <skip />
+    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
+    <skip />
+    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
+    <skip />
 </resources>

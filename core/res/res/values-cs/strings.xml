@@ -125,10 +125,10 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"Synchronizace"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synchronizace"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Příliš mnoho smazaných položek služby <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
-    <!-- outdated translation 6632412458436461203 -->     <string name="low_memory" product="tablet" msgid="2292820184396262278">"Paměť telefonu je plná. Smažte některé soubory a uvolněte místo."</string>
+    <string name="low_memory" product="tablet" msgid="2292820184396262278">"Paměť tabletu je plná. Uvolněte místo smazání některých souborů."</string>
     <string name="low_memory" product="default" msgid="6632412458436461203">"Paměť telefonu je plná. Smažte některé soubory a uvolněte místo."</string>
     <string name="me" msgid="6545696007631404292">"Já"</string>
-    <!-- outdated translation 1319919075463988638 -->     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Možnosti telefonu"</string>
+    <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Možnosti tabletu"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Možnosti telefonu"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Tichý režim"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Zapnout bezdrátové připojení"</string>
@@ -136,13 +136,13 @@
     <string name="screen_lock" msgid="799094655496098153">"Zámek obrazovky"</string>
     <string name="power_off" msgid="4266614107412865048">"Vypnout"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Vypínání..."</string>
-    <!-- outdated translation 649792175242821353 -->     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Váš telefon bude vypnut."</string>
+    <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet se vypne."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Váš telefon bude vypnut."</string>
     <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
     <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nejnovější"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"Žádné nedávno použité aplikace."</string>
-    <!-- outdated translation 2406416831541615258 -->     <string name="global_actions" product="tablet" msgid="408477140088053665">"Možnosti telefonu"</string>
+    <string name="global_actions" product="tablet" msgid="408477140088053665">"Možnosti tabletu"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Možnosti telefonu"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Zámek obrazovky"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Vypnout"</string>
@@ -159,7 +159,7 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Vaše zprávy"</string>
     <string name="permgroupdesc_messages" msgid="7045736972019211994">"Čtení a zápis zpráv SMS, e-mailů a dalších zpráv."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Vaše osobní informace"</string>
-    <!-- outdated translation 5488050357388806068 -->     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Přímý přístup k vašim kontaktům a kalendáři v telefonu."</string>
+    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Přímý přístup k vašim kontaktům a kalendáři v tabletu."</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Přímý přístup k vašim kontaktům a kalendáři v telefonu."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Vaše poloha"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Sleduje vaši fyzickou polohu"</string>
@@ -193,10 +193,10 @@
     <string name="permlab_sendSms" msgid="5600830612147671529">"odesílaní zpráv SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Umožňuje aplikaci odesílat zprávy SMS. Škodlivé aplikace mohou bez vašeho potvrzení odesílat zpoplatněné zprávy."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"čtení zpráv SMS a MMS"</string>
-    <!-- outdated translation 3002170087197294591 -->     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Umožňuje aplikaci číst zprávy SMS uložené ve vašem telefonu nebo na kartě SIM. Škodlivé aplikace mohou načíst vaše soukromé zprávy."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Umožňuje aplikaci číst zprávy SMS uložené v tabletu nebo na kartě SIM. Škodlivé aplikace mohou číst vaše důvěrné zprávy."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Umožňuje aplikaci číst zprávy SMS uložené ve vašem telefonu nebo na kartě SIM. Škodlivé aplikace mohou načíst vaše soukromé zprávy."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"úprava zpráv SMS a MMS"</string>
-    <!-- outdated translation 6299398896177548095 -->     <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"Umožňuje aplikaci zapisovat do zpráv SMS uložených ve vašem telefonu nebo na kartě SIM. Škodlivé aplikace mohou smazat vaše zprávy."</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"Umožňuje aplikaci zapisovat do zpráv SMS uložených v tabletu nebo na kartě SIM. Škodlivé aplikace mohou smazat vaše zprávy."</string>
     <string name="permdesc_writeSms" product="default" msgid="6299398896177548095">"Umožňuje aplikaci zapisovat do zpráv SMS uložených ve vašem telefonu nebo na kartě SIM. Škodlivé aplikace mohou smazat vaše zprávy."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"příjem WAP"</string>
     <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Umožňuje aplikaci přijímat a zpracovávat zprávy WAP. Škodlivé aplikace mohou sledovat vaše zprávy nebo je smazat, aniž by vám byly zobrazeny."</string>
@@ -223,7 +223,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"zabránění přepínání aplikací"</string>
     <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Zabrání uživateli přepnout na jinou aplikaci."</string>
     <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"sledování a řízení spouštění všech aplikací"</string>
-    <!-- outdated translation 3228701938345388092 -->     <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"Umožňuje aplikaci sledovat a řídit spouštění činností systémem. Škodlivé aplikace mohou zcela ovládnout systém. Toto oprávnění je zapotřebí pouze pro účely vývoje, nikdy pro běžné použití telefonu."</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"Umožňuje aplikaci sledovat a řídit spouštění činností systémem. Škodlivé aplikace mohou zcela ovládnout systém. Toto oprávnění je potřeba pouze pro účely vývoje, nikdy pro běžné použití."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"odeslání vysílání o odstranění balíčku"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"Umožňuje aplikaci vysílat oznámení o odstranění balíčku aplikace. Škodlivé aplikace mohou pomocí tohoto nastavení ukončit libovolnou další spuštěnou aplikaci."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"odeslání vysílání o přijaté zprávě SMS"</string>
@@ -241,13 +241,13 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"zobrazení nepovolených oken"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Umožňuje vytvoření oken, která mají být použita interním systémem uživatelského rozhraní. Běžné aplikace toto nastavení nepoužívají."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"zobrazení upozornění systémové úrovně"</string>
-    <!-- outdated translation 5109622689323490558 -->     <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"Umožňuje aplikaci zobrazit okna s výstrahami systému. Škodlivé aplikace mohou převzít kontrolu nad celou obrazovkou telefonu."</string>
+    <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"Umožňuje aplikaci zobrazit okna s výstrahami systému. Škodlivé aplikace mohou převzít kontrolu nad celou obrazovkou tabletu."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"změna globální rychlosti animace"</string>
     <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"Umožňuje aplikaci kdykoli globálně změnit rychlost animace (rychlejší či pomalejší animace)."</string>
     <string name="permlab_manageAppTokens" msgid="17124341698093865">"správa tokenů aplikací"</string>
     <string name="permdesc_manageAppTokens" msgid="977127907524195988">"Umožňuje aplikaci vytvořit a spravovat své vlastní tokeny a obejít jejich obvyklé řazení typu Z. Toto nastavení by nikdy nemělo být potřeba pro běžné aplikace."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"používání kláves a tlačítek"</string>
-    <!-- outdated translation 3946098050410874715 -->     <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"Umožňuje aplikaci doručit své vlastní vstupní události (stisknutí tlačítek, apod.) dalším aplikacím. Škodlivé aplikace mohou pomocí tohoto nastavení převzít kontrolu nad telefonem."</string>
+    <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"Umožňuje aplikaci doručit své vlastní vstupní události (stisknutí tlačítek, apod.) dalším aplikacím. Škodlivé aplikace mohou pomocí tohoto oprávnění nad tabletem převzít kontrolu."</string>
     <string name="permdesc_injectEvents" product="default" msgid="3946098050410874715">"Umožňuje aplikaci doručit své vlastní vstupní události (stisknutí tlačítek, apod.) dalším aplikacím. Škodlivé aplikace mohou pomocí tohoto nastavení převzít kontrolu nad telefonem."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"zaznamenání psaného textu a prováděných činností"</string>
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Umožňuje aplikacím sledovat, které klávesy používáte, a to i při práci s jinými aplikacemi (například při zadávání hesla). Běžné aplikace by toto nastavení nikdy neměly vyžadovat."</string>
@@ -274,18 +274,18 @@
     <string name="permlab_installPackages" msgid="335800214119051089">"přímá instalace aplikací"</string>
     <string name="permdesc_installPackages" msgid="526669220850066132">"Umožňuje aplikaci nainstalovat nové či aktualizované balíčky systému Android. Škodlivé aplikace mohou pomocí tohoto nastavení přidat nové aplikace s libovolnými oprávněními."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"smazání všech dat v mezipaměti aplikace"</string>
-    <!-- outdated translation 7740465694193671402 -->     <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Umožňuje aplikaci uvolnit paměť telefonu smazáním souborů v adresáři mezipaměti aplikace. Přístup je velmi omezený, většinou pouze pro systémové procesy."</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Umožňuje aplikaci uvolnit paměť tabletu smazáním souborů v adresáři mezipaměti aplikace. Přístup je velmi omezený, většinou pouze pro systémové procesy."</string>
     <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"Umožňuje aplikaci uvolnit paměť telefonu smazáním souborů v adresáři mezipaměti aplikace. Přístup je velmi omezený, většinou pouze pro systémové procesy."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Přesun zdrojů aplikace"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Umožňuje aplikaci přesunout své zdroje z interní paměti na externí médium a opačně."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"číst citlivá data v protokolech"</string>
-    <!-- outdated translation 8896449437464867766 -->     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Umožňuje aplikaci číst různé systémové soubory protokolů. Toto nastavení aplikaci umožní získat obecné informace o činnostech s telefonem, které by mohly obsahovat osobní či soukromé informace."</string>
+    <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Umožňuje aplikaci číst různé systémové soubory protokolů. Toto nastavení aplikaci umožní získat obecné informace o činnostech s tabletem, které by mohly obsahovat osobní či soukromé informace."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Umožňuje aplikaci číst různé systémové soubory protokolů. Toto nastavení aplikaci umožní získat obecné informace o činnostech s telefonem, které by mohly obsahovat osobní či soukromé informace."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"čtení nebo zápis do prostředků funkce diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Umožňuje aplikaci číst libovolné prostředky ve skupině diag, např. soubory ve složce /dev, a zapisovat do nich. Může dojít k ovlivnění stability a bezpečnosti systému. Toto nastavení by měl používat pouze výrobce či operátor pro diagnostiku hardwaru."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"povolení či zakázání komponent aplikací"</string>
-    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Umožňuje aplikaci změnit, zda je komponenta jiné aplikace povolena nebo ne. Škodlivé aplikace mohou pomocí tohoto nastavení vypnout důležité funkce telefonu. Je třeba postupovat opatrně, protože je možné způsobit nepoužitelnost, nekonzistenci či nestabilitu komponent aplikací."</string>
-    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Umožňuje aplikaci změnit, zda je komponenta jiné aplikace povolena nebo ne. Škodlivé aplikace mohou pomocí tohoto nastavení vypnout důležité funkce telefonu. Je třeba postupovat opatrně, protože je možné způsobit nepoužitelnost, nekonzistenci či nestabilitu komponent aplikací."</string>
+    <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Umožňuje aplikaci změnit, zda je komponenta jiné aplikace povolena nebo ne. Škodlivé aplikace mohou pomocí tohoto nastavení vypnout důležité funkce tabletu. Je třeba postupovat opatrně, protože je možné způsobit nepoužitelnost, nekonzistenci či nestabilitu komponent aplikací."</string>
+    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Umožňuje aplikaci změnit, zda je komponenta jiné aplikace povolena nebo ne. Škodlivé aplikace mohou pomocí tohoto nastavení vypnout důležité funkce tabletu. Je třeba postupovat opatrně, protože je možné způsobit nepoužitelnost, nekonzistenci či nestabilitu komponent aplikací."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"nastavení upřednostňovaných aplikací"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Umožňuje aplikaci změnit vaše upřednostňované aplikace. Toto nastavení může škodlivým aplikacím umožnit nepozorovaně změnit spouštěné aplikace a oklamat vaše existující aplikace tak, aby shromažďovaly vaše soukromá data."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"změna globálních nastavení systému"</string>
@@ -295,19 +295,19 @@
     <string name="permlab_writeGservices" msgid="2149426664226152185">"změna mapy služeb Google"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"Umožňuje aplikaci změnit mapu služeb Google. Běžné aplikace toto nastavení nevyužívají."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"automatické spuštění při startu"</string>
-    <!-- outdated translation 698336728415008796 -->     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"Umožňuje aplikaci spuštění ihned po spuštění systému. Toto nastavení může zpomalit spuštění telefonu a umožnit aplikaci celkově zpomalit telefon, protože bude neustále spuštěna."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"Umožňuje aplikaci spuštění ihned po spuštění systému. Toto nastavení může zpomalit spuštění tabletu a umožnit aplikaci celkově zpomalit tablet, protože bude neustále spuštěna."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="698336728415008796">"Umožňuje aplikaci spuštění ihned po spuštění systému. Toto nastavení může zpomalit spuštění telefonu a umožnit aplikaci celkově zpomalit telefon, protože bude neustále spuštěna."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"odeslání trvalého vysílání"</string>
-    <!-- outdated translation 1920045289234052219 -->     <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Umožňuje aplikaci odeslat trvalá vysílání, která přetrvávají i po skončení vysílání. Škodlivé aplikace mohou telefon zpomalit či způsobit jeho nestabilitu, protože bude používat příliš mnoho paměti."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Umožňuje aplikaci odeslat trvalá vysílání, která přetrvávají i po skončení vysílání. Škodlivé aplikace mohou tablet zpomalit či způsobit jeho nestabilitu, protože bude používat příliš mnoho paměti."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"Umožňuje aplikaci odeslat trvalá vysílání, která přetrvávají i po skončení vysílání. Škodlivé aplikace mohou telefon zpomalit či způsobit jeho nestabilitu, protože bude používat příliš mnoho paměti."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"čtení dat kontaktů"</string>
-    <!-- outdated translation 3371591512896545975 -->     <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Umožňuje aplikaci načíst všechna data kontaktů (adresy) uložená ve vašem telefonu. Škodlivé aplikace poté mohou dalším lidem odeslat vaše data."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Umožňuje aplikaci načíst všechna data kontaktů (adresy) uložená v tabletu. Škodlivé aplikace toto oprávnění mohou zneužít a odeslat vaše data dalším lidem."</string>
     <string name="permdesc_readContacts" product="default" msgid="3371591512896545975">"Umožňuje aplikaci načíst všechna data kontaktů (adresy) uložená ve vašem telefonu. Škodlivé aplikace poté mohou dalším lidem odeslat vaše data."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"zápis dat kontaktů"</string>
-    <!-- outdated translation 3924383579108183601 -->     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Umožňuje aplikaci změnit kontaktní údaje (adresu) uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit kontaktní údaje."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Umožňuje aplikaci změnit kontaktní údaje (adresu) uložené v tabletu. Škodlivé aplikace toto oprávnění mohou zneužít a vymazat či pozměnit kontaktní údaje."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Umožňuje aplikaci změnit kontaktní údaje (adresu) uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit kontaktní údaje."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"Čtení událostí v kalendáři"</string>
-    <!-- outdated translation 5533029139652095734 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Umožňuje aplikaci načíst všechny události kalendáře uložené ve vašem telefonu. Škodlivé aplikace poté mohou dalším lidem odeslat události z vašeho kalendáře."</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Umožňuje aplikaci číst všechny události kalendáře uložené v tabletu. Škodlivé aplikace toho mohou zneužít a odeslat události z vašeho kalendáře jiným lidem."</string>
     <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Umožňuje aplikaci načíst všechny události kalendáře uložené ve vašem telefonu. Škodlivé aplikace poté mohou dalším lidem odeslat události z vašeho kalendáře."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"Přidávání nebo úprava událostí v kalendáři a odesílání e-mailů hostům"</string>
     <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Umožňuje aplikaci přidávat nebo měnit události v kalendáři, které budou odesílat e-maily hostům. Škodlivé aplikace mohou pomocí tohoto oprávnění mazat nebo upravovat události v kalendáři a odesílat e-maily hostům."</string>
@@ -318,10 +318,10 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"oprávnění k instalaci poskytovatele polohy"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Vytvořit simulace zdrojů polohy pro účely testování. Škodlivé aplikace mohou toto nastavení využít k přepsání polohy nebo stavu vráceného zdroji skutečné polohy, například systémem GPS nebo poskytovateli sítí. Mohou také monitorovat polohu a ohlásit ji externímu zdroji."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"upřesnění polohy (GPS)"</string>
-    <!-- outdated translation 7411213317434337331 -->     <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Umožňuje aplikaci přístup ke zdrojům přesné polohy v telefonu, jako je například systém GPS, je-li k dispozici. Škodlivé aplikace mohou pomocí tohoto nastavení zjistit vaši polohu a mohou zvýšit spotřebu baterie."</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Umožňuje aplikaci přístup ke zdrojům přesné polohy v tabletu, jako je například systém GPS, je-li k dispozici. Škodlivé aplikace mohou pomocí tohoto nastavení zjistit vaši polohu a mohou zvýšit spotřebu baterie."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Umožňuje aplikaci přístup ke zdrojům přesné polohy v telefonu, jako je například systém GPS, je-li k dispozici. Škodlivé aplikace mohou pomocí tohoto nastavení zjistit vaši polohu a mohou zvýšit spotřebu baterie."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"přibližná poloha (pomocí sítě)"</string>
-    <!-- outdated translation 8235655958070862293 -->     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Umožňuje získat přístup ke zdrojům přibližné polohy, jako je například databáze mobilní sítě, je-li k dispozici, a určit přibližnou pozici telefonu. Škodlivé aplikace takto mohou zjistit, kde se přibližně nacházíte."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Umožňuje získat přístup ke zdrojům přibližné polohy, jako je například databáze mobilní sítě, je-li k dispozici, a určit přibližnou pozici tabletu. Škodlivé aplikace takto mohou zjistit, kde se přibližně nacházíte."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8235655958070862293">"Umožňuje získat přístup ke zdrojům přibližné polohy, jako je například databáze mobilní sítě, je-li k dispozici, a určit přibližnou pozici telefonu. Škodlivé aplikace takto mohou zjistit, kde se přibližně nacházíte."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"přístup ke službě SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Umožňuje aplikaci používat nízkoúrovňové funkce SurfaceFlinger."</string>
@@ -333,13 +333,13 @@
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Umožňuje aplikaci získat přístup k nahrávání zvuku."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"pořizování fotografií a videí"</string>
     <string name="permdesc_camera" msgid="6004878235852154239">"Umožňuje aplikaci pořizovat fotografie a videa pomocí fotoaparátu. Toto nastavení aplikaci umožní získávat snímky toho, na co je zrovna fotoaparát namířen."</string>
-    <!-- outdated translation 8337817093326370537 -->     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"trvalé vypnutí telefonu"</string>
+    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"trvalé vypnutí tabletu"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"trvalé vypnutí telefonu"</string>
-    <!-- outdated translation 5569526552607599221 -->     <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"Umožňuje aplikaci trvale vypnout celý telefon. Toto je velmi nebezpečné nastavení."</string>
+    <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"Umožňuje aplikaci trvale vypnout celý tablet. Toto je velmi nebezpečné oprávnění."</string>
     <string name="permdesc_brick" product="default" msgid="5569526552607599221">"Umožňuje aplikaci trvale vypnout celý telefon. Toto je velmi nebezpečné nastavení."</string>
-    <!-- outdated translation 2898560872462638242 -->     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"vynucení restartování telefonu"</string>
+    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"vynucení restartování tabletu"</string>
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"vynucení restartování telefonu"</string>
-    <!-- outdated translation 7914933292815491782 -->     <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"Umožňuje aplikaci vynutit restartování telefonu."</string>
+    <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"Umožňuje aplikaci vynutit restartování tabletu."</string>
     <string name="permdesc_reboot" product="default" msgid="7914933292815491782">"Umožňuje aplikaci vynutit restartování telefonu."</string>
     <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"připojení a odpojení souborových systémů"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Umožňuje aplikaci připojit či odpojit souborové systémy ve vyměnitelných úložištích."</string>
@@ -367,7 +367,7 @@
     <string name="permdesc_callPhone" msgid="3369867353692722456">"Umožňuje aplikaci bez vašeho zásahu volat na telefonní čísla. Škodlivé aplikace mohou na váš telefonní účet připsat neočekávané hovory. Toto nastavení aplikaci neumožňuje volat na tísňové linky."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"přímé volání na libovolná telefonní čísla"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Umožňuje aplikaci bez vašeho zásahu vytočit jakékoli telefonní číslo, včetně čísel tísňového volání. Škodlivé aplikace mohou provádět zbytečná a nezákonná volání na tísňové linky."</string>
-    <!-- outdated translation 5604848095315421425 -->     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"přímo spustit nastavení telefonu CDMA"</string>
+    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"přímo spustit nastavení tabletu CDMA"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"přímo spustit nastavení telefonu CDMA"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Umožňuje aplikaci zahájit poskytování CDMA. Škodlivé aplikace mohou poskytování CDMA zahájit samovolně."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"ovládání oznámení o aktualizaci polohy"</string>
@@ -380,16 +380,16 @@
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Umožňuje aplikaci ovládat telefonní funkce zařízení. Aplikace s tímto oprávněním může přepínat sítě nebo zapnout či vypnout bezdrátové připojení telefonu bez vašeho svolení."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"čtení stavu a identity telefonu"</string>
     <string name="permdesc_readPhoneState" msgid="188877305147626781">"Umožňuje aplikaci získat přístup k telefonním funkcím zařízení. Aplikace s tímto oprávněním mohou určit telefonní a sériové číslo tohoto telefonu, zda zrovna probíhá hovor, volané telefonní číslo a podobně."</string>
-    <!-- outdated translation 573480187941496130 -->     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"zabránění přechodu telefonu do režimu spánku"</string>
+    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"zabránění přechodu tabletu do režimu spánku"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"zabránění přechodu telefonu do režimu spánku"</string>
-    <!-- outdated translation 7584036471227467099 -->     <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"Umožňuje aplikaci zabránit přechodu telefonu do režimu spánku."</string>
+    <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"Umožňuje aplikaci zabránit přechodu tabletu do režimu spánku."</string>
     <string name="permdesc_wakeLock" product="default" msgid="7584036471227467099">"Umožňuje aplikaci zabránit přechodu telefonu do režimu spánku."</string>
-    <!-- outdated translation 4928622470980943206 -->     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"zapnutí či vypnutí telefonu"</string>
+    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"zapnutí či vypnutí tabletu"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"zapnutí či vypnutí telefonu"</string>
-    <!-- outdated translation 4577331933252444818 -->     <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"Umožňuje aplikaci zapnout či vypnout telefon."</string>
+    <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"Umožňuje aplikaci zapnout či vypnout tablet."</string>
     <string name="permdesc_devicePower" product="default" msgid="4577331933252444818">"Umožňuje aplikaci zapnout či vypnout telefon."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"spuštění v režimu továrního testu"</string>
-    <!-- outdated translation 8136644990319244802 -->     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Umožňuje aplikaci spuštění v režimu nízkoúrovňového testu výrobce a povolí přístup k hardwaru telefonu. K dispozici pouze, je-li telefon spuštěn v režimu testování výrobce."</string>
+    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Umožňuje aplikaci spuštění v režimu nízkoúrovňového testu výrobce a povolí přístup k hardwaru tabletu. K dispozici pouze je-li tablet spuštěn v režimu testování výrobce."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Umožňuje aplikaci spuštění v režimu nízkoúrovňového testu výrobce a povolí přístup k hardwaru telefonu. K dispozici pouze, je-li telefon spuštěn v režimu testování výrobce."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"nastavení tapety"</string>
     <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Umožňuje aplikaci nastavit tapetu systému."</string>
@@ -398,15 +398,15 @@
     <string name="permlab_masterClear" msgid="2315750423139697397">"obnovení továrního nastavení systému"</string>
     <string name="permdesc_masterClear" msgid="5033465107545174514">"Umožňuje aplikaci kompletně obnovit systém do továrního nastavení a vymazat všechna data, konfiguraci a nainstalované aplikace."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"nastavit čas"</string>
-    <!-- outdated translation 667294309287080045 -->     <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"Umožňuje aplikaci změnit čas hodin v telefonu."</string>
+    <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"Umožňuje aplikaci změnit čas hodin v tabletu."</string>
     <string name="permdesc_setTime" product="default" msgid="667294309287080045">"Umožňuje aplikaci změnit čas hodin v telefonu."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"nastavení časového pásma"</string>
-    <!-- outdated translation 1902540227418179364 -->     <string name="permdesc_setTimeZone" product="tablet" msgid="2522877107613885139">"Umožňuje aplikaci změnit časové pásmo telefonu."</string>
+    <string name="permdesc_setTimeZone" product="tablet" msgid="2522877107613885139">"Umožňuje aplikaci změnit časové pásmo tabletu."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="1902540227418179364">"Umožňuje aplikaci změnit časové pásmo telefonu."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"role služby AccountManagerService"</string>
     <string name="permdesc_accountManagerService" msgid="6056903274106394752">"Umožňuje aplikaci volat funkce AccountAuthenticator"</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"odhalení známých účtů"</string>
-    <!-- outdated translation 6839262446413155394 -->     <string name="permdesc_getAccounts" product="tablet" msgid="857622793935544694">"Umožňuje aplikaci získat seznam účtů v telefonu."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="857622793935544694">"Umožňuje aplikaci získat seznam účtů v tabletu."</string>
     <string name="permdesc_getAccounts" product="default" msgid="6839262446413155394">"Umožňuje aplikaci získat seznam účtů v telefonu."</string>
     <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"role ověřovatele účtu"</string>
     <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"Umožňuje aplikaci používat funkce aplikace AccountManager související s ověřováním účtů – včetně vytváření účtů a získávání a nastavování hesel."</string>
@@ -433,10 +433,10 @@
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"povolení příjmu Wi-Fi Multicast"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Povoluje aplikaci přijímat pakety, které nebyly adresovány přímo vašemu zařízení. Pomocí této možnosti můžete objevit služby nabízené ve vaší blízkosti. Spotřeba energie je vyšší než u režimu bez vícesměrového vysílání (multicast)."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"správa rozhraní Bluetooth"</string>
-    <!-- outdated translation 7256289774667054555 -->     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Umožňuje aplikaci konfigurovat místní telefon s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Umožňuje aplikaci konfigurovat místní tablet s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Umožňuje aplikaci konfigurovat místní telefon s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"vytvoření připojení Bluetooth"</string>
-    <!-- outdated translation 762515380679392945 -->     <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"Umožňuje aplikaci zobrazit konfiguraci místního telefonu s rozhraním Bluetooth, vytvářet připojení ke spárovaným zařízením a přijímat tato připojení."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"Umožňuje aplikaci zobrazit konfiguraci místního tabletu s rozhraním Bluetooth, vytvářet připojení ke spárovaným zařízením a přijímat tato připojení."</string>
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Umožňuje aplikaci zobrazit konfiguraci místního telefonu s rozhraním Bluetooth, vytvářet připojení ke spárovaným zařízením a přijímat tato připojení."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"ovládat technologii NFC"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Umožňuje aplikaci komunikovat se štítky, kartami a čtečkami s podporou technologie NFC."</string>
@@ -471,14 +471,14 @@
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavit pravidla pro heslo"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Řídit délku hesel pro odemčení obrazovky a v nich používané znaky"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovat pokusy o odemčení obrazovky"</string>
-    <!-- outdated translation 7227578260165172673 -->     <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"Sledovat počet nesprávných hesel zadaných při odemykání obrazovky a uzamknout telefon nebo odstranit veškerá data telefonu, pokud dojde k příliš mnoha neplatným pokusům o zadání hesla"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"Sledovat počet nesprávných hesel zadaných při odemykání obrazovky a uzamknout tablet nebo odstranit veškerá data tabletu, pokud dojde k příliš mnoha neplatným pokusům o zadání hesla"</string>
     <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"Sledovat počet nesprávných hesel zadaných při odemykání obrazovky a uzamknout telefon nebo odstranit veškerá data telefonu, pokud dojde k příliš mnoha neplatným pokusům o zadání hesla"</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Změnit heslo pro odemknutí obrazovky"</string>
     <string name="policydesc_resetPassword" msgid="5391240616981297361">"Změnit heslo pro odemknutí obrazovky"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Uzamknout obrazovku"</string>
     <string name="policydesc_forceLock" msgid="5696964126226028442">"Řídit, jak a kdy se obrazovka uzamkne"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Vymazání všech dat"</string>
-    <!-- outdated translation 7669895333814222586 -->     <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"Bez upozornění smazat všechna data telefonu obnovením továrních dat"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"Bez upozornění smazat všechna data tabletu obnovením továrních dat"</string>
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Bez upozornění smazat všechna data telefonu obnovením továrních dat"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Nastavit globální proxy server zařízení"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Vyberte globální proxy server, který se bude používat, když jsou zásady aktivní. Aktuální globální proxy server nastavuje pouze první správce zařízení."</string>
@@ -618,7 +618,7 @@
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Připojte dobíjecí zařízení."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Není vložena SIM karta."</string>
-    <!-- outdated translation 2186920585695169078 -->     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"V telefonu není žádná karta SIM."</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"V tabletu není karta SIM."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"V telefonu není žádná karta SIM."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Prosím vložte kartu SIM."</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Pouze tísňová volání"</string>
@@ -630,8 +630,7 @@
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"<xliff:g id="NUMBER_0">%d</xliff:g>krát jste nakreslili nesprávné bezpečnostní gesto. "\n\n"Opakujte prosím akci za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Vícekrát (<xliff:g id="NUMBER_0">%d</xliff:g>) jste nesprávně zadali heslo. "\n\n"Zkuste to znovu za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Vícekrát (<xliff:g id="NUMBER_0">%d</xliff:g>) jste nesprávně zadali kód PIN. "\n\n"Zkuste to znovu za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
-    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (8687762517114904651) -->
-    <skip />
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Již <xliff:g id="NUMBER_0">%d</xliff:g>krát jste bezpečnostní gesto nakreslili nesprávně. Po <xliff:g id="NUMBER_1">%d</xliff:g> dalších neúspěšných pokusech vás požádáme o odemčení tabletu pomocí přihlašovacích údajů účtu Google."\n\n"Zkuste to prosím znovu za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"<xliff:g id="NUMBER_0">%d</xliff:g>krát jste nesprávně nakreslili své bezpečnostní gesto. Po dalších neúspěšných pokusech (<xliff:g id="NUMBER_1">%d</xliff:g>) budete požádáni o odemčení telefonu pomocí přihlášení do účtu Google."\n\n" Akci prosím opakujte za několik sekund (<xliff:g id="NUMBER_2">%d</xliff:g>)."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Sekundy zbývající do dalšího pokusu: <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Zapomněli jste gesto?"</string>
@@ -661,8 +660,7 @@
     <string name="save_password_label" msgid="6860261758665825069">"Potvrdit"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Tip: Dvojitým klepnutím můžete zobrazení přiblížit nebo oddálit."</string>
     <!-- outdated translation 8940110866775097494 -->     <string name="autofill_this_form" msgid="1272247532604569872">"Automaticky vyplnit tento formulář"</string>
-    <!-- no translation found for setup_autofill (8154593408885654044) -->
-    <skip />
+    <string name="setup_autofill" msgid="8154593408885654044">"Nast. aut. vypl."</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />
@@ -672,7 +670,7 @@
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"čtení historie a záložek Prohlížeče"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Umožňuje aplikaci číst všechny navštívené adresy URL a záložky Prohlížeče."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"zápis do historie a záložek Prohlížeče"</string>
-    <!-- outdated translation 945571990357114950 -->     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"Umožní aplikaci změnit historii či záložky prohlížeče uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit data Prohlížeče."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"Umožní aplikaci změnit historii či záložky prohlížeče uložené v tabletu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit data Prohlížeče."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Umožní aplikaci změnit historii či záložky prohlížeče uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit data Prohlížeče."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"nastavit budík v budíku"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Dovoluje aplikaci nastavit budík v nainstalované aplikaci budíku. Některé budíkové aplikace nemusí tuto funkci implementovat."</string>
@@ -798,7 +796,7 @@
     <string name="inputMethod" msgid="1653630062304567879">"Metoda zadávání dat"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Operace s textem"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Málo paměti"</string>
-    <!-- outdated translation 635106544616378836 -->     <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"V telefonu zbývá málo místa pro ukládání dat."</string>
+    <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"V tabletu zbývá málo místa pro ukládání dat."</string>
     <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"V telefonu zbývá málo místa pro ukládání dat."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Zrušit"</string>
@@ -866,7 +864,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Je odesílán velký počet zpráv SMS. Vyberte OK, chcete-li pokračovat, nebo Zrušit, chcete-li odesílání ukončit."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Zrušit"</string>
-    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Nastavení času"</string>
+    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
     <skip />
     <string name="date_time_set" msgid="5777075614321087758">"Nastavit"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Výchozí"</string>
@@ -999,4 +998,14 @@
     <string name="media_unknown_state" msgid="729192782197290385">"Neznámý stav externího média."</string>
     <string name="share" msgid="1778686618230011964">"Sdílet"</string>
     <string name="find" msgid="4808270900322985960">"Najít"</string>
+    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
+    <skip />
+    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
+    <skip />
+    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
+    <skip />
+    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
+    <skip />
+    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
+    <skip />
 </resources>

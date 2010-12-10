@@ -126,10 +126,10 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"همگام سازی"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"همگام سازی"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"تعداد موارد حذف شده <xliff:g id="CONTENT_TYPE">%s</xliff:g> بسیار زیاد است."</string>
-    <!-- outdated translation 6632412458436461203 -->     <string name="low_memory" product="tablet" msgid="2292820184396262278">"محل ذخیره تلفن پر است! برخی از فایل ها را حذف کنید تا فضا خالی شود."</string>
+    <string name="low_memory" product="tablet" msgid="2292820184396262278">"محل ذخیره رایانه لوحی پر است! برخی از فایل ها را حذف کنید تا فضا خالی شود."</string>
     <string name="low_memory" product="default" msgid="6632412458436461203">"محل ذخیره تلفن پر است! برخی از فایل ها را حذف کنید تا فضا خالی شود."</string>
     <string name="me" msgid="6545696007631404292">"من"</string>
-    <!-- outdated translation 1319919075463988638 -->     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"گزینه های تلفن"</string>
+    <string name="power_dialog" product="tablet" msgid="8545351420865202853">"گزینه های رایانه لوحی"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"گزینه های تلفن"</string>
     <string name="silent_mode" msgid="7167703389802618663">"حالت ساکت"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"روشن کردن بی سیم"</string>
@@ -137,13 +137,13 @@
     <string name="screen_lock" msgid="799094655496098153">"قفل صفحه"</string>
     <string name="power_off" msgid="4266614107412865048">"خاموش کردن"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"خاموش کردن..."</string>
-    <!-- outdated translation 649792175242821353 -->     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"گوشی شما خاموش می شود."</string>
+    <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"رایانه لوحی شما خاموش می شود."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"گوشی شما خاموش می شود."</string>
     <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
     <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"اخیر"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"برنامه اخیری موجود نیست."</string>
-    <!-- outdated translation 2406416831541615258 -->     <string name="global_actions" product="tablet" msgid="408477140088053665">"گزینه های تلفن"</string>
+    <string name="global_actions" product="tablet" msgid="408477140088053665">"گزینه های رایانه لوحی"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"گزینه های تلفن"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"قفل صفحه"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"خاموش کردن"</string>
@@ -160,7 +160,7 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"پیام های شما"</string>
     <string name="permgroupdesc_messages" msgid="7045736972019211994">"پیامک، ایمیل و دیگر پیام ها را بنویسید و بخوانید."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"اطلاعات شخصی شما"</string>
-    <!-- outdated translation 5488050357388806068 -->     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"دسترسی مستقیم به مخاطبین و تقویم ذخیره شده در گوشی."</string>
+    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"دسترسی مستقیم به مخاطبین و تقویم ذخیره شده در رایانه لوحی."</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"دسترسی مستقیم به مخاطبین و تقویم ذخیره شده در گوشی."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"موقعیت مکانی شما"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"نظارت بر مکان فیزیکی شما"</string>
@@ -196,10 +196,10 @@
     <string name="permlab_sendSms" msgid="5600830612147671529">"ارسال پیامک ها"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"به برنامه کاربردی اجازه می دهد پیامک ارسال کند. برنامه های مضر ممکن است با ارسال پیام هایی بدون تأیید شما، هزینه هایی را برای شما ایجاد کنند."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"خواندن پیامک یا MMS"</string>
-    <!-- outdated translation 3002170087197294591 -->     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"به برنامه کاربردی اجازه می دهد پیامک های ذخیره شده در گوشی شما یا سیم کارت را بخواند. برنامه های مضر می توانند پیام های محرمانه شما را بخوانند."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"به برنامه کاربردی اجازه می دهد پیامک های ذخیره شده در رایانه لوحی شما یا سیم کارت را بخواند. برنامه های مضر می توانند پیام های محرمانه شما را بخوانند."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"به برنامه کاربردی اجازه می دهد پیامک های ذخیره شده در گوشی شما یا سیم کارت را بخواند. برنامه های مضر می توانند پیام های محرمانه شما را بخوانند."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"ویرایش پیامک یا MMS"</string>
-    <!-- outdated translation 6299398896177548095 -->     <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"به برنامه کاربردی اجازه می دهد در پیامک های ذخیره شده در گوشی شما یا سیم کارت بنویسد. برنامه های مضر می توانند پیام های شما را حذف کنند."</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"به برنامه کاربردی اجازه می دهد در پیامک های ذخیره شده در رایانه لوحی شما یا سیم کارت بنویسد. برنامه های مضر می توانند پیام های شما را حذف کنند."</string>
     <string name="permdesc_writeSms" product="default" msgid="6299398896177548095">"به برنامه کاربردی اجازه می دهد در پیامک های ذخیره شده در گوشی شما یا سیم کارت بنویسد. برنامه های مضر می توانند پیام های شما را حذف کنند."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"دریافت WAP"</string>
     <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"به برنامه کاربردی اجازه می دهد پیام های WAP را دریافت کرده و پردازش کند. برنامه های مضر ممکن است پیام های شما را کنترل کرده یا بدون نمایش به شما، آنها را حذف کنند."</string>
@@ -226,7 +226,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ممانعت از جابجایی برنامه"</string>
     <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"مانع از جابجایی کاربر به یک برنامه دیگر می شود."</string>
     <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"نظارت و بررسی تمام راه اندازی های برنامه کاربردی"</string>
-    <!-- outdated translation 3228701938345388092 -->     <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"به یک برنامه کاربردی امکان می دهد نحوه راه اندازی فعالیت ها توسط سیستم را کنترل و نظارت کند. برنامه های مضر ممکن است به طور کامل سیستم را تحت کنترل بگیرند. این مجوز تنها برای توسعه لازم است و هرگز برای استفاده های معمولی تلفن کاربرد ندارد."</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"به یک برنامه کاربردی امکان می دهد نحوه راه اندازی فعالیت ها توسط سیستم را کنترل و نظارت کند. برنامه های مضر ممکن است به طور کامل سیستم را تحت کنترل بگیرند. این مجوز تنها برای بهبود لازم است و هرگز برای استفاده های معمولی کاربرد ندارد."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"ارسال پخش بسته حذف شده"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"به یک برنامه کاربردی اجازه می دهد اعلانی را پخش کند که یک بسته برنامه آن را حذف کرده است. برنامه های مضر از این امکان برای از بین بردن سایر برنامه های در حال اجرا استفاده می کنند."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"ارسال پخش دریافت شده توسط پیامک"</string>
@@ -244,13 +244,13 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"نمایش پنجره های غیرمجاز"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"اجازه می دهد پنجره هایی ایجاد شوند که برای استفاده توسط رابط کاربر سیستم داخلی در نظر گرفته شده است. برای استفاده با برنامه های معمولی در نظر گرفته نشده است."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"هشدارهای سطح سیستم نمایش"</string>
-    <!-- outdated translation 5109622689323490558 -->     <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"به یک برنامه کاربردی اجازه می دهد پنجره های هشدار سیستم را نمایش دهد. برنامه های مضر می توانند کنترل تمام صفحه تلفن را در دست بگیرند."</string>
+    <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"به یک برنامه کاربردی اجازه می دهد پنجره های هشدار سیستم را نمایش دهد. برنامه های مضر می توانند کنترل کل صفحه را در دست بگیرند."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"اصلاح سرعت انیمیشن کلی"</string>
     <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"به یک برنامه کاربردی اجازه می دهد تا کل سرعت انیمیشن را در هر زمان تغییر دهد (انیمیشن هایی سریعتر یا آرام تر)."</string>
     <string name="permlab_manageAppTokens" msgid="17124341698093865">"مدیریت کدهای برنامه"</string>
     <string name="permdesc_manageAppTokens" msgid="977127907524195988">"به برنامه های کاربردی اجازه می دهد کدهای خود را ایجاد کرده و مدیریت کنند و همچنین ترتیب بندی Z خود را تأیید کنند. هرگز برای برنامه های معمولی مورد نیاز نیست."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"کلیدها و دکمه های کنترل را فشار دهید"</string>
-    <!-- outdated translation 3946098050410874715 -->     <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"به یک برنامه کاربردی اجازه می دهد رویدادهای ورودی خود (فشارهای کلید و سایر موارد) را به دیگر برنامه ها تحویل دهد. برنامه های مضر از این امکان می توانند برای مسلط شدن بر گوشی استفاده کنند."</string>
+    <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"به یک برنامه کاربردی اجازه می دهد رویدادهای ورودی خود (فشارهای کلید و سایر موارد) را به دیگر برنامه ها تحویل دهد. برنامه های مضر از این امکان می توانند برای کنترل رایانه لوحی استفاده کنند."</string>
     <string name="permdesc_injectEvents" product="default" msgid="3946098050410874715">"به یک برنامه کاربردی اجازه می دهد رویدادهای ورودی خود (فشارهای کلید و سایر موارد) را به دیگر برنامه ها تحویل دهد. برنامه های مضر از این امکان می توانند برای مسلط شدن بر گوشی استفاده کنند."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"مواردی که می نویسید و کارهایی که انجام می دهید را ضبط کنید"</string>
     <string name="permdesc_readInputState" msgid="5132879321450325445">"به برنامه های کاربردی اجازه می دهد حتی زمانی که با برنامه دیگری در حال ارتباط هستید (مانند وارد کردن یک رمز ورود)، بتوانند کلیدهایی را که فشار می دهید ببینند. هرگز برای برنامه های معمولی مورد نیاز نیست."</string>
@@ -277,18 +277,18 @@
     <string name="permlab_installPackages" msgid="335800214119051089">"نصب مستقیم برنامه های کاربردی"</string>
     <string name="permdesc_installPackages" msgid="526669220850066132">"به یک برنامه کاربردی اجازه می دهد تا بسته های Android جدید یا به روز شده را نصب کند. برنامه های مضر می توانند از این امکان برای افزودن برنامه های جدید با مجوزهای خودسرانه قدرتمند استفاده کنند."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"حذف کل داده های حافظه پنهان برنامه"</string>
-    <!-- outdated translation 7740465694193671402 -->     <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"به یک برنامه کاربردی اجازه می دهد با حذف فایل ها در دایرکتوری حافظه پنهان برنامه، فضای آزاد در محل ذخیره سازی گوشی ایجاد کند. دسترسی به فرآیندهای سیستم معمولاً بسیار محدود است."</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"به یک برنامه کاربردی اجازه می دهد با حذف فایل ها در دایرکتوری حافظه پنهان برنامه، فضای آزاد در محل ذخیره سازی رایانه لوحی ایجاد کند. دسترسی به فرآیندهای سیستم معمولاً بسیار محدود است."</string>
     <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"به یک برنامه کاربردی اجازه می دهد با حذف فایل ها در دایرکتوری حافظه پنهان برنامه، فضای آزاد در محل ذخیره سازی گوشی ایجاد کند. دسترسی به فرآیندهای سیستم معمولاً بسیار محدود است."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"انتقال منابع برنامه کاربردی"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"به یک برنامه کاربردی اجازه می دهد منابع برنامه را از رسانه داخلی به رسانه خارجی منتقل کرده و بالعکس."</string>
     <!-- outdated translation 4811921703882532070 -->     <string name="permlab_readLogs" msgid="6615778543198967614">"خواندن فایل های گزارش سیستم"</string>
-    <!-- outdated translation 2257937955580475902 -->     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"به یک برنامه کاربردی اجازه می دهد فایل های مختلف گزارش سیستم را بخواند. با این کار، اطلاعات کلی مربوط به کاری که با گوشی انجام می دهید مشخص می شود اما نباید حاوی اطلاعات شخصی و خصوصی باشند."</string>
-    <!-- outdated translation 2257937955580475902 -->     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"به یک برنامه کاربردی اجازه می دهد فایل های مختلف گزارش سیستم را بخواند. با این کار، اطلاعات کلی مربوط به کاری که با گوشی انجام می دهید مشخص می شود اما نباید حاوی اطلاعات شخصی و خصوصی باشند."</string>
+    <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"به یک برنامه کاربردی اجازه می دهد فایل های مختلف گزارش سیستم را بخواند. با این کار، اطلاعات کلی مربوط به کاری که با رایانه لوحی انجام می دهید مشخص می شود که ممکن است شامل حاوی اطلاعات شخصی و خصوصی باشند."</string>
+    <!-- outdated translation 4077356893924755294 -->     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"به یک برنامه کاربردی اجازه می دهد فایل های مختلف گزارش سیستم را بخواند. با این کار، اطلاعات کلی مربوط به کاری که با رایانه لوحی انجام می دهید مشخص می شود که ممکن است شامل حاوی اطلاعات شخصی و خصوصی باشند."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"خواندن/نوشتن منابع متعلق به تشخیص"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"به یک برنامه کاربردی امکان می دهد هر منبع متعلق به گروه تشخیص را بخواند یا بنویسد، مانند فایل های موجود در /dev. این امر می تواند بصورت بالقوه بر ثبات و امنیت سیستم تأثیر بگذارد. از این امکان تنها باید برای شناسایی مشکلات مخصوص سخت افزار توسط سازنده یا اپراتور استفاده شود."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"فعال یا غیرفعال کردن مؤلفه های برنامه"</string>
-    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"به یک برنامه کاربردی اجازه می دهد تا فعال شدن یا فعال نشدن مؤلفه یک برنامه دیگر را تغییر دهد. برنامه های مضر می توانند از این امکان برای غیرفعال کردن قابلیت های مهم گوشی استفاده کنند. در مورد مجوزها دقت بیشتری داشته باشید، زیرا امکان دارد مؤلفه های یک برنامه را به حالت بلااستفاده، ناسازگار یا بدون ثبات تبدیل کند."</string>
-    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"به یک برنامه کاربردی اجازه می دهد تا فعال شدن یا فعال نشدن مؤلفه یک برنامه دیگر را تغییر دهد. برنامه های مضر می توانند از این امکان برای غیرفعال کردن قابلیت های مهم گوشی استفاده کنند. در مورد مجوزها دقت بیشتری داشته باشید، زیرا امکان دارد مؤلفه های یک برنامه را به حالت بلااستفاده، ناسازگار یا بدون ثبات تبدیل کند."</string>
+    <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"به یک برنامه کاربردی اجازه می دهد تا فعال شدن یا فعال نشدن مؤلفه یک برنامه دیگر را تغییر دهد. برنامه های مضر می توانند از این امکان برای غیرفعال کردن قابلیت های مهم رایانه لوحی استفاده کنند. در مورد مجوزها دقت بیشتری داشته باشید، زیرا امکان دارد مؤلفه های یک برنامه را به حالت بلااستفاده، ناسازگار یا بدون ثبات تبدیل کند."</string>
+    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"به یک برنامه کاربردی اجازه می دهد تا فعال شدن یا فعال نشدن مؤلفه یک برنامه دیگر را تغییر دهد. برنامه های مضر می توانند از این امکان برای غیرفعال کردن قابلیت های مهم رایانه لوحی استفاده کنند. در مورد مجوزها دقت بیشتری داشته باشید، زیرا امکان دارد مؤلفه های یک برنامه را به حالت بلااستفاده، ناسازگار یا بدون ثبات تبدیل کند."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"تنظیم برنامه های برگزیده"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"به یک برنامه کاربردی اجازه می دهد برنامه های برگزیده شما را تغییر دهد. این امر به برنامه های مضر امکان می دهد تا به آرامی برنامه های در حال اجرا را تغییر دهند و سبب جمع آوری اطلاعات شخصی و خصوصی شما توسط برنامه های موجود شوند."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"اصلاح کردن تنظیمات سیستم کلی"</string>
@@ -298,19 +298,19 @@
     <string name="permlab_writeGservices" msgid="2149426664226152185">"اصلاح کردن نقشه سرویس های Google"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"به یک برنامه کاربردی اجازه می دهد نقشه سرویس های Google را تغییر دهد. برای استفاده با برنامه های معمولی در نظر گرفته نشده است."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"شروع به کار خودکار پس از راه اندازی مجدد"</string>
-    <!-- outdated translation 698336728415008796 -->     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"به یک برنامه کاربردی اجازه می دهد با پایان راه اندازی سیستم، به طور خودکار شروع به کار کند. این امر سبب می شود مدت بیشتری طول بکشد تا گوشی شروع به کار کند و به برنامه اجازه می دهد تا با اجرای دائمی، سرعت کلی تلفن را کم کند."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"به یک برنامه کاربردی اجازه می دهد با پایان راه اندازی سیستم، به طور خودکار شروع به کار کند. این امر سبب می شود مدت بیشتری طول بکشد تا رایانه لوحی شروع به کار کند و به برنامه اجازه می دهد تا با اجرای دائمی، سرعت کلی رایانه لوحی را کم کند."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="698336728415008796">"به یک برنامه کاربردی اجازه می دهد با پایان راه اندازی سیستم، به طور خودکار شروع به کار کند. این امر سبب می شود مدت بیشتری طول بکشد تا گوشی شروع به کار کند و به برنامه اجازه می دهد تا با اجرای دائمی، سرعت کلی تلفن را کم کند."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"ارسال پخش چسبنده"</string>
-    <!-- outdated translation 1920045289234052219 -->     <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"به یک برنامه کاربردی اجازه می دهد پخش های چسبنده را ارسال کند که پس از پایان پخش همچنان باقی می مانند. برنامه های مضر می توانند با وادار کردن تلفن به استفاده بیش از حد حافظه، تلفن را کند کرده یا ناپایدار کنند."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"به یک برنامه کاربردی اجازه می دهد پخش های چسبنده را ارسال کند که پس از پایان پخش همچنان باقی می مانند. برنامه های مضر می توانند با وادار کردن رایانه لوحی به استفاده بیش از حد حافظه، رایانه لوحی را کند کرده یا ناپایدار کنند."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"به یک برنامه کاربردی اجازه می دهد پخش های چسبنده را ارسال کند که پس از پایان پخش همچنان باقی می مانند. برنامه های مضر می توانند با وادار کردن تلفن به استفاده بیش از حد حافظه، تلفن را کند کرده یا ناپایدار کنند."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"خواندن اطلاعات تماس"</string>
-    <!-- outdated translation 3371591512896545975 -->     <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"به یک برنامه کاربردی اجازه می دهد تمام اطلاعات تماس (آدرس) ذخیره شده در گوشی شما را بخواند. برنامه های مضر می توانند از این امکان برای ارسال اطلاعات شما به دیگر افراد استفاده کنند."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"به یک برنامه کاربردی اجازه می دهد تمام اطلاعات تماس (آدرس) ذخیره شده در رایانه لوحی شما را بخواند. برنامه های مضر می توانند از این امکان برای ارسال اطلاعات شما به دیگر افراد استفاده کنند."</string>
     <string name="permdesc_readContacts" product="default" msgid="3371591512896545975">"به یک برنامه کاربردی اجازه می دهد تمام اطلاعات تماس (آدرس) ذخیره شده در گوشی شما را بخواند. برنامه های مضر می توانند از این امکان برای ارسال اطلاعات شما به دیگر افراد استفاده کنند."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"نوشتن اطلاعات تماس"</string>
-    <!-- outdated translation 3924383579108183601 -->     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"به یک برنامه کاربردی اجازه می دهد اطلاعات تماس (آدرس) ذخیره شده در گوشی شما را تغییر دهد. برنامه های مضر می توانند از این امکان برای حذف یا تغییر اطلاعات تماس شما استفاده کنند."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"به یک برنامه کاربردی اجازه می دهد اطلاعات تماس (آدرس) ذخیره شده در رایانه لوحی شما را تغییر دهد. برنامه های مضر می توانند از این امکان برای حذف یا تغییر اطلاعات تماس شما استفاده کنند."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"به یک برنامه کاربردی اجازه می دهد اطلاعات تماس (آدرس) ذخیره شده در گوشی شما را تغییر دهد. برنامه های مضر می توانند از این امکان برای حذف یا تغییر اطلاعات تماس شما استفاده کنند."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"خواندن رویدادهای تقویم"</string>
-    <!-- outdated translation 5533029139652095734 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"به یک برنامه کاربردی اجازه می دهد که تمام رویدادهای تقویم ذخیره شده در گوشی شما را بخواند. برنامه های کاربردی مضر می توانند از این ویژگی برای ارسال رویدادهای تقویم شما به سایر افراد استفاده کنند."</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"به یک برنامه کاربردی اجازه می دهد که تمام رویدادهای تقویم ذخیره شده در رایانه لوحی شما را بخواند. برنامه های کاربردی مضر می توانند از این ویژگی برای ارسال رویدادهای تقویم شما به سایر افراد استفاده کنند."</string>
     <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"به یک برنامه کاربردی اجازه می دهد که تمام رویدادهای تقویم ذخیره شده در گوشی شما را بخواند. برنامه های کاربردی مضر می توانند از این ویژگی برای ارسال رویدادهای تقویم شما به سایر افراد استفاده کنند."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"افزودن یا اصلاح رویدادهای تقویم و ارسال ایمیل به مهمانان"</string>
     <string name="permdesc_writeCalendar" msgid="2988871373544154221">"به یک برنامه کاربردی اجازه می دهد که رویدادهای تقویم شما را، که ممکن است برای مهمانان ایمیل ارسال کند، اضافه کرده یا حذف کند. برنامه های مضر می توانند از این امکان برای پاک کردن یا تغییر رویدادهای تقویم و یا ارسال ایمیل به مهمانان استفاده کنند."</string>
@@ -321,10 +321,10 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"مجوز برای نصب یک ارائه دهنده مکان"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"منابع مکان کاذب را برای تست ایجاد کنید. برنامه های مضر می توانند از این امکان برای لغو مکان و وضعیت بازگردانده شده توسط منابع مکان واقعی مانند GPS یا ارائه دهندگان شبکه استفاده کنند، یا مکان شما را کنترل کرده و آن را به یک منبع خارجی گزارش دهند."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"مکان مناسب (GPS)"</string>
-    <!-- outdated translation 7411213317434337331 -->     <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"به منابع مناسب مکان مانند سیستم موقعیت یابی جهانی،در صورت وجود، در گوشی خود متصل شوید. برنامه های مضر می توانند از این برنامه برای تعیین محل شما استفاده کننده و مقدار بیشتری باتری مصرف کنند."</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"به منابع مکان دقیق مانند سیستم موقعیت یابی جهانی، در صورت وجود، در گوشی خود متصل شوید. برنامه های مضر می توانند از آن برای تعیین محل شما استفاده کنند، و ممکن است مقدار بیشتری باتری مصرف کنند."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"به منابع مناسب مکان مانند سیستم موقعیت یابی جهانی،در صورت وجود، در گوشی خود متصل شوید. برنامه های مضر می توانند از این برنامه برای تعیین محل شما استفاده کننده و مقدار بیشتری باتری مصرف کنند."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"مکان نامشخص (وابسته به شبکه)"</string>
-    <!-- outdated translation 8235655958070862293 -->     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"برای تعیین مکان تقریبی گوشی، در صورت وجود، به منابع مکان نامشخص مانند پایگاه داده شبکه سلولی دسترسی پیدا کنید. برنامه های مضر می توانند از این مورد برای تعیین محل تقریبی شما استفاده کنند."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"برای تعیین مکان تقریبی رایانه لوحی، در صورت وجود، به منابع مکان نامشخص مانند پایگاه داده شبکه سلولی دسترسی پیدا کنید. برنامه های مضر می توانند از آن برای تعیین محل تقریبی شما استفاده کنند."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8235655958070862293">"برای تعیین مکان تقریبی گوشی، در صورت وجود، به منابع مکان نامشخص مانند پایگاه داده شبکه سلولی دسترسی پیدا کنید. برنامه های مضر می توانند از این مورد برای تعیین محل تقریبی شما استفاده کنند."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"دسترسی به SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"به برنامه کاربردی اجازه می دهد از ویژگی های سطح پایین SurfaceFlinger استفاده کند."</string>
@@ -336,13 +336,13 @@
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"به برنامه کاربردی اجازه می دهد به مسیر ضبط صدا دسترسی داشته باشد."</string>
     <!-- outdated translation 8059288807274039014 -->     <string name="permlab_camera" msgid="3616391919559751192">"گرفتن عکس ها"</string>
     <!-- outdated translation 9013476258810982546 -->     <string name="permdesc_camera" msgid="6004878235852154239">"به برنامه کاربردی اجازه می دهد تصاویری را با دوربین ضبط کند. با این کار برنامه در هر زمان می تواند تصاویر قابل مشاهده توسط دوربین را ببیند."</string>
-    <!-- outdated translation 8337817093326370537 -->     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"تلفن بطور دائمی غیرفعال شود"</string>
+    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"غیر فعال کردن رایانه لوحی بصورت دائم"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"تلفن بطور دائمی غیرفعال شود"</string>
-    <!-- outdated translation 5569526552607599221 -->     <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"به برنامه کاربردی اجازه می دهد تا گوشی را به طور کلی و دائمی غیرفعال کند. این کار بسیار خطرناک است."</string>
+    <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"به برنامه کاربردی اجازه می دهد تا رایانه لوحی را به طور کلی و دائمی غیرفعال کند. این کار بسیار خطرناک است."</string>
     <string name="permdesc_brick" product="default" msgid="5569526552607599221">"به برنامه کاربردی اجازه می دهد تا گوشی را به طور کلی و دائمی غیرفعال کند. این کار بسیار خطرناک است."</string>
-    <!-- outdated translation 2898560872462638242 -->     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"اجبار برنامه برای راه اندازی مجدد"</string>
+    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"راه اندازی مجدد رایانه لوحی به اجبار"</string>
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"اجبار برنامه برای راه اندازی مجدد"</string>
-    <!-- outdated translation 7914933292815491782 -->     <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"به برنامه کاربردی اجازه می دهد تا سبب راه اندازی مجدد گوشی شود."</string>
+    <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"به برنامه کاربردی اجازه می دهد تا سبب راه اندازی مجدد رایانه لوحی شود."</string>
     <string name="permdesc_reboot" product="default" msgid="7914933292815491782">"به برنامه کاربردی اجازه می دهد تا سبب راه اندازی مجدد گوشی شود."</string>
     <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"نصب و باز کردن سیستم های فایل"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"به برنامه کاربردی اجازه می دهد تا فایل سیستم ها را برای دستگاه ذخیره سازی جداشدنی نصب کرده یا جدا کند."</string>
@@ -372,7 +372,7 @@
     <string name="permdesc_callPhone" msgid="3369867353692722456">"به برنامه کاربردی اجازه می دهد تا بدون دخالت شما با هر شماره تلفنی تماس بگیرد. برنامه های مضر ممکن است باعث تماس های غیرمنتظره ای در صورتحساب تلفن شما شوند. توجه داشته باشید که این ویژگی به برنامه کاربردی اجازه نمی دهد با شماره های اضطراری تماس بگیرد."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"تماس مستقیم با هر شماره تلفنی"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"به برنامه کاربردی اجازه می دهد تا بدون دخالت شما با هر شماره تلفنی، از جمله شماره های اضطراری تماس بگیرد. برنامه های مضر می توانند تماس های غیرقانونی و غیرضروری با شماره های اضطراری برقرار کنند."</string>
-    <!-- outdated translation 5604848095315421425 -->     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"شروع مستقیم راه اندازی تلفن CDMA"</string>
+    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"شروع مستقیم راه اندازی رایانه لوحی CDMA"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"شروع مستقیم راه اندازی تلفن CDMA"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"به برنامه کاربردی اجازه می دهد تا ارائه مجوز CDMA را آغاز کند. برنامه های مضر ممکن است ارائه مجوز CDMA را بدون ضرورت شروع کنند."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"کنترل اعلان های به روز رسانی مکان"</string>
@@ -385,16 +385,16 @@
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"به برنامه کاربردی اجازه می دهد ویژگی های تلفنی دستگاه را کنترل کند. برنامه ای با این مجوز می تواند بدون اطلاع شما بین شبکه ها جابجا شده، رادیوی تلفن را روشن و خاموش کند و موارد مشابه."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"خواندن وضعیت و هویت تلفن"</string>
     <string name="permdesc_readPhoneState" msgid="188877305147626781">"به برنامه کاربردی اجازه می دهد به ویژگی های تلفنی این دستگاه دسترسی داشته باشد. برنامه دارای این مجوز می تواند شماره تلفن و شماره سریال این گوشی را تعیین کند، همچنین اینکه آیا تماس فعال است و شماره تماس گیرنده متصل است و سایر موارد."</string>
-    <!-- outdated translation 573480187941496130 -->     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ممانعت از به خواب رفتن تلفن"</string>
+    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ممانعت از به خواب رفتن رایانه لوحی"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ممانعت از به خواب رفتن تلفن"</string>
-    <!-- outdated translation 7584036471227467099 -->     <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"به یک برنامه کاربردی اجازه می دهد مانع از به خواب رفتن تلفن شود."</string>
+    <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"به یک برنامه کاربردی اجازه می دهد مانع از به خواب رفتن رایانه لوحی شود."</string>
     <string name="permdesc_wakeLock" product="default" msgid="7584036471227467099">"به یک برنامه کاربردی اجازه می دهد مانع از به خواب رفتن تلفن شود."</string>
-    <!-- outdated translation 4928622470980943206 -->     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"روشن/خاموش کردن تلفن"</string>
+    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"روشن/خاموش کردن رایانه لوحی"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"روشن/خاموش کردن تلفن"</string>
-    <!-- outdated translation 4577331933252444818 -->     <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"به برنامه کاربردی اجازه می دهد گوشی را روشن یا خاموش کند."</string>
+    <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"به برنامه کاربردی اجازه می دهد رایانه لوحی را روشن یا خاموش کند."</string>
     <string name="permdesc_devicePower" product="default" msgid="4577331933252444818">"به برنامه کاربردی اجازه می دهد گوشی را روشن یا خاموش کند."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"اجرا در حالت تست کارخانه"</string>
-    <!-- outdated translation 8136644990319244802 -->     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"اجرا به عنوان تست سازنده سطح پایین، امکان دسترسی کامل به سخت افزار تلفن شما را فراهم می آورد. فقط زمانی که تلفن در حالت تست سازنده در حال اجراست قابل دسترسی است."</string>
+    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"اجرا به عنوان تست سازنده سطح پایین، امکان دسترسی کامل به سخت افزار رایانه لوحی شما را فراهم می آورد. فقط زمانی که رایانه لوحی در حالت تست سازنده در حال اجراست قابل دسترسی است."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"اجرا به عنوان تست سازنده سطح پایین، امکان دسترسی کامل به سخت افزار تلفن شما را فراهم می آورد. فقط زمانی که تلفن در حالت تست سازنده در حال اجراست قابل دسترسی است."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"تنظیم تصویر زمینه"</string>
     <string name="permdesc_setWallpaper" msgid="6417041752170585837">"به برنامه کاربردی اجازه می دهد تا تصویر زمینه سیستم را تنظیم کند."</string>
@@ -403,15 +403,15 @@
     <string name="permlab_masterClear" msgid="2315750423139697397">"بازنشانی سیستم به موارد پیش فرض کارخانه"</string>
     <string name="permdesc_masterClear" msgid="5033465107545174514">"به یک برنامه کاربردی اجازه می دهد سیستم را به صورت کامل به تنظیمات کارخانه بازگرداند، تمام داده ها، پیکربندی ها و برنامه های نصب شده را حذف کند."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"تنظیم ساعت"</string>
-    <!-- outdated translation 667294309287080045 -->     <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"به یک برنامه کاربردی اجازه می دهد ساعت گوشی را تغییر دهد."</string>
+    <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"به یک برنامه کاربردی اجازه می دهد ساعت رایانه لوحی را تغییر دهد."</string>
     <string name="permdesc_setTime" product="default" msgid="667294309287080045">"به یک برنامه کاربردی اجازه می دهد ساعت گوشی را تغییر دهد."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"تنظیم منطقه زمانی"</string>
-    <!-- outdated translation 1902540227418179364 -->     <string name="permdesc_setTimeZone" product="tablet" msgid="2522877107613885139">"به یک برنامه کاربردی اجازه می دهد منطقه زمانی گوشی را تغییر دهد."</string>
+    <string name="permdesc_setTimeZone" product="tablet" msgid="2522877107613885139">"به یک برنامه کاربردی اجازه می دهد منطقه زمانی رایانه لوحی را تغییر دهد."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="1902540227418179364">"به یک برنامه کاربردی اجازه می دهد منطقه زمانی گوشی را تغییر دهد."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"عملکرد به عنوان AccountManagerService"</string>
     <string name="permdesc_accountManagerService" msgid="6056903274106394752">"به یک برنامه کاربردی امکان می دهد با تأیید کنندگان اعتبار حساب تماس بگیرند"</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"یافتن حساب های شناخته شده"</string>
-    <!-- outdated translation 6839262446413155394 -->     <string name="permdesc_getAccounts" product="tablet" msgid="857622793935544694">"به یک برنامه کاربردی امکان می دهد لیستی از حساب های شناخته شده توسط گوشی را دریافت کند."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="857622793935544694">"به یک برنامه کاربردی امکان می دهد لیستی از حساب های شناخته شده توسط رایانه لوحی را دریافت کند."</string>
     <string name="permdesc_getAccounts" product="default" msgid="6839262446413155394">"به یک برنامه کاربردی امکان می دهد لیستی از حساب های شناخته شده توسط گوشی را دریافت کند."</string>
     <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"عملکرد به عنوان تأیید کننده اعتبار حساب"</string>
     <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"به یک برنامه کاربردی اجازه می دهد از قابلیت های تأیید کننده اعتبار حساب مربوط به مدیر حساب استفاده کند، از جمله ایجاد چندین حساب و دریافت و تنظیم رمزهای ورود آنها."</string>
@@ -438,10 +438,10 @@
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"دریافت چندگانه Wi-Fi را مجاز می کند"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"به یک برنامه کاربردی اجازه می دهد بسته هایی را دریافت کند که مستقیماً برای دستگاه شما ارسال نشده باشد. این امر زمانی که در حال شناسایی سرویس های نزدیک به خود هستید، می تواند مؤثر باشد. در این حالت در مقایسه با حالت غیر چندگانه، از انرژِی بیشتری استفاده می شود."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"سرپرست بلوتوث"</string>
-    <!-- outdated translation 7256289774667054555 -->     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"به یک برنامه کاربردی اجازه می دهد تا تلفن محلی بلوتوث را پیکربندی کرده، دستگاه های راه دور را شناسایی کرده و با آنها جفت شود."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"به یک برنامه کاربردی اجازه می دهد تا رایانه لوحی محلی بلوتوث را پیکربندی کرده، دستگاه های راه دور را شناسایی کرده و با آنها جفت شود."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"به یک برنامه کاربردی اجازه می دهد تا تلفن محلی بلوتوث را پیکربندی کرده، دستگاه های راه دور را شناسایی کرده و با آنها جفت شود."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"ایجاد اتصال های بلوتوث"</string>
-    <!-- outdated translation 762515380679392945 -->     <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"به یک برنامه کاربردی اجازه می دهد تا پیکربندی تلفن بلوتوث محلی را مشاهده کند، اتصال ها را با دستگاه های جفت شده برقرار کرده، آنها را بپذیرد."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"به یک برنامه کاربردی اجازه می دهد تا پیکربندی رایانه لوحی بلوتوث محلی را مشاهده کند، اتصال ها را با دستگاه های جفت شده برقرار کرده، آنها را بپذیرد."</string>
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"به یک برنامه کاربردی اجازه می دهد تا پیکربندی تلفن بلوتوث محلی را مشاهده کند، اتصال ها را با دستگاه های جفت شده برقرار کرده، آنها را بپذیرد."</string>
     <!-- no translation found for permlab_nfc (4423351274757876953) -->
     <skip />
@@ -480,15 +480,15 @@
     <!-- outdated translation 4307861496302850201 -->     <string name="policylab_limitPassword" msgid="4497420728857585791">"محدود کردن رمز ورود"</string>
     <!-- outdated translation 1719877245692318299 -->     <string name="policydesc_limitPassword" msgid="9083400080861728056">"انواع رمز ورود که مجاز به استفاده از آنها هستید را محدود کنید."</string>
     <!-- outdated translation 7374780712664285321 -->     <string name="policylab_watchLogin" msgid="914130646942199503">"تعداد دفعات ورود به سیستم برای مشاهده"</string>
-    <!-- outdated translation 1961251179624843483 -->     <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"نظارت تلاش های ناموفق در ورود به سیستم دستگاه برای اجرای برخی از عملکردها."</string>
-    <!-- outdated translation 1961251179624843483 -->     <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"نظارت تلاش های ناموفق در ورود به سیستم دستگاه برای اجرای برخی از عملکردها."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"تعداد رمز ورودهای نادرست وارد شده هنگام بازکردن قفل را نظارت کنید، و رایانه لوحی را قفل کنید یا در صورتی که تعداد زیادی رمز ورود نادرست وارد شده، کلیه داده های رایانه لوحی را حذف کنید"</string>
+    <!-- outdated translation 933601759466308092 -->     <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"تعداد رمز ورودهای نادرست وارد شده هنگام بازکردن قفل را نظارت کنید، و رایانه لوحی را قفل کنید یا در صورتی که تعداد زیادی رمز ورود نادرست وارد شده، کلیه داده های رایانه لوحی را حذف کنید"</string>
     <!-- outdated translation 9084772090797485420 -->     <string name="policylab_resetPassword" msgid="2620077191242688955">"بازنشانی رمز ورود"</string>
     <!-- outdated translation 3332167600331799991 -->     <string name="policydesc_resetPassword" msgid="5391240616981297361">"رمز ورود شما را به اجبار به یک مورد جدید تبدیل می کند، سرپرست را ملزم می کند قبل از ورود به برنامه، آن را به شما تحویل دهد."</string>
     <!-- outdated translation 5760466025247634488 -->     <string name="policylab_forceLock" msgid="2274085384704248431">"قفل اجباری"</string>
     <!-- outdated translation 2819868664946089740 -->     <string name="policydesc_forceLock" msgid="5696964126226028442">"کنترل هنگام قفل شدن دستگاه و الزام شما به وارد کردن دوباره رمز ورود."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"پاک کردن تمام داده ها"</string>
-    <!-- outdated translation 2314060933796396205 -->     <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"با انجام بازنشانی کارخانه، تمام اطلاعات بدون هرگونه تأیید از طرف شما حذف می شوند."</string>
-    <!-- outdated translation 2314060933796396205 -->     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"با انجام بازنشانی کارخانه، تمام اطلاعات بدون هرگونه تأیید از طرف شما حذف می شوند."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"پاک کردن داده رایانه لوحی بدون اخطار، با اجرای یک بازنشانی به داده های کارخانه"</string>
+    <!-- outdated translation 314455232799486222 -->     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"پاک کردن داده رایانه لوحی بدون اخطار، با اجرای یک بازنشانی به داده های کارخانه"</string>
     <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
     <skip />
     <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
@@ -653,7 +653,7 @@
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"شارژر خود را متصل کنید."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"سیم کارت موجود نیست."</string>
-    <!-- outdated translation 2186920585695169078 -->     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"سیم کارت درون تلفن نیست."</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"سیم کارت درون رایانه لوحی نیست."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"سیم کارت درون تلفن نیست."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"لطفاً سیم کارت را وارد کنید."</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"فقط تماس های اضطراری"</string>
@@ -667,8 +667,7 @@
     <skip />
     <!-- no translation found for lockscreen_too_many_failed_pin_attempts_dialog_message (6827749231465145590) -->
     <skip />
-    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (8687762517114904651) -->
-    <skip />
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده اید. <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر سبب می شود از شما خواسته شود که برای بازگشایی قفل رایانه لوحی خود به برنامه Google وارد شوید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده اید. <xliff:g id="NUMBER_1">%d</xliff:g> تلاش های ناموفق بیشتر سبب می شود از شما خواسته شود که برای بازگشایی قفل گوشی خود به برنامه Google وارد شوید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"در <xliff:g id="NUMBER">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"الگو را فراموش کرده اید؟"</string>
@@ -699,8 +698,7 @@
     <string name="double_tap_toast" msgid="1068216937244567247">"نکته: برای انجام بزرگنمایی مثبت و منفی، دو بار ضربه بزنید."</string>
     <!-- no translation found for autofill_this_form (1272247532604569872) -->
     <skip />
-    <!-- no translation found for setup_autofill (8154593408885654044) -->
-    <skip />
+    <string name="setup_autofill" msgid="8154593408885654044">"تنظیم تکمیل خودکار"</string>
     <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
     <skip />
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
@@ -712,7 +710,7 @@
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"خواندن سابقه و نشانک های مرورگر"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"به برنامه کاربردی اجازه می دهد تا تمام URL های بازدید شده توسط مرورگر و تمام نشانک های آن را بخواند."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"نوشتن سابقه مرورگر و نشانک ها"</string>
-    <!-- outdated translation 945571990357114950 -->     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"به یک برنامه کاربردی اجازه می دهد سابقه مرورگر یا نشانک ذخیره شده در گوشی شما را تغییر دهد. برنامه های مضر می توانند از این امکان برای حذف یا تغییر داده های مرورگر شما استفاده کنند."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"به یک برنامه کاربردی اجازه می دهد سابقه مرورگر یا نشانک ذخیره شده در رایانه لوحی شما را تغییر دهد. برنامه های مضر می توانند از این امکان برای حذف یا تغییر داده های مرورگر شما استفاده کنند."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"به یک برنامه کاربردی اجازه می دهد سابقه مرورگر یا نشانک ذخیره شده در گوشی شما را تغییر دهد. برنامه های مضر می توانند از این امکان برای حذف یا تغییر داده های مرورگر شما استفاده کنند."</string>
     <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
     <skip />
@@ -843,7 +841,7 @@
     <string name="inputMethod" msgid="1653630062304567879">"روش ورودی"</string>
     <!-- outdated translation 1672989176958581452 -->     <string name="editTextMenuTitle" msgid="4909135564941815494">"ویرایش متن"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"فضا کم است"</string>
-    <!-- outdated translation 635106544616378836 -->     <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"فضای ذخیره سازی تلفن در حال کم شدن است."</string>
+    <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"فضای ذخیره سازی رایانه لوحی در حال کم شدن است."</string>
     <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"فضای ذخیره سازی تلفن در حال کم شدن است."</string>
     <string name="ok" msgid="5970060430562524910">"تأیید"</string>
     <string name="cancel" msgid="6442560571259935130">"لغو"</string>
@@ -925,7 +923,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"تعداد زیادی پیامک ارسال شده است. برای ادامه، \"تأیید\" را کلیک کرده و برای توقف ارسال، \"لغو\" را کلیک کنید."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"تأیید"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"لغو"</string>
-    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"تنظیم زمان"</string>
+    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
     <skip />
     <string name="date_time_set" msgid="5777075614321087758">"تنظیم"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"پیش فرض"</string>
@@ -1077,5 +1076,15 @@
     <!-- no translation found for share (1778686618230011964) -->
     <skip />
     <!-- no translation found for find (4808270900322985960) -->
+    <skip />
+    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
+    <skip />
+    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
+    <skip />
+    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
+    <skip />
+    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
+    <skip />
+    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
     <skip />
 </resources>
