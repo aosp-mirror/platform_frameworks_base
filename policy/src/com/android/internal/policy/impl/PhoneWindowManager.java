@@ -1330,38 +1330,40 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             } else if (keyCode == mShortcutKeyPressed) {
                 mShortcutKeyPressed = -1;
-                
                 if (mConsumeShortcutKeyUp) {
-                    // Consume the up-event
                     mConsumeShortcutKeyUp = false;
                     return true;
                 }
             }
+            return false;
         } else if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
             if (!down) {
                 showRecentAppsDialog();
             }
             return true;
         }
-        
+
         // Shortcuts are invoked through Search+key, so intercept those here
-        if (mShortcutKeyPressed != -1 && !mConsumeShortcutKeyUp) {
-            if (down && repeatCount == 0 && !keyguardOn) {
-                final KeyCharacterMap kcm = event.getKeyCharacterMap();
-                Intent shortcutIntent = mShortcutManager.getIntent(kcm, keyCode, metaState);
-                if (shortcutIntent != null) {
-                    shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(shortcutIntent);
-                    
-                    /*
-                     * We launched an app, so the up-event of the search key
-                     * should be consumed
-                     */
-                    if (mShortcutKeyPressed != -1) {
-                        mConsumeShortcutKeyUp = true;
+        // Any printing key that is chorded with Search should be consumed
+        // even if no shortcut was invoked.  This prevents text from being
+        // inadvertently inserted when using a keyboard that has built-in macro
+        // shortcut keys (that emit Search+x) and some of them are not registered.
+        if (mShortcutKeyPressed != -1) {
+            final KeyCharacterMap kcm = event.getKeyCharacterMap();
+            if (kcm.isPrintingKey(keyCode)) {
+                mConsumeShortcutKeyUp = true;
+                if (down && repeatCount == 0 && !keyguardOn) {
+                    Intent shortcutIntent = mShortcutManager.getIntent(kcm, keyCode, metaState);
+                    if (shortcutIntent != null) {
+                        shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        mContext.startActivity(shortcutIntent);
+                    } else {
+                        Slog.i(TAG, "Dropping unregistered shortcut key combination: "
+                                + KeyEvent.keyCodeToString(mShortcutKeyPressed)
+                                + "+" + KeyEvent.keyCodeToString(keyCode));
                     }
-                    return true;
                 }
+                return true;
             }
         }
 
