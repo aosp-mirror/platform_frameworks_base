@@ -195,4 +195,9 @@ public final class Ndef extends BasicTagTechnology {
     public void makeLowLevelReadonly() {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public byte[] transceive(byte[] data) {
+        throw new UnsupportedOperationException();
+    }
 }

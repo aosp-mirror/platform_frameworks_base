@@ -71,6 +71,31 @@ public final class MifareUltralight extends BasicTagTechnology {
     }
 
     /**
+     * Send data to a tag and receive the response.
+     * <p>
+     * This method will block until the response is received. It can be canceled
+     * with {@link #close}.
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     *
+     * @param data bytes to send
+     * @return bytes received in response
+     * @throws IOException if the target is lost or connection closed
+     */
+    @Override
+    public byte[] transceive(byte[] data) throws IOException {
+        try {
+            byte[] response = mTagService.transceive(mTag.getServiceHandle(), data, false);
+            if (response == null) {
+                throw new IOException("transceive failed");
+            }
+            return response;
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            throw new IOException("NFC service died");
+        }
+    }
+
+    /**
      * @throws IOException
      */
     /*
