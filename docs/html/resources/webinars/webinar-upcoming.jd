@@ -1,0 +1,53 @@
+page.title=Upcoming Schedule
+@jd:body
+
+<script type="text/javascript">
+
+/**
+/* Draw all webinars from feed into a 'webinars' div
+ * @param data  The feed data returned from the webinars request
+ */
+function renderWebinar(data) {
+
+  var entries = data.webinars || [];
+
+  var resultsDiv = $('#resource-browser-results');
+  var code = [];
+
+  // Loop through each entry (each webinar) and add it to the 'webinars' list
+  for (var i = 0; i < entries.length; i++) {
+    var entry = entries[i];
+
+    var title = entry.title;
+    var description = entry.description;
+    var url = entry.url;
+    var start = entry.start;
+    var end = entry.end;
+
+    code.push('<div>');
+    code.push('<h3>' + title + '</h3>');
+    code.push('<p ><i>' + formatDate(start, end) + '</i>');
+    code.push('<p>' + description);
+    code.push('</div>');
+  }
+
+  var html = code.join('\n');
+  resultsDiv.html(html);
+}
+
+/* Request the webinar feeds from webinarhosting server */
+function showWebinars() {
+  var script = "<script type='text/javascript' src='/resources/webinars/date.js'><\/script>";
+  $("body").append(script);
+  $.getJSON(
+  'http://android-webinars.appspot.com/feeds/api/upcomingwebinars?callback=?',
+  function(json){renderWebinar(json);});
+}
+// Initialization actions
+showWebinars();           // load webinars
+
+</script>
+
+
+<div id="resource-browser-results">
+  </div>
