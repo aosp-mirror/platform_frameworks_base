@@ -15,6 +15,7 @@
  */
 
 package com.android.rs.test;
+import android.content.Context;
 import android.renderscript.RenderScript.RSMessageHandler;
 import android.util.Log;
 
@@ -24,6 +25,7 @@ public class UnitTest extends Thread {
     private ScriptField_ListAllocs_s.Item mItem;
     private RSTestCore mRSTC;
     private boolean msgHandled;
+    protected Context mCtx;
 
     /* These constants must match those in shared.rsh */
     public static final int RS_MSG_TEST_PASSED = 100;
@@ -32,25 +34,26 @@ public class UnitTest extends Thread {
     private static int numTests = 0;
     public int testID;
 
-    protected UnitTest(RSTestCore rstc, String n, int initResult) {
+    protected UnitTest(RSTestCore rstc, String n, int initResult, Context ctx) {
         super();
         mRSTC = rstc;
         name = n;
         msgHandled = false;
+        mCtx = ctx;
         result = initResult;
         testID = numTests++;
     }
 
-    protected UnitTest(RSTestCore rstc, String n) {
-        this(rstc, n, 0);
+    protected UnitTest(RSTestCore rstc, String n, Context ctx) {
+        this(rstc, n, 0, ctx);
     }
 
-    protected UnitTest(RSTestCore rstc) {
-        this (rstc, "<Unknown>");
+    protected UnitTest(RSTestCore rstc, Context ctx) {
+        this (rstc, "<Unknown>", ctx);
     }
 
-    protected UnitTest() {
-        this (null);
+    protected UnitTest(Context ctx) {
+        this (null, ctx);
     }
 
     protected RSMessageHandler mRsMessage = new RSMessageHandler() {
@@ -101,4 +104,3 @@ public class UnitTest extends Thread {
         }
     }
 }
-

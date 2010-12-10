@@ -18,6 +18,7 @@ package android.renderscript;
 
 import java.lang.reflect.Field;
 
+import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -168,10 +169,11 @@ public class RenderScriptGL extends RenderScript {
     /**
      * Construct a new RenderScriptGL context.
      *
-     *
+     * @param ctx The context.
      * @param sc The desired format of the primart rendering surface.
      */
-    public RenderScriptGL(SurfaceConfig sc) {
+    public RenderScriptGL(Context ctx, SurfaceConfig sc) {
+        super(ctx);
         mSurfaceConfig = new SurfaceConfig(sc);
 
         mSurface = null;
@@ -304,5 +306,3 @@ public class RenderScriptGL extends RenderScript {
     }
 
 }
-
-

@@ -902,11 +902,15 @@ exit:
 }
 
 static jint
-nScriptCCreate(JNIEnv *_env, jobject _this, RsContext con, jstring resName)
+nScriptCCreate(JNIEnv *_env, jobject _this, RsContext con, jstring resName, jstring cacheDir)
 {
     LOG_API("nScriptCCreate, con(%p)", con);
     const char* resNameUTF = _env->GetStringUTFChars(resName, NULL);
-    return (jint)rsScriptCCreate(con, resNameUTF);
+    const char* cacheDirUTF = _env->GetStringUTFChars(cacheDir, NULL);
+    jint i = (jint)rsScriptCCreate(con, resNameUTF, cacheDirUTF);
+    _env->ReleaseStringUTFChars(resName, resNameUTF);
+    _env->ReleaseStringUTFChars(cacheDir, cacheDirUTF);
+    return i;
 }
 
 // ---------------------------------------------------------------------------
@@ -1297,7 +1301,7 @@ static JNINativeMethod methods[] = {
 
 {"rsnScriptCBegin",                  "(I)V",                                  (void*)nScriptCBegin },
 {"rsnScriptCSetScript",              "(I[BII)V",                              (void*)nScriptCSetScript },
-{"rsnScriptCCreate",                 "(ILjava/lang/String;)I",                (void*)nScriptCCreate },
+{"rsnScriptCCreate",                 "(ILjava/lang/String;Ljava/lang/String;)I",  (void*)nScriptCCreate },
 
 {"rsnProgramStoreBegin",             "(III)V",                                (void*)nProgramStoreBegin },
 {"rsnProgramStoreDepthFunc",         "(II)V",                                 (void*)nProgramStoreDepthFunc },
@@ -1372,4 +1376,3 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 bail:
     return result;
 }
-

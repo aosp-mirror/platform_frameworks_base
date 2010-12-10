@@ -16,14 +16,15 @@
 
 package com.android.rs.test;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.renderscript.*;
 
 public class UT_primitives extends UnitTest {
     private Resources mRes;
 
-    protected UT_primitives(RSTestCore rstc, Resources res) {
-        super(rstc, "Primitives");
+    protected UT_primitives(RSTestCore rstc, Resources res, Context ctx) {
+        super(rstc, "Primitives", ctx);
         mRes = res;
     }
 
@@ -87,7 +88,7 @@ public class UT_primitives extends UnitTest {
     }
 
     public void run() {
-        RenderScript pRS = RenderScript.create();
+        RenderScript pRS = RenderScript.create(mCtx);
         ScriptC_primitives s = new ScriptC_primitives(pRS, mRes, R.raw.primitives);
         pRS.setMessageHandler(mRsMessage);
         if (!initializeGlobals(s)) {
@@ -101,4 +102,3 @@ public class UT_primitives extends UnitTest {
         pRS.destroy();
     }
 }
-

@@ -16,19 +16,20 @@
 
 package com.android.rs.test;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.renderscript.*;
 
 public class UT_fp_mad extends UnitTest {
     private Resources mRes;
 
-    protected UT_fp_mad(RSTestCore rstc, Resources res) {
-        super(rstc, "Fp_Mad");
+    protected UT_fp_mad(RSTestCore rstc, Resources res, Context ctx) {
+        super(rstc, "Fp_Mad", ctx);
         mRes = res;
     }
 
     public void run() {
-        RenderScript pRS = RenderScript.create();
+        RenderScript pRS = RenderScript.create(mCtx);
         ScriptC_fp_mad s = new ScriptC_fp_mad(pRS, mRes, R.raw.fp_mad);
         pRS.setMessageHandler(mRsMessage);
         s.invoke_fp_mad_test(0, 0);
@@ -37,4 +38,3 @@ public class UT_fp_mad extends UnitTest {
         pRS.destroy();
     }
 }
-
