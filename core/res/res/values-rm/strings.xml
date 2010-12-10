@@ -906,6 +906,8 @@
     <string name="sms_control_no" msgid="1715320703137199869">"Interrumper"</string>
     <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
     <skip />
+    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
+    <skip />
     <string name="date_time_set" msgid="5777075614321087758">"Definir"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Standard"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Naginas permissiuns obligatoricas"</string>
@@ -1052,5 +1054,15 @@
     <!-- no translation found for share (1778686618230011964) -->
     <skip />
     <!-- no translation found for find (4808270900322985960) -->
+    <skip />
+    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
+    <skip />
+    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
+    <skip />
+    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
+    <skip />
+    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
+    <skip />
+    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
     <skip />
 </resources>

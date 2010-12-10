@@ -126,10 +126,10 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"סנכרון"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"סנכרן"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"יש מחיקות <xliff:g id="CONTENT_TYPE">%s</xliff:g> רבות מדי."</string>
-    <!-- outdated translation 6632412458436461203 -->     <string name="low_memory" product="tablet" msgid="2292820184396262278">"שטח האחסון בטלפון מלא! מחק חלק מהקבצים כדי לפנות שטח."</string>
+    <string name="low_memory" product="tablet" msgid="2292820184396262278">"שטח האחסון בטבלט מלא! מחק חלק מהקבצים כדי לפנות שטח."</string>
     <string name="low_memory" product="default" msgid="6632412458436461203">"שטח האחסון בטלפון מלא! מחק חלק מהקבצים כדי לפנות שטח."</string>
     <string name="me" msgid="6545696007631404292">"אני"</string>
-    <!-- outdated translation 1319919075463988638 -->     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"אפשרויות טלפון"</string>
+    <string name="power_dialog" product="tablet" msgid="8545351420865202853">"אפשרויות טבלט"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"אפשרויות טלפון"</string>
     <string name="silent_mode" msgid="7167703389802618663">"מצב שקט"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"הפעל חיבור אלחוטי"</string>
@@ -137,13 +137,13 @@
     <string name="screen_lock" msgid="799094655496098153">"נעילת מסך"</string>
     <string name="power_off" msgid="4266614107412865048">"כיבוי"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"מבצע כיבוי..."</string>
-    <!-- outdated translation 649792175242821353 -->     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"הטלפון שלך יכובה."</string>
+    <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"הטבלט שלך יכובה."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"הטלפון שלך יכובה."</string>
     <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
     <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"אחרונות"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"לא הותקנו יישומים לאחרונה."</string>
-    <!-- outdated translation 2406416831541615258 -->     <string name="global_actions" product="tablet" msgid="408477140088053665">"אפשרויות טלפון"</string>
+    <string name="global_actions" product="tablet" msgid="408477140088053665">"אפשרויות טבלט"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"אפשרויות טלפון"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"נעילת מסך"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"כיבוי"</string>
@@ -160,7 +160,7 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"ההודעות שלך"</string>
     <string name="permgroupdesc_messages" msgid="7045736972019211994">"קרא וכתוב SMS, דוא\"ל והודעות אחרות."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"המידע האישי שלך"</string>
-    <!-- outdated translation 5488050357388806068 -->     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"גישה ישירה לאנשי הקשר וללוח השנה המאוחסנים בטלפון."</string>
+    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"גישה ישירה לאנשי הקשר וללוח השנה המאוחסנים בטבלט."</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"גישה ישירה לאנשי הקשר וללוח השנה המאוחסנים בטלפון."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"המיקום שלך"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"עקוב אחר המיקום הפיזי שלך"</string>
@@ -196,10 +196,10 @@
     <string name="permlab_sendSms" msgid="5600830612147671529">"שלח הודעות SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"מאפשר ליישום לשלוח הודעות SMS. יישומים זדוניים עלולים לגרום לחיובים על ידי שליחת הודעות ללא אישורך."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"קריאת SMS או MMS"</string>
-    <!-- outdated translation 3002170087197294591 -->     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"מאפשר ליישום לקרוא הודעות SMS המאוחסנות בטלפון או בכרטיס ה-SIM. יישומים זדוניים עלולים לקרוא את ההודעות הסודיות."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"מאפשר ליישום לקרוא הודעות SMS המאוחסנות בטבלט או בכרטיס ה-SIM. יישומים זדוניים עלולים לקרוא את ההודעות הסודיות."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"מאפשר ליישום לקרוא הודעות SMS המאוחסנות בטלפון או בכרטיס ה-SIM. יישומים זדוניים עלולים לקרוא את ההודעות הסודיות."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"ערוך SMS או MMS"</string>
-    <!-- outdated translation 6299398896177548095 -->     <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"מאפשר ליישום לכתוב להודעות SMS המאוחסנות בטלפון או בכרטיס ה-SIM. יישומים זדוניים עלולים למחוק את ההודעות."</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"מאפשר ליישום לכתוב להודעות SMS המאוחסנות בטבלט או בכרטיס ה-SIM. יישומים זדוניים עלולים למחוק את ההודעות."</string>
     <string name="permdesc_writeSms" product="default" msgid="6299398896177548095">"מאפשר ליישום לכתוב להודעות SMS המאוחסנות בטלפון או בכרטיס ה-SIM. יישומים זדוניים עלולים למחוק את ההודעות."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"קבל WAP"</string>
     <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"מאפשר ליישום לקבל ולעבד הודעות WAP. יישומים זדוניים עלולים לעקוב אחר ההודעות או למחוק אותן מבלי להציג אותן לך."</string>
@@ -226,7 +226,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"מנע החלפת יישומים"</string>
     <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"מונע מהמשתמש לעבור ליישום אחר."</string>
     <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"עקוב ושלוט בכל השקת היישומים"</string>
-    <!-- outdated translation 3228701938345388092 -->     <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"מאפשר ליישום לעקוב אחרי ולשלוט באופן שבו המערכת מפעילה פעילויות. יישומים זדוניים עלולים לפגוע לחלוטין במערכת. הרשאה זו דרושה רק לפיתוח, לעולם לא לשימוש רגיל בטלפון."</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"מאפשר ליישום לעקוב אחרי האופן שבו המערכת מפעילה פעילויות ולשלוט בו. יישומים זדוניים עלולים לפגוע לחלוטין במערכת. הרשאה זו דרושה רק לפיתוח, לעולם לא לשימוש רגיל."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"שליחת שידור שהוסר מחבילה"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"מאפשר ליישום לשדר התראה שחבילת יישום הוסרה. יישומים זדוניים עלולים להשתמש ביכולת זו כדי לסיים יישומים פועלים אחרים."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"שלח שידור שהתקבל ב-SMS"</string>
@@ -244,13 +244,13 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"הצג חלונות לא מורשים"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"מאפשר יצירת חלונות המיועדים לשימוש של ממשק המשתמש במערכת הפנימית. לא לשימוש של יישומים רגילים."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"הצג התראות ברמת המערכת"</string>
-    <!-- outdated translation 5109622689323490558 -->     <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"מאפשר ליישום להציג חלונות התראה של המערכת. יישומים זדוניים עלולים להשתלט על מסך הטלפון כולו."</string>
+    <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"מאפשר ליישום להציג חלונות התראה של המערכת. יישומים זדוניים עלולים להשתלט על המסך כולו."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"שנה את מהירות ההנפשה הכללית"</string>
     <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"מאפשר ליישום לשנות את מהירות ההנפשה הכללית (הנפשות מהירות או איטיות יותר) בכל עת."</string>
     <string name="permlab_manageAppTokens" msgid="17124341698093865">"נהל אסימוני יישום"</string>
     <string name="permdesc_manageAppTokens" msgid="977127907524195988">"מאפשר ליישומים ליצור ולנהל אסימונים משלהם, תוך עקיפת סידור ה-Z הרגיל שלהם. לא אמור להידרש לעולם ליישומים רגילים."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"לחיצה על מקשים ושליטה בלחצנים"</string>
-    <!-- outdated translation 3946098050410874715 -->     <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"מאפשר ליישום לספק אירועי קלט משלו (הקשות על מקשים וכדומה) ליישומים אחרים. יישומים זדוניים עלולים להשתמש ביכולת זו כדי להשתלט על הטלפון."</string>
+    <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"מאפשר ליישום לספק אירועי קלט משלו (הקשות על מקשים וכדומה) ליישומים אחרים. יישומים זדוניים עלולים להשתמש ביכולת זו כדי להשתלט על הטבלט."</string>
     <string name="permdesc_injectEvents" product="default" msgid="3946098050410874715">"מאפשר ליישום לספק אירועי קלט משלו (הקשות על מקשים וכדומה) ליישומים אחרים. יישומים זדוניים עלולים להשתמש ביכולת זו כדי להשתלט על הטלפון."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"הקלט את מה שאתה מקליד ואת הפעולות שאתה מבצע"</string>
     <string name="permdesc_readInputState" msgid="5132879321450325445">"מאפשר ליישומים לצפות במקשים שעליהם אתה לוחץ בעת אינטראקציה עם יישום אחר (כגון הזנת סיסמה). לא אמור להיות דרוש לעולם ליישום רגילים."</string>
@@ -277,18 +277,18 @@
     <string name="permlab_installPackages" msgid="335800214119051089">"התקן יישומים באופן ישיר"</string>
     <string name="permdesc_installPackages" msgid="526669220850066132">"מאפשר ליישום להתקין חבילות Android חדשות או מעודכנות. יישומים זדוניים עלולים להשתמש ביכולת זו כדי להוסיף יישומים חדשים עם הרשאות חזקות אקראיות."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"מחק את כל נתוני הקובץ השמור של היישום"</string>
-    <!-- outdated translation 7740465694193671402 -->     <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"מאפשר ליישום לפנות שטח אחסון בטלפון על ידי מחיקת קבצים בספריית הקובץ השמור של היישום. הגישה מוגבלת מאוד בדרך כלל לתהליך מערכת."</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"מאפשר ליישום לפנות שטח אחסון בטבלט על ידי מחיקת קבצים בספריית הקובץ השמור של היישום. הגישה מוגבלת מאוד בדרך כלל לתהליך מערכת."</string>
     <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"מאפשר ליישום לפנות שטח אחסון בטלפון על ידי מחיקת קבצים בספריית הקובץ השמור של היישום. הגישה מוגבלת מאוד בדרך כלל לתהליך מערכת."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"העבר משאבי יישום"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"מאפשר ליישום להעביר משאבי יישומים ממדיה פנימית לחיצונית ולהיפך."</string>
     <!-- outdated translation 4811921703882532070 -->     <string name="permlab_readLogs" msgid="6615778543198967614">"קריאת קובצי יומן מערכת"</string>
-    <!-- outdated translation 2257937955580475902 -->     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"מאפשר ליישום לקרוא מקבצי היומן השונים של המערכת. יכולת זו מאפשר לגלות מידע כללי על הפעולות שאתה מבצע בטלפון, אך מידע זה לא יכיל מידע אישי או פרטי."</string>
-    <!-- outdated translation 2257937955580475902 -->     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"מאפשר ליישום לקרוא מקבצי היומן השונים של המערכת. יכולת זו מאפשר לגלות מידע כללי על הפעולות שאתה מבצע בטלפון, אך מידע זה לא יכיל מידע אישי או פרטי."</string>
+    <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"מאפשר ליישום לקרוא מקובצי היומן השונים של המערכת. יכולת זו מאפשרת לגלות מידע כללי על הפעולות שאתה מבצע בטבלט, שעשוי לכלול מידע אישי או פרטי."</string>
+    <!-- outdated translation 4077356893924755294 -->     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"מאפשר ליישום לקרוא מקובצי היומן השונים של המערכת. יכולת זו מאפשרת לגלות מידע כללי על הפעולות שאתה מבצע בטבלט, שעשוי לכלול מידע אישי או פרטי."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"קריאה/כתיבה למשאבים בבעלות diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"מאפשר ליישום לקרוא ולכתוב לכל משאב בבעלות קבוצת ה-diag; לדוגמה, קבצים ב-‎/dev. לפעולה זו יש פוטנציאל להשפיע על היציבות והאבטחה של המערכת. היצרן או המפעיל בלבד יכולים להשתמש ביכולת זו לצורך אבחונים ספציפיים בחומרה."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"הופך לפעיל או משבית רכיבי יישום"</string>
-    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"מאפשר ליישום לשנות ולקבוע אם רכיב של יישום אחר מופעל או לא. יישומים זדוניים עלולים להשתמש ביכולת זו כדי להשבית יכולות חשובות של הטלפון. יש להשתמש בזהירות ועם אישור, משום שאפשר להעביר רכיבי יישום למצב לא שמיש, לא עקבי או לא יציב."</string>
-    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"מאפשר ליישום לשנות ולקבוע אם רכיב של יישום אחר מופעל או לא. יישומים זדוניים עלולים להשתמש ביכולת זו כדי להשבית יכולות חשובות של הטלפון. יש להשתמש בזהירות ועם אישור, משום שאפשר להעביר רכיבי יישום למצב לא שמיש, לא עקבי או לא יציב."</string>
+    <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"מאפשר ליישום לשנות ולקבוע אם רכיב של יישום אחר מופעל או לא. יישומים זדוניים עלולים להשתמש ביכולת זו כדי להשבית יכולות חשובות של הטבלט. יש להשתמש בזהירות בהרשאה זו, משום שהיא עלולה להעביר רכיבי יישום למצב לא שמיש, לא עקבי או לא יציב."</string>
+    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"מאפשר ליישום לשנות ולקבוע אם רכיב של יישום אחר מופעל או לא. יישומים זדוניים עלולים להשתמש ביכולת זו כדי להשבית יכולות חשובות של הטבלט. יש להשתמש בזהירות בהרשאה זו, משום שהיא עלולה להעביר רכיבי יישום למצב לא שמיש, לא עקבי או לא יציב."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"הגדר יישומים מועדפים"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"מאפשר ליישום לשנות את היישומים המועדפים. פעולה זו עלולה לאפשר ליישומים זדוניים לשנות באופן שקט את היישומים הפועלים, לזייף את היישומים הקיימים כדי לאסוף נתונים פרטיים ממך."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"שנה הגדרות מערכת כלליות"</string>
@@ -298,19 +298,19 @@
     <string name="permlab_writeGservices" msgid="2149426664226152185">"שינוי מפת השירותים של Google"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"מאפשר ליישום לשנות את מפת השירותים של Google. לא לשימוש של יישומים רגילים."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"הפעל אוטומטית באתחול"</string>
-    <!-- outdated translation 698336728415008796 -->     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"מאפשר ליישום להפעיל את עצמו מחדש לאחר אתחול המערכת. פעולה זו עלולה להאריך את הפעלת הטלפון ומאפשר ליישום להאט את הפעולה הכוללת של הטלפון אם היא פועלת תמיד."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"מאפשר ליישום להפעיל את עצמו מחדש לאחר אתחול המערכת. פעולה זו עלולה להאריך את זמן הפעלת הטבלט, ומאפשרת ליישום להאט את הפעולה הכוללת של הטבלט כאשר היא פועלת תמיד."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="698336728415008796">"מאפשר ליישום להפעיל את עצמו מחדש לאחר אתחול המערכת. פעולה זו עלולה להאריך את הפעלת הטלפון ומאפשר ליישום להאט את הפעולה הכוללת של הטלפון אם היא פועלת תמיד."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"שלח שידור דביק"</string>
-    <!-- outdated translation 1920045289234052219 -->     <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"מאפשר ליישום לשלוח שירותים דביקים, הנשארים לאחר סיום השידור. יישומים זדוניים עלולים להאט את פעולת הטלפון או להפוך אותו ללא יציג כיוון שהם גורמים לשימוש מופרז בזיכרון."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"מאפשר ליישום לשלוח שידורים דביקים, הנשארים לאחר סיום השידור. יישומים זדוניים עלולים להאט את פעולת הטבלט או להפוך אותו ללא יציב כיוון שהם גורמים לשימוש מופרז בזיכרון."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"מאפשר ליישום לשלוח שירותים דביקים, הנשארים לאחר סיום השידור. יישומים זדוניים עלולים להאט את פעולת הטלפון או להפוך אותו ללא יציג כיוון שהם גורמים לשימוש מופרז בזיכרון."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"קרא נתונים של אנשי קשר"</string>
-    <!-- outdated translation 3371591512896545975 -->     <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"מאפשר ליישום לקרוא את כל הנתונים של אנשי הקשר (כתובות) המאוחסנים בטלפון. יישומים זדוניים עלולים להשתמש ביכולת זו כדי לשלוח את הנתונים שלך לאנשים אחרים."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"מאפשר ליישום לקרוא את כל הנתונים של אנשי הקשר (כתובות) המאוחסנים בטבלט. יישומים זדוניים עלולים להשתמש ביכולת זו כדי לשלוח את הנתונים שלך לאנשים אחרים."</string>
     <string name="permdesc_readContacts" product="default" msgid="3371591512896545975">"מאפשר ליישום לקרוא את כל הנתונים של אנשי הקשר (כתובות) המאוחסנים בטלפון. יישומים זדוניים עלולים להשתמש ביכולת זו כדי לשלוח את הנתונים שלך לאנשים אחרים."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"כתוב נתוני איש קשר"</string>
-    <!-- outdated translation 3924383579108183601 -->     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"מאפשר ליישום לשנות את הנתונים של אנשי הקשר (כתובות) המאוחסנים בטלפון. יישומים זדוניים עלולים להשתמש ביכולת זו כדי למחוק או לשנות את הנתונים של אנשי הקשר."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"מאפשר ליישום לשנות את הנתונים של אנשי הקשר (כתובות) המאוחסנים בטבלט. יישומים זדוניים עלולים להשתמש ביכולת זו כדי למחוק או לשנות את הנתונים של אנשי הקשר."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"מאפשר ליישום לשנות את הנתונים של אנשי הקשר (כתובות) המאוחסנים בטלפון. יישומים זדוניים עלולים להשתמש ביכולת זו כדי למחוק או לשנות את הנתונים של אנשי הקשר."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"קרא אירועי לוח שנה"</string>
-    <!-- outdated translation 5533029139652095734 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"מאפשר ליישום לקרוא את כל אירועי לוח השנה המאוחסנים בטלפון. יישומים זדוניים עלולים להשתמש ביכולת זו כדי לשלוח את אירועי לוח השנה שלך לאנשים אחרים."</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"מאפשר ליישום לקרוא את כל אירועי לוח השנה המאוחסנים בטבלט. יישומים זדוניים עלולים להשתמש ביכולת זו כדי לשלוח את אירועי לוח השנה שלך לאנשים אחרים."</string>
     <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"מאפשר ליישום לקרוא את כל אירועי לוח השנה המאוחסנים בטלפון. יישומים זדוניים עלולים להשתמש ביכולת זו כדי לשלוח את אירועי לוח השנה שלך לאנשים אחרים."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"הוסף או שנה אירועי לוח השנה ושלח דוא\"ל לאורחים"</string>
     <string name="permdesc_writeCalendar" msgid="2988871373544154221">"מאפשר ליישום להוסיף או לשנות את האירועים בלוח השנה, פעולה שעשויה לשלוח דוא\"ל לאורחים. יישומים זדוניים עלולים להשתמש ביכולת זו כדי למחוק או לשנות את האירועים בלוח השנה או כדי לשלוח דוא\"ל לאורחים."</string>
@@ -321,10 +321,10 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"הרשאה להתקין ספק מיקום"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"צור מקורות מיקום מדומים לצורך בדיקה. יישומים זדוניים עלולים להשתמש ביכולת זו כדי לעקוף את המקום ו/או המצב המוחזרים על ידי מקורות המיקום האמיתיים כגון GPS או ספקי רשת או לעקוב ולדווח על המיקום שלך למקור חיצוני."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"מיקום מדויק (GPS)"</string>
-    <!-- outdated translation 7411213317434337331 -->     <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"קבל גישה למקורות מיקום מדויקים כגון מערכת מיקום גלובלית (GPS) בטלפון, כאשר הם זמינים. יישומים זדוניים עלולים להשתמש ביכולת זו כדי לקבוע היכן אתה נמצא, ולגרום לצריכת סוללה נוספת."</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"קבל גישה למקורות מיקום מדויקים כגון מערכת מיקום גלובלית (GPS) בטבלט, כאשר הם זמינים. יישומים זדוניים עלולים להשתמש ביכולת זו כדי לקבוע היכן אתה נמצא ולגרום לצריכת סוללה נוספת."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"קבל גישה למקורות מיקום מדויקים כגון מערכת מיקום גלובלית (GPS) בטלפון, כאשר הם זמינים. יישומים זדוניים עלולים להשתמש ביכולת זו כדי לקבוע היכן אתה נמצא, ולגרום לצריכת סוללה נוספת."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"מיקום משוער (מבוסס רשת)"</string>
-    <!-- outdated translation 8235655958070862293 -->     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"קבל גישה למשאבי מיקום משוער כגון מסד הנתונים של הרשת הסלולרית כדי לקבוע את המיקום המשוער של הטלפון, כאשר ניתן. יישומים זדוניים עלולים להשתמש ביכולת זו כדי לקבוע את מיקומך המשוער."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"קבל גישה למשאבי מיקום משוער כגון מסד הנתונים של הרשת הסלולרית כדי לקבוע את המיקום המשוער של הטבלט, כאשר הם זמינים. יישומים זדוניים עלולים להשתמש ביכולת זו כדי לקבוע את מיקומך המשוער."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8235655958070862293">"קבל גישה למשאבי מיקום משוער כגון מסד הנתונים של הרשת הסלולרית כדי לקבוע את המיקום המשוער של הטלפון, כאשר ניתן. יישומים זדוניים עלולים להשתמש ביכולת זו כדי לקבוע את מיקומך המשוער."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"גישה ל-SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"מאפשר ליישומים להשתמש בתכונות SurfaceFlinger ברמה נמוכה."</string>
@@ -336,13 +336,13 @@
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"מאפשר ליישום לגשת לנתיב הקלטת אודיו."</string>
     <!-- outdated translation 8059288807274039014 -->     <string name="permlab_camera" msgid="3616391919559751192">"צלם תמונות"</string>
     <!-- outdated translation 9013476258810982546 -->     <string name="permdesc_camera" msgid="6004878235852154239">"מאפשר ליישום לצלם תמונות בעזרת המצלמה. כך מתאפשר ליישום לאסוף תמונות שהמצלמה רואה בכל עת."</string>
-    <!-- outdated translation 8337817093326370537 -->     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"השבת טלפון לצמיתות"</string>
+    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"השבת לצמיתות את הטבלט"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"השבת טלפון לצמיתות"</string>
-    <!-- outdated translation 5569526552607599221 -->     <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"מאפשר ליישום להשבית את הטלפון כולו לצמיתות. יכולת זו מסוכנת מאוד."</string>
+    <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"מאפשר ליישום להשבית את הטבלט כולו לצמיתות. יכולת זו מסוכנת מאוד."</string>
     <string name="permdesc_brick" product="default" msgid="5569526552607599221">"מאפשר ליישום להשבית את הטלפון כולו לצמיתות. יכולת זו מסוכנת מאוד."</string>
-    <!-- outdated translation 2898560872462638242 -->     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"אלץ אתחול מחדש של הטלפון"</string>
+    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"אלץ אתחול מחדש של הטבלט"</string>
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"אלץ אתחול מחדש של הטלפון"</string>
-    <!-- outdated translation 7914933292815491782 -->     <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"מאפשר ליישום לאלץ את הטלפון לבצע אתחול מחדש."</string>
+    <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"מאפשר ליישום לאלץ את הטבלט לבצע אתחול מחדש."</string>
     <string name="permdesc_reboot" product="default" msgid="7914933292815491782">"מאפשר ליישום לאלץ את הטלפון לבצע אתחול מחדש."</string>
     <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"טעינה וביטול טעינה של מערכות קבצים"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"מאפשר ליישום לטעון מערכות קבצים ולבטל את טעינתן עבור אחסון נשלף."</string>
@@ -372,7 +372,7 @@
     <string name="permdesc_callPhone" msgid="3369867353692722456">"מאפשר ליישום להתקשר למספרי טלפון ללא התערבות מצידך. יישומים זדוניים עלולים לגרום לשיחות לא צפויות בחשבון הטלפון. לתשומת ליבך, אינו מאפשר ליישום להתקשר למספרי חירום."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"התקשר ישירות למספרי טלפון"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"מאפשר ליישום להתקשר לכל מספר טלפון, כולל מספרי חירום, ללא התערבות מצידך. יישומים זדוניים עלולים לבצע שיחות מיותרות ולא חוקיות לשירותי חירום."</string>
-    <!-- outdated translation 5604848095315421425 -->     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"הפעל ישירות התקנה של טלפון CDMA"</string>
+    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"הפעל ישירות התקנת טבלט מסוג CDMA"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"הפעל ישירות התקנה של טלפון CDMA"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"מאפשר ליישום להפעיל הקצאת CDMA. יישומים זדוניים עלולים להפעיל הקצאת CDMA ללא צורך"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"שליטה בהתראות עדכון מיקום"</string>
@@ -385,16 +385,16 @@
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"מאפשר ליישום לשלוט בתכונות הטלפון של המכשיר. יישום עם הרשאה זו יכול להחליף רשתות, להפעיל ולכבות את הרדיו בטלפון וכדומה מבלי להודיע לך כלל."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"קרא את המצב והזהות של הטלפון"</string>
     <string name="permdesc_readPhoneState" msgid="188877305147626781">"מאפשר ליישום לגשת לתכונות טלפון של המכשיר.יישום עם הרשאה זו יכול לקבוע את מספר הטלפון והמספר הסידורי של טלפון זה, אם שיחה היא פעילה, המספר שאליו מחוברת שיחה זו וכדומה."</string>
-    <!-- outdated translation 573480187941496130 -->     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"מניעת מעבר הטלפון למצב שינה"</string>
+    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"מנע מעבר של הטבלט למצב שינה"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"מניעת מעבר הטלפון למצב שינה"</string>
-    <!-- outdated translation 7584036471227467099 -->     <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"מאפשר ליישום למנוע מעבר של הטלפון למצב שינה."</string>
+    <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"מאפשר ליישום למנוע מעבר של הטבלט למצב שינה."</string>
     <string name="permdesc_wakeLock" product="default" msgid="7584036471227467099">"מאפשר ליישום למנוע מעבר של הטלפון למצב שינה."</string>
-    <!-- outdated translation 4928622470980943206 -->     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"הדלק או כבה את הטלפון"</string>
+    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"הדלק או כבה את הטבלט"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"הדלק או כבה את הטלפון"</string>
-    <!-- outdated translation 4577331933252444818 -->     <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"מאפשר ליישום לכבות ולהדליק את הטלפון."</string>
+    <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"מאפשר ליישום לכבות ולהדליק את הטבלט."</string>
     <string name="permdesc_devicePower" product="default" msgid="4577331933252444818">"מאפשר ליישום לכבות ולהדליק את הטלפון."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"הפעל במצב בדיקה של היצרן"</string>
-    <!-- outdated translation 8136644990319244802 -->     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"הפעל כבדיקת יצרן ברמה נמוכה, המאפשרת גישה מלאה לחומרת הטלפון. זמינה רק כאשר טלפון פועל במצב בדיקת יצרן."</string>
+    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"הפעל כבדיקת יצרן ברמה נמוכה, המאפשרת גישה מלאה לחומרת הטבלט. זמין רק כאשר טבלט פועל במצב בדיקת יצרן."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"הפעל כבדיקת יצרן ברמה נמוכה, המאפשרת גישה מלאה לחומרת הטלפון. זמינה רק כאשר טלפון פועל במצב בדיקת יצרן."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"הגדר טפט"</string>
     <string name="permdesc_setWallpaper" msgid="6417041752170585837">"מאפשר ליישום להגדיר את טפט המערכת."</string>
@@ -403,15 +403,15 @@
     <string name="permlab_masterClear" msgid="2315750423139697397">"אפס את המערכת לברירות המחדל של היצרן"</string>
     <string name="permdesc_masterClear" msgid="5033465107545174514">"מאפשר ליישום לאפס לחלוטין את המערכת להגדרות היצרן, תוך מחיקה של כל הנתונים, התצורה והיישומים שהותקנו."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"הגדר שעה"</string>
-    <!-- outdated translation 667294309287080045 -->     <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"מאפשר ליישום לשנות את שעת השעון של הטלפון."</string>
+    <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"מאפשר ליישום לשנות את שעת השעון של הטבלט."</string>
     <string name="permdesc_setTime" product="default" msgid="667294309287080045">"מאפשר ליישום לשנות את שעת השעון של הטלפון."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"הגדר אזור זמן"</string>
-    <!-- outdated translation 1902540227418179364 -->     <string name="permdesc_setTimeZone" product="tablet" msgid="2522877107613885139">"מאפשר ליישום לשנות את אזור הזמן של הטלפון."</string>
+    <string name="permdesc_setTimeZone" product="tablet" msgid="2522877107613885139">"מאפשר ליישום לשנות את אזור הזמן של הטבלט."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="1902540227418179364">"מאפשר ליישום לשנות את אזור הזמן של הטלפון."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"פעל בתור ה-AccountManagerService"</string>
     <string name="permdesc_accountManagerService" msgid="6056903274106394752">"מאפשר ליישום לבצע שיחות אל AccountAuthenticators"</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"גלה חשבונות ידועים"</string>
-    <!-- outdated translation 6839262446413155394 -->     <string name="permdesc_getAccounts" product="tablet" msgid="857622793935544694">"מאפשר ליישום להגיע לרשימת החשבונות הידועים לטלפון."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="857622793935544694">"מאפשר ליישום להגיע לרשימת החשבונות הידועים לטבלט."</string>
     <string name="permdesc_getAccounts" product="default" msgid="6839262446413155394">"מאפשר ליישום להגיע לרשימת החשבונות הידועים לטלפון."</string>
     <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"פעל כמאמת חשבון"</string>
     <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"מאפשר ליישום להשתמש ביכולות מאמת החשבון של מנהל החשבון, כולל יצירת חשבונות וקבלה והגדרה של הסיסמאות שלהם."</string>
@@ -438,10 +438,10 @@
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"אפשר קבלת שידורים מרובים ב-Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"מאפשר ליישום לקבל חפיסות שלא ממוענות ישירות למכשיר שלך. יכולת זו שימושית בעת גילוי שירותים המוצעים בקרבת מקום. היא משתמשת במתח סוללה רב יותר לעומת מצב שאינו ריבוי שידורים."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"ניהול Bluetooth"</string>
-    <!-- outdated translation 7256289774667054555 -->     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"מאפשר ליישום להגדיר את טלפון Bluetooth המקומי, ולגלות מכשירים מרוחקים ולבצע התאמה איתם."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"מאפשר ליישום להגדיר את הטבלט המקומי מסוג Bluetooth ולגלות התקנים מרוחקים ולבצע התאמה איתם."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"מאפשר ליישום להגדיר את טלפון Bluetooth המקומי, ולגלות מכשירים מרוחקים ולבצע התאמה איתם."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"צור חיבורי Bluetooth"</string>
-    <!-- outdated translation 762515380679392945 -->     <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"מאפשר ליישום להציג תצורה של מכשיר Bluetooth המקומי, וליצור ולקבל חיבורים עם מכשירים מותאמים."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"מאפשר ליישום להציג תצורה של הטבלט המקומי מסוג Bluetooth וליצור ולקבל חיבורים עם מכשירים מותאמים."</string>
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"מאפשר ליישום להציג תצורה של מכשיר Bluetooth המקומי, וליצור ולקבל חיבורים עם מכשירים מותאמים."</string>
     <!-- no translation found for permlab_nfc (4423351274757876953) -->
     <skip />
@@ -480,15 +480,15 @@
     <!-- outdated translation 4307861496302850201 -->     <string name="policylab_limitPassword" msgid="4497420728857585791">"הגבל סיסמה"</string>
     <!-- outdated translation 1719877245692318299 -->     <string name="policydesc_limitPassword" msgid="9083400080861728056">"הגבל את סוגי הסיסמאות שבהן מותר לך להשתמש."</string>
     <!-- outdated translation 7374780712664285321 -->     <string name="policylab_watchLogin" msgid="914130646942199503">"צפה בניסיונות התחברות"</string>
-    <!-- outdated translation 1961251179624843483 -->     <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"הצג נכשל בניסיונות להתחבר למכשיר, לביצוע פעולה כלשהי."</string>
-    <!-- outdated translation 1961251179624843483 -->     <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"הצג נכשל בניסיונות להתחבר למכשיר, לביצוע פעולה כלשהי."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"עקוב אחר מספר הסיסמאות השגויות שהוזנו בעת ביטול נעילת המסך, ונעל את הטבלט, או מחק את כל הנתונים בטבלט אם סיסמאות שגויות רבות מדי הוזנו"</string>
+    <!-- outdated translation 933601759466308092 -->     <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"עקוב אחר מספר הסיסמאות השגויות שהוזנו בעת ביטול נעילת המסך, ונעל את הטבלט, או מחק את כל הנתונים בטבלט אם סיסמאות שגויות רבות מדי הוזנו"</string>
     <!-- outdated translation 9084772090797485420 -->     <string name="policylab_resetPassword" msgid="2620077191242688955">"אפס סיסמה"</string>
     <!-- outdated translation 3332167600331799991 -->     <string name="policydesc_resetPassword" msgid="5391240616981297361">"אלץ את הסיסמה שלך לערך חדש, דורש שמנהל המערכת ייתן לך את הסיסמה לפני שתוכל להיכנס."</string>
     <!-- outdated translation 5760466025247634488 -->     <string name="policylab_forceLock" msgid="2274085384704248431">"אלץ נעילה"</string>
     <!-- outdated translation 2819868664946089740 -->     <string name="policydesc_forceLock" msgid="5696964126226028442">"שולט במועד נעילת ההתקן, דורש הזנה חוזרת של הסיסמה שלו."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"מחק את כל הנתונים"</string>
-    <!-- outdated translation 2314060933796396205 -->     <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"בצע איפוס להגדרות היצרן, המוחק את כל הנתונים ללא צורך באישור."</string>
-    <!-- outdated translation 2314060933796396205 -->     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"בצע איפוס להגדרות היצרן, המוחק את כל הנתונים ללא צורך באישור."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"מחק את הנתונים בטבלט ללא אזהרה על ידי איפוס נתוני יצרן"</string>
+    <!-- outdated translation 314455232799486222 -->     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"מחק את הנתונים בטבלט ללא אזהרה על ידי איפוס נתוני יצרן"</string>
     <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
     <skip />
     <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
@@ -653,7 +653,7 @@
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"חבר את המטען."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"אין כרטיס SIM."</string>
-    <!-- outdated translation 2186920585695169078 -->     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"אין כרטיס SIM בטלפון."</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"אין כרטיס SIM בטבלט."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"אין כרטיס SIM בטלפון."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"הכנס כרטיס SIM."</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"שיחות חירום בלבד"</string>
@@ -667,8 +667,7 @@
     <skip />
     <!-- no translation found for lockscreen_too_many_failed_pin_attempts_dialog_message (6827749231465145590) -->
     <skip />
-    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (8687762517114904651) -->
-    <skip />
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"ציירת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות פרטי הכניסה שלך ב-Google‏."\n"‏ "\n" נסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"ציירת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילה הטלפון באמצעות פרטי הכניסה שלך ב-Google."\n\n" נסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"נסה שוב בעוד <xliff:g id="NUMBER">%d</xliff:g> שניות."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"שכחת את הקו?"</string>
@@ -699,8 +698,7 @@
     <string name="double_tap_toast" msgid="1068216937244567247">"טיפש: הקש פעמיים כדי להתקרב ולהתרחק."</string>
     <!-- no translation found for autofill_this_form (1272247532604569872) -->
     <skip />
-    <!-- no translation found for setup_autofill (8154593408885654044) -->
-    <skip />
+    <string name="setup_autofill" msgid="8154593408885654044">"התקן \'מילוי אוטומטי\'"</string>
     <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
     <skip />
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
@@ -712,7 +710,7 @@
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"קרא היסטוריה וסימניות של דפדפן"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"מאפשר ליישום לקרוא את כל כתובות האתרים שבהן ביקר הדפדפן, ואת כל הסימניות של הדפדפן."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"כתיבת היסטוריה וסימניות של דפדפן"</string>
-    <!-- outdated translation 945571990357114950 -->     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"מאפשר ליישום לשנות את ההיסטוריה או הסימניות של הדפדפן המאוחסנים בטלפון. יישומים זדוניים עלולים להשתמש ביכולת זו כדי למחוק או לשנות את נתוני הדפדפן."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"מאפשר ליישום לשנות את ההיסטוריה או הסימניות של הדפדפן המאוחסנים בטבלט. יישומים זדוניים עלולים להשתמש ביכולת זו כדי למחוק או לשנות את נתוני הדפדפן."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"מאפשר ליישום לשנות את ההיסטוריה או הסימניות של הדפדפן המאוחסנים בטלפון. יישומים זדוניים עלולים להשתמש ביכולת זו כדי למחוק או לשנות את נתוני הדפדפן."</string>
     <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
     <skip />
@@ -843,7 +841,7 @@
     <string name="inputMethod" msgid="1653630062304567879">"שיטת קלט"</string>
     <!-- outdated translation 1672989176958581452 -->     <string name="editTextMenuTitle" msgid="4909135564941815494">"ערוך טקסט"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"חסר מקום"</string>
-    <!-- outdated translation 635106544616378836 -->     <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"שטח האחסון בטלפון עומד להיגמר."</string>
+    <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"שטח האחסון בטבלט עומד להיגמר."</string>
     <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"שטח האחסון בטלפון עומד להיגמר."</string>
     <string name="ok" msgid="5970060430562524910">"אישור"</string>
     <string name="cancel" msgid="6442560571259935130">"ביטול"</string>
@@ -925,7 +923,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"מספר גדול של הודעות SMS נשלח. בחר \'אישור\' כדי להמשיך או \'ביטול\' כדי לעצור את השליחה."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"אישור"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"ביטול"</string>
-    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"הגדרת שעה"</string>
+    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
     <skip />
     <string name="date_time_set" msgid="5777075614321087758">"הגדר"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"ברירת מחדל"</string>
@@ -1077,5 +1076,15 @@
     <!-- no translation found for share (1778686618230011964) -->
     <skip />
     <!-- no translation found for find (4808270900322985960) -->
+    <skip />
+    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
+    <skip />
+    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
+    <skip />
+    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
+    <skip />
+    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
+    <skip />
+    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
     <skip />
 </resources>
