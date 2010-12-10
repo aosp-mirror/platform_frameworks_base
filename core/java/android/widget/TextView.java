@@ -7152,7 +7152,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 int end = Math.min(len, mPrevEnd);
                 Selection.setSelection((Spannable)mText, start, end);
 
-                if (hasSelection()) {
+                boolean selectAllGotFocus = mSelectAllOnFocus && mTouchFocusSelected;
+                if (hasSelection() && !selectAllGotFocus) {
                     startSelectionActionMode();
                 }
             }
@@ -7956,9 +7957,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return true;
         }
 
+        // Long press in empty space moves cursor and shows the Paste affordance if available.
         if (!isPositionOnText(mLastDownPositionX, mLastDownPositionY) &&
                 mInsertionControllerEnabled) {
-            // Long press in empty space moves cursor and shows the Paste affordance if available.
             final int offset = getOffset(mLastDownPositionX, mLastDownPositionY);
             stopSelectionActionMode();
             Selection.setSelection((Spannable)mText, offset);
@@ -7978,6 +7979,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 startDrag(data, getTextThumbnailBuilder(selectedText), false, localState);
                 stopSelectionActionMode();
             } else {
+                // Start a new selection at current position, keep selectionAction mode on
                 selectCurrentWord();
                 getSelectionController().show();
             }
@@ -7986,6 +7988,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return true;
         }
 
+        // Start a new selection
         if (startSelectionActionMode()) {
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             mDiscardNextActionUp = true;
@@ -8061,6 +8064,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         selectCurrentWord();
+        final InputMethodManager imm = (InputMethodManager)
+                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(this, 0, null);
         ActionMode.Callback actionModeCallback = new SelectionActionModeCallback();
         mSelectionActionMode = startActionMode(actionModeCallback);
         return mSelectionActionMode != null;
