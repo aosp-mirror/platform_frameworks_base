@@ -25,6 +25,7 @@ interface INfcTag
 {
     int close(int nativeHandle);
     int connect(int nativeHandle);
+    int reconnect(int nativeHandle);
     int[] getTechList(int nativeHandle);
     byte[] getUid(int nativeHandle);
     boolean isNdef(int nativeHandle);
