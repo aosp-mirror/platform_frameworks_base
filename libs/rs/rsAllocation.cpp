@@ -763,30 +763,42 @@ RsAllocation rsi_AllocationCreateBitmapRef(Context *rsc, RsType vtype,
     return alloc;
 }
 
-void rsi_AllocationUpdateFromBitmap(Context *rsc, RsAllocation va,
-                                    RsElement _src, const void *data) {
+void rsi_AllocationCopyFromBitmap(Context *rsc, RsAllocation va, const void *data, size_t dataLen) {
     Allocation *texAlloc = static_cast<Allocation *>(va);
-    const Element *src = static_cast<const Element *>(_src);
-    const Element *dst = texAlloc->getType()->getElement();
-    uint32_t w = texAlloc->getType()->getDimX();
-    uint32_t h = texAlloc->getType()->getDimY();
-    bool genMips = texAlloc->getType()->getDimLOD();
+    const Type * t = texAlloc->getType();
 
-    ElementConverter_t cvt = pickConverter(dst, src);
-    if (cvt) {
-        cvt(texAlloc->getPtr(), data, w * h);
-        if (genMips) {
-            Adapter2D adapt(rsc, texAlloc);
-            Adapter2D adapt2(rsc, texAlloc);
-            for (uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
-                adapt.setLOD(lod);
-                adapt2.setLOD(lod + 1);
-                mip(adapt2, adapt);
-            }
-        }
-    } else {
-        rsc->setError(RS_ERROR_BAD_VALUE, "Unsupported bitmap format");
+    uint32_t w = t->getDimX();
+    uint32_t h = t->getDimY();
+    bool genMips = t->getDimLOD();
+    size_t s = w * h * t->getElementSizeBytes();
+    if (s != dataLen) {
+        rsc->setError(RS_ERROR_BAD_VALUE, "Bitmap size didn't match allocation size");
+        return;
     }
+
+    memcpy(texAlloc->getPtr(), data, s);
+    if (genMips) {
+        Adapter2D adapt(rsc, texAlloc);
+        Adapter2D adapt2(rsc, texAlloc);
+        for (uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
+            adapt.setLOD(lod);
+            adapt2.setLOD(lod + 1);
+            mip(adapt2, adapt);
+        }
+    }
+}
+
+void rsi_AllocationCopyToBitmap(Context *rsc, RsAllocation va, void *data, size_t dataLen) {
+    Allocation *texAlloc = static_cast<Allocation *>(va);
+    const Type * t = texAlloc->getType();
+
+    size_t s = t->getDimX() * t->getDimY() * t->getElementSizeBytes();
+    if (s != dataLen) {
+        rsc->setError(RS_ERROR_BAD_VALUE, "Bitmap size didn't match allocation size");
+        return;
+    }
+
+    memcpy(data, texAlloc->getPtr(), s);
 }
 
 void rsi_AllocationData(Context *rsc, RsAllocation va, const void *data, uint32_t sizeBytes) {
