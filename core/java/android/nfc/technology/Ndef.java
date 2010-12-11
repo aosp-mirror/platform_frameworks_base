@@ -38,11 +38,12 @@ import java.io.IOException;
  * permission.
  */
 public final class Ndef extends BasicTagTechnology {
-    public static final int NDEF_MODE_READ_ONCE = 1;
-    public static final int NDEF_MODE_READ_ONLY = 2;
-    public static final int NDEF_MODE_WRITE_ONCE = 3;
-    public static final int NDEF_MODE_WRITE_MANY = 4;
-    public static final int NDEF_MODE_UNKNOWN = 5;
+    /** @hide */
+    public static final int NDEF_MODE_READ_ONLY = 1;
+    /** @hide */
+    public static final int NDEF_MODE_READ_WRITE = 2;
+    /** @hide */
+    public static final int NDEF_MODE_UNKNOWN = 3;
 
     /** @hide */
     public static final String EXTRA_NDEF_MSG = "ndefmsg";
@@ -50,7 +51,11 @@ public final class Ndef extends BasicTagTechnology {
     /** @hide */
     public static final String EXTRA_NDEF_MAXLENGTH = "ndefmaxlength";
 
-    private final int maxNdefSize;
+    /** @hide */
+    public static final String EXTRA_NDEF_CARDSTATE = "ndefcardstate";
+
+    private final int mMaxNdefSize;
+    private final int mCardState;
 
     /**
      * Internal constructor, to be used by NfcAdapter
@@ -59,10 +64,12 @@ public final class Ndef extends BasicTagTechnology {
     public Ndef(NfcAdapter adapter, Tag tag, int tech, Bundle extras) throws RemoteException {
         super(adapter, tag, tech);
         if (extras != null) {
-            maxNdefSize = extras.getInt(EXTRA_NDEF_MAXLENGTH);
+            mMaxNdefSize = extras.getInt(EXTRA_NDEF_MAXLENGTH);
+            mCardState = extras.getInt(EXTRA_NDEF_CARDSTATE);
         } else {
-            maxNdefSize = 0;  //TODO: throw exception
+            throw new NullPointerException("NDEF tech extras are null.");
         }
+
     }
 
     /**
@@ -104,35 +111,18 @@ public final class Ndef extends BasicTagTechnology {
     /**
      * Get maximum NDEF message size in bytes
      */
-    public int getSize() {
-        return maxNdefSize;
+    public int getMaxSize() {
+        return mMaxNdefSize;
     }
 
     /**
-     * Read/Write mode hint.
-     * Provides a hint if further reads or writes are likely to succeed.
+     * Provides a hint on whether writes are likely to succeed.
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     * @return one of NDEF_MODE
+     * @return true if write is likely to succeed
      * @throws IOException if the target is lost or connection closed
      */
-    public int getModeHint() throws IOException {
-        try {
-            int result = mTagService.getModeHint(mTag.getServiceHandle());
-            if (ErrorCodes.isError(result)) {
-                switch (result) {
-                    case ErrorCodes.ERROR_IO:
-                        throw new IOException();
-                    default:
-                        // Should not happen
-                        throw new IOException();
-                }
-            }
-            return result;
-
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            return NDEF_MODE_UNKNOWN;
-        }
+    public boolean isWritable() {
+        return (mCardState == NDEF_MODE_READ_WRITE);
     }
 
     // Methods that require connect()
