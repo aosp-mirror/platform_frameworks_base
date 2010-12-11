@@ -41,15 +41,33 @@ class UsbService {
     private static final String TAG = UsbService.class.getSimpleName();
     private static final boolean LOG = false;
 
-    private static final String USB_CONFIGURATION_MATCH = "DEVPATH=/devices/virtual/switch/usb_configuration";
-    private static final String USB_FUNCTIONS_MATCH = "DEVPATH=/devices/virtual/usb_composite/";
-    private static final String USB_CONFIGURATION_PATH = "/sys/class/switch/usb_configuration/state";
-    private static final String USB_COMPOSITE_CLASS_PATH = "/sys/class/usb_composite";
+    private static final String USB_CONNECTED_MATCH =
+            "DEVPATH=/devices/virtual/switch/usb_connected";
+    private static final String USB_CONFIGURATION_MATCH =
+            "DEVPATH=/devices/virtual/switch/usb_configuration";
+    private static final String USB_FUNCTIONS_MATCH =
+            "DEVPATH=/devices/virtual/usb_composite/";
+    private static final String USB_CONNECTED_PATH =
+            "/sys/class/switch/usb_connected/state";
+    private static final String USB_CONFIGURATION_PATH =
+            "/sys/class/switch/usb_configuration/state";
+    private static final String USB_COMPOSITE_CLASS_PATH =
+            "/sys/class/usb_composite";
 
     private static final int MSG_UPDATE = 0;
 
-    private int mUsbConfig = 0;
-    private int mPreviousUsbConfig = 0;
+    // Delay for debouncing USB disconnects.
+    // We often get rapid connect/disconnect events when enabling USB functions,
+    // which need debouncing.
+    private static final int UPDATE_DELAY = 1000;
+
+    // current connected and configuration state
+    private int mConnected;
+    private int mConfiguration;
+
+    // last broadcasted connected and configuration state
+    private int mLastConnected = -1;
+    private int mLastConfiguration = -1;
 
     // lists of enabled and disabled USB functions
     private final ArrayList<String> mEnabledFunctions = new ArrayList<String>();
@@ -59,8 +77,6 @@ class UsbService {
 
     private final Context mContext;
 
-    private PowerManagerService mPowerManager;
-
     private final UEventObserver mUEventObserver = new UEventObserver() {
         @Override
         public void onUEvent(UEventObserver.UEvent event) {
@@ -69,16 +85,23 @@ class UsbService {
             }
 
             synchronized (this) {
-                String switchState = event.get("SWITCH_STATE");
-                if (switchState != null) {
+                String name = event.get("SWITCH_NAME");
+                String state = event.get("SWITCH_STATE");
+                if (name != null && state != null) {
                     try {
-                        int newConfig = Integer.parseInt(switchState);
-                        if (newConfig != mUsbConfig) {
-                            mPreviousUsbConfig = mUsbConfig;
-                            mUsbConfig = newConfig;
+                        int intState = Integer.parseInt(state);
+                        if ("usb_connected".equals(name)) {
+                            mConnected = intState;
                             // trigger an Intent broadcast
                             if (mSystemReady) {
-                                update();
+                                // debounce disconnects
+                                update(mConnected == 0);
+                            }
+                        } else if ("usb_configuration".equals(name)) {
+                            mConfiguration = intState;
+                            // trigger an Intent broadcast
+                            if (mSystemReady) {
+                                update(mConnected == 0);
                             }
                         }
                     } catch (NumberFormatException e) {
@@ -112,6 +135,7 @@ class UsbService {
         mContext = context;
         init();  // set initial status
 
+        mUEventObserver.startObserving(USB_CONNECTED_MATCH);
         mUEventObserver.startObserving(USB_CONFIGURATION_MATCH);
         mUEventObserver.startObserving(USB_FUNCTIONS_MATCH);
     }
@@ -120,10 +144,15 @@ class UsbService {
         char[] buffer = new char[1024];
 
         try {
-            FileReader file = new FileReader(USB_CONFIGURATION_PATH);
+            FileReader file = new FileReader(USB_CONNECTED_PATH);
             int len = file.read(buffer, 0, 1024);
             file.close();
-            mPreviousUsbConfig = mUsbConfig = Integer.valueOf((new String(buffer, 0, len)).trim());
+            mConnected = Integer.valueOf((new String(buffer, 0, len)).trim());
+
+            file = new FileReader(USB_CONFIGURATION_PATH);
+            len = file.read(buffer, 0, 1024);
+            file.close();
+            mConfiguration = Integer.valueOf((new String(buffer, 0, len)).trim());
 
         } catch (FileNotFoundException e) {
             Slog.w(TAG, "This kernel does not have USB configuration switch support");
@@ -190,13 +219,14 @@ class UsbService {
                 initHostSupport();
             }
 
-            update();
+            update(false);
             mSystemReady = true;
         }
     }
 
-    private final void update() {
-        mHandler.sendEmptyMessage(MSG_UPDATE);
+    private final void update(boolean delayed) {
+        mHandler.removeMessages(MSG_UPDATE);
+        mHandler.sendEmptyMessageDelayed(MSG_UPDATE, delayed ? UPDATE_DELAY : 0);
     }
 
     private final Handler mHandler = new Handler() {
@@ -215,31 +245,26 @@ class UsbService {
             switch (msg.what) {
                 case MSG_UPDATE:
                     synchronized (this) {
-                        final ContentResolver cr = mContext.getContentResolver();
+                        if (mConnected != mLastConnected || mConfiguration != mLastConfiguration) {
 
-                        if (Settings.Secure.getInt(cr,
-                                Settings.Secure.DEVICE_PROVISIONED, 0) == 0) {
-                            Slog.i(TAG, "Device not provisioned, skipping USB broadcast");
-                            return;
-                        }
-                        // Send an Intent containing connected/disconnected state
-                        // and the enabled/disabled state of all USB functions
-                        Intent intent;
-                        boolean usbConnected = (mUsbConfig != 0);
-                        if (usbConnected) {
-                            intent = new Intent(UsbManager.ACTION_USB_CONNECTED);
+                            final ContentResolver cr = mContext.getContentResolver();
+                            if (Settings.Secure.getInt(cr,
+                                    Settings.Secure.DEVICE_PROVISIONED, 0) == 0) {
+                                Slog.i(TAG, "Device not provisioned, skipping USB broadcast");
+                                return;
+                            }
+
+                            mLastConnected = mConnected;
+                            mLastConfiguration = mConfiguration;
+
+                            // send a sticky broadcast containing current USB state
+                            Intent intent = new Intent(UsbManager.ACTION_USB_STATE);
+                            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+                            intent.putExtra(UsbManager.USB_CONNECTED, mConnected != 0);
+                            intent.putExtra(UsbManager.USB_CONFIGURATION, mConfiguration);
                             addEnabledFunctions(intent);
-                        } else {
-                            intent = new Intent(UsbManager.ACTION_USB_DISCONNECTED);
+                            mContext.sendStickyBroadcast(intent);
                         }
-                        mContext.sendBroadcast(intent);
-
-                        // send a sticky broadcast for clients interested in both connect and disconnect
-                        intent = new Intent(UsbManager.ACTION_USB_STATE);
-                        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-                        intent.putExtra(UsbManager.USB_CONNECTED, usbConnected);
-                        addEnabledFunctions(intent);
-                        mContext.sendStickyBroadcast(intent);
                     }
                     break;
             }

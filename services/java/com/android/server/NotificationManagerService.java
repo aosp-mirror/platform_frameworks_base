@@ -332,8 +332,6 @@ public class NotificationManagerService extends INotificationManager.Stub
                 boolean adbEnabled = (UsbManager.USB_FUNCTION_ENABLED.equals(
                                     extras.getString(UsbManager.USB_FUNCTION_ADB)));
                 updateAdbNotification(usbConnected && adbEnabled);
-            } else if (action.equals(UsbManager.ACTION_USB_DISCONNECTED)) {
-                updateAdbNotification(false);
             } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)
                     || (queryRestart=action.equals(Intent.ACTION_QUERY_PACKAGE_RESTART))
