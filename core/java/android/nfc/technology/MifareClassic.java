@@ -74,7 +74,7 @@ public final class MifareClassic extends BasicTagTechnology {
         super(adapter, tag, TagTechnology.MIFARE_CLASSIC);
 
         // Check if this could actually be a Mifare
-        NfcA a = (NfcA) tag.getTechnology(TagTechnology.NFC_A);
+        NfcA a = (NfcA) tag.getTechnology(adapter, TagTechnology.NFC_A);
         //short[] ATQA = getATQA(tag);
 
         mIsEmulated = false;
