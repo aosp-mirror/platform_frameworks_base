@@ -3944,6 +3944,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mBlink != null) {
             mBlink.cancel();
         }
+
+        if (mInsertionPointCursorController != null) {
+            mInsertionPointCursorController.onDetached();
+        }
+
+        if (mSelectionModifierCursorController != null) {
+            mSelectionModifierCursorController.onDetached();
+        }
+
         hideControllers();
     }
 
@@ -8291,6 +8300,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
          * @param event The touch event
          */
         public boolean onTouchEvent(MotionEvent event);
+
+        /**
+         * Called when the view is detached from window. Perform house keeping task, such as
+         * stopping Runnable thread that would otherwise keep a reference on the context, thus
+         * preventing the activity to be recycled.
+         */
+        public void onDetached();
     }
 
     private class PastePopupMenu implements OnClickListener {
@@ -8413,7 +8429,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private long mTouchTimer;
         private boolean mIsInsertionHandle = false;
         private PastePopupMenu mPastePopupWindow;
-        private LongPressCallback mLongPressCallback;
+        private Runnable mLongPressCallback;
 
         public static final int LEFT = 0;
         public static final int CENTER = 1;
@@ -8643,7 +8659,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (mIsInsertionHandle) {
                     mTouchTimer = SystemClock.uptimeMillis();
                     if (mLongPressCallback == null) {
-                        mLongPressCallback = new LongPressCallback();
+                        mLongPressCallback = new Runnable() {
+                            public void run() {
+                                mController.hide();
+                                startSelectionActionMode();
+                            }
+                        };
                     }
                     postDelayed(mLongPressCallback, ViewConfiguration.getLongPressTimeout());
                 }
@@ -8663,7 +8684,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     final float dy = rawY - mDownPositionY;
                     final float distanceSquared = dx * dx + dy * dy;
                     if (distanceSquared >= mSquaredTouchSlopDistance) {
-                        removeCallbacks(mLongPressCallback);
+                        removeLongPressCallback();
                     }
                 }
                 break;
@@ -8671,7 +8692,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case MotionEvent.ACTION_UP:
                 if (mIsInsertionHandle) {
-                    removeCallbacks(mLongPressCallback);
+                    removeLongPressCallback();
                     long delay = SystemClock.uptimeMillis() - mTouchTimer;
                     if (delay < ViewConfiguration.getTapTimeout()) {
                         if (mPastePopupWindow != null && mPastePopupWindow.isShowing()) {
@@ -8687,7 +8708,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case MotionEvent.ACTION_CANCEL:
                 if (mIsInsertionHandle) {
-                    removeCallbacks(mLongPressCallback);
+                    removeLongPressCallback();
                 }
                 mIsDragging = false;
             }
@@ -8726,6 +8747,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mPastePopupWindow.show();
             }
         }
+
+        private void removeLongPressCallback() {
+            if (mLongPressCallback != null) {
+                removeCallbacks(mLongPressCallback);
+            }
+        }
+
+        void onDetached() {
+            removeLongPressCallback();
+        }
     }
 
     private class InsertionPointCursorController implements CursorController {
@@ -8735,18 +8766,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // The cursor controller image. Lazily created.
         private HandleView mHandle;
-
-        private final Runnable mHider = new Runnable() {
-            public void run() {
-                hide();
-            }
-        };
-
-        private final Runnable mPastePopupShower = new Runnable() {
-            public void run() {
-                getHandle().showPastePopupWindow();
-            }
-        };
+        private Runnable mHider;
+        private Runnable mPastePopupShower;
 
         public void show() {
             show(DELAY_BEFORE_PASTE);
@@ -8756,12 +8777,32 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             updatePosition();
             hideDelayed();
             getHandle().show();
-            removeCallbacks(mPastePopupShower);
+            removePastePopupCallback();
             if (canPaste()) {
                 final long durationSinceCutOrCopy = SystemClock.uptimeMillis() - sLastCutOrCopyTime;
-                if (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION)
+                if (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION) {
                     delayBeforePaste = 0;
+                }
+                if (mPastePopupShower == null) {
+                    mPastePopupShower = new Runnable() {
+                        public void run() {
+                            getHandle().showPastePopupWindow();
+                        }
+                    };
+                }
                 postDelayed(mPastePopupShower, delayBeforePaste);
+            }
+        }
+
+        private void removePastePopupCallback() {
+            if (mPastePopupShower != null) {
+                removeCallbacks(mPastePopupShower);
+            }
+        }
+
+        private void removeHiderCallback() {
+            if (mHider != null) {
+                removeCallbacks(mHider);
             }
         }
 
@@ -8769,12 +8810,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mHandle != null) {
                 mHandle.hide();
             }
-            removeCallbacks(mHider);
-            removeCallbacks(mPastePopupShower);
+            removeHiderCallback();
+            removePastePopupCallback();
         }
 
         private void hideDelayed() {
-            removeCallbacks(mHider);
+            removeHiderCallback();
+            if (mHider == null) {
+                mHider = new Runnable() {
+                    public void run() {
+                        hide();
+                    }
+                };
+            }
             postDelayed(mHider, DELAY_BEFORE_FADE_OUT);
         }
 
@@ -8821,6 +8869,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mHandle = new HandleView(this, HandleView.CENTER);
             }
             return mHandle;
+        }
+
+        @Override
+        public void onDetached() {
+            removeHiderCallback();
+            removePastePopupCallback();
+            if (mHandle != null) {
+                mHandle.onDetached();
+            }
         }
     }
 
@@ -9013,6 +9070,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 hide();
             }
         }
+
+        @Override
+        public void onDetached() {}
     }
 
     private void hideInsertionPointCursorController() {
