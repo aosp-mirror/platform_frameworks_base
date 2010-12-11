@@ -62,6 +62,7 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
     private static final long RESET_TIMEOUT = 3000; // elapsed time of inactivity before we reset
     private static final long DELAY_INCREMENT = 15; // increment per wave while tracking motion
     private static final long DELAY_INCREMENT2 = 12; // increment per wave while not tracking
+    private static final long WAVE_DELAY = WAVE_DURATION / WAVE_COUNT; // initial propagation delay
 
     private Vibrator mVibrator;
     private OnTriggerListener mOnTriggerListener;
@@ -70,9 +71,8 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
     private boolean mFingerDown = false;
     private float mRingRadius = 182.0f; // Radius of bitmap ring. Used to snap halo to it
     private int mSnapRadius = 136; // minimum threshold for drag unlock
-    private int mWaveDelay = 240; // time to delay
     private int mWaveCount = WAVE_COUNT;  // number of waves
-    private long mWaveTimerDelay = mWaveDelay;
+    private long mWaveTimerDelay = WAVE_DELAY;
     private int mCurrentWave = 0;
     private float mLockCenterX; // center of widget as dictated by widget size
     private float mLockCenterY;
@@ -190,7 +190,7 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
         switch (mLockState) {
             case STATE_RESET_LOCK:
                 if (DBG) Log.v(TAG, "State RESET_LOCK");
-                mWaveTimerDelay = mWaveDelay;
+                mWaveTimerDelay = WAVE_DELAY;
                 for (int i = 0; i < mLightWaves.size(); i++) {
                     //TweenMax.to(mLightWave.get(i), .3, {alpha:0, ease:Quint.easeOut});
                     DrawableHolder holder = mLightWaves.get(i);
@@ -445,7 +445,7 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
             double distY = mMouseY - mLockCenterY;
             int dragDistance = (int) Math.ceil(Math.hypot(distX, distY));
             if (mLockState == STATE_ATTEMPTING && dragDistance < mSnapRadius
-                    && mWaveTimerDelay >= mWaveDelay) {
+                    && mWaveTimerDelay >= WAVE_DELAY) {
                 mWaveTimerDelay = Math.min(WAVE_DURATION, mWaveTimerDelay + DELAY_INCREMENT);
 
                 DrawableHolder wave = mLightWaves.get(mCurrentWave);
