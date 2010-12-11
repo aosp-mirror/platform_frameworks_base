@@ -361,6 +361,7 @@ public final class ActivityThread {
     private static final class DumpComponentInfo {
         FileDescriptor fd;
         IBinder token;
+        String prefix;
         String[] args;
         boolean dumped;
     }
@@ -680,10 +681,12 @@ public final class ActivityThread {
             queueOrSendMessage(H.SCHEDULE_CRASH, msg);
         }
 
-        public void dumpActivity(FileDescriptor fd, IBinder activitytoken, String[] args) {
+        public void dumpActivity(FileDescriptor fd, IBinder activitytoken,
+                String prefix, String[] args) {
             DumpComponentInfo data = new DumpComponentInfo();
             data.fd = fd;
             data.token = activitytoken;
+            data.prefix = prefix;
             data.args = args;
             data.dumped = false;
             queueOrSendMessage(H.DUMP_ACTIVITY, data);
@@ -2076,7 +2079,7 @@ public final class ActivityThread {
             ActivityClientRecord r = mActivities.get(info.token);
             if (r != null && r.activity != null) {
                 PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd));
-                r.activity.dump(info.fd, pw, info.args);
+                r.activity.dump(info.prefix, info.fd, pw, info.args);
                 pw.close();
             }
         } finally {

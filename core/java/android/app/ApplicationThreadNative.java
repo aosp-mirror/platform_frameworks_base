@@ -434,9 +434,10 @@ public abstract class ApplicationThreadNative extends Binder
             data.enforceInterface(IApplicationThread.descriptor);
             ParcelFileDescriptor fd = data.readFileDescriptor();
             final IBinder activity = data.readStrongBinder();
+            final String prefix = data.readString();
             final String[] args = data.readStringArray();
             if (fd != null) {
-                dumpActivity(fd.getFileDescriptor(), activity, args);
+                dumpActivity(fd.getFileDescriptor(), activity, prefix, args);
                 try {
                     fd.close();
                 } catch (IOException e) {
@@ -906,12 +907,13 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
 
-    public void dumpActivity(FileDescriptor fd, IBinder token, String[] args)
+    public void dumpActivity(FileDescriptor fd, IBinder token, String prefix, String[] args)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeFileDescriptor(fd);
         data.writeStrongBinder(token);
+        data.writeString(prefix);
         data.writeStringArray(args);
         mRemote.transact(DUMP_ACTIVITY_TRANSACTION, data, null, 0);
         data.recycle();

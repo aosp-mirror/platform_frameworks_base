@@ -4095,15 +4095,36 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Print the Activity's state into the given stream.  This gets invoked if
-     * you run "adb shell dumpsys activity <youractivityname>".
+     * you run "adb shell dumpsys activity <activity_component_name>".
      *
+     * @param prefix Desired prefix to prepend at each line of output.
      * @param fd The raw file descriptor that the dump is being sent to.
      * @param writer The PrintWriter to which you should dump your state.  This will be
      * closed for you after you return.
      * @param args additional arguments to the dump request.
      */
-    public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
-        mFragments.dump("", fd, writer, args);
+    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+        writer.print(prefix); writer.print("Local Activity ");
+                writer.print(Integer.toHexString(System.identityHashCode(this)));
+                writer.println(" State:");
+        String innerPrefix = prefix + "  ";
+        writer.print(innerPrefix); writer.print("mResumed=");
+                writer.print(mResumed); writer.print(" mStopped=");
+                writer.print(mStopped); writer.print(" mFinished=");
+                writer.println(mFinished);
+        writer.print(innerPrefix); writer.print("mLoadersStarted=");
+                writer.println(mLoadersStarted);
+        writer.print(innerPrefix); writer.print("mChangingConfigurations=");
+                writer.println(mChangingConfigurations);
+        writer.print(innerPrefix); writer.print("mCurrentConfig=");
+                writer.println(mCurrentConfig);
+        if (mLoaderManager != null) {
+            writer.print(prefix); writer.print("Loader Manager ");
+                    writer.print(Integer.toHexString(System.identityHashCode(mLoaderManager)));
+                    writer.println(":");
+            mLoaderManager.dump(prefix + "  ", fd, writer, args);
+        }
+        mFragments.dump(prefix, fd, writer, args);
     }
 
     /**

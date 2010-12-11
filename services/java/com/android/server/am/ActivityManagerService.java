@@ -7340,6 +7340,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("    prov[iders]: content provider state");
                 pw.println("    s[ervices]: service state");
                 pw.println("    service [name]: service client-side state");
+                pw.println("  cmd may also be a component name (com.foo/.myApp),");
+                pw.println("    a partial substring in a component name, or an");
+                pw.println("    ActivityRecord hex object identifier.");
                 return;
             } else {
                 pw.println("Unknown argument: " + opt + "; use -h for help");
@@ -7393,7 +7396,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (dumpActivity(fd, pw, cmd, args, opti, dumpAll)) {
                     return;
                 }
-                pw.println("Bad activity command: " + cmd);
+                pw.println("Bad activity command, or no activities match: " + cmd);
+                pw.println("Use -h for help.");
+                return;
             }
         }
         
@@ -7811,11 +7816,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         String[] newArgs;
         ComponentName componentName = ComponentName.unflattenFromString(name);
         int objectId = 0;
-        try {
-            objectId = Integer.parseInt(name, 16);
-            name = null;
-            componentName = null;
-        } catch (RuntimeException e) {
+        if (componentName == null) {
+            // Not a '/' separated full component name; maybe an object ID?
+            try {
+                objectId = Integer.parseInt(name, 16);
+                name = null;
+                componentName = null;
+            } catch (RuntimeException e) {
+            }
         }
         newArgs = new String[args.length - opti];
         if (args.length > 2) System.arraycopy(args, opti, newArgs, 0, args.length - opti);
@@ -7831,7 +7839,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (r1.intent.getComponent().flattenToString().contains(name)) {
                         activities.add(r1);
                     }
-                } else if (System.identityHashCode(this) == objectId) {
+                } else if (System.identityHashCode(r1) == objectId) {
                     activities.add(r1);
                 }
             }
@@ -7841,8 +7849,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             return false;
         }
 
-        for (int i=0; i<activities.size(); i++) {
-            dumpActivity(fd, pw, activities.get(i), newArgs, dumpAll);
+        TaskRecord lastTask = null;
+        for (int i=activities.size()-1; i>=0; i--) {
+            ActivityRecord r = (ActivityRecord)activities.get(i);
+            if (lastTask != r.task) {
+                lastTask = r.task;
+                pw.print("* Task "); pw.print(lastTask.affinity);
+                        pw.print(" id="); pw.println(lastTask.taskId);
+                if (dumpAll) {
+                    lastTask.dump(pw, "  ");
+                }
+            }
+            dumpActivity("  ", fd, pw, activities.get(i), newArgs, dumpAll);
         }
         return true;
     }
@@ -7851,23 +7869,24 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Invokes IApplicationThread.dumpActivity() on the thread of the specified activity if
      * there is a thread associated with the activity.
      */
-    private void dumpActivity(FileDescriptor fd, PrintWriter pw, ActivityRecord r, String[] args,
-            boolean dumpAll) {
-        pw.println("  Activity " + r.intent.getComponent().flattenToString());
-        if (dumpAll) {
-            synchronized (this) {
-                pw.print("  * "); pw.println(r);
-                r.dump(pw, "    ");
+    private void dumpActivity(String prefix, FileDescriptor fd, PrintWriter pw,
+            ActivityRecord r, String[] args, boolean dumpAll) {
+        synchronized (this) {
+            pw.print(prefix); pw.print("* Activity ");
+                    pw.print(Integer.toHexString(System.identityHashCode(r)));
+                    pw.print(" "); pw.print(r.shortComponentName); pw.print(" pid=");
+                    if (r.app != null) pw.println(r.app.pid);
+                    else pw.println("(not running)");
+            if (dumpAll) {
+                r.dump(pw, prefix + "  ");
             }
-            pw.println("");
         }
         if (r.app != null && r.app.thread != null) {
             try {
                 // flush anything that is already in the PrintWriter since the thread is going
                 // to write to the file descriptor directly
                 pw.flush();
-                r.app.thread.dumpActivity(fd, r, args);
-                pw.print("\n");
+                r.app.thread.dumpActivity(fd, r, prefix + "  ", args);
                 pw.flush();
             } catch (RemoteException e) {
                 pw.println("got a RemoteException while dumping the activity");

@@ -107,7 +107,7 @@ public interface IApplicationThread extends IInterface {
     static final int EXTERNAL_STORAGE_UNAVAILABLE = 1;
     void dispatchPackageBroadcast(int cmd, String[] packages) throws RemoteException;
     void scheduleCrash(String msg) throws RemoteException;
-    void dumpActivity(FileDescriptor fd, IBinder servicetoken, String[] args)
+    void dumpActivity(FileDescriptor fd, IBinder servicetoken, String prefix, String[] args)
             throws RemoteException;
 
     String descriptor = "android.app.IApplicationThread";
