@@ -16,17 +16,15 @@
 
 package com.android.server;
 
-import android.app.backup.AbsoluteFileBackupHelper;
 import android.app.backup.BackupDataInput;
-import android.app.backup.BackupDataInputStream;
 import android.app.backup.BackupDataOutput;
-import android.app.backup.BackupHelper;
 import android.app.backup.BackupAgentHelper;
+import android.app.backup.WallpaperBackupHelper;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.os.ServiceManager;
-import android.os.SystemService;
 import android.util.Slog;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +52,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
             // TODO: Send a delete for any stored wallpaper image in this case?
             files = new String[] { WALLPAPER_INFO };
         }
-        addHelper("wallpaper", new AbsoluteFileBackupHelper(SystemBackupAgent.this, files));
+        addHelper("wallpaper", new WallpaperBackupHelper(SystemBackupAgent.this, files));
         super.onBackup(oldState, data, newState);
     }
 
@@ -62,12 +60,11 @@ public class SystemBackupAgent extends BackupAgentHelper {
     public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState)
             throws IOException {
         // On restore, we also support a previous data schema "system_files"
-        addHelper("wallpaper", new AbsoluteFileBackupHelper(SystemBackupAgent.this,
+        addHelper("wallpaper", new WallpaperBackupHelper(SystemBackupAgent.this,
                 new String[] { WALLPAPER_IMAGE, WALLPAPER_INFO }));
-        addHelper("system_files", new AbsoluteFileBackupHelper(SystemBackupAgent.this,
+        addHelper("system_files", new WallpaperBackupHelper(SystemBackupAgent.this,
                 new String[] { WALLPAPER_IMAGE }));
 
-        boolean success = false;
         try {
             super.onRestore(data, appVersionCode, newState);
 
@@ -75,7 +72,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
                     Context.WALLPAPER_SERVICE);
             wallpaper.settingsRestored();
         } catch (IOException ex) {
-            // If there was a failure, delete everything for the wallpaper, this is too aggresive,
+            // If there was a failure, delete everything for the wallpaper, this is too aggressive,
             // but this is hopefully a rare failure.
             Slog.d(TAG, "restore failed", ex);
             (new File(WALLPAPER_IMAGE)).delete();
