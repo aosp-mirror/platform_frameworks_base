@@ -2078,7 +2078,8 @@ status_t SurfaceFlinger::turnElectronBeamOn(int32_t mode)
 status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
         sp<IMemoryHeap>* heap,
         uint32_t* w, uint32_t* h, PixelFormat* f,
-        uint32_t sw, uint32_t sh)
+        uint32_t sw, uint32_t sh,
+        uint32_t minLayerZ, uint32_t maxLayerZ)
 {
     status_t result = PERMISSION_DENIED;
 
@@ -2132,7 +2133,10 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
         const size_t count = layers.size();
         for (size_t i=0 ; i<count ; ++i) {
             const sp<LayerBase>& layer(layers[i]);
-            layer->drawForSreenShot();
+            const uint32_t z = layer->drawingState().z;
+            if (z >= minLayerZ && z <= maxLayerZ) {
+                layer->drawForSreenShot();
+            }
         }
 
         // XXX: this is needed on tegra
@@ -2185,7 +2189,8 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
 status_t SurfaceFlinger::captureScreen(DisplayID dpy,
         sp<IMemoryHeap>* heap,
         uint32_t* width, uint32_t* height, PixelFormat* format,
-        uint32_t sw, uint32_t sh)
+        uint32_t sw, uint32_t sh,
+        uint32_t minLayerZ, uint32_t maxLayerZ)
 {
     // only one display supported for now
     if (UNLIKELY(uint32_t(dpy) >= DISPLAY_COUNT))
@@ -2203,13 +2208,18 @@ status_t SurfaceFlinger::captureScreen(DisplayID dpy,
         PixelFormat* f;
         uint32_t sw;
         uint32_t sh;
+        uint32_t minLayerZ;
+        uint32_t maxLayerZ;
         status_t result;
     public:
         MessageCaptureScreen(SurfaceFlinger* flinger, DisplayID dpy,
                 sp<IMemoryHeap>* heap, uint32_t* w, uint32_t* h, PixelFormat* f,
-                uint32_t sw, uint32_t sh)
+                uint32_t sw, uint32_t sh,
+                uint32_t minLayerZ, uint32_t maxLayerZ)
             : flinger(flinger), dpy(dpy),
-              heap(heap), w(w), h(h), f(f), sw(sw), sh(sh), result(PERMISSION_DENIED)
+              heap(heap), w(w), h(h), f(f), sw(sw), sh(sh),
+              minLayerZ(minLayerZ), maxLayerZ(maxLayerZ),
+              result(PERMISSION_DENIED)
         {
         }
         status_t getResult() const {
@@ -2223,14 +2233,14 @@ status_t SurfaceFlinger::captureScreen(DisplayID dpy,
                 return true;
 
             result = flinger->captureScreenImplLocked(dpy,
-                    heap, w, h, f, sw, sh);
+                    heap, w, h, f, sw, sh, minLayerZ, maxLayerZ);
 
             return true;
         }
     };
 
     sp<MessageBase> msg = new MessageCaptureScreen(this,
-            dpy, heap, width, height, format, sw, sh);
+            dpy, heap, width, height, format, sw, sh, minLayerZ, maxLayerZ);
     status_t res = postMessageSync(msg);
     if (res == NO_ERROR) {
         res = static_cast<MessageCaptureScreen*>( msg.get() )->getResult();

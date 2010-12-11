@@ -183,6 +183,8 @@ public:
     // frees the previous screenshot and capture a new one
     status_t update();
     status_t update(uint32_t reqWidth, uint32_t reqHeight);
+    status_t update(uint32_t reqWidth, uint32_t reqHeight,
+            uint32_t minLayerZ, uint32_t maxLayerZ);
 
     // release memory occupied by the screenshot
     void release();

@@ -192,13 +192,13 @@ public:
     virtual status_t                    unfreezeDisplay(DisplayID dpy, uint32_t flags);
     virtual int                         setOrientation(DisplayID dpy, int orientation, uint32_t flags);
     virtual void                        signal() const;
-    virtual status_t                    captureScreen(DisplayID dpy,
-                                                      sp<IMemoryHeap>* heap,
-                                                      uint32_t* width,
-                                                      uint32_t* height,
-                                                      PixelFormat* format,
-                                                      uint32_t reqWidth,
-                                                      uint32_t reqHeight);
+
+    virtual status_t captureScreen(DisplayID dpy,
+            sp<IMemoryHeap>* heap,
+            uint32_t* width, uint32_t* height,
+            PixelFormat* format, uint32_t reqWidth, uint32_t reqHeight,
+            uint32_t minLayerZ, uint32_t maxLayerZ);
+
     virtual status_t                    turnElectronBeamOff(int32_t mode);
     virtual status_t                    turnElectronBeamOn(int32_t mode);
 
@@ -313,7 +313,8 @@ private:
             status_t captureScreenImplLocked(DisplayID dpy,
                     sp<IMemoryHeap>* heap,
                     uint32_t* width, uint32_t* height, PixelFormat* format,
-                    uint32_t reqWidth = 0, uint32_t reqHeight = 0);
+                    uint32_t reqWidth, uint32_t reqHeight,
+                    uint32_t minLayerZ, uint32_t maxLayerZ);
 
             status_t turnElectronBeamOffImplLocked(int32_t mode);
             status_t turnElectronBeamOnImplLocked(int32_t mode);

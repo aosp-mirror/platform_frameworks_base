@@ -555,7 +555,8 @@ status_t ScreenshotClient::update() {
     if (s == NULL) return NO_INIT;
     mHeap = 0;
     return s->captureScreen(0, &mHeap,
-            &mWidth, &mHeight, &mFormat, 0, 0);
+            &mWidth, &mHeight, &mFormat, 0, 0,
+            0, -1UL);
 }
 
 status_t ScreenshotClient::update(uint32_t reqWidth, uint32_t reqHeight) {
@@ -563,7 +564,18 @@ status_t ScreenshotClient::update(uint32_t reqWidth, uint32_t reqHeight) {
     if (s == NULL) return NO_INIT;
     mHeap = 0;
     return s->captureScreen(0, &mHeap,
-            &mWidth, &mHeight, &mFormat, reqWidth, reqHeight);
+            &mWidth, &mHeight, &mFormat, reqWidth, reqHeight,
+            0, -1UL);
+}
+
+status_t ScreenshotClient::update(uint32_t reqWidth, uint32_t reqHeight,
+        uint32_t minLayerZ, uint32_t maxLayerZ) {
+    sp<ISurfaceComposer> s(ComposerService::getComposerService());
+    if (s == NULL) return NO_INIT;
+    mHeap = 0;
+    return s->captureScreen(0, &mHeap,
+            &mWidth, &mHeight, &mFormat, reqWidth, reqHeight,
+            minLayerZ, maxLayerZ);
 }
 
 void ScreenshotClient::release() {
