@@ -89,4 +89,9 @@ public final class NdefFormatable extends BasicTagTechnology {
             attemptDeadServiceRecovery(e);
         }
     }
+
+    @Override
+    public byte[] transceive(byte[] data) {
+        throw new UnsupportedOperationException();
+    }
 }

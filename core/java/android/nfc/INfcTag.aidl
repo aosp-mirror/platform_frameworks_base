@@ -29,7 +29,7 @@ interface INfcTag
     byte[] getUid(int nativeHandle);
     boolean isNdef(int nativeHandle);
     boolean isPresent(int nativeHandle);
-    byte[] transceive(int nativeHandle, in byte[] data);
+    byte[] transceive(int nativeHandle, in byte[] data, boolean raw);
 
     int getLastError(int nativeHandle);
 
