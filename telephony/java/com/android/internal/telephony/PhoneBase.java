@@ -742,6 +742,10 @@ public abstract class PhoneBase extends Handler implements Phone {
     }
 
     public void notifyMessageWaitingIndicator() {
+        // Do not notify voice mail waiting if device doesn't support voice
+        if (!mIsVoiceCapable)
+            return;
+
         // This function is added to send the notification to DefaultPhoneNotifier.
         mNotifier.notifyMessageWaitingChanged(this);
     }
