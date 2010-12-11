@@ -1403,6 +1403,10 @@
   <public type="attr" name="isAlwaysSyncable" />
   <public type="attr" name="verticalScrollbarPosition" />
   <public type="attr" name="fastScrollAlwaysVisible" />
+  <public type="attr" name="fastScrollThumbDrawable" />
+  <public type="attr" name="fastScrollPreviewBackgroundLeft" />
+  <public type="attr" name="fastScrollTrackDrawable" />
+  <public type="attr" name="fastScrollOverlayPosition" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />

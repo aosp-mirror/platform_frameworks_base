@@ -1779,6 +1779,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
             mRecycler.markChildrenDirty();
         }
+        
+        if (mFastScroller != null && mItemCount != mOldItemCount) {
+            mFastScroller.onItemCountChanged(mOldItemCount, mItemCount);
+        }
 
         layoutChildren();
         mInLayout = false;
