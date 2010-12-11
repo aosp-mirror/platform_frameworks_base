@@ -283,7 +283,7 @@ public class ImageProcessingActivity extends Activity
             long t = java.lang.System.currentTimeMillis();
             if (true) {
                 mScript.invoke_filter();
-                mRS.finish();
+                mOutPixelsAllocation.copyTo(mBitmapOut);
             } else {
                 javaFilter();
                 mDisplayView.invalidate();
@@ -352,7 +352,7 @@ public class ImageProcessingActivity extends Activity
     public void surfaceCreated(SurfaceHolder holder) {
         createScript();
         mScript.invoke_filter();
-        mRS.finish();
+        mOutPixelsAllocation.copyTo(mBitmapOut);
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
@@ -365,8 +365,12 @@ public class ImageProcessingActivity extends Activity
         mRS = RenderScript.create();
         mRS.setMessageHandler(new FilterCallback());
 
-        mInPixelsAllocation = Allocation.createBitmapRef(mRS, mBitmapIn);
-        mOutPixelsAllocation = Allocation.createBitmapRef(mRS, mBitmapOut);
+        mInPixelsAllocation = Allocation.createFromBitmap(mRS, mBitmapIn,
+                                                          Allocation.MipmapControl.MIPMAP_NONE,
+                                                          Allocation.USAGE_SCRIPT);
+        mOutPixelsAllocation = Allocation.createFromBitmap(mRS, mBitmapOut,
+                                                           Allocation.MipmapControl.MIPMAP_NONE,
+                                                           Allocation.USAGE_SCRIPT);
 
         Type.Builder tb = new Type.Builder(mRS, Element.F32_4(mRS));
         tb.setX(mBitmapIn.getWidth());
@@ -419,7 +423,7 @@ public class ImageProcessingActivity extends Activity
         long t = java.lang.System.currentTimeMillis();
 
         mScript.invoke_filter();
-        mRS.finish();
+        mOutPixelsAllocation.copyTo(mBitmapOut);
 
         t = java.lang.System.currentTimeMillis() - t;
         android.util.Log.v("Img", "Renderscript frame time core ms " + t);
@@ -432,6 +436,6 @@ public class ImageProcessingActivity extends Activity
         mScript.set_radius(mRadius);
 
         mScript.invoke_filter();
-        mRS.finish();
+        mOutPixelsAllocation.copyTo(mBitmapOut);
     }
 }
