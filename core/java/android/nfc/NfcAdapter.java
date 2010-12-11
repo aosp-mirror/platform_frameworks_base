@@ -19,6 +19,7 @@ package android.nfc;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.ActivityThread;
+import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
@@ -29,11 +30,12 @@ import android.util.Log;
 /**
  * Represents the device's local NFC adapter.
  * <p>
- * Use the static {@link #getDefaultAdapter} method to get the default NFC
- * Adapter for this Android device. Most Android devices will have only one NFC
- * Adapter, and {@link #getDefaultAdapter} returns the singleton object.
+ * Use the helper {@link #getDefaultAdapter(Context)} to get the default NFC
+ * adapter for this Android device.
  */
 public final class NfcAdapter {
+    private static final String TAG = "NFC";
+
     /**
      * Intent to start an activity when a tag is discovered.
      */
@@ -161,29 +163,17 @@ public final class NfcAdapter {
      */
     private static final int DISCOVERY_MODE_CARD_EMULATION = 2;
 
-    private static final String TAG = "NFC";
 
-    // Both guarded by NfcAdapter.class:
+    // Guarded by NfcAdapter.class
     private static boolean sIsInitialized = false;
-    private static NfcAdapter sAdapter;
 
-    // Final after construction, except for attemptDeadServiceRecovery()
-    // when NFC crashes.
-    // Not locked - we accept a best effort attempt when NFC crashes.
-    /*package*/ INfcAdapter mService;
+    // Final after first constructor, except for
+    // attemptDeadServiceRecovery() when NFC crashes - we accept a best effort
+    // recovery
+    private static INfcAdapter sService;
 
-    private NfcAdapter(INfcAdapter service) {
-        mService = service;
-    }
+    private final Context mContext;
 
-    /**
-     * Returns the binder interface to the service.
-     * @hide
-     */
-    public INfcAdapter getService() {
-        return mService;
-    }
-    
     /**
      * Helper to check if this device has FEATURE_NFC, but without using
      * a context.
@@ -204,8 +194,27 @@ public final class NfcAdapter {
         }
     }
 
+    private static synchronized INfcAdapter setupService() {
+        if (!sIsInitialized) {
+            sIsInitialized = true;
+
+            /* is this device meant to have NFC */
+            if (!hasNfcFeature()) {
+                Log.v(TAG, "this device does not have NFC support");
+                return null;
+            }
+
+            sService = getServiceInterface();
+            if (sService == null) {
+                Log.e(TAG, "could not retrieve NFC service");
+                return null;
+            }
+        }
+        return sService;
+    }
+
     /** get handle to NFC service interface */
-    private static synchronized INfcAdapter getServiceInterface() {
+    private static INfcAdapter getServiceInterface() {
         /* get a handle to NFC service */
         IBinder b = ServiceManager.getService("nfc");
         if (b == null) {
@@ -215,34 +224,54 @@ public final class NfcAdapter {
     }
 
     /**
+     * Helper to get the default NFC Adapter.
+     * <p>
+     * Most Android devices will only have one NFC Adapter (NFC Controller).
+     * <p>
+     * This helper is the equivalent of:
+     * <pre>{@code
+     * NfcManager manager = (NfcManager) context.getSystemService(Context.NFC_SERVICE);
+     * NfcAdapter adapter = manager.getDefaultAdapter();
+     * }</pre>
+     * @param context the calling application's context
+     *
+     * @return the default NFC adapter, or null if no NFC adapter exists
+     */
+    public static NfcAdapter getDefaultAdapter(Context context) {
+        /* use getSystemService() instead of just instantiating to take
+         * advantage of the context's cached NfcManager & NfcAdapter */
+        NfcManager manager = (NfcManager) context.getSystemService(Context.NFC_SERVICE);
+        return manager.getDefaultAdapter();
+    }
+
+    /**
      * Get a handle to the default NFC Adapter on this Android device.
      * <p>
      * Most Android devices will only have one NFC Adapter (NFC Controller).
      *
      * @return the default NFC adapter, or null if no NFC adapter exists
+     * @deprecated use {@link #getDefaultAdapter(Context)}
      */
+    @Deprecated
     public static NfcAdapter getDefaultAdapter() {
-        synchronized (NfcAdapter.class) {
-            if (sIsInitialized) {
-                return sAdapter;
-            }
-            sIsInitialized = true;
+        Log.w(TAG, "WARNING: NfcAdapter.getDefaultAdapter() is deprecated, use " +
+                "NfcAdapter.getDefaultAdapter(Context) instead", new Exception());
+        return new NfcAdapter(null);
+    }
 
-            /* is this device meant to have NFC */
-            if (!hasNfcFeature()) {
-                Log.v(TAG, "this device does not have NFC support");
-                return null;
-            }
-
-            INfcAdapter service = getServiceInterface();
-            if (service == null) {
-                Log.e(TAG, "could not retrieve NFC service");
-                return null;
-            }
-
-            sAdapter = new NfcAdapter(service);
-            return sAdapter;
+    /*package*/ NfcAdapter(Context context) {
+        if (setupService() == null) {
+            throw new UnsupportedOperationException();
         }
+        mContext = context;
+    }
+
+    /**
+     * Returns the binder interface to the service.
+     * @hide
+     */
+    public INfcAdapter getService() {
+        return sService;
     }
 
     /**
@@ -256,9 +285,9 @@ public final class NfcAdapter {
             Log.e(TAG, "could not retrieve NFC service during service recovery");
             return;
         }
-        /* assigning to mService is not thread-safe, but this is best-effort code
+        /* assigning to sService is not thread-safe, but this is best-effort code
          * and on a well-behaved system should never happen */
-        mService = service;
+        sService = service;
         return;
     }
 
@@ -275,7 +304,7 @@ public final class NfcAdapter {
      */
     public boolean isEnabled() {
         try {
-            return mService.isEnabled();
+            return sService.isEnabled();
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return false;
@@ -292,7 +321,7 @@ public final class NfcAdapter {
      */
     public boolean enable() {
         try {
-            return mService.enable();
+            return sService.enable();
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return false;
@@ -311,7 +340,7 @@ public final class NfcAdapter {
      */
     public boolean disable() {
         try {
-            return mService.disable();
+            return sService.disable();
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return false;
@@ -338,7 +367,7 @@ public final class NfcAdapter {
      */
     public void setLocalNdefMessage(NdefMessage message) {
         try {
-            mService.localSet(message);
+            sService.localSet(message);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
         }
@@ -353,7 +382,7 @@ public final class NfcAdapter {
      */
     public NdefMessage getLocalNdefMessage() {
         try {
-            return mService.localGet();
+            return sService.localGet();
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return null;
@@ -366,7 +395,7 @@ public final class NfcAdapter {
      */
     public NfcSecureElement createNfcSecureElementConnection() {
         try {
-            return new NfcSecureElement(mService.getNfcSecureElementInterface());
+            return new NfcSecureElement(sService.getNfcSecureElementInterface());
         } catch (RemoteException e) {
             Log.e(TAG, "createNfcSecureElementConnection failed", e);
             return null;
