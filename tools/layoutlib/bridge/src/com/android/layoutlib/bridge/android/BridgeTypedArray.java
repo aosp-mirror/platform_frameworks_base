@@ -328,6 +328,7 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         // looks like were unable to resolve the color value.
+        assert false;
         Bridge.getLog().warning(null, String.format(
                 "Unable to resolve color value \"%1$s\" in attribute \"%2$s\"",
                 value, mNames[index]));
@@ -405,6 +406,7 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         // looks like we were unable to resolve the dimension value
+        assert false;
         Bridge.getLog().warning(null, String.format(
                 "Unable to resolve dimension value \"%1$s\" in attribute \"%2$s\"",
                 s, mNames[index]));
@@ -534,6 +536,7 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         // looks like we were unable to resolve the fraction value
+        assert false;
         Bridge.getLog().warning(null, String.format(
                 "Unable to resolve fraction value \"%1$s\" in attribute \"%2$s\"",
                 value, mNames[index]));
@@ -641,6 +644,7 @@ public final class BridgeTypedArray extends TypedArray {
             return idValue.intValue();
         }
 
+        assert false;
         Bridge.getLog().warning(null, String.format(
                 "Unable to resolve id \"%1$s\" for attribute \"%2$s\"", value, mNames[index]));
         return defValue;
@@ -675,6 +679,7 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         // looks like we were unable to resolve the drawable
+        assert false;
         Bridge.getLog().warning(null, String.format(
                 "Unable to resolve drawable \"%1$s\" in attribute \"%2$s\"", stringValue,
                 mNames[index]));

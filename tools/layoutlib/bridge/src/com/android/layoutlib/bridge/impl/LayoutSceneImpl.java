@@ -918,6 +918,7 @@ public class LayoutSceneImpl {
             return (StyleResourceValue)parent;
         }
 
+        assert false;
         mParams.getLog().error(null,
                 String.format("Unable to resolve parent style name: %s", parentName));
 
