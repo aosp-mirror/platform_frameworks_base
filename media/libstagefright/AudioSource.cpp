@@ -140,38 +140,6 @@ sp<MetaData> AudioSource::getFormat() {
     return meta;
 }
 
-/*
- * Returns -1 if frame skipping request is too long.
- * Returns  0 if there is no need to skip frames.
- * Returns  1 if we need to skip frames.
- */
-static int skipFrame(int64_t timestampUs,
-        const MediaSource::ReadOptions *options) {
-
-    int64_t skipFrameUs;
-    if (!options || !options->getSkipFrame(&skipFrameUs)) {
-        return 0;
-    }
-
-    if (skipFrameUs <= timestampUs) {
-        return 0;
-    }
-
-    // Safe guard against the abuse of the kSkipFrame_Option.
-    if (skipFrameUs - timestampUs >= 1E6) {
-        LOGE("Frame skipping requested is way too long: %lld us",
-            skipFrameUs - timestampUs);
-
-        return -1;
-    }
-
-    LOGV("skipFrame: %lld us > timestamp: %lld us",
-        skipFrameUs, timestampUs);
-
-    return 1;
-
-}
-
 void AudioSource::rampVolume(
         int32_t startFrame, int32_t rampDurationFrames,
         uint8_t *data,   size_t bytes) {
@@ -218,7 +186,7 @@ status_t AudioSource::read(
     CHECK_EQ(mGroup->acquire_buffer(&buffer), OK);
 
     int err = 0;
-    while (mStarted) {
+    if (mStarted) {
 
         uint32_t numFramesRecorded;
         mRecord->getPosition(&numFramesRecorded);
@@ -268,12 +236,6 @@ status_t AudioSource::read(
             if (mCollectStats) {
                 mTotalLostFrames += (numLostBytes >> 1);
             }
-            if ((err = skipFrame(timestampUs, options)) == -1) {
-                buffer->release();
-                return UNKNOWN_ERROR;
-            } else if (err != 0) {
-                continue;
-            }
             memset(buffer->data(), 0, numLostBytes);
             buffer->set_range(0, numLostBytes);
             if (numFramesRecorded == 0) {
@@ -294,12 +256,6 @@ status_t AudioSource::read(
 
         int64_t recordDurationUs = (1000000LL * n >> 1) / sampleRate;
         timestampUs += recordDurationUs;
-        if ((err = skipFrame(timestampUs, options)) == -1) {
-            buffer->release();
-            return UNKNOWN_ERROR;
-        } else if (err != 0) {
-            continue;
-        }
 
         if (mPrevSampleTimeUs - mStartTimeUs < kAutoRampStartUs) {
             // Mute the initial video recording signal
