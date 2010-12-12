@@ -673,10 +673,9 @@ class ZoomManager {
 
         public boolean onScale(ScaleGestureDetector detector) {
             // Prevent scaling beyond overview scale.
-            float scale = Math.max(
-                Math.round(detector.getScaleFactor() * mActualScale * 100) * 0.01f,
-                getZoomOverviewScale());
-            if (willScaleTriggerZoom(scale)) {
+            float scale = Math.max(detector.getScaleFactor() * mActualScale,
+                    getZoomOverviewScale());
+            if (mPinchToZoomAnimating || willScaleTriggerZoom(scale)) {
                 mPinchToZoomAnimating = true;
                 // limit the scale change per step
                 if (scale > mActualScale) {
