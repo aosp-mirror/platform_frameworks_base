@@ -82,6 +82,7 @@ public class BallsView extends RSSurfaceView {
             int pointerIndex = ev.getActionIndex();
             int pointerId = ev.getPointerId(pointerIndex);
             mRender.newTouchPosition(0, 0, 0, pointerId);
+            return false;
         }
         int count = ev.getHistorySize();
         int pcount = ev.getPointerCount();
