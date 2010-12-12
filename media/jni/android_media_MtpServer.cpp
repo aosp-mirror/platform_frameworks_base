@@ -60,14 +60,17 @@ private:
     MtpDatabase*    mDatabase;
     MtpServer*      mServer;
     String8         mStoragePath;
+    uint64_t        mReserveSpace;
     jobject         mJavaServer;
     int             mFd;
 
 public:
-    MtpThread(MtpDatabase* database, const char* storagePath, jobject javaServer)
+    MtpThread(MtpDatabase* database, const char* storagePath, uint64_t reserveSpace,
+                jobject javaServer)
         :   mDatabase(database),
             mServer(NULL),
             mStoragePath(storagePath),
+            mReserveSpace(reserveSpace),
             mJavaServer(javaServer),
             mFd(-1)
     {
@@ -100,7 +103,7 @@ public:
         }
 
         mServer = new MtpServer(mFd, mDatabase, AID_SDCARD_RW, 0664, 0775);
-        mServer->addStorage(mStoragePath);
+        mServer->addStorage(mStoragePath, mReserveSpace);
         sMutex.unlock();
 
         LOGD("MtpThread mServer->run");
@@ -139,7 +142,8 @@ public:
 #endif // HAVE_ANDROID_OS
 
 static void
-android_media_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase, jstring storagePath)
+android_media_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase,
+        jstring storagePath, jlong reserveSpace)
 {
 #ifdef HAVE_ANDROID_OS
     LOGD("setup\n");
@@ -147,7 +151,8 @@ android_media_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase, j
     MtpDatabase* database = getMtpDatabase(env, javaDatabase);
     const char *storagePathStr = env->GetStringUTFChars(storagePath, NULL);
 
-    MtpThread* thread = new MtpThread(database, storagePathStr, env->NewGlobalRef(thiz));
+    MtpThread* thread = new MtpThread(database, storagePathStr,
+            reserveSpace, env->NewGlobalRef(thiz));
     env->SetIntField(thiz, field_context, (int)thread);
 
     env->ReleaseStringUTFChars(storagePath, storagePathStr);
@@ -213,7 +218,7 @@ android_media_MtpServer_set_ptp_mode(JNIEnv *env, jobject thiz, jboolean usePtp)
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"native_setup",                "(Landroid/media/MtpDatabase;Ljava/lang/String;)V",
+    {"native_setup",                "(Landroid/media/MtpDatabase;Ljava/lang/String;J)V",
                                             (void *)android_media_MtpServer_setup},
     {"native_finalize",             "()V",  (void *)android_media_MtpServer_finalize},
     {"native_start",                "()V",  (void *)android_media_MtpServer_start},

@@ -30,8 +30,8 @@ public class MtpServer {
         System.loadLibrary("media_jni");
     }
 
-    public MtpServer(MtpDatabase database, String storagePath) {
-        native_setup(database, storagePath);
+    public MtpServer(MtpDatabase database, String storagePath, long reserveSpace) {
+        native_setup(database, storagePath, reserveSpace);
     }
 
     @Override
@@ -66,7 +66,8 @@ public class MtpServer {
     // used by the JNI code
     private int mNativeContext;
 
-    private native final void native_setup(MtpDatabase database, String storagePath);
+    private native final void native_setup(MtpDatabase database, String storagePath,
+            long reserveSpace);
     private native final void native_finalize();
     private native final void native_start();
     private native final void native_stop();

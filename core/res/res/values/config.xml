@@ -105,6 +105,16 @@
          removable. -->
     <bool name="config_externalStorageRemovable" product="default">true</bool>
 
+    <!-- Number of megabytes of space to leave unallocated by MTP.
+         MTP will subtract this value from the free space it reports back
+         to the host via GetStorageInfo, and will not allow new files to
+         be added via MTP if there is less than this amount left free in the storage.
+         If MTP has dedicated storage this value should be zero, but if MTP is
+         sharing storage with the rest of the system, set this to a positive value
+         to ensure that MTP activity does not result in the storage being
+         too close to full. -->
+    <integer name="config_mtpReserveSpaceMegabytes">0</integer>
+
     <!-- XXXXX NOTE THE FOLLOWING RESOURCES USE THE WRONG NAMING CONVENTION.
          Please don't copy them, copy anything else. -->
 
