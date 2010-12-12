@@ -129,9 +129,7 @@ public class BallsRS {
     }
 
     public void newTouchPosition(float x, float y, float pressure, int id) {
-        mPhysicsScript.set_touchX(x);
-        mPhysicsScript.set_touchY(y);
-        mPhysicsScript.set_touchPressure(pressure);
+        mPhysicsScript.invoke_touch(x, y, pressure, id);
     }
 
     public void setAccel(float x, float y) {

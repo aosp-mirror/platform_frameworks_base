@@ -8,18 +8,22 @@ float2 gGravityVector = {0.f, 9.8f};
 float2 gMinPos = {0.f, 0.f};
 float2 gMaxPos = {1280.f, 700.f};
 
-float touchX;
-float touchY;
-float touchPressure = 0.f;
+static float2 touchPos[10];
+static float touchPressure[10];
 
-void setGamma(float g) {
+void touch(float x, float y, float pressure, int id) {
+    if (id >= 10) {
+        return;
+    }
+
+    touchPos[id].x = x;
+    touchPos[id].y = y;
+    touchPressure[id] = pressure;
 }
-
 
 void root(const Ball_t *ballIn, Ball_t *ballOut, const BallControl_t *ctl, uint32_t x) {
     float2 fv = {0, 0};
     float2 pos = ballIn->position;
-    //rsDebug("physics pos in", pos);
 
     int arcID = -1;
     float arcInvStr = 100000;
@@ -38,10 +42,6 @@ void root(const Ball_t *ballIn, Ball_t *ballOut, const BallControl_t *ctl, uint3
             if (len2 > 16 /* (minDist*minDist)*/)  {
                 // Repulsion
                 float len = sqrt(len2);
-                //if (len < arcInvStr) {
-                    //arcInvStr = len;
-                    //arcID = xin;
-                //}
                 fv -= (vec / (len * len * len)) * 20000.f * forceScale;
             } else {
                 if (len2 < 1) {
@@ -78,12 +78,13 @@ void root(const Ball_t *ballIn, Ball_t *ballOut, const BallControl_t *ctl, uint3
     fv -= gGravityVector * 4.f;
     fv *= ctl->dt;
 
-    if (touchPressure > 0.1f) {
-        float2 tp = {touchX, touchY};
-        float2 vec = tp - ballIn->position;
-        float2 vec2 = vec * vec;
-        float len2 = max(2.f, vec2.x + vec2.y);
-        fv -= (vec / len2) * touchPressure * 400.f;
+    for (int i=0; i < 10; i++) {
+        if (touchPressure[i] > 0.1f) {
+            float2 vec = touchPos[i] - ballIn->position;
+            float2 vec2 = vec * vec;
+            float len2 = max(2.f, vec2.x + vec2.y);
+            fv -= (vec / len2) * touchPressure[i] * 300.f;
+        }
     }
 
     ballOut->delta = (ballIn->delta * (1.f - 0.004f)) + fv;
@@ -138,11 +139,6 @@ void root(const Ball_t *ballIn, Ball_t *ballOut, const BallControl_t *ctl, uint3
         }
     }
 
-    //ballOut->color.b = 1.f;
-    //ballOut->color.r = min(sqrt(length(ballOut->delta)) * 0.1f, 1.f);
-    //ballOut->color.g = min(sqrt(length(fv) * 0.1f), 1.f);
-    //ballOut->arcID = arcID;
-    //ballOut->arcStr = 8 / arcInvStr;
     ballOut->size = ballIn->size;
 
     //rsDebug("physics pos out", ballOut->position);
