@@ -79,7 +79,7 @@ public final class Ndef extends BasicTagTechnology {
     public NdefMessage getNdefMessage() throws IOException, FormatException {
         try {
             int serviceHandle = mTag.getServiceHandle();
-            NdefMessage msg = mTagService.read(serviceHandle);
+            NdefMessage msg = mTagService.ndefRead(serviceHandle);
             if (msg == null) {
                 int errorCode = mTagService.getLastError(serviceHandle);
                 switch (errorCode) {
@@ -119,7 +119,6 @@ public final class Ndef extends BasicTagTechnology {
      * Provides a hint on whether writes are likely to succeed.
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
      * @return true if write is likely to succeed
-     * @throws IOException if the target is lost or connection closed
      */
     public boolean isWritable() {
         return (mCardState == NDEF_MODE_READ_WRITE);
@@ -132,7 +131,7 @@ public final class Ndef extends BasicTagTechnology {
      */
     public void writeNdefMessage(NdefMessage msg) throws IOException, FormatException {
         try {
-            int errorCode = mTagService.write(mTag.getServiceHandle(), msg);
+            int errorCode = mTagService.ndefWrite(mTag.getServiceHandle(), msg);
             switch (errorCode) {
                 case ErrorCodes.SUCCESS:
                     break;
@@ -169,7 +168,7 @@ public final class Ndef extends BasicTagTechnology {
      */
     public boolean makeReadonly() throws IOException {
         try {
-            int errorCode = mTagService.makeReadOnly(mTag.getServiceHandle());
+            int errorCode = mTagService.ndefMakeReadOnly(mTag.getServiceHandle());
             switch (errorCode) {
                 case ErrorCodes.SUCCESS:
                     return true;

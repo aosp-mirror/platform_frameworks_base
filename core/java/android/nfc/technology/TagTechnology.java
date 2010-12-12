@@ -39,42 +39,32 @@ public interface TagTechnology {
     /**
      * This object is an instance of {@link NfcF}
      */
-    public static final int NFC_F = 11;
+    public static final int NFC_F = 4;
 
     /**
      * This object is an instance of {@link NfcV}
      */
-    public static final int NFC_V = 21;
+    public static final int NFC_V = 5;
 
     /**
      * This object is an instance of {@link Ndef}
      */
-    public static final int NDEF = 101;
+    public static final int NDEF = 6;
 
     /**
      * This object is an instance of {@link NdefFormatable}
      */
-    public static final int NDEF_FORMATABLE = 110;
+    public static final int NDEF_FORMATABLE = 7;
 
     /**
      * This object is an instance of {@link MifareClassic}
      */
-    public static final int MIFARE_CLASSIC = 200;
-
-    /**
-     * A Mifare Classic tag with NDEF data
-     */
-    public static final int MIFARE_CLASSIC_NDEF = 201;
+    public static final int MIFARE_CLASSIC = 8;
 
     /**
      * This object is an instance of {@link MifareUltralight}
      */
-    public static final int MIFARE_ULTRALIGHT = 202;
-
-    /**
-     * A Mifare DESFire tag
-     */
-    public static final int MIFARE_DESFIRE = 203;
+    public static final int MIFARE_ULTRALIGHT = 9;
 
     /**
      * Returns the technology type for this tag connection.
