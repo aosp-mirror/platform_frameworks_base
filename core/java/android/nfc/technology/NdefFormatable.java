@@ -73,17 +73,22 @@ public final class NdefFormatable extends BasicTagTechnology {
                     // Should not happen
                     throw new IOException();
             }
-            errorCode = mTagService.ndefWrite(serviceHandle, firstMessage);
-            switch (errorCode) {
-                case ErrorCodes.SUCCESS:
-                    break;
-                case ErrorCodes.ERROR_IO:
-                    throw new IOException();
-                case ErrorCodes.ERROR_INVALID_PARAM:
-                    throw new FormatException();
-                default:
-                    // Should not happen
-                    throw new IOException();
+            // Now check and see if the format worked
+            if (mTagService.isNdef(serviceHandle)) {
+                errorCode = mTagService.ndefWrite(serviceHandle, firstMessage);
+                switch (errorCode) {
+                    case ErrorCodes.SUCCESS:
+                        break;
+                    case ErrorCodes.ERROR_IO:
+                        throw new IOException();
+                    case ErrorCodes.ERROR_INVALID_PARAM:
+                        throw new FormatException();
+                    default:
+                        // Should not happen
+                        throw new IOException();
+                }
+            } else {
+                throw new IOException();
             }
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
