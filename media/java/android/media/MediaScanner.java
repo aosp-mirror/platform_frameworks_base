@@ -1494,17 +1494,6 @@ public class MediaScanner
         } else if (fileType == MediaFile.FILE_TYPE_WPL) {
             processWplPlayList(path, playListDirectory, membersUri);
         }
-
-        Cursor cursor = mMediaProvider.query(membersUri, PLAYLIST_MEMBERS_PROJECTION, null,
-                null, null);
-        try {
-            if (cursor == null || cursor.getCount() == 0) {
-                Log.d(TAG, "playlist is empty - deleting");
-                mMediaProvider.delete(uri, null, null);
-            }
-        } finally {
-            if (cursor != null) cursor.close();
-        }
     }
 
     private void processPlayLists() throws RemoteException {
