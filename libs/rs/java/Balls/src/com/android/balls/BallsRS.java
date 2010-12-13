@@ -34,11 +34,12 @@ public class BallsRS {
     private ProgramFragment mPFPoints;
     private ProgramVertex mPV;
     private ScriptField_Point mPoints;
-    private ScriptField_Point mArcs;
     private ScriptField_VpConsts mVpConsts;
 
     void updateProjectionMatrices() {
-        mVpConsts = new ScriptField_VpConsts(mRS, 1);
+        mVpConsts = new ScriptField_VpConsts(mRS, 1,
+                                             Allocation.USAGE_SCRIPT |
+                                             Allocation.USAGE_GRAPHICS_CONSTANTS);
         ScriptField_VpConsts.Item i = new ScriptField_VpConsts.Item();
         Matrix4f mvp = new Matrix4f();
         mvp.loadOrtho(0, mRS.getWidth(), mRS.getHeight(), 0, -1, 1);
@@ -67,9 +68,10 @@ public class BallsRS {
     }
 
     private Allocation loadTexture(int id) {
-        final Allocation allocation = Allocation.createFromBitmapResource(mRS, mRes,
-                id, Element.RGB_565(mRS), false);
-        allocation.uploadToTexture(0);
+        final Allocation allocation =
+            Allocation.createFromBitmapResource(mRS, mRes,
+                id, Allocation.MipmapControl.MIPMAP_NONE,
+                Allocation.USAGE_GRAPHICS_TEXTURE);
         return allocation;
     }
 
@@ -88,31 +90,24 @@ public class BallsRS {
         pfb.setVaryingColor(true);
         mPFLines = pfb.create();
 
+        android.util.Log.e("rs", "Load texture");
         mPFPoints.bindTexture(loadTexture(R.drawable.flares), 0);
 
-        mPoints = new ScriptField_Point(mRS, PART_COUNT);
-        mArcs = new ScriptField_Point(mRS, PART_COUNT * 2);
+        mPoints = new ScriptField_Point(mRS, PART_COUNT, Allocation.USAGE_SCRIPT);
 
         Mesh.AllocationBuilder smb = new Mesh.AllocationBuilder(mRS);
         smb.addVertexAllocation(mPoints.getAllocation());
         smb.addIndexType(Primitive.POINT);
         Mesh smP = smb.create();
 
-        smb = new Mesh.AllocationBuilder(mRS);
-        smb.addVertexAllocation(mArcs.getAllocation());
-        smb.addIndexType(Primitive.LINE);
-        Mesh smA = smb.create();
-
         mPhysicsScript = new ScriptC_ball_physics(mRS, mRes, R.raw.ball_physics);
 
         mScript = new ScriptC_balls(mRS, mRes, R.raw.balls);
         mScript.set_partMesh(smP);
-        mScript.set_arcMesh(smA);
         mScript.set_physics_script(mPhysicsScript);
         mScript.bind_point(mPoints);
-        mScript.bind_arc(mArcs);
-        mScript.bind_balls1(new ScriptField_Ball(mRS, PART_COUNT));
-        mScript.bind_balls2(new ScriptField_Ball(mRS, PART_COUNT));
+        mScript.bind_balls1(new ScriptField_Ball(mRS, PART_COUNT, Allocation.USAGE_SCRIPT));
+        mScript.bind_balls2(new ScriptField_Ball(mRS, PART_COUNT, Allocation.USAGE_SCRIPT));
 
         mScript.set_gPFLines(mPFLines);
         mScript.set_gPFPoints(mPFPoints);

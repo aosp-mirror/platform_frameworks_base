@@ -89,14 +89,6 @@ AllocationCopyToBitmap {
 	param size_t dataLen
 	}
 
-AllocationCreateBitmapRef {
-	param RsType type
-	param RsAsyncVoidPtr bmpPtr
-	param RsAsyncVoidPtr callbackData
-	param RsBitmapCallback_t callback
-	ret RsAllocation
-	}
-
 AllocationUploadToTexture {
 	param RsAllocation alloc
 	param bool genMipMaps

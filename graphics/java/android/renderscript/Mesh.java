@@ -77,18 +77,14 @@ public class Mesh extends BaseObj {
 
         for(int i = 0; i < vtxCount; i ++) {
             if(vtxIDs[i] != 0) {
-                mVertexBuffers[i] = new Allocation(vtxIDs[i], mRS, null,
-                                                   Allocation.USAGE_GRAPHICS_VERTEX |
-                                                   Allocation.USAGE_SCRIPT);
+                mVertexBuffers[i] = new Allocation(vtxIDs[i], mRS, null, Allocation.USAGE_SCRIPT);
                 mVertexBuffers[i].updateFromNative();
             }
         }
 
         for(int i = 0; i < idxCount; i ++) {
             if(idxIDs[i] != 0) {
-                mIndexBuffers[i] = new Allocation(idxIDs[i], mRS, null,
-                                                  Allocation.USAGE_GRAPHICS_VERTEX |
-                                                  Allocation.USAGE_SCRIPT);
+                mIndexBuffers[i] = new Allocation(idxIDs[i], mRS, null, Allocation.USAGE_SCRIPT);
                 mIndexBuffers[i].updateFromNative();
             }
             mPrimitives[i] = Primitive.values()[primitives[i]];

@@ -191,9 +191,9 @@ public class RenderScript {
         rsnTypeGetNativeData(mContext, id, typeData);
     }
 
-    native int  rsnAllocationCreateTyped(int con, int type, int usage);
-    synchronized int nAllocationCreateTyped(int type, int usage) {
-        return rsnAllocationCreateTyped(mContext, type, usage);
+    native int  rsnAllocationCreateTyped(int con, int type, int mip, int usage);
+    synchronized int nAllocationCreateTyped(int type, int mip, int usage) {
+        return rsnAllocationCreateTyped(mContext, type, mip, usage);
     }
     native int  rsnAllocationCreateFromBitmap(int con, int type, int mip, Bitmap bmp, int usage);
     synchronized int nAllocationCreateFromBitmap(int type, int mip, Bitmap bmp, int usage) {
