@@ -218,8 +218,14 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
                 }
             } while (read > 0);
 
-            createEntry(temp, tag, flags);
+            long time = createEntry(temp, tag, flags);
             temp = null;
+
+            Intent dropboxIntent = new Intent(DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED);
+            dropboxIntent.putExtra(DropBoxManager.EXTRA_TAG, tag);
+            dropboxIntent.putExtra(DropBoxManager.EXTRA_TIME, time);
+            mContext.sendBroadcast(dropboxIntent, android.Manifest.permission.READ_LOGS);
+
         } catch (IOException e) {
             Slog.e(TAG, "Can't write: " + tag, e);
         } finally {
@@ -604,7 +610,7 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
     }
 
     /** Moves a temporary file to a final log filename and enrolls it. */
-    private synchronized void createEntry(File temp, String tag, int flags) throws IOException {
+    private synchronized long createEntry(File temp, String tag, int flags) throws IOException {
         long t = System.currentTimeMillis();
 
         // Require each entry to have a unique timestamp; if there are entries
@@ -643,6 +649,7 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
         } else {
             enrollEntry(new EntryFile(temp, mDropBoxDir, tag, t, flags, mBlockSize));
         }
+        return t;
     }
 
     /**
