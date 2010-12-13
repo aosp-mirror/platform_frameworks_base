@@ -38,10 +38,7 @@ import android.util.Log;
  * in the <em>samples/</em> directory of the SDK.</p>
  *
  * <p class="note"><strong>Note:</strong> this class assumes
- * monotonically increasing version numbers for upgrades.  Also, there
- * is no concept of a database downgrade; installing a new version of
- * your app which uses a lower version number than a
- * previously-installed version will result in undefined behavior.</p>
+ * monotonically increasing version numbers for upgrades.</p>
  */
 public abstract class SQLiteOpenHelper {
     private static final String TAG = SQLiteOpenHelper.class.getSimpleName();
@@ -65,7 +62,8 @@ public abstract class SQLiteOpenHelper {
      * @param name of the database file, or null for an in-memory database
      * @param factory to use for creating cursor objects, or null for the default
      * @param version number of the database (starting at 1); if the database is older,
-     *     {@link #onUpgrade} will be used to upgrade the database
+     *     {@link #onUpgrade} will be used to upgrade the database; if the database is
+     *     newer, {@link #onDowngrade} will be used to downgrade the database
      */
     public SQLiteOpenHelper(Context context, String name, CursorFactory factory, int version) {
         this(context, name, factory, version, new DefaultDatabaseErrorHandler());
@@ -152,10 +150,6 @@ public abstract class SQLiteOpenHelper {
             }
 
             int version = db.getVersion();
-            if (version > mNewVersion) {
-                throw new IllegalStateException("Database " + mName +
-                        " cannot be downgraded. instead, please uninstall new version first.");
-            }
             if (version != mNewVersion) {
                 db.beginTransaction();
                 try {
@@ -163,10 +157,10 @@ public abstract class SQLiteOpenHelper {
                         onCreate(db);
                     } else {
                         if (version > mNewVersion) {
-                            Log.wtf(TAG, "Can't downgrade read-only database from version " +
-                                    version + " to " + mNewVersion + ": " + db.getPath());
+                            onDowngrade(db, version, mNewVersion);
+                        } else {
+                            onUpgrade(db, version, mNewVersion);
                         }
-                        onUpgrade(db, version, mNewVersion);
                     }
                     db.setVersion(mNewVersion);
                     db.setTransactionSuccessful();
@@ -289,6 +283,22 @@ public abstract class SQLiteOpenHelper {
      * @param newVersion The new database version.
      */
     public abstract void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion);
+
+    /**
+     * Called when the database needs to be downgraded. This is stricly similar to
+     * onUpgrade() method, but is called whenever current version is newer than requested one.
+     * However, this method is not abstract, so it is not mandatory for a customer to
+     * implement it. If not overridden, default implementation will reject downgrade and
+     * throws SQLiteException
+     *
+     * @param db The database.
+     * @param oldVersion The old database version.
+     * @param newVersion The new database version.
+     */
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        throw new SQLiteException("Can't downgrade database from version " +
+                oldVersion + " to " + newVersion);
+    }
 
     /**
      * Called when the database has been opened.  The implementation
