@@ -126,10 +126,10 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"Sinhronizācija"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sinhronizācija"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Pārāk daudz <xliff:g id="CONTENT_TYPE">%s</xliff:g> dzēsto vienumu."</string>
-    <!-- outdated translation 6632412458436461203 -->     <string name="low_memory" product="tablet" msgid="2292820184396262278">"tālruņa krātuve ir pilna! Dzēsiet dažus failus, lai atbrīvotu vietu."</string>
+    <string name="low_memory" product="tablet" msgid="2292820184396262278">"Planšetdatora krātuve ir pilna. Dzēsiet dažus failus, lai atbrīvotu vietu."</string>
     <string name="low_memory" product="default" msgid="6632412458436461203">"tālruņa krātuve ir pilna! Dzēsiet dažus failus, lai atbrīvotu vietu."</string>
     <string name="me" msgid="6545696007631404292">"Man"</string>
-    <!-- outdated translation 1319919075463988638 -->     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tālruņa opcijas"</string>
+    <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Planšetdatora opcijas"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Tālruņa opcijas"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Klusuma režīms"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Ieslēgt bezvadu tīklu"</string>
@@ -137,13 +137,13 @@
     <string name="screen_lock" msgid="799094655496098153">"Bloķēt ekrānu"</string>
     <string name="power_off" msgid="4266614107412865048">"Strāvas padeve ir izslēgta."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Notiek izslēgšana..."</string>
-    <!-- outdated translation 649792175242821353 -->     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tālrunis tiks izslēgts."</string>
+    <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Planšetdators tiks izslēgts."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Tālrunis tiks izslēgts."</string>
     <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
     <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nesens"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"Nav nesen izmantotu lietojumprogrammu."</string>
-    <!-- outdated translation 2406416831541615258 -->     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tālruņa opcijas"</string>
+    <string name="global_actions" product="tablet" msgid="408477140088053665">"Planšetdatora opcijas"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Tālruņa opcijas"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Ekrāna bloķētājs"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Strāvas padeve ir izslēgta."</string>
@@ -160,7 +160,7 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Jūsu ziņojumi"</string>
     <string name="permgroupdesc_messages" msgid="7045736972019211994">"Lasiet un rakstiet īsziņas, e-pasta un citus ziņojumus."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Personas informācija"</string>
-    <!-- outdated translation 5488050357388806068 -->     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Tiešā piekļuve tālrunī saglabātajām kontaktpersonām un kalendāram."</string>
+    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Tieša piekļuve planšetdatorā saglabātajām kontaktpersonām un kalendāram."</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Tiešā piekļuve tālrunī saglabātajām kontaktpersonām un kalendāram."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Jūsu atrašanās vieta"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Pārraugiet savu fizisko atrašanās vietu"</string>
@@ -196,10 +196,10 @@
     <string name="permlab_sendSms" msgid="5600830612147671529">"sūtīt īsziņas"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Ļauj lietojumprogrammai sūtīt īsziņas. Ļaunprātīgas lietojumprogrammas var radīt jums izmaksas, bez apstiprinājuma sūtot īsziņas."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"lasīt īsziņu vai multiziņu"</string>
-    <!-- outdated translation 3002170087197294591 -->     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Ļauj lietojumprogrammai lasīt īsziņas, kas ir saglabātas jūsu tālrunī vai SIM kartē. Ļaunprātīgas lietojumprogrammas var lasīt konfidenciālos ziņojumus."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Ļauj lietojumprogrammai lasīt planšetdatorā vai SIM kartē saglabātās īsziņas. Ļaunprātīgas lietojumprogrammas var lasīt jūsu konfidenciālos ziņojumus."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Ļauj lietojumprogrammai lasīt īsziņas, kas ir saglabātas jūsu tālrunī vai SIM kartē. Ļaunprātīgas lietojumprogrammas var lasīt konfidenciālos ziņojumus."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"rediģēt īsziņu vai multiziņu"</string>
-    <!-- outdated translation 6299398896177548095 -->     <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"Ļauj lietojumprogrammai rakstīt īsziņās, kas ir saglabātas tālrunī vai SIM kartē. Ļaunprātīgas lietojumprogrammas var dzēst jūsu ziņojumus."</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"Ļauj lietojumprogrammai rakstīt īsziņās, kas ir saglabātas planšetdatorā vai SIM kartē. Ļaunprātīgas lietojumprogrammas var dzēst jūsu ziņojumus."</string>
     <string name="permdesc_writeSms" product="default" msgid="6299398896177548095">"Ļauj lietojumprogrammai rakstīt īsziņās, kas ir saglabātas tālrunī vai SIM kartē. Ļaunprātīgas lietojumprogrammas var dzēst jūsu ziņojumus."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"saņemt WAP"</string>
     <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Ļauj lietojumprogrammai saņemt un apstrādāt WAP ziņojumus. Ļaunprātīgas lietojumprogrammas var pārraudzīt jūsu ziņojumus vai dzēst tos, neparādot tos jums."</string>
@@ -226,7 +226,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"novērst lietojumprogrammu pārslēgšanu"</string>
     <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Neļauj lietotājam pārslēgties uz citu lietojumprogrammu."</string>
     <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"pārraudzīt un kontrolēt visu lietojumprogrammu palaišanu"</string>
-    <!-- outdated translation 3228701938345388092 -->     <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"Ļauj lietojumprogrammai pārraudzīt un kontrolēt, kā sistēma uzsāk darbības. Ļaunprātīgas lietojumprogrammas var pilnībā pārkāpt sistēmas drošības politiku. Šī atļauja ir nepieciešama tikai izstrādei (nekad parastai tālruņa lietošanai)."</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"Ļauj lietojumprogrammai pārraudzīt un kontrolēt to, kā sistēma uzsāk darbības. Ļaunprātīgas lietojumprogrammas var pilnībā apdraudēt sistēmu. Šī atļauja ir nepieciešama tikai izstrādei (taču ne parastai ierīces lietošanai)."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"sūtīt apraidi par pakotnes noņemšanu"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"Ļauj lietojumprogrammai raidīt paziņojumu, ka lietojumprogrammas pakotne ir noņemta. Ļaunprātīgas lietojumprogrammas var to izmantot, lai pārtrauktu jebkuras citas aktīvas lietojumprogrammas darbību."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"sūtīt īsziņā saņemtu apraidi"</string>
@@ -244,13 +244,13 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"attēlot neautorizētus logus"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Ļauj izveidot logus, kas ir paredzēti izmantošanai iekšējās sistēmas lietotāja saskarnē. Nav paredzēts izmantošanai parastajās lietojumprogrammās."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"rādīt sistēmas līmeņa brīdinājumus"</string>
-    <!-- outdated translation 5109622689323490558 -->     <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"Ļauj lietojumprogrammai rādīt sistēmas brīdinājumu logus. Ļaunprātīgas lietojumprogrammas var pārņemt visu tālruņa ekrānu."</string>
+    <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"Ļauj lietojumprogrammai rādīt sistēmas brīdinājumu logus. Ļaunprātīgas lietojumprogrammas var pārņemt visu planšetdatora ekrānu."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"pārveidot globālo animācijas ātrumu"</string>
     <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"Ļauj lietojumprogrammai jebkurā brīdī mainīt globālo animācijas ātrumu (ātrākas vai lēnākas animācijas)."</string>
     <string name="permlab_manageAppTokens" msgid="17124341698093865">"pārvaldīt lietojumprogrammas pilnvaras"</string>
     <string name="permdesc_manageAppTokens" msgid="977127907524195988">"Ļauj lietojumprogrammām izveidot un pārvaldīt savas pilnvaras, apejot parasto Z secību. Nav nepieciešams parastajām lietojumprogrammām."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"nospiest taustiņus un vadības pogas"</string>
-    <!-- outdated translation 3946098050410874715 -->     <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"Ļauj lietojumprogrammai piegādāt savus ievades notikumus (taustiņu spiedienus u.c.) citām lietojumprogrammām. Ļaunprātīgas lietojumprogrammas var to izmantot, lai pārņemtu tālruni."</string>
+    <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"Ļauj lietojumprogrammai piegādāt savus ievades notikumus (taustiņu spiedienus u.c.) citām lietojumprogrammām. Ļaunprātīgas lietojumprogrammas var to izmantot, lai pārņemtu vadību pār planšetdatoru."</string>
     <string name="permdesc_injectEvents" product="default" msgid="3946098050410874715">"Ļauj lietojumprogrammai piegādāt savus ievades notikumus (taustiņu spiedienus u.c.) citām lietojumprogrammām. Ļaunprātīgas lietojumprogrammas var to izmantot, lai pārņemtu tālruni."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"reģistrēt rakstīto un veiktās darbības"</string>
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Ļauj lietojumprogrammām sekot līdzi nospiestajiem taustiņiem, mijiedarbojoties ar citu lietojumprogrammu (piemēram, ievadot paroli). Parastajām lietojumprogrammām nekad nav nepieciešama."</string>
@@ -277,18 +277,18 @@
     <string name="permlab_installPackages" msgid="335800214119051089">"tieši instalēt lietojumprogrammas"</string>
     <string name="permdesc_installPackages" msgid="526669220850066132">"Ļauj lietojumprogrammai instalēt jaunas vai atjauninātas Android pakotnes. Ļaunprātīgas lietojumprogrammas var to izmantot, lai pievienotu jaunas lietojumprogrammas ar nejauši jaudīgām atļaujām."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"dzēst visus lietojumprogrammas kešatmiņas datus"</string>
-    <!-- outdated translation 7740465694193671402 -->     <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Ļauj lietojumprogrammai atbrīvot vietu tālruņa krātuvē, dzēšot failus lietojumprogrammas kešatmiņas katalogā. Piekļuve parasti ir pieejama tikai sistēmas procesam."</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Ļauj lietojumprogrammai atbrīvot vietu planšetdatora krātuvē, dzēšot failus lietojumprogrammas kešatmiņas katalogā. Piekļuve parasti ir pieejama tikai sistēmas procesā."</string>
     <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"Ļauj lietojumprogrammai atbrīvot vietu tālruņa krātuvē, dzēšot failus lietojumprogrammas kešatmiņas katalogā. Piekļuve parasti ir pieejama tikai sistēmas procesam."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Pārvietot lietojumprogrammas resursus"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Ļauj lietojumprogrammai pārvietot lietojumprogrammas resursus no iekšējā datu nesēja uz ārējo un otrādi."</string>
     <!-- outdated translation 4811921703882532070 -->     <string name="permlab_readLogs" msgid="6615778543198967614">"lasīt sistēmas žurnālfailus"</string>
-    <!-- outdated translation 2257937955580475902 -->     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Ļauj lietojumprogrammai lasīt no dažādiem sistēmas žurnālfailiem. Šādi tai tiek atļauts atklāt vispārīgu informāciju par to, kādas darbības tiek veiktas ar tālruni, taču tajā nevajadzētu būt ietvertai nekādai personas vai privātai informācijai."</string>
-    <!-- outdated translation 2257937955580475902 -->     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Ļauj lietojumprogrammai lasīt no dažādiem sistēmas žurnālfailiem. Šādi tai tiek atļauts atklāt vispārīgu informāciju par to, kādas darbības tiek veiktas ar tālruni, taču tajā nevajadzētu būt ietvertai nekādai personas vai privātai informācijai."</string>
+    <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Ļauj lietojumprogrammai lasīt informāciju no dažādiem sistēmas žurnālfailiem. Tādējādi tā var atklāt vispārīgu informāciju par to, kādas darbības tiek veiktas ar planšetdatoru, iespējams, arī personas vai privātu informāciju."</string>
+    <!-- outdated translation 4077356893924755294 -->     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Ļauj lietojumprogrammai lasīt informāciju no dažādiem sistēmas žurnālfailiem. Tādējādi tā var atklāt vispārīgu informāciju par to, kādas darbības tiek veiktas ar planšetdatoru, iespējams, arī personas vai privātu informāciju."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lasīt grupas “diag” resursus un rakstīt tajos"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Ļauj lietojumprogrammai lasīt jebkuru resursu, kas pieder grupai “diag”, un rakstīt tajos; piemēram, failus direktorijā /dev. Tas var ietekmēt sistēmas stabilitāti un drošību. Tas ir jāizmanto TIKAI aparatūrai specifiskas diagnostikas veikšanai, ko izpilda ražotājs vai operators."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"iespējot vai atspējot lietojumprogrammas komponentus"</string>
-    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Ļauj lietojumprogrammai mainīt, vai citas lietojumprogrammas komponents ir iespējots vai ne. Ļaunprātīgas lietojumprogrammas var to izmantot, lai atspējotu svarīgas tālruņa iespējas. Atļauja ir jāizmanto uzmanīgi, jo pastāv iespēja, ka lietojumprogrammas komponenti būs neizmantojamā, nekonsekventā vai nestabilā stāvoklī."</string>
-    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Ļauj lietojumprogrammai mainīt, vai citas lietojumprogrammas komponents ir iespējots vai ne. Ļaunprātīgas lietojumprogrammas var to izmantot, lai atspējotu svarīgas tālruņa iespējas. Atļauja ir jāizmanto uzmanīgi, jo pastāv iespēja, ka lietojumprogrammas komponenti būs neizmantojamā, nekonsekventā vai nestabilā stāvoklī."</string>
+    <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Ļauj lietojumprogrammai mainīt to, vai citas lietojumprogrammas komponents ir iespējots vai ne. Ļaunprātīgas lietojumprogrammas var to izmantot, lai atspējotu svarīgas planšetdatora iespējas. Atļauja ir jāizmanto uzmanīgi, jo pastāv iespēja, ka lietojumprogrammas komponenti būs neizmantojamā, nepastāvīgā vai nestabilā stāvoklī."</string>
+    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Ļauj lietojumprogrammai mainīt to, vai citas lietojumprogrammas komponents ir iespējots vai ne. Ļaunprātīgas lietojumprogrammas var to izmantot, lai atspējotu svarīgas planšetdatora iespējas. Atļauja ir jāizmanto uzmanīgi, jo pastāv iespēja, ka lietojumprogrammas komponenti būs neizmantojamā, nepastāvīgā vai nestabilā stāvoklī."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"iestatīt vēlamās lietojumprogrammas"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Ļauj lietojumprogrammai pārveidot vēlamās lietojumprogrammas. Šādi ļaunprātīgajām lietojumprogrammā var tikt atļauts nemanāmi mainīt darbinātās lietojumprogrammas, izmānot datus no esošajām lietojumprogrammām, lai apkopotu jūsu privātos datus."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"pārveidot globālos sistēmas iestatījumus"</string>
@@ -298,19 +298,19 @@
     <string name="permlab_writeGservices" msgid="2149426664226152185">"pārveidot Google pakalpojumu karti"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"Ļauj lietojumprogrammai pārveidot Google pakalpojumu karti. Nav paredzēts izmantošanai parastajās lietojumprogrammās."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"automātiski sākt pēc palaišanas"</string>
-    <!-- outdated translation 698336728415008796 -->     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"Ļauj startēt lietojumprogrammu, sevi tiklīdz sistēma ir pabeigusi palaišanu. Šādi tālruņa startēšana var būt ilgāka un lietojumprogrammai var tikt atļauts palēnināt vispārējo tālruņa darbību, vienmēr darbojoties."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"Ļauj startēt lietojumprogrammu, tiklīdz sistēma ir pabeigusi palaišanu. Tādējādi planšetdatora startēšanai var būt nepieciešams vairāk laika un lietojumprogrammai var tikt atļauts palēnināt vispārējo planšetdatora darbību."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="698336728415008796">"Ļauj startēt lietojumprogrammu, sevi tiklīdz sistēma ir pabeigusi palaišanu. Šādi tālruņa startēšana var būt ilgāka un lietojumprogrammai var tikt atļauts palēnināt vispārējo tālruņa darbību, vienmēr darbojoties."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"sūtīt piesaistošu apraidi"</string>
-    <!-- outdated translation 1920045289234052219 -->     <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Ļauj lietojumprogrammai sūtīt piesaistošās apraides, kas saglabājas pēc apraides pabeigšanas. Ļaunprātīgas lietojumprogrammas var palēnināt tālruņa darbību vai padarīt to nestabilu, tādējādi liekot izmantot pārāk daudz atmiņas."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Ļauj lietojumprogrammai sūtīt piesaistošās apraides, kas saglabājas pēc apraides pabeigšanas. Ļaunprātīgas lietojumprogrammas var palēnināt planšetdatora darbību vai padarīt to nestabilu, tādējādi liekot izmantot pārāk daudz atmiņas."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"Ļauj lietojumprogrammai sūtīt piesaistošās apraides, kas saglabājas pēc apraides pabeigšanas. Ļaunprātīgas lietojumprogrammas var palēnināt tālruņa darbību vai padarīt to nestabilu, tādējādi liekot izmantot pārāk daudz atmiņas."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"lasīt kontaktpersonu datus"</string>
-    <!-- outdated translation 3371591512896545975 -->     <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Ļauj lietojumprogrammai lasīt visus jūsu tālrunī saglabāto kontaktpersonu (adrešu) datus. Ļaunprātīgas lietojumprogrammas var to izmantot, lai sūtītu jūsu datus citām personām."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Ļauj lietojumprogrammai lasīt visus planšetdatorā saglabāto kontaktpersonu (adrešu) datus. Ļaunprātīgas lietojumprogrammas var to izmantot, lai sūtītu jūsu datus citām personām."</string>
     <string name="permdesc_readContacts" product="default" msgid="3371591512896545975">"Ļauj lietojumprogrammai lasīt visus jūsu tālrunī saglabāto kontaktpersonu (adrešu) datus. Ļaunprātīgas lietojumprogrammas var to izmantot, lai sūtītu jūsu datus citām personām."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"rakstīt kontaktpersonu datus"</string>
-    <!-- outdated translation 3924383579108183601 -->     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Ļauj lietojumprogrammai pārveidot tālrunī saglabātos kontaktpersonu (adrešu) datus. Ļaunprātīgas lietojumprogrammas var to izmantot, lai dzēstu vai pārveidotu jūsu kontaktpersonu datus."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Ļauj lietojumprogrammai pārveidot planšetdatorā saglabātos kontaktpersonu (adrešu) datus. Ļaunprātīgas lietojumprogrammas var to izmantot, lai dzēstu vai pārveidotu jūsu kontaktpersonu datus."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Ļauj lietojumprogrammai pārveidot tālrunī saglabātos kontaktpersonu (adrešu) datus. Ļaunprātīgas lietojumprogrammas var to izmantot, lai dzēstu vai pārveidotu jūsu kontaktpersonu datus."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"lasīt kalendāra pasākumus"</string>
-    <!-- outdated translation 5533029139652095734 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Ļauj lietojumprogrammai lasīt visus tālrunī saglabātos kalendāra pasākumus. Ļaunprātīgas lietojumprogrammas var to izmantot, lai sūtītu kalendāra pasākumus citām personām."</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Ļauj lietojumprogrammai lasīt visus planšetdatorā saglabātos kalendāra notikumus. Ļaunprātīgas lietojumprogrammas var to izmantot, lai sūtītu kalendāra notikumus citām personām."</string>
     <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Ļauj lietojumprogrammai lasīt visus tālrunī saglabātos kalendāra pasākumus. Ļaunprātīgas lietojumprogrammas var to izmantot, lai sūtītu kalendāra pasākumus citām personām."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"pievienot vai pārveidot kalendāra pasākumus un sūtīt e-pasta ziņojumus viesiem"</string>
     <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Ļauj lietojumprogrammai pievienot vai mainīt pasākumus jūsu kalendārā, kas var sūtīt e-pasta ziņojumus viesiem. Ļaunprātīgas lietojumprogrammas var to izmantot, lai dzēstu vai pārveidotu jūsu kalendāra pasākumus vai sūtītu e-pasta ziņojumus viesiem."</string>
@@ -321,10 +321,10 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"atļauja instalēt atrašanās vietas sniedzēju"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Izveidojiet imitētas atrašanās vietas avotus pārbaudīšanai. Ļaunprātīgas lietojumprogrammas var to izmantot, lai ignorētu atrašanās vietu un/vai statusu, ko atgriež reālās atrašanās vietas avoti, piemēram, GPS vai tīkla nodrošinātāji, vai pārraudzītu un ziņotu par jūsu atrašanās vietu ārējam avotam."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"noteikt precīzu (GPS) atrašanās vietu"</string>
-    <!-- outdated translation 7411213317434337331 -->     <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Piekļūstiet precīziem atrašanās vietas avotiem, piemēram, globālās pozicionēšanas sistēmai tālrunī (ja pieejams). Ļaunprātīgas lietojumprogrammas var to izmantot, lai noteiktu, kur jūs atrodaties, un var patērēt papildu akumulatora jaudu."</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Piekļūt precīziem atrašanās vietas avotiem, piemēram, globālās pozicionēšanas sistēmai planšetdatorā (ja pieejams). Ļaunprātīgas lietojumprogrammas var to izmantot, lai noteiktu jūsu atrašanās vietu, un var patērēt papildu akumulatora jaudu."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Piekļūstiet precīziem atrašanās vietas avotiem, piemēram, globālās pozicionēšanas sistēmai tālrunī (ja pieejams). Ļaunprātīgas lietojumprogrammas var to izmantot, lai noteiktu, kur jūs atrodaties, un var patērēt papildu akumulatora jaudu."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"noteikt aptuvenu (uz tīklu balstītu) atrašanās vietu"</string>
-    <!-- outdated translation 8235655958070862293 -->     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Piekļūstiet tādiem zemas kvalitātes atrašanās vietas avotiem kā mobilā tīkla datu bāzei, lai noteiktu aptuvenu tālruņa atrašanās vietu (ja pieejams). Ļaunprātīgas lietojumprogrammas var to izmantot, lai noteiktu jūsu aptuveno atrašanās vietu."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Piekļūt tādiem zemas kvalitātes atrašanās vietas avotiem kā mobilā tīkla datu bāze, lai noteiktu aptuvenu planšetdatora atrašanās vietu (ja pieejams). Ļaunprātīgas lietojumprogrammas var to izmantot, lai noteiktu jūsu aptuveno atrašanās vietu."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8235655958070862293">"Piekļūstiet tādiem zemas kvalitātes atrašanās vietas avotiem kā mobilā tīkla datu bāzei, lai noteiktu aptuvenu tālruņa atrašanās vietu (ja pieejams). Ļaunprātīgas lietojumprogrammas var to izmantot, lai noteiktu jūsu aptuveno atrašanās vietu."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"piekļūt SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Ļauj lietojumprogrammai izmantot SurfaceFlinger zemā līmeņa funkcijas."</string>
@@ -336,13 +336,13 @@
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Ļauj lietojumprogrammai piekļūt audio ieraksta ceļam."</string>
     <!-- outdated translation 8059288807274039014 -->     <string name="permlab_camera" msgid="3616391919559751192">"uzņemt attēlus"</string>
     <!-- outdated translation 9013476258810982546 -->     <string name="permdesc_camera" msgid="6004878235852154239">"Ļauj lietojumprogrammai uzņemt attēlus ar kameru. Šādi lietojumprogramma jebkurā brīdī var apkopot attēlus, kas ir redzami ar kameru."</string>
-    <!-- outdated translation 8337817093326370537 -->     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"neatgriezeniski atspējot tālruni"</string>
+    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"neatgriezeniska planšetdatora atspējošana"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"neatgriezeniski atspējot tālruni"</string>
-    <!-- outdated translation 5569526552607599221 -->     <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"Ļauj lietojumprogrammai neatgriezeniski atspējot visu tālruni. Tas ir ļoti bīstami."</string>
+    <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"Ļauj lietojumprogrammai neatgriezeniski atspējot visu planšetdatoru. Šāda darbība ir bīstama."</string>
     <string name="permdesc_brick" product="default" msgid="5569526552607599221">"Ļauj lietojumprogrammai neatgriezeniski atspējot visu tālruni. Tas ir ļoti bīstami."</string>
-    <!-- outdated translation 2898560872462638242 -->     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"atsāknēt tālruni"</string>
+    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"planšetdatora piespiedu atsāknēšana"</string>
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"atsāknēt tālruni"</string>
-    <!-- outdated translation 7914933292815491782 -->     <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"Ļauj lietojumprogrammai atsāknēt tālruni."</string>
+    <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"Ļauj lietojumprogrammai atsāknēt planšetdatoru."</string>
     <string name="permdesc_reboot" product="default" msgid="7914933292815491782">"Ļauj lietojumprogrammai atsāknēt tālruni."</string>
     <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"uzlikt un noņemt failu sistēmas"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Ļauj lietojumprogrammai noņemt vai uzlikt noņemamu krātuvju failu sistēmas."</string>
@@ -372,7 +372,7 @@
     <string name="permdesc_callPhone" msgid="3369867353692722456">"Ļauj lietojumprogrammai zvanīt uz tālruņa numuriem bez jūsu iejaukšanās. Ļaunprātīgas lietojumprogrammas var radīt neparedzētu zvanu parādīšanos jūsu tālruņa rēķinā. Ņemiet vērā, ka lietojumprogramma nevar zvanīt uz ārkārtas numuriem."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"tieši zvanīt uz jebkuriem tālruņa numuriem"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Ļauj lietojumprogrammai zvanīt uz jebkuru tālruņa numuru, tostarp ārkārtas numuriem, bez jūsu iejaukšanās. Ļaunprātīgas lietojumprogrammas var veikt nevajadzīgus un pretlikumīgus zvanus uz ārkārtas pakalpojumiem."</string>
-    <!-- outdated translation 5604848095315421425 -->     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"tiešā veidā sākt CDMA tālruņa iestatīšanu"</string>
+    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"tiešā veidā sākt CDMA planšetdatora iestatīšanu"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"tiešā veidā sākt CDMA tālruņa iestatīšanu"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Ļauj lietojumprogrammai sākt CDMA nodrošināšanu. Ļaunprātīgas lietojumprogrammas var nevajadzīgi sākt CDMA nodrošināšanu."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"kontrolēt atrašanās vietas atjauninājumu paziņojumus"</string>
@@ -385,16 +385,16 @@
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Ļauj lietojumprogrammai kontrolēt ierīces tālruņa funkcijas. Lietojumprogramma ar šo atļauju var pārslēgt tīklus, ieslēgt un izslēgt tālruņa radio un veikt līdzīgas darbības, neinformējot par to jūs."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"lasīt tālruņa stāvokli un identitāti"</string>
     <string name="permdesc_readPhoneState" msgid="188877305147626781">"Ļauj lietojumprogrammai piekļūt ierīces tālruņa funkcijām. Lietojumprogramma ar šo atļauju var noteikt tālruņa numuru un šī tālruņa sērijas numuru, to, vai zvans ir aktīvs, numuru, ar kuru zvans ir savienots u.tml."</string>
-    <!-- outdated translation 573480187941496130 -->     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"novērst tālruņa pāriešanu miega režīmā"</string>
+    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"planšetdatora pāriešanas miega režīmā novēršana"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"novērst tālruņa pāriešanu miega režīmā"</string>
-    <!-- outdated translation 7584036471227467099 -->     <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"Ļauj lietojumprogrammai novērst tālruņa pāriešanu miega režīmā."</string>
+    <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"Ļauj lietojumprogrammai novērst planšetdatora pāriešanu miega režīmā."</string>
     <string name="permdesc_wakeLock" product="default" msgid="7584036471227467099">"Ļauj lietojumprogrammai novērst tālruņa pāriešanu miega režīmā."</string>
-    <!-- outdated translation 4928622470980943206 -->     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"ieslēgt vai izslēgt tālruni"</string>
+    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"planšetdatora ieslēgšana vai izslēgšana"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ieslēgt vai izslēgt tālruni"</string>
-    <!-- outdated translation 4577331933252444818 -->     <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"Ļauj lietojumprogrammai ieslēgt vai izslēgt tālruni."</string>
+    <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"Ļauj lietojumprogrammai ieslēgt vai izslēgt planšetdatoru."</string>
     <string name="permdesc_devicePower" product="default" msgid="4577331933252444818">"Ļauj lietojumprogrammai ieslēgt vai izslēgt tālruni."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"darbināt rūpnīcas pārbaudes režīmā"</string>
-    <!-- outdated translation 8136644990319244802 -->     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Darbiniet kā zema līmeņa ražotāja pārbaudi, atļaujot pilnīgu piekļuvi tālruņa aparatūrai. Pieejams tikai tad, ja tālrunis darbojas ražotāja pārbaudes režīmā."</string>
+    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Tiek palaista kā zema līmeņa ražotāja pārbaude, atļaujot pilnīgu piekļuvi tālruņa aparatūrai. Pieejama tikai tad, ja planšetdators darbojas ražotāja pārbaudes režīmā."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Darbiniet kā zema līmeņa ražotāja pārbaudi, atļaujot pilnīgu piekļuvi tālruņa aparatūrai. Pieejams tikai tad, ja tālrunis darbojas ražotāja pārbaudes režīmā."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"iestatīt tapeti"</string>
     <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Ļauj lietojumprogrammai iestatīt sistēmas tapeti."</string>
@@ -403,15 +403,15 @@
     <string name="permlab_masterClear" msgid="2315750423139697397">"atiestatīt sistēmu uz rūpnīcas noklusējuma iestatījumiem"</string>
     <string name="permdesc_masterClear" msgid="5033465107545174514">"Ļauj lietojumprogrammai pilnībā atiestatīt sistēmu uz rūpnīcas iestatījumiem, dzēšot visus datus, konfigurāciju un instalētās lietojumprogrammas."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"iestatīt laiku"</string>
-    <!-- outdated translation 667294309287080045 -->     <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"Ļauj lietojumprogrammai mainīt tālruņa pulksteņa laiku."</string>
+    <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"Ļauj lietojumprogrammai mainīt planšetdatora pulksteņa laiku."</string>
     <string name="permdesc_setTime" product="default" msgid="667294309287080045">"Ļauj lietojumprogrammai mainīt tālruņa pulksteņa laiku."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"iestatīt laika joslu"</string>
-    <!-- outdated translation 1902540227418179364 -->     <string name="permdesc_setTimeZone" product="tablet" msgid="2522877107613885139">"Ļauj lietojumprogrammai mainīt tālruņa laika joslu."</string>
+    <string name="permdesc_setTimeZone" product="tablet" msgid="2522877107613885139">"Ļauj lietojumprogrammai mainīt planšetdatora laika joslu."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="1902540227418179364">"Ļauj lietojumprogrammai mainīt tālruņa laika joslu."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"darboties kā AccountManagerService"</string>
     <string name="permdesc_accountManagerService" msgid="6056903274106394752">"Ļauj lietojumprogrammai veikt zvanus uz AccountAuthenticators"</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"atklāt zināmus kontus"</string>
-    <!-- outdated translation 6839262446413155394 -->     <string name="permdesc_getAccounts" product="tablet" msgid="857622793935544694">"Ļauj lietojumprogrammai iegūt tālrunim zināmo kontu sarakstu."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="857622793935544694">"Ļauj lietojumprogrammai iegūt ar planšetdatoru saistīto kontu sarakstu."</string>
     <string name="permdesc_getAccounts" product="default" msgid="6839262446413155394">"Ļauj lietojumprogrammai iegūt tālrunim zināmo kontu sarakstu."</string>
     <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"darboties kā konta autentificētājam"</string>
     <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"Ļauj lietojumprogrammai izmantot AccountManager konta autentificētāja iespējas, tostarp kontu izveidi un to paroļu iegūšanu un iestatīšanu."</string>
@@ -438,10 +438,10 @@
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"atļaut Wi-Fi multiraides uztveršanu"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Ļauj lietojumprogrammai saņemt paketes, kas nav tieši adresētas ierīcei. Tas var būt noderīgi, atklājot pakalpojumus, kas tiek piedāvāti tuvākajā apkārtnē. Tas izmanto vairāk jaudas nekā režīmā, kas nav multiraides režīms."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"Bluetooth administrēšana"</string>
-    <!-- outdated translation 7256289774667054555 -->     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Ļauj lietojumprogrammai konfigurēt vietējo Bluetooth tālruni un atklāt attālās ierīces, un izveidot pāri ar tām."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Ļauj lietojumprogrammai konfigurēt vietējo Bluetooth planšetdatoru, kā arī atklāt attālās ierīces un savienot tās pārī."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Ļauj lietojumprogrammai konfigurēt vietējo Bluetooth tālruni un atklāt attālās ierīces, un izveidot pāri ar tām."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"izveidot Bluetooth savienojumus"</string>
-    <!-- outdated translation 762515380679392945 -->     <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"Ļauj lietojumprogrammai skatīt vietējā Bluetooth tālruņa konfigurāciju, kā arī veidot un pieņemt savienojumus ar pārī savienotām ierīcēm."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"Ļauj lietojumprogrammai skatīt vietējā Bluetooth planšetdatora konfigurāciju, kā arī veidot un pieņemt savienojumus ar pārī savienotām ierīcēm."</string>
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Ļauj lietojumprogrammai skatīt vietējā Bluetooth tālruņa konfigurāciju, kā arī veidot un pieņemt savienojumus ar pārī savienotām ierīcēm."</string>
     <!-- no translation found for permlab_nfc (4423351274757876953) -->
     <skip />
@@ -480,15 +480,15 @@
     <!-- outdated translation 4307861496302850201 -->     <string name="policylab_limitPassword" msgid="4497420728857585791">"Paroles ierobežošana"</string>
     <!-- outdated translation 1719877245692318299 -->     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Ierobežojiet izmantojamo paroļu veidus."</string>
     <!-- outdated translation 7374780712664285321 -->     <string name="policylab_watchLogin" msgid="914130646942199503">"Pieteikšanās mēģinājumu vērošana"</string>
-    <!-- outdated translation 1961251179624843483 -->     <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"Pārraugiet neizdevušos mēģinājumus pieteikties ierīcē, lai veiktu kādu darbību."</string>
-    <!-- outdated translation 1961251179624843483 -->     <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"Pārraugiet neizdevušos mēģinājumus pieteikties ierīcē, lai veiktu kādu darbību."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"Tiek pārraudzīts nepareizi ievadīto paroļu skaits, atbloķējot ekrānu, un tiek bloķēts planšetdators vai dzēsti visi planšetdatora dati, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
+    <!-- outdated translation 933601759466308092 -->     <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"Tiek pārraudzīts nepareizi ievadīto paroļu skaits, atbloķējot ekrānu, un tiek bloķēts planšetdators vai dzēsti visi planšetdatora dati, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <!-- outdated translation 9084772090797485420 -->     <string name="policylab_resetPassword" msgid="2620077191242688955">"Atiestatīt paroli"</string>
     <!-- outdated translation 3332167600331799991 -->     <string name="policydesc_resetPassword" msgid="5391240616981297361">"Piespiedu kārtā mainīt paroli uz jaunu vērtību, pieprasot administratoram to jums piešķirt, lai varētu pieteikties."</string>
     <!-- outdated translation 5760466025247634488 -->     <string name="policylab_forceLock" msgid="2274085384704248431">"Piespiedu bloķēšana"</string>
     <!-- outdated translation 2819868664946089740 -->     <string name="policydesc_forceLock" msgid="5696964126226028442">"Kontrolējiet, kad ierīce tiek bloķēta, pieprasot atkārtoti ievadīt tās paroli."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Dzēst visus datus"</string>
-    <!-- outdated translation 2314060933796396205 -->     <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"Veiciet rūpnīcas iestatījumu atiestatīšanu, dzēšot visus datus bez jebkāda apstiprinājuma."</string>
-    <!-- outdated translation 2314060933796396205 -->     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Veiciet rūpnīcas iestatījumu atiestatīšanu, dzēšot visus datus bez jebkāda apstiprinājuma."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"Atiestatot rūpnīcas datus, bez brīdinājuma tiek dzēsti visi planšetdatora dati"</string>
+    <!-- outdated translation 314455232799486222 -->     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Atiestatot rūpnīcas datus, bez brīdinājuma tiek dzēsti visi planšetdatora dati"</string>
     <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
     <skip />
     <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
@@ -653,7 +653,7 @@
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Pievienojiet uzlādes ierīci."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Nav SIM kartes."</string>
-    <!-- outdated translation 2186920585695169078 -->     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Tālrunī nav SIM kartes."</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Planšetdatorā nav SIM kartes."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Tālrunī nav SIM kartes."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Lūdzu, ievietojiet SIM karti."</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Tikai ārkārtas zvani"</string>
@@ -667,8 +667,7 @@
     <skip />
     <!-- no translation found for lockscreen_too_many_failed_pin_attempts_dialog_message (6827749231465145590) -->
     <skip />
-    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (8687762517114904651) -->
-    <skip />
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Atbloķēšanas kombinācija tika nepareizi izveidota <xliff:g id="NUMBER_0">%d</xliff:g> reizi(-es). Pēc vēl <xliff:g id="NUMBER_1">%d</xliff:g> neveiksmīgiem mēģinājumiem planšetdators būs jāatbloķē, pierakstoties Google kontā."\n\n"Lūdzu, mēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%d</xliff:g> sekundes(-ēm)."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Atbloķēšanas kombinācija tika nepareizi uzzīmēta <xliff:g id="NUMBER_0">%d</xliff:g> reizi(-es). Pēc vēl <xliff:g id="NUMBER_1">%d</xliff:g> neveiksmīgiem mēģinājumiem tālrunis būs jāatbloķē, izmantojot Google pierakstīšanos."\n\n" Lūdzu, mēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%d</xliff:g> sekundes(-ēm)."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Mēģiniet vēlreiz pēc <xliff:g id="NUMBER">%d</xliff:g> sekundes(-ēm)."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Vai aizmirsāt kombināciju?"</string>
@@ -699,8 +698,7 @@
     <string name="double_tap_toast" msgid="1068216937244567247">"Padoms: divreiz pieskarieties, lai tuvinātu un tālinātu."</string>
     <!-- no translation found for autofill_this_form (1272247532604569872) -->
     <skip />
-    <!-- no translation found for setup_autofill (8154593408885654044) -->
-    <skip />
+    <string name="setup_autofill" msgid="8154593408885654044">"Iest. aut. aizp."</string>
     <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
     <skip />
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
@@ -712,7 +710,7 @@
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"lasīt pārlūkprogrammas vēsturi un grāmatzīmes"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Ļauj lietojumprogrammai lasīt visus URL, kas ir apmeklēti pārlūkprogrammā, un visas pārlūkprogrammas grāmatzīmes."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"rakstīt pārlūkprogrammas vēsturi un grāmatzīmes"</string>
-    <!-- outdated translation 945571990357114950 -->     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"Ļauj lietojumprogrammai pārveidot tālrunī saglabāto pārlūkprogrammas vēsturi un grāmatzīmes. Ļaunprātīgas lietojumprogrammas var to izmantot, lai dzēstu vai pārveidotu pārlūkprogrammas datus."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"Ļauj lietojumprogrammai pārveidot planšetdatorā saglabāto pārlūkprogrammas vēsturi un grāmatzīmes. Ļaunprātīgas lietojumprogrammas var to izmantot, lai dzēstu vai pārveidotu pārlūkprogrammas datus."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Ļauj lietojumprogrammai pārveidot tālrunī saglabāto pārlūkprogrammas vēsturi un grāmatzīmes. Ļaunprātīgas lietojumprogrammas var to izmantot, lai dzēstu vai pārveidotu pārlūkprogrammas datus."</string>
     <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
     <skip />
@@ -843,7 +841,7 @@
     <string name="inputMethod" msgid="1653630062304567879">"Ievades metode"</string>
     <!-- outdated translation 1672989176958581452 -->     <string name="editTextMenuTitle" msgid="4909135564941815494">"Rediģēt tekstu"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Maz brīvas vietas"</string>
-    <!-- outdated translation 635106544616378836 -->     <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"Tālruņa krātuvē kļūst maz vietas."</string>
+    <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"Planšetdatora krātuve ir gandrīz pilna."</string>
     <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"Tālruņa krātuvē kļūst maz vietas."</string>
     <string name="ok" msgid="5970060430562524910">"Labi"</string>
     <string name="cancel" msgid="6442560571259935130">"Atcelt"</string>
@@ -925,7 +923,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Tiek sūtīts liels īsziņu skaits. Atlasiet Labi, lai turpinātu, vai Atcelt, lai apturētu sūtīšanu."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"Labi"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Atcelt"</string>
-    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Laika iestatīšana"</string>
+    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
     <skip />
     <string name="date_time_set" msgid="5777075614321087758">"Iestatīt"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Noklusējums"</string>
@@ -1077,5 +1076,15 @@
     <!-- no translation found for share (1778686618230011964) -->
     <skip />
     <!-- no translation found for find (4808270900322985960) -->
+    <skip />
+    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
+    <skip />
+    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
+    <skip />
+    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
+    <skip />
+    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
+    <skip />
+    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
     <skip />
 </resources>

@@ -25,13 +25,11 @@ import android.text.TextUtils;
  * an input method.
  */
 public final class CompletionInfo implements Parcelable {
-    static final String TAG = "CompletionInfo";
-    
-    final long mId;
-    final int mPosition;
-    final CharSequence mText;
-    final CharSequence mLabel;
-    
+    private final long mId;
+    private final int mPosition;
+    private final CharSequence mText;
+    private final CharSequence mLabel;
+
     /**
      * Create a simple completion with just text, no label.
      */
@@ -52,7 +50,7 @@ public final class CompletionInfo implements Parcelable {
         mLabel = label;
     }
 
-    CompletionInfo(Parcel source) {
+    private CompletionInfo(Parcel source) {
         mId = source.readLong();
         mPosition = source.readInt();
         mText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
@@ -100,7 +98,7 @@ public final class CompletionInfo implements Parcelable {
 
     /**
      * Used to package this object into a {@link Parcel}.
-     * 
+     *
      * @param dest The {@link Parcel} to be written.
      * @param flags The flags used for parceling.
      */

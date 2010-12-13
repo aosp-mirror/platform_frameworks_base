@@ -232,6 +232,16 @@ public interface InputConnection {
     public boolean commitCompletion(CompletionInfo text);
 
     /**
+     * Commit a correction automatically performed on the raw user's input. A typical example would
+     * be to correct typos using a dictionary.
+     *
+     * @param correctionInfo Detailed information about the correction.
+     *
+     * @return True on success, false if the input connection is no longer valid.
+     */
+    public boolean commitCorrection(CorrectionInfo correctionInfo);
+
+    /**
      * Set the selection of the text editor.  To set the cursor position,
      * start and end should have the same value.
      * @return Returns true on success, false if the input connection is no longer

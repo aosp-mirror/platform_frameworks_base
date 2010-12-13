@@ -31,14 +31,16 @@
     <string name="battery_low_percent_format" msgid="1077244949318261761">"还剩 <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"不支持 USB 充电功能。"\n"只能使用随附的充电器充电。"</string>
     <string name="battery_low_why" msgid="7279169609518386372">"电量使用情况"</string>
-    <!-- no translation found for status_bar_settings_settings_button (3023889916699270224) -->
+    <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"设置"</string>
+    <!-- no translation found for status_bar_settings_wifi_button (1733928151698311923) -->
     <skip />
-    <!-- no translation found for status_bar_settings_airplane (4879879698500955300) -->
+    <string name="status_bar_settings_airplane" msgid="4879879698500955300">"飞行模式"</string>
+    <string name="status_bar_settings_rotation_lock" msgid="8361452930058000609">"锁定屏幕浏览模式"</string>
+    <!-- no translation found for status_bar_settings_mute_label (554682549917429396) -->
     <skip />
-    <!-- no translation found for status_bar_settings_rotation_lock (8361452930058000609) -->
+    <!-- no translation found for status_bar_settings_auto_brightness_label (511453614962324674) -->
     <skip />
-    <!-- no translation found for status_bar_settings_notifications (397146176280905137) -->
-    <skip />
+    <string name="status_bar_settings_notifications" msgid="397146176280905137">"通知"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"近期任务"</string>
     <string name="recent_tasks_empty" msgid="1905484479067697884">"没有最近使用的应用程序。"</string>
     <!-- no translation found for recent_tasks_app_label (3796483981246752469) -->

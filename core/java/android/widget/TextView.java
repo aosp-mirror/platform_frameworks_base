@@ -32,6 +32,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -114,6 +115,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
+import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -316,6 +318,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private int mLastDownPositionX, mLastDownPositionY;
     private Callback mCustomSelectionActionModeCallback;
+
+    private final int mSquaredTouchSlopDistance;
 
     /*
      * Kick-start the font cache for the zygote process (to pay the cost of
@@ -1007,6 +1011,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         setLongClickable(longClickable);
 
         prepareCursorControllers();
+
+        final ViewConfiguration viewConfiguration = ViewConfiguration.get(context);
+        final int touchSlop = viewConfiguration.getScaledTouchSlop();
+        mSquaredTouchSlopDistance = touchSlop * touchSlop;
     }
 
     private void setTypefaceByIndex(int typefaceIndex, int styleIndex) {
@@ -3936,6 +3944,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mBlink != null) {
             mBlink.cancel();
         }
+
+        if (mInsertionPointCursorController != null) {
+            mInsertionPointCursorController.onDetached();
+        }
+
+        if (mSelectionModifierCursorController != null) {
+            mSelectionModifierCursorController.onDetached();
+        }
+
         hideControllers();
     }
 
@@ -4333,6 +4350,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         */
 
         final InputMethodState ims = mInputMethodState;
+        final int cursorOffsetVertical = voffsetCursor - voffsetText;
         if (ims != null && ims.mBatchEditNesting == 0) {
             InputMethodManager imm = InputMethodManager.peekInstance();
             if (imm != null) {
@@ -4363,7 +4381,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     canvas.getMatrix().mapPoints(ims.mTmpOffset);
                     ims.mTmpRectF.offset(ims.mTmpOffset[0], ims.mTmpOffset[1]);
     
-                    ims.mTmpRectF.offset(0, voffsetCursor - voffsetText);
+                    ims.mTmpRectF.offset(0, cursorOffsetVertical);
     
                     ims.mCursorRectInWindow.set((int)(ims.mTmpRectF.left + 0.5),
                             (int)(ims.mTmpRectF.top + 0.5),
@@ -4377,11 +4395,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        layout.draw(canvas, highlight, mHighlightPaint, voffsetCursor - voffsetText);
+        if (mCorrectionHighlighter != null) {
+            mCorrectionHighlighter.draw(canvas, cursorOffsetVertical);
+        }
+
+        layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
 
         if (mMarquee != null && mMarquee.shouldDrawGhost()) {
             canvas.translate((int) mMarquee.getGhostOffset(), 0.0f);
-            layout.draw(canvas, highlight, mHighlightPaint, voffsetCursor - voffsetText);
+            layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
         }
 
         /*  Comment out until we decide what to do about animations
@@ -5055,6 +5077,115 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @param text The auto complete text the user has selected.
      */
     public void onCommitCompletion(CompletionInfo text) {
+    }
+
+    /**
+     * Called by the framework in response to a text auto-correction (such as fixing a typo using a
+     * a dictionnary) from the current input method, provided by it calling
+     * {@link InputConnection#commitCorrection} InputConnection.commitCorrection()}. The default
+     * implementation flashes the background of the corrected word to provide feedback to the user.
+     *
+     * @param info The auto correct info about the text that was corrected.
+     */
+    public void onCommitCorrection(CorrectionInfo info) {
+        if (mCorrectionHighlighter == null) {
+            mCorrectionHighlighter = new CorrectionHighlighter();
+        } else {
+            mCorrectionHighlighter.invalidate(false);
+        }
+
+        mCorrectionHighlighter.highlight(info);
+    }
+
+    private class CorrectionHighlighter {
+        private final Path mPath = new Path();
+        private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private int mStart, mEnd;
+        private long mFadingStartTime;
+        private final static int FADE_OUT_DURATION = 400;
+
+        public CorrectionHighlighter() {
+            mPaint.setCompatibilityScaling(getResources().getCompatibilityInfo().applicationScale);
+            mPaint.setStyle(Paint.Style.FILL);
+        }
+
+        public void highlight(CorrectionInfo info) {
+            mStart = info.getOffset();
+            mEnd = mStart + info.getNewText().length();
+            mFadingStartTime = SystemClock.uptimeMillis();
+
+            if (mStart < 0 || mEnd < 0) {
+                stopAnimation();
+            }
+        }
+
+        public void draw(Canvas canvas, int cursorOffsetVertical) {
+            if (updatePath() && updatePaint()) {
+                if (cursorOffsetVertical != 0) {
+                    canvas.translate(0, cursorOffsetVertical);
+                }
+
+                canvas.drawPath(mPath, mPaint);
+
+                if (cursorOffsetVertical != 0) {
+                    canvas.translate(0, -cursorOffsetVertical);
+                }
+                invalidate(true);
+            } else {
+                stopAnimation();
+                invalidate(false);
+            }
+        }
+
+        private boolean updatePaint() {
+            final long duration = SystemClock.uptimeMillis() - mFadingStartTime;
+            if (duration > FADE_OUT_DURATION) return false;
+
+            final float coef = 1.0f - (float) duration / FADE_OUT_DURATION;
+            final int highlightColorAlpha = Color.alpha(mHighlightColor);
+            final int color = (mHighlightColor & 0x00FFFFFF) +
+                    ((int) (highlightColorAlpha * coef) << 24);
+            mPaint.setColor(color);
+            return true;
+        }
+
+        private boolean updatePath() {
+            final Layout layout = TextView.this.mLayout;
+            if (layout == null) return false;
+
+            // Update in case text is edited while the animation is run
+            final int length = mText.length();
+            int start = Math.min(length, mStart);
+            int end = Math.min(length, mEnd);
+
+            mPath.reset();
+            TextView.this.mLayout.getSelectionPath(start, end, mPath);
+            return true;
+        }
+
+        private void invalidate(boolean delayed) {
+            if (TextView.this.mLayout == null) return;
+
+            synchronized (sTempRect) {
+                mPath.computeBounds(sTempRect, false);
+
+                int left = getCompoundPaddingLeft();
+                int top = getExtendedPaddingTop() + getVerticalOffset(true);
+
+                if (delayed) {
+                    TextView.this.postInvalidateDelayed(16, // 60 Hz update
+                            left + (int) sTempRect.left, top + (int) sTempRect.top,
+                            left + (int) sTempRect.right, top + (int) sTempRect.bottom);
+                } else {
+                    TextView.this.postInvalidate((int) sTempRect.left, (int) sTempRect.top,
+                            (int) sTempRect.right, (int) sTempRect.bottom);
+                }
+            }
+        }
+
+        private void stopAnimation() {
+            TextView.this.mCorrectionHighlighter = null;
+        }
     }
 
     public void beginBatchEdit() {
@@ -6572,8 +6703,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Not private so it can be called from an inner class without going
      * through a thunk.
      */
-    void handleTextChanged(CharSequence buffer, int start,
-            int before, int after) {
+    void handleTextChanged(CharSequence buffer, int start, int before, int after) {
         final InputMethodState ims = mInputMethodState;
         if (ims == null || ims.mBatchEditNesting == 0) {
             updateAfterEdit();
@@ -6603,8 +6733,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Not private so it can be called from an inner class without going
      * through a thunk.
      */
-    void spanChange(Spanned buf, Object what, int oldStart, int newStart,
-            int oldEnd, int newEnd) {
+    void spanChange(Spanned buf, Object what, int oldStart, int newStart, int oldEnd, int newEnd) {
         // XXX Make the start and end move together if this ends up
         // spending too much time invalidating.
 
@@ -7484,6 +7613,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int start = end;
 
         for (; start > 0; start--) {
+            if (start == end) {
+                // Cases where the text ends with a '.' and we select from the end of the line
+                // (right after the dot), or when we select from the space character in "aaa, bbb".
+                final char c = mTransformed.charAt(start);
+                final int type = Character.getType(c);
+                if (type == Character.OTHER_PUNCTUATION) continue;
+            }
             if (!isWordCharacter(start - 1)) break;
             if ((end - start) > MAX_LENGTH) return -1;
         }
@@ -8164,6 +8300,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
          * @param event The touch event
          */
         public boolean onTouchEvent(MotionEvent event);
+
+        /**
+         * Called when the view is detached from window. Perform house keeping task, such as
+         * stopping Runnable thread that would otherwise keep a reference on the context, thus
+         * preventing the activity to be recycled.
+         */
+        public void onDetached();
     }
 
     private class PastePopupMenu implements OnClickListener {
@@ -8281,14 +8424,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private float mTouchOffsetY;
         private int mLastParentX;
         private int mLastParentY;
+        private float mDownPositionX, mDownPositionY;
         private int mContainerPositionX, mContainerPositionY;
         private long mTouchTimer;
-        private boolean mHasPastePopupWindow = false;
+        private boolean mIsInsertionHandle = false;
         private PastePopupMenu mPastePopupWindow;
+        private Runnable mLongPressCallback;
 
         public static final int LEFT = 0;
         public static final int CENTER = 1;
         public static final int RIGHT = 2;
+
+        class LongPressCallback implements Runnable {
+            public void run() {
+                mController.hide();
+                startSelectionActionMode();
+            }
+        }
 
         public HandleView(CursorController controller, int pos) {
             super(TextView.this.mContext);
@@ -8336,7 +8488,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mDrawable = mSelectHandleCenter;
                 handleWidth = mDrawable.getIntrinsicWidth();
                 mHotspotX = handleWidth / 2;
-                mHasPastePopupWindow = true;
+                mIsInsertionHandle = true;
                 break;
             }
             }
@@ -8495,20 +8647,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public boolean onTouchEvent(MotionEvent ev) {
             switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
-                final float rawX = ev.getRawX();
-                final float rawY = ev.getRawY();
-                mTouchToWindowOffsetX = rawX - mPositionX;
-                mTouchToWindowOffsetY = rawY - mPositionY;
+                mDownPositionX = ev.getRawX();
+                mDownPositionY = ev.getRawY();
+                mTouchToWindowOffsetX = mDownPositionX - mPositionX;
+                mTouchToWindowOffsetY = mDownPositionY - mPositionY;
                 final int[] coords = mTempCoords;
                 TextView.this.getLocationInWindow(coords);
                 mLastParentX = coords[0];
                 mLastParentY = coords[1];
                 mIsDragging = true;
-                if (mHasPastePopupWindow) {
+                if (mIsInsertionHandle) {
                     mTouchTimer = SystemClock.uptimeMillis();
+                    if (mLongPressCallback == null) {
+                        mLongPressCallback = new Runnable() {
+                            public void run() {
+                                mController.hide();
+                                startSelectionActionMode();
+                            }
+                        };
+                    }
+                    postDelayed(mLongPressCallback, ViewConfiguration.getLongPressTimeout());
                 }
                 break;
             }
+
             case MotionEvent.ACTION_MOVE: {
                 final float rawX = ev.getRawX();
                 final float rawY = ev.getRawY();
@@ -8517,35 +8679,37 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 mController.updatePosition(this, Math.round(newPosX), Math.round(newPosY));
 
+                if (mIsInsertionHandle) {
+                    final float dx = rawX - mDownPositionX;
+                    final float dy = rawY - mDownPositionY;
+                    final float distanceSquared = dx * dx + dy * dy;
+                    if (distanceSquared >= mSquaredTouchSlopDistance) {
+                        removeLongPressCallback();
+                    }
+                }
                 break;
             }
+
             case MotionEvent.ACTION_UP:
-                if (mHasPastePopupWindow) {
+                if (mIsInsertionHandle) {
+                    removeLongPressCallback();
                     long delay = SystemClock.uptimeMillis() - mTouchTimer;
                     if (delay < ViewConfiguration.getTapTimeout()) {
-                        final float touchOffsetX = ev.getRawX() - mPositionX;
-                        final float touchOffsetY = ev.getRawY() - mPositionY;
-                        final float dx = touchOffsetX - mTouchToWindowOffsetX;
-                        final float dy = touchOffsetY - mTouchToWindowOffsetY;
-                        final float distanceSquared = dx * dx + dy * dy;
-                        final ViewConfiguration viewConfiguration = ViewConfiguration.get(getContext());
-                        final int doubleTapSlop = viewConfiguration.getScaledDoubleTapSlop();
-                        final int slopSquared = doubleTapSlop * doubleTapSlop;
-                        if (distanceSquared < slopSquared) {
-                            if (mPastePopupWindow != null && mPastePopupWindow.isShowing()) {
-                                // Tapping on the handle dismisses the displayed paste view,
-                                mPastePopupWindow.hide();
-                            } else {
-                                ((InsertionPointCursorController) mController).show(0);
-                            }
+                        if (mPastePopupWindow != null && mPastePopupWindow.isShowing()) {
+                            // Tapping on the handle dismisses the displayed paste view,
+                            mPastePopupWindow.hide();
+                        } else {
+                            ((InsertionPointCursorController) mController).show(0);
                         }
-                    } else {
-                        mController.show();
                     }
                 }
                 mIsDragging = false;
                 break;
+
             case MotionEvent.ACTION_CANCEL:
+                if (mIsInsertionHandle) {
+                    removeLongPressCallback();
+                }
                 mIsDragging = false;
             }
             return true;
@@ -8575,13 +8739,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         void showPastePopupWindow() {
-            if (mHasPastePopupWindow) {
+            if (mIsInsertionHandle) {
                 if (mPastePopupWindow == null) {
                     // Lazy initialisation: create when actually shown only.
                     mPastePopupWindow = new PastePopupMenu();
                 }
                 mPastePopupWindow.show();
             }
+        }
+
+        private void removeLongPressCallback() {
+            if (mLongPressCallback != null) {
+                removeCallbacks(mLongPressCallback);
+            }
+        }
+
+        void onDetached() {
+            removeLongPressCallback();
         }
     }
 
@@ -8592,18 +8766,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // The cursor controller image. Lazily created.
         private HandleView mHandle;
-
-        private final Runnable mHider = new Runnable() {
-            public void run() {
-                hide();
-            }
-        };
-
-        private final Runnable mPastePopupShower = new Runnable() {
-            public void run() {
-                getHandle().showPastePopupWindow();
-            }
-        };
+        private Runnable mHider;
+        private Runnable mPastePopupShower;
 
         public void show() {
             show(DELAY_BEFORE_PASTE);
@@ -8613,12 +8777,32 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             updatePosition();
             hideDelayed();
             getHandle().show();
-            removeCallbacks(mPastePopupShower);
+            removePastePopupCallback();
             if (canPaste()) {
                 final long durationSinceCutOrCopy = SystemClock.uptimeMillis() - sLastCutOrCopyTime;
-                if (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION)
+                if (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION) {
                     delayBeforePaste = 0;
+                }
+                if (mPastePopupShower == null) {
+                    mPastePopupShower = new Runnable() {
+                        public void run() {
+                            getHandle().showPastePopupWindow();
+                        }
+                    };
+                }
                 postDelayed(mPastePopupShower, delayBeforePaste);
+            }
+        }
+
+        private void removePastePopupCallback() {
+            if (mPastePopupShower != null) {
+                removeCallbacks(mPastePopupShower);
+            }
+        }
+
+        private void removeHiderCallback() {
+            if (mHider != null) {
+                removeCallbacks(mHider);
             }
         }
 
@@ -8626,12 +8810,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mHandle != null) {
                 mHandle.hide();
             }
-            removeCallbacks(mHider);
-            removeCallbacks(mPastePopupShower);
+            removeHiderCallback();
+            removePastePopupCallback();
         }
 
         private void hideDelayed() {
-            removeCallbacks(mHider);
+            removeHiderCallback();
+            if (mHider == null) {
+                mHider = new Runnable() {
+                    public void run() {
+                        hide();
+                    }
+                };
+            }
             postDelayed(mHider, DELAY_BEFORE_FADE_OUT);
         }
 
@@ -8678,6 +8869,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mHandle = new HandleView(this, HandleView.CENTER);
             }
             return mHandle;
+        }
+
+        @Override
+        public void onDetached() {
+            removeHiderCallback();
+            removePastePopupCallback();
+            if (mHandle != null) {
+                mHandle.onDetached();
+            }
         }
     }
 
@@ -8803,10 +9003,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             final int deltaX = x - mPreviousTapPositionX;
                             final int deltaY = y - mPreviousTapPositionY;
                             final int distanceSquared = deltaX * deltaX + deltaY * deltaY;
-                            final int doubleTapSlop =
-                                ViewConfiguration.get(getContext()).getScaledDoubleTapSlop();
-                            final int slopSquared = doubleTapSlop * doubleTapSlop;
-                            if (distanceSquared < slopSquared) {
+                            if (distanceSquared < mSquaredTouchSlopDistance) {
                                 startSelectionActionMode();
                                 mDiscardNextActionUp = true;
                             }
@@ -8873,6 +9070,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 hide();
             }
         }
+
+        @Override
+        public void onDetached() {}
     }
 
     private void hideInsertionPointCursorController() {
@@ -9216,4 +9416,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static int DRAG_THUMBNAIL_MAX_TEXT_LENGTH = 20;
     // System wide time for last cut or copy action.
     private static long sLastCutOrCopyTime;
+    // Used to highlight a word when it is corrected by the IME
+    private CorrectionHighlighter mCorrectionHighlighter;
 }

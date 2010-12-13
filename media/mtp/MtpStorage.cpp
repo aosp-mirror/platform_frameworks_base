@@ -32,11 +32,11 @@
 
 namespace android {
 
-MtpStorage::MtpStorage(MtpStorageID id, const char* filePath, MtpDatabase* db)
+MtpStorage::MtpStorage(MtpStorageID id, const char* filePath, uint64_t reserveSpace)
     :   mStorageID(id),
         mFilePath(filePath),
-        mDatabase(db),
-        mMaxCapacity(0)
+        mMaxCapacity(0),
+        mReserveSpace(reserveSpace)
 {
     LOGD("MtpStorage id: %d path: %s\n", id, filePath);
 }
@@ -70,7 +70,8 @@ uint64_t MtpStorage::getFreeSpace() {
     struct statfs   stat;
     if (statfs(mFilePath, &stat))
         return -1;
-    return (uint64_t)stat.f_bavail * (uint64_t)stat.f_bsize;
+    uint64_t freeSpace = (uint64_t)stat.f_bavail * (uint64_t)stat.f_bsize;
+    return (freeSpace > mReserveSpace ? freeSpace - mReserveSpace : 0);
 }
 
 const char* MtpStorage::getDescription() const {

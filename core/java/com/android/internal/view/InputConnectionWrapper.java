@@ -22,6 +22,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
+import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
@@ -281,6 +282,15 @@ public class InputConnectionWrapper implements InputConnection {
     public boolean commitCompletion(CompletionInfo text) {
         try {
             mIInputContext.commitCompletion(text);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    public boolean commitCorrection(CorrectionInfo correctionInfo) {
+        try {
+            mIInputContext.commitCorrection(correctionInfo);
             return true;
         } catch (RemoteException e) {
             return false;

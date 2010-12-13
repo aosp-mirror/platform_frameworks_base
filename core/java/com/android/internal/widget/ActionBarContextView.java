@@ -159,15 +159,13 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
     }
 
     public void initForMode(final ActionMode mode) {
-        if (mCurrentAnimation != null && mCurrentAnimation.isRunning()) {
-            mCurrentAnimation.end();
-            killMode();
-        }
+        finishAnimation();
+
         if (mClose == null) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
             mClose = inflater.inflate(R.layout.action_mode_close_item, this, false);
             addView(mClose);
-        } else {
+        } else if (mClose.getParent() == null) {
             addView(mClose);
         }
 
@@ -188,6 +186,10 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
     }
 
     public void closeMode() {
+        if (mAnimationMode == ANIMATE_OUT) {
+            // Called again during close; just finish what we were doing.
+            return;
+        }
         if (mClose == null) {
             killMode();
             return;
@@ -200,8 +202,10 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
     }
 
     private void finishAnimation() {
-        if (mCurrentAnimation != null && mCurrentAnimation.isRunning()) {
-            mCurrentAnimation.end();
+        final Animator a = mCurrentAnimation;
+        if (a != null && a.isRunning()) {
+            mCurrentAnimation = null;
+            a.end();
         }
     }
 

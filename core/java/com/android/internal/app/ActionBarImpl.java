@@ -26,6 +26,7 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.TimeInterpolator;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
@@ -41,6 +42,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.SpinnerAdapter;
@@ -90,6 +92,8 @@ public class ActionBarImpl extends ActionBar {
     final Handler mHandler = new Handler();
 
     private Animator mCurrentAnim;
+
+    private static final TimeInterpolator sFadeOutInterpolator = new DecelerateInterpolator();
 
     final AnimatorListener[] mAfterAnimation = new AnimatorListener[] {
             new AnimatorListener() { // NORMAL_VIEW
@@ -166,6 +170,7 @@ public class ActionBarImpl extends ActionBar {
         @Override
         public void onAnimationEnd(Animator animation) {
             mCurrentAnim = null;
+            mContainerView.requestLayout();
         }
 
         @Override
@@ -492,11 +497,11 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void show() {
-        if (mCurrentAnim != null) {
-            mCurrentAnim.end();
-        }
         if (mContainerView.getVisibility() == View.VISIBLE) {
             return;
+        }
+        if (mCurrentAnim != null) {
+            mCurrentAnim.end();
         }
         mContainerView.setVisibility(View.VISIBLE);
         mContainerView.setAlpha(0);
@@ -545,10 +550,6 @@ public class ActionBarImpl extends ActionBar {
         final View targetChild = mContainerView.getChildAt(viewIndex);
         targetChild.setVisibility(View.VISIBLE);
         AnimatorSet.Builder b = set.play(ObjectAnimator.ofFloat(targetChild, "alpha", 1));
-        if (viewIndex == NORMAL_VIEW) {
-            targetChild.setScaleY(0);
-            b.with(ObjectAnimator.ofFloat(targetChild, "scaleY", 1));
-        }
 
         final int count = mContainerView.getChildCount();
         for (int i = 0; i < count; i++) {
@@ -558,11 +559,9 @@ public class ActionBarImpl extends ActionBar {
             }
 
             if (child.getVisibility() != View.GONE) {
-                ObjectAnimator a = ObjectAnimator.ofFloat(child, "alpha", 0);
+                Animator a = ObjectAnimator.ofFloat(child, "alpha", 0);
+                a.setInterpolator(sFadeOutInterpolator);
                 b.with(a);
-                if (viewIndex == CONTEXT_VIEW) {
-                    b.with(ObjectAnimator.ofFloat(child, "scaleY", 0));
-                }
             }
         }
 

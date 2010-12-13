@@ -24,6 +24,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
+import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 
@@ -39,6 +40,7 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_GET_EXTRACTED_TEXT = 40;
     private static final int DO_COMMIT_TEXT = 50;
     private static final int DO_COMMIT_COMPLETION = 55;
+    private static final int DO_COMMIT_CORRECTION = 56;
     private static final int DO_SET_SELECTION = 57;
     private static final int DO_PERFORM_EDITOR_ACTION = 58;
     private static final int DO_PERFORM_CONTEXT_MENU_ACTION = 59;
@@ -114,6 +116,10 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
 
     public void commitCompletion(CompletionInfo text) {
         dispatchMessage(obtainMessageO(DO_COMMIT_COMPLETION, text));
+    }
+
+    public void commitCorrection(CorrectionInfo info) {
+        dispatchMessage(obtainMessageO(DO_COMMIT_CORRECTION, info));
     }
 
     public void setSelection(int start, int end) {
@@ -307,6 +313,15 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
                     return;
                 }
                 ic.commitCompletion((CompletionInfo)msg.obj);
+                return;
+            }
+            case DO_COMMIT_CORRECTION: {
+                InputConnection ic = mInputConnection.get();
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "commitCorrection on inactive InputConnection");
+                    return;
+                }
+                ic.commitCorrection((CorrectionInfo)msg.obj);
                 return;
             }
             case DO_SET_COMPOSING_TEXT: {

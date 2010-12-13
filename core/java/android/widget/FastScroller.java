@@ -307,10 +307,13 @@ class FastScroller {
         }
 
         if (mTrackDrawable != null) {
-            final int left = mThumbDrawable.getBounds().left;
+            final Rect thumbBounds = mThumbDrawable.getBounds();
+            final int left = thumbBounds.left;
+            final int halfThumbHeight = (thumbBounds.bottom - thumbBounds.top) / 2;
             final int trackWidth = mTrackDrawable.getIntrinsicWidth();
-            final int trackLeft = (left + mThumbW) / 2 - trackWidth / 2;
-            mTrackDrawable.setBounds(trackLeft, 0, trackLeft + trackWidth, mList.getHeight());
+            final int trackLeft = (left + mThumbW / 2) - trackWidth / 2;
+            mTrackDrawable.setBounds(trackLeft, halfThumbHeight,
+                    trackLeft + trackWidth, mList.getHeight() - halfThumbHeight);
             mTrackDrawable.draw(canvas);
         }
 
@@ -393,13 +396,19 @@ class FastScroller {
             }
         }
     }
-    
+
+    void onItemCountChanged(int oldCount, int newCount) {
+        if (mAlwaysShow) {
+            mLongList = true;
+        }
+    }
+
     void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, 
             int totalItemCount) {
         // Are there enough pages to require fast scroll? Recompute only if total count changes
         if (mItemCount != totalItemCount && visibleItemCount > 0) {
             mItemCount = totalItemCount;
-            mLongList = mItemCount / visibleItemCount >= MIN_PAGES;
+            mLongList = mAlwaysShow || mItemCount / visibleItemCount >= MIN_PAGES;
         }
         if (!mLongList) {
             if (mState != STATE_NONE) {

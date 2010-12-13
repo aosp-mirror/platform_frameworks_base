@@ -21,9 +21,10 @@ This is an optimized layout for a screen with the Action Bar enabled.
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:fitsSystemWindows="true">
-    <FrameLayout android:id="@+id/action_bar_container"
+    <com.android.internal.widget.ActionBarContainer android:id="@+id/action_bar_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        style="?android:attr/actionBarStyle">
         <com.android.internal.widget.ActionBarView
             android:id="@+id/action_bar"
             android:layout_width="match_parent"
@@ -35,7 +36,7 @@ This is an optimized layout for a screen with the Action Bar enabled.
             android:layout_height="wrap_content"
             android:visibility="gone"
             style="?android:attr/actionModeStyle" />
-    </FrameLayout>
+    </com.android.internal.widget.ActionBarContainer>
     <FrameLayout android:id="@android:id/content"
         android:layout_width="match_parent"
         android:layout_height="0dip"

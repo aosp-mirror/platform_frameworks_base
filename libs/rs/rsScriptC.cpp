@@ -47,7 +47,6 @@ ScriptC::~ScriptC() {
 }
 
 void ScriptC::setupScript(Context *rsc) {
-    setupGLState(rsc);
     mEnviroment.mStartTimeMillis
                 = nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC));
 
@@ -123,6 +122,7 @@ uint32_t ScriptC::run(Context *rsc) {
         return 0;
     }
 
+    setupGLState(rsc);
     setupScript(rsc);
 
     uint32_t ret = 0;
@@ -278,6 +278,7 @@ void ScriptC::runForEach(Context *rsc,
 
     rsAssert(ain->getType()->getDimZ() == 0);
 
+    setupGLState(rsc);
     setupScript(rsc);
     Script * oldTLS = setTLS(this);
 
@@ -336,7 +337,6 @@ void ScriptC::runForEach(Context *rsc,
 }
 
 void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len) {
-    //LOGE("rsi_ScriptInvoke %i", slot);
     if ((slot >= mEnviroment.mInvokeFunctionCount) ||
         (mEnviroment.mInvokeFunctions[slot] == NULL)) {
         rsc->setError(RS_ERROR_BAD_SCRIPT, "Calling invoke on bad script");

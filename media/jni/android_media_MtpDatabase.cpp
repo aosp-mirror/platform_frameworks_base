@@ -710,7 +710,7 @@ MtpResponseCode MyMtpDatabase::getObjectPropertyList(MtpObjectHandle handle,
                     break;
                 case MTP_TYPE_STR: {
                     jstring value = (jstring)env->GetObjectArrayElement(stringValuesArray, i);
-                    const char *valueStr = env->GetStringUTFChars(value, NULL);
+                    const char *valueStr = (value ? env->GetStringUTFChars(value, NULL) : NULL);
                     if (valueStr) {
                         packet.putString(valueStr);
                         env->ReleaseStringUTFChars(value, valueStr);

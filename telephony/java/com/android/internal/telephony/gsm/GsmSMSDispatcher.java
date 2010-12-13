@@ -110,6 +110,13 @@ final class GsmSMSDispatcher extends SMSDispatcher {
             return Intents.RESULT_SMS_HANDLED;
         }
 
+        if (!mSmsCapable) {
+            // Device doesn't support SMS service,
+            Log.d(TAG, "Received short message on device which doesn't support "
+                    + "SMS service. Ignored.");
+            return Intents.RESULT_SMS_HANDLED;
+        }
+
         // Special case the message waiting indicator messages
         if (sms.isMWISetMessage()) {
             mGsmPhone.updateMessageWaitingIndicator(true);

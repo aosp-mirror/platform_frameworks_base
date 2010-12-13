@@ -67,7 +67,7 @@ public:
                                     int fileGroup, int filePerm, int directoryPerm);
     virtual             ~MtpServer();
 
-    void                addStorage(const char* filePath);
+    void                addStorage(const char* filePath, uint64_t reserveSpace);
     inline void         addStorage(MtpStorage* storage) { mStorages.push(storage); }
     MtpStorage*         getStorage(MtpStorageID id);
     void                run();

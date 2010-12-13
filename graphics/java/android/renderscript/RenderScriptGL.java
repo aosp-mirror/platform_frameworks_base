@@ -190,7 +190,6 @@ public class RenderScriptGL extends RenderScript {
         }
         mMessageThread = new MessageThread(this);
         mMessageThread.start();
-        Element.initPredefined(this);
     }
 
     /**

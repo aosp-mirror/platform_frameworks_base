@@ -65,7 +65,6 @@ public class RenderScript {
     }
 
     // Non-threadsafe functions.
-    native void nInitElements(int a8, int rgba4444, int rgba8888, int rgb565);
     native int  nDeviceCreate();
     native void nDeviceDestroy(int dev);
     native void nDeviceSetConfig(int dev, int param, int value);
@@ -213,13 +212,19 @@ public class RenderScript {
         return rsnAllocationCreateFromAssetStream(mContext, mips, assetStream, usage);
     }
 
+    native void  rsnAllocationCopyToBitmap(int con, int alloc, Bitmap bmp);
+    synchronized void nAllocationCopyToBitmap(int alloc, Bitmap bmp) {
+        rsnAllocationCopyToBitmap(mContext, alloc, bmp);
+    }
+
+
     native void rsnAllocationSyncAll(int con, int alloc, int src);
     synchronized void nAllocationSyncAll(int alloc, int src) {
         rsnAllocationSyncAll(mContext, alloc, src);
     }
-    native void  rsnAllocationUpdateFromBitmap(int con, int alloc, Bitmap bmp);
-    synchronized void nAllocationUpdateFromBitmap(int alloc, Bitmap bmp) {
-        rsnAllocationUpdateFromBitmap(mContext, alloc, bmp);
+    native void  rsnAllocationCopyFromBitmap(int con, int alloc, Bitmap bmp);
+    synchronized void nAllocationCopyFromBitmap(int alloc, Bitmap bmp) {
+        rsnAllocationCopyFromBitmap(mContext, alloc, bmp);
     }
 
     native void rsnAllocationUploadToTexture(int con, int alloc, boolean genMips, int baseMioLevel);
@@ -787,7 +792,6 @@ public class RenderScript {
         rs.mContext = rs.nContextCreate(rs.mDev, 0);
         rs.mMessageThread = new MessageThread(rs);
         rs.mMessageThread.start();
-        Element.initPredefined(rs);
         return rs;
     }
 

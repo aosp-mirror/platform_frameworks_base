@@ -192,7 +192,6 @@ public abstract class DataConnection extends HierarchicalStateMachine {
         public boolean isPermanentFail() {
             return (this == OPERATOR_BARRED) || (this == MISSING_UNKNOWN_APN) ||
                    (this == UNKNOWN_PDP_ADDRESS) || (this == USER_AUTHENTICATION) ||
-                   (this == ACTIVATION_REJECT_GGSN) || (this == ACTIVATION_REJECT_UNSPECIFIED) ||
                    (this == SERVICE_OPTION_NOT_SUPPORTED) ||
                    (this == SERVICE_OPTION_NOT_SUBSCRIBED) || (this == NSAPI_IN_USE) ||
                    (this == PROTOCOL_ERRORS);

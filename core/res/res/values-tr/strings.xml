@@ -125,10 +125,10 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"Senk."</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Senk."</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Çok fazla <xliff:g id="CONTENT_TYPE">%s</xliff:g> silme var."</string>
-    <!-- outdated translation 6632412458436461203 -->     <string name="low_memory" product="tablet" msgid="2292820184396262278">"Telefonun depolama alanı doldu! Yer açmak için bazı dosyaları silin."</string>
+    <string name="low_memory" product="tablet" msgid="2292820184396262278">"Tabletin depolama alanı doldu! Yer açmak için bazı dosyaları silin."</string>
     <string name="low_memory" product="default" msgid="6632412458436461203">"Telefonun depolama alanı doldu! Yer açmak için bazı dosyaları silin."</string>
     <string name="me" msgid="6545696007631404292">"Ben"</string>
-    <!-- outdated translation 1319919075463988638 -->     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Telefon seçenekleri"</string>
+    <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tablet seçenekleri"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Telefon seçenekleri"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Sessiz mod"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Kablosuzu aç"</string>
@@ -136,13 +136,13 @@
     <string name="screen_lock" msgid="799094655496098153">"Ekran kilidi"</string>
     <string name="power_off" msgid="4266614107412865048">"Kapat"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Kapanıyor…"</string>
-    <!-- outdated translation 649792175242821353 -->     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Telefonunuz kapanacak."</string>
+    <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tabletiniz kapanacak."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefonunuz kapanacak."</string>
     <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
     <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"En Son Görevler"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"Hiçbir yeni uygulama yok."</string>
-    <!-- outdated translation 2406416831541615258 -->     <string name="global_actions" product="tablet" msgid="408477140088053665">"Telefon seçenekleri"</string>
+    <string name="global_actions" product="tablet" msgid="408477140088053665">"Tablet seçenekleri"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefon seçenekleri"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Ekran kilidi"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Kapat"</string>
@@ -159,7 +159,7 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Mesajlarınız"</string>
     <string name="permgroupdesc_messages" msgid="7045736972019211994">"SMS mesajlarınızı, e-posta iletilerinizi ve diğer mesajlarınızı okuyup yazın."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Kişisel bilgileriniz"</string>
-    <!-- outdated translation 5488050357388806068 -->     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Telefonunuzda depolanan kişilere ve takvime doğrudan erişim."</string>
+    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Tabletinizde depolanan kişilere ve takvime doğrudan erişim."</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Telefonunuzda depolanan kişilere ve takvime doğrudan erişim."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Konumunuz"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Fiziksel konumunuzu izleyin"</string>
@@ -193,10 +193,10 @@
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS mesajları gönder"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Uygulamaların SMS mesajları göndermesine izin verir. Kötü amaçlı uygulamalar, onayınızı almadan mesaj göndererek size maliyet çıkarabilir."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"SMS veya MMS oku"</string>
-    <!-- outdated translation 3002170087197294591 -->     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Uygulamaların, telefonunuzda veya SIM kartta depolanan SMS mesajlarını okumasına izin verir. Kötü amaçlı uygulamalar gizli mesajlarınızı okuyabilir."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Uygulamaya, tabletinizde veya SIM kartta depolanan SMS mesajlarını okuma izni verir. Kötü amaçlı uygulamalar gizli mesajlarınızı okuyabilir."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Uygulamaların, telefonunuzda veya SIM kartta depolanan SMS mesajlarını okumasına izin verir. Kötü amaçlı uygulamalar gizli mesajlarınızı okuyabilir."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"SMS veya MMS düzenle"</string>
-    <!-- outdated translation 6299398896177548095 -->     <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"Uygulamanın telefonunuzda veya SIM kartta depolanan SMS mesajlarına yazmasına izin verir. Kötü amaçlı uygulamalar mesajlarınızı silebilir."</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"Uygulamaya, tabletinizde veya SIM kartta depolanan SMS mesajlarına yazma izni verir. Kötü amaçlı uygulamalar mesajlarınızı silebilir."</string>
     <string name="permdesc_writeSms" product="default" msgid="6299398896177548095">"Uygulamanın telefonunuzda veya SIM kartta depolanan SMS mesajlarına yazmasına izin verir. Kötü amaçlı uygulamalar mesajlarınızı silebilir."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"WAP al"</string>
     <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Uygulamanın WAP mesajları alıp işlemesine izin verir. Kötü amaçlı uygulamalar mesajlarınızı izleyebilir veya bunları size göstermeden silebilir."</string>
@@ -223,7 +223,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"uygulama değişimlerini engelle"</string>
     <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Kullanıcının başka bir uygulamaya geçiş yapmasını engeller."</string>
     <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"tüm uygulama başlatma işlemlerini izle ve denetle"</string>
-    <!-- outdated translation 3228701938345388092 -->     <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"Uygulamaların, sistemin etkinlikleri nasıl başlattığını izlemesine ve denetlemesine izin verir. Kötü amaçlı uygulamalar sistemin güvenliğini tamamen tehlikeye atabilir. Bu izin yalnızca program geliştirme amacıyla gereklidir, normal telefon kullanımı için gerekli değildir."</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"Uygulamaya, sistemin etkinlikleri nasıl başlattığını izlemesi ve denetlemesi izni verir. Kötü amaçlı uygulamalar sistemin güvenliğini tamamen tehlikeye atabilir. Bu izin yalnızca program geliştirme amacıyla gereklidir, normal kullanım için gerekli değildir."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"paket ile kaldırılan yayını gönder"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"Uygulamaların bir uygulama paketinin kaldırıldığında dair bir bildirim yayınlamasına izin verir. Kötü amaçlı uygulamalar bunu çalışan diğer herhangi bir uygulamayı kapatmak için kullanabilir."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"SMS ile alınan yayın gönder"</string>
@@ -241,13 +241,13 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"yetkisiz pencereleri görüntüle"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Dahili sistem kullanıcı arayüzü tarafından kullanılmak üzere tasarlanmış pencerelerin oluşturulmasına izin verir. Normal uygulamalarda kullanılmaz."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"sistem düzeyi uyarıları görüntüle"</string>
-    <!-- outdated translation 5109622689323490558 -->     <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"Uygulamaların sistem uyarı pencereleri göstermesine izin verir. Kötü amaçlı uygulamalar telefonun tüm ekranını işgal edebilir."</string>
+    <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"Uygulamaya, sistem uyarı pencereleri gösterme izni verir. Kötü amaçlı uygulamalar tabletin tüm ekranını işgal edebilir."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"genel animasyon hızını değiştir"</string>
     <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"Uygulamaların, istedikleri zaman genel animasyon hızını değiştirmesine (animasyonları hızlandırmasına veya yavaşlatmasına) izin verir."</string>
     <string name="permlab_manageAppTokens" msgid="17124341698093865">"uygulama simgelerini yönet"</string>
     <string name="permdesc_manageAppTokens" msgid="977127907524195988">"Uygulamaların, kendi normal Z sıralamalarını atlayarak kendi simgelerini oluşturup yönetmelerine izin verir. Normal uygulamalar için hiçbir zaman gerekli olmamalıdır."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"tuşlara bas ve düğmeleri denetle"</string>
-    <!-- outdated translation 3946098050410874715 -->     <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"Uygulamaların kendi giriş işlemlerini (tuşa basma vb.) başka uygulamalara göndermesine izin verir. Kötü amaçlı uygulamalar bunu telefonun denetimini ele geçirmek için kullanabilir."</string>
+    <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"Uygulamaya, kendi giriş işlemlerini (tuşa basma vb.) başka uygulamalara gönderme izni verir. Kötü amaçlı uygulamalar bunu tabletin denetimini ele geçirmek için kullanabilir."</string>
     <string name="permdesc_injectEvents" product="default" msgid="3946098050410874715">"Uygulamaların kendi giriş işlemlerini (tuşa basma vb.) başka uygulamalara göndermesine izin verir. Kötü amaçlı uygulamalar bunu telefonun denetimini ele geçirmek için kullanabilir."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"yazdıklarınızı ve yaptığınız işlemleri kaydet"</string>
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Uygulamaların, başka bir uygulama ile etkileşim halindeyken (örneğin bir şifre girerken) bile bastığınız tuşları izlemesine izin verir. Normal uygulamalarda hiçbir zaman gerek duyulmamalıdır."</string>
@@ -274,18 +274,18 @@
     <string name="permlab_installPackages" msgid="335800214119051089">"doğrudan uygulama yükle"</string>
     <string name="permdesc_installPackages" msgid="526669220850066132">"Uygulamaların yeni veya güncellenmiş Android paketleri yüklemesine izin verir. Kötü amaçlı uygulamalar bunu, kendilerine verilen izin derecesi keyfi olarak değişen yeni uygulamalar eklemek için kullanabilir."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"tüm uygulama önbelleği verilerini sil"</string>
-    <!-- outdated translation 7740465694193671402 -->     <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Uygulamaların uygulama önbelleği dizinindeki dosyaları silerek telefonda yer açmasına izin verir. Erişim genellikle sistem işlemlerine ve yüksek düzeyde kısıtlı olarak verilir."</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Uygulamaya, uygulama önbelleği dizinindeki dosyaları silerek tablette yer açma izni verir. Erişim genellikle sistem işlemlerine ve yüksek düzeyde kısıtlı olarak verilir."</string>
     <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"Uygulamaların uygulama önbelleği dizinindeki dosyaları silerek telefonda yer açmasına izin verir. Erişim genellikle sistem işlemlerine ve yüksek düzeyde kısıtlı olarak verilir."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Uygulama kaynaklarını taşı"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Bir uygulamanın, uygulama kaynaklarını dahili ve harici ortamlar arasında taşımasına olanak tanır."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"hassas günlük verilerini okuma"</string>
-    <!-- outdated translation 8896449437464867766 -->     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Bir uygulamanın, sistemin çeşitli günlük dosyalarındaki bilgileri okumasına izin verir. Bu izin, uygulamanın, telefonda yaptıklarınızla ilgili genel bilgileri bulmasına olanak sağlar ve bunlar kişisel ve gizli bilgilerinizi de içerebilir."</string>
+    <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Uygulamaya, sistemin çeşitli günlük dosyalarındaki bilgileri okuma izni verir. Bu izin, uygulamanın, tablette yaptıklarınızla ilgili genel bilgileri bulmasına olanak sağlar. Bu bilgiler arasında kişisel ve gizli bilgilerinizi de olabilir."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Bir uygulamanın, sistemin çeşitli günlük dosyalarındaki bilgileri okumasına izin verir. Bu izin, uygulamanın, telefonda yaptıklarınızla ilgili genel bilgileri bulmasına olanak sağlar ve bunlar kişisel ve gizli bilgilerinizi de içerebilir."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"sahibi tanılama olan kaynakları oku/bunlara yaz"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Uygulamanın tanılama grubundaki bir kaynağa ait herhangi bir kaynağı; örneğin /dev içindeki dosyaları okumasına ve bunlara yazmasına izin verir. Bu işlevin sistem kararlılığını ve güvenliğini olumsuz etkileme olasılığı vardır. Üretici veya operatör tarafından YALNIZCA donanıma özgü tanılama için kullanılmalıdır."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"uygulama bileşenlerini etkinleştir veya devre dışı bırak"</string>
-    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Uygulamaların başka bir uygulamanın bir bileşenini etkinleştirme ayarını değiştirmesine izin verir. Kötü amaçlı uygulamalar bu ayarı telefonun önemli yeteneklerini devre dışı bırakmak için kullanabilir. Bu iznin verilmesi uygulama bileşenlerini kullanılamaz, tutarsız veya kararsız bir duruma sokabileceği için izin verilirken dikkatli olunmalıdır."</string>
-    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Uygulamaların başka bir uygulamanın bir bileşenini etkinleştirme ayarını değiştirmesine izin verir. Kötü amaçlı uygulamalar bu ayarı telefonun önemli yeteneklerini devre dışı bırakmak için kullanabilir. Bu iznin verilmesi uygulama bileşenlerini kullanılamaz, tutarsız veya kararsız bir duruma sokabileceği için izin verilirken dikkatli olunmalıdır."</string>
+    <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Uygulamaya başka bir uygulamanın bir bileşenini etkinleştirme ayarını değiştirme izni verir. Kötü amaçlı uygulamalar bu ayarı tabletin önemli yeteneklerini devre dışı bırakmak için kullanabilir. Bu iznin verilmesi uygulama bileşenlerini kullanılamaz, tutarsız veya kararsız bir duruma sokabileceği için izin verilirken dikkatli olunmalıdır."</string>
+    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Uygulamaya başka bir uygulamanın bir bileşenini etkinleştirme ayarını değiştirme izni verir. Kötü amaçlı uygulamalar bu ayarı tabletin önemli yeteneklerini devre dışı bırakmak için kullanabilir. Bu iznin verilmesi uygulama bileşenlerini kullanılamaz, tutarsız veya kararsız bir duruma sokabileceği için izin verilirken dikkatli olunmalıdır."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"tercih edilen uygulamaları ayarla"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Uygulamanın tercih ettiğiniz uygulamaları değiştirmesine izin verir. Bu işlem, kötü amaçlı uygulamaların, çalışmakta olan uygulamaları sessizce değiştirerek mevcut uygulamalarınızı aldatıp kişisel bilgilerinizi almasına izin verebilir."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"genel sistem ayarlarını değiştir"</string>
@@ -295,19 +295,19 @@
     <string name="permlab_writeGservices" msgid="2149426664226152185">"Google hizmetler haritasını değiştir"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"Uygulamanın, Google hizmetleri haritasını değiştirmesine izin verir. Normal uygulamalarda kullanılmaz."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"açılışta otomatik başlat"</string>
-    <!-- outdated translation 698336728415008796 -->     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"Uygulamaların, sistem açıldıktan hemen sonra kendini başlatmasına izin verir. Bu işlev, telefonu başlatma süresini uzatabilir ve uygulama, sürekli çalışması nedeniyle telefonun çalışmasını genel olarak yavaşlatabilir."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"Uygulamaya, sistem açıldıktan hemen sonra kendini başlatma izni verir. Bu işlev, tableti başlatma süresini uzatabilir ve uygulama, sürekli çalışması nedeniyle tabletin çalışmasını genel olarak yavaşlatabilir."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="698336728415008796">"Uygulamaların, sistem açıldıktan hemen sonra kendini başlatmasına izin verir. Bu işlev, telefonu başlatma süresini uzatabilir ve uygulama, sürekli çalışması nedeniyle telefonun çalışmasını genel olarak yavaşlatabilir."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"sabit yayın gönder"</string>
-    <!-- outdated translation 1920045289234052219 -->     <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Uygulamaların yayın bittikten sonra da kalan sabit yayınlar göndermesine izin verir. Kötü amaçlı uygulamalar telefonun aşırı miktarda bellek kullanmasına neden olarak telefonu yavaşlatabilir veya telefonun kararsız hale gelmesine neden olabilir."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Uygulamaya, yayın bittikten sonra da kalan sabit yayınları gönderme izni verir. Kötü amaçlı uygulamalar tabletin aşırı miktarda bellek kullanmasına neden olarak tableti yavaşlatabilir veya tabletin kararsız hale gelmesine neden olabilir."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"Uygulamaların yayın bittikten sonra da kalan sabit yayınlar göndermesine izin verir. Kötü amaçlı uygulamalar telefonun aşırı miktarda bellek kullanmasına neden olarak telefonu yavaşlatabilir veya telefonun kararsız hale gelmesine neden olabilir."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"kişi verilerini oku"</string>
-    <!-- outdated translation 3371591512896545975 -->     <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Uygulamaların telefonunuzda depolanan tüm kişi (adres) verilerini okumasına izin verir. Kötü amaçlı uygulamalar bu işlevi verilerinizi başkalarına göndermek için kullanabilir."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Uygulamaya tabletinizde depolanan tüm kişi (adres) verilerini okuma izni verir. Kötü amaçlı uygulamalar bu işlevi verilerinizi başkalarına göndermek için kullanabilir."</string>
     <string name="permdesc_readContacts" product="default" msgid="3371591512896545975">"Uygulamaların telefonunuzda depolanan tüm kişi (adres) verilerini okumasına izin verir. Kötü amaçlı uygulamalar bu işlevi verilerinizi başkalarına göndermek için kullanabilir."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"kişi verileri yaz"</string>
-    <!-- outdated translation 3924383579108183601 -->     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Uygulamaların telefonunuzda depolanan kişi (adres) verilerini değiştirmesine izin verir. Kötü amaçlı uygulamalar bu işlevi kişi verilerinizi silmek veya değiştirmek için kullanabilir."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Uygulamaya, tabletinizde depolanan kişi (adres) verilerini değiştirme izni verir. Kötü amaçlı uygulamalar bu işlevi kişi verilerinizi silmek veya değiştirmek için kullanabilir."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Uygulamaların telefonunuzda depolanan kişi (adres) verilerini değiştirmesine izin verir. Kötü amaçlı uygulamalar bu işlevi kişi verilerinizi silmek veya değiştirmek için kullanabilir."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"takvim etkinliklerini oku"</string>
-    <!-- outdated translation 5533029139652095734 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Uygulamaların telefonunuzda depolanan takvim etkinliklerinin tümünü okumasına izin verir. Kötü amaçlı uygulamalar bunu, takvim etkinliklerinizi başkalarına göndermek için kullanabilir."</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Uygulamaya, tabletinizde depolanan takvim etkinliklerinin tümünü okuma izni verir. Kötü amaçlı uygulamalar bunu, takvim etkinliklerinizi başkalarına göndermek için kullanabilir."</string>
     <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Uygulamaların telefonunuzda depolanan takvim etkinliklerinin tümünü okumasına izin verir. Kötü amaçlı uygulamalar bunu, takvim etkinliklerinizi başkalarına göndermek için kullanabilir."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"takvim etkinlikleri ekle veya değiştir ve konuklara e-posta gönder"</string>
     <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Bir uygulamanın takviminize etkinlik ekleyebilmesini veya takviminizdeki etkinlikleri değiştirebilmesini sağlar ve konuklara e-posta gönderebilir. Kötü amaçlı uygulamalar, bunu takvim etkinliklerinizi silmek veya değiştirmek veya konuklara e-posta göndermek için kullanabilir."</string>
@@ -318,10 +318,10 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"konum sağlayıcı yükleme izni"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Test için sahte konum kaynakları oluşturun. Kötü amaçlı uygulamalar bunu GPS veya Ağ sağlayıcılarının gerçek konum kaynakları tarafından gönderilen konum ve/veya durumu geçersiz kılmak veya konumunuzu izleyerek bir dış kaynağa bildirmek için kullanabilir."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"kesinliği yüksek (GPS) konum"</string>
-    <!-- outdated translation 7411213317434337331 -->     <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Bulunduğu yerlerde telefondan Küresel Konumlandırma Sistemi gibi hassas konum bulma kaynaklarına erişin. Kötü amaçlı uygulamalar bu işlevi bulunduğunuz yeri belirlemek için kullanabilir ve ek pil gücü tüketebilir."</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Bulunduğu yerlerde tabletten Küresel Konumlandırma Sistemi gibi hassas konum bulma kaynaklarına erişir. Kötü amaçlı uygulamalar bu işlevi bulunduğunuz yeri belirlemek için kullanabilir ve ek pil gücü tüketebilir."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Bulunduğu yerlerde telefondan Küresel Konumlandırma Sistemi gibi hassas konum bulma kaynaklarına erişin. Kötü amaçlı uygulamalar bu işlevi bulunduğunuz yeri belirlemek için kullanabilir ve ek pil gücü tüketebilir."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"kesinliği düşük (ağ tabanlı) konum"</string>
-    <!-- outdated translation 8235655958070862293 -->     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Telefonun yaklaşık yerini belirlemek için bulunduğu yerlerde hücresel ağ veritabanı gibi tahmini konum kaynaklarına erişir. Kötü amaçlı uygulamalar, bu işlevi bulunduğunuz yeri yaklaşık olarak belirlemek için kullanabilir."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Tabletin yaklaşık yerini belirlemek için bulunduğu yerlerde hücresel ağ veritabanı gibi tahmini konum kaynaklarına erişir. Kötü amaçlı uygulamalar, bu işlevi bulunduğunuz yeri yaklaşık olarak belirlemek için kullanabilir."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8235655958070862293">"Telefonun yaklaşık yerini belirlemek için bulunduğu yerlerde hücresel ağ veritabanı gibi tahmini konum kaynaklarına erişir. Kötü amaçlı uygulamalar, bu işlevi bulunduğunuz yeri yaklaşık olarak belirlemek için kullanabilir."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"SurfaceFlinger\'a eriş"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Uygulamanın SurfaceFlinger alt düzey özelliklerini kullanmasına izin verir."</string>
@@ -333,13 +333,13 @@
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Uygulamanın, ses kayıt yoluna erişmesine izin verir."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"resim çekme ve görüntü kaydetme"</string>
     <string name="permdesc_camera" msgid="6004878235852154239">"Uygulamanın kamera ile resim çekmesine ve görüntü almasına izin verir. Bu işlev herhangi bir zamanda uygulamanın kamera görüntülerini yakalamasına olanak tanır."</string>
-    <!-- outdated translation 8337817093326370537 -->     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"telefonu tamamen devre dışı bırak"</string>
+    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"tableti kalıcı olarak devre dışı bırak"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"telefonu tamamen devre dışı bırak"</string>
-    <!-- outdated translation 5569526552607599221 -->     <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"Uygulamaların tüm telefonu kalıcı olarak devre dışı bırakmasına izin verir. Bu çok tehlikelidir."</string>
+    <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"Uygulamaya, tüm tableti kalıcı olarak devre dışı bırakma izni verir. Bu çok tehlikelidir."</string>
     <string name="permdesc_brick" product="default" msgid="5569526552607599221">"Uygulamaların tüm telefonu kalıcı olarak devre dışı bırakmasına izin verir. Bu çok tehlikelidir."</string>
-    <!-- outdated translation 2898560872462638242 -->     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"telefonu yeniden başlamaya zorla"</string>
+    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"tableti yeniden başlatmaya zorla"</string>
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"telefonu yeniden başlamaya zorla"</string>
-    <!-- outdated translation 7914933292815491782 -->     <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"Uygulamanın telefonu yeniden açılmaya zorlamasına izin verir."</string>
+    <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"Uygulamaya, tableti yeniden açılmaya zorlama izni verir."</string>
     <string name="permdesc_reboot" product="default" msgid="7914933292815491782">"Uygulamanın telefonu yeniden açılmaya zorlamasına izin verir."</string>
     <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"dosya sistemlerini bağla ve bağlantısını kes"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Uygulamaların çıkarılabilir depolama birimleri için dosya sistemleri ile bağlantı kurmasına ve bağlantıyı kesmesine izin verir."</string>
@@ -367,7 +367,7 @@
     <string name="permdesc_callPhone" msgid="3369867353692722456">"Uygulamanın müdahaleniz olmadan telefon numaralarına çağrı yapmasına izin verir. Kötü amaçlı uygulamalar, telefon faturanızda beklenmedik görüşmeler çıkmasına neden olabilir. Bu işlev, uygulamanın acil numaralara çağrı yapmasına izin vermez."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"herhangi bir telefon numarasına doğrudan çağrı yap"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Uygulamanın, siz müdahale etmeden acil numaralar dahil herhangi bir numarayı aramasına izin verir. Kötü amaçlı uygulamalar acil servisleri gereksiz yere ve yasal olmayan şekilde arayabilir."</string>
-    <!-- outdated translation 5604848095315421425 -->     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"CDMA telefon kurulumunu doğrudan başlat"</string>
+    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"CDMA tablet kurulumunu doğrudan başlat"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA telefon kurulumunu doğrudan başlat"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Uygulamaya CDMA hazırlığını başlatma izni verir. Kötü niyetli uygulamalar CDMA hazırlığını gereksiz yere başlatabilir"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"konum güncelleme bildirimlerini denetle"</string>
@@ -380,16 +380,16 @@
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Uygulamaların cihazın telefon özelliklerini kullanmasına izin verir. Bu izne sahip bir uygulama, size bildirmeden ağ değiştirebilir ve telefon radyosunu kapatıp açabilir."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"telefon durumunu ve kimliğini oku"</string>
     <string name="permdesc_readPhoneState" msgid="188877305147626781">"Uygulamaların cihazın telefon özelliklerine erişmesine izin verir. Bu izne sahip bir uygulama telefonun telefon numarasını, bu telefonun seri numarasını, o anda bir çağrı sürmekte olup olmadığını, çağrının bağlanmış olduğu numarayı ve benzerini belirleyebilir."</string>
-    <!-- outdated translation 573480187941496130 -->     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"telefonunun uykuya geçmesini önle"</string>
+    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"tabletin uykuya geçmesini önle"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"telefonunun uykuya geçmesini önle"</string>
-    <!-- outdated translation 7584036471227467099 -->     <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"Uygulamaların telefonun uykuya geçmesini önlemesine izin verir."</string>
+    <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"Uygulamaya, tabletin uykuya geçmesini önleme izni verir."</string>
     <string name="permdesc_wakeLock" product="default" msgid="7584036471227467099">"Uygulamaların telefonun uykuya geçmesini önlemesine izin verir."</string>
-    <!-- outdated translation 4928622470980943206 -->     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"telefonu aç veya kapat"</string>
+    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"tableti aç veya kapat"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"telefonu aç veya kapat"</string>
-    <!-- outdated translation 4577331933252444818 -->     <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"Uygulamaların telefonunuzu açmasına veya kapatmasına izin verir."</string>
+    <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"Uygulamaya, tabletinizi açma veya kapatma izin verir."</string>
     <string name="permdesc_devicePower" product="default" msgid="4577331933252444818">"Uygulamaların telefonunuzu açmasına veya kapatmasına izin verir."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"fabrika test modunda çalıştır"</string>
-    <!-- outdated translation 8136644990319244802 -->     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Telefon donanımına tam erişim veren alt düzey bir üretici testi olarak çalıştırılır. Yalnızca telefon üretici test modunda çalışırken kullanılabilir."</string>
+    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Tabletin donanımına tam erişim veren alt düzey bir üretici testi olarak çalıştırılır. Yalnızca tablet üretici test modunda çalışırken kullanılabilir."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Telefon donanımına tam erişim veren alt düzey bir üretici testi olarak çalıştırılır. Yalnızca telefon üretici test modunda çalışırken kullanılabilir."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"duvar kağıdını ayarla"</string>
     <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Uygulamanın sistem duvar kağıdını ayarlamasına izin verir."</string>
@@ -398,15 +398,15 @@
     <string name="permlab_masterClear" msgid="2315750423139697397">"sistemi fabrika değerlerine sıfırla"</string>
     <string name="permdesc_masterClear" msgid="5033465107545174514">"Uygulamanın, sistemi tamamen fabrika ayarlarına sıfırlamasına; verileri, yapılandırmayı ve yüklü uygulamaları silmesine izin verir."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"saati ayarla"</string>
-    <!-- outdated translation 667294309287080045 -->     <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"Bu uygulamanın telefonun saatini değiştirmesine izin verir."</string>
+    <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"Uygulamaya, tabletin saatini değiştirme izni verir."</string>
     <string name="permdesc_setTime" product="default" msgid="667294309287080045">"Bu uygulamanın telefonun saatini değiştirmesine izin verir."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"saat dilimini ayarla"</string>
-    <!-- outdated translation 1902540227418179364 -->     <string name="permdesc_setTimeZone" product="tablet" msgid="2522877107613885139">"Uygulamaların telefonun saat dilimini değiştirmesine izin verir."</string>
+    <string name="permdesc_setTimeZone" product="tablet" msgid="2522877107613885139">"Uygulamaya, tabletin saat dilimini değiştirme izni verir."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="1902540227418179364">"Uygulamaların telefonun saat dilimini değiştirmesine izin verir."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"Hesap Yönetici Hizmeti gibi davran"</string>
     <string name="permdesc_accountManagerService" msgid="6056903274106394752">"Bir uygulamaya Hesap Doğrulayıcılarını arama izni verir"</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"bilinen hesapları keşfet"</string>
-    <!-- outdated translation 6839262446413155394 -->     <string name="permdesc_getAccounts" product="tablet" msgid="857622793935544694">"Uygulamaların telefonda bilinen hesapların listesini almasına izin verir."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="857622793935544694">"Uygulamaya, tablette bilinen hesapların listesini alma izni verir."</string>
     <string name="permdesc_getAccounts" product="default" msgid="6839262446413155394">"Uygulamaların telefonda bilinen hesapların listesini almasına izin verir."</string>
     <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"hesap denetleyicisi gibi davran"</string>
     <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"Bir uygulamaya, hesaplar oluşturma ve bunların şifrelerini alma ve ayarlama da dahil olmak üzere Hesap Yöneticisi\'nin hesap doğrulama yetkilerini kullanma izni verir."</string>
@@ -433,10 +433,10 @@
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Kablosuz Çoklu Yayın alımına izin ver"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Bir uygulamaya doğrudan cihazınıza yönlendirilmemiş paketleri alma izni verir. Yakın yerlerde sunulan hizmetlerin keşfedilmesi sırasında faydalı olabilir. Birden fazla noktaya yayın yapmayan moda göre daha fazla güç harcar."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"bluetooth yönetimi"</string>
-    <!-- outdated translation 7256289774667054555 -->     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Uygulamaların yerel Bluetooth telefonunu yapılandırmasına ve uzak cihazları keşfedip bunlar ile eşleşmesine izin verir."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Uygulamaya, yerel Bluetooth tabletini yapılandırma ve uzak cihazları keşfedip bunlar ile eşleşme izni verir."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Uygulamaların yerel Bluetooth telefonunu yapılandırmasına ve uzak cihazları keşfedip bunlar ile eşleşmesine izin verir."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth bağlantıları oluştur"</string>
-    <!-- outdated translation 762515380679392945 -->     <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"Uygulamaların yerel Bluetooth telefonunun yapılandırmasını görüntülemesine ve eşleşilmiş cihazlar ile bağlantı kurup kabul etmesine izin verir."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"Uygulamaya, yerel Bluetooth tabletinin yapılandırmasını görüntüleme ve eşlenilmiş cihazlar ile bağlantı kurup kabul etme izni verir."</string>
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Uygulamaların yerel Bluetooth telefonunun yapılandırmasını görüntülemesine ve eşleşilmiş cihazlar ile bağlantı kurup kabul etmesine izin verir."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"Yakın Alan İletişimini denetle"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Bir uyg\'nın Yakın Alan İletişimi etiketleri, kartları ve okuyclr ile iletşm kurmasına izin verir."</string>
@@ -471,14 +471,14 @@
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Şifre kuralları ayarla"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Ekran kilidini açma şifrelerinde izin verilen uzunluğu ve karakterleri kontrol edin"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekran kilidini açma denemelerini izle"</string>
-    <!-- outdated translation 7227578260165172673 -->     <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"Ekran kilidi açılırken girilen yanlış şifre sayısını izler ve çok fazla sayıda yanlış şifre girilirse telefonu kilitler veya telefondaki tüm verileri siler"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"Ekran kilidi açılırken girilen yanlış şifre sayısını izler ve çok fazla sayıda yanlış şifre girilirse tableti kilitler veya tabletteki tüm verileri siler"</string>
     <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"Ekran kilidi açılırken girilen yanlış şifre sayısını izler ve çok fazla sayıda yanlış şifre girilirse telefonu kilitler veya telefondaki tüm verileri siler"</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Ekran kilidini açma şifresini değiştir"</string>
     <string name="policydesc_resetPassword" msgid="5391240616981297361">"Ekran kilidini açma şifresini değiştirin"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Ekranı kilitle"</string>
     <string name="policydesc_forceLock" msgid="5696964126226028442">"Ekranın nasıl ve ne zaman kilitlendiğini kontrol edin"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Tüm verileri sil"</string>
-    <!-- outdated translation 7669895333814222586 -->     <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek telefondaki verileri uyarıda bulunmadan silin"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek tabletteki verileri uyarıda bulunmadan siler"</string>
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek telefondaki verileri uyarıda bulunmadan silin"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Cihaz genelinde geçerli proxy\'i ayarla"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Politika etkin olduğunda kullanılacak cihaz genelinde geçerli proxy\'yi ayarlayın. Etkin genel proxy\'yi yalnızca ilk cihaz yöneticisi ayarlar."</string>
@@ -618,7 +618,7 @@
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Şarj cihazınızı bağlayın."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"SIM kart yok."</string>
-    <!-- outdated translation 2186920585695169078 -->     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Telefonda SIM kart yok."</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Tablette SIM kart yok."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Telefonda SIM kart yok."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Lütfen SIM kart takın."</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Yalnızca acil çağrılar için"</string>
@@ -630,8 +630,7 @@
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış çizdiniz. "\n\n"Lütfen <xliff:g id="NUMBER_1">%d</xliff:g> saniye içinde yeniden deneyin."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Şifrenizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış girdiniz. "\n\n"Lütfen <xliff:g id="NUMBER_1">%d</xliff:g> saniye içinde yeniden deneyin."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"PIN\'inizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış girdiniz. "\n\n"Lütfen <xliff:g id="NUMBER_1">%d</xliff:g> saniye içinde yeniden deneyin."</string>
-    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (8687762517114904651) -->
-    <skip />
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%d</xliff:g> başarısız denemeden sonra tabletinizi Google oturum açma bilgilerinizi kullanarak açmanız istenir."\n\n" Lütfen <xliff:g id="NUMBER_2">%d</xliff:g> saniye içinde yeniden deneyin."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%d</xliff:g> başarısız denemeden sonra telefonunuzu Google oturum açma bilgilerinizi kullanarak açmanız istenir."\n\n" Lütfen <xliff:g id="NUMBER_2">%d</xliff:g> saniye içinde yeniden deneyin."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> saniye içinde yeniden deneyin."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Deseni unuttunuz mu?"</string>
@@ -661,8 +660,7 @@
     <string name="save_password_label" msgid="6860261758665825069">"Onayla"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"İpucu: Yakınlaştırmak ve uzaklaştırmak için iki kez hafifçe vurun."</string>
     <!-- outdated translation 8940110866775097494 -->     <string name="autofill_this_form" msgid="1272247532604569872">"Bu formu otomatik doldur"</string>
-    <!-- no translation found for setup_autofill (8154593408885654044) -->
-    <skip />
+    <string name="setup_autofill" msgid="8154593408885654044">"Oto Doldr Ayarla"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />
@@ -672,7 +670,7 @@
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"Tarayıcı geçmişini ve favorileri oku"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Uygulamaya Tarayıcının ziyaret etmiş olduğu tüm URL\'leri ve Tarayıcının tüm favorilerini okuma izni verir."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"Tarayıcı geçmişini ve favorileri yaz"</string>
-    <!-- outdated translation 945571990357114950 -->     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"Uygulamaya telefonunuzda depolanan Tarayıcı geçmişini veya favorileri değiştirme izni verir. Kötü amaçlı uygulamalar bunu Tarayıcı verilerinizi silmek veya değiştirmek için kullanabilir."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"Uygulamaya, tabletinizde depolanan Tarayıcı geçmişini veya favorileri değiştirme izni verir. Kötü amaçlı uygulamalar bunu Tarayıcı verilerinizi silmek veya değiştirmek için kullanabilir."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Uygulamaya telefonunuzda depolanan Tarayıcı geçmişini veya favorileri değiştirme izni verir. Kötü amaçlı uygulamalar bunu Tarayıcı verilerinizi silmek veya değiştirmek için kullanabilir."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"çalar saatte alarm ayarla"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Uygulamanın yüklü bir çalar saat uygulamasında bir alarm ayarlamasına izin verir. Bazı çalar saat uygulamaları bu özelliği kullanmayabilir."</string>
@@ -798,7 +796,7 @@
     <string name="inputMethod" msgid="1653630062304567879">"Giriş yöntemi"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Metin eylemleri"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Yer az"</string>
-    <!-- outdated translation 635106544616378836 -->     <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"Telefonun depolama alanı azalıyor."</string>
+    <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"Tabletin depolama alanı azalıyor."</string>
     <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"Telefonun depolama alanı azalıyor."</string>
     <string name="ok" msgid="5970060430562524910">"Tamam"</string>
     <string name="cancel" msgid="6442560571259935130">"İptal"</string>
@@ -866,7 +864,8 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Çok sayıda SMS mesajı gönderiliyor. Devam etmek için \"Tamam\"ı, göndermeyi durdurmak için \"İptal\"i seçin."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"Tamam"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"İptal"</string>
-    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Saati ayarla"</string>
+    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
     <skip />
     <string name="date_time_set" msgid="5777075614321087758">"Ayarla"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Varsayılan"</string>
@@ -999,4 +998,14 @@
     <string name="media_unknown_state" msgid="729192782197290385">"Harici medyanın durumu bilinmiyor."</string>
     <string name="share" msgid="1778686618230011964">"Paylaş"</string>
     <string name="find" msgid="4808270900322985960">"Bul"</string>
+    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
+    <skip />
+    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
+    <skip />
+    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
+    <skip />
+    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
+    <skip />
+    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
+    <skip />
 </resources>

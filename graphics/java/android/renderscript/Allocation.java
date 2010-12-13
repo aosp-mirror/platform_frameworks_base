@@ -55,13 +55,13 @@ public class Allocation extends BaseObj {
         }
     }
 
-    public enum MipmapGenerationControl {
+    public enum MipmapControl {
         MIPMAP_NONE(0),
         MIPMAP_FULL(1),
         MIPMAP_ON_SYNC_TO_TEXTURE(2);
 
         int mID;
-        MipmapGenerationControl(int id) {
+        MipmapControl(int id) {
             mID = id;
         }
     }
@@ -131,6 +131,14 @@ public class Allocation extends BaseObj {
         subData1D(0, mType.getCount(), i);
     }
 
+    private void validateBitmap(Bitmap b) {
+        mRS.validate();
+        if(mType.getX() != b.getWidth() ||
+           mType.getY() != b.getHeight()) {
+            throw new RSIllegalArgumentException("Cannot update allocation from bitmap, sizes mismatch");
+        }
+    }
+
     public void copyFrom(int[] d) {
         mRS.validate();
         subData1D(0, mType.getCount(), d);
@@ -147,17 +155,16 @@ public class Allocation extends BaseObj {
         mRS.validate();
         subData1D(0, mType.getCount(), d);
     }
-
     public void copyFrom(Bitmap b) {
-
-        mRS.validate();
-        if(mType.getX() != b.getWidth() ||
-           mType.getY() != b.getHeight()) {
-            throw new RSIllegalArgumentException("Cannot update allocation from bitmap, sizes mismatch");
-        }
-
-        mRS.nAllocationUpdateFromBitmap(getID(), b);
+        validateBitmap(b);
+        mRS.nAllocationCopyFromBitmap(getID(), b);
     }
+
+    public void copyTo(Bitmap b) {
+        validateBitmap(b);
+        mRS.nAllocationCopyToBitmap(getID(), b);
+    }
+
 
     public void subData(int xoff, FieldPacker fp) {
         int eSize = mType.mElement.getSizeBytes();
@@ -423,17 +430,17 @@ public class Allocation extends BaseObj {
     }
 
     static private Type typeFromBitmap(RenderScript rs, Bitmap b,
-                                       MipmapGenerationControl mip) {
+                                       MipmapControl mip) {
         Element e = elementFromBitmap(rs, b);
         Type.Builder tb = new Type.Builder(rs, e);
         tb.setX(b.getWidth());
         tb.setY(b.getHeight());
-        tb.setMipmaps(mip == MipmapGenerationControl.MIPMAP_FULL);
+        tb.setMipmaps(mip == MipmapControl.MIPMAP_FULL);
         return tb.create();
     }
 
     static public Allocation createFromBitmap(RenderScript rs, Bitmap b,
-                                              MipmapGenerationControl mips,
+                                              MipmapControl mips,
                                               int usage) {
         rs.validate();
         Type t = typeFromBitmap(rs, b, mips);
@@ -447,15 +454,15 @@ public class Allocation extends BaseObj {
 
     static public Allocation createFromBitmap(RenderScript rs, Bitmap b,
                                               Element dstFmt, boolean genMips) {
-        MipmapGenerationControl mc = MipmapGenerationControl.MIPMAP_NONE;
+        MipmapControl mc = MipmapControl.MIPMAP_NONE;
         if (genMips) {
-            mc = MipmapGenerationControl.MIPMAP_ON_SYNC_TO_TEXTURE;
+            mc = MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE;
         }
         return createFromBitmap(rs, b, mc, USAGE_ALL);
     }
 
     static public Allocation createCubemapFromBitmap(RenderScript rs, Bitmap b,
-                                                     MipmapGenerationControl mips,
+                                                     MipmapControl mips,
                                                      CubemapLayout layout,
                                                      int usage) {
         rs.validate();
@@ -482,7 +489,7 @@ public class Allocation extends BaseObj {
         tb.setX(width);
         tb.setY(width);
         tb.setFaces(true);
-        tb.setMipmaps(mips == MipmapGenerationControl.MIPMAP_FULL);
+        tb.setMipmaps(mips == MipmapControl.MIPMAP_FULL);
         Type t = tb.create();
 
         int id = rs.nAllocationCubeCreateFromBitmap(t.getID(), mips.mID, b, usage);
@@ -496,33 +503,17 @@ public class Allocation extends BaseObj {
                                                      Element dstFmt,
                                                      boolean genMips,
                                                      CubemapLayout layout) {
-        MipmapGenerationControl mc = MipmapGenerationControl.MIPMAP_NONE;
+        MipmapControl mc = MipmapControl.MIPMAP_NONE;
         if (genMips) {
-            mc = MipmapGenerationControl.MIPMAP_ON_SYNC_TO_TEXTURE;
+            mc = MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE;
         }
         return createCubemapFromBitmap(rs, b, mc, layout, USAGE_ALL);
-    }
-
-
-    static public Allocation createBitmapRef(RenderScript rs, Bitmap b) {
-
-        rs.validate();
-        Type t = typeFromBitmap(rs, b, MipmapGenerationControl.MIPMAP_NONE);
-
-        int id = rs.nAllocationCreateBitmapRef(t.getID(), b);
-        if(id == 0) {
-            throw new RSRuntimeException("Load failed.");
-        }
-
-        Allocation a = new Allocation(id, rs, t, USAGE_SCRIPT);
-        a.mBitmap = b;
-        return a;
     }
 
     static public Allocation createFromBitmapResource(RenderScript rs,
                                                       Resources res,
                                                       int id,
-                                                      MipmapGenerationControl mips,
+                                                      MipmapControl mips,
                                                       int usage) {
 
         rs.validate();
@@ -537,9 +528,9 @@ public class Allocation extends BaseObj {
                                                       int id,
                                                       Element dstFmt,
                                                       boolean genMips) {
-        MipmapGenerationControl mc = MipmapGenerationControl.MIPMAP_NONE;
+        MipmapControl mc = MipmapControl.MIPMAP_NONE;
         if (genMips) {
-            mc = MipmapGenerationControl.MIPMAP_ON_SYNC_TO_TEXTURE;
+            mc = MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE;
         }
         return createFromBitmapResource(rs, res, id, mc, USAGE_ALL);
     }

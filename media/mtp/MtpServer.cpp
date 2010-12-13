@@ -104,10 +104,10 @@ MtpServer::MtpServer(int fd, MtpDatabase* database,
 MtpServer::~MtpServer() {
 }
 
-void MtpServer::addStorage(const char* filePath) {
+void MtpServer::addStorage(const char* filePath, uint64_t reserveSpace) {
     int index = mStorages.size() + 1;
     index |= index << 16;   // set high and low part to our index
-    MtpStorage* storage = new MtpStorage(index, filePath, mDatabase);
+    MtpStorage* storage = new MtpStorage(index, filePath, reserveSpace);
     addStorage(storage);
 }
 
@@ -686,6 +686,10 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
     // file should not already exist
     if (access(path, R_OK) == 0)
         return MTP_RESPONSE_GENERAL_ERROR;
+
+    // check space first
+    if (mSendObjectFileSize > storage->getFreeSpace())
+        return MTP_RESPONSE_STORAGE_FULL;
 
     MtpObjectHandle handle = mDatabase->beginSendObject((const char*)path,
             format, parent, storageID, mSendObjectFileSize, modifiedTime);

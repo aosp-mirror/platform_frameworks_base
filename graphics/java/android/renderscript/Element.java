@@ -654,17 +654,5 @@ public class Element extends BaseObj {
             return new Element(id, mRS, ein, sin, asin);
         }
     }
-
-    static void initPredefined(RenderScript rs) {
-        int a8 = rs.nElementCreate(DataType.UNSIGNED_8.mID,
-                                   DataKind.PIXEL_A.mID, true, 1);
-        int rgba4444 = rs.nElementCreate(DataType.UNSIGNED_4_4_4_4.mID,
-                                         DataKind.PIXEL_RGBA.mID, true, 4);
-        int rgba8888 = rs.nElementCreate(DataType.UNSIGNED_8.mID,
-                                         DataKind.PIXEL_RGBA.mID, true, 4);
-        int rgb565 = rs.nElementCreate(DataType.UNSIGNED_5_6_5.mID,
-                                       DataKind.PIXEL_RGB.mID, true, 3);
-        rs.nInitElements(a8, rgba4444, rgba8888, rgb565);
-    }
 }
 

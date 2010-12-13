@@ -77,10 +77,16 @@ ElementCreate2 {
 	ret RsElement
 	}
 
-AllocationUpdateFromBitmap {
+AllocationCopyFromBitmap {
 	param RsAllocation alloc
-	param RsElement srcFmt
 	param const void * data
+	param size_t dataLen
+	}
+
+AllocationCopyToBitmap {
+	param RsAllocation alloc
+	param void * data
+	param size_t dataLen
 	}
 
 AllocationCreateBitmapRef {

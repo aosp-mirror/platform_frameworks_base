@@ -17,7 +17,7 @@
 package com.android.layoutlib.bridge.android;
 
 import com.android.layoutlib.api.IProjectCallback;
-import com.android.layoutlib.api.IResourceValue;
+import com.android.layoutlib.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 
@@ -150,7 +150,7 @@ public final class BridgeInflater extends LayoutInflater {
         if (context instanceof BridgeContext) {
             BridgeContext bridgeContext = (BridgeContext)context;
 
-            IResourceValue value = null;
+            ResourceValue value = null;
 
             String[] layoutInfo = Bridge.resolveResourceValue(resource);
             if (layoutInfo != null) {
