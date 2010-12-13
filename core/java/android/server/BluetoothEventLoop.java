@@ -293,7 +293,7 @@ class BluetoothEventLoop {
                 intent = new Intent(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
             }
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-        } else if (name.equals("Devices")) {
+        } else if (name.equals("Devices") || name.equals("UUIDs")) {
             String value = null;
             int len = Integer.valueOf(propValues[1]);
             if (len > 0) {
