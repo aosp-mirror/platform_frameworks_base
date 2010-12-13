@@ -34,9 +34,9 @@ interface INfcTag
 
     int getLastError(int nativeHandle);
 
-    NdefMessage read(int nativeHandle);
-    int write(int nativeHandle, in NdefMessage msg);
-    int makeReadOnly(int nativeHandle);
-    int getModeHint(int nativeHandle);
+    NdefMessage ndefRead(int nativeHandle);
+    int ndefWrite(int nativeHandle, in NdefMessage msg);
+    int ndefMakeReadOnly(int nativeHandle);
+    boolean ndefIsWritable(int nativeHandle);
     int formatNdef(int nativeHandle, in byte[] key);
 }
