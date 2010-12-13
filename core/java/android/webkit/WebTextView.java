@@ -848,7 +848,7 @@ import junit.framework.Assert;
 
         public AutoCompleteAdapter(Context context, ArrayList<String> entries) {
             super(context, com.android.internal.R.layout
-                    .search_dropdown_item_1line, entries);
+                    .web_text_view_dropdown, entries);
         }
 
         /**
