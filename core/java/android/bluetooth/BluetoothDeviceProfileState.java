@@ -82,7 +82,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
     public static final int TRANSITION_TO_STABLE = 102;
     public static final int CONNECT_OTHER_PROFILES = 103;
 
-    private static final int AUTO_CONNECT_DELAY = 6000; // 6 secs
+    private static final int CONNECT_OTHER_PROFILES_DELAY = 4000; // 4 secs
 
     private BondedDevice mBondedDevice = new BondedDevice();
     private OutgoingHandsfree mOutgoingHandsfree = new OutgoingHandsfree();
@@ -152,7 +152,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
             } else if (action.equals(BluetoothDevice.ACTION_ACL_CONNECTED)) {
                 Message msg = new Message();
                 msg.what = AUTO_CONNECT_PROFILES;
-                sendMessageDelayed(msg, AUTO_CONNECT_DELAY);
+                sendMessage(msg);
             } else if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
                 // This is technically not needed, but we can get stuck sometimes.
                 // For example, if incoming A2DP fails, we are not informed by Bluez
@@ -1019,7 +1019,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                     Message msg = new Message();
                     msg.what = CONNECT_OTHER_PROFILES;
                     msg.arg1 = CONNECT_A2DP_OUTGOING;
-                    sendMessageDelayed(msg, AUTO_CONNECT_DELAY);
+                    sendMessageDelayed(msg, CONNECT_OTHER_PROFILES_DELAY);
                 }
                 break;
             case CONNECT_A2DP_INCOMING:
@@ -1031,7 +1031,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                     Message msg = new Message();
                     msg.what = CONNECT_OTHER_PROFILES;
                     msg.arg1 = CONNECT_HFP_OUTGOING;
-                    sendMessageDelayed(msg, AUTO_CONNECT_DELAY);
+                    sendMessageDelayed(msg, CONNECT_OTHER_PROFILES_DELAY);
                 }
                 break;
             default:

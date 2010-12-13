@@ -420,6 +420,11 @@ public class BluetoothService extends IBluetooth.Stub {
                                     BluetoothDevice.UNBOND_REASON_AUTH_CANCELED);
         }
 
+        // Stop the profile state machine for bonded devices.
+        for (String address : mBondState.listInState(BluetoothDevice.BOND_BONDED)) {
+            removeProfileState(address);
+        }
+
         // update mode
         Intent intent = new Intent(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
         intent.putExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.SCAN_MODE_NONE);
@@ -2714,10 +2719,9 @@ public class BluetoothService extends IBluetooth.Stub {
         for (String path : bonds) {
             String address = getAddressFromObjectPath(path);
             BluetoothDeviceProfileState state = addProfileState(address);
-            // Allow 8 secs for SDP records to get registered.
             Message msg = new Message();
             msg.what = BluetoothDeviceProfileState.AUTO_CONNECT_PROFILES;
-            state.sendMessageDelayed(msg, 8000);
+            state.sendMessage(msg);
         }
     }
 
