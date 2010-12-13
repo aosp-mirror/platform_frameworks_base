@@ -6248,7 +6248,12 @@ public class WebView extends AbsoluteLayout
         // resumes during this effect we will take a performance hit. See computeScroll;
         // we resume webcore there when the animation is finished.
         final int time = mScroller.getDuration();
-        awakenScrollBars(time);
+
+        // Suppress scrollbars for layer scrolling.
+        if (mTouchMode != TOUCH_DRAG_LAYER_MODE) {
+            awakenScrollBars(time);
+        }
+
         invalidate();
     }
 
