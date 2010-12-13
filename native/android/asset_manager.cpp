@@ -178,6 +178,11 @@ off_t AAsset_seek(AAsset* asset, off_t offset, int whence)
     return asset->mAsset->seek(offset, whence);
 }
 
+off64_t AAsset_seek64(AAsset* asset, off64_t offset, int whence)
+{
+    return asset->mAsset->seek(offset, whence);
+}
+
 void AAsset_close(AAsset* asset)
 {
     asset->mAsset->close();
@@ -194,14 +199,35 @@ off_t AAsset_getLength(AAsset* asset)
     return asset->mAsset->getLength();
 }
 
+off64_t AAsset_getLength64(AAsset* asset)
+{
+    return asset->mAsset->getLength();
+}
+
 off_t AAsset_getRemainingLength(AAsset* asset)
+{
+    return asset->mAsset->getRemainingLength();
+}
+
+off64_t AAsset_getRemainingLength64(AAsset* asset)
 {
     return asset->mAsset->getRemainingLength();
 }
 
 int AAsset_openFileDescriptor(AAsset* asset, off_t* outStart, off_t* outLength)
 {
-    return asset->mAsset->openFileDescriptor((off64_t*)outStart, (off64_t*)outLength);
+    off64_t outStart64, outLength64;
+
+    int ret = asset->mAsset->openFileDescriptor(&outStart64, &outLength64);
+
+    *outStart = off_t(outStart64);
+    *outLength = off_t(outLength64);
+    return ret;
+}
+
+int AAsset_openFileDescriptor64(AAsset* asset, off64_t* outStart, off64_t* outLength)
+{
+    return asset->mAsset->openFileDescriptor(outStart, outLength);
 }
 
 int AAsset_isAllocated(AAsset* asset)
