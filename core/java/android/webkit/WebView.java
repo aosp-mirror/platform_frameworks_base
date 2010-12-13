@@ -1952,21 +1952,6 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    /**
-     * Deletes any files that were created as a part of the last private
-     * browsing session and clears any internal state associated with that
-     * session. The consequences of calling this method while a private
-     * browsing session is active are unspecified.
-     * @return True if the private browsing files were successfully deleted,
-     *         false otherwise.
-     * @hide pending API council approval.
-     */
-    public static boolean cleanupPrivateBrowsingFiles() {
-        return nativeCleanupPrivateBrowsingFiles();
-    }
-
-    private static native boolean nativeCleanupPrivateBrowsingFiles();
-
     private boolean extendScroll(int y) {
         int finalY = mScroller.getFinalY();
         int newY = pinLocY(finalY + y);
