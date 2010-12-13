@@ -99,10 +99,6 @@ public final class CookieManager {
 
     private boolean mAcceptCookie = true;
 
-    // TODO: Remove this if/when we permanently switch to the Chromium HTTP stack
-    // http:/b/3118772
-    private static Boolean sUseChromiumHttpStack;
-
     private int pendingCookieOperations = 0;
 
     /**
@@ -264,19 +260,12 @@ public final class CookieManager {
         return sRef;
     }
 
-    private static boolean useChromiumHttpStack() {
-        if (sUseChromiumHttpStack == null) {
-            sUseChromiumHttpStack = nativeUseChromiumHttpStack();
-        }
-        return sUseChromiumHttpStack;
-    }
-
     /**
      * Control whether cookie is enabled or disabled
      * @param accept TRUE if accept cookie
      */
     public synchronized void setAcceptCookie(boolean accept) {
-        if (useChromiumHttpStack()) {
+        if (JniUtil.useChromiumHttpStack()) {
             nativeSetAcceptCookie(accept);
             return;
         }
@@ -289,7 +278,7 @@ public final class CookieManager {
      * @return TRUE if accept cookie
      */
     public synchronized boolean acceptCookie() {
-        if (useChromiumHttpStack()) {
+        if (JniUtil.useChromiumHttpStack()) {
             return nativeAcceptCookie();
         }
 
@@ -304,7 +293,7 @@ public final class CookieManager {
      * @param value The value for set-cookie: in http response header
      */
     public void setCookie(String url, String value) {
-        if (useChromiumHttpStack()) {
+        if (JniUtil.useChromiumHttpStack()) {
             nativeSetCookie(url, value);
             return;
         }
@@ -435,7 +424,7 @@ public final class CookieManager {
      * @return The cookies in the format of NAME=VALUE [; NAME=VALUE]
      */
     public String getCookie(String url) {
-        if (useChromiumHttpStack()) {
+        if (JniUtil.useChromiumHttpStack()) {
             return nativeGetCookie(url);
         }
 
@@ -549,7 +538,7 @@ public final class CookieManager {
      */
     public void removeSessionCookie() {
         signalCookieOperationsStart();
-        if (useChromiumHttpStack()) {
+        if (JniUtil.useChromiumHttpStack()) {
             new AsyncTask<Void, Void, Void>() {
                 protected Void doInBackground(Void... none) {
                     nativeRemoveSessionCookie();
@@ -587,7 +576,7 @@ public final class CookieManager {
      * Remove all cookies
      */
     public void removeAllCookie() {
-        if (useChromiumHttpStack()) {
+        if (JniUtil.useChromiumHttpStack()) {
             nativeRemoveAllCookie();
             return;
         }
@@ -608,7 +597,7 @@ public final class CookieManager {
      *  Return true if there are stored cookies.
      */
     public synchronized boolean hasCookies() {
-        if (useChromiumHttpStack()) {
+        if (JniUtil.useChromiumHttpStack()) {
             return nativeHasCookies();
         }
 
@@ -619,7 +608,7 @@ public final class CookieManager {
      * Remove all expired cookies
      */
     public void removeExpiredCookie() {
-        if (useChromiumHttpStack()) {
+        if (JniUtil.useChromiumHttpStack()) {
             nativeRemoveExpiredCookie();
             return;
         }
@@ -655,7 +644,7 @@ public final class CookieManager {
      * Flush all cookies managed by the Chrome HTTP stack to flash.
      */
     void flushCookieStore() {
-        if (useChromiumHttpStack()) {
+        if (JniUtil.useChromiumHttpStack()) {
             nativeFlushCookieStore();
         }
     }
@@ -1109,7 +1098,6 @@ public final class CookieManager {
     }
 
     // Native functions
-    private static native boolean nativeUseChromiumHttpStack();
     private static native boolean nativeAcceptCookie();
     private static native String nativeGetCookie(String url);
     private static native boolean nativeHasCookies();
