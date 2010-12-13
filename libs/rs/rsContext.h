@@ -207,6 +207,7 @@ public:
     uint32_t getMaxFragmentTextures() const {return mGL.mMaxFragmentTextureImageUnits;}
     uint32_t getMaxFragmentUniformVectors() const {return mGL.mMaxFragmentUniformVectors;}
     uint32_t getMaxVertexUniformVectors() const {return mGL.mMaxVertexUniformVectors;}
+    uint32_t getMaxVertexAttributes() const {return mGL.mMaxVertexAttribs;}
 
     void launchThreads(WorkerCallback_t cbk, void *data);
     uint32_t getWorkerPoolSize() const {return (uint32_t)mWorkers.mCount;}
