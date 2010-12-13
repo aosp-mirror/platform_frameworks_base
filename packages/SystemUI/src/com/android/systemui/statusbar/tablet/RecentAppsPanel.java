@@ -20,13 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
-import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.IThumbnailReceiver;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
@@ -50,12 +46,10 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.ImageView.ScaleType;
 
 import com.android.systemui.R;
 
@@ -68,6 +62,7 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
     private TabletStatusBar mBar;
     private TextView mNoRecents;
     private LinearLayout mRecentsContainer;
+    private View mRecentsGlowView;
     private ArrayList<ActivityDescription> mActivityDescriptions;
     private int mIconDpi;
     private AnimatorSet mAnimationSet;
@@ -145,6 +140,7 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         super.onFinishInflate();
         mNoRecents = (TextView) findViewById(R.id.recents_no_recents);
         mRecentsContainer = (LinearLayout) findViewById(R.id.recents_container);
+        mRecentsGlowView = findViewById(R.id.recents_glow);
         mBackgroundProtector = (View) findViewById(R.id.recents_bg_protect);
 
         // In order to save space, we make the background texture repeat in the Y direction
@@ -308,11 +304,6 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
     private void updateUiElements(Configuration config, boolean animate) {
         mRecentsContainer.removeAllViews();
 
-
-        // TODO: disabled until I have a chance to tune animations with UX
-        animate = false;
-
-
         final float initialAlpha = 0.0f;
         final int first = 0;
         final boolean isPortrait = config.orientation == Configuration.ORIENTATION_PORTRAIT;
@@ -339,8 +330,8 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
             if (animate) {
                 view.setAlpha(initialAlpha);
                 ObjectAnimator anim = ObjectAnimator.ofFloat(view, "alpha", initialAlpha, 1.0f);
-                anim.setDuration(25);
-                anim.setStartDelay((last-i)*25);
+                anim.setDuration(200);
+                anim.setStartDelay((last-i)*80);
                 anim.setInterpolator(interp);
                 anims.add(anim);
             }
@@ -349,11 +340,12 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         int views = mRecentsContainer.getChildCount();
         mNoRecents.setVisibility(View.GONE); // views == 0 ? View.VISIBLE : View.GONE);
         mRecentsContainer.setVisibility(views > 0 ? View.VISIBLE : View.GONE);
+        mRecentsGlowView.setVisibility(views > 0 ? View.VISIBLE : View.GONE);
 
-        if (animate) {
-            ObjectAnimator anim = ObjectAnimator.ofFloat(mRecentsContainer, "alpha",
+        if (animate && views > 0) {
+            ObjectAnimator anim = ObjectAnimator.ofFloat(mRecentsGlowView, "alpha",
                     initialAlpha, 1.0f);
-            anim.setDuration(last*25);
+            anim.setDuration((last-first)*80);
             anim.setInterpolator(interp);
             anims.add(anim);
         }
@@ -361,7 +353,7 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         if (animate) {
             ObjectAnimator anim = ObjectAnimator.ofFloat(mBackgroundProtector, "alpha",
                     initialAlpha, 1.0f);
-            anim.setDuration(last*25);
+            anim.setDuration(last*80);
             anim.setInterpolator(interp);
             anims.add(anim);
         }

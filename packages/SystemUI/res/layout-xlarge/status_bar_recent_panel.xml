@@ -28,8 +28,8 @@
     android:orientation="vertical">
 
     <TextView android:id="@+id/recents_no_recents"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="@string/recent_tasks_empty"
         android:textSize="22dip"
         android:gravity="center_horizontal|center_vertical"
@@ -42,15 +42,19 @@
         android:layout_weight="1"
     />
 
-    <LinearLayout android:id="@+id/recents_container"
-        android:layout_width="match_parent"
+    <LinearLayout android:id="@+id/recents_glow"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="16dip"
-        android:layout_alignParentLeft="true"
-        android:layout_marginRight="100dip"
-        android:background="@drawable/recents_blue_glow"
-    />
+        android:orientation="horizontal"
+        android:background="@drawable/recents_blue_glow">
+
+        <LinearLayout android:id="@+id/recents_container"
+            android:layout_width="356dip"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginRight="100dip"
+        />
+
+    </LinearLayout>
 
 </com.android.systemui.statusbar.tablet.RecentAppsPanel>
