@@ -17,9 +17,12 @@
 package android.os;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Formatter;
+import java.util.List;
 import java.util.Map;
 
+import android.content.pm.ApplicationInfo;
 import android.util.Log;
 import android.util.Printer;
 import android.util.SparseArray;
@@ -120,6 +123,7 @@ public abstract class BatteryStats implements Parcelable {
     private static final long BYTES_PER_GB = 1073741824; //1024^3
     
 
+    private static final String UID_DATA = "uid";
     private static final String APK_DATA = "apk";
     private static final String PROCESS_DATA = "pr";
     private static final String SENSOR_DATA = "sr";
@@ -1460,7 +1464,7 @@ public abstract class BatteryStats implements Parcelable {
 
         for (int iu=0; iu<NU; iu++) {
             final int uid = uidStats.keyAt(iu);
-            if (reqUid >= 0 && uid != reqUid) {
+            if (reqUid >= 0 && uid != reqUid && uid != Process.SYSTEM_UID) {
                 continue;
             }
             
@@ -1877,7 +1881,7 @@ public abstract class BatteryStats implements Parcelable {
     }
     
     @SuppressWarnings("unused")
-    public void dumpCheckinLocked(PrintWriter pw, String[] args) {
+    public void dumpCheckinLocked(PrintWriter pw, String[] args, List<ApplicationInfo> apps) {
         boolean isUnpluggedOnly = false;
         
         for (String arg : args) {
@@ -1887,6 +1891,33 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
         
+        if (apps != null) {
+            SparseArray<ArrayList<String>> uids = new SparseArray<ArrayList<String>>();
+            for (int i=0; i<apps.size(); i++) {
+                ApplicationInfo ai = apps.get(i);
+                ArrayList<String> pkgs = uids.get(ai.uid);
+                if (pkgs == null) {
+                    pkgs = new ArrayList<String>();
+                    uids.put(ai.uid, pkgs);
+                }
+                pkgs.add(ai.packageName);
+            }
+            SparseArray<? extends Uid> uidStats = getUidStats();
+            final int NU = uidStats.size();
+            String[] lineArgs = new String[2];
+            for (int i=0; i<NU; i++) {
+                int uid = uidStats.keyAt(i);
+                ArrayList<String> pkgs = uids.get(uid);
+                if (pkgs != null) {
+                    for (int j=0; j<pkgs.size(); j++) {
+                        lineArgs[0] = Integer.toString(uid);
+                        lineArgs[1] = pkgs.get(j);
+                        dumpLine(pw, 0 /* uid */, "i" /* category */, UID_DATA,
+                                (Object[])lineArgs);
+                    }
+                }
+            }
+        }
         if (isUnpluggedOnly) {
             dumpCheckinLocked(pw, STATS_SINCE_UNPLUGGED, -1);
         }
