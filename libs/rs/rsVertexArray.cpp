@@ -81,8 +81,12 @@ void VertexArray::setupGL2(const Context *rsc,
                            class VertexArrayState *state,
                            ShaderCache *sc) const {
     rsc->checkError("VertexArray::setupGL2 start");
-    for (uint32_t ct=1; ct <= state->mLastEnableCount; ct++) {
-        glDisableVertexAttribArray(ct);
+    uint32_t maxAttrs = state->mAttrsEnabledSize;
+    for (uint32_t ct=1; ct < maxAttrs; ct++) {
+        if(state->mAttrsEnabled[ct]) {
+            glDisableVertexAttribArray(ct);
+            state->mAttrsEnabled[ct] = false;
+        }
     }
 
     rsc->checkError("VertexArray::setupGL2 disabled");
@@ -91,10 +95,11 @@ void VertexArray::setupGL2(const Context *rsc,
         if (rsc->props.mLogShadersAttr) {
             logAttrib(ct, slot);
         }
-        if (slot < 0) {
+        if (slot < 0 || slot >= (int32_t)maxAttrs) {
             continue;
         }
         glEnableVertexAttribArray(slot);
+        state->mAttrsEnabled[slot] = true;
         glBindBuffer(GL_ARRAY_BUFFER, mAttribs[ct].buffer);
         glVertexAttribPointer(slot,
                               mAttribs[ct].size,
@@ -103,12 +108,25 @@ void VertexArray::setupGL2(const Context *rsc,
                               mAttribs[ct].stride,
                               mAttribs[ct].ptr + mAttribs[ct].offset);
     }
-    state->mLastEnableCount = mCount;
     rsc->checkError("VertexArray::setupGL2 done");
 }
 ////////////////////////////////////////////
+VertexArrayState::VertexArrayState() {
+    mAttrsEnabled = NULL;
+    mAttrsEnabledSize = 0;
+}
 
-void VertexArrayState::init(Context *) {
-    mLastEnableCount = 0;
+VertexArrayState::~VertexArrayState() {
+    if (mAttrsEnabled) {
+        delete[] mAttrsEnabled;
+        mAttrsEnabled = NULL;
+    }
+}
+void VertexArrayState::init(Context *rsc) {
+    mAttrsEnabledSize = rsc->getMaxVertexAttributes();
+    mAttrsEnabled = new bool[mAttrsEnabledSize];
+    for (uint32_t ct = 0; ct < mAttrsEnabledSize; ct++) {
+        mAttrsEnabled[ct] = false;
+    }
 }
 
