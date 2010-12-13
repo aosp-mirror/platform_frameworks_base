@@ -18,8 +18,6 @@ package android.os;
 
 import android.util.Log;
 
-import com.android.internal.os.RuntimeInit;
-
 /**
  * This class gives you control of the power state of the device.  
  * 
