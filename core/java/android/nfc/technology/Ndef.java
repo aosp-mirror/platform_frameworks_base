@@ -56,6 +56,7 @@ public final class Ndef extends BasicTagTechnology {
 
     private final int mMaxNdefSize;
     private final int mCardState;
+    private final NdefMessage mNdefMsg;
 
     /**
      * Internal constructor, to be used by NfcAdapter
@@ -66,6 +67,7 @@ public final class Ndef extends BasicTagTechnology {
         if (extras != null) {
             mMaxNdefSize = extras.getInt(EXTRA_NDEF_MAXLENGTH);
             mCardState = extras.getInt(EXTRA_NDEF_CARDSTATE);
+            mNdefMsg = extras.getParcelable(EXTRA_NDEF_MSG);
         } else {
             throw new NullPointerException("NDEF tech extras are null.");
         }
@@ -76,27 +78,8 @@ public final class Ndef extends BasicTagTechnology {
      * Get the primary NDEF message on this tag. This data is read at discovery time
      * and does not require a connection.
      */
-    public NdefMessage getNdefMessage() throws IOException, FormatException {
-        try {
-            int serviceHandle = mTag.getServiceHandle();
-            NdefMessage msg = mTagService.ndefRead(serviceHandle);
-            if (msg == null) {
-                int errorCode = mTagService.getLastError(serviceHandle);
-                switch (errorCode) {
-                    case ErrorCodes.ERROR_IO:
-                        throw new IOException();
-                    case ErrorCodes.ERROR_INVALID_PARAM:
-                        throw new FormatException();
-                    default:
-                        // Should not happen
-                        throw new IOException();
-                }
-            }
-            return msg;
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            return null;
-        }
+    public NdefMessage getCachedNdefMessage() {
+        return mNdefMsg;
     }
 
     /**
@@ -125,6 +108,36 @@ public final class Ndef extends BasicTagTechnology {
     }
 
     // Methods that require connect()
+    /**
+     * Get the primary NDEF message on this tag. This data is read actively
+     * and requires a connection.
+     */
+    public NdefMessage getNdefMessage() throws IOException, FormatException {
+        try {
+            int serviceHandle = mTag.getServiceHandle();
+            if (mTagService.isNdef(serviceHandle)) {
+                NdefMessage msg = mTagService.ndefRead(serviceHandle);
+                if (msg == null) {
+                    int errorCode = mTagService.getLastError(serviceHandle);
+                    switch (errorCode) {
+                        case ErrorCodes.ERROR_IO:
+                            throw new IOException();
+                        case ErrorCodes.ERROR_INVALID_PARAM:
+                            throw new FormatException();
+                        default:
+                            // Should not happen
+                            throw new IOException();
+                    }
+                }
+                return msg;
+            } else {
+                return null;
+            }
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return null;
+        }
+    }
     /**
      * Overwrite the primary NDEF message
      * @throws IOException
