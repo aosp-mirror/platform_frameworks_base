@@ -1610,6 +1610,14 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
+     * {@link android.nfc.NfcManager} for using NFC.
+     *
+     * @see #getSystemService
+     */
+    public static final String NFC_SERVICE = "nfc";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.net.sip.SipManager} for accessing the SIP related service.
      *
      * @see #getSystemService
