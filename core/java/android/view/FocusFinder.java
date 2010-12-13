@@ -19,6 +19,8 @@ package android.view;
 import android.graphics.Rect;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * The algorithm used for finding the next focusable view in a given direction
@@ -44,6 +46,7 @@ public class FocusFinder {
     Rect mFocusedRect = new Rect();
     Rect mOtherRect = new Rect();
     Rect mBestCandidateRect = new Rect();
+    SequentialFocusComparator mSequentialFocusComparator = new SequentialFocusComparator();
 
     // enforce thread local access
     private FocusFinder() {}
@@ -76,6 +79,7 @@ public class FocusFinder {
             switch (direction) {
                 case View.FOCUS_RIGHT:
                 case View.FOCUS_DOWN:
+                case View.FOCUS_FORWARD:
                     final int rootTop = root.getScrollY();
                     final int rootLeft = root.getScrollX();
                     mFocusedRect.set(rootLeft, rootTop, rootLeft, rootTop);
@@ -83,6 +87,7 @@ public class FocusFinder {
 
                 case View.FOCUS_LEFT:
                 case View.FOCUS_UP:
+                case View.FOCUS_BACKWARD:
                     final int rootBottom = root.getScrollY() + root.getHeight();
                     final int rootRight = root.getScrollX() + root.getWidth();
                     mFocusedRect.set(rootRight, rootBottom,
@@ -107,6 +112,48 @@ public class FocusFinder {
 
     private View findNextFocus(ViewGroup root, View focused, Rect focusedRect, int direction) {
         ArrayList<View> focusables = root.getFocusables(direction);
+        if (focusables.isEmpty()) {
+            // The focus cannot change.
+            return null;
+        }
+
+        if (direction == View.FOCUS_FORWARD || direction == View.FOCUS_BACKWARD) {
+            if (focused != null && !focusables.contains(focused)) {
+                // Add the currently focused view to the list to have it sorted
+                // along with the other views.
+                focusables.add(focused);
+            }
+
+            try {
+                // Note: This sort is stable.
+                mSequentialFocusComparator.setRoot(root);
+                Collections.sort(focusables, mSequentialFocusComparator);
+            } finally {
+                mSequentialFocusComparator.recycle();
+            }
+
+            final int count = focusables.size();
+            switch (direction) {
+                case View.FOCUS_FORWARD:
+                    if (focused != null) {
+                        int position = focusables.lastIndexOf(focused);
+                        if (position >= 0 && position + 1 < count) {
+                            return focusables.get(position + 1);
+                        }
+                    }
+                    return focusables.get(0);
+
+                case View.FOCUS_BACKWARD:
+                    if (focused != null) {
+                        int position = focusables.indexOf(focused);
+                        if (position > 0) {
+                            return focusables.get(position - 1);
+                        }
+                    }
+                    return focusables.get(count - 1);
+            }
+            return null;
+        }
 
         // initialize the best candidate to something impossible
         // (so the first plausible view will become the best choice)
@@ -476,5 +523,60 @@ public class FocusFinder {
         }
         throw new IllegalArgumentException("direction must be one of "
                 + "{FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, FOCUS_RIGHT}.");
+    }
+
+    /**
+     * Sorts views according to their visual layout and geometry for default tab order.
+     * This is used for sequential focus traversal.
+     */
+    private static final class SequentialFocusComparator implements Comparator<View> {
+        private final Rect mFirstRect = new Rect();
+        private final Rect mSecondRect = new Rect();
+        private ViewGroup mRoot;
+
+        public void recycle() {
+            mRoot = null;
+        }
+
+        public void setRoot(ViewGroup root) {
+            mRoot = root;
+        }
+
+        public int compare(View first, View second) {
+            if (first == second) {
+                return 0;
+            }
+
+            getRect(first, mFirstRect);
+            getRect(second, mSecondRect);
+
+            if (mFirstRect.top < mSecondRect.top) {
+                return -1;
+            } else if (mFirstRect.top > mSecondRect.top) {
+                return 1;
+            } else if (mFirstRect.left < mSecondRect.left) {
+                return -1;
+            } else if (mFirstRect.left > mSecondRect.left) {
+                return 1;
+            } else if (mFirstRect.bottom < mSecondRect.bottom) {
+                return -1;
+            } else if (mFirstRect.bottom > mSecondRect.bottom) {
+                return 1;
+            } else if (mFirstRect.right < mSecondRect.right) {
+                return -1;
+            } else if (mFirstRect.right > mSecondRect.right) {
+                return 1;
+            } else {
+                // The view are distinct but completely coincident so we consider
+                // them equal for our purposes.  Since the sort is stable, this
+                // means that the views will retain their layout order relative to one another.
+                return 0;
+            }
+        }
+
+        private void getRect(View view, Rect rect) {
+            view.getDrawingRect(rect);
+            mRoot.offsetDescendantRectToMyCoords(view, rect);
+        }
     }
 }

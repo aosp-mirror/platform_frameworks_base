@@ -4586,14 +4586,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if ((mInputType & EditorInfo.TYPE_MASK_CLASS) == EditorInfo.TYPE_CLASS_TEXT) {
             int variation = mInputType & EditorInfo.TYPE_MASK_VARIATION;
-
-            if (variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
-                variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_SUBJECT) {
+            if (variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                    || variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_SUBJECT) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Returns true if pressing TAB in this field advances focus instead
+     * of inserting the character.  Insert tabs only in multi-line editors.
+     */
+    private boolean shouldAdvanceFocusOnTab() {
+        if (mInput != null && !mSingleLine) {
+            if ((mInputType & EditorInfo.TYPE_MASK_CLASS) == EditorInfo.TYPE_CLASS_TEXT) {
+                int variation = mInputType & EditorInfo.TYPE_MASK_VARIATION;
+                if (variation == EditorInfo.TYPE_TEXT_FLAG_IME_MULTI_LINE
+                        || variation == EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private int doKeyDown(int keyCode, KeyEvent event, KeyEvent otherEvent) {
@@ -4604,16 +4620,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENTER:
                 mEnterKeyIsDown = true;
-                // If ALT modifier is held, then we always insert a
-                // newline character.
-                if ((event.getMetaState()&KeyEvent.META_ALT_ON) == 0) {
-                    
+                if (event.hasNoModifiers()) {
                     // When mInputContentType is set, we know that we are
                     // running in a "modern" cupcake environment, so don't need
                     // to worry about the application trying to capture
                     // enter key events.
                     if (mInputContentType != null) {
-                        
                         // If there is an action listener, given them a
                         // chance to consume the event.
                         if (mInputContentType.onEditorActionListener != null &&
@@ -4624,11 +4636,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             return -1;
                         }
                     }
-                    
+
                     // If our editor should move focus when enter is pressed, or
                     // this is a generated event from an IME action button, then
                     // don't let it be inserted into the text.
-                    if ((event.getFlags()&KeyEvent.FLAG_EDITOR_ACTION) != 0
+                    if ((event.getFlags() & KeyEvent.FLAG_EDITOR_ACTION) != 0
                             || shouldAdvanceFocusOnEnter()) {
                         return -1;
                     }
@@ -4637,8 +4649,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 mDPadCenterIsDown = true;
-                if (shouldAdvanceFocusOnEnter()) {
-                    return 0;
+                if (event.hasNoModifiers()) {
+                    if (shouldAdvanceFocusOnEnter()) {
+                        return 0;
+                    }
+                }
+                break;
+
+            case KeyEvent.KEYCODE_TAB:
+                if (event.hasNoModifiers() || event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
+                    if (shouldAdvanceFocusOnTab()) {
+                        return 0;
+                    }
                 }
                 break;
 
@@ -4733,76 +4755,80 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 mDPadCenterIsDown = false;
-                /*
-                 * If there is a click listener, just call through to
-                 * super, which will invoke it.
-                 *
-                 * If there isn't a click listener, try to show the soft
-                 * input method.  (It will also
-                 * call performClick(), but that won't do anything in
-                 * this case.)
-                 */
-                if (mOnClickListener == null) {
-                    if (mMovement != null && mText instanceof Editable
-                            && mLayout != null && onCheckIsTextEditor()) {
-                        InputMethodManager imm = (InputMethodManager)
-                                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.showSoftInput(this, 0);
-                    }
-                }
-                return super.onKeyUp(keyCode, event);
-                
-            case KeyEvent.KEYCODE_ENTER:
-                mEnterKeyIsDown = false;
-                if (mInputContentType != null
-                        && mInputContentType.onEditorActionListener != null
-                        && mInputContentType.enterDown) {
-                    mInputContentType.enterDown = false;
-                    if (mInputContentType.onEditorActionListener.onEditorAction(
-                            this, EditorInfo.IME_NULL, event)) {
-                        return true;
-                    }
-                }
-                
-                if ((event.getFlags()&KeyEvent.FLAG_EDITOR_ACTION) != 0
-                        || shouldAdvanceFocusOnEnter()) {
+                if (event.hasNoModifiers()) {
                     /*
                      * If there is a click listener, just call through to
                      * super, which will invoke it.
                      *
-                     * If there isn't a click listener, try to advance focus,
-                     * but still call through to super, which will reset the
-                     * pressed state and longpress state.  (It will also
+                     * If there isn't a click listener, try to show the soft
+                     * input method.  (It will also
                      * call performClick(), but that won't do anything in
                      * this case.)
                      */
                     if (mOnClickListener == null) {
-                        View v = focusSearch(FOCUS_DOWN);
+                        if (mMovement != null && mText instanceof Editable
+                                && mLayout != null && onCheckIsTextEditor()) {
+                            InputMethodManager imm = (InputMethodManager)
+                                    getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.showSoftInput(this, 0);
+                        }
+                    }
+                }
+                return super.onKeyUp(keyCode, event);
 
-                        if (v != null) {
-                            if (!v.requestFocus(FOCUS_DOWN)) {
-                                throw new IllegalStateException("focus search returned a view " +
-                                        "that wasn't able to take focus!");
-                            }
-
-                            /*
-                             * Return true because we handled the key; super
-                             * will return false because there was no click
-                             * listener.
-                             */
-                            super.onKeyUp(keyCode, event);
+            case KeyEvent.KEYCODE_ENTER:
+                mEnterKeyIsDown = false;
+                if (event.hasNoModifiers()) {
+                    if (mInputContentType != null
+                            && mInputContentType.onEditorActionListener != null
+                            && mInputContentType.enterDown) {
+                        mInputContentType.enterDown = false;
+                        if (mInputContentType.onEditorActionListener.onEditorAction(
+                                this, EditorInfo.IME_NULL, event)) {
                             return true;
-                        } else if ((event.getFlags()
-                                & KeyEvent.FLAG_EDITOR_ACTION) != 0) {
-                            // No target for next focus, but make sure the IME
-                            // if this came from it.
-                            InputMethodManager imm = InputMethodManager.peekInstance();
-                            if (imm != null) {
-                                imm.hideSoftInputFromWindow(getWindowToken(), 0);
-                            }
                         }
                     }
 
+                    if ((event.getFlags() & KeyEvent.FLAG_EDITOR_ACTION) != 0
+                            || shouldAdvanceFocusOnEnter()) {
+                        /*
+                         * If there is a click listener, just call through to
+                         * super, which will invoke it.
+                         *
+                         * If there isn't a click listener, try to advance focus,
+                         * but still call through to super, which will reset the
+                         * pressed state and longpress state.  (It will also
+                         * call performClick(), but that won't do anything in
+                         * this case.)
+                         */
+                        if (mOnClickListener == null) {
+                            View v = focusSearch(FOCUS_DOWN);
+
+                            if (v != null) {
+                                if (!v.requestFocus(FOCUS_DOWN)) {
+                                    throw new IllegalStateException(
+                                            "focus search returned a view " +
+                                            "that wasn't able to take focus!");
+                                }
+
+                                /*
+                                 * Return true because we handled the key; super
+                                 * will return false because there was no click
+                                 * listener.
+                                 */
+                                super.onKeyUp(keyCode, event);
+                                return true;
+                            } else if ((event.getFlags()
+                                    & KeyEvent.FLAG_EDITOR_ACTION) != 0) {
+                                // No target for next focus, but make sure the IME
+                                // if this came from it.
+                                InputMethodManager imm = InputMethodManager.peekInstance();
+                                if (imm != null) {
+                                    imm.hideSoftInputFromWindow(getWindowToken(), 0);
+                                }
+                            }
+                        }
+                    }
                     return super.onKeyUp(keyCode, event);
                 }
                 break;

@@ -1483,61 +1483,95 @@ public class GridView extends AbsListView {
         int action = event.getAction();
 
         if (action != KeyEvent.ACTION_UP) {
-            if (mSelectedPosition < 0) {
-                switch (keyCode) {
-                    case KeyEvent.KEYCODE_DPAD_UP:
-                    case KeyEvent.KEYCODE_DPAD_DOWN:
-                    case KeyEvent.KEYCODE_DPAD_LEFT:
-                    case KeyEvent.KEYCODE_DPAD_RIGHT:
-                    case KeyEvent.KEYCODE_DPAD_CENTER:
-                    case KeyEvent.KEYCODE_SPACE:
-                    case KeyEvent.KEYCODE_ENTER:
-                        resurrectSelection();
-                        return true;
-                }
-            }
-
             switch (keyCode) {
                 case KeyEvent.KEYCODE_DPAD_LEFT:
-                    handled = arrowScroll(FOCUS_LEFT);
+                    if (event.hasNoModifiers()) {
+                        handled = ensureSelectionOnMovementKey() && arrowScroll(FOCUS_LEFT);
+                    }
                     break;
 
                 case KeyEvent.KEYCODE_DPAD_RIGHT:
-                    handled = arrowScroll(FOCUS_RIGHT);
+                    if (event.hasNoModifiers()) {
+                        handled = ensureSelectionOnMovementKey() && arrowScroll(FOCUS_RIGHT);
+                    }
                     break;
 
                 case KeyEvent.KEYCODE_DPAD_UP:
-                    if (!event.isAltPressed()) {
-                        handled = arrowScroll(FOCUS_UP);
-
-                    } else {
-                        handled = fullScroll(FOCUS_UP);
+                    if (event.hasNoModifiers()) {
+                        handled = ensureSelectionOnMovementKey() && arrowScroll(FOCUS_UP);
+                    } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
+                        handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_UP);
                     }
                     break;
 
                 case KeyEvent.KEYCODE_DPAD_DOWN:
-                    if (!event.isAltPressed()) {
-                        handled = arrowScroll(FOCUS_DOWN);
-                    } else {
-                        handled = fullScroll(FOCUS_DOWN);
+                    if (event.hasNoModifiers()) {
+                        handled = ensureSelectionOnMovementKey() && arrowScroll(FOCUS_DOWN);
+                    } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
+                        handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_DOWN);
                     }
                     break;
 
                 case KeyEvent.KEYCODE_DPAD_CENTER:
                 case KeyEvent.KEYCODE_ENTER: {
-                    if (getChildCount() > 0 && event.getRepeatCount() == 0) {
+                    if (event.hasNoModifiers()
+                            && event.getRepeatCount() == 0 && getChildCount() > 0) {
+                        ensureSelectionOnMovementKey();
                         keyPressed();
                     }
-
                     return true;
                 }
 
                 case KeyEvent.KEYCODE_SPACE:
                     if (mPopup == null || !mPopup.isShowing()) {
-                        if (!event.isShiftPressed()) {
-                            handled = pageScroll(FOCUS_DOWN);
-                        } else {
-                            handled = pageScroll(FOCUS_UP);
+                        if (event.hasNoModifiers()) {
+                            handled = ensureSelectionOnMovementKey() && pageScroll(FOCUS_DOWN);
+                        } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
+                            handled = ensureSelectionOnMovementKey() && pageScroll(FOCUS_UP);
+                        }
+                    }
+                    break;
+
+                case KeyEvent.KEYCODE_PAGE_UP:
+                    if (event.hasNoModifiers()) {
+                        handled = ensureSelectionOnMovementKey() && pageScroll(FOCUS_UP);
+                    } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
+                        handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_UP);
+                    }
+                    break;
+
+                case KeyEvent.KEYCODE_PAGE_DOWN:
+                    if (event.hasNoModifiers()) {
+                        handled = ensureSelectionOnMovementKey() && pageScroll(FOCUS_DOWN);
+                    } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
+                        handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_DOWN);
+                    }
+                    break;
+
+                case KeyEvent.KEYCODE_MOVE_HOME:
+                    if (event.hasNoModifiers()) {
+                        handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_UP);
+                    }
+                    break;
+
+                case KeyEvent.KEYCODE_MOVE_END:
+                    if (event.hasNoModifiers()) {
+                        handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_DOWN);
+                    }
+                    break;
+
+                case KeyEvent.KEYCODE_TAB:
+                    // XXX Sometimes it is useful to be able to TAB through the items in
+                    //     a GridView sequentially.  Unfortunately this can create an
+                    //     asymmetry in TAB navigation order unless the list selection
+                    //     always reverts to the top or bottom when receiving TAB focus from
+                    //     another widget.  Leaving this behavior disabled for now but
+                    //     perhaps it should be configurable (and more comprehensive).
+                    if (false) {
+                        if (event.hasNoModifiers()) {
+                            handled = ensureSelectionOnMovementKey() && sequenceScroll(FOCUS_FORWARD);
+                        } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
+                            handled = ensureSelectionOnMovementKey() && sequenceScroll(FOCUS_BACKWARD);
                         }
                     }
                     break;
@@ -1686,6 +1720,64 @@ public class GridView extends AbsListView {
         return moved;
     }
 
+    /**
+     * Goes to the next or previous item according to the order set by the
+     * adapter.
+     */
+    boolean sequenceScroll(int direction) {
+        int selectedPosition = mSelectedPosition;
+        int numColumns = mNumColumns;
+        int count = mItemCount;
+
+        int startOfRow;
+        int endOfRow;
+        if (!mStackFromBottom) {
+            startOfRow = (selectedPosition / numColumns) * numColumns;
+            endOfRow = Math.min(startOfRow + numColumns - 1, count - 1);
+        } else {
+            int invertedSelection = count - 1 - selectedPosition;
+            endOfRow = count - 1 - (invertedSelection / numColumns) * numColumns;
+            startOfRow = Math.max(0, endOfRow - numColumns + 1);
+        }
+
+        boolean moved = false;
+        boolean showScroll = false;
+        switch (direction) {
+            case FOCUS_FORWARD:
+                if (selectedPosition < count - 1) {
+                    // Move to the next item.
+                    mLayoutMode = LAYOUT_MOVE_SELECTION;
+                    setSelectionInt(selectedPosition + 1);
+                    moved = true;
+                    // Show the scrollbar only if changing rows.
+                    showScroll = selectedPosition == endOfRow;
+                }
+                break;
+
+            case FOCUS_BACKWARD:
+                if (selectedPosition > 0) {
+                    // Move to the previous item.
+                    mLayoutMode = LAYOUT_MOVE_SELECTION;
+                    setSelectionInt(selectedPosition - 1);
+                    moved = true;
+                    // Show the scrollbar only if changing rows.
+                    showScroll = selectedPosition == startOfRow;
+                }
+                break;
+        }
+
+        if (moved) {
+            playSoundEffect(SoundEffectConstants.getContantForFocusDirection(direction));
+            invokeOnItemScrollListener();
+        }
+
+        if (showScroll) {
+            awakenScrollBars();
+        }
+
+        return moved;
+    }
+
     @Override
     protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
@@ -1729,7 +1821,7 @@ public class GridView extends AbsListView {
      * change is coming from?
      * @param childIndex The index to check.
      * @param direction The direction, one of
-     *        {FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, FOCUS_RIGHT}
+     *        {FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, FOCUS_RIGHT, FOCUS_FORWARD, FOCUS_BACKWARD}
      * @return Whether childIndex is a candidate.
      */
     private boolean isCandidateSelection(int childIndex, int direction) {
@@ -1761,9 +1853,16 @@ public class GridView extends AbsListView {
             case View.FOCUS_UP:
                 // coming from bottom, need to be in last row
                 return rowEnd == count - 1;
+            case View.FOCUS_FORWARD:
+                // coming from top-left, need to be first in top row
+                return childIndex == rowStart && rowStart == 0;
+            case View.FOCUS_BACKWARD:
+                // coming from bottom-right, need to be last in bottom row
+                return childIndex == rowEnd && rowEnd == count - 1;
             default:
                 throw new IllegalArgumentException("direction must be one of "
-                        + "{FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, FOCUS_RIGHT}.");
+                        + "{FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, FOCUS_RIGHT, "
+                        + "FOCUS_FORWARD, FOCUS_BACKWARD}.");
         }
     }
 

@@ -18,6 +18,7 @@ package android.view;
 
 import android.animation.LayoutTransition;
 import com.android.internal.R;
+import com.android.internal.util.Predicate;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -2505,6 +2506,33 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             if ((v.mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
                 v = v.findViewWithTag(tag);
+
+                if (v != null) {
+                    return v;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * {@hide}
+     */
+    @Override
+    protected View findViewByPredicateTraversal(Predicate<View> predicate) {
+        if (predicate.apply(this)) {
+            return this;
+        }
+
+        final View[] where = mChildren;
+        final int len = mChildrenCount;
+
+        for (int i = 0; i < len; i++) {
+            View v = where[i];
+
+            if ((v.mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
+                v = v.findViewByPredicate(predicate);
 
                 if (v != null) {
                     return v;
