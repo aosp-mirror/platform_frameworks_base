@@ -33,7 +33,6 @@ import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
