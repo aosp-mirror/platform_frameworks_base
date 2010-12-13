@@ -208,7 +208,7 @@ public class KeyCharacterMap {
      * @return The associated character or combining accent, or 0 if none.
      */
     public int get(int keyCode, int metaState) {
-        metaState = applyLockedModifiers(metaState);
+        metaState = KeyEvent.normalizeMetaState(metaState);
         char ch = nativeGetCharacter(mPtr, keyCode, metaState);
 
         int map = COMBINING.get(ch);
@@ -243,7 +243,7 @@ public class KeyCharacterMap {
             throw new IllegalArgumentException("fallbackAction must not be null");
         }
 
-        metaState = applyLockedModifiers(metaState);
+        metaState = KeyEvent.normalizeMetaState(metaState);
         return nativeGetFallbackAction(mPtr, keyCode, metaState, outFallbackAction);
     }
 
@@ -303,7 +303,7 @@ public class KeyCharacterMap {
             throw new IllegalArgumentException("chars must not be null.");
         }
 
-        metaState = applyLockedModifiers(metaState);
+        metaState = KeyEvent.normalizeMetaState(metaState);
         return nativeGetMatch(mPtr, keyCode, chars, metaState);
     }
 
@@ -534,16 +534,6 @@ public class KeyCharacterMap {
             // no fallback; just return the empty array
         }
         return ret;
-    }
-
-    private static int applyLockedModifiers(int metaState) {
-        if ((metaState & MetaKeyKeyListener.META_CAP_LOCKED) != 0) {
-            metaState |= KeyEvent.META_CAPS_LOCK_ON;
-        }
-        if ((metaState & MetaKeyKeyListener.META_ALT_LOCKED) != 0) {
-            metaState |= KeyEvent.META_ALT_ON;
-        }
-        return metaState;
     }
 
     /**
