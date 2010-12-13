@@ -893,13 +893,29 @@ public class AccountManagerService
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         checkBinderPermission(Manifest.permission.USE_CREDENTIALS);
         final int callerUid = Binder.getCallingUid();
-        final boolean permissionGranted = permissionIsGranted(account, authTokenType, callerUid);
+        final int callerPid = Binder.getCallingPid();
+
+        AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription> authenticatorInfo =
+            mAuthenticatorCache.getServiceInfo(
+                    AuthenticatorDescription.newKey(account.type));
+        final boolean customTokens =
+            authenticatorInfo != null && authenticatorInfo.type.customTokens;
+
+        // skip the check if customTokens
+        final boolean permissionGranted = customTokens ||
+            permissionIsGranted(account, authTokenType, callerUid);
+
+        if (customTokens) {
+            // let authenticator know the identity of the caller
+            loginOptions.putInt(AccountManager.KEY_CALLER_UID, callerUid);
+            loginOptions.putInt(AccountManager.KEY_CALLER_PID, callerPid);
+        }
 
         long identityToken = clearCallingIdentity();
         try {
             // if the caller has permission, do the peek. otherwise go the more expensive
             // route of starting a Session
-            if (permissionGranted) {
+            if (!customTokens && permissionGranted) {
                 String authToken = readAuthTokenFromCache(account, authTokenType);
                 if (authToken != null) {
                     Bundle result = new Bundle();
@@ -953,8 +969,10 @@ public class AccountManagerService
                                         "the type and name should not be empty");
                                 return;
                             }
-                            saveAuthTokenToDatabase(new Account(name, type),
-                                    authTokenType, authToken);
+                            if (!customTokens) {
+                                saveAuthTokenToDatabase(new Account(name, type),
+                                        authTokenType, authToken);
+                            }
                         }
 
                         Intent intent = result.getParcelable(AccountManager.KEY_INTENT);

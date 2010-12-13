@@ -48,6 +48,7 @@
              theme does not set this value, meaning it is based on whether the
              window is floating. -->
         <attr name="backgroundDimEnabled" format="boolean" />
+
         <!-- =========== -->
         <!-- Text styles -->
         <!-- =========== -->
@@ -261,7 +262,7 @@
         <!-- Flag indicating whether this is a translucent window. -->
         <attr name="windowIsTranslucent" format="boolean" />
         <!-- Flag indicating that this window's background should be the
-        	 user's current wallpaper. -->
+           user's current wallpaper. -->
         <attr name="windowShowWallpaper" format="boolean" />
         <!-- This Drawable is overlaid over the foreground of the Window's content area, usually
              to place a shadow below the title.  -->
@@ -4310,7 +4311,7 @@
              If not supplied, then no activity will be launched. -->
         <attr name="configure" format="string" />
         <!-- A preview of what the AppWidget will look like after it's configured.
-       	     If not supplied, the AppWidget's icon will be used. -->
+              If not supplied, the AppWidget's icon will be used. -->
         <attr name="previewImage" format="reference" />
         <!-- The view id of the AppWidget subview which should be auto-advanced.
              by the widget's host. -->
@@ -4421,6 +4422,10 @@
         <attr name="smallIcon" format="reference"/>
         <!-- A preferences.xml file for authenticator-specific settings. -->
         <attr name="accountPreferences" format="reference"/>
+        <!-- Account handles its own token storage and permissions.
+             Default to false
+          -->
+        <attr name="customTokens" format="boolean"/>
     </declare-styleable>
 
     <!-- =============================== -->
