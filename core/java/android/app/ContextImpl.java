@@ -64,6 +64,7 @@ import android.net.IThrottleManager;
 import android.net.Uri;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiManager;
+import android.nfc.NfcManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -311,6 +312,11 @@ class ContextImpl extends Context {
         registerService(DOWNLOAD_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
                     return new DownloadManager(ctx.getContentResolver(), ctx.getPackageName());
+                }});
+
+        registerService(NFC_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return new NfcManager(ctx);
                 }});
 
         registerService(DROPBOX_SERVICE, new StaticServiceFetcher() {
