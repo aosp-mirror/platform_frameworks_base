@@ -72,8 +72,9 @@ public class SntpClient
      * @return true if the transaction was successful.
      */
     public boolean requestTime(String host, int timeout) {
+        DatagramSocket socket = null;
         try {
-            DatagramSocket socket = new DatagramSocket();
+            socket = new DatagramSocket();
             socket.setSoTimeout(timeout);
             InetAddress address = InetAddress.getByName(host);
             byte[] buffer = new byte[NTP_PACKET_SIZE];
@@ -96,7 +97,6 @@ public class SntpClient
             socket.receive(response);
             long responseTicks = SystemClock.elapsedRealtime();
             long responseTime = requestTime + (responseTicks - requestTicks);
-            socket.close();
 
             // extract the results
             long originateTime = readTimeStamp(buffer, ORIGINATE_TIME_OFFSET);
@@ -123,6 +123,10 @@ public class SntpClient
         } catch (Exception e) {
             if (Config.LOGD) Log.d(TAG, "request time failed: " + e);
             return false;
+        } finally {
+            if (socket != null) {
+                socket.close();
+            }
         }
 
         return true;
