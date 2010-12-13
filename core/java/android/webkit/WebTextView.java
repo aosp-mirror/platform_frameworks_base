@@ -921,24 +921,59 @@ import junit.framework.Assert;
      * Private class used for the background of a password textfield.
      */
     private static class OutlineDrawable extends Drawable {
+        private Paint mBackgroundPaint;
+        private Paint mOutlinePaint;
+        private float[] mLines;
+        public OutlineDrawable() {
+            mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            mBackgroundPaint.setColor(Color.WHITE);
+
+            mOutlinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            mOutlinePaint.setColor(Color.BLACK);
+            mOutlinePaint.setStyle(Paint.Style.STROKE);
+
+            mLines = new float[16];
+        }
+        @Override
+        public void setBounds(int left, int top, int right, int bottom) {
+            super.setBounds(left, top, right, bottom);
+            // Top line
+            mLines[0] = left;
+            mLines[1] = top + 1;
+            mLines[2] = right;
+            mLines[3] = top + 1;
+            // Right line
+            mLines[4] = right;
+            mLines[5] = top;
+            mLines[6] = right;
+            mLines[7] = bottom;
+            // Bottom line
+            mLines[8] = left;
+            mLines[9] = bottom;
+            mLines[10] = right;
+            mLines[11] = bottom;
+            // Left line
+            mLines[12] = left + 1;
+            mLines[13] = top;
+            mLines[14] = left + 1;
+            mLines[15] = bottom;
+        }
+        @Override
         public void draw(Canvas canvas) {
-            Rect bounds = getBounds();
-            Paint paint = new Paint();
-            paint.setAntiAlias(true);
             // Draw the background.
-            paint.setColor(Color.WHITE);
-            canvas.drawRect(bounds, paint);
+            canvas.drawRect(getBounds(), mBackgroundPaint);
             // Draw the outline.
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(Color.BLACK);
-            canvas.drawRect(bounds, paint);
+            canvas.drawLines(mLines, mOutlinePaint);
         }
         // Always want it to be opaque.
+        @Override
         public int getOpacity() {
             return PixelFormat.OPAQUE;
         }
         // These are needed because they are abstract in Drawable.
+        @Override
         public void setAlpha(int alpha) { }
+        @Override
         public void setColorFilter(ColorFilter cf) { }
     }
 
