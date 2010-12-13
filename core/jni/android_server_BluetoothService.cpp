@@ -928,8 +928,8 @@ static jboolean discoverServicesNative(JNIEnv *env, jobject object,
     return JNI_FALSE;
 }
 
-static jintArray extract_handles(JNIEnv *env, DBusMessage *reply) {
 #ifdef HAVE_BLUETOOTH
+static jintArray extract_handles(JNIEnv *env, DBusMessage *reply) {
     jint *handles;
     jintArray handleArray = NULL;
     int len;
@@ -950,9 +950,8 @@ static jintArray extract_handles(JNIEnv *env, DBusMessage *reply) {
         LOG_AND_FREE_DBUS_ERROR(&err);
     }
     return handleArray;
-#endif
-    return NULL;
 }
+#endif
 
 static jintArray addReservedServiceRecordsNative(JNIEnv *env, jobject object,
                                                 jintArray uuids) {
