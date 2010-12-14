@@ -43,8 +43,10 @@
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/preview/features.html">Introduction
 to Honeycomb</a></li>
+<!--
       <li><a href="<?cs var:toroot ?>sdk/preview/installing.html">Getting
 Started</a></li>
+-->
     </ul>
   </li><?cs
   /if ?>
