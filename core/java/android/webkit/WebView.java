@@ -1952,21 +1952,6 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    /**
-     * Deletes any files that were created as a part of the last private
-     * browsing session and clears any internal state associated with that
-     * session. The consequences of calling this method while a private
-     * browsing session is active are unspecified.
-     * @return True if the private browsing files were successfully deleted,
-     *         false otherwise.
-     * @hide pending API council approval.
-     */
-    public static boolean cleanupPrivateBrowsingFiles() {
-        return nativeCleanupPrivateBrowsingFiles();
-    }
-
-    private static native boolean nativeCleanupPrivateBrowsingFiles();
-
     private boolean extendScroll(int y) {
         int finalY = mScroller.getFinalY();
         int newY = pinLocY(finalY + y);
@@ -6248,7 +6233,12 @@ public class WebView extends AbsoluteLayout
         // resumes during this effect we will take a performance hit. See computeScroll;
         // we resume webcore there when the animation is finished.
         final int time = mScroller.getDuration();
-        awakenScrollBars(time);
+
+        // Suppress scrollbars for layer scrolling.
+        if (mTouchMode != TOUCH_DRAG_LAYER_MODE) {
+            awakenScrollBars(time);
+        }
+
         invalidate();
     }
 

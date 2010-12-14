@@ -319,6 +319,8 @@ public final class BridgeContext extends Activity {
             BridgeXmlBlockParser parser = null;
             parser = (BridgeXmlBlockParser)set;
 
+            isPlatformFile = parser.isPlatformFile();
+
             Object key = parser.getViewKey();
             if (key != null) {
                 defaultPropMap = mDefaultPropMaps.get(key);
@@ -329,7 +331,9 @@ public final class BridgeContext extends Activity {
             }
 
         } else if (set instanceof BridgeLayoutParamsMapAttributes) {
-            // good, nothing to do.
+            // this is only for temp layout params generated dynamically, so this is never
+            // platform content.
+            isPlatformFile = false;
         } else if (set != null) { // null parser is ok
             // really this should not be happening since its instantiated in Bridge
             Bridge.getLog().error(null, "Parser is not a BridgeXmlBlockParser!");

@@ -490,9 +490,31 @@
                <span class="en">UI Guidelines</span>
              </a></div>
         <ul>
-          <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design.html">
-                <span class="en">Icon Design</span>
-              </a></li>
+          <li class="toggle-list">
+            <div><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design.html">
+                   <span class="en">Icon Design</span>
+                 </a></div>
+            <ul>
+              <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_launcher.html">
+                    <span class="en">Launcher Icons</span>
+                  </a></li>
+              <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_menu.html">
+                    <span class="en">Menu Icons</span>
+                  </a></li>
+              <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_status_bar.html">
+                    <span class="en">Status Bar Icons</span>
+                  </a></li>
+              <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_tab.html">
+                    <span class="en">Tab Icons</span>
+                  </a></li>
+              <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_dialog.html">
+                    <span class="en">Dialog Icons</span>
+                  </a></li>
+              <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_list.html">
+                    <span class="en">List View Icons</span>
+                  </a></li>
+            </ul>
+          </li>
           <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/widget_design.html">
                 <span class="en">App Widget Design</span>
               </a></li>

@@ -44,10 +44,11 @@ public class BitmapFactory {
 
         /**
          * If set, decode methods that take the Options object will attempt to
-         * reuse this bitmap when loading content. This is a hint to the decoder
-         * only, and the decoder may choose to create a new Bitmap instead. The
+         * reuse this bitmap when loading content. If the decode operation cannot
+         * use this bitmap, the decode method will return <code>null</code> and
+         * will throw an IllegalArgumentException. The
          * current implementation necessitates that the reused bitmap be of the
-         * same size as the source content and in jpeg format (whether as a
+         * same size as the source content and in jpeg or png format (whether as a
          * resource or as a stream). The {@link android.graphics.Bitmap.Config
          * configuration} of the reused bitmap will override the setting of
          * {@link #inPreferredConfig}, if set.
@@ -389,6 +390,10 @@ public class BitmapFactory {
             }
         }
 
+        if (bm == null && opts != null && opts.inBitmap != null) {
+            throw new IllegalArgumentException("Problem decoding into existing bitmap");
+        }
+
         return bm;
     }
 
@@ -421,7 +426,11 @@ public class BitmapFactory {
         if ((offset | length) < 0 || data.length < offset + length) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        return nativeDecodeByteArray(data, offset, length, opts);
+        Bitmap bm = nativeDecodeByteArray(data, offset, length, opts);
+        if (bm == null && opts != null && opts.inBitmap != null) {
+            throw new IllegalArgumentException("Problem decoding into existing bitmap");
+        }
+        return bm;
     }
 
     /**
@@ -487,6 +496,9 @@ public class BitmapFactory {
             if (opts != null) tempStorage = opts.inTempStorage;
             if (tempStorage == null) tempStorage = new byte[16 * 1024];
             bm = nativeDecodeStream(is, tempStorage, outPadding, opts);
+        }
+        if (bm == null && opts != null && opts.inBitmap != null) {
+            throw new IllegalArgumentException("Problem decoding into existing bitmap");
         }
 
         return finishDecode(bm, outPadding, opts);
@@ -558,6 +570,9 @@ public class BitmapFactory {
      */
     public static Bitmap decodeFileDescriptor(FileDescriptor fd, Rect outPadding, Options opts) {
         Bitmap bm = nativeDecodeFileDescriptor(fd, outPadding, opts);
+        if (bm == null && opts != null && opts.inBitmap != null) {
+            throw new IllegalArgumentException("Problem decoding into existing bitmap");
+        }
         return finishDecode(bm, outPadding, opts);
     }
 

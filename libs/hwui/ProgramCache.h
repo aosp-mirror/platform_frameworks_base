@@ -102,14 +102,8 @@ struct ProgramDescription {
         kGradientSweep
     };
 
-    ProgramDescription():
-        hasTexture(false), hasAlpha8Texture(false), modulate(false),
-        hasBitmap(false), isBitmapNpot(false), hasGradient(false),
-        gradientType(kGradientLinear),
-        shadersMode(SkXfermode::kClear_Mode), isBitmapFirst(false),
-        bitmapWrapS(GL_CLAMP_TO_EDGE), bitmapWrapT(GL_CLAMP_TO_EDGE),
-        colorOp(kColorNone), colorMode(SkXfermode::kClear_Mode),
-        framebufferMode(SkXfermode::kClear_Mode), swapSrcDst(false) {
+    ProgramDescription() {
+        reset();
     }
 
     // Texturing
@@ -140,6 +134,35 @@ struct ProgramDescription {
     // Ignored for all values < SkXfermode::kPlus_Mode
     SkXfermode::Mode framebufferMode;
     bool swapSrcDst;
+
+    /**
+     * Resets this description. All fields are reset back to the default
+     * values they hold after building a new instance.
+     */
+    void reset() {
+        hasTexture = false;
+        hasAlpha8Texture = false;
+
+        modulate = false;
+
+        hasBitmap = false;
+        isBitmapNpot = false;
+
+        hasGradient = false;
+        gradientType = kGradientLinear;
+
+        shadersMode = SkXfermode::kClear_Mode;
+
+        isBitmapFirst = false;
+        bitmapWrapS = GL_CLAMP_TO_EDGE;
+        bitmapWrapT = GL_CLAMP_TO_EDGE;
+
+        colorOp = kColorNone;
+        colorMode = SkXfermode::kClear_Mode;
+
+        framebufferMode = SkXfermode::kClear_Mode;
+        swapSrcDst = false;
+    }
 
     /**
      * Indicates, for a given color, whether color modulation is required in

@@ -587,7 +587,7 @@ class ActivityRecord extends IApplicationToken.Stub {
             return stringName;
         }
         StringBuilder sb = new StringBuilder(128);
-        sb.append("HistoryRecord{");
+        sb.append("ActivityRecord{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(' ');
         sb.append(intent.getComponent().flattenToShortString());

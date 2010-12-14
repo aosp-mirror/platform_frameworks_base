@@ -225,6 +225,9 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     if (javaBitmap == NULL) {
         bitmap = new SkBitmap;
     } else {
+        if (sampleSize != 1) {
+            return nullObjectReturn("SkImageDecoder: Cannot reuse bitmap with sampleSize != 1");
+        }
         bitmap = (SkBitmap *) env->GetIntField(javaBitmap, gBitmap_nativeBitmapFieldID);
         // config of supplied bitmap overrules config set in options
         prefConfig = bitmap->getConfig();
@@ -232,7 +235,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     Res_png_9patch      dummy9Patch;
 
     SkAutoTDelete<SkImageDecoder>   add(decoder);
-    SkAutoTDelete<SkBitmap>         adb(bitmap);
+    SkAutoTDelete<SkBitmap>         adb(bitmap, (javaBitmap == NULL));
 
     decoder->setPeeker(&peeker);
     if (!isPurgeable) {

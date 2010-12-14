@@ -13,7 +13,7 @@
 ** distributed under the License is distributed on an "AS IS" BASIS,
 ** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 ** See the License for the specific language governing permissions and
-** limitations under the License.
+** limitations under the License. 
 */
 -->
 
@@ -21,7 +21,14 @@
         android:shareInterpolator="false">
     <scale android:fromXScale="1.0" android:toXScale="1.0"
             android:fromYScale=".9" android:toYScale="1.0"
-            android:pivotX="50%" android:pivotY="50%"
+            android:pivotX="50%p" android:pivotY="50%p"
+            android:fillEnabled="true" android:fillBefore="true"
             android:interpolator="@anim/decelerate_quint_interpolator"
-            android:duration="@android:integer/config_mediumAnimTime" />
+            android:startOffset="160"
+            android:duration="300" />
+    <alpha android:fromAlpha="0" android:toAlpha="1.0"
+            android:fillEnabled="true" android:fillBefore="true"
+            android:interpolator="@anim/decelerate_quint_interpolator"
+            android:startOffset="160"
+            android:duration="300"/>
 </set>

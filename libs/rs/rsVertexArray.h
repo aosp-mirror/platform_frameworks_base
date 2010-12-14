@@ -63,9 +63,12 @@ protected:
 
 class VertexArrayState {
 public:
+    VertexArrayState();
+    ~VertexArrayState();
     void init(Context *);
 
-    uint32_t mLastEnableCount;
+    bool *mAttrsEnabled;
+    uint32_t mAttrsEnabledSize;
 };
 
 

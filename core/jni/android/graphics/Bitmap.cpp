@@ -429,7 +429,15 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
 
     size_t size = bitmap->getSize();
     bitmap->lockPixels();
-    memcpy(p->writeInplace(size), bitmap->getPixels(), size);
+    void* pDst = p->writeInplace(size);
+
+    const void* pSrc =  bitmap->getPixels();
+
+    if (pSrc == NULL) {
+        memset(pDst, 0, size);
+    } else {
+        memcpy(pDst, pSrc, size);
+    }
     bitmap->unlockPixels();
     return true;
 }

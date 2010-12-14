@@ -7,6 +7,7 @@ void main() {
    lowp vec4 col2 = texture2D(UNI_Tex2, t0).rgba;
    col0.xyz = col0.xyz*col1.xyz*1.5;
    col0.xyz = mix(col0.xyz, col2.xyz, col2.w);
+   col0.w = 0.5;
    gl_FragColor = col0;
 }
 

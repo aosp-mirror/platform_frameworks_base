@@ -326,7 +326,7 @@ public class ActionBarImpl extends ActionBar {
     }
 
     public void setBackgroundDrawable(Drawable d) {
-        mActionView.setBackgroundDrawable(d);
+        mContainerView.setBackgroundDrawable(d);
     }
 
     public View getCustomNavigationView() {

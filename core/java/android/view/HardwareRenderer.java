@@ -478,35 +478,35 @@ public abstract class HardwareRenderer {
                     startTime = SystemClock.elapsedRealtime();
                 }
 
-                checkCurrent();
-
-                onPreDraw();
-
-                Canvas canvas = mCanvas;
-                int saveCount = canvas.save();
-                callbacks.onHardwarePreDraw(canvas);
-
-                try {
-                    view.draw(canvas);
-                } finally {
-                    callbacks.onHardwarePostDraw(canvas);
-                    canvas.restoreToCount(saveCount);
+                if (checkCurrent()) {
+                    onPreDraw();
+    
+                    Canvas canvas = mCanvas;
+                    int saveCount = canvas.save();
+                    callbacks.onHardwarePreDraw(canvas);
+    
+                    try {
+                        view.draw(canvas);
+                    } finally {
+                        callbacks.onHardwarePostDraw(canvas);
+                        canvas.restoreToCount(saveCount);
+                    }
+    
+                    onPostDraw();
+    
+                    if (ViewDebug.DEBUG_PROFILE_DRAWING) {
+                        EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
+                    }
+    
+                    attachInfo.mIgnoreDirtyState = false;
+    
+                    sEgl.eglSwapBuffers(sEglDisplay, mEglSurface);
+                    checkEglErrors();
                 }
-
-                onPostDraw();
-
-                if (ViewDebug.DEBUG_PROFILE_DRAWING) {
-                    EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
-                }
-
-                attachInfo.mIgnoreDirtyState = false;
-
-                sEgl.eglSwapBuffers(sEglDisplay, mEglSurface);
-                checkEglErrors();
             }
         }
 
-        private void checkCurrent() {
+        private boolean checkCurrent() {
             // TODO: Don't check the current context when we have one per UI thread
             // TODO: Use a threadlocal flag to know whether the surface has changed
             if (sEgl.eglGetCurrentContext() != sEglContext ||
@@ -515,8 +515,10 @@ public abstract class HardwareRenderer {
                     fallback(true);
                     Log.e(LOG_TAG, "eglMakeCurrent failed " +
                             getEGLErrorString(sEgl.eglGetError()));
+                    return false;
                 }
             }
+            return true;
         }
 
         static abstract class EglConfigChooser {
@@ -649,6 +651,11 @@ public abstract class HardwareRenderer {
         GLES20Canvas createCanvas() {
             return mGlCanvas = new GLES20Canvas(mTranslucent);
         }
+        
+        @Override
+        boolean canDraw() {
+            return super.canDraw() && mGlCanvas != null;
+        }                
 
         @Override
         void onPreDraw() {
@@ -662,9 +669,12 @@ public abstract class HardwareRenderer {
 
         @Override
         void destroy(boolean full) {
-            super.destroy(full);
-            if (full && mGlCanvas != null) {
-                mGlCanvas = null;
+            try {
+                super.destroy(full);
+            } finally {
+                if (full && mGlCanvas != null) {
+                    mGlCanvas = null;
+                }
             }
         }
 

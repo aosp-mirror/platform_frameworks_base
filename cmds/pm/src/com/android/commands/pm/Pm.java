@@ -152,6 +152,7 @@ public final class Pm {
      * pm list permission-groups
      * pm list permissions
      * pm list features
+     * pm list libraries
      * pm list instrumentation
      */
     private void runList() {
@@ -169,6 +170,8 @@ public final class Pm {
             runListPermissions();
         } else if ("features".equals(type)) {
             runListFeatures();
+        } else if ("libraries".equals(type)) {
+            runListLibraries();
         } else if ("instrumentation".equals(type)) {
             runListInstrumentation();
         } else {
@@ -181,6 +184,8 @@ public final class Pm {
      * Lists all the installed packages.
      */
     private void runListPackages(boolean showApplicationPackage) {
+        int getFlags = 0;
+        boolean listDisabled = false, listEnabled = false;
         try {
             String opt;
             while ((opt=nextOption()) != null) {
@@ -190,6 +195,12 @@ public final class Pm {
                     showApplicationPackage = true;
                 } else if (opt.equals("-f")) {
                     showApplicationPackage = true;
+                } else if (opt.equals("-d")) {
+                    listDisabled = true;
+                } else if (opt.equals("-e")) {
+                    listEnabled = true;
+                } else if (opt.equals("-u")) {
+                    getFlags |= PackageManager.GET_UNINSTALLED_PACKAGES;
                 } else {
                     System.err.println("Error: Unknown option: " + opt);
                     showUsage();
@@ -202,18 +213,26 @@ public final class Pm {
             return;
         }
 
+        String filter = nextArg();
+
         try {
-            List<PackageInfo> packages = mPm.getInstalledPackages(0 /* all */);
+            List<PackageInfo> packages = mPm.getInstalledPackages(getFlags);
 
             int count = packages.size();
             for (int p = 0 ; p < count ; p++) {
                 PackageInfo info = packages.get(p);
-                System.out.print("package:");
-                if (showApplicationPackage) {
-                    System.out.print(info.applicationInfo.sourceDir);
-                    System.out.print("=");
+                if (filter != null && !info.packageName.contains(filter)) {
+                    continue;
                 }
-                System.out.println(info.packageName);
+                if ((!listDisabled || !info.applicationInfo.enabled) &&
+                        (!listEnabled || info.applicationInfo.enabled)) {
+                    System.out.print("package:");
+                    if (showApplicationPackage) {
+                        System.out.print(info.applicationInfo.sourceDir);
+                        System.out.print("=");
+                    }
+                    System.out.println(info.packageName);
+                }
             }
         } catch (RemoteException e) {
             System.err.println(e.toString());
@@ -252,6 +271,42 @@ public final class Pm {
                 if (fi.name != null) System.out.println(fi.name);
                 else System.out.println("reqGlEsVersion=0x"
                         + Integer.toHexString(fi.reqGlEsVersion));
+            }
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+        }
+    }
+
+    /**
+     * Lists all of the libraries supported by the current device.
+     *
+     * pm list libraries
+     */
+    private void runListLibraries() {
+        try {
+            List<String> list = new ArrayList<String>();
+            String[] rawList = mPm.getSystemSharedLibraryNames();
+            for (int i=0; i<rawList.length; i++) {
+                list.add(rawList[i]);
+            }
+
+
+            // Sort by name
+            Collections.sort(list, new Comparator<String>() {
+                public int compare(String o1, String o2) {
+                    if (o1 == o2) return 0;
+                    if (o1 == null) return -1;
+                    if (o2 == null) return 1;
+                    return o1.compareTo(o2);
+                }
+            });
+
+            int count = (list != null) ? list.size() : 0;
+            for (int p = 0; p < count; p++) {
+                String lib = list.get(p);
+                System.out.print("library:");
+                System.out.println(lib);
             }
         } catch (RemoteException e) {
             System.err.println(e.toString());
@@ -882,11 +937,12 @@ public final class Pm {
 
     private static void showUsage() {
         System.err.println("usage: pm [list|path|install|uninstall]");
-        System.err.println("       pm list packages [-f]");
+        System.err.println("       pm list packages [-f] [-d] [-e] [-u] [FILTER]");
         System.err.println("       pm list permission-groups");
         System.err.println("       pm list permissions [-g] [-f] [-d] [-u] [GROUP]");
         System.err.println("       pm list instrumentation [-f] [TARGET-PACKAGE]");
         System.err.println("       pm list features");
+        System.err.println("       pm list libraries");
         System.err.println("       pm path PACKAGE");
         System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] [-s] [-f] PATH");
         System.err.println("       pm uninstall [-k] PACKAGE");
@@ -894,8 +950,12 @@ public final class Pm {
         System.err.println("       pm disable PACKAGE_OR_COMPONENT");
         System.err.println("       pm setInstallLocation [0/auto] [1/internal] [2/external]");
         System.err.println("");
-        System.err.println("The list packages command prints all packages.  Options:");
+        System.err.println("The list packages command prints all packages, optionally only");
+        System.err.println("those whose package name contains the text in FILTER.  Options:");
         System.err.println("  -f: see their associated file.");
+        System.err.println("  -d: filter to include disbled packages.");
+        System.err.println("  -e: filter to include enabled packages.");
+        System.err.println("  -u: also include uninstalled packages.");
         System.err.println("");
         System.err.println("The list permission-groups command prints all known");
         System.err.println("permission groups.");

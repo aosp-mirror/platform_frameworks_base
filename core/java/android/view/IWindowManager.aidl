@@ -186,5 +186,5 @@ interface IWindowManager
 	/**
 	 * Create a screenshot of the applications currently displayed.
 	 */
-	Bitmap screenshotApplications(int maxWidth, int maxHeight);
+	Bitmap screenshotApplications(IBinder appToken, int maxWidth, int maxHeight);
 }

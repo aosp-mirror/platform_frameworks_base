@@ -38,11 +38,12 @@ import java.io.IOException;
  * permission.
  */
 public final class Ndef extends BasicTagTechnology {
-    public static final int NDEF_MODE_READ_ONCE = 1;
-    public static final int NDEF_MODE_READ_ONLY = 2;
-    public static final int NDEF_MODE_WRITE_ONCE = 3;
-    public static final int NDEF_MODE_WRITE_MANY = 4;
-    public static final int NDEF_MODE_UNKNOWN = 5;
+    /** @hide */
+    public static final int NDEF_MODE_READ_ONLY = 1;
+    /** @hide */
+    public static final int NDEF_MODE_READ_WRITE = 2;
+    /** @hide */
+    public static final int NDEF_MODE_UNKNOWN = 3;
 
     /** @hide */
     public static final String EXTRA_NDEF_MSG = "ndefmsg";
@@ -50,7 +51,12 @@ public final class Ndef extends BasicTagTechnology {
     /** @hide */
     public static final String EXTRA_NDEF_MAXLENGTH = "ndefmaxlength";
 
-    private final int maxNdefSize;
+    /** @hide */
+    public static final String EXTRA_NDEF_CARDSTATE = "ndefcardstate";
+
+    private final int mMaxNdefSize;
+    private final int mCardState;
+    private final NdefMessage mNdefMsg;
 
     /**
      * Internal constructor, to be used by NfcAdapter
@@ -59,37 +65,21 @@ public final class Ndef extends BasicTagTechnology {
     public Ndef(NfcAdapter adapter, Tag tag, int tech, Bundle extras) throws RemoteException {
         super(adapter, tag, tech);
         if (extras != null) {
-            maxNdefSize = extras.getInt(EXTRA_NDEF_MAXLENGTH);
+            mMaxNdefSize = extras.getInt(EXTRA_NDEF_MAXLENGTH);
+            mCardState = extras.getInt(EXTRA_NDEF_CARDSTATE);
+            mNdefMsg = extras.getParcelable(EXTRA_NDEF_MSG);
         } else {
-            maxNdefSize = 0;  //TODO: throw exception
+            throw new NullPointerException("NDEF tech extras are null.");
         }
+
     }
 
     /**
      * Get the primary NDEF message on this tag. This data is read at discovery time
      * and does not require a connection.
      */
-    public NdefMessage getNdefMessage() throws IOException, FormatException {
-        try {
-            int serviceHandle = mTag.getServiceHandle();
-            NdefMessage msg = mTagService.read(serviceHandle);
-            if (msg == null) {
-                int errorCode = mTagService.getLastError(serviceHandle);
-                switch (errorCode) {
-                    case ErrorCodes.ERROR_IO:
-                        throw new IOException();
-                    case ErrorCodes.ERROR_INVALID_PARAM:
-                        throw new FormatException();
-                    default:
-                        // Should not happen
-                        throw new IOException();
-                }
-            }
-            return msg;
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            return null;
-        }
+    public NdefMessage getCachedNdefMessage() {
+        return mNdefMsg;
     }
 
     /**
@@ -104,45 +94,57 @@ public final class Ndef extends BasicTagTechnology {
     /**
      * Get maximum NDEF message size in bytes
      */
-    public int getSize() {
-        return maxNdefSize;
+    public int getMaxSize() {
+        return mMaxNdefSize;
     }
 
     /**
-     * Read/Write mode hint.
-     * Provides a hint if further reads or writes are likely to succeed.
+     * Provides a hint on whether writes are likely to succeed.
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     * @return one of NDEF_MODE
-     * @throws IOException if the target is lost or connection closed
+     * @return true if write is likely to succeed
      */
-    public int getModeHint() throws IOException {
-        try {
-            int result = mTagService.getModeHint(mTag.getServiceHandle());
-            if (ErrorCodes.isError(result)) {
-                switch (result) {
-                    case ErrorCodes.ERROR_IO:
-                        throw new IOException();
-                    default:
-                        // Should not happen
-                        throw new IOException();
-                }
-            }
-            return result;
-
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            return NDEF_MODE_UNKNOWN;
-        }
+    public boolean isWritable() {
+        return (mCardState == NDEF_MODE_READ_WRITE);
     }
 
     // Methods that require connect()
+    /**
+     * Get the primary NDEF message on this tag. This data is read actively
+     * and requires a connection.
+     */
+    public NdefMessage getNdefMessage() throws IOException, FormatException {
+        try {
+            int serviceHandle = mTag.getServiceHandle();
+            if (mTagService.isNdef(serviceHandle)) {
+                NdefMessage msg = mTagService.ndefRead(serviceHandle);
+                if (msg == null) {
+                    int errorCode = mTagService.getLastError(serviceHandle);
+                    switch (errorCode) {
+                        case ErrorCodes.ERROR_IO:
+                            throw new IOException();
+                        case ErrorCodes.ERROR_INVALID_PARAM:
+                            throw new FormatException();
+                        default:
+                            // Should not happen
+                            throw new IOException();
+                    }
+                }
+                return msg;
+            } else {
+                return null;
+            }
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return null;
+        }
+    }
     /**
      * Overwrite the primary NDEF message
      * @throws IOException
      */
     public void writeNdefMessage(NdefMessage msg) throws IOException, FormatException {
         try {
-            int errorCode = mTagService.write(mTag.getServiceHandle(), msg);
+            int errorCode = mTagService.ndefWrite(mTag.getServiceHandle(), msg);
             switch (errorCode) {
                 case ErrorCodes.SUCCESS:
                     break;
@@ -179,7 +181,7 @@ public final class Ndef extends BasicTagTechnology {
      */
     public boolean makeReadonly() throws IOException {
         try {
-            int errorCode = mTagService.makeReadOnly(mTag.getServiceHandle());
+            int errorCode = mTagService.ndefMakeReadOnly(mTag.getServiceHandle());
             switch (errorCode) {
                 case ErrorCodes.SUCCESS:
                     return true;
@@ -203,6 +205,11 @@ public final class Ndef extends BasicTagTechnology {
      * For NFC Forum Type 1 and 2 only.
      */
     public void makeLowLevelReadonly() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public byte[] transceive(byte[] data) {
         throw new UnsupportedOperationException();
     }
 }

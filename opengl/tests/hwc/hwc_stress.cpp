@@ -120,14 +120,21 @@ const float maxSizeRatio = 1.3;  // Graphic buffers can be upto this munch
                                  // larger than the default screen size
 const unsigned int passesPerGroup = 10; // A group of passes all use the same
                                         // graphic buffers
-const float rareRatio = 0.1; // Ratio at which rare conditions are produced.
+
+// Ratios at which rare and frequent conditions should be produced
+const float rareRatio = 0.1;
+const float freqRatio = 0.9;
 
 // Defaults for command-line options
 const bool defaultVerbose = false;
 const unsigned int defaultStartPass = 0;
 const unsigned int defaultEndPass = 99999;
 const unsigned int defaultPerPassNumSet = 10;
-const float defaultPerPassDelay = 0.1;
+const float defaultPerSetDelay = 0.0; // Default delay after each set
+                                      // operation.  Default delay of
+                                      // zero used so as to perform the
+                                      // the set operations as quickly
+                                      // as possible.
 const float defaultEndDelay = 2.0; // Default delay between completion of
                                    // final pass and restart of framework
 const float defaultDuration = FLT_MAX; // A fairly long time, so that
@@ -139,7 +146,7 @@ static bool verbose = defaultVerbose;
 static unsigned int startPass = defaultStartPass;
 static unsigned int endPass = defaultEndPass;
 static unsigned int numSet = defaultPerPassNumSet;
-static float perSetDelay = defaultPerPassDelay;
+static float perSetDelay = defaultPerSetDelay;
 static float endDelay = defaultEndDelay;
 static float duration = defaultDuration;
 
@@ -201,12 +208,12 @@ static const struct {
 } graphicFormat[] = {
     {HAL_PIXEL_FORMAT_RGBA_8888, "RGBA8888"},
     {HAL_PIXEL_FORMAT_RGBX_8888, "RGBX8888"},
-//    {HAL_PIXEL_FORMAT_RGB_888, "RGB888"},  // Known issue: 3198458
+    {HAL_PIXEL_FORMAT_RGB_888, "RGB888"},
     {HAL_PIXEL_FORMAT_RGB_565, "RGB565"},
     {HAL_PIXEL_FORMAT_BGRA_8888, "BGRA8888"},
     {HAL_PIXEL_FORMAT_RGBA_5551, "RGBA5551"},
     {HAL_PIXEL_FORMAT_RGBA_4444, "RGBA4444"},
-//    {HAL_PIXEL_FORMAT_YV12, "YV12"}, // Currently not supported by HWC
+    {HAL_PIXEL_FORMAT_YV12, "YV12"},
 };
 const unsigned int blendingOps[] = {
     HWC_BLENDING_NONE,
@@ -505,6 +512,28 @@ main(int argc, char *argv[])
                 + testRandMod(width - layer->displayFrame.left) + 1;
             layer->displayFrame.bottom = layer->displayFrame.top
                 + testRandMod(height - layer->displayFrame.top) + 1;
+
+            // Increase the frequency that a scale factor of 1.0 from
+            // the sourceCrop to displayFrame occurs.  This is the
+            // most common scale factor used by applications and would
+            // be rarely produced by this stress test without this
+            // logic.
+            if (testRandFract() <= freqRatio) {
+                // Only change to scale factor to 1.0 if both the
+                // width and height will fit.
+                int sourceWidth = layer->sourceCrop.right
+                                  - layer->sourceCrop.left;
+                int sourceHeight = layer->sourceCrop.bottom
+                                   - layer->sourceCrop.top;
+                if (((layer->displayFrame.left + sourceWidth) <= width)
+                    && ((layer->displayFrame.top + sourceHeight) <= height)) {
+                    layer->displayFrame.right = layer->displayFrame.left
+                                                + sourceWidth;
+                    layer->displayFrame.bottom = layer->displayFrame.top
+                                                 + sourceHeight;
+                }
+            }
+
             layer->visibleRegionScreen.numRects = 1;
             layer->visibleRegionScreen.rects = &layer->displayFrame;
         }
@@ -995,6 +1024,7 @@ void init(void)
  */
 void initFrames(unsigned int seed)
 {
+    int rv;
     const size_t maxRows = 5;
     const size_t minCols = 2;  // Need at least double buffering
     const size_t maxCols = 4;  // One more than triple buffering
@@ -1026,6 +1056,13 @@ void initFrames(unsigned int seed)
             float transp = testRandFract();
 
             frames[row][col] = new GraphicBuffer(w, h, format, texUsage);
+            if ((rv = frames[row][col]->initCheck()) != NO_ERROR) {
+                testPrintE("GraphicBuffer initCheck failed, rv: %i", rv);
+                testPrintE("  frame %u width: %u height: %u format: %u %s",
+                           row, w, h, format, graphicFormat2str(format));
+                exit(80);
+            }
+
             fillColor(frames[row][col].get(), color, transp);
             if (verbose) {
                 testPrintI("    buf: %p handle: %p color: <%f, %f, %f> "
@@ -1097,6 +1134,15 @@ void displayList(hwc_layer_list_t *list)
                    list->hwLayers[layer].displayFrame.top,
                    list->hwLayers[layer].displayFrame.right,
                    list->hwLayers[layer].displayFrame.bottom);
+        testPrintI("      scaleFactor: [%f %f]",
+                   (float) (list->hwLayers[layer].displayFrame.right
+                            - list->hwLayers[layer].displayFrame.left)
+                       / (float) (list->hwLayers[layer].sourceCrop.right
+                            - list->hwLayers[layer].sourceCrop.left),
+                   (float) (list->hwLayers[layer].displayFrame.bottom
+                            - list->hwLayers[layer].displayFrame.top)
+                       / (float) (list->hwLayers[layer].sourceCrop.bottom
+                            - list->hwLayers[layer].sourceCrop.top));
     }
 }
 

@@ -97,6 +97,8 @@ public class BluetoothService extends IBluetooth.Stub {
     private boolean mRestart = false;  // need to call enable() after disable()
     private boolean mIsDiscovering;
     private boolean mTetheringOn;
+    private int[] mAdapterSdpUuids;
+    private int[] mAdapterSdpHandles;
 
     private BluetoothAdapter mAdapter;  // constant after init()
     private final BondState mBondState = new BondState();  // local cache of bondings
@@ -112,11 +114,10 @@ public class BluetoothService extends IBluetooth.Stub {
     private static final String SHARED_PREFERENCE_DOCK_ADDRESS = "dock_bluetooth_address";
     private static final String SHARED_PREFERENCES_NAME = "bluetooth_service_settings";
 
-    private static final int MESSAGE_REGISTER_SDP_RECORDS = 1;
-    private static final int MESSAGE_FINISH_DISABLE = 2;
-    private static final int MESSAGE_UUID_INTENT = 3;
-    private static final int MESSAGE_DISCOVERABLE_TIMEOUT = 4;
-    private static final int MESSAGE_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY = 5;
+    private static final int MESSAGE_FINISH_DISABLE = 1;
+    private static final int MESSAGE_UUID_INTENT = 2;
+    private static final int MESSAGE_DISCOVERABLE_TIMEOUT = 3;
+    private static final int MESSAGE_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY = 4;
 
     // The time (in millisecs) to delay the pairing attempt after the first
     // auto pairing attempt fails. We use an exponential delay with
@@ -378,8 +379,10 @@ public class BluetoothService extends IBluetooth.Stub {
         if (mEnableThread != null && mEnableThread.isAlive()) {
             return false;
         }
+
         setBluetoothState(BluetoothAdapter.STATE_TURNING_OFF);
-        mHandler.removeMessages(MESSAGE_REGISTER_SDP_RECORDS);
+
+        if (mAdapterSdpHandles != null) removeReservedServiceRecordsNative(mAdapterSdpHandles);
         setBluetoothTetheringNative(false, BluetoothPan.NAP_ROLE, BluetoothPan.NAP_BRIDGE);
 
         // Allow 3 seconds for profiles to gracefully disconnect
@@ -415,6 +418,11 @@ public class BluetoothService extends IBluetooth.Stub {
         for (String address : mBondState.listInState(BluetoothDevice.BOND_BONDING)) {
             mBondState.setBondState(address, BluetoothDevice.BOND_NONE,
                                     BluetoothDevice.UNBOND_REASON_AUTH_CANCELED);
+        }
+
+        // Stop the profile state machine for bonded devices.
+        for (String address : mBondState.listInState(BluetoothDevice.BOND_BONDED)) {
+            removeProfileState(address);
         }
 
         // update mode
@@ -516,43 +524,6 @@ public class BluetoothService extends IBluetooth.Stub {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-            case MESSAGE_REGISTER_SDP_RECORDS:
-                if (!isEnabledInternal()) {
-                    return;
-                }
-                // SystemService.start() forks sdptool to register service
-                // records. It can fail to register some records if it is
-                // forked multiple times in a row, probably because there is
-                // some race in sdptool or bluez when operated in parallel.
-                // As a workaround, delay 500ms between each fork of sdptool.
-                // TODO: Don't fork sdptool in order to register service
-                // records, use a DBUS call instead.
-                switch (msg.arg1) {
-                case 1:
-                    Log.d(TAG, "Registering hfag record");
-                    SystemService.start("hfag");
-                    mHandler.sendMessageDelayed(
-                            mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 2, -1), 500);
-                    break;
-                case 2:
-                    Log.d(TAG, "Registering hsag record");
-                    SystemService.start("hsag");
-                    mHandler.sendMessageDelayed(
-                            mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 3, -1), 500);
-                    break;
-                case 3:
-                    Log.d(TAG, "Registering pbap record");
-                    SystemService.start("pbap");
-                    mHandler.sendMessageDelayed(
-                        mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 4, -1), 500);
-
-                    break;
-                case 4:
-                    Log.d(TAG, "Registering opush record");
-                    SystemService.start("opush");
-                    break;
-                }
-                break;
             case MESSAGE_FINISH_DISABLE:
                 finishDisable(msg.arg1 != 0);
                 break;
@@ -625,23 +596,40 @@ public class BluetoothService extends IBluetooth.Stub {
                 if (mSaveSetting) {
                     persistBluetoothOnSetting(true);
                 }
+                //Register SDP records.
+                if (mContext.getResources().
+                        getBoolean(com.android.internal.R.bool.config_voice_capable)) {
+                     int[] uuids = {
+                        BluetoothUuid.getServiceIdentifierFromParcelUuid(
+                            BluetoothUuid.Handsfree_AG),
+                        BluetoothUuid.getServiceIdentifierFromParcelUuid(
+                            BluetoothUuid.HSP_AG),
+                        BluetoothUuid.getServiceIdentifierFromParcelUuid(
+                             BluetoothUuid.PBAP_PSE),
+                        BluetoothUuid.getServiceIdentifierFromParcelUuid(
+                             BluetoothUuid.ObexObjectPush),
+                        };
+                     mAdapterSdpUuids = uuids;
+
+                } else {
+                     int[] uuids = {
+                         BluetoothUuid.getServiceIdentifierFromParcelUuid(
+                             BluetoothUuid.HSP_AG),
+                         BluetoothUuid.getServiceIdentifierFromParcelUuid(
+                             BluetoothUuid.PBAP_PSE),
+                         BluetoothUuid.getServiceIdentifierFromParcelUuid(
+                             BluetoothUuid.ObexObjectPush),
+                         };
+                      mAdapterSdpUuids = uuids;
+                }
+
+                mAdapterSdpHandles = addReservedServiceRecordsNative(mAdapterSdpUuids);
+                setBluetoothTetheringNative(true, BluetoothPan.NAP_ROLE, BluetoothPan.NAP_BRIDGE);
+
                 mIsDiscovering = false;
                 mBondState.readAutoPairingData();
                 mBondState.loadBondState();
                 initProfileState();
-
-                //Register SDP records.
-                if (mContext.getResources().
-                        getBoolean(com.android.internal.R.bool.config_voice_capable)) {
-                    mHandler.sendMessageDelayed(
-                        mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 1, -1), 3000);
-                } else {
-                    // Register only OPP.
-                    mHandler.sendMessageDelayed(
-                        mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 4, -1), 3000);
-                }
-                setBluetoothTetheringNative(true, BluetoothPan.NAP_ROLE, BluetoothPan.NAP_BRIDGE);
-
 
                 // Log bluetooth on to battery stats.
                 long ident = Binder.clearCallingIdentity();
@@ -2731,10 +2719,9 @@ public class BluetoothService extends IBluetooth.Stub {
         for (String path : bonds) {
             String address = getAddressFromObjectPath(path);
             BluetoothDeviceProfileState state = addProfileState(address);
-            // Allow 8 secs for SDP records to get registered.
             Message msg = new Message();
             msg.what = BluetoothDeviceProfileState.AUTO_CONNECT_PROFILES;
-            state.sendMessageDelayed(msg, 8000);
+            state.sendMessage(msg);
         }
     }
 
@@ -2908,4 +2895,7 @@ public class BluetoothService extends IBluetooth.Stub {
     private native boolean setBluetoothTetheringNative(boolean value, String nap, String bridge);
     private native boolean connectPanDeviceNative(String path, String srcRole, String dstRole);
     private native boolean disconnectPanDeviceNative(String path);
+
+    private native int[] addReservedServiceRecordsNative(int[] uuuids);
+    private native boolean removeReservedServiceRecordsNative(int[] handles);
 }

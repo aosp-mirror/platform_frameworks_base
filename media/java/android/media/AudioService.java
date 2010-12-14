@@ -752,6 +752,10 @@ public class AudioService extends IAudioService.Stub {
                 mode = mMode;
             }
             if (mode != mMode) {
+
+                // automatically handle audio focus for mode changes
+                handleFocusForCalls(mMode, mode);
+
                 if (AudioSystem.setPhoneState(mode) == AudioSystem.AUDIO_STATUS_OK) {
                     mMode = mode;
 
@@ -804,6 +808,38 @@ public class AudioService extends IAudioService.Stub {
             int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
             int index = mStreamStates[STREAM_VOLUME_ALIAS[streamType]].mIndex;
             setStreamVolumeInt(STREAM_VOLUME_ALIAS[streamType], index, true, false);
+        }
+    }
+
+    /** pre-condition: oldMode != newMode */
+    private void handleFocusForCalls(int oldMode, int newMode) {
+        // if ringing
+        if (newMode == AudioSystem.MODE_RINGTONE) {
+            // if not ringing silently
+            int ringVolume = AudioService.this.getStreamVolume(AudioManager.STREAM_RING);
+            if (ringVolume > 0) {
+                // request audio focus for the communication focus entry
+                requestAudioFocus(AudioManager.STREAM_RING,
+                        AudioManager.AUDIOFOCUS_GAIN_TRANSIENT,
+                        null, null /* both allowed to be null only for this clientId */,
+                        IN_VOICE_COMM_FOCUS_ID /*clientId*/);
+
+            }
+        }
+        // if entering call
+        else if ((newMode == AudioSystem.MODE_IN_CALL)
+                || (newMode == AudioSystem.MODE_IN_COMMUNICATION)) {
+            // request audio focus for the communication focus entry
+            // (it's ok if focus was already requested during ringing)
+            requestAudioFocus(AudioManager.STREAM_RING,
+                    AudioManager.AUDIOFOCUS_GAIN_TRANSIENT,
+                    null, null /* both allowed to be null only for this clientId */,
+                    IN_VOICE_COMM_FOCUS_ID /*clientId*/);
+        }
+        // if exiting call
+        else if (newMode == AudioSystem.MODE_NORMAL) {
+            // abandon audio focus for communication focus entry
+            abandonAudioFocus(null, IN_VOICE_COMM_FOCUS_ID);
         }
     }
 
@@ -2093,28 +2129,11 @@ public class AudioService extends IAudioService.Stub {
                 synchronized(mRingingLock) {
                     mIsRinging = true;
                 }
-                int ringVolume = AudioService.this.getStreamVolume(AudioManager.STREAM_RING);
-                if (ringVolume > 0) {
-                    requestAudioFocus(AudioManager.STREAM_RING,
-                                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT,
-                                null, null /* both allowed to be null only for this clientId */,
-                                IN_VOICE_COMM_FOCUS_ID /*clientId*/);
-                }
-            } else if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
-                //Log.v(TAG, " CALL_STATE_OFFHOOK");
+            } else if ((state == TelephonyManager.CALL_STATE_OFFHOOK)
+                    || (state == TelephonyManager.CALL_STATE_IDLE)) {
                 synchronized(mRingingLock) {
                     mIsRinging = false;
                 }
-                requestAudioFocus(AudioManager.STREAM_RING,
-                        AudioManager.AUDIOFOCUS_GAIN_TRANSIENT,
-                        null, null /* both allowed to be null only for this clientId */,
-                        IN_VOICE_COMM_FOCUS_ID /*clientId*/);
-            } else if (state == TelephonyManager.CALL_STATE_IDLE) {
-                //Log.v(TAG, " CALL_STATE_IDLE");
-                synchronized(mRingingLock) {
-                    mIsRinging = false;
-                }
-                abandonAudioFocus(null, IN_VOICE_COMM_FOCUS_ID);
             }
         }
     };

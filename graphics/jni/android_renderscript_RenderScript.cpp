@@ -377,8 +377,8 @@ nTypeGetNativeData(JNIEnv *_env, jobject _this, RsContext con, jint id, jintArra
 static jint
 nAllocationCreateTyped(JNIEnv *_env, jobject _this, RsContext con, jint type, jint mips, jint usage)
 {
-    LOG_API("nAllocationCreateTyped, con(%p), type(%p), mip(%i), usage(%i)", con, (RsElement)type, mip, usage);
-    return (jint) rsaAllocationCreateTyped(con, (RsType)type, (RsAllocationMipmapGenerationControl)mips, (uint32_t)usage);
+    LOG_API("nAllocationCreateTyped, con(%p), type(%p), mip(%i), usage(%i)", con, (RsElement)type, mips, usage);
+    return (jint) rsaAllocationCreateTyped(con, (RsType)type, (RsAllocationMipmapControl)mips, (uint32_t)usage);
 }
 
 static void
@@ -411,7 +411,7 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint typ
 
     bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
-    jint id = (jint)rsaAllocationCreateFromBitmap(con, (RsType)type, (RsAllocationMipmapGenerationControl)mip, ptr, usage);
+    jint id = (jint)rsaAllocationCreateFromBitmap(con, (RsType)type, (RsAllocationMipmapControl)mip, ptr, usage);
     bitmap.unlockPixels();
     return id;
 }
@@ -425,7 +425,7 @@ nAllocationCubeCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint
 
     bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
-    jint id = (jint)rsaAllocationCubeCreateFromBitmap(con, (RsType)type, (RsAllocationMipmapGenerationControl)mip, ptr, usage);
+    jint id = (jint)rsaAllocationCubeCreateFromBitmap(con, (RsType)type, (RsAllocationMipmapControl)mip, ptr, usage);
     bitmap.unlockPixels();
     return id;
 }
@@ -1245,7 +1245,7 @@ static JNINativeMethod methods[] = {
 {"rsnTypeCreate",                    "(IIIIIZZ)I",                            (void*)nTypeCreate },
 {"rsnTypeGetNativeData",             "(II[I)V",                               (void*)nTypeGetNativeData },
 
-{"rsnAllocationCreateTyped",         "(III)I",                                (void*)nAllocationCreateTyped },
+{"rsnAllocationCreateTyped",         "(IIII)I",                               (void*)nAllocationCreateTyped },
 {"rsnAllocationCreateFromBitmap",    "(IIILandroid/graphics/Bitmap;I)I",      (void*)nAllocationCreateFromBitmap },
 {"rsnAllocationCubeCreateFromBitmap","(IIILandroid/graphics/Bitmap;I)I",      (void*)nAllocationCubeCreateFromBitmap },
 

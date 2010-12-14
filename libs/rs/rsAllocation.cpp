@@ -45,17 +45,6 @@ Allocation::Allocation(Context *rsc, const Type *type, uint32_t usages) : Object
     }
 }
 
-Allocation::Allocation(Context *rsc, const Type *type, void *bmp,
-                       void *callbackData, RsBitmapCallback_t callback)
-                       : ObjectBase(rsc) {
-    init(rsc, type);
-
-    mUsageFlags = RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE;
-
-    mPtr = bmp;
-    mUserBitmapCallback = callback;
-    mUserBitmapCallbackData = callbackData;
-}
 
 void Allocation::init(Context *rsc, const Type *type) {
     mPtr = NULL;
@@ -67,10 +56,10 @@ void Allocation::init(Context *rsc, const Type *type) {
 
     mReadWriteRatio = 0;
     mUpdateSize = 0;
+    mUsageFlags = 0;
+    mMipmapControl = RS_ALLOCATION_MIPMAP_NONE;
 
-    mIsTexture = false;
     mTextureID = 0;
-    mIsVertexBuffer = false;
     mBufferID = 0;
     mUploadDefered = false;
 
@@ -121,21 +110,21 @@ bool Allocation::fixAllocation() {
 
 void Allocation::deferedUploadToTexture(const Context *rsc, bool genMipmap, uint32_t lodOffset) {
     rsAssert(lodOffset < mType->getLODCount());
-    mIsTexture = true;
+    mUsageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE;
     mTextureLOD = lodOffset;
     mUploadDefered = true;
     mTextureGenMipmap = !mType->getDimLOD() && genMipmap;
 }
 
 uint32_t Allocation::getGLTarget() const {
-    if (mIsTexture) {
+    if (getIsTexture()) {
         if (mType->getDimFaces()) {
             return GL_TEXTURE_CUBE_MAP;
         } else {
             return GL_TEXTURE_2D;
         }
     }
-    if (mIsVertexBuffer) {
+    if (getIsBufferObject()) {
         return GL_ARRAY_BUFFER;
     }
     return 0;
@@ -144,10 +133,10 @@ uint32_t Allocation::getGLTarget() const {
 void Allocation::syncAll(Context *rsc, RsAllocationUsageType src) {
     rsAssert(src == RS_ALLOCATION_USAGE_SCRIPT);
 
-    if (mIsTexture) {
+    if (getIsTexture()) {
         uploadToTexture(rsc);
     }
-    if (mIsVertexBuffer) {
+    if (getIsBufferObject()) {
         uploadToBufferObject(rsc);
     }
 
@@ -156,7 +145,7 @@ void Allocation::syncAll(Context *rsc, RsAllocationUsageType src) {
 
 void Allocation::uploadToTexture(const Context *rsc) {
 
-    mIsTexture = true;
+    mUsageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE;
     GLenum type = mType->getElement()->getComponent().getGLType();
     GLenum format = mType->getElement()->getComponent().getGLFormat();
 
@@ -257,7 +246,7 @@ void Allocation::uploadCubeTexture(bool isFirstUpload) {
 }
 
 void Allocation::deferedUploadToBufferObject(const Context *rsc) {
-    mIsVertexBuffer = true;
+    mUsageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_VERTEX;
     mUploadDefered = true;
 }
 
@@ -265,7 +254,7 @@ void Allocation::uploadToBufferObject(const Context *rsc) {
     rsAssert(!mType->getDimY());
     rsAssert(!mType->getDimZ());
 
-    mIsVertexBuffer = true;
+    mUsageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_VERTEX;
 
     if (!mBufferID) {
         glGenBuffers(1, &mBufferID);
@@ -470,8 +459,8 @@ void Allocation::dumpLOGV(const char *prefix) const {
     LOGV("%s allocation ptr=%p mCpuWrite=%i, mCpuRead=%i, mGpuWrite=%i, mGpuRead=%i",
           prefix, mPtr, mCpuWrite, mCpuRead, mGpuWrite, mGpuRead);
 
-    LOGV("%s allocation mIsTexture=%i mTextureID=%i, mIsVertexBuffer=%i, mBufferID=%i",
-          prefix, mIsTexture, mTextureID, mIsVertexBuffer, mBufferID);
+    LOGV("%s allocation mUsageFlags=0x04%x, mMipmapControl=0x%04x, mTextureID=%i, mBufferID=%i",
+          prefix, mUsageFlags, mMipmapControl, mTextureID, mBufferID);
 }
 
 void Allocation::serialize(OStream *stream) const {
@@ -517,7 +506,7 @@ Allocation *Allocation::createFromStream(Context *rsc, IStream *stream) {
         return NULL;
     }
 
-    Allocation *alloc = new Allocation(rsc, type, RS_ALLOCATION_USAGE_ALL);
+    Allocation *alloc = new Allocation(rsc, type, RS_ALLOCATION_USAGE_SCRIPT);
     alloc->setName(name.string(), name.size());
 
     // Read in all of our allocation data
@@ -672,95 +661,11 @@ static void mip(const Adapter2D &out, const Adapter2D &in) {
     }
 }
 
-typedef void (*ElementConverter_t)(void *dst, const void *src, uint32_t count);
-
-static void elementConverter_cpy_16(void *dst, const void *src, uint32_t count) {
-    memcpy(dst, src, count * 2);
-}
-static void elementConverter_cpy_8(void *dst, const void *src, uint32_t count) {
-    memcpy(dst, src, count);
-}
-static void elementConverter_cpy_32(void *dst, const void *src, uint32_t count) {
-    memcpy(dst, src, count * 4);
-}
-
-static void elementConverter_888_to_565(void *dst, const void *src, uint32_t count) {
-    uint16_t *d = static_cast<uint16_t *>(dst);
-    const uint8_t *s = static_cast<const uint8_t *>(src);
-
-    while (count--) {
-        *d = rs888to565(s[0], s[1], s[2]);
-        d++;
-        s+= 3;
-    }
-}
-
-static void elementConverter_8888_to_565(void *dst, const void *src, uint32_t count) {
-    uint16_t *d = static_cast<uint16_t *>(dst);
-    const uint8_t *s = static_cast<const uint8_t *>(src);
-
-    while (count--) {
-        *d = rs888to565(s[0], s[1], s[2]);
-        d++;
-        s+= 4;
-    }
-}
-
-static ElementConverter_t pickConverter(const Element *dst, const Element *src) {
-    GLenum srcGLType = src->getComponent().getGLType();
-    GLenum srcGLFmt = src->getComponent().getGLFormat();
-    GLenum dstGLType = dst->getComponent().getGLType();
-    GLenum dstGLFmt = dst->getComponent().getGLFormat();
-
-    if (srcGLFmt == dstGLFmt && srcGLType == dstGLType) {
-        switch (dst->getSizeBytes()) {
-        case 4:
-            return elementConverter_cpy_32;
-        case 2:
-            return elementConverter_cpy_16;
-        case 1:
-            return elementConverter_cpy_8;
-        }
-    }
-
-    if (srcGLType == GL_UNSIGNED_BYTE &&
-        srcGLFmt == GL_RGB &&
-        dstGLType == GL_UNSIGNED_SHORT_5_6_5 &&
-        dstGLFmt == GL_RGB) {
-
-        return elementConverter_888_to_565;
-    }
-
-    if (srcGLType == GL_UNSIGNED_BYTE &&
-        srcGLFmt == GL_RGBA &&
-        dstGLType == GL_UNSIGNED_SHORT_5_6_5 &&
-        dstGLFmt == GL_RGB) {
-
-        return elementConverter_8888_to_565;
-    }
-
-    LOGE("pickConverter, unsuported combo, src %p,  dst %p", src, dst);
-    LOGE("pickConverter, srcGLType = %x,  srcGLFmt = %x", srcGLType, srcGLFmt);
-    LOGE("pickConverter, dstGLType = %x,  dstGLFmt = %x", dstGLType, dstGLFmt);
-    src->dumpLOGV("SRC ");
-    dst->dumpLOGV("DST ");
-    return 0;
-}
-
 #ifndef ANDROID_RS_BUILD_FOR_HOST
 
 void rsi_AllocationSyncAll(Context *rsc, RsAllocation va, RsAllocationUsageType src) {
     Allocation *a = static_cast<Allocation *>(va);
     a->syncAll(rsc, src);
-}
-
-RsAllocation rsi_AllocationCreateBitmapRef(Context *rsc, RsType vtype,
-                                           void *bmp, void *callbackData,
-                                           RsBitmapCallback_t callback) {
-    const Type * type = static_cast<const Type *>(vtype);
-    Allocation * alloc = new Allocation(rsc, type, bmp, callbackData, callback);
-    alloc->incUserRef();
-    return alloc;
 }
 
 void rsi_AllocationCopyFromBitmap(Context *rsc, RsAllocation va, const void *data, size_t dataLen) {
@@ -854,7 +759,7 @@ const void * rsaAllocationGetType(RsContext con, RsAllocation va) {
 }
 
 RsAllocation rsaAllocationCreateTyped(RsContext con, RsType vtype,
-                                      RsAllocationMipmapGenerationControl mips,
+                                      RsAllocationMipmapControl mips,
                                       uint32_t usages) {
     Context *rsc = static_cast<Context *>(con);
     Allocation * alloc = new Allocation(rsc, static_cast<Type *>(vtype), usages);
@@ -864,7 +769,7 @@ RsAllocation rsaAllocationCreateTyped(RsContext con, RsType vtype,
 
 
 RsAllocation rsaAllocationCreateFromBitmap(RsContext con, RsType vtype,
-                                           RsAllocationMipmapGenerationControl mips,
+                                           RsAllocationMipmapControl mips,
                                            const void *data, uint32_t usages) {
     Context *rsc = static_cast<Context *>(con);
     Type *t = static_cast<Type *>(vtype);
@@ -877,7 +782,7 @@ RsAllocation rsaAllocationCreateFromBitmap(RsContext con, RsType vtype,
     }
 
     memcpy(texAlloc->getPtr(), data, t->getDimX() * t->getDimY() * t->getElementSizeBytes());
-    if (mips == RS_MIPMAP_FULL) {
+    if (mips == RS_ALLOCATION_MIPMAP_FULL) {
         Adapter2D adapt(rsc, texAlloc);
         Adapter2D adapt2(rsc, texAlloc);
         for (uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
@@ -887,11 +792,12 @@ RsAllocation rsaAllocationCreateFromBitmap(RsContext con, RsType vtype,
         }
     }
 
+    texAlloc->deferedUploadToTexture(rsc, false, 0);
     return texAlloc;
 }
 
 RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, RsType vtype,
-                                               RsAllocationMipmapGenerationControl mips,
+                                               RsAllocationMipmapControl mips,
                                                const void *data, uint32_t usages) {
     Context *rsc = static_cast<Context *>(con);
     Type *t = static_cast<Type *>(vtype);
@@ -917,7 +823,7 @@ RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, RsType vtype,
         // Move the data pointer to the next cube face
         sourcePtr += cpySize;
 
-        if (mips == RS_MIPMAP_FULL) {
+        if (mips == RS_ALLOCATION_MIPMAP_FULL) {
             Adapter2D adapt(rsc, texAlloc);
             Adapter2D adapt2(rsc, texAlloc);
             adapt.setFace(face);
@@ -930,5 +836,6 @@ RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, RsType vtype,
         }
     }
 
+    texAlloc->deferedUploadToTexture(rsc, false, 0);
     return texAlloc;
 }

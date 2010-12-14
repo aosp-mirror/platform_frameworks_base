@@ -390,13 +390,37 @@ public class Paint_Delegate {
     }
 
     /*package*/ static float ascent(Paint thisPaint) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        if (delegate == null) {
+            assert false;
+            return 0;
+        }
+
+        if (delegate.mFonts.size() > 0) {
+            java.awt.FontMetrics javaMetrics = delegate.mFonts.get(0).mMetrics;
+            // Android expects negative ascent so we invert the value from Java.
+            return - javaMetrics.getAscent();
+        }
+
+        return 0;
     }
 
     /*package*/ static float descent(Paint thisPaint) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        if (delegate == null) {
+            assert false;
+            return 0;
+        }
+
+        if (delegate.mFonts.size() > 0) {
+            java.awt.FontMetrics javaMetrics = delegate.mFonts.get(0).mMetrics;
+            return javaMetrics.getDescent();
+        }
+
+        return 0;
+
     }
 
     /*package*/ static float getFontMetrics(Paint thisPaint, FontMetrics metrics) {
@@ -407,21 +431,7 @@ public class Paint_Delegate {
             return 0;
         }
 
-        if (delegate.mFonts.size() > 0) {
-            java.awt.FontMetrics javaMetrics = delegate.mFonts.get(0).mMetrics;
-            if (metrics != null) {
-                // Android expects negative ascent so we invert the value from Java.
-                metrics.top = - javaMetrics.getMaxAscent();
-                metrics.ascent = - javaMetrics.getAscent();
-                metrics.descent = javaMetrics.getDescent();
-                metrics.bottom = javaMetrics.getMaxDescent();
-                metrics.leading = javaMetrics.getLeading();
-            }
-
-            return javaMetrics.getHeight();
-        }
-
-        return 0;
+        return delegate.getFontMetrics(metrics);
     }
 
     /*package*/ static int getFontMetricsInt(Paint thisPaint, FontMetricsInt fmi) {
@@ -698,8 +708,14 @@ public class Paint_Delegate {
     }
 
     /*package*/ static float native_getFontMetrics(int native_paint, FontMetrics metrics) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Paint_Delegate delegate = sManager.getDelegate(native_paint);
+        if (delegate == null) {
+            assert false;
+            return 0.f;
+        }
+
+        return delegate.getFontMetrics(metrics);
     }
 
     /*package*/ static int native_getTextWidths(int native_object, char[] text, int index,
@@ -941,8 +957,27 @@ public class Paint_Delegate {
         }
 
         return 0;
-
     }
+
+    private float getFontMetrics(FontMetrics metrics) {
+        if (mFonts.size() > 0) {
+            java.awt.FontMetrics javaMetrics = mFonts.get(0).mMetrics;
+            if (metrics != null) {
+                // Android expects negative ascent so we invert the value from Java.
+                metrics.top = - javaMetrics.getMaxAscent();
+                metrics.ascent = - javaMetrics.getAscent();
+                metrics.descent = javaMetrics.getDescent();
+                metrics.bottom = javaMetrics.getMaxDescent();
+                metrics.leading = javaMetrics.getLeading();
+            }
+
+            return javaMetrics.getHeight();
+        }
+
+        return 0;
+    }
+
+
 
     private static void setFlag(Paint thisPaint, int flagMask, boolean flagValue) {
         // get the delegate from the native int.

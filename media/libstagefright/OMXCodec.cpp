@@ -1426,7 +1426,6 @@ OMXCodec::OMXCodec(
       mSeekTimeUs(-1),
       mSeekMode(ReadOptions::SEEK_CLOSEST_SYNC),
       mTargetTimeUs(-1),
-      mSkipTimeUs(-1),
       mLeftOverBuffer(NULL),
       mPaused(false),
       mNativeWindow(nativeWindow) {
@@ -2030,6 +2029,9 @@ void OMXCodec::on_message(const omx_message &msg) {
 
                 mFilledBuffers.push_back(i);
                 mBufferFilled.signal();
+                if (mIsEncoder) {
+                    sched_yield();
+                }
             }
 
             break;
@@ -2635,15 +2637,13 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
 
     for (;;) {
         MediaBuffer *srcBuffer;
-        MediaSource::ReadOptions options;
-        if (mSkipTimeUs >= 0) {
-            options.setSkipFrame(mSkipTimeUs);
-        }
         if (mSeekTimeUs >= 0) {
             if (mLeftOverBuffer) {
                 mLeftOverBuffer->release();
                 mLeftOverBuffer = NULL;
             }
+
+            MediaSource::ReadOptions options;
             options.setSeekTo(mSeekTimeUs, mSeekMode);
 
             mSeekTimeUs = -1;
@@ -2668,7 +2668,7 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
 
             err = OK;
         } else {
-            err = mSource->read(&srcBuffer, &options);
+            err = mSource->read(&srcBuffer);
         }
 
         if (err != OK) {
@@ -3303,12 +3303,6 @@ status_t OMXCodec::read(
     ReadOptions::SeekMode seekMode;
     if (options && options->getSeekTo(&seekTimeUs, &seekMode)) {
         seeking = true;
-    }
-    int64_t skipTimeUs;
-    if (options && options->getSkipFrame(&skipTimeUs)) {
-        mSkipTimeUs = skipTimeUs;
-    } else {
-        mSkipTimeUs = -1;
     }
 
     if (mInitialBufferSubmit) {

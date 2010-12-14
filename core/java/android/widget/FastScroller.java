@@ -58,11 +58,11 @@ class FastScroller {
 
     private static final int[] ATTRS = new int[] {
         android.R.attr.textColorPrimary,
-        com.android.internal.R.attr.fastScrollThumbDrawable,
-        com.android.internal.R.attr.fastScrollTrackDrawable,
-        com.android.internal.R.attr.fastScrollPreviewBackgroundLeft,
-        com.android.internal.R.attr.fastScrollPreviewBackgroundRight,
-        com.android.internal.R.attr.fastScrollOverlayPosition
+        android.R.attr.fastScrollThumbDrawable,
+        android.R.attr.fastScrollTrackDrawable,
+        android.R.attr.fastScrollPreviewBackgroundLeft,
+        android.R.attr.fastScrollPreviewBackgroundRight,
+        android.R.attr.fastScrollOverlayPosition
     };
 
     private static final int PRIMARY_TEXT_COLOR = 0;
@@ -227,14 +227,13 @@ class FastScroller {
 
     private void init(Context context) {
         // Get both the scrollbar states drawables
-        final Resources res = context.getResources();
         TypedArray ta = context.getTheme().obtainStyledAttributes(ATTRS);
-        useThumbDrawable(context, ta.getDrawable(ta.getIndex(THUMB_DRAWABLE)));
-        mTrackDrawable = ta.getDrawable(ta.getIndex(TRACK_DRAWABLE));
+        useThumbDrawable(context, ta.getDrawable(THUMB_DRAWABLE));
+        mTrackDrawable = ta.getDrawable(TRACK_DRAWABLE);
         
-        mOverlayDrawableLeft = ta.getDrawable(ta.getIndex(PREVIEW_BACKGROUND_LEFT));
-        mOverlayDrawableRight = ta.getDrawable(ta.getIndex(PREVIEW_BACKGROUND_RIGHT));
-        mOverlayPosition = ta.getInt(ta.getIndex(OVERLAY_POSITION), OVERLAY_FLOATING);
+        mOverlayDrawableLeft = ta.getDrawable(PREVIEW_BACKGROUND_LEFT);
+        mOverlayDrawableRight = ta.getDrawable(PREVIEW_BACKGROUND_RIGHT);
+        mOverlayPosition = ta.getInt(OVERLAY_POSITION, OVERLAY_FLOATING);
         
         mScrollCompleted = true;
 
@@ -249,7 +248,7 @@ class FastScroller {
         mPaint.setTextAlign(Paint.Align.CENTER);
         mPaint.setTextSize(mOverlaySize / 2);
 
-        ColorStateList textColor = ta.getColorStateList(ta.getIndex(PRIMARY_TEXT_COLOR));
+        ColorStateList textColor = ta.getColorStateList(PRIMARY_TEXT_COLOR);
         int textColorNormal = textColor.getDefaultColor();
         mPaint.setColor(textColorNormal);
         mPaint.setStyle(Paint.Style.FILL_AND_STROKE);

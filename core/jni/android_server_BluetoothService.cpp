@@ -928,6 +928,78 @@ static jboolean discoverServicesNative(JNIEnv *env, jobject object,
     return JNI_FALSE;
 }
 
+#ifdef HAVE_BLUETOOTH
+static jintArray extract_handles(JNIEnv *env, DBusMessage *reply) {
+    jint *handles;
+    jintArray handleArray = NULL;
+    int len;
+
+    DBusError err;
+    dbus_error_init(&err);
+
+    if (dbus_message_get_args(reply, &err,
+                              DBUS_TYPE_ARRAY, DBUS_TYPE_UINT32, &handles, &len,
+                              DBUS_TYPE_INVALID)) {
+        handleArray = env->NewIntArray(len);
+        if (handleArray) {
+            env->SetIntArrayRegion(handleArray, 0, len, handles);
+        } else {
+            LOGE("Null array in extract_handles");
+        }
+    } else {
+        LOG_AND_FREE_DBUS_ERROR(&err);
+    }
+    return handleArray;
+}
+#endif
+
+static jintArray addReservedServiceRecordsNative(JNIEnv *env, jobject object,
+                                                jintArray uuids) {
+    LOGV(__FUNCTION__);
+#ifdef HAVE_BLUETOOTH
+    DBusMessage *reply = NULL;
+
+    native_data_t *nat = get_native_data(env, object);
+
+    jint* svc_classes = env->GetIntArrayElements(uuids, NULL);
+    if (!svc_classes) return NULL;
+
+    int len = env->GetArrayLength(uuids);
+    reply = dbus_func_args(env, nat->conn,
+                            get_adapter_path(env, object),
+                            DBUS_ADAPTER_IFACE, "AddReservedServiceRecords",
+                            DBUS_TYPE_ARRAY, DBUS_TYPE_UINT32,
+                            &svc_classes, len, DBUS_TYPE_INVALID);
+    env->ReleaseIntArrayElements(uuids, svc_classes, 0);
+    return reply ? extract_handles(env, reply) : NULL;
+
+#endif
+    return NULL;
+}
+
+static jboolean removeReservedServiceRecordsNative(JNIEnv *env, jobject object,
+                                                   jintArray handles) {
+    LOGV(__FUNCTION__);
+#ifdef HAVE_BLUETOOTH
+    native_data_t *nat = get_native_data(env, object);
+    jint *values = env->GetIntArrayElements(handles, NULL);
+    DBusMessage *msg = NULL;
+    DBusMessage *reply = NULL;
+    if (values == NULL) return JNI_FALSE;
+
+    jsize len = env->GetArrayLength(handles);
+
+    reply = dbus_func_args(env, nat->conn,
+                            get_adapter_path(env, object),
+                            DBUS_ADAPTER_IFACE, "RemoveReservedServiceRecords",
+                            DBUS_TYPE_ARRAY, DBUS_TYPE_UINT32,
+                            &values, len, DBUS_TYPE_INVALID);
+    env->ReleaseIntArrayElements(handles, values, NULL);
+    return reply ? JNI_TRUE : JNI_FALSE;
+#endif
+    return JNI_FALSE;
+}
+
 static jint addRfcommServiceRecordNative(JNIEnv *env, jobject object,
         jstring name, jlong uuidMsb, jlong uuidLsb, jshort channel) {
     LOGV(__FUNCTION__);
@@ -1193,6 +1265,8 @@ static JNINativeMethod sMethods[] = {
     {"discoverServicesNative", "(Ljava/lang/String;Ljava/lang/String;)Z", (void *)discoverServicesNative},
     {"addRfcommServiceRecordNative", "(Ljava/lang/String;JJS)I", (void *)addRfcommServiceRecordNative},
     {"removeServiceRecordNative", "(I)Z", (void *)removeServiceRecordNative},
+    {"addReservedServiceRecordsNative", "([I)[I", (void *) addReservedServiceRecordsNative},
+    {"removeReservedServiceRecordsNative", "([I)Z", (void *) removeReservedServiceRecordsNative},
     {"setLinkTimeoutNative", "(Ljava/lang/String;I)Z", (void *)setLinkTimeoutNative},
     // HID functions
     {"connectInputDeviceNative", "(Ljava/lang/String;)Z", (void *)connectInputDeviceNative},

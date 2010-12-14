@@ -16,11 +16,20 @@
 
 package com.android.systemui.statusbar.tablet;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -32,12 +41,20 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
         View.OnClickListener {
     static final String TAG = "NotificationPanel";
 
+    boolean mShowing;
     View mTitleArea;
     View mSettingsButton;
     View mNotificationButton;
     View mNotificationScroller;
-    FrameLayout mContentFrame;
+    ViewGroup mContentFrame;
+    Rect mContentArea;
     View mSettingsView;
+    ViewGroup mContentParent;
+
+    Choreographer mChoreo = new Choreographer();
+    int mStatusBarHeight;
+    Drawable mBgDrawable;
+    Drawable mGlowDrawable;
 
     public NotificationPanel(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -45,12 +62,22 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
 
     public NotificationPanel(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+
+        final Resources res = context.getResources();
+
+        mStatusBarHeight = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_height);
+        mBgDrawable = res.getDrawable(R.drawable.notify_panel_bg_protect);
+        mGlowDrawable = res.getDrawable(R.drawable.notify_glow_back);
     }
 
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
 
+        setWillNotDraw(false);
+
+        mContentParent = (ViewGroup)findViewById(R.id.content_parent);
         mTitleArea = findViewById(R.id.title_area);
 
         mSettingsButton = (ImageView)findViewById(R.id.settings_button);
@@ -59,7 +86,31 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
         mNotificationButton.setOnClickListener(this);
 
         mNotificationScroller = findViewById(R.id.notificationScroller);
-        mContentFrame = (FrameLayout)findViewById(R.id.content_frame);
+        mContentFrame = (ViewGroup)findViewById(R.id.content_frame);
+    }
+
+    public void show(boolean show, boolean animate) {
+        if (animate) {
+            if (mShowing != show) {
+                mShowing = show;
+                if (show) {
+                    setVisibility(View.VISIBLE);
+                }
+                mChoreo.startAnimation(show);
+            }
+        } else {
+            mShowing = show;
+            setVisibility(show ? View.VISIBLE : View.GONE);
+            mChoreo.jumpTo(show);
+        }
+    }
+
+    /**
+     * Whether the panel is showing, or, if it's animating, whether it will be
+     * when the animation is done.
+     */
+    public boolean isShowing() {
+        return mShowing;
     }
 
     @Override
@@ -93,6 +144,34 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
             final View c = getChildAt(i);
             c.layout(c.getLeft(), c.getTop() + shift, c.getRight(), c.getBottom() + shift);
         }
+
+        mChoreo.setPanelHeight(mContentParent.getHeight());
+    }
+
+    @Override
+    public void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        mContentArea = null;
+        mBgDrawable.setBounds(0, 0, w, h-mStatusBarHeight);
+    }
+
+    @Override
+    public void onDraw(Canvas canvas) {
+        int saveCount;
+        final int w = getWidth();
+        final int h = getHeight();
+
+        super.onDraw(canvas);
+
+        // Background protection
+        mBgDrawable.draw(canvas);
+
+        // The panel glow (behind status bar)
+
+        saveCount = canvas.save();
+        canvas.clipRect(0, 0, w, h-mStatusBarHeight);
+        mGlowDrawable.draw(canvas);
+        canvas.restoreToCount(saveCount);
     }
 
     public void onClick(View v) {
@@ -119,11 +198,14 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
     }
 
     public boolean isInContentArea(int x, int y) {
-        final int l = mContentFrame.getLeft();
-        final int r = mContentFrame.getRight();
-        final int t = mTitleArea.getTop();
-        final int b = mContentFrame.getBottom();
-        return x >= l && x < r && y >= t && y < b;
+        if (mContentArea == null) {
+            mContentArea = new Rect(mContentFrame.getLeft(),
+                    mTitleArea.getTop(),
+                    mContentFrame.getRight(),
+                    mContentFrame.getBottom());
+            offsetDescendantRectToMyCoords(mContentParent, mContentArea);
+        }
+        return mContentArea.contains(x, y);
     }
 
     void removeSettingsView() {
@@ -137,6 +219,103 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
         LayoutInflater infl = LayoutInflater.from(getContext());
         mSettingsView = infl.inflate(R.layout.status_bar_settings_view, mContentFrame, false);
         mContentFrame.addView(mSettingsView);
+    }
+
+    private class Choreographer implements Animator.AnimatorListener {
+        int mBgAlpha;
+        ValueAnimator mBgAnim;
+        int mPanelHeight;
+        int mPanelBottom;
+        ValueAnimator mPositionAnim;
+
+        // should group this into a multi-property animation
+        final int OPEN_DURATION = 200;
+
+        Choreographer() {
+        }
+
+        void createAnimation(boolean visible) {
+            mBgAnim = ObjectAnimator.ofInt(this, "bgAlpha", mBgAlpha, visible ? 255 : 0)
+                    .setDuration(OPEN_DURATION);
+            mBgAnim.addListener(this);
+
+            mPositionAnim = ObjectAnimator.ofInt(this, "panelBottom", mPanelBottom,
+                        visible ? mPanelHeight : 0)
+                    .setDuration(OPEN_DURATION);
+        }
+
+        void startAnimation(boolean visible) {
+            if (mBgAnim == null) {
+                createAnimation(visible);
+                mBgAnim.start();
+                mPositionAnim.start();
+            } else {
+                mBgAnim.reverse();
+                mPositionAnim.reverse();
+            }
+        }
+
+        void jumpTo(boolean visible) {
+            setBgAlpha(visible ? 255 : 0);
+            setPanelBottom(visible ? mPanelHeight : 0);
+        }
+
+        public void setBgAlpha(int alpha) {
+            mBgAlpha = alpha;
+            mBgDrawable.setAlpha((int)(alpha));
+            invalidate();
+        }
+
+        // 0 is closed, the height of the panel is open
+        public void setPanelBottom(int y) {
+            mPanelBottom = y;
+            int translationY = mPanelHeight - y;
+            mContentParent.setTranslationY(translationY);
+
+            final int glowXOffset = 100;
+            final int glowYOffset = 100;
+            int glowX = mContentParent.getLeft() - glowXOffset;
+            int glowY = mContentParent.getTop() - glowYOffset + translationY;
+            mGlowDrawable.setBounds(glowX, glowY, glowX + mGlowDrawable.getIntrinsicWidth(),
+                    glowY + mGlowDrawable.getIntrinsicHeight());
+
+            float alpha;
+            if (mPanelBottom > glowYOffset) {
+                alpha = 1;
+            } else {
+                alpha = ((float)mPanelBottom) / glowYOffset;
+            }
+            mContentParent.setAlpha(alpha);
+            mGlowDrawable.setAlpha((int)(255 * alpha));
+
+            if (false) {
+                Slog.d(TAG, "mPanelBottom=" + mPanelBottom + "translationY=" + translationY
+                        + " alpha=" + alpha + " glowY=" + glowY);
+            }
+        }
+
+        public void setPanelHeight(int h) {
+            mPanelHeight = h;
+            setPanelBottom(mPanelBottom);
+        }
+
+        public void onAnimationCancel(Animator animation) {
+            //Slog.d(TAG, "onAnimationCancel mBgAlpha=" + mBgAlpha);
+        }
+
+        public void onAnimationEnd(Animator animation) {
+            //Slog.d(TAG, "onAnimationEnd mBgAlpha=" + mBgAlpha);
+            if (mBgAlpha == 0) {
+                setVisibility(View.GONE);
+            }
+            mBgAnim = null;
+        }
+
+        public void onAnimationRepeat(Animator animation) {
+        }
+
+        public void onAnimationStart(Animator animation) {
+        }
     }
 }
 

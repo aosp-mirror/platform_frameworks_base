@@ -13,20 +13,20 @@
 ** distributed under the License is distributed on an "AS IS" BASIS, 
 ** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 ** See the License for the specific language governing permissions and 
-** limitations under the License.
+** limitations under the License. 
 */
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:detachWallpaper="true" android:shareInterpolator="false">
+        android:shareInterpolator="false">
     <scale android:fromXScale="1.0" android:toXScale="1.0"
             android:fromYScale="1.0" android:toYScale="0.0"
             android:pivotX="50%p" android:pivotY="50%p"
-            android:fillEnabled="true" android:fillAfter="true"
-            android:interpolator="@anim/linear_interpolator"
-            android:duration="300" />
-    <alpha android:fromAlpha="1.0" android:toAlpha="0"
-            android:fillEnabled="true" android:fillAfter="true"
+			android:fillEnabled="true" android:fillAfter="true"
+            android:interpolator="@anim/accelerate_cubic_interpolator"
+            android:duration="160" />
+    <alpha android:fromAlpha="1.0" android:toAlpha="0"		
+			android:fillEnabled="true" android:fillAfter="true"
             android:interpolator="@anim/decelerate_cubic_interpolator"
-            android:duration="150"/>
+            android:duration="160"/>
 </set>

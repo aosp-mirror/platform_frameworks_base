@@ -58,6 +58,30 @@ public class DropBoxManager {
     private static final int HAS_BYTE_ARRAY = 8;
 
     /**
+     * Broadcast Action: This is broadcast when a new entry is added in the dropbox.
+     * You must hold the {@link android.Manifest.permission#READ_LOGS} permission
+     * in order to receive this broadcast.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     */
+    public static final String ACTION_DROPBOX_ENTRY_ADDED =
+        "android.intent.action.DROPBOX_ENTRY_ADDED";
+
+    /**
+     * Extra for {@link android.os.DropBoxManager#ACTION_DROPBOX_ENTRY_ADDED}:
+     * string containing the dropbox tag.
+     */
+    public static final String EXTRA_TAG = "tag";
+
+    /**
+     * Extra for {@link android.os.DropBoxManager#ACTION_DROPBOX_ENTRY_ADDED}:
+     * long integer value containing time (in milliseconds since January 1, 1970 00:00:00 UTC)
+     * when the entry was created.
+     */
+    public static final String EXTRA_TIME = "time";
+
+    /**
      * A single entry retrieved from the drop box.
      * This may include a reference to a stream, so you must call
      * {@link #close()} when you are done using it.

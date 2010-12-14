@@ -526,7 +526,16 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(128);
-        sb.append("Fragment{");
+        String simpleName = getClass().getSimpleName();
+        if (simpleName == null || simpleName.isEmpty()) {
+            simpleName = getClass().getName();
+            int end = simpleName.lastIndexOf('.');
+            if (end > 0) {
+                simpleName = simpleName.substring(end+1);
+            }
+        }
+        sb.append(simpleName);
+        sb.append("{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         if (mIndex >= 0) {
             sb.append(" #");
@@ -1186,8 +1195,10 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      * @param args additional arguments to the dump request.
      */
     public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
-        writer.print(prefix); writer.print("mFragmentId="); writer.print(mFragmentId);
-                writer.print(" mContainerId="); writer.print(mContainerId);
+        writer.print(prefix); writer.print("mFragmentId=#");
+                writer.print(Integer.toHexString(mFragmentId));
+                writer.print(" mContainerId#=");
+                writer.print(Integer.toHexString(mContainerId));
                 writer.print(" mTag="); writer.println(mTag);
         writer.print(prefix); writer.print("mState="); writer.print(mState);
                 writer.print(" mIndex="); writer.print(mIndex);
@@ -1239,10 +1250,8 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
             writer.print(prefix); writer.print("mView="); writer.println(mView);
         }
         if (mLoaderManager != null) {
-            writer.print(prefix); writer.print("mLoaderManager="); writer.print(mLoaderManager);
-                    writer.print(" mLoadersStarted="); writer.print(mLoadersStarted);
-                    writer.print(" mCheckedForLoaderManager=");
-                    writer.println(mCheckedForLoaderManager);
+            writer.print(prefix); writer.println("Loader Manager:");
+            mLoaderManager.dump(prefix + "  ", fd, writer, args);
         }
     }
 

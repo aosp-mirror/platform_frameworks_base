@@ -650,7 +650,7 @@ public class ActivityStack {
         }
     }
     
-    public final Bitmap screenshotActivities() {
+    public final Bitmap screenshotActivities(ActivityRecord who) {
         Resources res = mService.mContext.getResources();
         int w = mThumbnailWidth;
         int h = mThumbnailHeight;
@@ -662,7 +662,7 @@ public class ActivityStack {
         }
 
         if (w > 0) {
-            //return mService.mWindowManager.screenshotApplications(w, h);
+            //return mService.mWindowManager.screenshotApplications(who, w, h);
         }
         return null;
     }
@@ -686,7 +686,10 @@ public class ActivityStack {
         mLastPausedActivity = prev;
         prev.state = ActivityState.PAUSING;
         prev.task.touchActiveTime();
-        prev.thumbnail = screenshotActivities();
+        prev.thumbnail = screenshotActivities(prev);
+        if (prev.task != null) {
+            prev.task.lastThumbnail = prev.thumbnail;
+        }
 
         mService.updateCpuStats();
         

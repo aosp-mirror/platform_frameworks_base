@@ -105,10 +105,10 @@ enum RsAllocationUsageType {
     RS_ALLOCATION_USAGE_ALL = 0x000F
 };
 
-enum RsAllocationMipmapGenerationControl {
-    RS_MIPMAP_NONE = 0,
-    RS_MIPMAP_FULL = 1,
-    RS_MIPMAP_TEXTURE_ONLY = 2
+enum RsAllocationMipmapControl {
+    RS_ALLOCATION_MIPMAP_NONE = 0,
+    RS_ALLOCATION_MIPMAP_FULL = 1,
+    RS_ALLOCATION_MIPMAP_ON_SYNC_TO_TEXTURE = 2
 };
 
 enum RsDataType {
@@ -345,13 +345,13 @@ void rsaElementGetSubElements(RsContext, RsElement, uint32_t *ids, const char **
 RsType rsaTypeCreate(RsContext, RsElement, uint32_t dimX, uint32_t dimY,
                      uint32_t dimZ, bool mips, bool faces);
 RsAllocation rsaAllocationCreateTyped(RsContext rsc, RsType vtype,
-                                      RsAllocationMipmapGenerationControl mips,
+                                      RsAllocationMipmapControl mips,
                                       uint32_t usages);
 RsAllocation rsaAllocationCreateFromBitmap(RsContext con, RsType vtype,
-                                           RsAllocationMipmapGenerationControl mips,
+                                           RsAllocationMipmapControl mips,
                                            const void *data, uint32_t usages);
 RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, RsType vtype,
-                                               RsAllocationMipmapGenerationControl mips,
+                                               RsAllocationMipmapControl mips,
                                                const void *data, uint32_t usages);
 
 #ifndef NO_RS_FUNCS

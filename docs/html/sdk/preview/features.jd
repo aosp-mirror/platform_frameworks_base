@@ -160,11 +160,12 @@ notification</li>
 and APIs introduced for Android 2.3. To learn more, read the <a
 href="{@docRoot}sdk/android-2.3.html">Android 2.3 release notes</a>.</p>
 
+<!--
 <div class="special">
 <p>To set up your preview SDK and start developing apps for Honeycomb, see the <a
 href="{@docRoot}sdk/preview/installing.html">Getting Started</a> guide.</p>
 </div>
-
+-->
 
 
 

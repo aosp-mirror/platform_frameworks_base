@@ -21,6 +21,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * Interface associated with an {@link Activity} or {@link Fragment} for managing
  * one or more {@link android.content.Loader} instances associated with it.
@@ -90,6 +93,16 @@ public abstract class LoaderManager {
      * is found.
      */
     public abstract <D> Loader<D> getLoader(int id);
+
+    /**
+     * Print the LoaderManager's state into the given stream.
+     *
+     * @param prefix Text to print at the front of each line.
+     * @param fd The raw file descriptor that the dump is being sent to.
+     * @param writer A PrintWriter to which the dump is to be set.
+     * @param args Additional arguments to the dump request.
+     */
+    public abstract void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args);
 }
 
 class LoaderManagerImpl extends LoaderManager {
@@ -123,7 +136,7 @@ class LoaderManagerImpl extends LoaderManager {
         boolean mRetainingStarted;
         boolean mDestroyed;
         boolean mListenerRegistered;
-        
+
         public LoaderInfo(int id, Bundle args, LoaderManager.LoaderCallbacks<Object> callbacks) {
             mId = id;
             mArgs = args;
@@ -270,6 +283,28 @@ class LoaderManagerImpl extends LoaderManager {
             }
             sb.append("}");
             return sb.toString();
+        }
+
+        public String toBasicString() {
+            StringBuilder sb = new StringBuilder(64);
+            sb.append("LoaderInfo{");
+            sb.append(Integer.toHexString(System.identityHashCode(this)));
+            sb.append(" #");
+            sb.append(mId);
+            sb.append("}");
+            return sb.toString();
+        }
+
+        public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+            writer.print(prefix); writer.print("mId="); writer.print(mId);
+                    writer.print(" mArgs="); writer.println(mArgs);
+            writer.print(prefix); writer.print("mCallbacks="); writer.println(mCallbacks);
+            writer.print(prefix); writer.print("mLoader="); writer.println(mLoader);
+            writer.print(prefix); writer.print("mData="); writer.println(mData);
+            writer.print(prefix); writer.print("mStarted="); writer.print(mStarted);
+                    writer.print(" mRetaining="); writer.print(mRetaining);
+                    writer.print(" mDestroyed="); writer.print(mDestroyed);
+                    writer.print(" mListenerRegistered="); writer.println(mListenerRegistered);
         }
     }
     
@@ -442,5 +477,29 @@ class LoaderManagerImpl extends LoaderManager {
             mInactiveLoaders.valueAt(i).destroy();
         }
         mInactiveLoaders.clear();
+    }
+
+    @Override
+    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+        if (mLoaders.size() > 0) {
+            writer.print(prefix); writer.println("Active Loaders:");
+            String innerPrefix = prefix + "    ";
+            for (int i=0; i < mLoaders.size(); i++) {
+                LoaderInfo li = mLoaders.valueAt(i);
+                writer.print(prefix); writer.print("  #"); writer.print(mLoaders.keyAt(i));
+                        writer.print(": "); writer.println(li.toBasicString());
+                li.dump(innerPrefix, fd, writer, args);
+            }
+        }
+        if (mInactiveLoaders.size() > 0) {
+            writer.print(prefix); writer.println("Inactive Loaders:");
+            String innerPrefix = prefix + "    ";
+            for (int i=0; i < mInactiveLoaders.size(); i++) {
+                LoaderInfo li = mInactiveLoaders.valueAt(i);
+                writer.print(prefix); writer.print("  #"); writer.print(mInactiveLoaders.keyAt(i));
+                        writer.print(": "); writer.println(li.toBasicString());
+                li.dump(innerPrefix, fd, writer, args);
+            }
+        }
     }
 }

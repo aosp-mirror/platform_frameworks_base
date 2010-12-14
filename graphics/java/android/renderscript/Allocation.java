@@ -378,12 +378,12 @@ public class Allocation extends BaseObj {
         mBitmapOptions.inScaled = false;
     }
 
-    static public Allocation createTyped(RenderScript rs, Type type, int usage) {
+    static public Allocation createTyped(RenderScript rs, Type type, MipmapControl mc, int usage) {
         rs.validate();
         if (type.getID() == 0) {
             throw new RSInvalidStateException("Bad Type");
         }
-        int id = rs.nAllocationCreateTyped(type.getID(), usage);
+        int id = rs.nAllocationCreateTyped(type.getID(), mc.mID, usage);
         if (id == 0) {
             throw new RSRuntimeException("Allocation creation failed.");
         }
@@ -391,7 +391,7 @@ public class Allocation extends BaseObj {
     }
 
     static public Allocation createTyped(RenderScript rs, Type type) {
-        return createTyped(rs, type, USAGE_ALL);
+        return createTyped(rs, type, MipmapControl.MIPMAP_NONE, USAGE_SCRIPT);
     }
 
     static public Allocation createSized(RenderScript rs, Element e,
@@ -401,7 +401,7 @@ public class Allocation extends BaseObj {
         b.setX(count);
         Type t = b.create();
 
-        int id = rs.nAllocationCreateTyped(t.getID(), usage);
+        int id = rs.nAllocationCreateTyped(t.getID(), MipmapControl.MIPMAP_NONE.mID, usage);
         if (id == 0) {
             throw new RSRuntimeException("Allocation creation failed.");
         }
@@ -409,7 +409,7 @@ public class Allocation extends BaseObj {
     }
 
     static public Allocation createSized(RenderScript rs, Element e, int count) {
-        return createSized(rs, e, count, USAGE_ALL);
+        return createSized(rs, e, count, USAGE_SCRIPT);
     }
 
     static private Element elementFromBitmap(RenderScript rs, Bitmap b) {
@@ -458,7 +458,7 @@ public class Allocation extends BaseObj {
         if (genMips) {
             mc = MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE;
         }
-        return createFromBitmap(rs, b, mc, USAGE_ALL);
+        return createFromBitmap(rs, b, mc, USAGE_GRAPHICS_TEXTURE);
     }
 
     static public Allocation createCubemapFromBitmap(RenderScript rs, Bitmap b,
@@ -507,7 +507,7 @@ public class Allocation extends BaseObj {
         if (genMips) {
             mc = MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE;
         }
-        return createCubemapFromBitmap(rs, b, mc, layout, USAGE_ALL);
+        return createCubemapFromBitmap(rs, b, mc, layout, USAGE_GRAPHICS_TEXTURE);
     }
 
     static public Allocation createFromBitmapResource(RenderScript rs,
@@ -532,7 +532,7 @@ public class Allocation extends BaseObj {
         if (genMips) {
             mc = MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE;
         }
-        return createFromBitmapResource(rs, res, id, mc, USAGE_ALL);
+        return createFromBitmapResource(rs, res, id, mc, USAGE_GRAPHICS_TEXTURE);
     }
 
     static public Allocation createFromString(RenderScript rs,

@@ -162,7 +162,10 @@ import android.util.Log;
     public void close() {
         mIsConnected = false;
         try {
-            mTagService.close(mTag.getServiceHandle());
+            /* Note that we don't want to physically disconnect the tag,
+             * but just reconnect to it to reset its state
+             */
+            mTagService.reconnect(mTag.getServiceHandle());
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
         }
@@ -181,9 +184,9 @@ import android.util.Log;
      */
     public byte[] transceive(byte[] data) throws IOException {
         try {
-            byte[] response = mTagService.transceive(mTag.getServiceHandle(), data);
+            byte[] response = mTagService.transceive(mTag.getServiceHandle(), data, true);
             if (response == null) {
-                throw new IOException("transcieve failed");
+                throw new IOException("transceive failed");
             }
             return response;
         } catch (RemoteException e) {

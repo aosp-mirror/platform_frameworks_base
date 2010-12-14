@@ -159,7 +159,9 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
     }
 
     public void initForMode(final ActionMode mode) {
-        finishAnimation();
+        if (mAnimationMode == ANIMATE_OUT) {
+            killMode();
+        }
 
         if (mClose == null) {
             LayoutInflater inflater = LayoutInflater.from(mContext);

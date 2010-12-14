@@ -115,8 +115,9 @@ final class ApplicationPackageManager extends PackageManager {
             return null;
         }
         Intent intent = new Intent(intentToResolve);
-        intent.setClassName(resolveInfo.activityInfo.applicationInfo.packageName,
-                            resolveInfo.activityInfo.name);
+        // Note: we do NOT fill in the component name; we'll leave the
+        // Intent unspecified, so if there are multiple matches within the
+        // package something reasonable will happen.
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return intent;
     }

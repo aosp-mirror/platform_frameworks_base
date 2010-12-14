@@ -1405,6 +1405,7 @@
   <public type="attr" name="fastScrollAlwaysVisible" />
   <public type="attr" name="fastScrollThumbDrawable" />
   <public type="attr" name="fastScrollPreviewBackgroundLeft" />
+  <public type="attr" name="fastScrollPreviewBackgroundRight" />
   <public type="attr" name="fastScrollTrackDrawable" />
   <public type="attr" name="fastScrollOverlayPosition" />
 

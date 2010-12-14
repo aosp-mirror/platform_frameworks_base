@@ -366,8 +366,8 @@ class WifiConfigStore {
      * Start WPS pin method configuration with pin obtained
      * from the access point
      */
-    static boolean startWpsWithPinFromAccessPoint(String bssid, int apPin) {
-        if (WifiNative.startWpsWithPinFromAccessPointCommand(bssid, apPin)) {
+    static boolean startWpsWithPinFromAccessPoint(WpsConfiguration config) {
+        if (WifiNative.startWpsWithPinFromAccessPointCommand(config.BSSID, config.pin)) {
             /* WPS leaves all networks disabled */
             markAllNetworksDisabled();
             return true;
@@ -379,14 +379,16 @@ class WifiConfigStore {
     /**
      * Start WPS pin method configuration with pin obtained
      * from the device
+     * @return empty string on failure. null is never returned.
      */
-    static int startWpsWithPinFromDevice(String bssid) {
-        int pin = WifiNative.startWpsWithPinFromDeviceCommand(bssid);
+    static String startWpsWithPinFromDevice(WpsConfiguration config) {
+        String pin = WifiNative.startWpsWithPinFromDeviceCommand(config.BSSID);
         /* WPS leaves all networks disabled */
-        if (pin != -1) {
+        if (!TextUtils.isEmpty(pin)) {
             markAllNetworksDisabled();
         } else {
             Log.e(TAG, "Failed to start WPS pin method configuration");
+            pin = "";
         }
         return pin;
     }
@@ -394,8 +396,8 @@ class WifiConfigStore {
     /**
      * Start WPS push button configuration
      */
-    static boolean startWpsPbc(String bssid) {
-        if (WifiNative.startWpsPbcCommand(bssid)) {
+    static boolean startWpsPbc(WpsConfiguration config) {
+        if (WifiNative.startWpsPbcCommand(config.BSSID)) {
             /* WPS leaves all networks disabled */
             markAllNetworksDisabled();
             return true;
@@ -525,6 +527,18 @@ class WifiConfigStore {
         }
         readIpAndProxyConfigurations();
         sendConfiguredNetworksChangedBroadcast();
+    }
+
+    static void updateIpAndProxyFromWpsConfig(int netId, WpsConfiguration wpsConfig) {
+        synchronized (sConfiguredNetworks) {
+            WifiConfiguration config = sConfiguredNetworks.get(netId);
+            if (config != null) {
+                config.ipAssignment = wpsConfig.ipAssignment;
+                config.proxySettings = wpsConfig.proxySettings;
+                config.linkProperties = wpsConfig.linkProperties;
+                writeIpAndProxyConfigurations();
+            }
+        }
     }
 
     /* Mark all networks except specified netId as disabled */

@@ -4908,7 +4908,7 @@ public class WindowManagerService extends IWindowManager.Stub
         SystemProperties.set(StrictMode.VISUAL_PROPERTY, value);
     }
 
-    public Bitmap screenshotApplications(int maxWidth, int maxHeight) {
+    public Bitmap screenshotApplications(IBinder appToken, int maxWidth, int maxHeight) {
         if (!checkCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
                 "screenshotApplications()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
@@ -4916,6 +4916,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         Bitmap rawss;
 
+        int maxLayer = 0;
+        boolean foundApp;
         final Rect frame = new Rect();
 
         float scale;
@@ -4938,6 +4940,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (ws.mLayer >= aboveAppLayer) {
                     break;
+                }
+                if (appToken != null && (ws.mAppToken == null
+                        || ws.mAppToken.token != appToken)) {
+                    continue;
+                }
+                if (maxLayer < ws.mAnimLayer) {
+                    maxLayer = ws.mAnimLayer;
                 }
                 final Rect wf = ws.mFrame;
                 final Rect cr = ws.mContentInsets;
@@ -4978,7 +4987,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 dh = tmp;
                 rot = (rot == Surface.ROTATION_90) ? Surface.ROTATION_270 : Surface.ROTATION_90;
             }
-            rawss = Surface.screenshot(dw, dh);
+            rawss = Surface.screenshot(dw, dh, 0, maxLayer);
         }
 
         Bitmap bm = Bitmap.createBitmap(sw, sh, rawss.getConfig());

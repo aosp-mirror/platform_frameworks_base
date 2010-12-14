@@ -908,7 +908,7 @@ public class DownloadManager {
             if (cursor == null) {
                 return null;
             }
-            while (cursor.moveToFirst()) {
+            if (cursor.moveToFirst()) {
                 int status = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_STATUS));
                 if (DownloadManager.STATUS_SUCCESSFUL == status) {
                     int indx = cursor.getColumnIndexOrThrow(

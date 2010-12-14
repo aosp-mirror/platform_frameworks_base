@@ -723,13 +723,6 @@ void OpenGLRenderer::dirtyLayer(const float left, const float top,
 #endif
 }
 
-void OpenGLRenderer::setupDraw() {
-    clearLayerRegions();
-    if (mDirtyClip) {
-        setScissorFromClip();
-    }
-}
-
 void OpenGLRenderer::clearLayerRegions() {
     if (mLayers.size() == 0 || mSnapshot->isIgnored()) return;
 
@@ -829,6 +822,156 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, 
         dirtyClip();
     }
     return !mSnapshot->clipRect->isEmpty();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Drawing commands
+///////////////////////////////////////////////////////////////////////////////
+
+void OpenGLRenderer::setupDraw() {
+    clearLayerRegions();
+    if (mDirtyClip) {
+        setScissorFromClip();
+    }
+    mDescription.reset();
+    mSetShaderColor = false;
+    mColorSet = false;
+    mColorA = mColorR = mColorG = mColorB = 0.0f;
+    mTextureUnit = 0;
+    mTrackDirtyRegions = true;
+}
+
+void OpenGLRenderer::setupDrawWithTexture(bool isAlpha8) {
+    mDescription.hasTexture = true;
+    mDescription.hasAlpha8Texture = isAlpha8;
+}
+
+void OpenGLRenderer::setupDrawColor(int color) {
+    mColorA = ((color >> 24) & 0xFF) / 255.0f;
+    const float a = mColorA / 255.0f;
+    mColorR = mColorA * ((color >> 16) & 0xFF);
+    mColorG = mColorA * ((color >>  8) & 0xFF);
+    mColorB = mColorA * ((color      ) & 0xFF);
+    mColorSet = true;
+    mSetShaderColor = mDescription.setColor(mColorR, mColorG, mColorB, mColorA);
+}
+
+void OpenGLRenderer::setupDrawColor(float r, float g, float b, float a) {
+    mColorA = a;
+    mColorR = r;
+    mColorG = g;
+    mColorB = b;
+    mColorSet = true;
+    mSetShaderColor = mDescription.setColor(r, g, b, a);
+}
+
+void OpenGLRenderer::setupDrawShader() {
+    if (mShader) {
+        mShader->describe(mDescription, mCaches.extensions);
+    }
+}
+
+void OpenGLRenderer::setupDrawColorFilter() {
+    if (mColorFilter) {
+        mColorFilter->describe(mDescription, mCaches.extensions);
+    }
+}
+
+void OpenGLRenderer::setupDrawBlending(SkXfermode::Mode mode, bool swapSrcDst) {
+    chooseBlending((mColorSet && mColorA < 1.0f) || (mShader && mShader->blend()), mode,
+            mDescription, swapSrcDst);
+}
+
+void OpenGLRenderer::setupDrawBlending(bool blend, SkXfermode::Mode mode, bool swapSrcDst) {
+    chooseBlending(blend || (mColorSet && mColorA < 1.0f) || (mShader && mShader->blend()), mode,
+            mDescription, swapSrcDst);
+}
+
+void OpenGLRenderer::setupDrawProgram() {
+    useProgram(mCaches.programCache.get(mDescription));
+}
+
+void OpenGLRenderer::setupDrawDirtyRegionsDisabled() {
+    mTrackDirtyRegions = false;
+}
+
+void OpenGLRenderer::setupDrawModelViewTranslate(float left, float top, float right, float bottom,
+        bool ignoreTransform) {
+    mModelView.loadTranslate(left, top, 0.0f);
+    if (!ignoreTransform) {
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
+        if (mTrackDirtyRegions) dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
+    } else {
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, mIdentity);
+        if (mTrackDirtyRegions) dirtyLayer(left, top, right, bottom);
+    }
+}
+
+void OpenGLRenderer::setupDrawModelView(float left, float top, float right, float bottom,
+        bool ignoreTransform, bool ignoreModelView) {
+    if (!ignoreModelView) {
+        mModelView.loadTranslate(left, top, 0.0f);
+        mModelView.scale(right - left, bottom - top, 1.0f);
+        if (!ignoreTransform) {
+            mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
+            if (mTrackDirtyRegions) dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
+        } else {
+            mCaches.currentProgram->set(mOrthoMatrix, mModelView, mIdentity);
+            if (mTrackDirtyRegions) dirtyLayer(left, top, right, bottom);
+        }
+    } else {
+        mModelView.loadIdentity();
+    }
+}
+
+void OpenGLRenderer::setupDrawColorUniforms() {
+    if (mColorSet && mSetShaderColor) {
+        mCaches.currentProgram->setColor(mColorR, mColorG, mColorB, mColorA);
+    }
+}
+
+void OpenGLRenderer::setupDrawShaderUniforms(bool ignoreTransform) {
+    if (mShader) {
+        if (ignoreTransform) {
+            mModelView.loadInverse(*mSnapshot->transform);
+        }
+        mShader->setupProgram(mCaches.currentProgram, mModelView, *mSnapshot, &mTextureUnit);
+    }
+}
+
+void OpenGLRenderer::setupDrawColorFilterUniforms() {
+    if (mColorFilter) {
+        mColorFilter->setupProgram(mCaches.currentProgram);
+    }
+}
+
+void OpenGLRenderer::setupDrawSimpleMesh() {
+    mCaches.bindMeshBuffer();
+    glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
+            gMeshStride, 0);
+}
+
+void OpenGLRenderer::setupDrawTexture(GLuint texture) {
+    bindTexture(texture);
+    glUniform1i(mCaches.currentProgram->getUniform("sampler"), mTextureUnit++);
+
+    mTexCoordsSlot = mCaches.currentProgram->getAttrib("texCoords");
+    glEnableVertexAttribArray(mTexCoordsSlot);
+}
+
+void OpenGLRenderer::setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLuint vbo) {
+    if (!vertices) {
+        mCaches.bindMeshBuffer(vbo == 0 ? mCaches.meshBuffer : vbo);
+    } else {
+        mCaches.unbindMeshBuffer();
+    }
+    glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
+            gMeshStride, vertices);
+    glVertexAttribPointer(mTexCoordsSlot, 2, GL_FLOAT, GL_FALSE, gMeshStride, texCoords);
+}
+
+void OpenGLRenderer::finishDrawTexture() {
+    glDisableVertexAttribArray(mTexCoordsSlot);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1043,18 +1186,16 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
             gMeshStride, vertex);
 
-    mModelView.loadIdentity();
-
     // Build and use the appropriate shader
     useProgram(mCaches.programCache.get(description));
-    mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
+    mCaches.currentProgram->set(mOrthoMatrix, mIdentity, *mSnapshot->transform);
 
     if (!mShader || (mShader && setColor)) {
         mCaches.currentProgram->setColor(r, g, b, a);
     }
 
     if (mShader) {
-        mShader->setupProgram(mCaches.currentProgram, mModelView, *mSnapshot, &textureUnit);
+        mShader->setupProgram(mCaches.currentProgram, mIdentity, *mSnapshot, &textureUnit);
     }
     if (mColorFilter) {
         mColorFilter->setupProgram(mCaches.currentProgram);
@@ -1116,6 +1257,7 @@ void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
 
     Rect& clip(*mSnapshot->clipRect);
     clip.snapToPixelBoundaries();
+
     drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color, mode, true);
 }
 
@@ -1512,82 +1654,24 @@ void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float
 
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,
         int color, SkXfermode::Mode mode, bool ignoreTransform) {
-    setupDraw();
-
     // If a shader is set, preserve only the alpha
     if (mShader) {
         color |= 0x00ffffff;
     }
 
-    // Render using pre-multiplied alpha
-    const int alpha = (color >> 24) & 0xFF;
-    const GLfloat a = alpha / 255.0f;
-    const GLfloat r = a * ((color >> 16) & 0xFF) / 255.0f;
-    const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
-    const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
+    setupDraw();
+    setupDrawColor(color);
+    setupDrawShader();
+    setupDrawColorFilter();
+    setupDrawBlending(mode);
+    setupDrawProgram();
+    setupDrawModelView(left, top, right, bottom, ignoreTransform);
+    setupDrawColorUniforms();
+    setupDrawShaderUniforms(ignoreTransform);
+    setupDrawColorFilterUniforms();
+    setupDrawSimpleMesh();
 
-    setupColorRect(left, top, right, bottom, r, g, b, a, mode, ignoreTransform);
-
-    // Draw the mesh
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
-}
-
-void OpenGLRenderer::setupColorRect(float left, float top, float right, float bottom,
-        float r, float g, float b, float a, SkXfermode::Mode mode,
-        bool ignoreTransform, bool ignoreMatrix) {
-    GLuint textureUnit = 0;
-
-    // Describe the required shaders
-    ProgramDescription description;
-    const bool setColor = description.setColor(r, g, b, a);
-
-    if (mShader) {
-        mShader->describe(description, mCaches.extensions);
-    }
-    if (mColorFilter) {
-        mColorFilter->describe(description, mCaches.extensions);
-    }
-
-    // Setup the blending mode
-    chooseBlending(a < 1.0f || (mShader && mShader->blend()), mode, description);
-
-    // Build and use the appropriate shader
-    useProgram(mCaches.programCache.get(description));
-
-    // Setup attributes
-    mCaches.bindMeshBuffer();
-    glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
-            gMeshStride, 0);
-
-    if (!ignoreMatrix) {
-        // Setup uniforms
-        mModelView.loadTranslate(left, top, 0.0f);
-        mModelView.scale(right - left, bottom - top, 1.0f);
-        if (!ignoreTransform) {
-            mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
-            dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
-        } else {
-            mat4 identity;
-            mCaches.currentProgram->set(mOrthoMatrix, mModelView, identity);
-            dirtyLayer(left, top, right, bottom);
-        }
-    }
-    if (!mShader || (mShader && setColor)) {
-        mCaches.currentProgram->setColor(r, g, b, a);
-    }
-
-    // Setup attributes and uniforms required by the shaders
-    if (mShader) {
-        if (ignoreMatrix) {
-            mModelView.loadIdentity();
-        } else if (ignoreTransform) {
-            mModelView.loadInverse(*mSnapshot->transform);
-        }
-        mShader->setupProgram(mCaches.currentProgram, mModelView, *mSnapshot, &textureUnit);
-    }
-    if (mColorFilter) {
-        mColorFilter->setupProgram(mCaches.currentProgram);
-    }
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
@@ -1622,61 +1706,29 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
         GLuint texture, float alpha, SkXfermode::Mode mode, bool blend,
         GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
         bool swapSrcDst, bool ignoreTransform, GLuint vbo, bool ignoreScale, bool dirty) {
+
     setupDraw();
-
-    ProgramDescription description;
-    description.hasTexture = true;
-    const bool setColor = description.setColor(alpha, alpha, alpha, alpha);
-    if (mColorFilter) {
-        mColorFilter->describe(description, mCaches.extensions);
+    setupDrawWithTexture();
+    setupDrawColor(alpha, alpha, alpha, alpha);
+    setupDrawColorFilter();
+    setupDrawBlending(blend, mode, swapSrcDst);
+    setupDrawProgram();
+    if (!dirty) {
+        setupDrawDirtyRegionsDisabled();
     }
-
-    mModelView.loadTranslate(left, top, 0.0f);
     if (!ignoreScale) {
-        mModelView.scale(right - left, bottom - top, 1.0f);
-    }
-
-    chooseBlending(blend || alpha < 1.0f, mode, description, swapSrcDst);
-
-    useProgram(mCaches.programCache.get(description));
-    if (!ignoreTransform) {
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
-        if (dirty) dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
+        setupDrawModelView(left, top, right, bottom, ignoreTransform);
     } else {
-        mat4 identity;
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, identity);
-        if (dirty) dirtyLayer(left, top, right, bottom);
+        setupDrawModelViewTranslate(left, top, right, bottom, ignoreTransform);
     }
-
-    // Texture
-    bindTexture(texture);
-    glUniform1i(mCaches.currentProgram->getUniform("sampler"), 0);
-
-    // Always premultiplied
-    if (setColor) {
-        mCaches.currentProgram->setColor(alpha, alpha, alpha, alpha);
-    }
-
-    // Mesh
-    int texCoordsSlot = mCaches.currentProgram->getAttrib("texCoords");
-    glEnableVertexAttribArray(texCoordsSlot);
-
-    if (!vertices) {
-        mCaches.bindMeshBuffer(vbo == 0 ? mCaches.meshBuffer : vbo);
-    } else {
-        mCaches.unbindMeshBuffer();
-    }
-    glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
-            gMeshStride, vertices);
-    glVertexAttribPointer(texCoordsSlot, 2, GL_FLOAT, GL_FALSE, gMeshStride, texCoords);
-
-    // Color filter
-    if (mColorFilter) {
-        mColorFilter->setupProgram(mCaches.currentProgram);
-    }
+    setupDrawColorUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawTexture(texture);
+    setupDrawMesh(vertices, texCoords, vbo);
 
     glDrawArrays(drawMode, 0, elementsCount);
-    glDisableVertexAttribArray(texCoordsSlot);
+
+    finishDrawTexture();
 }
 
 void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,

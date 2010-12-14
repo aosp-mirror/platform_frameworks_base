@@ -248,7 +248,7 @@ public abstract class FragmentManager {
      * @param prefix Text to print at the front of each line.
      * @param fd The raw file descriptor that the dump is being sent to.
      * @param writer A PrintWriter to which the dump is to be set.
-     * @param args additional arguments to the dump request.
+     * @param args Additional arguments to the dump request.
      */
     public abstract void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args);
 }
@@ -293,7 +293,7 @@ final class FragmentManagerState implements Parcelable {
  * Container for fragments associated with an activity.
  */
 final class FragmentManagerImpl extends FragmentManager {
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
     static final String TAG = "FragmentManager";
     
     static final String TARGET_REQUEST_CODE_STATE_TAG = "android:target_req_state";
@@ -456,7 +456,9 @@ final class FragmentManagerImpl extends FragmentManager {
             return;
         }
 
-        writer.print(prefix); writer.println("Active Fragments:");
+        writer.print(prefix); writer.print("Active Fragments in ");
+                writer.print(Integer.toHexString(System.identityHashCode(this)));
+                writer.println(":");
 
         String innerPrefix = prefix + "    ";
 
@@ -490,6 +492,7 @@ final class FragmentManagerImpl extends FragmentManager {
                     BackStackRecord bs = mBackStack.get(i);
                     writer.print(prefix); writer.print("  #"); writer.print(i);
                             writer.print(": "); writer.println(bs.toString());
+                    bs.dump(innerPrefix, fd, writer, args);
                 }
             }
         }
@@ -559,6 +562,7 @@ final class FragmentManagerImpl extends FragmentManager {
                         }
                     }
                     f.mActivity = mActivity;
+                    f.mFragmentManager = mActivity.mFragments;
                     f.mCalled = false;
                     f.onAttach(mActivity);
                     if (!f.mCalled) {
@@ -734,6 +738,7 @@ final class FragmentManagerImpl extends FragmentManager {
                         }
                         f.mImmediateActivity = null;
                         f.mActivity = null;
+                        f.mFragmentManager = null;
                     }
             }
         }
@@ -1312,6 +1317,10 @@ final class FragmentManagerImpl extends FragmentManager {
                 Fragment f = fs.instantiate(mActivity);
                 if (DEBUG) Log.v(TAG, "restoreAllState: adding #" + i + ": " + f);
                 mActive.add(f);
+                // Now that the fragment is instantiated (or came from being
+                // retained above), clear mInstance in case we end up re-restoring
+                // from this FragmentState again.
+                fs.mInstance = null;
             } else {
                 if (DEBUG) Log.v(TAG, "restoreAllState: adding #" + i + ": (null)");
                 mActive.add(null);

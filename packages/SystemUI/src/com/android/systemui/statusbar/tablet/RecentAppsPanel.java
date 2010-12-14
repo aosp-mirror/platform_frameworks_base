@@ -20,13 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
-import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.IThumbnailReceiver;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
@@ -50,12 +46,10 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.ImageView.ScaleType;
 
 import com.android.systemui.R;
 
@@ -64,10 +58,11 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
     private static final boolean DEBUG = TabletStatusBar.DEBUG;
     private static final int DISPLAY_TASKS_PORTRAIT = 8;
     private static final int DISPLAY_TASKS_LANDSCAPE = 5; // number of recent tasks to display
-    private static final int MAX_TASKS = 2 * DISPLAY_TASKS_PORTRAIT; // allow extra for non-apps
+    private static final int MAX_TASKS = DISPLAY_TASKS_PORTRAIT + 2; // allow extra for non-apps
     private TabletStatusBar mBar;
     private TextView mNoRecents;
     private LinearLayout mRecentsContainer;
+    private View mRecentsGlowView;
     private ArrayList<ActivityDescription> mActivityDescriptions;
     private int mIconDpi;
     private AnimatorSet mAnimationSet;
@@ -85,8 +80,8 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         int position; // position in list
 
         public ActivityDescription(Bitmap _thumbnail,
-                Drawable _icon, String _label, String _desc, Intent _intent, int _id, int _pos,
-                String _packageName)
+                Drawable _icon, String _label, CharSequence _desc, Intent _intent,
+                int _id, int _pos, String _packageName)
         {
             thumbnail = _thumbnail;
             icon = _icon;
@@ -96,21 +91,6 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
             id = _id;
             position = _pos;
             packageName = _packageName;
-        }
-    };
-
-    private final IThumbnailReceiver mThumbnailReceiver = new IThumbnailReceiver.Stub() {
-
-        public void finished() throws RemoteException {
-        }
-
-        public void newThumbnail(final int id, final Bitmap bitmap, CharSequence description)
-                throws RemoteException {
-            ActivityDescription info = findActivityDescription(id);
-            if (info != null) {
-                info.thumbnail = bitmap;
-                info.description = description;
-            }
         }
     };
 
@@ -145,6 +125,7 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         super.onFinishInflate();
         mNoRecents = (TextView) findViewById(R.id.recents_no_recents);
         mRecentsContainer = (LinearLayout) findViewById(R.id.recents_container);
+        mRecentsGlowView = findViewById(R.id.recents_glow);
         mBackgroundProtector = (View) findViewById(R.id.recents_bg_protect);
 
         // In order to save space, we make the background texture repeat in the Y direction
@@ -205,7 +186,8 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
                 mContext.getSystemService(Context.ACTIVITY_SERVICE);
 
         final List<ActivityManager.RecentTaskInfo> recentTasks =
-                am.getRecentTasks(MAX_TASKS, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
+                am.getRecentTasks(MAX_TASKS, ActivityManager.RECENT_IGNORE_UNAVAILABLE
+                        | ActivityManager.TASKS_GET_THUMBNAILS);
 
         ActivityInfo homeInfo = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
                     .resolveActivityInfo(pm, 0);
@@ -238,7 +220,8 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
                 if (title != null && title.length() > 0 && icon != null) {
                     if (DEBUG) Log.v(TAG, "creating activity desc for id=" + id + ", label=" + title);
                     ActivityDescription item = new ActivityDescription(
-                            null, icon, title, null, intent, id, index, info.packageName);
+                            crop(recentInfo.thumbnail), icon, title, recentInfo.description,
+                            intent, id, index, info.packageName);
                     activityDescriptions.add(item);
                     ++index;
                 } else {
@@ -262,28 +245,8 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         return desc;
     }
 
-    private void getThumbnails(ArrayList<ActivityDescription> tasks) {
-        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        List<RunningTaskInfo> runningTasks = am.getRunningTasks(MAX_TASKS, 0, mThumbnailReceiver);
-        for (RunningTaskInfo runningTaskInfo : runningTasks) {
-            // Find the activity description associted with the given id
-            ActivityDescription desc = findActivityDescription(runningTaskInfo.id);
-            if (desc != null) {
-                if (runningTaskInfo.thumbnail != null) {
-                    desc.thumbnail = crop(runningTaskInfo.thumbnail);
-                    desc.description = runningTaskInfo.description;
-                } else {
-                    if (DEBUG) Log.v(TAG, "*** RUNNING THUMBNAIL WAS NULL ***");
-                }
-            } else {
-                if (DEBUG) Log.v(TAG, "Couldn't find ActivityDesc for id=" + runningTaskInfo.id);
-            }
-        }
-    }
-
     private void refreshApplicationList() {
         mActivityDescriptions = getRecentTasks();
-        getThumbnails(mActivityDescriptions);
         updateUiElements(getResources().getConfiguration(), true);
     }
 
@@ -307,11 +270,6 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
 
     private void updateUiElements(Configuration config, boolean animate) {
         mRecentsContainer.removeAllViews();
-
-
-        // TODO: disabled until I have a chance to tune animations with UX
-        animate = false;
-
 
         final float initialAlpha = 0.0f;
         final int first = 0;
@@ -339,8 +297,8 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
             if (animate) {
                 view.setAlpha(initialAlpha);
                 ObjectAnimator anim = ObjectAnimator.ofFloat(view, "alpha", initialAlpha, 1.0f);
-                anim.setDuration(25);
-                anim.setStartDelay((last-i)*25);
+                anim.setDuration(200);
+                anim.setStartDelay((last-i)*80);
                 anim.setInterpolator(interp);
                 anims.add(anim);
             }
@@ -349,11 +307,12 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         int views = mRecentsContainer.getChildCount();
         mNoRecents.setVisibility(View.GONE); // views == 0 ? View.VISIBLE : View.GONE);
         mRecentsContainer.setVisibility(views > 0 ? View.VISIBLE : View.GONE);
+        mRecentsGlowView.setVisibility(views > 0 ? View.VISIBLE : View.GONE);
 
-        if (animate) {
-            ObjectAnimator anim = ObjectAnimator.ofFloat(mRecentsContainer, "alpha",
+        if (animate && views > 0) {
+            ObjectAnimator anim = ObjectAnimator.ofFloat(mRecentsGlowView, "alpha",
                     initialAlpha, 1.0f);
-            anim.setDuration(last*25);
+            anim.setDuration((last-first)*80);
             anim.setInterpolator(interp);
             anims.add(anim);
         }
@@ -361,7 +320,7 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         if (animate) {
             ObjectAnimator anim = ObjectAnimator.ofFloat(mBackgroundProtector, "alpha",
                     initialAlpha, 1.0f);
-            anim.setDuration(last*25);
+            anim.setDuration(last*80);
             anim.setInterpolator(interp);
             anims.add(anim);
         }

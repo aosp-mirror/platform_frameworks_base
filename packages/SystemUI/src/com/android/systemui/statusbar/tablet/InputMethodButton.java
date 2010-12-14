@@ -157,6 +157,17 @@ public class InputMethodButton extends ImageView {
         return null;
     }
 
+    // Display IME switcher icon only when all of the followings are true:
+    // * There is only one enabled IME on the device.  (Note that the IME should be the system IME)
+    // * There are no explicitly enabled (by the user) subtypes of the IME, or the IME doesn't have
+    // its subtypes at all
+    private boolean needsToShowIMEButton() {
+        List<InputMethodInfo> imis = mImm.getInputMethodList();
+        final int size = imis.size();
+        return size > 1
+                || (size == 1 && mImm.getEnabledInputMethodSubtypeList(imis.get(0)).size() > 1);
+    }
+
     private void refreshStatusIcon(boolean keyboardShown) {
         if (!keyboardShown) {
             setVisibility(View.INVISIBLE);
@@ -187,7 +198,7 @@ public class InputMethodButton extends ImageView {
 
     public void setIMEButtonVisible(IBinder token, boolean visible) {
         mToken = token;
-        mKeyboardShown = visible;
+        mKeyboardShown = visible ? needsToShowIMEButton() : false;
         refreshStatusIcon(mKeyboardShown);
     }
 }
