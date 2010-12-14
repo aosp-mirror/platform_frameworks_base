@@ -725,26 +725,38 @@ public class MtpDatabase {
         }
     }
 
-    private int deleteRecursive(int handle) throws RemoteException {
-        int[] children = getObjectList(0 /* storageID */, 0 /* format */, handle);
-        Uri uri = Files.getMtpObjectsUri(mVolumeName, handle);
-        // delete parent first, to avoid potential infinite recursion
-        int count = mMediaProvider.delete(uri, null, null);
-        if (count == 1) {
-            if (children != null) {
-                for (int i = 0; i < children.length; i++) {
-                    count += deleteRecursive(children[i]);
-                }
-            }
-        }
-        return count;
-    }
-
     private int deleteFile(int handle) {
         Log.d(TAG, "deleteFile: " + handle);
         mDatabaseModified = true;
+        String path = null;
+        int format = 0;
+
+        Cursor c = null;
         try {
-            if (deleteRecursive(handle) > 0) {
+            c = mMediaProvider.query(mObjectsUri, PATH_SIZE_FORMAT_PROJECTION,
+                            ID_WHERE, new String[] {  Integer.toString(handle) }, null);
+            if (c != null && c.moveToNext()) {
+                // don't convert to media path here, since we will be matching
+                // against paths in the database matching /data/media
+                path = c.getString(1);
+                format = c.getInt(3);
+            } else {
+                return MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE;
+            }
+
+            if (path == null || format == 0) {
+                return MtpConstants.RESPONSE_GENERAL_ERROR;
+            }
+
+            if (format == MtpConstants.FORMAT_ASSOCIATION) {
+                // recursive case - delete all children first
+                Uri uri = Files.getMtpObjectsUri(mVolumeName);
+                int count = mMediaProvider.delete(uri, "_data LIKE ?",
+                        new String[] { path + "/%"});
+            }
+
+            Uri uri = Files.getMtpObjectsUri(mVolumeName, handle);
+            if (mMediaProvider.delete(uri, null, null) > 0) {
                 return MtpConstants.RESPONSE_OK;
             } else {
                 return MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE;
@@ -752,6 +764,10 @@ public class MtpDatabase {
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in deleteFile", e);
             return MtpConstants.RESPONSE_GENERAL_ERROR;
+        } finally {
+            if (c != null) {
+                c.close();
+            }
         }
     }
 
