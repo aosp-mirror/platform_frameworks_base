@@ -2410,6 +2410,12 @@ public final class Settings {
                 "input_methods_subtype_history";
 
         /**
+         * Setting to record the visibility of input method selector
+         */
+        public static final String INPUT_METHOD_SELECTOR_VISIBILITY =
+                "input_method_selector_visibility";
+
+        /**
          * Whether the device has been provisioned (0 = false, 1 = true)
          */
         public static final String DEVICE_PROVISIONED = "device_provisioned";
