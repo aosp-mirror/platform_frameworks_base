@@ -1,0 +1,349 @@
+page.title=Menu Icons
+parent.title=Icon Design Guidelines
+parent.link=icon_design.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+<ol>
+<li><a href="#icon9">Android 2.3 and Later</a>
+  <ol>
+    <li><a href="#size9">Size</a></li>
+    <li><a href="#style9">Style, colors, and effects</a></li>
+    <li><a href="#dodonts9">Do's and don'ts</a></li>
+    <li><a href="#examples9">Example icons</a></li>
+  </ol>
+</li>
+<li><a href="#icon1">Android 2.2 and Earlier</a></li>
+</ol>
+
+<h2>See also</h2>
+
+<ol>
+<li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a></li>
+</ol>
+
+</div>
+</div>
+
+
+
+<p>Menu icons are graphical elements placed in the options menu shown to users
+when they press the Menu button. They are drawn in a flat-front perspective and
+in greyscale. Elements in a menu icon must not be visualized in 3D or
+perspective.</p>
+
+<p>As described in <a href="icon_design.html#icon-sets">Providing
+Density-Specific Icon Sets</a>, you should create separate icon sets for low-,
+medium-, and high-density screens. This ensures that your icons will display
+properly across the range of devices on which your application can be installed.
+See <a href="icon_design.html#design-tips">Tips for Designers</a>
+for suggestions on how to work with multiple sets of icons.</p>
+
+<p><strong>Final art must be exported as a transparent PNG file. Do not include
+a background color</strong>.</p>
+
+<p>Templates for creating icons in Adobe Photoshop are available in the <a
+href="{@docRoot}guide/practices/ui_guidelines/icon_design.html#templatespack">Icon
+Templates Pack</a>.</p>
+
+
+<p class="caution"><strong>Caution:</strong> The style and content sizing of
+menu icons have changed in Android 2.3 compared to
+<a href="#icon1">previous versions</a>:
+<br>
+1. Icons have a larger safe frame; icon content is smaller within the full
+asset. Final asset sizes have not changed.
+<br>
+2. The color palette is slightly lighter.
+<br>
+3. No outer glow effects are applied.
+<br>
+4. Menu icons can now be rendered on either dark or light backgrounds.
+
+</p>
+
+
+
+<h2 id="icon9">Android 2.3 and Later</h2>
+
+<p>The following guidelines describe how to design menu icons for Android
+2.3 (API Level 9) and later.</p>
+
+<h3 id="size9">Size and positioning</h3>
+
+<p>Menu icons can use a variety of shapes and forms and must be scaled and
+positioned inside the asset to create consistent visual weight with other
+icons.</p>
+
+<p>Figure 1 illustrates various ways of positioning the icon inside the
+asset. You should size the icons <em>smaller than the actual bounds of the
+asset</em>, to create a consistent visual weight. If your icon is square or
+nearly square, it should be scaled even smaller.</p>
+
+<p>In order to indicate the recommended size for the icon, each example in
+Figure 1 includes three different guide rectangles:</p>
+
+<ul>
+<li>The red box is the bounding box for the full asset.</li>
+<li>The blue box is the recommended bounding box for the actual icon.
+The icon box is sized smaller than the full asset box to allow for
+varying icon shapes while maintaining a consistent visual weight.</li>
+<li>The orange box is the recommended bounding box for the actual icon when
+the content is square. The box for square icons is smaller than that for other
+icons to establish a consistent visual weight across the two types.</li>
+</ul>
+
+<table>
+<tr>
+
+<td style="border:0;">
+<ol class="nolist">
+  <li>Menu icon dimensions for high-density (<code>hdpi</code>) screens:</li>
+  <ol class="nolist">
+    <li>Full Asset: 72 x 72 px</li>
+    <li>Icon: 48 x 48 px</li>
+    <li>Square Icon: 44 x 44 px</li>
+  </ol>
+  </li>
+</ol>
+</td>
+<td style="border:0;">
+  <img src="{@docRoot}images/icon_design/menu_size_hdpi.png" width="450">
+</td>
+</tr>
+<tr>
+<td style="border:0;">
+  <ol class="nolist">
+  <li>Menu icon dimensions for medium-density (<code>mdpi</code>) screens:</li>
+    <ol class="nolist">
+      <li>Full Asset: 48 x 48 px</li>
+      <li>Icon: 32 x 32 px</li>
+      <li>Square Icon: 30 x 30 px</li>
+    </ol>
+  </li>
+</ol>
+</td>
+
+<td style="border:0;">
+ <img src="{@docRoot}images/icon_design/menu_size_mdpi.png" width="450">
+</td>
+</tr>
+<tr>
+<td style="border:0;">
+  <ol class="nolist">
+  <li>Menu icon dimensions for low-density (<code>ldpi</code>) screens:</li>
+    <ol class="nolist">
+      <li>Full Asset: 36 x 36 px</li>
+      <li>Icon: 24 x 24 px</li>
+      <li>Square Icon: 22 x 22 px</li>
+    </ol>
+  </li>
+</ol>
+</td>
+
+<td style="border:0;">
+ <img src="{@docRoot}images/icon_design/menu_size_ldpi.png" width="450">
+</td>
+</tr>
+
+<tr>
+<td style="border:0;"></td>
+<td style="border:0;">
+ <p class="table-caption"><strong>Figure 1.</strong>
+ Menu icon sizing and positioning inside the bounds of the
+ icon asset.</p>
+</td>
+</tr>
+
+</table>
+
+
+
+
+<h3 id="style9">Style, colors, and effects</h3>
+
+<p>Menu icons are flat, pictured face on, and greyscale. A slight deboss and
+some other effects, which are shown below, are used to create depth. Menu icons
+should include rounded corners, but only when logically appropriate.</p>
+
+<p>In order to maintain consistency, all menu icons must use the same
+color palette and effects, as shown in Figure 2.</p>
+
+
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/menu_style.png" alt="A view of light, effects, and shadows for menu icons."/>
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 2. </strong>Style, light and effects for menu icons.</p>
+    <div class="image-caption-nested">
+    <p><em>Note: all pixel dimensions are for medium density and should be scaled appropriately for other densities.</em></p>
+    <table>
+    <tr><td><em>1.</em></td><td nowrap>Corner rounding:</td><td>2 pixel corner radius, when appropriate<br><br></td></tr>
+    <tr><td><em>2.</em></td><td nowrap>Fill gradient:</td><td>90&deg;, from <code>#8C8C8C</code> to <code>#B2B2B2</code><br><br></td></tr>
+    <tr><td><em>3.</em></td><td nowrap>Inner shadow:</td><td><code>#000000</code>, 20% opacity<br>angle 90&deg;<br>distance 2px<br>size 2px<br><br></td></tr>
+    <tr><td><em>4.</em></td><td nowrap>Inner bevel:</td><td>depth 1%<br>direction down<br>size 0px<br>angle 90&deg;<br>altitude 10&deg;<br>highlight <code>#ffffff</code>, 70% opacity<br>shadow <code>#000000</code>, 25% opacity</td></tr>
+    </table>
+    </div>
+  </div>
+</td>
+</tr>
+</table>
+
+
+
+
+<h3 id="dodonts9">Do's and don'ts</h3>
+
+<p>Below are some "do and don't" examples to consider when creating menu icons for
+your application. </p>
+
+
+<img src="{@docRoot}images/icon_design/do_dont_menuicons.png">
+
+
+
+
+<h3 id="examples9">Example icons</h3>
+
+<p>Shown below are standard high-density menu icons that are used in the Android
+platform.</p>
+
+<p class="warning"><strong>Warning:</strong> Because these resources can change
+between platform versions, you should not reference these icons using the
+Android platform resource IDs (i.e. menu icons under
+<code>android.R.drawable</code>). If you want to use any icons or other internal
+drawable resources, you should store a local copy of those icons or drawables in
+your application resources, then reference the local copy from your application
+code. In that way, you can maintain control over the appearance of your icons,
+even if the system's copy changes. Note that the grid below is not intended to
+be complete.</p>
+
+<img src="{@docRoot}images/icon_design/menu_standard.png" />
+
+
+
+
+<h2 id="icon1">Android 2.2 and Earlier</h2>
+
+<p>The following guidelines describe how to design menu icons for Android 2.2
+(API Level 4) and earlier. Menu icons in Android 2.2 and below are drawn in a
+flat-front perspective. Elements in a menu icon must not be visualized in 3D or
+perspective.</p>
+
+<h3 id="structure1">Structure</h3>
+
+<ul>
+<li>In order to maintain consistency, all menu icons must use the same
+primary palette and the same effects. For more information, see the
+menu icon <a href="#palette1">color palette</a>. </li>
+
+<li>Menu icons should include rounded corners, but only when logically
+appropriate. For example, in Figure 3 the logical place for rounded corners is
+the roof and not the rest of the building.</span></li>
+
+<li>All dimensions specified on this page are based on a 48x48 pixel artboard 
+size with a 6 pixel safeframe.</li>
+
+<li>The menu icon effect (the outer glow) described in <a
+href="#style1">Light, effects, and shadows</a> can overlap the 6px safeframe,
+but only when necessary. The base shape must always stay inside the
+safeframe.</li>
+
+<li><strong>Final art must be exported as a transparent PNG file.</strong></li>
+
+<li>Templates for creating menu icons in Adobe Photoshop are available in the 
+Icon Templates Pack.</li>
+</ul>
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/menu_structure.png" alt="A view of menu
+icon structure." />
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 3. </strong>Safeframe and corner-rounding for menu
+icons. Icon size is 48x48.</p>
+  </div>
+</td>
+</tr>
+</table>
+
+
+<h3 id="style1">Light, effects, and shadows</h3>
+
+<p>Menu icons are flat and pictured face on. A slight deboss and some other
+effects, which are shown below, are used to create depth.</p>
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/menu_light.png" alt="A view of light, effects, and shadows for launcher icons."/>
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 4. </strong>Light, effects, and shadows for launcher icons.</p>
+    <div class="image-caption-nested">
+    <table>
+    <tr><td><em>1.</em></td><td>Front part:</td><td>Use fill gradient from primary color palette</td></tr>
+    <tr><td><em>2.</em></td><td>Inner shadow:</td><td>black | 20 % opacity<br>angle 90° | distance 2px<br>size 2px</td></tr>
+    <tr><td><em>3.</em></td><td>Outer glow:</td><td>white | 55% opacity <br>spread 10% | size 3px</td></tr>
+    <tr><td><em>5.</em></td><td>Inner bevel:</td><td>depth 1% | direction down size 0px<br>angle 90° | altitude 10°<br>highlight white 70% opacity<br>shadow black 25% opacity</td></tr>
+    </table>
+    </div>
+  </div>
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td style="border:0">
+
+<h4 id="palette1">Color palette</h4>
+
+<table>
+<tr>
+<td class="image-caption-i"><img src="{@docRoot}images/icon_design/menu_palette_white.png"/></td>
+<td class="image-caption-c">White<br>r 255 | g 255 | b 255<br>Used for outer glow and bevel highlight.</td>
+</tr>
+
+<tr>
+<td class="image-caption-i"><img src="{@docRoot}images/icon_design/menu_palette_gradient_medium.png"/></td>
+<td class="image-caption-c">Fill gradient<br><em>1:&nbsp;&nbsp;</em>r 163 | g 163 | b 163<br><em>2:&nbsp;&nbsp;</em>r 120 | g 120 | b 120<br>Used as color fill.</td>
+</tr>
+
+<tr>
+<td class="image-caption-i"><img src="{@docRoot}images/icon_design/menu_palette_black.png"/></td>
+<td class="image-caption-c">Black<br>r 0 | g 0 | b 0<br>Used for inner shadow and bevel shadow.</td>
+</tr>
+
+</table>
+
+</td>
+
+<td style="border:0">
+
+<h4 id="steps1">Step by step</h4>
+
+<ol>
+<li>Create the basic shapes using a tool like Adobe Illustrator.</li>
+<li>Import the shape into a tool like Adobe Photoshop and scale to fit an image
+of 48x48 px on a transparent background. Mind the safeframe.</li>
+<li>Add the effects seen as described in Figure 4.</li>
+<li>Export the icon at 48x48 as a PNG file with transparency enabled.</li>
+</ol>
+
+</td>
+</tr>
+</table>
