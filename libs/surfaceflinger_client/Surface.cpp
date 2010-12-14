@@ -489,6 +489,9 @@ status_t Surface::validate() const
         LOGE("[Surface] using an invalid surface, "
                 "identity=%u should be %d",
                 mIdentity, identity);
+        CallStack stack;
+        stack.update();
+        stack.dump("Surface");
         return NO_INIT;
     }
 
@@ -497,6 +500,9 @@ status_t Surface::validate() const
     if (err != NO_ERROR) {
         LOGE("surface (identity=%u) is invalid, err=%d (%s)",
                 mIdentity, err, strerror(-err));
+        CallStack stack;
+        stack.update();
+        stack.dump("Surface");
         return err;
     }
 

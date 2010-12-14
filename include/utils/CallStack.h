@@ -50,7 +50,7 @@ public:
     
     void clear();
 
-    void update(int32_t ignoreDepth=0, int32_t maxDepth=MAX_DEPTH);
+    void update(int32_t ignoreDepth=1, int32_t maxDepth=MAX_DEPTH);
 
     // Dump a stack trace to the log
     void dump(const char* prefix = 0) const;
