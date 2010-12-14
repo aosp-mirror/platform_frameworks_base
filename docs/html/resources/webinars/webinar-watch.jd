@@ -1,4 +1,4 @@
-page.title=Watch A Webinar
+page.title=Watch a Webinar
 @jd:body
 
 <script type="text/javascript">
@@ -24,14 +24,14 @@ function renderLiveWebinar(data) {
     var start = entry.start;
     var end = entry.end;
     code.push('<div >');
-    code.push('<h3><b>Live!</b><a href="' + url + '"  target="_blank" onClick=_gaq.push(["_trackEvent", "Live Webinar", "' + title + '"]);>' + title + '</a></h3>');
+    code.push('<h3><b>Live!</b>&nbsp;<a href="' + url + '"  target="_blank" onClick=_gaq.push(["_trackEvent", "Live Webinar", "' + title + '"]);>' + title + '</a></h3>');
     code.push('<p ><i>' + formatDate(start, end) + '</i>');
     code.push('<p>' + description);
     code.push('</div>');
   }
   if (entries.length == 0) {
     code.push('<div >');
-    code.push('<p>There is currently no live webinar. Watch one of the previous webinars from the list below and check the schedule for <a href="/resources/webinars/webinar-upcoming.html">Upcoming Webinars</a>.');
+    code.push('<p class="note">There is currently no live webinar. Check the schedule for <a href="/resources/webinars/webinar-upcoming.html">Upcoming Webinars</a>.');
     code.push('</div>');
   }
   var html = code.join('\n');
@@ -72,7 +72,7 @@ function renderPastWebinar(data) {
     var end = entry.end;
     code.push('<div >');
     code.push('<h3><a href="' + url + '"  target="_blank" onClick=_gaq.push(["_trackEvent", "Past Webinars", "' + title + '"]);>' + title + '</a></h3>');
-    code.push('<p ><i>' + formatDate(start, end) + '</i>');
+    code.push('<p><i>' + formatDate(start, end) + '</i>');
     code.push('<p>' + description);
     code.push('</div>');
   }
@@ -98,7 +98,12 @@ showPastWebinars();      // load webinars
 
 </script>
 
-
+<p>Webinars are web-based seminars that provide online training for a wide range of Android
+  developer topics. When a new webinar takes place, you can watch live and chat with the presenter
+  and other participants in an IRC session that's coupled with the presentation. The IRC session
+is held on the <em>#android-dev</em> channel at <em>irc.freenode.net</em>.</p>
+<p style="margin-bottom:2em">When available, live webinars appear at the top of this page. If there's no live webinar, you
+  can watch one of the previous webinars from the list below.</p>
 
 <div id="live_webinar">
   </div>
