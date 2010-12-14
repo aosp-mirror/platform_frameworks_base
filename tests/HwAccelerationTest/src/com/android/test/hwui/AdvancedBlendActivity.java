@@ -41,7 +41,7 @@ public class AdvancedBlendActivity extends Activity {
         setContentView(new ShadersView(this));
     }
 
-    static class ShadersView extends View {
+    public static class ShadersView extends View {
         private BitmapShader mScaledShader;
         private int mTexWidth;
         private int mTexHeight;
@@ -57,7 +57,7 @@ public class AdvancedBlendActivity extends Activity {
         private ComposeShader mCompose6Shader;
         private BitmapShader mScaled2Shader;
 
-        ShadersView(Context c) {
+        public ShadersView(Context c) {
             super(c);
 
             Bitmap texture = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset1);
@@ -71,7 +71,7 @@ public class AdvancedBlendActivity extends Activity {
             Matrix m2 = new Matrix();
             m2.setScale(0.5f, 0.5f);
             mScaledShader.setLocalMatrix(m2);
-            
+
             mScaled2Shader = new BitmapShader(texture, Shader.TileMode.MIRROR,
                     Shader.TileMode.MIRROR);
             Matrix m3 = new Matrix();
@@ -80,7 +80,7 @@ public class AdvancedBlendActivity extends Activity {
 
             mHorGradient = new LinearGradient(0.0f, 0.0f, mDrawWidth, 0.0f,
                     Color.BLACK, Color.WHITE, Shader.TileMode.CLAMP);
-            
+
             mComposeShader = new ComposeShader(mScaledShader, mHorGradient,
                     PorterDuff.Mode.DARKEN);
             mCompose2Shader = new ComposeShader(mScaledShader, mHorGradient,
@@ -107,7 +107,7 @@ public class AdvancedBlendActivity extends Activity {
 
             mPaint.setShader(mComposeShader);
             canvas.drawRect(0.0f, 0.0f, mDrawWidth, mDrawHeight, mPaint);
-            
+
             canvas.translate(0.0f, 40.0f + mDrawHeight);
             mPaint.setShader(mCompose2Shader);
             canvas.drawRect(0.0f, 0.0f, mDrawWidth, mDrawHeight, mPaint);
@@ -117,10 +117,10 @@ public class AdvancedBlendActivity extends Activity {
             canvas.drawRect(0.0f, 0.0f, mDrawWidth, mDrawHeight, mPaint);
 
             canvas.restore();
-            
+
             canvas.save();
             canvas.translate(40.0f + mDrawWidth + 40.0f, 40.0f);
-            
+
             mPaint.setShader(mCompose4Shader);
             canvas.drawRect(0.0f, 0.0f, mDrawWidth, mDrawHeight, mPaint);
 
@@ -131,7 +131,7 @@ public class AdvancedBlendActivity extends Activity {
             canvas.translate(0.0f, 40.0f + mDrawHeight);
             mPaint.setShader(mCompose6Shader);
             canvas.drawRect(0.0f, 0.0f, mDrawWidth, mDrawHeight, mPaint);
-            
+
             canvas.restore();
         }
     }

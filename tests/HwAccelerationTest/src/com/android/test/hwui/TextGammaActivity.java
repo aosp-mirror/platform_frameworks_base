@@ -43,9 +43,8 @@ public class TextGammaActivity extends Activity {
         ));
 
         setContentView(layout);
-        
+
         layout.post(new Runnable() {
-            @Override
             public void run() {
                 Bitmap b = Bitmap.createBitmap(gamma.getWidth(), gamma.getHeight(),
                         Bitmap.Config.ARGB_8888);
@@ -88,7 +87,7 @@ public class TextGammaActivity extends Activity {
 
             final LinearLayout layout = new LinearLayout(this);
             layout.setOrientation(LinearLayout.VERTICAL);
-        
+
             final GammaTextView gamma = new GammaTextView(this);
             final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT

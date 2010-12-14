@@ -51,15 +51,12 @@ public class GradientsActivity extends Activity {
         final SeekBar rotateView = new SeekBar(this);
         rotateView.setMax(360);
         rotateView.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
 
-            @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
             }
 
-            @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 gradientView.setRotationY((float) progress);
                 radialGradientView.setRotationX((float) progress);
@@ -67,7 +64,7 @@ public class GradientsActivity extends Activity {
                 bitmapView.setRotationX((float) progress);
             }
         });
-        
+
         layout.addView(shadersView);
         layout.addView(gradientView, new FrameLayout.LayoutParams(
                 200, 200, Gravity.CENTER));
@@ -90,7 +87,7 @@ public class GradientsActivity extends Activity {
 
         setContentView(layout);
     }
-    
+
     static class BitmapView extends View {
         private final Paint mPaint;
 
@@ -116,7 +113,7 @@ public class GradientsActivity extends Activity {
             canvas.drawRect(0.0f, 0.0f, getWidth(), getHeight(), mPaint);
         }
     }
-    
+
     static class GradientView extends View {
         private final Paint mPaint;
 
@@ -166,14 +163,14 @@ public class GradientsActivity extends Activity {
             canvas.drawRect(0.0f, 0.0f, getWidth(), getHeight(), mPaint);
         }
     }
-    
+
     static class SweepGradientView extends View {
         private final Paint mPaint;
 
         SweepGradientView(Context c) {
             super(c);
 
-            SweepGradient gradient = new SweepGradient(100.0f, 100.0f, 0xff000000, 0xffffffff);                
+            SweepGradient gradient = new SweepGradient(100.0f, 100.0f, 0xff000000, 0xffffffff);
             mPaint = new Paint();
             mPaint.setShader(gradient);
         }
@@ -190,7 +187,7 @@ public class GradientsActivity extends Activity {
             canvas.drawRect(0.0f, 0.0f, getWidth(), getHeight(), mPaint);
         }
     }
-        
+
     static class ShadersView extends View {
         private final Paint mPaint;
         private final float mDrawWidth;
@@ -232,12 +229,12 @@ public class GradientsActivity extends Activity {
 
             top += 40.0f + mDrawHeight;
             bottom += 40.0f + mDrawHeight;
-            
+
             mMatrix.setScale(1, mDrawHeight);
             mMatrix.postTranslate(left, top);
             mGradient.setLocalMatrix(mMatrix);
             canvas.drawRect(left, top, right, top + mDrawHeight, mPaint);
-            
+
             left += 40.0f + mDrawWidth;
             right += 40.0f + mDrawWidth;
             top -= 40.0f + mDrawHeight;
@@ -251,13 +248,13 @@ public class GradientsActivity extends Activity {
 
             top += 40.0f + mDrawHeight;
             bottom += 40.0f + mDrawHeight;
-            
+
             mMatrix.setScale(1, mDrawWidth);
             mMatrix.postRotate(-90);
             mMatrix.postTranslate(left, top);
             mGradient.setLocalMatrix(mMatrix);
             canvas.drawRect(left, top, left + mDrawWidth, bottom, mPaint);
-           
+
             canvas.restore();
         }
     }
