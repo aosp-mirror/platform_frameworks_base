@@ -34,21 +34,31 @@ public final class BluetoothPan {
     private static final String TAG = "BluetoothPan";
     private static final boolean DBG = false;
 
+    //TODO: This needs to inherit from BluetoothProfile like other profiles.
+
     /** int extra for ACTION_PAN_STATE_CHANGED */
-    public static final String EXTRA_PAN_STATE =
-        "android.bluetooth.pan.extra.STATE";
+    public static final String EXTRA_PAN_STATE = "android.bluetooth.pan.extra.STATE";
+
     /** int extra for ACTION_PAN_STATE_CHANGED */
     public static final String EXTRA_PREVIOUS_PAN_STATE =
         "android.bluetooth.pan.extra.PREVIOUS_STATE";
 
-    /** Indicates the state of an PAN device has changed.
+    /** int extra for ACTION_PAN_STATE_CHANGED */
+    public static final String EXTRA_LOCAL_ROLE = "android.bluetooth.pan.extra.LOCAL_ROLE";
+
+    public static final int LOCAL_NAP_ROLE = 1;
+    public static final int LOCAL_PANU_ROLE = 2;
+
+    /**
+     * Indicates the state of an PAN device has changed.
      * This intent will always contain EXTRA_DEVICE_STATE,
-     * EXTRA_PREVIOUS_DEVICE_STATE and BluetoothDevice.EXTRA_DEVICE
+     * EXTRA_PREVIOUS_DEVICE_STATE, BluetoothDevice.EXTRA_DEVICE
+     * and EXTRA_LOCAL_ROLE.
      * extras.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PAN_STATE_CHANGED =
-        "android.bluetooth.pan.action.STATE_CHANGED";
+      "android.bluetooth.pan.action.STATE_CHANGED";
 
     public static final String NAP_ROLE = "nap";
     public static final String NAP_BRIDGE = "pan1";
@@ -130,40 +140,42 @@ public final class BluetoothPan {
         }
     }
 
-    /** Get the state of a PAN Device.
-    *
-    * This function returns an int representing the state of the PAN connection
-    *
-    *  @param device Remote BT device.
-    *  @return The current state of the PAN Device
-    *  @hide
-    */
-   public int getPanDeviceState(BluetoothDevice device) {
-       if (DBG) log("getPanDeviceState(" + device + ")");
+    /**
+     * Get the state of a PAN Device.
+     *
+     * This function returns an int representing the state of the PAN connection
+     *
+     *  @param device Remote BT device.
+     *  @return The current state of the PAN Device
+     *  @hide
+     */
+    public int getPanDeviceState(BluetoothDevice device) {
+        if (DBG) log("getPanDeviceState(" + device + ")");
+        try {
+            return mService.getPanDeviceState(device);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+            return STATE_DISCONNECTED;
+        }
+    }
+
+    /**
+     * Returns a set of all the connected PAN Devices
+     *
+     * Does not include devices that are currently connecting or disconnecting
+     *
+     *  @return List of PAN devices or empty on Error
+     * @hide
+     */
+    public List<BluetoothDevice> getConnectedDevices() {
+       if (DBG) log("getConnectedDevices");
        try {
-           return mService.getPanDeviceState(device);
+           return mService.getConnectedPanDevices();
        } catch (RemoteException e) {
            Log.e(TAG, "", e);
-           return STATE_DISCONNECTED;
+           return new ArrayList<BluetoothDevice>();
        }
-   }
-
-   /** Returns a set of all the connected PAN Devices
-   *
-   * Does not include devices that are currently connecting or disconnecting
-   *
-   * @return List of PAN devices or empty on Error
-   * @hide
-   */
-   public List<BluetoothDevice> getConnectedDevices() {
-      if (DBG) log("getConnectedDevices");
-      try {
-          return mService.getConnectedPanDevices();
-      } catch (RemoteException e) {
-          Log.e(TAG, "", e);
-          return new ArrayList<BluetoothDevice>();
-      }
-   }
+    }
 
     private static void log(String msg) {
         Log.d(TAG, msg);
