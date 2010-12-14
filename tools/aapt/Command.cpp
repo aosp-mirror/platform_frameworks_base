@@ -904,10 +904,10 @@ int doDump(Bundle* bundle)
                                     error.string());
                                 goto bail;
                         }
-                    } else if (tag == "uses-gl-texture") {
+                    } else if (tag == "supports-gl-texture") {
                         String8 name = getAttribute(tree, NAME_ATTR, &error);
                         if (name != "" && error == "") {
-                            printf("uses-gl-texture:'%s'\n", name.string());
+                            printf("supports-gl-texture:'%s'\n", name.string());
                         } else {
                             fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n",
                                     error.string());
