@@ -869,7 +869,7 @@ public final class Matrix_Delegate {
              tmpDest = new float[dstIndex + pointCount * 2];
          }
 
-         for (int i = 0 ; i < pointCount ; i++) {
+         for (int i = 0 ; i < pointCount * 2 ; i += 2) {
              // just in case we are doing in place, we better put this in temp vars
              float x = mValues[0] * src[i + srcIndex] +
                        mValues[1] * src[i + srcIndex + 1] +
