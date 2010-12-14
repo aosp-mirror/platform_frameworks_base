@@ -80,6 +80,25 @@ public abstract class Context {
     public static final int MODE_APPEND = 0x8000;
 
     /**
+     * SharedPreference loading flag: when set, the file on disk will
+     * be checked for modification even if the shared preferences
+     * instance is already loaded in this process.  This behavior is
+     * sometimes desired in cases where the application has multiple
+     * processes, all writing to the same SharedPreferences file.
+     * Generally there are better forms of communication between
+     * processes, though.
+     *
+     * <p>This was the legacy (but undocumented) behavior in and
+     * before Gingerbread (Android 2.3) and this flag is implied when
+     * targetting such releases.  For applications targetting SDK
+     * versions <em>greater than</em> Android 2.3, this flag must be
+     * explicitly set if desired.
+     *
+     * @see #getSharedPreferences
+     */
+    public static final int MODE_MULTI_PROCESS = 0x0004;
+
+    /**
      * Flag for {@link #bindService}: automatically create the service as long
      * as the binding exists.  Note that while this will create the service,
      * its {@link android.app.Service#onStartCommand}
@@ -318,7 +337,11 @@ public abstract class Context {
      * editor (SharedPreferences.edit()) and then commit changes (Editor.commit()).
      * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
      * default operation, {@link #MODE_WORLD_READABLE}
-     * and {@link #MODE_WORLD_WRITEABLE} to control permissions.
+     * and {@link #MODE_WORLD_WRITEABLE} to control permissions.  The bit
+     * {@link #MODE_MULTI_PROCESS} can also be used if multiple processes
+     * are mutating the same SharedPreferences file.  {@link #MODE_MULTI_PROCESS}
+     * is always on in apps targetting Gingerbread (Android 2.3) and below, and
+     * off by default in later versions.
      *
      * @return Returns the single SharedPreferences instance that can be used
      *         to retrieve and modify the preference values.
@@ -326,6 +349,7 @@ public abstract class Context {
      * @see #MODE_PRIVATE
      * @see #MODE_WORLD_READABLE
      * @see #MODE_WORLD_WRITEABLE
+     * @see #MODE_MULTI_PROCESS
      */
     public abstract SharedPreferences getSharedPreferences(String name,
             int mode);
