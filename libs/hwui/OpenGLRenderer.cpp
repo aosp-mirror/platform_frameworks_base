@@ -925,8 +925,14 @@ void OpenGLRenderer::setupDrawModelView(float left, float top, float right, floa
 }
 
 void OpenGLRenderer::setupDrawColorUniforms() {
-    if (mColorSet && mSetShaderColor) {
+    if (mColorSet || (mShader && mSetShaderColor)) {
         mCaches.currentProgram->setColor(mColorR, mColorG, mColorB, mColorA);
+    }
+}
+
+void OpenGLRenderer::setupDrawColorAlphaUniforms() {
+    if (mSetShaderColor) {
+        mCaches.currentProgram->setColor(mColorA, mColorA, mColorA, mColorA);
     }
 }
 
@@ -1721,7 +1727,7 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     } else {
         setupDrawModelViewTranslate(left, top, right, bottom, ignoreTransform);
     }
-    setupDrawColorUniforms();
+    setupDrawColorAlphaUniforms();
     setupDrawColorFilterUniforms();
     setupDrawTexture(texture);
     setupDrawMesh(vertices, texCoords, vbo);
