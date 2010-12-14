@@ -30,7 +30,6 @@ class Allocation : public ObjectBase {
 
 public:
     Allocation(Context *rsc, const Type *, uint32_t usages);
-    Allocation(Context *rsc, const Type *, void *bmp, void *callbackData, RsBitmapCallback_t callback);
 
     virtual ~Allocation();
 
@@ -88,8 +87,12 @@ public:
 
     virtual void uploadCheck(Context *rsc);
 
-    bool getIsTexture() const {return mIsTexture;}
-    bool getIsBufferObject() const {return mIsVertexBuffer;}
+    bool getIsTexture() const {
+        return (mUsageFlags & RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE) != 0;
+    }
+    bool getIsBufferObject() const {
+        return (mUsageFlags & RS_ALLOCATION_USAGE_GRAPHICS_VERTEX) != 0;
+    }
 
     void incRefs(const void *ptr, size_t ct, size_t startOff = 0) const;
     void decRefs(const void *ptr, size_t ct, size_t startOff = 0) const;
@@ -115,6 +118,7 @@ protected:
     bool mGpuRead;
 
     uint32_t mUsageFlags;
+    RsAllocationMipmapControl mMipmapControl;
 
     // more usage hint data from the application
     // which can be used by a driver to pick the best memory type.
@@ -125,7 +129,6 @@ protected:
 
     // Is this a legal structure to be used as a texture source.
     // Initially this will require 1D or 2D and color data
-    bool mIsTexture;
     bool mTextureGenMipmap;
     uint32_t mTextureLOD;
     uint32_t mTextureID;
@@ -133,7 +136,6 @@ protected:
     // Is this a legal structure to be used as a vertex source.
     // Initially this will require 1D and x(yzw).  Additional per element data
     // is allowed.
-    bool mIsVertexBuffer;
     uint32_t mBufferID;
 
     bool mUploadDefered;
