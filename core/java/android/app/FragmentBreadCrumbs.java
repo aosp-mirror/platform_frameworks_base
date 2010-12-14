@@ -45,6 +45,10 @@ public class FragmentBreadCrumbs extends ViewGroup
 
     // Hahah
     BackStackRecord mTopEntry;
+    BackStackRecord mParentEntry;
+
+    /** Listener to inform when a parent entry is clicked */
+    private OnClickListener mParentClickListener;
 
     public FragmentBreadCrumbs(Context context) {
         this(context, null);
@@ -75,11 +79,42 @@ public class FragmentBreadCrumbs extends ViewGroup
     }
 
     /**
-     * The maximum number of crumbs to show.
-     * @hide
+     * The maximum number of breadcrumbs to show. Older fragment headers will be hidden from view.
+     * @param visibleCrumbs the number of visible breadcrumbs. This should be greater than zero.
      */
     public void setMaxVisible(int visibleCrumbs) {
+        if (visibleCrumbs < 1) {
+            throw new IllegalArgumentException("visibleCrumbs must be greater than zero");
+        }
         mMaxVisible = visibleCrumbs;
+    }
+
+    /**
+     * Inserts an optional parent entry at the first position in the breadcrumbs. Selecting this
+     * entry will result in a call to the specified listener's 
+     * {@link android.view.View.OnClickListener#onClick(View)}
+     * method.
+     *
+     * @param title the title for the parent entry
+     * @param shortTitle the short title for the parent entry
+     * @param listener the {@link android.view.View.OnClickListener} to be called when clicked.
+     * A null will result in no action being taken when the parent entry is clicked.
+     */
+    public void setParentTitle(CharSequence title, CharSequence shortTitle,
+            OnClickListener listener) {
+        mParentEntry = createBackStackEntry(title, shortTitle);
+        mParentClickListener = listener;
+        updateCrumbs();
+    }
+
+    private BackStackRecord createBackStackEntry(CharSequence title, CharSequence shortTitle) {
+        if (title == null) return null;
+
+        final BackStackRecord entry = new BackStackRecord(
+                (FragmentManagerImpl) mActivity.getFragmentManager());
+        entry.setBreadCrumbTitle(title);
+        entry.setBreadCrumbShortTitle(shortTitle);
+        return entry;
     }
 
     /**
@@ -88,14 +123,7 @@ public class FragmentBreadCrumbs extends ViewGroup
      * title is null, it will not be shown.
      */
     public void setTitle(CharSequence title, CharSequence shortTitle) {
-        if (title == null) {
-            mTopEntry = null;
-        } else {
-            mTopEntry = new BackStackRecord((FragmentManagerImpl)
-                    mActivity.getFragmentManager());
-            mTopEntry.setBreadCrumbTitle(title);
-            mTopEntry.setBreadCrumbShortTitle(shortTitle);
-        }
+        mTopEntry = createBackStackEntry(title, shortTitle);
         updateCrumbs();
     }
 
@@ -151,41 +179,66 @@ public class FragmentBreadCrumbs extends ViewGroup
         updateCrumbs();
     }
 
+    /**
+     * Returns the number of entries before the backstack, including the title of the current
+     * fragment and any custom parent title that was set.
+     */
+    private int getPreEntryCount() {
+        return (mTopEntry != null ? 1 : 0) + (mParentEntry != null ? 1 : 0);
+    }
+
+    /**
+     * Returns the pre-entry corresponding to the index. If there is a parent and a top entry
+     * set, parent has an index of zero and top entry has an index of 1. Returns null if the
+     * specified index doesn't exist or is null.
+     * @param index should not be more than {@link #getPreEntryCount()} - 1
+     */
+    private BackStackEntry getPreEntry(int index) {
+        // If there's a parent entry, then return that for zero'th item, else top entry.
+        if (mParentEntry != null) {
+            return index == 0 ? mParentEntry : mTopEntry;
+        } else {
+            return mTopEntry;
+        }
+    }
+
     void updateCrumbs() {
         FragmentManager fm = mActivity.getFragmentManager();
         int numEntries = fm.countBackStackEntries();
+        int numPreEntries = getPreEntryCount();
         int numViews = mContainer.getChildCount();
-        for (int i = mTopEntry != null ? -1 : 0; i < numEntries; i++) {
-            BackStackEntry bse = i == -1 ? mTopEntry : fm.getBackStackEntry(i);
-            int viewI = mTopEntry != null ? i + 1 : i;
-            if (viewI < numViews) {
-                View v = mContainer.getChildAt(viewI);
+        for (int i = 0; i < numEntries + numPreEntries; i++) {
+            BackStackEntry bse = i < numPreEntries
+                    ? getPreEntry(i)
+                    : fm.getBackStackEntry(i - numPreEntries);
+            if (i < numViews) {
+                View v = mContainer.getChildAt(i);
                 Object tag = v.getTag();
                 if (tag != bse) {
-                    for (int j = viewI; j < numViews; j++) {
-                        mContainer.removeViewAt(viewI);
+                    for (int j = i; j < numViews; j++) {
+                        mContainer.removeViewAt(i);
                     }
-                    numViews = viewI;
+                    numViews = i;
                 }
             }
-            if (viewI >= numViews) {
+            if (i >= numViews) {
                 final View item = mInflater.inflate(
                         com.android.internal.R.layout.fragment_bread_crumb_item,
                         this, false);
                 final TextView text = (TextView) item.findViewById(com.android.internal.R.id.title);
                 text.setText(bse.getBreadCrumbTitle());
                 text.setTag(bse);
-                if (viewI == 0) {
+                if (i == 0) {
                     item.findViewById(com.android.internal.R.id.left_icon).setVisibility(View.GONE);
                 }
                 mContainer.addView(item);
                 text.setOnClickListener(mOnClickListener);
             }
         }
-        int viewI = mTopEntry != null ? numEntries + 1 : numEntries;
+        int viewI = numEntries + numPreEntries;
         numViews = mContainer.getChildCount();
         while (numViews > viewI) {
-            mContainer.removeViewAt(numViews-1);
+            mContainer.removeViewAt(numViews - 1);
             numViews--;
         }
         // Adjust the visibility and availability of the bread crumbs and divider
@@ -208,8 +261,14 @@ public class FragmentBreadCrumbs extends ViewGroup
         public void onClick(View v) {
             if (v.getTag() instanceof BackStackEntry) {
                 BackStackEntry bse = (BackStackEntry) v.getTag();
-                mActivity.getFragmentManager().popBackStack(bse.getId(),
-                        bse == mTopEntry? FragmentManager.POP_BACK_STACK_INCLUSIVE : 0);
+                if (bse == mParentEntry) {
+                    if (mParentClickListener != null) {
+                        mParentClickListener.onClick(v);
+                    }
+                } else {
+                    mActivity.getFragmentManager().popBackStack(bse.getId(),
+                            bse == mTopEntry? FragmentManager.POP_BACK_STACK_INCLUSIVE : 0);
+                }
             }
         }
     };
