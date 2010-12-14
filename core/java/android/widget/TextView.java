@@ -918,9 +918,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             drawableLeft, drawableTop, drawableRight, drawableBottom);
         setCompoundDrawablePadding(drawablePadding);
 
-        // Same as setSingleLine, but make sure the transformation method is unchanged.
+        // Same as setSingleLine(), but make sure the transformation method and the maximum number
+        // of lines of height (for multi-line only) are unchanged.
         setInputTypeSingleLine(singleLine);
-        applySingleLine(singleLine, false);
+        applySingleLine(singleLine, false, false);
 
         if (singleLine && mInput == null && ellipsize < 0) {
                 ellipsize = 3; // END
@@ -2156,7 +2157,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Makes the TextView at least this many lines tall
+     * Makes the TextView at least this many lines tall.
+     *
+     * Setting this value overrides any other (minimum) height setting. A single line TextView will
+     * set this value to 1.
      *
      * @attr ref android.R.styleable#TextView_minLines
      */
@@ -2170,7 +2174,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Makes the TextView at least this many pixels tall
+     * Makes the TextView at least this many pixels tall.
+     *
+     * Setting this value overrides any other (minimum) number of lines setting.
      *
      * @attr ref android.R.styleable#TextView_minHeight
      */
@@ -2184,7 +2190,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Makes the TextView at most this many lines tall
+     * Makes the TextView at most this many lines tall.
+     *
+     * Setting this value overrides any other (maximum) height setting.
      *
      * @attr ref android.R.styleable#TextView_maxLines
      */
@@ -2198,7 +2206,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Makes the TextView at most this many pixels tall
+     * Makes the TextView at most this many pixels tall.  This option is mutually exclusive with the
+     * {@link #setMaxLines(int)} method.
+     *
+     * Setting this value overrides any other (maximum) number of lines setting.
      *
      * @attr ref android.R.styleable#TextView_maxHeight
      */
@@ -2212,7 +2223,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Makes the TextView exactly this many lines tall
+     * Makes the TextView exactly this many lines tall.
+     *
+     * Note that setting this value overrides any other (minimum / maximum) number of lines or
+     * height setting. A single line TextView will set this value to 1.
      *
      * @attr ref android.R.styleable#TextView_lines
      */
@@ -2229,6 +2243,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Makes the TextView exactly this many pixels tall.
      * You could do the same thing by specifying this number in the
      * LayoutParams.
+     *
+     * Note that setting this value overrides any other (minimum / maximum) number of lines or
+     * height setting.
      *
      * @attr ref android.R.styleable#TextView_height
      */
@@ -3027,12 +3044,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Set the type of the content with a constant as defined for
-     * {@link EditorInfo#inputType}.  This will take care of changing
-     * the key listener, by calling {@link #setKeyListener(KeyListener)}, to
-     * match the given content type.  If the given content type is
-     * {@link EditorInfo#TYPE_NULL} then a soft keyboard will
-     * not be displayed for this text view.
+     * Set the type of the content with a constant as defined for {@link EditorInfo#inputType}. This
+     * will take care of changing the key listener, by calling {@link #setKeyListener(KeyListener)},
+     * to match the given content type.  If the given content type is {@link EditorInfo#TYPE_NULL}
+     * then a soft keyboard will not be displayed for this text view.
+     *
+     * Note that the maximum number of displayed lines (see {@link #setMaxLines(int)}) will be
+     * modified if you change the {@link EditorInfo#TYPE_TEXT_FLAG_MULTI_LINE} flag of the input
+     * type.
      *
      * @see #getInputType()
      * @see #setRawInputType(int)
@@ -3069,7 +3088,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mSingleLine != singleLine || forceUpdate) {
             // Change single line mode, but only change the transformation if
             // we are not in password mode.
-            applySingleLine(singleLine, !isPassword);
+            applySingleLine(singleLine, !isPassword, true);
         }
         
         InputMethodManager imm = InputMethodManager.peekInstance();
@@ -6308,19 +6327,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * If true, sets the properties of this field (lines, horizontally
-     * scrolling, transformation method) to be for a single-line input;
-     * if false, restores these to the default conditions.
-     * Note that calling this with false restores default conditions,
-     * not necessarily those that were in effect prior to calling
-     * it with true.
+     * If true, sets the properties of this field (number of lines, horizontally scrolling,
+     * transformation method) to be for a single-line input; if false, restores these to the default
+     * conditions.
+     *
+     * Note that the default conditions are not necessarily those that were in effect prior this
+     * method, and you may want to reset these properties to your custom values.
      *
      * @attr ref android.R.styleable#TextView_singleLine
      */
     @android.view.RemotableViewMethod
     public void setSingleLine(boolean singleLine) {
+        // Could be used, but may break backward compatibility.
+        // if (mSingleLine == singleLine) return;
         setInputTypeSingleLine(singleLine);
-        applySingleLine(singleLine, true);
+        applySingleLine(singleLine, true, true);
     }
 
     /**
@@ -6337,7 +6358,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private void applySingleLine(boolean singleLine, boolean applyTransformation) {
+    private void applySingleLine(boolean singleLine, boolean applyTransformation,
+            boolean changeMaxLines) {
         mSingleLine = singleLine;
         if (singleLine) {
             setLines(1);
@@ -6347,7 +6369,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             setBackgroundDrawable(mEditTextSingleLineBackground);
         } else {
-            setMaxLines(Integer.MAX_VALUE);
+            if (changeMaxLines) {
+                setMaxLines(Integer.MAX_VALUE);
+            }
             setHorizontallyScrolling(false);
             if (applyTransformation) {
                 setTransformationMethod(null);
