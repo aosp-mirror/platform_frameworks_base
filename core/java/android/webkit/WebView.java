@@ -432,8 +432,10 @@ public class WebView extends AbsoluteLayout
      * to further, which slows down the refresh rate. Choose 50 to favor the
      * current high speed devices. For Dream like devices, 100 is a better
      * choice. Maybe make this in the buildspec later.
+     * (Update 12/14/2010: changed to 0 since current device should be able to
+     * handle the raw events and Map team voted to have the raw events too.
      */
-    private static final int TOUCH_SENT_INTERVAL = 50;
+    private static final int TOUCH_SENT_INTERVAL = 0;
     private int mCurrentTouchInterval = TOUCH_SENT_INTERVAL;
 
     /**
