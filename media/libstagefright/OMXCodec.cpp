@@ -2675,6 +2675,7 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
             signalEOS = true;
             mFinalStatus = err;
             mSignalledEOS = true;
+            mBufferFilled.signal();
             break;
         }
 
