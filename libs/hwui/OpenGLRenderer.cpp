@@ -849,9 +849,9 @@ void OpenGLRenderer::setupDrawWithTexture(bool isAlpha8) {
 void OpenGLRenderer::setupDrawColor(int color) {
     mColorA = ((color >> 24) & 0xFF) / 255.0f;
     const float a = mColorA / 255.0f;
-    mColorR = mColorA * ((color >> 16) & 0xFF);
-    mColorG = mColorA * ((color >>  8) & 0xFF);
-    mColorB = mColorA * ((color      ) & 0xFF);
+    mColorR = a * ((color >> 16) & 0xFF);
+    mColorG = a * ((color >>  8) & 0xFF);
+    mColorB = a * ((color      ) & 0xFF);
     mColorSet = true;
     mSetShaderColor = mDescription.setColor(mColorR, mColorG, mColorB, mColorA);
 }
