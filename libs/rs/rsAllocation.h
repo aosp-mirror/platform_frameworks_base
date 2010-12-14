@@ -45,7 +45,7 @@ public:
 
     void syncAll(Context *rsc, RsAllocationUsageType src);
 
-    void deferedUploadToTexture(const Context *rsc, bool genMipmap, uint32_t lodOffset);
+    void deferedUploadToTexture(const Context *rsc);
     void uploadToTexture(const Context *rsc);
     uint32_t getTextureID() const {return mTextureID;}
 
@@ -87,6 +87,9 @@ public:
 
     virtual void uploadCheck(Context *rsc);
 
+    bool getIsScript() const {
+        return (mUsageFlags & RS_ALLOCATION_USAGE_SCRIPT) != 0;
+    }
     bool getIsTexture() const {
         return (mUsageFlags & RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE) != 0;
     }
@@ -98,7 +101,11 @@ public:
     void decRefs(const void *ptr, size_t ct, size_t startOff = 0) const;
 
     void sendDirty() const;
-    bool getHasGraphicsMipmaps() const {return mTextureGenMipmap;}
+    bool getHasGraphicsMipmaps() const {
+        return mMipmapControl != RS_ALLOCATION_MIPMAP_NONE;
+    }
+
+    void upload2DTexture(bool isFirstUpload, const void *ptr);
 
 protected:
     ObjectBaseRef<const Type> mType;
@@ -129,8 +136,6 @@ protected:
 
     // Is this a legal structure to be used as a texture source.
     // Initially this will require 1D or 2D and color data
-    bool mTextureGenMipmap;
-    uint32_t mTextureLOD;
     uint32_t mTextureID;
 
     // Is this a legal structure to be used as a vertex source.
@@ -142,8 +147,11 @@ protected:
 
 private:
     void init(Context *rsc, const Type *);
-    void upload2DTexture(bool isFirstUpload);
     void uploadCubeTexture(bool isFirstUpload);
+
+    void allocScriptMemory();
+    void freeScriptMemory();
+
 };
 
 }

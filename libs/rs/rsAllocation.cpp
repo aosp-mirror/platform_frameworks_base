@@ -36,7 +36,7 @@ Allocation::Allocation(Context *rsc, const Type *type, uint32_t usages) : Object
 
     mUsageFlags = usages;
 
-    mPtr = malloc(mType->getSizeBytes());
+    allocScriptMemory();
     if (mType->getElement()->getHasReferences()) {
         memset(mPtr, 0, mType->getSizeBytes());
     }
@@ -75,10 +75,9 @@ void Allocation::init(Context *rsc, const Type *type) {
 Allocation::~Allocation() {
     if (mUserBitmapCallback != NULL) {
         mUserBitmapCallback(mUserBitmapCallbackData);
-    } else {
-        free(mPtr);
+        mPtr = NULL;
     }
-    mPtr = NULL;
+    freeScriptMemory();
 
     if (mBufferID) {
         // Causes a SW crash....
@@ -108,12 +107,9 @@ bool Allocation::fixAllocation() {
     return false;
 }
 
-void Allocation::deferedUploadToTexture(const Context *rsc, bool genMipmap, uint32_t lodOffset) {
-    rsAssert(lodOffset < mType->getLODCount());
+void Allocation::deferedUploadToTexture(const Context *rsc) {
     mUsageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE;
-    mTextureLOD = lodOffset;
     mUploadDefered = true;
-    mTextureGenMipmap = !mType->getDimLOD() && genMipmap;
 }
 
 uint32_t Allocation::getGLTarget() const {
@@ -129,6 +125,20 @@ uint32_t Allocation::getGLTarget() const {
     }
     return 0;
 }
+
+void Allocation::allocScriptMemory() {
+    rsAssert(!mPtr);
+    mPtr = malloc(mType->getSizeBytes());
+}
+
+void Allocation::freeScriptMemory() {
+    rsAssert(!(mUsageFlags & RS_ALLOCATION_USAGE_SCRIPT));
+    if (mPtr) {
+        free(mPtr);
+        mPtr = NULL;
+    }
+}
+
 
 void Allocation::syncAll(Context *rsc, RsAllocationUsageType src) {
     rsAssert(src == RS_ALLOCATION_USAGE_SCRIPT);
@@ -153,6 +163,10 @@ void Allocation::uploadToTexture(const Context *rsc) {
         return;
     }
 
+    if (!mPtr) {
+        return;
+    }
+
     bool isFirstUpload = false;
 
     if (!mTextureID) {
@@ -171,41 +185,46 @@ void Allocation::uploadToTexture(const Context *rsc) {
     }
 
     GLenum target = (GLenum)getGLTarget();
-    glBindTexture(target, mTextureID);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
     if (target == GL_TEXTURE_2D) {
-        upload2DTexture(isFirstUpload);
+        upload2DTexture(isFirstUpload, mPtr);
     } else if (target == GL_TEXTURE_CUBE_MAP) {
         uploadCubeTexture(isFirstUpload);
     }
 
-    if (mTextureGenMipmap) {
+    if (mMipmapControl == RS_ALLOCATION_MIPMAP_ON_SYNC_TO_TEXTURE) {
 #ifndef ANDROID_RS_BUILD_FOR_HOST
         glGenerateMipmap(target);
 #endif //ANDROID_RS_BUILD_FOR_HOST
     }
 
+
+    if (!(mUsageFlags & RS_ALLOCATION_USAGE_SCRIPT)) {
+        freeScriptMemory();
+    }
+
     rsc->checkError("Allocation::uploadToTexture");
 }
 
-void Allocation::upload2DTexture(bool isFirstUpload) {
+void Allocation::upload2DTexture(bool isFirstUpload, const void *ptr) {
     GLenum type = mType->getElement()->getComponent().getGLType();
     GLenum format = mType->getElement()->getComponent().getGLFormat();
 
-    Adapter2D adapt(getContext(), this);
-    for (uint32_t lod = 0; (lod + mTextureLOD) < mType->getLODCount(); lod++) {
-        adapt.setLOD(lod+mTextureLOD);
+    GLenum target = (GLenum)getGLTarget();
+    glBindTexture(target, mTextureID);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        uint16_t * ptr = static_cast<uint16_t *>(adapt.getElement(0,0));
+    for (uint32_t lod = 0; lod < mType->getLODCount(); lod++) {
+        const uint8_t *p = (const uint8_t *)ptr;
+        p += mType->getLODOffset(lod);
+
         if (isFirstUpload) {
             glTexImage2D(GL_TEXTURE_2D, lod, format,
-                         adapt.getDimX(), adapt.getDimY(),
-                         0, format, type, ptr);
+                         mType->getLODDimX(lod), mType->getLODDimY(lod),
+                         0, format, type, p);
         } else {
             glTexSubImage2D(GL_TEXTURE_2D, lod, 0, 0,
-                            adapt.getDimX(), adapt.getDimY(),
-                            format, type, ptr);
+                            mType->getLODDimX(lod), mType->getLODDimY(lod),
+                            format, type, p);
         }
     }
 }
@@ -213,6 +232,10 @@ void Allocation::upload2DTexture(bool isFirstUpload) {
 void Allocation::uploadCubeTexture(bool isFirstUpload) {
     GLenum type = mType->getElement()->getComponent().getGLType();
     GLenum format = mType->getElement()->getComponent().getGLFormat();
+
+    GLenum target = (GLenum)getGLTarget();
+    glBindTexture(target, mTextureID);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     GLenum faceOrder[] = {
         GL_TEXTURE_CUBE_MAP_POSITIVE_X,
@@ -227,8 +250,8 @@ void Allocation::uploadCubeTexture(bool isFirstUpload) {
     for (uint32_t face = 0; face < 6; face ++) {
         adapt.setFace(face);
 
-        for (uint32_t lod = 0; (lod + mTextureLOD) < mType->getLODCount(); lod++) {
-            adapt.setLOD(lod+mTextureLOD);
+        for (uint32_t lod = 0; lod < mType->getLODCount(); lod++) {
+            adapt.setLOD(lod);
 
             uint16_t * ptr = static_cast<uint16_t *>(adapt.getElement(0,0));
 
@@ -585,7 +608,7 @@ namespace renderscript {
 
 void rsi_AllocationUploadToTexture(Context *rsc, RsAllocation va, bool genmip, uint32_t baseMipLevel) {
     Allocation *alloc = static_cast<Allocation *>(va);
-    alloc->deferedUploadToTexture(rsc, genmip, baseMipLevel);
+    alloc->deferedUploadToTexture(rsc);
 }
 
 void rsi_AllocationUploadToBufferObject(Context *rsc, RsAllocation va) {
@@ -681,16 +704,21 @@ void rsi_AllocationCopyFromBitmap(Context *rsc, RsAllocation va, const void *dat
         return;
     }
 
-    memcpy(texAlloc->getPtr(), data, s);
-    if (genMips) {
-        Adapter2D adapt(rsc, texAlloc);
-        Adapter2D adapt2(rsc, texAlloc);
-        for (uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
-            adapt.setLOD(lod);
-            adapt2.setLOD(lod + 1);
-            mip(adapt2, adapt);
+    if (texAlloc->getIsScript()) {
+        memcpy(texAlloc->getPtr(), data, s);
+        if (genMips) {
+            Adapter2D adapt(rsc, texAlloc);
+            Adapter2D adapt2(rsc, texAlloc);
+            for (uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
+                adapt.setLOD(lod);
+                adapt2.setLOD(lod + 1);
+                mip(adapt2, adapt);
+            }
         }
+    } else {
+        texAlloc->upload2DTexture(false, data);
     }
+
 }
 
 void rsi_AllocationCopyToBitmap(Context *rsc, RsAllocation va, void *data, size_t dataLen) {
@@ -792,7 +820,7 @@ RsAllocation rsaAllocationCreateFromBitmap(RsContext con, RsType vtype,
         }
     }
 
-    texAlloc->deferedUploadToTexture(rsc, false, 0);
+    texAlloc->deferedUploadToTexture(rsc);
     return texAlloc;
 }
 
@@ -836,6 +864,6 @@ RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, RsType vtype,
         }
     }
 
-    texAlloc->deferedUploadToTexture(rsc, false, 0);
+    texAlloc->deferedUploadToTexture(rsc);
     return texAlloc;
 }

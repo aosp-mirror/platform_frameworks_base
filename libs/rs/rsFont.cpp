@@ -463,7 +463,7 @@ bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *r
 
     // This will dirty the texture and the shader so next time
     // we draw it will upload the data
-    mTextTexture->deferedUploadToTexture(mRSC, false, 0);
+    mTextTexture->deferedUploadToTexture(mRSC);
     mFontShaderF->bindTexture(mRSC, 0, mTextTexture.get());
 
     // Some debug code
@@ -529,7 +529,7 @@ void FontState::initTextTexture() {
 
     Allocation *cacheAlloc = new Allocation(mRSC, texType, RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE);
     mTextTexture.set(cacheAlloc);
-    mTextTexture->deferedUploadToTexture(mRSC, false, 0);
+    mTextTexture->deferedUploadToTexture(mRSC);
 
     // Split up our cache texture into lines of certain widths
     int32_t nextLine = 0;
