@@ -3750,6 +3750,18 @@ public class WebView extends AbsoluteLayout
             clearTextEntry();
         }
         if (inEditingMode()) {
+            // Since we just called rebuildWebTextView, the layout is not set
+            // properly.  Update it so it can correctly find the word to select.
+            mWebTextView.ensureLayout();
+            // Provide a touch down event to WebTextView, which will allow it
+            // to store the location to use in performLongClick.
+            AbsoluteLayout.LayoutParams params
+                    = (AbsoluteLayout.LayoutParams) mWebTextView.getLayoutParams();
+            MotionEvent fake = MotionEvent.obtain(mLastTouchTime,
+                    mLastTouchTime, MotionEvent.ACTION_DOWN,
+                    mLastTouchX - params.x + mScrollX,
+                    mLastTouchY - params.y + mScrollY, 0);
+            mWebTextView.dispatchTouchEvent(fake);
             return mWebTextView.performLongClick();
         }
         if (mSelectingText) return false; // long click does nothing on selection
