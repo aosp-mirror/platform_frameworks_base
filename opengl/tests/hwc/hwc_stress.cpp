@@ -1061,15 +1061,15 @@ void initFrames(unsigned int seed)
         size_t h = (height * maxSizeRatio) * testRandFract();
         w = max(1u, w);
         h = max(1u, h);
-        if (verbose) {
-            testPrintI("  frame %u width: %u height: %u format: %u %s",
-                       row, w, h, format, graphicFormat2str(format));
-        }
         if ((w % formatPtr->wMod) != 0) {
             w += formatPtr->wMod - (w % formatPtr->wMod);
         }
         if ((h % formatPtr->hMod) != 0) {
             h += formatPtr->hMod - (h % formatPtr->hMod);
+        }
+        if (verbose) {
+            testPrintI("  frame %u width: %u height: %u format: %u %s",
+                       row, w, h, format, graphicFormat2str(format));
         }
 
         size_t cols = testRandMod((maxCols + 1) - minCols) + minCols;
