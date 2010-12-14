@@ -8465,13 +8465,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public static final int CENTER = 1;
         public static final int RIGHT = 2;
 
-        class LongPressCallback implements Runnable {
-            public void run() {
-                mController.hide();
-                startSelectionActionMode();
-            }
-        }
-
         public HandleView(CursorController controller, int pos) {
             super(TextView.this.mContext);
             mController = controller;
