@@ -4083,8 +4083,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * Use {@link #setTextIsSelectable(boolean)} or the
      * {@link android.R.styleable#TextView_textIsSelectable} XML attribute to make this TextView
-     * selectable (the text is not selectable by default). Note that the content of an EditText is
-     * always selectable.
+     * selectable (the text is not selectable by default). 
+     *
+     * Note that the content of an EditText is always selectable.
      *
      * @return True if the text displayed in this TextView can be selected by the user.
      *
@@ -4096,6 +4097,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Sets whether or not (default) the content of this view is selectable by the user.
+     * 
+     * Note that this methods affect the {@link #setFocusableInTouchMode(boolean)},
+     * {@link #setFocusable(boolean)}, {@link #setClickable(boolean)} and
+     * {@link #setLongClickable(boolean)} states and you may want to restore these if they were
+     * customized.
      *
      * See {@link #isTextSelectable} for details.
      *
