@@ -856,6 +856,16 @@ void OpenGLRenderer::setupDrawColor(int color) {
     mSetShaderColor = mDescription.setColor(mColorR, mColorG, mColorB, mColorA);
 }
 
+void OpenGLRenderer::setupDrawAlpha8Color(int color, int alpha) {
+    mColorA = alpha / 255.0f;
+    const float a = mColorA / 255.0f;
+    mColorR = a * ((color >> 16) & 0xFF);
+    mColorG = a * ((color >>  8) & 0xFF);
+    mColorB = a * ((color      ) & 0xFF);
+    mColorSet = true;
+    mSetShaderColor = mDescription.setAlpha8Color(mColorR, mColorG, mColorB, mColorA);
+}
+
 void OpenGLRenderer::setupDrawColor(float r, float g, float b, float a) {
     mColorA = a;
     mColorR = r;
@@ -863,6 +873,15 @@ void OpenGLRenderer::setupDrawColor(float r, float g, float b, float a) {
     mColorB = b;
     mColorSet = true;
     mSetShaderColor = mDescription.setColor(r, g, b, a);
+}
+
+void OpenGLRenderer::setupDrawAlpha8Color(float r, float g, float b, float a) {
+    mColorA = a;
+    mColorR = r;
+    mColorG = g;
+    mColorB = b;
+    mColorSet = true;
+    mSetShaderColor = mDescription.setAlpha8Color(r, g, b, a);
 }
 
 void OpenGLRenderer::setupDrawShader() {
@@ -912,15 +931,18 @@ void OpenGLRenderer::setupDrawModelView(float left, float top, float right, floa
     if (!ignoreModelView) {
         mModelView.loadTranslate(left, top, 0.0f);
         mModelView.scale(right - left, bottom - top, 1.0f);
-        if (!ignoreTransform) {
-            mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
-            if (mTrackDirtyRegions) dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
-        } else {
-            mCaches.currentProgram->set(mOrthoMatrix, mModelView, mIdentity);
-            if (mTrackDirtyRegions) dirtyLayer(left, top, right, bottom);
-        }
     } else {
         mModelView.loadIdentity();
+    }
+    bool dirty = right - left > 0.0f && bottom - top > 0.0f;
+    if (!ignoreTransform) {
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
+        if (mTrackDirtyRegions && dirty) {
+            dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
+        }
+    } else {
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, mIdentity);
+        if (mTrackDirtyRegions && dirty) dirtyLayer(left, top, right, bottom);
     }
 }
 
@@ -930,9 +952,9 @@ void OpenGLRenderer::setupDrawColorUniforms() {
     }
 }
 
-void OpenGLRenderer::setupDrawColorAlphaUniforms() {
+void OpenGLRenderer::setupDrawPureColorUniforms() {
     if (mSetShaderColor) {
-        mCaches.currentProgram->setColor(mColorA, mColorA, mColorA, mColorA);
+        mCaches.currentProgram->setColor(mColorR, mColorG, mColorB, mColorA);
     }
 }
 
@@ -1000,7 +1022,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint
         return;
     }
 
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(gTextureUnits[0]);
     Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
@@ -1017,7 +1039,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* pai
         return;
     }
 
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(gTextureUnits[0]);
     Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
@@ -1325,38 +1347,39 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         y = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
     }
 
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
-
-    uint32_t color = paint->getColor();
-    const GLfloat a = alpha / 255.0f;
-    const GLfloat r = a * ((color >> 16) & 0xFF) / 255.0f;
-    const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
-    const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
-
     FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer(paint);
     fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
             paint->getTextSize());
 
-    setupDraw();
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
 
     if (mHasShadow) {
-        glActiveTexture(gTextureUnits[0]);
         mCaches.dropShadowCache.setFontRenderer(fontRenderer);
         const ShadowTexture* shadow = mCaches.dropShadowCache.get(paint, text, bytesCount,
                 count, mShadowRadius);
         const AutoTexture autoCleanup(shadow);
 
-        setupShadow(shadow, x, y, mode, a, pureTranslate);
+        const float sx = x - shadow->left + mShadowDx;
+        const float sy = y - shadow->top + mShadowDy;
 
-        // Draw the mesh
+        const int shadowAlpha = ((mShadowColor >> 24) & 0xFF);
+
+        glActiveTexture(gTextureUnits[0]);
+        setupDraw();
+        setupDrawWithTexture(true);
+        setupDrawAlpha8Color(mShadowColor, shadowAlpha < 255 ? shadowAlpha : alpha);
+        setupDrawBlending(true, mode);
+        setupDrawProgram();
+        setupDrawModelView(sx, sy, sx + shadow->width, sy + shadow->height, pureTranslate);
+        setupDrawTexture(shadow->id);
+        setupDrawPureColorUniforms();
+        setupDrawMesh(NULL, (GLvoid*) gMeshTextureOffset);
+
         glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
-        glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
+        finishDrawTexture();
     }
-
-    GLuint textureUnit = 0;
-    glActiveTexture(gTextureUnits[textureUnit]);
 
     // Pick the appropriate texture filtering
     bool linearFilter = mSnapshot->transform->changesBounds();
@@ -1364,9 +1387,20 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         linearFilter = fabs(y - (int) y) > 0.0f || fabs(x - (int) x) > 0.0f;
     }
 
-    // Dimensions are set to (0,0), the layer (if any) won't be dirtied
-    setupTextureAlpha8(fontRenderer.getTexture(linearFilter), 0, 0, textureUnit,
-            x, y, r, g, b, a, mode, false, true, NULL, NULL, 0, pureTranslate);
+    glActiveTexture(gTextureUnits[0]);
+    setupDraw();
+    setupDrawDirtyRegionsDisabled();
+    setupDrawWithTexture(true);
+    setupDrawAlpha8Color(paint->getColor(), alpha);
+    setupDrawColorFilter();
+    setupDrawShader();
+    setupDrawBlending(true, mode);
+    setupDrawProgram();
+    setupDrawModelView(x, y, x, y, pureTranslate, true);
+    setupDrawTexture(fontRenderer.getTexture(linearFilter));
+    setupDrawPureColorUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawShaderUniforms(pureTranslate);
 
     const Rect* clip = pureTranslate ? mSnapshot->clipRect : &mSnapshot->getLocalClip();
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
@@ -1421,19 +1455,23 @@ void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    uint32_t color = paint->getColor();
-    const GLfloat a = alpha / 255.0f;
-    const GLfloat r = a * ((color >> 16) & 0xFF) / 255.0f;
-    const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
-    const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
-
-    setupTextureAlpha8(texture, textureUnit, x, y, r, g, b, a, mode, true, true);
-
     setupDraw();
+    setupDrawWithTexture(true);
+    setupDrawAlpha8Color(paint->getColor(), alpha);
+    setupDrawColorFilter();
+    setupDrawShader();
+    setupDrawBlending(true, mode);
+    setupDrawProgram();
+    setupDrawModelView(x, y, x + texture->width, y + texture->height);
+    setupDrawTexture(texture->id);
+    setupDrawPureColorUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawShaderUniforms();
+    setupDrawMesh(NULL, (GLvoid*) gMeshTextureOffset);
 
-    // Draw the mesh
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
-    glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
+
+    finishDrawTexture();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1482,118 +1520,6 @@ void OpenGLRenderer::setupShadow(float radius, float dx, float dy, int color) {
 ///////////////////////////////////////////////////////////////////////////////
 // Drawing implementation
 ///////////////////////////////////////////////////////////////////////////////
-
-void OpenGLRenderer::setupShadow(const ShadowTexture* texture, float x, float y,
-        SkXfermode::Mode mode, float alpha, bool ignoreTransforms) {
-    const float sx = x - texture->left + mShadowDx;
-    const float sy = y - texture->top + mShadowDy;
-
-    const int shadowAlpha = ((mShadowColor >> 24) & 0xFF);
-    const GLfloat a = shadowAlpha < 255 ? shadowAlpha / 255.0f : alpha;
-    const GLfloat r = a * ((mShadowColor >> 16) & 0xFF) / 255.0f;
-    const GLfloat g = a * ((mShadowColor >>  8) & 0xFF) / 255.0f;
-    const GLfloat b = a * ((mShadowColor      ) & 0xFF) / 255.0f;
-
-    GLuint textureUnit = 0;
-    setupTextureAlpha8(texture->id, texture->width, texture->height, textureUnit,
-            sx, sy, r, g, b, a, mode, true, false,
-            (GLvoid*) 0, (GLvoid*) gMeshTextureOffset, 0, ignoreTransforms);
-}
-
-void OpenGLRenderer::setupTextureAlpha8(const Texture* texture, GLuint& textureUnit,
-        float x, float y, float r, float g, float b, float a, SkXfermode::Mode mode,
-        bool transforms, bool applyFilters) {
-    setupTextureAlpha8(texture->id, texture->width, texture->height, textureUnit,
-            x, y, r, g, b, a, mode, transforms, applyFilters,
-            (GLvoid*) 0, (GLvoid*) gMeshTextureOffset);
-}
-
-void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t height,
-        GLuint& textureUnit, float x, float y, float r, float g, float b, float a,
-        SkXfermode::Mode mode, bool transforms, bool applyFilters) {
-    setupTextureAlpha8(texture, width, height, textureUnit, x, y, r, g, b, a, mode,
-            transforms, applyFilters, (GLvoid*) 0, (GLvoid*) gMeshTextureOffset);
-}
-
-void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t height,
-        GLuint& textureUnit, float x, float y, float r, float g, float b, float a,
-        SkXfermode::Mode mode, bool transforms, bool applyFilters,
-        GLvoid* vertices, GLvoid* texCoords, GLuint vbo, bool ignoreTransform) {
-     // Describe the required shaders
-     ProgramDescription description;
-     description.hasTexture = true;
-     description.hasAlpha8Texture = true;
-     const bool setColor = description.setAlpha8Color(r, g, b, a);
-
-     if (applyFilters) {
-         if (mShader) {
-             mShader->describe(description, mCaches.extensions);
-         }
-         if (mColorFilter) {
-             mColorFilter->describe(description, mCaches.extensions);
-         }
-     }
-
-     // Setup the blending mode
-     chooseBlending(true, mode, description);
-
-     // Build and use the appropriate shader
-     useProgram(mCaches.programCache.get(description));
-
-     bindTexture(texture);
-     glUniform1i(mCaches.currentProgram->getUniform("sampler"), textureUnit);
-
-     int texCoordsSlot = mCaches.currentProgram->getAttrib("texCoords");
-     glEnableVertexAttribArray(texCoordsSlot);
-
-     if (texCoords) {
-         // Setup attributes
-         if (!vertices) {
-             mCaches.bindMeshBuffer(vbo == 0 ? mCaches.meshBuffer : vbo);
-         } else {
-             mCaches.unbindMeshBuffer();
-         }
-         glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
-                 gMeshStride, vertices);
-         glVertexAttribPointer(texCoordsSlot, 2, GL_FLOAT, GL_FALSE, gMeshStride, texCoords);
-     }
-
-     // Setup uniforms
-     if (transforms) {
-         mModelView.loadTranslate(x, y, 0.0f);
-         mModelView.scale(width, height, 1.0f);
-     } else {
-         mModelView.loadIdentity();
-     }
-
-     mat4 t;
-     if (!ignoreTransform) {
-         t.load(*mSnapshot->transform);
-     }
-
-     mCaches.currentProgram->set(mOrthoMatrix, mModelView, t);
-     if (width > 0 && height > 0) {
-         dirtyLayer(x, y, x + width, y + height, t);
-     }
-
-     if (setColor) {
-         mCaches.currentProgram->setColor(r, g, b, a);
-     }
-
-     textureUnit++;
-     if (applyFilters) {
-         // Setup attributes and uniforms required by the shaders
-         if (mShader) {
-             if (ignoreTransform) {
-                 mModelView.loadInverse(*mSnapshot->transform);
-             }
-             mShader->setupProgram(mCaches.currentProgram, mModelView, *mSnapshot, &textureUnit);
-         }
-         if (mColorFilter) {
-             mColorFilter->setupProgram(mCaches.currentProgram);
-         }
-     }
-}
 
 // Same values used by Skia
 #define kStdStrikeThru_Offset   (-6.0f / 21.0f)
@@ -1727,7 +1653,7 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     } else {
         setupDrawModelViewTranslate(left, top, right, bottom, ignoreTransform);
     }
-    setupDrawColorAlphaUniforms();
+    setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
     setupDrawTexture(texture);
     setupDrawMesh(vertices, texCoords, vbo);
