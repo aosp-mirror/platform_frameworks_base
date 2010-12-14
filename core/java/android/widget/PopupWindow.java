@@ -600,7 +600,6 @@ public class PopupWindow {
      * @return true if the touch splitting is enabled, false otherwise
      * 
      * @see #setSplitTouchEnabled(boolean)
-     * @hide
      */
     public boolean isSplitTouchEnabled() {
         if (mSplitTouchEnabled < 0 && mContext != null) {
@@ -621,7 +620,6 @@ public class PopupWindow {
      *
      * @param enabled true if the split touches should be enabled, false otherwise
      * @see #isSplitTouchEnabled()
-     * @hide
      */
     public void setSplitTouchEnabled(boolean enabled) {
         mSplitTouchEnabled = enabled ? 1 : 0;
