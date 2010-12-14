@@ -16,9 +16,11 @@
 
 package android.renderscript;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map.Entry;
@@ -76,6 +78,7 @@ public class ScriptC extends Script {
         rs.nScriptCBegin();
         rs.nScriptCSetScript(pgm, 0, pgmLength);
         Log.v(TAG, "Create script for resource = " + resources.getResourceName(resourceID));
-        return rs.nScriptCCreate(resources.getResourceName(resourceID));
+        String cacheDir = rs.getApplicationContext().getCacheDir().toString();
+        return rs.nScriptCCreate(resources.getResourceName(resourceID), cacheDir);
     }
 }

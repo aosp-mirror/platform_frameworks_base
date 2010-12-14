@@ -119,7 +119,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public RenderScriptGL createRenderScriptGL(RenderScriptGL.SurfaceConfig sc) {
-        RenderScriptGL rs = new RenderScriptGL(sc);
+      RenderScriptGL rs = new RenderScriptGL(this.getContext(), sc);
         setRenderScriptGL(rs);
         return rs;
     }
@@ -137,4 +137,3 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         return mRS;
     }
 }
-
