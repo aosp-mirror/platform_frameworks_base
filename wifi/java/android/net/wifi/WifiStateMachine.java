@@ -127,6 +127,18 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private static final int POLL_RSSI_INTERVAL_MSECS = 3000;
 
     /**
+     * Delay between supplicant restarts upon failure to establish connection
+     */
+    private static final int SUPPLICANT_RESTART_INTERVAL_MSECS = 5000;
+
+    /**
+     * Number of times we attempt to restart supplicant
+     */
+    private static final int SUPPLICANT_RESTART_TRIES = 5;
+
+    private int mSupplicantRestartCount = 0;
+
+    /**
      * Instance of the bluetooth headset helper. This needs to be created
      * early because there is a delay before it actually 'connects', as
      * noted by its javadoc. If we check before it is connected, it will be
@@ -365,10 +377,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /* Driver loaded */
     private HierarchicalState mDriverLoadedState = new DriverLoadedState();
     /* Driver loaded, waiting for supplicant to start */
-    private HierarchicalState mWaitForSupState = new WaitForSupState();
-
+    private HierarchicalState mSupplicantStartingState = new SupplicantStartingState();
     /* Driver loaded and supplicant ready */
-    private HierarchicalState mDriverSupReadyState = new DriverSupReadyState();
+    private HierarchicalState mSupplicantStartedState = new SupplicantStartedState();
+    /* Waiting for supplicant to stop and monitor to exit */
+    private HierarchicalState mSupplicantStoppingState = new SupplicantStoppingState();
     /* Driver start issued, waiting for completed event */
     private HierarchicalState mDriverStartingState = new DriverStartingState();
     /* Driver started */
@@ -513,10 +526,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 addState(mDriverFailedState, mDriverUnloadedState);
             addState(mDriverLoadingState, mDefaultState);
             addState(mDriverLoadedState, mDefaultState);
-                addState(mWaitForSupState, mDriverLoadedState);
-            addState(mDriverSupReadyState, mDefaultState);
-                addState(mDriverStartingState, mDriverSupReadyState);
-                addState(mDriverStartedState, mDriverSupReadyState);
+            addState(mSupplicantStartingState, mDefaultState);
+            addState(mSupplicantStartedState, mDefaultState);
+                addState(mDriverStartingState, mSupplicantStartedState);
+                addState(mDriverStartedState, mSupplicantStartedState);
                     addState(mScanModeState, mDriverStartedState);
                     addState(mConnectModeState, mDriverStartedState);
                         addState(mConnectingState, mConnectModeState);
@@ -524,8 +537,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         addState(mDisconnectingState, mConnectModeState);
                         addState(mDisconnectedState, mConnectModeState);
                         addState(mWaitForWpsCompletionState, mConnectModeState);
-                addState(mDriverStoppingState, mDriverSupReadyState);
-                addState(mDriverStoppedState, mDriverSupReadyState);
+                addState(mDriverStoppingState, mSupplicantStartedState);
+                addState(mDriverStoppedState, mSupplicantStartedState);
+            addState(mSupplicantStoppingState, mDefaultState);
             addState(mSoftApStartedState, mDefaultState);
 
         setInitialState(mInitialState);
@@ -1742,7 +1756,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         Log.d(TAG, "Supplicant start successful");
                         mWifiMonitor.startMonitoring();
                         setWifiState(WIFI_STATE_ENABLED);
-                        transitionTo(mWaitForSupState);
+                        transitionTo(mSupplicantStartingState);
                     } else {
                         Log.e(TAG, "Failed to start supplicant!");
                         sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_STATE_UNKNOWN, 0));
@@ -1888,7 +1902,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
 
-    class WaitForSupState extends HierarchicalState {
+    class SupplicantStartingState extends HierarchicalState {
         @Override
         public void enter() {
             if (DBG) Log.d(TAG, getName() + "\n");
@@ -1900,6 +1914,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             switch(message.what) {
                 case SUP_CONNECTION_EVENT:
                     Log.d(TAG, "Supplicant connection established");
+                    mSupplicantRestartCount = 0;
                     mSupplicantStateTracker.resetSupplicantState();
                     /* Initialize data structures */
                     mLastBssid = null;
@@ -1919,10 +1934,18 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     transitionTo(mDriverStartedState);
                     break;
                 case SUP_DISCONNECTION_EVENT:
-                    Log.e(TAG, "Failed to setup control channel, restart supplicant");
-                    WifiNative.stopSupplicant();
-                    transitionTo(mDriverLoadedState);
-                    sendMessageAtFrontOfQueue(CMD_START_SUPPLICANT);
+                    if (++mSupplicantRestartCount <= SUPPLICANT_RESTART_TRIES) {
+                        Log.e(TAG, "Failed to setup control channel, restart supplicant");
+                        WifiNative.killSupplicant();
+                        transitionTo(mDriverLoadedState);
+                        sendMessageDelayed(CMD_START_SUPPLICANT, SUPPLICANT_RESTART_INTERVAL_MSECS);
+                    } else {
+                        mSupplicantRestartCount = 0;
+                        Log.e(TAG, "Failed " + mSupplicantRestartCount +
+                                " times to start supplicant, unload driver");
+                        transitionTo(mDriverLoadedState);
+                        sendMessage(CMD_UNLOAD_DRIVER);
+                    }
                     break;
                 case CMD_LOAD_DRIVER:
                 case CMD_UNLOAD_DRIVER:
@@ -1951,7 +1974,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         }
     }
 
-    class DriverSupReadyState extends HierarchicalState {
+    class SupplicantStartedState extends HierarchicalState {
         @Override
         public void enter() {
             if (DBG) Log.d(TAG, getName() + "\n");
@@ -1966,23 +1989,26 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             switch(message.what) {
                 case CMD_STOP_SUPPLICANT:   /* Supplicant stopped by user */
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
-                    Log.d(TAG, "Stop supplicant received");
-                    WifiNative.closeSupplicantConnection();
-                    WifiNative.stopSupplicant();
+                    Log.d(TAG, "send terminate command to supplicant");
+                    if (!WifiNative.terminateCommand()) {
+                        Log.e(TAG, "Failed to terminate cleanly, issue kill");
+                        WifiNative.killSupplicant();
+                    }
                     handleNetworkDisconnect();
                     sendSupplicantConnectionChangedBroadcast(false);
                     mSupplicantStateTracker.resetSupplicantState();
-                    transitionTo(mDriverLoadedState);
+                    transitionTo(mSupplicantStoppingState);
                     break;
-                case SUP_DISCONNECTION_EVENT:  /* Supplicant died */
+                case SUP_DISCONNECTION_EVENT:  /* Supplicant connection lost */
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
-                    Log.e(TAG, "Supplicant died, restarting");
+                    Log.e(TAG, "Connection lost, restart supplicant");
+                    WifiNative.killSupplicant();
                     WifiNative.closeSupplicantConnection();
                     handleNetworkDisconnect();
                     sendSupplicantConnectionChangedBroadcast(false);
                     mSupplicantStateTracker.resetSupplicantState();
                     transitionTo(mDriverLoadedState);
-                    sendMessageAtFrontOfQueue(CMD_START_SUPPLICANT); /* restart */
+                    sendMessageDelayed(CMD_START_SUPPLICANT, SUPPLICANT_RESTART_INTERVAL_MSECS);
                     break;
                 case SCAN_RESULTS_EVENT:
                     setScanResults(WifiNative.scanResultsCommand());
@@ -2054,6 +2080,51 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 default:
                     return NOT_HANDLED;
             }
+            return HANDLED;
+        }
+    }
+
+    class SupplicantStoppingState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            switch(message.what) {
+                case SUP_CONNECTION_EVENT:
+                    Log.e(TAG, "Supplicant connection received while stopping");
+                    break;
+                case SUP_DISCONNECTION_EVENT:
+                    Log.d(TAG, "Supplicant connection lost");
+                    WifiNative.closeSupplicantConnection();
+                    transitionTo(mDriverLoadedState);
+                    break;
+                case CMD_LOAD_DRIVER:
+                case CMD_UNLOAD_DRIVER:
+                case CMD_START_SUPPLICANT:
+                case CMD_STOP_SUPPLICANT:
+                case CMD_START_AP:
+                case CMD_STOP_AP:
+                case CMD_START_DRIVER:
+                case CMD_STOP_DRIVER:
+                case CMD_SET_SCAN_MODE:
+                case CMD_SET_SCAN_TYPE:
+                case CMD_SET_HIGH_PERF_MODE:
+                case CMD_SET_BLUETOOTH_COEXISTENCE:
+                case CMD_SET_BLUETOOTH_SCAN_MODE:
+                case CMD_SET_COUNTRY_CODE:
+                case CMD_SET_FREQUENCY_BAND:
+                case CMD_START_PACKET_FILTERING:
+                case CMD_STOP_PACKET_FILTERING:
+                    deferMessage(message);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
