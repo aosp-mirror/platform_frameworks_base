@@ -293,7 +293,7 @@ final class FragmentManagerState implements Parcelable {
  * Container for fragments associated with an activity.
  */
 final class FragmentManagerImpl extends FragmentManager {
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
     static final String TAG = "FragmentManager";
     
     static final String TARGET_REQUEST_CODE_STATE_TAG = "android:target_req_state";
@@ -562,6 +562,7 @@ final class FragmentManagerImpl extends FragmentManager {
                         }
                     }
                     f.mActivity = mActivity;
+                    f.mFragmentManager = mActivity.mFragments;
                     f.mCalled = false;
                     f.onAttach(mActivity);
                     if (!f.mCalled) {
@@ -737,6 +738,7 @@ final class FragmentManagerImpl extends FragmentManager {
                         }
                         f.mImmediateActivity = null;
                         f.mActivity = null;
+                        f.mFragmentManager = null;
                     }
             }
         }

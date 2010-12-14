@@ -19,7 +19,7 @@ package com.android.server.am;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.os.SystemClock;
+import android.graphics.Bitmap;
 
 import java.io.PrintWriter;
 
@@ -34,6 +34,8 @@ class TaskRecord {
     long lastActiveTime;    // Last time this task was active, including sleep.
     boolean rootWasReset;   // True if the intent at the root of the task had
                             // the FLAG_ACTIVITY_RESET_TASK_IF_NEEDED flag.
+    Bitmap lastThumbnail;   // Last thumbnail captured for this task.
+    CharSequence lastDescription; // Last description captured for this task.
 
     String stringName;      // caching of toString() result.
     

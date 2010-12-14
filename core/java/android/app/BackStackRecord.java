@@ -233,19 +233,25 @@ final class BackStackRecord extends FragmentTransaction implements
             Op op = mHead;
             int num = 0;
             while (op != null) {
-                writer.print(prefix); writer.print("  #"); writer.print(num);
-                        writer.print(" "); writer.print(op); writer.println(":");
+                writer.print(prefix); writer.print("  Op #"); writer.print(num);
+                        writer.println(":");
                 writer.print(innerPrefix); writer.print("cmd="); writer.print(op.cmd);
-                        writer.println("fragment="); writer.println(op.fragment);
+                        writer.print(" fragment="); writer.println(op.fragment);
                 if (op.enterAnim != 0 || op.exitAnim != 0) {
                     writer.print(prefix); writer.print("enterAnim="); writer.print(op.enterAnim);
                             writer.print(" exitAnim="); writer.println(op.exitAnim);
                 }
                 if (op.removed != null && op.removed.size() > 0) {
                     for (int i=0; i<op.removed.size(); i++) {
-                        writer.print(innerPrefix); writer.println("Removed:");
-                        writer.print(innerPrefix); writer.print("  #"); writer.print(num);
-                                writer.print(": "); writer.println(op.removed.get(i));
+                        writer.print(innerPrefix);
+                        if (op.removed.size() == 1) {
+                            writer.print("Removed: ");
+                        } else {
+                            writer.println("Removed:");
+                            writer.print(innerPrefix); writer.print("  #"); writer.print(num);
+                                    writer.print(": "); 
+                        }
+                        writer.println(op.removed.get(i));
                     }
                 }
                 op = op.next;

@@ -93,6 +93,17 @@ public class ActivityManager {
          * implementation that the alias referred to.  Otherwise, this is null.
          */
         public ComponentName origActivity;
+
+        /**
+         * Thumbnail representation of the task's last state.  Must
+         * use {@link ActivityManager#TASKS_GET_THUMBNAILS} to have this set.
+         */
+        public Bitmap thumbnail;
+
+        /**
+         * Description of the task's last state.
+         */
+        public CharSequence description;
         
         public RecentTaskInfo() {
         }
@@ -110,6 +121,14 @@ public class ActivityManager {
                 dest.writeInt(0);
             }
             ComponentName.writeToParcel(origActivity, dest);
+            if (thumbnail != null) {
+                dest.writeInt(1);
+                thumbnail.writeToParcel(dest, 0);
+            } else {
+                dest.writeInt(0);
+            }
+            TextUtils.writeToParcel(description, dest,
+                    Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         }
 
         public void readFromParcel(Parcel source) {
@@ -120,6 +139,12 @@ public class ActivityManager {
                 baseIntent = null;
             }
             origActivity = ComponentName.readFromParcel(source);
+            if (source.readInt() != 0) {
+                thumbnail = Bitmap.CREATOR.createFromParcel(source);
+            } else {
+                thumbnail = null;
+            }
+            description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         }
         
         public static final Creator<RecentTaskInfo> CREATOR
@@ -145,11 +170,16 @@ public class ActivityManager {
     public static final int RECENT_WITH_EXCLUDED = 0x0001;
     
     /**
-     * @hide
-     * TODO: Make this public.  Provides a list that does not contain any
+     * Provides a list that does not contain any
      * recent tasks that currently are not available to the user.
      */
     public static final int RECENT_IGNORE_UNAVAILABLE = 0x0002;
+
+    /**
+     * Flag for use with {@link #getRecentTasks}: also return the thumbnail
+     * bitmap (if available) for each recent task.
+     */
+    public static final int TASKS_GET_THUMBNAILS = 0x0001000;
     
     /**
      * Return a list of the tasks that the user has recently launched, with
@@ -158,6 +188,9 @@ public class ActivityManager {
      * @param maxNum The maximum number of entries to return in the list.  The
      * actual number returned may be smaller, depending on how many tasks the
      * user has started and the maximum number the system can remember.
+     * @param flags Information about what to return.  May be any combination
+     * of {@link #RECENT_WITH_EXCLUDED}, {@link #RECENT_IGNORE_UNAVAILABLE},
+     * and {@link #TASKS_GET_THUMBNAILS}.
      * 
      * @return Returns a list of RecentTaskInfo records describing each of
      * the recent tasks.
@@ -203,7 +236,8 @@ public class ActivityManager {
         public ComponentName topActivity;
 
         /**
-         * Thumbnail representation of the task's current state.
+         * Thumbnail representation of the task's current state.  Must
+         * use {@link ActivityManager#TASKS_GET_THUMBNAILS} to have this set.
          */
         public Bitmap thumbnail;
 
@@ -273,7 +307,7 @@ public class ActivityManager {
             readFromParcel(source);
         }
     }
-
+    
     /**
      * Return a list of the tasks that are currently running, with
      * the most recent being first and older ones after in order.  Note that

@@ -449,9 +449,11 @@ public:
         SkSafeUnref(fCTable);
     }
 
-    status_t update(int width, int height) {
+    status_t update(int width, int height, int minLayer, int maxLayer, bool allLayers) {
         status_t res = (width > 0 && height > 0)
-                ? mScreenshot.update(width, height)
+                ? (allLayers
+                        ? mScreenshot.update(width, height)
+                        : mScreenshot.update(width, height, minLayer, maxLayer))
                 : mScreenshot.update();
         if (res != NO_ERROR) {
             return res;
@@ -493,10 +495,11 @@ private:
     typedef SkPixelRef INHERITED;
 };
 
-static jobject Surface_screenshot(JNIEnv* env, jobject clazz, jint width, jint height)
+static jobject doScreenshot(JNIEnv* env, jobject clazz, jint width, jint height,
+        jint minLayer, jint maxLayer, bool allLayers)
 {
     ScreenshotPixelRef* pixels = new ScreenshotPixelRef(NULL);
-    if (pixels->update(width, height) != NO_ERROR) {
+    if (pixels->update(width, height, minLayer, maxLayer, allLayers) != NO_ERROR) {
         delete pixels;
         return 0;
     }
@@ -523,6 +526,17 @@ static jobject Surface_screenshot(JNIEnv* env, jobject clazz, jint width, jint h
     }
 
     return GraphicsJNI::createBitmap(env, bitmap, false, NULL);
+}
+
+static jobject Surface_screenshotAll(JNIEnv* env, jobject clazz, jint width, jint height)
+{
+    return doScreenshot(env, clazz, width, height, 0, 0, true);
+}
+
+static jobject Surface_screenshot(JNIEnv* env, jobject clazz, jint width, jint height,
+        jint minLayer, jint maxLayer, bool allLayers)
+{
+    return doScreenshot(env, clazz, width, height, minLayer, maxLayer, false);
 }
 
 static void Surface_setLayer(
@@ -750,7 +764,8 @@ static JNINativeMethod gSurfaceMethods[] = {
     {"setOrientation",      "(III)V", (void*)Surface_setOrientation },
     {"freezeDisplay",       "(I)V", (void*)Surface_freezeDisplay },
     {"unfreezeDisplay",     "(I)V", (void*)Surface_unfreezeDisplay },
-    {"screenshot",          "(II)Landroid/graphics/Bitmap;", (void*)Surface_screenshot },
+    {"screenshot",          "(II)Landroid/graphics/Bitmap;", (void*)Surface_screenshotAll },
+    {"screenshot",          "(IIII)Landroid/graphics/Bitmap;", (void*)Surface_screenshot },
     {"setLayer",            "(I)V", (void*)Surface_setLayer },
     {"setPosition",         "(II)V",(void*)Surface_setPosition },
     {"setSize",             "(II)V",(void*)Surface_setSize },

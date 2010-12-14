@@ -58,7 +58,7 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
     private static final boolean DEBUG = TabletStatusBar.DEBUG;
     private static final int DISPLAY_TASKS_PORTRAIT = 8;
     private static final int DISPLAY_TASKS_LANDSCAPE = 5; // number of recent tasks to display
-    private static final int MAX_TASKS = 2 * DISPLAY_TASKS_PORTRAIT; // allow extra for non-apps
+    private static final int MAX_TASKS = DISPLAY_TASKS_PORTRAIT + 2; // allow extra for non-apps
     private TabletStatusBar mBar;
     private TextView mNoRecents;
     private LinearLayout mRecentsContainer;
@@ -80,8 +80,8 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         int position; // position in list
 
         public ActivityDescription(Bitmap _thumbnail,
-                Drawable _icon, String _label, String _desc, Intent _intent, int _id, int _pos,
-                String _packageName)
+                Drawable _icon, String _label, CharSequence _desc, Intent _intent,
+                int _id, int _pos, String _packageName)
         {
             thumbnail = _thumbnail;
             icon = _icon;
@@ -91,21 +91,6 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
             id = _id;
             position = _pos;
             packageName = _packageName;
-        }
-    };
-
-    private final IThumbnailReceiver mThumbnailReceiver = new IThumbnailReceiver.Stub() {
-
-        public void finished() throws RemoteException {
-        }
-
-        public void newThumbnail(final int id, final Bitmap bitmap, CharSequence description)
-                throws RemoteException {
-            ActivityDescription info = findActivityDescription(id);
-            if (info != null) {
-                info.thumbnail = bitmap;
-                info.description = description;
-            }
         }
     };
 
@@ -201,7 +186,8 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
                 mContext.getSystemService(Context.ACTIVITY_SERVICE);
 
         final List<ActivityManager.RecentTaskInfo> recentTasks =
-                am.getRecentTasks(MAX_TASKS, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
+                am.getRecentTasks(MAX_TASKS, ActivityManager.RECENT_IGNORE_UNAVAILABLE
+                        | ActivityManager.TASKS_GET_THUMBNAILS);
 
         ActivityInfo homeInfo = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
                     .resolveActivityInfo(pm, 0);
@@ -234,7 +220,8 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
                 if (title != null && title.length() > 0 && icon != null) {
                     if (DEBUG) Log.v(TAG, "creating activity desc for id=" + id + ", label=" + title);
                     ActivityDescription item = new ActivityDescription(
-                            null, icon, title, null, intent, id, index, info.packageName);
+                            crop(recentInfo.thumbnail), icon, title, recentInfo.description,
+                            intent, id, index, info.packageName);
                     activityDescriptions.add(item);
                     ++index;
                 } else {
@@ -258,28 +245,8 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         return desc;
     }
 
-    private void getThumbnails(ArrayList<ActivityDescription> tasks) {
-        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        List<RunningTaskInfo> runningTasks = am.getRunningTasks(MAX_TASKS, 0, mThumbnailReceiver);
-        for (RunningTaskInfo runningTaskInfo : runningTasks) {
-            // Find the activity description associted with the given id
-            ActivityDescription desc = findActivityDescription(runningTaskInfo.id);
-            if (desc != null) {
-                if (runningTaskInfo.thumbnail != null) {
-                    desc.thumbnail = crop(runningTaskInfo.thumbnail);
-                    desc.description = runningTaskInfo.description;
-                } else {
-                    if (DEBUG) Log.v(TAG, "*** RUNNING THUMBNAIL WAS NULL ***");
-                }
-            } else {
-                if (DEBUG) Log.v(TAG, "Couldn't find ActivityDesc for id=" + runningTaskInfo.id);
-            }
-        }
-    }
-
     private void refreshApplicationList() {
         mActivityDescriptions = getRecentTasks();
-        getThumbnails(mActivityDescriptions);
         updateUiElements(getResources().getConfiguration(), true);
     }
 
