@@ -20,6 +20,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -27,6 +28,7 @@ import android.os.Process;
 import android.os.ServiceManager;
 import android.os.WorkSource;
 import android.telephony.SignalStrength;
+import android.telephony.TelephonyManager;
 import android.util.Slog;
 
 import com.android.internal.app.IBatteryStats;
@@ -35,6 +37,7 @@ import com.android.internal.os.PowerProfile;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * All information we are collecting about things that can happen that impact
@@ -217,8 +220,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
 
     public void notePhoneState(int state) {
         enforceCallingPermission();
+        int simState = TelephonyManager.getDefault().getSimState();
         synchronized (mStats) {
-            mStats.notePhoneStateLocked(state);
+            mStats.notePhoneStateLocked(state, simState);
         }
     }
 
@@ -444,19 +448,28 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        synchronized (mStats) {
-            boolean isCheckin = false;
-            if (args != null) {
-                for (String arg : args) {
-                    if ("--checkin".equals(arg)) {
-                        isCheckin = true;
-                    } else if ("--reset".equals(arg)) {
+        boolean isCheckin = false;
+        if (args != null) {
+            for (String arg : args) {
+                if ("--checkin".equals(arg)) {
+                    isCheckin = true;
+                } else if ("--reset".equals(arg)) {
+                    synchronized (mStats) {
                         mStats.resetAllStatsLocked();
+                        pw.println("Battery stats reset.");
                     }
                 }
             }
-            if (isCheckin) mStats.dumpCheckinLocked(pw, args);
-            else mStats.dumpLocked(pw);
+        }
+        if (isCheckin) {
+            List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(0);
+            synchronized (mStats) {
+                mStats.dumpCheckinLocked(pw, args, apps);
+            }
+        } else {
+            synchronized (mStats) {
+                mStats.dumpLocked(pw);
+            }
         }
     }
 }
