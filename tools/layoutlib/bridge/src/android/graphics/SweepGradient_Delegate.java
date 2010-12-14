@@ -16,9 +16,12 @@
 
 package android.graphics;
 
+import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
 import java.awt.Paint;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 
 /**
  * Delegate implementing the native methods of android.graphics.SweepGradient
@@ -90,16 +93,16 @@ public class SweepGradient_Delegate extends Gradient_Delegate {
     private SweepGradient_Delegate(float cx, float cy,
                          int colors[], float positions[]) {
         super(colors, positions);
-
         mJavaPaint = new SweepGradientPaint(cx, cy, mColors, mPositions);
     }
 
-    private static class SweepGradientPaint extends GradientPaint {
+    private class SweepGradientPaint extends GradientPaint {
 
         private final float mCx;
         private final float mCy;
 
-        public SweepGradientPaint(float cx, float cy, int[] colors, float[] positions) {
+        public SweepGradientPaint(float cx, float cy, int[] colors,
+                float[] positions) {
             super(colors, positions, null /*tileMode*/);
             mCx = cx;
             mCy = cy;
@@ -112,14 +115,36 @@ public class SweepGradient_Delegate extends Gradient_Delegate {
                 java.awt.geom.AffineTransform xform,
                 java.awt.RenderingHints       hints) {
             precomputeGradientColors();
-            return new SweepGradientPaintContext(colorModel);
+
+            AffineTransform canvasMatrix;
+            try {
+                canvasMatrix = xform.createInverse();
+            } catch (NoninvertibleTransformException e) {
+                Bridge.getLog().error(null, "Unable to inverse matrix in SweepGradient", e);
+                canvasMatrix = new AffineTransform();
+            }
+
+            AffineTransform localMatrix = getLocalMatrix();
+            try {
+                localMatrix = localMatrix.createInverse();
+            } catch (NoninvertibleTransformException e) {
+                Bridge.getLog().error(null, "Unable to inverse matrix in SweepGradient", e);
+                localMatrix = new AffineTransform();
+            }
+
+            return new SweepGradientPaintContext(canvasMatrix, localMatrix, colorModel);
         }
 
         private class SweepGradientPaintContext implements java.awt.PaintContext {
 
+            private final AffineTransform mCanvasMatrix;
+            private final AffineTransform mLocalMatrix;
             private final java.awt.image.ColorModel mColorModel;
 
-            public SweepGradientPaintContext(java.awt.image.ColorModel colorModel) {
+            public SweepGradientPaintContext(AffineTransform canvasMatrix,
+                    AffineTransform localMatrix, java.awt.image.ColorModel colorModel) {
+                mCanvasMatrix = canvasMatrix;
+                mLocalMatrix = localMatrix;
                 mColorModel = colorModel;
             }
 
@@ -139,10 +164,23 @@ public class SweepGradient_Delegate extends Gradient_Delegate {
                 // compute angle from each point to the center, and figure out the distance from
                 // it.
                 int index = 0;
+                float[] pt1 = new float[2];
+                float[] pt2 = new float[2];
                 for (int iy = 0 ; iy < h ; iy++) {
                     for (int ix = 0 ; ix < w ; ix++) {
-                        float dx = x + ix - mCx;
-                        float dy = y + iy - mCy;
+                        // handle the canvas transform
+                        pt1[0] = x + ix;
+                        pt1[1] = y + iy;
+                        mCanvasMatrix.transform(pt1, 0, pt2, 0, 1);
+
+                        // handle the local matrix
+                        pt1[0] = pt2[0] - mCx;
+                        pt1[1] = pt2[1] - mCy;
+                        mLocalMatrix.transform(pt1, 0, pt2, 0, 1);
+
+                        float dx = pt2[0];
+                        float dy = pt2[1];
+
                         float angle;
                         if (dx == 0) {
                             angle = (float) (dy < 0 ? 3 * Math.PI / 2 : Math.PI / 2);

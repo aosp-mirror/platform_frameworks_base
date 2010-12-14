@@ -471,7 +471,7 @@ public final class Matrix_Delegate {
             return false;
         }
 
-        d.preTransform(getRotate(degrees, px, py));
+        d.postTransform(getRotate(degrees, px, py));
         return true;
     }
 
