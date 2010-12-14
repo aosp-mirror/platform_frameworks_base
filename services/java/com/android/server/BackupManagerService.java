@@ -107,6 +107,7 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final int MSG_RUN_INITIALIZE = 5;
     private static final int MSG_RUN_GET_RESTORE_SETS = 6;
     private static final int MSG_TIMEOUT = 7;
+    private static final int MSG_RESTORE_TIMEOUT = 8;
 
     // Timeout interval for deciding that a bind or clear-data has taken too long
     static final long TIMEOUT_INTERVAL = 10 * 1000;
@@ -395,6 +396,21 @@ class BackupManagerService extends IBackupManager.Stub {
                     mCurrentOpLock.notifyAll();
                 }
                 break;
+            }
+
+            case MSG_RESTORE_TIMEOUT:
+            {
+                synchronized (BackupManagerService.this) {
+                    if (mActiveRestoreSession != null) {
+                        // Client app left the restore session dangling.  We know that it
+                        // can't be in the middle of an actual restore operation because
+                        // those are executed serially on this same handler thread.  Clean
+                        // up now.
+                        Slog.w(TAG, "Restore session timed out; aborting");
+                        post(mActiveRestoreSession.new EndRestoreRunnable(
+                                BackupManagerService.this, mActiveRestoreSession));
+                    }
+                }
             }
             }
         }
@@ -1826,6 +1842,11 @@ class BackupManagerService extends IBackupManager.Stub {
                     } catch (RemoteException e) { /* can't happen */ }
                 }
 
+                // Furthermore we need to reset the session timeout clock
+                mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
+                mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_TIMEOUT,
+                        TIMEOUT_RESTORE_INTERVAL);
+
                 // done; we can finally release the wakelock
                 mWakelock.release();
             }
@@ -2506,8 +2527,21 @@ class BackupManagerService extends IBackupManager.Stub {
                 return null;
             }
             mActiveRestoreSession = new ActiveRestoreSession(packageName, transport);
+            mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_TIMEOUT, TIMEOUT_RESTORE_INTERVAL);
         }
         return mActiveRestoreSession;
+    }
+
+    void clearRestoreSession(ActiveRestoreSession currentSession) {
+        synchronized(this) {
+            if (currentSession != mActiveRestoreSession) {
+                Slog.e(TAG, "ending non-current restore session");
+            } else {
+                if (DEBUG) Slog.v(TAG, "Clearing restore session and halting timeout");
+                mActiveRestoreSession = null;
+                mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
+            }
+        }
     }
 
     // Note that a currently-active backup agent has notified us that it has
@@ -2528,6 +2562,7 @@ class BackupManagerService extends IBackupManager.Stub {
         private String mPackageName;
         private IBackupTransport mRestoreTransport = null;
         RestoreSet[] mRestoreSets = null;
+        boolean mEnded = false;
 
         ActiveRestoreSession(String packageName, String transport) {
             mPackageName = packageName;
@@ -2540,6 +2575,10 @@ class BackupManagerService extends IBackupManager.Stub {
                     "getAvailableRestoreSets");
             if (observer == null) {
                 throw new IllegalArgumentException("Observer must not be null");
+            }
+
+            if (mEnded) {
+                throw new IllegalStateException("Restore session already ended");
             }
 
             long oldId = Binder.clearCallingIdentity();
@@ -2568,6 +2607,10 @@ class BackupManagerService extends IBackupManager.Stub {
 
             if (DEBUG) Slog.d(TAG, "restoreAll token=" + Long.toHexString(token)
                     + " observer=" + observer);
+
+            if (mEnded) {
+                throw new IllegalStateException("Restore session already ended");
+            }
 
             if (mRestoreTransport == null || mRestoreSets == null) {
                 Slog.e(TAG, "Ignoring restoreAll() with no restore set");
@@ -2599,6 +2642,10 @@ class BackupManagerService extends IBackupManager.Stub {
 
         public synchronized int restorePackage(String packageName, IRestoreObserver observer) {
             if (DEBUG) Slog.v(TAG, "restorePackage pkg=" + packageName + " obs=" + observer);
+
+            if (mEnded) {
+                throw new IllegalStateException("Restore session already ended");
+            }
 
             if (mPackageName != null) {
                 if (! mPackageName.equals(packageName)) {
@@ -2656,31 +2703,47 @@ class BackupManagerService extends IBackupManager.Stub {
             return 0;
         }
 
+        // Posted to the handler to tear down a restore session in a cleanly synchronized way
+        class EndRestoreRunnable implements Runnable {
+            BackupManagerService mBackupManager;
+            ActiveRestoreSession mSession;
+
+            EndRestoreRunnable(BackupManagerService manager, ActiveRestoreSession session) {
+                mBackupManager = manager;
+                mSession = session;
+            }
+
+            public void run() {
+                // clean up the session's bookkeeping
+                synchronized (mSession) {
+                    try {
+                        if (mSession.mRestoreTransport != null) {
+                            mSession.mRestoreTransport.finishRestore();
+                        }
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Error in finishRestore", e);
+                    } finally {
+                        mSession.mRestoreTransport = null;
+                        mSession.mEnded = true;
+                    }
+                }
+
+                // clean up the BackupManagerService side of the bookkeeping
+                // and cancel any pending timeout message
+                mBackupManager.clearRestoreSession(mSession);
+            }
+        }
+
         public synchronized void endRestoreSession() {
             if (DEBUG) Slog.d(TAG, "endRestoreSession");
 
-            synchronized (this) {
-                long oldId = Binder.clearCallingIdentity();
-                try {
-                    if (mRestoreTransport != null) mRestoreTransport.finishRestore();
-                } catch (Exception e) {
-                    Slog.e(TAG, "Error in finishRestore", e);
-                } finally {
-                    mRestoreTransport = null;
-                    Binder.restoreCallingIdentity(oldId);
-                }
+            if (mEnded) {
+                throw new IllegalStateException("Restore session already ended");
             }
 
-            synchronized (BackupManagerService.this) {
-                if (BackupManagerService.this.mActiveRestoreSession == this) {
-                    BackupManagerService.this.mActiveRestoreSession = null;
-                } else {
-                    Slog.e(TAG, "ending non-current restore session");
-                }
-            }
+            mBackupHandler.post(new EndRestoreRunnable(BackupManagerService.this, this));
         }
     }
-
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
