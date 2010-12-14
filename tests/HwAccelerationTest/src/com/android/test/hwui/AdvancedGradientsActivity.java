@@ -36,7 +36,7 @@ public class AdvancedGradientsActivity extends Activity {
         setContentView(new GradientsView(this));
     }
 
-    static class GradientsView extends View {
+    public static class GradientsView extends View {
         private final Paint mPaint;
         private final SweepGradient mSweepGradient;
         private final RadialGradient mRadialGradient;
@@ -44,7 +44,7 @@ public class AdvancedGradientsActivity extends Activity {
         private final Matrix mMatrix2;
         private final Matrix mMatrix3;
 
-        GradientsView(Context c) {
+        public GradientsView(Context c) {
             super(c);
 
             mSweepGradient = new SweepGradient(0.0f, 0.0f, 0xff000000, 0xffffffff);
