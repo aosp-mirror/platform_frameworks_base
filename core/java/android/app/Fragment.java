@@ -526,7 +526,16 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(128);
-        sb.append("Fragment{");
+        String simpleName = getClass().getSimpleName();
+        if (simpleName == null || simpleName.isEmpty()) {
+            simpleName = getClass().getName();
+            int end = simpleName.lastIndexOf('.');
+            if (end > 0) {
+                simpleName = simpleName.substring(end+1);
+            }
+        }
+        sb.append(simpleName);
+        sb.append("{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         if (mIndex >= 0) {
             sb.append(" #");

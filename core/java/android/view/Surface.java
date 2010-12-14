@@ -377,17 +377,29 @@ public class Surface implements Parcelable {
     }
     
     /**
+     * Like {@link #screenshot(int, int, int, int)} but includes all
+     * Surfaces in the screenshot.
+     *
+     * @hide
+     */
+    public static native Bitmap screenshot(int width, int height);
+    
+    /**
      * Copy the current screen contents into a bitmap and return it.
      *
      * @param width The desired width of the returned bitmap; the raw
      * screen will be scaled down to this size.
      * @param height The desired height of the returned bitmap; the raw
      * screen will be scaled down to this size.
+     * @param minLayer The lowest (bottom-most Z order) surface layer to
+     * include in the screenshot.
+     * @param maxLayer The highest (top-most Z order) surface layer to
+     * include in the screenshot.
      * @return Returns a Bitmap containing the screen contents.
      *
      * @hide
      */
-    public static native Bitmap screenshot(int width, int height);
+    public static native Bitmap screenshot(int width, int height, int minLayer, int maxLayer);
 
     /**
      * set surface parameters.

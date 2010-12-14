@@ -3808,8 +3808,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 r.haveState = true;
                 if (thumbnail != null) {
                     r.thumbnail = thumbnail;
+                    if (r.task != null) {
+                        r.task.lastThumbnail = r.thumbnail;
+                    }
                 }
                 r.description = description;
+                if (r.task != null) {
+                    r.task.lastDescription = r.description;
+                }
                 r.stopped = true;
                 r.state = ActivityState.STOPPED;
                 if (!r.finishing) {
@@ -4826,9 +4832,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 throw new SecurityException(msg);
             }
 
-            final boolean canReadFb = checkCallingPermission(
-                    android.Manifest.permission.READ_FRAME_BUFFER)
-                    == PackageManager.PERMISSION_GRANTED;
+            final boolean canReadFb = (flags&ActivityManager.TASKS_GET_THUMBNAILS) != 0
+                    && checkCallingPermission(
+                            android.Manifest.permission.READ_FRAME_BUFFER)
+                            == PackageManager.PERMISSION_GRANTED;
 
             int pos = mMainStack.mHistory.size()-1;
             ActivityRecord next =
@@ -4878,7 +4885,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if (top.thumbnail != null) {
                             ci.thumbnail = top.thumbnail;
                         } else if (top.state == ActivityState.RESUMED) {
-                            ci.thumbnail = top.stack.screenshotActivities();
+                            ci.thumbnail = top.stack.screenshotActivities(top);
                         }
                     }
                     ci.description = topDescription;
@@ -4949,7 +4956,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             enforceCallingPermission(android.Manifest.permission.GET_TASKS,
                     "getRecentTasks()");
 
+            final boolean canReadFb = (flags&ActivityManager.TASKS_GET_THUMBNAILS) != 0
+                    && checkCallingPermission(
+                            android.Manifest.permission.READ_FRAME_BUFFER)
+                            == PackageManager.PERMISSION_GRANTED;
+            
             IPackageManager pm = AppGlobals.getPackageManager();
+            
+            ActivityRecord resumed = mMainStack.mResumedActivity;
             
             final int N = mRecentTasks.size();
             ArrayList<ActivityManager.RecentTaskInfo> res
@@ -4967,6 +4981,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                     rti.baseIntent = new Intent(
                             tr.intent != null ? tr.intent : tr.affinityIntent);
                     rti.origActivity = tr.origActivity;
+                    
+                    if (canReadFb) {
+                        if (resumed != null && resumed.task == tr) {
+                            rti.thumbnail = resumed.stack.screenshotActivities(resumed);
+                        } else {
+                            rti.thumbnail = tr.lastThumbnail;
+                        }
+                    }
+                    rti.description = tr.lastDescription;
                     
                     if ((flags&ActivityManager.RECENT_IGNORE_UNAVAILABLE) != 0) {
                         // Check whether this activity is currently available.
