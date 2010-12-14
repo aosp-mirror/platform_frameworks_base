@@ -16,11 +16,14 @@
 
 package android.graphics;
 
+import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
 import android.graphics.Shader.TileMode;
 
 import java.awt.Paint;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 
 /**
  * Delegate implementing the native methods of android.graphics.LinearGradient
@@ -115,7 +118,7 @@ public class LinearGradient_Delegate extends Gradient_Delegate {
      * {@link java.awt.GradientPaint} only supports 2 points and does not support Android's tile
      * modes.
      */
-    private static class LinearGradientPaint extends GradientPaint {
+    private class LinearGradientPaint extends GradientPaint {
 
         private final float mX0;
         private final float mY0;
@@ -126,11 +129,11 @@ public class LinearGradient_Delegate extends Gradient_Delegate {
         public LinearGradientPaint(float x0, float y0, float x1, float y1, int colors[],
                 float positions[], TileMode tile) {
             super(colors, positions, tile);
-                mX0 = x0;
-                mY0 = y0;
-                mDx = x1 - x0;
-                mDy = y1 - y0;
-                mDSize2 = mDx * mDx + mDy * mDy;
+            mX0 = x0;
+            mY0 = y0;
+            mDx = x1 - x0;
+            mDy = y1 - y0;
+            mDSize2 = mDx * mDx + mDy * mDy;
         }
 
         public java.awt.PaintContext createContext(
@@ -140,16 +143,37 @@ public class LinearGradient_Delegate extends Gradient_Delegate {
                 java.awt.geom.AffineTransform  xform,
                 java.awt.RenderingHints        hints) {
             precomputeGradientColors();
-            return new LinearGradientPaintContext(colorModel);
+
+            AffineTransform canvasMatrix;
+            try {
+                canvasMatrix = xform.createInverse();
+            } catch (NoninvertibleTransformException e) {
+                Bridge.getLog().error(null, "Unable to inverse matrix in LinearGradient", e);
+                canvasMatrix = new AffineTransform();
+            }
+
+            AffineTransform localMatrix = getLocalMatrix();
+            try {
+                localMatrix = localMatrix.createInverse();
+            } catch (NoninvertibleTransformException e) {
+                Bridge.getLog().error(null, "Unable to inverse matrix in LinearGradient", e);
+                localMatrix = new AffineTransform();
+            }
+
+            return new LinearGradientPaintContext(canvasMatrix, localMatrix, colorModel);
         }
 
         private class LinearGradientPaintContext implements java.awt.PaintContext {
 
+            private final AffineTransform mCanvasMatrix;
+            private final AffineTransform mLocalMatrix;
             private final java.awt.image.ColorModel mColorModel;
 
-            public LinearGradientPaintContext(java.awt.image.ColorModel colorModel) {
+            public LinearGradientPaintContext(AffineTransform canvasMatrix,
+                    AffineTransform localMatrix, java.awt.image.ColorModel colorModel) {
+                mCanvasMatrix = canvasMatrix;
+                mLocalMatrix = localMatrix;
                 mColorModel = colorModel;
-                // FIXME: so far all this is always the same rect gotten in getRaster with an identity matrix?
             }
 
             public void dispose() {
@@ -165,31 +189,22 @@ public class LinearGradient_Delegate extends Gradient_Delegate {
 
                 int[] data = new int[w*h];
 
-                if (mDx == 0) { // vertical gradient
-                    // compute first column and copy to all other columns
-                    int index = 0;
-                    for (int iy = 0 ; iy < h ; iy++) {
-                        int color = getColor(iy + y, mY0, mDy);
-                        for (int ix = 0 ; ix < w ; ix++) {
-                            data[index++] = color;
-                        }
-                    }
-                } else if (mDy == 0) { // horizontal
-                    // compute first line in a tmp array and copy to all lines
-                    int[] line = new int[w];
+                int index = 0;
+                float[] pt1 = new float[2];
+                float[] pt2 = new float[2];
+                for (int iy = 0 ; iy < h ; iy++) {
                     for (int ix = 0 ; ix < w ; ix++) {
-                        line[ix] = getColor(ix + x, mX0, mDx);
-                    }
+                        // handle the canvas transform
+                        pt1[0] = x + ix;
+                        pt1[1] = y + iy;
+                        mCanvasMatrix.transform(pt1, 0, pt2, 0, 1);
 
-                    for (int iy = 0 ; iy < h ; iy++) {
-                        System.arraycopy(line, 0, data, iy*w, line.length);
-                    }
-                } else {
-                    int index = 0;
-                    for (int iy = 0 ; iy < h ; iy++) {
-                        for (int ix = 0 ; ix < w ; ix++) {
-                            data[index++] = getColor(ix + x, iy + y);
-                        }
+                        // handle the local matrix.
+                        pt1[0] = pt2[0];
+                        pt1[1] = pt2[1];
+                        mLocalMatrix.transform(pt1, 0, pt2, 0, 1);
+
+                        data[index++] = getColor(pt2[0], pt2[1]);
                     }
                 }
 
@@ -197,13 +212,6 @@ public class LinearGradient_Delegate extends Gradient_Delegate {
 
                 return image.getRaster();
             }
-        }
-
-        /** Returns a color for the easy vertical/horizontal mode */
-        private int getColor(float absPos, float refPos, float refSize) {
-            float pos = (absPos - refPos) / refSize;
-
-            return getGradientColor(pos);
         }
 
         /**

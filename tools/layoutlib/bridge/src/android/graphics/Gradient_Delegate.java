@@ -119,20 +119,23 @@ public abstract class Gradient_Delegate extends Shader_Delegate {
                             pos = 0.f;
                             break;
                         case REPEAT:
-                            // remove the integer part to stay in the [0,1] range
-                            // careful: this is a negative value, so use ceil instead of floor
-                            pos = pos - (float)Math.ceil(pos);
+                            // remove the integer part to stay in the [0,1] range.
+                            // we also need to invert the value from [-1,0] to [0, 1]
+                            pos = pos - (float)Math.floor(pos);
                             break;
                         case MIRROR:
+                            // this is the same as the positive side, just make the value positive
+                            // first.
+                            pos = Math.abs(pos);
+
                             // get the integer and the decimal part
-                            // careful: this is a negative value, so use ceil instead of floor
-                            int intPart = (int)Math.ceil(pos);
+                            int intPart = (int)Math.floor(pos);
                             pos = pos - intPart;
-                            // 0  -> -1 : mirrored order
-                            // -1 -> -2: normal order
+                            // 0 -> 1 : normal order
+                            // 1 -> 2: mirrored
                             // etc..
-                            // this means if the intpart is even we invert
-                            if ((intPart % 2) == 0) {
+                            // this means if the intpart is odd we invert
+                            if ((intPart % 2) == 1) {
                                 pos = 1.f - pos;
                             }
                             break;
