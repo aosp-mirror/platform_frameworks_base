@@ -1358,7 +1358,6 @@
   <public type="attr" name="loopViews" />
   <public type="attr" name="dialogTheme" />
   <public type="attr" name="alertDialogTheme" />
-  <public type="attr" name="textLineHeight" />
   <public type="attr" name="dividerVertical" />
   <public type="attr" name="homeAsUpIndicator" />
   <public type="attr" name="enterFadeDuration" />

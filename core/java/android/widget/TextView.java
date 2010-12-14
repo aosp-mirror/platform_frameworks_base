@@ -766,13 +766,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mEditTextMultilineBackground = a.getDrawable(attr);
                 break;
 
-            case com.android.internal.R.styleable.TextView_textLineHeight:
-                int lineHeight = a.getDimensionPixelSize(attr, 0);
-                if (lineHeight != 0) {
-                    setLineHeight(lineHeight);
-                }
-                break;
-
             case com.android.internal.R.styleable.TextView_textIsSelectable:
                 mTextIsSelectable = a.getBoolean(attr, false);
                 break;
@@ -1133,15 +1126,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * within the text can cause individual lines to be taller or shorter
      * than this height, and the layout may contain additional first-
      * or last-line padding.
-     *
-     * @attr ref android.R.styleable#TextView_textLineHeight
      */
     public int getLineHeight() {
-        if (mLineHeight != 0) {
-            return mLineHeight;
-        }
-        return FastMath.round(mTextPaint.getFontMetricsInt(null) * mSpacingMult
-                          + mSpacingAdd);
+        return FastMath.round(mTextPaint.getFontMetricsInt(null) * mSpacingMult + mSpacingAdd);
     }
 
     /**
@@ -1728,23 +1715,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         setTypefaceByIndex(typefaceIndex, styleIndex);
         
-        int lineHeight = appearance.getDimensionPixelSize(
-                com.android.internal.R.styleable.TextAppearance_textLineHeight, 0);
-        if (lineHeight != 0) {
-            setLineHeight(lineHeight);
-        }
-
         appearance.recycle();
-    }
-
-    /**
-     * Set the height of a line of text in pixels. This value will override line height
-     * values stored in the font modified by lineSpacingExtra and lineSpacingMultiplier.
-     *
-     * @param lineHeight Desired height of a single line of text in pixels
-     */
-    public void setLineHeight(int lineHeight) {
-        mLineHeight = lineHeight;
     }
 
     /**
@@ -9393,7 +9364,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private float                   mSpacingMult = 1;
     private float                   mSpacingAdd = 0;
-    private int                     mLineHeight = 0;
     private boolean                 mTextIsSelectable = false;
 
     private static final int        LINES = 1;
