@@ -91,6 +91,7 @@ public class MtpDatabase {
             Files.FileColumns.DATE_MODIFIED, // 5
     };
     private static final String ID_WHERE = Files.FileColumns._ID + "=?";
+    private static final String PATH_WHERE = Files.FileColumns.DATA + "=?";
     private static final String PARENT_WHERE = Files.FileColumns.PARENT + "=?";
     private static final String PARENT_FORMAT_WHERE = PARENT_WHERE + " AND "
                                             + Files.FileColumns.FORMAT + "=?";
@@ -154,6 +155,25 @@ public class MtpDatabase {
 
     private int beginSendObject(String path, int format, int parent,
                          int storage, long size, long modified) {
+        // first make sure the object does not exist
+        if (path != null) {
+            Cursor c = null;
+            try {
+                c = mMediaProvider.query(mObjectsUri, ID_PROJECTION, PATH_WHERE,
+                        new String[] { path }, null);
+                if (c != null && c.getCount() > 0) {
+                    Log.w(TAG, "file already exists in beginSendObject: " + path);
+                    return -1;
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException in beginSendObject", e);
+            } finally {
+                if (c != null) {
+                    c.close();
+                }
+            }
+        }
+
         mDatabaseModified = true;
         ContentValues values = new ContentValues();
         values.put(Files.FileColumns.DATA, path);

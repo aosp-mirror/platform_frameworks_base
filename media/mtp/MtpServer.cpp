@@ -683,10 +683,6 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
         path += "/";
     path += (const char *)name;
 
-    // file should not already exist
-    if (access(path, R_OK) == 0)
-        return MTP_RESPONSE_GENERAL_ERROR;
-
     // check space first
     if (mSendObjectFileSize > storage->getFreeSpace())
         return MTP_RESPONSE_STORAGE_FULL;
