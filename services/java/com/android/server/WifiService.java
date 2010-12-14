@@ -58,6 +58,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -347,8 +348,8 @@ public class WifiService extends IWifiManager.Stub {
                         ifcg = service.getInterfaceConfig(intf);
                         if (ifcg != null) {
                             /* IP/netmask: 192.168.43.1/255.255.255.0 */
-                            ifcg.ipAddr = (192 << 24) + (168 << 16) + (43 << 8) + 1;
-                            ifcg.netmask = (255 << 24) + (255 << 16) + (255 << 8) + 0;
+                            ifcg.addr = InetAddress.getByName("192.168.43.1");
+                            ifcg.mask = InetAddress.getByName("255.255.255.0");
                             ifcg.interfaceFlags = "[up]";
 
                             service.setInterfaceConfig(intf, ifcg);
