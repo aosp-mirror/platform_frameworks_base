@@ -170,7 +170,8 @@ public class Canvas_Delegate {
     }
 
     /*package*/ static boolean clipRect(Canvas thisCanvas, RectF rect) {
-        return clipRect(thisCanvas, rect.left, rect.top, rect.right, rect.bottom);
+        return clipRect(thisCanvas,
+                (int) rect.left, (int) rect.top, (int) rect.right, (int) rect.bottom);
     }
 
     /*package*/ static boolean clipRect(Canvas thisCanvas, Rect rect) {
@@ -179,16 +180,7 @@ public class Canvas_Delegate {
 
     /*package*/ static boolean clipRect(Canvas thisCanvas, float left, float top, float right,
             float bottom) {
-        // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
-        if (canvasDelegate == null) {
-            assert false;
-            return false;
-        }
-
-        canvasDelegate.getGraphics2d().clipRect((int)left, (int)top, (int)(right-left),
-                (int)(bottom-top));
-        return true;
+        return clipRect(thisCanvas, (int) left, (int) top, (int) right, (int) bottom);
     }
 
     /*package*/ static boolean clipRect(Canvas thisCanvas, int left, int top, int right,
@@ -200,8 +192,7 @@ public class Canvas_Delegate {
             return false;
         }
 
-        canvasDelegate.getGraphics2d().clipRect(left, top, right - left, bottom - top);
-        return true;
+        return canvasDelegate.clipRect(left, top, right, bottom, Region.Op.INTERSECT.nativeInt);
     }
 
     /*package*/ static int save(Canvas thisCanvas) {
@@ -277,8 +268,31 @@ public class Canvas_Delegate {
 
     /*package*/ static void drawLines(Canvas thisCanvas, float[] pts, int offset, int count,
             Paint paint) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
+        if (canvasDelegate == null) {
+            assert false;
+            return;
+        }
+
+        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(paint.mNativePaint);
+        if (paintDelegate == null) {
+            assert false;
+            return;
+        }
+
+        // get a Graphics2D object configured with the drawing parameters.
+        Graphics2D g = canvasDelegate.getCustomGraphics(paintDelegate);
+
+        try {
+            for (int i = 0 ; i < count ; i += 4) {
+                g.drawLine((int)pts[i + offset], (int)pts[i + offset + 1],
+                        (int)pts[i + offset + 2], (int)pts[i + offset + 3]);
+            }
+        } finally {
+            // dispose Graphics2D object
+            g.dispose();
+        }
     }
 
     /*package*/ static void freeCaches() {
@@ -410,8 +424,16 @@ public class Canvas_Delegate {
                                                   float left, float top,
                                                   float right, float bottom,
                                                   int regionOp) {
-        // FIXME
-        throw new UnsupportedOperationException();
+
+        // get the delegate from the native int.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
+        if (canvasDelegate == null) {
+            assert false;
+        }
+
+        return canvasDelegate.clipRect(
+                (int) left, (int) top, (int) right, (int) bottom,
+                regionOp);
     }
 
     /*package*/ static boolean native_clipPath(int nativeCanvas,
@@ -998,6 +1020,16 @@ public class Canvas_Delegate {
     private void dispose() {
         while (mGraphicsStack.size() > 0) {
             mGraphicsStack.pop().dispose();
+        }
+    }
+
+    private boolean clipRect(int left, int top, int right, int bottom, int regionOp) {
+        if (regionOp == Region.Op.INTERSECT.nativeInt) {
+            Graphics2D gc = getGraphics2d();
+            gc.clipRect(left, top, right - left, bottom - top);
+            return gc.getClip().getBounds().isEmpty() == false;
+        } else {
+            throw new UnsupportedOperationException();
         }
     }
 
