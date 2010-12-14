@@ -18,6 +18,7 @@ package android.net.wifi;
 
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WpsConfiguration;
 import android.net.wifi.ScanResult;
 import android.net.DhcpInfo;
 
@@ -108,10 +109,6 @@ interface IWifiManager
 
     void forgetNetwork(int networkId);
 
-    void startWpsPbc(String bssid);
-
-    void startWpsWithPinFromAccessPoint(String bssid, int apPin);
-
-    int startWpsWithPinFromDevice(String bssid);
+    String startWps(in WpsConfiguration config);
 }
 

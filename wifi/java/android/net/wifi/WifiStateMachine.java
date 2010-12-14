@@ -147,6 +147,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private WifiInfo mWifiInfo;
     private NetworkInfo mNetworkInfo;
     private SupplicantStateTracker mSupplicantStateTracker;
+    private WpsStateMachine mWpsStateMachine;
+
     /* Connection to a specific network involves disabling all networks,
      * this flag tracks if networks need to be re-enabled */
     private boolean mEnableAllNetworks = false;
@@ -307,18 +309,18 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * supplicant config.
      */
     static final int CMD_FORGET_NETWORK                   = 88;
-    /* Start Wi-Fi protected setup push button configuration */
-    static final int CMD_START_WPS_PBC                    = 89;
-    /* Start Wi-Fi protected setup pin method configuration with pin obtained from AP */
-    static final int CMD_START_WPS_PIN_FROM_AP            = 90;
-    /* Start Wi-Fi protected setup pin method configuration with pin obtained from device */
-    static final int CMD_START_WPS_PIN_FROM_DEVICE        = 91;
+    /* Start Wi-Fi protected setup */
+    static final int CMD_START_WPS                        = 89;
     /* Set the frequency band */
-    static final int CMD_SET_FREQUENCY_BAND               = 92;
+    static final int CMD_SET_FREQUENCY_BAND               = 90;
 
     /* Commands from the SupplicantStateTracker */
     /* Indicates whether a wifi network is available for connection */
     static final int CMD_SET_NETWORK_AVAILABLE             = 111;
+
+    /* Commands/events reported by WpsStateMachine */
+    /* Indicates the completion of WPS activity */
+    static final int WPS_COMPLETED_EVENT                   = 121;
 
     private static final int CONNECT_MODE   = 1;
     private static final int SCAN_ONLY_MODE = 2;
@@ -387,6 +389,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private HierarchicalState mDisconnectingState = new DisconnectingState();
     /* Network is not connected, supplicant assoc+auth is not complete */
     private HierarchicalState mDisconnectedState = new DisconnectedState();
+    /* Waiting for WPS to be completed*/
+    private HierarchicalState mWaitForWpsCompletionState = new WaitForWpsCompletionState();
 
     /* Soft Ap is running */
     private HierarchicalState mSoftApStartedState = new SoftApStartedState();
@@ -457,6 +461,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         mWifiInfo = new WifiInfo();
         mInterfaceName = SystemProperties.get("wifi.interface", "tiwlan0");
         mSupplicantStateTracker = new SupplicantStateTracker(context, this, getHandler());
+        mWpsStateMachine = new WpsStateMachine(context, this, getHandler());
 
         mLinkProperties = new LinkProperties();
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
@@ -518,6 +523,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         addState(mConnectedState, mConnectModeState);
                         addState(mDisconnectingState, mConnectModeState);
                         addState(mDisconnectedState, mConnectModeState);
+                        addState(mWaitForWpsCompletionState, mConnectModeState);
                 addState(mDriverStoppingState, mDriverSupReadyState);
                 addState(mDriverStoppedState, mDriverSupReadyState);
             addState(mSoftApStartedState, mDefaultState);
@@ -808,18 +814,20 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         sendMessage(obtainMessage(CMD_FORGET_NETWORK, netId, 0));
     }
 
-    public void startWpsPbc(String bssid) {
-        sendMessage(obtainMessage(CMD_START_WPS_PBC, bssid));
-    }
-
-    public void startWpsWithPinFromAccessPoint(String bssid, int apPin) {
-        sendMessage(obtainMessage(CMD_START_WPS_PIN_FROM_AP, apPin, 0, bssid));
-    }
-
-    public int syncStartWpsWithPinFromDevice(AsyncChannel channel, String bssid) {
-        Message resultMsg = channel.sendMessageSynchronously(CMD_START_WPS_PIN_FROM_DEVICE, bssid);
-        int result = resultMsg.arg1;
-        resultMsg.recycle();
+    public String startWps(AsyncChannel channel, WpsConfiguration config) {
+        String result = null;
+        switch (config.setup) {
+            case PIN_FROM_DEVICE:
+                //TODO: will go away with AsyncChannel use from settings
+                Message resultMsg = channel.sendMessageSynchronously(CMD_START_WPS, config);
+                result = (String) resultMsg.obj;
+                resultMsg.recycle();
+                break;
+            case PBC:
+            case PIN_FROM_ACCESS_POINT:
+                sendMessage(obtainMessage(CMD_START_WPS, config));
+                break;
+        }
         return result;
     }
 
@@ -1554,7 +1562,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_ADD_OR_UPDATE_NETWORK:
                 case CMD_REMOVE_NETWORK:
                 case CMD_SAVE_CONFIG:
-                case CMD_START_WPS_PIN_FROM_DEVICE:
                     mReplyChannel.replyToMessage(message, message.what, FAILURE);
                     break;
                 case CMD_ENABLE_RSSI_POLL:
@@ -1598,9 +1605,16 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_CONNECT_NETWORK:
                 case CMD_SAVE_NETWORK:
                 case CMD_FORGET_NETWORK:
-                case CMD_START_WPS_PBC:
-                case CMD_START_WPS_PIN_FROM_AP:
                 case CMD_RSSI_POLL:
+                    break;
+                case CMD_START_WPS:
+                    WpsConfiguration config = (WpsConfiguration) message.obj;
+                    switch (config.setup) {
+                        case PIN_FROM_DEVICE:
+                            String pin = "";
+                            mReplyChannel.replyToMessage(message, message.what, pin);
+                            break;
+                    }
                     break;
                 default:
                     Log.e(TAG, "Error! unhandled message" + message);
@@ -2306,9 +2320,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         mWifiInfo.setBSSID(stateChangeResult.BSSID);
                     }
 
-                    Message newMsg = obtainMessage();
-                    newMsg.copyFrom(message);
-                    mSupplicantStateTracker.sendMessage(newMsg);
+                    mSupplicantStateTracker.sendMessage(Message.obtain(message));
+                    mWpsStateMachine.sendMessage(Message.obtain(message));
                     break;
                     /* Do a redundant disconnect without transition */
                 case CMD_DISCONNECT:
@@ -2348,51 +2361,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     /* Expect a disconnection from the old connection */
                     transitionTo(mDisconnectingState);
                     break;
-                case CMD_START_WPS_PBC:
-                    String bssid = (String) message.obj;
-                    /* WPS push button configuration */
-                    boolean success = WifiConfigStore.startWpsPbc(bssid);
-
-                    /* During WPS setup, all other networks are disabled. After
-                     * a successful connect a new config is created in the supplicant.
-                     *
-                     * We need to enable all networks after a successful connection
-                     * or when supplicant goes inactive due to failure. Enabling all
-                     * networks after a disconnect is observed as done with connectNetwork
-                     * does not lead to a successful WPS setup.
-                     *
-                     * Upon success, the configuration list needs to be reloaded
-                     */
-                    if (success) {
-                        mSupplicantStateTracker.sendMessage(message.what);
-                        /* Expect a disconnection from the old connection */
-                        transitionTo(mDisconnectingState);
-                    }
-                    break;
-                case CMD_START_WPS_PIN_FROM_AP:
-                    bssid = (String) message.obj;
-                    int apPin = message.arg1;
-
-                    /* WPS pin from access point */
-                    success = WifiConfigStore.startWpsWithPinFromAccessPoint(bssid, apPin);
-
-                    if (success) {
-                        mSupplicantStateTracker.sendMessage(message.what);
-                        /* Expect a disconnection from the old connection */
-                        transitionTo(mDisconnectingState);
-                    }
-                    break;
-                case CMD_START_WPS_PIN_FROM_DEVICE:
-                    bssid = (String) message.obj;
-                    int pin = WifiConfigStore.startWpsWithPinFromDevice(bssid);
-                    success = (pin != FAILURE);
-                    mReplyChannel.replyToMessage(message, CMD_START_WPS_PIN_FROM_DEVICE, pin);
-
-                    if (success) {
-                        mSupplicantStateTracker.sendMessage(message.what);
-                        /* Expect a disconnection from the old connection */
-                        transitionTo(mDisconnectingState);
-                    }
+                case CMD_START_WPS:
+                    mWpsStateMachine.sendMessage(Message.obtain(message));
+                    transitionTo(mWaitForWpsCompletionState);
                     break;
                 case SCAN_RESULTS_EVENT:
                     /* Set the scan setting back to "connect" mode */
@@ -2436,7 +2407,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         public void enter() {
             if (DBG) Log.d(TAG, getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
-
             mUseStaticIp = WifiConfigStore.isUsingStaticIp(mLastNetworkId);
             if (!mUseStaticIp) {
                 mDhcpThread = null;
@@ -2796,6 +2766,45 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         @Override
         public void exit() {
             mAlarmManager.cancel(mScanIntent);
+        }
+    }
+
+    class WaitForWpsCompletionState extends HierarchicalState {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            switch (message.what) {
+                /* Defer all commands that can cause connections to a different network
+                 * or put the state machine out of connect mode
+                 */
+                case CMD_STOP_DRIVER:
+                case CMD_SET_SCAN_MODE:
+                case CMD_CONNECT_NETWORK:
+                case CMD_ENABLE_NETWORK:
+                case CMD_RECONNECT:
+                case CMD_REASSOCIATE:
+                case NETWORK_CONNECTION_EVENT: /* Handled after IP & proxy update */
+                    deferMessage(message);
+                    break;
+                case NETWORK_DISCONNECTION_EVENT:
+                    Log.d(TAG,"Network connection lost");
+                    handleNetworkDisconnect();
+                    break;
+                case WPS_COMPLETED_EVENT:
+                    /* we are still disconnected until we see a network connection
+                     * notification */
+                    transitionTo(mDisconnectedState);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
         }
     }
 

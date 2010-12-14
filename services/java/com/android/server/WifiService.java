@@ -39,6 +39,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
+import android.net.wifi.WpsConfiguration;
 import android.net.ConnectivityManager;
 import android.net.InterfaceConfiguration;
 import android.net.DhcpInfo;
@@ -843,23 +844,13 @@ public class WifiService extends IWifiManager.Stub {
         mWifiStateMachine.forgetNetwork(netId);
     }
 
-    public void startWpsPbc(String bssid) {
-        enforceChangePermission();
-        mWifiStateMachine.startWpsPbc(bssid);
-    }
-
-    public void startWpsWithPinFromAccessPoint(String bssid, int apPin) {
-        enforceChangePermission();
-        mWifiStateMachine.startWpsWithPinFromAccessPoint(bssid, apPin);
-    }
-
-    public int startWpsWithPinFromDevice(String bssid) {
+    public String startWps(WpsConfiguration config) {
         enforceChangePermission();
         if (mChannel != null) {
-            return mWifiStateMachine.syncStartWpsWithPinFromDevice(mChannel, bssid);
+            return mWifiStateMachine.startWps(mChannel, config);
         } else {
             Slog.e(TAG, "mChannel is not initialized");
-            return -1;
+            return "";
         }
     }
 
