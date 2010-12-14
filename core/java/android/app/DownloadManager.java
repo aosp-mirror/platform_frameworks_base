@@ -24,6 +24,7 @@ import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.Downloads;
@@ -335,6 +336,7 @@ public class DownloadManager {
         private int mAllowedNetworkTypes = ~0; // default to all network types allowed
         private boolean mIsVisibleInDownloadsUi = true;
         private boolean mScannable = false;
+        private boolean mUseSystemCache = false;
         /** if a file is designated as a MediaScanner scannable file, the following value is
          * stored in the database column {@link Downloads.Impl#COLUMN_MEDIA_SCANNED}.
          */
@@ -398,6 +400,24 @@ public class DownloadManager {
          */
         public Request setDestinationUri(Uri uri) {
             mDestinationUri = uri;
+            return this;
+        }
+
+        /**
+         * Set the local destination for the downloaded file to the system cache dir (/cache).
+         * This is only available to System apps with the permission
+         * {@link android.Manifest.permission#ACCESS_CACHE_FILESYSTEM}.
+         * <p>
+         * The downloaded file is not scanned by MediaScanner.
+         * But it can be made scannable by calling {@link #allowScanningByMediaScanner()}.
+         * <p>
+         * Files downloaded to /cache may be deleted by the system at any time to reclaim space.
+         *
+         * @return this object
+         * @hide
+         */
+        public Request setDestinationToSystemCache() {
+            mUseSystemCache = true;
             return this;
         }
 
@@ -596,7 +616,9 @@ public class DownloadManager {
                 values.put(Downloads.Impl.COLUMN_FILE_NAME_HINT, mDestinationUri.toString());
             } else {
                 values.put(Downloads.Impl.COLUMN_DESTINATION,
-                           Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
+                           (this.mUseSystemCache) ?
+                                   Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION :
+                                   Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
             }
             // is the file supposed to be media-scannable?
             values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, (mScannable) ? SCANNABLE_VALUE_YES :
@@ -918,6 +940,7 @@ public class DownloadManager {
                     // non-external storage for a downloaded file, then the following code
                     // should also check for that destination.
                     if (destination == Downloads.Impl.DESTINATION_CACHE_PARTITION ||
+                            destination == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION ||
                             destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING ||
                             destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE) {
                         // return private uri

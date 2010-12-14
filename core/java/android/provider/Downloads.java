@@ -459,6 +459,13 @@ public final class Downloads {
         public static final int DESTINATION_FILE_URI = 4;
 
         /**
+         * This download will be saved to the system cache ("/cache")
+         * partition. This option is only used by system apps and so it requires
+         * android.permission.ACCESS_CACHE_FILESYSTEM permission.
+         */
+        public static final int DESTINATION_SYSTEMCACHE_PARTITION = 5;
+
+        /**
          * This download is allowed to run.
          */
         public static final int CONTROL_RUN = 0;
