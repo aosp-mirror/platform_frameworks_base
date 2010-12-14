@@ -83,8 +83,28 @@ status_t Layer::setToken(const sp<UserClient>& userClient,
             sharedClient, token, mBufferManager.getDefaultBufferCount(),
             getIdentity());
 
-    status_t err = mUserClientRef.setToken(userClient, lcblk, token);
 
+    sp<UserClient> ourClient(mUserClientRef.getClient());
+
+    /*
+     *  Here it is guaranteed that userClient != ourClient
+     *  (see UserClient::getTokenForSurface()).
+     *
+     *  We release the token used by this surface in ourClient below.
+     *  This should be safe to do so now, since this layer won't be attached
+     *  to this client, it should be okay to reuse that id.
+     *
+     *  If this causes problems, an other solution would be to keep a list
+     *  of all the {UserClient, token} ever used and release them when the
+     *  Layer is destroyed.
+     *
+     */
+
+    if (ourClient != 0) {
+        ourClient->detachLayer(this);
+    }
+
+    status_t err = mUserClientRef.setToken(userClient, lcblk, token);
     LOGE_IF(err != NO_ERROR,
             "ClientRef::setToken(%p, %p, %u) failed",
             userClient.get(), lcblk.get(), token);
