@@ -696,8 +696,7 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Chcete opustiť túto stránku?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Ak chcete pokračovať, vyberte OK. Ak chcete zostať na stránke, vyberte Zrušiť."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Potvrdiť"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Tip: Dvojitým klepnutím môžete zobrazenie priblížiť alebo oddialiť."</string>
-    <!-- no translation found for autofill_this_form (1272247532604569872) -->
-    <skip />
+    <string name="autofill_this_form" msgid="1272247532604569872">"Aut. dop."</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Nast. Auto. dopĺň."</string>
     <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
     <skip />
@@ -924,8 +923,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Zrušiť"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Nastaviť čas"</string>
-    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
-    <skip />
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Nastaviť dátum"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Nastaviť"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Predvolené"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Nevyžadujú sa žiadne oprávnenia."</string>
@@ -1076,6 +1074,8 @@
     <!-- no translation found for share (1778686618230011964) -->
     <skip />
     <!-- no translation found for find (4808270900322985960) -->
+    <skip />
+    <!-- no translation found for websearch (4337157977400211589) -->
     <skip />
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />

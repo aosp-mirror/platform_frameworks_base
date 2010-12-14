@@ -321,7 +321,7 @@
     <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Få åtkomst till detaljerade platser som GPS på pekdatorn, om det är tillgängligt. Skadliga program kan använda detta för att avgöra var du befinner dig, vilket drar mycket batteri."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Få åtkomst till detaljerade platskällor som Global Positioning System på telefonen, om det är tillgängligt. Skadliga program kan använda detta för att identifiera var du befinner dig, vilket drar mycket batteri."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"grov (nätverksbaserad) plats"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Få åtkomst till grova platser, till exempel mobilnätverkets databas, för att bestämma ungefärlig plats för en pekdator. Skadliga program kan använda detta för att avgöra ungefär var du befinner dig."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Få åtkomst till grova platsdata, till exempel mobilnätverkets databas, för att bestämma ungefärlig plats för en pekdator. Skadliga program kan använda detta för att avgöra ungefär var du befinner dig."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8235655958070862293">"Få åtkomst till grova platser, till exempel mobilnätverkets databas, för att bestämma ungefärlig plats för en telefon. Skadliga program kan använda detta för att avgöra ungefär var du befinner dig."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"få åtkomst till SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Tillåter att program använder lågnivåfunktioner i SurfaceFlinger."</string>
@@ -659,7 +659,7 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Vill du lämna den här den här sidan?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Tryck på OK om du vill fortsätta eller på Avbryt om du vill vara kvar på den aktuella sidan."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bekräfta"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Tips! Dubbelklicka om du vill zooma in eller ut."</string>
-    <!-- outdated translation 8940110866775097494 -->     <string name="autofill_this_form" msgid="1272247532604569872">"Autofyll formuläret"</string>
+    <string name="autofill_this_form" msgid="1272247532604569872">"Autofyll"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Konfig. Autofyll"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
@@ -865,8 +865,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Avbryt"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Ange tid"</string>
-    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
-    <skip />
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Ange datum"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Ställ in"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Standardinställning"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Inga behörigheter krävs"</string>
@@ -998,6 +997,8 @@
     <string name="media_unknown_state" msgid="729192782197290385">"Externa media i okänt tillstånd."</string>
     <string name="share" msgid="1778686618230011964">"Dela"</string>
     <string name="find" msgid="4808270900322985960">"Sök efter"</string>
+    <!-- no translation found for websearch (4337157977400211589) -->
+    <skip />
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />
     <!-- no translation found for gpsNotifTitle (5446858717157416839) -->

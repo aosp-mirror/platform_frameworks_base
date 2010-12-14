@@ -321,7 +321,7 @@
     <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Permite acceder a fuentes de ubicación precisas como, por ejemplo, el sistema de posicionamiento global, en la tableta, si hay alguna disponible. Las aplicaciones malintencionadas pueden utilizar este permiso para determinar la ubicación del usuario y pueden consumir batería adicional."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Permite precisar las fuentes de ubicación como, por ejemplo, el sistema de posicionamiento global, en el teléfono, en los casos en que estén disponibles. Las aplicaciones malintencionadas pueden utilizar este permiso para determinar dónde se encuentra el usuario y pueden consumir batería adicional."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"ubicación común (basada en red)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Permite acceder a fuentes de ubicación comunes como, por ejemplo, la base de datos de la red de un teléfono móvil, para determinar la ubicación aproximada de una tableta, si hay alguna disponible. Las aplicaciones malintencionadas pueden utilizar este permiso para determinar tu ubicación aproximada."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Permite acceder a fuentes de ubicación comunes como, por ejemplo, la base de datos de la red de telefonía móvil, para determinar la ubicación aproximada de una tableta, si hay alguna disponible. Las aplicaciones malintencionadas pueden utilizar este permiso para determinar tu ubicación aproximada."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8235655958070862293">"Acceder a fuentes de ubicación comunes como, por ejemplo, la base de datos de red de un teléfono móvil, para determinar una ubicación telefónica aproximada, en los casos en que esté disponible. Las aplicaciones malintencionadas pueden utilizar este permiso para determinar dónde te encuentras aproximadamente."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"acceder a SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Permite que la aplicación utilice funciones de SurfaceFlinger de nivel inferior."</string>
@@ -389,7 +389,7 @@
     <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"Permite que la aplicación active o desactive la tableta."</string>
     <string name="permdesc_devicePower" product="default" msgid="4577331933252444818">"Permite que la aplicación active o desactive el teléfono."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"ejecutar en modo de prueba de fábrica"</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Permite la ejecución como prueba de fabricante de nivel inferior, lo que posibilita un total acceso al hardware de la tableta. Sólo está disponible cuando una tableta se está ejecutando en modo de prueba."</string>
+    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Permite la ejecución como prueba de fabricante de nivel inferior, lo que posibilita un acceso completo al hardware de la tableta. Sólo está disponible cuando una tableta se está ejecutando en modo de prueba."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Ejecutar como prueba de fabricante de nivel inferior, permitiendo un acceso íntegro al hardware del teléfono. Sólo está disponible cuando un teléfono se está ejecutando en modo de prueba."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"establecer fondo de pantalla"</string>
     <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Permite que la aplicación establezca el fondo de pantalla del sistema."</string>
@@ -659,7 +659,7 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"¿Quieres salir de esta página?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Selecciona \"Aceptar\" para continuar o \"Cancelar\" para permanecer en la página actual."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Confirmar"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Sugerencia: toca dos veces para ampliar o reducir."</string>
-    <!-- outdated translation 8940110866775097494 -->     <string name="autofill_this_form" msgid="1272247532604569872">"Autocompletar este formulario"</string>
+    <string name="autofill_this_form" msgid="1272247532604569872">"Autocompletar"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Config autocomp"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
@@ -865,8 +865,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"Aceptar"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Cancelar"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Establecer hora"</string>
-    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
-    <skip />
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Establecer fecha"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Establecer"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Predeterminado"</string>
     <string name="no_permissions" msgid="7283357728219338112">"No es necesario ningún permiso"</string>
@@ -998,6 +997,8 @@
     <string name="media_unknown_state" msgid="729192782197290385">"Estado de medio externo desconocido"</string>
     <string name="share" msgid="1778686618230011964">"Compartir"</string>
     <string name="find" msgid="4808270900322985960">"Buscar"</string>
+    <!-- no translation found for websearch (4337157977400211589) -->
+    <skip />
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />
     <!-- no translation found for gpsNotifTitle (5446858717157416839) -->

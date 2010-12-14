@@ -696,8 +696,7 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Ali se želite premakniti s te strani?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Če želite nadaljevati, izberite V redu, če želite ostati na trenutni strani, izberite Prekliči."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Potrdi"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Namig: tapnite dvakrat, če želite povečati ali pomanjšati."</string>
-    <!-- no translation found for autofill_this_form (1272247532604569872) -->
-    <skip />
+    <string name="autofill_this_form" msgid="1272247532604569872">"Samodejno izpolnjevanje"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Nam. sam. izpoln."</string>
     <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
     <skip />
@@ -924,8 +923,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"V redu"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Prekliči"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Nastavi uro"</string>
-    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
-    <skip />
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Nastavi datum"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Nastavi"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Privzeto"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Ni zahtevanih dovoljenj"</string>
@@ -1076,6 +1074,8 @@
     <!-- no translation found for share (1778686618230011964) -->
     <skip />
     <!-- no translation found for find (4808270900322985960) -->
+    <skip />
+    <!-- no translation found for websearch (4337157977400211589) -->
     <skip />
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />
