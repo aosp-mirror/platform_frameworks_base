@@ -246,9 +246,10 @@ void Layer::setGeometry(hwc_layer_t* hwcl)
 void Layer::setPerFrameData(hwc_layer_t* hwcl) {
     sp<GraphicBuffer> buffer(mBufferManager.getActiveBuffer());
     if (buffer == NULL) {
-        // this situation can happen if we ran out of memory for instance.
-        // not much we can do. continue to use whatever texture was bound
-        // to this context.
+        // this can happen if the client never drew into this layer yet,
+        // or if we ran out of memory. In that case, don't let
+        // HWC handle it.
+        hwcl->flags |= HWC_SKIP_LAYER;
         hwcl->handle = NULL;
         return;
     }
@@ -581,10 +582,18 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
     }
 
     // we retired a buffer, which becomes the new front buffer
+
+    const bool noActiveBuffer = !mBufferManager.hasActiveBuffer();
     if (mBufferManager.setActiveBufferIndex(buf) < NO_ERROR) {
         LOGE("retireAndLock() buffer index (%d) out of range", int(buf));
         mPostedDirtyRegion.clear();
         return;
+    }
+
+    if (noActiveBuffer) {
+        // we didn't have an active buffer, we need to recompute
+        // our visible region
+        recomputeVisibleRegions = true;
     }
 
     sp<GraphicBuffer> newFrontBuffer(getBuffer(buf));
@@ -886,6 +895,10 @@ sp<GraphicBuffer> Layer::BufferManager::getActiveBuffer() const {
         result = buffers[activeBuffer].buffer;
     }
     return result;
+}
+
+bool Layer::BufferManager::hasActiveBuffer() const {
+    return mActiveBuffer >= 0;
 }
 
 sp<GraphicBuffer> Layer::BufferManager::detachBuffer(size_t index)
