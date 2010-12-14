@@ -1,0 +1,520 @@
+page.title=Launcher Icons
+parent.title=Icon Design Guidelines
+parent.link=icon_design.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+<ol>
+<li><a href="#market">Application Icons in Android Market</a></li>
+<li><a href="#icon5">Android 2.0 and Later</a>
+  <ol>
+    <li><a href="#style5">Style</a></li>
+    <li><a href="#size5">Size</a></li>
+    <li><a href="#materialscolors5">Materials and colors</a></li>
+    <li><a href="#effects5">Effects</a></li>
+    <li><a href="#dodonts5">Do's and don'ts</a></li>
+    <li><a href="#examples5">Example icons</a></li>
+  </ol>
+</li>
+<li><a href="#icon1">Android 1.6 and Earlier</a></li>
+</ol>
+
+<h2>See also</h2>
+
+<ol>
+<li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a></li>
+</ol>
+
+</div>
+</div>
+
+
+<p>A Launcher icon is a graphic that represents your application on the device's
+Home screen and in the Launcher window.</p>
+
+<p>The user opens the Launcher by touching the icon at the bottom of the Home
+screen. The Launcher opens and exposes the icons for all of the installed
+applications. The user selects an application and opens it by touching the
+Launcher icon or by means of any hardware navigation controls available, such as
+a trackball or d-pad.</p>
+
+<p>As described in <a href="icon_design.html#icon-sets">Providing
+Density-Specific Icon Sets</a>, you should create separate icons for low-,
+medium-, and high-density screens. This ensures that your icons will display
+properly across the range of devices on which your application can be installed.
+See <a href="icon_design.html#design-tips">Tips for Designers</a> for
+suggestions on how to work with multiple sets of icons.</p>
+
+
+
+<h2 id="market">Application Icons in Android Market</h2>
+
+<p>If you are <a href="{@docRoot}guide/publishing/publishing.html">publishing
+your application on Android Market</a>, you will also need to provide a 512x512
+pixel, high-resolution application icon in the <a
+href="http://market.android.com/publish">developer console</a> at upload-time.
+This icon will be used in various locations in Android Market and does
+not replace your launcher icon.</p>
+
+<p>For tips and recommendations on creating high-resolution launcher icons that
+can easily be scaled up to 512x512, see
+<a href="{@docRoot}guide/practices/ui_guidelines/icon_design.html#design-tips">
+Tips for Designers</a>.</p>
+
+<p>For information and specifications about high-resolution application
+icons in Android Market, see the following article:</p>
+
+<p style="margin-left:2em"><a
+href="http://market.android.com/support/bin/answer.py?answer=1078870">
+  Graphic Assets for your Application (Android Market Help) &raquo;</a>
+
+
+
+
+<h2 id="icon5">Android 2.0 and Later</h2>
+
+<p>Starting with Android 2.0, launcher icons should be front-facing, instead of
+at a three-quarter perspective. The following guidelines describe how to design
+launcher icons for Android 2.0 (API Level 5) and later.</p>
+
+<h3 id="style5">Style</h3>
+
+<p>The launcher icons that you create should follow the general style principles
+below. The guidelines aren't meant to restrict what you can do with your icons,
+but rather they are meant to emphasize the common approaches that your icons can
+share with others on the device. Figure 1, at right, provides examples.  </p>
+
+<div class="figure">
+  <img src="{@docRoot}images/icon_design/IconGraphic_Icons_i.png" 
+    width="340">
+  <p class="img-caption">
+    <strong>Figure 1.</strong> Example launcher icons for Android 2.0 and
+    greater.
+  </p>
+</div>
+
+<p>Clean and contemporary:</p>
+
+<ul>
+  <li>Launcher icons should be modern and sometimes quirky; they should not
+appear aged or ragged. You should avoid overused symbolic metaphors whenever
+possible.</li>
+</ul>
+
+<p>Simple and iconic:</p>
+<ul>
+  <li>Android Launcher icons are caricatural in nature; your icons should be
+highly simplified and exaggerated, so that they are appropriate for use at small
+sizes. Your icons should not be overly complicated. </li>
+  <li>Try featuring a single part of an application as a symbolic
+representation of the whole (for example, the Music icon features a speaker).
+</li>
+  <li>Consider using natural outlines and shapes, both geometric and organic,
+with a realistic (but never photorealistic) rendering. </li>
+  <li>Your icons <em>should not</em> present a cropped view of a larger
+image.</li>
+</ul>
+
+<p>Tactile and textured:</p>
+<ul>
+  <li>Icons should feature non-glossy, textured material. See
+  <a href="#materialscolors5">Materials and colors</a>, below, for more
+  information.</li>
+</ul>
+
+<p>Forward-facing and top-lit:</p>
+<ul>
+  <li><em>New for Android 2.0 and later platforms</em>: Android Launcher
+icons should be forward-facing, with very little perspective, and they
+should be top-lit.</li>
+</ul>
+
+<p class="note"><strong>Note:</strong> Android applies separate text labels
+using the application name when displaying launcher icons, so you should avoid
+embedding text in your icon and instead focus on designing a distinct and
+memorable icon.</p>
+
+
+
+<h3 id="size5">Size and positioning</h3>
+
+<p>Launcher icons should use a variety of shapes and forms that are scaled and
+positioned inside the asset to create consistent visual weight with other
+icons.</p>
+
+<p>Figure 2 illustrates various ways of positioning the icon inside the
+asset. You should size the icons <em>smaller than the actual bounds of the
+asset</em> to create a consistent visual weight and to allow for shadows. If
+your icon is square or nearly square, it should be scaled even smaller.</p>
+
+<p>In order to indicate the recommended size for the icon, each example in
+Figure 2 includes three different guide rectangles:</p>
+
+<ul>
+<li>The red box is the bounding box for the full asset.</li>
+<li>The blue box is the recommended bounding box for the actual icon.
+The icon box is sized smaller than the full asset box so that there is space to
+include shadows and allow for special icon treatments.</li>
+<li>The orange box is the recommended bounding box for the actual icon when
+the content is square. The box for square icons is smaller than that for other
+icons to establish a consistent visual weight across the two types.</li>
+</ul>
+
+<table>
+<tr>
+
+<td style="border:0;">
+<ol class="nolist">
+  <li>Launcher icon dimensions for high-density (<code>hdpi</code>) screens:</li>
+  <ol class="nolist">
+    <li>Full Asset: 72 x 72 px</li>
+    <li>Icon: 60 x 60 px</li>
+    <li>Square Icon: 56 x 56 px</li>
+  </ol>
+  </li>
+</ol>
+</td>
+<td style="border:0;">
+  <img src="{@docRoot}images/icon_design/launcher_size_hdpi.png" width="450">
+</td>
+</tr>
+<tr>
+<td style="border:0;">
+  <ol class="nolist">
+  <li>Launcher icon dimensions for medium-density (<code>mdpi</code>) screens:</li>
+    <ol class="nolist">
+      <li>Full Asset: 48 x 48 px</li>
+      <li>Icon: 40 x 40 px</li>
+      <li>Square Icon: 38 x 38 px</li>
+    </ol>
+  </li>
+</ol>
+</td>
+
+<td style="border:0;">
+ <img src="{@docRoot}images/icon_design/launcher_size_mdpi.png" width="450">
+</td>
+</tr>
+<tr>
+<td style="border:0;">
+  <ol class="nolist">
+  <li>Launcher icon dimensions for low-density (<code>ldpi</code>) screens:</li>
+    <ol class="nolist">
+      <li>Full Asset: 36 x 36 px</li>
+      <li>Icon: 30 x 30 px</li>
+      <li>Square Icon: 28 x 28 px</li>
+    </ol>
+  </li>
+</ol>
+</td>
+
+<td style="border:0;">
+ <img src="{@docRoot}images/icon_design/launcher_size_ldpi.png" width="450">
+</td>
+</tr>
+
+<tr>
+<td style="border:0;"></td>
+<td style="border:0;">
+ <p class="table-caption"><strong>Figure 2.</strong>
+ Launcher icon sizing and positioning inside the bounds of the
+ icon asset.</p>
+</td>
+</tr>
+
+</table>
+
+
+
+
+<h3 id="materialscolors5">Materials and colors</h3>
+
+<p>Launcher icons should make use of tactile, top-lit, textured materials. Even
+if your icon is just a simple shape, you should try to render in a way that
+makes it appear to be sculpted from some real-world material.</p>
+
+<p>Android launcher icons usually consist of a smaller shape within a
+larger base shape and combine one neutral and one primary color. Icons may
+use a combination of neutral colors but should maintain a fairly high level of
+contrast. Icons should not use more than one primary color per icon, if
+possible.</p>
+
+<p>Launcher icons should use a limited color palette that includes a range
+of neutral and primary colors. The icons should not be over-saturated.</p>
+
+<p>The recommended color palette to use for Launcher icons is shown in Figure 3.
+You can use elements of the palette for both the base color and the highlight
+color. You can use the colors of the palette in conjunction with a
+white-to-black vertical linear gradient overlay. This creates the impression
+that the icon is lit from above and keeps the color less saturated.</p>
+
+<img src="{@docRoot}images/icon_design/IconGraphic_Colors.png" width="530">
+<p class="img-caption">
+<strong>Figure 3.</strong> Recommended color palette for icons.</p>
+
+<p>When you combine the materials in Figure 4 with a color highlight from the
+recommended palette above, you can create materials combinations such as those
+shown in Figure 5. To get you started, the
+<a href="{@docRoot}guide/practices/ui_guidelines/icon_design.html#templatespack">Icon Templates Pack</a>
+includes a Photoshop file (<code>ic_launcher_template/example_materials.psd</code>)
+that provides all of the default materials, colors, and gradients. </p>
+
+<table>
+  <tbody>
+    <tr>
+      <td style="border:0;">
+<img src="{@docRoot}images/icon_design/IconGraphic_Materials.png" width="450">
+<p class="img-caption">
+<strong>Figure 4.</strong> Example materials that you can use to create
+your icons.</p>
+      </td>
+      <td style="border:0;border-left:1px solid #ccc;margin-left:1em;padding-left:1em">
+<img src="{@docRoot}images/icon_design/IconGraphic_AccentColor.png" width="450">
+<p class="img-caption">
+<strong>Figure 5.</strong> Examples of materials combined with base
+and highlight colors from the recommended palette.</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+<h3 id="effects5">Effects</h3>
+
+<p>Launcher icons are flat and the perspective is straight-on, rather than at an
+angle. A drop shadow is used to create a sense of depth. Launcher icons can use
+varying textures and lighting effects, but must be lit directly from above
+(straight down).</p>
+
+<p>In order to maintain consistency, all launcher icons should use the same
+drop shadow effect, as shown in Figure 6.</p>
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/launcher_style.png"/>
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 6. </strong>Style, light and effects for launcher icons.</p>
+    <div class="image-caption-nested">
+    <p><em>Note: all pixel dimensions are for medium density and should be scaled appropriately for other densities.</em></p>
+    <table>
+    <tr><td><em>1.</em></td><td nowrap>Lighting:</td><td>Top-lit, using appropriate lighting details<br><br></td></tr>
+    <tr><td><em>2.</em></td><td nowrap>Drop shadow:</td><td><code>#000000</code>, 75% opacity<br>angle 90&deg;<br>distance 1px<br>size 3px<br><br></td></tr>
+    <tr><td><em>3.</em></td><td nowrap>Textures:</td><td>Tactile, appear to use real-world materials (monochromatic noise in example image)<br><br></td></tr>
+    </table>
+    </div>
+  </div>
+</td>
+</tr>
+</table>
+
+
+
+<h3 id="dodonts5">Do's and don'ts</h3>
+
+<p>Below are some "do and don't" examples to consider when creating icons for
+your application.  </p>
+
+
+<table>
+<tr>
+<td style="border:0;width:50%">
+
+<h4>Android Launcher icons are...</h4>
+
+<ul>
+<li>Modern, minimal, matte, tactile, and textured</li>
+<li>Forward-facing and top-lit, whole, limited in color
+palette</li>
+</ul>
+</td>
+<td style="border:0;width:50%">
+
+<h4>Android Launcher icons are not...</h4>
+
+<ul>
+<li>Antique, over-complicated, glossy, flat vector</li>
+<li>Rotated, Cropped, Over-Saturated</li>
+</ul>
+</td>
+</tr>
+<tr>
+</table>
+
+<img src="{@docRoot}images/icon_design/IconGraphic_DosDonts.png"/>
+<p class="img-caption">
+<strong>Figure 7.</strong> Side-by-side examples of "do's and don'ts" for
+Android launcher icons. </p>
+
+
+
+
+
+<h3 id="examples5">Example icons</h3>
+
+<p>Shown below are examples of high-density launcher icons used by
+Android applications. The icons are provided for your reference only &mdash;
+please do not reuse these icons in your applications.</code>.</p>
+
+<img src="{@docRoot}images/icon_design/IconGraphic_Icons.png" />
+
+
+
+<h2 id="icon1">Android 1.6 and earlier</h2>
+
+<p>The following guidelines describe how to design launcher icons for Android
+1.6 (API Level 4) and earlier. Launcher icons for Android 1.6 and below are
+simplified 3D icons with a fixed perspective. The required perspective is shown
+in Figure 8.</p>
+
+<h3 id="structure1">Structure</h3>
+
+<ul>
+<li>The base of a launcher icon can face either the top view or the front
+view.</li>
+
+<li>The majority of a launcher icon’s surface should be created using the
+launcher icon <a href="#palette1">color palette</a>. To add emphasis, use
+one or more bright accent colors to highlight specific characteristics.</li>
+
+<li>All launcher icons must be created with rounded corners to make them look
+friendly and simple—as shown in Figure 8.</li>
+
+<li>All dimensions specified are based on a 250x250 pixel artboard size
+in a vector graphics editor like Adobe Illustrator, where the icon fits within
+the artboard boundaries.</li>
+
+<li><strong>Final art must be scaled down and exported as a transparent PNG file
+using a raster image editor such as Adobe Photoshop. Do not include a background
+color.</strong></li>
+
+<li>Templates for creating icons in Adobe Photoshop are available in the <a
+href="{@docRoot}guide/practices/ui_guidelines/icon_design.html#templatespack">Icon
+Templates Pack</a>.</li>
+
+</ul>
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/launcher_structure.png" alt="A view of
+launcher icon corners and perspective angles" />
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 8.</strong> Rounded corners and perspective angles for
+      launcher icons (90° is vertical).</p>
+    <div class="image-caption-nested">
+      <table>
+      <tr><td><em>1.</em></td><td>92°</td></tr>
+      <tr><td><em>2.</em></td><td>92°</td></tr>
+      <tr><td><em>3.</em></td><td>173°</td></tr>
+      <tr><td><em>4.</em></td><td>171°</td></tr>
+      <tr><td><em>5.</em></td><td>49°</td></tr>
+      <tr><td><em>6.</em></td><td>171°</td></tr>
+      <tr><td><em>7.</em></td><td>64°</td></tr>
+      <tr><td><em>8.</em></td><td>97°</td></tr>
+      <tr><td><em>9.</em></td><td>75°</td></tr>
+      <tr><td><em>10.</em></td><td>93°</td></tr>
+      <tr><td><em>11.</em></td><td>169°</td></tr>
+      </table>
+    </div>
+  </div>
+</td>
+</tr>
+</table>
+
+<h3 id="style1">Light, effects, and shadows</h3>
+
+<p>Launcher icons are simplified 3D icons using light and shadows for
+definition. A light source is placed slightly to the left in front of the icon,
+and therefore the shadow expands to the right and back.</p>
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/launcher_light.png" alt="A view of
+light, effects, and shadows for launcher icons."/>
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 9. </strong>Light, effects, and shadows for launcher icons.</p>
+    <div class="image-caption-nested">
+    <table>
+    <tr><td><em>1.</em></td><td>Edge highlight:</td><td>white</td></tr>
+    <tr><td><em>2.</em></td><td>Icon shadow:</td><td>black | 20px blur<br>50% opacity | angle 67°</td></tr>
+    <tr><td><em>3.</em></td><td>Front part:</td><td>Use light gradient from color palette</td></tr>
+    <tr><td><em>4.</em></td><td>Detail shadow:</td><td>black | 10px blur<br>75% opacity</td></tr>
+    <tr><td><em>5.</em></td><td> Side part:</td><td>Use medium gradient from color palette</td></tr>
+    </table>
+    </div>
+  </div>
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td style="border:0">
+
+<h4 id="palette1">Launcher icon color palette</h4>
+
+<table>
+<tr>
+<td class="image-caption-i"><img src="{@docRoot}images/icon_design/launcher_palette_white.png"/></td>
+<td class="image-caption-c">White<br>r 255 | g 255 | b 255<br>Used for highlights on edges.</td>
+</tr>
+
+<tr>
+<td class="image-caption-i"><img src="{@docRoot}images/icon_design/launcher_palette_gradient_light.png"/></td>
+<td class="image-caption-c">Light gradient<br><em>1:&nbsp;&nbsp;</em>r 0  | g 0  | b 0<br><em>2:&nbsp;&nbsp;</em>r 217 | g 217 | b 217<br>Used on the front (lit) part of the icon.</td>
+</tr>
+
+<tr>
+<td class="image-caption-i"><img src="{@docRoot}images/icon_design/launcher_palette_gradient_medium.png"/></td>
+<td class="image-caption-c">Medium gradient<br><em>1:&nbsp;&nbsp;</em>r 190 | g 190 | b 190<br><em>2:&nbsp;&nbsp;</em>r 115 | g 115 | b 115<br>Used on the side (shaded) part of the icon.</td>
+</tr>
+
+<tr>
+<td class="image-caption-i"><img src="{@docRoot}images/icon_design/launcher_palette_gradient_dark.png"/></td>
+<td class="image-caption-c">Dark gradient<br><em>1:&nbsp;&nbsp;</em>r 100 | g 100 | b 100<br><em>2:&nbsp;&nbsp;</em>r 25  | g 25  | b 25<br>Used on details and parts in the shade of the icon.</td>
+</tr>
+
+<tr>
+<td class="image-caption-i"><img src="{@docRoot}images/icon_design/launcher_palette_black.png"/></td>
+<td class="image-caption-c">Black<br>r 0 | g 0 | b 0<br>Used as base color in shadows.</td>
+</tr>
+
+</table>
+
+</td>
+
+<td style="border:0">
+
+<h4 id="steps1">Step by step</h4>
+
+<ol>
+  <li>Create the basic shapes with a tool like Adobe Illustrator, using the
+angles described in <a href="#structure1">Launcher icon: structure</a>.
+The shapes and effects must fit within a 250x250 pixel artboard.</li>
+  <li>Add depth to shapes by extruding them and create the rounded corners as
+described for the launcher icon structure.</li>
+  <li>Add details and colors. Gradients should be treated as if there is a light
+source placed slightly to the left in front of the icon.</li>
+  <li>Create the shadows with the correct angle and blur effect.</li>
+  <li>Import the icon into a tool like Adobe Photoshop and scale to fit an image
+size of 48x48 px on a transparent background.</li>
+  <li>Export the icon at 48x48 as a PNG file with transparency enabled.</li>
+</ol>
+
+</td>
+</tr>
+</table>

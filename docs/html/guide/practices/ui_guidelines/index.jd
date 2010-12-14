@@ -12,7 +12,7 @@ these guidelines as we release them.</p>
  <dl>
   <dt><a href="{@docRoot}guide/practices/ui_guidelines/icon_design.html">Icon
 Design Guidelines</a> and <a
-href="{@docRoot}shareables/icon_templates-v2.0.zip">Android Icon Templates Pack
+href="{@docRoot}shareables/icon_templates-v2.3.zip">Android Icon Templates Pack
 &raquo; </a></dt>
   <dd>Your applications need a wide variety of icons, from a launcher icon to
 icons in menus, dialogs, tabs, the status bar, and lists. The Icon Guidelines

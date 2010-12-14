@@ -1,0 +1,454 @@
+page.title=Tab Icons
+parent.title=Icon Design Guidelines
+parent.link=icon_design.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+<ol>
+<li><a href="#tabstates">Providing Icons for Two Tab States</a>
+<li><a href="#icon5">Android 2.0 and Later</a>
+  <ol>
+    <li><a href="#size5">Size</a></li>
+    <li><a href="#style5">Style, colors, and effects</a></li>
+    <li><a href="#dodonts5">Do's and don'ts</a></li>
+    <li><a href="#examples5">Example icons</a></li>
+  </ol>
+</li>
+<li><a href="#icon1">Android 1.6 and Earlier</a></li>
+</ol>
+
+<h2>See also</h2>
+
+<ol>
+<li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a></li>
+</ol>
+
+</div>
+</div>
+
+
+
+<p>Tab icons are graphical elements used to represent individual tabs in a
+multi-tab interface. Each tab icon has two states: unselected and selected.</p>
+
+<p>As described in <a href="icon_design.html#icon-sets">Providing
+Density-Specific Icon Sets</a>, you should create separate icon sets for low-,
+medium-, and high-density screens. This ensures that your icons will display
+properly across the range of devices on which your application can be installed.
+See <a href="icon_design.html#design-tips">Tips for Designers</a>
+for suggestions on how to work with multiple sets of icons.</p>
+
+<p><strong>Final art must be exported as a transparent PNG file. Do not include
+a background color</strong>.</p>
+
+<p>Templates for creating icons in Adobe Photoshop are available in the <a
+href="{@docRoot}guide/practices/ui_guidelines/icon_design.html#templatespack">Icon
+Templates Pack</a>.</p>
+
+
+
+<p class="warning"><strong>Warning:</strong>
+
+The style of tab icons has changed drastically in
+Android 2.0 compared to <a href="#icon1">previous versions</a>. <strong>To
+provide support for all Android versions</strong>, developers should:
+<br>
+1. Place tab icons for Android 2.0 and higher in the
+<code>drawable-hdpi-v5</code>, <code>drawable-mdpi-v5</code>, and <code>drawable-ldpi-v5</code> directories.
+<br>
+2. Place tab icons for previous versions in
+<code>drawable-hdpi</code>, <code>drawable-mdpi</code>, and <code>drawable-ldpi</code> directories.
+<br>
+3. Set <code>android:targetSdkVersion</code> to 5 or higher in the
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a>
+in the <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">application manifest</a>.
+This will inform the system that it should render tabs using the new tab style.
+
+</p>
+
+
+<h2 id="tabstates">Providing Icons for Two Tab States</h2>
+
+<p>Tab icons should have two states: unselected and selected. To provide icons
+with multiple states, developers must create a
+<a href="{@docRoot}guide/topics/resources/drawable-resource.html#StateList">state
+list drawable</a> for each an icon, which is an XML file that lists which image
+to use for the different UI states.</p>
+
+<p>For example, for a tab widget with tabs named 'Friends' and 'Coworkers',
+you can use a directory structure similar to the one below:</p>
+
+<pre>res/...
+    drawable/...
+        <strong>ic_tab_friends.xml</strong>
+        <strong>ic_tab_coworkers.xml</strong>
+    drawable-ldpi/...
+        ic_tab_friends_selected.png
+        ic_tab_friends_unselected.png
+        ic_tab_coworkers_selected.png
+        ic_tab_coworkers_unselected.png
+    drawable-mdpi/...
+        ic_tab_friends_selected.png
+        ic_tab_friends_unselected.png
+        ic_tab_coworkers_selected.png
+        ic_tab_coworkers_unselected.png
+    drawable-hdpi/...
+        ...
+    drawable-ldpi-v5/...
+        ...
+    drawable-mdpi-v5/...
+        ...
+    drawable-hdpi-v5/...
+        ...</pre>
+
+<p>The contents of the XML files listed above should reference the corresponding
+selected and unselected icon drawables. For example, below is the code
+for <code>ic_tab_friends.xml</code>:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;selector xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;!-- selected state --&gt;
+    &lt;item android:drawable="@drawable/ic_tab_friends_selected"
+          android:state_selected="true"
+          android:state_pressed="false" /&gt;
+    &lt;!-- unselected state (default) --&gt;
+    &lt;item android:drawable="@drawable/ic_tab_friends_unselected" /&gt;
+&lt;/selector&gt;
+</pre>
+
+
+
+
+<h2 id="icon5">Android 2.0 and Later</h2>
+
+<p>The following guidelines describe how to design tab icons for Android
+2.0 (API Level 5) and later.</p>
+
+<h3 id="size5">Size and positioning</h3>
+
+<p>Tab icons should use simple shapes and forms and those must be
+scaled and positioned inside the final asset.</p>
+
+<p>Figure 1 illustrates various ways of positioning the icon inside the
+asset. You should size the icons <em>smaller than the actual bounds of the
+asset</em>.</p>
+
+<p>In order to indicate the recommended size for the icon, each example in
+Figure 1 includes three different guide rectangles:</p>
+
+<ul>
+<li>The red box is the bounding box for the full asset.</li>
+<li>The blue box is the recommended bounding box for the actual icon.
+The icon box is sized smaller than the full asset box to allow for
+special icon treatments.</li>
+<li>The orange box is the recommended bounding box for the actual icon when
+the content is square. The box for square icons is smaller than that for other
+icons to establish a consistent visual weight across the two types.</li>
+</ul>
+
+
+<table>
+<tr>
+
+<td style="border:0;">
+<ol class="nolist">
+  <li>Tab icon dimensions for high-density (<code>hdpi</code>) screens:</li>
+  <ol class="nolist">
+    <li>Full Asset: 48 x 48 px</li>
+    <li>Icon: 42 x 42 px</li>
+  </ol>
+  </li>
+</ol>
+</td>
+<td style="border:0;">
+  <img src="{@docRoot}images/icon_design/tab_size_hdpi.png" width="385">
+</td>
+</tr>
+<tr>
+<td style="border:0;">
+  <ol class="nolist">
+  <li>Tab icon dimensions for medium-density (<code>mdpi</code>) screens:</li>
+    <ol class="nolist">
+      <li>Full Asset: 32 x 32 px</li>
+      <li>Icon: 28 x 28 px</li>
+    </ol>
+  </li>
+</ol>
+</td>
+
+<td style="border:0;">
+ <img src="{@docRoot}images/icon_design/tab_size_mdpi.png" width="385">
+</td>
+</tr>
+<tr>
+<td style="border:0;">
+  <ol class="nolist">
+  <li>Tab icon dimensions for low-density (<code>ldpi</code>) screens:</li>
+    <ol class="nolist">
+      <li>Full Asset: 24 x 24 px</li>
+      <li>Icon: 22 x 22 px</li>
+    </ol>
+  </li>
+</ol>
+</td>
+
+<td style="border:0;">
+ <img src="{@docRoot}images/icon_design/tab_size_ldpi.png" width="385">
+</td>
+</tr>
+
+<tr>
+<td style="border:0;"></td>
+<td style="border:0;">
+ <p class="table-caption"><strong>Figure 1.</strong>
+ Tab icon sizing and positioning inside the bounds of the
+ icon asset.</p>
+</td>
+</tr>
+
+</table>
+
+
+
+
+<h3 id="style5">Style, colors, and effects</h3>
+
+<p>Tab icons are flat, matte, and pictured face-on.</p>
+
+<p>Tab icons should have two states: selected and unselected.</p>
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/tab_style_unselected.png" alt="A view of effects for unselected tab icons."/>
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 2. </strong>Style and effects for unselected tab icons.</p>
+    <div class="image-caption-nested">
+    <p><em>Note: all pixel dimensions are for medium density and should be scaled appropriately for other densities.</em></p>
+    <table>
+    <tr><td><em>1.</em></td><td nowrap>Fill color:</td><td><code>#808080</code><br><br></td></tr>
+    <tr><td><em>2.</em></td><td nowrap>Inner content:</td><td>Inner content should subtract from the outer shape and consist purely of transparent pixels.</td></tr>
+    </table>
+    </div>
+  </div>
+</td>
+</tr>
+</table>
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/tab_style_selected.png" alt="A view of effects for selected tab icons."/>
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 3. </strong>Style and effects for selected tab icons.</p>
+    <div class="image-caption-nested">
+    <p><em>Note: all pixel dimensions are for medium density and should be scaled appropriately for other densities.</em></p>
+    <table>
+      <tr><td><em>1.</em></td><td nowrap>Fill color:</td><td><code>#FFFFFF</code><br><br></td></tr>
+      <tr><td><em>2.</em></td><td nowrap>Inner content:</td><td>Inner content should subtract from the outer shape and consist purely of transparent pixels.<br><br></td></tr>
+      <tr><td><em>3.</em></td><td nowrap>Outer glow:</td><td><code>#000000</code>, 25% opacity<br>size 3px</td></tr>
+    </table>
+    </div>
+  </div>
+</td>
+</tr>
+</table>
+
+
+
+<h3 id="dosdonts5">Do's and don'ts</h3>
+
+<p>Below are some "do and don't" examples to consider when creating tab icons for
+your application. </p>
+
+
+<img src="{@docRoot}images/icon_design/do_dont_tabicons.png">
+
+
+
+
+<h3 id="examples5">Example icons</h3>
+
+<p>Shown below are standard high-density tab icons that are used in
+the Android platform.</p>
+
+<p class="warning"><strong>Warning:</strong>
+Because these resources can change between platform versions, you 
+should not reference the system's copy of the resources. If you want to
+use any icons or other internal drawable resources, you should store a
+local copy of those icons or drawables in your application resources, 
+then reference the local copy from your application code. In that way, you can
+maintain control over the appearance of your icons, even if the system's
+copy changes. Note that the grid below is not intended to be complete.</p>
+
+<img src="{@docRoot}images/icon_design/tab_standard.png" />
+
+
+
+<h2 id="icon1">Android 1.6 and Earlier</h2>
+
+<p>The following guidelines describe how to design tab icons for Android
+1.6 (API Level 4) and earlier.</p>
+
+<h4 id="structure1">Structure</h4>
+
+<ul>
+<li>Unselected tab icons have the same fill gradient and effects as
+<a href="icon_design_menu.html#icon1">menu icons</a>,
+but with no outer glow.</li>
+
+<li>Selected tab icons look just like unselected tab icons, but with a fainter
+inner shadow, and have the same front part gradient as
+<a href="icon_design_dialog.html#icon1">dialog icons</a>.</li>
+
+<li>Tab icons have a 1 px safeframe which should only be overlapped for the edge
+of the anti-alias of a round shape.</li>
+
+<li>All dimensions specified on this page are based on a 32x32 px artboard size.
+Keep 1 px of padding around the bounding box inside the Photoshop template.</li>
+
+</ul>
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/tab_icon_unselected.png" alt="A view of
+unselected tab icon structure." />
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 3. </strong>Safeframe and fill gradient for unselected tab
+icons. Icon size is 32x32.</p>
+  </div>
+</td>
+</tr>
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/tab_icon_selected.png" alt="A view of
+selected tab icon structure." />
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 4. </strong>Safeframe and fill gradient for tab icons in
+selected state. Icon size is 32x32.</p>
+  </div>
+</td>
+</tr>
+</table>
+
+<h3 id="unselectedtabdetails1">Unselected tab icon</h3>
+
+<h4 id="unselectedtablight1">Light, effects, and shadows</h4>
+
+<p>Unselected tab icons look just like the selected tab icons, but with a
+fainter inner shadow, and the same front part gradient as the dialog icons.</p>
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/tab_unselected_light.png" alt="A view
+of light, effects, and shadows for unselected tab icons."/>
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 5. </strong>Light, effects, and shadows for unselected
+tab icons.</p>
+    <div class="image-caption-nested">
+    <table>
+    <tr><td><em>1.</em></td><td>Front part:</td><td>gradient overlay | angle 90°<br>bottom color: r 223 | g 223 | b 223<br>top color: r 249 | g 249 | b 249<br>bottom color location: 0%<br>top color location: 75%</td></tr>
+    <tr><td><em>2.</em></td><td>Inner shadow:</td><td>black | 10 % opacity | angle 90° distance 2px | size 2px</td></tr>
+    <tr><td><em>3.</em></td><td>Inner bevel:</td><td>depth 1% | direction down | size 0px | angle 90° | altitude 10°<br>highlight white 70% opacity<br>shadow black 25% opacity</td></tr>
+    </table>
+    </div>
+  </div>
+</td>
+</tr>
+</table>
+
+
+<table>
+<tr>
+<td style="border:0">
+
+<h4 id="unselectedtabsteps1">Step by step</h4>
+
+<ol>
+<li>Create the basic shapes using a tool like Adobe Illustrator.</li>
+<li>Import the shape to a tool like Adobe Photoshop and scale to fit an image of
+32x32 px on a transparent background.</li>
+<li>Add the effects seen in Figure 5 for the unselected state filter.</li>
+<li>Export the icon at 32x32 as a PNG file with transparency enabled.</li>
+</ol>
+
+</td>
+</tr>
+</table>
+
+<h3 id="selectedtabdetails1">Selected tab icon</h3>
+
+<p>The selected tab icons have the same fill gradient and effects as the menu
+icon, but with no outer glow.</p>
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/tab_selected_light.png" alt="A view of
+light, effects, and shadows for selected tab icons."/>
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 6. </strong>Light, effects, and shadows for selected tab
+icons.</p>
+    <div class="image-caption-nested">
+    <table>
+    <tr><td><em>1.</em></td><td>Front part:</td><td>Use fill gradient from color palette.</td></tr>
+    <tr><td><em>2.</em></td><td>Inner shadow:</td><td>black | 20% opacity | <br>angle 90° | distance 2px | <br>size 2px</td></tr>
+    <tr><td><em>3.</em></td><td>Inner bevel:</td><td>depth 1% | direction down | size 0px | angle 90° | <br>altitude 10°<br>highlight white 70% opacity<br>shadow black 25% opacity</td></tr>
+    </table>
+    </div>
+  </div>
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td style="border:0">
+
+<h4 id="selectedtabpalette1">Color palette</h4>
+
+<table>
+<tr>
+<td class="image-caption-i"><img src="{@docRoot}images/icon_design/menu_palette_gradient_medium.png"/></td>
+<td class="image-caption-c">Fill gradient<br><em>1:&nbsp;&nbsp;</em>r 163 | g 163 | b 163<br><em>2:&nbsp;&nbsp;</em>r 120 | g 120 | b 120<br>Used as color fill on unselected tab icons.</td>
+</tr>
+
+</table>
+
+</td>
+
+<td style="border:0">
+
+<h4 id="selectedtabsteps1">Step by step</h4>
+
+<ol>
+<li>Create the basic shape using a tool like Adobe Illustrator.</li>
+<li>Import the shape into a tool like Adobe Photoshop and scale to fit a 32x32
+px artboard with a transparent background. </li>
+<li>Add the effects seen in Figure 6 for the selected state filter.</li>
+<li>Export the icon at 32x32 as a PNG file with transparency enabled.</li>
+</ol>
+
+</td>
+</tr>
+</table>
