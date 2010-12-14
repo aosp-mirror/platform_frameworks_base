@@ -102,7 +102,7 @@ public:
             return false;
         }
 
-        mServer = new MtpServer(mFd, mDatabase, AID_SDCARD_RW, 0664, 0775);
+        mServer = new MtpServer(mFd, mDatabase, AID_MEDIA_RW, 0664, 0775);
         mServer->addStorage(mStoragePath, mReserveSpace);
         sMutex.unlock();
 
