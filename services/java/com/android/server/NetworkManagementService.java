@@ -219,28 +219,6 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         }
     }
 
-    private static int stringToIpAddr(String addrString) throws UnknownHostException {
-        try {
-            String[] parts = addrString.split("\\.");
-            if (parts.length != 4) {
-                throw new UnknownHostException(addrString);
-            }
-
-            int a = Integer.parseInt(parts[0]) << 24;
-            int b = Integer.parseInt(parts[1]) << 16;
-            int c = Integer.parseInt(parts[2]) <<  8;
-            int d = Integer.parseInt(parts[3])      ;
-
-            return a | b | c | d;
-        } catch (NumberFormatException ex) {
-            throw new UnknownHostException(addrString);
-        }
-    }
-
-    public static String intToIpString(int i) {
-        return ((i >> 24 ) & 0xFF) + "." + ((i >> 16 ) & 0xFF) + "." + ((i >>  8 ) & 0xFF) + "." +
-               (i & 0xFF);
-    }
 
     //
     // INetworkManagementService members
@@ -288,18 +266,17 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             cfg = new InterfaceConfiguration();
             cfg.hwAddr = st.nextToken(" ");
             try {
-                cfg.ipAddr = stringToIpAddr(st.nextToken(" "));
+                cfg.addr = InetAddress.getByName(st.nextToken(" "));
             } catch (UnknownHostException uhe) {
                 Slog.e(TAG, "Failed to parse ipaddr", uhe);
-                cfg.ipAddr = 0;
             }
 
             try {
-                cfg.netmask = stringToIpAddr(st.nextToken(" "));
+                cfg.mask = InetAddress.getByName(st.nextToken(" "));
             } catch (UnknownHostException uhe) {
                 Slog.e(TAG, "Failed to parse netmask", uhe);
-                cfg.netmask = 0;
             }
+
             cfg.interfaceFlags = st.nextToken("]").trim() +"]";
         } catch (NoSuchElementException nsee) {
             throw new IllegalStateException(
@@ -312,7 +289,8 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     public void setInterfaceConfig(
             String iface, InterfaceConfiguration cfg) throws IllegalStateException {
         String cmd = String.format("interface setcfg %s %s %s %s", iface,
-                intToIpString(cfg.ipAddr), intToIpString(cfg.netmask), cfg.interfaceFlags);
+                cfg.addr.getHostAddress(), cfg.mask.getHostAddress(),
+                cfg.interfaceFlags);
         try {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {

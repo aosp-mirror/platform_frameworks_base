@@ -51,6 +51,7 @@ import com.android.internal.util.HierarchicalStateMachine;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -585,16 +586,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 try {
                     ifcg = service.getInterfaceConfig(iface);
                     if (ifcg != null) {
-                        String[] addr = USB_NEAR_IFACE_ADDR.split("\\.");
-                        ifcg.ipAddr = (Integer.parseInt(addr[0]) << 24) +
-                                (Integer.parseInt(addr[1]) << 16) +
-                                (Integer.parseInt(addr[2]) << 8) +
-                                (Integer.parseInt(addr[3]));
-                        addr = USB_NETMASK.split("\\.");
-                        ifcg.netmask = (Integer.parseInt(addr[0]) << 24) +
-                                (Integer.parseInt(addr[1]) << 16) +
-                                (Integer.parseInt(addr[2]) << 8) +
-                                (Integer.parseInt(addr[3]));
+                        ifcg.addr = InetAddress.getByName(USB_NEAR_IFACE_ADDR);
+                        ifcg.mask = InetAddress.getByName(USB_NETMASK);
                         if (enabled) {
                             ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
                         } else {

@@ -75,6 +75,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1660,20 +1661,10 @@ public class BluetoothService extends IBluetooth.Stub {
         try {
             ifcg = service.getInterfaceConfig(iface);
             if (ifcg != null) {
-                String[] addr = BLUETOOTH_NETMASK.split("\\.");
-                ifcg.netmask = (Integer.parseInt(addr[0]) << 24) +
-                        (Integer.parseInt(addr[1]) << 16) +
-                        (Integer.parseInt(addr[2]) << 8) +
-                        (Integer.parseInt(addr[3]));
-                if (ifcg.ipAddr == 0) {
-                    addr = address.split("\\.");
-
-                    ifcg.ipAddr = (Integer.parseInt(addr[0]) << 24) +
-                            (Integer.parseInt(addr[1]) << 16) +
-                            (Integer.parseInt(addr[2]) << 8) +
-                            (Integer.parseInt(addr[3]));
-                    ifcg.interfaceFlags =
-                        ifcg.interfaceFlags.replace("down", "up");
+                ifcg.mask = InetAddress.getByName(BLUETOOTH_NETMASK);
+                if (ifcg.addr == null) {
+                    ifcg.addr = InetAddress.getByName(address);
+                    ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
                 }
                 ifcg.interfaceFlags = ifcg.interfaceFlags.replace("running", "");
                 ifcg.interfaceFlags = ifcg.interfaceFlags.replace("  "," ");
