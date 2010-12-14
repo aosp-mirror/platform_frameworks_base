@@ -443,6 +443,7 @@ private:
     void setupDrawModelViewTranslate(float left, float top, float right, float bottom,
             bool ignoreTransform = false);
     void setupDrawColorUniforms();
+    void setupDrawColorAlphaUniforms();
     void setupDrawShaderUniforms(bool ignoreTransform = false);
     void setupDrawColorFilterUniforms();
     void setupDrawSimpleMesh();
