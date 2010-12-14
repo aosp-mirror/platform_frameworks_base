@@ -318,7 +318,7 @@ status_t WAVSource::read(
     int64_t seekTimeUs;
     ReadOptions::SeekMode mode;
     if (options != NULL && options->getSeekTo(&seekTimeUs, &mode)) {
-        int64_t pos = (seekTimeUs * mSampleRate) / 1000000 * mNumChannels * 2;
+        int64_t pos = (seekTimeUs * mSampleRate) / 1000000 * mNumChannels * (mBitsPerSample >> 3);
         if (pos > mSize) {
             pos = mSize;
         }
