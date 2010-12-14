@@ -147,13 +147,14 @@ public class LayoutTransition {
     private TimeInterpolator mChangingDisappearingInterpolator = new DecelerateInterpolator();
 
     /**
-     * This hashmap is used to store the animations that are currently running as part of
+     * These hashmaps are used to store the animations that are currently running as part of
      * the transition. The reason for this is that a further layout event should cause
      * existing animations to stop where they are prior to starting new animations. So
      * we cache all of the current animations in this map for possible cancellation on
      * another layout event.
      */
-    private HashMap<View, Animator> currentAnimations = new HashMap<View, Animator>();
+    private HashMap<View, Animator> currentChangingAnimations = new HashMap<View, Animator>();
+    private HashMap<View, Animator> currentVisibilityAnimations = new HashMap<View, Animator>();
 
     /**
      * This hashmap is used to track the listeners that have been added to the children of
@@ -542,17 +543,17 @@ public class LayoutTransition {
             if (child != newView) {
 
                 // If there's an animation running on this view already, cancel it
-                Animator currentAnimation = currentAnimations.get(child);
+                Animator currentAnimation = currentChangingAnimations.get(child);
                 if (currentAnimation != null) {
                     currentAnimation.cancel();
-                    currentAnimations.remove(child);
+                    currentChangingAnimations.remove(child);
                 }
 
                 // Make a copy of the appropriate animation
                 final Animator anim = baseAnimator.clone();
 
                 // Cache the animation in case we need to cancel it later
-                currentAnimations.put(child, anim);
+                currentChangingAnimations.put(child, anim);
 
                 // Set the target object for the animation
                 anim.setTarget(child);
@@ -606,7 +607,7 @@ public class LayoutTransition {
                     }
                     public void onAnimationEnd(Animator animator) {
                         if (!canceled) {
-                            currentAnimations.remove(child);
+                            currentChangingAnimations.remove(child);
                         }
                     }
                 });
@@ -640,6 +641,10 @@ public class LayoutTransition {
      * @param child The View being added to the ViewGroup.
      */
     private void runAppearingTransition(final ViewGroup parent, final View child) {
+        Animator currentAnimation = currentVisibilityAnimations.get(child);
+        if (currentAnimation != null) {
+            currentAnimation.cancel();
+        }
         if (mAppearingAnim == null) {
             if (mListeners != null) {
                 for (TransitionListener listener : mListeners) {
@@ -658,12 +663,14 @@ public class LayoutTransition {
         if (mListeners != null) {
             anim.addListener(new AnimatorListenerAdapter() {
                 public void onAnimationEnd() {
+                    currentVisibilityAnimations.remove(child);
                     for (TransitionListener listener : mListeners) {
                         listener.endTransition(LayoutTransition.this, parent, child, APPEARING);
                     }
                 }
             });
         }
+        currentVisibilityAnimations.put(child, anim);
         anim.start();
     }
 
@@ -674,6 +681,10 @@ public class LayoutTransition {
      * @param child The View being removed from the ViewGroup.
      */
     private void runDisappearingTransition(final ViewGroup parent, final View child) {
+        Animator currentAnimation = currentVisibilityAnimations.get(child);
+        if (currentAnimation != null) {
+            currentAnimation.cancel();
+        }
         if (mDisappearingAnim == null) {
             if (mListeners != null) {
                 for (TransitionListener listener : mListeners) {
@@ -690,6 +701,7 @@ public class LayoutTransition {
             anim.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator anim) {
+                    currentVisibilityAnimations.remove(child);
                     for (TransitionListener listener : mListeners) {
                         listener.endTransition(LayoutTransition.this, parent, child, DISAPPEARING);
                     }
@@ -699,6 +711,7 @@ public class LayoutTransition {
         if (anim instanceof ObjectAnimator) {
             ((ObjectAnimator) anim).setCurrentPlayTime(0);
         }
+        currentVisibilityAnimations.put(child, anim);
         anim.start();
     }
 
