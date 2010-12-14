@@ -221,13 +221,6 @@ private:
             int color, SkXfermode::Mode mode, bool ignoreTransform = false);
 
     /**
-     * Setups shaders to draw a colored rect.
-     */
-    void setupColorRect(float left, float top, float right, float bottom,
-            float r, float g, float b, float a, SkXfermode::Mode mode,
-            bool ignoreTransform, bool ignoreMatrix = false);
-
-    /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
      * are transformed by the current snapshot's transform matrix.
      *
@@ -431,6 +424,31 @@ private:
      * Invoked before any drawing operation. This sets required state.
      */
     void setupDraw();
+    /**
+     * Various methods to setup OpenGL rendering.
+     */
+    void setupDrawWithTexture(bool isAlpha8 = false);
+    void setupDrawColor(int color);
+    void setupDrawColor(float r, float g, float b, float a);
+    void setupDrawShader();
+    void setupDrawColorFilter();
+    void setupDrawBlending(SkXfermode::Mode mode = SkXfermode::kSrcOver_Mode,
+            bool swapSrcDst = false);
+    void setupDrawBlending(bool blend = true, SkXfermode::Mode mode = SkXfermode::kSrcOver_Mode,
+            bool swapSrcDst = false);
+    void setupDrawProgram();
+    void setupDrawDirtyRegionsDisabled();
+    void setupDrawModelView(float left, float top, float right, float bottom,
+            bool ignoreTransform = false, bool ignoreModelView = false);
+    void setupDrawModelViewTranslate(float left, float top, float right, float bottom,
+            bool ignoreTransform = false);
+    void setupDrawColorUniforms();
+    void setupDrawShaderUniforms(bool ignoreTransform = false);
+    void setupDrawColorFilterUniforms();
+    void setupDrawSimpleMesh();
+    void setupDrawTexture(GLuint texture);
+    void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLuint vbo = 0);
+    void finishDrawTexture();
 
     /**
      * Should be invoked every time the glScissor is modified.
@@ -494,6 +512,21 @@ private:
 
     // Indicates whether the clip must be restored
     bool mDirtyClip;
+
+    // The following fields are used to setup drawing
+    // Used to describe the shaders to generate
+    ProgramDescription mDescription;
+    // Color description
+    bool mColorSet;
+    float mColorA, mColorR, mColorG, mColorB;
+    // Indicates that the shader should get a color
+    bool mSetShaderColor;
+    // Current texture unit
+    GLuint mTextureUnit;
+    // Track dirty regions, true by default
+    bool mTrackDirtyRegions;
+    // Texture coordinates slot
+    int mTexCoordsSlot;
 
     friend class DisplayListRenderer;
 
