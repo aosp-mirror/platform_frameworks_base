@@ -21,5 +21,8 @@
     <declare-styleable name="ToggleSlider">
         <attr name="text" format="string" />
     </declare-styleable>
+    <declare-styleable name="NotificationLinearLayout">
+        <attr name="insetLeft" format="dimension" />
+    </declare-styleable>
 </resources>
 
