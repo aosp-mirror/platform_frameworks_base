@@ -60,9 +60,9 @@ public class ValueAnimator extends Animator {
      * Values used with internal variable mPlayingState to indicate the current state of an
      * animation.
      */
-    private static final int STOPPED    = 0; // Not yet playing
-    private static final int RUNNING    = 1; // Playing normally
-    private static final int SEEKED     = 2; // Seeked to some time value
+    static final int STOPPED    = 0; // Not yet playing
+    static final int RUNNING    = 1; // Playing normally
+    static final int SEEKED     = 2; // Seeked to some time value
 
     /**
      * Internal variables
@@ -74,13 +74,13 @@ public class ValueAnimator extends Animator {
     // The first time that the animation's animateFrame() method is called. This time is used to
     // determine elapsed time (and therefore the elapsed fraction) in subsequent calls
     // to animateFrame()
-    private long mStartTime;
+    long mStartTime;
 
     /**
      * Set when setCurrentPlayTime() is called. If negative, animation is not currently seeked
      * to a value.
      */
-    private long mSeekTime = -1;
+    long mSeekTime = -1;
 
     // TODO: We access the following ThreadLocal variables often, some of them on every update.
     // If ThreadLocal access is significantly expensive, we may want to put all of these
@@ -178,7 +178,7 @@ public class ValueAnimator extends Animator {
      * has been cancel()'d or end()'d since the last animation frame. Possible values are
      * STOPPED, RUNNING, SEEKED.
      */
-    private int mPlayingState = STOPPED;
+    int mPlayingState = STOPPED;
 
     /**
      * Flag that denotes whether the animation is set up and ready to go. Used to
@@ -1051,7 +1051,7 @@ public class ValueAnimator extends Animator {
      * @return true if the animation's duration, including any repetitions due to
      * <code>repeatCount</code> has been exceeded and the animation should be ended.
      */
-    private boolean animationFrame(long currentTime) {
+    boolean animationFrame(long currentTime) {
         boolean done = false;
 
         if (mPlayingState == STOPPED) {
