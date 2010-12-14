@@ -131,13 +131,14 @@ public final class Proxy {
     }
 
 
-    // TODO: deprecate this function
     /**
      * Return the proxy host set by the user.
      * @param ctx A Context used to get the settings for the proxy host.
      * @return String containing the host name. If the user did not set a host
      *         name it returns the default host. A null value means that no
      *         host is to be used.
+     * @deprecated Use standard java vm proxy values to find the host, port
+     *         and exclusion list.  This call ignores the exclusion list.
      */
     public static final String getHost(Context ctx) {
         java.net.Proxy proxy = getProxy(ctx, null);
@@ -149,11 +150,12 @@ public final class Proxy {
         }
     }
 
-    // TODO: deprecate this function
     /**
      * Return the proxy port set by the user.
      * @param ctx A Context used to get the settings for the proxy port.
      * @return The port number to use or -1 if no proxy is to be used.
+     * @deprecated Use standard java vm proxy values to find the host, port
+     *         and exclusion list.  This call ignores the exclusion list.
      */
     public static final int getPort(Context ctx) {
         java.net.Proxy proxy = getProxy(ctx, null);
@@ -165,31 +167,40 @@ public final class Proxy {
         }
     }
 
-    // TODO: deprecate this function
     /**
      * Return the default proxy host specified by the carrier.
      * @return String containing the host name or null if there is no proxy for
      * this carrier.
+     * @deprecated Use standard java vm proxy values to find the host, port and
+     *         exclusion list.  This call ignores the exclusion list and no
+     *         longer reports only mobile-data apn-based proxy values.
      */
     public static final String getDefaultHost() {
-        return null;
+        String host = System.getProperty("http.proxyHost");
+        if (TextUtils.isEmpty(host)) return null;
+        return host;
     }
 
-    // TODO: deprecate this function
     /**
      * Return the default proxy port specified by the carrier.
      * @return The port number to be used with the proxy host or -1 if there is
      * no proxy for this carrier.
+     * @deprecated Use standard java vm proxy values to find the host, port and
+     *         exclusion list.  This call ignores the exclusion list and no
+     *         longer reports only mobile-data apn-based proxy values.
      */
     public static final int getDefaultPort() {
-        return -1;
+        if (getDefaultHost() == null) return -1;
+        try {
+            return Integer.parseInt(System.getProperty("http.proxyPort"));
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 
-    // TODO: remove this function / deprecate
     /**
      * Returns the preferred proxy to be used by clients. This is a wrapper
-     * around {@link android.net.Proxy#getHost()}. Currently no proxy will
-     * be returned for localhost or if the active network is Wi-Fi.
+     * around {@link android.net.Proxy#getHost()}.
      *
      * @param context the context which will be passed to
      * {@link android.net.Proxy#getHost()}
