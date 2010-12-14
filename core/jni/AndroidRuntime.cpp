@@ -20,6 +20,7 @@
 
 #include <android_runtime/AndroidRuntime.h>
 #include <binder/IBinder.h>
+#include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
@@ -431,6 +432,20 @@ static void runtime_vfprintf(FILE* fp, const char* format, va_list ap)
     LOG_PRI_VA(ANDROID_LOG_INFO, "vm-printf", format, ap);
 }
 
+/**
+ * The VM calls this when mutex contention debugging is enabled to
+ * determine whether or not the blocked thread was a "sensitive thread"
+ * for user responsiveness/smoothess.
+ *
+ * Our policy for this is whether or not we're tracing any StrictMode
+ * events on this thread (which we might've inherited via Binder calls
+ * into us)
+ */
+static bool runtime_isSensitiveThread() {
+    IPCThreadState* state = IPCThreadState::selfOrNull();
+    return state && state->getStrictModePolicy() != 0;
+}
+
 
 /**
  * Add VM arguments to the to-be-executed VM
@@ -616,6 +631,11 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     /* route fprintf() to our handler */
     opt.extraInfo = (void*) runtime_vfprintf;
     opt.optionString = "vfprintf";
+    mOptions.add(opt);
+
+    /* register the framework-specific "is sensitive thread" hook */
+    opt.extraInfo = (void*) runtime_isSensitiveThread;
+    opt.optionString = "sensitiveThread";
     mOptions.add(opt);
 
     opt.extraInfo = NULL;
