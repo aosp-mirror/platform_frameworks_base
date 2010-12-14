@@ -24,6 +24,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Slog;
@@ -76,6 +77,13 @@ public class SystemUIService extends Service {
             mServices[i].mContext = this;
             Slog.d(TAG, "running: " + mServices[i]);
             mServices[i].start();
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        for (SystemUI ui: mServices) {
+            ui.onConfigurationChanged(newConfig);
         }
     }
 

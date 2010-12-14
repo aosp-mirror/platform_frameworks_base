@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!-- notification icons & panel access -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    android:id="@+id/notificationArea"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_alignParentRight="true"
+    android:orientation="horizontal"
+    >
+    <com.android.systemui.statusbar.tablet.InputMethodButton
+        android:id="@+id/imeSwitchButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="8dip"
+        android:src="@drawable/ic_sysbar_ime_default"
+        android:visibility="gone"
+        />
+    <com.android.systemui.statusbar.tablet.NotificationIconArea
+        android:id="@+id/notificationIcons"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        >
+        <view
+            class="com.android.systemui.statusbar.tablet.NotificationIconArea$IconLayout"
+            android:id="@+id/icons"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:paddingTop="5dp"
+            android:layout_marginLeft="8dp"
+            />
+    </com.android.systemui.statusbar.tablet.NotificationIconArea>
+
+    <LinearLayout
+        android:id="@+id/notificationTrigger"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        >
+        <com.android.systemui.statusbar.tablet.HoloClock
+            android:id="@+id/clock"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            >
+            <TextView android:id="@+id/time_bg"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:singleLine="true"
+                android:textSize="72dip"
+                android:textColor="#1f1f1f" />
+            <TextView android:id="@+id/time_fg"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:singleLine="true"
+                android:textSize="72dip"
+                android:textColor="#2e2e2e" />
+        </com.android.systemui.statusbar.tablet.HoloClock>
+
+        <TextView
+            android:id="@+id/network_text"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="12dp"
+            android:layout_marginRight="6dip"
+            android:layout_marginLeft="6dip"
+            android:gravity="center"
+            android:singleLine="true"
+            android:visibility="gone"
+            android:textSize="14dip"
+            android:textColor="#606060"
+            />
+
+        <LinearLayout
+            android:id="@+id/signal_battery_cluster"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center"
+            >
+            <FrameLayout
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_gravity="top"
+                android:layout_marginTop="19dp"
+                android:layout_marginRight="4dp"
+                >
+                <ImageView
+                    android:id="@+id/network_signal"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    />
+                <ImageView
+                    android:id="@+id/network_type"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    />
+            </FrameLayout>
+            <ImageView
+                android:id="@+id/battery"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_gravity="top"
+                android:layout_marginTop="19dp"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="2dp"
+                />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
+

@@ -15,266 +15,125 @@
  * limitations under the License.
 -->
 
-<!--    android:background="@drawable/status_bar_closed_default_background" -->
+<!-- TabletStatusBarView extends FrameLayout -->
 <com.android.systemui.statusbar.tablet.TabletStatusBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:background="@drawable/status_bar_background"
     >
-    <RelativeLayout
-        android:id="@+id/bar_contents"
+    
+    <FrameLayout
+        android:id="@+id/bar_contents_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         >
-
-        <!-- notification icons & panel access -->
-        <LinearLayout
-            android:id="@+id/notificationArea"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:id="@+id/bar_contents"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:orientation="horizontal"
             >
-            <com.android.systemui.statusbar.tablet.InputMethodButton
-                android:id="@+id/imeSwitchButton"
+
+            <!-- notification icons & panel access -->
+            <include layout="@layout/status_bar_notification_area" 
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="8dip"
-                android:src="@drawable/ic_sysbar_ime_default"
-                android:visibility="gone"
+                android:layout_alignParentRight="true"
                 />
-            <com.android.systemui.statusbar.tablet.NotificationIconArea
-                android:id="@+id/notificationIcons"
+
+            <!-- navigation controls -->
+            <LinearLayout
+                android:id="@+id/navigationArea"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_alignParentLeft="true"
                 android:orientation="horizontal"
                 >
-                <view
-                    class="com.android.systemui.statusbar.tablet.NotificationIconArea$IconLayout"
-                    android:id="@+id/icons"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@*android:dimen/status_bar_icon_size"
-                    android:layout_gravity="top"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginLeft="8dp"
+
+                <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
+                    android:layout_width="80dip"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_sysbar_back"
+                    systemui:keyCode="4"
                     />
-            </com.android.systemui.statusbar.tablet.NotificationIconArea>
-
-            <LinearLayout
-                android:id="@+id/notificationTrigger"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                >
-                <com.android.systemui.statusbar.tablet.HoloClock
-                    android:id="@+id/clock"
-                    android:layout_width="wrap_content"
+                <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
+                    android:layout_width="80dip"
                     android:layout_height="match_parent"
-                    >
-                    <TextView android:id="@+id/time_bg"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:singleLine="true"
-                        android:textSize="72dip"
-                        android:textColor="#1f1f1f" />
-                    <TextView android:id="@+id/time_fg"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:singleLine="true"
-                        android:textSize="72dip"
-                        android:textColor="#2e2e2e" />
-                </com.android.systemui.statusbar.tablet.HoloClock>
-
-                <TextView
-                    android:id="@+id/network_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginRight="6dip"
-                    android:layout_marginLeft="6dip"
-                    android:gravity="center"
-                    android:singleLine="true"
-                    android:visibility="gone"
-                    android:textSize="14dip"
-                    android:textColor="#606060"
+                    android:src="@drawable/ic_sysbar_home"
+                    systemui:keyCode="3"
                     />
-
-                <LinearLayout
-                    android:id="@+id/signal_battery_cluster"
-                    android:layout_width="wrap_content"
+                <ImageView android:id="@+id/recent_apps"
+                    android:layout_width="80dip"
                     android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    >
-                    <FrameLayout
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:layout_gravity="top"
-                        android:layout_marginTop="19dp"
-                        android:layout_marginRight="4dp"
-                        >
-                        <ImageView
-                            android:id="@+id/network_signal"
-                            android:layout_height="wrap_content"
-                            android:layout_width="wrap_content"
-                            />
-                        <ImageView
-                            android:id="@+id/network_type"
-                            android:layout_height="wrap_content"
-                            android:layout_width="wrap_content"
-                            />
-                    </FrameLayout>
-                    <ImageView
-                        android:id="@+id/battery"
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:layout_gravity="top"
-                        android:layout_marginTop="19dp"
-                        android:layout_marginLeft="2dp"
-                        android:layout_marginRight="2dp"
-                        />
-                </LinearLayout>
+                    android:src="@drawable/ic_sysbar_recent"
+                    />
+                <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
+                    android:layout_width="80dip"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_sysbar_menu"
+                    systemui:keyCode="82"
+                    android:visibility="invisible"
+                    />
             </LinearLayout>
-        </LinearLayout>
 
-        <!-- navigation controls -->
-        <LinearLayout
-            android:id="@+id/navigationArea"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentLeft="true"
-            android:orientation="horizontal"
-            >
-
-            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
-                android:layout_width="96dip"
+            <!-- fake space bar zone -->
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/fake_space_bar"
                 android:layout_height="match_parent"
-                android:paddingLeft="18dip"
-                android:paddingRight="18dip"
-                android:src="@drawable/ic_sysbar_back"
-                systemui:keyCode="4"
-                />
-            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
-                android:layout_width="96dip"
-                android:layout_height="match_parent"
-                android:paddingLeft="18dip"
-                android:paddingRight="18dip"
-                android:src="@drawable/ic_sysbar_home"
-                systemui:keyCode="3"
-                />
-            <ImageButton android:id="@+id/recent_apps"
-                android:layout_width="96dip"
-                android:layout_height="match_parent"
-                android:src="@drawable/ic_sysbar_recent"
-                android:background="@null"
-                android:paddingLeft="18dip"
-                android:clickable="true"
-                android:paddingRight="18dip"
-                />
-            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
-                android:layout_width="96dip"
-                android:layout_height="match_parent"
-                android:paddingLeft="18dip"
-                android:paddingRight="18dip"
-                android:src="@drawable/ic_sysbar_menu"
-                systemui:keyCode="82"
-                android:visibility="invisible"
-                />
-            <com.android.systemui.statusbar.tablet.ShirtPocket
-                android:id="@+id/pocket"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:animateLayoutChanges="true"
-                android:clickable="true"
-                android:descendantFocusability="blocksDescendants"
-                android:gravity="center"
-                >
-                <ImageView 
-                    android:id="@+id/pocket_icon"
-                    android:src="@drawable/ic_sysbar_pocket"
-                    android:paddingLeft="18dip"
-                    android:paddingRight="18dip"
-                    android:layout_width="96dip"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:visibility="gone"
-                    />
-            </com.android.systemui.statusbar.tablet.ShirtPocket>
-        </LinearLayout>
-
-        <!-- lights out mode: "shadow" views -->
-        <RelativeLayout
-            android:id="@+id/shadows"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            >
-            <ImageView
-                android:id="@+id/notification_shadow"
-                android:layout_width="176dip"
-                android:layout_height="match_parent"
-                android:paddingRight="48dip"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentBottom="true"
-                android:src="@drawable/ic_sysbar_shadow"
+                android:layout_width="match_parent"
+                android:paddingLeft="8dip"
+                android:paddingRight="8dip"
+                android:layout_toRightOf="@+id/navigationArea"
+                android:layout_toLeftOf="@+id/notificationArea"
                 android:visibility="gone"
-                android:scaleType="fitXY"
-                />
-
-            <ImageView
-                android:id="@+id/back_shadow"
-                android:layout_width="96dip"
-                android:layout_height="match_parent"
-                android:paddingLeft="18dip"
-                android:paddingRight="18dip"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentBottom="true"
-                android:src="@drawable/ic_sysbar_shadow"
-                android:visibility="gone"
-                />
-            <ImageView
-                android:id="@+id/home_shadow"
-                android:layout_width="96dip"
-                android:layout_height="match_parent"
-                android:paddingLeft="18dip"
-                android:paddingRight="18dip"
-                android:layout_toRightOf="@id/back_shadow"
-                android:layout_alignParentBottom="true"
-                android:src="@drawable/ic_sysbar_shadow"
-                android:visibility="gone"
-                />
-            <ImageView
-                android:id="@+id/recent_shadow"
-                android:layout_width="96dip"
-                android:layout_height="match_parent"
-                android:paddingLeft="18dip"
-                android:paddingRight="18dip"
-                android:layout_toRightOf="@id/home_shadow"
-                android:layout_alignParentBottom="true"
-                android:src="@drawable/ic_sysbar_shadow"
-                android:visibility="gone"
-                />
-            <ImageView
-                android:id="@+id/menu_shadow"
-                android:layout_width="96dip"
-                android:layout_height="match_parent"
-                android:paddingLeft="18dip"
-                android:paddingRight="18dip"
-                android:layout_toRightOf="@id/recent_shadow"
-                android:layout_alignParentBottom="true"
-                android:src="@drawable/ic_sysbar_shadow"
-                android:visibility="gone"
+                systemui:keyCode="62"
                 />
         </RelativeLayout>
+    </FrameLayout>
 
-        <!-- fake space bar zone -->
-        <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/fake_space_bar"
-            android:layout_height="match_parent"
+    <FrameLayout
+        android:id="@+id/bar_shadow_holder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+        <!-- lights out shade -->
+        <RelativeLayout
+            android:id="@+id/bar_shadow"
             android:layout_width="match_parent"
-            android:paddingLeft="8dip"
-            android:paddingRight="8dip"
-            android:layout_toRightOf="@+id/navigationArea"
-            android:layout_toLeftOf="@+id/notificationArea"
+            android:layout_height="match_parent"
+            android:background="#FF000000"
             android:visibility="gone"
-            systemui:keyCode="62"
-            />
-    </RelativeLayout>
+            >
+            <ImageView
+                android:id="@+id/dot0"
+                android:layout_width="80dip"
+                android:layout_height="48dip"
+                android:src="@drawable/ic_sysbar_lights_out_dot_small"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentBottom="true"
+                />
+            <ImageView
+                android:id="@+id/dot1"
+                android:layout_width="80dip"
+                android:layout_height="48dip"
+                android:src="@drawable/ic_sysbar_lights_out_dot_large"
+                android:layout_toRightOf="@+id/dot0"
+                android:layout_alignParentBottom="true"
+                />
+            <ImageView
+                android:id="@+id/dot2"
+                android:layout_width="80dip"
+                android:layout_height="48dip"
+                android:src="@drawable/ic_sysbar_lights_out_dot_small"
+                android:layout_toRightOf="@+id/dot1"
+                android:layout_alignParentBottom="true"
+                />
+            <ImageView
+                android:id="@+id/dot3"
+                android:layout_width="80dip"
+                android:layout_height="48dip"
+                android:src="@drawable/ic_sysbar_lights_out_dot_small"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                />
+        </RelativeLayout>
+    </FrameLayout>
 </com.android.systemui.statusbar.tablet.TabletStatusBarView>
