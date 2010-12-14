@@ -3573,7 +3573,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         overScrollBy(0, overshoot, 0, mScrollY, 0, 0,
                                 0, mOverflingDistance, false);
                     }
-                    edgeReached(delta);
+                    if (more) {
+                        edgeReached(delta);
+                    }
                     break;
                 }
 
