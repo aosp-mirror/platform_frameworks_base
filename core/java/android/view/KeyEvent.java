@@ -20,6 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.method.MetaKeyKeyListener;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseIntArray;
 import android.view.KeyCharacterMap;
 import android.view.KeyCharacterMap.KeyData;
@@ -351,7 +352,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_CTRL_LEFT       = 113;
     /** Key code constant: Right Control modifier key. */
     public static final int KEYCODE_CTRL_RIGHT      = 114;
-    /** Key code constant: Caps Lock modifier key. */
+    /** Key code constant: Caps Lock key. */
     public static final int KEYCODE_CAPS_LOCK       = 115;
     /** Key code constant: Scroll Lock key. */
     public static final int KEYCODE_SCROLL_LOCK     = 116;
@@ -415,9 +416,9 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_F11             = 141;
     /** Key code constant: F12 key. */
     public static final int KEYCODE_F12             = 142;
-    /** Key code constant: Num Lock modifier key.
+    /** Key code constant: Num Lock key.
      * This is the Num Lock key; it is different from {@link #KEYCODE_NUM}.
-     * This key generally modifies the behavior of other keys on the numeric keypad. */
+     * This key alters the behavior of other keys on the numeric keypad. */
     public static final int KEYCODE_NUM_LOCK        = 143;
     /** Key code constant: Numeric keypad '0' key. */
     public static final int KEYCODE_NUMPAD_0        = 144;
@@ -1621,15 +1622,66 @@ public class KeyEvent extends InputEvent implements Parcelable {
         return mFlags;
     }
 
+    // Mask of all modifier key meta states.  Specifically excludes locked keys like caps lock.
+    private static final int META_MODIFIER_MASK =
+            META_SHIFT_ON | META_SHIFT_LEFT_ON | META_SHIFT_RIGHT_ON
+            | META_ALT_ON | META_ALT_LEFT_ON | META_ALT_RIGHT_ON
+            | META_CTRL_ON | META_CTRL_LEFT_ON | META_CTRL_RIGHT_ON
+            | META_META_ON | META_META_LEFT_ON | META_META_RIGHT_ON
+            | META_SYM_ON | META_FUNCTION_ON;
+
+    // Mask of all lock key meta states.
+    private static final int META_LOCK_MASK =
+            META_CAPS_LOCK_ON | META_NUM_LOCK_ON | META_SCROLL_LOCK_ON;
+
+    // Mask of all valid meta states.
+    private static final int META_ALL_MASK = META_MODIFIER_MASK | META_LOCK_MASK;
+
+    // Mask of all synthetic meta states that are reserved for API compatibility with
+    // historical uses in MetaKeyKeyListener.
+    private static final int META_SYNTHETIC_MASK =
+            META_CAP_LOCKED | META_ALT_LOCKED | META_SYM_LOCKED | META_SELECTING;
+
+    // Mask of all meta states that are not valid use in specifying a modifier key.
+    // These bits are known to be used for purposes other than specifying modifiers.
+    private static final int META_INVALID_MODIFIER_MASK =
+            META_LOCK_MASK | META_SYNTHETIC_MASK;
+
+    /**
+     * Gets a mask that includes all valid modifier key meta state bits.
+     * <p>
+     * For the purposes of this function, {@link #KEYCODE_CAPS_LOCK},
+     * {@link #KEYCODE_SCROLL_LOCK}, and {@link #KEYCODE_NUM_LOCK} are
+     * not considered modifier keys.  Consequently, the mask specifically excludes
+     * {@link #META_CAPS_LOCK_ON}, {@link #META_SCROLL_LOCK_ON} and {@link #META_NUM_LOCK_ON}.
+     * </p>
+     *
+     * @return The modifier meta state mask which is a combination of
+     * {@link #META_SHIFT_ON}, {@link #META_SHIFT_LEFT_ON}, {@link #META_SHIFT_RIGHT_ON},
+     * {@link #META_ALT_ON}, {@link #META_ALT_LEFT_ON}, {@link #META_ALT_RIGHT_ON},
+     * {@link #META_CTRL_ON}, {@link #META_CTRL_LEFT_ON}, {@link #META_CTRL_RIGHT_ON},
+     * {@link #META_META_ON}, {@link #META_META_LEFT_ON}, {@link #META_META_RIGHT_ON},
+     * {@link #META_SYM_ON}, {@link #META_FUNCTION_ON}.
+     */
+    public static int getModifierMetaStateMask() {
+        return META_MODIFIER_MASK;
+    }
+
     /**
      * Returns true if this key code is a modifier key.
+     * <p>
+     * For the purposes of this function, {@link #KEYCODE_CAPS_LOCK},
+     * {@link #KEYCODE_SCROLL_LOCK}, and {@link #KEYCODE_NUM_LOCK} are
+     * not considered modifier keys.  Consequently, this function return false
+     * for those keys.
+     * </p>
      *
-     * @return whether the provided keyCode is one of
+     * @return True if the key code is one of
      * {@link #KEYCODE_SHIFT_LEFT} {@link #KEYCODE_SHIFT_RIGHT},
      * {@link #KEYCODE_ALT_LEFT}, {@link #KEYCODE_ALT_RIGHT},
-     * {@link #KEYCODE_SYM}, {@link #KEYCODE_NUM}, {@link #KEYCODE_FUNCTION},
      * {@link #KEYCODE_CTRL_LEFT}, {@link #KEYCODE_CTRL_RIGHT},
-     * {@link #KEYCODE_META_LEFT}, or {@link #KEYCODE_META_RIGHT}.
+     * {@link #KEYCODE_META_LEFT}, or {@link #KEYCODE_META_RIGHT},
+     * {@link #KEYCODE_SYM}, {@link #KEYCODE_NUM}, {@link #KEYCODE_FUNCTION}.
      */
     public static boolean isModifierKey(int keyCode) {
         switch (keyCode) {
@@ -1637,17 +1689,206 @@ public class KeyEvent extends InputEvent implements Parcelable {
             case KEYCODE_SHIFT_RIGHT:
             case KEYCODE_ALT_LEFT:
             case KEYCODE_ALT_RIGHT:
-            case KEYCODE_SYM:
-            case KEYCODE_NUM:
-            case KEYCODE_FUNCTION:
             case KEYCODE_CTRL_LEFT:
             case KEYCODE_CTRL_RIGHT:
             case KEYCODE_META_LEFT:
             case KEYCODE_META_RIGHT:
+            case KEYCODE_SYM:
+            case KEYCODE_NUM:
+            case KEYCODE_FUNCTION:
                 return true;
             default:
                 return false;
         }
+    }
+
+    /**
+     * Normalizes the specified meta state.
+     * <p>
+     * The meta state is normalized such that if either the left or right modifier meta state
+     * bits are set then the result will also include the universal bit for that modifier.
+     * </p><p>
+     * If the specified meta state contains {@link #META_ALT_LEFT_ON} then
+     * the result will also contain {@link #META_ALT_ON} in addition to {@link #META_ALT_LEFT_ON}
+     * and the other bits that were specified in the input.  The same is process is
+     * performed for shift, control and meta.
+     * </p><p>
+     * If the specified meta state contains synthetic meta states defined by
+     * {@link MetaKeyKeyListener}, then those states are translated here and the original
+     * synthetic meta states are removed from the result.
+     * {@link MetaKeyKeyListener#META_CAP_LOCKED} is translated to {@link #META_CAPS_LOCK_ON}.
+     * {@link MetaKeyKeyListener#META_ALT_LOCKED} is translated to {@link #META_ALT_ON}.
+     * {@link MetaKeyKeyListener#META_SYM_LOCKED} is translated to {@link #META_SYM_ON}.
+     * </p><p>
+     * Undefined meta state bits are removed.
+     * </p>
+     *
+     * @param metaState The meta state.
+     * @return The normalized meta state.
+     */
+    public static int normalizeMetaState(int metaState) {
+        if ((metaState & (META_SHIFT_LEFT_ON | META_SHIFT_RIGHT_ON)) != 0) {
+            metaState |= META_SHIFT_ON;
+        }
+        if ((metaState & (META_ALT_LEFT_ON | META_ALT_RIGHT_ON)) != 0) {
+            metaState |= META_ALT_ON;
+        }
+        if ((metaState & (META_CTRL_LEFT_ON | META_CTRL_RIGHT_ON)) != 0) {
+            metaState |= META_CTRL_ON;
+        }
+        if ((metaState & (META_META_LEFT_ON | META_META_RIGHT_ON)) != 0) {
+            metaState |= META_META_ON;
+        }
+        if ((metaState & MetaKeyKeyListener.META_CAP_LOCKED) != 0) {
+            metaState |= META_CAPS_LOCK_ON;
+        }
+        if ((metaState & MetaKeyKeyListener.META_ALT_LOCKED) != 0) {
+            metaState |= META_ALT_ON;
+        }
+        if ((metaState & MetaKeyKeyListener.META_SYM_LOCKED) != 0) {
+            metaState |= META_SYM_ON;
+        }
+        return metaState & META_ALL_MASK;
+    }
+
+    /**
+     * Returns true if no modifiers keys are pressed according to the specified meta state.
+     * <p>
+     * For the purposes of this function, {@link #KEYCODE_CAPS_LOCK},
+     * {@link #KEYCODE_SCROLL_LOCK}, and {@link #KEYCODE_NUM_LOCK} are
+     * not considered modifier keys.  Consequently, this function ignores
+     * {@link #META_CAPS_LOCK_ON}, {@link #META_SCROLL_LOCK_ON} and {@link #META_NUM_LOCK_ON}.
+     * </p><p>
+     * The meta state is normalized prior to comparison using {@link #normalizeMetaState(int)}.
+     * </p>
+     *
+     * @param metaState The meta state to consider.
+     * @return True if no modifier keys are pressed.
+     * @see #hasNoModifiers()
+     */
+    public static boolean metaStateHasNoModifiers(int metaState) {
+        return (normalizeMetaState(metaState) & META_MODIFIER_MASK) == 0;
+    }
+
+    /**
+     * Returns true if only the specified modifier keys are pressed according to
+     * the specified meta state.  Returns false if a different combination of modifier
+     * keys are pressed.
+     * <p>
+     * For the purposes of this function, {@link #KEYCODE_CAPS_LOCK},
+     * {@link #KEYCODE_SCROLL_LOCK}, and {@link #KEYCODE_NUM_LOCK} are
+     * not considered modifier keys.  Consequently, this function ignores
+     * {@link #META_CAPS_LOCK_ON}, {@link #META_SCROLL_LOCK_ON} and {@link #META_NUM_LOCK_ON}.
+     * </p><p>
+     * If the specified modifier mask includes directional modifiers, such as
+     * {@link #META_SHIFT_LEFT_ON}, then this method ensures that the
+     * modifier is pressed on that side.
+     * If the specified modifier mask includes non-directional modifiers, such as
+     * {@link #META_SHIFT_ON}, then this method ensures that the modifier
+     * is pressed on either side.
+     * If the specified modifier mask includes both directional and non-directional modifiers
+     * for the same type of key, such as {@link #META_SHIFT_ON} and {@link #META_SHIFT_LEFT_ON},
+     * then this method throws an illegal argument exception.
+     * </p>
+     *
+     * @param metaState The meta state to consider.
+     * @param modifiers The meta state of the modifier keys to check.  May be a combination
+     * of modifier meta states as defined by {@link #getModifierMetaStateMask()}.  May be 0 to
+     * ensure that no modifier keys are pressed.
+     * @return True if only the specified modifier keys are pressed.
+     * @throws IllegalArgumentException if the modifiers parameter contains invalid modifiers
+     * @see #hasModifiers
+     */
+    public static boolean metaStateHasModifiers(int metaState, int modifiers) {
+        // Note: For forward compatibility, we allow the parameter to contain meta states
+        //       that we do not recognize but we explicitly disallow meta states that
+        //       are not valid modifiers.
+        if ((modifiers & META_INVALID_MODIFIER_MASK) != 0) {
+            throw new IllegalArgumentException("modifiers must not contain "
+                    + "META_CAPS_LOCK_ON, META_NUM_LOCK_ON, META_SCROLL_LOCK_ON, "
+                    + "META_CAP_LOCKED, META_ALT_LOCKED, META_SYM_LOCKED, "
+                    + "or META_SELECTING");
+        }
+
+        metaState = normalizeMetaState(metaState) & META_MODIFIER_MASK;
+        metaState = metaStateFilterDirectionalModifiers(metaState, modifiers,
+                META_SHIFT_ON, META_SHIFT_LEFT_ON, META_SHIFT_RIGHT_ON);
+        metaState = metaStateFilterDirectionalModifiers(metaState, modifiers,
+                META_ALT_ON, META_ALT_LEFT_ON, META_ALT_RIGHT_ON);
+        metaState = metaStateFilterDirectionalModifiers(metaState, modifiers,
+                META_CTRL_ON, META_CTRL_LEFT_ON, META_CTRL_RIGHT_ON);
+        metaState = metaStateFilterDirectionalModifiers(metaState, modifiers,
+                META_META_ON, META_META_LEFT_ON, META_META_RIGHT_ON);
+        return metaState == modifiers;
+    }
+
+    private static int metaStateFilterDirectionalModifiers(int metaState,
+            int modifiers, int basic, int left, int right) {
+        final boolean wantBasic = (modifiers & basic) != 0;
+        final int directional = left | right;
+        final boolean wantLeftOrRight = (modifiers & directional) != 0;
+
+        if (wantBasic) {
+            if (wantLeftOrRight) {
+                throw new IllegalArgumentException("modifiers must not contain "
+                        + metaStateToString(basic) + " combined with "
+                        + metaStateToString(left) + " or " + metaStateToString(right));
+            }
+            return metaState & ~directional;
+        } else if (wantLeftOrRight) {
+            return metaState & ~basic;
+        } else {
+            return metaState;
+        }
+    }
+
+    /**
+     * Returns true if no modifier keys are pressed.
+     * <p>
+     * For the purposes of this function, {@link #KEYCODE_CAPS_LOCK},
+     * {@link #KEYCODE_SCROLL_LOCK}, and {@link #KEYCODE_NUM_LOCK} are
+     * not considered modifier keys.  Consequently, this function ignores
+     * {@link #META_CAPS_LOCK_ON}, {@link #META_SCROLL_LOCK_ON} and {@link #META_NUM_LOCK_ON}.
+     * </p><p>
+     * The meta state is normalized prior to comparison using {@link #normalizeMetaState(int)}.
+     * </p>
+     *
+     * @return True if no modifier keys are pressed.
+     * @see #metaStateHasNoModifiers
+     */
+    public final boolean hasNoModifiers() {
+        return metaStateHasNoModifiers(mMetaState);
+    }
+
+    /**
+     * Returns true if only the specified modifiers keys are pressed.
+     * Returns false if a different combination of modifier keys are pressed.
+     * <p>
+     * For the purposes of this function, {@link #KEYCODE_CAPS_LOCK},
+     * {@link #KEYCODE_SCROLL_LOCK}, and {@link #KEYCODE_NUM_LOCK} are
+     * not considered modifier keys.  Consequently, this function ignores
+     * {@link #META_CAPS_LOCK_ON}, {@link #META_SCROLL_LOCK_ON} and {@link #META_NUM_LOCK_ON}.
+     * </p><p>
+     * If the specified modifier mask includes directional modifiers, such as
+     * {@link #META_SHIFT_LEFT_ON}, then this method ensures that the
+     * modifier is pressed on that side.
+     * If the specified modifier mask includes non-directional modifiers, such as
+     * {@link #META_SHIFT_ON}, then this method ensures that the modifier
+     * is pressed on either side.
+     * If the specified modifier mask includes both directional and non-directional modifiers
+     * for the same type of key, such as {@link #META_SHIFT_ON} and {@link #META_SHIFT_LEFT_ON},
+     * then this method throws an illegal argument exception.
+     * </p>
+     *
+     * @param modifiers The meta state of the modifier keys to check.  May be a combination
+     * of modifier meta states as defined by {@link #getModifierMetaStateMask()}.  May be 0 to
+     * ensure that no modifier keys are pressed.
+     * @return True if only the specified modifier keys are pressed.
+     * @throws IllegalArgumentException if the modifiers parameter contains invalid modifiers
+     * @see #metaStateHasModifiers
+     */
+    public final boolean hasModifiers(int modifiers) {
+        return metaStateHasModifiers(mMetaState, modifiers);
     }
 
     /**
