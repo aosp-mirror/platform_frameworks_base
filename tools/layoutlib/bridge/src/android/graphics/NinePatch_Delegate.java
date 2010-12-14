@@ -167,7 +167,7 @@ public class NinePatch_Delegate {
 
        try {
            chunkObject.draw(bitmap_delegate.getImage(), graphics,
-                   left, top, right - left, bottom - top);
+                   left, top, right - left, bottom - top, destDensity, srcDensity);
        } finally {
            if (paint_delegate != null) {
                graphics.dispose();

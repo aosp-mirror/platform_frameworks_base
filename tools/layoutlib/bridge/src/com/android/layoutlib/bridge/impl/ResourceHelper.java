@@ -48,7 +48,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Helper class to provide various convertion method used in handling android resources.
+ * Helper class to provide various conversion method used in handling android resources.
  */
 public final class ResourceHelper {
 
@@ -133,7 +133,8 @@ public final class ResourceHelper {
                 // if either chunk or bitmap is null, then we reload the 9-patch file.
                 if (chunk == null || bitmap == null) {
                     try {
-                        NinePatch ninePatch = NinePatch.load(file.toURL(), false /* convert */);
+                        NinePatch ninePatch = NinePatch.load(file.toURI().toURL(),
+                                false /* convert */);
                         if (ninePatch != null) {
                             if (chunk == null) {
                                 chunk = ninePatch.getChunk();
@@ -161,6 +162,7 @@ public final class ResourceHelper {
                         // URL is wrong, we'll return null below
                     } catch (IOException e) {
                         // failed to read the file, we'll return null below.
+                        Bridge.getLog().error(null, e);
                     }
                 }
 
@@ -176,7 +178,7 @@ public final class ResourceHelper {
 
             return null;
         } else if (lowerCaseValue.endsWith(".xml")) {
-            // create a blockparser for the file
+            // create a block parser for the file
             File f = new File(stringValue);
             if (f.isFile()) {
                 try {
@@ -220,7 +222,7 @@ public final class ResourceHelper {
                     return new BitmapDrawable(context.getResources(), bitmap);
                 } catch (IOException e) {
                     // we'll return null below
-                    // TODO: log the error.
+                    Bridge.getLog().error(null, e);
                 }
             } else {
                 // attempt to get a color from the value
@@ -229,7 +231,8 @@ public final class ResourceHelper {
                     return new ColorDrawable(color);
                 } catch (NumberFormatException e) {
                     // we'll return null below.
-                    // TODO: log the error
+                    Bridge.getLog().error(null,
+                            "failed to convert " + stringValue + " into a drawable");
                 }
             }
         }
