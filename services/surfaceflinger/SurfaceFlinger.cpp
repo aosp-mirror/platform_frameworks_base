@@ -395,6 +395,7 @@ bool SurfaceFlinger::threadLoop()
         logger.log(GraphicLog::SF_REPAINT_DONE, index);
     } else {
         // pretend we did the post
+        hw.compositionComplete();
         unlockClients();
         usleep(16667); // 60 fps period
     }
@@ -2184,6 +2185,9 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
     glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
     glDeleteRenderbuffersOES(1, &tname);
     glDeleteFramebuffersOES(1, &name);
+
+    hw.compositionComplete();
+
     return result;
 }
 
