@@ -236,20 +236,20 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     public void invalidateDrawable(Drawable who) {
-        if (who == mCurrDrawable && mCallback != null) {
-            mCallback.invalidateDrawable(this);
+        if (who == mCurrDrawable && getCallback() != null) {
+            getCallback().invalidateDrawable(this);
         }
     }
 
     public void scheduleDrawable(Drawable who, Runnable what, long when) {
-        if (who == mCurrDrawable && mCallback != null) {
-            mCallback.scheduleDrawable(this, what, when);
+        if (who == mCurrDrawable && getCallback() != null) {
+            getCallback().scheduleDrawable(this, what, when);
         }
     }
 
     public void unscheduleDrawable(Drawable who, Runnable what) {
-        if (who == mCurrDrawable && mCallback != null) {
-            mCallback.unscheduleDrawable(this, what);
+        if (who == mCurrDrawable && getCallback() != null) {
+            getCallback().unscheduleDrawable(this, what);
         }
     }
 
