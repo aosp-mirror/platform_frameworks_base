@@ -784,7 +784,6 @@ android:name="com.android.vending.CHECK_LICENSE"&gt;</code></p>
 <pre>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 
 &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android" ..."&gt;
-    ...
     &lt;!-- Devices &gt;= 3 have version of Android Market that supports licensing. --&gt;
     &lt;uses-sdk android:minSdkVersion="3" /&gt;
     &lt;!-- Required permission to check licensing. --&gt;

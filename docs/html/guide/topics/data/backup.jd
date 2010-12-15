@@ -166,6 +166,7 @@ href="{@docRoot}guide/topics/manifest/application-element.html">{@code
 
 <pre>
 &lt;manifest ... &gt;
+    ...
     &lt;application android:label="MyApplication"
                  <b>android:backupAgent="MyBackupAgent"</b>&gt;
         &lt;activity ... &gt;

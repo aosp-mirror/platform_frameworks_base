@@ -489,7 +489,6 @@ adb install bin/NativeActivity-debug.apk
       <code>android:minSdkVersion</code> attribute value of "3" or higher. For example:
       <pre style="margin:1em;">
 &lt;manifest&gt;
-  ...
   &lt;uses-sdk android:minSdkVersion="3" /&gt;
   ...
 &lt;/manifest&gt;
@@ -540,7 +539,6 @@ adb install bin/NativeActivity-debug.apk
     to users whose devices are capable of supporting your application. For example:
       <pre style="margin:1em;">
 &lt;manifest&gt;
-  ... 
 <!-- Declare that the application uses the OpenGL ES 2.0 API and is designed
      to run only on devices that support OpenGL ES 2.0 or higher. -->
   &lt;uses-feature android:glEsVersion="0x00020000" /&gt;
