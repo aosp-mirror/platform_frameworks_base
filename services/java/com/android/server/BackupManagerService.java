@@ -149,9 +149,9 @@ class BackupManagerService extends IBackupManager.Stub {
             return "BackupRequest{app=" + appInfo + " full=" + fullBackup + "}";
         }
     }
-    // Backups that we haven't started yet.
-    HashMap<ApplicationInfo,BackupRequest> mPendingBackups
-            = new HashMap<ApplicationInfo,BackupRequest>();
+    // Backups that we haven't started yet.  Keys are package names.
+    HashMap<String,BackupRequest> mPendingBackups
+            = new HashMap<String,BackupRequest>();
 
     // Pseudoname that we use for the Package Manager metadata "package"
     static final String PACKAGE_MANAGER_SENTINEL = "@pm@";
@@ -929,42 +929,48 @@ class BackupManagerService extends IBackupManager.Stub {
     // 'packageName' is null, *all* participating apps will be removed.
     void removePackageParticipantsLocked(String packageName) {
         if (DEBUG) Slog.v(TAG, "removePackageParticipantsLocked: " + packageName);
-        List<PackageInfo> allApps = null;
+        List<String> allApps = new ArrayList<String>();
         if (packageName != null) {
-            allApps = new ArrayList<PackageInfo>();
-            try {
-                int flags = PackageManager.GET_SIGNATURES;
-                allApps.add(mPackageManager.getPackageInfo(packageName, flags));
-            } catch (Exception e) {
-                // just skip it (???)
-            }
+            allApps.add(packageName);
         } else {
             // all apps with agents
-            allApps = allAgentPackages();
+            List<PackageInfo> knownPackages = allAgentPackages();
+            for (PackageInfo pkg : knownPackages) {
+                allApps.add(pkg.packageName);
+            }
         }
         removePackageParticipantsLockedInner(packageName, allApps);
     }
 
     private void removePackageParticipantsLockedInner(String packageName,
-            List<PackageInfo> agents) {
+            List<String> allPackageNames) {
         if (DEBUG) {
             Slog.v(TAG, "removePackageParticipantsLockedInner (" + packageName
-                    + ") removing " + agents.size() + " entries");
-            for (PackageInfo p : agents) {
+                    + ") removing " + allPackageNames.size() + " entries");
+            for (String p : allPackageNames) {
                 Slog.v(TAG, "    - " + p);
             }
         }
-        for (PackageInfo pkg : agents) {
-            if (packageName == null || pkg.packageName.equals(packageName)) {
-                int uid = pkg.applicationInfo.uid;
+        for (String pkg : allPackageNames) {
+            if (packageName == null || pkg.equals(packageName)) {
+                int uid = -1;
+                try {
+                    PackageInfo info = mPackageManager.getPackageInfo(packageName, 0);
+                    uid = info.applicationInfo.uid;
+                } catch (NameNotFoundException e) {
+                    // we don't know this package name, so just skip it for now
+                    continue;
+                }
+
                 HashSet<ApplicationInfo> set = mBackupParticipants.get(uid);
                 if (set != null) {
                     // Find the existing entry with the same package name, and remove it.
                     // We can't just remove(app) because the instances are different.
                     for (ApplicationInfo entry: set) {
-                        if (entry.packageName.equals(pkg.packageName)) {
+                        if (entry.packageName.equals(pkg)) {
+                            if (DEBUG) Slog.v(TAG, "  removing participant " + pkg);
                             set.remove(entry);
-                            removeEverBackedUp(pkg.packageName);
+                            removeEverBackedUp(pkg);
                             break;
                         }
                     }
@@ -1014,7 +1020,11 @@ class BackupManagerService extends IBackupManager.Stub {
 
         // brute force but small code size
         List<PackageInfo> allApps = allAgentPackages();
-        removePackageParticipantsLockedInner(packageName, allApps);
+        List<String> allAppNames = new ArrayList<String>();
+        for (PackageInfo pkg : allApps) {
+            allAppNames.add(pkg.packageName);
+        }
+        removePackageParticipantsLockedInner(packageName, allAppNames);
         addPackageParticipantsLockedInner(packageName, allApps);
     }
 
@@ -1380,6 +1390,17 @@ class BackupManagerService extends IBackupManager.Stub {
         private int doQueuedBackups(IBackupTransport transport) {
             for (BackupRequest request : mQueue) {
                 Slog.d(TAG, "starting agent for backup of " + request);
+
+                // Verify that the requested app exists; it might be something that
+                // requested a backup but was then uninstalled.  The request was
+                // journalled and rather than tamper with the journal it's safer
+                // to sanity-check here.
+                try {
+                    mPackageManager.getPackageInfo(request.appInfo.packageName, 0);
+                } catch (NameNotFoundException e) {
+                    Slog.d(TAG, "Package does not exist; skipping");
+                    continue;
+                }
 
                 IBackupAgent agent = null;
                 int mode = (request.fullBackup)
@@ -2068,7 +2089,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     // Add the caller to the set of pending backups.  If there is
                     // one already there, then overwrite it, but no harm done.
                     BackupRequest req = new BackupRequest(app, false);
-                    if (mPendingBackups.put(app, req) == null) {
+                    if (mPendingBackups.put(app.packageName, req) == null) {
                         // Journal this request in case of crash.  The put()
                         // operation returned null when this package was not already
                         // in the set; we want to avoid touching the disk redundantly.
