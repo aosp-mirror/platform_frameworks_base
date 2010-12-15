@@ -245,7 +245,7 @@ public class StackView extends AdapterViewAnimator {
 
     private void transformViewAtIndex(int index, View view) {
         float maxPerspectiveShiftY = getMeasuredHeight() * PERSPECTIVE_SHIFT_FACTOR_Y;
-        float maxPerspectiveShiftX = getMeasuredHeight() * PERSPECTIVE_SHIFT_FACTOR_X;
+        float maxPerspectiveShiftX = getMeasuredWidth() * PERSPECTIVE_SHIFT_FACTOR_X;
 
         index = mMaxNumActiveViews - index - 1;
         if (index == mMaxNumActiveViews - 1) index--;
