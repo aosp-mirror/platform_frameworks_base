@@ -568,6 +568,8 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * be killed when they would like to avoid it), vs allowing the performance
      * of the entire system to be decreased, this method was deemed less
      * important.
+     * 
+     * @hide
      */
     @Deprecated
     public final void setForeground(boolean isForeground) {
@@ -585,7 +587,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * would notice if their music stopped playing.
      * 
      * <p>If you need your application to run on platform versions prior to API
-     * level 5, you can use the following model to call the the older {@link #setForeground}
+     * level 5, you can use the following model to call the the older setForeground()
      * or this modern method as appropriate:
      * 
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/ForegroundService.java

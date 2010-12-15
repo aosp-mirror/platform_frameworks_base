@@ -469,7 +469,7 @@ in {@link android.app.ActivityManager.RunningAppProcessInfo}. The value
 indicates that a specific process is running something that is considered to be
 actively perceptible to the user. An example would be an application performing
 background music playback.</li>
-<li>The {@link android.app.Activity#setPersistent(boolean)} method to mark an
+<li>The Activity.setPersistent(boolean) method to mark an
 Activity as persistent is now deprecated and the implementation is a no-op.</li>
 </ul>
 </li>

@@ -1730,6 +1730,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * @deprecated As of {@link android.os.Build.VERSION_CODES#GINGERBREAD}
      * this is a no-op.
+     * @hide
      */
     @Deprecated
     public void setPersistent(boolean isPersistent) {
