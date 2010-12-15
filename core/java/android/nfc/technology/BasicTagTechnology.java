@@ -164,6 +164,40 @@ import android.util.Log;
             }
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
+            throw new IOException("NFC service died");
+        }
+    }
+
+    /**
+     * Re-connect to the {@link Tag} associated with this connection.
+     * <p>
+     * Reconnecting to a tag can be used to reset the state of the tag itself.
+     * This method blocks until the connection is re-established.
+     * <p>
+     * {@link #close} can be called from another thread to cancel this connection
+     * attempt.
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     * @throws IOException if the target is lost, or connect canceled
+     */
+    @Override
+    public void reconnect() throws IOException {
+        if (!mIsConnected) {
+            throw new IllegalStateException("Technology not connected yet");
+        } else {
+            try {
+                int errorCode = mTagService.reconnect(mTag.getServiceHandle());
+
+                if (errorCode != ErrorCodes.SUCCESS) {
+                    mIsConnected = false;
+                    mTag.setTechnologyDisconnected();
+                    throw new IOException();
+                }
+            } catch (RemoteException e) {
+                mIsConnected = false;
+                mTag.setTechnologyDisconnected();
+                attemptDeadServiceRecovery(e);
+                throw new IOException("NFC service died");
+            }
         }
     }
 
