@@ -4,7 +4,7 @@
     <application android:label="Samples"
     android:icon="@drawable/test_pattern">
         <activity android:name="RsList"
-                  android:label="RsList"                  
+                  android:label="RsList"
                   android:theme="@android:style/Theme.Black.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -13,7 +13,7 @@
         </activity>
         
         <activity android:name="RsRenderStates"
-                  android:label="RsStates"                  
+                  android:label="RsStates"
                   android:theme="@android:style/Theme.Black.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,7 +22,7 @@
         </activity>
 
         <activity android:name="RsBench"
-                  android:label="RsBenchmark"                  
+                  android:label="RsBenchmark"
                   android:theme="@android:style/Theme.Black.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

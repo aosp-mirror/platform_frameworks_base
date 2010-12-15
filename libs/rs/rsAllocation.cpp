@@ -31,10 +31,13 @@
 using namespace android;
 using namespace android::renderscript;
 
-Allocation::Allocation(Context *rsc, const Type *type, uint32_t usages) : ObjectBase(rsc) {
+Allocation::Allocation(Context *rsc, const Type *type, uint32_t usages,
+                       RsAllocationMipmapControl mc)
+    : ObjectBase(rsc) {
     init(rsc, type);
 
     mUsageFlags = usages;
+    mMipmapControl = mc;
 
     allocScriptMemory();
     if (mType->getElement()->getHasReferences()) {
@@ -795,7 +798,7 @@ RsAllocation rsaAllocationCreateTyped(RsContext con, RsType vtype,
                                       RsAllocationMipmapControl mips,
                                       uint32_t usages) {
     Context *rsc = static_cast<Context *>(con);
-    Allocation * alloc = new Allocation(rsc, static_cast<Type *>(vtype), usages);
+    Allocation * alloc = new Allocation(rsc, static_cast<Type *>(vtype), usages, mips);
     alloc->incUserRef();
     return alloc;
 }

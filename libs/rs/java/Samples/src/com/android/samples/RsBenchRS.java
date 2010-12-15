@@ -216,7 +216,7 @@ public class RsBenchRS {
         ProgramVertex.ShaderBuilder pvbCustom = new ProgramVertex.ShaderBuilder(mRS);
         // Specify the resource that contains the shader string
         pvbCustom.setShader(mRes, R.raw.shaderv);
-        // Use a script field to spcify the input layout
+        // Use a script field to specify the input layout
         pvbCustom.addInput(ScriptField_VertexShaderInputs_s.createElement(mRS));
         // Define the constant input layout
         pvbCustom.addConstant(mVSConst.getAllocation().getType());
@@ -227,7 +227,7 @@ public class RsBenchRS {
         ProgramFragment.ShaderBuilder pfbCustom = new ProgramFragment.ShaderBuilder(mRS);
         // Specify the resource that contains the shader string
         pfbCustom.setShader(mRes, R.raw.shaderf);
-        //Tell the builder how many textures we have
+        // Tell the builder how many textures we have
         pfbCustom.addTexture(Program.TextureType.TEXTURE_2D);
         // Define the constant input layout
         pfbCustom.addConstant(mFSConst.getAllocation().getType());
@@ -315,16 +315,22 @@ public class RsBenchRS {
 
     private void initFonts() {
         // Sans font by family name
-        mFontSans = Font.createFromFamily(mRS, mRes, "sans-serif", Font.Style.NORMAL, 8);
+        mFontSans = Font.createFromFamily(mRS, mRes, "sans-serif",
+                                          Font.Style.NORMAL, 8);
         // Create font by file name
         mFontSerif = Font.create(mRS, mRes, "DroidSerif-Regular.ttf", 8);
         // Create fonts by family and style
-        mFontSerifBold = Font.createFromFamily(mRS, mRes, "serif", Font.Style.BOLD, 8);
-        mFontSerifItalic = Font.createFromFamily(mRS, mRes, "serif", Font.Style.ITALIC, 8);
-        mFontSerifBoldItalic = Font.createFromFamily(mRS, mRes, "serif", Font.Style.BOLD_ITALIC, 8);
-        mFontMono = Font.createFromFamily(mRS, mRes, "mono", Font.Style.NORMAL, 8);
+        mFontSerifBold = Font.createFromFamily(mRS, mRes, "serif",
+                                               Font.Style.BOLD, 8);
+        mFontSerifItalic = Font.createFromFamily(mRS, mRes, "serif",
+                                                 Font.Style.ITALIC, 8);
+        mFontSerifBoldItalic = Font.createFromFamily(mRS, mRes, "serif",
+                                                     Font.Style.BOLD_ITALIC, 8);
+        mFontMono = Font.createFromFamily(mRS, mRes, "mono",
+                                          Font.Style.NORMAL, 8);
 
-        mTextAlloc = Allocation.createFromString(mRS, "String from allocation", Allocation.USAGE_SCRIPT);
+        mTextAlloc = Allocation.createFromString(mRS, "String from allocation",
+                                                 Allocation.USAGE_SCRIPT);
 
         mScript.set_gFontSans(mFontSans);
         mScript.set_gFontSerif(mFontSerif);
