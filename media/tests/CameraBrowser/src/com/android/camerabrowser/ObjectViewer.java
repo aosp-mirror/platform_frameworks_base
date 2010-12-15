@@ -16,6 +16,7 @@
 package com.android.camerabrowser;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -155,7 +156,11 @@ public class ObjectViewer extends Activity implements View.OnClickListener {
         if (resultUri != null) {
             Toast.makeText(this, R.string.object_saved_message, Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Intent.ACTION_VIEW, resultUri);
-            startActivity(intent);
+            try {
+                startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(this, R.string.start_activity_failed_message, Toast.LENGTH_SHORT).show();
+            }
         } else {
             Toast.makeText(this, R.string.save_failed_message, Toast.LENGTH_SHORT).show();
         }
