@@ -3818,17 +3818,21 @@ public class WebView extends AbsoluteLayout
      */
     private SelectActionModeCallback mSelectCallback;
 
+    // These values are possible options for didUpdateWebTextViewDimensions.
+    private static final int FULLY_ON_SCREEN = 0;
+    private static final int INTERSECTS_SCREEN = 1;
+    private static final int ANYWHERE = 2;
+
     /**
      * Check to see if the focused textfield/textarea is still on screen.  If it
      * is, update the the dimensions and location of WebTextView.  Otherwise,
      * remove the WebTextView.  Should be called when the zoom level changes.
-     * @param allowIntersect Whether to consider the textfield/textarea on
-     *         screen if it only intersects the screen (as opposed to being
-     *         completely on screen).
+     * @param intersection How to determine whether the textfield/textarea is
+     *        still on screen.
      * @return boolean True if the textfield/textarea is still on screen and the
      *         dimensions/location of WebTextView have been updated.
      */
-    private boolean didUpdateWebTextViewDimensions(boolean allowIntersect) {
+    private boolean didUpdateWebTextViewDimensions(int intersection) {
         Rect contentBounds = nativeFocusCandidateNodeBounds();
         Rect vBox = contentToViewRect(contentBounds);
         Rect visibleRect = new Rect();
@@ -3836,8 +3840,22 @@ public class WebView extends AbsoluteLayout
         // If the textfield is on screen, place the WebTextView in
         // its new place, accounting for our new scroll/zoom values,
         // and adjust its textsize.
-        if (allowIntersect ? Rect.intersects(visibleRect, vBox)
-                : visibleRect.contains(vBox)) {
+        boolean onScreen;
+        switch (intersection) {
+            case FULLY_ON_SCREEN:
+                onScreen = visibleRect.contains(vBox);
+                break;
+            case INTERSECTS_SCREEN:
+                onScreen = Rect.intersects(visibleRect, vBox);
+                break;
+            case ANYWHERE:
+                onScreen = true;
+                break;
+            default:
+                throw new AssertionError(
+                        "invalid parameter passed to didUpdateWebTextViewDimensions");
+        }
+        if (onScreen) {
             mWebTextView.setRect(vBox.left, vBox.top, vBox.width(),
                     vBox.height());
             mWebTextView.updateTextSize();
@@ -3874,7 +3892,7 @@ public class WebView extends AbsoluteLayout
 
     private void onZoomAnimationEnd() {
         // adjust the edit text view if needed
-        if (inEditingMode() && didUpdateWebTextViewDimensions(false)
+        if (inEditingMode() && didUpdateWebTextViewDimensions(FULLY_ON_SCREEN)
                 && nativeFocusCandidateIsPassword()) {
             // If it is a password field, start drawing the WebTextView once
             // again.
@@ -4011,7 +4029,7 @@ public class WebView extends AbsoluteLayout
             // finishes.  We also do not need to do this unless the WebTextView
             // is showing.
             if (!animateZoom && inEditingMode()) {
-                didUpdateWebTextViewDimensions(true);
+                didUpdateWebTextViewDimensions(ANYWHERE);
             }
         }
     }
@@ -4116,7 +4134,7 @@ public class WebView extends AbsoluteLayout
             if (inEditingMode()) {
                 imm.showSoftInput(mWebTextView, 0);
                 if (zoom) {
-                    didUpdateWebTextViewDimensions(true);
+                    didUpdateWebTextViewDimensions(INTERSECTS_SCREEN);
                 }
                 return;
             }
