@@ -473,16 +473,20 @@ void AndroidPixelRef::setLocalJNIRef(jbyteArray arr) {
     }
 }
 
-void AndroidPixelRef::globalRef() {
+void AndroidPixelRef::globalRef(void* localref) {
     if (fOnJavaHeap && sk_atomic_inc(&fGlobalRefCnt) == 0) {
         JNIEnv *env = vm2env(fVM);
+
+        // If JNI ref was passed, it is always used
+        if (localref) fStorageObj = (jbyteArray) localref;
+
         if (fStorageObj == NULL) {
-            SkDebugf("Cannot create a global ref, fStorage obj is NULL");
+            SkDebugf("No valid local ref to create a JNI global ref\n");
             sk_throw();
         }
         if (fHasGlobalRef) {
             // This should never happen
-            SkDebugf("Already holding a global ref");
+            SkDebugf("Already holding a JNI global ref");
             sk_throw();
         }
 

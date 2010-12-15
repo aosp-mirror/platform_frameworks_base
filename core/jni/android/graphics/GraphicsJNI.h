@@ -92,7 +92,16 @@ public:
 
     void setLocalJNIRef(jbyteArray arr);
 
-    virtual void globalRef();
+    /** Used to hold a ref to the pixels when the Java bitmap may be collected.
+     *  If specified, 'localref' is a valid JNI local reference to the byte array
+     *  containing the pixel data.
+     *
+     *  'localref' may only be NULL if setLocalJNIRef() was already called with
+     *  a JNI local ref that is still valid.
+     */
+    virtual void globalRef(void* localref=NULL);
+
+    /** Release a ref that was acquired using globalRef(). */
     virtual void globalUnref();
 
 private:
