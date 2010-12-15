@@ -248,8 +248,8 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, SkBitmapRegionDecoder *b
     // promise we will never change our pixels (great for sharing and pictures)
     pr->setImmutable();
 
-    // now create the java bitmap
-    jbyteArray buff = ((AndroidPixelRef*) pr)->getStorageObj();
+    JavaPixelAllocator* allocator = (JavaPixelAllocator*) decoder->getAllocator();
+    jbyteArray buff = allocator->getStorageObjAndReset();
     return GraphicsJNI::createBitmap(env, bitmap, buff, false, NULL, -1);
 }
 
