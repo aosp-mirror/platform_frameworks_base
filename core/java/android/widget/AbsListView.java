@@ -1464,7 +1464,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         SavedState ss = new SavedState(superState);
 
-        boolean haveChildren = getChildCount() > 0;
+        boolean haveChildren = getChildCount() > 0 && mItemCount > 0;
         long selectedId = getSelectedItemId();
         ss.selectedId = selectedId;
         ss.height = getHeight();
@@ -1479,8 +1479,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 // Remember the position of the first child
                 View v = getChildAt(0);
                 ss.viewTop = v.getTop();
-                ss.position = mFirstPosition;
-                ss.firstId = mAdapter.getItemId(mFirstPosition);
+                int firstPos = mFirstPosition;
+                if (firstPos >= mItemCount) {
+                    firstPos = mItemCount - 1;
+                }
+                ss.position = firstPos;
+                ss.firstId = mAdapter.getItemId(firstPos);
             } else {
                 ss.viewTop = 0;
                 ss.firstId = INVALID_POSITION;
