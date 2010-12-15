@@ -23033,6 +23033,7 @@ package android.view {
     method public void getDrawingRect(android.graphics.Rect);
     method public long getDrawingTime();
     method public boolean getFilterTouchesWhenObscured();
+    method public void getFocusRect(android.graphics.Rect);
     method public java.util.ArrayList<android.view.View> getFocusables(int);
     method public void getFocusedRect(android.graphics.Rect);
     method public boolean getGlobalVisibleRect(android.graphics.Rect, android.graphics.Point);
