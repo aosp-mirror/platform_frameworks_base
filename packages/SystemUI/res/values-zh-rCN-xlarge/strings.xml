@@ -21,6 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- no translation found for status_bar_clear_all_button (4722520806446512408) -->
     <skip />
-    <!-- outdated translation 2598368990139689031 -->     <string name="status_bar_settings_signal_meter_disconnected" msgid="4684094636492991496">"无互联网连接"</string>
-    <!-- outdated translation 8083149878235207364 -->     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="1456658018593445677">"Wi-Fi：已连接"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="4684094636492991496">"未连接至互联网"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="1456658018593445677">"Wi-Fi 已连接"</string>
 </resources>

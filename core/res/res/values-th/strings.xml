@@ -667,7 +667,7 @@
     <skip />
     <!-- no translation found for lockscreen_too_many_failed_pin_attempts_dialog_message (6827749231465145590) -->
     <skip />
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้ง หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้การลงชื่อเข้าใช้ "\n\n" โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้ง หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้การลงชื่อเข้าใช้ Google "\n\n" โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งหากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้การลงชื่อเข้าใช้ Google"\n\n"โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"ลองใหม่อีกครั้งใน <xliff:g id="NUMBER">%d</xliff:g> วินาที"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"ลืมรูปแบบหรือ"</string>
@@ -696,8 +696,7 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"ไปจากหน้าเว็บนี้หรือไม่"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"เลือก ตกลง เพื่อทำต่อ หรือ ยกเลิก เพื่ออยู่ที่หน้าปัจจุบัน"</string>
     <string name="save_password_label" msgid="6860261758665825069">"ยืนยัน"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"เคล็ดลับ: แตะสองครั้งเพื่อขยายและย่อ"</string>
-    <!-- no translation found for autofill_this_form (1272247532604569872) -->
-    <skip />
+    <string name="autofill_this_form" msgid="1272247532604569872">"ป้อนอัตโนมัติ"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"ตั้งค่าการป้อนอัตโนมัติ"</string>
     <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
     <skip />
@@ -924,8 +923,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"ตกลง"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"ยกเลิก"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"ตั้งเวลา"</string>
-    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
-    <skip />
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"ตั้งวันที่"</string>
     <string name="date_time_set" msgid="5777075614321087758">"ตั้งค่า"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"เริ่มต้น"</string>
     <string name="no_permissions" msgid="7283357728219338112">"ไม่ต้องการการอนุญาต"</string>
@@ -1076,6 +1074,8 @@
     <!-- no translation found for share (1778686618230011964) -->
     <skip />
     <!-- no translation found for find (4808270900322985960) -->
+    <skip />
+    <!-- no translation found for websearch (4337157977400211589) -->
     <skip />
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />

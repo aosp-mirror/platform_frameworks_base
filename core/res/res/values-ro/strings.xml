@@ -277,7 +277,7 @@
     <string name="permlab_installPackages" msgid="335800214119051089">"instalare directă a aplicaţiilor"</string>
     <string name="permdesc_installPackages" msgid="526669220850066132">"Permite unei aplicaţii să instaleze pachete Android noi sau actualizate. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a adăuga aplicaţii noi cu permisiuni puternice alese la întâmplare."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"ştergere integrală date din cache ale aplicaţiei"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Permite unei aplicaţii să elibereze stocare de pe tabletă, prin ştergerea fişierelor din directorul cache al aplicaţiei. De regulă, accesul este strict restricţionat la procesul de sistem."</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Permite unei aplicaţii să elibereze spaţiu de stocare pe tabletă, prin ştergerea fişierelor din directorul cache al aplicaţiei. De regulă, accesul este strict restricţionat la procesul de sistem."</string>
     <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"Permite unei aplicaţii să stocheze gratuit pe telefon, prin ştergerea fişierelor din directorul cache al aplicaţiei. De regulă, accesul este strict restricţionat la procesul de sistem."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"mutare resurse aplicaţie"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Permite unei aplicaţii să mute resursele aplicaţiei de pe suporturile fizice interne pe cele externe şi invers."</string>
@@ -304,10 +304,10 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Permite unei aplicaţii să trimită mesaje difuzate persistente, care rămân după terminarea mesajului difuzat. Aplicaţiile rău-intenţionate ar putea să încetinească sau să destabilizeze tableta, determinând-o să utilizeze prea multă memorie."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"Permite unei aplicaţii să trimită mesaje difuzate persistente, care rămân după terminarea mesajului difuzat. Aplicaţiile rău-intenţionate ar putea să încetinească sau să destabilizeze telefonul, determinându-l să utilizeze prea multă memorie."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"citire date de contact"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Permite unei aplicaţii să citească toate datele de contact (adrese) stocate pe tabletă. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a trimite datele dvs. către alte persoane."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Permite unei aplicaţii să citească toate datele din agendă (adrese) stocate pe tabletă. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a trimite datele din agenda dvs. către alte persoane."</string>
     <string name="permdesc_readContacts" product="default" msgid="3371591512896545975">"Permite unei aplicaţii să citească toate datele de contact (adrese) stocate pe telefon. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a trimite datele dvs. către alte persoane."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"scriere date de contact"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Permite unei aplicaţii să modifice datele de contact (adresele) stocate pe tabletă. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a şterge sau a modifica datele dvs. de contact."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Permite unei aplicaţii să modifice datele din agendă (adresele) stocate pe tabletă. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a şterge sau a modifica datele din agenda dvs."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Permite unei aplicaţii să modifice datele de contact (adresele) stocate pe telefon. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a şterge sau a modifica datele dvs. de contact."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"citire evenimente din calendar"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Permite unei aplicaţii să citească toate evenimentele din calendar stocate pe tabletă. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a trimite evenimentele din calendar către alte persoane."</string>
@@ -336,7 +336,7 @@
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Permite aplicaţiei să acceseze calea către înregistrarea audio."</string>
     <!-- outdated translation 8059288807274039014 -->     <string name="permlab_camera" msgid="3616391919559751192">"fotografiere"</string>
     <!-- outdated translation 9013476258810982546 -->     <string name="permdesc_camera" msgid="6004878235852154239">"Permite unei aplicaţii să facă fotografii cu ajutorul camerei foto. Astfel i se permite aplicaţiei să colecteze oricând imaginile văzute de camera foto."</string>
-    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"dezactivare permanentă tabletă"</string>
+    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"dezactivare definitivă tabletă"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"dezactivare permanentă a telefonului"</string>
     <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"Permite aplicaţiei să dezactiveze definitiv întreaga tabletă. Acest lucru este foarte periculos."</string>
     <string name="permdesc_brick" product="default" msgid="5569526552607599221">"Permite aplicaţiei să dezactiveze definitiv întregul telefon. Acest lucru este foarte periculos."</string>
@@ -394,7 +394,7 @@
     <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"Permite aplicaţiei să activeze sau să dezactiveze tableta."</string>
     <string name="permdesc_devicePower" product="default" msgid="4577331933252444818">"Permite aplicaţiei să activeze sau să dezactiveze telefonul."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"rulare în mod test de fabrică"</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Rulează ca testare de nivel redus al producătorului, permiţând accesul complet la hardware-ul tabletei. Permisiune disponibilă doar când tableta rulează în modul de testare a producătorului."</string>
+    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Rulează ca testare de producător la nivel redus, permiţând accesul complet la hardware-ul tabletei. Permisiune disponibilă doar când tableta rulează în modul de testare de producător."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Rulează ca testare de nivel redus al producătorului, permiţând accesul complet la hardware-ul telefonului. Permisiune disponibilă doar când telefonul rulează în modul de testare a producător."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"setare imagine de fundal"</string>
     <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Permite aplicaţiei să seteze imaginea de fundal a sistemului."</string>
@@ -667,7 +667,7 @@
     <skip />
     <!-- no translation found for lockscreen_too_many_failed_pin_attempts_dialog_message (6827749231465145590) -->
     <skip />
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> (de) ori. După alte <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi tableta cu ajutorul datelor de conectare la Google."\n\n"Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După alte <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi tableta cu ajutorul datelor de conectare la Google."\n\n"Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> de ori. După <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi telefonul cu ajutorul datelor de conectare la Google."\n\n" Încercaţi din nou în <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Încercaţi din nou peste <xliff:g id="NUMBER">%d</xliff:g> (de) secunde."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Aţi uitat modelul?"</string>
@@ -696,8 +696,7 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Doriţi să părăsiţi această pagini?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Selectaţi OK pentru a continua sau Anulaţi pentru a rămâne pe pagina curentă."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Confirmaţi"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Sfat: apăsaţi de două ori pentru a mări şi a micşora."</string>
-    <!-- no translation found for autofill_this_form (1272247532604569872) -->
-    <skip />
+    <string name="autofill_this_form" msgid="1272247532604569872">"Com.aut."</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Complet. autom."</string>
     <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
     <skip />
@@ -924,8 +923,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Anulaţi"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Setaţi ora"</string>
-    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
-    <skip />
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Setaţi data"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Setaţi"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Prestabilit"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Nu se solicită nicio permisiune"</string>
@@ -1076,6 +1074,8 @@
     <!-- no translation found for share (1778686618230011964) -->
     <skip />
     <!-- no translation found for find (4808270900322985960) -->
+    <skip />
+    <!-- no translation found for websearch (4337157977400211589) -->
     <skip />
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />

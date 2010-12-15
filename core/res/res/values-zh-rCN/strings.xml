@@ -659,7 +659,7 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"是否从该页面导航至它处？"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"选择“确定”继续，或选择“取消”留在当前页面。"</string>
     <string name="save_password_label" msgid="6860261758665825069">"确认"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"提示：点按两次可放大和缩小。"</string>
-    <!-- outdated translation 8940110866775097494 -->     <string name="autofill_this_form" msgid="1272247532604569872">"自动填充此表单"</string>
+    <string name="autofill_this_form" msgid="1272247532604569872">"自动填充"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"设置自动填充"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
@@ -865,8 +865,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"确定"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"取消"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"设置时间"</string>
-    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
-    <skip />
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"设置日期"</string>
     <string name="date_time_set" msgid="5777075614321087758">"设置"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"默认"</string>
     <string name="no_permissions" msgid="7283357728219338112">"不需要任何权限"</string>
@@ -998,6 +997,8 @@
     <string name="media_unknown_state" msgid="729192782197290385">"外部媒体处于未知状态。"</string>
     <string name="share" msgid="1778686618230011964">"分享"</string>
     <string name="find" msgid="4808270900322985960">"查找"</string>
+    <!-- no translation found for websearch (4337157977400211589) -->
+    <skip />
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />
     <!-- no translation found for gpsNotifTitle (5446858717157416839) -->

@@ -126,10 +126,10 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"Синхр."</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Синхр."</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Забагато видалень <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
-    <string name="low_memory" product="tablet" msgid="2292820184396262278">"Пам\'ять пристр. заповнено! Видал. файли, щоб звільн. місце."</string>
+    <string name="low_memory" product="tablet" msgid="2292820184396262278">"Пам\'ять пристрою заповнено! Видаліть файли, щоб звільнити місце."</string>
     <string name="low_memory" product="default" msgid="6632412458436461203">"Пам\'ять тел. заповн.! Видаліть файли, щоб звільн. місце."</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>
-    <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Парам. пристрою"</string>
+    <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Параметри пристрою"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Параметри тел."</string>
     <string name="silent_mode" msgid="7167703389802618663">"Беззвуч. режим"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Увімкнути радіо"</string>
@@ -196,7 +196,7 @@
     <string name="permlab_sendSms" msgid="5600830612147671529">"надсил. SMS повідом."</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Дозволяє програмі надсил. SMS повідомл. Шкідливі програми можуть спричин. збитки, надсилаючи повідомлення без вашого підтвердження."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"читати SMS або MMS"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Дозволяє програмі читати SMS повідомлення, збережені в пристрої чи SIM-карті. Шкідливі програми можуть читати ваші конфіденц. повідомл."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Дозволяє програмі читати SMS повідомлення, збережені в пристрої чи SIM-карті. Шкідливі програми можуть читати ваші конфіденційні повідомлення."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Дозволяє програмі зчитувати SMS повідомлення, збереж. у вашому тел. чи SIM-карті. Шкідливі прогр. можуть зчит. ваші конфіденційні повід."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"редаг. SMS або MMS"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"Дозволяє програмі змінювати SMS повідомлення, збережені в пристрої чи SIM-карті. Шкідливі програми можуть видаляти ваші повідомл."</string>
@@ -250,7 +250,7 @@
     <string name="permlab_manageAppTokens" msgid="17124341698093865">"керувати маркерами програми"</string>
     <string name="permdesc_manageAppTokens" msgid="977127907524195988">"Дозволяє програмам створ. і керувати власними маркерами, не застосовуючи звич. накладання по осі Z. Ніколи не потрібний для звичайних програм."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"натиск. клавіші чи кнопки керув."</string>
-    <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"Дозволяє програмі надавати власні події введення (натискання клавіш тощо) іншим програмам. Шкідливі програми можуть використов. це для контролю над пристроєм."</string>
+    <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"Дозволяє програмі надавати власні події введення (натискання клавіш тощо) іншим програмам. Шкідливі програми можуть використовувати це для контролю над пристроєм."</string>
     <string name="permdesc_injectEvents" product="default" msgid="3946098050410874715">"Дозволяє програмі надавати власні події введення (натискання клавіш і т. д.) іншим програмам. Шкідливі програми можуть використ. це для контролю над телеф."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"записувати, що ви вводите та які дії викон."</string>
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Дозволяє програмі переглядати клавіші, які ви натискаєте, навіть під час роботи з іншою програмою (наприклад, під час вводу пароля). Ніколи не потрібний для звичайних програм."</string>
@@ -301,16 +301,16 @@
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"Дозволяє програмі запускатися відразу після завантаження системи. Це може затримати запуск пристрою та дозволяє програмі сповільнити загальну роботу пристрою своїм постійним функціонуванням."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="698336728415008796">"Дозволяє програмі запускатися відразу після завантаження системи. Це може затримати запуск телефону та дозволяє програмі сповільнити загальну роботу телефону своїм постійним функціонуванням."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"надсилати закріпл. запис"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Дозволяє програмі надсил. закріпл. записи, які залиш. після відтвор. запису. Шкідливі прогр. можуть сповільн. роботу пристрою, робити його нестаб., спричин. викор. завеликої к-сті пам\'яті."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Дозволяє програмі надсилати закріплені записи, які залишаються після відтворення запису. Шкідливі програми можуть сповільнювати роботу пристрою, робити його нестабільним, спричиняти використання завеликої кількості пам\'яті."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"Дозволяє програмі надсил. закріпл. записи, які залиш. після відтвор. запису. Шкідливі програми можуть сповільн. роботу тел., робити його нестаб., спричин. викор. завеликої к-сті пам\'яті."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"читати контакт. дані"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Дозволяє програмі зчитувати всі контактні дані (адреси), збережені у вашому пристрої. Шкідливі програми можуть використ. це для надсил. ваших даних іншим людям."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Дозволяє програмі зчитувати всі контактні дані (адреси), збережені у вашому пристрої. Шкідливі програми можуть використовувати це для надсилання ваших даних іншим людям."</string>
     <string name="permdesc_readContacts" product="default" msgid="3371591512896545975">"Дозволяє програмі зчитувати всі дані контактів (адреси), збережені у вашому тел. Шкідливі програми можуть використ. це для надсилання ваших даних іншим людям."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"запис. контактні дані"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Дозволяє програмі змінювати контактні дані (адреси), збереж. в пристрої. Шкідливі програми можуть використ. це для видалення чи зміни ваших контактних даних."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Дозволяє програмі змінювати контактні дані (адреси), збережені в пристрої. Шкідливі програми можуть використовувати це для видалення чи зміни ваших контактних даних."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Дозволяє програмі змінювати контактні дані (адресу), збереж. в телефоні. Шкідливі програми можуть використ. це для видалення чи зміни ваших контактних даних."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"читати події календаря"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Дозволяє програмі зчитувати всі події календаря, збережені в пристрої. Шкідливі програми можуть використов. це для надсилання ваших подій календаря іншим людям."</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Дозволяє програмі зчитувати всі події календаря, збережені в пристрої. Шкідливі програми можуть використовувати це для надсилання ваших подій календаря іншим людям."</string>
     <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Дозволяє програмі зчитувати всі події календаря, збережені у вашому телефоні. Шкідливі програми можуть використ-ти це для надсилання подій календаря іншим людям."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"дод. чи змін. події календаря та надсил. ел. листи гостям"</string>
     <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Дозволяє програмі дод. чи змін. події у вашому календарі, який може надсилати ел. листи гостям. Шкідливі прогр. можуть викор. це, щоб видаляти чи змін. події вашого календаря або надсилати ел. листи гостям."</string>
@@ -321,10 +321,10 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"дозвіл на встановлення провайдера місцезнах."</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Створ. фіктивні джерела місцезн. для тестув. Шкідливі прогр. можуть викор. це для заміни місцезн. і/чи статусу, отрим. від дійсних джерел місцезн., таких як GPS або моб. операторів, а також для відстеж. і передачі вашого місцезн. зовн. джерелу."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"точне (GPS) місцезнах."</string>
-    <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Отрим. доступ до точного місцезн., напр. системи глоб. позиціонування в пристрої, де це доступно. Шкідливі прогр. можуть викор. це для визначення вашого місцезн. і споживати додаткову енергію батареї."</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Отримує доступ до джерел точного місцезнаходження, наприклад системи глобального позиціонування в пристрої, де це доступно. Шкідливі програми можуть використовувати це для визначення вашого місцезнаходження та споживати додаткову енергію батареї."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Отрим. доступ до точних джерел місцезн., таких як сист. глоб. позиціонування в тел., де це доступно. Шкідливі прогр. можуть викор. це для визнач. вашого місцезн. і споживати додаткову енергію батареї."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"приблизне (мережеве) місцезнах."</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Отрим. доступ до джерел прибл. місцезнах., напр. баз даних моб. мережі, для визначення прибл. місцезнах. пристрою, де це доступно. Шкідливі програми можуть використов. це, щоб приблизно визначати ваше місцезнах."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Отримує доступ до джерел приблизного місцезнаходження, наприклад баз даних мобільної мережі, для визначення приблизного місцезнаходження пристрою, де це доступно. Шкідливі програми можуть використовувати це, щоб приблизно визначати ваше місцезнаходження."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8235655958070862293">"Отрим. доступ до джерел прибл. місцезн., напр. баз даних моб. мережі, для визначення прибл. місцезн. телефону, де це доступно. Шкідливі програми можуть використов. це, щоб приблизно визначати ваше місцезн."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"дост. до SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Дозволяє програмі викор. низькорівневі функції SurfaceFlinger."</string>
@@ -340,7 +340,7 @@
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"остаточно вимкнути телефон"</string>
     <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"Дозволяє програмі остаточно вимкнути весь пристрій. Це дуже небезпечно."</string>
     <string name="permdesc_brick" product="default" msgid="5569526552607599221">"Дозволяє програмі остаточно вимкнути весь телефон. Це дуже небезпечно."</string>
-    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"примус.перезав.пристр."</string>
+    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"примусово перезавантажити пристрій"</string>
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"примус. перезав. тел."</string>
     <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"Дозволяє програмі примусово перезавантажувати пристрій."</string>
     <string name="permdesc_reboot" product="default" msgid="7914933292815491782">"Дозволяє програмі примусово перезавантажувати телефон."</string>
@@ -372,7 +372,7 @@
     <string name="permdesc_callPhone" msgid="3369867353692722456">"Дозволяє програмі набирати номери телефону без вашого залучення. Шкідливі програми можуть негативно впливати на стан вашого телефонного рахунку. Зауважте, що програмі не дозволено набирати номери аварійних служб."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"прямо набирати будь-які ном. тел."</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Дозволяє програмі набирати будь-який номер телефону, зокрема аварійні номери, без вашого залучення. Шкідливі програми можуть здійснювати непотрібні та незаконні дзвінки до аварійних служб."</string>
-    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"безпосер. поч. налашт. пристр. CDMA"</string>
+    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"безпосередньо почати налаштування пристрою CDMA"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"безпосер. поч. налашт-ня CDMA тел."</string>
     <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Дозволяє програмі запускати ініціалізацію CDMA. Шкідливі програми можуть без потреби запускати ініціалізацію CDMA"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"контрол. сповіщ. про оновлення місцезн."</string>
@@ -385,16 +385,16 @@
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Дозволяє програмі контролювати телефонні функції пристрою. Програма з цим дозволом може змінювати мережі, вмикати та вимикати радіо телефону тощо, не повідомляючи вас."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"читати стан телефону та ідентиф."</string>
     <string name="permdesc_readPhoneState" msgid="188877305147626781">"Дозволяє програмі отримувати доступ до телефонних функцій пристрою. Програма з цим дозволом може визначити номер телефону та серійний номер даного телефону, активність виклику, номер, на який робиться виклик та інше."</string>
-    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"недоп.перехід пристр. в реж.сну"</string>
+    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"не допускати перехід пристрою в режим сну"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"недоп. перехід тел. в реж. сну"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"Дозволяє програмі не допускати перехід пристрою в режим сну."</string>
     <string name="permdesc_wakeLock" product="default" msgid="7584036471227467099">"Дозволяє програмі не допускати перехід телефону в режим сну."</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"вмик. чи вимик. пристрій"</string>
+    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"увімкнути чи вимкнути пристрій"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"вмик. чи вимик. телефон"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"Дозволяє програмі вимикати чи вимикати пристрій."</string>
     <string name="permdesc_devicePower" product="default" msgid="4577331933252444818">"Дозволяє програмі вимикати чи вимикати телефон."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"запуск у завод. реж. тест."</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Запускає тест виробника на низьк. рівні, дозволяючи повний доступ до апарат. забезп. пристр. Доступно лише коли пристр. запущ. в режимі тестув. виробником."</string>
+    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Запускає тест виробника на низькому рівні, дозволяючи повний доступ до апаратного забезпечення пристрою. Доступно лише коли пристрій запущено в режимі тестування виробником."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Запускає тест виробника на низькому рівні, дозволяючи повний доступ до апарат. забезп. тел. Доступно лише коли тел. запущено в режимі тестув. виробником."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"устан. фон. мал."</string>
     <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Дозволяє програмі встановлювати фонов. мал. системи."</string>
@@ -438,7 +438,7 @@
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"дозвол. отримання багатоадр. Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Дозволяє програмі отрим. пакети, які не адрес. безпосер. вашому пристрою. Це може бути корисно під час виявл. пропонованих служб неподалік. Викор. більше потужності, ніж не багатоадресний реж."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"адміністрування bluetooth"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Дозволяє програмі налашт. локальний пристрій із Bluetooth, знаходити віддалені пристрої та створ. з ними пару."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Дозволяє програмі налаштовувати локальний пристрій із Bluetooth, знаходити віддалені пристрої та створювати з ними пару."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Дозволяє програмі налашт. локальний телефон із Bluetooth і знаходити та створ. пару з віддаленими пристроями."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"створюв. підключення Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"Дозволяє програмі переглядати конфігурацію локального пристрою з Bluetooth, створювати та приймати з\'єднання зі спареними пристроями."</string>
@@ -653,7 +653,7 @@
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Підкл. заряд. пристрій."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Нема SIM-карти."</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"У пристр. нема SIM-карти."</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"У пристрої немає SIM-карти."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"У тел. немає SIM-карти."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Вставте SIM-карту."</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Лише аварійні виклики"</string>
@@ -667,7 +667,7 @@
     <skip />
     <!-- no translation found for lockscreen_too_many_failed_pin_attempts_dialog_message (6827749231465145590) -->
     <skip />
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Неправильно намал. ключ розблокування стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. Ваш пристрій потрібно буде розблок-ти за допомогою входу в Google після стількох додатк. неуспішних спроб: <xliff:g id="NUMBER_1">%d</xliff:g>."\n\n" Спробуйте ще через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Неправильно намальовано ключ розблокування стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. Ваш пристрій потрібно буде розблоковувати за допомогою входу в Google після стількох додаткових неуспішних спроб: <xliff:g id="NUMBER_1">%d</xliff:g>."\n\n" Спробуйте ще через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Неправильно намал. ключ розблокування стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. Ваш телефон потрібно буде розблок-ти за допомогою входу в Google після стількох додатк. неуспішних спроб: <xliff:g id="NUMBER_1">%d</xliff:g>."\n\n" Спробуйте ще через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Спробуйте ще через <xliff:g id="NUMBER">%d</xliff:g> сек."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Забули ключ?"</string>
@@ -696,8 +696,7 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Перейти з цієї стор.?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Виберіть OK, щоб продовж., або \"Скасувати\", щоб залиш. на поточній стор."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Підтверд."</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Порада: двічі нат. для збіл. або змен."</string>
-    <!-- no translation found for autofill_this_form (1272247532604569872) -->
-    <skip />
+    <string name="autofill_this_form" msgid="1272247532604569872">"Автозап."</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Налашт. автозап."</string>
     <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
     <skip />
@@ -710,7 +709,7 @@
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"читати історію та закладки переглядача"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Дозволяє програмі зчитувати всі URL-адреси, на які заходив переглядач, і всі закладки переглядача."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"запис. історію та закладки переглядача"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"Дозволяє програмі змінювати історію чи закладки веб-переглядача, збережені в пристрої. Шкідливі прогр. можуть використ. це для видалення чи зміни даних веб-переглядача."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"Дозволяє програмі змінювати історію чи закладки веб-переглядача, збережені в пристрої. Шкідливі програми можуть використовувати це для видалення чи зміни даних веб-переглядача."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Дозволяє програмі змінювати історію чи закладки переглядача, збережені у вашому тел. Шкідливі програми можуть викор. це, щоб видаляти чи змінювати дані переглядача."</string>
     <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
     <skip />
@@ -924,8 +923,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Скасувати"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Установити час"</string>
-    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
-    <skip />
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Установити дату"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Устан."</string>
     <string name="default_permission_group" msgid="2690160991405646128">"За умовч."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Дозвіл не потрібний"</string>
@@ -1076,6 +1074,8 @@
     <!-- no translation found for share (1778686618230011964) -->
     <skip />
     <!-- no translation found for find (4808270900322985960) -->
+    <skip />
+    <!-- no translation found for websearch (4337157977400211589) -->
     <skip />
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />

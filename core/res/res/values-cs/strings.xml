@@ -125,7 +125,7 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"Synchronizace"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synchronizace"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Příliš mnoho smazaných položek služby <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
-    <string name="low_memory" product="tablet" msgid="2292820184396262278">"Paměť tabletu je plná. Uvolněte místo smazání některých souborů."</string>
+    <string name="low_memory" product="tablet" msgid="2292820184396262278">"Paměť tabletu je plná. Uvolněte místo smazáním některých souborů."</string>
     <string name="low_memory" product="default" msgid="6632412458436461203">"Paměť telefonu je plná. Smažte některé soubory a uvolněte místo."</string>
     <string name="me" msgid="6545696007631404292">"Já"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Možnosti tabletu"</string>
@@ -389,7 +389,7 @@
     <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"Umožňuje aplikaci zapnout či vypnout tablet."</string>
     <string name="permdesc_devicePower" product="default" msgid="4577331933252444818">"Umožňuje aplikaci zapnout či vypnout telefon."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"spuštění v režimu továrního testu"</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Umožňuje aplikaci spuštění v režimu nízkoúrovňového testu výrobce a povolí přístup k hardwaru tabletu. K dispozici pouze je-li tablet spuštěn v režimu testování výrobce."</string>
+    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Umožňuje aplikaci spuštění v režimu nízkoúrovňového testu výrobce a povolí přístup k hardwaru tabletu. K dispozici, pouze je-li tablet spuštěn v režimu testování výrobce."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Umožňuje aplikaci spuštění v režimu nízkoúrovňového testu výrobce a povolí přístup k hardwaru telefonu. K dispozici pouze, je-li telefon spuštěn v režimu testování výrobce."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"nastavení tapety"</string>
     <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Umožňuje aplikaci nastavit tapetu systému."</string>
@@ -659,7 +659,7 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Chcete opustit tuto stránku?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Vyberte OK, chcete-li pokračovat, nebo Zrušit, chcete-li na stránce zůstat."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Potvrdit"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Tip: Dvojitým klepnutím můžete zobrazení přiblížit nebo oddálit."</string>
-    <!-- outdated translation 8940110866775097494 -->     <string name="autofill_this_form" msgid="1272247532604569872">"Automaticky vyplnit tento formulář"</string>
+    <string name="autofill_this_form" msgid="1272247532604569872">"Aut.vyp."</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Nast. aut. vypl."</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
@@ -865,8 +865,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Zrušit"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Nastavení času"</string>
-    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
-    <skip />
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Nastavení data"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Nastavit"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Výchozí"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Nejsou vyžadována žádná oprávnění"</string>
@@ -998,6 +997,8 @@
     <string name="media_unknown_state" msgid="729192782197290385">"Neznámý stav externího média."</string>
     <string name="share" msgid="1778686618230011964">"Sdílet"</string>
     <string name="find" msgid="4808270900322985960">"Najít"</string>
+    <!-- no translation found for websearch (4337157977400211589) -->
+    <skip />
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />
     <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
