@@ -27,15 +27,6 @@
     android:id="@+id/recents_bg_protect"
     android:orientation="vertical">
 
-    <TextView android:id="@+id/recents_no_recents"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/recent_tasks_empty"
-        android:textSize="22dip"
-        android:gravity="center_horizontal|center_vertical"
-        android:visibility="gone">
-    </TextView>
-
     <View
         android:layout_width="match_parent"
         android:layout_height="0dip"
