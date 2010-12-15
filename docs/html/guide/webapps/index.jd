@@ -63,8 +63,8 @@ WebView</strong></a></dt>
 bind JavaScript to Android APIs.</dd>
   <dt><a href="{@docRoot}guide/webapps/debugging.html"><strong>Debugging Web Apps</strong></a></dt>
   <dd>How to debug web apps using JavaScript Console APIs.</dd>
-  <dt><a href="{@docRoot}guide/webapps/best-practices.html"><strong>Best Practices for Web</strong>
-Apps</a></dt>
+  <dt><a href="{@docRoot}guide/webapps/best-practices.html"><strong>Best Practices for Web
+Apps</strong></a></dt>
   <dd>A list of practices you should follow, in order to provide an effective web application on
 Android-powered devices.</dd>
 </dl>
