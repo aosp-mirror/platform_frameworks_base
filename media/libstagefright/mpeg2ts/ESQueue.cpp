@@ -45,7 +45,7 @@ void ElementaryStreamQueue::clear() {
         mBuffer->setRange(0, 0);
     }
 
-    mTimestamps.clear();
+    mRangeInfos.clear();
     mFormat.clear();
 }
 
@@ -171,7 +171,17 @@ status_t ElementaryStreamQueue::appendData(
     memcpy(mBuffer->data() + mBuffer->size(), data, size);
     mBuffer->setRange(0, mBuffer->size() + size);
 
-    mTimestamps.push_back(timeUs);
+    RangeInfo info;
+    info.mLength = size;
+    info.mTimestampUs = timeUs;
+    mRangeInfos.push_back(info);
+
+#if 0
+    if (mMode == AAC) {
+        LOGI("size = %d, timeUs = %.2f secs", size, timeUs / 1E6);
+        hexdump(data, size);
+    }
+#endif
 
     return OK;
 }
@@ -186,6 +196,7 @@ sp<ABuffer> ElementaryStreamQueue::dequeueAccessUnit() {
 }
 
 sp<ABuffer> ElementaryStreamQueue::dequeueAccessUnitAAC() {
+    Vector<size_t> ranges;
     Vector<size_t> frameOffsets;
     Vector<size_t> frameSizes;
     size_t auSize = 0;
@@ -239,6 +250,7 @@ sp<ABuffer> ElementaryStreamQueue::dequeueAccessUnitAAC() {
 
         size_t headerSize = protection_absent ? 7 : 9;
 
+        ranges.push(aac_frame_length);
         frameOffsets.push(offset + headerSize);
         frameSizes.push(aac_frame_length - headerSize);
         auSize += aac_frame_length - headerSize;
@@ -250,11 +262,23 @@ sp<ABuffer> ElementaryStreamQueue::dequeueAccessUnitAAC() {
         return NULL;
     }
 
+    int64_t timeUs = -1;
+
+    for (size_t i = 0; i < ranges.size(); ++i) {
+        int64_t tmpUs = fetchTimestamp(ranges.itemAt(i));
+
+        if (i == 0) {
+            timeUs = tmpUs;
+        }
+    }
+
     sp<ABuffer> accessUnit = new ABuffer(auSize);
     size_t dstOffset = 0;
     for (size_t i = 0; i < frameOffsets.size(); ++i) {
+        size_t frameOffset = frameOffsets.itemAt(i);
+
         memcpy(accessUnit->data() + dstOffset,
-               mBuffer->data() + frameOffsets.itemAt(i),
+               mBuffer->data() + frameOffset,
                frameSizes.itemAt(i));
 
         dstOffset += frameSizes.itemAt(i);
@@ -264,13 +288,46 @@ sp<ABuffer> ElementaryStreamQueue::dequeueAccessUnitAAC() {
             mBuffer->size() - offset);
     mBuffer->setRange(0, mBuffer->size() - offset);
 
-    CHECK_GT(mTimestamps.size(), 0u);
-    int64_t timeUs = *mTimestamps.begin();
-    mTimestamps.erase(mTimestamps.begin());
-
-    accessUnit->meta()->setInt64("time", timeUs);
+    if (timeUs >= 0) {
+        accessUnit->meta()->setInt64("time", timeUs);
+    } else {
+        LOGW("no time for AAC access unit");
+    }
 
     return accessUnit;
+}
+
+int64_t ElementaryStreamQueue::fetchTimestamp(size_t size) {
+    int64_t timeUs = -1;
+    bool first = true;
+
+    while (size > 0) {
+        CHECK(!mRangeInfos.empty());
+
+        RangeInfo *info = &*mRangeInfos.begin();
+
+        if (first) {
+            timeUs = info->mTimestampUs;
+            first = false;
+        }
+
+        if (info->mLength > size) {
+            info->mLength -= size;
+
+            if (first) {
+                info->mTimestampUs = -1;
+            }
+
+            size = 0;
+        } else {
+            size -= info->mLength;
+
+            mRangeInfos.erase(mRangeInfos.begin());
+            info = NULL;
+        }
+    }
+
+    return timeUs;
 }
 
 // static
@@ -410,9 +467,8 @@ sp<ABuffer> ElementaryStreamQueue::dequeueAccessUnitH264() {
 
             mBuffer->setRange(0, mBuffer->size() - nextScan);
 
-            CHECK_GT(mTimestamps.size(), 0u);
-            int64_t timeUs = *mTimestamps.begin();
-            mTimestamps.erase(mTimestamps.begin());
+            int64_t timeUs = fetchTimestamp(nextScan);
+            CHECK_GE(timeUs, 0ll);
 
             accessUnit->meta()->setInt64("time", timeUs);
 
