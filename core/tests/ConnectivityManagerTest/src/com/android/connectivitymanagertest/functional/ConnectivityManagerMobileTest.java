@@ -25,6 +25,7 @@ import android.os.PowerManager.WakeLock;
 import android.app.Instrumentation;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
@@ -78,6 +79,11 @@ public class ConnectivityManagerMobileTest
         Log.v(LOG_TAG, "tear down ConnectivityManagerTestActivity");
         wl.release();
         cmActivity.removeConfiguredNetworksAndDisableWifi();
+        // if airplane mode is set, disable it.
+        if (Settings.System.getInt(getInstrumentation().getContext().getContentResolver(),
+                Settings.System.AIRPLANE_MODE_ON) == 1) {
+            cmActivity.setAirplaneMode(getInstrumentation().getContext(), false);
+        }
         super.tearDown();
     }
 
@@ -297,8 +303,6 @@ public class ConnectivityManagerMobileTest
                                               State.DISCONNECTED);
         networkInfo = cmActivity.mCM.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         assertEquals(State.DISCONNECTED, networkInfo.getState());
-        cmActivity.setStateTransitionCriteria(ConnectivityManager.TYPE_WIFI, networkInfo.getState(),
-                NetworkState.DO_NOTHING, State.DISCONNECTED);
 
         // Enable airplane mode
         cmActivity.setAirplaneMode(getInstrumentation().getContext(), true);
@@ -308,13 +312,9 @@ public class ConnectivityManagerMobileTest
             Log.v(LOG_TAG, "exception: " + e.toString());
         }
 
-        // Validate the state transition
-        if (!cmActivity.validateNetworkStates(ConnectivityManager.TYPE_WIFI)) {
-            Log.v(LOG_TAG, "Wifi state transition validation failed.");
-            Log.v(LOG_TAG, "reason: " +
-                    cmActivity.getTransitionFailureReason(ConnectivityManager.TYPE_WIFI));
-            assertTrue(false);
-        }
+        networkInfo = cmActivity.mCM.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        assertEquals(State.DISCONNECTED, networkInfo.getState());
+
         if (!cmActivity.validateNetworkStates(ConnectivityManager.TYPE_MOBILE)) {
             Log.v(LOG_TAG, "Mobile state transition validation failed.");
             Log.v(LOG_TAG, "reason: " +
