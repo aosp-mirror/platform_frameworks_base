@@ -195,7 +195,8 @@ public final class Matrix_Delegate {
         setTranslate(d.mValues, dx, dy);
     }
 
-    /*package*/ static void native_setScale(int native_object, float sx, float sy, float px, float py) {
+    /*package*/ static void native_setScale(int native_object, float sx, float sy,
+            float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -272,7 +273,8 @@ public final class Matrix_Delegate {
         setRotate(d.mValues, sinValue, cosValue);
     }
 
-    /*package*/ static void native_setSkew(int native_object, float kx, float ky, float px, float py) {
+    /*package*/ static void native_setSkew(int native_object, float kx, float ky,
+            float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -364,7 +366,8 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    /*package*/ static boolean native_preRotate(int native_object, float degrees, float px, float py) {
+    /*package*/ static boolean native_preRotate(int native_object, float degrees,
+            float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -464,7 +467,8 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    /*package*/ static boolean native_postRotate(int native_object, float degrees, float px, float py) {
+    /*package*/ static boolean native_postRotate(int native_object, float degrees,
+            float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -526,7 +530,8 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    /*package*/ static boolean native_setRectToRect(int native_object, RectF src, RectF dst, int stf) {
+    /*package*/ static boolean native_setRectToRect(int native_object, RectF src,
+            RectF dst, int stf) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
