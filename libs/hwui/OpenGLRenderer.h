@@ -362,6 +362,7 @@ private:
      */
     void setupDrawWithTexture(bool isAlpha8 = false);
     void setupDrawColor(int color);
+    void setupDrawColor(int color, int alpha);
     void setupDrawColor(float r, float g, float b, float a);
     void setupDrawAlpha8Color(int color, int alpha);
     void setupDrawAlpha8Color(float r, float g, float b, float a);
@@ -373,17 +374,19 @@ private:
             bool swapSrcDst = false);
     void setupDrawProgram();
     void setupDrawDirtyRegionsDisabled();
+    void setupDrawModelViewIdentity();
     void setupDrawModelView(float left, float top, float right, float bottom,
             bool ignoreTransform = false, bool ignoreModelView = false);
     void setupDrawModelViewTranslate(float left, float top, float right, float bottom,
             bool ignoreTransform = false);
     void setupDrawColorUniforms();
     void setupDrawPureColorUniforms();
+    void setupDrawShaderIdentityUniforms();
     void setupDrawShaderUniforms(bool ignoreTransform = false);
     void setupDrawColorFilterUniforms();
     void setupDrawSimpleMesh();
     void setupDrawTexture(GLuint texture);
-    void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLuint vbo = 0);
+    void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords = NULL, GLuint vbo = 0);
     void finishDrawTexture();
 
     /**
