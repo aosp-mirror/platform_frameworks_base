@@ -215,7 +215,7 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
     // its pixels, it is important that the pixels (along with SkBitmap) be
     // available after creating the Bitmap is returned to Java app.
     jobject jSrcBitmap = env->NewObject(fields.bitmapClazz,
-            fields.bitmapConstructor, (int) bitmap, true, NULL, -1);
+            fields.bitmapConstructor, (int) bitmap, NULL, true, NULL, -1);
 
     LOGV("Return a new bitmap constructed with the rotation matrix");
     return env->CallStaticObjectMethod(
@@ -321,7 +321,7 @@ static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
         return;
     }
 
-    fields.bitmapConstructor = env->GetMethodID(fields.bitmapClazz, "<init>", "(IZ[BI)V");
+    fields.bitmapConstructor = env->GetMethodID(fields.bitmapClazz, "<init>", "(I[BZ[BI)V");
     if (fields.bitmapConstructor == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Can't find Bitmap constructor");
         return;
