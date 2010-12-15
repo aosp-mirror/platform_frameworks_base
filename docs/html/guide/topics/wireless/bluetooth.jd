@@ -432,7 +432,7 @@ client are considered connected to each other when they each have a connected
 {@link android.bluetooth.BluetoothSocket} on the same RFCOMM channel. At this
 point, each device can obtain input and output streams and data transfer can
 begin, which is discussed in the section about <a
-href="#ManagingConnection">Managing a Connection</a>. This section describes how
+href="#ManagingAConnection">Managing a Connection</a>. This section describes how
 to initiate the connection between two devices.</p>
 
 <p>The server device and the client device each obtain the required {@link
@@ -603,7 +603,7 @@ client-side).</p>
 <p><code>manageConnectedSocket()</code> is a fictional method in the application
 that will
 initiate the thread for transferring data, which is discussed in the section
-about <a href="#ManagingConnection">Managing a Connection</a>.</p>
+about <a href="#ManagingAConnection">Managing a Connection</a>.</p>
 
 <p>You should usually close your {@link android.bluetooth.BluetoothServerSocket}
 as soon as you are done listening for incoming connections. In this example, {@link
@@ -724,7 +724,7 @@ check, call {@link android.bluetooth.BluetoothAdapter#isDiscovering()}).</p>
 
 <p><code>manageConnectedSocket()</code> is a fictional method in the application
 that will initiate the thread for transferring data, which is discussed in the section
-about <a href="#ManagingConnection">Managing a Connection</a>.</p>
+about <a href="#ManagingAConnection">Managing a Connection</a>.</p>
 
 <p>When you're done with your {@link android.bluetooth.BluetoothSocket}, always
 call {@link android.bluetooth.BluetoothSocket#close()} to clean up.

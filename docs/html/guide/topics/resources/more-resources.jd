@@ -369,11 +369,11 @@ In XML: <code>@[<em>package</em>:]id/<em>name</em></code>
 <dd>
 <dl class="tag-list">
 
-  <dt id="integer-resources-element"><code>&lt;resources&gt;</code></dt>
+  <dt id="id-resources-element"><code>&lt;resources&gt;</code></dt>
     <dd><strong>Required.</strong> This must be the root node.
       <p>No attributes.</p>
     </dd>
-  <dt id="integer-element"><code>&lt;integer&gt;</code></dt>
+  <dt id="id-item-element"><code>&lt;item&gt;</code></dt>
     <dd>Defines a unique ID. Takes no value, only attributes.
       <p class="caps">attributes:</p>
       <dl class="atn-list">

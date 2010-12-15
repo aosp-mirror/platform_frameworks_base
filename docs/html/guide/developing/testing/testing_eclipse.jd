@@ -505,15 +505,14 @@ page.title=Testing In Eclipse, with ADT
     pane and moves the focus to the first line of the test method.
 </p>
 <p>
-    The results of a successful test are shown in
-    <a href="#TestResults">Figure 1. Messages for a successful test</a>:
+    The results of a successful test are shown in figure 1.
 </p>
 <a href="{@docRoot}images/testing/eclipse_test_results.png">
     <img src="{@docRoot}images/testing/eclipse_test_results.png"
          alt="Messages for a successful test" height="327px" id="TestResults"/>
 </a>
 <p class="img-caption">
-    <strong>Figure 1.</strong> Messages for a successful test
+    <strong>Figure 1.</strong> Messages for a successful test.
 </p>
 <p>
     The lower pane is for stack traces. If you highlight a failed test in the upper pane, the
@@ -521,14 +520,11 @@ page.title=Testing In Eclipse, with ADT
     test code, you can double-click it to display the code in an editor view pane, with the
     line highlighted. For a successful test, the lower pane is empty.
 </p>
-<p>
-    The results of a failed test are shown in
-    <a href="#FailedTestResults">Figure 2. Messages for a test failure</a>
-</p>
+<p>The results of a failed test are shown in figure 2.</p>
 <a href="{@docRoot}images/testing/eclipse_test_run_failure.png">
     <img src="{@docRoot}images/testing/eclipse_test_run_failure.png"
-         alt="Messages for a test failure" height="372px" id="TestRun"/>
+         alt="" height="372px" id="TestRun"/>
 </a>
 <p class="img-caption">
-    <strong>Figure 2.</strong> Messages for a test failure
+    <strong>Figure 2.</strong> Messages for a test failure.
 </p>

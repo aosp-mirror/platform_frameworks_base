@@ -214,7 +214,7 @@ screen.</p>
 <p class="table-caption" id="screens-table"><strong>Table 1.</strong> Screen
 sizes and densities of emulator skins included in the Android SDK.</p>
 
-  <table id="screens-table">
+  <table>
     <tbody>
     <tr>
       <td style="border:none"></td>

@@ -496,7 +496,7 @@ In the dialog that appears, click the <strong>Available Software</strong> tab.</
 </tr>
 </table>
 
-<h3 id="preparing">Configuring the ADT Plugin</h3>
+<h3 id="configuring">Configuring the ADT Plugin</h3>
 
 <p>Once you've successfully downloaded ADT as described above, the next step
 is to modify your ADT preferences in Eclipse to point to the Android SDK directory:</p>

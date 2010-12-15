@@ -51,7 +51,7 @@ restoring significant amounts of data can be costly and create a poor user exper
 situation, you have two options:</p>
 
 <ol type="a">
-  <li><a href="#RetainAnObject">Retain an object during a configuration change</a>
+  <li><a href="#RetainingAnObject">Retain an object during a configuration change</a>
   <p>Allow your Activity to restart when a configuration changes, but carry a stateful
 {@link java.lang.Object} to the new instance of your Activity.</p>
 
