@@ -576,14 +576,16 @@ public abstract class Window {
 
     /**
      * Set the width and height layout parameters of the window.  The default
-     * for both of these is MATCH_PARENT; you can change them to WRAP_CONTENT to
-     * make a window that is not full-screen.
+     * for both of these is MATCH_PARENT; you can change them to WRAP_CONTENT
+     * or an absolute value to make a window that is not full-screen.
      *
      * @param width The desired layout width of the window.
      * @param height The desired layout height of the window.
+     *
+     * @see ViewGroup.LayoutParams#height
+     * @see ViewGroup.LayoutParams#width
      */
-    public void setLayout(int width, int height)
-    {
+    public void setLayout(int width, int height) {
         final WindowManager.LayoutParams attrs = getAttributes();
         attrs.width = width;
         attrs.height = height;

@@ -27,6 +27,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     Cursor mCursor;
     ForceLoadContentObserver mObserver;
     boolean mStopped;
+    boolean mReset;
     Uri mUri;
     String[] mProjection;
     String mSelection;
@@ -57,7 +58,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     /* Runs on the UI thread */
     @Override
     public void deliverResult(Cursor cursor) {
-        if (mStopped) {
+        if (mReset) {
             // An async query came in while the loader is stopped
             if (cursor != null) {
                 cursor.close();
@@ -66,9 +67,12 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
         }
         Cursor oldCursor = mCursor;
         mCursor = cursor;
-        super.deliverResult(cursor);
 
-        if (oldCursor != null && !oldCursor.isClosed()) {
+        if (!mStopped) {
+            super.deliverResult(cursor);
+        }
+
+        if (oldCursor != null && oldCursor != cursor && !oldCursor.isClosed()) {
             oldCursor.close();
         }
     }
@@ -94,6 +98,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     @Override
     public void startLoading() {
         mStopped = false;
+        mReset = false;
 
         if (mCursor != null) {
             deliverResult(mCursor);
@@ -107,11 +112,6 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
      */
     @Override
     public void stopLoading() {
-        if (mCursor != null && !mCursor.isClosed()) {
-            mCursor.close();
-        }
-        mCursor = null;
-
         // Attempt to cancel the current load task if possible.
         cancelLoad();
 
@@ -127,9 +127,16 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     }
 
     @Override
-    public void destroy() {
+    public void reset() {
+        mReset = true;
+
         // Ensure the loader is stopped
         stopLoading();
+
+        if (mCursor != null && !mCursor.isClosed()) {
+            mCursor.close();
+        }
+        mCursor = null;
     }
 
     public Uri getUri() {

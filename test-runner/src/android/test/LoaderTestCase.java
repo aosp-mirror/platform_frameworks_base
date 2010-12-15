@@ -64,7 +64,7 @@ public class LoaderTestCase extends AndroidTestCase {
                 // Shut the loader down
                 completedLoader.unregisterListener(this);
                 completedLoader.stopLoading();
-                completedLoader.destroy();
+                completedLoader.reset();
 
                 // Store the result, unblocking the test thread
                 queue.add(data);

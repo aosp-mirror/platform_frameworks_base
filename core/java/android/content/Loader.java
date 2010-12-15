@@ -128,7 +128,7 @@ public abstract class Loader<D> {
      * the data set and may deliver future callbacks if the source changes. Calling
      * {@link #stopLoading} will stop the delivery of callbacks.
      *
-     * Must be called from the UI thread
+     * <p>Must be called from the UI thread
      */
     public abstract void startLoading();
 
@@ -141,22 +141,34 @@ public abstract class Loader<D> {
     /**
      * Stops delivery of updates until the next time {@link #startLoading()} is called
      *
-     * Must be called from the UI thread
+     * <p>Must be called from the UI thread
      */
     public abstract void stopLoading();
 
     /**
-     * Destroys the loader and frees its resources, making it unusable.
+     * Resets the state of the Loader.  The Loader should at this point free
+     * all of its resources, since it may never be called again; however, its
+     * {@link #startLoading()} may later be called at which point it must be
+     * able to start running again.
      *
-     * Must be called from the UI thread
+     * <p>Must be called from the UI thread
      */
-    public abstract void destroy();
+    public void reset() {
+        destroy();
+    }
+
+    /**
+     * @deprecated Old API, implement reset() now.
+     */
+    @Deprecated
+    public void destroy() {
+    }
 
     /**
      * Called when {@link ForceLoadContentObserver} detects a change.  Calls {@link #forceLoad()}
      * by default.
      *
-     * Must be called from the UI thread
+     * <p>Must be called from the UI thread
      */
     public void onContentChanged() {
         forceLoad();
