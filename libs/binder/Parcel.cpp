@@ -619,7 +619,10 @@ status_t Parcel::writeCString(const char* str)
 status_t Parcel::writeString8(const String8& str)
 {
     status_t err = writeInt32(str.bytes());
-    if (err == NO_ERROR) {
+    // only write string if its length is more than zero characters,
+    // as readString8 will only read if the length field is non-zero.
+    // this is slightly different from how writeString16 works.
+    if (str.bytes() > 0 && err == NO_ERROR) {
         err = write(str.string(), str.bytes()+1);
     }
     return err;
