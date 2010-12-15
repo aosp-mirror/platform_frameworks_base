@@ -32,12 +32,16 @@ android.graphics.drawable.LayerDrawable}.</dd>
     for different states (for example, to use a different image when a button is pressed).
     Creates a {@link android.graphics.drawable.StateListDrawable}.</dd>
   <dt><a href="#LevelList">Level List</a></dt>
-    <dd>An XML file that defines a Drawable that manages a number of alternate Drawables, each
+    <dd>An XML file that defines a drawable that manages a number of alternate Drawables, each
 assigned a maximum numerical value. Creates a {@link
 android.graphics.drawable.LevelListDrawable}.</dd>
   <dt><a href="#Transition">Transition Drawable</a></dt>
-    <dd>An XML file that defines a Drawable that can cross-fade between two drawable resources.
+    <dd>An XML file that defines a drawable that can cross-fade between two drawable resources.
 Creates a {@link android.graphics.drawable.TransitionDrawable}.</dd>
+  <dt><a href="#Inset">Inset Drawable</a></dt>
+    <dd>An XML file that defines a drawable that insets another drawable by a specified distance.
+This is useful when a View needs a background drawble that is smaller than the View's actual
+bounds.</dd>
   <dt><a href="#Clip">Clip Drawable</a></dt>
     <dd>An XML file that defines a drawable that clips another Drawable based on this Drawable's
 current level value. Creates a {@link android.graphics.drawable.ClipDrawable}.</dd>
@@ -893,7 +897,7 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
 <dd>
 <pre class="stx">
 &lt;?xml version="1.0" encoding="utf-8"?>
-&lt;<a href="#transition-element">layer-list</a>
+&lt;<a href="#transition-element">transition</a>
 xmlns:android="http://schemas.android.com/apk/res/android" &gt;
     &lt;<a href="#transition-item-element">item</a>
         android:drawable="@[package:]drawable/<em>drawable_resource</em>"
@@ -994,13 +998,10 @@ drawable.startTransition(500);
 
 
 
-
-
-
 <h2 id="Inset">Inset Drawable</h2>
 
-<p>A drawable defined in XML that insets another drawable by a specified distance. This is used when
-a View needs a background that is smaller than the View's actual bounds.</p>
+<p>A drawable defined in XML that insets another drawable by a specified distance. This is useful
+when a View needs a background that is smaller than the View's actual bounds.</p>
 
 <dl class="xml">
 
