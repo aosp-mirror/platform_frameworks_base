@@ -191,13 +191,6 @@ void Allocation::uploadToTexture(const Context *rsc) {
         uploadCubeTexture(isFirstUpload);
     }
 
-    if (mMipmapControl == RS_ALLOCATION_MIPMAP_ON_SYNC_TO_TEXTURE) {
-#ifndef ANDROID_RS_BUILD_FOR_HOST
-        glGenerateMipmap(target);
-#endif //ANDROID_RS_BUILD_FOR_HOST
-    }
-
-
     if (!(mUsageFlags & RS_ALLOCATION_USAGE_SCRIPT)) {
         freeScriptMemory();
     }
@@ -226,6 +219,12 @@ void Allocation::upload2DTexture(bool isFirstUpload, const void *ptr) {
                             mType->getLODDimX(lod), mType->getLODDimY(lod),
                             format, type, p);
         }
+    }
+
+    if (mMipmapControl == RS_ALLOCATION_MIPMAP_ON_SYNC_TO_TEXTURE) {
+#ifndef ANDROID_RS_BUILD_FOR_HOST
+        glGenerateMipmap(target);
+#endif //ANDROID_RS_BUILD_FOR_HOST
     }
 }
 
@@ -265,6 +264,12 @@ void Allocation::uploadCubeTexture(bool isFirstUpload) {
                                 format, type, ptr);
             }
         }
+    }
+
+    if (mMipmapControl == RS_ALLOCATION_MIPMAP_ON_SYNC_TO_TEXTURE) {
+#ifndef ANDROID_RS_BUILD_FOR_HOST
+        glGenerateMipmap(target);
+#endif //ANDROID_RS_BUILD_FOR_HOST
     }
 }
 

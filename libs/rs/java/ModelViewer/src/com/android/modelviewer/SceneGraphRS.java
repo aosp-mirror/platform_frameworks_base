@@ -128,9 +128,9 @@ public class SceneGraphRS {
     }
 
     private void loadImage() {
-        mGridImage = Allocation.createFromBitmapResource(mRS, mRes, R.drawable.robot, Element.RGB_565(mRS), true);
-        mGridImage.uploadToTexture(0);
-
+        mGridImage = Allocation.createFromBitmapResource(mRS, mRes, R.drawable.robot,
+                                                         Allocation.MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
+                                                         Allocation.USAGE_GRAPHICS_TEXTURE);
         mScript.set_gTGrid(mGridImage);
     }
 

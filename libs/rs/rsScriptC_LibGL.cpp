@@ -275,6 +275,18 @@ static void SC_color(float r, float g, float b, float a) {
     pf->setConstantColor(rsc, r, g, b, a);
 }
 
+static void SC_allocationSyncAll(RsAllocation va) {
+    CHECK_OBJ(va);
+    GET_TLS();
+    static_cast<Allocation *>(va)->syncAll(rsc, RS_ALLOCATION_USAGE_SCRIPT);
+}
+
+static void SC_allocationSyncAll2(RsAllocation va, RsAllocationUsageType source) {
+    CHECK_OBJ(va);
+    GET_TLS();
+    static_cast<Allocation *>(va)->syncAll(rsc, source);
+}
+
 static void SC_uploadToTexture2(RsAllocation va, uint32_t baseMipLevel) {
     CHECK_OBJ(va);
     GET_TLS();
@@ -424,6 +436,8 @@ static ScriptCState::SymbolTable_t gSyms[] = {
 
     { "_Z11rsgGetWidthv", (void *)&SC_getWidth, false },
     { "_Z12rsgGetHeightv", (void *)&SC_getHeight, false },
+
+    { "_Z20rsgAllocationSyncAll13rs_allocation", (void *)&SC_allocationSyncAll, false },
 
     { "_Z18rsgUploadToTexture13rs_allocationj", (void *)&SC_uploadToTexture2, false },
     { "_Z18rsgUploadToTexture13rs_allocation", (void *)&SC_uploadToTexture, false },

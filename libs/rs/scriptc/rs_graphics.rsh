@@ -35,6 +35,9 @@ extern uint __attribute__((overloadable))
     rsgGetHeight(void);
 
 extern void __attribute__((overloadable))
+    rsgAllocationSyncAll(rs_allocation);
+
+extern void __attribute__((overloadable))
     rsgUploadToTexture(rs_allocation);
 extern void __attribute__((overloadable))
     rsgUploadToTexture(rs_allocation, uint mipLevel);
