@@ -679,8 +679,8 @@ removes several classes that were previously deprecated.</li>
 
 <ul>
 <li>New <code>xlargeScreens</code> attribute for <a
-href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;<
-/ code > < /a>
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens&gt;}</a>
 element, to indicate whether the application supports
 extra large screen form-factors. For details, see <a
 href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
