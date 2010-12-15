@@ -656,10 +656,7 @@ to install it. </p>
 </table>
 
 
-<p>If you encounter problems during the update of ADT, you
-can try removing the existing ADT plugin and then performing a fresh
-installation. To remove the plugin, follow the instructions in <a
-href="#uninstalling">Uninstalling the ADT Plugin</a>, below. To reinstall
-the plugin, follow the instructions in <a
-href="#installing">Installing the ADT Plugin</a>, above.</p>
+<p>If you encounter problems during the update, remove the existing ADT plugin from Eclipse, then
+perform a fresh installation, using the instructions for <a href="#installing">Installing the ADT
+Plugin</a>.</p>
 
