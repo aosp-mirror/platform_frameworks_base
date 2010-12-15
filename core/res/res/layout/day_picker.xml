@@ -25,7 +25,7 @@
     <TextView android:id="@+android:id/month_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal" 
+        android:layout_gravity="center_horizontal"
         android:paddingTop="10dip"
         android:paddingBottom="10dip"
         style="@android:style/TextAppearance.Medium" />
@@ -37,7 +37,7 @@
         android:layout_marginBottom="6dip"
         android:layout_marginRight="2dip"
         android:layout_marginLeft="2dip"
-        android:gravity="center">
+        android:gravity="center" >
 
         <TextView android:layout_width="0dip"
             android:layout_height="wrap_content"
@@ -50,7 +50,6 @@
             android:layout_weight="1"
             android:gravity="center"
             style="?android:attr/dayPickerWeekDayViewStyle" />
-
         <TextView android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -89,12 +88,18 @@
 
     </LinearLayout>
 
+    <ImageView android:layout_width="match_parent"
+        android:layout_height="1dip"
+        android:scaleType="fitXY"
+        android:gravity="fill_horizontal"
+        android:src="?android:attr/dividerHorizontal" />
+
     <ListView android:id="@android:id/list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:drawSelectorOnTop="false"
-            android:cacheColorHint="@android:color/transparent"
-            android:fastScrollEnabled="false"
-            android:overScrollMode="never" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:drawSelectorOnTop="false"
+        android:cacheColorHint="@android:color/transparent"
+        android:fastScrollEnabled="false"
+        android:overScrollMode="never" />
 
 </LinearLayout>

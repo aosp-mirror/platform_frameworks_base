@@ -2976,6 +2976,14 @@
 
     <!-- @hide -->
     <declare-styleable name="DayPickerWeekView">
+        <attr name="height" />
+        <attr name="weekStartDay" format="integer|reference" />
+        <attr name="weekDayCount" format="integer|reference" />
+        <attr name="showWeekNumber" format="boolean|reference" />
+        <attr name="weekSeperatorWidth" format="dimension" />
+        <attr name="textSize" />
+        <attr name="weekDayPadding" format="dimension" />
+        <attr name="selectedDayLineWidth" format="dimension" />
         <attr name="selectionBackgroundColor" format="color|reference" />
         <attr name="focusedMonthDateColor" format="color|reference" />
         <attr name="otherMonthDateColor" format="color|reference" />
