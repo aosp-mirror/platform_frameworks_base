@@ -177,7 +177,7 @@ static const JNINativeMethod methods[] = {
     {"getPermissions",  "(Ljava/lang/String;[I)I", (void*)android_os_FileUtils_getPermissions},
     {"setUMask",        "(I)I",                    (void*)android_os_FileUtils_setUMask},
     {"getFatVolumeId",  "(Ljava/lang/String;)I", (void*)android_os_FileUtils_getFatVolumeId},
-    {"getFileStatus",  "(Ljava/lang/String;Landroid/os/FileUtils$FileStatus;)Z", (void*)android_os_FileUtils_getFileStatus},
+    {"getFileStatusNative", "(Ljava/lang/String;Landroid/os/FileUtils$FileStatus;)Z", (void*)android_os_FileUtils_getFileStatus},
 };
 
 static const char* const kFileUtilsPathName = "android/os/FileUtils";
@@ -211,4 +211,3 @@ int register_android_os_FileUtils(JNIEnv* env)
 }
 
 }
-
