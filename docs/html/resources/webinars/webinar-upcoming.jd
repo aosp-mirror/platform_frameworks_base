@@ -26,8 +26,15 @@ function renderWebinar(data) {
 
     code.push('<div>');
     code.push('<h3>' + title + '</h3>');
-    code.push('<p ><i>' + formatDate(start, end) + '</i>');
-    code.push('<p>' + description);
+    code.push('<p><i>' + formatDate(start, end) + '</i>');
+    code.push('<br/><a href="https://www.google.com/calendar/event?action=TEMPLATE&hl=en&text=' + title +
+                  '&dates=' + formatDateUtf(start) + '/' + formatDateUtf(end) +
+                  '&details=' + description + '  Go to: http://developer.android.com/resources/webinars/webinar-watch.html' +
+                  '&location=developer.android.com' +
+                  '&sprop=name:Android Developers' +
+                  '&sprop=website:developer.android.com' +
+                  '" target="_blank">Add this to my calendar</a></p>');
+    code.push('<p>' + description + '</p>');
     code.push('</div>');
   }
 
@@ -48,6 +55,10 @@ showWebinars();           // load webinars
 
 </script>
 
+<p>This page provides a schedule of upcoming webinars.
+  When a webinar occurs, you can watch it live and participate in an ICQ session that's coupled
+  with the presentation, by following the live link at
+  <a href="{@docRoot}resources/webinars/webinar-watch.html">Watch a Webinar</a>.</p>
 
 <div id="resource-browser-results">
   </div>

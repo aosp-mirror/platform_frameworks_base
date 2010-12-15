@@ -98,3 +98,22 @@ function formatDate(start,end) {
   return str;
 
 }
+
+
+function formatDateUtf(date) {
+  var regex =  /(^\d{4})-(\d{2})-(\d{2})\s{1}(\d{2}):(\d{2}):(\d{2}$)/;
+  var match = regex.exec(date.toString());
+  var yy = match[1];
+  var mm = match[2];
+  var dd = match[3];
+  var hh = parseInt(match[4], 10) + 8;  // +8 to convert from PST to GMT
+  var mi = match[5] + "00"; // add seconds
+
+  if (hh >= 24) {  // If the GMT adjustment put us into the next day,
+    dd++;          // increment the day and
+    hh -= 24;      // set the hour back to real hours
+  }
+  hh = hh < 10 ? "0" + hh : hh;  // form a double digit number for single digit hours
+
+  return yy + mm + dd + 'T' + hh + mi + 'Z';
+}
