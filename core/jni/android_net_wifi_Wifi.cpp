@@ -121,6 +121,11 @@ static jboolean android_net_wifi_startSupplicant(JNIEnv* env, jobject clazz)
     return (jboolean)(::wifi_start_supplicant() == 0);
 }
 
+static jboolean android_net_wifi_stopSupplicant(JNIEnv* env, jobject clazz)
+{
+    return doBooleanCommand("TERMINATE", "OK");
+}
+
 static jboolean android_net_wifi_killSupplicant(JNIEnv* env, jobject clazz)
 {
     return (jboolean)(::wifi_stop_supplicant() == 0);
@@ -533,11 +538,6 @@ static jboolean android_net_wifi_reloadConfigCommand(JNIEnv* env, jobject clazz)
     return doBooleanCommand("RECONFIGURE", "OK");
 }
 
-static jboolean android_net_wifi_terminateCommand(JNIEnv* env, jobject clazz)
-{
-    return doBooleanCommand("TERMINATE", "OK");
-}
-
 static jboolean android_net_wifi_setScanResultHandlingCommand(JNIEnv* env, jobject clazz, jint mode)
 {
     char cmdstr[BUF_SIZE];
@@ -610,6 +610,7 @@ static JNINativeMethod gWifiMethods[] = {
     { "isDriverLoaded", "()Z",  (void *)android_net_wifi_isDriverLoaded},
     { "unloadDriver", "()Z",  (void *)android_net_wifi_unloadDriver },
     { "startSupplicant", "()Z",  (void *)android_net_wifi_startSupplicant },
+    { "stopSupplicant", "()Z", (void*) android_net_wifi_stopSupplicant },
     { "killSupplicant", "()Z",  (void *)android_net_wifi_killSupplicant },
     { "connectToSupplicant", "()Z",  (void *)android_net_wifi_connectToSupplicant },
     { "closeSupplicantConnection", "()V",  (void *)android_net_wifi_closeSupplicantConnection },
@@ -652,7 +653,6 @@ static JNINativeMethod gWifiMethods[] = {
     { "getMacAddressCommand", "()Ljava/lang/String;", (void*) android_net_wifi_getMacAddressCommand },
     { "saveConfigCommand", "()Z", (void*) android_net_wifi_saveConfigCommand },
     { "reloadConfigCommand", "()Z", (void*) android_net_wifi_reloadConfigCommand },
-    { "terminateCommand", "()Z", (void*) android_net_wifi_terminateCommand },
     { "setScanResultHandlingCommand", "(I)Z", (void*) android_net_wifi_setScanResultHandlingCommand },
     { "addToBlacklistCommand", "(Ljava/lang/String;)Z", (void*) android_net_wifi_addToBlacklistCommand },
     { "clearBlacklistCommand", "()Z", (void*) android_net_wifi_clearBlacklistCommand },

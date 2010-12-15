@@ -1989,9 +1989,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             switch(message.what) {
                 case CMD_STOP_SUPPLICANT:   /* Supplicant stopped by user */
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
-                    Log.d(TAG, "send terminate command to supplicant");
-                    if (!WifiNative.terminateCommand()) {
-                        Log.e(TAG, "Failed to terminate cleanly, issue kill");
+                    Log.d(TAG, "stopping supplicant");
+                    if (!WifiNative.stopSupplicant()) {
+                        Log.e(TAG, "Failed to stop supplicant, issue kill");
                         WifiNative.killSupplicant();
                     }
                     handleNetworkDisconnect();
