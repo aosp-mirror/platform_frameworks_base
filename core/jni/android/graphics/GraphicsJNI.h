@@ -136,12 +136,28 @@ public:
     // overrides
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
     
-    jbyteArray getStorageObj() { return fStorageObj; };
+    /** Return the Java array object created for the last allocation.
+     *  This returns a local JNI reference which the caller is responsible
+     *  for storing appropriately (usually by passing it to the Bitmap
+     *  constructor).
+     */
+    jbyteArray getStorageObj() { return fStorageObj; }
+
+    /** Same as getStorageObj(), but also resets the allocator so that it
+     *  can allocate again.
+     */
+    jbyteArray getStorageObjAndReset() {
+        jbyteArray result = fStorageObj;
+        fStorageObj = NULL;
+        fAllocCount = 0;
+        return result;
+    };
 
 private:
     JavaVM* fVM;
     bool fAllocateInJavaHeap;
     jbyteArray fStorageObj;
+    int fAllocCount;
 };
 
 class JavaMemoryUsageReporter : public SkVMMemoryReporter {
