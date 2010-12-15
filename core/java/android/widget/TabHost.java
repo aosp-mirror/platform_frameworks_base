@@ -79,11 +79,13 @@ public class TabHost extends FrameLayout implements ViewTreeObserver.OnTouchMode
                 com.android.internal.R.attr.tabWidgetStyle, 0);
 
         mTabLayoutId = a.getResourceId(R.styleable.TabWidget_tabLayout, 0);
-        if (mTabLayoutId == 0) {
-            throw new IllegalArgumentException("Invalid TabWidget tabLayout id");
-        }
-
         a.recycle();
+
+        if (mTabLayoutId == 0) {
+            // In case the tabWidgetStyle does not inherit from Widget.TabWidget and tabLayout is
+            // not defined.
+            mTabLayoutId = R.layout.tab_indicator_holo;
+        }
 
         initTabHost();
     }
