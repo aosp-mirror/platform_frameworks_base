@@ -452,13 +452,9 @@ public class Allocation extends BaseObj {
         return new Allocation(id, rs, t, usage);
     }
 
-    static public Allocation createFromBitmap(RenderScript rs, Bitmap b,
-                                              Element dstFmt, boolean genMips) {
-        MipmapControl mc = MipmapControl.MIPMAP_NONE;
-        if (genMips) {
-            mc = MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE;
-        }
-        return createFromBitmap(rs, b, mc, USAGE_GRAPHICS_TEXTURE);
+    static public Allocation createFromBitmap(RenderScript rs, Bitmap b) {
+        return createFromBitmap(rs, b, MipmapControl.MIPMAP_NONE,
+                                USAGE_GRAPHICS_TEXTURE);
     }
 
     static public Allocation createCubemapFromBitmap(RenderScript rs, Bitmap b,
@@ -500,14 +496,9 @@ public class Allocation extends BaseObj {
     }
 
     static public Allocation createCubemapFromBitmap(RenderScript rs, Bitmap b,
-                                                     Element dstFmt,
-                                                     boolean genMips,
                                                      CubemapLayout layout) {
-        MipmapControl mc = MipmapControl.MIPMAP_NONE;
-        if (genMips) {
-            mc = MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE;
-        }
-        return createCubemapFromBitmap(rs, b, mc, layout, USAGE_GRAPHICS_TEXTURE);
+        return createCubemapFromBitmap(rs, b, MipmapControl.MIPMAP_NONE,
+                                       layout, USAGE_GRAPHICS_TEXTURE);
     }
 
     static public Allocation createFromBitmapResource(RenderScript rs,
@@ -525,6 +516,15 @@ public class Allocation extends BaseObj {
 
     static public Allocation createFromBitmapResource(RenderScript rs,
                                                       Resources res,
+                                                      int id) {
+        return createFromBitmapResource(rs, res, id,
+                                        MipmapControl.MIPMAP_NONE,
+                                        USAGE_GRAPHICS_TEXTURE);
+    }
+
+/*
+    static public Allocation createFromBitmapResource(RenderScript rs,
+                                                      Resources res,
                                                       int id,
                                                       Element dstFmt,
                                                       boolean genMips) {
@@ -534,7 +534,7 @@ public class Allocation extends BaseObj {
         }
         return createFromBitmapResource(rs, res, id, mc, USAGE_GRAPHICS_TEXTURE);
     }
-
+*/
     static public Allocation createFromString(RenderScript rs,
                                               String str,
                                               int usage) {
