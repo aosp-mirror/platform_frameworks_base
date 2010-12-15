@@ -39,6 +39,7 @@ import android.util.Xml;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 
 /**
@@ -112,7 +113,7 @@ public abstract class Drawable {
     private int mLevel = 0;
     private int mChangingConfigurations = 0;
     private Rect mBounds = ZERO_BOUNDS_RECT;  // lazily becomes a new Rect()
-    /*package*/ Callback mCallback = null;
+    private WeakReference<Callback> mCallback = null;
     private boolean mVisible = true;
 
     /**
@@ -291,22 +292,41 @@ public abstract class Drawable {
      * that want to support animated drawables.
      *
      * @param cb The client's Callback implementation.
+     * 
+     * @see #getCallback() 
      */
     public final void setCallback(Callback cb) {
-        mCallback = cb;
+        mCallback = new WeakReference<Callback>(cb);
     }
 
+    /**
+     * Return the current {@link Callback} implementation attached to this
+     * Drawable.
+     * 
+     * @return A {@link Callback} instance or null if no callback was set.
+     * 
+     * @see #setCallback(android.graphics.drawable.Drawable.Callback) 
+     */
+    public Callback getCallback() {
+        if (mCallback != null) {
+            return mCallback.get();
+        }
+        return null;
+    }
+    
     /**
      * Use the current {@link Callback} implementation to have this Drawable
      * redrawn.  Does nothing if there is no Callback attached to the
      * Drawable.
      *
      * @see Callback#invalidateDrawable
+     * @see #getCallback() 
+     * @see #setCallback(android.graphics.drawable.Drawable.Callback) 
      */
-    public void invalidateSelf()
-    {
-        if (mCallback != null) {
-            mCallback.invalidateDrawable(this);
+    public void invalidateSelf() {
+        final Callback callback = getCallback();
+        if (callback != null) {
+            callback.invalidateDrawable(this);
         }
     }
 
@@ -320,10 +340,10 @@ public abstract class Drawable {
      *
      * @see Callback#scheduleDrawable
      */
-    public void scheduleSelf(Runnable what, long when)
-    {
-        if (mCallback != null) {
-            mCallback.scheduleDrawable(this, what, when);
+    public void scheduleSelf(Runnable what, long when) {
+        final Callback callback = getCallback();
+        if (callback != null) {
+            callback.scheduleDrawable(this, what, when);
         }
     }
 
@@ -336,10 +356,10 @@ public abstract class Drawable {
      *
      * @see Callback#unscheduleDrawable
      */
-    public void unscheduleSelf(Runnable what)
-    {
-        if (mCallback != null) {
-            mCallback.unscheduleDrawable(this, what);
+    public void unscheduleSelf(Runnable what) {
+        final Callback callback = getCallback();
+        if (callback != null) {
+            callback.unscheduleDrawable(this, what);
         }
     }
 
