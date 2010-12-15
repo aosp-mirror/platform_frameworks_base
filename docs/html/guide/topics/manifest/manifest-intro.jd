@@ -441,6 +441,7 @@ element.  For example, an activity could be protected as follows:
 <pre>
 &lt;manifest . . . &gt;
     &lt;permission android:name="com.example.project.DEBIT_ACCT" . . . /&gt;
+    &lt;uses-permission android:name="com.example.project.DEBIT_ACCT" /&gt;
     . . .
     &lt;application . . .&gt;
         &lt;activity android:name="com.example.project.FreneticActivity"
@@ -449,9 +450,6 @@ element.  For example, an activity could be protected as follows:
             . . .
         &lt;/activity&gt;
     &lt;/application&gt;
-    . . .
-    &lt;uses-permission android:name="com.example.project.DEBIT_ACCT" /&gt;
-    . . .
 &lt;/manifest&gt;
 </pre>
 

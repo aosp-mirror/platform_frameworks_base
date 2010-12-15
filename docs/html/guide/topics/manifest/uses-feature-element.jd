@@ -403,10 +403,9 @@ declares a Bluetooth permission, but does not declare the Bluetooth feature in a
 </dl>
 
 <pre>&lt;manifest ...>
-...
     &lt;uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     &lt;uses-sdk android:minSdkVersion="3" />
-...
+    ...
 &lt;/manifest></pre>
 
 <dl>
@@ -418,10 +417,9 @@ including devices running older versions of the platform. </dd>
 </dl>
 
 <pre>&lt;manifest ...>
-...
     &lt;uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     &lt;uses-sdk android:minSdkVersion="3" android:targetSdkVersion="5" />
-...
+    ...
 &lt;/manifest></pre>
 
 <dl>
@@ -430,11 +428,10 @@ including devices running older versions of the platform. </dd>
 </dl>
 
 <pre>&lt;manifest ...>
-...
     &lt;uses-feature android:name="android.hardware.bluetooth" />
     &lt;uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     &lt;uses-sdk android:minSdkVersion="3" android:targetSdkVersion="5" />
-...
+    ...
 &lt;/manifest></pre>
 
 <dl>
@@ -445,11 +442,10 @@ feature support, for all devices.</dd>
 </dl>
 
 <pre>&lt;manifest ...>
-...
     &lt;uses-feature android:name="android.hardware.bluetooth" android:required="false" />
     &lt;uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     &lt;uses-sdk android:minSdkVersion="3" android:targetSdkVersion="5" />
-...
+    ...
 &lt;/manifest></pre>
 
 
