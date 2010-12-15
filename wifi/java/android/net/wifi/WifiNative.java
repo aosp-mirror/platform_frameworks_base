@@ -48,7 +48,7 @@ public class WifiNative {
 
     public native static boolean startSupplicant();
     
-    public native static boolean stopSupplicant();
+    public native static boolean killSupplicant();
 
     public native static boolean connectToSupplicant();
 
@@ -79,6 +79,8 @@ public class WifiNative {
     public native static boolean reassociateCommand();
 
     public native static boolean disconnectCommand();
+
+    public native static boolean terminateCommand();
 
     public native static String statusCommand();
 
