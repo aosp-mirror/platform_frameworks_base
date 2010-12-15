@@ -296,7 +296,7 @@ $ android create test-project -m ../HelloAndroid -n HelloAndroidTest -p HelloAnd
 <h2 id="RunTestsCommand">Running Tests</h2>
 <p>
     You run tests from the command line, either with Ant or with an
-    <a href="{@docRoot}http://developer.android.com/guide/developing/tools/adb.html">
+    <a href="{@docRoot}guide/developing/tools/adb.html">
     Android Debug Bridge (adb)</a> shell.
 </p>
 <h3 id="RunTestsAnt">Quick build and run with Ant</h3>
@@ -318,7 +318,7 @@ $ android create test-project -m ../HelloAndroid -n HelloAndroidTest -p HelloAnd
 <h3 id="RunTestsDevice">Running tests on a device or emulator</h3>
 <p>
     When you run tests from the command line with
-    <a href="{@docRoot}http://developer.android.com/guide/developing/tools/adb.html">
+    <a href="{@docRoot}guide/developing/tools/adb.html">
     Android Debug Bridge (adb)</a>, you get more options for choosing the tests
     to run than with any other method. You can select individual test methods, filter tests
     according to their annotation, or specify testing options. Since the test run is controlled

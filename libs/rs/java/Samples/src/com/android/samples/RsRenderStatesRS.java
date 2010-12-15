@@ -274,17 +274,16 @@ public class RsRenderStatesRS {
     }
 
     private Allocation loadTextureRGB(int id) {
-        final Allocation allocation = Allocation.createFromBitmapResource(mRS, mRes,
-                id, Element.RGB_565(mRS), true);
-        allocation.uploadToTexture(0);
-        return allocation;
+        return Allocation.createFromBitmapResource(mRS, mRes, id,
+                                                   Allocation.MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
+                                                   Allocation.USAGE_GRAPHICS_TEXTURE);
     }
 
     private Allocation loadTextureARGB(int id) {
         Bitmap b = BitmapFactory.decodeResource(mRes, id, mOptionsARGB);
-        final Allocation allocation = Allocation.createFromBitmap(mRS, b, Element.RGBA_8888(mRS), true);
-        allocation.uploadToTexture(0);
-        return allocation;
+        return Allocation.createFromBitmap(mRS, b,
+                                           Allocation.MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
+                                           Allocation.USAGE_GRAPHICS_TEXTURE);
     }
 
     private void loadImages() {
@@ -293,9 +292,8 @@ public class RsRenderStatesRS {
         mTexTransparent = loadTextureARGB(R.drawable.leaf);
         mTexChecker = loadTextureRGB(R.drawable.checker);
         Bitmap b = BitmapFactory.decodeResource(mRes, R.drawable.cubemap_test);
-        mTexCube = Allocation.createCubemapFromBitmap(mRS, b, Element.RGB_565(mRS), false,
+        mTexCube = Allocation.createCubemapFromBitmap(mRS, b,
                                                       Allocation.CubemapLayout.VERTICAL_FACE_LIST);
-        mTexCube.uploadToTexture(0);
 
         mScript.set_gTexTorus(mTexTorus);
         mScript.set_gTexOpaque(mTexOpaque);

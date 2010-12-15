@@ -16,19 +16,20 @@
 
 package com.android.rs.test;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.renderscript.*;
 
 public class UT_rsdebug extends UnitTest {
     private Resources mRes;
 
-    protected UT_rsdebug(RSTestCore rstc, Resources res) {
-        super(rstc, "rsDebug");
+    protected UT_rsdebug(RSTestCore rstc, Resources res, Context ctx) {
+        super(rstc, "rsDebug", ctx);
         mRes = res;
     }
 
     public void run() {
-        RenderScript pRS = RenderScript.create();
+        RenderScript pRS = RenderScript.create(mCtx);
         ScriptC_rsdebug s = new ScriptC_rsdebug(pRS, mRes, R.raw.rsdebug);
         pRS.setMessageHandler(mRsMessage);
         s.invoke_test_rsdebug(0, 0);
@@ -37,4 +38,3 @@ public class UT_rsdebug extends UnitTest {
         pRS.destroy();
     }
 }
-

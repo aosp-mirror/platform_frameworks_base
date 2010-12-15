@@ -1005,6 +1005,21 @@ public abstract class PreferenceActivity extends ListActivity implements
             mFragmentBreadCrumbs.setActivity(this);
         }
         mFragmentBreadCrumbs.setTitle(title, shortTitle);
+        mFragmentBreadCrumbs.setParentTitle(null, null, null);
+    }
+
+    /**
+     * Should be called after onCreate to ensure that the breadcrumbs, if any, were created.
+     * This prepends a title to the fragment breadcrumbs and attaches a listener to any clicks
+     * on the parent entry.
+     * @param title the title for the breadcrumb
+     * @param shortTitle the short title for the breadcrumb
+     */
+    public void setParentTitle(CharSequence title, CharSequence shortTitle,
+            OnClickListener listener) {
+        if (mFragmentBreadCrumbs != null) {
+            mFragmentBreadCrumbs.setParentTitle(title, shortTitle, listener);
+        }
     }
 
     void setSelectedHeader(Header header) {

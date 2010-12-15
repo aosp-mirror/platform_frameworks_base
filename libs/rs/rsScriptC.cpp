@@ -402,7 +402,7 @@ static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name) {
 extern const char rs_runtime_lib_bc[];
 extern unsigned rs_runtime_lib_bc_size;
 
-void ScriptCState::runCompiler(Context *rsc, ScriptC *s, const char *resName) {
+void ScriptCState::runCompiler(Context *rsc, ScriptC *s, const char *resName, const char *cacheDir) {
     {
         s->mBccScript = bccCreateScript();
         s->mEnviroment.mIsThreadable = true;
@@ -413,7 +413,8 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s, const char *resName) {
         if (bccReadBC(s->mBccScript,
                       s->mEnviroment.mScriptText,
                       s->mEnviroment.mScriptTextLength,
-                      resName) >= 0) {
+                      resName,
+                      cacheDir) >= 0) {
           //bccLinkBC(s->mBccScript, rs_runtime_lib_bc, rs_runtime_lib_bc_size);
           bccCompileBC(s->mBccScript);
         } else {
@@ -534,7 +535,7 @@ void rsi_ScriptCSetText(Context *rsc, const char *text, uint32_t len) {
     ss->mScript->mEnviroment.mScriptTextLength = len;
 }
 
-RsScript rsi_ScriptCCreate(Context * rsc, const char *resName)
+RsScript rsi_ScriptCCreate(Context * rsc, const char *resName, const char *cacheDir)
 {
     ScriptCState *ss = &rsc->mScriptC;
 
@@ -542,7 +543,7 @@ RsScript rsi_ScriptCCreate(Context * rsc, const char *resName)
     ss->mScript.clear();
     s->incUserRef();
 
-    ss->runCompiler(rsc, s.get(), resName);
+    ss->runCompiler(rsc, s.get(), resName, cacheDir);
     ss->clear(rsc);
     return s.get();
 }

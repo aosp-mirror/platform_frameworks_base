@@ -16,11 +16,14 @@
 
 package android.graphics;
 
+import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
 import android.graphics.Shader.TileMode;
 
 import java.awt.Paint;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 
 /**
  * Delegate implementing the native methods of android.graphics.RadialGradient
@@ -105,18 +108,17 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
     private RadialGradient_Delegate(float x, float y, float radius, int colors[], float positions[],
             TileMode tile) {
         super(colors, positions);
-
         mJavaPaint = new RadialGradientPaint(x, y, radius, mColors, mPositions, tile);
     }
 
-    private static class RadialGradientPaint extends GradientPaint {
+    private class RadialGradientPaint extends GradientPaint {
 
         private final float mX;
         private final float mY;
         private final float mRadius;
 
-        public RadialGradientPaint(float x, float y, float radius, int[] colors, float[] positions,
-                TileMode mode) {
+        public RadialGradientPaint(float x, float y, float radius,
+                int[] colors, float[] positions, TileMode mode) {
             super(colors, positions, mode);
             mX = x;
             mY = y;
@@ -130,14 +132,36 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
                 java.awt.geom.AffineTransform xform,
                 java.awt.RenderingHints       hints) {
             precomputeGradientColors();
-            return new RadialGradientPaintContext(colorModel);
+
+            AffineTransform canvasMatrix;
+            try {
+                canvasMatrix = xform.createInverse();
+            } catch (NoninvertibleTransformException e) {
+                Bridge.getLog().error(null, "Unable to inverse matrix in RadialGradient", e);
+                canvasMatrix = new AffineTransform();
+            }
+
+            AffineTransform localMatrix = getLocalMatrix();
+            try {
+                localMatrix = localMatrix.createInverse();
+            } catch (NoninvertibleTransformException e) {
+                Bridge.getLog().error(null, "Unable to inverse matrix in RadialGradient", e);
+                localMatrix = new AffineTransform();
+            }
+
+            return new RadialGradientPaintContext(canvasMatrix, localMatrix, colorModel);
         }
 
         private class RadialGradientPaintContext implements java.awt.PaintContext {
 
+            private final AffineTransform mCanvasMatrix;
+            private final AffineTransform mLocalMatrix;
             private final java.awt.image.ColorModel mColorModel;
 
-            public RadialGradientPaintContext(java.awt.image.ColorModel colorModel) {
+            public RadialGradientPaintContext(AffineTransform canvasMatrix,
+                    AffineTransform localMatrix, java.awt.image.ColorModel colorModel) {
+                mCanvasMatrix = canvasMatrix;
+                mLocalMatrix = localMatrix;
                 mColorModel = colorModel;
             }
 
@@ -157,10 +181,22 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
                 // compute distance from each point to the center, and figure out the distance from
                 // it.
                 int index = 0;
+                float[] pt1 = new float[2];
+                float[] pt2 = new float[2];
                 for (int iy = 0 ; iy < h ; iy++) {
                     for (int ix = 0 ; ix < w ; ix++) {
-                        float _x = x + ix - mX;
-                        float _y = y + iy - mY;
+                        // handle the canvas transform
+                        pt1[0] = x + ix;
+                        pt1[1] = y + iy;
+                        mCanvasMatrix.transform(pt1, 0, pt2, 0, 1);
+
+                        // handle the local matrix
+                        pt1[0] = pt2[0] - mX;
+                        pt1[1] = pt2[1] - mY;
+                        mLocalMatrix.transform(pt1, 0, pt2, 0, 1);
+
+                        float _x = pt2[0];
+                        float _y = pt2[1];
                         float distance = (float) Math.sqrt(_x * _x + _y * _y);
 
                         data[index++] = getGradientColor(distance / mRadius);

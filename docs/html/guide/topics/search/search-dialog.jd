@@ -461,7 +461,7 @@ private void handleIntent(Intent intent) {
 }
 </pre>
 
-<p>Compared to the example code in the section about <a href="#PerfomingSearch">Performing a
+<p>Compared to the example code in the section about <a href="#PerformingSearch">Performing a
 Search</a>, all the code to handle the
 search Intent is now in the {@code handleIntent()} method, so that both {@link
 android.app.Activity#onCreate(Bundle)

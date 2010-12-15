@@ -126,7 +126,7 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"Sinkron"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sinkron"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Terlalu banyak <xliff:g id="CONTENT_TYPE">%s</xliff:g> penghapusan."</string>
-    <string name="low_memory" product="tablet" msgid="2292820184396262278">"Penyimpanan pada tablet penuh! Hapus beberapa berkas untuk mendapatkan ruang."</string>
+    <string name="low_memory" product="tablet" msgid="2292820184396262278">"Penyimpanan pada tablet penuh! Hapus beberapa berkas agar ada tempat kosong."</string>
     <string name="low_memory" product="default" msgid="6632412458436461203">"Penyimpanan di ponsel penuh! Hapus sebagian berkas untuk mendapatkan ruang."</string>
     <string name="me" msgid="6545696007631404292">"Saya"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opsi tablet"</string>
@@ -277,7 +277,7 @@
     <string name="permlab_installPackages" msgid="335800214119051089">"pasang aplikasi secara langsung"</string>
     <string name="permdesc_installPackages" msgid="526669220850066132">"Mengizinkan aplikasi memasang paket Android baru atau yang diperbarui. Aplikasi hasad dapat menggunakan ini untuk menambahkan aplikasi dengan izin yang kuat secara sembarangan."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"hapus semua data tembolok aplikasi"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Mengizinkan aplikasi mengosongkan penyimpanan tablet dengan menghapus berkas dalam direktori tembolok aplikasi. Akses sangat terbatas, biasanya pada proses sistem."</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Mengizinkan aplikasi mengosongkan penyimpanan tablet dengan menghapus berkas dalam direktori tembolok aplikasi. Akses sangat terbatas, biasanya hanya untuk proses sistem."</string>
     <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"Mengizinkan aplikasi mengosongkan penyimpanan ponsel dengan menghapus berkas dalam direktori tembolok aplikasi. Akses sangat terbatas, biasanya pada proses sistem."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Pindahkan sumber daya aplikasi"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Mengizinkan aplikasi memindah sumber daya aplikasi dari media internal ke eksternal dan sebaliknya."</string>
@@ -298,13 +298,13 @@
     <string name="permlab_writeGservices" msgid="2149426664226152185">"ubah peta layanan Google"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"Mengizinkan aplikasi mengubah peta layanan Google. Tidak untuk digunakan oleh aplikasi normal."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"mulai secara otomatis pada saat boot"</string>
-    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"Memungkinkan aplikasi memulai secara otomatis segera setelah sistem selesai booting. Ini dapat memperlambat proses memulai tablet dan menyebabkan aplikasi memperlambat tablet secara keseluruhan ketika terus berjalan."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"Memungkinkan aplikasi memulai secara otomatis segera setelah sistem selesai booting. Ini dapat memperlambat proses memulai tablet dan menyebabkan aplikasi memperlambat tablet secara keseluruhan karena terus-terusan aktif."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="698336728415008796">"Mengizinkan aplikasi memulai sendiri segera setelah sistem selesai booting. Ini dapat memperlambat proses memulai ponsel dan menyebabkan aplikasi memperlambat ponsel secara keseluruhan ketika terus berjalan."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"kirim siaran memikat"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Memungkinkan aplikasi mengirimkan siaran memikat, yang tetap ada setelah siaran berakhir. Aplikasi hasad dapat memperlambat tablet atau membuatnya tidak stabil dengan menyebabkannya menggunakan terlalu banyak memori."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Memungkinkan aplikasi mengirimkan siaran lengket, yang tetap ada setelah siaran berakhir. Aplikasi hasad dapat memperlambat tablet atau membuatnya tidak stabil dengan menyebabkannya menggunakan terlalu banyak memori."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"Mengizinkan aplikasi mengirimkan siaran memikat, yang tetap ada setelah siaran berakhir. Aplikasi hasad dapat memperlambat ponsel atau membuatnya tidak stabil dengan menyebabkannya menggunakan terlalu banyak memori."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"baca data kenalan"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Memungkinkan aplikasi membaca semua data kenalan (alamat) yang tersimpan pada tablet. Aplikasi hasad dapat menggunakan ini untuk mengirimkan data Anda kepada orang lain."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Memungkinkan aplikasi membaca semua data (alamat) kenalan yang tersimpan pada tablet. Aplikasi hasad dapat menggunakan ini untuk mengirimkan data Anda kepada orang lain."</string>
     <string name="permdesc_readContacts" product="default" msgid="3371591512896545975">"Mengizinkan aplikasi membaca semua data kenalan (alamat) yang tersimpan pada ponsel. Aplikasi hasad dapat menggunakan ini untuk mengirimkan data Anda ke orang lain."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"tuliskan data kenalan"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Memungkinkan aplikasi mengubah data kenalan (alamat) yang tersimpan pada tablet. Aplikasi hasad dapat menggunakan ini untuk menghapus atau mengubah data kenalan Anda."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Akses sumber lokasi detail seperti GPS pada tablet, jika tersedia. Aplikasi hasad dapat menggunakan ini untuk menentukan lokasi Anda, dapat menguras daya baterai."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Akses sumber lokasi detail seperti GPS pada ponsel, jika tersedia. Aplikasi hasad dapat menggunakan ini untuk menentukan lokasi Anda, dapat menguras daya baterai."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"lokasi sementara (berdasarkan jaringan)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Akses sumber lokasi sementara seperti database jaringan seluler untuk menentukan perkiraan lokasi tablet terdekat, jika ada. Aplikasi berbahaya dapat menggunakan ini untuk memperkirakan lokasi Anda."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Akses sumber lokasi kasar seperti database jaringan seluler untuk menentukan perkiraan lokasi tablet terdekat, jika ada. Aplikasi hasad dapat menggunakan ini untuk memperkirakan lokasi Anda."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8235655958070862293">"Akses sumber lokasi sementara seperti database jaringan seluler untuk menentukan lokasi ponsel terdekat, jika ada. Aplikasi hasad dapat menggunakan ini untuk memperkirakan lokasi Anda."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"akses SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Izinkan aplikasi menggunakan fitur tingkat rendah SurfaceFlinger."</string>
@@ -385,7 +385,7 @@
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Mengizinkan aplikasi mengendalikan fitur ponsel pada perangkat. Suatu aplikasi dengan izin ini dapat beralih jaringan, menghidupkan dan mematikan radio ponsel dan semacamnya tanpa memberitahukan kepada Anda."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"baca kondisi dan identitas ponsel"</string>
     <string name="permdesc_readPhoneState" msgid="188877305147626781">"Mengizinkan aplikasi mengakses fitur ponsel yang ada pada perangkat. Suatu aplikasi dengan izin ini dapat menentukan nomor telepon dan nomor seri telepon, apakah panggilan telah aktif, nomor yang dipanggil, dan semacamnya."</string>
-    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"mencegah tablet menjadi tidak aktif"</string>
+    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"mencegah tablet masuk mode tidur"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"mencegah ponsel menjadi tidak aktif"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"Memungkinkan aplikasi mencegah tablet masuk ke mode tidur."</string>
     <string name="permdesc_wakeLock" product="default" msgid="7584036471227467099">"Mengizinkan aplikasi mencegah ponsel masuk ke mode tidur"</string>
@@ -438,7 +438,7 @@
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Izinkan penerimaan Wi-Fi Multicast"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Mengizinkan aplikasi menerima paket yang tidak langsung dialamatkan ke perangkat Anda. Ini dapat bermanfaat ketika mencari perangkat yang ditawarkan di dekat Anda. Aplikasi ini menggunakan lebih banyak daya ketimbang mode selain multicast."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"Administrasi bluetooth"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Memungkinkan aplikasi mengonfigurasi tablet Bluetooth lokal, serta menemukan dan menyandingkan dengan perangkat jarak jauh."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Memungkinkan aplikasi mengonfigurasi tablet Bluetooth lokal, serta menemukan dan menyandingkannya dengan perangkat jarak jauh."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Mengizinkan aplikasi mengonfigurasi ponsel Bluetooth lokal, dan menemukan dan menyandingkan perangkat jarak jauh."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"buat sambungan Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"Mengizinkan aplikasi melihat konfigurasi tablet Bluetooth lokal, serta melakukan dan menerima panggilan dengan perangkat yang disandingkan."</string>
@@ -480,8 +480,8 @@
     <!-- outdated translation 4307861496302850201 -->     <string name="policylab_limitPassword" msgid="4497420728857585791">"Batasi sandi"</string>
     <!-- outdated translation 1719877245692318299 -->     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Batasi jenis sandi yang Anda perbolehkan gunakan."</string>
     <!-- outdated translation 7374780712664285321 -->     <string name="policylab_watchLogin" msgid="914130646942199503">"Awasi upaya masuk"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"Memonitor jumlah sandi tidak benar yang dimasukkan saat membuka kunci layar, dan mengunci tablet atau menghapus semua data tablet jika ada terlalu banyak sandi salah yang dimasukkan"</string>
-    <!-- outdated translation 933601759466308092 -->     <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"Memonitor jumlah sandi tidak benar yang dimasukkan saat membuka kunci layar, dan mengunci tablet atau menghapus semua data tablet jika ada terlalu banyak sandi salah yang dimasukkan"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"Memonitor jumlah sandi tidak benar yang dimasukkan saat membuka kunci layar, dan mengunci tablet atau menghapus semua data tablet jika sandi yang salah dimasukkan berkali-kali"</string>
+    <!-- outdated translation 933601759466308092 -->     <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"Memonitor jumlah sandi tidak benar yang dimasukkan saat membuka kunci layar, dan mengunci tablet atau menghapus semua data tablet jika sandi yang salah dimasukkan berkali-kali"</string>
     <!-- outdated translation 9084772090797485420 -->     <string name="policylab_resetPassword" msgid="2620077191242688955">"Setel ulang sandi"</string>
     <!-- outdated translation 3332167600331799991 -->     <string name="policydesc_resetPassword" msgid="5391240616981297361">"Paksakan sandi ke nilai baru, administrator harus memberikannya kepada Anda sebelum dapat masuk."</string>
     <!-- outdated translation 5760466025247634488 -->     <string name="policylab_forceLock" msgid="2274085384704248431">"Paksakan kunci"</string>
@@ -667,7 +667,7 @@
     <skip />
     <!-- no translation found for lockscreen_too_many_failed_pin_attempts_dialog_message (6827749231465145590) -->
     <skip />
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Anda telah salah menggambar pola pembuka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> upaya gagal lagi, Anda akan diminta membuka kunci tablet menggunakan info masuk Google."\n\n" Harap coba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> detik."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Anda telah salah menggambar pola pembuka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Bila gagal lagi <xliff:g id="NUMBER_1">%d</xliff:g> kali, Anda akan diminta membuka kunci tablet menggunakan info masuk Google."\n\n" Harap coba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> detik."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Anda telah salah menggambar pola pembuka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> upaya gagal lagi, Anda akan diminta membuka kunci ponsel menggunakan info masuk Google."\n\n" Harap coba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> detik."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Coba lagi dalam <xliff:g id="NUMBER">%d</xliff:g> detik."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Lupa pola?"</string>
@@ -696,8 +696,7 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Beranjak dari laman ini?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Pilih OK untuk melanjutkan, atau Batalkan untuk tetap pada laman ini."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Konfirmasi"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Kiat: ketuk dua kali untuk memperbesar dan memperkecil."</string>
-    <!-- no translation found for autofill_this_form (1272247532604569872) -->
-    <skip />
+    <string name="autofill_this_form" msgid="1272247532604569872">"IsiOtomatis"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Penyiapan IsiOtomatis"</string>
     <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
     <skip />
@@ -924,8 +923,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Batal"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Setel waktu"</string>
-    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
-    <skip />
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Setel tanggal"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Setel"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Bawaan"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Tidak perlu izin"</string>
@@ -1076,6 +1074,8 @@
     <!-- no translation found for share (1778686618230011964) -->
     <skip />
     <!-- no translation found for find (4808270900322985960) -->
+    <skip />
+    <!-- no translation found for websearch (4337157977400211589) -->
     <skip />
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />

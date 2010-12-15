@@ -13,7 +13,7 @@ page.title=Developing In Eclipse, with ADT
         <li><a href="#RunningOnDevice">Running on a device</a></li>
       </ol>
     </li>
-    <li><a href="#RunConfig">Creating a Custom Run Configuration</a></li>
+    <li><a href="#RunConfig">Creating a Run Configuration</a></li>
     <li><a href="#Signing">Setting Up Application Signing</a></li>
     <li><a href="#libraryProject">Working with Library Projects</a>
       <ol>
@@ -222,7 +222,7 @@ debugger is attached, Eclipse will open the Debug perspective.</p>
 
 <p>To set or change the launch configuration used for your project, use the launch configuration
 manager.
-See <a href="#launchconfig">Creating a Launch Configuration</a> for information.</p>
+See <a href="#RunConfig">Creating a Run Configuration</a> for information.</p>
 
 <p>Be certain to create multiple AVDs upon which to test your application. You should have one AVD
 for each platform and screen type with which your application is compatible. For
@@ -296,7 +296,7 @@ configuration</em>
   <li>Adjust your desired launch configuration settings.
     <p>In the Target tab, consider whether you'd like to use Manual or Automatic mode
     when selecting an AVD to run your application.
-    See the following section on <a href=#AutoAndManualModes">Automatic and manual target 
+    See the following section on <a href="#AutoAndManualTargetModes">Automatic and manual target 
     modes</a>).</p>
     <p>You can specify any emulator options to the Additional Emulator Command
     Line Options field. For example, you could add <code>-scale 96dpi</code> to
@@ -541,7 +541,6 @@ example library project declares the Activity <code>GameActivity</code>: </p>
     &lt;activity android:name="GameActivity" /&gt;
     ...
   &lt;/application&gt;
-  ...
 &lt;/manifest&gt;</pre>
 
 
@@ -611,7 +610,6 @@ like this: </p>
     &lt;activity android:name="com.example.android.tictactoe.library.GameActivity" /&gt;
     ...
   &lt;/application&gt;
-  ...
 &lt;/manifest&gt;</pre>
 
 <p>For more information about the manifest file, see the documentation for <a

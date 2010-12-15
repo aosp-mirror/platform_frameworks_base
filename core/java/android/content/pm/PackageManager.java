@@ -926,7 +926,7 @@ public abstract class PackageManager {
      *
      * @param packageName The name of the package to inspect.
      * 
-     * @return Returns either an Intent that can be used to
+     * @return Returns either a fully-qualified Intent that can be used to
      * launch the main activity in the package, or null if the package does
      * not contain such an activity.
      */

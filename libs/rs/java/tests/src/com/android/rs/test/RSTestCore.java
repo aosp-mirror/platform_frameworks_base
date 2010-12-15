@@ -16,6 +16,7 @@
 
 package com.android.rs.test;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.renderscript.*;
 import android.util.Log;
@@ -28,8 +29,10 @@ import java.util.TimerTask;
 public class RSTestCore {
     int mWidth;
     int mHeight;
+    Context mCtx;
 
-    public RSTestCore() {
+    public RSTestCore(Context ctx) {
+        mCtx = ctx;
     }
 
     private Resources mRes;
@@ -61,10 +64,10 @@ public class RSTestCore {
 
         unitTests = new ArrayList<UnitTest>();
 
-        unitTests.add(new UT_primitives(this, mRes));
-        unitTests.add(new UT_rsdebug(this, mRes));
-        unitTests.add(new UT_rstypes(this, mRes));
-        unitTests.add(new UT_fp_mad(this, mRes));
+        unitTests.add(new UT_primitives(this, mRes, mCtx));
+        unitTests.add(new UT_rsdebug(this, mRes, mCtx));
+        unitTests.add(new UT_rstypes(this, mRes, mCtx));
+        unitTests.add(new UT_fp_mad(this, mRes, mCtx));
         /*
         unitTests.add(new UnitTest(null, "<Pass>", 1));
         unitTests.add(new UnitTest());

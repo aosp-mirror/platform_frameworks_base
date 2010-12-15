@@ -149,7 +149,25 @@ struct id3_header {
     }
 
     if (header.version_major == 4) {
-        if (!removeUnsynchronizationV2_4()) {
+        void *copy = malloc(size);
+        memcpy(copy, mData, size);
+
+        bool success = removeUnsynchronizationV2_4(false /* iTunesHack */);
+        if (!success) {
+            memcpy(mData, copy, size);
+            mSize = size;
+
+            success = removeUnsynchronizationV2_4(true /* iTunesHack */);
+
+            if (success) {
+                LOGV("Had to apply the iTunes hack to parse this ID3 tag");
+            }
+        }
+
+        free(copy);
+        copy = NULL;
+
+        if (!success) {
             free(mData);
             mData = NULL;
 
@@ -261,7 +279,7 @@ static void WriteSyncsafeInteger(uint8_t *dst, size_t x) {
     }
 }
 
-bool ID3::removeUnsynchronizationV2_4() {
+bool ID3::removeUnsynchronizationV2_4(bool iTunesHack) {
     size_t oldSize = mSize;
 
     size_t offset = 0;
@@ -271,7 +289,9 @@ bool ID3::removeUnsynchronizationV2_4() {
         }
 
         size_t dataSize;
-        if (!ParseSyncsafeInteger(&mData[offset + 4], &dataSize)) {
+        if (iTunesHack) {
+            dataSize = U32_AT(&mData[offset + 4]);
+        } else if (!ParseSyncsafeInteger(&mData[offset + 4], &dataSize)) {
             return false;
         }
 
@@ -308,7 +328,7 @@ bool ID3::removeUnsynchronizationV2_4() {
             flags &= ~2;
         }
 
-        if (flags != prevFlags) {
+        if (flags != prevFlags || iTunesHack) {
             WriteSyncsafeInteger(&mData[offset + 4], dataSize);
             mData[offset + 8] = flags >> 8;
             mData[offset + 9] = flags & 0xff;

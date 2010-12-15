@@ -152,6 +152,8 @@ public class LayoutSceneImpl {
             return result;
         }
 
+        Bridge.setLog(mParams.getLog());
+
         // setup the display Metrics.
         DisplayMetrics metrics = new DisplayMetrics();
         metrics.densityDpi = mParams.getDensity();

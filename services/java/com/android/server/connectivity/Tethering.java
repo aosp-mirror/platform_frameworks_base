@@ -51,6 +51,7 @@ import com.android.internal.util.HierarchicalStateMachine;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -126,14 +127,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     // broadcasts so track them so we can decide what to do when either changes
     private boolean mUsbMassStorageOff;  // track the status of USB Mass Storage
     private boolean mUsbConnected;       // track the status of USB connection
-
-    // mUsbHandler message
-    static final int USB_STATE_CHANGE = 1;
-    static final int USB_DISCONNECTED = 0;
-    static final int USB_CONNECTED = 1;
-
-    // Time to delay before processing USB disconnect events
-    static final long USB_DISCONNECT_DELAY = 1000;
 
     public Tethering(Context context, Looper looper) {
         mContext = context;
@@ -481,25 +474,12 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         }
     }
 
-    private Handler mUsbHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            mUsbConnected = (msg.arg1 == USB_CONNECTED);
-            updateUsbStatus();
-        }
-    };
-
     private class StateReceiver extends BroadcastReceiver {
         public void onReceive(Context content, Intent intent) {
             String action = intent.getAction();
             if (action.equals(UsbManager.ACTION_USB_STATE)) {
-                // process connect events immediately, but delay handling disconnects
-                // to debounce USB configuration changes
-                boolean connected = intent.getExtras().getBoolean(UsbManager.USB_CONNECTED);
-                Message msg = Message.obtain(mUsbHandler, USB_STATE_CHANGE,
-                        (connected ? USB_CONNECTED : USB_DISCONNECTED), 0);
-                mUsbHandler.removeMessages(USB_STATE_CHANGE);
-                mUsbHandler.sendMessageDelayed(msg, connected ? 0 : USB_DISCONNECT_DELAY);
+                mUsbConnected = intent.getExtras().getBoolean(UsbManager.USB_CONNECTED);
+                updateUsbStatus();
             } else if (action.equals(Intent.ACTION_MEDIA_SHARED)) {
                 mUsbMassStorageOff = false;
                 updateUsbStatus();
@@ -585,16 +565,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 try {
                     ifcg = service.getInterfaceConfig(iface);
                     if (ifcg != null) {
-                        String[] addr = USB_NEAR_IFACE_ADDR.split("\\.");
-                        ifcg.ipAddr = (Integer.parseInt(addr[0]) << 24) +
-                                (Integer.parseInt(addr[1]) << 16) +
-                                (Integer.parseInt(addr[2]) << 8) +
-                                (Integer.parseInt(addr[3]));
-                        addr = USB_NETMASK.split("\\.");
-                        ifcg.netmask = (Integer.parseInt(addr[0]) << 24) +
-                                (Integer.parseInt(addr[1]) << 16) +
-                                (Integer.parseInt(addr[2]) << 8) +
-                                (Integer.parseInt(addr[3]));
+                        ifcg.addr = InetAddress.getByName(USB_NEAR_IFACE_ADDR);
+                        ifcg.mask = InetAddress.getByName(USB_NETMASK);
                         if (enabled) {
                             ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
                         } else {

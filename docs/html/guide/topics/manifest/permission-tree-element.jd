@@ -42,7 +42,7 @@ when the application is ready to be published, it should be set as a
 reference to a string resource, so that it can be localized like other 
 strings in the user interface.</dd>
 
-<dt><a name="nm"</a>{@code android:name}</dt>
+<dt><a name="nm"></a>{@code android:name}</dt>
 <dd>The name that's at the base of the permission tree.  It serves as 
 a prefix to all permission names in the tree.  Java-style scoping should 
 be used to ensure that the name is unique.  The name must have more than 

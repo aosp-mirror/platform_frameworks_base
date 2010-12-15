@@ -160,7 +160,6 @@ documentation for more information about how the system handles this attribute.<
 element might look like this: </p>
 
 <pre>&lt;manifest&gt;
-  ...
   &lt;uses-sdk android:minSdkVersion="5" /&gt;
   ...
 &lt;/manifest&gt;</pre>

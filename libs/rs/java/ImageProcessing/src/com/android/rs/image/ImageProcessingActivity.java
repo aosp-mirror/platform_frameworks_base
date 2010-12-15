@@ -362,7 +362,7 @@ public class ImageProcessingActivity extends Activity
     }
 
     private void createScript() {
-        mRS = RenderScript.create();
+        mRS = RenderScript.create(this);
         mRS.setMessageHandler(new FilterCallback());
 
         mInPixelsAllocation = Allocation.createFromBitmap(mRS, mBitmapIn,

@@ -202,18 +202,19 @@ class YUVColor {
 };
 
 // File scope constants
-static const struct {
+static const struct graphicFormat {
     unsigned int format;
     const char *desc;
+    unsigned int wMod, hMod; // Width/height mod this value must equal zero
 } graphicFormat[] = {
-    {HAL_PIXEL_FORMAT_RGBA_8888, "RGBA8888"},
-    {HAL_PIXEL_FORMAT_RGBX_8888, "RGBX8888"},
-    {HAL_PIXEL_FORMAT_RGB_888, "RGB888"},
-    {HAL_PIXEL_FORMAT_RGB_565, "RGB565"},
-    {HAL_PIXEL_FORMAT_BGRA_8888, "BGRA8888"},
-    {HAL_PIXEL_FORMAT_RGBA_5551, "RGBA5551"},
-    {HAL_PIXEL_FORMAT_RGBA_4444, "RGBA4444"},
-    {HAL_PIXEL_FORMAT_YV12, "YV12"},
+    {HAL_PIXEL_FORMAT_RGBA_8888, "RGBA8888", 1, 1},
+    {HAL_PIXEL_FORMAT_RGBX_8888, "RGBX8888", 1, 1},
+    {HAL_PIXEL_FORMAT_RGB_888, "RGB888", 1, 1},
+    {HAL_PIXEL_FORMAT_RGB_565, "RGB565", 1, 1},
+    {HAL_PIXEL_FORMAT_BGRA_8888, "BGRA8888", 1, 1},
+    {HAL_PIXEL_FORMAT_RGBA_5551, "RGBA5551", 1, 1},
+    {HAL_PIXEL_FORMAT_RGBA_4444, "RGBA4444", 1, 1},
+    {HAL_PIXEL_FORMAT_YV12, "YV12", 2, 2},
 };
 const unsigned int blendingOps[] = {
     HWC_BLENDING_NONE,
@@ -478,7 +479,7 @@ main(int argc, char *argv[])
             exit(20);
         }
 
-	// Prandomly select a subset of frames to be used by this pass.
+        // Prandomly select a subset of frames to be used by this pass.
         vector <vector <sp<GraphicBuffer> > > selectedFrames;
         selectedFrames = vectorRandSelect(frames, list->numHwLayers);
 
@@ -749,7 +750,6 @@ static void fillColor(GraphicBuffer *gBuf, RGBColor color, float trans)
 {
     unsigned char* buf = NULL;
     status_t err;
-    unsigned int numPixels = gBuf->getWidth() * gBuf->getHeight();
     uint32_t pixel;
 
     // RGB 2 YUV conversion ratios
@@ -835,9 +835,16 @@ static void fillColor(GraphicBuffer *gBuf, RGBColor color, float trans)
         exit(51);
     }
 
-    for (unsigned int n1 = 0; n1 < numPixels; n1++) {
-        memmove(buf, &pixel, attrib->bytes);
-        buf += attrib->bytes;
+    for (unsigned int row = 0; row < gBuf->getHeight(); row++) {
+        for (unsigned int col = 0; col < gBuf->getWidth(); col++) {
+          memmove(buf, &pixel, attrib->bytes);
+          buf += attrib->bytes;
+        }
+        for (unsigned int pad = 0;
+             pad < (gBuf->getStride() - gBuf->getWidth()) * attrib->bytes;
+             pad++) {
+            *buf++ = testRandMod(256);
+        }
     }
 
     err = gBuf->unlock();
@@ -856,14 +863,13 @@ static void fillColor(GraphicBuffer *gBuf, YUVColor color, float trans)
 
     const struct yuvAttrib {
         int format;
-        size_t padWidth;
         bool   planar;
         unsigned int uSubSampX;
         unsigned int uSubSampY;
         unsigned int vSubSampX;
         unsigned int vSubSampY;
     } yuvAttributes[] = {
-        { HAL_PIXEL_FORMAT_YV12, 16, true, 2, 2, 2, 2},
+        { HAL_PIXEL_FORMAT_YV12, true, 2, 2, 2, 2},
     };
 
     const struct yuvAttrib *attrib;
@@ -879,12 +885,6 @@ static void fillColor(GraphicBuffer *gBuf, YUVColor color, float trans)
 
     assert(attrib->planar == true); // So far, only know how to handle planar
 
-    // If needed round width up to pad size
-    if (width % attrib->padWidth) {
-        width += attrib->padWidth - (width % attrib->padWidth);
-    }
-    assert((width % attrib->padWidth) == 0);
-
     err = gBuf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&buf));
     if (err != 0) {
         testPrintE("fillColor lock failed: %d", err);
@@ -892,23 +892,35 @@ static void fillColor(GraphicBuffer *gBuf, YUVColor color, float trans)
     }
 
     // Fill in Y component
-    for (unsigned int x = 0; x < width; x++) {
-        for (unsigned int y = 0; y < height; y++) {
-            *buf++ = (x < gBuf->getWidth()) ? (255 * color.y()) : 0;
+    for (unsigned int row = 0; row < height; row++) {
+        for (unsigned int col = 0; col < width; col++) {
+            *buf++ = 255 * color.y();
+        }
+        for (unsigned int pad = 0; pad < gBuf->getStride() - gBuf->getWidth();
+             pad++) {
+             *buf++ = testRandMod(256);
         }
     }
 
     // Fill in U component
-    for (unsigned int x = 0; x < width; x += attrib->uSubSampX) {
-        for (unsigned int y = 0; y < height; y += attrib->uSubSampY) {
-            *buf++ = (x < gBuf->getWidth()) ? (255 * color.u()) : 0;
+    for (unsigned int row = 0; row < height; row += attrib->uSubSampY) {
+        for (unsigned int col = 0; col < width; col += attrib->uSubSampX) {
+            *buf++ = 255 * color.u();
+        }
+        for (unsigned int pad = 0; pad < gBuf->getStride() - gBuf->getWidth();
+             pad += attrib->uSubSampX) {
+            *buf++ = testRandMod(256);
         }
     }
 
     // Fill in V component
-    for (unsigned int x = 0; x < width; x += attrib->vSubSampX) {
-        for (unsigned int y = 0; y < height; y += attrib->vSubSampY) {
-            *buf++ = (x < gBuf->getWidth()) ? (255 * color.v()) : 0;
+    for (unsigned int row = 0; row < height; row += attrib->vSubSampY) {
+        for (unsigned int col = 0; col < width; col += attrib->vSubSampX) {
+            *buf++ = 255 * color.v();
+        }
+        for (unsigned int pad = 0; pad < gBuf->getStride() - gBuf->getWidth();
+             pad += attrib->vSubSampX) {
+            *buf++ = testRandMod(256);
         }
     }
 
@@ -989,7 +1001,7 @@ void init(void)
     eglQuerySurface(dpy, surface, EGL_HEIGHT, &height);
     checkEglError("eglQuerySurface");
 
-    fprintf(stderr, "Window dimensions: %d x %d", width, height);
+    testPrintI("Window dimensions: %d x %d", width, height);
 
     printGLString("Version", GL_VERSION);
     printGLString("Vendor", GL_VENDOR);
@@ -1017,7 +1029,7 @@ void init(void)
  *
  * Creates an array of graphic buffers, within the global variable
  * named frames.  The graphic buffers are contained within a vector of
- * verctors.  All the graphic buffers in a particular row are of the same
+ * vectors.  All the graphic buffers in a particular row are of the same
  * format and dimension.  Each graphic buffer is uniformly filled with a
  * prandomly selected color.  It is likely that each buffer, even
  * in the same row, will be filled with a unique color.
@@ -1039,11 +1051,22 @@ void initFrames(unsigned int seed)
     for (unsigned int row = 0; row < rows; row++) {
         // All frames within a row have to have the same format and
         // dimensions.  Width and height need to be >= 1.
-        int format = graphicFormat[testRandMod(NUMA(graphicFormat))].format;
+        unsigned int formatIdx = testRandMod(NUMA(graphicFormat));
+        const struct graphicFormat *formatPtr = &graphicFormat[formatIdx];
+        int format = formatPtr->format;
+
+        // Pick width and height, which must be >= 1 and the size
+        // mod the wMod/hMod value must be equal to 0.
         size_t w = (width * maxSizeRatio) * testRandFract();
         size_t h = (height * maxSizeRatio) * testRandFract();
         w = max(1u, w);
         h = max(1u, h);
+        if ((w % formatPtr->wMod) != 0) {
+            w += formatPtr->wMod - (w % formatPtr->wMod);
+        }
+        if ((h % formatPtr->hMod) != 0) {
+            h += formatPtr->hMod - (h % formatPtr->hMod);
+        }
         if (verbose) {
             testPrintI("  frame %u width: %u height: %u format: %u %s",
                        row, w, h, format, graphicFormat2str(format));

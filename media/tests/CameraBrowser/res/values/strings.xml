@@ -41,5 +41,6 @@
     <string name="save_failed_message">Could not save object</string>
     <string name="object_deleted_message">Object deleted</string>
     <string name="delete_failed_message">Could not delete object</string>
+    <string name="start_activity_failed_message">Import succeeded, but could not display object</string>
 
 </resources>

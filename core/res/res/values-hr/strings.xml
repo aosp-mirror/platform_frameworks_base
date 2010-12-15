@@ -277,7 +277,7 @@
     <string name="permlab_installPackages" msgid="335800214119051089">"izravno instaliranje aplikacija"</string>
     <string name="permdesc_installPackages" msgid="526669220850066132">"Aplikaciji omogućuje instaliranje novih ili ažuriranih paketa sustava Android. Zlonamjerne aplikacije mogu to upotrijebiti za dodavanje aplikacija uz moćna, samovoljna dopuštenja."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"brisanje svih podataka iz predmemorije aplikacije"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Aplikaciji omogućuje oslobađanje mjesta za pohranu na tablet računalu brisanjem datoteka u direktoriju predmemorije aplikacije. Pristup je veoma ograničen obično sistemskim postupku."</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Aplikaciji omogućuje oslobađanje mjesta za pohranu na tablet računalu brisanjem datoteka u direktoriju predmemorije aplikacije. Pristup je veoma ograničen obično na sistemski postupak."</string>
     <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"Aplikaciji omogućuje oslobađanje mjesta za pohranu na telefonu brisanjem datoteka u direktoriju predmemorije aplikacije. Pristup je veoma ograničen obično sistemskim postupkom."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Premjesti izvore aplikacije"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Aplikaciji omogućuje premještanje resursa aplikacije iz internih na vanjske medije i obratno."</string>
@@ -438,7 +438,7 @@
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"omogući višenamjenski Wi-Fi prijem"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Aplikaciji omogućuje primanje paketa koji nisu izravno upućeni na vaš uređaj. To može biti korisno za otkrivanje obližnjih usluge. Koristi više energije od višenamjenskog načina rada."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"bluetooth administracija"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Aplikaciji omogućuje konfiguraciju lokalnog Bluetooth tablet računala i otkrivanje i sparivanje s udaljenim uređajima."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Aplikaciji omogućuje konfiguraciju lokalnog Bluetooth tablet računala te otkrivanje i sparivanje s udaljenim uređajima."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Aplikaciji omogućuje konfiguraciju lokalnog Bluetooth telefona i otkrivanje i sparivanje s udaljenim uređajima."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"stvaranje Bluetooth veza"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"Aplikaciji omogućuje pregled konfiguracije lokalnog Bluetooth tablet računala i uspostavljanje i prihvaćanje veza sa sparenim uređajima."</string>
@@ -696,8 +696,7 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Želite otići s ove lokacije?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Za nastavak odaberite U redu ili da biste ostali na trenutačnoj stranici odaberite Odustani."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Potvrdi"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Savjet: Dvaput dotaknite za povećanje i smanjivanje."</string>
-    <!-- no translation found for autofill_this_form (1272247532604569872) -->
-    <skip />
+    <string name="autofill_this_form" msgid="1272247532604569872">"AutoFill"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Postavi autopop."</string>
     <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
     <skip />
@@ -924,8 +923,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"U redu"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Odustani"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Postavljanje vremena"</string>
-    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
-    <skip />
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Postavi datum"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Postavi"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Zadano"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Nije potrebno dopuštenje"</string>
@@ -1076,6 +1074,8 @@
     <!-- no translation found for share (1778686618230011964) -->
     <skip />
     <!-- no translation found for find (4808270900322985960) -->
+    <skip />
+    <!-- no translation found for websearch (4337157977400211589) -->
     <skip />
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />

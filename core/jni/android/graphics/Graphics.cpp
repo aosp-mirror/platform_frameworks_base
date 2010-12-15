@@ -2,6 +2,9 @@
 
 #include "jni.h"
 #include "GraphicsJNI.h"
+
+#include "SkCanvas.h"
+#include "SkDevice.h"
 #include "SkPicture.h"
 #include "SkRegion.h"
 #include <android_runtime/AndroidRuntime.h>
@@ -163,7 +166,6 @@ static jfieldID gPointF_yFieldID;
 static jclass   gBitmap_class;
 static jfieldID gBitmap_nativeInstanceID;
 static jmethodID gBitmap_constructorMethodID;
-static jmethodID gBitmap_allocBufferMethodID;
 
 static jclass   gBitmapConfig_class;
 static jfieldID gBitmapConfig_nativeInstanceID;
@@ -360,22 +362,29 @@ SkRegion* GraphicsJNI::getNativeRegion(JNIEnv* env, jobject region)
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, bool isMutable,
-                                  jbyteArray ninepatch, int density)
+jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buffer,
+                                  bool isMutable, jbyteArray ninepatch, int density)
 {
-    SkASSERT(bitmap != NULL);
-    SkASSERT(NULL != bitmap->pixelRef());
+    SkASSERT(bitmap);
+    SkASSERT(bitmap->pixelRef());
     
     jobject obj = env->AllocObject(gBitmap_class);
     if (obj) {
         env->CallVoidMethod(obj, gBitmap_constructorMethodID,
-                            (jint)bitmap, isMutable, ninepatch, density);
+                            (jint)bitmap, buffer, isMutable, ninepatch, density);
         if (hasException(env)) {
             obj = NULL;
         }
     }
     return obj;
 }
+
+jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, bool isMutable,
+                            jbyteArray ninepatch, int density)
+{
+    return createBitmap(env, bitmap, NULL, isMutable, ninepatch, density);
+}
+
 
 jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap)
 {
@@ -408,8 +417,6 @@ jobject GraphicsJNI::createRegion(JNIEnv* env, SkRegion* region)
     return obj;
 }
 
-#include "SkPixelRef.h"
-
 static JNIEnv* vm2env(JavaVM* vm)
 {
     JNIEnv* env = NULL;
@@ -427,87 +434,125 @@ static JNIEnv* vm2env(JavaVM* vm)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "SkMallocPixelRef.h"
+AndroidPixelRef::AndroidPixelRef(JNIEnv* env, void* storage, size_t size, jbyteArray storageObj,
+        SkColorTable* ctable) : SkMallocPixelRef(storage, size, ctable) {
+    SkASSERT(storage);
+    SkASSERT(env);
 
-/*  Extend SkMallocPixelRef to inform the VM when we free up the storage
-*/
-class AndroidPixelRef : public SkMallocPixelRef {
-public:
-    /** Allocate the specified buffer for pixels. The memory is freed when the
-        last owner of this pixelref is gone. Our caller has already informed
-        the VM of our allocation.
-    */
-    AndroidPixelRef(JNIEnv* env, void* storage, size_t size,
-            SkColorTable* ctable) : SkMallocPixelRef(storage, size, ctable) {
-        SkASSERT(storage);
-        SkASSERT(env);
-
-        if (env->GetJavaVM(&fVM) != JNI_OK) {
-            SkDebugf("------ [%p] env->GetJavaVM failed\n", env);
-            sk_throw();
-        }        
+    if (env->GetJavaVM(&fVM) != JNI_OK) {
+        SkDebugf("------ [%p] env->GetJavaVM failed\n", env);
+        sk_throw();
     }
+    fStorageObj = storageObj;
+    fHasGlobalRef = false;
+    fGlobalRefCnt = 0;
 
-    virtual ~AndroidPixelRef() {
+    // If storageObj is NULL, the memory was NOT allocated on the Java heap
+    fOnJavaHeap = (storageObj != NULL);
+    
+}
+
+AndroidPixelRef::~AndroidPixelRef() {
+    if (fOnJavaHeap) {
         JNIEnv* env = vm2env(fVM);
-//        SkDebugf("-------------- inform VM we're releasing %d bytes\n", this->getSize());
-        jlong jsize = this->getSize();  // the VM wants longs for the size
-        env->CallVoidMethod(gVMRuntime_singleton,
-                            gVMRuntime_trackExternalFreeMethodID,
-                            jsize);
-        if (GraphicsJNI::hasException(env)) {
-            env->ExceptionClear();
+
+        if (fStorageObj && fHasGlobalRef) {
+            env->DeleteGlobalRef(fStorageObj);
+        }
+        fStorageObj = NULL;
+
+        // Set this to NULL to prevent the SkMallocPixelRef destructor
+        // from freeing the memory.
+        fStorage = NULL;
+    }
+}
+
+void AndroidPixelRef::setLocalJNIRef(jbyteArray arr) {
+    if (!fHasGlobalRef) {
+        fStorageObj = arr;
+    }
+}
+
+void AndroidPixelRef::globalRef() {
+    if (fOnJavaHeap && sk_atomic_inc(&fGlobalRefCnt) == 0) {
+        JNIEnv *env = vm2env(fVM);
+        if (fStorageObj == NULL) {
+            SkDebugf("Cannot create a global ref, fStorage obj is NULL");
+            sk_throw();
+        }
+        if (fHasGlobalRef) {
+            // This should never happen
+            SkDebugf("Already holding a global ref");
+            sk_throw();
+        }
+
+        fStorageObj = (jbyteArray) env->NewGlobalRef(fStorageObj);
+        // TODO: Check for failure here
+        fHasGlobalRef = true;
+    }
+    ref();
+}
+
+void AndroidPixelRef::globalUnref() {
+    if (fOnJavaHeap && sk_atomic_dec(&fGlobalRefCnt) == 1) {
+        JNIEnv *env = vm2env(fVM);
+        if (!fHasGlobalRef) {
+            SkDebugf("We don't have a global ref!");
+            sk_throw();
+        }
+        env->DeleteGlobalRef(fStorageObj);
+        fStorageObj = NULL;
+        fHasGlobalRef = false;
+    }
+    unref();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
+                                             SkColorTable* ctable) {
+    Sk64 size64 = bitmap->getSize64();
+    if (size64.isNeg() || !size64.is32()) {
+        doThrow(env, "java/lang/IllegalArgumentException",
+                     "bitmap size exceeds 32bits");
+        return NULL;
+    }
+    
+    size_t size = size64.get32();
+    jbyteArray arrayObj = env->NewByteArray(size);
+    if (arrayObj) {
+        jbyte *addr = env->GetByteArrayElements(arrayObj, NULL);
+        env->ReleaseByteArrayElements(arrayObj, addr, 0);
+        if (addr) {
+            SkPixelRef* pr = new AndroidPixelRef(env, (void*) addr, size, arrayObj, ctable);
+            bitmap->setPixelRef(pr)->unref();
+            // since we're already allocated, we lockPixels right away
+            // HeapAllocator behaves this way too
+            bitmap->lockPixels();
         }
     }
 
-private:
-    JavaVM* fVM;
-};
+    return arrayObj;
+}
 
-bool GraphicsJNI::setJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
-                                  SkColorTable* ctable, bool reportSizeToVM) {
+bool GraphicsJNI::mallocPixelRef(JNIEnv* env, SkBitmap* bitmap, SkColorTable* ctable) {
     Sk64 size64 = bitmap->getSize64();
     if (size64.isNeg() || !size64.is32()) {
         doThrow(env, "java/lang/IllegalArgumentException",
                      "bitmap size exceeds 32bits");
         return false;
     }
-    
+
     size_t size = size64.get32();
-    jlong jsize = size;  // the VM wants longs for the size
-    if (reportSizeToVM) {
-        //    SkDebugf("-------------- inform VM we've allocated %d bytes\n", size);
-        bool r = env->CallBooleanMethod(gVMRuntime_singleton,
-                                    gVMRuntime_trackExternalAllocationMethodID,
-                                    jsize);
-        if (GraphicsJNI::hasException(env)) {
-            return false;
-        }
-        if (!r) {
-            LOGE("VM won't let us allocate %zd bytes\n", size);
-            doThrowOOME(env, "bitmap size exceeds VM budget");
-            return false;
-        }
-    }
+
     // call the version of malloc that returns null on failure
     void* addr = sk_malloc_flags(size, 0);
+
     if (NULL == addr) {
-        if (reportSizeToVM) {
-            //        SkDebugf("-------------- inform VM we're releasing %d bytes which we couldn't allocate\n", size);
-            // we didn't actually allocate it, so inform the VM
-            env->CallVoidMethod(gVMRuntime_singleton,
-                                 gVMRuntime_trackExternalFreeMethodID,
-                                 jsize);
-            if (!GraphicsJNI::hasException(env)) {
-                doThrowOOME(env, "bitmap size too large for malloc");
-            }
-        }
         return false;
     }
-    
-    SkPixelRef* pr = reportSizeToVM ?
-                        new AndroidPixelRef(env, addr, size, ctable) :
-                        new SkMallocPixelRef(addr, size, ctable);
+
+    SkPixelRef* pr = new AndroidPixelRef(env, addr, size, NULL, ctable);
     bitmap->setPixelRef(pr)->unref();
     // since we're already allocated, we lockPixels right away
     // HeapAllocator behaves this way too
@@ -517,8 +562,9 @@ bool GraphicsJNI::setJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-JavaPixelAllocator::JavaPixelAllocator(JNIEnv* env, bool reportSizeToVM)
-    : fReportSizeToVM(reportSizeToVM) {
+JavaPixelAllocator::JavaPixelAllocator(JNIEnv* env, bool allocateInJavaHeap)
+    : fAllocateInJavaHeap(allocateInJavaHeap),
+      fStorageObj(NULL) {
     if (env->GetJavaVM(&fVM) != JNI_OK) {
         SkDebugf("------ [%p] env->GetJavaVM failed\n", env);
         sk_throw();
@@ -527,7 +573,19 @@ JavaPixelAllocator::JavaPixelAllocator(JNIEnv* env, bool reportSizeToVM)
     
 bool JavaPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
     JNIEnv* env = vm2env(fVM);
-    return GraphicsJNI::setJavaPixelRef(env, bitmap, ctable, fReportSizeToVM);
+
+    // If allocating in the Java heap, only allow a single object to be
+    // allocated for the lifetime of this object.
+    if (fStorageObj != NULL) {
+        SkDebugf("ERROR: One-shot allocator has already allocated\n");
+        sk_throw();
+    }
+
+    if (fAllocateInJavaHeap) {
+        fStorageObj = GraphicsJNI::allocateJavaPixelRef(env, bitmap, ctable);
+        return fStorageObj != NULL;
+    }
+    return GraphicsJNI::mallocPixelRef(env, bitmap, ctable);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -564,6 +622,25 @@ bool JavaMemoryUsageReporter::reportMemory(size_t memorySize) {
     }
     fTotalSize += memorySize;
     return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+JavaHeapBitmapRef::JavaHeapBitmapRef(JNIEnv* env, SkBitmap* nativeBitmap, jbyteArray buffer) {
+    fEnv = env;
+    fNativeBitmap = nativeBitmap;
+    fBuffer = buffer;
+
+    // If the buffer is NULL, the backing memory wasn't allocated on the Java heap
+    if (fBuffer) {
+        ((AndroidPixelRef*) fNativeBitmap->pixelRef())->setLocalJNIRef(fBuffer);
+    }
+}
+
+JavaHeapBitmapRef::~JavaHeapBitmapRef() {
+    if (fBuffer) {
+        ((AndroidPixelRef*) fNativeBitmap->pixelRef())->setLocalJNIRef(NULL);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -609,10 +686,9 @@ int register_android_graphics_Graphics(JNIEnv* env)
     gPointF_yFieldID = getFieldIDCheck(env, gPointF_class, "y", "F");
 
     gBitmap_class = make_globalref(env, "android/graphics/Bitmap");
-    gBitmap_nativeInstanceID = getFieldIDCheck(env, gBitmap_class, "mNativeBitmap", "I");    
+    gBitmap_nativeInstanceID = getFieldIDCheck(env, gBitmap_class, "mNativeBitmap", "I");
     gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>",
-                                            "(IZ[BI)V");
-
+                                            "(I[BZ[BI)V");
     gBitmapRegionDecoder_class = make_globalref(env, "android/graphics/BitmapRegionDecoder");
     gBitmapRegionDecoder_constructorMethodID = env->GetMethodID(gBitmapRegionDecoder_class, "<init>", "(I)V");
 

@@ -279,7 +279,7 @@
     <string name="permlab_movePackage" msgid="728454979946503926">"Uygulama kaynaklarını taşı"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Bir uygulamanın, uygulama kaynaklarını dahili ve harici ortamlar arasında taşımasına olanak tanır."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"hassas günlük verilerini okuma"</string>
-    <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Uygulamaya, sistemin çeşitli günlük dosyalarındaki bilgileri okuma izni verir. Bu izin, uygulamanın, tablette yaptıklarınızla ilgili genel bilgileri bulmasına olanak sağlar. Bu bilgiler arasında kişisel ve gizli bilgilerinizi de olabilir."</string>
+    <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Uygulamaya, sistemin çeşitli günlük dosyalarındaki bilgileri okuma izni verir. Bu izin, uygulamanın, tablette yaptıklarınızla ilgili genel bilgileri bulmasına olanak sağlar. Bu bilgiler arasında kişisel ve gizli bilgileriniz de olabilir."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Bir uygulamanın, sistemin çeşitli günlük dosyalarındaki bilgileri okumasına izin verir. Bu izin, uygulamanın, telefonda yaptıklarınızla ilgili genel bilgileri bulmasına olanak sağlar ve bunlar kişisel ve gizli bilgilerinizi de içerebilir."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"sahibi tanılama olan kaynakları oku/bunlara yaz"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Uygulamanın tanılama grubundaki bir kaynağa ait herhangi bir kaynağı; örneğin /dev içindeki dosyaları okumasına ve bunlara yazmasına izin verir. Bu işlevin sistem kararlılığını ve güvenliğini olumsuz etkileme olasılığı vardır. Üretici veya operatör tarafından YALNIZCA donanıma özgü tanılama için kullanılmalıdır."</string>
@@ -659,7 +659,7 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Bu sayfadan ayrılıyor musunuz?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Devam etmek için Tamam\'ı, sayfada kalmak için İptal\'i tıklatın."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Onayla"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"İpucu: Yakınlaştırmak ve uzaklaştırmak için iki kez hafifçe vurun."</string>
-    <!-- outdated translation 8940110866775097494 -->     <string name="autofill_this_form" msgid="1272247532604569872">"Bu formu otomatik doldur"</string>
+    <string name="autofill_this_form" msgid="1272247532604569872">"OtoDoldr"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Oto Doldr Ayarla"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
@@ -796,7 +796,7 @@
     <string name="inputMethod" msgid="1653630062304567879">"Giriş yöntemi"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Metin eylemleri"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Yer az"</string>
-    <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"Tabletin depolama alanı azalıyor."</string>
+    <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"Tabletin depolama alanındaki boş yer azalıyor."</string>
     <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"Telefonun depolama alanı azalıyor."</string>
     <string name="ok" msgid="5970060430562524910">"Tamam"</string>
     <string name="cancel" msgid="6442560571259935130">"İptal"</string>
@@ -865,8 +865,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"Tamam"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"İptal"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Saati ayarla"</string>
-    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
-    <skip />
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Tarihi ayarla"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Ayarla"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Varsayılan"</string>
     <string name="no_permissions" msgid="7283357728219338112">"İzin gerektirmez"</string>
@@ -998,6 +997,8 @@
     <string name="media_unknown_state" msgid="729192782197290385">"Harici medyanın durumu bilinmiyor."</string>
     <string name="share" msgid="1778686618230011964">"Paylaş"</string>
     <string name="find" msgid="4808270900322985960">"Bul"</string>
+    <!-- no translation found for websearch (4337157977400211589) -->
+    <skip />
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />
     <!-- no translation found for gpsNotifTitle (5446858717157416839) -->

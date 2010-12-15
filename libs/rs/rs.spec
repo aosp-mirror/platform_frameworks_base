@@ -322,6 +322,7 @@ ScriptCSetText {
 
 ScriptCCreate {
         param const char * resName
+        param const char * cacheDir
 	ret RsScript
 	}
 

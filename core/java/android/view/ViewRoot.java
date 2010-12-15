@@ -865,6 +865,9 @@ public final class ViewRoot extends Handler implements ViewParent,
                 childWidthMeasureSpec = getRootMeasureSpec(desiredWindowWidth, lp.width);
                 childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
                 host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+                if (mWidth != host.getMeasuredWidth() || mHeight != host.getMeasuredHeight()) {
+                    windowSizeMayChange = true;
+                }
             }
 
             if (DBG) {

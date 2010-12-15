@@ -948,6 +948,7 @@ public class OverScroller {
             }
 
             mCurrentPosition = mStart + (int) Math.round(distance);
+
             return true;
         }
     }

@@ -96,6 +96,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         }
 
         mPopup.setContentWidth(Math.min(measureContentWidth(adapter), mPopupMaxWidth));
+        mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
         mPopup.show();
         mPopup.getListView().setOnKeyListener(this);
     }
@@ -163,6 +164,9 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
             final View anchor = mAnchorView != null ? mAnchorView.get() : null;
             if (anchor != null && !anchor.isShown()) {
                 dismiss();
+            } else {
+                // Recompute window size and position
+                mPopup.show();
             }
         }
     }

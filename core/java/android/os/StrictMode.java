@@ -669,25 +669,46 @@ public final class StrictMode {
         CloseGuard.setEnabled(enabled);
     }
 
-    private static class StrictModeNetworkViolation extends BlockGuard.BlockGuardPolicyException {
+    /**
+     * @hide
+     */
+    public static class StrictModeViolation extends BlockGuard.BlockGuardPolicyException {
+        public StrictModeViolation(int policyState, int policyViolated, String message) {
+            super(policyState, policyViolated, message);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static class StrictModeNetworkViolation extends StrictModeViolation {
         public StrictModeNetworkViolation(int policyMask) {
-            super(policyMask, DETECT_NETWORK);
+            super(policyMask, DETECT_NETWORK, null);
         }
     }
 
-    private static class StrictModeDiskReadViolation extends BlockGuard.BlockGuardPolicyException {
+    /**
+     * @hide
+     */
+    private static class StrictModeDiskReadViolation extends StrictModeViolation {
         public StrictModeDiskReadViolation(int policyMask) {
-            super(policyMask, DETECT_DISK_READ);
+            super(policyMask, DETECT_DISK_READ, null);
         }
     }
 
-    private static class StrictModeDiskWriteViolation extends BlockGuard.BlockGuardPolicyException {
+     /**
+     * @hide
+     */
+   private static class StrictModeDiskWriteViolation extends StrictModeViolation {
         public StrictModeDiskWriteViolation(int policyMask) {
-            super(policyMask, DETECT_DISK_WRITE);
+            super(policyMask, DETECT_DISK_WRITE, null);
         }
     }
 
-    private static class StrictModeCustomViolation extends BlockGuard.BlockGuardPolicyException {
+    /**
+     * @hide
+     */
+    private static class StrictModeCustomViolation extends StrictModeViolation {
         public StrictModeCustomViolation(int policyMask, String name) {
             super(policyMask, DETECT_CUSTOM, name);
         }
@@ -1007,9 +1028,16 @@ public final class StrictMode {
             // thread, in "gather" mode.  In this case, the duration
             // of the violation is computed by the ultimate caller and
             // its Looper, if any.
+            //
+            // Also, as a special short-cut case when the only penalty
+            // bit is death, we die immediately, rather than timing
+            // the violation's duration.  This makes it convenient to
+            // use in unit tests too, rather than waiting on a Looper.
+            //
             // TODO: if in gather mode, ignore Looper.myLooper() and always
             //       go into this immediate mode?
-            if (looper == null) {
+            if (looper == null ||
+                (info.policy & PENALTY_MASK) == PENALTY_DEATH) {
                 info.durationMillis = -1;  // unknown (redundant, already set)
                 handleViolation(info);
                 return;
@@ -1179,11 +1207,14 @@ public final class StrictMode {
             }
 
             if ((info.policy & PENALTY_DEATH) != 0) {
-                System.err.println("StrictMode policy violation with POLICY_DEATH; shutting down.");
-                Process.killProcess(Process.myPid());
-                System.exit(10);
+                executeDeathPenalty(info);
             }
         }
+    }
+
+    private static void executeDeathPenalty(ViolationInfo info) {
+        int violationBit = parseViolationFromMessage(info.crashInfo.exceptionMessage);
+        throw new StrictModeViolation(info.policy, violationBit, null);
     }
 
     /**
@@ -1594,6 +1625,31 @@ public final class StrictMode {
             return;
         }
         ((AndroidBlockGuardPolicy) policy).onCustomSlowCall(name);
+    }
+
+    /**
+     * @hide
+     */
+    public static void noteDiskRead() {
+        BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
+        Log.d(TAG, "noteDiskRead; policy=" + policy);
+        if (!(policy instanceof AndroidBlockGuardPolicy)) {
+            // StrictMode not enabled.
+            return;
+        }
+        ((AndroidBlockGuardPolicy) policy).onReadFromDisk();
+    }
+
+    /**
+     * @hide
+     */
+    public static void noteDiskWrite() {
+        BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
+        if (!(policy instanceof AndroidBlockGuardPolicy)) {
+            // StrictMode not enabled.
+            return;
+        }
+        ((AndroidBlockGuardPolicy) policy).onWriteToDisk();
     }
 
     /**

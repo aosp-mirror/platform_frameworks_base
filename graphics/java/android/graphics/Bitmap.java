@@ -19,18 +19,15 @@ package android.graphics;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DisplayMetrics;
-import android.util.Finalizers;
 
 import java.io.OutputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 public final class Bitmap implements Parcelable {
+
     /**
      * Indicates that the bitmap was created for an unknown pixel density.
      *
@@ -46,6 +43,17 @@ public final class Bitmap implements Parcelable {
      * @hide
      */
     public final int mNativeBitmap;
+
+    /**
+     * Backing buffer for the Bitmap.
+     * Made public for quick access from drawing methods -- do NOT modify
+     * from outside this class.
+     *
+     * @hide
+     */
+    public byte[] mBuffer;
+
+    private final BitmapFinalizer mFinalizer;
 
     private final boolean mIsMutable;
     private byte[] mNinePatchChunk;   // may be null
@@ -85,24 +93,21 @@ public final class Bitmap implements Parcelable {
 
         This can be called from JNI code.
     */
-    private Bitmap(int nativeBitmap, boolean isMutable, byte[] ninePatchChunk, int density) {
+    private Bitmap(int nativeBitmap, byte[] buffer, boolean isMutable, byte[] ninePatchChunk,
+            int density) {
         if (nativeBitmap == 0) {
             throw new RuntimeException("internal error: native bitmap is 0");
         }
 
+        mBuffer = buffer;
         // we delete this in our finalizer
         mNativeBitmap = nativeBitmap;
+        mFinalizer = new BitmapFinalizer(nativeBitmap);
+
         mIsMutable = isMutable;
         mNinePatchChunk = ninePatchChunk;
         if (density >= 0) {
             mDensity = density;
-        }
-
-        // If the finalizers queue is null, we are running in zygote and the
-        // bitmap will never be reclaimed, so we don't need to run our native
-        // destructor
-        if (Finalizers.getQueue() != null) {
-            new BitmapFinalizer(this);
         }
     }
 
@@ -169,6 +174,7 @@ public final class Bitmap implements Parcelable {
      */
     public void recycle() {
         if (!mRecycled) {
+            mBuffer = null;
             nativeRecycle(mNativeBitmap);
             mNinePatchChunk = null;
             mRecycled = true;
@@ -520,6 +526,9 @@ public final class Bitmap implements Parcelable {
      * @throws IllegalArgumentException if the width or height are <= 0
      */
     private static Bitmap createBitmap(int width, int height, Config config, boolean hasAlpha) {
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("width and height must be > 0");
+        }
         Bitmap bm = nativeCreate(null, 0, width, width, height, config.nativeInt, true);
         if (config == Config.ARGB_8888 && !hasAlpha) {
             bm.eraseColor(0xff000000);
@@ -560,6 +569,9 @@ public final class Bitmap implements Parcelable {
         if (offset < 0 || (offset + width > length) || lastScanline < 0 ||
                 (lastScanline + width > length)) {
             throw new ArrayIndexOutOfBoundsException();
+        }
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("width and height must be > 0");
         }
         return nativeCreate(colors, offset, stride, width, height,
                             config.nativeInt, false);
@@ -1059,22 +1071,16 @@ public final class Bitmap implements Parcelable {
         nativePrepareToDraw(mNativeBitmap);
     }
 
-    private static class BitmapFinalizer extends Finalizers.ReclaimableReference<Bitmap> {
-        private static final Set<BitmapFinalizer> sFinalizers = Collections.synchronizedSet(
-                new HashSet<BitmapFinalizer>());
+    private static class BitmapFinalizer {
+        private final int mNativeBitmap;
 
-        private int mNativeBitmap;
-
-        BitmapFinalizer(Bitmap b) {
-            super(b, Finalizers.getQueue());
-            mNativeBitmap = b.mNativeBitmap;
-            sFinalizers.add(this);
+        BitmapFinalizer(int nativeBitmap) {
+            mNativeBitmap = nativeBitmap;
         }
 
         @Override
-        public void reclaim() {
+        public void finalize() {
             nativeDestructor(mNativeBitmap);
-            sFinalizers.remove(this);
         }
     }
 

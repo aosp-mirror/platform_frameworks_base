@@ -18,6 +18,7 @@ package android.renderscript;
 
 import java.lang.reflect.Field;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Config;
@@ -42,9 +43,9 @@ public class RenderScript {
     @SuppressWarnings({"UnusedDeclaration", "deprecation"})
     static final boolean LOG_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
 
+    private Context mApplicationContext;
 
-
-     /*
+    /*
      * We use a class initializer to allow the native code to cache some
      * field offsets.
      */
@@ -416,9 +417,9 @@ public class RenderScript {
     synchronized void nScriptCSetScript(byte[] script, int offset, int length) {
         rsnScriptCSetScript(mContext, script, offset, length);
     }
-    native int  rsnScriptCCreate(int con, String val);
-    synchronized int nScriptCCreate(String val) {
-        return rsnScriptCCreate(mContext, val);
+    native int  rsnScriptCCreate(int con, String val, String cacheDir);
+    synchronized int nScriptCCreate(String resName, String cacheDir) {
+      return rsnScriptCCreate(mContext, resName, cacheDir);
     }
 
     native void rsnSamplerBegin(int con);
@@ -776,17 +777,27 @@ public class RenderScript {
         }
     }
 
-    RenderScript() {
+    RenderScript(Context ctx) {
+        mApplicationContext = ctx.getApplicationContext();
+    }
+
+    /**
+     * Gets the application context associated with the RenderScript context.
+     *
+     * @return The application context.
+     */
+    public final Context getApplicationContext() {
+        return mApplicationContext;
     }
 
     /**
      * Create a basic RenderScript context.
      *
-     *
+     * @param ctx The context.
      * @return RenderScript
      */
-    public static RenderScript create() {
-        RenderScript rs = new RenderScript();
+    public static RenderScript create(Context ctx) {
+        RenderScript rs = new RenderScript(ctx);
 
         rs.mDev = rs.nDeviceCreate();
         rs.mContext = rs.nContextCreate(rs.mDev, 0);

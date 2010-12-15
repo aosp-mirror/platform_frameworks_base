@@ -124,7 +124,7 @@ order for it to work. Any other backup services available might also require you
 in order to store your data on their servers.</li>
   <li>Define a backup agent by either:</p>
     <ol type="a">
-      <li><a href="#backupAgent">Extending BackupAgent</a>
+      <li><a href="#BackupAgent">Extending BackupAgent</a>
         <p>The {@link android.app.backup.BackupAgent} class provides the central interface with
 which your application communicates with the Backup Manager. If you extend this class
 directly, you must override {@link
@@ -133,7 +133,7 @@ onBackup()} and {@link
 android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor)
 onRestore()} to handle the backup and restore operations for your data.</p>
         <p><em>Or</em></p>
-      <li><a href="#backupAgentHelper">Extending BackupAgentHelper</a>
+      <li><a href="#BackupAgentHelper">Extending BackupAgentHelper</a>
         <p>The {@link android.app.backup.BackupAgentHelper} class provides a convenient
 wrapper around the {@link android.app.backup.BackupAgent} class, which minimizes the amount of code
 you need to write. In your {@link android.app.backup.BackupAgentHelper}, you must use one or more
@@ -166,6 +166,7 @@ href="{@docRoot}guide/topics/manifest/application-element.html">{@code
 
 <pre>
 &lt;manifest ... &gt;
+    ...
     &lt;application android:label="MyApplication"
                  <b>android:backupAgent="MyBackupAgent"</b>&gt;
         &lt;activity ... &gt;
@@ -277,7 +278,7 @@ must implement the following callback methods:</p>
   <dt>{@link
 android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
 onBackup()}</dt>
-    <dd>The Backup Manager calls this method after you <a href="#RequestBackup">request a
+    <dd>The Backup Manager calls this method after you <a href="#RequestingBackup">request a
 backup</a>. In this method, you read your application data from the device and pass the data you
 want to back up to the Backup Manager, as described below in <a href="#PerformingBackup">Performing
 backup</a>.</dd>
@@ -286,8 +287,8 @@ backup</a>.</dd>
 android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor)
 onRestore()}</dt>
     <dd>The Backup Manager calls this method during a restore operation (you can <a
-href="#RequestRestore">request a restore</a>, but the system automatically performs restore when the
-user re-installs your application). When it calls this method, the Backup Manager delivers your
+href="#RequestingRestore">request a restore</a>, but the system automatically performs restore when
+the user re-installs your application). When it calls this method, the Backup Manager delivers your
 backup data, which you then restore to the device, as described below in <a
 href="#PerformingRestore">Performing restore</a>.</dd>
 </dl>

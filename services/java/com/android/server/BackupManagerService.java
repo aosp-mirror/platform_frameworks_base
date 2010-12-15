@@ -107,6 +107,7 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final int MSG_RUN_INITIALIZE = 5;
     private static final int MSG_RUN_GET_RESTORE_SETS = 6;
     private static final int MSG_TIMEOUT = 7;
+    private static final int MSG_RESTORE_TIMEOUT = 8;
 
     // Timeout interval for deciding that a bind or clear-data has taken too long
     static final long TIMEOUT_INTERVAL = 10 * 1000;
@@ -148,9 +149,9 @@ class BackupManagerService extends IBackupManager.Stub {
             return "BackupRequest{app=" + appInfo + " full=" + fullBackup + "}";
         }
     }
-    // Backups that we haven't started yet.
-    HashMap<ApplicationInfo,BackupRequest> mPendingBackups
-            = new HashMap<ApplicationInfo,BackupRequest>();
+    // Backups that we haven't started yet.  Keys are package names.
+    HashMap<String,BackupRequest> mPendingBackups
+            = new HashMap<String,BackupRequest>();
 
     // Pseudoname that we use for the Package Manager metadata "package"
     static final String PACKAGE_MANAGER_SENTINEL = "@pm@";
@@ -395,6 +396,21 @@ class BackupManagerService extends IBackupManager.Stub {
                     mCurrentOpLock.notifyAll();
                 }
                 break;
+            }
+
+            case MSG_RESTORE_TIMEOUT:
+            {
+                synchronized (BackupManagerService.this) {
+                    if (mActiveRestoreSession != null) {
+                        // Client app left the restore session dangling.  We know that it
+                        // can't be in the middle of an actual restore operation because
+                        // those are executed serially on this same handler thread.  Clean
+                        // up now.
+                        Slog.w(TAG, "Restore session timed out; aborting");
+                        post(mActiveRestoreSession.new EndRestoreRunnable(
+                                BackupManagerService.this, mActiveRestoreSession));
+                    }
+                }
             }
             }
         }
@@ -913,42 +929,48 @@ class BackupManagerService extends IBackupManager.Stub {
     // 'packageName' is null, *all* participating apps will be removed.
     void removePackageParticipantsLocked(String packageName) {
         if (DEBUG) Slog.v(TAG, "removePackageParticipantsLocked: " + packageName);
-        List<PackageInfo> allApps = null;
+        List<String> allApps = new ArrayList<String>();
         if (packageName != null) {
-            allApps = new ArrayList<PackageInfo>();
-            try {
-                int flags = PackageManager.GET_SIGNATURES;
-                allApps.add(mPackageManager.getPackageInfo(packageName, flags));
-            } catch (Exception e) {
-                // just skip it (???)
-            }
+            allApps.add(packageName);
         } else {
             // all apps with agents
-            allApps = allAgentPackages();
+            List<PackageInfo> knownPackages = allAgentPackages();
+            for (PackageInfo pkg : knownPackages) {
+                allApps.add(pkg.packageName);
+            }
         }
         removePackageParticipantsLockedInner(packageName, allApps);
     }
 
     private void removePackageParticipantsLockedInner(String packageName,
-            List<PackageInfo> agents) {
+            List<String> allPackageNames) {
         if (DEBUG) {
             Slog.v(TAG, "removePackageParticipantsLockedInner (" + packageName
-                    + ") removing " + agents.size() + " entries");
-            for (PackageInfo p : agents) {
+                    + ") removing " + allPackageNames.size() + " entries");
+            for (String p : allPackageNames) {
                 Slog.v(TAG, "    - " + p);
             }
         }
-        for (PackageInfo pkg : agents) {
-            if (packageName == null || pkg.packageName.equals(packageName)) {
-                int uid = pkg.applicationInfo.uid;
+        for (String pkg : allPackageNames) {
+            if (packageName == null || pkg.equals(packageName)) {
+                int uid = -1;
+                try {
+                    PackageInfo info = mPackageManager.getPackageInfo(packageName, 0);
+                    uid = info.applicationInfo.uid;
+                } catch (NameNotFoundException e) {
+                    // we don't know this package name, so just skip it for now
+                    continue;
+                }
+
                 HashSet<ApplicationInfo> set = mBackupParticipants.get(uid);
                 if (set != null) {
                     // Find the existing entry with the same package name, and remove it.
                     // We can't just remove(app) because the instances are different.
                     for (ApplicationInfo entry: set) {
-                        if (entry.packageName.equals(pkg.packageName)) {
+                        if (entry.packageName.equals(pkg)) {
+                            if (DEBUG) Slog.v(TAG, "  removing participant " + pkg);
                             set.remove(entry);
-                            removeEverBackedUp(pkg.packageName);
+                            removeEverBackedUp(pkg);
                             break;
                         }
                     }
@@ -998,7 +1020,11 @@ class BackupManagerService extends IBackupManager.Stub {
 
         // brute force but small code size
         List<PackageInfo> allApps = allAgentPackages();
-        removePackageParticipantsLockedInner(packageName, allApps);
+        List<String> allAppNames = new ArrayList<String>();
+        for (PackageInfo pkg : allApps) {
+            allAppNames.add(pkg.packageName);
+        }
+        removePackageParticipantsLockedInner(packageName, allAppNames);
         addPackageParticipantsLockedInner(packageName, allApps);
     }
 
@@ -1364,6 +1390,17 @@ class BackupManagerService extends IBackupManager.Stub {
         private int doQueuedBackups(IBackupTransport transport) {
             for (BackupRequest request : mQueue) {
                 Slog.d(TAG, "starting agent for backup of " + request);
+
+                // Verify that the requested app exists; it might be something that
+                // requested a backup but was then uninstalled.  The request was
+                // journalled and rather than tamper with the journal it's safer
+                // to sanity-check here.
+                try {
+                    mPackageManager.getPackageInfo(request.appInfo.packageName, 0);
+                } catch (NameNotFoundException e) {
+                    Slog.d(TAG, "Package does not exist; skipping");
+                    continue;
+                }
 
                 IBackupAgent agent = null;
                 int mode = (request.fullBackup)
@@ -1826,6 +1863,11 @@ class BackupManagerService extends IBackupManager.Stub {
                     } catch (RemoteException e) { /* can't happen */ }
                 }
 
+                // Furthermore we need to reset the session timeout clock
+                mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
+                mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_TIMEOUT,
+                        TIMEOUT_RESTORE_INTERVAL);
+
                 // done; we can finally release the wakelock
                 mWakelock.release();
             }
@@ -2047,7 +2089,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     // Add the caller to the set of pending backups.  If there is
                     // one already there, then overwrite it, but no harm done.
                     BackupRequest req = new BackupRequest(app, false);
-                    if (mPendingBackups.put(app, req) == null) {
+                    if (mPendingBackups.put(app.packageName, req) == null) {
                         // Journal this request in case of crash.  The put()
                         // operation returned null when this package was not already
                         // in the set; we want to avoid touching the disk redundantly.
@@ -2506,8 +2548,21 @@ class BackupManagerService extends IBackupManager.Stub {
                 return null;
             }
             mActiveRestoreSession = new ActiveRestoreSession(packageName, transport);
+            mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_TIMEOUT, TIMEOUT_RESTORE_INTERVAL);
         }
         return mActiveRestoreSession;
+    }
+
+    void clearRestoreSession(ActiveRestoreSession currentSession) {
+        synchronized(this) {
+            if (currentSession != mActiveRestoreSession) {
+                Slog.e(TAG, "ending non-current restore session");
+            } else {
+                if (DEBUG) Slog.v(TAG, "Clearing restore session and halting timeout");
+                mActiveRestoreSession = null;
+                mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
+            }
+        }
     }
 
     // Note that a currently-active backup agent has notified us that it has
@@ -2528,6 +2583,7 @@ class BackupManagerService extends IBackupManager.Stub {
         private String mPackageName;
         private IBackupTransport mRestoreTransport = null;
         RestoreSet[] mRestoreSets = null;
+        boolean mEnded = false;
 
         ActiveRestoreSession(String packageName, String transport) {
             mPackageName = packageName;
@@ -2540,6 +2596,10 @@ class BackupManagerService extends IBackupManager.Stub {
                     "getAvailableRestoreSets");
             if (observer == null) {
                 throw new IllegalArgumentException("Observer must not be null");
+            }
+
+            if (mEnded) {
+                throw new IllegalStateException("Restore session already ended");
             }
 
             long oldId = Binder.clearCallingIdentity();
@@ -2568,6 +2628,10 @@ class BackupManagerService extends IBackupManager.Stub {
 
             if (DEBUG) Slog.d(TAG, "restoreAll token=" + Long.toHexString(token)
                     + " observer=" + observer);
+
+            if (mEnded) {
+                throw new IllegalStateException("Restore session already ended");
+            }
 
             if (mRestoreTransport == null || mRestoreSets == null) {
                 Slog.e(TAG, "Ignoring restoreAll() with no restore set");
@@ -2599,6 +2663,10 @@ class BackupManagerService extends IBackupManager.Stub {
 
         public synchronized int restorePackage(String packageName, IRestoreObserver observer) {
             if (DEBUG) Slog.v(TAG, "restorePackage pkg=" + packageName + " obs=" + observer);
+
+            if (mEnded) {
+                throw new IllegalStateException("Restore session already ended");
+            }
 
             if (mPackageName != null) {
                 if (! mPackageName.equals(packageName)) {
@@ -2656,31 +2724,47 @@ class BackupManagerService extends IBackupManager.Stub {
             return 0;
         }
 
+        // Posted to the handler to tear down a restore session in a cleanly synchronized way
+        class EndRestoreRunnable implements Runnable {
+            BackupManagerService mBackupManager;
+            ActiveRestoreSession mSession;
+
+            EndRestoreRunnable(BackupManagerService manager, ActiveRestoreSession session) {
+                mBackupManager = manager;
+                mSession = session;
+            }
+
+            public void run() {
+                // clean up the session's bookkeeping
+                synchronized (mSession) {
+                    try {
+                        if (mSession.mRestoreTransport != null) {
+                            mSession.mRestoreTransport.finishRestore();
+                        }
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Error in finishRestore", e);
+                    } finally {
+                        mSession.mRestoreTransport = null;
+                        mSession.mEnded = true;
+                    }
+                }
+
+                // clean up the BackupManagerService side of the bookkeeping
+                // and cancel any pending timeout message
+                mBackupManager.clearRestoreSession(mSession);
+            }
+        }
+
         public synchronized void endRestoreSession() {
             if (DEBUG) Slog.d(TAG, "endRestoreSession");
 
-            synchronized (this) {
-                long oldId = Binder.clearCallingIdentity();
-                try {
-                    if (mRestoreTransport != null) mRestoreTransport.finishRestore();
-                } catch (Exception e) {
-                    Slog.e(TAG, "Error in finishRestore", e);
-                } finally {
-                    mRestoreTransport = null;
-                    Binder.restoreCallingIdentity(oldId);
-                }
+            if (mEnded) {
+                throw new IllegalStateException("Restore session already ended");
             }
 
-            synchronized (BackupManagerService.this) {
-                if (BackupManagerService.this.mActiveRestoreSession == this) {
-                    BackupManagerService.this.mActiveRestoreSession = null;
-                } else {
-                    Slog.e(TAG, "ending non-current restore session");
-                }
-            }
+            mBackupHandler.post(new EndRestoreRunnable(BackupManagerService.this, this));
         }
     }
-
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {

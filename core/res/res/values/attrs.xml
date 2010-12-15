@@ -722,9 +722,6 @@
     <!-- Color of link text (URLs). -->
     <attr name="textColorLink" format="reference|color" />
 
-    <!-- Height of a line of text. -->
-    <attr name="textLineHeight" format="dimension" />
-
     <!-- Indicates that the content of a non-editable TextView can be selected.
      Default value is false. EditText content is always selectable. -->
     <attr name="textIsSelectable" format="boolean" />
@@ -2429,8 +2426,6 @@
         <attr name="textColorHint" />
         <!-- Color of the links. -->
         <attr name="textColorLink" />
-        <!-- Height of a single line of text. -->
-        <attr name="textLineHeight" />
     </declare-styleable>
     <declare-styleable name="TextSwitcher">
     </declare-styleable>
@@ -2672,10 +2667,7 @@
         <attr name="textEditPasteWindowLayout" />
         <!-- Variation of textEditPasteWindowLayout displayed when the clipboard is empty. -->
         <attr name="textEditNoPasteWindowLayout" />
-
-        <!-- Height of a line of text. -->
-        <attr name="textLineHeight" />
-        <!-- Indicates that a non-editable text can be selected. -->
+        <!-- Indicates that the content of a non-editable text can be selected. -->
         <attr name="textIsSelectable" />
         <!--  A specific background drawable used by multi-line EditText only. -->
         <attr name="multilineBackground" format="reference"/>

@@ -749,7 +749,7 @@ you always provide default resources for each type of resource that your applica
 
 <p>For example, if your application supports several languages, always include a {@code
 values/} directory (in which your strings are saved) <em>without</em> a <a
-href="#LocalQualifier">language and region qualifier</a>. If you instead put all your string files
+href="#LocaleQualifier">language and region qualifier</a>. If you instead put all your string files
 in directories that have a language and region qualifier, then your application will crash when run
 on a device set to a language that your strings do not support. But, as long as you provide default
 {@code values/} resources, then your application will run properly (even if the user doesn't

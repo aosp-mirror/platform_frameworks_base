@@ -41,8 +41,11 @@ import android.view.MotionEvent;
 
 public class RSTestView extends RSSurfaceView {
 
+    private Context mCtx;
+
     public RSTestView(Context context) {
         super(context);
+        mCtx = context;
         //setFocusable(true);
     }
 
@@ -55,7 +58,7 @@ public class RSTestView extends RSSurfaceView {
             RenderScriptGL.SurfaceConfig sc = new RenderScriptGL.SurfaceConfig();
             mRS = createRenderScriptGL(sc);
             mRS.setSurface(holder, w, h);
-            mRender = new RSTestCore();
+            mRender = new RSTestCore(mCtx);
             mRender.init(mRS, getResources(), w, h);
         }
     }
@@ -92,5 +95,3 @@ public class RSTestView extends RSSurfaceView {
         return ret;
     }
 }
-
-

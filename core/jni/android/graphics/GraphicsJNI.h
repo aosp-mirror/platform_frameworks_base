@@ -1,9 +1,12 @@
 #ifndef GraphicsJNI_DEFINED
 #define GraphicsJNI_DEFINED
 
+#include "SkBitmap.h"
+#include "SkDevice.h"
+#include "SkPixelRef.h"
+#include "SkMallocPixelRef.h"
 #include "SkPoint.h"
 #include "SkRect.h"
-#include "SkBitmap.h"
 #include "../images/SkBitmapRegionDecoder.h"
 #include "../images/SkImageDecoder.h"
 #include <jni.h>
@@ -47,23 +50,26 @@ public:
     static SkBitmap::Config getNativeBitmapConfig(JNIEnv*, jobject jconfig);
     
     /** Create a java Bitmap object given the native bitmap (required) and optional
-        storage array (may be null). If storage is specified, then it must already be
-        locked, and its native address set as the bitmap's pixels. If storage is null,
-        then the bitmap must be an owner of its natively allocated pixels (via allocPixels).
-        */
+        storage array (may be null).
+    */
+    static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buffer,
+                                bool isMutable, jbyteArray ninepatch, int density = -1);
+
     static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, bool isMutable,
-                                jbyteArray ninePatch, int density = -1);
+                                jbyteArray ninepatch, int density = -1);
     
     static jobject createRegion(JNIEnv* env, SkRegion* region);
 
     static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
 
+    static jbyteArray allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
+                                     SkColorTable* ctable);
+
     /** Set a pixelref for the bitmap (needs setConfig to already be called)
         Returns true on success. If it returns false, then it failed, and the
         appropriate exception will have been raised.
     */
-    static bool setJavaPixelRef(JNIEnv*, SkBitmap*, SkColorTable* ctable,
-                                bool reportSizeToVM);
+    static bool mallocPixelRef(JNIEnv*, SkBitmap*, SkColorTable* ctable);
 
     /** Copy the colors in colors[] to the bitmap, convert to the correct
         format along the way.
@@ -71,17 +77,71 @@ public:
     static bool SetPixels(JNIEnv* env, jintArray colors, int srcOffset,
                           int srcStride, int x, int y, int width, int height,
                           const SkBitmap& dstBitmap);
+
+    static jbyteArray getBitmapStorageObj(SkPixelRef *pixref);
 };
 
+class AndroidPixelRef : public SkMallocPixelRef {
+public:
+    AndroidPixelRef(JNIEnv* env, void* storage, size_t size, jbyteArray storageObj,
+                    SkColorTable* ctable);
+
+    virtual ~AndroidPixelRef();
+
+    jbyteArray getStorageObj() { return fStorageObj; }
+
+    void setLocalJNIRef(jbyteArray arr);
+
+    virtual void globalRef();
+    virtual void globalUnref();
+
+private:
+    JavaVM* fVM;
+    bool fOnJavaHeap; // If true, the memory was allocated on the Java heap
+
+    jbyteArray fStorageObj; // The Java byte[] object used as the bitmap backing store
+    bool fHasGlobalRef; // If true, fStorageObj holds a JNI global ref
+
+    mutable int32_t fGlobalRefCnt;
+};
+
+/** A helper class for accessing Java-heap-allocated bitmaps.
+ *  This should be used when calling into a JNI method that retains a
+ *  reference to the bitmap longer than the lifetime of the Java Bitmap.
+ *
+ *  After creating an instance of this class, a call to
+ *  AndroidPixelRef::globalRef() will allocate a JNI global reference
+ *  to the backing buffer object.
+ */
+class JavaHeapBitmapRef {
+public:
+
+    JavaHeapBitmapRef(JNIEnv *env, SkBitmap* nativeBitmap, jbyteArray buffer);
+    ~JavaHeapBitmapRef();
+
+private:
+    JNIEnv* fEnv;
+    SkBitmap* fNativeBitmap;
+    jbyteArray fBuffer;
+};
+
+/** Allocator which allocates the backing buffer in the Java heap.
+ *  Instances can only be used to perform a single allocation, which helps
+ *  ensure that the allocated buffer is properly accounted for with a
+ *  reference in the heap (or a JNI global reference).
+ */
 class JavaPixelAllocator : public SkBitmap::Allocator {
 public:
-    JavaPixelAllocator(JNIEnv* env, bool reportSizeToVM);
+    JavaPixelAllocator(JNIEnv* env, bool allocateInJavaHeap=true);
     // overrides
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
     
+    jbyteArray getStorageObj() { return fStorageObj; };
+
 private:
     JavaVM* fVM;
-    bool fReportSizeToVM;
+    bool fAllocateInJavaHeap;
+    jbyteArray fStorageObj;
 };
 
 class JavaMemoryUsageReporter : public SkVMMemoryReporter {

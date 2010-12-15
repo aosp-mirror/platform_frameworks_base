@@ -18,6 +18,8 @@ package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
+import java.awt.geom.AffineTransform;
+
 /**
  * Delegate implementing the native methods of android.graphics.Shader
  *
@@ -108,5 +110,20 @@ public abstract class Shader_Delegate {
     }
 
     // ---- Private delegate/helper methods ----
+
+    protected AffineTransform getLocalMatrix() {
+        Matrix_Delegate localMatrixDelegate = null;
+        if (mLocalMatrix > 0) {
+            localMatrixDelegate = Matrix_Delegate.getDelegate(mLocalMatrix);
+            if (localMatrixDelegate == null) {
+                assert false;
+                return new AffineTransform();
+            }
+
+            return localMatrixDelegate.getAffineTransform();
+        }
+
+        return new AffineTransform();
+    }
 
 }

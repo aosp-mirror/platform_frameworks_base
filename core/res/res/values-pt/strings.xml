@@ -295,7 +295,7 @@
     <string name="permlab_writeGservices" msgid="2149426664226152185">"modificar o mapa de serviços do Google"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"Permite que um aplicativo modifique o mapa de serviços do Google. Não deve ser usado por aplicativos normais."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"iniciar automaticamente na inicialização"</string>
-    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"Permite que um aplicativo inicie assim que o sistema conclui a inicialização. Isso pode retardar a inicialização do tablet e permitir que o aplicativo deixe o tablet mais lento por estar sempre em execução."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"Permite que um aplicativo inicie assim que o sistema concluir a inicialização. Isso pode retardar a inicialização do tablet e permitir que o aplicativo deixe o tablet mais lento por estar sempre em execução."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="698336728415008796">"Permite que um aplicativo inicie assim que o sistema conclui a inicialização. Isso pode retardar a inicialização do telefone e permitir que o aplicativo deixe o telefone mais lento por estar sempre em execução."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"enviar transmissão persistente"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Permite que um aplicativo envie uma transmissão persistente, que permanece após o término da transmissão. Aplicativos maliciosos podem tornar o tablet lento ou instável fazendo com que ele use muita memória."</string>
@@ -630,7 +630,7 @@
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Você desenhou incorretamente o seu padrão de desbloqueio <xliff:g id="NUMBER_0">%d</xliff:g> vezes. "\n\n"Tente novamente em <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Você inseriu incorretamente a sua senha <xliff:g id="NUMBER_0">%d</xliff:g> vezes. "\n\n"Tente novamente em <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Você digitou incorretamente o seu PIN <xliff:g id="NUMBER_0">%d</xliff:g> vezes. "\n\n"Tente novamente em <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Você desenhou seu padrão de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas incorretas e você receberá uma solicitação para desbloquear seu tablet usando seu login do Google."\n\n" Tente novamente em <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Você desenhou <xliff:g id="NUMBER_0">%d</xliff:g> vezes seu padrão de desbloqueio de maneira incorreta. Mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas incorretas e você receberá uma solicitação para desbloquear seu tablet usando seu login do Google."\n\n" Tente novamente em <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Você desenhou o seu padrão de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas incorretas e você receberá uma solicitação para desbloquear o seu telefone usando o seu login do Google."\n\n" Tente novamente em <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Tente novamente em <xliff:g id="NUMBER">%d</xliff:g> segundos."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Esqueceu o padrão?"</string>
@@ -659,7 +659,7 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Deseja sair desta página?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Selecione OK para continuar ou Cancelar para permanecer na página atual."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Confirmar"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Dica: toque duas vezes para aumentar e diminuir o zoom."</string>
-    <!-- outdated translation 8940110866775097494 -->     <string name="autofill_this_form" msgid="1272247532604569872">"Preencher automaticamente este formulário"</string>
+    <string name="autofill_this_form" msgid="1272247532604569872">"Preenchimento automático"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Conf preen autom"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
@@ -865,8 +865,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Cancelar"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Definir hora"</string>
-    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
-    <skip />
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Definir data"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Definir"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Padrão"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Nenhuma permissão necessária"</string>
@@ -998,6 +997,8 @@
     <string name="media_unknown_state" msgid="729192782197290385">"Mídia externa em estado desconhecido."</string>
     <string name="share" msgid="1778686618230011964">"Compartilhar"</string>
     <string name="find" msgid="4808270900322985960">"Localizar"</string>
+    <!-- no translation found for websearch (4337157977400211589) -->
+    <skip />
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />
     <!-- no translation found for gpsNotifTitle (5446858717157416839) -->

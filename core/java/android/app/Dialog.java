@@ -582,7 +582,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     public boolean onTouchEvent(MotionEvent event) {
         if (mCancelable && mCanceledOnTouchOutside && event.getAction() == MotionEvent.ACTION_DOWN
-                && isOutOfBounds(event)) {
+                && isOutOfBounds(event) && mDecor != null && mShowing) {
             cancel();
             return true;
         }
@@ -998,7 +998,6 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     public void cancel() {
         if (mCancelMessage != null) {
-            
             // Obtain a new message so this dialog can be re-used
             Message.obtain(mCancelMessage).sendToTarget();
         }

@@ -188,6 +188,8 @@ private:
         size_t getActiveBufferIndex() const;
         // return the active buffer
         sp<GraphicBuffer> getActiveBuffer() const;
+        // return wether we have an active buffer
+        bool hasActiveBuffer() const;
         // return the active texture (or fail-over)
         Texture getActiveTexture() const;
         // frees resources associated with all buffers

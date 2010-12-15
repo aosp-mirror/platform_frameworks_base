@@ -192,12 +192,6 @@ public class Switch extends CompoundButton {
 
         setSwitchTypefaceByIndex(typefaceIndex, styleIndex);
 
-        int lineHeight = appearance.getDimensionPixelSize(
-                com.android.internal.R.styleable.TextAppearance_textLineHeight, 0);
-        if (lineHeight != 0) {
-            setLineHeight(lineHeight);
-        }
-
         appearance.recycle();
     }
 

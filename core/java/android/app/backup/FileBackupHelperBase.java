@@ -81,7 +81,7 @@ class FileBackupHelperBase {
         }
     }
 
-    void writeFile(File f, BackupDataInputStream in) {
+    boolean writeFile(File f, BackupDataInputStream in) {
         int result = -1;
 
         // Create the enclosing directory.
@@ -98,6 +98,7 @@ class FileBackupHelperBase {
                 mExceptionLogged = true;
             }
         }
+        return (result == 0);
     }
 
     public void writeNewStateDescription(ParcelFileDescriptor fd) {

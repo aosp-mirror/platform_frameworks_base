@@ -554,10 +554,13 @@ class ContextImpl extends Context {
                 return sp;
             }
         }
-        // If somebody else (some other process) changed the prefs
-        // file behind our back, we reload it.  This has been the
-        // historical (if undocumented) behavior.
-        sp.startReloadIfChangedUnexpectedly();
+        if ((mode & Context.MODE_MULTI_PROCESS) != 0 ||
+            getApplicationInfo().targetSdkVersion < android.os.Build.VERSION_CODES.HONEYCOMB) {
+            // If somebody else (some other process) changed the prefs
+            // file behind our back, we reload it.  This has been the
+            // historical (if undocumented) behavior.
+            sp.startReloadIfChangedUnexpectedly();
+        }
         return sp;
     }
 
