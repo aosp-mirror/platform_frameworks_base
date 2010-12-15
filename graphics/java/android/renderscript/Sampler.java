@@ -40,6 +40,7 @@ public class Sampler extends BaseObj {
         NEAREST (0),
         LINEAR (1),
         LINEAR_MIP_LINEAR (2),
+        LINEAR_MIP_NEAREST (5),
         WRAP (3),
         CLAMP (4);
 
@@ -201,7 +202,8 @@ public class Sampler extends BaseObj {
         public void setMin(Value v) {
             if (v == Value.NEAREST ||
                 v == Value.LINEAR ||
-                v == Value.LINEAR_MIP_LINEAR) {
+                v == Value.LINEAR_MIP_LINEAR ||
+                v == Value.LINEAR_MIP_NEAREST) {
                 mMin = v;
             } else {
                 throw new IllegalArgumentException("Invalid value");

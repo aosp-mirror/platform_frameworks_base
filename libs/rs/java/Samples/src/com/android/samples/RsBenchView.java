@@ -43,7 +43,6 @@ public class RsBenchView extends RSSurfaceView {
 
     public RsBenchView(Context context) {
         super(context);
-        //setFocusable(true);
     }
 
     private RenderScriptGL mRS;
@@ -71,17 +70,13 @@ public class RsBenchView extends RSSurfaceView {
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)
-    {
-        // break point at here
-        // this method doesn't work when 'extends View' include 'extends ScrollView'.
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
         return super.onKeyDown(keyCode, event);
     }
 
 
     @Override
-    public boolean onTouchEvent(MotionEvent ev)
-    {
+    public boolean onTouchEvent(MotionEvent ev) {
         boolean ret = false;
         int act = ev.getAction();
         if (act == ev.ACTION_DOWN) {

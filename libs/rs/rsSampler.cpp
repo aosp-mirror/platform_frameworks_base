@@ -61,6 +61,7 @@ void Sampler::setupGL(const Context *rsc, const Allocation *tex) {
         GL_LINEAR_MIPMAP_LINEAR, //RS_SAMPLER_LINEAR_MIP_LINEAR,
         GL_REPEAT, //RS_SAMPLER_WRAP,
         GL_CLAMP_TO_EDGE, //RS_SAMPLER_CLAMP
+        GL_LINEAR_MIPMAP_NEAREST, //RS_SAMPLER_LINEAR_MIP_NEAREST
     };
 
     GLenum transNP[] = {
@@ -69,6 +70,7 @@ void Sampler::setupGL(const Context *rsc, const Allocation *tex) {
         GL_LINEAR, //RS_SAMPLER_LINEAR_MIP_LINEAR,
         GL_CLAMP_TO_EDGE, //RS_SAMPLER_WRAP,
         GL_CLAMP_TO_EDGE, //RS_SAMPLER_CLAMP
+        GL_LINEAR, //RS_SAMPLER_LINEAR_MIP_NEAREST,
     };
 
     // This tells us the correct texture type

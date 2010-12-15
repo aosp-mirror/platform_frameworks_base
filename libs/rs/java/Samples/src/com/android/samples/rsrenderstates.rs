@@ -81,7 +81,7 @@ float gDt = 0;
 void init() {
 }
 
-void displayFontSamples() {
+static void displayFontSamples() {
     rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
     int yPos = 100;
     rsgBindFont(gFontSans);
@@ -148,7 +148,7 @@ void displayFontSamples() {
 
 }
 
-void bindProgramVertexOrtho() {
+static void bindProgramVertexOrtho() {
     // Default vertex sahder
     rsgBindProgramVertex(gProgVertex);
     // Setup the projectioni matrix
@@ -157,7 +157,7 @@ void bindProgramVertexOrtho() {
     rsgProgramVertexLoadProjectionMatrix(&proj);
 }
 
-void displayShaderSamples() {
+static void displayShaderSamples() {
     bindProgramVertexOrtho();
     rs_matrix4x4 matrix;
     rsMatrixLoadIdentity(&matrix);
@@ -206,7 +206,7 @@ void displayShaderSamples() {
     rsgDrawText("Flat color shader", 100, 450);
 }
 
-void displayBlendingSamples() {
+static void displayBlendingSamples() {
     int i;
 
     bindProgramVertexOrtho();
@@ -252,7 +252,7 @@ void displayBlendingSamples() {
 
 }
 
-void displayMeshSamples() {
+static void displayMeshSamples() {
 
     bindProgramVertexOrtho();
     rs_matrix4x4 matrix;
@@ -272,7 +272,7 @@ void displayMeshSamples() {
     rsgDrawText("User gen 10 by 10 grid mesh", 10, 250);
 }
 
-void displayTextureSamplers() {
+static void displayTextureSamplers() {
 
     bindProgramVertexOrtho();
     rs_matrix4x4 matrix;
@@ -327,9 +327,9 @@ void displayTextureSamplers() {
     rsgDrawText("Filtering: miplinear wrap", 310, 590);
 }
 
-float gTorusRotation = 0;
+static float gTorusRotation = 0;
 
-void displayCullingSamples() {
+static void displayCullingSamples() {
     rsgBindProgramVertex(gProgVertex);
     // Setup the projectioni matrix with 60 degree field of view
     rs_matrix4x4 proj;
@@ -370,10 +370,10 @@ void displayCullingSamples() {
     rsgDrawText("Displaying mesh front/back face culling", 10, rsgGetHeight() - 10);
 }
 
-float gLight0Rotation = 0;
-float gLight1Rotation = 0;
+static float gLight0Rotation = 0;
+static float gLight1Rotation = 0;
 
-void setupCustomShaderLights() {
+static void setupCustomShaderLights() {
     float4 light0Pos = {-5.0f, 5.0f, -10.0f, 1.0f};
     float4 light1Pos = {2.0f, 5.0f, 15.0f, 1.0f};
     float4 light0DiffCol = {0.9f, 0.7f, 0.7f, 1.0f};
@@ -436,7 +436,7 @@ void setupCustomShaderLights() {
     rsAllocationMarkDirty(rsGetAllocation(gFSConstants2));
 }
 
-void displayCustomShaderSamples() {
+static void displayCustomShaderSamples() {
 
     // Update vertex shader constants
     // Load model matrix
@@ -472,7 +472,7 @@ void displayCustomShaderSamples() {
     rsgDrawText("Custom shader sample", 10, rsgGetHeight() - 10);
 }
 
-void displayCustomShaderSamples2() {
+static void displayCustomShaderSamples2() {
 
     // Update vertex shader constants
     // Load model matrix
@@ -509,7 +509,7 @@ void displayCustomShaderSamples2() {
     rsgDrawText("Custom shader sample with array uniforms", 10, rsgGetHeight() - 10);
 }
 
-void displayCubemapShaderSample() {
+static void displayCubemapShaderSample() {
     // Update vertex shader constants
     // Load model matrix
     // Aplly a rotation to our mesh
@@ -545,7 +545,7 @@ void displayCubemapShaderSample() {
     rsgDrawText("Cubemap shader sample", 10, rsgGetHeight() - 10);
 }
 
-void displayMultitextureSample() {
+static void displayMultitextureSample() {
     bindProgramVertexOrtho();
     rs_matrix4x4 matrix;
     rsMatrixLoadIdentity(&matrix);
@@ -573,9 +573,9 @@ void displayMultitextureSample() {
     rsgDrawText("Custom shader with multitexturing", 10, 280);
 }
 
-float gAnisoTime = 0.0f;
-uint anisoMode = 0;
-void displayAnisoSample() {
+static float gAnisoTime = 0.0f;
+static uint anisoMode = 0;
+static void displayAnisoSample() {
 
     gAnisoTime += gDt;
 
