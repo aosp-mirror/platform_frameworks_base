@@ -162,7 +162,7 @@ public class InputMethodButton extends ImageView {
     // * There are no explicitly enabled (by the user) subtypes of the IME, or the IME doesn't have
     // its subtypes at all
     private boolean needsToShowIMEButton() {
-        List<InputMethodInfo> imis = mImm.getInputMethodList();
+        List<InputMethodInfo> imis = mImm.getEnabledInputMethodList();
         final int size = imis.size();
         return size > 1
                 || (size == 1 && mImm.getEnabledInputMethodSubtypeList(imis.get(0)).size() > 1);
