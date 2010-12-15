@@ -101,24 +101,23 @@ final class ApplicationPackageManager extends PackageManager {
         Intent intentToResolve = new Intent(Intent.ACTION_MAIN);
         intentToResolve.addCategory(Intent.CATEGORY_INFO);
         intentToResolve.setPackage(packageName);
-        ResolveInfo resolveInfo = resolveActivity(intentToResolve, 0);
+        List<ResolveInfo> ris = queryIntentActivities(intentToResolve, 0);
 
         // Otherwise, try to find a main launcher activity.
-        if (resolveInfo == null) {
+        if (ris == null || ris.size() <= 0) {
             // reuse the intent instance
             intentToResolve.removeCategory(Intent.CATEGORY_INFO);
             intentToResolve.addCategory(Intent.CATEGORY_LAUNCHER);
             intentToResolve.setPackage(packageName);
-            resolveInfo = resolveActivity(intentToResolve, 0);
+            ris = queryIntentActivities(intentToResolve, 0);
         }
-        if (resolveInfo == null) {
+        if (ris == null || ris.size() <= 0) {
             return null;
         }
         Intent intent = new Intent(intentToResolve);
-        // Note: we do NOT fill in the component name; we'll leave the
-        // Intent unspecified, so if there are multiple matches within the
-        // package something reasonable will happen.
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setClassName(ris.get(0).activityInfo.packageName,
+                ris.get(0).activityInfo.name);
         return intent;
     }
 
