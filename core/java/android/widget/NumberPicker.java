@@ -1188,16 +1188,12 @@ public class NumberPicker extends LinearLayout {
 
     /**
      * @return The wrapped index <code>selectorIndex</code> value.
-     *         <p>
-     *         Note: The absolute value of the argument is never larger than
-     *         mEnd - mStart.
-     *         </p>
      */
     private int getWrappedSelectorIndex(int selectorIndex) {
         if (selectorIndex > mEnd) {
-            return mStart + selectorIndex - mEnd - 1;
+            return mStart + (selectorIndex - mEnd) % (mEnd - mStart);
         } else if (selectorIndex < mStart) {
-            return mEnd + selectorIndex - mStart + 1;
+            return mEnd - (mStart - selectorIndex) % (mEnd - mStart);
         }
         return selectorIndex;
     }

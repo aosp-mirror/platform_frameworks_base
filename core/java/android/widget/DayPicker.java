@@ -1091,34 +1091,23 @@ public class DayPicker extends FrameLayout {
          */
         public static final String VIEW_PARAMS_SHOW_WK_NUM = "show_wk_num";
 
-        protected int mDefaultHeight = 32;
-
-        protected int mMinHeight = 10;
-
-        protected static final int DEFAULT_SELECTED_DAY = -1;
-
-        protected static final int DEFAULT_WEEK_START = Calendar.SUNDAY;
-
-        protected static final int DEFAULT_NUM_DAYS = 7;
-
         protected static final int DEFAULT_SHOW_WK_NUM = 0;
 
-        protected static final int DEFAULT_FOCUS_MONTH = -1;
+        protected final int mWeekSeperatorWidth;
 
-        protected static final int DAY_SEPARATOR_WIDTH = 1;
+        protected final int mNumberTextSize;
 
-        protected int mNumberTextSize = 14;
-
-        // affects the padding on the sides of this view
-        protected int mPadding = 0;
+        protected final int mWeekDayPadding;
 
         protected final Rect mTempRect = new Rect();
 
         protected final Paint mDrawPaint = new Paint();
 
-        protected Paint mMonthNumDrawPaint = new Paint();
+        protected final Paint mMonthNumDrawPaint = new Paint();
 
-        protected Drawable mSelectedDayLine;
+        protected final Drawable mSelectedDayLine;
+
+        protected final int mSelectedDayLineWidth;
 
         protected final int mSelectionBackgroundColor;
 
@@ -1129,6 +1118,8 @@ public class DayPicker extends FrameLayout {
         protected final int mGridLinesColor;
 
         protected final int mWeekNumberColor;
+
+        protected final int mFirstDayOfweek;
 
         // Cache the number strings so we don't have to recompute them each time
         protected String[] mDayNumbers;
@@ -1153,22 +1144,19 @@ public class DayPicker extends FrameLayout {
         protected int mWidth;
 
         // The height this view should draw at in pixels, set by height param
-        protected int mHeight = mDefaultHeight;
-
-        // Whether the week number should be shown
-        protected boolean mShowWeekNum = false;
+        protected int mHeight;
 
         // If this view contains the selected day
         protected boolean mHasSelectedDay = false;
 
         // Which day is selected [0-6] or -1 if no day is selected
-        protected int mSelectedDay = DEFAULT_SELECTED_DAY;
+        protected int mSelectedDay = -1;
 
         // How many days to display
-        protected int mNumDays = DEFAULT_NUM_DAYS;
+        protected int mWeekDayCount;
 
         // The number of days + a spot for week number if it is displayed
-        protected int mNumCells = mNumDays;
+        protected int mNumCells;
 
         // The left edge of the selected day
         protected int mSelectedLeft = -1;
@@ -1183,7 +1171,20 @@ public class DayPicker extends FrameLayout {
             context.getTheme().resolveAttribute(R.attr.dayPickerWeekViewStyle, outTypedValue, true);
             TypedArray attributesArray = context.obtainStyledAttributes(outTypedValue.resourceId,
                     R.styleable.DayPickerWeekView);
-
+            mHeight = attributesArray.getDimensionPixelSize(R.styleable.DayPickerWeekView_height,
+                    26);
+            mNumberTextSize = attributesArray.getDimensionPixelSize(
+                    R.styleable.DayPickerWeekView_textSize, 14);
+            mFirstDayOfweek = attributesArray.getInt(R.styleable.DayPickerWeekView_weekStartDay,
+                    Calendar.SUNDAY);
+            mNumCells = mWeekDayCount = attributesArray.getInt(
+                    R.styleable.DayPickerWeekView_weekDayCount, 7);
+            mShowWeekNumber = attributesArray.getBoolean(R.styleable.DayPickerWeekView_weekDayCount,
+                    true);
+            mWeekSeperatorWidth = attributesArray.getDimensionPixelSize(
+                    R.styleable.DayPickerWeekView_weekSeperatorWidth, 1);
+            mWeekDayPadding = attributesArray.getDimensionPixelSize(
+                    R.styleable.DayPickerWeekView_weekDayPadding, 0);
             mSelectionBackgroundColor = attributesArray.getColor(
                     R.styleable.DayPickerWeekView_selectionBackgroundColor, 0);
             mFocusedMonthDateColor = attributesArray.getColor(
@@ -1196,16 +1197,9 @@ public class DayPicker extends FrameLayout {
                     R.styleable.DayPickerWeekView_weekNumberColor, 0);
             mSelectedDayLine = attributesArray
                     .getDrawable(R.styleable.DayPickerWeekView_selectedDayLine);
+            mSelectedDayLineWidth = attributesArray.getDimensionPixelSize(
+                    R.styleable.DayPickerWeekView_selectedDayLineWidth, 6);
             attributesArray.recycle();
-
-            if (sScale == 0) {
-                sScale = context.getResources().getDisplayMetrics().density;
-                if (sScale != 1) {
-                    mDefaultHeight *= sScale;
-                    mMinHeight *= sScale;
-                    mNumberTextSize *= sScale;
-                }
-            }
 
             // Sets up any standard paints that will be used
             setPaintProperties();
@@ -1231,26 +1225,23 @@ public class DayPicker extends FrameLayout {
             // We keep the current value for any params not present
             if (params.containsKey(VIEW_PARAMS_HEIGHT)) {
                 mHeight = ((int[]) params.get(VIEW_PARAMS_HEIGHT))[0];
-                if (mHeight < mMinHeight) {
-                    mHeight = mMinHeight;
-                }
             }
             if (params.containsKey(VIEW_PARAMS_SELECTED_DAY)) {
                 mSelectedDay = ((int[]) params.get(VIEW_PARAMS_SELECTED_DAY))[0];
             }
             mHasSelectedDay = mSelectedDay != -1;
             if (params.containsKey(VIEW_PARAMS_NUM_DAYS)) {
-                mNumDays = ((int[]) params.get(VIEW_PARAMS_NUM_DAYS))[0];
+                mWeekDayCount = ((int[]) params.get(VIEW_PARAMS_NUM_DAYS))[0];
             }
             if (params.containsKey(VIEW_PARAMS_SHOW_WK_NUM)) {
                 if (((int[]) params.get(VIEW_PARAMS_SHOW_WK_NUM))[0] != 0) {
-                    mNumCells = mNumDays + 1;
-                    mShowWeekNum = true;
+                    mNumCells = mWeekDayCount + 1;
+                    mShowWeekNumber = true;
                 } else {
-                    mShowWeekNum = false;
+                    mShowWeekNumber = false;
                 }
             } else {
-                mNumCells = mShowWeekNum ? mNumDays + 1 : mNumDays;
+                mNumCells = mShowWeekNumber ? mWeekDayCount + 1 : mWeekDayCount;
             }
             mWeek = ((int[]) params.get(VIEW_PARAMS_WEEK))[0];
             mTempCalendar.clear();
@@ -1259,7 +1250,7 @@ public class DayPicker extends FrameLayout {
             if (params.containsKey(VIEW_PARAMS_WEEK_START)) {
                 mTempCalendar.setFirstDayOfWeek(((int[]) params.get(VIEW_PARAMS_WEEK_START))[0]);
             } else {
-                mTempCalendar.setFirstDayOfWeek(DEFAULT_WEEK_START);
+                mTempCalendar.setFirstDayOfWeek(Calendar.SUNDAY);
             }
 
             // Allocate space for caching the day numbers and focus values
@@ -1268,7 +1259,7 @@ public class DayPicker extends FrameLayout {
 
             // If we're showing the week number calculate it based on Monday
             int i = 0;
-            if (mShowWeekNum) {
+            if (mShowWeekNumber) {
                 mDayNumbers[0] = Integer.toString(mTempCalendar.get(Calendar.WEEK_OF_YEAR));
                 i++;
             }
@@ -1282,7 +1273,7 @@ public class DayPicker extends FrameLayout {
             mMonthOfFirstWeekDay = mTempCalendar.get(Calendar.MONTH);
 
             int focusMonth = params.containsKey(VIEW_PARAMS_FOCUS_MONTH) ? ((int[]) params
-                    .get(VIEW_PARAMS_FOCUS_MONTH))[0] : DEFAULT_FOCUS_MONTH;
+                    .get(VIEW_PARAMS_FOCUS_MONTH))[0] : -1;
 
             for (; i < mNumCells; i++) {
                 mFocusDay[i] = (mTempCalendar.get(Calendar.MONTH) == focusMonth);
@@ -1348,7 +1339,7 @@ public class DayPicker extends FrameLayout {
          * Returns the number of days this view will display.
          */
         public int getNumDays() {
-            return mNumDays;
+            return mWeekDayCount;
         }
 
         /**
@@ -1358,13 +1349,15 @@ public class DayPicker extends FrameLayout {
          * @param x The x position of the touch eventy
          */
         public void getDayFromLocation(float x, Calendar outCalendar) {
-            int dayStart = mShowWeekNum ? (mWidth - mPadding * 2) / mNumCells + mPadding : mPadding;
-            if (x < dayStart || x > mWidth - mPadding) {
+            int dayStart = mShowWeekNumber ? (mWidth - mWeekDayPadding * 2) / mNumCells
+                    + mWeekDayPadding : mWeekDayPadding;
+            if (x < dayStart || x > mWidth - mWeekDayPadding) {
                 outCalendar.set(0, 0, 0, 0, 0, 0);
                 return;
             }
             // Selection is (x - start) / (pixels/day) == (x -s) * day / pixels
-            int dayPosition = (int) ((x - dayStart) * mNumDays / (mWidth - dayStart - mPadding));
+            int dayPosition = (int) ((x - dayStart) * mWeekDayCount
+                    / (mWidth - dayStart - mWeekDayPadding));
             outCalendar.setTimeZone(mFirstDay.getTimeZone());
             outCalendar.setTimeInMillis(mFirstDay.getTimeInMillis());
             outCalendar.add(Calendar.DAY_OF_MONTH, dayPosition);
@@ -1375,6 +1368,7 @@ public class DayPicker extends FrameLayout {
             drawBackground(canvas);
             drawWeekNums(canvas);
             drawDaySeparators(canvas);
+            drawSelectedDayLines(canvas);
         }
 
         /**
@@ -1390,15 +1384,15 @@ public class DayPicker extends FrameLayout {
             }
             mDrawPaint.setColor(mSelectionBackgroundColor);
 
-            mTempRect.top = DAY_SEPARATOR_WIDTH;
+            mTempRect.top = mWeekSeperatorWidth;
             mTempRect.bottom = mHeight;
-            mTempRect.left = mShowWeekNum ? mPadding + (mWidth - mPadding * 2) / mNumCells
-                    : mPadding;
+            mTempRect.left = mShowWeekNumber ? mWeekDayPadding + (mWidth - mWeekDayPadding * 2)
+                    / mNumCells : mWeekDayPadding;
             mTempRect.right = mSelectedLeft - 2;
             canvas.drawRect(mTempRect, mDrawPaint);
 
             mTempRect.left = mSelectedRight + 3;
-            mTempRect.right = mWidth - mPadding;
+            mTempRect.right = mWidth - mWeekDayPadding;
             canvas.drawRect(mTempRect, mDrawPaint);
         }
 
@@ -1410,22 +1404,22 @@ public class DayPicker extends FrameLayout {
          */
         protected void drawWeekNums(Canvas canvas) {
             float textHeight = mDrawPaint.getTextSize();
-            int y = (int) ((mHeight + textHeight) / 2) - DAY_SEPARATOR_WIDTH;
+            int y = (int) ((mHeight + textHeight) / 2) - mWeekSeperatorWidth;
             int nDays = mNumCells;
 
             mDrawPaint.setTextAlign(Align.CENTER);
             int i = 0;
             int divisor = 2 * nDays;
-            if (mShowWeekNum) {
+            if (mShowWeekNumber) {
                 mDrawPaint.setColor(mWeekNumberColor);
-                int x = (mWidth - mPadding * 2) / divisor + mPadding;
+                int x = (mWidth - mWeekDayPadding * 2) / divisor + mWeekDayPadding;
                 canvas.drawText(mDayNumbers[0], x, y, mDrawPaint);
                 i++;
             }
             for (; i < nDays; i++) {
                 mMonthNumDrawPaint.setColor(mFocusDay[i] ? mFocusedMonthDateColor
                         : mOtherMonthDateColor);
-                int x = (2 * i + 1) * (mWidth - mPadding * 2) / divisor + mPadding;
+                int x = (2 * i + 1) * (mWidth - mWeekDayPadding * 2) / divisor + mWeekDayPadding;
                 canvas.drawText(mDayNumbers[i], x, y, mMonthNumDrawPaint);
             }
         }
@@ -1434,22 +1428,41 @@ public class DayPicker extends FrameLayout {
          * Draws a horizontal line for separating the weeks. Override this
          * method if you want custom separators.
          *
-         * @param canvas The canvas to draw on
+         * @param canvas The canvas to draw on.
          */
         protected void drawDaySeparators(Canvas canvas) {
-            mDrawPaint.setColor(mGridLinesColor);
-            mDrawPaint.setStrokeWidth(DAY_SEPARATOR_WIDTH);
-            float x = mShowWeekNum ? mPadding + (mWidth - mPadding * 2) / mNumCells : mPadding;
-            canvas.drawLine(x, 0, mWidth - mPadding, 0, mDrawPaint);
-
-            if (mHasSelectedDay) {
-                mSelectedDayLine.setBounds(mSelectedLeft - 2, DAY_SEPARATOR_WIDTH,
-                        mSelectedLeft + 4, mHeight + 1);
-                mSelectedDayLine.draw(canvas);
-                mSelectedDayLine.setBounds(mSelectedRight - 3, DAY_SEPARATOR_WIDTH,
-                        mSelectedRight + 3, mHeight + 1);
-                mSelectedDayLine.draw(canvas);
+            // If it is the topmost fully visible child do not draw separator line
+            int firstFullyVisiblePosition = mListView.getFirstVisiblePosition();
+            if (mListView.getChildAt(0).getTop() < 0) {
+                firstFullyVisiblePosition++;
             }
+            if (firstFullyVisiblePosition == mWeek) {
+                return;
+            }
+            mDrawPaint.setColor(mGridLinesColor);
+            mDrawPaint.setStrokeWidth(mWeekSeperatorWidth);
+            float x = mShowWeekNumber ? mWeekDayPadding + (mWidth - mWeekDayPadding * 2) / mNumCells
+                    : mWeekDayPadding;
+            canvas.drawLine(x, 0, mWidth - mWeekDayPadding, 0, mDrawPaint);
+        }
+
+        /**
+         * Draws the selected day lines if this week has a selected day.
+         *
+         * @param canvas The canvas to draw on
+         */
+        protected void drawSelectedDayLines(Canvas canvas) {
+            if (!mHasSelectedDay) {
+                return;
+            }
+            mSelectedDayLine.setBounds(mSelectedLeft - mSelectedDayLineWidth / 2,
+                    mWeekSeperatorWidth,
+                    mSelectedLeft + mSelectedDayLineWidth / 2, mHeight);
+            mSelectedDayLine.draw(canvas);
+            mSelectedDayLine.setBounds(mSelectedRight - mSelectedDayLineWidth / 2,
+                    mWeekSeperatorWidth,
+                    mSelectedRight + mSelectedDayLineWidth / 2, mHeight);
+            mSelectedDayLine.draw(canvas);
         }
 
         @Override
@@ -1467,12 +1480,13 @@ public class DayPicker extends FrameLayout {
                 if (selectedPosition < 0) {
                     selectedPosition += 7;
                 }
-                if (mShowWeekNum) {
+                if (mShowWeekNumber) {
                     selectedPosition++;
                 }
-                mSelectedLeft = selectedPosition * (mWidth - mPadding * 2) / mNumCells + mPadding;
-                mSelectedRight = (selectedPosition + 1) * (mWidth - mPadding * 2) / mNumCells
-                        + mPadding;
+                mSelectedLeft = selectedPosition * (mWidth - mWeekDayPadding * 2) / mNumCells
+                        + mWeekDayPadding;
+                mSelectedRight = (selectedPosition + 1) * (mWidth - mWeekDayPadding * 2) / mNumCells
+                        + mWeekDayPadding;
             }
         }
 
