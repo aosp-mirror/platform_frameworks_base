@@ -698,9 +698,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         NetworkStateTracker network = mNetTrackers[usedNetworkType];
         if (network != null) {
+            Integer currentPid = new Integer(getCallingPid());
             if (usedNetworkType != networkType) {
-                Integer currentPid = new Integer(getCallingPid());
-
                 NetworkStateTracker radio = mNetTrackers[networkType];
                 NetworkInfo ni = network.getNetworkInfo();
 
@@ -739,6 +738,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 network.reconnect();
                 return Phone.APN_REQUEST_STARTED;
             } else {
+                // need to remember this unsupported request so we respond appropriately on stop
+                synchronized(this) {
+                    mFeatureUsers.add(f);
+                    if (!mNetRequestersPids[usedNetworkType].contains(currentPid)) {
+                        // this gets used for per-pid dns when connected
+                        mNetRequestersPids[usedNetworkType].add(currentPid);
+                    }
+                }
                 return -1;
             }
         }
