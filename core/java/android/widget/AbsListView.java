@@ -4126,9 +4126,19 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         final Rect listPadding = mListPadding;
 
+        // "effective padding" In this case is the amount of padding that affects
+        // how much space should not be filled by items. If we don't clip to padding
+        // there is no effective padding.
+        int effectivePaddingTop = 0;
+        int effectivePaddingBottom = 0;
+        if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
+            effectivePaddingTop = listPadding.top;
+            effectivePaddingBottom = listPadding.bottom;
+        }
+
          // FIXME account for grid vertical spacing too?
-        final int spaceAbove = listPadding.top - firstTop;
-        final int end = getHeight() - listPadding.bottom;
+        final int spaceAbove = effectivePaddingTop - firstTop;
+        final int end = getHeight() - effectivePaddingBottom;
         final int spaceBelow = lastBottom - end;
 
         final int height = getHeight() - mPaddingBottom - mPaddingTop;
@@ -4148,12 +4158,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         // Update our guesses for where the first and last views are
         if (firstPosition == 0) {
-            mFirstPositionDistanceGuess = firstTop - mListPadding.top;
+            mFirstPositionDistanceGuess = firstTop - listPadding.top;
         } else {
             mFirstPositionDistanceGuess += incrementalDeltaY;
         }
         if (firstPosition + childCount == mItemCount) {
-            mLastPositionDistanceGuess = lastBottom + mListPadding.bottom;
+            mLastPositionDistanceGuess = lastBottom + listPadding.bottom;
         } else {
             mLastPositionDistanceGuess += incrementalDeltaY;
         }
