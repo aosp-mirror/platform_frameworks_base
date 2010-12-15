@@ -308,7 +308,7 @@ status_t AACDecoder::read(
             mAnchorTimeUs
                 + (mNumSamplesOutput * 1000000) / mConfig->samplingRate);
 
-    mNumSamplesOutput += mConfig->frameLength;
+    mNumSamplesOutput += mConfig->frameLength * mUpsamplingFactor;
 
     *out = buffer;
 
