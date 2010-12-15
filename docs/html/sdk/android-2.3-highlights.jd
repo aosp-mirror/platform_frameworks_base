@@ -258,7 +258,7 @@ audio</strong></p>
 href="http://www.khronos.org/opensles/">Khronos OpenSL ES</a>, a standard API
 that gives applications access to powerful audio controls and effects from
 native code. Applications can use the API to manage audio devices and control
-low-latency audio input, output and processing directly from native code</p>
+audio input, output, and processing directly from native code.</p>
 
 <p style="margin-top:1.25em;margin-bottom:.75em;"><strong>Native graphics
 management</strong></p>

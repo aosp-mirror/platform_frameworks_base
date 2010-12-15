@@ -124,7 +124,7 @@ in {@sdkPlatformVersion}, including new features and changes in the framework
 API since the previous version.</p>
 
 
-<h3 id="sip">SIP-based VOIP</h3>
+<h3 id="sip">SIP-based VoIP</h3>
 
 <p>The platform now includes a SIP protocol stack and framework API that lets
 developers build internet telephony applications. Using the API, applications can offer
@@ -747,7 +747,7 @@ gyroscope sensor.</li>
 <li>{@link android.content.pm.PackageManager#FEATURE_SIP android.software.sip}
 &mdash; The application uses the SIP API on the device.</li>
 <li>{@link android.content.pm.PackageManager#FEATURE_SIP_VOIP
-android.software.sip.voip} &mdash; The application uses a SIP-based VOIP
+android.software.sip.voip} &mdash; The application uses a SIP-based VoIP
 service on the device.</li>
 <li>{@link
 android.content.pm.PackageManager#FEATURE_TOUCHSCREEN_MULTITOUCH_JAZZHAND

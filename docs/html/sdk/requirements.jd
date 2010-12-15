@@ -8,12 +8,14 @@ Android applications using the Android SDK. </p>
 <ul>
   <li>Windows XP (32-bit), Vista (32- or 64-bit), or Windows 7 (32- or 64-bit)</li>
   <li>Mac OS X 10.5.8 or later (x86 only)</li>
-  <li>Linux (tested on Linux Ubuntu Hardy Heron and Lucid Lynx)
+  <li>Linux (tested on Ubuntu Linux, Lucid Lynx)
     <ul>
+      <li>GNU C Library (glibc) 2.11 or later is required.</li>
+      <li>On Ubuntu Linux, Lucid Lynx or later release is required.</li>
       <li>64-bit distributions must be capable of running 32-bit applications. 
       For information about how to add support for 32-bit applications, see
       the <a href="installing.html#troubleshooting">Ubuntu Linux
-installation notes</a>.</li>
+      installation notes</a>.</li>
     </ul>
   </li>
 </ul>
