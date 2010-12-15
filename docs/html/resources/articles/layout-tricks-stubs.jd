@@ -17,7 +17,7 @@ to keep in a view hierarchy. A <code>ViewStub</code> can be best described as a
 inflated and added to the user interface only when you decide so.</p>
 
 <p>The following screenshot comes from the <a
-href="http://code.google/p/shelves">Shelves</a> application. The main purpose of
+href="http://code.google.com/p/shelves">Shelves</a> application. The main purpose of
 the activity shown in the screenshot is to present the user with a browsable
 list of books:</p>
 

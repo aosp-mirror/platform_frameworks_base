@@ -132,7 +132,7 @@ panel of the Android SDK and AVD Manager. </li>
 
 <p>When you see that a new revision is available, you can use the Android SDK
 and AVD Manager to quickly download it to your environment. Follow the same
-procedure as given in <a href="">Installing SDK Components</a>, above. The new
+procedure as given in <a href="#InstallingComponents">Installing SDK Components</a>, above. The new
 component is installed in place of the old, but without impacting your
 applications. </p>
 

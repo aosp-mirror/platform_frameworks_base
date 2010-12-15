@@ -299,7 +299,8 @@ padding: .25em 1em;
   <p>Before you get started make sure that you have downloaded the latest <a href=
   "{@docRoot}sdk/index.html">Android SDK</a> and upgraded your applications and environment as
   needed. The NDK is compatible with older platform versions but not older versions of the SDK tools.
-  Also, take a moment to review the <a href="{@docRoot}sdk/ndk/reqs.html">System and Software Requirements</a>
+  Also, take a moment to review the <a href="{@docRoot}sdk/ndk/overview.html#reqs">System and
+Software Requirements</a>
   for the NDK, if you haven't already.</p>
 
   <p>To install the NDK, follow these steps:</p>

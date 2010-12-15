@@ -181,7 +181,7 @@ that already contains the appropriate parent View to contain the children of the
 in another layout file using <a href="#include-element"><code>&lt;include&gt;</code></a> and
 this layout doesn't require a different {@link android.view.ViewGroup} container. For more
 information about merging layouts, read <a
-href="{@docRoot}resources/articles/layout-tricks-merging.html">Layout
+href="{@docRoot}resources/articles/layout-tricks-merge.html">Layout
 Tricks: Merging</a>.</dd>
 
   </dl>
