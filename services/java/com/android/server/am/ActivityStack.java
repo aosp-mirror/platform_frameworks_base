@@ -662,7 +662,7 @@ public class ActivityStack {
         }
 
         if (w > 0) {
-            //return mService.mWindowManager.screenshotApplications(who, w, h);
+            return mService.mWindowManager.screenshotApplications(who, w, h);
         }
         return null;
     }
