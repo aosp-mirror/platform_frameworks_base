@@ -164,7 +164,8 @@ private:
         size_t              mNumBuffers;
         Texture             mFailoverTexture;
         TextureManager&     mTextureManager;
-        ssize_t             mActiveBuffer;
+        ssize_t             mActiveBufferIndex;
+        sp<GraphicBuffer>   mActiveBuffer;
         bool                mFailover;
         static status_t destroyTexture(Image* tex, EGLDisplay dpy);
 
