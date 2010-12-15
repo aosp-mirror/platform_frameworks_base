@@ -40,13 +40,16 @@ sp<MetaData> ElementaryStreamQueue::getFormat() {
     return mFormat;
 }
 
-void ElementaryStreamQueue::clear() {
+void ElementaryStreamQueue::clear(bool clearFormat) {
     if (mBuffer != NULL) {
         mBuffer->setRange(0, 0);
     }
 
     mRangeInfos.clear();
-    mFormat.clear();
+
+    if (clearFormat) {
+        mFormat.clear();
+    }
 }
 
 static bool IsSeeminglyValidADTSHeader(const uint8_t *ptr, size_t size) {
@@ -289,7 +292,7 @@ sp<ABuffer> ElementaryStreamQueue::dequeueAccessUnitAAC() {
     mBuffer->setRange(0, mBuffer->size() - offset);
 
     if (timeUs >= 0) {
-        accessUnit->meta()->setInt64("time", timeUs);
+        accessUnit->meta()->setInt64("timeUs", timeUs);
     } else {
         LOGW("no time for AAC access unit");
     }
@@ -470,7 +473,7 @@ sp<ABuffer> ElementaryStreamQueue::dequeueAccessUnitH264() {
             int64_t timeUs = fetchTimestamp(nextScan);
             CHECK_GE(timeUs, 0ll);
 
-            accessUnit->meta()->setInt64("time", timeUs);
+            accessUnit->meta()->setInt64("timeUs", timeUs);
 
             if (mFormat == NULL) {
                 mFormat = MakeAVCCodecSpecificData(accessUnit);

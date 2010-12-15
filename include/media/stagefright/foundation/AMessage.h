@@ -40,6 +40,8 @@ struct AMessage : public RefBase {
     void setTarget(ALooper::handler_id target);
     ALooper::handler_id target() const;
 
+    void clear();
+
     void setInt32(const char *name, int32_t value);
     void setInt64(const char *name, int64_t value);
     void setSize(const char *name, size_t value);
@@ -106,7 +108,6 @@ private:
     Item mItems[kMaxNumItems];
     size_t mNumItems;
 
-    void clear();
     Item *allocateItem(const char *name);
     void freeItem(Item *item);
     const Item *findItem(const char *name, Type type) const;

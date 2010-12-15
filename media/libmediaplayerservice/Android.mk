@@ -35,7 +35,8 @@ LOCAL_SHARED_LIBRARIES :=     		\
 	libsurfaceflinger_client
 
 LOCAL_STATIC_LIBRARIES := \
-        libstagefright_rtsp
+        libstagefright_rtsp                     \
+        libstagefright_nuplayer                 \
 
 ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SHARED_LIBRARIES += libdl
@@ -47,9 +48,11 @@ LOCAL_C_INCLUDES :=                                                 \
 	$(TOP)/frameworks/base/include/media/stagefright/openmax \
 	$(TOP)/frameworks/base/media/libstagefright/include             \
 	$(TOP)/frameworks/base/media/libstagefright/rtsp                \
-        $(TOP)/external/tremolo/Tremolo
+        $(TOP)/external/tremolo/Tremolo \
 
 LOCAL_MODULE:= libmediaplayerservice
 
 include $(BUILD_SHARED_LIBRARY)
+
+include $(call all-makefiles-under,$(LOCAL_PATH))
 

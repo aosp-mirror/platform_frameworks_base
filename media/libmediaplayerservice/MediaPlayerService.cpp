@@ -58,6 +58,7 @@
 #include "MidiFile.h"
 #include "TestPlayerStub.h"
 #include "StagefrightPlayer.h"
+#include "nuplayer/NuPlayerDriver.h"
 
 #include <OMX.h>
 
@@ -759,6 +760,10 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
             LOGV(" create StagefrightPlayer");
             p = new StagefrightPlayer;
             break;
+        case NU_PLAYER:
+            LOGV(" create NuPlayer");
+            p = new NuPlayerDriver;
+            break;
         case TEST_PLAYER:
             LOGV("Create Test Player stub");
             p = new TestPlayerStub();
@@ -887,7 +892,7 @@ status_t MediaPlayerService::Client::setDataSource(int fd, int64_t offset, int64
 status_t MediaPlayerService::Client::setDataSource(
         const sp<IStreamSource> &source) {
     // create the right type of player
-    sp<MediaPlayerBase> p = createPlayer(STAGEFRIGHT_PLAYER);
+    sp<MediaPlayerBase> p = createPlayer(NU_PLAYER);
 
     if (p == NULL) {
         return NO_INIT;

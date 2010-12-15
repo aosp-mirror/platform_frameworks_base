@@ -28,6 +28,8 @@ protected:
 
 private:
     int mFd;
+    off64_t mFileSize;
+    int64_t mNextSeekTimeUs;
 
     sp<IStreamListener> mListener;
     Vector<sp<IMemory> > mBuffers;
@@ -36,8 +38,13 @@ private:
 };
 
 MyStreamSource::MyStreamSource(int fd)
-    : mFd(fd) {
+    : mFd(fd),
+      mFileSize(0),
+      mNextSeekTimeUs(ALooper::GetNowUs() + 5000000ll) {
     CHECK_GE(fd, 0);
+
+    mFileSize = lseek64(fd, 0, SEEK_END);
+    lseek64(fd, 0, SEEK_SET);
 }
 
 MyStreamSource::~MyStreamSource() {
@@ -53,6 +60,20 @@ void MyStreamSource::setBuffers(const Vector<sp<IMemory> > &buffers) {
 
 void MyStreamSource::onBufferAvailable(size_t index) {
     CHECK_LT(index, mBuffers.size());
+
+    if (mNextSeekTimeUs >= 0 && mNextSeekTimeUs <= ALooper::GetNowUs()) {
+        off64_t offset = (off64_t)(((float)rand() / RAND_MAX) * mFileSize * 0.8);
+        offset = (offset / 188) * 188;
+
+        lseek(mFd, offset, SEEK_SET);
+
+        mListener->issueCommand(
+                IStreamListener::DISCONTINUITY, false /* synchronous */);
+
+        mNextSeekTimeUs = -1;
+        mNextSeekTimeUs = ALooper::GetNowUs() + 5000000ll;
+    }
+
     sp<IMemory> mem = mBuffers.itemAt(index);
 
     ssize_t n = read(mFd, mem->pointer(), mem->size());

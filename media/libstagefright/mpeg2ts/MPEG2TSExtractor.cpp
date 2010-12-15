@@ -214,7 +214,7 @@ status_t MPEG2TSExtractor::feedMore() {
 
     if (isDiscontinuity(packet, n)) {
         LOGI("XXX discontinuity detected");
-        mParser->signalDiscontinuity();
+        mParser->signalDiscontinuity(ATSParser::DISCONTINUITY_HTTPLIVE);
     } else if (n < (ssize_t)kTSPacketSize) {
         return (n < 0) ? (status_t)n : ERROR_END_OF_STREAM;
     } else {

@@ -122,3 +122,29 @@ LOCAL_MODULE_TAGS := debug
 LOCAL_MODULE:= stream
 
 include $(BUILD_EXECUTABLE)
+
+################################################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=         \
+        sf2.cpp    \
+
+LOCAL_SHARED_LIBRARIES := \
+	libstagefright liblog libutils libbinder libstagefright_foundation \
+        libmedia libsurfaceflinger_client libcutils libui
+
+LOCAL_C_INCLUDES:= \
+	$(JNI_H_INCLUDE) \
+	frameworks/base/media/libstagefright \
+	$(TOP)/frameworks/base/include/media/stagefright/openmax
+
+LOCAL_CFLAGS += -Wno-multichar
+
+LOCAL_MODULE_TAGS := debug
+
+LOCAL_MODULE:= sf2
+
+include $(BUILD_EXECUTABLE)
+
+
