@@ -16,8 +16,7 @@ parent.link=index.html
       </ol>
     </li>
     <li><a href="#Position">Position</a></li>
-    <li><a href="#SizePaddingMargin">Size, Padding and Margins</a></li>
-    <li><a href="#example">Example Layout</a></li>
+    <li><a href="#SizePaddingMargins">Size, Padding and Margins</a></li>
   </ol>
 
   <h2>Key classes</h2>

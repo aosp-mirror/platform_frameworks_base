@@ -54,7 +54,7 @@ function toggleDiv(link) {
     <li><a href="#Preparing">1. Preparing Your Development Computer</a></li>
     <li><a href="#Installing">2. Downloading the SDK Starter Package</a></li>
     <li><a href="#InstallingADT">3. Installing the ADT Plugin for Eclipse</a></li>
-    <li><a href="#components">4. Adding Platforms and Other Components</a>
+    <li><a href="#AddingComponents">4. Adding Platforms and Other Components</a>
       <ol>
         <li><a href="#components">Available Components</a></li>
         <li><a href="#which">Recommended Components</a></li>
@@ -153,7 +153,7 @@ href="{@docRoot}guide/developing/other-ide.html">Developing in Other IDEs</a>.</
 
 
 
-<h2 id="components">Step 4. Adding Android Platforms and Other Components</h2>
+<h2 id="AddingComponents">Step 4. Adding Platforms and Other Components</h2>
 
 <p>The last step in setting up your SDK is using the <em>Android SDK and AVD Manager</em> (a
 tool included in the SDK starter package) to download

@@ -14,7 +14,7 @@ page.title=Audio and Video
 
 <h2>In this document</h2>
 <ol>
-<li><a href="#playback.html">Audio and Video Playback</a>
+<li><a href="#playback">Audio and Video Playback</a>
     <ol>
       <li><a href="#playraw">Playing from a Raw Resource</li>
       <li><a href="#playfile">Playing from a File or Stream</li>
@@ -63,7 +63,7 @@ capabilities, accessible through the MediaRecorder class. </p>
 see the <a href="{@docRoot}guide/appendix/media-formats.html">Android Media
 Formats</a> appendix. </p>
 
-<h2 id="play">Audio and Video Playback</h2>
+<h2 id="playback">Audio and Video Playback</h2>
 <p>Media can be played from anywhere: from a raw resource, from a file from the system, 
 or from an available network (URL).</p>
   

@@ -31,8 +31,8 @@ for an interactive game or 3D rendering.</p>
 and which tasks they're best suited for.</p>
 
 <p>If you're specifically looking for information on drawing 3D graphics, this page won't
-help a lot. However, the information below, on <a href="#drawing-with-canvas">Drawing with a Canvas</a>
-(and the section on SurfaceView), 
+help a lot. However, the information below about how to <a href="#draw-with-canvas">Draw with a
+Canvas</a> (and the section on SurfaceView), 
 will give you a quick idea of how you should draw to the View hierarchy. For more information
 on Android's 3D graphic utilities (provided by the OpenGL ES API), 
 read <a href="opengl.html">3D with OpenGL</a> and refer to other OpenGL documentation.</p>

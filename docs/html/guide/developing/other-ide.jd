@@ -804,7 +804,7 @@ href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml</
 
 <p>To build an application project that depends on one or more library projects,
 you can use the standard Ant build commands and compile modes, as described in
-<a href=#Building">Building Your Application</a>, earlier in this document. The
+<a href="#Building">Building Your Application</a>, earlier in this document. The
 tools compile and merge all libraries referenced by the application as part
 of compiling the dependent application project. No additional commands or steps
 are necessary. </p>

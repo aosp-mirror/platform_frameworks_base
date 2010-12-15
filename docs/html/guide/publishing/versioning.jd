@@ -16,7 +16,7 @@ page.title=Versioning Your Applications
 <h2>In this document</h2>
 
 <ol>
-<li><a href="#appversion">Setting Application Version</a></li>
+<li><a href="#appversioning">Setting Application Version</a></li>
 <li><a href="#minsdkversion">Specifying Your Application's System API Requirements</a>
 </ol>
 

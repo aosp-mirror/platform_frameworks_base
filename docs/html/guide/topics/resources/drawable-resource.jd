@@ -381,7 +381,7 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
 <dd>
 <pre class="stx">
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;<a href="#bitmap-element">nine-patch</a>
+&lt;<a href="#ninepatch-element">nine-patch</a>
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:src="@[package:]drawable/<em>drawable_resource</em>"
     android:dither=["true" | "false"] /&gt;
@@ -394,8 +394,8 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
 <dd>
 <dl class="tag-list">
 
-  <dt id="layerlist-element"><code>&lt;bitmap&gt;</code></dt>
-    <dd>Defines the bitmap source and its properties.
+  <dt id="ninepatch-element"><code>&lt;nine-patch&gt;</code></dt>
+    <dd>Defines the Nine-Patch source and its properties.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>xmlns:android</code></dt>
@@ -1613,7 +1613,7 @@ href="more-resources.html#Dimension">dimension resource</a>.</dd>
 href="more-resources.html#Dimension">dimension resource</a>.</dd>
       </dl>
     </dd>
-  <dt id="solid-element"><code>&lt;size&gt;</code></dt>
+  <dt id="size-element"><code>&lt;size&gt;</code></dt>
     <dd>The size of the shape.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
