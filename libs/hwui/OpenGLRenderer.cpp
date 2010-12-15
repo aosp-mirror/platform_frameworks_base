@@ -839,6 +839,7 @@ void OpenGLRenderer::setupDraw() {
     mColorA = mColorR = mColorG = mColorB = 0.0f;
     mTextureUnit = 0;
     mTrackDirtyRegions = true;
+    mTexCoordsSlot = -1;
 }
 
 void OpenGLRenderer::setupDrawWithTexture(bool isAlpha8) {
@@ -847,7 +848,11 @@ void OpenGLRenderer::setupDrawWithTexture(bool isAlpha8) {
 }
 
 void OpenGLRenderer::setupDrawColor(int color) {
-    mColorA = ((color >> 24) & 0xFF) / 255.0f;
+    setupDrawColor(color, (color >> 24) & 0xFF);
+}
+
+void OpenGLRenderer::setupDrawColor(int color, int alpha) {
+    mColorA = alpha / 255.0f;
     const float a = mColorA / 255.0f;
     mColorR = a * ((color >> 16) & 0xFF);
     mColorG = a * ((color >>  8) & 0xFF);
@@ -926,6 +931,10 @@ void OpenGLRenderer::setupDrawModelViewTranslate(float left, float top, float ri
     }
 }
 
+void OpenGLRenderer::setupDrawModelViewIdentity() {
+    mCaches.currentProgram->set(mOrthoMatrix, mIdentity, *mSnapshot->transform);
+}
+
 void OpenGLRenderer::setupDrawModelView(float left, float top, float right, float bottom,
         bool ignoreTransform, bool ignoreModelView) {
     if (!ignoreModelView) {
@@ -967,6 +976,12 @@ void OpenGLRenderer::setupDrawShaderUniforms(bool ignoreTransform) {
     }
 }
 
+void OpenGLRenderer::setupDrawShaderIdentityUniforms() {
+    if (mShader) {
+        mShader->setupProgram(mCaches.currentProgram, mIdentity, *mSnapshot, &mTextureUnit);
+    }
+}
+
 void OpenGLRenderer::setupDrawColorFilterUniforms() {
     if (mColorFilter) {
         mColorFilter->setupProgram(mCaches.currentProgram);
@@ -995,7 +1010,9 @@ void OpenGLRenderer::setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLuint v
     }
     glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
             gMeshStride, vertices);
-    glVertexAttribPointer(mTexCoordsSlot, 2, GL_FLOAT, GL_FALSE, gMeshStride, texCoords);
+    if (mTexCoordsSlot > 0) {
+        glVertexAttribPointer(mTexCoordsSlot, 2, GL_FLOAT, GL_FALSE, gMeshStride, texCoords);
+    }
 }
 
 void OpenGLRenderer::finishDrawTexture() {
@@ -1167,37 +1184,9 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     // it draws an unscaled 1px wide line
     const bool isHairLine = paint->getStrokeWidth() == 0.0f;
 
-    setupDraw();
-
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
-
-    uint32_t color = paint->getColor();
-    const GLfloat a = alpha / 255.0f;
-    const GLfloat r = a * ((color >> 16) & 0xFF) / 255.0f;
-    const GLfloat g = a * ((color >>  8) & 0xFF) / 255.0f;
-    const GLfloat b = a * ((color      ) & 0xFF) / 255.0f;
-
-    // Used only with AA lines
-    GLuint textureUnit = 0;
-
-    // Describe the required shaders
-    ProgramDescription description;
-    const bool setColor = description.setColor(r, g, b, a);
-
-    if (mShader) {
-        mShader->describe(description, mCaches.extensions);
-    }
-    if (mColorFilter) {
-        mColorFilter->describe(description, mCaches.extensions);
-    }
-
-    // Setup the blending mode
-    chooseBlending(a < 1.0f || (mShader && mShader->blend()), mode, description);
-
-    // We're not drawing with VBOs here
-    mCaches.unbindMeshBuffer();
 
     int verticesCount = count >> 2;
     if (!isHairLine) {
@@ -1211,23 +1200,17 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     TextureVertex lines[verticesCount];
     TextureVertex* vertex = &lines[0];
 
-    glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
-            gMeshStride, vertex);
-
-    // Build and use the appropriate shader
-    useProgram(mCaches.programCache.get(description));
-    mCaches.currentProgram->set(mOrthoMatrix, mIdentity, *mSnapshot->transform);
-
-    if (!mShader || (mShader && setColor)) {
-        mCaches.currentProgram->setColor(r, g, b, a);
-    }
-
-    if (mShader) {
-        mShader->setupProgram(mCaches.currentProgram, mIdentity, *mSnapshot, &textureUnit);
-    }
-    if (mColorFilter) {
-        mColorFilter->setupProgram(mCaches.currentProgram);
-    }
+    setupDraw();
+    setupDrawColor(paint->getColor(), alpha);
+    setupDrawColorFilter();
+    setupDrawShader();
+    setupDrawBlending(mode);
+    setupDrawProgram();
+    setupDrawModelViewIdentity();
+    setupDrawColorUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawShaderIdentityUniforms();
+    setupDrawMesh(vertex);
 
     if (!isHairLine) {
         // TODO: Handle the AA case
@@ -1274,6 +1257,7 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
             TextureVertex::set(vertex++, points[i], points[i + 1], 0.0f, 0.0f);
             TextureVertex::set(vertex++, points[i + 2], points[i + 3], 0.0f, 0.0f);
         }
+
         glLineWidth(1.0f);
         glDrawArrays(GL_LINES, 0, verticesCount);
     }
