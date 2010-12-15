@@ -496,8 +496,8 @@ on disk images, use <code>-help-disk-images</code>.</p>
   <td>Enable the root shell (as in <code>-shell</code> and specify the QEMU character 
   device to use for communication with the shell.</td>
   <td>&lt;device&gt; must be a QEMU device type. See the documentation for '-serial <em>dev</em>' at 
-  <a href="http://www.nongnu.org/qemu/qemu-doc.html#SEC10">http://www.bellard.org/qemu/qemu-doc.html#SEC10</a> 
-  for a list of device types.</p>
+  <a href="http://wiki.qemu.org/download/qemu-doc.html">wiki.qemu.org</a> 
+  for more information.</p>
 
 <p>Here are some examples: </p>
 <ul>

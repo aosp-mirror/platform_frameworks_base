@@ -160,7 +160,7 @@ so before continuing with the driver installation. </p>
 <a href="adding-components.html">Adding SDK Components</a> to launch the Android
 SDK and AVD Manager. From the <strong>Available Packages</strong> panel, select
 "Usb Driver Package" and download it to your computer. The driver files are
-downloaded into the <code>&lt;sdk&gt;\usb_driver</code> directory.</p>
+downloaded into the <code>&lt;sdk&gt;\google-usb_driver\</code> directory.</p>
 
 <p>After the download, follow the instructions below to install or upgrade the
 driver, based on your needs and Windows operating system version. If you are

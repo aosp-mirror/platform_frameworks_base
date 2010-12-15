@@ -156,14 +156,14 @@ Administration API lets you do the following:</p> <ul>
 <h2 id="sample">Sample Application</h2>
 
 <p>The examples used in this document are based on the <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/
-android/apis/app/DeviceAdminSample.html">Device Administration API
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/DeviceAdminSample.html">
+Device Administration API
 sample</a>, which is included in the SDK samples. For information on downloading and
 installing the SDK samples, see <a
 href="{@docRoot}resources/samples/get.html">
 Getting the Samples</a>. Here is the  <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/
-android/apis/app/DeviceAdminSample.html">complete code</a> for
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/DeviceAdminSample.html">
+complete code</a> for
 the sample. </p>
 <p>The
 sample application offers a demo of device admin features. It presents users
