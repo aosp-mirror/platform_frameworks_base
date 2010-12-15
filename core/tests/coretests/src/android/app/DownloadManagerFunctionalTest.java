@@ -16,51 +16,35 @@
 
 package android.app;
 
+import coretestutils.http.MockResponse;
+
 import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
 import android.app.DownloadManagerBaseTest.DataType;
-import android.app.DownloadManagerBaseTest.MultipleDownloadsCompletedReceiver;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
-import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.StatFs;
-import android.os.SystemClock;
-import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
 
-import junit.framework.AssertionFailedError;
-
-import coretestutils.http.MockResponse;
-import coretestutils.http.MockWebServer;
-
 /**
  * Integration tests of the DownloadManager API.
  */
-public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
-
-    private final static String LOG_TAG = "android.net.DownloadManagerIntegrationTest";
-    private final static String PROHIBITED_DIRECTORY =
-            Environment.getRootDirectory().getAbsolutePath();
+public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
+    private static final String TAG = "DownloadManagerFunctionalTest";
     private final static String CACHE_DIR =
             Environment.getDownloadCacheDirectory().getAbsolutePath();
+    private final static String PROHIBITED_DIRECTORY =
+            Environment.getRootDirectory().getAbsolutePath();
 
     /**
      * {@inheritDoc}
@@ -89,26 +73,12 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
     }
 
     /**
-     * Helper that does the actual basic download verification.
-     */
-    protected long doBasicDownload(byte[] blobData) throws Exception {
-        long dlRequest = doStandardEnqueue(blobData);
-
-        // wait for the download to complete
-        waitForDownloadOrTimeout(dlRequest);
-
-        assertEquals(1, mReceiver.numDownloadsCompleted());
-        return dlRequest;
-    }
-
-    /**
      * Verifies a particular error code was received from a download
      *
      * @param uri The uri to enqueue to the DownloadManager
      * @param error The error code expected
-     * @throws an Exception if the test fails
+     * @throws Exception if the test fails
      */
-    @LargeTest
     public void doErrorTest(Uri uri, int error) throws Exception {
         Request request = new Request(uri);
         request.setTitle(DEFAULT_FILENAME);
@@ -128,66 +98,57 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
      * Test a basic download of a binary file 500k in size.
      */
     @LargeTest
-    public void testBasicBinaryDownload() throws Exception {
-        int fileSize = 500 * 1024;  // 500k
+    public void testBinaryDownloadToSystemCache() throws Exception {
+        int fileSize = 1024;
         byte[] blobData = generateData(fileSize, DataType.BINARY);
 
-        long dlRequest = doBasicDownload(blobData);
-        verifyAndCleanupSingleFileDownload(dlRequest, blobData);
+        long dlRequest = doBasicDownload(blobData, DOWNLOAD_TO_SYSTEM_CACHE);
+        verifyDownload(dlRequest, blobData);
+        mDownloadManager.remove(dlRequest);
     }
 
     /**
      * Tests the basic downloading of a text file 300000 bytes in size.
      */
     @LargeTest
-    public void testBasicTextDownload() throws Exception {
-        int fileSize = 300000;
+    public void testTextDownloadToSystemCache() throws Exception {
+        int fileSize = 1024;
         byte[] blobData = generateData(fileSize, DataType.TEXT);
 
-        long dlRequest = doBasicDownload(blobData);
-        verifyAndCleanupSingleFileDownload(dlRequest, blobData);
+        long dlRequest = doBasicDownload(blobData, DOWNLOAD_TO_SYSTEM_CACHE);
+        verifyDownload(dlRequest, blobData);
+        mDownloadManager.remove(dlRequest);
     }
-
+    
     /**
-     * Tests when the server drops the connection after all headers (but before any data send).
+     * Helper to verify a standard single-file download from the mock server, and clean up after
+     * verification
+     *
+     * Note that this also calls the Download manager's remove, which cleans up the file from cache.
+     *
+     * @param requestId The id of the download to remove
+     * @param fileData The data to verify the file contains
      */
-    @LargeTest
-    public void testDropConnection_headers() throws Exception {
-        byte[] blobData = generateData(DEFAULT_FILE_SIZE, DataType.TEXT);
-
-        MockResponse response = enqueueResponse(HTTP_OK, blobData);
-        response.setCloseConnectionAfterHeader("content-length");
-        long dlRequest = doCommonStandardEnqueue();
-
-        // Download will never complete when header is dropped
-        boolean success = waitForDownloadOrTimeoutNoThrow(dlRequest, DEFAULT_WAIT_POLL_TIME,
-                DEFAULT_MAX_WAIT_TIME);
-
-        assertFalse(success);
-    }
-
-    /**
-     * Tests that we get an error code when the server drops the connection during a download.
-     */
-    @LargeTest
-    public void testServerDropConnection_body() throws Exception {
-        byte[] blobData = generateData(25000, DataType.TEXT);  // file size = 25000 bytes
-
-        MockResponse response = enqueueResponse(HTTP_OK, blobData);
-        response.setCloseConnectionAfterXBytes(15382);
-        long dlRequest = doCommonStandardEnqueue();
-        waitForDownloadOrTimeout(dlRequest);
-
-        Cursor cursor = getCursor(dlRequest);
+    private void verifyDownload(long requestId, byte[] fileData)
+            throws Exception {
+        int fileSize = fileData.length;
+        ParcelFileDescriptor pfd = mDownloadManager.openDownloadedFile(requestId);
+        Cursor cursor = mDownloadManager.query(new Query().setFilterById(requestId));
         try {
-            verifyInt(cursor, DownloadManager.COLUMN_STATUS, DownloadManager.STATUS_FAILED);
-            verifyInt(cursor, DownloadManager.COLUMN_REASON,
-                    DownloadManager.ERROR_CANNOT_RESUME);
+            assertEquals(1, cursor.getCount());
+            assertTrue(cursor.moveToFirst());
+
+            mServer.checkForExceptions();
+
+            verifyFileSize(pfd, fileSize);
+            verifyFileContents(pfd, fileData);
+            int colIndex = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME);
+            String fileName = cursor.getString(colIndex);
+            assertTrue(fileName.startsWith(CACHE_DIR));
         } finally {
+            pfd.close();
             cursor.close();
         }
-        // Even tho the server drops the connection, we should still get a completed notification
-        assertEquals(1, mReceiver.numDownloadsCompleted());
     }
 
     /**
@@ -198,7 +159,7 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
         // need to be sure all current downloads have stopped first
         removeAllCurrentDownloads();
         int NUM_FILES = 10;
-        int MAX_FILE_SIZE = 500 * 1024; // 500 kb
+        int MAX_FILE_SIZE = 10 * 1024; // 10 kb
 
         Random r = new LoggingRng();
         for (int i=0; i<NUM_FILES; ++i) {
@@ -213,7 +174,6 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
             enqueueResponse(HTTP_OK, blobData);
 
             long requestID = mDownloadManager.enqueue(request);
-            Log.i(LOG_TAG, "request: " + i + " -- requestID: " + requestID);
         }
 
         waitForDownloadsOrTimeout(WAIT_FOR_DOWNLOAD_POLL_TIME, MAX_WAIT_FOR_DOWNLOAD_TIME);
@@ -236,8 +196,6 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
 
             assertEquals(NUM_FILES, mReceiver.numDownloadsCompleted());
         } finally {
-            Log.i(LOG_TAG, "All download IDs: " + mReceiver.getDownloadIds().toString());
-            Log.i(LOG_TAG, "Total downloads completed: " + mReceiver.getDownloadIds().size());
             cursor.close();
         }
     }
@@ -258,7 +216,6 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
             Request request = new Request(uri);
 
             Uri localUri = Uri.fromFile(existentFile);
-            Log.i(LOG_TAG, "setting localUri to: " + localUri.getPath());
             request.setDestinationUri(localUri);
 
             long dlRequest = mDownloadManager.enqueue(request);
@@ -268,9 +225,7 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
             Cursor cursor = getCursor(dlRequest);
 
             try {
-                verifyInt(cursor, DownloadManager.COLUMN_STATUS, DownloadManager.STATUS_FAILED);
-                verifyInt(cursor, DownloadManager.COLUMN_REASON,
-                        DownloadManager.ERROR_FILE_ALREADY_EXISTS);
+                verifyInt(cursor, DownloadManager.COLUMN_STATUS, DownloadManager.STATUS_SUCCESSFUL);
             } finally {
                 cursor.close();
             }
@@ -299,7 +254,6 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
             Request request = new Request(uri);
 
             Uri localUri = Uri.fromFile(downloadedFile);
-            Log.i(LOG_TAG, "setting localUri to: " + localUri.getPath());
             request.setDestinationUri(localUri);
 
             long dlRequest = mDownloadManager.enqueue(request);
@@ -331,7 +285,6 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
             Request request = new Request(uri);
 
             Uri localUri = Uri.fromFile(downloadedFile);
-            Log.i(LOG_TAG, "setting localUri to: " + localUri.getPath());
             request.setDestinationUri(localUri);
 
             try {
@@ -343,144 +296,6 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
         } finally {
             // Just in case file somehow got created, make sure to delete it
             downloadedFile.delete();
-        }
-    }
-
-    /**
-     * Tests that a download set for Wifi does not progress while Wifi is disabled, but resumes
-     * once Wifi is re-enabled.
-     */
-    @LargeTest
-    public void testDownloadNoWifi() throws Exception {
-        long timeout = 60 * 1000; // wait only 60 seconds before giving up
-        int fileSize = 140 * 1024;  // 140k
-        byte[] blobData = generateData(fileSize, DataType.TEXT);
-
-        setWiFiStateOn(false);
-        enqueueResponse(HTTP_OK, blobData);
-
-        try {
-            Uri uri = getServerUri(DEFAULT_FILENAME);
-            Request request = new Request(uri);
-            request.setAllowedNetworkTypes(Request.NETWORK_WIFI);
-
-            long dlRequest = mDownloadManager.enqueue(request);
-
-            // wait for the download to complete
-            boolean success = waitForDownloadOrTimeoutNoThrow(dlRequest,
-                    WAIT_FOR_DOWNLOAD_POLL_TIME, timeout);
-            assertFalse("Download proceeded without Wifi connection!", success);
-
-            setWiFiStateOn(true);
-            waitForDownloadOrTimeout(dlRequest);
-
-            assertEquals(1, mReceiver.numDownloadsCompleted());
-        } finally {
-            setWiFiStateOn(true);
-        }
-    }
-
-    /**
-     * Tests downloading a file to cache when there isn't enough space in the cache to hold the
-     * entire file.
-     */
-    @LargeTest
-    public void testDownloadToCache_whenFull() throws Exception {
-        int DOWNLOAD_FILE_SIZE = 500000;
-
-        StatFs fs = new StatFs(CACHE_DIR);
-        Log.i(LOG_TAG, "getAvailableBlocks: " + fs.getAvailableBlocks());
-        Log.i(LOG_TAG, "getBlockSize: " + fs.getBlockSize());
-
-        int blockSize = fs.getBlockSize();
-        int availableBlocks = fs.getAvailableBlocks();
-        int availableBytes = blockSize * availableBlocks;
-        File outFile = null;
-
-        try {
-            // fill cache to ensure we don't have enough space - take half the size of the
-            // download size, and leave that much freespace left on the cache partition
-            if (DOWNLOAD_FILE_SIZE <= availableBytes) {
-                int writeSizeBytes = availableBytes - (DOWNLOAD_FILE_SIZE / 2);
-
-                int writeSizeBlocks = writeSizeBytes / blockSize;
-                int remainderSizeBlocks = availableBlocks - writeSizeBlocks;
-
-                FileOutputStream fo = null;
-                try {
-                    outFile = File.createTempFile("DM_TEST", null, new File(CACHE_DIR));
-                    Log.v(LOG_TAG, "writing " + writeSizeBlocks + " blocks to file "
-                            + outFile.getAbsolutePath());
-
-                    fo = new FileOutputStream(outFile);
-
-                    byte[] buffer = new byte[blockSize];
-                    while (fs.getAvailableBlocks() >= remainderSizeBlocks) {
-                        fo.write(buffer);
-                        fs.restat(CACHE_DIR);
-                    }
-                } catch (IOException e) {
-                    Log.e(LOG_TAG, "error filling file: ", e);
-                    throw e;
-                } finally {
-                    if (fo != null) {
-                        fo.close();
-                    }
-                }
-            }
-
-            Log.i(LOG_TAG, "Done creating filler file.");
-            assertTrue(DOWNLOAD_FILE_SIZE > (fs.getAvailableBlocks() * blockSize));
-            byte[] blobData = generateData(DOWNLOAD_FILE_SIZE, DataType.TEXT);
-            long dlRequest = doBasicDownload(blobData);
-            verifyAndCleanupSingleFileDownload(dlRequest, blobData);
-
-        } finally {
-            if (outFile != null) {
-                outFile.delete();
-            }
-        }
-    }
-
-    /**
-     * Tests that files are not deleted when DOWNLOAD_CACHE_NON_PURGEABLE is set, even if we've
-     * run out of space.
-     */
-    @LargeTest
-    public void testDownloadCacheNonPurgeable() throws Exception {
-        int fileSize = 10000000;
-        byte[] blobData = generateData(fileSize, DataType.BINARY);
-        long dlRequest = -1;
-
-        // Fill up the cache partition until there's not enough room for another download.
-        // Note that we need to initiate a download first, then check for the available space. This
-        // is b/c there could be some files that are still left in the cache that can (and will be)
-        // cleared out, but not until DM gets a request for a download and reclaims that
-        // space first.
-        boolean spaceAvailable = true;
-        while (spaceAvailable) {
-            dlRequest = doStandardEnqueue(blobData);
-            waitForDownloadOrTimeout(dlRequest);
-
-            // Check if we've filled up the cache yet
-            StatFs fs = new StatFs(CACHE_DIR);
-            Log.i(LOG_TAG, "getAvailableBlocks: " + fs.getAvailableBlocks());
-            Log.i(LOG_TAG, "getBlockSize: " + fs.getBlockSize());
-            int availableBytes = fs.getBlockSize() * fs.getAvailableBlocks();
-            spaceAvailable = (availableBytes > fileSize) ? true : false;
-        }
-
-        // Now add one more download (should not fit in the space left over)
-        dlRequest = doStandardEnqueue(blobData);
-        waitForDownloadOrTimeout(dlRequest);
-
-        // For the last download we should have failed b/c there is not enough space left in cache
-        Cursor cursor = getCursor(dlRequest);
-        try {
-            verifyInt(cursor, DownloadManager.COLUMN_REASON,
-                    DownloadManager.ERROR_INSUFFICIENT_SPACE);
-        } finally {
-            cursor.close();
         }
     }
 
@@ -545,10 +360,10 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
      */
     @LargeTest
     public void testRemoveDownload() throws Exception {
-        int fileSize = 100 * 1024;  // 100k
+        int fileSize = 1024;
         byte[] blobData = generateData(fileSize, DataType.BINARY);
 
-        long dlRequest = doBasicDownload(blobData);
+        long dlRequest = doBasicDownload(blobData, DOWNLOAD_TO_DOWNLOAD_CACHE_DIR);
         Cursor cursor = mDownloadManager.query(new Query().setFilterById(dlRequest));
         try {
             assertEquals("The count of downloads with this ID is not 1!", 1, cursor.getCount());
@@ -565,7 +380,7 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
      */
     @LargeTest
     public void testSetTitle() throws Exception {
-        int fileSize = 50 * 1024;  // 50k
+        int fileSize = 1024;
         byte[] blobData = generateData(fileSize, DataType.BINARY);
         MockResponse response = enqueueResponse(HTTP_OK, blobData);
 
@@ -583,6 +398,181 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
         Cursor cursor = getCursor(dlRequest);
         try {
             verifyString(cursor, DownloadManager.COLUMN_TITLE, title);
+        } finally {
+            cursor.close();
+        }
+    }
+
+    /**
+     * Tests that a download set for Wifi does not progress while Wifi is disabled, but resumes
+     * once Wifi is re-enabled.
+     */
+    @LargeTest
+    public void testDownloadNoWifi() throws Exception {
+        long timeout = 60 * 1000; // wait only 60 seconds before giving up
+        int fileSize = 1024;  // 140k
+        byte[] blobData = generateData(fileSize, DataType.TEXT);
+
+        setWiFiStateOn(false);
+        enqueueResponse(HTTP_OK, blobData);
+
+        try {
+            Uri uri = getServerUri(DEFAULT_FILENAME);
+            Request request = new Request(uri);
+            request.setAllowedNetworkTypes(Request.NETWORK_WIFI);
+
+            long dlRequest = mDownloadManager.enqueue(request);
+
+            // wait for the download to complete
+            boolean success = waitForDownloadOrTimeoutNoThrow(dlRequest,
+                    WAIT_FOR_DOWNLOAD_POLL_TIME, timeout);
+            assertFalse("Download proceeded without Wifi connection!", success);
+
+            setWiFiStateOn(true);
+            waitForDownloadOrTimeout(dlRequest);
+
+            assertEquals(1, mReceiver.numDownloadsCompleted());
+        } finally {
+            setWiFiStateOn(true);
+        }
+    }
+
+    /**
+     * Tests when the server drops the connection after all headers (but before any data send).
+     */
+    @LargeTest
+    public void testDropConnection_headers() throws Exception {
+        byte[] blobData = generateData(DEFAULT_FILE_SIZE, DataType.TEXT);
+
+        MockResponse response = enqueueResponse(HTTP_OK, blobData);
+        response.setCloseConnectionAfterHeader("content-length");
+        long dlRequest = doCommonStandardEnqueue();
+
+        // Download will never complete when header is dropped
+        boolean success = waitForDownloadOrTimeoutNoThrow(dlRequest, DEFAULT_WAIT_POLL_TIME,
+                DEFAULT_MAX_WAIT_TIME);
+
+        assertFalse(success);
+    }
+
+    /**
+     * Tests that we get an error code when the server drops the connection during a download.
+     */
+    @LargeTest
+    public void testServerDropConnection_body() throws Exception {
+        byte[] blobData = generateData(25000, DataType.TEXT);  // file size = 25000 bytes
+
+        MockResponse response = enqueueResponse(HTTP_OK, blobData);
+        response.setCloseConnectionAfterXBytes(15382);
+        long dlRequest = doCommonStandardEnqueue();
+        waitForDownloadOrTimeout(dlRequest);
+
+        Cursor cursor = getCursor(dlRequest);
+        try {
+            verifyInt(cursor, DownloadManager.COLUMN_STATUS, DownloadManager.STATUS_FAILED);
+            verifyInt(cursor, DownloadManager.COLUMN_REASON,
+                    DownloadManager.ERROR_CANNOT_RESUME);
+        } finally {
+            cursor.close();
+        }
+        // Even tho the server drops the connection, we should still get a completed notification
+        assertEquals(1, mReceiver.numDownloadsCompleted());
+    }
+
+    /**
+     * Tests downloading a file to system cache when there isn't enough space in the system cache 
+     * to hold the entire file. DownloadManager deletes enough files to make space for the
+     * new download.
+     */
+    @LargeTest
+    public void testDownloadToCacheWithAlmostFullCache() throws Exception {
+        int DOWNLOAD_FILE_SIZE = 1024 * 1024; // 1MB
+
+        StatFs fs = new StatFs(CACHE_DIR);
+        int blockSize = fs.getBlockSize();
+        int availableBlocks = fs.getAvailableBlocks();
+        int availableBytes = blockSize * availableBlocks;
+        Log.i(TAG, "INITIAL stage, available space in /cache: " + availableBytes);
+        File outFile = File.createTempFile("DM_TEST", null, new File(CACHE_DIR));
+        byte[] buffer = new byte[blockSize];
+
+        try {
+            // fill cache to ensure we don't have enough space - take half the size of the
+            // download size, and leave that much freespace left on the cache partition
+            if (DOWNLOAD_FILE_SIZE <= availableBytes) {
+                int writeSizeBytes = availableBytes - (DOWNLOAD_FILE_SIZE / 2);
+
+                int writeSizeBlocks = writeSizeBytes / blockSize;
+                int remainderSizeBlocks = availableBlocks - writeSizeBlocks;
+
+                FileOutputStream fo = null;
+                try {
+                    fo = new FileOutputStream(outFile);
+                    while (fs.getAvailableBlocks() >= remainderSizeBlocks) {
+                        fo.write(buffer);
+                        fs.restat(CACHE_DIR);
+                    }
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "error filling file: ", e);
+                    throw e;
+                } finally {
+                    if (fo != null) {
+                        fo.close();
+                    }
+                }
+            }
+
+            // /cache should now be almost full. 
+            long spaceAvailable = fs.getAvailableBlocks() * blockSize;
+            Log.i(TAG, "BEFORE download, available space in /cache: " + spaceAvailable);
+            assertTrue(DOWNLOAD_FILE_SIZE > spaceAvailable);
+
+            // try to download 1MB file into /cache - and it should succeed
+            byte[] blobData = generateData(DOWNLOAD_FILE_SIZE, DataType.TEXT);
+            long dlRequest = doBasicDownload(blobData, DOWNLOAD_TO_SYSTEM_CACHE);
+            verifyAndCleanupSingleFileDownload(dlRequest, blobData);
+        } finally {
+            if (outFile != null) {
+                outFile.delete();
+            }
+        }
+    }
+
+    /**
+     * Tests that files are not deleted when DOWNLOAD_CACHE_NON_PURGEABLE is set, even if we've
+     * run out of space.
+     */
+    @LargeTest
+    public void testDownloadToCacheNonPurgeableWithFullCache() throws Exception {
+        int fileSize = 1024 * 1024; // 1MB
+        byte[] blobData = generateData(fileSize, DataType.BINARY);
+        long dlRequest = -1;
+
+        // Fill up the cache partition with DOWNLOAD_CACHE_NON_PURGEABLE downloads
+        // until 500KB is left.
+        boolean spaceAvailable = true;
+        while (spaceAvailable) {
+            // since this tests package has android.permission.DOWNLOAD_CACHE_NON_PURGEABLE
+            // permission, downloads are automatically set to be DOWNLOAD_CACHE_NON_PURGEABLE
+            dlRequest = enqueueDownloadRequest(blobData, DOWNLOAD_TO_DOWNLOAD_CACHE_DIR);
+            waitForDownloadOrTimeout(dlRequest);
+
+            // Check if we've filled up the cache yet
+            StatFs fs = new StatFs(Environment.getDownloadCacheDirectory().getAbsolutePath());
+            int availableBytes = fs.getBlockSize() * fs.getAvailableBlocks();
+            Log.i(TAG, "available space in /cache: " + availableBytes);
+            spaceAvailable = (availableBytes > fileSize) ? true : false;
+        }
+
+        // Now add one more 1MB download (should not fit in the space left over)
+        dlRequest = enqueueDownloadRequest(blobData, DOWNLOAD_TO_DOWNLOAD_CACHE_DIR);
+        waitForDownloadOrTimeout(dlRequest);
+
+        // For the last download we should have failed b/c there is not enough space left in cache
+        Cursor cursor = getCursor(dlRequest);
+        try {
+            verifyInt(cursor, DownloadManager.COLUMN_REASON,
+                    DownloadManager.ERROR_INSUFFICIENT_SPACE);
         } finally {
             cursor.close();
         }

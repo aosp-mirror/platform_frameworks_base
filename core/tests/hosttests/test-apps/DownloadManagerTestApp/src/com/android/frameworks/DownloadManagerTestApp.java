@@ -18,7 +18,6 @@ package com.android.frameworks.downloadmanagertests;
 import android.app.DownloadManager;
 import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
-import android.app.DownloadManagerBaseTest;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
