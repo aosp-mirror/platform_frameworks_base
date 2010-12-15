@@ -124,7 +124,7 @@ in {@sdkPlatformVersion}, including new features and changes in the framework
 API since the previous version.</p>
 
 
-<h3 id="sip">SIP-based VOIP</h3>
+<h3 id="sip">SIP-based VoIP</h3>
 
 <p>The platform now includes a SIP protocol stack and framework API that lets
 developers build internet telephony applications. Using the API, applications can offer
@@ -719,7 +719,7 @@ should require this permission.</li>
 <li><code>android.permission.USE_SIP</code> &mdash; Allows an application to use
 the {@link android.net.sip SIP API} to make or receive internet calls.
 <li><code>android.permission.NFC</code> &mdash; Allows an application to use the
-{@link android.nfc NFC API} to make or receive internet calls.</li>
+{@link android.nfc NFC API} to read NFC tags.</li>
 </ul>
 
 <h3 id="feature_constants">New Feature Constants</h3>
@@ -748,13 +748,13 @@ gyroscope sensor.</li>
 <li>{@link android.content.pm.PackageManager#FEATURE_SIP android.software.sip}
 &mdash; The application uses the SIP API on the device.</li>
 <li>{@link android.content.pm.PackageManager#FEATURE_SIP_VOIP
-android.software.sip.voip} &mdash; The application uses a SIP-based VOIP
+android.software.sip.voip} &mdash; The application uses a SIP-based VoIP
 service on the device.</li>
 <li>{@link
 android.content.pm.PackageManager#FEATURE_TOUCHSCREEN_MULTITOUCH_JAZZHAND
 android.hardware.touchscreen.multitouch.jazzhand} &mdash; The application uses
 advanced multipoint multitouch capabilities on the device screen, for tracking
-up to five points fully independently.</li>
+five or more points fully independently.</li>
 </ul>
 
 <p>For full information about how to declare features and use them for
