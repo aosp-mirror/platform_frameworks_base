@@ -39,7 +39,10 @@ In XML: <code>@[<em>package</em>:]menu.<em>filename</em></code>
           android:title="<em>string</em>"
           android:titleCondensed="<em>string</em>"
           android:icon="@[package:]drawable/<em>drawable_resource_name</em>"
+          android:onClick="<em>method name</em>"
           android:showAsAction=["ifRoom" | "never" | "withText" | "always"]
+          android:actionLayout="@[package:]layout/<em>layout_resource_name</em>"
+          android:actionViewClass="<em>class name</em>"
           android:alphabeticShortcut="<em>string</em>"
           android:numericShortcut="<em>string</em>"
           android:checkable=["true" | "false"]
@@ -74,8 +77,8 @@ In XML: <code>@[<em>package</em>:]menu.<em>filename</em></code>
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>xmlns:android</code></dt>
-          <dd><em>String</em>. <strong>Required.</strong> Defines the XML namespace, which must be
-          <code>"http://schemas.android.com/apk/res/android"</code>.
+          <dd><em>XML namespace</em>. <strong>Required.</strong> Defines the XML namespace, which
+must be <code>"http://schemas.android.com/apk/res/android"</code>.
       </dl>
     </dd>
 
@@ -89,12 +92,25 @@ In XML: <code>@[<em>package</em>:]menu.<em>filename</em></code>
 <code>"@+id/<em>name</em>"</code>. The plus symbol indicates that this should be created as a new
 ID.</dd>
         <dt><code>android:title</code></dt>
-          <dd><em>String</em>. The menu title.</dd>
+          <dd><em>String resource</em>. The menu title as a string resource or raw string.</dd>
         <dt><code>android:titleCondensed</code></dt>
-          <dd><em>String</em>. A condensed title, for situations in which the normal title is
-too long.</dd>
+          <dd><em>String resource</em>. A condensed title as a string resource or a raw string. This
+title is used for situations in which the normal title is too long.</dd>
+
         <dt><code>android:icon</code></dt>
           <dd><em>Drawable resource</em>. An image to be used as the menu item icon.</dd>
+
+        <dt><code>android:onClick</code></dt>
+          <dd><em>Method name</em>. The method to call when this menu item is clicked. The
+method must be declared in the activity as public and accept a {@link android.view.MenuItem} as its
+only parameter, which indicates the item clicked. This method takes precedence over the standard
+callback to {@link android.app.Activity#onOptionsItemSelected onOptionsItemSelected()}. See the
+example at the bottom.
+          <p class="warning"><strong>Warning:</strong> If you obfuscate your code using <a
+href="{@docRoot}guide/developing/tools/proguard.html">ProGuard</a> (or a similar tool),
+be sure to exclude the method you specify in this attribute from renaming, because it can break the
+functionality.</p>
+          <p>Introduced in API Level HONEYCOMB.</p></dd>
 
         <dt><code>android:showAsAction</code></dt>
           <dd><em>Keyword</em>. When and how this item should appear as an action item in the Action
@@ -117,6 +133,24 @@ with other UI in the action bar.</td></tr>
 more information.</p>
           <p>Introduced in API Level HONEYCOMB.</p>
         </dd>
+
+        <dt><code>android:actionViewLayout</code></dt>
+          <dd><em>Layout resource</em>. A layout to use as the action view.
+          <p>See <a href="{@docRoot}guide/topics/ui/actionbar.html">Using the Action Bar</a> for
+more information.</p>
+          <p>Introduced in API Level HONEYCOMB.</p></dd>
+
+        <dt><code>android:actionViewClassName</code></dt>
+          <dd><em>Class name</em>. A fully-qualified class name for the {@link android.view.View}
+to use as the action view.
+          <p>See <a href="{@docRoot}guide/topics/ui/actionbar.html">Using the Action Bar</a> for
+more information.</p>
+          <p class="warning"><strong>Warning:</strong> If you obfuscate your code using <a
+href="{@docRoot}guide/developing/tools/proguard.html">ProGuard</a> (or a similar tool),
+be sure to exclude the class you specify in this attribute from renaming, because it can break the
+functionality.</p>
+          <p>Introduced in API Level HONEYCOMB.</p></dd>
+
 
         <dt><code>android:alphabeticShortcut</code></dt>
           <dd><em>Char</em>. A character for the alphabetic shortcut key.</dd>
@@ -208,9 +242,11 @@ on the data that is currently displayed.</td></tr>
           android:showAsAction="ifRoom|withText"/>
     &lt;group android:id="@+id/group">
         &lt;item android:id="@+id/group_item1"
+              android:onClick="onGroupItemClick"
               android:title="@string/group_item1"
               android:icon="@drawable/group_item1_icon" />
         &lt;item android:id="@+id/group_item2"
+              android:onClick="onGroupItemClick"
               android:title="G@string/group_item2"
               android:icon="@drawable/group_item2_icon" />
     &lt;/group>
@@ -224,13 +260,20 @@ on the data that is currently displayed.</td></tr>
     &lt;/item>
 &lt;/menu>
 </pre>
-    <p>This application code will inflate the menu from the {@link
-android.app.Activity#onCreateOptionsMenu(Menu)} callback:</p>
+    <p>The following application code inflates the menu from the {@link
+android.app.Activity#onCreateOptionsMenu(Menu)} callback and also declares the on-click
+callback for two of the items:</p>
 <pre>
 public boolean onCreateOptionsMenu(Menu menu) {
-  MenuInflater inflater = getMenuInflater();
-  inflater.inflate(R.menu.example_menu, menu);
-  return true;
+    MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.example_menu, menu);
+    return true;
+}
+
+public void onGroupItemClick(MenuItem item) {
+    // One of the group items (using the onClick attribute) was clicked
+    // The item parameter passed here indicates which item it is
+    // All other menu item clicks are handled by {@link android.app.Activity#onOptionsItemSelected onOptionsItemSelected()}
 }
 </pre>
 <p class="note"><strong>Note:</strong> The {@code android:showAsAction} attribute is
