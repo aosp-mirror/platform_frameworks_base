@@ -91,7 +91,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
             final float x = ev.getX();
             final float y = ev.getY();
 
-            if (mCancelable && (x < 0 || x > width || y < 0 || y > height)) {
+            if (mCancelable && (x < 0 || x > width || y < 0 || y > height)
+                    &&  mDecor != null && isShowing()) {
                 cancel();
                 return true;
             }
