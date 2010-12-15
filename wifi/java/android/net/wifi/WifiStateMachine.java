@@ -2184,6 +2184,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             setCountryCode();
             /* set frequency band of operation */
             setFrequencyBand();
+            /* initialize network state */
+            setNetworkDetailedState(DetailedState.DISCONNECTED);
 
             if (mIsScanMode) {
                 WifiNative.setScanResultHandlingCommand(SCAN_ONLY_MODE);
