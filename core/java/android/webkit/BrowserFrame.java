@@ -28,6 +28,8 @@ import android.net.Uri;
 import android.net.WebAddress;
 import android.net.http.ErrorStrings;
 import android.net.http.SslCertificate;
+import android.net.http.SslError;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.OpenableColumns;
@@ -44,10 +46,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.URLEncoder;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
+
+import org.apache.harmony.security.provider.cert.X509CertImpl;
 
 class BrowserFrame extends Handler {
 
@@ -1102,6 +1108,47 @@ class BrowserFrame extends Handler {
     }
 
     /**
+     * Called by JNI when the native HTTP(S) stack gets a invalid cert chain.
+     *
+     * We delegate the request to CallbackProxy, and route its response to
+     * {@link #nativeSslCertErrorProceed(int)} or
+     * {@link #nativeSslCertErrorCancel(int, int)}.
+     */
+    private void reportSslCertError(final int handle, final int cert_error, byte cert_der[]) {
+        final SslError ssl_error;
+        try {
+            X509Certificate cert = new X509CertImpl(cert_der);
+            ssl_error = new SslError(cert_error, cert);
+        } catch (IOException e) {
+            // Can't get the cert, not much to do.
+            Log.e(LOGTAG, "Can't get the certificate from WebKit, cancling");
+            nativeSslCertErrorCancel(handle, cert_error);
+            return;
+        }
+
+        SslErrorHandler handler = new SslErrorHandler() {
+
+            @Override
+            public void proceed() {
+                SslCertLookupTable.getInstance().Allow(ssl_error);
+                nativeSslCertErrorProceed(handle);
+            }
+
+            @Override
+            public void cancel() {
+                SslCertLookupTable.getInstance().Deny(ssl_error);
+                nativeSslCertErrorCancel(handle, cert_error);
+            }
+        };
+
+        if (SslCertLookupTable.getInstance().IsAllowed(ssl_error)) {
+            nativeSslCertErrorProceed(handle);
+        } else {
+            mCallbackProxy.onReceivedSslError(handler, ssl_error);
+        }
+    }
+
+    /**
      * Called by JNI when the native HTTP stack needs to download a file.
      *
      * We delegate the request to CallbackProxy, which owns the current app's
@@ -1246,4 +1293,7 @@ class BrowserFrame extends Handler {
 
     private native void nativeAuthenticationProceed(int handle, String username, String password);
     private native void nativeAuthenticationCancel(int handle);
+
+    private native void nativeSslCertErrorProceed(int handle);
+    private native void nativeSslCertErrorCancel(int handle, int cert_error);
 }
