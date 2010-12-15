@@ -555,6 +555,7 @@ final class WebViewCore {
 
     private native String nativeRetrieveHref(int x, int y);
     private native String nativeRetrieveAnchorText(int x, int y);
+    private native String nativeRetrieveImageSource(int x, int y);
 
     private native void nativeTouchUp(int touchGeneration,
             int framePtr, int nodePtr, int x, int y);
@@ -1335,6 +1336,8 @@ final class WebViewCore {
                                     nativeRetrieveHref(msg.arg1, msg.arg2));
                             hrefMsg.getData().putString("title",
                                     nativeRetrieveAnchorText(msg.arg1, msg.arg2));
+                            hrefMsg.getData().putString("src",
+                                    nativeRetrieveImageSource(msg.arg1, msg.arg2));
                             hrefMsg.sendToTarget();
                             break;
                         }

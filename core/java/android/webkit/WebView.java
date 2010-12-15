@@ -2180,17 +2180,19 @@ public class WebView extends AbsoluteLayout
         }
     }
     /**
-     * Request the href of an anchor element due to getFocusNodePath returning
-     * "href." If hrefMsg is null, this method returns immediately and does not
-     * dispatch hrefMsg to its target.
+     * Request the anchor or image element URL at the last tapped point.
+     * If hrefMsg is null, this method returns immediately and does not
+     * dispatch hrefMsg to its target. If the tapped point hits an image,
+     * an anchor, or an image in an anchor, the message associates
+     * strings in named keys in its data. The value paired with the key
+     * may be an empty string.
      *
      * @param hrefMsg This message will be dispatched with the result of the
-     *            request as the data member with "url" as key. The result can
-     *            be null.
+     *                request. The message data contains three keys:
+     *                - "url" returns the anchor's href attribute.
+     *                - "title" returns the anchor's text.
+     *                - "src" returns the image's src attribute.
      */
-    // FIXME: API change required to change the name of this function.  We now
-    // look at the cursor node, and not the focus node.  Also, what is
-    // getFocusNodePath?
     public void requestFocusNodeHref(Message hrefMsg) {
         if (hrefMsg == null) {
             return;
