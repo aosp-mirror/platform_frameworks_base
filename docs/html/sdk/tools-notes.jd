@@ -74,6 +74,9 @@ SDK Tools, Revision 8</a> <em>(December 2010)</em>
 designed for use with ADT 8.0.0 and later. After installing SDK Tools r8, we
 highly recommend updating your ADT Plugin to 8.0.0.</p>
 
+<p>If you are developing outside Eclipse, you must have <a href="http://ant.apache.org/">Apache
+Ant</a> 1.8 or later.</p>
+
 <p>Also note that SDK Tools r8 requires a new SDK component called
 <em>Platform-tools</em>. The new Platform-tools component lets all SDK platforms
 (Android 2.1, Android 2.2, and so on) use the same (latest) version of build
