@@ -1,9 +1,9 @@
 page.title=ADT Plugin for Eclipse
 sdk.preview=0
-adt.zip.version=0.9.9
-adt.zip.download=ADT-0.9.9.zip
-adt.zip.bytes=8301681
-adt.zip.checksum=7deff0c9b25940a74cea7a0815a3bc36
+adt.zip.version=8.0.1
+adt.zip.download=ADT-8.0.1.zip
+adt.zip.bytes=8724909
+adt.zip.checksum=0e62185279083ddc01f18098ce7ba2d1
 
 @jd:body
 
@@ -98,7 +98,37 @@ padding: .25em 1em;
 
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
+width="9px" />
+ADT 8.0.1</a> <em>(December 2010)</em>
+  <div class="toggleme">
+
+<dl>
+
+<dt>Dependencies:</dt>
+
+<p><p>ADT 8.0.1 is designed for use with SDK Tools r8. If you haven't
+already installed SDK Tools r8 into your SDK, use the Android SDK and AVD Manager to do
+so.</p></dd>
+
+<dt>General notes:</dt>
+<dd>
+<ul>
+  <li>This is a quick follow-up to ADT 8.0.0 to fix some bugs.</li>
+  <li>Fixes an issue in which projects failed to compile, citing a dex error.</li>
+  <li>Better ProGuard error reporting when exporting applications for release.</li>
+</ul>
+<p>Also see the recent release notes for 8.0.0, below.</p>
+</dd>
+</dl>
+ </div>
+</div>
+
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
+width="9px" />
 ADT 8.0.0</a> <em>(December 2010)</em>
   <div class="toggleme">
 
@@ -322,7 +352,7 @@ ADT 0.9.5</a> <em>(December 2009)</em>
 
 <dd><p>ADT 0.9.5 requires features provided in SDK Tools r4 or higher. If you install
 ADT 0.9.5, which is highly recommended, you should use the Android SDK and AVD
-Manager to download thye latest SDK Tools into your SDK. For more information,
+Manager to download the latest SDK Tools into your SDK. For more information,
 see <a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.</p>
 </dd>
 
