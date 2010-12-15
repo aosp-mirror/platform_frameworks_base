@@ -279,73 +279,6 @@ private:
             bool ignoreScale = false, bool dirty = true);
 
     /**
-     * Prepares the renderer to draw the specified shadow. The active texture
-     * unit must be 0 and the other units must be unbound.
-     *
-     * @param texture The shadow texture
-     * @param x The x coordinate of the shadow
-     * @param y The y coordinate of the shadow
-     * @param mode The blending mode
-     * @param alpha The alpha value
-     * @param ignoreTransforms True if the coordinates are already in screen space
-     */
-    void setupShadow(const ShadowTexture* texture, float x, float y, SkXfermode::Mode mode,
-            float alpha, bool ignoreTransforms = false);
-
-    /**
-     * Prepares the renderer to draw the specified Alpha8 texture as a rectangle.
-     *
-     * @param texture The texture to render with
-     * @param textureUnit The texture unit to use, may be modified
-     * @param x The x coordinate of the rectangle to draw
-     * @param y The y coordinate of the rectangle to draw
-     * @param r The red component of the color
-     * @param g The green component of the color
-     * @param b The blue component of the color
-     * @param a The alpha component of the color
-     * @param mode The blending mode
-     * @param transforms True if the matrix passed to the shader should be multiplied
-     *        by the model-view matrix
-     * @param applyFilters Whether or not to take color filters and
-     *        shaders into account
-     */
-    void setupTextureAlpha8(const Texture* texture, GLuint& textureUnit, float x, float y,
-            float r, float g, float b, float a, SkXfermode::Mode mode, bool transforms,
-            bool applyFilters);
-
-    /**
-     * Prepares the renderer to draw the specified Alpha8 texture as a rectangle.
-     *
-     * @param texture The texture to render with
-     * @param width The width of the texture
-     * @param height The height of the texture
-     * @param textureUnit The texture unit to use, may be modified
-     * @param x The x coordinate of the rectangle to draw
-     * @param y The y coordinate of the rectangle to draw
-     * @param r The red component of the color
-     * @param g The green component of the color
-     * @param b The blue component of the color
-     * @param a The alpha component of the color
-     * @param mode The blending mode
-     * @param transforms True if the matrix passed to the shader should be multiplied
-     *        by the model-view matrix
-     * @param applyFilters Whether or not to take color filters and
-     *        shaders into account
-     */
-    void setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t height,
-            GLuint& textureUnit, float x, float y, float r, float g, float b, float a,
-            SkXfermode::Mode mode, bool transforms, bool applyFilters);
-
-    /**
-     * Same as above setupTextureAlpha8() but specifies the mesh's vertices
-     * and texCoords pointers. The pointers become offsets when a VBO is bound.
-     */
-    void setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t height,
-            GLuint& textureUnit, float x, float y, float r, float g, float b, float a,
-            SkXfermode::Mode mode, bool transforms, bool applyFilters,
-            GLvoid* vertices, GLvoid* texCoords, GLuint vbo = 0, bool ignoreTransform = false);
-
-    /**
      * Draws text underline and strike-through if needed.
      *
      * @param text The text to decor
@@ -430,6 +363,8 @@ private:
     void setupDrawWithTexture(bool isAlpha8 = false);
     void setupDrawColor(int color);
     void setupDrawColor(float r, float g, float b, float a);
+    void setupDrawAlpha8Color(int color, int alpha);
+    void setupDrawAlpha8Color(float r, float g, float b, float a);
     void setupDrawShader();
     void setupDrawColorFilter();
     void setupDrawBlending(SkXfermode::Mode mode = SkXfermode::kSrcOver_Mode,
@@ -443,7 +378,7 @@ private:
     void setupDrawModelViewTranslate(float left, float top, float right, float bottom,
             bool ignoreTransform = false);
     void setupDrawColorUniforms();
-    void setupDrawColorAlphaUniforms();
+    void setupDrawPureColorUniforms();
     void setupDrawShaderUniforms(bool ignoreTransform = false);
     void setupDrawColorFilterUniforms();
     void setupDrawSimpleMesh();
