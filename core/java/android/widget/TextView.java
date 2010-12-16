@@ -912,9 +912,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         setCompoundDrawablePadding(drawablePadding);
 
         // Same as setSingleLine(), but make sure the transformation method and the maximum number
-        // of lines of height (for multi-line only) are unchanged.
+        // of lines of height are unchanged for multi-line TextViews.
         setInputTypeSingleLine(singleLine);
-        applySingleLine(singleLine, false, false);
+        applySingleLine(singleLine, singleLine, singleLine);
 
         if (singleLine && mInput == null && ellipsize < 0) {
                 ellipsize = 3; // END
