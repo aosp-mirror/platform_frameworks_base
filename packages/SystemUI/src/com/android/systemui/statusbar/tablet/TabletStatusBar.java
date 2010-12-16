@@ -598,6 +598,14 @@ public class TabletStatusBar extends StatusBar {
                     handleNotificationError(key, notification, "Couldn't update icon: " + ic);
                     return;
                 }
+                
+                if (key == mNotificationPeekKey) {
+                    // must update the peek window
+                    Message peekMsg = mHandler.obtainMessage(MSG_OPEN_NOTIFICATION_PEEK);
+                    peekMsg.arg1 = mNotificationPeekIndex;
+                    mHandler.removeMessages(MSG_OPEN_NOTIFICATION_PEEK);
+                    mHandler.sendMessage(peekMsg);
+                }
             }
             catch (RuntimeException e) {
                 // It failed to add cleanly.  Log, and remove the view from the panel.
