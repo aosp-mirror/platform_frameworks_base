@@ -959,6 +959,13 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
             uint16_t width = U16_AT(&buffer[6 + 18]);
             uint16_t height = U16_AT(&buffer[6 + 20]);
 
+            // The video sample is not stand-compliant if it has invalid dimension.
+            // Use some default width and height value, and
+            // let the decoder figure out the actual width and height (and thus
+            // be prepared for INFO_FOMRAT_CHANGED event).
+            if (width == 0)  width  = 352;
+            if (height == 0) height = 288;
+
             // printf("*** coding='%s' width=%d height=%d\n",
             //        chunk, width, height);
 
