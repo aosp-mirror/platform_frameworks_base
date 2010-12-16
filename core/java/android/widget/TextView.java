@@ -208,8 +208,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     static final boolean DEBUG_EXTRACT = false;
     
     private static final int PRIORITY = 100;
-
-    private int mCurrentAlpha = 255;    
+    private int mCurrentAlpha = 255;
 
     final int[] mTempCoords = new int[2];
     Rect mTempRect;
@@ -4066,7 +4065,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected boolean onSetAlpha(int alpha) {
-        if (mMovement == null && getBackground() == null) {
+        // Alpha is supported if and only if the drawing can be done in one pass.
+        // TODO text with spans with a background color currently do not respect this alpha.
+        if (getBackground() == null) {
             mCurrentAlpha = alpha;
             final Drawables dr = mDrawables;
             if (dr != null) {
@@ -4077,6 +4078,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             return true;
         }
+
+        mCurrentAlpha = 255;
         return false;
     }
 
@@ -4256,7 +4259,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         mTextPaint.setColor(color);
-        mTextPaint.setAlpha(mCurrentAlpha);
+        if (mCurrentAlpha != 255) {
+            // If set, the alpha will override the color's alpha. Multiply the alphas.
+            mTextPaint.setAlpha((mCurrentAlpha * Color.alpha(color)) / 255);
+        }
         mTextPaint.drawableState = getDrawableState();
 
         canvas.save();
@@ -4334,6 +4340,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                         // XXX should pass to skin instead of drawing directly
                         mHighlightPaint.setColor(cursorcolor);
+                        if (mCurrentAlpha != 255) {
+                            mHighlightPaint.setAlpha(
+                                    (mCurrentAlpha * Color.alpha(cursorcolor)) / 255);
+                        }
                         mHighlightPaint.setStyle(Paint.Style.STROKE);
 
                         highlight = mHighlightPath;
@@ -4347,6 +4357,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                     // XXX should pass to skin instead of drawing directly
                     mHighlightPaint.setColor(mHighlightColor);
+                    if (mCurrentAlpha != 255) {
+                        mHighlightPaint.setAlpha(
+                                (mCurrentAlpha * Color.alpha(mHighlightColor)) / 255);
+                    }
                     mHighlightPaint.setStyle(Paint.Style.FILL);
 
                     highlight = mHighlightPath;

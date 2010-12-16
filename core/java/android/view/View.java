@@ -16,6 +16,10 @@
 
 package android.view;
 
+import com.android.internal.R;
+import com.android.internal.util.Predicate;
+import com.android.internal.view.menu.MenuBuilder;
+
 import android.content.ClipData;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -54,6 +58,7 @@ import android.util.PoolableManager;
 import android.util.Pools;
 import android.util.SparseArray;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
@@ -63,9 +68,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ScrollBarDrawable;
-import com.android.internal.R;
-import com.android.internal.util.Predicate;
-import com.android.internal.view.menu.MenuBuilder;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
@@ -2805,7 +2807,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * Gets the current list of listeners for layout changes.
-     * @return
      */
     public List<OnLayoutChangeListener> getOnLayoutChangeListeners() {
         return mOnLayoutChangeListeners;
@@ -5448,8 +5449,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 if ((mRight - mLeft) != mPrevWidth || (mBottom - mTop) != mPrevHeight) {
                     mPrevWidth = mRight - mLeft;
                     mPrevHeight = mBottom - mTop;
-                    mPivotX = (float) mPrevWidth / 2f;
-                    mPivotY = (float) mPrevHeight / 2f;
+                    mPivotX = mPrevWidth / 2f;
+                    mPivotY = mPrevHeight / 2f;
                 }
             }
             mMatrix.reset();
@@ -10423,8 +10424,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 root.getLastTouchPoint(thumbSize);
 
                 okay = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, token,
-                        (float) thumbSize.x, (float) thumbSize.y,
-                        (float) thumbTouchPoint.x, (float) thumbTouchPoint.y, data);
+                        thumbSize.x, thumbSize.y,
+                        thumbTouchPoint.x, thumbTouchPoint.y, data);
                 if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "performDrag returned " + okay);
             }
         } catch (Exception e) {
@@ -11299,8 +11300,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         public final Interpolator scrollBarInterpolator = new Interpolator(1, 2);
 
-        private final float[] mOpaque = { 255.0f };
-        private final float[] mTransparent = { 0.0f };
+        private static final float[] OPAQUE = { 255 };
+        private static final float[] TRANSPARENT = { 0.0f };
         
         /**
          * When fading should start. This time moves into the future every time
@@ -11360,11 +11361,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 Interpolator interpolator = scrollBarInterpolator;
 
                 // Start opaque
-                interpolator.setKeyFrame(framesCount++, nextFrame, mOpaque);
+                interpolator.setKeyFrame(framesCount++, nextFrame, OPAQUE);
 
                 // End transparent
                 nextFrame += scrollBarFadeDuration;
-                interpolator.setKeyFrame(framesCount, nextFrame, mTransparent);
+                interpolator.setKeyFrame(framesCount, nextFrame, TRANSPARENT);
 
                 state = FADING;
 
