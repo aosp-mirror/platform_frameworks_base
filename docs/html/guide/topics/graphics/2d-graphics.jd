@@ -14,9 +14,9 @@ parent.link=index.html
           <li><a href="#drawables-from-xml">Creating from resource XML</a></li>
         </ol>
       </li>
-      <li><a href="#shape-drawable">ShapeDrawable</a></li>
+      <li><a href="#shape-drawable">Shape Drawable</a></li>
    <!--   <li><a href="#state-list">StateListDrawable</a></li> -->
-      <li><a href="#nine-patch">NinePatchDrawable</a></li>
+      <li><a href="#nine-patch">Nine-patch</a></li>
       <li><a href="#tween-animation">Tween Animation</a></li>
       <li><a href="#frame-animation">Frame Animation</a></li>
     </ol>
@@ -165,7 +165,7 @@ image.setImageDrawable(transition);
 
 
 
-<h2 id="shape-drawable">ShapeDrawable</h2>
+<h2 id="shape-drawable">Shape Drawable</h2>
 
 <p>When you want to dynamically draw some two-dimensional graphics, a {@link android.graphics.drawable.ShapeDrawable}
 object will probably suit your needs. With a ShapeDrawable, you can programmatically draw
@@ -234,6 +234,11 @@ allows you to define various properties of the drawable with public methods.
 Some properties you might want to adjust include
 alpha transparency, color filter, dither, opacity and color.</p>
 
+<p>You can also define primitive drawable shapes using XML. For more information, see the
+section about Shape Drawables in the <a
+href="{@docRoot}guide/topics/resources/drawable-resource.html#Shape">Drawable Resources</a>
+document.</p>
+
 <!-- TODO
 <h2 id="state-list">StateListDrawable</h2>
 
@@ -245,7 +250,7 @@ intention of the StateListDrawable is to automatically change the image used bas
 of the object it's attached to.
 -->
 
-<h2 id="nine-patch">NinePatchDrawable</h2>
+<h2 id="nine-patch">Nine-patch</h2>
 
 <p>A {@link android.graphics.drawable.NinePatchDrawable} graphic is a stretchable bitmap image, which Android
 will automatically resize to accommodate the contents of the View in which you have placed it as the background. 
@@ -424,8 +429,8 @@ then assign the animation to the View with
 <code>{@link android.view.View#setAnimation(android.view.animation.Animation) View.setAnimation()}</code>.
 </p>
 
-<p>For more information on the XML syntax, available tags and attributes, see the discussion on animation 
-in the <a href="{@docRoot}guide/topics/resources/available-resources.html#animation">Available Resources</a>.</p>
+<p>For more information on the XML syntax, available tags and attributes, see <a
+href="{@docRoot}guide/topics/resources/animation-resource.html">Animation Resources</a>.</p>
 
 <p class="note"><strong>Note:</strong> Regardless of how your animation may move or resize, the bounds of the 
 View that holds your animation will not automatically adjust to accommodate it. Even so, the animation will still
@@ -489,4 +494,6 @@ requiring interaction, then you might want to call it from the
 <code>{@link android.app.Activity#onWindowFocusChanged(boolean) onWindowFocusChanged()}</code> method in 
 your Activity, which will get called when Android brings your window into focus.</p> 
 
+<p>For more information on the XML syntax, available tags and attributes, see <a
+href="{@docRoot}guide/topics/resources/animation-resource.html">Animation Resources</a>.</p>
 
