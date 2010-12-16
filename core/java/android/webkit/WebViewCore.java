@@ -1991,6 +1991,13 @@ final class WebViewCore {
                 .obtainMessage(WebCoreThread.RESUME_PRIORITY));
     }
 
+    static void sendStaticMessage(int messageType, Object argument) {
+        if (sWebCoreHandler == null)
+            return;
+
+        sWebCoreHandler.sendMessage(sWebCoreHandler.obtainMessage(messageType, argument));
+    }
+
     static void pauseUpdatePicture(WebViewCore core) {
         // Note: there is one possible failure mode. If pauseUpdatePicture() is
         // called from UI thread while WEBKIT_DRAW is just pulled out of the
