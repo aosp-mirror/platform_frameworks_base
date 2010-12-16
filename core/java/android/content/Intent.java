@@ -1845,7 +1845,7 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_USB_ANLG_HEADSET_PLUG =
-            "android.intent.action.DOCK_HEADSET_PLUG";
+            "android.intent.action.USB_ANLG_HEADSET_PLUG";
 
     /**
      * Broadcast Action: An analog audio speaker/headset plugged in or unplugged.
@@ -1860,7 +1860,7 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_USB_DGTL_HEADSET_PLUG =
-            "android.intent.action.HDMI_AUDIO_PLUG";
+            "android.intent.action.USB_DGTL_HEADSET_PLUG";
 
     /**
      * Broadcast Action: A HMDI cable was plugged or unplugged
