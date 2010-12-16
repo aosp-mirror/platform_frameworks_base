@@ -22,7 +22,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -61,6 +60,11 @@ public class StackView extends AdapterViewAnimator {
      */
     private static final float PERSPECTIVE_SHIFT_FACTOR_Y = 0.1f;
     private static final float PERSPECTIVE_SHIFT_FACTOR_X = 0.1f;
+
+    private float mPerspectiveShiftX;
+    private float mPerspectiveShiftY;
+    private float mNewPerspectiveShiftX;
+    private float mNewPerspectiveShiftY;
 
     @SuppressWarnings({"FieldCanBeLocal"})
     private static final float PERSPECTIVE_SCALE_FACTOR = 0.f;
@@ -239,41 +243,54 @@ public class StackView extends AdapterViewAnimator {
 
         // Implement the faked perspective
         if (toIndex != -1) {
-            transformViewAtIndex(toIndex, view);
+            transformViewAtIndex(toIndex, view, true);
         }
     }
 
-    private void transformViewAtIndex(int index, View view) {
-        float maxPerspectiveShiftY = getMeasuredHeight() * PERSPECTIVE_SHIFT_FACTOR_Y;
-        float maxPerspectiveShiftX = getMeasuredWidth() * PERSPECTIVE_SHIFT_FACTOR_X;
+    private void transformViewAtIndex(int index, final View view, boolean animate) {
+        final float maxPerspectiveShiftY = mPerspectiveShiftY;
+        final float maxPerspectiveShiftX = mPerspectiveShiftX;
 
         index = mMaxNumActiveViews - index - 1;
         if (index == mMaxNumActiveViews - 1) index--;
 
         float r = (index * 1.0f) / (mMaxNumActiveViews - 2);
 
-        float scale = 1 - PERSPECTIVE_SCALE_FACTOR * (1 - r);
-        PropertyValuesHolder scalePropX = PropertyValuesHolder.ofFloat("scaleX", scale);
-        PropertyValuesHolder scalePropY = PropertyValuesHolder.ofFloat("scaleY", scale);
+        final float scale = 1 - PERSPECTIVE_SCALE_FACTOR * (1 - r);
 
         int stackDirection = (mStackMode == ITEMS_SLIDE_UP) ? 1 : -1;
         float perspectiveTranslationY = -stackDirection * r * maxPerspectiveShiftY;
         float scaleShiftCorrectionY = stackDirection * (1 - scale) *
                 (getMeasuredHeight() * (1 - PERSPECTIVE_SHIFT_FACTOR_Y) / 2.0f);
-        float transY = perspectiveTranslationY + scaleShiftCorrectionY;
+        final float transY = perspectiveTranslationY + scaleShiftCorrectionY;
 
         float perspectiveTranslationX = (1 - r) * maxPerspectiveShiftX;
         float scaleShiftCorrectionX =  (1 - scale) *
                 (getMeasuredWidth() * (1 - PERSPECTIVE_SHIFT_FACTOR_X) / 2.0f);
-        float transX = perspectiveTranslationX + scaleShiftCorrectionX;
+        final float transX = perspectiveTranslationX + scaleShiftCorrectionX;
 
-        PropertyValuesHolder translationX = PropertyValuesHolder.ofFloat("translationX", transX);
-        PropertyValuesHolder translationY = PropertyValuesHolder.ofFloat("translationY", transY);
+        if (animate) {
+            PropertyValuesHolder translationX = PropertyValuesHolder.ofFloat("translationX", transX);
+            PropertyValuesHolder translationY = PropertyValuesHolder.ofFloat("translationY", transY);
+            PropertyValuesHolder scalePropX = PropertyValuesHolder.ofFloat("scaleX", scale);
+            PropertyValuesHolder scalePropY = PropertyValuesHolder.ofFloat("scaleY", scale);
 
-        ObjectAnimator pa = ObjectAnimator.ofPropertyValuesHolder(view, scalePropX, scalePropY,
-                translationY, translationX);
-        pa.setDuration(100);
-        pa.start();
+            ObjectAnimator oa = ObjectAnimator.ofPropertyValuesHolder(view, scalePropX, scalePropY,
+                    translationY, translationX);
+            oa.setDuration(100);
+            view.setTagInternal(com.android.internal.R.id.viewAnimation, oa);
+            oa.start();
+        } else {
+            Object tag = view.getTag(com.android.internal.R.id.viewAnimation);
+            if (tag instanceof ObjectAnimator) {
+                ((ObjectAnimator) tag).cancel();
+            }
+
+            view.setTranslationX(transX);
+            view.setTranslationY(transY);
+            view.setScaleX(scale);
+            view.setScaleY(scale);
+        }
     }
 
     private void setupStackSlider(View v, int mode) {
@@ -369,7 +386,7 @@ public class StackView extends AdapterViewAnimator {
         for (int i = 0; i < getNumActiveViews(); i++) {
             View v = getViewAtRelativeIndex(i);
             if (v != null) {
-                transformViewAtIndex(i, v);
+                transformViewAtIndex(i, v, false);
             }
         }
     }
@@ -408,6 +425,13 @@ public class StackView extends AdapterViewAnimator {
             updateChildTransforms();
             mSwipeThreshold = Math.round(SWIPE_THRESHOLD_RATIO * mSlideAmount);
             mFirstLayoutHappened = true;
+        }
+
+        if (Float.compare(mPerspectiveShiftY, mNewPerspectiveShiftY) != 0 ||
+                Float.compare(mPerspectiveShiftX, mNewPerspectiveShiftX) != 0) {
+            mPerspectiveShiftY = mNewPerspectiveShiftY;
+            mPerspectiveShiftX = mNewPerspectiveShiftX;
+            updateChildTransforms();
         }
     }
 
@@ -922,15 +946,43 @@ public class StackView extends AdapterViewAnimator {
 
     private void measureChildren() {
         final int count = getChildCount();
-        final int childWidth = Math.round(getMeasuredWidth()*(1-PERSPECTIVE_SHIFT_FACTOR_X))
+
+        final int measuredWidth = getMeasuredWidth();
+        final int measuredHeight = getMeasuredHeight();
+
+        final int childWidth = Math.round(measuredWidth*(1-PERSPECTIVE_SHIFT_FACTOR_X))
                 - mPaddingLeft - mPaddingRight;
-        final int childHeight = Math.round(getMeasuredHeight()*(1-PERSPECTIVE_SHIFT_FACTOR_Y))
+        final int childHeight = Math.round(measuredHeight*(1-PERSPECTIVE_SHIFT_FACTOR_Y))
                 - mPaddingTop - mPaddingBottom;
+
+        int maxWidth = 0;
+        int maxHeight = 0;
 
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            child.measure(MeasureSpec.makeMeasureSpec(childWidth, MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(childHeight, MeasureSpec.EXACTLY));
+            child.measure(MeasureSpec.makeMeasureSpec(childWidth, MeasureSpec.AT_MOST),
+                    MeasureSpec.makeMeasureSpec(childHeight, MeasureSpec.AT_MOST));
+
+            if (child != mHighlight && child != mClickFeedback) {
+                final int childMeasuredWidth = child.getMeasuredWidth();
+                final int childMeasuredHeight = child.getMeasuredHeight();
+                if (childMeasuredWidth > maxWidth) {
+                    maxWidth = childMeasuredWidth;
+                }
+                if (childMeasuredHeight > maxHeight) {
+                    maxHeight = childMeasuredHeight;
+                }
+            }
+        }
+
+        mNewPerspectiveShiftX = PERSPECTIVE_SHIFT_FACTOR_X * measuredWidth;
+        mNewPerspectiveShiftY = PERSPECTIVE_SHIFT_FACTOR_Y * measuredHeight;
+        if (maxWidth > 0 && maxWidth < childWidth) {
+            mNewPerspectiveShiftX = measuredWidth - maxWidth;
+        }
+
+        if (maxHeight > 0 && maxHeight < childHeight) {
+            mNewPerspectiveShiftY = measuredHeight - maxHeight;
         }
     }
 

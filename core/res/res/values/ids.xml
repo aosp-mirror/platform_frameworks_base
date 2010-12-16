@@ -73,4 +73,5 @@
   <item type="id" name="fillInIntent" />
   <item type="id" name="rowTypeId" />
   <item type="id" name="up" />
+  <item type="id" name="viewAnimation" />
 </resources>
