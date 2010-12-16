@@ -177,7 +177,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
          */
         public Builder setPort(int port) throws IllegalArgumentException {
             if ((port > 65535) || (port < 1000)) {
-                throw new IllegalArgumentException("incorrect port arugment");
+                throw new IllegalArgumentException("incorrect port arugment: " + port);
             }
             mProfile.mPort = port;
             return this;
