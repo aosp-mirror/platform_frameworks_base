@@ -33,14 +33,15 @@ import org.apache.http.conn.params.ConnRouteParams;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.impl.client.DefaultHttpClient;
 import tests.http.MockResponse;
 import tests.http.MockWebServer;
 import tests.http.RecordedRequest;
 
-public class ProxyTest extends TestCase {
+public abstract class AbstractProxyTest extends TestCase {
 
     private MockWebServer server = new MockWebServer();
+
+    protected abstract HttpClient newHttpClient();
 
     @Override protected void tearDown() throws Exception {
         System.clearProperty("proxyHost");
@@ -54,7 +55,7 @@ public class ProxyTest extends TestCase {
         super.tearDown();
     }
 
-    public void testConnectToHttps() throws IOException, InterruptedException {
+    public void testConnectToHttps() throws Exception {
         TestSSLContext testSSLContext = TestSSLContext.create();
 
         server.useHttps(testSSLContext.serverContext.getSocketFactory(), false);
@@ -63,9 +64,9 @@ public class ProxyTest extends TestCase {
                 .setBody("this response comes via HTTPS"));
         server.play();
 
-        HttpClient httpClient = new DefaultHttpClient();
-        SSLSocketFactory sslSocketFactory = new SSLSocketFactory(
-                testSSLContext.clientContext.getSocketFactory());
+        HttpClient httpClient = newHttpClient();
+
+        SSLSocketFactory sslSocketFactory = newSslSocketFactory(testSSLContext);
         sslSocketFactory.setHostnameVerifier(new AllowAllHostnameVerifier());
         httpClient.getConnectionManager().getSchemeRegistry()
                 .register(new Scheme("https", sslSocketFactory, server.getPort()));
@@ -76,6 +77,12 @@ public class ProxyTest extends TestCase {
 
         RecordedRequest request = server.takeRequest();
         assertEquals("GET /foo HTTP/1.1", request.getRequestLine());
+    }
+
+    private SSLSocketFactory newSslSocketFactory(TestSSLContext testSSLContext) throws Exception {
+        // call through to Apache HTTP's non-public SSLSocketFactory constructor
+        return SSLSocketFactory.class.getConstructor(javax.net.ssl.SSLSocketFactory.class)
+                .newInstance(testSSLContext.clientContext.getSocketFactory());
     }
 
     /**
@@ -108,7 +115,7 @@ public class ProxyTest extends TestCase {
         server.enqueue(mockResponse);
         server.play();
 
-        HttpClient httpProxyClient = new DefaultHttpClient();
+        HttpClient httpProxyClient = newHttpClient();
 
         HttpGet request = new HttpGet("http://android.com/foo");
         proxyConfig.configure(server, httpProxyClient, request);
@@ -150,9 +157,8 @@ public class ProxyTest extends TestCase {
                 .setBody("this response comes via a secure proxy"));
         server.play();
 
-        HttpClient httpProxyClient = new DefaultHttpClient();
-        SSLSocketFactory sslSocketFactory = new SSLSocketFactory(
-                testSSLContext.clientContext.getSocketFactory());
+        HttpClient httpProxyClient = newHttpClient();
+        SSLSocketFactory sslSocketFactory = newSslSocketFactory(testSSLContext);
         sslSocketFactory.setHostnameVerifier(new AllowAllHostnameVerifier());
         httpProxyClient.getConnectionManager().getSchemeRegistry()
                 .register(new Scheme("https", sslSocketFactory, 443));
@@ -187,7 +193,7 @@ public class ProxyTest extends TestCase {
         System.setProperty("http.proxyHost", "proxy.foo");
         System.setProperty("http.proxyPort", "8080");
 
-        HttpClient client = new DefaultHttpClient();
+        HttpClient client = newHttpClient();
         HttpGet request = new HttpGet("http://origin.foo/bar");
         proxyConfig.configure(server, client, request);
         HttpResponse response = client.execute(request);
@@ -203,7 +209,7 @@ public class ProxyTest extends TestCase {
         System.setProperty("http.proxyHost", "proxy.foo");
         System.setProperty("http.proxyPort", "8080");
 
-        HttpClient client = new DefaultHttpClient();
+        HttpClient client = newHttpClient();
         HttpGet request = new HttpGet(server.getUrl("/bar").toURI());
         request.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, ConnRouteParams.NO_HOST);
         HttpResponse response = client.execute(request);
