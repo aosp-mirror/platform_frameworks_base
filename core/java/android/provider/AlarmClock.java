@@ -68,4 +68,15 @@ public final class AlarmClock {
      * 59.
      */
     public static final String EXTRA_MINUTES = "android.intent.extra.alarm.MINUTES";
+
+    /**
+     * Activity Extra: Optionally skip the application UI.
+     * <p>
+     * This value can be passed as an extra field to the Intent created with
+     * ACTION_SET_ALARM.  If true, the application is asked to bypass any
+     * intermediate UI and instead pop a toast indicating the result then
+     * finish the Activity.  If false, the application may display intermediate
+     * UI like a confirmation dialog or alarm settings.  The default is false.
+     */
+    public static final String EXTRA_SKIP_UI = "android.intent.extra.alarm.SKIP_UI";
 }
