@@ -25,6 +25,7 @@ class JniUtil {
     private static String sDatabaseDirectory;
     private static String sCacheDirectory;
     private static Boolean sUseChromiumHttpStack;
+    private static Context sContext;
 
     private static boolean initialized = false;
 
@@ -38,9 +39,7 @@ class JniUtil {
         if (initialized)
             return;
 
-        Context appContext = context.getApplicationContext();
-        sDatabaseDirectory = appContext.getDatabasePath("dummy").getParent();
-        sCacheDirectory = appContext.getCacheDir().getAbsolutePath();
+        sContext = context;
         initialized = true;
     }
 
@@ -50,6 +49,10 @@ class JniUtil {
      */
     private static synchronized String getDatabaseDirectory() {
         checkIntialized();
+
+        if (sDatabaseDirectory == null)
+            sDatabaseDirectory = sContext.getDatabasePath("dummy").getParent();
+
         return sDatabaseDirectory;
     }
 
@@ -59,6 +62,10 @@ class JniUtil {
      */
     private static synchronized String getCacheDirectory() {
         checkIntialized();
+
+        if (sCacheDirectory == null)
+            sCacheDirectory = sContext.getCacheDir().getAbsolutePath();
+
         return sCacheDirectory;
     }
 
