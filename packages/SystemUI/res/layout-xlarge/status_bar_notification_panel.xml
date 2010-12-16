@@ -163,7 +163,7 @@
             android:orientation="vertical"
             >
             <ScrollView
-                android:id="@+id/notificationScroller"
+                android:id="@+id/notification_scroller"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:layout_weight="1"
@@ -184,6 +184,7 @@
                 </com.android.systemui.statusbar.tablet.NotificationLinearLayout>
             </ScrollView>
             <ImageView
+                android:id="@+id/notification_glow"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/status_bar_panel_bottom_offset"
                 android:layout_marginLeft="16dp"
