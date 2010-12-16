@@ -102,16 +102,6 @@ public class Allocation extends BaseObj {
         mRS.nAllocationSyncAll(getID(), srcLocation);
     }
 
-    public void uploadToTexture(int baseMipLevel) {
-        mRS.validate();
-        mRS.nAllocationUploadToTexture(getID(), false, baseMipLevel);
-    }
-
-    public void uploadToTexture(boolean genMips, int baseMipLevel) {
-        mRS.validate();
-        mRS.nAllocationUploadToTexture(getID(), genMips, baseMipLevel);
-    }
-
     public void uploadToBufferObject() {
         mRS.validate();
         mRS.nAllocationUploadToBufferObject(getID());
@@ -388,6 +378,10 @@ public class Allocation extends BaseObj {
             throw new RSRuntimeException("Allocation creation failed.");
         }
         return new Allocation(id, rs, type, usage);
+    }
+
+    static public Allocation createTyped(RenderScript rs, Type type, int usage) {
+        return createTyped(rs, type, MipmapControl.MIPMAP_NONE, usage);
     }
 
     static public Allocation createTyped(RenderScript rs, Type type) {
