@@ -158,6 +158,9 @@ status_t NuHTTPDataSource::connect(
         request.append(" HTTP/1.1\r\n");
         request.append("Host: ");
         request.append(mHost);
+        if (mPort != 80) {
+            request.append(StringPrintf(":%u", mPort).c_str());
+        }
         request.append("\r\n");
 
         if (offset != 0) {

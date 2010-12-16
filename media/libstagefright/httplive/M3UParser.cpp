@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "M3UParser"
+#include <utils/Log.h>
+
 #include "include/M3UParser.h"
 
 #include <media/stagefright/foundation/AMessage.h>
@@ -88,6 +92,9 @@ static bool MakeURL(const char *baseURL, const char *url, AString *out) {
     if (!strncasecmp("http://", url, 7)) {
         // "url" is already an absolute URL, ignore base URL.
         out->setTo(url);
+
+        LOGV("base:'%s', url:'%s' => '%s'", baseURL, url, out->c_str());
+
         return true;
     }
 
@@ -107,6 +114,8 @@ static bool MakeURL(const char *baseURL, const char *url, AString *out) {
         out->append("/");
         out->append(url);
     }
+
+    LOGV("base:'%s', url:'%s' => '%s'", baseURL, url, out->c_str());
 
     return true;
 }
