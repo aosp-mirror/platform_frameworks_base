@@ -872,8 +872,13 @@ class SipSessionGroup implements SipListener {
                 }
                 return true;
             } else {
-                onError(SipErrorCode.INVALID_CREDENTIALS,
-                        "incorrect username or password");
+                if (crossDomainAuthenticationRequired(response)) {
+                    onError(SipErrorCode.CROSS_DOMAIN_AUTHENTICATION,
+                            getRealmFromResponse(response));
+                } else {
+                    onError(SipErrorCode.INVALID_CREDENTIALS,
+                            "incorrect username or password");
+                }
                 return false;
             }
         }
@@ -1025,10 +1030,7 @@ class SipSessionGroup implements SipListener {
                     return true;
                 case Response.UNAUTHORIZED:
                 case Response.PROXY_AUTHENTICATION_REQUIRED:
-                    if (crossDomainAuthenticationRequired(response)) {
-                        onError(SipErrorCode.CROSS_DOMAIN_AUTHENTICATION,
-                                getRealmFromResponse(response));
-                    } else if (handleAuthentication(event)) {
+                    if (handleAuthentication(event)) {
                         addSipSession(this);
                     }
                     return true;
