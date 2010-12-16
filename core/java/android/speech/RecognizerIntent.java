@@ -82,7 +82,11 @@ public class RecognizerIntent {
 
     /**
      * Starts an activity that will prompt the user for speech, sends it through a
-     * speech recognizer, and invokes and displays a web search result.
+     * speech recognizer, and invokes and either displays a web search result or triggers
+     * another type of action based on the user's speech.
+     *
+     * <p>If you want to avoid triggering any type of action besides web search, you can use
+     * the {@link #EXTRA_WEB_SEARCH_ONLY} extra.
      * 
      * <p>Required extras:
      * <ul>
@@ -95,6 +99,7 @@ public class RecognizerIntent {
      *   <li>{@link #EXTRA_LANGUAGE}
      *   <li>{@link #EXTRA_MAX_RESULTS}
      *   <li>{@link #EXTRA_PARTIAL_RESULTS}
+     *   <li>{@link #EXTRA_WEB_SEARCH_ONLY}
      * </ul>
      * 
      * <p> Result extras (returned in the result, not to be specified in the request):
@@ -182,6 +187,13 @@ public class RecognizerIntent {
      * will choose how many results to return. Must be an integer.
      */
     public static final String EXTRA_MAX_RESULTS = "android.speech.extra.MAX_RESULTS";
+    
+    /**
+     * Optional boolean, to be used with {@link #ACTION_WEB_SEARCH}, to indicate whether to
+     * only fire web searches in response to a user's speech. The default is false, meaning
+     * that other types of actions can be taken based on the user's speech.
+     */
+    public static final String EXTRA_WEB_SEARCH_ONLY = "android.speech.extra.WEB_SEARCH_ONLY";
 
     /**
      * Optional boolean to indicate whether partial results should be returned by the recognizer
