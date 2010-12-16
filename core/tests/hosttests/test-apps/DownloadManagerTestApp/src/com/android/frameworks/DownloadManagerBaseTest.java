@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package android.app;
+package com.android.frameworks.downloadmanagertests;
 
-import coretestutils.http.MockResponse;
-import coretestutils.http.MockWebServer;
-
+import android.app.DownloadManager;
 import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
-import android.app.DownloadManagerBaseTest.DataType;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,10 +28,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.os.ParcelFileDescriptor.AutoCloseInputStream;
 import android.os.SystemClock;
+import android.os.ParcelFileDescriptor.AutoCloseInputStream;
 import android.provider.Settings;
 import android.test.InstrumentationTestCase;
 import android.util.Log;
@@ -46,12 +44,19 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.concurrent.TimeoutException;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.TimeoutException;
+import java.util.Vector;
+
+import junit.framework.AssertionFailedError;
+
+import coretestutils.http.MockResponse;
+import coretestutils.http.MockWebServer;
 
 /**
  * Base class for Instrumented tests for the Download Manager.
@@ -242,24 +247,13 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
     }
 
     /**
-     * Helper to enqueue a response from the MockWebServer with no body.
-     *
-     * @param status The HTTP status code to return for this response
-     * @return Returns the mock web server response that was queued (which can be modified)
-     */
-    protected MockResponse enqueueResponse(int status) {
-        return doEnqueueResponse(status);
-
-    }
-
-    /**
      * Helper to enqueue a response from the MockWebServer.
      *
      * @param status The HTTP status code to return for this response
      * @param body The body to return in this response
      * @return Returns the mock web server response that was queued (which can be modified)
      */
-    protected MockResponse enqueueResponse(int status, byte[] body) {
+    private MockResponse enqueueResponse(int status, byte[] body) {
         return doEnqueueResponse(status).setBody(body);
 
     }
@@ -271,7 +265,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      * @param bodyFile The body to return in this response
      * @return Returns the mock web server response that was queued (which can be modified)
      */
-    protected MockResponse enqueueResponse(int status, File bodyFile) {
+    private MockResponse enqueueResponse(int status, File bodyFile) {
         return doEnqueueResponse(status).setBody(bodyFile);
     }
 
@@ -281,23 +275,11 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      * @param status The HTTP status code to return for this response
      * @return Returns the mock web server response that was queued (which can be modified)
      */
-    protected MockResponse doEnqueueResponse(int status) {
+    private MockResponse doEnqueueResponse(int status) {
         MockResponse response = new MockResponse().setResponseCode(status);
         response.addHeader("Content-type", mFileType);
         mServer.enqueue(response);
         return response;
-    }
-
-    /**
-     * Helper to generate a random blob of bytes.
-     *
-     * @param size The size of the data to generate
-     * @param type The type of data to generate: currently, one of {@link DataType.TEXT} or
-     *         {@link DataType.BINARY}.
-     * @return The random data that is generated.
-     */
-    protected byte[] generateData(int size, DataType type) {
-        return generateData(size, type, null);
     }
 
     /**
@@ -309,7 +291,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      * @param rng (optional) The RNG to use; pass null to use
      * @return The random data that is generated.
      */
-    protected byte[] generateData(int size, DataType type, Random rng) {
+    private byte[] generateData(int size, DataType type, Random rng) {
         int min = Byte.MIN_VALUE;
         int max = Byte.MAX_VALUE;
 
@@ -348,7 +330,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      * @param expected The data we expect to find in the aforementioned file
      * @throws IOException if there was a problem reading from the file
      */
-    protected void verifyFileContents(ParcelFileDescriptor actual, byte[] expected)
+    private void verifyFileContents(ParcelFileDescriptor actual, byte[] expected)
             throws IOException {
         AutoCloseInputStream input = new ParcelFileDescriptor.AutoCloseInputStream(actual);
         long fileSize = actual.getStatSize();
@@ -367,7 +349,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      * @param actual The array whose data we want to verify
      * @param expected The array of data we expect to see
      */
-    protected void compareByteArrays(byte[] actual, byte[] expected) {
+    private void compareByteArrays(byte[] actual, byte[] expected) {
         assertEquals(actual.length, expected.length);
         int length = actual.length;
         for (int i = 0; i < length; ++i) {
@@ -376,41 +358,6 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
                 fail("Byte arrays are not equal.");
             }
         }
-    }
-
-    /**
-     * Verifies the contents of a downloaded file versus the contents of a File.
-     *
-     * @param pfd The file whose data we want to verify
-     * @param file The file containing the data we expect to see in the aforementioned file
-     * @throws IOException If there was a problem reading either of the two files
-     */
-    protected void verifyFileContents(ParcelFileDescriptor pfd, File file) throws IOException {
-        byte[] actual = new byte[FILE_BLOCK_READ_SIZE];
-        byte[] expected = new byte[FILE_BLOCK_READ_SIZE];
-
-        AutoCloseInputStream input = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
-
-        assertEquals(file.length(), pfd.getStatSize());
-
-        DataInputStream inFile = new DataInputStream(new FileInputStream(file));
-        int actualRead = 0;
-        int expectedRead = 0;
-
-        while (((actualRead = input.read(actual)) != -1) &&
-                ((expectedRead = inFile.read(expected)) != -1)) {
-            assertEquals(actualRead, expectedRead);
-            compareByteArrays(actual, expected);
-        }
-    }
-
-    /**
-     * Sets the MIME type of file that will be served from the mock server
-     *
-     * @param type The MIME type to return from the server
-     */
-    protected void setServerMimeType(DownloadFileType type) {
-        mFileType = getMimeMapping(type);
     }
 
     /**
@@ -441,21 +388,9 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      * @param filename The name of the file to try to retrieve from the mock server
      * @return the Uri to use for access the file on the mock server
      */
-    protected Uri getServerUri(String filename) throws Exception {
+    private Uri getServerUri(String filename) throws Exception {
         URL url = mServer.getUrl("/" + filename);
         return Uri.parse(url.toString());
-    }
-
-   /**
-    * Gets the Uri that should be used to access the mock server
-    *
-    * @param filename The name of the file to try to retrieve from the mock server
-    * @return the Uri to use for access the file on the mock server
-    */
-    protected void logDBColumnData(Cursor cursor, String column) {
-        int index = cursor.getColumnIndex(column);
-        Log.i(LOG_TAG, "columnName: " + column);
-        Log.i(LOG_TAG, "columnValue: " + cursor.getString(index));
     }
 
     /**
@@ -471,36 +406,6 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
         mContext.registerReceiver(receiver, new IntentFilter(
                 DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         return receiver;
-    }
-
-    /**
-     * Helper to verify a standard single-file download from the mock server, and clean up after
-     * verification
-     *
-     * Note that this also calls the Download manager's remove, which cleans up the file from cache.
-     *
-     * @param requestId The id of the download to remove
-     * @param fileData The data to verify the file contains
-     */
-    protected void verifyAndCleanupSingleFileDownload(long requestId, byte[] fileData)
-            throws Exception {
-        int fileSize = fileData.length;
-        ParcelFileDescriptor pfd = mDownloadManager.openDownloadedFile(requestId);
-        Cursor cursor = mDownloadManager.query(new Query().setFilterById(requestId));
-
-        try {
-            assertEquals(1, cursor.getCount());
-            assertTrue(cursor.moveToFirst());
-
-            mServer.checkForExceptions();
-
-            verifyFileSize(pfd, fileSize);
-            verifyFileContents(pfd, fileData);
-        } finally {
-            pfd.close();
-            cursor.close();
-            mDownloadManager.remove(requestId);
-        }
     }
 
     /**
@@ -580,74 +485,13 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
     }
 
     /**
-     * Helper to create a large file of random data on the SD card.
-     *
-     * @param filename (optional) The name of the file to create on the SD card; pass in null to
-     *          use a default temp filename.
-     * @param type The type of file to create
-     * @param subdirectory If not null, the subdirectory under the SD card where the file should go
-     * @return The File that was created
-     * @throws IOException if there was an error while creating the file.
-     */
-    protected File createFileOnSD(String filename, long fileSize, DataType type,
-            String subdirectory) throws IOException {
-
-        // Build up the file path and name
-        String sdPath = Environment.getExternalStorageDirectory().getPath();
-        StringBuilder fullPath = new StringBuilder(sdPath);
-        if (subdirectory != null) {
-            fullPath.append(File.separatorChar).append(subdirectory);
-        }
-
-        File file = null;
-        if (filename == null) {
-            file = File.createTempFile("DMTEST_", null, new File(fullPath.toString()));
-        }
-        else {
-            fullPath.append(File.separatorChar).append(filename);
-            file = new File(fullPath.toString());
-            file.createNewFile();
-        }
-
-        // Fill the file with random data
-        DataOutputStream output = new DataOutputStream(new FileOutputStream(file));
-        final int CHUNK_SIZE = 1000000;  // copy random data in 1000000-char chunks
-        long remaining = fileSize;
-        int nextChunkSize = CHUNK_SIZE;
-        byte[] randomData = null;
-        Random rng = new LoggingRng();
-
-        try {
-            while (remaining > 0) {
-                if (remaining < CHUNK_SIZE) {
-                    nextChunkSize = (int)remaining;
-                    remaining = 0;
-                }
-                else {
-                    remaining -= CHUNK_SIZE;
-                }
-
-                randomData = generateData(nextChunkSize, type, rng);
-                output.write(randomData);
-            }
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Error writing to file " + file.getAbsolutePath());
-            file.delete();
-            throw e;
-        } finally {
-            output.close();
-        }
-        return file;
-    }
-
-    /**
      * Helper to wait for a particular download to finish, or else a timeout to occur
      *
      * Does not wait for a receiver notification of the download.
      *
      * @param id The download id to query on (wait for)
      */
-    protected void waitForDownloadOrTimeout_skipNotification(long id) throws TimeoutException,
+    private void waitForDownloadOrTimeout_skipNotification(long id) throws TimeoutException,
             InterruptedException {
         waitForDownloadOrTimeout(id, WAIT_FOR_DOWNLOAD_POLL_TIME, MAX_WAIT_FOR_DOWNLOAD_TIME);
     }
@@ -703,7 +547,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      * @param timeoutMillis The max time (in ms) to wait for the download(s) to complete
      * @return true if download completed successfully (didn't timeout), false otherwise
      */
-    protected boolean waitForDownloadOrTimeoutNoThrow(long id, long poll, long timeoutMillis) {
+    private boolean waitForDownloadOrTimeoutNoThrow(long id, long poll, long timeoutMillis) {
         try {
             doWaitForDownloadsOrTimeout(new Query().setFilterById(id), poll, timeoutMillis);
             waitForReceiverNotifications(1);
@@ -724,7 +568,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      * @return The new total amount of time we've waited so far
      * @throws TimeoutException if timed out waiting for SD card to mount
      */
-    protected int timeoutWait(int currentTotalWaitTime, long poll, long maxTimeoutMillis,
+    private int timeoutWait(int currentTotalWaitTime, long poll, long maxTimeoutMillis,
             String timedOutMessage) throws TimeoutException {
         long now = SystemClock.elapsedRealtime();
         long end = now + poll;
@@ -753,7 +597,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      * @param poll The poll time to wait between checks
      * @param timeoutMillis The max amount of time (in ms) to wait for the download(s) to complete
      */
-    protected void doWaitForDownloadsOrTimeout(Query query, long poll, long timeoutMillis)
+    private void doWaitForDownloadsOrTimeout(Query query, long poll, long timeoutMillis)
             throws TimeoutException {
         int currentWaitTime = 0;
         while (true) {
@@ -823,15 +667,6 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
     }
 
     /**
-     * Convenience function to wait for just 1 notification of a download.
-     *
-     * @throws Exception if timed out while waiting
-     */
-    protected void waitForReceiverNotification() throws Exception {
-        waitForReceiverNotifications(1);
-    }
-
-    /**
      * Synchronously waits for our receiver to receive notification for a given number of
      * downloads.
      *
@@ -839,7 +674,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      *         -1 to not wait for notification.
      * @throws Exception if timed out while waiting
      */
-    protected void waitForReceiverNotifications(int targetNumber) throws TimeoutException {
+    private void waitForReceiverNotifications(int targetNumber) throws TimeoutException {
         int count = mReceiver.numDownloadsCompleted();
         int currentWaitTime = 0;
 
@@ -887,27 +722,16 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      */
     protected void removeAllCurrentDownloads() {
         Log.i(LOG_TAG, "Removing all current registered downloads...");
-        ArrayList<Long> ids = new ArrayList<Long>();
         Cursor cursor = mDownloadManager.query(new Query());
         try {
             if (cursor.moveToFirst()) {
                 do {
                     int index = cursor.getColumnIndex(DownloadManager.COLUMN_ID);
                     long downloadId = cursor.getLong(index);
-                    ids.add(downloadId);
+
+                    mDownloadManager.remove(downloadId);
                 } while (cursor.moveToNext());
             }
-        } finally {
-            cursor.close();
-        }
-        // delete all ids
-        for (long id : ids) {
-            mDownloadManager.remove(id);
-        }
-        // make sure the database is empty
-        cursor = mDownloadManager.query(new Query());
-        try {
-            assertEquals(0, cursor.getCount());
         } finally {
             cursor.close();
         }
@@ -919,14 +743,10 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      *
      * @param body The body to return in the response from the server
      */
-    protected long doStandardEnqueue(byte[] body) throws Exception {
-        return enqueueDownloadRequest(body, DOWNLOAD_TO_DOWNLOAD_CACHE_DIR);
-    }
-
-    protected long enqueueDownloadRequest(byte[] body, int location) throws Exception {
+    private long doStandardEnqueue(byte[] body) throws Exception {
         // Prepare the mock server with a standard response
         enqueueResponse(HTTP_OK, body);
-        return doEnqueue(location);
+        return doCommonStandardEnqueue();
     }
 
     /**
@@ -934,31 +754,19 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      *
      * @param body The body to return in the response from the server, contained in the file
      */
-    protected long doStandardEnqueue(File body) throws Exception {
-        return enqueueDownloadRequest(body, DOWNLOAD_TO_DOWNLOAD_CACHE_DIR);
-    }
-
-    protected long enqueueDownloadRequest(File body, int location) throws Exception {
+    private long doStandardEnqueue(File body) throws Exception {
         // Prepare the mock server with a standard response
         enqueueResponse(HTTP_OK, body);
-        return doEnqueue(location);
+        return doCommonStandardEnqueue();
     }
 
     /**
      * Helper to do the additional steps (setting title and Uri of default filename) when
      * doing a standard enqueue request to the server.
      */
-    protected long doCommonStandardEnqueue() throws Exception {
-        return doEnqueue(DOWNLOAD_TO_DOWNLOAD_CACHE_DIR);
-    }
-
-    private long doEnqueue(int location) throws Exception {
+    private long doCommonStandardEnqueue() throws Exception {
         Uri uri = getServerUri(DEFAULT_FILENAME);
         Request request = new Request(uri).setTitle(DEFAULT_FILENAME);
-        if (location == DOWNLOAD_TO_SYSTEM_CACHE) {
-            request.setDestinationToSystemCache();
-        }
-
         return mDownloadManager.enqueue(request);
     }
 
@@ -969,23 +777,9 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      * @param columnName The name of the column to query
      * @param expected The expected int value
      */
-    protected void verifyInt(Cursor cursor, String columnName, int expected) {
+    private void verifyInt(Cursor cursor, String columnName, int expected) {
         int index = cursor.getColumnIndex(columnName);
         int actual = cursor.getInt(index);
-        assertEquals(expected, actual);
-    }
-
-    /**
-     * Helper to verify a String value in a Cursor
-     *
-     * @param cursor The cursor containing the query results
-     * @param columnName The name of the column to query
-     * @param expected The expected String value
-     */
-    protected void verifyString(Cursor cursor, String columnName, String expected) {
-        int index = cursor.getColumnIndex(columnName);
-        String actual = cursor.getString(index);
-        Log.i(LOG_TAG, ": " + actual);
         assertEquals(expected, actual);
     }
 
@@ -1018,18 +812,5 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
             throw e;
         }
         return cursor;
-    }
-
-    /**
-     * Helper that does the actual basic download verification.
-     */
-    protected long doBasicDownload(byte[] blobData, int location) throws Exception {
-        long dlRequest = enqueueDownloadRequest(blobData, location);
-
-        // wait for the download to complete
-        waitForDownloadOrTimeout(dlRequest);
-
-        assertEquals(1, mReceiver.numDownloadsCompleted());
-        return dlRequest;
     }
 }

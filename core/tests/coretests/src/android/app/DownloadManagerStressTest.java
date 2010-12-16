@@ -16,19 +16,21 @@
 
 package android.app;
 
-import java.io.File;
-import java.util.Random;
 
 import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
+
+import java.io.File;
+import java.util.Random;
 
 
 public class DownloadManagerStressTest extends DownloadManagerBaseTest {
-    private static String LOG_TAG = "android.net.DownloadManagerStressTest";
 
     /**
      * {@inheritDoc}
@@ -42,8 +44,25 @@ public class DownloadManagerStressTest extends DownloadManagerBaseTest {
     }
 
     /**
-     * Attempts to downloading thousands of files simultaneously
+     * {@inheritDoc}
      */
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        setWiFiStateOn(true);
+        removeAllCurrentDownloads();
+
+        if (mReceiver != null) {
+            mContext.unregisterReceiver(mReceiver);
+            mReceiver = null;
+        }
+    }
+
+    /**
+     * Attempts to downloading thousands of files simultaneously
+     * don't run this test - downloadmanager needs to allow only a few simultaneous downloads.
+     */
+    @Suppress
     public void testDownloadThousands() throws Exception {
         int NUM_FILES = 1500;
         int MAX_FILE_SIZE = 3000;
@@ -106,6 +125,7 @@ public class DownloadManagerStressTest extends DownloadManagerBaseTest {
     /**
      * Tests trying to download a large file (50M bytes).
      */
+    @LargeTest
     public void testDownloadLargeFile() throws Exception {
         long fileSize = 50000000L;  // note: kept relatively small to not exceed /cache dir size
         File largeFile = createFileOnSD(null, fileSize, DataType.TEXT, null);
@@ -126,33 +146,6 @@ public class DownloadManagerStressTest extends DownloadManagerBaseTest {
         } catch (Exception e) {
             throw e;
         } finally {
-            largeFile.delete();
-        }
-    }
-
-    /**
-     * Tests trying to download a large file (~600M bytes) when there's not enough space in cache
-     */
-    public void testInsufficientSpace() throws Exception {
-        // @TODO: Rework this to fill up cache partition with a dynamically calculated size
-        long fileSize = 600000000L;
-        File largeFile = createFileOnSD(null, fileSize, DataType.TEXT, null);
-
-        Cursor cursor = null;
-        try {
-            long dlRequest = doStandardEnqueue(largeFile);
-
-             // wait for the download to complete
-            waitForDownloadOrTimeout(dlRequest);
-
-            cursor = getCursor(dlRequest);
-            verifyInt(cursor, DownloadManager.COLUMN_STATUS, DownloadManager.STATUS_FAILED);
-            verifyInt(cursor, DownloadManager.COLUMN_REASON,
-                    DownloadManager.ERROR_INSUFFICIENT_SPACE);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
             largeFile.delete();
         }
     }
