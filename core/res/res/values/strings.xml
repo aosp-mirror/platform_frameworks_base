@@ -298,12 +298,12 @@
     <string name="shutdown_confirm_question">Would you like to shut down?</string>
 
     <!-- Recent Tasks dialog: title
-     TODO: this should move to SystemUI.apk, but the code for the old 
+     TODO: this should move to SystemUI.apk, but the code for the old
             recent dialog is still in the framework
      -->
     <string name="recent_tasks_title">Recent</string>
     <!-- Recent Tasks dialog: message when there are no recent applications
-     TODO: this should move to SystemUI.apk, but the code for the old 
+     TODO: this should move to SystemUI.apk, but the code for the old
             recent dialog is still in the framework
      -->
     <string name="no_recent_tasks">No recent applications.</string>
@@ -1363,17 +1363,17 @@
     <!-- Title of policy access to limiting the user's password choices -->
     <string name="policylab_limitPassword">Set password rules</string>
     <!-- Description of policy access to limiting the user's password choices -->
-    <string name="policydesc_limitPassword">Control the length and the characters 
+    <string name="policydesc_limitPassword">Control the length and the characters
     allowed in screen-unlock passwords</string>
     <!-- Title of policy access to watch user login attempts -->
     <string name="policylab_watchLogin">Monitor screen-unlock attempts</string>
     <!-- Description of policy access to watch user login attempts -->
-    <string name="policydesc_watchLogin" product="tablet">Monitor the number of incorrect passwords 
-    entered when unlocking the screen, and lock the tablet or erase all the tablet\'s 
+    <string name="policydesc_watchLogin" product="tablet">Monitor the number of incorrect passwords
+    entered when unlocking the screen, and lock the tablet or erase all the tablet\'s
     data if too many incorrect passwords are entered</string>
     <!-- Description of policy access to watch user login attempts -->
-    <string name="policydesc_watchLogin" product="default">Monitor the number of incorrect passwords 
-    entered when unlocking the screen, and lock the phone or erase all the phone\'s 
+    <string name="policydesc_watchLogin" product="default">Monitor the number of incorrect passwords
+    entered when unlocking the screen, and lock the phone or erase all the phone\'s
     data if too many incorrect passwords are entered</string>
     <!-- Title of policy access to reset user's password -->
     <string name="policylab_resetPassword">Change the screen-unlock password</string>
@@ -1386,10 +1386,10 @@
     <!-- Title of policy access to wipe the user's data -->
     <string name="policylab_wipeData">Erase all data</string>
     <!-- Description of policy access to wipe the user's data -->
-    <string name="policydesc_wipeData" product="tablet">Erase the tablet\'s data without warning, 
+    <string name="policydesc_wipeData" product="tablet">Erase the tablet\'s data without warning,
     by performing a factory data reset</string>
     <!-- Description of policy access to wipe the user's data -->
-    <string name="policydesc_wipeData" product="default">Erase the phone\'s data without warning, 
+    <string name="policydesc_wipeData" product="default">Erase the phone\'s data without warning,
     by performing a factory data reset</string>
     <string name="policylab_setGlobalProxy">Set the device global proxy</string>
     <!-- Description of policy access to wipe the user's data -->
@@ -1602,7 +1602,7 @@
     <string name="relationTypeSister">Sister</string>
     <!-- Spouse relationship type [CHAR LIMIT=20] -->
     <string name="relationTypeSpouse">Spouse</string>
-    
+
     <!-- Custom SIP address type -->
     <string name="sipAddressTypeCustom">Custom</string>
     <!-- Home SIP address type -->
@@ -2640,4 +2640,15 @@
     <!-- Network positioning verification No. Button to push to deny sharing of location
          information. -->
     <string name="gpsVerifNo">No</string>
+
+    <!-- Error message when the sync tried to delete too many things -->
+    <string name="sync_too_many_deletes">Delete limit exceeded</string>
+    <!-- Dialog message for when there are too many deletes that would take place and we want user confirmation -->
+    <string name="sync_too_many_deletes_desc">There are <xliff:g id="number_of_deleted_items">%1$d</xliff:g> deleted items for <xliff:g id="type_of_sync">%2$s</xliff:g>, account <xliff:g id="account_name">%3$s</xliff:g>. What would you like to do?</string>
+    <!-- Dialog action for when there are too many deletes that would take place and we want user confirmation, and the user wants to delete the items -->
+    <string name="sync_really_delete">Delete the items.</string>
+    <!-- Dialog action for when there are too many deletes that would take place and we want user confirmation, and the user wants to undo the deletions -->
+    <string name="sync_undo_deletes">Undo the deletes.</string>
+    <!-- Dialog action for when there are too many deletes that would take place and we want user confirmation, and the user wants to do nothing for now -->
+    <string name="sync_do_nothing">Do nothing for now.</string>
 </resources>
