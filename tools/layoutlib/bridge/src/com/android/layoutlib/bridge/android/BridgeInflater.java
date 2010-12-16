@@ -16,8 +16,8 @@
 
 package com.android.layoutlib.bridge.android;
 
-import com.android.layoutlib.api.IProjectCallback;
-import com.android.layoutlib.api.ResourceValue;
+import com.android.ide.common.rendering.api.IProjectCallback;
+import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 
@@ -217,14 +217,14 @@ public final class BridgeInflater extends LayoutInflater {
                 BridgeXmlBlockParser parser = (BridgeXmlBlockParser) attrs;
 
                 // get the view key
-                Object viewKey = parser.getViewKey();
+                Object viewKey = parser.getViewCookie();
 
                 // if there's no view key and the depth is 1 (ie this is the first tag),
                 // look for a previous parser in the context, and check if this one has a viewkey.
                 if (viewKey == null && parser.getDepth() == 1) {
                     BridgeXmlBlockParser previousParser = bc.getPreviousParser();
                     if (previousParser != null) {
-                        viewKey = previousParser.getViewKey();
+                        viewKey = previousParser.getViewCookie();
                     }
                 }
 

@@ -16,9 +16,9 @@
 
 package com.android.layoutlib.bridge.impl;
 
-import com.android.layoutlib.api.DensityBasedResourceValue;
-import com.android.layoutlib.api.ResourceDensity;
-import com.android.layoutlib.api.ResourceValue;
+import com.android.ide.common.rendering.api.DensityBasedResourceValue;
+import com.android.ide.common.rendering.api.ResourceDensity;
+import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;

@@ -16,9 +16,9 @@
 
 package com.android.layoutlib.bridge.impl;
 
-import com.android.layoutlib.api.SceneResult;
-import com.android.layoutlib.api.LayoutScene.IAnimationListener;
-import com.android.layoutlib.api.SceneResult.SceneStatus;
+import com.android.ide.common.rendering.api.IAnimationListener;
+import com.android.ide.common.rendering.api.Result;
+import com.android.ide.common.rendering.api.Result.Status;
 
 import android.animation.Animator;
 
@@ -26,19 +26,19 @@ public class PlayAnimationThread extends AnimationThread {
 
     private final Animator mAnimator;
 
-    public PlayAnimationThread(Animator animator, LayoutSceneImpl scene, String animName,
+    public PlayAnimationThread(Animator animator, RenderSessionImpl scene, String animName,
             IAnimationListener listener) {
         super(scene, animName, listener);
         mAnimator = animator;
     }
 
     @Override
-    public SceneResult preAnimation() {
+    public Result preAnimation() {
         // start the animation. This will send a message to the handler right away, so
         // the queue is filled when this method returns.
         mAnimator.start();
 
-        return SceneStatus.SUCCESS.createResult();
+        return Status.SUCCESS.createResult();
     }
 
     @Override

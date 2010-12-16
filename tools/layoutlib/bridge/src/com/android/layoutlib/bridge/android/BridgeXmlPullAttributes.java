@@ -16,7 +16,7 @@
 
 package com.android.layoutlib.bridge.android;
 
-import com.android.layoutlib.api.ResourceValue;
+import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 

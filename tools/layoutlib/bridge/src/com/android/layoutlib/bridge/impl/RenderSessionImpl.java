@@ -16,24 +16,28 @@
 
 package com.android.layoutlib.bridge.impl;
 
-import static com.android.layoutlib.api.SceneResult.SceneStatus.ERROR_LOCK_INTERRUPTED;
-import static com.android.layoutlib.api.SceneResult.SceneStatus.ERROR_TIMEOUT;
-import static com.android.layoutlib.api.SceneResult.SceneStatus.SUCCESS;
+import static com.android.ide.common.rendering.api.Result.Status.ERROR_ANIM_NOT_FOUND;
+import static com.android.ide.common.rendering.api.Result.Status.ERROR_INFLATION;
+import static com.android.ide.common.rendering.api.Result.Status.ERROR_LOCK_INTERRUPTED;
+import static com.android.ide.common.rendering.api.Result.Status.ERROR_NOT_INFLATED;
+import static com.android.ide.common.rendering.api.Result.Status.ERROR_TIMEOUT;
+import static com.android.ide.common.rendering.api.Result.Status.ERROR_UNKNOWN;
+import static com.android.ide.common.rendering.api.Result.Status.ERROR_VIEWGROUP_NO_CHILDREN;
+import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
 
+import com.android.ide.common.rendering.api.IAnimationListener;
+import com.android.ide.common.rendering.api.ILayoutPullParser;
+import com.android.ide.common.rendering.api.IProjectCallback;
+import com.android.ide.common.rendering.api.Params;
+import com.android.ide.common.rendering.api.RenderSession;
+import com.android.ide.common.rendering.api.ResourceDensity;
+import com.android.ide.common.rendering.api.ResourceValue;
+import com.android.ide.common.rendering.api.Result;
+import com.android.ide.common.rendering.api.StyleResourceValue;
+import com.android.ide.common.rendering.api.ViewInfo;
+import com.android.ide.common.rendering.api.Params.RenderingMode;
+import com.android.ide.common.rendering.api.Result.Status;
 import com.android.internal.util.XmlUtils;
-import com.android.layoutlib.api.IProjectCallback;
-import com.android.layoutlib.api.IXmlPullParser;
-import com.android.layoutlib.api.LayoutBridge;
-import com.android.layoutlib.api.LayoutScene;
-import com.android.layoutlib.api.ResourceDensity;
-import com.android.layoutlib.api.ResourceValue;
-import com.android.layoutlib.api.SceneParams;
-import com.android.layoutlib.api.SceneResult;
-import com.android.layoutlib.api.StyleResourceValue;
-import com.android.layoutlib.api.ViewInfo;
-import com.android.layoutlib.api.LayoutScene.IAnimationListener;
-import com.android.layoutlib.api.SceneParams.RenderingMode;
-import com.android.layoutlib.api.SceneResult.SceneStatus;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.android.BridgeContext;
@@ -75,14 +79,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Class managing a layout "scene".
+ * Class implementing the render session.
  *
- * A scene is a stateful representation of a layout file. It is initialized with data coming through
- * the {@link LayoutBridge} API to inflate the layout. Further actions and rendering can then
+ * A session is a stateful representation of a layout file. It is initialized with data coming
+ * through the {@link Bridge} API to inflate the layout. Further actions and rendering can then
  * be done on the layout.
  *
  */
-public class LayoutSceneImpl {
+public class RenderSessionImpl {
 
     private static final int DEFAULT_TITLE_BAR_HEIGHT = 25;
     private static final int DEFAULT_STATUS_BAR_HEIGHT = 25;
@@ -93,10 +97,10 @@ public class LayoutSceneImpl {
      */
     private static BridgeContext sCurrentContext = null;
 
-    private final SceneParams mParams;
+    private final Params mParams;
 
     // scene state
-    private LayoutScene mScene;
+    private RenderSession mScene;
     private BridgeContext mContext;
     private BridgeXmlBlockParser mBlockParser;
     private BridgeInflater mInflater;
@@ -123,14 +127,14 @@ public class LayoutSceneImpl {
     /**
      * Creates a layout scene with all the information coming from the layout bridge API.
      * <p>
-     * This <b>must</b> be followed by a call to {@link LayoutSceneImpl#init()}, which act as a
-     * call to {@link LayoutSceneImpl#acquire(long)}
+     * This <b>must</b> be followed by a call to {@link RenderSessionImpl#init()}, which act as a
+     * call to {@link RenderSessionImpl#acquire(long)}
      *
      * @see LayoutBridge#createScene(com.android.layoutlib.api.SceneParams)
      */
-    public LayoutSceneImpl(SceneParams params) {
+    public RenderSessionImpl(Params params) {
         // copy the params.
-        mParams = new SceneParams(params);
+        mParams = new Params(params);
     }
 
     /**
@@ -144,10 +148,10 @@ public class LayoutSceneImpl {
      * @see #acquire(long)
      * @see #release()
      */
-    public SceneResult init(long timeout) {
+    public Result init(long timeout) {
         // acquire the lock. if the result is null, lock was just acquired, otherwise, return
         // the result.
-        SceneResult result = acquireLock(timeout);
+        Result result = acquireLock(timeout);
         if (result != null) {
             return result;
         }
@@ -168,7 +172,7 @@ public class LayoutSceneImpl {
         Map<StyleResourceValue, StyleResourceValue> styleParentMap =
             new HashMap<StyleResourceValue, StyleResourceValue>();
 
-        mCurrentTheme = computeStyleMaps(mParams.getThemeName(), mParams.getIsProjectTheme(),
+        mCurrentTheme = computeStyleMaps(mParams.getThemeName(), mParams.isProjectTheme(),
                 mParams.getProjectResources().get(BridgeConstants.RES_STYLE),
                 mParams.getFrameworkResources().get(BridgeConstants.RES_STYLE), styleParentMap);
 
@@ -187,7 +191,7 @@ public class LayoutSceneImpl {
         // get the screen offset and window-background resource
         mWindowBackground = null;
         mScreenOffset = 0;
-        if (mCurrentTheme != null && mParams.isCustomBackgroundEnabled() == false) {
+        if (mCurrentTheme != null && mParams.isBgColorOverridden() == false) {
             mWindowBackground = mContext.findItemInStyle(mCurrentTheme, "windowBackground");
             mWindowBackground = mContext.resolveResValue(mWindowBackground);
 
@@ -203,7 +207,7 @@ public class LayoutSceneImpl {
         mBlockParser = new BridgeXmlBlockParser(mParams.getLayoutDescription(),
                 mContext, false /* platformResourceFlag */);
 
-        return SceneStatus.SUCCESS.createResult();
+        return SUCCESS.createResult();
     }
 
     /**
@@ -215,7 +219,7 @@ public class LayoutSceneImpl {
      * The preparation can fail if another rendering took too long and the timeout was elapsed.
      *
      * More than one call to this from the same thread will have no effect and will return
-     * {@link SceneResult#SUCCESS}.
+     * {@link Result#SUCCESS}.
      *
      * After scene actions have taken place, only one call to {@link #release()} must be
      * done.
@@ -228,14 +232,14 @@ public class LayoutSceneImpl {
      *
      * @throws IllegalStateException if {@link #init(long)} was never called.
      */
-    public SceneResult acquire(long timeout) {
+    public Result acquire(long timeout) {
         if (mContext == null) {
             throw new IllegalStateException("After scene creation, #init() must be called");
         }
 
         // acquire the lock. if the result is null, lock was just acquired, otherwise, return
         // the result.
-        SceneResult result = acquireLock(timeout);
+        Result result = acquireLock(timeout);
         if (result != null) {
             return result;
         }
@@ -253,8 +257,8 @@ public class LayoutSceneImpl {
      * Acquire the lock so that the scene can be acted upon.
      * <p>
      * This returns null if the lock was just acquired, otherwise it returns
-     * {@link SceneResult#SUCCESS} if the lock already belonged to that thread, or another
-     * instance (see {@link SceneResult#getStatus()}) if an error occurred.
+     * {@link Result#SUCCESS} if the lock already belonged to that thread, or another
+     * instance (see {@link Result#getStatus()}) if an error occurred.
      *
      * @param timeout the time to wait if another rendering is happening.
      * @return null if the lock was just acquire or another result depending on the state.
@@ -262,7 +266,7 @@ public class LayoutSceneImpl {
      * @throws IllegalStateException if the current context is different than the one owned by
      *      the scene.
      */
-    private SceneResult acquireLock(long timeout) {
+    private Result acquireLock(long timeout) {
         ReentrantLock lock = Bridge.getLock();
         if (lock.isHeldByCurrentThread() == false) {
             try {
@@ -314,7 +318,7 @@ public class LayoutSceneImpl {
      * @throws IllegalStateException if the current context is different than the one owned by
      *      the scene, or if {@link #init(long)} was not called.
      */
-    public SceneResult inflate() {
+    public Result inflate() {
         checkLock();
 
         try {
@@ -347,9 +351,9 @@ public class LayoutSceneImpl {
                 mViewRoot.setBackgroundDrawable(d);
             }
 
-            return SceneStatus.SUCCESS.createResult();
+            return SUCCESS.createResult();
         } catch (PostInflateException e) {
-            return SceneStatus.ERROR_INFLATION.createResult(e.getMessage(), e);
+            return ERROR_INFLATION.createResult(e.getMessage(), e);
         } catch (Throwable e) {
             // get the real cause of the exception.
             Throwable t = e;
@@ -360,7 +364,7 @@ public class LayoutSceneImpl {
             // log it
             mParams.getLog().error("Scene inflate failed", t);
 
-            return SceneStatus.ERROR_INFLATION.createResult(t.getMessage(), t);
+            return ERROR_INFLATION.createResult(t.getMessage(), t);
         }
     }
 
@@ -375,12 +379,12 @@ public class LayoutSceneImpl {
      * @see SceneParams#getRenderingMode()
      * @see LayoutScene#render(long)
      */
-    public SceneResult render() {
+    public Result render() {
         checkLock();
 
         try {
             if (mViewRoot == null) {
-                return SceneStatus.ERROR_NOT_INFLATED.createResult();
+                return ERROR_NOT_INFLATED.createResult();
             }
             // measure the views
             int w_spec, h_spec;
@@ -443,9 +447,9 @@ public class LayoutSceneImpl {
                             mMeasuredScreenHeight - mScreenOffset, BufferedImage.TYPE_INT_ARGB);
                 }
 
-                if (mParams.isCustomBackgroundEnabled()) {
+                if (mParams.isBgColorOverridden()) {
                     Graphics2D gc = mImage.createGraphics();
-                    gc.setColor(new Color(mParams.getCustomBackgroundColor(), true));
+                    gc.setColor(new Color(mParams.getOverrideBgColor(), true));
                     gc.fillRect(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight - mScreenOffset);
                     gc.dispose();
                 }
@@ -465,7 +469,7 @@ public class LayoutSceneImpl {
             mViewInfo = visit(((ViewGroup)mViewRoot).getChildAt(0), mContext);
 
             // success!
-            return SceneStatus.SUCCESS.createResult();
+            return SUCCESS.createResult();
         } catch (Throwable e) {
             // get the real cause of the exception.
             Throwable t = e;
@@ -476,7 +480,7 @@ public class LayoutSceneImpl {
             // log it
             mParams.getLog().error("Scene Render failed", t);
 
-            return SceneStatus.ERROR_UNKNOWN.createResult(t.getMessage(), t);
+            return ERROR_UNKNOWN.createResult(t.getMessage(), t);
         }
     }
 
@@ -490,7 +494,7 @@ public class LayoutSceneImpl {
      *
      * @see LayoutScene#animate(Object, String, boolean, IAnimationListener)
      */
-    public SceneResult animate(Object targetObject, String animationName,
+    public Result animate(Object targetObject, String animationName,
             boolean isFrameworkAnimation, IAnimationListener listener) {
         checkLock();
 
@@ -517,7 +521,7 @@ public class LayoutSceneImpl {
 
                     new PlayAnimationThread(anim, this, animationName, listener).start();
 
-                    return SceneStatus.SUCCESS.createResult();
+                    return SUCCESS.createResult();
                 }
             } catch (Exception e) {
                 // get the real cause of the exception.
@@ -526,11 +530,11 @@ public class LayoutSceneImpl {
                     t = t.getCause();
                 }
 
-                return SceneStatus.ERROR_UNKNOWN.createResult(t.getMessage(), t);
+                return ERROR_UNKNOWN.createResult(t.getMessage(), t);
             }
         }
 
-        return SceneStatus.ERROR_ANIM_NOT_FOUND.createResult();
+        return ERROR_ANIM_NOT_FOUND.createResult();
     }
 
     /**
@@ -541,9 +545,9 @@ public class LayoutSceneImpl {
      * @throws IllegalStateException if the current context is different than the one owned by
      *      the scene, or if {@link #acquire(long)} was not called.
      *
-     * @see LayoutScene#insertChild(Object, IXmlPullParser, int, IAnimationListener)
+     * @see LayoutScene#insertChild(Object, ILayoutPullParser, int, IAnimationListener)
      */
-    public SceneResult insertChild(final ViewGroup parentView, IXmlPullParser childXml,
+    public Result insertChild(final ViewGroup parentView, ILayoutPullParser childXml,
             final int index, IAnimationListener listener) {
         checkLock();
 
@@ -562,7 +566,7 @@ public class LayoutSceneImpl {
             new AnimationThread(this, "insertChild", listener) {
 
                 @Override
-                public SceneResult preAnimation() {
+                public Result preAnimation() {
                     parentView.setLayoutTransition(new LayoutTransition());
                     return addView(parentView, child, index);
                 }
@@ -574,11 +578,11 @@ public class LayoutSceneImpl {
             }.start();
 
             // always return success since the real status will come through the listener.
-            return SceneStatus.SUCCESS.createResult(child);
+            return SUCCESS.createResult(child);
         }
 
         // add it to the parentView in the correct location
-        SceneResult result = addView(parentView, child, index);
+        Result result = addView(parentView, child, index);
         if (result.isSuccess() == false) {
             return result;
         }
@@ -598,17 +602,17 @@ public class LayoutSceneImpl {
      * @param view the view to add to the parent
      * @param index the index where to do the add.
      *
-     * @return a SceneResult with {@link SceneStatus#SUCCESS} or
-     *     {@link SceneStatus#ERROR_VIEWGROUP_NO_CHILDREN} if the given parent doesn't support
+     * @return a Result with {@link Status#SUCCESS} or
+     *     {@link Status#ERROR_VIEWGROUP_NO_CHILDREN} if the given parent doesn't support
      *     adding views.
      */
-    private SceneResult addView(ViewGroup parent, View view, int index) {
+    private Result addView(ViewGroup parent, View view, int index) {
         try {
             parent.addView(view, index);
-            return SceneStatus.SUCCESS.createResult();
+            return SUCCESS.createResult();
         } catch (UnsupportedOperationException e) {
             // looks like this is a view class that doesn't support children manipulation!
-            return SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN.createResult();
+            return ERROR_VIEWGROUP_NO_CHILDREN.createResult();
         }
     }
 
@@ -622,7 +626,7 @@ public class LayoutSceneImpl {
      *
      * @see LayoutScene#moveChild(Object, Object, int, Map, IAnimationListener)
      */
-    public SceneResult moveChild(final ViewGroup parentView, final View childView, final int index,
+    public Result moveChild(final ViewGroup parentView, final View childView, final int index,
             Map<String, String> layoutParamsMap, IAnimationListener listener) {
         checkLock();
 
@@ -640,7 +644,7 @@ public class LayoutSceneImpl {
             new AnimationThread(this, "moveChild", listener) {
 
                 @Override
-                public SceneResult preAnimation() {
+                public Result preAnimation() {
                     parentView.setLayoutTransition(new LayoutTransition());
                     return moveView(parentView, childView, index, params);
                 }
@@ -652,10 +656,10 @@ public class LayoutSceneImpl {
             }.start();
 
             // always return success since the real status will come through the listener.
-            return SceneStatus.SUCCESS.createResult(layoutParams);
+            return SUCCESS.createResult(layoutParams);
         }
 
-        SceneResult result = moveView(parentView, childView, index, layoutParams);
+        Result result = moveView(parentView, childView, index, layoutParams);
         if (result.isSuccess() == false) {
             return result;
         }
@@ -677,11 +681,11 @@ public class LayoutSceneImpl {
      * @param index the new location in the new parent
      * @param params an option (can be null) {@link LayoutParams} instance.
      *
-     * @return a SceneResult with {@link SceneStatus#SUCCESS} or
-     *     {@link SceneStatus#ERROR_VIEWGROUP_NO_CHILDREN} if the given parent doesn't support
+     * @return a Result with {@link Status#SUCCESS} or
+     *     {@link Status#ERROR_VIEWGROUP_NO_CHILDREN} if the given parent doesn't support
      *     adding views.
      */
-    private SceneResult moveView(ViewGroup parent, View view, int index, LayoutParams params) {
+    private Result moveView(ViewGroup parent, View view, int index, LayoutParams params) {
         try {
             ViewGroup previousParent = (ViewGroup) view.getParent();
             previousParent.removeView(view);
@@ -694,10 +698,10 @@ public class LayoutSceneImpl {
                 parent.addView(view, index);
             }
 
-            return SceneStatus.SUCCESS.createResult();
+            return SUCCESS.createResult();
         } catch (UnsupportedOperationException e) {
             // looks like this is a view class that doesn't support children manipulation!
-            return SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN.createResult();
+            return ERROR_VIEWGROUP_NO_CHILDREN.createResult();
         }
     }
 
@@ -711,7 +715,7 @@ public class LayoutSceneImpl {
      *
      * @see LayoutScene#removeChild(Object, IAnimationListener)
      */
-    public SceneResult removeChild(final View childView, IAnimationListener listener) {
+    public Result removeChild(final View childView, IAnimationListener listener) {
         checkLock();
 
         invalidateRenderingSize();
@@ -722,7 +726,7 @@ public class LayoutSceneImpl {
             new AnimationThread(this, "moveChild", listener) {
 
                 @Override
-                public SceneResult preAnimation() {
+                public Result preAnimation() {
                     parent.setLayoutTransition(new LayoutTransition());
                     return removeView(parent, childView);
                 }
@@ -734,10 +738,10 @@ public class LayoutSceneImpl {
             }.start();
 
             // always return success since the real status will come through the listener.
-            return SceneStatus.SUCCESS.createResult();
+            return SUCCESS.createResult();
         }
 
-        SceneResult result = removeView(parent, childView);
+        Result result = removeView(parent, childView);
         if (result.isSuccess() == false) {
             return result;
         }
@@ -750,17 +754,17 @@ public class LayoutSceneImpl {
      *
      * @param view the view to remove from its parent
      *
-     * @return a SceneResult with {@link SceneStatus#SUCCESS} or
-     *     {@link SceneStatus#ERROR_VIEWGROUP_NO_CHILDREN} if the given parent doesn't support
+     * @return a Result with {@link Status#SUCCESS} or
+     *     {@link Status#ERROR_VIEWGROUP_NO_CHILDREN} if the given parent doesn't support
      *     adding views.
      */
-    private SceneResult removeView(ViewGroup parent, View view) {
+    private Result removeView(ViewGroup parent, View view) {
         try {
             parent.removeView(view);
-            return SceneStatus.SUCCESS.createResult();
+            return SUCCESS.createResult();
         } catch (UnsupportedOperationException e) {
             // looks like this is a view class that doesn't support children manipulation!
-            return SceneStatus.ERROR_VIEWGROUP_NO_CHILDREN.createResult();
+            return ERROR_VIEWGROUP_NO_CHILDREN.createResult();
         }
     }
 
@@ -791,7 +795,7 @@ public class LayoutSceneImpl {
      * @param inProjectStyleMap the project style map
      * @param inFrameworkStyleMap the framework style map
      * @param outInheritanceMap the map of style inheritance. This is filled by the method
-     * @return the {@link IStyleResourceValue} matching <var>themeName</var>
+     * @return the {@link StyleResourceValue} matching <var>themeName</var>
      */
     private StyleResourceValue computeStyleMaps(
             String themeName, boolean isProjectTheme, Map<String,
@@ -865,7 +869,7 @@ public class LayoutSceneImpl {
     }
 
     /**
-     * Searches for and returns the {@link IStyleResourceValue} from a given name.
+     * Searches for and returns the {@link StyleResourceValue} from a given name.
      * <p/>The format of the name can be:
      * <ul>
      * <li>[android:]&lt;name&gt;</li>
@@ -875,7 +879,7 @@ public class LayoutSceneImpl {
      * @param parentName the name of the style.
      * @param inProjectStyleMap the project style map. Can be <code>null</code>
      * @param inFrameworkStyleMap the framework style map.
-     * @return The matching {@link IStyleResourceValue} object or <code>null</code> if not found.
+     * @return The matching {@link StyleResourceValue} object or <code>null</code> if not found.
      */
     private StyleResourceValue getStyle(String parentName,
             Map<String, ResourceValue> inProjectStyleMap,
@@ -1143,15 +1147,15 @@ public class LayoutSceneImpl {
         return mViewInfo;
     }
 
-    public Map<String, String> getDefaultViewPropertyValues(Object viewObject) {
+    public Map<String, String> getDefaultProperties(Object viewObject) {
         return mContext.getDefaultPropMap(viewObject);
     }
 
-    public void setScene(LayoutScene scene) {
-        mScene = scene;
+    public void setScene(RenderSession session) {
+        mScene = session;
     }
 
-    public LayoutScene getScene() {
+    public RenderSession getSession() {
         return mScene;
     }
 }

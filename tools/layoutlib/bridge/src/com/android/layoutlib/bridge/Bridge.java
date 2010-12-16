@@ -16,15 +16,17 @@
 
 package com.android.layoutlib.bridge;
 
-import com.android.layoutlib.api.Capability;
-import com.android.layoutlib.api.LayoutBridge;
-import com.android.layoutlib.api.LayoutLog;
-import com.android.layoutlib.api.SceneParams;
-import com.android.layoutlib.api.SceneResult;
-import com.android.layoutlib.api.SceneResult.SceneStatus;
+import static com.android.ide.common.rendering.api.Result.Status.ERROR_UNKNOWN;
+import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
+
+import com.android.ide.common.rendering.api.Capability;
+import com.android.ide.common.rendering.api.LayoutLog;
+import com.android.ide.common.rendering.api.Params;
+import com.android.ide.common.rendering.api.RenderSession;
+import com.android.ide.common.rendering.api.Result;
 import com.android.layoutlib.bridge.android.BridgeAssetManager;
 import com.android.layoutlib.bridge.impl.FontLoader;
-import com.android.layoutlib.bridge.impl.LayoutSceneImpl;
+import com.android.layoutlib.bridge.impl.RenderSessionImpl;
 import com.android.ninepatch.NinePatchChunk;
 import com.android.tools.layoutlib.create.MethodAdapter;
 import com.android.tools.layoutlib.create.OverrideMethod;
@@ -33,6 +35,7 @@ import android.graphics.Bitmap;
 import android.graphics.Typeface_Delegate;
 import android.os.Looper;
 
+import java.io.File;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -47,7 +50,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * <p/>To use this bridge, simply instantiate an object of type {@link Bridge} and call
  * {@link #createScene(SceneParams)}
  */
-public final class Bridge extends LayoutBridge {
+public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
 
     public static class StaticMethodNotImplementedException extends RuntimeException {
         private static final long serialVersionUID = 1L;
@@ -169,7 +172,7 @@ public final class Bridge extends LayoutBridge {
 
     @Override
     public int getApiLevel() {
-        return LayoutBridge.API_CURRENT;
+        return com.android.ide.common.rendering.api.Bridge.API_CURRENT;
     }
 
     @Override
@@ -179,10 +182,10 @@ public final class Bridge extends LayoutBridge {
 
     /*
      * (non-Javadoc)
-     * @see com.android.layoutlib.api.ILayoutLibBridge#init(java.lang.String, java.util.Map)
+     * @see com.android.layoutlib.api.ILayoutLibBridge#init(java.io.File, java.util.Map)
      */
     @Override
-    public boolean init(String fontOsLocation, Map<String, Map<String, Integer>> enumValueMap) {
+    public boolean init(File fontLocation, Map<String, Map<String, Integer>> enumValueMap) {
         sEnumValueMap = enumValueMap;
 
         // don't use EnumSet.allOf(), because the bridge doesn't come with its specific version
@@ -229,7 +232,7 @@ public final class Bridge extends LayoutBridge {
         }
 
         // load the fonts.
-        FontLoader fontLoader = FontLoader.create(fontOsLocation);
+        FontLoader fontLoader = FontLoader.create(fontLocation.getAbsolutePath());
         if (fontLoader != null) {
             Typeface_Delegate.init(fontLoader);
         } else {
@@ -299,10 +302,10 @@ public final class Bridge extends LayoutBridge {
      * @since 5
      */
     @Override
-    public BridgeLayoutScene createScene(SceneParams params) {
+    public RenderSession createSession(Params params) {
         try {
-            SceneResult lastResult = SceneStatus.SUCCESS.createResult();
-            LayoutSceneImpl scene = new LayoutSceneImpl(params);
+            Result lastResult = SUCCESS.createResult();
+            RenderSessionImpl scene = new RenderSessionImpl(params);
             try {
                 prepareThread();
                 lastResult = scene.init(params.getTimeout());
@@ -317,15 +320,15 @@ public final class Bridge extends LayoutBridge {
                 cleanupThread();
             }
 
-            return new BridgeLayoutScene(scene, lastResult);
+            return new BridgeRenderSession(scene, lastResult);
         } catch (Throwable t) {
             // get the real cause of the exception.
             Throwable t2 = t;
             while (t2.getCause() != null) {
                 t2 = t.getCause();
             }
-            return new BridgeLayoutScene(null,
-                    SceneStatus.ERROR_UNKNOWN.createResult(t2.getMessage(), t2));
+            return new BridgeRenderSession(null,
+                    ERROR_UNKNOWN.createResult(t2.getMessage(), t2));
         }
     }
 

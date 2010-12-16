@@ -16,7 +16,7 @@
 
 package android.graphics;
 
-import com.android.layoutlib.api.ResourceDensity;
+import com.android.ide.common.rendering.api.ResourceDensity;
 import com.android.layoutlib.bridge.Bridge;
 
 import android.content.res.AssetManager;

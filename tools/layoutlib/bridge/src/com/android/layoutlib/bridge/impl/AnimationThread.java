@@ -16,10 +16,10 @@
 
 package com.android.layoutlib.bridge.impl;
 
-import com.android.layoutlib.api.LayoutScene;
-import com.android.layoutlib.api.SceneResult;
-import com.android.layoutlib.api.LayoutScene.IAnimationListener;
-import com.android.layoutlib.api.SceneResult.SceneStatus;
+import com.android.ide.common.rendering.api.IAnimationListener;
+import com.android.ide.common.rendering.api.RenderSession;
+import com.android.ide.common.rendering.api.Result;
+import com.android.ide.common.rendering.api.Result.Status;
 import com.android.layoutlib.bridge.Bridge;
 
 import android.animation.ValueAnimator;
@@ -57,18 +57,19 @@ public abstract class AnimationThread extends Thread {
         }
     }
 
-    private final LayoutSceneImpl mScene;
+    private final RenderSessionImpl mSession;
 
     Queue<MessageBundle> mQueue = new LinkedList<MessageBundle>();
     private final IAnimationListener mListener;
 
-    public AnimationThread(LayoutSceneImpl scene, String threadName, IAnimationListener listener) {
+    public AnimationThread(RenderSessionImpl scene, String threadName,
+            IAnimationListener listener) {
         super(threadName);
-        mScene = scene;
+        mSession = scene;
         mListener = listener;
     }
 
-    public abstract SceneResult preAnimation();
+    public abstract Result preAnimation();
     public abstract void postAnimation();
 
     @Override
@@ -87,13 +88,13 @@ public abstract class AnimationThread extends Thread {
             });
 
             // call out to the pre-animation work, which should start an animation or more.
-            SceneResult result = preAnimation();
+            Result result = preAnimation();
             if (result.isSuccess() == false) {
                 mListener.done(result);
             }
 
             // loop the animation
-            LayoutScene scene = mScene.getScene();
+            RenderSession session = mSession.getSession();
             do {
                 // check early.
                 if (mListener.isCanceled()) {
@@ -123,7 +124,7 @@ public abstract class AnimationThread extends Thread {
                 }
 
                 // ready to do the work, acquire the scene.
-                result = mScene.acquire(250);
+                result = mSession.acquire(250);
                 if (result.isSuccess() == false) {
                     mListener.done(result);
                     return;
@@ -138,15 +139,15 @@ public abstract class AnimationThread extends Thread {
                     }
 
                     bundle.mTarget.handleMessage(bundle.mMessage);
-                    if (mScene.render().isSuccess()) {
-                        mListener.onNewFrame(scene);
+                    if (mSession.render().isSuccess()) {
+                        mListener.onNewFrame(session);
                     }
                 } finally {
-                    mScene.release();
+                    mSession.release();
                 }
             } while (mListener.isCanceled() == false && mQueue.size() > 0);
 
-            mListener.done(SceneStatus.SUCCESS.createResult());
+            mListener.done(Status.SUCCESS.createResult());
         } finally {
             postAnimation();
             Handler_Delegate.setCallback(null);

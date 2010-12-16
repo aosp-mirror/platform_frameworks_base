@@ -16,9 +16,9 @@
 
 package com.android.layoutlib.bridge.android;
 
+import com.android.ide.common.rendering.api.ResourceValue;
+import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.internal.util.XmlUtils;
-import com.android.layoutlib.api.ResourceValue;
-import com.android.layoutlib.api.StyleResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
@@ -66,7 +66,7 @@ public final class BridgeTypedArray extends TypedArray {
     }
 
     /**
-     * Seals the array after all calls to {@link #bridgeSetValue(int, String, IResourceValue)} have
+     * Seals the array after all calls to {@link #bridgeSetValue(int, String, ResourceValue)} have
      * been done.
      * <p/>This allows to compute the list of non default values, permitting
      * {@link #getIndexCount()} to return the proper value.

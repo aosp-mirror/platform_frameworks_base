@@ -16,12 +16,13 @@
 
 package com.android.layoutlib.bridge;
 
-import com.android.layoutlib.api.IXmlPullParser;
-import com.android.layoutlib.api.LayoutScene;
-import com.android.layoutlib.api.SceneParams;
-import com.android.layoutlib.api.SceneResult;
-import com.android.layoutlib.api.ViewInfo;
-import com.android.layoutlib.bridge.impl.LayoutSceneImpl;
+import com.android.ide.common.rendering.api.IAnimationListener;
+import com.android.ide.common.rendering.api.ILayoutPullParser;
+import com.android.ide.common.rendering.api.Params;
+import com.android.ide.common.rendering.api.RenderSession;
+import com.android.ide.common.rendering.api.Result;
+import com.android.ide.common.rendering.api.ViewInfo;
+import com.android.layoutlib.bridge.impl.RenderSessionImpl;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,47 +31,47 @@ import java.awt.image.BufferedImage;
 import java.util.Map;
 
 /**
- * An implementation of {@link LayoutScene}.
+ * An implementation of {@link RenderSession}.
  *
  * This is a pretty basic class that does almost nothing. All of the work is done in
- * {@link LayoutSceneImpl}.
+ * {@link RenderSessionImpl}.
  *
  */
-public class BridgeLayoutScene extends LayoutScene {
+public class BridgeRenderSession extends RenderSession {
 
-    private final LayoutSceneImpl mScene;
-    private SceneResult mLastResult;
+    private final RenderSessionImpl mSession;
+    private Result mLastResult;
 
     @Override
-    public SceneResult getResult() {
+    public Result getResult() {
         return mLastResult;
     }
 
     @Override
     public BufferedImage getImage() {
-        return mScene.getImage();
+        return mSession.getImage();
     }
 
     @Override
     public ViewInfo getRootView() {
-        return mScene.getViewInfo();
+        return mSession.getViewInfo();
     }
 
     @Override
-    public Map<String, String> getDefaultViewPropertyValues(Object viewObject) {
-        return mScene.getDefaultViewPropertyValues(viewObject);
+    public Map<String, String> getDefaultProperties(Object viewObject) {
+        return mSession.getDefaultProperties(viewObject);
     }
 
     @Override
-    public SceneResult render(long timeout) {
+    public Result render(long timeout) {
         try {
             Bridge.prepareThread();
-            mLastResult = mScene.acquire(timeout);
+            mLastResult = mSession.acquire(timeout);
             if (mLastResult.isSuccess()) {
-                mLastResult = mScene.render();
+                mLastResult = mSession.render();
             }
         } finally {
-            mScene.release();
+            mSession.release();
             Bridge.cleanupThread();
         }
 
@@ -78,17 +79,17 @@ public class BridgeLayoutScene extends LayoutScene {
     }
 
     @Override
-    public SceneResult animate(Object targetObject, String animationName,
+    public Result animate(Object targetObject, String animationName,
             boolean isFrameworkAnimation, IAnimationListener listener) {
         try {
             Bridge.prepareThread();
-            mLastResult = mScene.acquire(SceneParams.DEFAULT_TIMEOUT);
+            mLastResult = mSession.acquire(Params.DEFAULT_TIMEOUT);
             if (mLastResult.isSuccess()) {
-                mLastResult = mScene.animate(targetObject, animationName, isFrameworkAnimation,
+                mLastResult = mSession.animate(targetObject, animationName, isFrameworkAnimation,
                         listener);
             }
         } finally {
-            mScene.release();
+            mSession.release();
             Bridge.cleanupThread();
         }
 
@@ -96,7 +97,7 @@ public class BridgeLayoutScene extends LayoutScene {
     }
 
     @Override
-    public SceneResult insertChild(Object parentView, IXmlPullParser childXml, int index,
+    public Result insertChild(Object parentView, ILayoutPullParser childXml, int index,
             IAnimationListener listener) {
         if (parentView instanceof ViewGroup == false) {
             throw new IllegalArgumentException("parentView is not a ViewGroup");
@@ -104,12 +105,12 @@ public class BridgeLayoutScene extends LayoutScene {
 
         try {
             Bridge.prepareThread();
-            mLastResult = mScene.acquire(SceneParams.DEFAULT_TIMEOUT);
+            mLastResult = mSession.acquire(Params.DEFAULT_TIMEOUT);
             if (mLastResult.isSuccess()) {
-                mLastResult = mScene.insertChild((ViewGroup) parentView, childXml, index, listener);
+                mLastResult = mSession.insertChild((ViewGroup) parentView, childXml, index, listener);
             }
         } finally {
-            mScene.release();
+            mSession.release();
             Bridge.cleanupThread();
         }
 
@@ -118,7 +119,7 @@ public class BridgeLayoutScene extends LayoutScene {
 
 
     @Override
-    public SceneResult moveChild(Object parentView, Object childView, int index,
+    public Result moveChild(Object parentView, Object childView, int index,
             Map<String, String> layoutParams, IAnimationListener listener) {
         if (parentView instanceof ViewGroup == false) {
             throw new IllegalArgumentException("parentView is not a ViewGroup");
@@ -129,13 +130,13 @@ public class BridgeLayoutScene extends LayoutScene {
 
         try {
             Bridge.prepareThread();
-            mLastResult = mScene.acquire(SceneParams.DEFAULT_TIMEOUT);
+            mLastResult = mSession.acquire(Params.DEFAULT_TIMEOUT);
             if (mLastResult.isSuccess()) {
-                mLastResult = mScene.moveChild((ViewGroup) parentView, (View) childView, index,
+                mLastResult = mSession.moveChild((ViewGroup) parentView, (View) childView, index,
                         layoutParams, listener);
             }
         } finally {
-            mScene.release();
+            mSession.release();
             Bridge.cleanupThread();
         }
 
@@ -143,19 +144,19 @@ public class BridgeLayoutScene extends LayoutScene {
     }
 
     @Override
-    public SceneResult removeChild(Object childView, IAnimationListener listener) {
+    public Result removeChild(Object childView, IAnimationListener listener) {
         if (childView instanceof View == false) {
             throw new IllegalArgumentException("childView is not a View");
         }
 
         try {
             Bridge.prepareThread();
-            mLastResult = mScene.acquire(SceneParams.DEFAULT_TIMEOUT);
+            mLastResult = mSession.acquire(Params.DEFAULT_TIMEOUT);
             if (mLastResult.isSuccess()) {
-                mLastResult = mScene.removeChild((View) childView, listener);
+                mLastResult = mSession.removeChild((View) childView, listener);
             }
         } finally {
-            mScene.release();
+            mSession.release();
             Bridge.cleanupThread();
         }
 
@@ -166,9 +167,9 @@ public class BridgeLayoutScene extends LayoutScene {
     public void dispose() {
     }
 
-    /*package*/ BridgeLayoutScene(LayoutSceneImpl scene, SceneResult lastResult) {
-        mScene = scene;
-        mScene.setScene(this);
+    /*package*/ BridgeRenderSession(RenderSessionImpl scene, Result lastResult) {
+        mSession = scene;
+        mSession.setScene(this);
         mLastResult = lastResult;
     }
 }

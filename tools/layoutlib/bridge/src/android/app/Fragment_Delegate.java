@@ -16,7 +16,7 @@
 
 package android.app;
 
-import com.android.layoutlib.api.IProjectCallback;
+import com.android.ide.common.rendering.api.IProjectCallback;
 
 import android.content.Context;
 import android.os.Bundle;

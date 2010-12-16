@@ -16,9 +16,9 @@
 
 package com.android.layoutlib.bridge.android;
 
-import com.android.layoutlib.api.IProjectCallback;
-import com.android.layoutlib.api.ResourceValue;
-import com.android.layoutlib.api.StyleResourceValue;
+import com.android.ide.common.rendering.api.IProjectCallback;
+import com.android.ide.common.rendering.api.ResourceValue;
+import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.Stack;
@@ -105,11 +105,11 @@ public final class BridgeContext extends Activity {
      * @param themeName The name of the theme to use.
      * @param projectResources the resources of the project. The map contains (String, map) pairs
      * where the string is the type of the resource reference used in the layout file, and the
-     * map contains (String, {@link IResourceValue}) pairs where the key is the resource name,
+     * map contains (String, {@link }) pairs where the key is the resource name,
      * and the value is the resource value.
      * @param frameworkResources the framework resources. The map contains (String, map) pairs
      * where the string is the type of the resource reference used in the layout file, and the map
-     * contains (String, {@link IResourceValue}) pairs where the key is the resource name, and the
+     * contains (String, {@link ResourceValue}) pairs where the key is the resource name, and the
      * value is the resource value.
      * @param styleInheritanceMap
      * @param projectCallback
@@ -321,7 +321,7 @@ public final class BridgeContext extends Activity {
 
             isPlatformFile = parser.isPlatformFile();
 
-            Object key = parser.getViewKey();
+            Object key = parser.getViewCookie();
             if (key != null) {
                 defaultPropMap = mDefaultPropMaps.get(key);
                 if (defaultPropMap == null) {

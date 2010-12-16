@@ -16,7 +16,8 @@
 
 package com.android.layoutlib.bridge.android;
 
-import com.android.layoutlib.api.IXmlPullParser;
+
+import com.android.ide.common.rendering.api.ILayoutPullParser;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -65,17 +66,17 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
         return mPlatformFile;
     }
 
-    public IXmlPullParser getParser(String layoutName) {
-        if (mParser instanceof IXmlPullParser) {
-            return ((IXmlPullParser)mParser).getParser(layoutName);
+    public ILayoutPullParser getParser(String layoutName) {
+        if (mParser instanceof ILayoutPullParser) {
+            return ((ILayoutPullParser)mParser).getParser(layoutName);
         }
 
         return null;
     }
 
-    public Object getViewKey() {
-        if (mParser instanceof IXmlPullParser) {
-            return ((IXmlPullParser)mParser).getViewKey();
+    public Object getViewCookie() {
+        if (mParser instanceof ILayoutPullParser) {
+            return ((ILayoutPullParser)mParser).getViewCookie();
         }
 
         return null;
