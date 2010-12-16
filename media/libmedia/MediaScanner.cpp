@@ -84,6 +84,7 @@ status_t MediaScanner::doProcessDirectory(
     // place to copy file or directory name
     char* fileSpot = path + strlen(path);
     struct dirent* entry;
+    struct stat statbuf;
 
     // ignore directories that contain a  ".nomedia" file
     if (pathRemaining >= 8 /* strlen(".nomedia") */ ) {
@@ -125,7 +126,6 @@ status_t MediaScanner::doProcessDirectory(
             // If the type is unknown, stat() the file instead.
             // This is sometimes necessary when accessing NFS mounted filesystems, but
             // could be needed in other cases well.
-            struct stat statbuf;
             if (stat(path, &statbuf) == 0) {
                 if (S_ISREG(statbuf.st_mode)) {
                     type = DT_REG;
@@ -142,8 +142,15 @@ status_t MediaScanner::doProcessDirectory(
                 // for example, the Mac ".Trashes" directory
                 if (name[0] == '.') continue;
 
+                // report the directory to the client
+                if (stat(path, &statbuf) == 0) {
+                    client.scanFile(path, statbuf.st_mtime, 0, true);
+                }
+
+                // and now process its contents
                 strcat(fileSpot, "/");
-                int err = doProcessDirectory(path, pathRemaining - nameLength - 1, client, exceptionCheck, exceptionEnv);
+                int err = doProcessDirectory(path, pathRemaining - nameLength - 1, client,
+                        exceptionCheck, exceptionEnv);
                 if (err) {
                     // pass exceptions up - ignore other errors
                     if (exceptionCheck && exceptionCheck(exceptionEnv)) goto failure;
@@ -151,11 +158,8 @@ status_t MediaScanner::doProcessDirectory(
                     continue;
                 }
             } else {
-                struct stat statbuf;
                 stat(path, &statbuf);
-                if (statbuf.st_size > 0) {
-                    client.scanFile(path, statbuf.st_mtime, statbuf.st_size);
-                }
+                client.scanFile(path, statbuf.st_mtime, statbuf.st_size, false);
                 if (exceptionCheck && exceptionCheck(exceptionEnv)) goto failure;
             }
         }

@@ -62,7 +62,7 @@ public:
         }
         else {
             mScanFileMethodID = env->GetMethodID(mediaScannerClientInterface, "scanFile",
-                                                     "(Ljava/lang/String;JJ)V");
+                                                     "(Ljava/lang/String;JJZ)V");
             mHandleStringTagMethodID = env->GetMethodID(mediaScannerClientInterface, "handleStringTag",
                                                      "(Ljava/lang/String;Ljava/lang/String;)V");
             mSetMimeTypeMethodID = env->GetMethodID(mediaScannerClientInterface, "setMimeType",
@@ -78,12 +78,14 @@ public:
     }
     
     // returns true if it succeeded, false if an exception occured in the Java code
-    virtual bool scanFile(const char* path, long long lastModified, long long fileSize)
+    virtual bool scanFile(const char* path, long long lastModified,
+            long long fileSize, bool isDirectory)
     {
         jstring pathStr;
         if ((pathStr = mEnv->NewStringUTF(path)) == NULL) return false;
 
-        mEnv->CallVoidMethod(mClient, mScanFileMethodID, pathStr, lastModified, fileSize);
+        mEnv->CallVoidMethod(mClient, mScanFileMethodID, pathStr, lastModified,
+                fileSize, isDirectory);
 
         mEnv->DeleteLocalRef(pathStr);
         return (!mEnv->ExceptionCheck());
