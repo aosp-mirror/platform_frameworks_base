@@ -1662,7 +1662,8 @@ public class BluetoothService extends IBluetooth.Stub {
             ifcg = service.getInterfaceConfig(iface);
             if (ifcg != null) {
                 ifcg.mask = InetAddress.getByName(BLUETOOTH_NETMASK);
-                if (ifcg.addr == null) {
+
+                if (ifcg.addr == null || ifcg.addr.equals(InetAddress.getByName("0.0.0.0"))) {
                     ifcg.addr = InetAddress.getByName(address);
                     ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
                 }

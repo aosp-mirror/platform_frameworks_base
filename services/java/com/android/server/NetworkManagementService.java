@@ -295,7 +295,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
             throw new IllegalStateException(
-                    "Unable to communicate with native daemon to interface setcfg");
+                    "Unable to communicate with native daemon to interface setcfg - " + e);
         }
     }
 
