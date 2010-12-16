@@ -181,11 +181,6 @@ public final class CacheManager {
             removeAllCacheFiles();
             mClearCacheOnInit = false;
         }
-        // If we're using the Chrome HTTP stack, disable the cache.
-        // Chrome has its own cache, and we don't provide programmatic access to it.
-        if (JniUtil.useChromiumHttpStack()) {
-            setCacheDisabled(true);
-        }
     }
     
     /**
@@ -237,10 +232,6 @@ public final class CacheManager {
         mDisabled = disabled;
         if (mDisabled) {
             removeAllCacheFiles();
-        }
-        if (!mDisabled && JniUtil.useChromiumHttpStack()) {
-            Log.w(LOGTAG, "CacheManager enabled, but it will not work as "
-                    + "expected because the Chrome HTTP stack is in use.");
         }
     }
 
