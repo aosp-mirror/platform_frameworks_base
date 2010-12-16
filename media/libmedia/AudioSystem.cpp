@@ -763,7 +763,8 @@ bool AudioSystem::isBluetoothScoDevice(audio_devices device)
     if ((popCount(device) == 1 ) &&
         (device & (AudioSystem::DEVICE_OUT_BLUETOOTH_SCO |
                    AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_HEADSET |
-                   AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT))) {
+                   AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT |
+                   AudioSystem::DEVICE_IN_BLUETOOTH_SCO_HEADSET))) {
         return true;
     } else {
         return false;
