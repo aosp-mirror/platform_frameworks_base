@@ -349,7 +349,11 @@ void LiveSession::onDownloadNext() {
         bool firstTime = (mPlaylist == NULL);
 
         mPlaylist = fetchPlaylist(url.c_str());
-        CHECK(mPlaylist != NULL);
+        if (mPlaylist == NULL) {
+            LOGE("failed to load playlist at url '%s'", url.c_str());
+            mDataSource->queueEOS(ERROR_IO);
+            return;
+        }
 
         if (firstTime) {
             Mutex::Autolock autoLock(mLock);
@@ -446,7 +450,11 @@ void LiveSession::onDownloadNext() {
 
     sp<ABuffer> buffer;
     status_t err = fetchFile(uri.c_str(), &buffer);
-    CHECK_EQ(err, (status_t)OK);
+    if (err != OK) {
+        LOGE("failed to fetch .ts segment at url '%s'", uri.c_str());
+        mDataSource->queueEOS(err);
+        return;
+    }
 
     CHECK_EQ((status_t)OK,
              decryptBuffer(mSeqNumber - firstSeqNumberInPlaylist, buffer));
