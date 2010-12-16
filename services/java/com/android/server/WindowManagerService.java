@@ -4991,6 +4991,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (rawss == null) {
+            Log.w(TAG, "Failure taking screenshot for (" + dw + "x" + dh
+                    + ") to layer " + maxLayer);
             return null;
         }
         
