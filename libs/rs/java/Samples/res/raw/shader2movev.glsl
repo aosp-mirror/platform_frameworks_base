@@ -14,7 +14,6 @@ void main() {
 
    mat3 model3 = mat3(UNI_model[0].xyz, UNI_model[1].xyz, UNI_model[2].xyz);
    vec3 worldNorm = model3 * (ATTRIB_normal + oldPos - objPos.xyz);
-   //vec3 worldNorm = model3 * ATTRIB_normal;
 
    varWorldPos = worldPos.xyz;
    varWorldNormal = worldNorm;

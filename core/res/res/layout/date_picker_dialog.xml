@@ -17,12 +17,6 @@
 */
 -->
 
-<!-- Note: We want the DatePicker to take as much space as possible, therefore
-           we set the width and height bigger than the max AlertDialog size
-           determined by our parent WeightedLinearLayout.
-
-           See: alert_dialog.xml
--->
 <DatePicker xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/datePicker"
     android:layout_gravity="center_horizontal"

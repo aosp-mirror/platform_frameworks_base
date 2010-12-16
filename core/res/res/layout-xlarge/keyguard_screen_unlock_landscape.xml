@@ -96,8 +96,8 @@
         android:gravity="center"
         >
         <com.android.internal.widget.LockPatternView android:id="@+id/lockPattern"
-            android:layout_width="350dip"
-            android:layout_height="350dip"
+            android:layout_width="354dip"
+            android:layout_height="354dip"
             android:layout_marginTop="90dip"
             android:layout_marginRight="90dip"
           />

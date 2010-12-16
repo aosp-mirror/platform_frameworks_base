@@ -17,7 +17,6 @@
 package android.content;
 
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -246,6 +245,7 @@ public class SyncManager implements OnAccountsUpdateListener {
                 Log.v(TAG, "received connectivity action.  network info: " + networkInfo);
             }
 
+            final boolean wasConnected = mDataConnectionIsConnected;
             // only pay attention to the CONNECTED and DISCONNECTED states.
             // if connected, we are connected.
             // if disconnected, we may not be connected.  in some cases, we may be connected on
@@ -259,16 +259,19 @@ public class SyncManager implements OnAccountsUpdateListener {
                     mDataConnectionIsConnected = true;
                     break;
                 case DISCONNECTED:
-                    if (intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false)) {
-                        mDataConnectionIsConnected = false;
-                    } else {
-                        mDataConnectionIsConnected = true;
-                    }
+                    mDataConnectionIsConnected = !intent.getBooleanExtra(
+                            ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
                     break;
                 default:
                     // ignore the rest of the states -- leave our boolean alone.
             }
             if (mDataConnectionIsConnected) {
+                if (!wasConnected) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "Reconnection detected: clearing all backoffs");
+                    }
+                    mSyncStorageEngine.clearAllBackoffs();
+                }
                 sendCheckAlarmsMessage();
             }
         }

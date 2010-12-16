@@ -18,6 +18,8 @@ package android.widget;
 
 import static android.widget.SuggestionsAdapter.getColumnString;
 
+import com.android.internal.R;
+
 import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
@@ -44,13 +46,10 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.TextView.OnEditorActionListener;
-
-import com.android.internal.R;
 
 import java.util.WeakHashMap;
 
@@ -84,7 +83,7 @@ public class SearchView extends LinearLayout {
     private CursorAdapter mSuggestionsAdapter;
     private View mSearchButton;
     private View mSubmitButton;
-    private View mCloseButton;
+    private ImageView mCloseButton;
     private View mSearchEditFrame;
     private View mVoiceButton;
     private SearchAutoComplete mQueryTextView;
@@ -189,7 +188,7 @@ public class SearchView extends LinearLayout {
 
         mSearchEditFrame = findViewById(R.id.search_edit_frame);
         mSubmitButton = findViewById(R.id.search_go_btn);
-        mCloseButton = findViewById(R.id.search_close_btn);
+        mCloseButton = (ImageView) findViewById(R.id.search_close_btn);
         mVoiceButton = findViewById(R.id.search_voice_btn);
 
         mSearchButton.setOnClickListener(mOnClickListener);
@@ -252,7 +251,9 @@ public class SearchView extends LinearLayout {
     @Override
     public boolean requestFocus(int direction, Rect previouslyFocusedRect) {
         if (mClearingFocus || isIconified()) return false;
-        return mQueryTextView.requestFocus(direction, previouslyFocusedRect);
+        boolean result = mQueryTextView.requestFocus(direction, previouslyFocusedRect);
+        if (result) updateViewsVisibility(mIconifiedByDefault);
+        return result;
     }
 
     /** @hide */
@@ -263,6 +264,7 @@ public class SearchView extends LinearLayout {
         mQueryTextView.clearFocus();
         setImeVisibility(false);
         mClearingFocus = false;
+        updateViewsVisibility(mIconifiedByDefault);
     }
 
     /**
@@ -515,9 +517,19 @@ public class SearchView extends LinearLayout {
         mSearchButton.setVisibility(visCollapsed);
         mSubmitButton.setVisibility(mSubmitButtonEnabled && hasText ? visExpanded : GONE);
         mSearchEditFrame.setVisibility(visExpanded);
+        updateCloseButton();
         updateVoiceButton(!hasText);
         requestLayout();
         invalidate();
+    }
+
+    private void updateCloseButton() {
+        final boolean hasText = !TextUtils.isEmpty(mQueryTextView.getText());
+        // Should we show the close button? It is not shown if there's no focus,
+        // field is not iconified by default and there is no text in it.
+        final boolean showClose = hasText || mIconifiedByDefault || mQueryTextView.hasFocus();
+        mCloseButton.setVisibility(showClose ? VISIBLE : INVISIBLE);
+        mCloseButton.getDrawable().setState(hasText ? ENABLED_STATE_SET : EMPTY_STATE_SET);
     }
 
     private void setImeVisibility(boolean visible) {
@@ -812,6 +824,7 @@ public class SearchView extends LinearLayout {
             invalidate();
         }
         updateVoiceButton(!hasText);
+        updateViewsVisibility(mIconifiedByDefault);
         if (mOnQueryChangeListener != null) {
             mOnQueryChangeListener.onQueryTextChanged(newText.toString());
         }
@@ -880,6 +893,10 @@ public class SearchView extends LinearLayout {
             // voice search before showing the button. But just in case...
             Log.w(LOG_TAG, "Could not find voice search activity");
         }
+    }
+
+    void onTextFocusChanged() {
+        updateCloseButton();
     }
 
     private boolean onItemClicked(int position, int actionKey, String actionMsg) {
@@ -1281,6 +1298,12 @@ public class SearchView extends LinearLayout {
                     ensureImeVisible(true);
                 }
             }
+        }
+
+        @Override
+        protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
+            super.onFocusChanged(focused, direction, previouslyFocusedRect);
+            mSearchView.onTextFocusChanged();
         }
 
         /**

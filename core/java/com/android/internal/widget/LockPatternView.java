@@ -51,6 +51,7 @@ import java.util.List;
  * "correct" states.
  */
 public class LockPatternView extends View {
+    private static final String TAG = "LockPatternView";
     // Aspect to use when rendering this view
     private static final int ASPECT_SQUARE = 0; // View will be the minimum of width/height
     private static final int ASPECT_LOCK_WIDTH = 1; // Fixed width; height will be minimum of (w,h)
@@ -293,7 +294,7 @@ public class LockPatternView extends View {
         try {
             pattern = getResources().getIntArray(id);
         } catch (Resources.NotFoundException e) {
-            Log.e("LockPatternView", "Vibrate pattern missing, using default", e);
+            Log.e(TAG, "Vibrate pattern missing, using default", e);
         }
         if (pattern == null) {
             return DEFAULT_VIBE_PATTERN;
@@ -444,25 +445,47 @@ public class LockPatternView extends View {
         mSquareHeight = height / 3.0f;
     }
 
+    private int resolveMeasured(int measureSpec, int desired)
+    {
+        int result = 0;
+        int specSize = MeasureSpec.getSize(measureSpec);
+        switch (MeasureSpec.getMode(measureSpec)) {
+            case MeasureSpec.UNSPECIFIED:
+                result = desired;
+                break;
+            case MeasureSpec.AT_MOST:
+                result = Math.min(specSize, desired);
+                break;
+            case MeasureSpec.EXACTLY:
+            default:
+                result = specSize;
+        }
+        return result;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int width = MeasureSpec.getSize(widthMeasureSpec);
-        final int height = MeasureSpec.getSize(heightMeasureSpec);
-        int viewWidth = width;
-        int viewHeight = height;
+        final int minimumWidth = 3 * mBitmapCircleDefault.getWidth();
+        final int minimumHeight = 3 * mBitmapCircleDefault.getHeight();
+        int viewWidth = resolveMeasured(widthMeasureSpec, minimumWidth);
+        int viewHeight = resolveMeasured(heightMeasureSpec, minimumHeight);
+
+        int requestedWidth = MeasureSpec.getSize(widthMeasureSpec);
+        int requestedHeight = MeasureSpec.getSize(heightMeasureSpec);
         switch (mAspect) {
             case ASPECT_SQUARE:
-                viewWidth = viewHeight = Math.min(width, height);
+                viewWidth = viewHeight = Math.min(requestedWidth, requestedHeight);
                 break;
             case ASPECT_LOCK_WIDTH:
-                viewWidth = width;
-                viewHeight = Math.min(width, height);
+                viewWidth = requestedWidth;
+                viewHeight = Math.min(requestedWidth, requestedHeight);
                 break;
             case ASPECT_LOCK_HEIGHT:
-                viewWidth = Math.min(width, height);
-                viewHeight = height;
+                viewWidth = Math.min(requestedWidth, requestedHeight);
+                viewHeight = requestedHeight;
                 break;
         }
+        // Log.v(TAG, "LockPatternView dimensions: " + viewWidth + "x" + viewHeight);
         setMeasuredDimension(viewWidth, viewHeight);
     }
 

@@ -46,6 +46,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -54,13 +55,15 @@ import android.widget.TextView;
 import com.android.systemui.R;
 
 public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnClickListener {
+    private static final int COLLAPSE_DURATION = 360;
     private static final String TAG = "RecentAppsPanel";
     private static final boolean DEBUG = TabletStatusBar.DEBUG;
     private static final int DISPLAY_TASKS_PORTRAIT = 8;
     private static final int DISPLAY_TASKS_LANDSCAPE = 5; // number of recent tasks to display
     private static final int MAX_TASKS = DISPLAY_TASKS_PORTRAIT + 2; // allow extra for non-apps
+    private static final int STAGGER_ANIMATION_DELAY = 30;
+    private static final long ALPHA_ANIMATION_DURATION = 120;
     private TabletStatusBar mBar;
-    private TextView mNoRecents;
     private LinearLayout mRecentsContainer;
     private View mRecentsGlowView;
     private ArrayList<ActivityDescription> mActivityDescriptions;
@@ -123,7 +126,6 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mNoRecents = (TextView) findViewById(R.id.recents_no_recents);
         mRecentsContainer = (LinearLayout) findViewById(R.id.recents_container);
         mRecentsGlowView = findViewById(R.id.recents_glow);
         mBackgroundProtector = (View) findViewById(R.id.recents_bg_protect);
@@ -193,7 +195,10 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
                     .resolveActivityInfo(pm, 0);
 
         int numTasks = recentTasks.size();
-        for (int i = 0, index = 0; i < numTasks && (index < MAX_TASKS); ++i) {
+
+        // skip the first activity - assume it's either the home screen or the current app.
+        final int first = 1;
+        for (int i = first, index = 0; i < numTasks && (index < MAX_TASKS); ++i) {
             final ActivityManager.RecentTaskInfo recentInfo = recentTasks.get(i);
 
             Intent intent = new Intent(recentInfo.baseIntent);
@@ -297,22 +302,21 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
             if (animate) {
                 view.setAlpha(initialAlpha);
                 ObjectAnimator anim = ObjectAnimator.ofFloat(view, "alpha", initialAlpha, 1.0f);
-                anim.setDuration(200);
-                anim.setStartDelay((last-i)*80);
+                anim.setDuration(ALPHA_ANIMATION_DURATION);
+                anim.setStartDelay((last-i) * STAGGER_ANIMATION_DELAY);
                 anim.setInterpolator(interp);
                 anims.add(anim);
             }
         }
 
         int views = mRecentsContainer.getChildCount();
-        mNoRecents.setVisibility(View.GONE); // views == 0 ? View.VISIBLE : View.GONE);
         mRecentsContainer.setVisibility(views > 0 ? View.VISIBLE : View.GONE);
         mRecentsGlowView.setVisibility(views > 0 ? View.VISIBLE : View.GONE);
 
         if (animate && views > 0) {
             ObjectAnimator anim = ObjectAnimator.ofFloat(mRecentsGlowView, "alpha",
                     initialAlpha, 1.0f);
-            anim.setDuration((last-first)*80);
+            anim.setDuration((last-first) * STAGGER_ANIMATION_DELAY);
             anim.setInterpolator(interp);
             anims.add(anim);
         }
@@ -320,7 +324,7 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         if (animate) {
             ObjectAnimator anim = ObjectAnimator.ofFloat(mBackgroundProtector, "alpha",
                     initialAlpha, 1.0f);
-            anim.setDuration(last*80);
+            anim.setDuration(last * STAGGER_ANIMATION_DELAY);
             anim.setInterpolator(interp);
             anims.add(anim);
         }

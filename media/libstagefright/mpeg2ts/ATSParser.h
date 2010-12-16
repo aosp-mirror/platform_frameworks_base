@@ -21,19 +21,28 @@
 #include <sys/types.h>
 
 #include <media/stagefright/foundation/ABase.h>
+#include <media/stagefright/foundation/AMessage.h>
 #include <utils/Vector.h>
 #include <utils/RefBase.h>
 
 namespace android {
 
 struct ABitReader;
+struct ABuffer;
 struct MediaSource;
 
 struct ATSParser : public RefBase {
+    enum DiscontinuityType {
+        DISCONTINUITY_HTTPLIVE,
+        DISCONTINUITY_SEEK,
+        DISCONTINUITY_FORMATCHANGE
+    };
+
     ATSParser();
 
     void feedTSPacket(const void *data, size_t size);
-    void signalDiscontinuity(bool isASeek = false);
+    void signalDiscontinuity(DiscontinuityType type);
+    void signalEOS(status_t finalResult);
 
     enum SourceType {
         AVC_VIDEO,

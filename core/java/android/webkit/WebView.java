@@ -432,8 +432,10 @@ public class WebView extends AbsoluteLayout
      * to further, which slows down the refresh rate. Choose 50 to favor the
      * current high speed devices. For Dream like devices, 100 is a better
      * choice. Maybe make this in the buildspec later.
+     * (Update 12/14/2010: changed to 0 since current device should be able to
+     * handle the raw events and Map team voted to have the raw events too.
      */
-    private static final int TOUCH_SENT_INTERVAL = 50;
+    private static final int TOUCH_SENT_INTERVAL = 0;
     private int mCurrentTouchInterval = TOUCH_SENT_INTERVAL;
 
     /**
@@ -2180,17 +2182,19 @@ public class WebView extends AbsoluteLayout
         }
     }
     /**
-     * Request the href of an anchor element due to getFocusNodePath returning
-     * "href." If hrefMsg is null, this method returns immediately and does not
-     * dispatch hrefMsg to its target.
+     * Request the anchor or image element URL at the last tapped point.
+     * If hrefMsg is null, this method returns immediately and does not
+     * dispatch hrefMsg to its target. If the tapped point hits an image,
+     * an anchor, or an image in an anchor, the message associates
+     * strings in named keys in its data. The value paired with the key
+     * may be an empty string.
      *
      * @param hrefMsg This message will be dispatched with the result of the
-     *            request as the data member with "url" as key. The result can
-     *            be null.
+     *                request. The message data contains three keys:
+     *                - "url" returns the anchor's href attribute.
+     *                - "title" returns the anchor's text.
+     *                - "src" returns the image's src attribute.
      */
-    // FIXME: API change required to change the name of this function.  We now
-    // look at the cursor node, and not the focus node.  Also, what is
-    // getFocusNodePath?
     public void requestFocusNodeHref(Message hrefMsg) {
         if (hrefMsg == null) {
             return;
@@ -3750,6 +3754,18 @@ public class WebView extends AbsoluteLayout
             clearTextEntry();
         }
         if (inEditingMode()) {
+            // Since we just called rebuildWebTextView, the layout is not set
+            // properly.  Update it so it can correctly find the word to select.
+            mWebTextView.ensureLayout();
+            // Provide a touch down event to WebTextView, which will allow it
+            // to store the location to use in performLongClick.
+            AbsoluteLayout.LayoutParams params
+                    = (AbsoluteLayout.LayoutParams) mWebTextView.getLayoutParams();
+            MotionEvent fake = MotionEvent.obtain(mLastTouchTime,
+                    mLastTouchTime, MotionEvent.ACTION_DOWN,
+                    mLastTouchX - params.x + mScrollX,
+                    mLastTouchY - params.y + mScrollY, 0);
+            mWebTextView.dispatchTouchEvent(fake);
             return mWebTextView.performLongClick();
         }
         if (mSelectingText) return false; // long click does nothing on selection

@@ -29,7 +29,8 @@ class Allocation : public ObjectBase {
     // The graphics equilivent of malloc.  The allocation contains a structure of elements.
 
 public:
-    Allocation(Context *rsc, const Type *, uint32_t usages);
+    Allocation(Context *rsc, const Type *, uint32_t usages,
+               RsAllocationMipmapControl mc = RS_ALLOCATION_MIPMAP_NONE);
 
     virtual ~Allocation();
 

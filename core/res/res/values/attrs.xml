@@ -667,6 +667,10 @@
         <attr name="searchViewSearchIcon" format="reference" />
         <!-- SearchView Voice button icon -->
         <attr name="searchViewVoiceIcon" format="reference" />
+        <!-- SearchView query refinement icon -->
+        <attr name="searchViewEditQuery" format="reference" />
+        <!-- SearchView query refinement icon background -->
+        <attr name="searchViewEditQueryBackground" format="reference" />
 
         <!-- Specifies a drawable to use for the 'home as up' indicator. -->
         <attr name="homeAsUpIndicator" format="reference" />
@@ -2976,6 +2980,14 @@
 
     <!-- @hide -->
     <declare-styleable name="DayPickerWeekView">
+        <attr name="height" />
+        <attr name="weekStartDay" format="integer|reference" />
+        <attr name="weekDayCount" format="integer|reference" />
+        <attr name="showWeekNumber" format="boolean|reference" />
+        <attr name="weekSeperatorWidth" format="dimension" />
+        <attr name="textSize" />
+        <attr name="weekDayPadding" format="dimension" />
+        <attr name="selectedDayLineWidth" format="dimension" />
         <attr name="selectionBackgroundColor" format="color|reference" />
         <attr name="focusedMonthDateColor" format="color|reference" />
         <attr name="otherMonthDateColor" format="color|reference" />

@@ -32,6 +32,7 @@ namespace android {
 #define CHECK(condition)                                \
     LOG_ALWAYS_FATAL_IF(                                \
             !(condition),                               \
+            "%s",                                       \
             __FILE__ ":" LITERAL_TO_STRING(__LINE__)    \
             " CHECK(" #condition ") failed.")
 
@@ -58,10 +59,12 @@ MAKE_COMPARATOR(GT,>)
     do {                                                                \
         AString ___res = Compare_##suffix(x, y);                        \
         if (!___res.empty()) {                                          \
-            LOG_ALWAYS_FATAL(                                           \
-                    __FILE__ ":" LITERAL_TO_STRING(__LINE__)            \
-                    " CHECK_" #suffix "( " #x "," #y ") failed: %s",    \
-                    ___res.c_str());                                    \
+            AString ___full =                                           \
+                __FILE__ ":" LITERAL_TO_STRING(__LINE__)                \
+                    " CHECK_" #suffix "( " #x "," #y ") failed: ";      \
+            ___full.append(___res);                                     \
+                                                                        \
+            LOG_ALWAYS_FATAL("%s", ___full.c_str());                    \
         }                                                               \
     } while (false)
 

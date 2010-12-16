@@ -195,10 +195,10 @@ its characteristics. </p>
 Illustration of how the Android platform maps actual screen densities and sizes
 to generalized density and size configurations. </p>
 
-<p>Although the platform lets your application provide layouts and resources for
-generalized size-density configurations, you do not necessarily need to do write
-custom code or provide custom resources for each of the nine supported
-configurations. The platform provides robust compatibility features, described
+<p>Although the platform lets your application provide customized resources for
+the various size and density configurations, you do not need to do write
+custom code or provide custom resources for every combination of screen size and density.
+The platform provides robust compatibility features, described
 in the sections below, that can handle most of the work of rendering your
 application on any device screen, provided that you've implemented your
 application UI properly. For more information about how to implement a UI that

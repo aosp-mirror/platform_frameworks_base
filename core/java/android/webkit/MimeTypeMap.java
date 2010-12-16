@@ -43,10 +43,16 @@ public class MimeTypeMap {
      */
     public static String getFileExtensionFromUrl(String url) {
         if (!TextUtils.isEmpty(url)) {
+            int fragment = url.lastIndexOf('#');
+            if (fragment > 0) {
+                url = url.substring(0, fragment);
+            }
+
             int query = url.lastIndexOf('?');
             if (query > 0) {
                 url = url.substring(0, query);
             }
+
             int filenamePos = url.lastIndexOf('/');
             String filename =
                 0 <= filenamePos ? url.substring(filenamePos + 1) : url;

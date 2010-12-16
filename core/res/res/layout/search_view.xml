@@ -44,7 +44,7 @@
         android:layout_width="wrap_content"
         android:layout_gravity="center_vertical"
         android:background="?android:attr/selectableItemBackground"
-        android:src="@android:drawable/ic_search"
+        android:src="?android:attr/searchViewSearchIcon"
     />
 
     <LinearLayout

@@ -804,7 +804,7 @@ Layer::ClientRef::Access::~Access()
 
 Layer::BufferManager::BufferManager(TextureManager& tm)
     : mNumBuffers(NUM_BUFFERS), mTextureManager(tm),
-      mActiveBuffer(-1), mFailover(false)
+      mActiveBufferIndex(-1), mFailover(false)
 {
 }
 
@@ -819,10 +819,10 @@ status_t Layer::BufferManager::resize(size_t size,
 
     if (size < mNumBuffers) {
         // Move the active texture into slot 0
-        BufferData activeBufferData = mBufferData[mActiveBuffer];
-        mBufferData[mActiveBuffer] = mBufferData[0];
+        BufferData activeBufferData = mBufferData[mActiveBufferIndex];
+        mBufferData[mActiveBufferIndex] = mBufferData[0];
         mBufferData[0] = activeBufferData;
-        mActiveBuffer = 0;
+        mActiveBufferIndex = 0;
 
         // Free the buffers that are no longer needed.
         for (size_t i = size; i < mNumBuffers; i++) {
@@ -868,37 +868,33 @@ sp<GraphicBuffer> Layer::BufferManager::getBuffer(size_t index) const {
 }
 
 status_t Layer::BufferManager::setActiveBufferIndex(size_t index) {
-    mActiveBuffer = index;
+    BufferData const * const buffers = mBufferData;
+    Mutex::Autolock _l(mLock);
+    mActiveBuffer = buffers[index].buffer;
+    mActiveBufferIndex = index;
     return NO_ERROR;
 }
 
 size_t Layer::BufferManager::getActiveBufferIndex() const {
-    return mActiveBuffer;
+    return mActiveBufferIndex;
 }
 
 Texture Layer::BufferManager::getActiveTexture() const {
     Texture res;
-    if (mFailover || mActiveBuffer<0) {
+    if (mFailover || mActiveBufferIndex<0) {
         res = mFailoverTexture;
     } else {
-        static_cast<Image&>(res) = mBufferData[mActiveBuffer].texture;
+        static_cast<Image&>(res) = mBufferData[mActiveBufferIndex].texture;
     }
     return res;
 }
 
 sp<GraphicBuffer> Layer::BufferManager::getActiveBuffer() const {
-    sp<GraphicBuffer> result;
-    const ssize_t activeBuffer = mActiveBuffer;
-    if (activeBuffer >= 0) {
-        BufferData const * const buffers = mBufferData;
-        Mutex::Autolock _l(mLock);
-        result = buffers[activeBuffer].buffer;
-    }
-    return result;
+    return mActiveBuffer;
 }
 
 bool Layer::BufferManager::hasActiveBuffer() const {
-    return mActiveBuffer >= 0;
+    return mActiveBufferIndex >= 0;
 }
 
 sp<GraphicBuffer> Layer::BufferManager::detachBuffer(size_t index)
@@ -943,7 +939,7 @@ status_t Layer::BufferManager::initEglImage(EGLDisplay dpy,
         const sp<GraphicBuffer>& buffer)
 {
     status_t err = NO_INIT;
-    ssize_t index = mActiveBuffer;
+    ssize_t index = mActiveBufferIndex;
     if (index >= 0) {
         if (!mFailover) {
             Image& texture(mBufferData[index].texture);

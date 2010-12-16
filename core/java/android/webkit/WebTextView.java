@@ -353,6 +353,18 @@ import junit.framework.Assert;
         return false;
     }
 
+    void ensureLayout() {
+        if (getLayout() == null) {
+            // Ensure we have a Layout
+            measure(mWidthSpec, mHeightSpec);
+            LayoutParams params = (LayoutParams) getLayoutParams();
+            if (params != null) {
+                layout(params.x, params.y, params.x + params.width,
+                        params.y + params.height);
+            }
+        }
+    }
+
     /**
      *  Determine whether this WebTextView currently represents the node
      *  represented by ptr.

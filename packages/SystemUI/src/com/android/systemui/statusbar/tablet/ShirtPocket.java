@@ -39,21 +39,19 @@ import android.view.Gravity;
 
 import com.android.systemui.R;
 
-public class ShirtPocket extends FrameLayout {
+public class ShirtPocket extends ImageView {
     private static final boolean DEBUG = false;
     private static final String  TAG = "StatusBar/ShirtPocket";
 
     private ClipData mClipping = null;
 
     private View mWindow = null;
-    private ImageView mIcon;
     private ImageView mPreviewIcon;
     private TextView mDescription;
     private TextView mAltText;
 
     public ShirtPocket(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setupWindow();
     }
 
     // TODO: "pin area" panel, dragging things out
@@ -63,8 +61,7 @@ public class ShirtPocket extends FrameLayout {
         // Drag API notes: we must be visible to receive drag events
         setVisibility(View.VISIBLE);
 
-        mIcon = (ImageView) findViewById(R.id.pocket_icon);
-        refreshStatusIcon();
+        refresh();
 
         setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -76,19 +73,16 @@ public class ShirtPocket extends FrameLayout {
         });
     }
 
-    private void refreshStatusIcon() {
+    private void refresh() {
         setClickable(mClipping != null);
-        mIcon.setImageResource(mClipping == null
-                ? R.drawable.ic_sysbar_pocket_hidden
-                : R.drawable.ic_sysbar_pocket_holding);
-        mIcon.setVisibility(mClipping == null ? View.GONE : View.VISIBLE);
+        // XXX: TODO
     }
     
     private void showWindow() {
         getHandler().post(new Runnable() {
             public void run() {
                 mWindow.setVisibility(View.VISIBLE);
-                refreshStatusIcon();
+                refresh();
             }
         });
     }
@@ -97,7 +91,7 @@ public class ShirtPocket extends FrameLayout {
         getHandler().post(new Runnable() {
             public void run() {
                 mWindow.setVisibility(View.GONE);
-                refreshStatusIcon();
+                refresh();
             }
         });
     }
@@ -106,7 +100,7 @@ public class ShirtPocket extends FrameLayout {
         getHandler().postDelayed(new Runnable() {
             public void run() {
                 mWindow.setVisibility(View.GONE);
-                refreshStatusIcon();
+                refresh();
             }
         },
         250);
@@ -183,65 +177,27 @@ public class ShirtPocket extends FrameLayout {
         }
     };
 
-    private void setupWindow() {
-        mWindow = View.inflate(getContext(), R.layout.status_bar_pocket_panel, null);
-
-        mPreviewIcon = (ImageView) mWindow.findViewById(R.id.icon);
-        mDescription = (TextView) mWindow.findViewById(R.id.description);
-        mAltText = (TextView) mWindow.findViewById(R.id.alt);
-
-        mWindow.setVisibility(View.GONE);
-        mWindow.setOnTouchListener(mWindowTouchListener);
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                400,
-                250,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                PixelFormat.TRANSLUCENT);
-        lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
-//        int pos[] = new int[2];
-//        getLocationOnScreen(pos);
-//        lp.x = pos[1];
-//        lp.y = 0;
-        lp.setTitle("ShirtPocket");
-        lp.windowAnimations = R.style.Animation_ShirtPocketPanel;
-
-        WindowManagerImpl.getDefault().addView(mWindow, lp);
-
-    }
-
     public boolean onDragEvent(DragEvent event) {
         if (DEBUG) Slog.d(TAG, "onDragEvent: " + event);
-        if (mIcon != null) {
-            switch (event.getAction()) {
-                // We want to appear whenever a potential drag takes off from anywhere in the UI.
-                case DragEvent.ACTION_DRAG_STARTED:
-                    mIcon.setImageResource(mClipping == null
-                            ? R.drawable.ic_sysbar_pocket
-                            : R.drawable.ic_sysbar_pocket_holding);
-                    mIcon.setVisibility(View.VISIBLE);
-                    break;
-                case DragEvent.ACTION_DRAG_ENTERED:
-                    if (DEBUG) Slog.d(TAG, "entered!");
-                    mIcon.setImageResource(R.drawable.ic_sysbar_pocket_drag);
-                    break;
-                case DragEvent.ACTION_DRAG_EXITED:
-                    if (DEBUG) Slog.d(TAG, "exited!");
-                    mIcon.setImageResource(mClipping == null
-                            ? R.drawable.ic_sysbar_pocket
-                            : R.drawable.ic_sysbar_pocket_holding);
-                    break;
-                case DragEvent.ACTION_DROP:
-                    if (DEBUG) Slog.d(TAG, "dropped!");
-                    stash(event.getClipData());
-                    refreshStatusIcon();
-                    break;
-                case DragEvent.ACTION_DRAG_ENDED:
-                    refreshStatusIcon();
-                    break;
-            }
+        switch (event.getAction()) {
+            // We want to appear whenever a potential drag takes off from anywhere in the UI.
+            case DragEvent.ACTION_DRAG_STARTED:
+                // XXX: TODO
+                break;
+            case DragEvent.ACTION_DRAG_ENTERED:
+                if (DEBUG) Slog.d(TAG, "entered!");
+                // XXX: TODO
+                break;
+            case DragEvent.ACTION_DRAG_EXITED:
+                if (DEBUG) Slog.d(TAG, "exited!");
+                setVisibility(mClipping == null ? View.GONE : View.VISIBLE);
+                break;
+            case DragEvent.ACTION_DROP:
+                if (DEBUG) Slog.d(TAG, "dropped!");
+                stash(event.getClipData());
+                break;
+            case DragEvent.ACTION_DRAG_ENDED:
+                break;
         }
         return true; // we want everything, thank you
     }

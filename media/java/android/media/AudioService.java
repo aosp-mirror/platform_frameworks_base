@@ -2012,7 +2012,8 @@ public class AudioService extends IAudioService.Stub {
                 int microphone = intent.getIntExtra("microphone", 0);
 
                 if (microphone != 0) {
-                    boolean isConnected = mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_WIRED_HEADSET);
+                    boolean isConnected =
+                        mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_WIRED_HEADSET);
                     if (state == 0 && isConnected) {
                         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
                                 AudioSystem.DEVICE_STATE_UNAVAILABLE,
@@ -2022,10 +2023,12 @@ public class AudioService extends IAudioService.Stub {
                         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
                                 AudioSystem.DEVICE_STATE_AVAILABLE,
                                 "");
-                        mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_WIRED_HEADSET), "");
+                        mConnectedDevices.put(
+                                new Integer(AudioSystem.DEVICE_OUT_WIRED_HEADSET), "");
                     }
                 } else {
-                    boolean isConnected = mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
+                    boolean isConnected =
+                        mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
                     if (state == 0 && isConnected) {
                         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE,
                                 AudioSystem.DEVICE_STATE_UNAVAILABLE,
@@ -2035,13 +2038,15 @@ public class AudioService extends IAudioService.Stub {
                         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE,
                                 AudioSystem.DEVICE_STATE_AVAILABLE,
                                 "");
-                        mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE), "");
+                        mConnectedDevices.put(
+                                new Integer(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE), "");
                     }
                 }
             } else if (action.equals(Intent.ACTION_USB_ANLG_HEADSET_PLUG)) {
                 int state = intent.getIntExtra("state", 0);
                 Log.v(TAG, "Broadcast Receiver: Got ACTION_USB_ANLG_HEADSET_PLUG, state = "+state);
-                boolean isConnected = mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET);
+                boolean isConnected =
+                    mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET);
                 if (state == 0 && isConnected) {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET,
                                                          AudioSystem.DEVICE_STATE_UNAVAILABLE, "");
@@ -2049,13 +2054,28 @@ public class AudioService extends IAudioService.Stub {
                 } else if (state == 1 && !isConnected)  {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET,
                                                          AudioSystem.DEVICE_STATE_AVAILABLE, "");
-                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET), "");
+                    mConnectedDevices.put(
+                            new Integer(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET), "");
                 }
-            } else if ( (action.equals(Intent.ACTION_USB_DGTL_HEADSET_PLUG)) ||
-                        (action.equals(Intent.ACTION_HDMI_AUDIO_PLUG)) ) {
+            } else if (action.equals(Intent.ACTION_HDMI_AUDIO_PLUG)) {
+                int state = intent.getIntExtra("state", 0);
+                Log.v(TAG, "Broadcast Receiver: Got ACTION_HDMI_AUDIO_PLUG, state = "+state);
+                boolean isConnected =
+                    mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_AUX_DIGITAL);
+                if (state == 0 && isConnected) {
+                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_AUX_DIGITAL,
+                                                         AudioSystem.DEVICE_STATE_UNAVAILABLE, "");
+                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_AUX_DIGITAL);
+                } else if (state == 1 && !isConnected)  {
+                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_AUX_DIGITAL,
+                                                         AudioSystem.DEVICE_STATE_AVAILABLE, "");
+                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_AUX_DIGITAL), "");
+                }
+            } else if (action.equals(Intent.ACTION_USB_DGTL_HEADSET_PLUG)) {
                 int state = intent.getIntExtra("state", 0);
                 Log.v(TAG, "Broadcast Receiver: Got ACTION_USB_DGTL_HEADSET_PLUG, state = "+state);
-                boolean isConnected = mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET);
+                boolean isConnected =
+                    mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET);
                 if (state == 0 && isConnected) {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET,
                                                          AudioSystem.DEVICE_STATE_UNAVAILABLE, "");
@@ -2063,7 +2083,8 @@ public class AudioService extends IAudioService.Stub {
                 } else if (state == 1 && !isConnected)  {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET,
                                                          AudioSystem.DEVICE_STATE_AVAILABLE, "");
-                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET), "");
+                    mConnectedDevices.put(
+                            new Integer(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET), "");
                 }
             } else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
                 boolean broadcast = false;

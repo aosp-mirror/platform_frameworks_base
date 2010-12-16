@@ -160,20 +160,17 @@ public class NinePatch_Delegate {
 
        Graphics2D graphics;
        if (paint_delegate != null) {
-           graphics = canvas_delegate.getCustomGraphics(paint_delegate);
+           graphics = canvas_delegate.createCustomGraphics(paint_delegate);
        } else {
-           graphics = canvas_delegate.getGraphics2d();
+           graphics = canvas_delegate.getGcSnapshot().create();
        }
 
        try {
            chunkObject.draw(bitmap_delegate.getImage(), graphics,
                    left, top, right - left, bottom - top, destDensity, srcDensity);
        } finally {
-           if (paint_delegate != null) {
-               graphics.dispose();
-           }
+           graphics.dispose();
        }
-
     }
 
     /*package*/ static int nativeGetTransparentRegion(int bitmap, byte[] chunk, Rect location) {

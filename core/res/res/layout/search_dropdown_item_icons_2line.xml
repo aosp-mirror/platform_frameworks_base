@@ -42,8 +42,8 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentBottom="true"
-        android:src="@android:drawable/edit_query"
-        android:background="@android:drawable/edit_query_background"
+        android:src="?attr/searchViewEditQuery"
+        android:background="?attr/searchViewEditQueryBackground"
         android:visibility="gone" />
 
     <ImageView android:id="@android:id/icon2"

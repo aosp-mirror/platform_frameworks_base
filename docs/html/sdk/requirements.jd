@@ -51,8 +51,7 @@ packages: </p>
     <ul>
       <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK 5 or JDK
 6</a> (JRE alone is not sufficient)</li>
-      <li><a href="http://ant.apache.org/">Apache Ant</a> 1.6.5 or later for
-Linux and Mac, 1.7 or later for Windows</li>
+      <li><a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later</li>
       <li><strong>Not</strong> compatible with Gnu Compiler for Java (gcj)</li>
     </ul>
   </li>

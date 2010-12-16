@@ -35,22 +35,31 @@ struct ElementaryStreamQueue {
     ElementaryStreamQueue(Mode mode);
 
     status_t appendData(const void *data, size_t size, int64_t timeUs);
-    void clear();
+    void clear(bool clearFormat);
 
     sp<ABuffer> dequeueAccessUnit();
 
     sp<MetaData> getFormat();
 
 private:
+    struct RangeInfo {
+        int64_t mTimestampUs;
+        size_t mLength;
+    };
+
     Mode mMode;
 
     sp<ABuffer> mBuffer;
-    List<int64_t> mTimestamps;
+    List<RangeInfo> mRangeInfos;
 
     sp<MetaData> mFormat;
 
     sp<ABuffer> dequeueAccessUnitH264();
     sp<ABuffer> dequeueAccessUnitAAC();
+
+    // consume a logical (compressed) access unit of size "size",
+    // returns its timestamp in us (or -1 if no time information).
+    int64_t fetchTimestamp(size_t size);
 
     static sp<MetaData> MakeAACCodecSpecificData(
             unsigned profile, unsigned sampling_freq_index,

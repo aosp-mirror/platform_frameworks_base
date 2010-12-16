@@ -18,7 +18,7 @@ package android.graphics;
 
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
-import com.android.layoutlib.bridge.impl.Stack;
+import com.android.layoutlib.bridge.impl.GcSnapshot;
 
 import android.graphics.Paint_Delegate.FontInfo;
 import android.text.TextUtils;
@@ -26,7 +26,6 @@ import android.text.TextUtils;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -58,7 +57,7 @@ public class Canvas_Delegate {
 
     // ---- delegate data ----
     private BufferedImage mBufferedImage;
-    private final Stack<Graphics2D> mGraphicsStack = new Stack<Graphics2D>();
+    private GcSnapshot mSnapshot = new GcSnapshot();
 
     // ---- Public Helper methods ----
 
@@ -79,8 +78,8 @@ public class Canvas_Delegate {
     /**
      * Returns the current {@link Graphics2D} used to draw.
      */
-    public Graphics2D getGraphics2d() {
-        return mGraphicsStack.peek();
+    public GcSnapshot getGcSnapshot() {
+        return mSnapshot;
     }
 
     // ---- native methods ----
@@ -120,7 +119,7 @@ public class Canvas_Delegate {
             return;
         }
 
-        canvasDelegate.getGraphics2d().translate(dx, dy);
+        canvasDelegate.getGcSnapshot().translate(dx, dy);
     }
 
     /*package*/ static void rotate(Canvas thisCanvas, float degrees) {
@@ -131,7 +130,7 @@ public class Canvas_Delegate {
             return;
         }
 
-        canvasDelegate.getGraphics2d().rotate(Math.toRadians(degrees));
+        canvasDelegate.getGcSnapshot().rotate(Math.toRadians(degrees));
     }
 
     /*package*/ static void scale(Canvas thisCanvas, float sx, float sy) {
@@ -142,7 +141,7 @@ public class Canvas_Delegate {
             return;
         }
 
-        canvasDelegate.getGraphics2d().scale(sx, sy);
+        canvasDelegate.getGcSnapshot().scale(sx, sy);
     }
 
     /*package*/ static void skew(Canvas thisCanvas, float kx, float ky) {
@@ -154,7 +153,7 @@ public class Canvas_Delegate {
         }
 
         // get the current top graphics2D object.
-        Graphics2D g = canvasDelegate.getGraphics2d();
+        GcSnapshot g = canvasDelegate.getGcSnapshot();
 
         // get its current matrix
         AffineTransform currentTx = g.getTransform();
@@ -170,21 +169,16 @@ public class Canvas_Delegate {
     }
 
     /*package*/ static boolean clipRect(Canvas thisCanvas, RectF rect) {
-        return clipRect(thisCanvas,
-                (int) rect.left, (int) rect.top, (int) rect.right, (int) rect.bottom);
+        return clipRect(thisCanvas, rect.left, rect.top, rect.right, rect.bottom);
     }
 
     /*package*/ static boolean clipRect(Canvas thisCanvas, Rect rect) {
-        return clipRect(thisCanvas, rect.left, rect.top, rect.right, rect.bottom);
+        return clipRect(thisCanvas, (float) rect.left, (float) rect.top,
+                (float) rect.right, (float) rect.bottom);
     }
 
     /*package*/ static boolean clipRect(Canvas thisCanvas, float left, float top, float right,
             float bottom) {
-        return clipRect(thisCanvas, (int) left, (int) top, (int) right, (int) bottom);
-    }
-
-    /*package*/ static boolean clipRect(Canvas thisCanvas, int left, int top, int right,
-            int bottom) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
         if (canvasDelegate == null) {
@@ -195,7 +189,17 @@ public class Canvas_Delegate {
         return canvasDelegate.clipRect(left, top, right, bottom, Region.Op.INTERSECT.nativeInt);
     }
 
+    /*package*/ static boolean clipRect(Canvas thisCanvas, int left, int top, int right,
+            int bottom) {
+
+        return clipRect(thisCanvas, (float) left, (float) top, (float) right, (float) bottom);
+    }
+
     /*package*/ static int save(Canvas thisCanvas) {
+        return save(thisCanvas, Canvas.MATRIX_SAVE_FLAG | Canvas.CLIP_SAVE_FLAG);
+    }
+
+    /*package*/ static int save(Canvas thisCanvas, int saveFlags) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
         if (canvasDelegate == null) {
@@ -203,21 +207,7 @@ public class Canvas_Delegate {
             return 0;
         }
 
-        // get the current save count
-        int count = canvasDelegate.mGraphicsStack.size();
-
-        // create a new graphics and add it to the stack
-        Graphics2D g = (Graphics2D)canvasDelegate.getGraphics2d().create();
-        canvasDelegate.mGraphicsStack.push(g);
-
-        // return the old save count
-        return count;
-
-    }
-
-    /*package*/ static int save(Canvas thisCanvas, int saveFlags) {
-        // FIXME implement save(flags)
-        return save(thisCanvas);
+        return canvasDelegate.save(saveFlags);
     }
 
     /*package*/ static void restore(Canvas thisCanvas) {
@@ -228,7 +218,7 @@ public class Canvas_Delegate {
             return;
         }
 
-        canvasDelegate.mGraphicsStack.pop();
+        canvasDelegate.restore();
     }
 
     /*package*/ static int getSaveCount(Canvas thisCanvas) {
@@ -239,7 +229,7 @@ public class Canvas_Delegate {
             return 0;
         }
 
-        return canvasDelegate.mGraphicsStack.size();
+        return canvasDelegate.getGcSnapshot().size();
     }
 
     /*package*/ static void restoreToCount(Canvas thisCanvas, int saveCount) {
@@ -250,9 +240,7 @@ public class Canvas_Delegate {
             return;
         }
 
-        while (canvasDelegate.mGraphicsStack.size() > saveCount) {
-            canvasDelegate.mGraphicsStack.pop();
-        }
+        canvasDelegate.restoreTo(saveCount);
     }
 
     /*package*/ static void drawPoints(Canvas thisCanvas, float[] pts, int offset, int count,
@@ -282,7 +270,7 @@ public class Canvas_Delegate {
         }
 
         // get a Graphics2D object configured with the drawing parameters.
-        Graphics2D g = canvasDelegate.getCustomGraphics(paintDelegate);
+        Graphics2D g = canvasDelegate.createCustomGraphics(paintDelegate);
 
         try {
             for (int i = 0 ; i < count ; i += 4) {
@@ -378,10 +366,10 @@ public class Canvas_Delegate {
         }
 
         // get the current top graphics2D object.
-        Graphics2D g = canvasDelegate.getGraphics2d();
+        GcSnapshot snapshot = canvasDelegate.getGcSnapshot();
 
         // get its current matrix
-        AffineTransform currentTx = g.getTransform();
+        AffineTransform currentTx = snapshot.getTransform();
         // get the AffineTransform of the given matrix
         AffineTransform matrixTx = matrixDelegate.getAffineTransform();
 
@@ -389,7 +377,7 @@ public class Canvas_Delegate {
         currentTx.preConcatenate(matrixTx);
 
         // give it to the graphics2D as a new matrix replacing all previous transform
-        g.setTransform(currentTx);
+        snapshot.setTransform(currentTx);
     }
 
     /*package*/ static void native_setMatrix(int nCanvas, int nMatrix) {
@@ -405,15 +393,16 @@ public class Canvas_Delegate {
         }
 
         // get the current top graphics2D object.
-        Graphics2D g = canvasDelegate.getGraphics2d();
+        GcSnapshot snapshot = canvasDelegate.getGcSnapshot();
 
         // get the AffineTransform of the given matrix
         AffineTransform matrixTx = matrixDelegate.getAffineTransform();
 
         // give it to the graphics2D as a new matrix replacing all previous transform
-        g.setTransform(matrixTx);
+        snapshot.setTransform(matrixTx);
 
         if (matrixDelegate.hasPerspective()) {
+            assert false;
             Bridge.getLog().warning(null,
                     "android.graphics.Canvas#setMatrix(android.graphics.Matrix) only " +
                     "supports affine transformations in the Layout Preview.");
@@ -431,9 +420,7 @@ public class Canvas_Delegate {
             assert false;
         }
 
-        return canvasDelegate.clipRect(
-                (int) left, (int) top, (int) right, (int) bottom,
-                regionOp);
+        return canvasDelegate.clipRect(left, top, right, bottom, regionOp);
     }
 
     /*package*/ static boolean native_clipPath(int nativeCanvas,
@@ -465,7 +452,7 @@ public class Canvas_Delegate {
             return false;
         }
 
-        Rectangle rect = canvasDelegate.getGraphics2d().getClipBounds();
+        Rectangle rect = canvasDelegate.getGcSnapshot().getClip().getBounds();
         if (rect != null) {
             bounds.left = rect.x;
             bounds.top = rect.y;
@@ -527,7 +514,7 @@ public class Canvas_Delegate {
         }
 
         // get a new graphics context.
-        Graphics2D graphics = (Graphics2D)canvasDelegate.getGraphics2d().create();
+        Graphics2D graphics = (Graphics2D)canvasDelegate.getGcSnapshot().create();
         try {
             // reset its transform just in case
             graphics.setTransform(new AffineTransform());
@@ -568,12 +555,14 @@ public class Canvas_Delegate {
         }
 
         // get a Graphics2D object configured with the drawing parameters.
-        Graphics2D g = canvasDelegate.getCustomGraphics(paintDelegate);
+        Graphics2D g = canvasDelegate.createCustomGraphics(paintDelegate);
 
-        g.drawLine((int)startX, (int)startY, (int)stopX, (int)stopY);
-
-        // dispose Graphics2D object
-        g.dispose();
+        try {
+            g.drawLine((int)startX, (int)startY, (int)stopX, (int)stopY);
+        } finally {
+            // dispose Graphics2D object
+            g.dispose();
+        }
     }
 
     /*package*/ static void native_drawRect(int nativeCanvas, RectF rect,
@@ -600,23 +589,25 @@ public class Canvas_Delegate {
 
         if (right > left && bottom > top) {
             // get a Graphics2D object configured with the drawing parameters.
-            Graphics2D g = canvasDelegate.getCustomGraphics(paintDelegate);
+            Graphics2D g = canvasDelegate.createCustomGraphics(paintDelegate);
 
-            int style = paintDelegate.getStyle();
+            try {
+                int style = paintDelegate.getStyle();
 
-            // draw
-            if (style == Paint.Style.FILL.nativeInt ||
-                    style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-                g.fillRect((int)left, (int)top, (int)(right-left), (int)(bottom-top));
+                // draw
+                if (style == Paint.Style.FILL.nativeInt ||
+                        style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                    g.fillRect((int)left, (int)top, (int)(right-left), (int)(bottom-top));
+                }
+
+                if (style == Paint.Style.STROKE.nativeInt ||
+                        style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                    g.drawRect((int)left, (int)top, (int)(right-left), (int)(bottom-top));
+                }
+            } finally {
+                // dispose Graphics2D object
+                g.dispose();
             }
-
-            if (style == Paint.Style.STROKE.nativeInt ||
-                    style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-                g.drawRect((int)left, (int)top, (int)(right-left), (int)(bottom-top));
-            }
-
-            // dispose Graphics2D object
-            g.dispose();
         }
     }
 
@@ -638,7 +629,7 @@ public class Canvas_Delegate {
 
         if (oval.right > oval.left && oval.bottom > oval.top) {
             // get a Graphics2D object configured with the drawing parameters.
-            Graphics2D g = canvasDelegate.getCustomGraphics(paintDelegate);
+            Graphics2D g = canvasDelegate.createCustomGraphics(paintDelegate);
 
             int style = paintDelegate.getStyle();
 
@@ -692,7 +683,7 @@ public class Canvas_Delegate {
 
         if (rect.right > rect.left && rect.bottom > rect.top) {
             // get a Graphics2D object configured with the drawing parameters.
-            Graphics2D g = canvasDelegate.getCustomGraphics(paintDelegate);
+            Graphics2D g = canvasDelegate.createCustomGraphics(paintDelegate);
 
             int style = paintDelegate.getStyle();
 
@@ -833,7 +824,7 @@ public class Canvas_Delegate {
             return;
         }
 
-        Graphics2D g = (Graphics2D) canvasDelegate.getCustomGraphics(paintDelegate);
+        Graphics2D g = (Graphics2D) canvasDelegate.createCustomGraphics(paintDelegate);
         try {
             // Paint.TextAlign indicates how the text is positioned relative to X.
             // LEFT is the default and there's nothing to do.
@@ -1018,34 +1009,53 @@ public class Canvas_Delegate {
      * Disposes of the {@link Graphics2D} stack.
      */
     private void dispose() {
-        while (mGraphicsStack.size() > 0) {
-            mGraphicsStack.pop().dispose();
-        }
+        mSnapshot.dispose();
     }
 
-    private boolean clipRect(int left, int top, int right, int bottom, int regionOp) {
-        if (regionOp == Region.Op.INTERSECT.nativeInt) {
-            Graphics2D gc = getGraphics2d();
-            gc.clipRect(left, top, right - left, bottom - top);
-            return gc.getClip().getBounds().isEmpty() == false;
-        } else {
-            throw new UnsupportedOperationException();
-        }
+    private int save(int saveFlags) {
+        // get the current save count
+        int count = mSnapshot.size();
+
+        // create a new snapshot and add it to the stack
+        mSnapshot = new GcSnapshot(mSnapshot, saveFlags);
+
+        // return the old save count
+        return count;
+    }
+
+    /**
+     * Restores the {@link GcSnapshot} to <var>saveCount</var>
+     * @param saveCount the saveCount
+     */
+    private void restoreTo(int saveCount) {
+        mSnapshot = mSnapshot.restoreTo(saveCount);
+    }
+
+    /**
+     * Restores the {@link GcSnapshot} to <var>saveCount</var>
+     * @param saveCount the saveCount
+     */
+    private void restore() {
+        mSnapshot = mSnapshot.restore();
+    }
+
+    private boolean clipRect(float left, float top, float right, float bottom, int regionOp) {
+        return mSnapshot.clipRect(left, top, right, bottom, regionOp);
     }
 
     private void setBitmap(BufferedImage image) {
         mBufferedImage = image;
-        mGraphicsStack.push(mBufferedImage.createGraphics());
+        assert mSnapshot.size() == 1;
+        mSnapshot.setGraphics2D(mBufferedImage.createGraphics());
     }
 
     /**
      * Creates a new {@link Graphics2D} based on the {@link Paint} parameters.
      * <p/>The object must be disposed ({@link Graphics2D#dispose()}) after being used.
      */
-    /*package*/ Graphics2D getCustomGraphics(Paint_Delegate paint) {
+    /*package*/ Graphics2D createCustomGraphics(Paint_Delegate paint) {
         // make new one
-        Graphics2D g = getGraphics2d();
-        g = (Graphics2D)g.create();
+        Graphics2D g = getGcSnapshot().create();
 
         // configure it
 
@@ -1062,6 +1072,7 @@ public class Canvas_Delegate {
         Shader_Delegate shaderDelegate = Shader_Delegate.getDelegate(paint.getShader());
         if (shaderDelegate != null) {
             java.awt.Paint shaderPaint = shaderDelegate.getJavaPaint();
+            assert shaderPaint != null;
             if (shaderPaint != null) {
                 g.setPaint(shaderPaint);
                 useColorPaint = false;
@@ -1113,6 +1124,7 @@ public class Canvas_Delegate {
 
             // if xfermode wasn't null, then it's something we don't support. log it.
             if (xfermodeDelegate != null) {
+                assert false;
                 Bridge.getLog().warning(null,
                         String.format(
                             "Xfermode '%1$s' is not supported in the Layout Preview.",
@@ -1217,30 +1229,18 @@ public class Canvas_Delegate {
             int sleft, int stop, int sright, int sbottom,
             int dleft, int dtop, int dright, int dbottom) {
 
-        Graphics2D g = canvasDelegate.getGraphics2d();
-
-        Composite c = null;
-
-        if (paintDelegate != null) {
-            if (paintDelegate.isFilterBitmap()) {
-                g = (Graphics2D)g.create();
+        Graphics2D g = canvasDelegate.getGcSnapshot().create();
+        try {
+            if (paintDelegate != null && paintDelegate.isFilterBitmap()) {
                 g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
                         RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             }
-        }
 
-        g.drawImage(image, dleft, dtop, dright, dbottom,
-                sleft, stop, sright, sbottom, null);
-
-        if (paintDelegate != null) {
-            if (paintDelegate.isFilterBitmap()) {
-                g.dispose();
-            }
-            if (c != null) {
-                g.setComposite(c);
-            }
+            g.drawImage(image, dleft, dtop, dright, dbottom,
+                    sleft, stop, sright, sbottom, null);
+        } finally {
+            g.dispose();
         }
     }
-
 }
 

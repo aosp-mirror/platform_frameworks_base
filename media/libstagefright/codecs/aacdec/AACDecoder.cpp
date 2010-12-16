@@ -21,8 +21,8 @@
 
 #include "pvmp4audiodecoder_api.h"
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaBufferGroup.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
 
@@ -84,7 +84,7 @@ status_t AACDecoder::initCheck() {
     sp<MetaData> meta = mSource->getFormat();
     if (meta->findData(kKeyESDS, &type, &data, &size)) {
         ESDS esds((const char *)data, size);
-        CHECK_EQ(esds.InitCheck(), OK);
+        CHECK_EQ(esds.InitCheck(), (status_t)OK);
 
         const void *codec_specific_data;
         size_t codec_specific_data_size;
@@ -197,7 +197,7 @@ status_t AACDecoder::read(
     }
 
     MediaBuffer *buffer;
-    CHECK_EQ(mBufferGroup->acquire_buffer(&buffer), OK);
+    CHECK_EQ(mBufferGroup->acquire_buffer(&buffer), (status_t)OK);
 
     mConfig->pInputBuffer =
         (UChar *)mInputBuffer->data() + mInputBuffer->range_offset();
@@ -308,7 +308,7 @@ status_t AACDecoder::read(
             mAnchorTimeUs
                 + (mNumSamplesOutput * 1000000) / mConfig->samplingRate);
 
-    mNumSamplesOutput += mConfig->frameLength;
+    mNumSamplesOutput += mConfig->frameLength * mUpsamplingFactor;
 
     *out = buffer;
 

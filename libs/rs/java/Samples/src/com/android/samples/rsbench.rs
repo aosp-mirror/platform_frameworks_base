@@ -19,7 +19,7 @@
 #include "rs_graphics.rsh"
 #include "shader_def.rsh"
 
-const int gMaxModes = 23;
+const int gMaxModes = 26;
 
 rs_program_vertex gProgVertex;
 rs_program_fragment gProgFragmentColor;
@@ -94,7 +94,14 @@ static float textColors[] = {1.0f, 1.0f, 1.0f, 1.0f,
                              0.5f, 0.6f, 0.7f, 1.0f,
 };
 
-void displayFontSamples(int fillNum) {
+static void displayFontSamples(int fillNum) {
+
+    rs_font fonts[5];
+    rsSetObject(&fonts[0], gFontSans);
+    rsSetObject(&fonts[1], gFontSerif);
+    rsSetObject(&fonts[2], gFontSerifBold);
+    rsSetObject(&fonts[3], gFontSerifBoldItalic);
+    rsSetObject(&fonts[4], gFontSans);
 
     uint width = rsgGetWidth();
     uint height = rsgGetHeight();
@@ -107,9 +114,8 @@ void displayFontSamples(int fillNum) {
     int yPos = top;
 
     int xOffset = 0, yOffset = 0;
-    rsgBindFont(gFontSans); //rsgBindFont(gFontSerif); rsgBindFont(gFontSerifBold); rsgBindFont(gFontSerifBoldItalic); rsgBindFont(gFontSans);
-
     for(int fillI = 0; fillI < fillNum; fillI ++) {
+        rsgBindFont(fonts[fillI]);
         xOffset = textOffsets[fillI * 2];
         yOffset = textOffsets[fillI * 2 + 1];
         float *colPtr = textColors + fillI * 4;
@@ -122,18 +128,22 @@ void displayFontSamples(int fillNum) {
             }
         }
     }
+
+    for (int i = 0; i < 5; i ++) {
+        rsClearObject(&fonts[i]);
+    }
 }
 
-void bindProgramVertexOrtho() {
+static void bindProgramVertexOrtho() {
     // Default vertex sahder
     rsgBindProgramVertex(gProgVertex);
-    // Setup the projectioni matrix
+    // Setup the projection matrix
     rs_matrix4x4 proj;
     rsMatrixLoadOrtho(&proj, 0, rsgGetWidth(), rsgGetHeight(), 0, -500, 500);
     rsgProgramVertexLoadProjectionMatrix(&proj);
 }
 
-void displaySingletexFill(bool blend, int quadCount) {
+static void displaySingletexFill(bool blend, int quadCount) {
     bindProgramVertexOrtho();
     rs_matrix4x4 matrix;
     rsMatrixLoadIdentity(&matrix);
@@ -159,7 +169,7 @@ void displaySingletexFill(bool blend, int quadCount) {
     }
 }
 
-void displayBlendingSamples() {
+static void displayBlendingSamples() {
     int i;
 
     bindProgramVertexOrtho();
@@ -205,7 +215,7 @@ void displayBlendingSamples() {
 
 }
 
-void displayMeshSamples(int meshNum) {
+static void displayMeshSamples(int meshNum) {
 
     bindProgramVertexOrtho();
     rs_matrix4x4 matrix;
@@ -227,7 +237,7 @@ void displayMeshSamples(int meshNum) {
     }
 }
 
-void displayTextureSamplers() {
+static void displayTextureSamplers() {
 
     bindProgramVertexOrtho();
     rs_matrix4x4 matrix;
@@ -282,27 +292,34 @@ void displayTextureSamplers() {
     rsgDrawText("Filtering: miplinear wrap", 310, 590);
 }
 
-float gTorusRotation = 0;
-static void drawToruses(int numMeshes) {
-    rs_matrix4x4 matrix;
+static float gTorusRotation = 0;
+static void updateModelMatrix(rs_matrix4x4 *matrix, void *buffer) {
+    if (buffer == 0) {
+        rsgProgramVertexLoadModelMatrix(matrix);
+    } else {
+        rsAllocationMarkDirty(rsGetAllocation(buffer));
+    }
+}
+
+static void drawToruses(int numMeshes, rs_matrix4x4 *matrix, void *buffer) {
 
     if (numMeshes == 1) {
-        rsMatrixLoadTranslate(&matrix, 0.0f, 0.0f, -7.5f);
-        rsMatrixRotate(&matrix, gTorusRotation, 1.0f, 0.0f, 0.0f);
-        rsgProgramVertexLoadModelMatrix(&matrix);
+        rsMatrixLoadTranslate(matrix, 0.0f, 0.0f, -7.5f);
+        rsMatrixRotate(matrix, gTorusRotation, 1.0f, 0.0f, 0.0f);
+        updateModelMatrix(matrix, buffer);
         rsgDrawMesh(gTorusMesh);
         return;
     }
 
     if (numMeshes == 2) {
-        rsMatrixLoadTranslate(&matrix, -1.6f, 0.0f, -7.5f);
-        rsMatrixRotate(&matrix, gTorusRotation, 1.0f, 0.0f, 0.0f);
-        rsgProgramVertexLoadModelMatrix(&matrix);
+        rsMatrixLoadTranslate(matrix, -1.6f, 0.0f, -7.5f);
+        rsMatrixRotate(matrix, gTorusRotation, 1.0f, 0.0f, 0.0f);
+        updateModelMatrix(matrix, buffer);
         rsgDrawMesh(gTorusMesh);
 
-        rsMatrixLoadTranslate(&matrix, 1.6f, 0.0f, -7.5f);
-        rsMatrixRotate(&matrix, gTorusRotation, 1.0f, 0.0f, 0.0f);
-        rsgProgramVertexLoadModelMatrix(&matrix);
+        rsMatrixLoadTranslate(matrix, 1.6f, 0.0f, -7.5f);
+        rsMatrixRotate(matrix, gTorusRotation, 1.0f, 0.0f, 0.0f);
+        updateModelMatrix(matrix, buffer);
         rsgDrawMesh(gTorusMesh);
         return;
     }
@@ -315,9 +332,9 @@ static void drawToruses(int numMeshes) {
     for (int h = 0; h < 4; h ++) {
         for (int v = 0; v < 2; v ++) {
             // Position our model on the screen
-            rsMatrixLoadTranslate(&matrix, startX + dist * h, startY + dist * v, startZ);
-            rsMatrixRotate(&matrix, gTorusRotation, 1.0f, 0.0f, 0.0f);
-            rsgProgramVertexLoadModelMatrix(&matrix);
+            rsMatrixLoadTranslate(matrix, startX + dist * h, startY + dist * v, startZ);
+            rsMatrixRotate(matrix, gTorusRotation, 1.0f, 0.0f, 0.0f);
+            updateModelMatrix(matrix, buffer);
             rsgDrawMesh(gTorusMesh);
         }
     }
@@ -325,10 +342,10 @@ static void drawToruses(int numMeshes) {
 
 
 // Quick hack to get some geometry numbers
-void displaySimpleGeoSamples(bool useTexture, int numMeshes) {
+static void displaySimpleGeoSamples(bool useTexture, int numMeshes) {
     rsgBindProgramVertex(gProgVertex);
     rsgBindProgramRaster(gCullBack);
-    // Setup the projectioni matrix with 60 degree field of view
+    // Setup the projection matrix with 30 degree field of view
     rs_matrix4x4 proj;
     float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
     rsMatrixLoadPerspective(&proj, 30.0f, aspect, 0.1f, 100.0f);
@@ -345,19 +362,20 @@ void displaySimpleGeoSamples(bool useTexture, int numMeshes) {
     rsgBindSampler(gProgFragmentTexture, 0, gLinearClamp);
     rsgBindTexture(gProgFragmentTexture, 0, gTexTorus);
 
-    // Aplly a rotation to our mesh
+    // Apply a rotation to our mesh
     gTorusRotation += 50.0f * gDt;
     if (gTorusRotation > 360.0f) {
         gTorusRotation -= 360.0f;
     }
 
-    drawToruses(numMeshes);
+    rs_matrix4x4 matrix;
+    drawToruses(numMeshes, &matrix, 0);
 }
 
 float gLight0Rotation = 0;
 float gLight1Rotation = 0;
 
-void setupCustomShaderLights() {
+static void setupCustomShaderLights() {
     float4 light0Pos = {-5.0f, 5.0f, -10.0f, 1.0f};
     float4 light1Pos = {2.0f, 5.0f, 15.0f, 1.0f};
     float4 light0DiffCol = {0.9f, 0.7f, 0.7f, 1.0f};
@@ -393,7 +411,7 @@ void setupCustomShaderLights() {
     gVSConstants->light1_CosinePower = 25.0f;
     rsAllocationMarkDirty(rsGetAllocation(gVSConstants));
 
-    // Update fragmetn shader constants
+    // Update fragment shader constants
     // Set light 0 colors
     gFSConstants->light0_DiffuseColor = light0DiffCol;
     gFSConstants->light0_SpecularColor = light0SpecCol;
@@ -419,17 +437,17 @@ void setupCustomShaderLights() {
     rsAllocationMarkDirty(rsGetAllocation(gFSConstPixel));
 }
 
-void displayCustomShaderSamples(int numMeshes) {
+static void displayCustomShaderSamples(int numMeshes) {
 
     // Update vertex shader constants
     // Load model matrix
-    // Aplly a rotation to our mesh
+    // Apply a rotation to our mesh
     gTorusRotation += 50.0f * gDt;
     if (gTorusRotation > 360.0f) {
         gTorusRotation -= 360.0f;
     }
 
-    // Setup the projectioni matrix
+    // Setup the projection matrix
     float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
     rsMatrixLoadPerspective(&gVSConstants->proj, 30.0f, aspect, 0.1f, 100.0f);
     setupCustomShaderLights();
@@ -445,70 +463,31 @@ void displayCustomShaderSamples(int numMeshes) {
     // Use back face culling
     rsgBindProgramRaster(gCullBack);
 
-    rs_matrix4x4 matrix;
-
-    if (numMeshes == 1) {
-        rsMatrixLoadTranslate(&gVSConstants->model, 0.0f, 0.0f, -7.5f);
-        rsMatrixRotate(&gVSConstants->model, gTorusRotation, 1.0f, 0.0f, 0.0f);
-        rsMatrixRotate(&gVSConstants->model, gTorusRotation, 0.0f, 0.0f, 1.0f);
-        rsAllocationMarkDirty(rsGetAllocation(gVSConstants));
-
-        rsgDrawMesh(gTorusMesh);
-        return;
-    }
-
-    if (numMeshes == 2) {
-        rsMatrixLoadTranslate(&gVSConstants->model, -1.6f, 0.0f, -7.5f);
-        rsMatrixRotate(&gVSConstants->model, gTorusRotation, 1.0f, 0.0f, 0.0f);
-        rsMatrixRotate(&gVSConstants->model, gTorusRotation, 0.0f, 0.0f, 1.0f);
-        rsAllocationMarkDirty(rsGetAllocation(gVSConstants));
-        rsgDrawMesh(gTorusMesh);
-
-        rsMatrixLoadTranslate(&gVSConstants->model, 1.6f, 0.0f, -7.5f);
-        rsMatrixRotate(&gVSConstants->model, gTorusRotation, 1.0f, 0.0f, 0.0f);
-        rsMatrixRotate(&gVSConstants->model, gTorusRotation, 0.0f, 0.0f, 1.0f);
-        rsAllocationMarkDirty(rsGetAllocation(gVSConstants));
-        rsgDrawMesh(gTorusMesh);
-        return;
-    }
-
-    float startX = -5.0f;
-    float startY = -1.5f;
-    float startZ = -15.0f;
-    float dist = 3.2f;
-
-    for (int h = 0; h < 4; h ++) {
-        for (int v = 0; v < 2; v ++) {
-            // Position our model on the screen
-            rsMatrixLoadTranslate(&gVSConstants->model, startX + dist * h, startY + dist * v, startZ);
-            rsMatrixRotate(&gVSConstants->model, gTorusRotation, 1.0f, 0.0f, 0.0f);
-            rsMatrixRotate(&gVSConstants->model, gTorusRotation, 0.0f, 0.0f, 1.0f);
-            rsAllocationMarkDirty(rsGetAllocation(gVSConstants));
-            rsgDrawMesh(gTorusMesh);
-        }
-    }
+    drawToruses(numMeshes, &gVSConstants->model, gVSConstants);
 }
 
-void displayPixelLightSamples(int numMeshes) {
+static void displayPixelLightSamples(int numMeshes, bool heavyVertex) {
 
     // Update vertex shader constants
     // Load model matrix
-    // Aplly a rotation to our mesh
-    gTorusRotation += 20.0f * gDt;
+    // Apply a rotation to our mesh
+    gTorusRotation += 30.0f * gDt;
     if (gTorusRotation > 360.0f) {
         gTorusRotation -= 360.0f;
     }
 
-    //gTorusRotation = 45.0f;
-
     gVSConstPixel->time = rsUptimeMillis()*0.005;
 
-    // Setup the projectioni matrix
+    // Setup the projection matrix
     float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
     rsMatrixLoadPerspective(&gVSConstPixel->proj, 30.0f, aspect, 0.1f, 100.0f);
     setupCustomShaderLights();
 
-    rsgBindProgramVertex(gProgVertexPixelLight);
+    if (heavyVertex) {
+        rsgBindProgramVertex(gProgVertexPixelLightMove);
+    } else {
+        rsgBindProgramVertex(gProgVertexPixelLight);
+    }
 
     // Fragment shader with texture
     rsgBindProgramStore(gProgStoreBlendNoneDepth);
@@ -519,51 +498,10 @@ void displayPixelLightSamples(int numMeshes) {
     // Use back face culling
     rsgBindProgramRaster(gCullBack);
 
-    rs_matrix4x4 matrix;
-
-    if (numMeshes == 1) {
-        rsMatrixLoadTranslate(&gVSConstPixel->model, 0.0f, 0.0f, -7.5f);
-        rsMatrixRotate(&gVSConstPixel->model, gTorusRotation, 1.0f, 0.0f, 0.0f);
-        rsMatrixRotate(&gVSConstPixel->model, gTorusRotation, 0.0f, 0.0f, 1.0f);
-        rsAllocationMarkDirty(rsGetAllocation(gVSConstPixel));
-
-        rsgDrawMesh(gTorusMesh);
-        return;
-    }
-
-    if (numMeshes == 2) {
-        rsMatrixLoadTranslate(&gVSConstPixel->model, -1.6f, 0.0f, -7.5f);
-        rsMatrixRotate(&gVSConstPixel->model, gTorusRotation, 1.0f, 0.0f, 0.0f);
-        rsMatrixRotate(&gVSConstPixel->model, gTorusRotation, 0.0f, 0.0f, 1.0f);
-        rsAllocationMarkDirty(rsGetAllocation(gVSConstPixel));
-        rsgDrawMesh(gTorusMesh);
-
-        rsMatrixLoadTranslate(&gVSConstPixel->model, 1.6f, 0.0f, -7.5f);
-        rsMatrixRotate(&gVSConstPixel->model, gTorusRotation, 1.0f, 0.0f, 0.0f);
-        rsMatrixRotate(&gVSConstPixel->model, gTorusRotation, 0.0f, 0.0f, 1.0f);
-        rsAllocationMarkDirty(rsGetAllocation(gVSConstPixel));
-        rsgDrawMesh(gTorusMesh);
-        return;
-    }
-
-    float startX = -5.0f;
-    float startY = -1.5f;
-    float startZ = -15.0f;
-    float dist = 3.2f;
-
-    for (int h = 0; h < 4; h ++) {
-        for (int v = 0; v < 2; v ++) {
-            // Position our model on the screen
-            rsMatrixLoadTranslate(&gVSConstPixel->model, startX + dist * h, startY + dist * v, startZ);
-            rsMatrixRotate(&gVSConstPixel->model, gTorusRotation, 1.0f, 0.0f, 0.0f);
-            rsMatrixRotate(&gVSConstPixel->model, gTorusRotation, 0.0f, 0.0f, 1.0f);
-            rsAllocationMarkDirty(rsGetAllocation(gVSConstPixel));
-            rsgDrawMesh(gTorusMesh);
-        }
-    }
+    drawToruses(numMeshes, &gVSConstPixel->model, gVSConstPixel);
 }
 
-void displayMultitextureSample(bool blend, int quadCount) {
+static void displayMultitextureSample(bool blend, int quadCount) {
     bindProgramVertexOrtho();
     rs_matrix4x4 matrix;
     rsMatrixLoadIdentity(&matrix);
@@ -593,9 +531,9 @@ void displayMultitextureSample(bool blend, int quadCount) {
     }
 }
 
-float gAnisoTime = 0.0f;
-uint anisoMode = 0;
-void displayAnisoSample() {
+static float gAnisoTime = 0.0f;
+static uint anisoMode = 0;
+static void displayAnisoSample() {
 
     gAnisoTime += gDt;
 
@@ -672,6 +610,8 @@ static bool checkInit() {
         displayTextureSamplers();
         displayMultitextureSample(true, 5);
         displayAnisoSample();
+        displayPixelLightSamples(1, false);
+        displayPixelLightSamples(1, true);
         countdown --;
         rsgClearColor(0.2f, 0.2f, 0.2f, 0.0f);
 
@@ -699,7 +639,7 @@ static int frameCount = 0;
 static int totalFramesRendered = 0;
 static int benchMode = 0;
 
-#define testTime 10.0f
+#define testTime 5.0f
 static float curTestTime = testTime;
 
 static const char *testNames[] = {
@@ -727,12 +667,9 @@ static const char *testNames[] = {
     "Finished 25.6k geo heavy fragment",
     "Finished 51.2k geo heavy fragment",
     "Finished 204.8k geo raster load heavy fragment",
-    "Finished simpleGeo",
-    "Finished simpleGeo",
-    "Finished simpleGeo",
-    "Finished simpleGeo",
-    "Finished simpleGeo",
-    "Finished simpleGeo",
+    "Finished 25.6k geo heavy fragment, heavy vertex",
+    "Finished 51.2k geo heavy fragment, heavy vertex",
+    "Finished 204.8k geo raster load heavy fragment, heavy vertex",
 };
 
 int root(int launchID) {
@@ -745,9 +682,6 @@ int root(int launchID) {
     if(!checkInit()) {
         return 1;
     }
-
-    /*displayPixelLightSamples(1);
-    return 1;*/
 
     curTestTime -= gDt;
     if(curTestTime < 0.0f) {
@@ -829,14 +763,24 @@ int root(int launchID) {
         displayMultitextureSample(true, 5);
         break;
     case 21:
-        displayPixelLightSamples(1);
+        displayPixelLightSamples(1, false);
         break;
     case 22:
-        displayPixelLightSamples(2);
+        displayPixelLightSamples(2, false);
         break;
     case 23:
-        displayPixelLightSamples(8);
+        displayPixelLightSamples(8, false);
         break;
+    case 24:
+        displayPixelLightSamples(1, true);
+        break;
+    case 25:
+        displayPixelLightSamples(2, true);
+        break;
+    case 26:
+        displayPixelLightSamples(8, true);
+        break;
+
     }
 
     frameCount ++;

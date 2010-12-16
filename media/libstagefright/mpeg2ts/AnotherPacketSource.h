@@ -39,11 +39,15 @@ struct AnotherPacketSource : public MediaSource {
 
     bool hasBufferAvailable(status_t *finalResult);
 
+    status_t nextBufferTime(int64_t *timeUs);
+
     void queueAccessUnit(const sp<ABuffer> &buffer);
     void queueDiscontinuity();
     void signalEOS(status_t result);
 
     void clear();
+
+    status_t dequeueAccessUnit(sp<ABuffer> *buffer);
 
 protected:
     virtual ~AnotherPacketSource();

@@ -92,6 +92,7 @@ public class FileFilter {
         ignoreResultList.add("fast/encoding/percent-escaping.html"); // fails in Java HTTP stack, see http://b/issue?id=3046984
         ignoreResultList.add("http/tests/appcache/empty-manifest.html"); // flaky
         ignoreResultList.add("http/tests/appcache/fallback.html"); // http://b/issue?id=2713004
+        ignoreResultList.add("http/tests/appcache/foreign-fallback.html"); // Flaky, may be due to DRT, see http://b/3285647
         ignoreResultList.add("http/tests/appcache/foreign-iframe-main.html"); // flaky - skips states
         ignoreResultList.add("http/tests/appcache/manifest-with-empty-file.html"); // flaky
         ignoreResultList.add("http/tests/appcache/origin-quota.html"); // needs clearAllApplicationCaches(), see http://b/issue?id=2944196

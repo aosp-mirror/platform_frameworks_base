@@ -48,6 +48,32 @@ sp<MetaData> AnotherPacketSource::getFormat() {
     return mFormat;
 }
 
+status_t AnotherPacketSource::dequeueAccessUnit(sp<ABuffer> *buffer) {
+    buffer->clear();
+
+    Mutex::Autolock autoLock(mLock);
+    while (mEOSResult == OK && mBuffers.empty()) {
+        mCondition.wait(mLock);
+    }
+
+    if (!mBuffers.empty()) {
+        *buffer = *mBuffers.begin();
+        mBuffers.erase(mBuffers.begin());
+
+        int32_t discontinuity;
+        if ((*buffer)->meta()->findInt32("discontinuity", &discontinuity)
+                && discontinuity) {
+            buffer->clear();
+
+            return INFO_DISCONTINUITY;
+        }
+
+        return OK;
+    }
+
+    return mEOSResult;
+}
+
 status_t AnotherPacketSource::read(
         MediaBuffer **out, const ReadOptions *) {
     *out = NULL;
@@ -66,9 +92,8 @@ status_t AnotherPacketSource::read(
                 && discontinuity) {
             return INFO_DISCONTINUITY;
         } else {
-            uint64_t timeUs;
-            CHECK(buffer->meta()->findInt64(
-                        "time", (int64_t *)&timeUs));
+            int64_t timeUs;
+            CHECK(buffer->meta()->findInt64("timeUs", &timeUs));
 
             MediaBuffer *mediaBuffer = new MediaBuffer(buffer->size());
             mediaBuffer->meta_data()->setInt64(kKeyTime, timeUs);
@@ -92,7 +117,7 @@ void AnotherPacketSource::queueAccessUnit(const sp<ABuffer> &buffer) {
     }
 
     int64_t timeUs;
-    CHECK(buffer->meta()->findInt64("time", &timeUs));
+    CHECK(buffer->meta()->findInt64("timeUs", &timeUs));
     LOGV("queueAccessUnit timeUs=%lld us (%.2f secs)", timeUs, timeUs / 1E6);
 
     Mutex::Autolock autoLock(mLock);
@@ -132,6 +157,21 @@ bool AnotherPacketSource::hasBufferAvailable(status_t *finalResult) {
 
     *finalResult = mEOSResult;
     return false;
+}
+
+status_t AnotherPacketSource::nextBufferTime(int64_t *timeUs) {
+    *timeUs = 0;
+
+    Mutex::Autolock autoLock(mLock);
+
+    if (mBuffers.empty()) {
+        return mEOSResult != OK ? mEOSResult : -EWOULDBLOCK;
+    }
+
+    sp<ABuffer> buffer = *mBuffers.begin();
+    CHECK(buffer->meta()->findInt64("timeUs", timeUs));
+
+    return OK;
 }
 
 }  // namespace android

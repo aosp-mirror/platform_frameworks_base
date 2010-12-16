@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
- * Copyright (c) 2006, The Android Open Source Project
+ * Copyright (c) 2010, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -24,6 +24,8 @@
     <dimen name="notification_ticker_width">360dp</dimen>
     <!-- Status bar panel bottom offset (height of status bar - overlap) -->
     <dimen name="status_bar_panel_bottom_offset">36dp</dimen>
+    <!-- gap on either side of status bar notification icons -->
+    <dimen name="status_bar_icon_padding">8dp</dimen>
 </resources>
 
 

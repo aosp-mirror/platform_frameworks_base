@@ -420,7 +420,14 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s, const char *resName, co
         } else {
           // bccReadBC returns a neagative value: Didn't read any script,
           // So, use cached binary instead
-          bccLoadBinary(s->mBccScript);
+          if (bccLoadBinary(s->mBccScript)) {  // LoadBinary fails ==> Recompile
+            bccReadBC(s->mBccScript,
+                      s->mEnviroment.mScriptText,
+                      s->mEnviroment.mScriptTextLength,
+                      NULL,
+                      cacheDir);
+            bccCompileBC(s->mBccScript);
+          }
         }
         bccGetScriptLabel(s->mBccScript, "root", (BCCvoid**) &s->mProgram.mRoot);
         bccGetScriptLabel(s->mBccScript, "init", (BCCvoid**) &s->mProgram.mInit);

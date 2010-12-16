@@ -4,6 +4,7 @@ include $(CLEAR_VARS)
 include frameworks/base/media/libstagefright/codecs/common/Config.mk
 
 LOCAL_SRC_FILES:=                         \
+        ACodec.cpp                        \
         AMRExtractor.cpp                  \
         AMRWriter.cpp                     \
         AudioPlayer.cpp                   \

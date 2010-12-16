@@ -61,42 +61,42 @@ struct Blender {
 // In this array, the index of each Blender equals the value of the first
 // entry. For instance, gBlends[1] == gBlends[SkXfermode::kSrc_Mode]
 static const Blender gBlends[] = {
-        { SkXfermode::kClear_Mode,   GL_ZERO,                 GL_ZERO },
-        { SkXfermode::kSrc_Mode,     GL_ONE,                  GL_ZERO },
-        { SkXfermode::kDst_Mode,     GL_ZERO,                 GL_ONE },
-        { SkXfermode::kSrcOver_Mode, GL_ONE,                  GL_ONE_MINUS_SRC_ALPHA },
-        { SkXfermode::kDstOver_Mode, GL_ONE_MINUS_DST_ALPHA,  GL_ONE },
-        { SkXfermode::kSrcIn_Mode,   GL_DST_ALPHA,            GL_ZERO },
-        { SkXfermode::kDstIn_Mode,   GL_ZERO,                 GL_SRC_ALPHA },
-        { SkXfermode::kSrcOut_Mode,  GL_ONE_MINUS_DST_ALPHA,  GL_ZERO },
-        { SkXfermode::kDstOut_Mode,  GL_ZERO,                 GL_ONE_MINUS_SRC_ALPHA },
-        { SkXfermode::kSrcATop_Mode, GL_DST_ALPHA,            GL_ONE_MINUS_SRC_ALPHA },
-        { SkXfermode::kDstATop_Mode, GL_ONE_MINUS_DST_ALPHA,  GL_SRC_ALPHA },
-        { SkXfermode::kXor_Mode,     GL_ONE_MINUS_DST_ALPHA,  GL_ONE_MINUS_SRC_ALPHA }
+    { SkXfermode::kClear_Mode,   GL_ZERO,                 GL_ZERO },
+    { SkXfermode::kSrc_Mode,     GL_ONE,                  GL_ZERO },
+    { SkXfermode::kDst_Mode,     GL_ZERO,                 GL_ONE },
+    { SkXfermode::kSrcOver_Mode, GL_ONE,                  GL_ONE_MINUS_SRC_ALPHA },
+    { SkXfermode::kDstOver_Mode, GL_ONE_MINUS_DST_ALPHA,  GL_ONE },
+    { SkXfermode::kSrcIn_Mode,   GL_DST_ALPHA,            GL_ZERO },
+    { SkXfermode::kDstIn_Mode,   GL_ZERO,                 GL_SRC_ALPHA },
+    { SkXfermode::kSrcOut_Mode,  GL_ONE_MINUS_DST_ALPHA,  GL_ZERO },
+    { SkXfermode::kDstOut_Mode,  GL_ZERO,                 GL_ONE_MINUS_SRC_ALPHA },
+    { SkXfermode::kSrcATop_Mode, GL_DST_ALPHA,            GL_ONE_MINUS_SRC_ALPHA },
+    { SkXfermode::kDstATop_Mode, GL_ONE_MINUS_DST_ALPHA,  GL_SRC_ALPHA },
+    { SkXfermode::kXor_Mode,     GL_ONE_MINUS_DST_ALPHA,  GL_ONE_MINUS_SRC_ALPHA }
 };
 
 // This array contains the swapped version of each SkXfermode. For instance
 // this array's SrcOver blending mode is actually DstOver. You can refer to
 // createLayer() for more information on the purpose of this array.
 static const Blender gBlendsSwap[] = {
-        { SkXfermode::kClear_Mode,   GL_ZERO,                 GL_ZERO },
-        { SkXfermode::kSrc_Mode,     GL_ZERO,                 GL_ONE },
-        { SkXfermode::kDst_Mode,     GL_ONE,                  GL_ZERO },
-        { SkXfermode::kSrcOver_Mode, GL_ONE_MINUS_DST_ALPHA,  GL_ONE },
-        { SkXfermode::kDstOver_Mode, GL_ONE,                  GL_ONE_MINUS_SRC_ALPHA },
-        { SkXfermode::kSrcIn_Mode,   GL_ZERO,                 GL_SRC_ALPHA },
-        { SkXfermode::kDstIn_Mode,   GL_DST_ALPHA,            GL_ZERO },
-        { SkXfermode::kSrcOut_Mode,  GL_ZERO,                 GL_ONE_MINUS_SRC_ALPHA },
-        { SkXfermode::kDstOut_Mode,  GL_ONE_MINUS_DST_ALPHA,  GL_ZERO },
-        { SkXfermode::kSrcATop_Mode, GL_ONE_MINUS_DST_ALPHA,  GL_SRC_ALPHA },
-        { SkXfermode::kDstATop_Mode, GL_DST_ALPHA,            GL_ONE_MINUS_SRC_ALPHA },
-        { SkXfermode::kXor_Mode,     GL_ONE_MINUS_DST_ALPHA,  GL_ONE_MINUS_SRC_ALPHA }
+    { SkXfermode::kClear_Mode,   GL_ZERO,                 GL_ZERO },
+    { SkXfermode::kSrc_Mode,     GL_ZERO,                 GL_ONE },
+    { SkXfermode::kDst_Mode,     GL_ONE,                  GL_ZERO },
+    { SkXfermode::kSrcOver_Mode, GL_ONE_MINUS_DST_ALPHA,  GL_ONE },
+    { SkXfermode::kDstOver_Mode, GL_ONE,                  GL_ONE_MINUS_SRC_ALPHA },
+    { SkXfermode::kSrcIn_Mode,   GL_ZERO,                 GL_SRC_ALPHA },
+    { SkXfermode::kDstIn_Mode,   GL_DST_ALPHA,            GL_ZERO },
+    { SkXfermode::kSrcOut_Mode,  GL_ZERO,                 GL_ONE_MINUS_SRC_ALPHA },
+    { SkXfermode::kDstOut_Mode,  GL_ONE_MINUS_DST_ALPHA,  GL_ZERO },
+    { SkXfermode::kSrcATop_Mode, GL_ONE_MINUS_DST_ALPHA,  GL_SRC_ALPHA },
+    { SkXfermode::kDstATop_Mode, GL_DST_ALPHA,            GL_ONE_MINUS_SRC_ALPHA },
+    { SkXfermode::kXor_Mode,     GL_ONE_MINUS_DST_ALPHA,  GL_ONE_MINUS_SRC_ALPHA }
 };
 
 static const GLenum gTextureUnits[] = {
-        GL_TEXTURE0,
-        GL_TEXTURE1,
-        GL_TEXTURE2
+    GL_TEXTURE0,
+    GL_TEXTURE1,
+    GL_TEXTURE2
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1301,7 +1301,7 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
 
 void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, SkPaint* paint) {
-    if (text == NULL || count == 0 || (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
+    if (text == NULL || count == 0) {
         return;
     }
     if (mSnapshot->isIgnored()) return;
@@ -1363,6 +1363,10 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
         finishDrawTexture();
+    }
+
+    if (paint->getAlpha() == 0 && paint->getXfermode() == NULL) {
+        return;
     }
 
     // Pick the appropriate texture filtering
