@@ -559,7 +559,7 @@ public class Paint {
     }
 
     /**
-     * Helper for setFlags(), setting or clearing the STRIKE_THRU_TEXT_FLAG bit
+     * Helper for setFlags(), setting or clearing the FAKE_BOLD_TEXT_FLAG bit
      *
      * @param fakeBoldText true to set the fakeBoldText bit in the paint's
      *                     flags, false to clear it.

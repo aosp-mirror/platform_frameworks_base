@@ -22,6 +22,7 @@ import android.os.Message;
 import android.util.AndroidRuntimeException;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -478,12 +479,17 @@ public class ValueAnimator extends Animator {
     /**
      * Sets the length of the animation. The default duration is 300 milliseconds.
      *
-     * @param duration The length of the animation, in milliseconds.
+     * @param duration The length of the animation, in milliseconds. This value cannot
+     * be negative.
      * @return ValueAnimator The object called with setDuration(). This return
      * value makes it easier to compose statements together that construct and then set the
      * duration, as in <code>ValueAnimator.ofInt(0, 10).setDuration(500).start()</code>.
      */
     public ValueAnimator setDuration(long duration) {
+        if (duration < 0) {
+            throw new IllegalArgumentException("Animators cannot have negative duration: " +
+                    duration);
+        }
         mDuration = duration;
         return this;
     }
@@ -829,12 +835,15 @@ public class ValueAnimator extends Animator {
      * such as acceleration and deceleration. The default value is
      * {@link android.view.animation.AccelerateDecelerateInterpolator}
      *
-     * @param value the interpolator to be used by this animation
+     * @param value the interpolator to be used by this animation. A value of <code>null</code>
+     * will result in linear interpolation.
      */
     @Override
     public void setInterpolator(TimeInterpolator value) {
         if (value != null) {
             mInterpolator = value;
+        } else {
+            mInterpolator = new LinearInterpolator();
         }
     }
 
