@@ -4958,7 +4958,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             Binder.restoreCallingIdentity(ident);
 
-            if (frame.isEmpty()) {
+            if (frame.isEmpty() || maxLayer == 0) {
                 return null;
             }
 
@@ -4990,6 +4990,10 @@ public class WindowManagerService extends IWindowManager.Stub
             rawss = Surface.screenshot(dw, dh, 0, maxLayer);
         }
 
+        if (rawss == null) {
+            return null;
+        }
+        
         Bitmap bm = Bitmap.createBitmap(sw, sh, rawss.getConfig());
         Matrix matrix = new Matrix();
         ScreenRotationAnimation.createRotationMatrix(rot, dw, dh, matrix);
