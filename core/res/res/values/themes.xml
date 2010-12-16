@@ -269,6 +269,8 @@
         <item name="searchViewSearchIcon">@android:drawable/ic_search</item>
         <item name="searchViewGoIcon">@android:drawable/ic_go</item>
         <item name="searchViewVoiceIcon">@android:drawable/ic_voice_search</item>
+        <item name="searchViewEditQuery">@android:drawable/ic_commit</item>
+        <item name="searchViewEditQueryBackground">?attr/selectableItemBackground</item>
 
 
         <!-- PreferenceFrameLayout attributes -->
@@ -362,8 +364,13 @@
         <item name="actionModePasteDrawable">@android:drawable/ic_menu_paste_light</item>
         <!-- SearchView attributes -->
         <item name="searchDropdownBackground">@android:drawable/search_dropdown_light</item>
+        <item name="searchViewCloseIcon">@android:drawable/ic_clear_holo_light</item>
+        <item name="searchViewSearchIcon">@android:drawable/ic_search_api_holo_light</item>
+        <item name="searchViewGoIcon">@android:drawable/ic_go_search_api_holo_light</item>
+        <item name="searchViewVoiceIcon">@android:drawable/ic_voice_search_api_holo_light</item>
+        <item name="searchViewEditQuery">@android:drawable/ic_commit_search_api_holo_light</item>
     </style>
-    
+
     <!-- Variant of the light theme with no title bar -->
     <style name="Theme.Light.NoTitleBar">
         <item name="android:windowNoTitle">true</item>
