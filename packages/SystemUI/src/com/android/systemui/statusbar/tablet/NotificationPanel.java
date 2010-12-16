@@ -46,6 +46,7 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
     View mSettingsButton;
     View mNotificationButton;
     View mNotificationScroller;
+    View mNotificationGlow;
     ViewGroup mContentFrame;
     Rect mContentArea;
     View mSettingsView;
@@ -85,7 +86,8 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
         mNotificationButton = (ImageView)findViewById(R.id.notification_button);
         mNotificationButton.setOnClickListener(this);
 
-        mNotificationScroller = findViewById(R.id.notificationScroller);
+        mNotificationScroller = findViewById(R.id.notification_scroller);
+        mNotificationGlow = findViewById(R.id.notification_glow);
         mContentFrame = (ViewGroup)findViewById(R.id.content_frame);
     }
 
@@ -218,10 +220,11 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
     void addSettingsView() {
         LayoutInflater infl = LayoutInflater.from(getContext());
         mSettingsView = infl.inflate(R.layout.status_bar_settings_view, mContentFrame, false);
-        mContentFrame.addView(mSettingsView);
+        mContentFrame.addView(mSettingsView, mContentFrame.indexOfChild(mNotificationGlow));
     }
 
     private class Choreographer implements Animator.AnimatorListener {
+        boolean mVisible;
         int mBgAlpha;
         ValueAnimator mBgAnim;
         int mPanelHeight;
@@ -245,14 +248,15 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
         }
 
         void startAnimation(boolean visible) {
-            if (mBgAnim == null) {
+            if (mBgAnim != null && mVisible != visible) {
+                mBgAnim.reverse();
+                mPositionAnim.reverse();
+            } else {
                 createAnimation(visible);
                 mBgAnim.start();
                 mPositionAnim.start();
-            } else {
-                mBgAnim.reverse();
-                mPositionAnim.reverse();
             }
+            mVisible = visible;
         }
 
         void jumpTo(boolean visible) {
@@ -289,14 +293,20 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
             mGlowDrawable.setAlpha((int)(255 * alpha));
 
             if (false) {
-                Slog.d(TAG, "mPanelBottom=" + mPanelBottom + "translationY=" + translationY
+                Slog.d(TAG, "mPanelBottom=" + mPanelBottom + " translationY=" + translationY
                         + " alpha=" + alpha + " glowY=" + glowY);
             }
         }
 
         public void setPanelHeight(int h) {
             mPanelHeight = h;
-            setPanelBottom(mPanelBottom);
+            if (mPanelBottom == 0) {
+                // fully closed, no animation necessary
+                setPanelBottom(0);
+            } else {
+                // a little bit visible, schedule an animation
+                startAnimation(true);
+            }
         }
 
         public void onAnimationCancel(Animator animation) {
