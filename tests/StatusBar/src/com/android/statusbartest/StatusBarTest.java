@@ -178,6 +178,11 @@ public class StatusBarTest extends TestActivity
                 mStatusBarManager.disable(StatusBarManager.DISABLE_CLOCK);
             }
         },
+        new Test("Disable System Info") {
+            public void run() {
+                mStatusBarManager.disable(StatusBarManager.DISABLE_SYSTEM_INFO);
+            }
+        },
         new Test("Disable everything in 3 sec") {
             public void run() {
                 mHandler.postDelayed(new Runnable() {

@@ -393,7 +393,6 @@ public class TabletStatusBar extends StatusBar {
 
         // set the initial view visibility
         setAreThereNotifications();
-        refreshNotificationTrigger();
 
         // Add the windows
         addPanelWindows();
@@ -503,23 +502,6 @@ public class TabletStatusBar extends StatusBar {
                     break;
             }
         }
-    }
-
-    public void refreshNotificationTrigger() {
-        /*
-        if (mNotificationTrigger == null) return;
-
-        int resId;
-        boolean panel = (mNotificationPanel != null && mNotificationPanel.isShowing();
-        if (!mNotificationsOn) {
-            resId = R.drawable.ic_sysbar_noti_dnd;
-        } else if (mNotns.size() > 0) {
-            resId = panel ? R.drawable.ic_sysbar_noti_avail_open : R.drawable.ic_sysbar_noti_avail;
-        } else {
-            resId = panel ? R.drawable.ic_sysbar_noti_none_open : R.drawable.ic_sysbar_noti_none;
-        }
-        //mNotificationTrigger.setImageResource(resId);
-        */
     }
 
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
@@ -668,6 +650,11 @@ public class TabletStatusBar extends StatusBar {
             boolean show = (state & StatusBarManager.DISABLE_CLOCK) == 0;
             Slog.d(TAG, "DISABLE_CLOCK: " + (show ? "no" : "yes"));
             showClock(show);
+        }
+        if ((diff & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
+            boolean show = (state & StatusBarManager.DISABLE_SYSTEM_INFO) == 0;
+            Slog.d(TAG, "DISABLE_SYSTEM_INFO: " + (show ? "no" : "yes"));
+            mNotificationTrigger.setVisibility(show ? View.VISIBLE : View.GONE);
         }
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state & StatusBarManager.DISABLE_EXPAND) != 0) {
@@ -820,7 +807,6 @@ public class TabletStatusBar extends StatusBar {
             if (!mNotificationsOn) {
                 mNotificationsOn = true;
                 mIconLayout.setVisibility(View.VISIBLE); // TODO: animation
-                refreshNotificationTrigger();
             } else {
                 int msg = !mNotificationPanel.isShowing()
                     ? MSG_OPEN_NOTIFICATION_PANEL
@@ -1068,7 +1054,6 @@ public class TabletStatusBar extends StatusBar {
         }
 
         loadNotificationPanel();
-        refreshNotificationTrigger();
     }
 
     private void loadNotificationPanel() {
