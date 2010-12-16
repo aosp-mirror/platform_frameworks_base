@@ -3790,7 +3790,9 @@ public class WebView extends AbsoluteLayout
     public boolean selectText() {
         int x = viewToContentX((int) mLastTouchX + mScrollX);
         int y = viewToContentY((int) mLastTouchY + mScrollY);
-        setUpSelect();
+        if (!setUpSelect()) {
+            return false;
+        }
         if (mNativeClass != 0 && nativeWordSelection(x, y)) {
             nativeSetExtendSelection();
             mDrawSelectionPointer = false;
@@ -4675,10 +4677,15 @@ public class WebView extends AbsoluteLayout
         return false;
     }
 
-    private void setUpSelect() {
-        if (0 == mNativeClass) return; // client isn't initialized
-        if (inFullScreenMode()) return;
-        if (mSelectingText) return;
+    /*
+     * Enter selecting text mode.  Returns true if the WebView is now in
+     * selecting text mode (including if it was already in that mode, and this
+     * method did nothing).
+     */
+    private boolean setUpSelect() {
+        if (0 == mNativeClass) return false; // client isn't initialized
+        if (inFullScreenMode()) return false;
+        if (mSelectingText) return true;
         mExtendSelection = false;
         mSelectingText = mDrawSelectionPointer = true;
         // don't let the picture change during text selection
@@ -4698,7 +4705,13 @@ public class WebView extends AbsoluteLayout
         nativeHideCursor();
         mSelectCallback = new SelectActionModeCallback();
         mSelectCallback.setWebView(this);
-        startActionMode(mSelectCallback);
+        if (startActionMode(mSelectCallback) == null) {
+            // There is no ActionMode, so do not allow the user to modify a
+            // selection.
+            selectionDone();
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -4715,7 +4728,9 @@ public class WebView extends AbsoluteLayout
     void selectAll() {
         if (0 == mNativeClass) return; // client isn't initialized
         if (inFullScreenMode()) return;
-        if (!mSelectingText) setUpSelect();
+        if (!mSelectingText && !setUpSelect()) {
+            return;
+        }
         nativeSelectAll();
         mDrawSelectionPointer = false;
         mExtendSelection = true;

@@ -34,7 +34,11 @@ class SelectActionModeCallback implements ActionMode.Callback {
     }
 
     void finish() {
-        mActionMode.finish();
+        // It is possible that onCreateActionMode was never called, in the case
+        // where there is no ActionBar, for example.
+        if (mActionMode != null) {
+            mActionMode.finish();
+        }
     }
 
     // ActionMode.Callback implementation
