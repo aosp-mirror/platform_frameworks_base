@@ -98,6 +98,12 @@ public class Process {
     public static final int NFC_UID = 1022;
 
     /**
+     * Defines the GID for the group that allows write access to the internal media storage.
+     * @hide
+     */
+    public static final int MEDIA_RW_GID = 1023;
+
+    /**
      * Defines the start of a range of UIDs (and GIDs), going from this
      * number to {@link #LAST_APPLICATION_UID} that are reserved for assigning
      * to applications.
