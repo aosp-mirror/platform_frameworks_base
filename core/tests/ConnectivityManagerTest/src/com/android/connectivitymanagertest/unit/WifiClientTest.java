@@ -77,7 +77,7 @@ public class WifiClientTest extends AndroidTestCase {
         List<WifiConfiguration> configList = mWifiManager.getConfiguredNetworks();
         boolean found = false;
         for (WifiConfiguration c : configList) {
-            if (c.networkId == netId) {
+            if (c.networkId == netId && c.SSID.equals(config.SSID)) {
                 found = true;
             }
         }

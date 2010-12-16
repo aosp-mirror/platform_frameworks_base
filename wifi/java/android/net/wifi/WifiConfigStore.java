@@ -1112,7 +1112,7 @@ class WifiConfigStore {
 
         value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.ssidVarName);
         if (!TextUtils.isEmpty(value)) {
-            config.SSID = removeDoubleQuotes(value);
+            config.SSID = value;
         } else {
             config.SSID = null;
         }
