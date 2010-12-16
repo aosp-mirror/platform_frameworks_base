@@ -198,6 +198,21 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                     mFlushingAudio = NONE;
                     mFlushingVideo = NONE;
                 }
+            } else if (what == ACodec::kWhatOutputFormatChanged) {
+                CHECK(audio);
+
+                int32_t numChannels;
+                CHECK(codecRequest->findInt32("channel-count", &numChannels));
+
+                int32_t sampleRate;
+                CHECK(codecRequest->findInt32("sample-rate", &sampleRate));
+
+                LOGI("Audio output format changed to %d Hz, %d channels",
+                     sampleRate, numChannels);
+
+                mAudioSink->close();
+                CHECK_EQ(mAudioSink->open(sampleRate, numChannels), (status_t)OK);
+                mAudioSink->start();
             } else {
                 CHECK_EQ((int)what, (int)ACodec::kWhatDrainThisBuffer);
 
@@ -364,18 +379,6 @@ status_t NuPlayer::instantiateDecoder(
 
     const sp<MetaData> &meta = source->getFormat();
     (*decoder)->configure(meta);
-
-    if (audio) {
-        int32_t sampleRate;
-        int32_t channelCount;
-        CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
-        CHECK(meta->findInt32(kKeyChannelCount, &channelCount));
-
-        channelCount = 2;  // XXX
-
-        CHECK_EQ(mAudioSink->open(sampleRate, channelCount), (status_t)OK);
-        mAudioSink->start();
-    }
 
     return OK;
 }

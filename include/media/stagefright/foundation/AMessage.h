@@ -64,6 +64,9 @@ struct AMessage : public RefBase {
 
     void post(int64_t delayUs = 0);
 
+    // Performs a deep-copy of "this", contained messages are in turn "dup'ed".
+    // Warning: RefBase items, i.e. "objects" are _not_ copied but only have
+    // their refcount incremented.
     sp<AMessage> dup() const;
 
     AString debugString(int32_t indent = 0) const;

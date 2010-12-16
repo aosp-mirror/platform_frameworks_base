@@ -166,6 +166,9 @@ private:
     sp<MediaSource> mDecoder;
     sp<AMessage> mNotify;
     bool mEOS;
+    bool mSentFormat;
+
+    void sendFormatChange();
 
     DISALLOW_EVIL_CONSTRUCTORS(WrapperReader);
 };
@@ -174,7 +177,8 @@ DecoderWrapper::WrapperReader::WrapperReader(
         const sp<MediaSource> &decoder, const sp<AMessage> &notify)
     : mDecoder(decoder),
       mNotify(notify),
-      mEOS(false) {
+      mEOS(false),
+      mSentFormat(false) {
 }
 
 DecoderWrapper::WrapperReader::~WrapperReader() {
@@ -215,12 +219,17 @@ void DecoderWrapper::WrapperReader::onMessageReceived(
             MediaBuffer *src;
             status_t err = mDecoder->read(&src, &options);
 
-            sp<AMessage> notify = mNotify->dup();
-
-            sp<AMessage> realNotify;
-            CHECK(notify->findMessage("real-notify", &realNotify));
-
             if (err == OK) {
+                if (!mSentFormat) {
+                    sendFormatChange();
+                    mSentFormat = true;
+                }
+
+                sp<AMessage> notify = mNotify->dup();
+
+                sp<AMessage> realNotify;
+                CHECK(notify->findMessage("real-notify", &realNotify));
+
                 realNotify->setInt32("what", ACodec::kWhatDrainThisBuffer);
 
                 sp<ABuffer> dst = new ABuffer(src->range_length());
@@ -236,12 +245,23 @@ void DecoderWrapper::WrapperReader::onMessageReceived(
                 dst->meta()->setInt64("timeUs", timeUs);
 
                 realNotify->setObject("buffer", dst);
+
+                notify->post();
+            } else if (err == INFO_FORMAT_CHANGED) {
+                sendFormatChange();
+
+                readMore(false /* flush */);
             } else {
+                sp<AMessage> notify = mNotify->dup();
+
+                sp<AMessage> realNotify;
+                CHECK(notify->findMessage("real-notify", &realNotify));
+
                 realNotify->setInt32("what", ACodec::kWhatEOS);
                 mEOS = true;
-            }
 
-            notify->post();
+                notify->post();
+            }
             break;
         }
 
@@ -249,6 +269,46 @@ void DecoderWrapper::WrapperReader::onMessageReceived(
             TRESPASS();
             break;
     }
+}
+
+void DecoderWrapper::WrapperReader::sendFormatChange() {
+    sp<AMessage> notify = mNotify->dup();
+
+    sp<AMessage> realNotify;
+    CHECK(notify->findMessage("real-notify", &realNotify));
+
+    realNotify->setInt32("what", ACodec::kWhatOutputFormatChanged);
+
+    sp<MetaData> meta = mDecoder->getFormat();
+
+    const char *mime;
+    CHECK(meta->findCString(kKeyMIMEType, &mime));
+
+    realNotify->setString("mime", mime);
+
+    if (!strncasecmp("audio/", mime, 6)) {
+        int32_t numChannels;
+        CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
+
+        int32_t sampleRate;
+        CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
+
+        realNotify->setInt32("channel-count", numChannels);
+        realNotify->setInt32("sample-rate", sampleRate);
+    } else {
+        CHECK(!strncasecmp("video/", mime, 6));
+
+        int32_t width, height;
+        CHECK(meta->findInt32(kKeyWidth, &width));
+        CHECK(meta->findInt32(kKeyHeight, &height));
+
+        realNotify->setInt32("width", width);
+        realNotify->setInt32("height", height);
+    }
+
+    notify->post();
+
+    mSentFormat = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -327,24 +387,33 @@ void DecoderWrapper::onMessageReceived(const sp<AMessage> &msg) {
 
         case kWhatFillBufferDone:
         {
-            CHECK_GT(mNumPendingDecodes, 0);
-            --mNumPendingDecodes;
-
-            if (mFlushing) {
-                completeFlushIfPossible();
-                break;
-            }
-
             sp<AMessage> notify;
             CHECK(msg->findMessage("real-notify", &notify));
 
-            sp<AMessage> reply =
-                new AMessage(kWhatOutputBufferDrained, id());
+            int32_t what;
+            CHECK(notify->findInt32("what", &what));
 
-            notify->setMessage("reply", reply);
+            if (what == ACodec::kWhatDrainThisBuffer) {
+                CHECK_GT(mNumPendingDecodes, 0);
+                --mNumPendingDecodes;
+
+                sp<AMessage> reply =
+                    new AMessage(kWhatOutputBufferDrained, id());
+
+                notify->setMessage("reply", reply);
+
+                ++mNumOutstandingOutputBuffers;
+            } else if (what == ACodec::kWhatEOS) {
+                CHECK_GT(mNumPendingDecodes, 0);
+                --mNumPendingDecodes;
+
+                if (mFlushing) {
+                    completeFlushIfPossible();
+                    break;
+                }
+            }
+
             notify->post();
-
-            ++mNumOutstandingOutputBuffers;
             break;
         }
 

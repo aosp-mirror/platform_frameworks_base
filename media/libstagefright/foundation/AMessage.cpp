@@ -224,9 +224,18 @@ sp<AMessage> AMessage::dup() const {
             }
 
             case kTypeObject:
-            case kTypeMessage:
             {
                 to->u.refValue = from->u.refValue;
+                to->u.refValue->incStrong(msg.get());
+                break;
+            }
+
+            case kTypeMessage:
+            {
+                sp<AMessage> copy =
+                    static_cast<AMessage *>(from->u.refValue)->dup();
+
+                to->u.refValue = copy.get();
                 to->u.refValue->incStrong(msg.get());
                 break;
             }

@@ -14,11 +14,12 @@ struct MemoryDealer;
 
 struct ACodec : public AHierarchicalStateMachine {
     enum {
-        kWhatFillThisBuffer    = 'fill',
-        kWhatDrainThisBuffer   = 'drai',
-        kWhatEOS               = 'eos ',
-        kWhatShutdownCompleted = 'scom',
-        kWhatFlushCompleted    = 'fcom',
+        kWhatFillThisBuffer      = 'fill',
+        kWhatDrainThisBuffer     = 'drai',
+        kWhatEOS                 = 'eos ',
+        kWhatShutdownCompleted   = 'scom',
+        kWhatFlushCompleted      = 'fcom',
+        kWhatOutputFormatChanged = 'outC',
     };
 
     ACodec();
