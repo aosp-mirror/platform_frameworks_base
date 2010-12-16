@@ -446,7 +446,7 @@ version.</td>
 </tr>
 <td colspan="3"><code>tools/</code></td>
 <td>Contains the set of development and profiling tools that are platform-independent, such
-as the emulator, the AVD and SDK Manager, adb, ddms, hierarchyviewer and more. The tools in
+as the emulator, the AVD and SDK Manager, ddms, hierarchyviewer and more. The tools in
 this directory may be updated at any time (from the <em>Android SDK Tools</em> component),
 independent of platform releases, whereas the tools in {@code platform-tools/} may be updated based
 on the latest platform release.</td>
