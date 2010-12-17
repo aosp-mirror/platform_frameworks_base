@@ -1407,6 +1407,7 @@
   <public type="attr" name="fastScrollPreviewBackgroundRight" />
   <public type="attr" name="fastScrollTrackDrawable" />
   <public type="attr" name="fastScrollOverlayPosition" />
+  <public type="attr" name="customTokens" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
