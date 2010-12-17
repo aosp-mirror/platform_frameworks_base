@@ -964,6 +964,8 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     public void onRemoteAdapterConnected() {
         if (mRemoteViewsAdapter != mAdapter) {
             setAdapter(mRemoteViewsAdapter);
+        } else if (mRemoteViewsAdapter != null) {
+            mRemoteViewsAdapter.superNotifyDataSetChanged();
         }
     }
 
@@ -971,10 +973,11 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * Called back when the adapter disconnects from the RemoteViewsService.
      */
     public void onRemoteAdapterDisconnected() {
-        if (mRemoteViewsAdapter != mAdapter) {
-            mRemoteViewsAdapter = null;
-            setAdapter(mRemoteViewsAdapter);
-        }
+        // If the remote adapter disconnects, we keep it around
+        // since the currently displayed items are still cached.
+        // Further, we want the service to eventually reconnect
+        // when necessary, as triggered by this view requesting
+        // items from the Adapter.
     }
 
     public void advance() {

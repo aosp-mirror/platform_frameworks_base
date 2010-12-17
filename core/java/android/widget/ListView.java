@@ -103,7 +103,7 @@ public class ListView extends AbsListView {
 
     Drawable mDivider;
     int mDividerHeight;
-    
+
     Drawable mOverScrollHeader;
     Drawable mOverScrollFooter;
 
@@ -1534,7 +1534,6 @@ public class ListView extends AbsListView {
 
             // reset the focus restoration
             View focusLayoutRestoreDirectChild = null;
-
 
             // Don't put header or footer views into the Recycler. Those are
             // already cached in mHeaderViews;

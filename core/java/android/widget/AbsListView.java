@@ -5184,6 +5184,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public void onRemoteAdapterConnected() {
         if (mRemoteAdapter != mAdapter) {
             setAdapter(mRemoteAdapter);
+        } else if (mRemoteAdapter != null) {
+            mRemoteAdapter.superNotifyDataSetChanged();
         }
     }
 
@@ -5191,10 +5193,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Called back when the adapter disconnects from the RemoteViewsService.
      */
     public void onRemoteAdapterDisconnected() {
-        if (mRemoteAdapter == mAdapter) {
-            mRemoteAdapter = null;
-            setAdapter(null);
-        }
+        // If the remote adapter disconnects, we keep it around
+        // since the currently displayed items are still cached.
+        // Further, we want the service to eventually reconnect
+        // when necessary, as triggered by this view requesting
+        // items from the Adapter.
     }
 
     /**
