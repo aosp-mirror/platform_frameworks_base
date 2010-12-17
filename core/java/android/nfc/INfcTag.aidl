@@ -24,7 +24,7 @@ import android.nfc.NdefMessage;
 interface INfcTag
 {
     int close(int nativeHandle);
-    int connect(int nativeHandle);
+    int connect(int nativeHandle, int technology);
     int reconnect(int nativeHandle);
     int[] getTechList(int nativeHandle);
     byte[] getUid(int nativeHandle);

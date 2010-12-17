@@ -66,6 +66,8 @@ public final class MifareUltralight extends BasicTagTechnology {
      * @throws IOException
      */
     public byte[] readBlock(int block) throws IOException {
+        checkConnected();
+
         byte[] blockread_cmd = { 0x30, (byte)block }; // phHal_eMifareRead
         return transceive(blockread_cmd);
     }
@@ -83,6 +85,8 @@ public final class MifareUltralight extends BasicTagTechnology {
      */
     @Override
     public byte[] transceive(byte[] data) throws IOException {
+        checkConnected();
+
         try {
             byte[] response = mTagService.transceive(mTag.getServiceHandle(), data, false);
             if (response == null) {

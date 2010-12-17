@@ -22,6 +22,7 @@ import android.nfc.INfcAdapter;
 import android.nfc.INfcTag;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
+import android.nfc.ErrorCodes;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -101,6 +102,13 @@ import android.util.Log;
         return mTag;
     }
 
+    public void checkConnected() {
+       if ((mTag.getConnectedTechnology() != getTechnologyId()) ||
+               (mTag.getConnectedTechnology() == -1)) {
+           throw new IllegalStateException("Call connect() first!");
+       }
+    }
+
     /**
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
      */
@@ -144,8 +152,19 @@ import android.util.Log;
      */
     @Override
     public void connect() throws IOException {
-        //TODO(nxp): enforce exclusivity
-        mIsConnected = true;
+        try {
+            int errorCode = mTagService.connect(mTag.getServiceHandle(), getTechnologyId());
+
+            if (errorCode == ErrorCodes.SUCCESS) {
+                // Store this in the tag object
+                mTag.setConnectedTechnology(getTechnologyId());
+                mIsConnected = true;
+            } else {
+                throw new IOException();
+            }
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+        }
     }
 
     /**
@@ -160,7 +179,6 @@ import android.util.Log;
      */
     @Override
     public void close() {
-        mIsConnected = false;
         try {
             /* Note that we don't want to physically disconnect the tag,
              * but just reconnect to it to reset its state
@@ -168,6 +186,9 @@ import android.util.Log;
             mTagService.reconnect(mTag.getServiceHandle());
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
+        } finally {
+            mIsConnected = false;
+            mTag.setTechnologyDisconnected();
         }
     }
 
@@ -183,6 +204,8 @@ import android.util.Log;
      * @throws IOException if the target is lost or connection closed
      */
     public byte[] transceive(byte[] data) throws IOException {
+        checkConnected();
+
         try {
             byte[] response = mTagService.transceive(mTag.getServiceHandle(), data, true);
             if (response == null) {
