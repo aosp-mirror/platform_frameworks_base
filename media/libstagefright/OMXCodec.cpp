@@ -1536,7 +1536,9 @@ status_t OMXCodec::init() {
     }
 
     err = allocateBuffers();
-    CHECK_EQ(err, (status_t)OK);
+    if (err != (status_t)OK) {
+        return err;
+    }
 
     if (mQuirks & kRequiresLoadedToIdleAfterAllocation) {
         err = mOMX->sendCommand(mNode, OMX_CommandStateSet, OMX_StateIdle);
