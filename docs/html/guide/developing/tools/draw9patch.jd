@@ -4,8 +4,9 @@ page.title=Draw 9-patch
 <p>The Draw 9-patch tool allows you to easily create a 
    {@link android.graphics.NinePatch} graphic using a WYSIWYG editor.</p>
 <p>For an introduction to Nine-patch graphics and how they work, please read 
-the section on Nine-patch in the 
-<a href="{@docRoot}guide/topics/resources/available-resources.html#ninepatch">Nine-patch Images</a> topic.</p>
+the section about Nine-patch in the 
+<a href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">2D Graphics</a>
+document.</p>
 
 <img src="{@docRoot}images/draw9patch-norm.png" style="float:right" alt="" height="300" width="341"
 />
