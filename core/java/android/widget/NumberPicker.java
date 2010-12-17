@@ -798,6 +798,7 @@ public class NumberPicker extends LinearLayout {
      */
     public void setFormatter(Formatter formatter) {
         mFormatter = formatter;
+        resetSelectorIndices();
     }
 
     /**
