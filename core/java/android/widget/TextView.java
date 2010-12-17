@@ -864,7 +864,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mInputType = EditorInfo.TYPE_NULL;
             mInput = null;
             bufferType = BufferType.SPANNABLE;
-            setFocusableInTouchMode(true);
             // So that selection can be changed using arrow keys and touch is handled.
             setMovementMethod(ArrowKeyMovementMethod.getInstance());
         } else if (editable) {
@@ -4073,7 +4072,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * Use {@link #setTextIsSelectable(boolean)} or the
      * {@link android.R.styleable#TextView_textIsSelectable} XML attribute to make this TextView
-     * selectable (the text is not selectable by default). 
+     * selectable (text is not selectable by default).
      *
      * Note that the content of an EditText is always selectable.
      *
@@ -4088,10 +4087,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Sets whether or not (default) the content of this view is selectable by the user.
      * 
-     * Note that this methods affect the {@link #setFocusableInTouchMode(boolean)},
-     * {@link #setFocusable(boolean)}, {@link #setClickable(boolean)} and
-     * {@link #setLongClickable(boolean)} states and you may want to restore these if they were
-     * customized.
+     * Note that this methods affect the {@link #setFocusable(boolean)},
+     * {@link #setClickable(boolean)} and {@link #setLongClickable(boolean)} states and you may want
+     * to restore these if they were customized.
      *
      * See {@link #isTextSelectable} for details.
      *
@@ -4102,7 +4100,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         mTextIsSelectable = selectable;
 
-        setFocusableInTouchMode(selectable);
         setFocusable(selectable);
         setClickable(selectable);
         setLongClickable(selectable);
