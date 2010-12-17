@@ -21,9 +21,7 @@ package android.media;
  */
 public interface MediaScannerClient
 {    
-    public void scanFile(String path, long lastModified, long fileSize);
-    
-    public void scanFile(String path, String mimeType, long lastModified, long fileSize);
+    public void scanFile(String path, long lastModified, long fileSize, boolean isDirectory);
 
     public void addNoMediaFolder(String path);
 
