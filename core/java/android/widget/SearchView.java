@@ -824,7 +824,7 @@ public class SearchView extends LinearLayout {
             invalidate();
         }
         updateVoiceButton(!hasText);
-        updateViewsVisibility(mIconifiedByDefault);
+        updateCloseButton();
         if (mOnQueryChangeListener != null) {
             mOnQueryChangeListener.onQueryTextChanged(newText.toString());
         }
