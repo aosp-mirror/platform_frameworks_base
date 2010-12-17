@@ -166,9 +166,10 @@ alias
 <p>Once you've created your project, you're ready to begin development.
 You can move your project folder wherever you want for development, but keep in mind
 that you must use the <a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> 
-(adb) &mdash; located in the SDK <code>tools/</code> directory &mdash; to send your application 
+(adb) &mdash; located in the SDK <code>platform-tools/</code> directory &mdash; to send your
+application 
 to the emulator (discussed later). So you need access between your project solution and 
-the <code>tools/</code> folder.</p>
+the <code>platform-tools/</code> folder.</p>
 
 <p class="caution"><strong>Caution:</strong> You should refrain from moving the
 location of the SDK directory, because this will break the build scripts. (They
@@ -460,7 +461,7 @@ arguments:
   </li>
 
   <li><strong>Install your application</strong>
-    <p>From your SDK's <code>tools/</code> directory, install the {@code .apk} on the
+    <p>From your SDK's <code>platform-tools/</code> directory, install the {@code .apk} on the
 emulator:
     <pre>adb install <em>&lt;path_to_your_bin&gt;</em>.apk</pre>
     <p>Your APK file (signed with either a release or debug key) is in your project {@code bin/}
@@ -507,7 +508,7 @@ device:</p>
 Development</a> for more information.</p>
 
 <p>Once your device is set up and connected via USB, navigate to your
-SDK's <code>tools/</code> directory and install the <code>.apk</code> on the device:
+SDK's <code>platform-tools/</code> directory and install the <code>.apk</code> on the device:
     <pre>adb -d install <em>path/to/your/app</em>.apk</pre>
     <p>The {@code -d} flag specifies that you want to use the attached device (in case you also
 have an emulator running).</p>

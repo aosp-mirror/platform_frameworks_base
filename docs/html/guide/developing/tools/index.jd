@@ -55,7 +55,8 @@ efficiency.
                   <dd>The adb tool lets you install your application's .apk files on an
                   emulator or device and access the emulator or device from a command line.
                   You can also use it to link a standard debugger to application code running
-                  on an Android emulator or device.</dd>
+                  on an Android emulator or device.
+                <p>This is located in {@code &lt;sdk&gt;/platform-tools/}.</p></dd>
 
   <dt><a href="aapt.html">Android Asset
           Packaging Tool</a> (aapt)</dt>
