@@ -23,6 +23,7 @@ import java.util.Vector;
 import android.content.res.Resources;
 import android.renderscript.*;
 import android.renderscript.Element.Builder;
+import android.renderscript.Font.Style;
 import android.renderscript.ProgramStore.DepthFunc;
 import android.util.Log;
 
@@ -186,21 +187,19 @@ public class SceneGraphRS {
 
         FileA3D model = FileA3D.createFromResource(mRS, mRes, R.raw.robot);
         FileA3D.IndexEntry entry = model.getIndexEntry(0);
-        if (entry == null || entry.getClassID() != FileA3D.ClassID.MESH) {
+        if (entry == null || entry.getEntryType() != FileA3D.EntryType.MESH) {
             Log.e("rs", "could not load model");
         } else {
             mMesh = (Mesh)entry.getObject();
             mScript.set_gTestMesh(mMesh);
         }
 
-        mItalic = Font.create(mRS, mRes, "DroidSerif-Italic.ttf", 8);
+        mItalic = Font.create(mRS, mRes, "serif", Font.Style.ITALIC, 8);
         mScript.set_gItalic(mItalic);
 
         initTextAllocation();
 
         initTransformHierarchy();
-
-        Log.v("========SceneGraph========", "transform hierarchy initialized");
 
         mScript.bind_gRootNode(mRootTransform.getField());
 

@@ -623,7 +623,7 @@ nFileA3DGetEntryByIndex(JNIEnv *_env, jobject _this, RsContext con, jint fileA3D
 // -----------------------------------
 
 static int
-nFontCreateFromFile(JNIEnv *_env, jobject _this, RsContext con, jstring fileName, jint fontSize, jint dpi)
+nFontCreateFromFile(JNIEnv *_env, jobject _this, RsContext con, jstring fileName, jfloat fontSize, jint dpi)
 {
     const char* fileNameUTF = _env->GetStringUTFChars(fileName, NULL);
 
@@ -1239,7 +1239,7 @@ static JNINativeMethod methods[] = {
 {"rsnFileA3DGetIndexEntries",        "(III[I[Ljava/lang/String;)V",           (void*)nFileA3DGetIndexEntries },
 {"rsnFileA3DGetEntryByIndex",        "(III)I",                                (void*)nFileA3DGetEntryByIndex },
 
-{"rsnFontCreateFromFile",            "(ILjava/lang/String;II)I",              (void*)nFontCreateFromFile },
+{"rsnFontCreateFromFile",            "(ILjava/lang/String;FI)I",              (void*)nFontCreateFromFile },
 
 {"rsnElementCreate",                 "(IIIZI)I",                              (void*)nElementCreate },
 {"rsnElementCreate2",                "(I[I[Ljava/lang/String;[I)I",           (void*)nElementCreate2 },

@@ -305,8 +305,8 @@ public class RenderScript {
         return rsnFileA3DGetEntryByIndex(mContext, fileA3D, index);
     }
 
-    native int  rsnFontCreateFromFile(int con, String fileName, int size, int dpi);
-    synchronized int nFontCreateFromFile(String fileName, int size, int dpi) {
+    native int  rsnFontCreateFromFile(int con, String fileName, float size, int dpi);
+    synchronized int nFontCreateFromFile(String fileName, float size, int dpi) {
         return rsnFontCreateFromFile(mContext, fileName, size, dpi);
     }
 

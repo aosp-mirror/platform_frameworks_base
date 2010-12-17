@@ -73,7 +73,7 @@ public:
         return RS_A3D_CLASS_ID_UNKNOWN;
     }
 
-    static Font * create(Context *rsc, const char *name, uint32_t fontSize, uint32_t dpi);
+    static Font * create(Context *rsc, const char *name, float fontSize, uint32_t dpi);
 
 protected:
 
@@ -112,11 +112,11 @@ protected:
     };
 
     String8 mFontName;
-    uint32_t mFontSize;
+    float mFontSize;
     uint32_t mDpi;
 
     Font(Context *rsc);
-    bool init(const char *name, uint32_t fontSize, uint32_t dpi);
+    bool init(const char *name, float fontSize, uint32_t dpi);
 
     FT_Face mFace;
     bool mInitialized;

@@ -16,11 +16,12 @@
 
 package android.renderscript;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import android.content.res.Resources;
 import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
@@ -32,25 +33,30 @@ import android.util.TypedValue;
  **/
 public class FileA3D extends BaseObj {
 
+    // This will go away in the clean up pass,
+    // trying to avoid multiproject submits
     public enum ClassID {
 
         UNKNOWN,
-        MESH,
-        TYPE,
-        ELEMENT,
-        ALLOCATION,
-        PROGRAM_VERTEX,
-        PROGRAM_RASTER,
-        PROGRAM_FRAGMENT,
-        PROGRAM_STORE,
-        SAMPLER,
-        ANIMATION,
-        ADAPTER_1D,
-        ADAPTER_2D,
-        SCRIPT_C;
+        MESH;
 
         public static ClassID toClassID(int intID) {
             return ClassID.values()[intID];
+        }
+    }
+
+    public enum EntryType {
+
+        UNKNOWN (0),
+        MESH (1);
+
+        int mID;
+        EntryType(int id) {
+            mID = id;
+        }
+
+        static EntryType toEntryType(int intID) {
+            return EntryType.values()[intID];
         }
     }
 
@@ -61,6 +67,7 @@ public class FileA3D extends BaseObj {
         int mID;
         String mName;
         ClassID mClassID;
+        EntryType mEntryType;
         BaseObj mLoadedObj;
 
         public String getName() {
@@ -71,10 +78,18 @@ public class FileA3D extends BaseObj {
             return mClassID;
         }
 
+        public EntryType getEntryType() {
+            return mEntryType;
+        }
+
         public BaseObj getObject() {
             mRS.validate();
             BaseObj obj = internalCreate(mRS, this);
             return obj;
+        }
+
+        public Mesh getMesh() {
+            return (Mesh)getObject();
         }
 
         static synchronized BaseObj internalCreate(RenderScript rs, IndexEntry entry) {
@@ -82,7 +97,8 @@ public class FileA3D extends BaseObj {
                 return entry.mLoadedObj;
             }
 
-            if(entry.mClassID == ClassID.UNKNOWN) {
+            // to be purged on cleanup
+            if(entry.mEntryType == EntryType.UNKNOWN) {
                 return null;
             }
 
@@ -91,51 +107,23 @@ public class FileA3D extends BaseObj {
                 return null;
             }
 
-            switch (entry.mClassID) {
+            switch (entry.mEntryType) {
             case MESH:
                 entry.mLoadedObj = new Mesh(objectID, rs);
-                break;
-            case TYPE:
-                entry.mLoadedObj = new Type(objectID, rs);
-                break;
-            case ELEMENT:
-                entry.mLoadedObj = null;
-                break;
-            case ALLOCATION:
-                entry.mLoadedObj = null;
-                break;
-            case PROGRAM_VERTEX:
-                entry.mLoadedObj = new ProgramVertex(objectID, rs);
-                break;
-            case PROGRAM_RASTER:
-                break;
-            case PROGRAM_FRAGMENT:
-                break;
-            case PROGRAM_STORE:
-                break;
-            case SAMPLER:
-                break;
-            case ANIMATION:
-                break;
-            case ADAPTER_1D:
-                break;
-            case ADAPTER_2D:
-                break;
-            case SCRIPT_C:
                 break;
             }
 
             entry.mLoadedObj.updateFromNative();
-
             return entry.mLoadedObj;
         }
 
-        IndexEntry(RenderScript rs, int index, int id, String name, ClassID classID) {
+        IndexEntry(RenderScript rs, int index, int id, String name, EntryType type) {
             mRS = rs;
             mIndex = index;
             mID = id;
             mName = name;
-            mClassID = classID;
+            mEntryType = type;
+            mClassID = mEntryType == EntryType.MESH ? ClassID.MESH : ClassID.UNKNOWN;
             mLoadedObj = null;
         }
     }
@@ -161,11 +149,11 @@ public class FileA3D extends BaseObj {
         mRS.nFileA3DGetIndexEntries(getID(), numFileEntries, ids, names);
 
         for(int i = 0; i < numFileEntries; i ++) {
-            mFileEntries[i] = new IndexEntry(mRS, i, getID(), names[i], ClassID.toClassID(ids[i]));
+            mFileEntries[i] = new IndexEntry(mRS, i, getID(), names[i], EntryType.toEntryType(ids[i]));
         }
     }
 
-    public int getNumIndexEntries() {
+    public int getIndexEntryCount() {
         if(mFileEntries == null) {
             return 0;
         }
@@ -173,10 +161,27 @@ public class FileA3D extends BaseObj {
     }
 
     public IndexEntry getIndexEntry(int index) {
-        if(getNumIndexEntries() == 0 || index < 0 || index >= mFileEntries.length) {
+        if(getIndexEntryCount() == 0 || index < 0 || index >= mFileEntries.length) {
             return null;
         }
         return mFileEntries[index];
+    }
+
+    // API cleanup stand-ins
+    // TODO: implement ermaining loading mechanisms
+    static public FileA3D createFromAsset(RenderScript rs, AssetManager mgr, String path)
+        throws IllegalArgumentException {
+        return null;
+    }
+
+    static public FileA3D createFromFile(RenderScript rs, String path)
+        throws IllegalArgumentException {
+        return null;
+    }
+
+    static public FileA3D createFromFile(RenderScript rs, File path)
+        throws IllegalArgumentException {
+        return createFromFile(rs, path.getAbsolutePath());
     }
 
     static public FileA3D createFromResource(RenderScript rs, Resources res, int id)
