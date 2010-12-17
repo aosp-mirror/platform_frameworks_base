@@ -1,0 +1,83 @@
+page.title=Debugging Tips
+@jd:body
+
+<p>While debugging, keep these helpful tips in mind to help you figure out common problems with your 
+applications:</p>
+
+<dl>
+<dt><strong>Dump the stack trace</strong></dt>
+<dd>To obtain a stack dump from emulator, you can log
+in with <code>adb shell</code>, use <code>ps</code> to find the process you
+want, and then <code>kill -3</code>. The stack trace appears in the log file.
+</dd>
+
+<dt><strong>Display useful info on the emulator screen</strong></dt>
+<dd>The device can display useful information such as CPU usage or highlights
+around redrawn areas. Turn these features on and off in the developer settings
+window as described in <a href="{@docRoot}guide/developing/debugging/debugging-devtools.html">
+Debugging with the Dev Tools App</a>.
+</dd>
+
+<dt><strong>Get application and system state information from the emulator</strong></dt>
+<dd>You can access dumpstate information from the <code>adb shell</code> commands. See 
+<a href="{@docRoot}guide/developing/tools/adb.html#dumpsys">dumpsys and
+dumpstate</a> on the adb topic page.</dd>
+
+
+
+<dt><strong>Get wireless connectivity information</strong></dt>
+<dd>You can get information about wireless connectivity using DDMS. 
+From the <strong>Device</strong> menu, select <strong>Dump
+radio state</strong>.</dd>
+
+<dt><strong>Log trace data</strong></dt>
+<dd>You can log method calls and other tracing data in an activity by calling
+{@link android.os.Debug#startMethodTracing(String) startMethodTracing()}. See <a
+href="{@docRoot}guide/developing/debugging/debugging-tracing.html">Profiling with Traceview and
+dmtracedump</a> for details. </dd>
+
+<dt><strong>Log radio data</strong></dt>
+<dd>By default, radio information is not logged to the system (it is a lot of
+data). However, you can enable radio logging using the following commands:
+
+<pre class="no-pretty-print">
+adb shell
+logcat -b radio
+</pre>
+</dd>
+
+<dt><strong>Capture screenshots</strong></dt>
+<dd>The Dalvik Debug Monitor Server (DDMS) can capture screenshots from the emulator. Select
+<strong>Device > Screen capture</strong>.</dd>
+
+<dt><strong>Use debugging helper classes</strong></dt>
+<dd>Android provides debug helper classes such as {@link android.util.Log
+    util.Log} and {@link android.os.Debug} for your convenience. </dd>
+</dl>
+
+<p>See the <a href="{@docRoot}resources/faq/troubleshooting.html">Troubleshooting</a> document
+for answers to some common developing and debugging issues.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
