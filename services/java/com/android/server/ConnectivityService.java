@@ -1574,11 +1574,18 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    private void writePidDns(Collection <InetAddress> dnses, int pid) {
+    // return true if results in a change
+    private boolean writePidDns(Collection <InetAddress> dnses, int pid) {
         int j = 1;
+        boolean changed = false;
         for (InetAddress dns : dnses) {
-            SystemProperties.set("net.dns" + j++ + "." + pid, dns.getHostAddress());
+            String dnsString = dns.getHostAddress();
+            if (changed || !dnsString.equals(SystemProperties.get("net.dns" + j + "." + pid))) {
+                changed = true;
+                SystemProperties.set("net.dns" + j++ + "." + pid, dns.getHostAddress());
+            }
         }
+        return changed;
     }
 
     private void bumpDns() {
@@ -1609,26 +1616,40 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             LinkProperties p = nt.getLinkProperties();
             if (p == null) return;
             Collection<InetAddress> dnses = p.getDnses();
+            boolean changed = false;
             if (mNetAttributes[netType].isDefault()) {
                 int j = 1;
                 if (dnses.size() == 0 && mDefaultDns != null) {
-                    if (DBG) {
-                        log("no dns provided - using " + mDefaultDns.getHostAddress());
+                    String dnsString = mDefaultDns.getHostAddress();
+                    if (!dnsString.equals(SystemProperties.get("net.dns1"))) {
+                        if (DBG) {
+                            log("no dns provided - using " + dnsString);
+                        }
+                        changed = true;
+                        SystemProperties.set("net.dns1", dnsString);
                     }
-                    SystemProperties.set("net.dns1", mDefaultDns.getHostAddress());
                     j++;
                 } else {
                     for (InetAddress dns : dnses) {
+                        String dnsString = dns.getHostAddress();
+                        if (!changed && dnsString.equals(SystemProperties.get("net.dns" + j))) {
+                            j++;
+                            continue;
+                        }
                         if (DBG) {
                             log("adding dns " + dns + " for " +
                                     nt.getNetworkInfo().getTypeName());
                         }
-                        SystemProperties.set("net.dns" + j++, dns.getHostAddress());
+                        changed = true;
+                        SystemProperties.set("net.dns" + j++, dnsString);
                     }
                 }
                 for (int k=j ; k<mNumDnsEntries; k++) {
-                    if (DBG) log("erasing net.dns" + k);
-                    SystemProperties.set("net.dns" + k, "");
+                    if (changed || !TextUtils.isEmpty(SystemProperties.get("net.dns" + k))) {
+                        if (DBG) log("erasing net.dns" + k);
+                        changed = true;
+                        SystemProperties.set("net.dns" + k, "");
+                    }
                 }
                 mNumDnsEntries = j;
             } else {
@@ -1636,10 +1657,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 List pids = mNetRequestersPids[netType];
                 for (int y=0; y< pids.size(); y++) {
                     Integer pid = (Integer)pids.get(y);
-                    writePidDns(dnses, pid.intValue());
+                    changed = writePidDns(dnses, pid.intValue());
                 }
             }
-            bumpDns();
+            if (changed) bumpDns();
         }
     }
 

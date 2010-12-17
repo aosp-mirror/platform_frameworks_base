@@ -68,7 +68,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     private Context mContext;
     private final static String TAG = "Tethering";
-    private final static boolean DEBUG = false;
+    private final static boolean DEBUG = true;
 
     private boolean mBooted = false;
     //used to remember if we got connected before boot finished
@@ -942,7 +942,12 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         String newUpstreamIfaceName = (String)(message.obj);
                         b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
                         service = INetworkManagementService.Stub.asInterface(b);
-
+                        if ((mMyUpstreamIfaceName == null && newUpstreamIfaceName == null) ||
+                                (mMyUpstreamIfaceName != null &&
+                                mMyUpstreamIfaceName.equals(newUpstreamIfaceName))) {
+                            if (DEBUG) Log.d(TAG, "Connection changed noop - dropping");
+                            break;
+                        }
                         if (mMyUpstreamIfaceName != null) {
                             try {
                                 service.disableNat(mIfaceName, mMyUpstreamIfaceName);
@@ -1085,7 +1090,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
         private ArrayList mNotifyList;
 
-        private boolean mConnectionRequested = false;
+        private int mCurrentConnectionSequence;
+        private boolean mMobileReserved = false;
 
         private String mUpstreamIfaceName = null;
 
@@ -1124,32 +1130,36 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             public boolean processMessage(Message m) {
                 return false;
             }
-            protected int turnOnMobileConnection() {
+            protected boolean turnOnMobileConnection() {
+                boolean retValue = true;
+                if (mMobileReserved) return retValue;
                 IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
                 IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
-                int retValue = Phone.APN_REQUEST_FAILED;
+                int result = Phone.APN_REQUEST_FAILED;
                 try {
-                    retValue = service.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
+                    result = service.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
                             (mDunRequired ? Phone.FEATURE_ENABLE_DUN : Phone.FEATURE_ENABLE_HIPRI),
                             new Binder());
                 } catch (Exception e) {
                 }
-                switch (retValue) {
+                switch (result) {
                 case Phone.APN_ALREADY_ACTIVE:
                 case Phone.APN_REQUEST_STARTED:
-                    sendMessageDelayed(CMD_CELL_CONNECTION_RENEW, CELL_CONNECTION_RENEW_MS);
-                    mConnectionRequested = true;
+                    mMobileReserved = true;
+                    Message m = obtainMessage(CMD_CELL_CONNECTION_RENEW);
+                    m.arg1 = ++mCurrentConnectionSequence;
+                    sendMessageDelayed(m, CELL_CONNECTION_RENEW_MS);
                     break;
                 case Phone.APN_REQUEST_FAILED:
                 default:
-                    mConnectionRequested = false;
+                    retValue = false;
                     break;
                 }
 
                 return retValue;
             }
             protected boolean turnOffMobileConnection() {
-                if (mConnectionRequested) {
+                if (mMobileReserved) {
                     IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
                     IConnectivityManager service =
                             IConnectivityManager.Stub.asInterface(b);
@@ -1160,7 +1170,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     } catch (Exception e) {
                         return false;
                     }
-                    mConnectionRequested = false;
+                    mMobileReserved = false;
                 }
                 return true;
             }
@@ -1240,13 +1250,14 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 }
                 return null;
             }
+
             protected void chooseUpstreamType(boolean tryCell) {
                 // decide if the current upstream is good or not and if not
                 // do something about it (start up DUN if required or HiPri if not)
                 String iface = findActiveUpstreamIface();
                 IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
                 IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
-                mConnectionRequested = false;
+                mMobileReserved = false;
                 if (DEBUG) {
                     Log.d(TAG, "chooseUpstreamType(" + tryCell + "),  dunRequired ="
                             + mDunRequired + ", iface=" + iface);
@@ -1287,11 +1298,14 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 }
                 // may have been set to null in the if above
                 if (iface == null ) {
+                    boolean success = false;
                     if (tryCell == TRY_TO_SETUP_MOBILE_CONNECTION) {
-                        turnOnMobileConnection();
+                        success = turnOnMobileConnection();
                     }
-                    // wait for things to settle and retry
-                    sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
+                    if (!success) {
+                        // wait for things to settle and retry
+                        sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
+                    }
                 }
                 notifyTetheredOfNewUpstreamIface(iface);
             }
@@ -1309,7 +1323,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         class InitialState extends TetherMasterUtilState {
             @Override
             public void enter() {
-                mConnectionRequested = false;
+                mMobileReserved = false;
             }
             @Override
             public boolean processMessage(Message message) {
@@ -1382,11 +1396,12 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     case CMD_CELL_CONNECTION_RENEW:
                         // make sure we're still using a requested connection - may have found
                         // wifi or something since then.
-                        if (mConnectionRequested) {
+                        if (mCurrentConnectionSequence == message.arg1) {
                             if (DEBUG) {
                                 Log.d(TAG, "renewing mobile connection - requeuing for another " +
                                         CELL_CONNECTION_RENEW_MS + "ms");
                             }
+                            mMobileReserved = false; // need to renew it
                             turnOnMobileConnection();
                         }
                         break;
