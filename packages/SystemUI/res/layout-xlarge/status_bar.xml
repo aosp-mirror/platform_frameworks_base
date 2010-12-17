@@ -31,6 +31,7 @@
             android:id="@+id/bar_contents"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
             >
 
             <!-- notification icons & panel access -->

@@ -236,6 +236,7 @@ public class TabletTicker
             WindowManagerImpl.getDefault().removeView(mWindow);
             mWindow = null;
             mWindowShouldClose = false;
+            mBar.doneTicking();
         }
     }
 
