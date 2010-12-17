@@ -7690,12 +7690,44 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (hasPasswordTransformationMethod()) {
             // selectCurrentWord is not available on a password field and would return an
             // arbitrary 10-charater selection around pressed position. Select all instead.
-            // Note that cut/copy menu entries are not available for passwords.
-            // This is however useful to delete or paste to replace the entire content.
+            // Cut/copy menu entries are not available for passwords, but being able to select all
+            // is however useful to delete or paste to replace the entire content.
             selectAll();
             return;
         }
 
+        long lastTouchOffset = getLastTouchOffsets();
+        final int minOffset = extractRangeStartFromLong(lastTouchOffset);
+        final int maxOffset = extractRangeEndFromLong(lastTouchOffset);
+
+        int selectionStart, selectionEnd;
+
+        // If a URLSpan (web address, email, phone...) is found at that position, select it.
+        URLSpan[] urlSpans = ((Spanned) mText).getSpans(minOffset, maxOffset, URLSpan.class);
+        if (urlSpans.length == 1) {
+            URLSpan url = urlSpans[0];
+            selectionStart = ((Spanned) mText).getSpanStart(url);
+            selectionEnd = ((Spanned) mText).getSpanEnd(url);
+        } else {
+            long wordLimits = getWordLimitsAt(minOffset);
+            if (wordLimits >= 0) {
+                selectionStart = extractRangeStartFromLong(wordLimits);
+            } else {
+                selectionStart = Math.max(minOffset - 5, 0);
+            }
+
+            wordLimits = getWordLimitsAt(maxOffset);
+            if (wordLimits >= 0) {
+                selectionEnd = extractRangeEndFromLong(wordLimits);
+            } else {
+                selectionEnd = Math.min(maxOffset + 5, mText.length());
+            }
+        }
+
+        Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
+    }
+
+    private long getLastTouchOffsets() {
         int minOffset, maxOffset;
 
         if (mContextMenuTriggeredByKey) {
@@ -7707,23 +7739,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             maxOffset = selectionController.getMaxTouchOffset();
         }
 
-        int selectionStart, selectionEnd;
-
-        long wordLimits = getWordLimitsAt(minOffset);
-        if (wordLimits >= 0) {
-            selectionStart = extractRangeStartFromLong(wordLimits);
-        } else {
-            selectionStart = Math.max(minOffset - 5, 0);
-        }
-
-        wordLimits = getWordLimitsAt(maxOffset);
-        if (wordLimits >= 0) {
-            selectionEnd = extractRangeEndFromLong(wordLimits);
-        } else {
-            selectionEnd = Math.min(maxOffset + 5, mText.length());
-        }
-
-        Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
+        return packRangeInLong(minOffset, maxOffset);
     }
 
     @Override
@@ -7779,13 +7795,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         MenuHandler handler = new MenuHandler();
 
         if (mText instanceof Spanned) {
-            int selStart = getSelectionStart();
-            int selEnd = getSelectionEnd();
+            long lastTouchOffset = getLastTouchOffsets();
+            final int selStart = extractRangeStartFromLong(lastTouchOffset);
+            final int selEnd = extractRangeEndFromLong(lastTouchOffset);
 
-            int min = Math.min(selStart, selEnd);
-            int max = Math.max(selStart, selEnd);
-
-            URLSpan[] urls = ((Spanned) mText).getSpans(min, max, URLSpan.class);
+            URLSpan[] urls = ((Spanned) mText).getSpans(selStart, selEnd, URLSpan.class);
             if (urls.length > 0) {
                 menu.add(0, ID_COPY_URL, 0, com.android.internal.R.string.copyUrl).
                         setOnMenuItemClickListener(handler);
@@ -7869,10 +7883,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         setPrimaryClip(clip);
                     }
                 }
+                stopSelectionActionMode();
                 return true;
 
             case ID_SELECTION_MODE:
-                startSelectionActionMode();
+                if (mSelectionActionMode != null) {
+                    // Selection mode is already started, simply change selected part.
+                    updateSelectedRegion();
+                } else {
+                    startSelectionActionMode();
+                }
                 return true;
             }
 
@@ -7993,9 +8013,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 startDrag(data, getTextThumbnailBuilder(selectedText), false, localState);
                 stopSelectionActionMode();
             } else {
-                // Start a new selection at current position, keep selectionAction mode on
-                selectCurrentWord();
-                getSelectionController().show();
+                updateSelectedRegion();
             }
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             mDiscardNextActionUp = true;
@@ -8010,6 +8028,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return false;
+    }
+
+    /**
+     * When selection mode is already started, this method simply updates the selected part of text
+     * to the text under the finger.
+     */
+    private void updateSelectedRegion() {
+        // Start a new selection at current position, keep selectionAction mode on
+        selectCurrentWord();
+        // Updates handles' positions
+        getSelectionController().show();
     }
 
     private boolean touchPositionIsInSelection() {
