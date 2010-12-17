@@ -39,7 +39,8 @@ import com.android.systemui.R;
 
 public class NotificationPanel extends LinearLayout implements StatusBarPanel,
         View.OnClickListener {
-    static final String TAG = "NotificationPanel";
+    static final String TAG = "Tablet/NotificationPanel";
+    static final boolean DEBUG = false;
 
     boolean mShowing;
     View mTitleArea;
@@ -248,6 +249,7 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
         }
 
         void startAnimation(boolean visible) {
+            if (DEBUG) Slog.d(TAG, "startAnimation(visible=" + visible + ")");
             if (mBgAnim != null && mVisible != visible) {
                 mBgAnim.reverse();
                 mPositionAnim.reverse();
@@ -303,18 +305,22 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
             if (mPanelBottom == 0) {
                 // fully closed, no animation necessary
                 setPanelBottom(0);
-            } else {
-                // a little bit visible, schedule an animation
+            } else if (mVisible) {
+                if (DEBUG) {
+                    Slog.d(TAG, "panelHeight not zero but trying to open; scheduling an anim to open fully");
+                }
                 startAnimation(true);
             }
         }
 
         public void onAnimationCancel(Animator animation) {
-            //Slog.d(TAG, "onAnimationCancel mBgAlpha=" + mBgAlpha);
+            if (DEBUG) Slog.d(TAG, "onAnimationCancel mBgAlpha=" + mBgAlpha);
+            // force this to zero so we close the window
+            mBgAlpha = 0;
         }
 
         public void onAnimationEnd(Animator animation) {
-            //Slog.d(TAG, "onAnimationEnd mBgAlpha=" + mBgAlpha);
+            if (DEBUG) Slog.d(TAG, "onAnimationEnd mBgAlpha=" + mBgAlpha);
             if (mBgAlpha == 0) {
                 setVisibility(View.GONE);
             }
