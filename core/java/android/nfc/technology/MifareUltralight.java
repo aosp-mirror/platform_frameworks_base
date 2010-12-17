@@ -73,6 +73,37 @@ public final class MifareUltralight extends BasicTagTechnology {
     }
 
     /**
+     * @throws IOException
+     */
+    public byte[] readOTP() throws IOException {
+        checkConnected();
+
+        return readBlock(3); // OTP is at page 3
+    }
+
+    public void writePage(int block, byte[] data) throws IOException {
+        checkConnected();
+
+        byte[] pagewrite_cmd = new byte[data.length + 2];
+        pagewrite_cmd[0] = (byte) 0xA2;
+        pagewrite_cmd[1] = (byte) block;
+        System.arraycopy(data, 0, pagewrite_cmd, 2, data.length);
+
+        transceive(pagewrite_cmd);
+    }
+
+    public void writeBlock(int block, byte[] data) throws IOException {
+        checkConnected();
+
+        byte[] blockwrite_cmd = new byte[data.length + 2];
+        blockwrite_cmd[0] = (byte) 0xA0;
+        blockwrite_cmd[1] = (byte) block;
+        System.arraycopy(data, 0, blockwrite_cmd, 2, data.length);
+
+        transceive(blockwrite_cmd);
+    }
+
+    /**
      * Send data to a tag and receive the response.
      * <p>
      * This method will block until the response is received. It can be canceled
@@ -99,12 +130,4 @@ public final class MifareUltralight extends BasicTagTechnology {
         }
     }
 
-    /**
-     * @throws IOException
-     */
-    /*
-    public byte[] readOTP();
-    public void writePage(int block, byte[] data);
-    public void writeBlock(int block, byte[] data);
-     */
 }
