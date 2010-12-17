@@ -154,6 +154,8 @@ public class TabletStatusBar extends StatusBar {
     boolean mNotificationsOn = true;
     private RecentAppsPanel mRecentsPanel;
 
+    public Context getContext() { return mContext; }
+
     protected void addPanelWindows() {
         final Context context = mContext;
 
@@ -322,7 +324,7 @@ public class TabletStatusBar extends StatusBar {
         mNotificationPeekTapDuration = vc.getTapTimeout();
         mNotificationFlingVelocity = 300; // px/s
 
-        mTicker = new TabletTicker(context);
+        mTicker = new TabletTicker(this);
 
         // The icons
         mBatteryController = new BatteryController(mContext);
@@ -842,6 +844,10 @@ public class TabletStatusBar extends StatusBar {
                 mHandler.sendEmptyMessage(msg);
             }
         }
+    }
+
+    public NotificationClicker makeClicker(PendingIntent intent, String pkg, String tag, int id) {
+        return new NotificationClicker(intent, pkg, tag, id);
     }
 
     private class NotificationClicker implements View.OnClickListener {

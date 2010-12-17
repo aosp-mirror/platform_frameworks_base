@@ -18,7 +18,9 @@ package com.android.systemui.statusbar.tablet;
 
 import java.util.Arrays;
 
+import android.animation.LayoutTransition;
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -45,8 +47,13 @@ import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBarIconView;
 
-public class TabletTicker extends Handler {
+public class TabletTicker
+        extends Handler
+        implements LayoutTransition.TransitionListener {
+
     private static final String TAG = "StatusBar.TabletTicker";
+
+    private static final boolean CLICKABLE_TICKER = true;
 
     // 3 is enough to let us see most cases, but not get so far behind that it's too annoying.
     private static final int QUEUE_LENGTH = 3;
@@ -66,8 +73,14 @@ public class TabletTicker extends Handler {
     private StatusBarNotification[] mQueue = new StatusBarNotification[QUEUE_LENGTH];
     private int mQueuePos;
 
-    public TabletTicker(Context context) {
-        mContext = context;
+    private TabletStatusBar mBar;
+
+    private LayoutTransition mLayoutTransition;
+    private boolean mWindowShouldClose;
+
+    public TabletTicker(TabletStatusBar bar) {
+        mBar = bar;
+        mContext = bar.getContext();
     }
 
     public void add(IBinder key, StatusBarNotification notification) {
@@ -170,11 +183,7 @@ public class TabletTicker extends Handler {
         }
 
         // if there's nothing left, close the window
-        // TODO: Do this when the animation is done instead
-        if (mCurrentView == null && mWindow != null) {
-            WindowManagerImpl.getDefault().removeView(mWindow);
-            mWindow = null;
-        }
+        mWindowShouldClose = (mCurrentView == null && mWindow != null);
     }
 
     private void dequeue() {
@@ -208,9 +217,26 @@ public class TabletTicker extends Handler {
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+//        lp.windowAnimations = com.android.internal.R.style.Animation_Toast;
+
+        mLayoutTransition = new LayoutTransition();
+        mLayoutTransition.addTransitionListener(this);
+        view.setLayoutTransition(mLayoutTransition);
         lp.setTitle("NotificationTicker");
         view.setLayoutParams(lp);
         return view;
+    }
+
+    public void startTransition(LayoutTransition transition, ViewGroup container,
+            View view, int transitionType) {}
+
+    public void endTransition(LayoutTransition transition, ViewGroup container,
+            View view, int transitionType) {
+        if (mWindowShouldClose) {
+            WindowManagerImpl.getDefault().removeView(mWindow);
+            mWindow = null;
+            mWindowShouldClose = false;
+        }
     }
 
     private View makeTickerView(StatusBarNotification notification) {
@@ -266,6 +292,17 @@ public class TabletTicker extends Handler {
             largeIcon.setImageBitmap(n.largeIcon);
             largeIcon.setVisibility(View.VISIBLE);
         }
+
+        if (CLICKABLE_TICKER) {
+            PendingIntent contentIntent = notification.notification.contentIntent;
+            if (contentIntent != null) {
+                group.setOnClickListener(mBar.makeClicker(contentIntent,
+                            notification.pkg, notification.tag, notification.id));
+            } else {
+                group.setOnClickListener(null);
+            }
+        }
+
         return group;
     }
 }
