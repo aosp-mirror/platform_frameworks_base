@@ -117,6 +117,8 @@ private:
                 uint32_t    mDevice;
                 bool        mClosing;
                 bool        mSuspended;
+                nsecs_t     mLastWriteTime;
+                uint32_t    mBufferDurationUs;
     };
 
     friend class A2dpAudioStreamOut;
