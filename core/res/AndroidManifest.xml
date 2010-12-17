@@ -1335,6 +1335,11 @@
                 android:exported="true">
         </activity>
 
+        <activity android:name="android.content.SyncActivityTooManyDeletes"
+               android:theme="@android:style/Theme.Holo.Dialog"
+               android:label="@string/sync_too_many_deletes">
+        </activity>
+
         <activity android:name="com.android.server.ShutdownActivity"
             android:permission="android.permission.SHUTDOWN"
             android:excludeFromRecents="true">
