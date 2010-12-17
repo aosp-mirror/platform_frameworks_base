@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.renderscript.*;
 import android.renderscript.Allocation.CubemapLayout;
+import android.renderscript.Font.Style;
 import android.renderscript.Program.TextureType;
 import android.renderscript.ProgramStore.DepthFunc;
 import android.renderscript.Sampler.Value;
@@ -304,14 +305,13 @@ public class RsRenderStatesRS {
 
     private void initFonts() {
         // Sans font by family name
-        mFontSans = Font.createFromFamily(mRS, mRes, "sans-serif", Font.Style.NORMAL, 8);
-        // Create font by file name
-        mFontSerif = Font.create(mRS, mRes, "DroidSerif-Regular.ttf", 8);
+        mFontSans = Font.create(mRS, mRes, "sans-serif", Font.Style.NORMAL, 8);
+        mFontSerif = Font.create(mRS, mRes, "serif", Font.Style.NORMAL, 8);
         // Create fonts by family and style
-        mFontSerifBold = Font.createFromFamily(mRS, mRes, "serif", Font.Style.BOLD, 8);
-        mFontSerifItalic = Font.createFromFamily(mRS, mRes, "serif", Font.Style.ITALIC, 8);
-        mFontSerifBoldItalic = Font.createFromFamily(mRS, mRes, "serif", Font.Style.BOLD_ITALIC, 8);
-        mFontMono = Font.createFromFamily(mRS, mRes, "mono", Font.Style.NORMAL, 8);
+        mFontSerifBold = Font.create(mRS, mRes, "serif", Font.Style.BOLD, 8);
+        mFontSerifItalic = Font.create(mRS, mRes, "serif", Font.Style.ITALIC, 8);
+        mFontSerifBoldItalic = Font.create(mRS, mRes, "serif", Font.Style.BOLD_ITALIC, 8);
+        mFontMono = Font.create(mRS, mRes, "mono", Font.Style.NORMAL, 8);
 
         mTextAlloc = Allocation.createFromString(mRS, "String from allocation", Allocation.USAGE_SCRIPT);
 
@@ -330,7 +330,7 @@ public class RsRenderStatesRS {
 
         FileA3D model = FileA3D.createFromResource(mRS, mRes, R.raw.torus);
         FileA3D.IndexEntry entry = model.getIndexEntry(0);
-        if (entry == null || entry.getClassID() != FileA3D.ClassID.MESH) {
+        if (entry == null || entry.getEntryType() != FileA3D.EntryType.MESH) {
             Log.e("rs", "could not load model");
         } else {
             mTorus = (Mesh)entry.getObject();

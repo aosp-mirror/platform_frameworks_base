@@ -16,13 +16,16 @@
 
 package android.renderscript;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
-import android.content.res.Resources;
+import android.os.Environment;
+
 import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.util.Log;
 import android.util.TypedValue;
 
@@ -126,13 +129,13 @@ public class Font extends BaseObj {
     /**
      * Takes a specific file name as an argument
      */
-    static public Font create(RenderScript rs, Resources res, String fileName, int size)
+    static public Font createFromFile(RenderScript rs, Resources res, String path, float pointSize)
         throws IllegalArgumentException {
 
         rs.validate();
         try {
             int dpi = res.getDisplayMetrics().densityDpi;
-            int fontId = rs.nFontCreateFromFile(fileName, size, dpi);
+            int fontId = rs.nFontCreateFromFile(path, pointSize, dpi);
 
             if(fontId == 0) {
                 throw new IllegalStateException("Failed loading a font");
@@ -148,6 +151,21 @@ public class Font extends BaseObj {
         return null;
     }
 
+    static public Font createFromFile(RenderScript rs, Resources res, File path, float pointSize)
+        throws IllegalArgumentException {
+        return createFromFile(rs, res, path.getAbsolutePath(), pointSize);
+    }
+
+    static public Font createFromAsset(RenderScript rs, Resources res, AssetManager mgr, String path, float pointSize)
+        throws IllegalArgumentException {
+        return null;
+    }
+
+    static public Font createFromResource(RenderScript rs, Resources res, int id, float pointSize)
+        throws IllegalArgumentException {
+        return null;
+    }
+
     /**
      * Accepts one of the following family names as an argument
      * and will attemp to produce the best match with a system font
@@ -157,9 +175,12 @@ public class Font extends BaseObj {
      * "monospace" "courier" "courier new" "monaco"
      * Returns default font if no match could be found
      */
-    static public Font createFromFamily(RenderScript rs, Resources res, String familyName, Style fontStyle, int size)
+    static public Font create(RenderScript rs, Resources res, String familyName, Style fontStyle, float pointSize)
     throws IllegalArgumentException {
         String fileName = getFontFileName(familyName, fontStyle);
-        return create(rs, res, fileName, size);
+        String fontPath = Environment.getRootDirectory().getAbsolutePath();
+        fontPath += "/fonts/" + fileName;
+        return createFromFile(rs, res, fontPath, pointSize);
     }
+
 }

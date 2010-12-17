@@ -31,6 +31,15 @@ public class Matrix4f {
         loadIdentity();
     }
 
+    public Matrix4f(float[] dataArray) {
+        mMat = new float[16];
+        System.arraycopy(dataArray, 0, mMat, 0, mMat.length);
+    }
+
+    public float[] getArray() {
+        return mMat;
+    }
+
     public float get(int i, int j) {
         return mMat[i*4 + j];
     }
@@ -147,6 +156,10 @@ public class Matrix4f {
         mMat[14]= -(f + n) / (f - n);
     }
 
+    public void loadOrthoWindow(int w, int h) {
+        loadOrtho(0,w, h,0, -1,1);
+    }
+
     public void loadFrustum(float l, float r, float b, float t, float n, float f) {
         loadIdentity();
         mMat[0] = 2 * n / (r - l);
@@ -157,6 +170,14 @@ public class Matrix4f {
         mMat[11]= -1;
         mMat[14]= -2*f*n / (f - n);
         mMat[15]= 0;
+    }
+
+    public void loadPerspective(float fovy, float aspect, float near, float far) {
+        float top = near * (float)Math.tan((float) (fovy * Math.PI / 360.0f));
+        float bottom = -top;
+        float left = bottom * aspect;
+        float right = top * aspect;
+        loadFrustum(left, right, bottom, top, near, far);
     }
 
     public void multiply(Matrix4f rhs) {

@@ -420,7 +420,7 @@ FileOpen {
 
 FontCreateFromFile {
 	param const char *name
-	param uint32_t fontSize
+	param float fontSize
 	param uint32_t dpi
 	ret RsFont
 	}

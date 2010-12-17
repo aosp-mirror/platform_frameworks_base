@@ -31,6 +31,15 @@ public class Matrix2f {
         loadIdentity();
     }
 
+    public Matrix2f(float[] dataArray) {
+        mMat = new float[2];
+        System.arraycopy(dataArray, 0, mMat, 0, mMat.length);
+    }
+
+    public float[] getArray() {
+        return mMat;
+    }
+
     public float get(int i, int j) {
         return mMat[i*2 + j];
     }

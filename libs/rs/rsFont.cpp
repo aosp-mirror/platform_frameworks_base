@@ -40,20 +40,15 @@ Font::Font(Context *rsc) : ObjectBase(rsc), mCachedGlyphs(NULL) {
     mFace = NULL;
 }
 
-bool Font::init(const char *name, uint32_t fontSize, uint32_t dpi) {
+bool Font::init(const char *name, float fontSize, uint32_t dpi) {
     if (mInitialized) {
         LOGE("Reinitialization of fonts not supported");
         return false;
     }
 
-    String8 fontsDir("/fonts/");
-    String8 fullPath(getenv("ANDROID_ROOT"));
-    fullPath += fontsDir;
-    fullPath += name;
-
-    FT_Error error = FT_New_Face(mRSC->mStateFont.getLib(), fullPath.string(), 0, &mFace);
+    FT_Error error = FT_New_Face(mRSC->mStateFont.getLib(), name, 0, &mFace);
     if (error) {
-        LOGE("Unable to initialize font %s", fullPath.string());
+        LOGE("Unable to initialize font %s", name);
         return false;
     }
 
@@ -61,9 +56,9 @@ bool Font::init(const char *name, uint32_t fontSize, uint32_t dpi) {
     mFontSize = fontSize;
     mDpi = dpi;
 
-    error = FT_Set_Char_Size(mFace, fontSize * 64, 0, dpi, 0);
+    error = FT_Set_Char_Size(mFace, (FT_F26Dot6)(fontSize * 64.0f), 0, dpi, 0);
     if (error) {
-        LOGE("Unable to set font size on %s", fullPath.string());
+        LOGE("Unable to set font size on %s", name);
         return false;
     }
 
@@ -278,7 +273,7 @@ Font::CachedGlyphInfo *Font::cacheGlyph(uint32_t glyph) {
     return newGlyph;
 }
 
-Font * Font::create(Context *rsc, const char *name, uint32_t fontSize, uint32_t dpi) {
+Font * Font::create(Context *rsc, const char *name, float fontSize, uint32_t dpi) {
     rsc->mStateFont.checkInit();
     Vector<Font*> &activeFonts = rsc->mStateFont.mActiveFonts;
 
@@ -332,31 +327,20 @@ FontState::FontState() {
     // Get the gamma
     float gamma = DEFAULT_TEXT_GAMMA;
     if (property_get(PROPERTY_TEXT_GAMMA, property, NULL) > 0) {
-        LOGD("  Setting text gamma to %s", property);
         gamma = atof(property);
-    } else {
-        LOGD("  Using default text gamma of %.2f", DEFAULT_TEXT_GAMMA);
     }
 
     // Get the black gamma threshold
     int32_t blackThreshold = DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD;
     if (property_get(PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD, property, NULL) > 0) {
-        LOGD("  Setting text black gamma threshold to %s", property);
         blackThreshold = atoi(property);
-    } else {
-        LOGD("  Using default text black gamma threshold of %d",
-                DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD);
     }
     mBlackThreshold = (float)(blackThreshold) / 255.0f;
 
     // Get the white gamma threshold
     int32_t whiteThreshold = DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD;
     if (property_get(PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD, property, NULL) > 0) {
-        LOGD("  Setting text white gamma threshold to %s", property);
         whiteThreshold = atoi(property);
-    } else {
-        LOGD("  Using default white black gamma threshold of %d",
-                DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD);
     }
     mWhiteThreshold = (float)(whiteThreshold) / 255.0f;
 
@@ -735,7 +719,11 @@ void FontState::renderText(const char *text, uint32_t len, int32_t x, int32_t y,
     Font *currentFont = mRSC->getFont();
     if (!currentFont) {
         if (!mDefault.get()) {
-            mDefault.set(Font::create(mRSC, "DroidSans.ttf", 16, 96));
+            String8 fontsDir("/fonts/DroidSans.ttf");
+            String8 fullPath(getenv("ANDROID_ROOT"));
+            fullPath += fontsDir;
+
+            mDefault.set(Font::create(mRSC, fullPath.string(), 16, 96));
         }
         currentFont = mDefault.get();
     }
@@ -815,7 +803,7 @@ void FontState::deinit(Context *rsc) {
 namespace android {
 namespace renderscript {
 
-RsFont rsi_FontCreateFromFile(Context *rsc, char const *name, uint32_t fontSize, uint32_t dpi) {
+RsFont rsi_FontCreateFromFile(Context *rsc, char const *name, float fontSize, uint32_t dpi) {
     Font *newFont = Font::create(rsc, name, fontSize, dpi);
     if (newFont) {
         newFont->incUserRef();
