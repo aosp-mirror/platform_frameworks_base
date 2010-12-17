@@ -82,6 +82,11 @@ public interface TagTechnology {
     public void connect() throws IOException;
 
     /**
+     * @throws IOException
+     */
+    public void reconnect() throws IOException;
+
+    /**
      * Non-blocking. Immediately causes all blocking calls
      * to throw IOException.
      */
