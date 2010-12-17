@@ -99,6 +99,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_SHOW_IM_PICKER = 1;
     static final int MSG_SHOW_IM_SUBTYPE_PICKER = 2;
     static final int MSG_SHOW_IM_SUBTYPE_ENABLER = 3;
+    static final int MSG_SHOW_IM_CONFIG = 4;
 
     static final int MSG_UNBIND_INPUT = 1000;
     static final int MSG_BIND_INPUT = 1010;
@@ -120,6 +121,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     // If IME doesn't support the system locale, the default subtype will be the first defined one.
     private static final int DEFAULT_SUBTYPE_ID = 0;
 
+    private static final String EXTRA_INPUT_METHOD_ID = "input_method_id";
     private static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
     private static final String SUBTYPE_MODE_VOICE = "voice";
 
@@ -1313,14 +1315,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     public void showInputMethodAndSubtypeEnablerFromClient(
-            IInputMethodClient client, String topId) {
-        // TODO: Handle topId for setting the top position of the list ActivityManagerNative
+            IInputMethodClient client, String inputMethodId) {
         synchronized (mMethodMap) {
             if (mCurClient == null || client == null
                 || mCurClient.client.asBinder() != client.asBinder()) {
                 Slog.w(TAG, "Ignoring showInputMethodAndSubtypeEnablerFromClient of: " + client);
             }
-            mHandler.sendEmptyMessage(MSG_SHOW_IM_SUBTYPE_ENABLER);
+            mHandler.sendEmptyMessage(MSG_SHOW_IM_SUBTYPE_ENABLER, inputMethodId);
         }
     }
 
@@ -1428,7 +1429,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return true;
 
             case MSG_SHOW_IM_SUBTYPE_ENABLER:
-                showInputMethodAndSubtypeEnabler();
+                args = (HandlerCaller.SomeArgs)msg.obj;
+                try {
+                    showInputMethodAndSubtypeEnabler((String)args.arg1);
+                } catch (RemoteException e) {
+                }
+                return true;
+
+            case MSG_SHOW_IM_CONFIG:
+                showConfigureInputMethods();
                 return true;
 
             // ---------------------------------------------------------
@@ -1624,8 +1633,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         showInputMethodMenuInternal(true);
     }
 
-    private void showInputMethodAndSubtypeEnabler() {
+    private void showInputMethodAndSubtypeEnabler(String inputMethodId) {
         Intent intent = new Intent(Settings.ACTION_INPUT_METHOD_AND_SUBTYPE_ENABLER);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra(EXTRA_INPUT_METHOD_ID, inputMethodId);
+        mContext.startActivity(intent);
+    }
+
+    private void showConfigureInputMethods() {
+        Intent intent = new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -1763,7 +1781,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mDialogBuilder.setPositiveButton(com.android.internal.R.string.more_item_label,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                showInputMethodAndSubtypeEnabler();
+                                showConfigureInputMethods();
                             }
                         });
             }
