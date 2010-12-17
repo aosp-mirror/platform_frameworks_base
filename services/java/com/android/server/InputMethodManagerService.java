@@ -1321,7 +1321,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 || mCurClient.client.asBinder() != client.asBinder()) {
                 Slog.w(TAG, "Ignoring showInputMethodAndSubtypeEnablerFromClient of: " + client);
             }
-            mHandler.sendEmptyMessage(MSG_SHOW_IM_SUBTYPE_ENABLER, inputMethodId);
+            executeOrSendMessage(mCurMethod, mCaller.obtainMessageO(
+                    MSG_SHOW_IM_SUBTYPE_ENABLER, inputMethodId));
         }
     }
 
@@ -1430,10 +1431,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             case MSG_SHOW_IM_SUBTYPE_ENABLER:
                 args = (HandlerCaller.SomeArgs)msg.obj;
-                try {
-                    showInputMethodAndSubtypeEnabler((String)args.arg1);
-                } catch (RemoteException e) {
-                }
+                showInputMethodAndSubtypeEnabler((String)args.arg1);
                 return true;
 
             case MSG_SHOW_IM_CONFIG:
@@ -1638,7 +1636,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra(EXTRA_INPUT_METHOD_ID, inputMethodId);
+        if (!TextUtils.isEmpty(inputMethodId)) {
+            intent.putExtra(EXTRA_INPUT_METHOD_ID, inputMethodId);
+        }
         mContext.startActivity(intent);
     }
 
