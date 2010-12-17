@@ -1333,10 +1333,12 @@ class SipSessionGroup implements SipListener {
             SipURI uri = (SipURI) address.getURI();
             String username = uri.getUser();
             if (username == null) username = ANONYMOUS;
-            return new SipProfile.Builder(username, uri.getHost())
-                    .setPort(uri.getPort())
-                    .setDisplayName(address.getDisplayName())
-                    .build();
+            int port = uri.getPort();
+            SipProfile.Builder builder =
+                    new SipProfile.Builder(username, uri.getHost())
+                    .setDisplayName(address.getDisplayName());
+            if (port > 0) builder.setPort(port);
+            return builder.build();
         } catch (IllegalArgumentException e) {
             throw new SipException("createPeerProfile()", e);
         } catch (ParseException e) {
