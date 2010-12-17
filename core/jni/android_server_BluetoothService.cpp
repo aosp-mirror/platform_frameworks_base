@@ -1154,7 +1154,7 @@ static jboolean setBluetoothTetheringNative(JNIEnv *env, jobject object, jboolea
 }
 
 static jboolean connectPanDeviceNative(JNIEnv *env, jobject object, jstring path,
-                                       jstring srcRole, jstring dstRole) {
+                                       jstring dstRole) {
     LOGV(__FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     LOGE("connectPanDeviceNative");
@@ -1165,7 +1165,6 @@ static jboolean connectPanDeviceNative(JNIEnv *env, jobject object, jstring path
 
     if (nat && eventLoopNat) {
         const char *c_path = env->GetStringUTFChars(path, NULL);
-        const char *src = env->GetStringUTFChars(srcRole, NULL);
         const char *dst = env->GetStringUTFChars(dstRole, NULL);
 
         int len = env->GetStringLength(path) + 1;
@@ -1175,12 +1174,10 @@ static jboolean connectPanDeviceNative(JNIEnv *env, jobject object, jstring path
         bool ret = dbus_func_args_async(env, nat->conn, -1,onPanDeviceConnectionResult,
                                     context_path, eventLoopNat, c_path,
                                     DBUS_NETWORK_IFACE, "Connect",
-                                    DBUS_TYPE_STRING, &src,
                                     DBUS_TYPE_STRING, &dst,
                                     DBUS_TYPE_INVALID);
 
         env->ReleaseStringUTFChars(path, c_path);
-        env->ReleaseStringUTFChars(srcRole, src);
         env->ReleaseStringUTFChars(dstRole, dst);
         return ret ? JNI_TRUE : JNI_FALSE;
     }
@@ -1274,7 +1271,7 @@ static JNINativeMethod sMethods[] = {
 
     {"setBluetoothTetheringNative", "(ZLjava/lang/String;Ljava/lang/String;)Z",
               (void *)setBluetoothTetheringNative},
-    {"connectPanDeviceNative", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z",
+    {"connectPanDeviceNative", "(Ljava/lang/String;Ljava/lang/String;)Z",
               (void *)connectPanDeviceNative},
     {"disconnectPanDeviceNative", "(Ljava/lang/String;)Z", (void *)disconnectPanDeviceNative},
 };
