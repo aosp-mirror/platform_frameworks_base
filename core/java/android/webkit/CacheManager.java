@@ -167,6 +167,13 @@ public final class CacheManager {
         public void setEncoding(String encoding) {
             this.encoding = encoding;
         }
+
+        /**
+         * @hide
+         */
+        public void setContentLength(long contentLength) {
+            this.contentLength = contentLength;
+        }
     }
 
     /**
