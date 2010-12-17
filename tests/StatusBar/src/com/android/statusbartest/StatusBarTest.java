@@ -138,13 +138,10 @@ public class StatusBarTest extends TestActivity
         },
         new Test("Priority notification") {
             public void run() {
-                Notification not = new Notification(StatusBarTest.this,
+                Notification not = new Notification(
                                 R.drawable.stat_sys_phone,
                                 "Incoming call from: Imperious Leader",
-                                System.currentTimeMillis()-(1000*60*60*24),
-                                "Imperious Leader",
-                                "(888) 555-5038",
-                                null
+                                System.currentTimeMillis()-(1000*60*60*24)
                                 );
                 not.flags |= Notification.FLAG_HIGH_PRIORITY;
                 Intent fullScreenIntent = new Intent(StatusBarTest.this, TestAlertActivity.class);
@@ -241,12 +238,10 @@ public class StatusBarTest extends TestActivity
                 mHandler.postDelayed(new Runnable() {
                         public void run() {
                             mNotificationManager.notify(1,
-                                    new Notification(StatusBarTest.this,
+                                    new Notification(
                                             R.drawable.ic_statusbar_missedcall,
                                             "tick tick tick",
-                                            System.currentTimeMillis()-(1000*60*60*24),
-                                            "(453) 123-2328",
-                                            "", null
+                                            System.currentTimeMillis()-(1000*60*60*24)
                                             ));
                         }
                     }, 3000);
