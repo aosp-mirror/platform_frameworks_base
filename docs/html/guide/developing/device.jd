@@ -104,7 +104,8 @@ href="#VendorIds">USB Vendor IDs</a>, below.
 </ol>
 
 <p>You can verify that your device is connected by executing <code>adb devices</code> from your 
-SDK {@code tools/} directory. If connected, you'll see the device name listed as a "device."</p>
+SDK {@code platform-tools/} directory. If connected, you'll see the device name listed as a
+"device."</p>
 
 <p>If using Eclipse, run or debug as usual. You will be presented
 with a <b>Device Chooser</b> dialog that lists the available emulator(s) and connected device(s).

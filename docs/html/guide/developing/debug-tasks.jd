@@ -42,8 +42,8 @@ your applications. Here are some tools that you'll use most often:</p>
   <dd>Dumps a log of system
       messages. The messages include a stack trace when the device throws an error,
       as well as {@link android.util.Log} messages you've written from your application. To run
-      logcat, execute <code>adb logcat</code> from your Android SDK {@code tools/} directory or,
-from DDMS, select <strong>Device > Run
+      logcat, execute <code>adb logcat</code> from your Android SDK {@code platform-tools/}
+directory or, from DDMS, select <strong>Device > Run
       logcat</strong>. When using the <a href="{@docRoot}sdk/eclipse-adt.html">ADT plugin for
 Eclipse</a>, you can also view logcat messages by opening the Logcat view, available from
 <strong>Window > Show View > Other > Android > Logcat</strong>.
