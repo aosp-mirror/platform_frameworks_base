@@ -203,6 +203,7 @@ class LoaderManagerImpl extends LoaderManager {
         Loader<Object> mLoader;
         Object mData;
         boolean mStarted;
+        boolean mNeedReset;
         boolean mRetaining;
         boolean mRetainingStarted;
         boolean mDestroyed;
@@ -291,7 +292,7 @@ class LoaderManagerImpl extends LoaderManager {
         void destroy() {
             if (DEBUG) Log.v(TAG, "  Destroying: " + this);
             mDestroyed = true;
-            if (mCallbacks != null && mLoader != null && mData != null) {
+            if (mCallbacks != null && mLoader != null && mData != null && mNeedReset) {
                 String lastBecause = null;
                 if (mActivity != null) {
                     lastBecause = mActivity.mFragments.mNoTransactionsBecause;
@@ -305,6 +306,7 @@ class LoaderManagerImpl extends LoaderManager {
                     }
                 }
             }
+            mNeedReset = false;
             mCallbacks = null;
             mData = null;
             if (mLoader != null) {
@@ -338,6 +340,7 @@ class LoaderManagerImpl extends LoaderManager {
             // clean it up.
             LoaderInfo info = mInactiveLoaders.get(mId);
             if (info != null && info != this) {
+                info.mNeedReset = false;
                 info.destroy();
                 mInactiveLoaders.remove(mId);
             }
@@ -357,6 +360,7 @@ class LoaderManagerImpl extends LoaderManager {
                         mActivity.mFragments.mNoTransactionsBecause = lastBecause;
                     }
                 }
+                mNeedReset = true;
             }
         }
         
@@ -456,6 +460,7 @@ class LoaderManagerImpl extends LoaderManager {
                     // yet destroyed the last inactive loader.  So just do
                     // that now.
                     if (DEBUG) Log.v(TAG, "  Removing last inactive loader in " + this);
+                    inactive.mNeedReset = false;
                     inactive.destroy();
                     mInactiveLoaders.put(id, info);
                 } else {
