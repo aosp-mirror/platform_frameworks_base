@@ -864,6 +864,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mInputType = EditorInfo.TYPE_NULL;
             mInput = null;
             bufferType = BufferType.SPANNABLE;
+            // Required to request focus while in touch mode.
+            setFocusableInTouchMode(true);
             // So that selection can be changed using arrow keys and touch is handled.
             setMovementMethod(ArrowKeyMovementMethod.getInstance());
         } else if (editable) {
@@ -2747,7 +2749,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                  */
                 mText = text;
 
-                if (mLinksClickable) {
+                // Do not change the movement method for text that support text selection as it
+                // would prevent an arbitrary cursor displacement.
+                final boolean hasTextSelection = this instanceof EditText || mTextIsSelectable;
+                if (mLinksClickable && !hasTextSelection) {
                     setMovementMethod(LinkMovementMethod.getInstance());
                 }
             }
@@ -3875,7 +3880,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // - ExtractEditText does not call onFocus when it is displayed. Fixing this issue would
         //   allow to test for hasSelection in onFocusChanged, which would trigger a
         //   startTextSelectionMode here. TODO
-        if (this instanceof ExtractEditText && hasSelection() && hasSelectionController()) {
+        if (this instanceof ExtractEditText && hasSelection() && canSelectText()) {
             startSelectionActionMode();
         }
 
@@ -4088,8 +4093,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Sets whether or not (default) the content of this view is selectable by the user.
      * 
      * Note that this methods affect the {@link #setFocusable(boolean)},
-     * {@link #setClickable(boolean)} and {@link #setLongClickable(boolean)} states and you may want
-     * to restore these if they were customized.
+     * {@link #setFocusableInTouchMode(boolean)} {@link #setClickable(boolean)} and
+     * {@link #setLongClickable(boolean)} states and you may want to restore these if they were
+     * customized.
      *
      * See {@link #isTextSelectable} for details.
      *
@@ -4100,6 +4106,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         mTextIsSelectable = selectable;
 
+        setFocusableInTouchMode(selectable);
         setFocusable(selectable);
         setClickable(selectable);
         setLongClickable(selectable);
@@ -7516,10 +7523,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return super.onKeyShortcut(keyCode, event);
     }
 
+    /**
+     * Unlike {@link #textCanBeSelected()}, this method is based on the <i>current</i> state of the
+     * TextView. {@link #textCanBeSelected()} has to be true (this is one of the conditions to have
+     * a selection controller (see {@link #prepareCursorControllers()}), but this is not sufficient.
+     */
     private boolean canSelectText() {
         return hasSelectionController() && mText.length() != 0;
     }
 
+    /**
+     * Test based on the <i>intrinsic</i> charateristics of the TextView.
+     * The text must be spannable and the movement method must allow for arbitary selection.
+     * 
+     * See also {@link #canSelectText()}.
+     */
     private boolean textCanBeSelected() {
         // prepareCursorController() relies on this method.
         // If you change this condition, make sure prepareCursorController is called anywhere
@@ -7750,11 +7768,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         boolean added = false;
         mContextMenuTriggeredByKey = mDPadCenterIsDown || mEnterKeyIsDown;
         // Problem with context menu on long press: the menu appears while the key in down and when
-        // the key is released, the view does not receive the key_up event. This ensures that the
-        // state is reset whenever the context menu action is displayed.
-        // mContextMenuTriggeredByKey saved that state so that it is available in
-        // onTextContextMenuItem. We cannot simply clear these flags in onTextContextMenuItem since
+        // the key is released, the view does not receive the key_up event.
+        // We need two layers of flags: mDPadCenterIsDown and mEnterKeyIsDown are set in key down/up
+        // events. We cannot simply clear these flags in onTextContextMenuItem since
         // it may not be called (if the user/ discards the context menu with the back key).
+        // We clear these flags here and mContextMenuTriggeredByKey saves that state so that it is
+        // available in onTextContextMenuItem.
         mDPadCenterIsDown = mEnterKeyIsDown = false;
 
         MenuHandler handler = new MenuHandler();
@@ -7766,12 +7785,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             int min = Math.min(selStart, selEnd);
             int max = Math.max(selStart, selEnd);
 
-            URLSpan[] urls = ((Spanned) mText).getSpans(min, max,
-                                                        URLSpan.class);
-            if (urls.length == 1) {
-                menu.add(0, ID_COPY_URL, 0,
-                         com.android.internal.R.string.copyUrl).
-                            setOnMenuItemClickListener(handler);
+            URLSpan[] urls = ((Spanned) mText).getSpans(min, max, URLSpan.class);
+            if (urls.length > 0) {
+                menu.add(0, ID_COPY_URL, 0, com.android.internal.R.string.copyUrl).
+                        setOnMenuItemClickListener(handler);
 
                 added = true;
             }
@@ -7783,7 +7800,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // populates the menu AFTER this call.
         if (menu.size() > 0) {
             menu.add(0, ID_SELECTION_MODE, 0, com.android.internal.R.string.selectTextMode).
-            setOnMenuItemClickListener(handler);
+                    setOnMenuItemClickListener(handler);
             added = true;
         }
 
@@ -8060,6 +8077,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return false;
         }
 
+        if (!canSelectText() || !requestFocus()) {
+            Log.w(LOG_TAG, "TextView does not support text selection. Action mode cancelled.");
+            return false;
+        }
+
         selectCurrentWord();
         final InputMethodManager imm = (InputMethodManager)
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -8136,26 +8158,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            if (!hasSelectionController()) {
-                Log.w(LOG_TAG, "TextView has no selection controller. Action mode cancelled.");
-                return false;
-            }
-
-            if (!requestFocus()) {
-                return false;
-            }
-
             TypedArray styledAttributes = mContext.obtainStyledAttributes(R.styleable.Theme);
 
             mode.setTitle(mContext.getString(com.android.internal.R.string.textSelectionCABTitle));
             mode.setSubtitle(null);
 
-            if (canSelectText()) {
-                menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
+            menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
                     setAlphabeticShortcut('a').
                     setShowAsAction(
                             MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-            }
 
             if (canCut()) {
                 menu.add(0, ID_CUT, 0, com.android.internal.R.string.cut).
