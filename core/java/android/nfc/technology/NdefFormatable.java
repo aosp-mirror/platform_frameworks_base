@@ -49,7 +49,9 @@ public final class NdefFormatable extends BasicTagTechnology {
      * NdefFormatable#format(NdefMessage)}
      */
     public boolean canBeFormatted() throws IOException {
-      throw new UnsupportedOperationException();
+        checkConnected();
+
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -57,6 +59,8 @@ public final class NdefFormatable extends BasicTagTechnology {
      * NdefMessage to be written on the tag.
      */
     public void format(NdefMessage firstMessage) throws IOException, FormatException {
+        checkConnected();
+
         try {
             byte[] DEFAULT_KEY = {(byte)0xFF,(byte)0xFF,(byte)0xFF,
                                   (byte)0xFF,(byte)0xFF,(byte)0xFF};
@@ -97,6 +101,8 @@ public final class NdefFormatable extends BasicTagTechnology {
 
     @Override
     public byte[] transceive(byte[] data) {
+        checkConnected();
+
         throw new UnsupportedOperationException();
     }
 }

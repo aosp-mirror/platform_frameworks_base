@@ -63,6 +63,8 @@ public class Tag implements Parcelable {
     /*package*/ final Bundle[] mTechExtras;
     /*package*/ final int mServiceHandle;  // for use by NFC service, 0 indicates a mock
 
+    /*package*/ int mConnectedTechnology;
+
     /**
      * Hidden constructor to be used by NFC service and internal classes.
      * @hide
@@ -76,6 +78,8 @@ public class Tag implements Parcelable {
         // Ensure mTechExtras is as long as mTechList
         mTechExtras = Arrays.copyOf(techListExtras, techList.length);
         mServiceHandle = serviceHandle;
+
+        mConnectedTechnology = -1;
     }
 
     /**
@@ -244,4 +248,29 @@ public class Tag implements Parcelable {
             return new Tag[size];
         }
     };
+
+    /*
+     * @hide
+     */
+    public synchronized void setConnectedTechnology(int technology) {
+        if (mConnectedTechnology == -1) {
+            mConnectedTechnology = technology;
+        } else {
+            throw new IllegalStateException("Close other technology first!");
+        }
+    }
+
+    /*
+     * @hide
+     */
+    public int getConnectedTechnology() {
+        return mConnectedTechnology;
+    }
+
+    /*
+     * @hide
+     */
+    public void setTechnologyDisconnected() {
+        mConnectedTechnology = -1;
+    }
 }

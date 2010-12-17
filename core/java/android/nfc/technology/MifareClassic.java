@@ -229,6 +229,8 @@ public final class MifareClassic extends BasicTagTechnology {
      * Authenticate for a given sector.
      */
     public boolean authenticateSector(int sector, byte[] key, boolean keyA) {
+        checkConnected();
+
         byte[] cmd = new byte[12];
 
         // First byte is the command
@@ -264,6 +266,8 @@ public final class MifareClassic extends BasicTagTechnology {
      * @throws IOException
      */
     public byte[] readBlock(int sector, int block) throws IOException {
+        checkConnected();
+
         byte addr = (byte) ((firstBlockInSector(sector) + block) & 0xff);
         byte[] blockread_cmd = { 0x30, addr }; // phHal_eMifareRead
 
@@ -300,6 +304,8 @@ public final class MifareClassic extends BasicTagTechnology {
      */
     @Override
     public byte[] transceive(byte[] data) throws IOException {
+        checkConnected();
+
         try {
             byte[] response = mTagService.transceive(mTag.getServiceHandle(), data, false);
             if (response == null) {

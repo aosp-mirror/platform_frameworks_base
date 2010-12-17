@@ -75,6 +75,8 @@ public final class IsoDep extends BasicTagTechnology {
      * @throws IOException, UnsupportedOperationException
      */
     public void selectAid(byte[] aid) throws IOException, UnsupportedOperationException {
+        checkConnected();
+
         throw new UnsupportedOperationException();
     }
 }

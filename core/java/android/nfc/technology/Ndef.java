@@ -113,6 +113,8 @@ public final class Ndef extends BasicTagTechnology {
      * and requires a connection.
      */
     public NdefMessage getNdefMessage() throws IOException, FormatException {
+        checkConnected();
+
         try {
             int serviceHandle = mTag.getServiceHandle();
             if (mTagService.isNdef(serviceHandle)) {
@@ -143,6 +145,8 @@ public final class Ndef extends BasicTagTechnology {
      * @throws IOException
      */
     public void writeNdefMessage(NdefMessage msg) throws IOException, FormatException {
+        checkConnected();
+
         try {
             int errorCode = mTagService.ndefWrite(mTag.getServiceHandle(), msg);
             switch (errorCode) {
@@ -172,6 +176,8 @@ public final class Ndef extends BasicTagTechnology {
      * @throws IOException
      */
     public void writeExtraNdefMessage(int i, NdefMessage msg) throws IOException, FormatException {
+        checkConnected();
+
         throw new UnsupportedOperationException();
     }
 
@@ -180,6 +186,8 @@ public final class Ndef extends BasicTagTechnology {
      * @throws IOException
      */
     public boolean makeReadonly() throws IOException {
+        checkConnected();
+
         try {
             int errorCode = mTagService.ndefMakeReadOnly(mTag.getServiceHandle());
             switch (errorCode) {
@@ -205,11 +213,15 @@ public final class Ndef extends BasicTagTechnology {
      * For NFC Forum Type 1 and 2 only.
      */
     public void makeLowLevelReadonly() {
+        checkConnected();
+
         throw new UnsupportedOperationException();
     }
 
     @Override
     public byte[] transceive(byte[] data) {
+        checkConnected();
+
         throw new UnsupportedOperationException();
     }
 }
