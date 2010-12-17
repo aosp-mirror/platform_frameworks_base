@@ -148,17 +148,23 @@ public final class Ndef extends BasicTagTechnology {
         checkConnected();
 
         try {
-            int errorCode = mTagService.ndefWrite(mTag.getServiceHandle(), msg);
-            switch (errorCode) {
-                case ErrorCodes.SUCCESS:
-                    break;
-                case ErrorCodes.ERROR_IO:
-                    throw new IOException();
-                case ErrorCodes.ERROR_INVALID_PARAM:
-                    throw new FormatException();
-                default:
-                    // Should not happen
-                    throw new IOException();
+            int serviceHandle = mTag.getServiceHandle();
+            if (mTagService.isNdef(serviceHandle)) {
+                int errorCode = mTagService.ndefWrite(serviceHandle, msg);
+                switch (errorCode) {
+                    case ErrorCodes.SUCCESS:
+                        break;
+                    case ErrorCodes.ERROR_IO:
+                        throw new IOException();
+                    case ErrorCodes.ERROR_INVALID_PARAM:
+                        throw new FormatException();
+                    default:
+                        // Should not happen
+                        throw new IOException();
+                }
+            }
+            else {
+                throw new IOException("Tag is not ndef");
             }
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
