@@ -1514,7 +1514,7 @@ public class BluetoothService extends IBluetooth.Stub {
         }
 
         handlePanDeviceStateChange(device, BluetoothPan.STATE_CONNECTING);
-        if (connectPanDeviceNative(objectPath, "nap", "panu")) {
+        if (connectPanDeviceNative(objectPath, "nap")) {
             log ("connecting to PAN");
             return true;
         } else {
@@ -2885,7 +2885,7 @@ public class BluetoothService extends IBluetooth.Stub {
     private native boolean disconnectInputDeviceNative(String path);
 
     private native boolean setBluetoothTetheringNative(boolean value, String nap, String bridge);
-    private native boolean connectPanDeviceNative(String path, String srcRole, String dstRole);
+    private native boolean connectPanDeviceNative(String path, String dstRole);
     private native boolean disconnectPanDeviceNative(String path);
 
     private native int[] addReservedServiceRecordsNative(int[] uuuids);
