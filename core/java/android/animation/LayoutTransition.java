@@ -153,8 +153,9 @@ public class LayoutTransition {
      * we cache all of the current animations in this map for possible cancellation on
      * another layout event.
      */
-    private HashMap<View, Animator> currentChangingAnimations = new HashMap<View, Animator>();
-    private HashMap<View, Animator> currentVisibilityAnimations = new HashMap<View, Animator>();
+    private final HashMap<View, Animator> currentChangingAnimations = new HashMap<View, Animator>();
+    private final HashMap<View, Animator> currentVisibilityAnimations =
+            new HashMap<View, Animator>();
 
     /**
      * This hashmap is used to track the listeners that have been added to the children of
@@ -165,7 +166,7 @@ public class LayoutTransition {
      * the process of setting up and running all appropriate animations is done, we need to
      * remove these listeners and clear out the map.
      */
-    private HashMap<View, View.OnLayoutChangeListener> layoutChangeListenerMap =
+    private final HashMap<View, View.OnLayoutChangeListener> layoutChangeListenerMap =
             new HashMap<View, View.OnLayoutChangeListener>();
 
     /**
@@ -599,12 +600,14 @@ public class LayoutTransition {
                 // Remove the animation from the cache when it ends
                 anim.addListener(new AnimatorListenerAdapter() {
                     private boolean canceled = false;
+                    @Override
                     public void onAnimationCancel(Animator animator) {
                         // we remove canceled animations immediately, not here
                         canceled = true;
                         child.removeOnLayoutChangeListener(listener);
                         layoutChangeListenerMap.remove(child);
                     }
+                    @Override
                     public void onAnimationEnd(Animator animator) {
                         if (!canceled) {
                             currentChangingAnimations.remove(child);
@@ -662,7 +665,8 @@ public class LayoutTransition {
         }
         if (mListeners != null) {
             anim.addListener(new AnimatorListenerAdapter() {
-                public void onAnimationEnd() {
+                @Override
+                public void onAnimationEnd(Animator anim) {
                     currentVisibilityAnimations.remove(child);
                     for (TransitionListener listener : mListeners) {
                         listener.endTransition(LayoutTransition.this, parent, child, APPEARING);
