@@ -388,7 +388,14 @@ public class MediaScanner
         String prop = SystemProperties.get("drm.service.enabled");
         return prop != null && prop.equals("true");
     }
-    
+
+    private final String mediaToExternalPath(String path) {
+        if (mMediaStoragePath != null && path.startsWith(mMediaStoragePath)) {
+            path = mExternalStoragePath + path.substring(mMediaStoragePath.length());
+        }
+        return path;
+    }
+
     private class MyMediaScannerClient implements MediaScannerClient {
 
         private String mArtist;
@@ -463,12 +470,9 @@ public class MediaScanner
                 }
             }
 
-            String key = path;
-            if (mMediaStoragePath != null && key.startsWith(mMediaStoragePath)) {
-                // MediaProvider uses external variant of path for _data, so we need to match
-                // against that path instead.
-                key = mExternalStoragePath + key.substring(mMediaStoragePath.length());
-            }
+            // MediaProvider uses external variant of path for _data, so we need to match
+            // against that path instead.
+            String key = mediaToExternalPath(path);
             if (mCaseInsensitivePaths) {
                 key = path.toLowerCase();
             }
@@ -881,6 +885,8 @@ public class MediaScanner
         }
 
         public void addNoMediaFolder(String path) {
+            path = mediaToExternalPath(path);
+
             ContentValues values = new ContentValues();
             values.put(MediaStore.Images.ImageColumns.DATA, "");
             String [] pathSpec = new String[] {path + '%'};
@@ -939,11 +945,9 @@ public class MediaScanner
         }
 
         if (filePath != null) {
-            if (mMediaStoragePath != null && filePath.startsWith(mMediaStoragePath)) {
-                // MediaProvider uses external variant of path for _data, so we need to query
-                // using that path instead.
-                filePath = mExternalStoragePath + filePath.substring(mMediaStoragePath.length());
-            }
+            // MediaProvider uses external variant of path for _data, so we need to query
+            // using that path instead.
+            filePath = mediaToExternalPath(filePath);
 
             // query for only one file
             where = Files.FileColumns.DATA + "=?";
@@ -1212,12 +1216,9 @@ public class MediaScanner
                 // build file cache so we can look up tracks in the playlist
                 prescan(null, true);
 
-                String key = path;
-                if (mMediaStoragePath != null && key.startsWith(mMediaStoragePath)) {
-                    // MediaProvider uses external variant of path for _data, so we need to match
-                    // against that path instead.
-                    key = mExternalStoragePath + key.substring(mMediaStoragePath.length());
-                }
+                // MediaProvider uses external variant of path for _data, so we need to match
+                // against that path instead.
+                String key = mediaToExternalPath(path);
                 if (mCaseInsensitivePaths) {
                     key = path.toLowerCase();
                 }
