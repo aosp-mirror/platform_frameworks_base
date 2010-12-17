@@ -260,6 +260,7 @@ status_t A2dpAudioInterface::A2dpAudioStreamOut::set(
     if (pRate) *pRate = lRate;
 
     mDevice = device;
+    mBufferDurationUs = ((bufferSize() * 1000 )/ frameSize() / sampleRate()) * 1000;
     return NO_ERROR;
 }
 
@@ -288,6 +289,7 @@ ssize_t A2dpAudioInterface::A2dpAudioStreamOut::write(const void* buffer, size_t
         if (mStandby) {
             acquire_wake_lock (PARTIAL_WAKE_LOCK, sA2dpWakeLock);
             mStandby = false;
+            mLastWriteTime = systemTime();
         }
 
         status = init();
@@ -308,6 +310,15 @@ ssize_t A2dpAudioInterface::A2dpAudioStreamOut::write(const void* buffer, size_t
             buffer = (char *)buffer + status;
         }
 
+        // if A2DP sink runs abnormally fast, sleep a little so that audioflinger mixer thread
+        // does no spin and starve other threads.
+        // NOTE: It is likely that the A2DP headset is being disconnected
+        nsecs_t now = systemTime();
+        if ((uint32_t)ns2us(now - mLastWriteTime) < (mBufferDurationUs >> 2)) {
+            LOGV("A2DP sink runs too fast");
+            usleep(mBufferDurationUs - (uint32_t)ns2us(now - mLastWriteTime));
+        }
+        mLastWriteTime = now;
         return bytes;
 
     }
@@ -316,7 +327,7 @@ Error:
     standby();
 
     // Simulate audio output timing in case of error
-    usleep(((bytes * 1000 )/ frameSize() / sampleRate()) * 1000);
+    usleep(mBufferDurationUs);
 
     return status;
 }
