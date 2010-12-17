@@ -17,6 +17,8 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include <cutils/properties.h>
+
 #include <surfaceflinger/SurfaceComposerClient.h>
 #include <ui/PixelFormat.h>
 #include <ui/DisplayInfo.h>
@@ -24,6 +26,7 @@
 #include "jni.h"
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/misc.h>
+#include <utils/Log.h>
 
 // ----------------------------------------------------------------------------
 
@@ -40,6 +43,9 @@ struct offsets_t {
     jfieldID ydpi;
 };
 static offsets_t offsets;
+
+static int gOldSize = -1;
+static int gNewSize = -1;
 
 static void doThrow(JNIEnv* env, const char* exc, const char* msg = NULL)
 {
@@ -69,14 +75,16 @@ static jint android_view_Display_getWidth(
         JNIEnv* env, jobject clazz)
 {
     DisplayID dpy = env->GetIntField(clazz, offsets.display);
-    return SurfaceComposerClient::getDisplayWidth(dpy);
+    jint w = SurfaceComposerClient::getDisplayWidth(dpy);
+    return w == gOldSize ? gNewSize : w;
 }
 
 static jint android_view_Display_getHeight(
         JNIEnv* env, jobject clazz)
 {
     DisplayID dpy = env->GetIntField(clazz, offsets.display);
-    return SurfaceComposerClient::getDisplayHeight(dpy);
+    int h = SurfaceComposerClient::getDisplayHeight(dpy);
+    return h == gOldSize ? gNewSize : h;
 }
 
 static jint android_view_Display_getOrientation(
@@ -90,6 +98,13 @@ static jint android_view_Display_getDisplayCount(
         JNIEnv* env, jclass clazz)
 {
     return SurfaceComposerClient::getNumberOfDisplays();
+}
+
+static jint android_view_Display_unmapDisplaySize(
+        JNIEnv* env, jclass clazz, jint newSize)
+{
+    if (newSize == gNewSize) return gOldSize;
+    return newSize;
 }
 
 // ----------------------------------------------------------------------------
@@ -110,7 +125,9 @@ static JNINativeMethod gMethods[] = {
     {   "getHeight", "()I",
             (void*)android_view_Display_getHeight },
     {   "getOrientation", "()I",
-            (void*)android_view_Display_getOrientation }
+            (void*)android_view_Display_getOrientation },
+    {   "unmapDisplaySize", "(I)I",
+            (void*)android_view_Display_unmapDisplaySize }
 };
 
 void nativeClassInit(JNIEnv* env, jclass clazz)
@@ -125,6 +142,16 @@ void nativeClassInit(JNIEnv* env, jclass clazz)
 
 int register_android_view_Display(JNIEnv* env)
 {
+    char buf[PROPERTY_VALUE_MAX];
+    int len = property_get("persist.demo.screensizehack", buf, "");
+    if (len > 0) {
+        int temp1, temp2;
+        if (sscanf(buf, "%d=%d", &temp1, &temp2) == 2) {
+            gOldSize = temp1;
+            gNewSize = temp2;
+        }
+    }
+
     return AndroidRuntime::registerNativeMethods(env,
             kClassPathName, gMethods, NELEM(gMethods));
 }

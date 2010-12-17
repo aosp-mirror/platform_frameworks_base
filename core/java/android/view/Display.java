@@ -136,6 +136,11 @@ public class Display
         outMetrics.ydpi         = mDpiY;
     }
 
+    /**
+     * @hide Helper for our fake display size hack.
+     */
+    native public static int unmapDisplaySize(int newSize);
+    
     /*
      * We use a class initializer to allow the native code to cache some
      * field offsets.
