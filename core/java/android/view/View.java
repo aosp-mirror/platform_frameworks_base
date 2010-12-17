@@ -8206,8 +8206,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Manually render this view (and all of its children) to the given Canvas.
      * The view must have already done a full layout before this function is
-     * called.  When implementing a view, do not override this method; instead,
-     * you should implement {@link #onDraw}.
+     * called.  When implementing a view, implement {@link #onDraw} instead of
+     * overriding this method. If you do need to override this method, call
+     * the superclass version.
      *
      * @param canvas The Canvas to which the View is rendered.
      */

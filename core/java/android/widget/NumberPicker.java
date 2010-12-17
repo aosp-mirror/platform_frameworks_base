@@ -979,10 +979,7 @@ public class NumberPicker extends LinearLayout {
         // children
         // after we have completed drawing ourselves.
 
-        // Draw the selector wheel if needed
-        if (mDrawSelectorWheel) {
-            super.draw(canvas);
-        }
+        super.draw(canvas);
 
         // Draw our children if we are not showing the selector wheel of fading
         // it out
