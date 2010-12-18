@@ -68,35 +68,44 @@
             android:layout_marginBottom="8dip"
             >
 
-            <TextView android:id="@+id/timeDisplay"
+            <!-- Because we can't have multi-tone fonts, we render two TextViews, one on
+            top of the other. Hence the redundant layout... -->
+            <TextView android:id="@+id/timeDisplayBackground"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:ellipsize="none"
                 android:textSize="72sp"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:shadowColor="#C0000000"
-                android:shadowDx="0"
-                android:shadowDy="0"
-                android:shadowRadius="3.0"
                 android:layout_marginBottom="6dip"
+                android:textColor="#999999"
                 />
+
+            <TextView android:id="@+id/timeDisplayForeground"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="none"
+                android:textSize="72sp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_marginBottom="6dip"
+                android:layout_alignLeft="@id/timeDisplayBackground"
+                android:layout_alignTop="@id/timeDisplayBackground"
+                android:textColor="#666666"
+                />
+
 
 
             <TextView android:id="@+id/am_pm"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/timeDisplay"
-                android:layout_alignBaseline="@id/timeDisplay"
+                android:layout_toRightOf="@id/timeDisplayBackground"
+                android:layout_alignBaseline="@id/timeDisplayBackground"
                 android:singleLine="true"
                 android:ellipsize="none"
                 android:textSize="22sp"
                 android:layout_marginLeft="8dip"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:shadowColor="#C0000000"
-                android:shadowDx="0"
-                android:shadowDy="0"
-                android:shadowRadius="3.0"
                 />
 
         </com.android.internal.widget.DigitalClock>
