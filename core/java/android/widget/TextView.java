@@ -8207,9 +8207,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             selectCurrentWord();
         }
 
-        final InputMethodManager imm = (InputMethodManager)
-                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(this, 0, null);
+        if (!mTextIsSelectable) {
+            // Show the IME, except when selection non editable text.
+            final InputMethodManager imm = (InputMethodManager)
+                    getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(this, 0, null);
+        }
 
         ActionMode.Callback actionModeCallback = new SelectionActionModeCallback();
         mSelectionActionMode = startActionMode(actionModeCallback);
