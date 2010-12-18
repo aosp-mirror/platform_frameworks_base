@@ -135,7 +135,7 @@ private:
  */
 class JavaPixelAllocator : public SkBitmap::Allocator {
 public:
-    JavaPixelAllocator(JNIEnv* env, bool allocateInJavaHeap=true);
+    JavaPixelAllocator(JNIEnv* env);
     // overrides
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
     
