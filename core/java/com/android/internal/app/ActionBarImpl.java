@@ -505,12 +505,13 @@ public class ActionBarImpl extends ActionBar {
         }
         mContainerView.setVisibility(View.VISIBLE);
         mContainerView.setAlpha(0);
-        mContainerView.setTranslationY(-mContainerView.getHeight());
         AnimatorSet anim = new AnimatorSet();
-        AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mContainerView, "translationY", 0))
-            .with(ObjectAnimator.ofFloat(mContainerView, "alpha", 1));
+        AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mContainerView, "alpha", 1));
         if (mContentView != null) {
-            b.with(ObjectAnimator.ofFloat(mContentView, "translationY", -mContainerView.getHeight(), 0));
+            b.with(ObjectAnimator.ofFloat(mContentView, "translationY",
+                    -mContainerView.getHeight(), 0));
+            mContainerView.setTranslationY(-mContainerView.getHeight());
+            b.with(ObjectAnimator.ofFloat(mContainerView, "translationY", 0));
         }
         anim.addListener(mShowListener);
         mCurrentAnim = anim;
@@ -527,11 +528,12 @@ public class ActionBarImpl extends ActionBar {
         }
         mContainerView.setAlpha(1);
         AnimatorSet anim = new AnimatorSet();
-        AnimatorSet.Builder b = anim.play(
-                ObjectAnimator.ofFloat(mContainerView, "translationY", -mContainerView.getHeight()))
-            .with(ObjectAnimator.ofFloat(mContainerView, "alpha", 0));
+        AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mContainerView, "alpha", 0));
         if (mContentView != null) {
-            b.with(ObjectAnimator.ofFloat(mContentView, "translationY", 0, -mContainerView.getHeight()));
+            b.with(ObjectAnimator.ofFloat(mContentView, "translationY",
+                    0, -mContainerView.getHeight()));
+            b.with(ObjectAnimator.ofFloat(mContainerView, "translationY",
+                    -mContainerView.getHeight()));
         }
         anim.addListener(mHideListener);
         mCurrentAnim = anim;
