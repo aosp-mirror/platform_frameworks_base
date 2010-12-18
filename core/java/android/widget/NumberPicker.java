@@ -534,7 +534,7 @@ public class NumberPicker extends LinearLayout {
         });
 
         // create the fling and adjust scrollers
-        mFlingScroller = new Scroller(getContext());
+        mFlingScroller = new Scroller(getContext(), null, true);
         mAdjustScroller = new Scroller(getContext(), new OvershootInterpolator());
 
         updateInputTextView();
