@@ -16,6 +16,7 @@
 
 package android.text.method;
 
+import android.graphics.Rect;
 import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
@@ -24,170 +25,185 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
-// XXX this doesn't extend MetaKeyKeyListener because the signatures
-// don't match.  Need to figure that out.  Meanwhile the meta keys
-// won't work in fields that don't take input.
-
-public class ArrowKeyMovementMethod implements MovementMethod {
-    private boolean isCap(Spannable buffer) {
+/**
+ * A movement method that provides cursor movement and selection.
+ * Supports displaying the context menu on DPad Center.
+ */
+public class ArrowKeyMovementMethod extends BaseMovementMethod implements MovementMethod {
+    private static boolean isSelecting(Spannable buffer) {
         return ((MetaKeyKeyListener.getMetaState(buffer, MetaKeyKeyListener.META_SHIFT_ON) == 1) ||
                 (MetaKeyKeyListener.getMetaState(buffer, MetaKeyKeyListener.META_SELECTING) != 0));
     }
 
-    private boolean isAlt(Spannable buffer) {
-        return MetaKeyKeyListener.getMetaState(buffer, MetaKeyKeyListener.META_ALT_ON) == 1;
+    private int getCurrentLineTop(Spannable buffer, Layout layout) {
+        return layout.getLineTop(layout.getLineForOffset(Selection.getSelectionEnd(buffer)));
     }
 
-    private boolean up(TextView widget, Spannable buffer) {
-        boolean cap = isCap(buffer);
-        boolean alt = isAlt(buffer);
-        Layout layout = widget.getLayout();
-
-        if (cap) {
-            if (alt) {
-                Selection.extendSelection(buffer, 0);
-                return true;
-            } else {
-                return Selection.extendUp(buffer, layout);
-            }
-        } else {
-            if (alt) {
-                Selection.setSelection(buffer, 0);
-                return true;
-            } else {
-                return Selection.moveUp(buffer, layout);
-            }
-        }
+    private int getPageHeight(TextView widget) {
+        // This calculation does not take into account the view transformations that
+        // may have been applied to the child or its containers.  In case of scaling or
+        // rotation, the calculated page height may be incorrect.
+        final Rect rect = new Rect();
+        return widget.getGlobalVisibleRect(rect) ? rect.height() : 0;
     }
 
-    private boolean down(TextView widget, Spannable buffer) {
-        boolean cap = isCap(buffer);
-        boolean alt = isAlt(buffer);
-        Layout layout = widget.getLayout();
-
-        if (cap) {
-            if (alt) {
-                Selection.extendSelection(buffer, buffer.length());
-                return true;
-            } else {
-                return Selection.extendDown(buffer, layout);
-            }
-        } else {
-            if (alt) {
-                Selection.setSelection(buffer, buffer.length());
-                return true;
-            } else {
-                return Selection.moveDown(buffer, layout);
-            }
-        }
-    }
-
-    private boolean left(TextView widget, Spannable buffer) {
-        boolean cap = isCap(buffer);
-        boolean alt = isAlt(buffer);
-        Layout layout = widget.getLayout();
-
-        if (cap) {
-            if (alt) {
-                return Selection.extendToLeftEdge(buffer, layout);
-            } else {
-                return Selection.extendLeft(buffer, layout);
-            }
-        } else {
-            if (alt) {
-                return Selection.moveToLeftEdge(buffer, layout);
-            } else {
-                return Selection.moveLeft(buffer, layout); 
-            }
-        }
-    }
-
-    private boolean right(TextView widget, Spannable buffer) {
-        boolean cap = isCap(buffer);
-        boolean alt = isAlt(buffer);
-        Layout layout = widget.getLayout();
-
-        if (cap) {
-            if (alt) {
-                return Selection.extendToRightEdge(buffer, layout);
-            } else {
-                return Selection.extendRight(buffer, layout);
-            }
-        } else {
-            if (alt) {
-                return Selection.moveToRightEdge(buffer, layout);
-            } else {
-                return Selection.moveRight(buffer, layout); 
-            }
-        }
-    }
-
-    public boolean onKeyDown(TextView widget, Spannable buffer, int keyCode, KeyEvent event) {
-        if (executeDown(widget, buffer, keyCode)) {
-            MetaKeyKeyListener.adjustMetaAfterKeypress(buffer);
-            MetaKeyKeyListener.resetLockedMeta(buffer);
-            return true;
-        }
-
-        return false;
-    }
-
-    private boolean executeDown(TextView widget, Spannable buffer, int keyCode) {
-        boolean handled = false;
-
+    @Override
+    protected boolean handleMovementKey(TextView widget, Spannable buffer, int keyCode,
+            int movementMetaState, KeyEvent event) {
         switch (keyCode) {
-        case KeyEvent.KEYCODE_DPAD_UP:
-            handled |= up(widget, buffer);
-            break;
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+                if (KeyEvent.metaStateHasNoModifiers(movementMetaState)) {
+                    if (event.getAction() == KeyEvent.ACTION_DOWN
+                            && event.getRepeatCount() == 0
+                            && MetaKeyKeyListener.getMetaState(buffer,
+                                        MetaKeyKeyListener.META_SELECTING) != 0) {
+                        return widget.showContextMenu();
+                    }
+                }
+                break;
+        }
+        return super.handleMovementKey(widget, buffer, keyCode, movementMetaState, event);
+    }
 
-        case KeyEvent.KEYCODE_DPAD_DOWN:
-            handled |= down(widget, buffer);
-            break;
+    @Override
+    protected boolean left(TextView widget, Spannable buffer) {
+        final Layout layout = widget.getLayout();
+        if (isSelecting(buffer)) {
+            return Selection.extendLeft(buffer, layout);
+        } else {
+            return Selection.moveLeft(buffer, layout);
+        }
+    }
 
-        case KeyEvent.KEYCODE_DPAD_LEFT:
-            handled |= left(widget, buffer);
-            break;
+    @Override
+    protected boolean right(TextView widget, Spannable buffer) {
+        final Layout layout = widget.getLayout();
+        if (isSelecting(buffer)) {
+            return Selection.extendRight(buffer, layout);
+        } else {
+            return Selection.moveRight(buffer, layout);
+        }
+    }
 
-        case KeyEvent.KEYCODE_DPAD_RIGHT:
-            handled |= right(widget, buffer);
-            break;
+    @Override
+    protected boolean up(TextView widget, Spannable buffer) {
+        final Layout layout = widget.getLayout();
+        if (isSelecting(buffer)) {
+            return Selection.extendUp(buffer, layout);
+        } else {
+            return Selection.moveUp(buffer, layout);
+        }
+    }
 
-        case KeyEvent.KEYCODE_DPAD_CENTER:
-            if ((MetaKeyKeyListener.getMetaState(buffer, MetaKeyKeyListener.META_SELECTING) != 0) &&
-                (widget.showContextMenu())) {
-                    handled = true;
+    @Override
+    protected boolean down(TextView widget, Spannable buffer) {
+        final Layout layout = widget.getLayout();
+        if (isSelecting(buffer)) {
+            return Selection.extendDown(buffer, layout);
+        } else {
+            return Selection.moveDown(buffer, layout);
+        }
+    }
+
+    @Override
+    protected boolean pageUp(TextView widget, Spannable buffer) {
+        final Layout layout = widget.getLayout();
+        final boolean selecting = isSelecting(buffer);
+        final int targetY = getCurrentLineTop(buffer, layout) - getPageHeight(widget);
+        boolean handled = false;
+        for (;;) {
+            final int previousSelectionEnd = Selection.getSelectionEnd(buffer);
+            if (selecting) {
+                Selection.extendUp(buffer, layout);
+            } else {
+                Selection.moveUp(buffer, layout);
+            }
+            if (Selection.getSelectionEnd(buffer) == previousSelectionEnd) {
+                break;
+            }
+            handled = true;
+            if (getCurrentLineTop(buffer, layout) <= targetY) {
+                break;
             }
         }
-
-        if (handled) {
-            MetaKeyKeyListener.adjustMetaAfterKeypress(buffer);
-            MetaKeyKeyListener.resetLockedMeta(buffer);
-        }
-
         return handled;
     }
 
-    public boolean onKeyUp(TextView widget, Spannable buffer, int keyCode, KeyEvent event) {
-        return false;
-    }
-
-    public boolean onKeyOther(TextView view, Spannable text, KeyEvent event) {
-        int code = event.getKeyCode();
-        if (code != KeyEvent.KEYCODE_UNKNOWN && event.getAction() == KeyEvent.ACTION_MULTIPLE) {
-            int repeat = event.getRepeatCount();
-            boolean handled = false;
-            while ((--repeat) > 0) {
-                handled |= executeDown(view, text, code);
+    @Override
+    protected boolean pageDown(TextView widget, Spannable buffer) {
+        final Layout layout = widget.getLayout();
+        final boolean selecting = isSelecting(buffer);
+        final int targetY = getCurrentLineTop(buffer, layout) + getPageHeight(widget);
+        boolean handled = false;
+        for (;;) {
+            final int previousSelectionEnd = Selection.getSelectionEnd(buffer);
+            if (selecting) {
+                Selection.extendDown(buffer, layout);
+            } else {
+                Selection.moveDown(buffer, layout);
             }
-            return handled;
+            if (Selection.getSelectionEnd(buffer) == previousSelectionEnd) {
+                break;
+            }
+            handled = true;
+            if (getCurrentLineTop(buffer, layout) >= targetY) {
+                break;
+            }
         }
-        return false;
+        return handled;
     }
 
-    public boolean onTrackballEvent(TextView widget, Spannable text, MotionEvent event) {
-        return false;
+    @Override
+    protected boolean top(TextView widget, Spannable buffer) {
+        if (isSelecting(buffer)) {
+            Selection.extendSelection(buffer, 0);
+        } else {
+            Selection.setSelection(buffer, 0);
+        }
+        return true;
     }
 
+    @Override
+    protected boolean bottom(TextView widget, Spannable buffer) {
+        if (isSelecting(buffer)) {
+            Selection.extendSelection(buffer, buffer.length());
+        } else {
+            Selection.setSelection(buffer, buffer.length());
+        }
+        return true;
+    }
+
+    @Override
+    protected boolean lineStart(TextView widget, Spannable buffer) {
+        final Layout layout = widget.getLayout();
+        if (isSelecting(buffer)) {
+            return Selection.extendToLeftEdge(buffer, layout);
+        } else {
+            return Selection.moveToLeftEdge(buffer, layout);
+        }
+    }
+
+    @Override
+    protected boolean lineEnd(TextView widget, Spannable buffer) {
+        final Layout layout = widget.getLayout();
+        if (isSelecting(buffer)) {
+            return Selection.extendToRightEdge(buffer, layout);
+        } else {
+            return Selection.moveToRightEdge(buffer, layout);
+        }
+    }
+
+    @Override
+    protected boolean home(TextView widget, Spannable buffer) {
+        return lineStart(widget, buffer);
+    }
+
+    @Override
+    protected boolean end(TextView widget, Spannable buffer) {
+        return lineEnd(widget, buffer);
+    }
+
+    @Override
     public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
         int initialScrollX = -1, initialScrollY = -1;
         final int action = event.getAction();
@@ -201,7 +217,7 @@ public class ArrowKeyMovementMethod implements MovementMethod {
 
         if (widget.isFocused() && !widget.didTouchFocusSelect()) {
             if (action == MotionEvent.ACTION_DOWN) {
-              boolean cap = isCap(buffer);
+              boolean cap = isSelecting(buffer);
               if (cap) {
                   int offset = widget.getOffset((int) event.getX(), (int) event.getY());
                   
@@ -214,7 +230,7 @@ public class ArrowKeyMovementMethod implements MovementMethod {
                   widget.getParent().requestDisallowInterceptTouchEvent(true);
               }
             } else if (action == MotionEvent.ACTION_MOVE) {
-                boolean cap = isCap(buffer);
+                boolean cap = isSelecting(buffer);
 
                 if (cap && handled) {
                     // Before selecting, make sure we've moved out of the "slop".
@@ -245,7 +261,7 @@ public class ArrowKeyMovementMethod implements MovementMethod {
                 }
 
                 int offset = widget.getOffset((int) event.getX(), (int) event.getY());
-                if (isCap(buffer)) {
+                if (isSelecting(buffer)) {
                     buffer.removeSpan(LAST_TAP_DOWN);
                     Selection.extendSelection(buffer, offset);
                 } else {
@@ -262,14 +278,17 @@ public class ArrowKeyMovementMethod implements MovementMethod {
         return handled;
     }
 
+    @Override
     public boolean canSelectArbitrarily() {
         return true;
     }
 
+    @Override
     public void initialize(TextView widget, Spannable text) {
         Selection.setSelection(text, 0);
     }
 
+    @Override
     public void onTakeFocus(TextView view, Spannable text, int dir) {
         if ((dir & (View.FOCUS_FORWARD | View.FOCUS_DOWN)) != 0) {
             if (view.getLayout() == null) {

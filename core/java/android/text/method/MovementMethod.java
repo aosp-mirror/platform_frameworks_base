@@ -21,24 +21,32 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.text.*;
 
-public interface MovementMethod
-{
+/**
+ * Provides cursor positioning, scrolling and text selection functionality in a {@link TextView}.
+ * <p>
+ * The {@link TextView} delegates handling of key events, trackball motions and touches to
+ * the movement method for purposes of content navigation.  The framework automatically
+ * selects an appropriate movement method based on the content of the {@link TextView}.
+ * </p><p>
+ * This interface is intended for use by the framework; it should not be implemented
+ * directly by applications.
+ * </p>
+ */
+public interface MovementMethod {
     public void initialize(TextView widget, Spannable text);
     public boolean onKeyDown(TextView widget, Spannable text, int keyCode, KeyEvent event);
     public boolean onKeyUp(TextView widget, Spannable text, int keyCode, KeyEvent event);
-    
+
     /**
      * If the key listener wants to other kinds of key events, return true,
      * otherwise return false and the caller (i.e. the widget host)
      * will handle the key.
      */
     public boolean onKeyOther(TextView view, Spannable text, KeyEvent event);
-    
+
     public void onTakeFocus(TextView widget, Spannable text, int direction);
-    public boolean onTrackballEvent(TextView widget, Spannable text,
-                                    MotionEvent event);
-    public boolean onTouchEvent(TextView widget, Spannable text,
-                                MotionEvent event);
+    public boolean onTrackballEvent(TextView widget, Spannable text, MotionEvent event);
+    public boolean onTouchEvent(TextView widget, Spannable text, MotionEvent event);
 
     /**
      * Returns true if this movement method allows arbitrary selection
