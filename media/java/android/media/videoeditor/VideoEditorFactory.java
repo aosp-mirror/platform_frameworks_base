@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package android.media.videoeditor;
 
 import java.io.File;
@@ -21,7 +22,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import android.media.videoeditor.VideoEditor.MediaProcessingProgressListener;
-
 
 /**
  * The VideoEditorFactory class must be used to instantiate VideoEditor objects
@@ -43,14 +43,19 @@ public class VideoEditorFactory {
      *             not be accessed in read/write mode
      */
     public static VideoEditor create(String projectPath) throws IOException {
-        // If the project path does not exist create it
+        /*
+         *  If the project path does not exist create it
+         */
         final File dir = new File(projectPath);
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
-                throw new FileNotFoundException("Cannot create project path: " + projectPath);
+                throw new FileNotFoundException("Cannot create project path: "
+                                                                 + projectPath);
             } else {
-                // Create the file which hides the media files
-                // from the media scanner
+                /*
+                 * Create the file which hides the media files
+                 * from the media scanner
+                 */
                 if (!new File(dir, ".nomedia").createNewFile()) {
                     throw new FileNotFoundException("Cannot create file .nomedia");
                 }
@@ -69,7 +74,8 @@ public class VideoEditorFactory {
      *            are stored. When a project is deleted the application is
      *            responsible for deleting the path and its contents.
      * @param generatePreview if set to true the
-     *      {@link MediaEditor#generatePreview(MediaProcessingProgressListener listener)}
+     *      {@link MediaEditor#generatePreview(MediaProcessingProgressListener
+     *             listener)}
      *      will be called internally to generate any needed transitions.
      *
      * @return The VideoEditor instance
@@ -79,7 +85,7 @@ public class VideoEditorFactory {
      *             media files cannot be retrieved
      */
     public static VideoEditor load(String projectPath, boolean generatePreview)
-            throws IOException {
+        throws IOException {
         final VideoEditor videoEditor = new VideoEditorImpl(projectPath);
         if (generatePreview) {
             videoEditor.generatePreview(null);

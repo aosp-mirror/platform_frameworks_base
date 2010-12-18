@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+
 package android.media.videoeditor;
 
 /**
- * This class allows to apply color on a media item.
+ * This class allows to apply color effect on a media item.
  * {@hide}
  */
 public class EffectColor extends Effect {
@@ -43,16 +44,27 @@ public class EffectColor extends Effect {
      * Make the video look like as if it was recorded in 50's
      */
     public static final int TYPE_FIFTIES = 5;
-
-    // Predefined colors
+    /**
+     * Change the video frame color to the RGB color value GREEN
+     */
     public static final int GREEN = 0x0000ff00;
+    /**
+     * Change the video frame color to the RGB color value PINK
+     */
     public static final int PINK = 0x00ff66cc;
+    /**
+     * Change the video frame color to the RGB color value GRAY
+     */
     public static final int GRAY = 0x007f7f7f;
 
-    // The effect type
+    /**
+     *  The effect type
+     */
     private final int mType;
 
-    // The effect color
+    /**
+     *  The effect color
+     */
     private final int mColor;
 
     /**
@@ -78,16 +90,24 @@ public class EffectColor extends Effect {
      *              If type is TYPE_GRADIENT, color is the RGB color at the
      *              top of the frame. Otherwise, color is ignored
      */
-    public EffectColor(MediaItem mediaItem, String effectId, long startTimeMs, long durationMs,
-            int type, int color) {
+    public EffectColor(MediaItem mediaItem, String effectId, long startTimeMs,
+                      long durationMs, int type, int color) {
         super(mediaItem, effectId, startTimeMs, durationMs);
         switch (type) {
             case TYPE_COLOR:
             case TYPE_GRADIENT: {
-                mColor = color;
-                break;
-            }
+                switch (color) {
+                    case GREEN:
+                    case PINK:
+                    case GRAY:
+                        mColor = color;
+                        break;
 
+                    default:
+                        throw new IllegalArgumentException("Invalid Color: " + color);
+                    }
+                    break;
+            }
             case TYPE_SEPIA:
             case TYPE_NEGATIVE:
             case TYPE_FIFTIES: {
@@ -99,11 +119,12 @@ public class EffectColor extends Effect {
                 throw new IllegalArgumentException("Invalid type: " + type);
             }
         }
-
         mType = type;
     }
 
     /**
+     * Get the effect type.
+     *
      * @return The effect type
      */
     public int getType() {
@@ -111,6 +132,8 @@ public class EffectColor extends Effect {
     }
 
     /**
+     * Get the color if effect type is TYPE_COLOR or TYPE_GRADIENT.
+     *
      * @return the color as RGB 888 if type is TYPE_COLOR or TYPE_GRADIENT.
      */
     public int getColor() {

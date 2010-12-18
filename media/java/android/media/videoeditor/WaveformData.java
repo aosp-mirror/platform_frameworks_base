@@ -14,24 +14,29 @@
  * limitations under the License.
  */
 
+
 package android.media.videoeditor;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
  * Class which describes the waveform data of an audio track. The gain values
- * represent the average gain for an audio frame. For audio codecs which do
- * not operate on a per frame bases (eg. ALAW, ULAW) a reasonable audio frame
+ * represent the average gain for an audio frame. For audio codecs which do not
+ * operate on a per frame bases (eg. ALAW, ULAW) a reasonable audio frame
  * duration will be assumed (eg. 50ms).
  * {@hide}
  */
 public class WaveformData {
-    // Instance variables
+    /*
+     *  Instance variables
+     */
     private final int mFrameDurationMs;
     private final int mFramesCount;
     private final short[] mGains;
 
-    /**
+    /*
      * This constructor shall not be used
      */
     @SuppressWarnings("unused")
@@ -41,18 +46,74 @@ public class WaveformData {
         mGains = null;
     }
 
-    /**
+    /*
      * Constructor
      *
      * @param audioWaveformFilename The name of the audio waveform file
+     *
+     * The file format is as following:
+     * <ul>
+     *  <li>first 4 bytes provide the number of samples for each value, as
+     *  big-endian signed</li>
+     *  <li>4 following bytes is the total number of values in the file, as
+     *  big-endian signed</li>
+     *  <li>then, all values follow as bytes</li>
+     * </ul>
+     *
+     * @throws IOException on failure of file input stream operations
+     * @throws IllegalArgumentException if audioWaveformFilename is null
      */
     WaveformData(String audioWaveformFilename) throws IOException {
-        // TODO: Read these values from the file
-        mFrameDurationMs = 20;
-        mFramesCount = 300000 / mFrameDurationMs;
-        mGains = new short[mFramesCount];
-        for (int i = 0; i < mFramesCount; i++) {
-            mGains[i] = (short)((i * 5) % 256);
+
+        if (audioWaveformFilename == null) {
+            throw new IllegalArgumentException("WaveformData : filename is null");
+        }
+
+        FileInputStream audioGraphFileReadHandle = null;
+
+        try {
+            final File audioGraphFileContext = new File(audioWaveformFilename);
+
+            audioGraphFileReadHandle = new FileInputStream(audioGraphFileContext);
+            /*
+             * Read frame duration
+             */
+            final byte tempFrameDuration[] = new byte[4];
+
+            audioGraphFileReadHandle.read(tempFrameDuration, 0, 4);
+
+            int tempFrameDurationMs = 0;
+            int tempFramesCounter = 0;
+            for (int i = 0; i < 4; i++) {
+                tempFrameDurationMs = (tempFrameDurationMs << 8);
+                tempFrameDurationMs = (tempFrameDurationMs | (tempFrameDuration[i] & 0xff));
+            }
+            mFrameDurationMs = tempFrameDurationMs;
+
+            /*
+             * Read count
+             */
+            final byte tempFramesCount[] = new byte[4];
+
+            audioGraphFileReadHandle.read(tempFramesCount, 0, 4);
+            for (int i = 0; i < 4; i++) {
+                tempFramesCounter = (tempFramesCounter << 8);
+                tempFramesCounter = (tempFramesCounter | (tempFramesCount[i] & 0xff));
+            }
+            mFramesCount = tempFramesCounter;
+
+            /*
+             *  Capture the graph values
+             */
+            mGains = new short[mFramesCount];
+
+            for (int i = 0; i < mFramesCount; i++) {
+                mGains[i] = (short)audioGraphFileReadHandle.read();
+            }
+        } finally {
+            if (audioGraphFileReadHandle != null) {
+                audioGraphFileReadHandle.close();
+            }
         }
     }
 
@@ -72,7 +133,7 @@ public class WaveformData {
 
     /**
      * @return The array of frame gains. The size of the array is the frames
-     *  count. The values of the frame gains range from 0 to 256.
+     *         count. The values of the frame gains range from 0 to 255.
      */
     public short[] getFrameGains() {
         return mGains;
