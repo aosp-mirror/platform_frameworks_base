@@ -45,16 +45,6 @@ public final class NdefFormatable extends BasicTagTechnology {
     }
 
     /**
-     * Returns whether a tag can be formatted with {@link
-     * NdefFormatable#format(NdefMessage)}
-     */
-    public boolean canBeFormatted() throws IOException {
-        checkConnected();
-
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * Formats a tag as NDEF, if possible. You may supply a first
      * NdefMessage to be written on the tag.
      */
