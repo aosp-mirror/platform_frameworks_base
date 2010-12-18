@@ -497,6 +497,17 @@
          to handle queries on each database. -->
     <integer name="db_connection_pool_size">1</integer>
 
+    <!-- Max space (in MB) allocated to DownloadManager to store the downloaded
+         files if they are to be stored in DownloadManager's data dir,
+         which typically is /data/data/com.android.providers.downloads/files -->
+    <integer name="config_downloadDataDirSize">100</integer>
+
+    <!-- When the free space available in DownloadManager's data dir falls
+         below the percentage value specified by this param, DownloadManager
+         starts removing files to try to make percentage of available
+         free space above this threshold value. -->
+    <integer name="config_downloadDataDirLowSpaceThreshold">10</integer>
+
     <!-- The URL that should be sent in an x-wap-profile header with an HTTP request,
          as defined in the Open Mobile Alliance User Agent Profile specification
          OMA-TS-UAProf-V2_0-20060206-A Section 8.1.1.1. If the URL contains a '%s'
