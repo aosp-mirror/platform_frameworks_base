@@ -488,7 +488,7 @@
         <item name="android:otherMonthDateColor">#66FFFFFF</item>
         <item name="android:weekNumberColor">#33FFFFFF</item>
         <item name="android:gridLinesColor">#19FFFFFF</item>
-        <item name="selectedDayLine">@android:drawable/day_picker_week_view_dayline_holo_dark</item>
+        <item name="selectedDayLine">@android:drawable/day_picker_week_view_dayline_holo</item>
     </style>
 
     <!-- @hide -->
@@ -1450,7 +1450,7 @@
         <item name="android:otherMonthDateColor">#66FFFFFF</item>
         <item name="android:weekNumberColor">#33FFFFFF</item>
         <item name="android:gridLinesColor">#19FFFFFF</item>
-        <item name="selectedDayLine">@android:drawable/day_picker_week_view_dayline_holo_dark</item>
+        <item name="selectedDayLine">@android:drawable/day_picker_week_view_dayline_holo</item>
     </style>
 
     <style name="Widget.Holo.ImageButton" parent="Widget.ImageButton">
@@ -1819,12 +1819,12 @@
 
     <!-- @hide -->
     <style name="Widget.Holo.Light.DayPickerWeekView" parent="Widget.DayPickerWeekView">
-        <item name="android:selectionBackgroundColor">#7F080030</item>
+        <item name="android:selectionBackgroundColor">#330066ff</item> 
         <item name="android:focusedMonthDateColor">#FF000000</item>
         <item name="android:otherMonthDateColor">#7F08002B</item>
         <item name="android:weekNumberColor">#7F080021</item>
         <item name="android:gridLinesColor">#7F08002A</item>
-        <item name="selectedDayLine">@android:drawable/day_picker_week_view_dayline_holo_light</item>
+        <item name="selectedDayLine">@android:drawable/day_picker_week_view_dayline_holo</item>
     </style>
 
     <!-- @hide -->
