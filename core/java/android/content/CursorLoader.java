@@ -27,6 +27,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     Cursor mCursor;
     ForceLoadContentObserver mObserver;
     boolean mStopped;
+    boolean mContentChanged;
     boolean mReset;
     Uri mUri;
     String[] mProjection;
@@ -102,7 +103,9 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
 
         if (mCursor != null) {
             deliverResult(mCursor);
-        } else {
+        }
+        if (mCursor == null || mContentChanged) {
+            mContentChanged = false;
             forceLoad();
         }
     }
@@ -119,6 +122,18 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
         mStopped = true;
     }
 
+    @Override
+    public void onContentChanged() {
+        if (mStopped) {
+            // This loader has been stopped, so we don't want to load
+            // new data right now...  but keep track of it changing to
+            // refresh later if we start again.
+            mContentChanged = true;
+            return;
+        }
+        super.onContentChanged();
+    }
+    
     @Override
     public void onCancelled(Cursor cursor) {
         if (cursor != null && !cursor.isClosed()) {
