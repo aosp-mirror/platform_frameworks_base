@@ -38,6 +38,7 @@
         android:layout_marginTop="32dip"
         android:singleLine="true"
         android:ellipsize="marquee"
+        android:visibility="gone"
         />
 
     <com.android.internal.widget.DigitalClock android:id="@+id/time"
@@ -47,37 +48,44 @@
         android:layout_alignParentLeft="true"
         android:layout_marginTop="8dip"
         android:layout_marginBottom="8dip"
-        >
+        android_layout_marginLeft="-10dip">
 
-        <TextView android:id="@+id/timeDisplay"
+        <!-- Because we can't have multi-tone fonts, we render two TextViews, one on
+        top of the other. Hence the redundant layout... -->
+        <TextView android:id="@+id/timeDisplayBackground"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:ellipsize="none"
             android:textSize="120sp"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:shadowColor="#C0000000"
-            android:shadowDx="0"
-            android:shadowDy="0"
-            android:shadowRadius="3.0"
+            android:textColor="#999999"
             android:layout_marginBottom="6dip"
             />
 
+        <TextView android:id="@+id/timeDisplayForeground"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:ellipsize="none"
+            android:textSize="120sp"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#666666"
+            android:layout_marginBottom="6dip"
+            android:layout_alignLeft="@id/timeDisplayBackground"
+            android:layout_alignTop="@id/timeDisplayBackground"
+            />
 
         <TextView android:id="@+id/am_pm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/timeDisplay"
-            android:layout_alignBaseline="@id/timeDisplay"
+            android:layout_toRightOf="@id/timeDisplayBackground"
+            android:layout_alignBaseline="@id/timeDisplayBackground"
             android:singleLine="true"
             android:ellipsize="none"
             android:textSize="30sp"
             android:layout_marginLeft="8dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:shadowColor="#C0000000"
-            android:shadowDx="0"
-            android:shadowDy="0"
-            android:shadowRadius="3.0"
             />
 
     </com.android.internal.widget.DigitalClock>
@@ -87,40 +95,40 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/time"
-        android:layout_marginTop="5dip"
+        android:layout_marginTop="10dip"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="32sp"
+        android:textSize="22sp"
         />
 
-    <!-- used for instructions such as "draw pattern to unlock", the next alarm, and charging
-         status.  -->
+    <!-- used for status such as the next alarm, and charging status.  -->
     <TextView
         android:id="@+id/status2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="32sp"
-        android:layout_marginTop="50dip"
+        android:textSize="22sp"
+        android:layout_marginTop="10dip"
         android:drawablePadding="4dip"
         />
+
     <TextView
         android:id="@+id/status1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dip"
-        android:textSize="32sp"
+        android:layout_marginTop="10dip"
+        android:textSize="22sp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         />
-        
+
     <TextView
         android:id="@+id/propertyOf"
         android:lineSpacingExtra="8dip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dip"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="22sp"
-        android:layout_marginTop="50dip"
         android:singleLine="false"
         android:visibility="invisible"
         />
