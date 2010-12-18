@@ -319,10 +319,8 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
             anim.setDuration((last-first) * STAGGER_ANIMATION_DELAY);
             anim.setInterpolator(interp);
             anims.add(anim);
-        }
 
-        if (animate) {
-            ObjectAnimator anim = ObjectAnimator.ofFloat(mBackgroundProtector, "alpha",
+            anim = ObjectAnimator.ofFloat(mBackgroundProtector, "alpha",
                     initialAlpha, 1.0f);
             anim.setDuration(last * STAGGER_ANIMATION_DELAY);
             anim.setInterpolator(interp);
