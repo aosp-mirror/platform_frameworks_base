@@ -65,12 +65,6 @@ public:
     static jbyteArray allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
                                      SkColorTable* ctable);
 
-    /** Set a pixelref for the bitmap (needs setConfig to already be called)
-        Returns true on success. If it returns false, then it failed, and the
-        appropriate exception will have been raised.
-    */
-    static bool mallocPixelRef(JNIEnv*, SkBitmap*, SkColorTable* ctable);
-
     /** Copy the colors in colors[] to the bitmap, convert to the correct
         format along the way.
     */
@@ -167,18 +161,6 @@ private:
     bool fAllocateInJavaHeap;
     jbyteArray fStorageObj;
     int fAllocCount;
-};
-
-class JavaMemoryUsageReporter : public SkVMMemoryReporter {
-public:
-    JavaMemoryUsageReporter(JNIEnv* env);
-    virtual ~JavaMemoryUsageReporter();
-    // overrides
-    virtual bool reportMemory(size_t memorySize);
-
-private:
-    JavaVM* fVM;
-    size_t fTotalSize;
 };
 
 enum JNIAccess {

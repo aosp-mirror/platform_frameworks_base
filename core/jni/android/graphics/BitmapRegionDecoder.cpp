@@ -81,10 +81,7 @@ static jobject doBuildTileIndex(JNIEnv* env, SkStream* stream) {
 
     JavaPixelAllocator *javaAllocator = new JavaPixelAllocator(env);
     decoder->setAllocator(javaAllocator);
-    JavaMemoryUsageReporter *javaMemoryReporter = new JavaMemoryUsageReporter(env);
-    decoder->setReporter(javaMemoryReporter);
     javaAllocator->unref();
-    javaMemoryReporter->unref();
 
     if (!decoder->buildTileIndex(stream, &width, &height)) {
         char msg[100];
