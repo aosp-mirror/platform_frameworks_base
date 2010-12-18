@@ -57,7 +57,7 @@ import java.util.concurrent.TimeoutException;
  * Base class for Instrumented tests for the Download Manager.
  */
 public class DownloadManagerBaseTest extends InstrumentationTestCase {
-
+    private static final String TAG = "DownloadManagerBaseTest";
     protected DownloadManager mDownloadManager = null;
     protected MockWebServer mServer = null;
     protected String mFileType = "text/plain";
@@ -616,19 +616,22 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
         int nextChunkSize = CHUNK_SIZE;
         byte[] randomData = null;
         Random rng = new LoggingRng();
+        byte[] chunkSizeData = generateData(nextChunkSize, type, rng);
 
         try {
             while (remaining > 0) {
                 if (remaining < CHUNK_SIZE) {
                     nextChunkSize = (int)remaining;
                     remaining = 0;
+                    randomData = generateData(nextChunkSize, type, rng);
                 }
                 else {
                     remaining -= CHUNK_SIZE;
+                    randomData = chunkSizeData;
                 }
-
-                randomData = generateData(nextChunkSize, type, rng);
                 output.write(randomData);
+                Log.i(TAG, "while creating " + fileSize + " file, " +
+                        "remaining bytes to be written: " + remaining);
             }
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error writing to file " + file.getAbsolutePath());

@@ -20,20 +20,14 @@ import coretestutils.http.MockResponse;
 
 import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
-import android.app.DownloadManagerBaseTest.DataType;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.os.StatFs;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.util.Log;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Iterator;
-import java.util.Random;
 import java.util.Set;
 
 /**
@@ -147,55 +141,6 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
             assertTrue(fileName.startsWith(CACHE_DIR));
         } finally {
             pfd.close();
-            cursor.close();
-        }
-    }
-
-    /**
-     * Attempts to download several files simultaneously
-     */
-    @LargeTest
-    public void testMultipleDownloads() throws Exception {
-        // need to be sure all current downloads have stopped first
-        removeAllCurrentDownloads();
-        int NUM_FILES = 10;
-        int MAX_FILE_SIZE = 10 * 1024; // 10 kb
-
-        Random r = new LoggingRng();
-        for (int i=0; i<NUM_FILES; ++i) {
-            int size = r.nextInt(MAX_FILE_SIZE);
-            byte[] blobData = generateData(size, DataType.TEXT);
-
-            Uri uri = getServerUri(DEFAULT_FILENAME + i);
-            Request request = new Request(uri);
-            request.setTitle(String.format("%s--%d", DEFAULT_FILENAME + i, i));
-
-            // Prepare the mock server with a standard response
-            enqueueResponse(HTTP_OK, blobData);
-
-            long requestID = mDownloadManager.enqueue(request);
-        }
-
-        waitForDownloadsOrTimeout(WAIT_FOR_DOWNLOAD_POLL_TIME, MAX_WAIT_FOR_DOWNLOAD_TIME);
-        Cursor cursor = mDownloadManager.query(new Query());
-        try {
-            assertEquals(NUM_FILES, cursor.getCount());
-
-            if (cursor.moveToFirst()) {
-                do {
-                    int status = cursor.getInt(cursor.getColumnIndex(
-                            DownloadManager.COLUMN_STATUS));
-                    String filename = cursor.getString(cursor.getColumnIndex(
-                            DownloadManager.COLUMN_URI));
-                    String errorString = String.format(
-                            "File %s failed to download successfully. Status code: %d",
-                            filename, status);
-                    assertEquals(errorString, DownloadManager.STATUS_SUCCESSFUL, status);
-                } while (cursor.moveToNext());
-            }
-
-            assertEquals(NUM_FILES, mReceiver.numDownloadsCompleted());
-        } finally {
             cursor.close();
         }
     }
@@ -477,104 +422,5 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
         }
         // Even tho the server drops the connection, we should still get a completed notification
         assertEquals(1, mReceiver.numDownloadsCompleted());
-    }
-
-    /**
-     * Tests downloading a file to system cache when there isn't enough space in the system cache 
-     * to hold the entire file. DownloadManager deletes enough files to make space for the
-     * new download.
-     */
-    @LargeTest
-    public void testDownloadToCacheWithAlmostFullCache() throws Exception {
-        int DOWNLOAD_FILE_SIZE = 1024 * 1024; // 1MB
-
-        StatFs fs = new StatFs(CACHE_DIR);
-        int blockSize = fs.getBlockSize();
-        int availableBlocks = fs.getAvailableBlocks();
-        int availableBytes = blockSize * availableBlocks;
-        Log.i(TAG, "INITIAL stage, available space in /cache: " + availableBytes);
-        File outFile = File.createTempFile("DM_TEST", null, new File(CACHE_DIR));
-        byte[] buffer = new byte[blockSize];
-
-        try {
-            // fill cache to ensure we don't have enough space - take half the size of the
-            // download size, and leave that much freespace left on the cache partition
-            if (DOWNLOAD_FILE_SIZE <= availableBytes) {
-                int writeSizeBytes = availableBytes - (DOWNLOAD_FILE_SIZE / 2);
-
-                int writeSizeBlocks = writeSizeBytes / blockSize;
-                int remainderSizeBlocks = availableBlocks - writeSizeBlocks;
-
-                FileOutputStream fo = null;
-                try {
-                    fo = new FileOutputStream(outFile);
-                    while (fs.getAvailableBlocks() >= remainderSizeBlocks) {
-                        fo.write(buffer);
-                        fs.restat(CACHE_DIR);
-                    }
-                } catch (IOException e) {
-                    Log.e(LOG_TAG, "error filling file: ", e);
-                    throw e;
-                } finally {
-                    if (fo != null) {
-                        fo.close();
-                    }
-                }
-            }
-
-            // /cache should now be almost full. 
-            long spaceAvailable = fs.getAvailableBlocks() * blockSize;
-            Log.i(TAG, "BEFORE download, available space in /cache: " + spaceAvailable);
-            assertTrue(DOWNLOAD_FILE_SIZE > spaceAvailable);
-
-            // try to download 1MB file into /cache - and it should succeed
-            byte[] blobData = generateData(DOWNLOAD_FILE_SIZE, DataType.TEXT);
-            long dlRequest = doBasicDownload(blobData, DOWNLOAD_TO_SYSTEM_CACHE);
-            verifyAndCleanupSingleFileDownload(dlRequest, blobData);
-        } finally {
-            if (outFile != null) {
-                outFile.delete();
-            }
-        }
-    }
-
-    /**
-     * Tests that files are not deleted when DOWNLOAD_CACHE_NON_PURGEABLE is set, even if we've
-     * run out of space.
-     */
-    @LargeTest
-    public void testDownloadToCacheNonPurgeableWithFullCache() throws Exception {
-        int fileSize = 1024 * 1024; // 1MB
-        byte[] blobData = generateData(fileSize, DataType.BINARY);
-        long dlRequest = -1;
-
-        // Fill up the cache partition with DOWNLOAD_CACHE_NON_PURGEABLE downloads
-        // until 500KB is left.
-        boolean spaceAvailable = true;
-        while (spaceAvailable) {
-            // since this tests package has android.permission.DOWNLOAD_CACHE_NON_PURGEABLE
-            // permission, downloads are automatically set to be DOWNLOAD_CACHE_NON_PURGEABLE
-            dlRequest = enqueueDownloadRequest(blobData, DOWNLOAD_TO_DOWNLOAD_CACHE_DIR);
-            waitForDownloadOrTimeout(dlRequest);
-
-            // Check if we've filled up the cache yet
-            StatFs fs = new StatFs(Environment.getDownloadCacheDirectory().getAbsolutePath());
-            int availableBytes = fs.getBlockSize() * fs.getAvailableBlocks();
-            Log.i(TAG, "available space in /cache: " + availableBytes);
-            spaceAvailable = (availableBytes > fileSize) ? true : false;
-        }
-
-        // Now add one more 1MB download (should not fit in the space left over)
-        dlRequest = enqueueDownloadRequest(blobData, DOWNLOAD_TO_DOWNLOAD_CACHE_DIR);
-        waitForDownloadOrTimeout(dlRequest);
-
-        // For the last download we should have failed b/c there is not enough space left in cache
-        Cursor cursor = getCursor(dlRequest);
-        try {
-            verifyInt(cursor, DownloadManager.COLUMN_REASON,
-                    DownloadManager.ERROR_INSUFFICIENT_SPACE);
-        } finally {
-            cursor.close();
-        }
     }
 }
