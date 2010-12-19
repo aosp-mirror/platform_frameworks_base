@@ -25,7 +25,6 @@
 #include <utils/RefBase.h>
 
 #define DEFAULT_WINDOW_SIZE 4096
-#define MAX_WINDOW_SIZE (1024 * 1024)
 #define WINDOW_ALLOCATION_SIZE 4096
 
 #define ROW_SLOT_CHUNK_NUM_ROWS 16
