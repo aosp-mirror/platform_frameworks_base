@@ -240,10 +240,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 public void onChange(boolean selfChange) {
                     super.onChange(selfChange);
 
-                    mIsEnabled = Settings.Secure.getInt(mContext.getContentResolver(),
-                        Settings.Secure.ACCESSIBILITY_ENABLED, 0) == 1;
-
                     synchronized (mLock) {
+                        mIsEnabled = Settings.Secure.getInt(mContext.getContentResolver(),
+                                Settings.Secure.ACCESSIBILITY_ENABLED, 0) == 1;
                         if (mIsEnabled) {
                             manageServicesLocked();
                         } else {
@@ -452,9 +451,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         } catch (RemoteException re) {
             if (re instanceof DeadObjectException) {
                 Slog.w(LOG_TAG, "Dead " + service.mService + ". Cleaning up.");
-                synchronized (mLock) {
-                    removeDeadServiceLocked(service);
-                }
+                removeDeadServiceLocked(service);
             } else {
                 Slog.e(LOG_TAG, "Error during sending " + event + " to " + service.mService, re);
             }
@@ -468,19 +465,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @return True if the service was removed, false otherwise.
      */
     private boolean removeDeadServiceLocked(Service service) {
-        mServices.remove(service);
-        mHandler.removeMessages(service.mId);
-
         if (Config.DEBUG) {
             Slog.i(LOG_TAG, "Dead service " + service.mService + " removed");
         }
-
-        if (mServices.isEmpty()) {
-            mIsEnabled = false;
-            updateClientsLocked();
-        }
-
-        return true;
+        mHandler.removeMessages(service.mId);
+        return mServices.remove(service);
     }
 
     /**
