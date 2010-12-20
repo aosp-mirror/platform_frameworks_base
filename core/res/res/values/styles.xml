@@ -1535,8 +1535,8 @@
         <item name="android:indeterminateOnly">false</item>
         <item name="android:progressDrawable">@android:drawable/scrubber_progress_horizontal_holo_dark</item>
         <item name="android:indeterminateDrawable">@android:drawable/scrubber_progress_horizontal_holo_dark</item>
-        <item name="android:minHeight">6dip</item>
-        <item name="android:maxHeight">6dip</item>
+        <item name="android:minHeight">13dip</item>
+        <item name="android:maxHeight">13dip</item>
         <item name="android:thumb">@android:drawable/scrubber_control_holo</item>
         <item name="android:thumbOffset">16dip</item>
         <item name="android:focusable">true</item>
