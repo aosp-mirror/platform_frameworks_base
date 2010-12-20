@@ -27,6 +27,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.graphics.ImageFormat;
+import android.graphics.SurfaceTexture;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -324,8 +325,10 @@ public class Camera {
 
     /**
      * Sets the {@link Surface} to be used for live preview.
-     * A surface is necessary for preview, and preview is necessary to take
-     * pictures.  The same surface can be re-set without harm.
+     * Either a surface or surface texture is necessary for preview, and
+     * preview is necessary to take pictures.  The same surface can be re-set
+     * without harm.  Setting a preview surface will un-set any preview surface
+     * texture that was set via {@link #setPreviewTexture}.
      *
      * <p>The {@link SurfaceHolder} must already contain a surface when this
      * method is called.  If you are using {@link android.view.SurfaceView},
@@ -355,6 +358,29 @@ public class Camera {
     }
 
     private native final void setPreviewDisplay(Surface surface);
+
+    /**
+     * Sets the {@link SurfaceTexture} to be used for live preview.
+     * Either a surface or surface texture is necessary for preview, and
+     * preview is necessary to take pictures.  The same surface texture can be
+     * re-set without harm.  Setting a preview surface texture will un-set any
+     * preview surface that was set via {@link #setPreviewDisplay}.
+     *
+     * <p>This method must be called before {@link #startPreview()}.  The
+     * one exception is that if the preview surface texture is not set (or set
+     * to null) before startPreview() is called, then this method may be called
+     * once with a non-null parameter to set the preview surface.  (This allows
+     * camera setup and surface creation to happen in parallel, saving time.)
+     * The preview surface texture may not otherwise change while preview is
+     * running.
+     *
+     * @param surfaceTexture the {@link SurfaceTexture} to which the preview
+     *     images are to be sent or null to remove the current preview surface
+     *     texture
+     * @throws IOException if the method fails (for example, if the surface
+     *     texture is unavailable or unsuitable).
+     */
+    public native final void setPreviewTexture(SurfaceTexture surfaceTexture);
 
     /**
      * Callback interface used to deliver copies of preview frames as
