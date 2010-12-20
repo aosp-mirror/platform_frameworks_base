@@ -166,6 +166,7 @@ public:
     mutable const ObjectBase * mObjHead;
 
     bool ext_OES_texture_npot() const {return mGL.OES_texture_npot;}
+    bool ext_GL_IMG_texture_npot() const {return mGL.GL_IMG_texture_npot;}
 
 protected:
     Device *mDev;
@@ -202,6 +203,7 @@ protected:
         int32_t mMaxVertexTextureUnits;
 
         bool OES_texture_npot;
+        bool GL_IMG_texture_npot;
     } mGL;
 
     uint32_t mWidth;
