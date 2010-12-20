@@ -131,6 +131,13 @@ public:
      * This is an ASYNCHRONOUS call.
      */
     virtual void signal() const = 0;
+
+    /* Create a new GraphicBuffer for the client to use.  SurfaceFlinger will
+     * not maintain a reference to the GraphicBuffer, so the underlying native
+     * handle will be freed once the client references are released.
+     */
+    virtual sp<GraphicBuffer> createGraphicBuffer(uint32_t w, uint32_t h,
+            PixelFormat format, uint32_t usage) const = 0;
 };
 
 // ----------------------------------------------------------------------------
@@ -144,6 +151,7 @@ public:
         BOOT_FINISHED = IBinder::FIRST_CALL_TRANSACTION,
         CREATE_CONNECTION,
         CREATE_CLIENT_CONNECTION,
+        CREATE_GRAPHIC_BUFFER,
         GET_CBLK,
         OPEN_GLOBAL_TRANSACTION,
         CLOSE_GLOBAL_TRANSACTION,
