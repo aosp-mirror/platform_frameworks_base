@@ -238,9 +238,8 @@ characteristics of each. </p>
 <ul>
 <li>New {@link android.hardware.Camera.CameraInfo} class stores a camera's
 positional characteristics (orientation, front-facing or back-facing).</li>
-<li>New {@link android.hardware.Camera#getNumberOfCameras()}, {@link
-android.hardware.Camera#getCameraInfo(int,CameraInfo) getCameraInfo()}, and
-{@link android.hardware.Camera#getNumberOfCameras()} methods in the {@link
+<li>New {@link android.hardware.Camera#getNumberOfCameras()} and {@link
+android.hardware.Camera#getCameraInfo(int,CameraInfo) getCameraInfo()} methods in the {@link
 android.hardware.Camera} class let applications query for the cameras available
 and open the camera that they need.</li>
 <li>New {@link android.media.CamcorderProfile get(int,int) method lets
@@ -691,7 +690,7 @@ Screens</a>.</li>
 <li><code>"reverseLandscape"</code> &mdash; The Activity would like to have the
 screen in landscape orientation, turned in the opposite direction from normal
 landscape.</li>
-<li><code>"reversePortait"</code> &mdash; The Activity would like to have the
+<li><code>"reversePortrait"</code> &mdash; The Activity would like to have the
 screen in portrait orientation, turned in the opposite direction from normal
 portrait.</li>
 <li><code>"sensorLandscape"</code> &mdash; The Activity would like to have the
