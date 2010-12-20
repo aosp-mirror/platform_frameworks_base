@@ -515,4 +515,7 @@
          Build.MODEL. The format string shall not be escaped. -->
     <string name="config_useragentprofile_url"></string>
 
+    <!-- When a database query is executed, the results retuned are paginated
+         in pages of size (in KB) indicated by this value -->
+    <integer name="config_cursorWindowSize">2048</integer>
 </resources>
