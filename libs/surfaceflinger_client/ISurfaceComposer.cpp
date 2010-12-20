@@ -247,13 +247,13 @@ status_t BnSurfaceComposer::onTransact(
             int32_t mode = data.readInt32();
             status_t res = turnElectronBeamOff(mode);
             reply->writeInt32(res);
-        }
+        } break;
         case TURN_ELECTRON_BEAM_ON: {
             CHECK_INTERFACE(ISurfaceComposer, data, reply);
             int32_t mode = data.readInt32();
             status_t res = turnElectronBeamOn(mode);
             reply->writeInt32(res);
-        }
+        } break;
         default:
             return BBinder::onTransact(code, data, reply, flags);
     }
