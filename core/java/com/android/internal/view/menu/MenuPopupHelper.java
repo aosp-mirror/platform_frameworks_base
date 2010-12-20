@@ -124,7 +124,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         if (mOverflowOnly) {
             item = mMenu.getOverflowItem(position);
         } else {
-            item = mMenu.getItem(position);
+            item = mMenu.getVisibleItems().get(position);
         }
         mMenu.performItemAction(item, 0);
         dismiss();
