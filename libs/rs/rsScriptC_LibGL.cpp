@@ -287,24 +287,6 @@ static void SC_allocationSyncAll2(RsAllocation va, RsAllocationUsageType source)
     static_cast<Allocation *>(va)->syncAll(rsc, source);
 }
 
-static void SC_uploadToTexture2(RsAllocation va, uint32_t baseMipLevel) {
-    CHECK_OBJ(va);
-    GET_TLS();
-    rsi_AllocationUploadToTexture(rsc, va, false, baseMipLevel);
-}
-
-static void SC_uploadToTexture(RsAllocation va) {
-    CHECK_OBJ(va);
-    GET_TLS();
-    rsi_AllocationUploadToTexture(rsc, va, false, 0);
-}
-
-static void SC_uploadToBufferObject(RsAllocation va) {
-    CHECK_OBJ(va);
-    GET_TLS();
-    rsi_AllocationUploadToBufferObject(rsc, va);
-}
-
 static void SC_ClearColor(float r, float g, float b, float a) {
     GET_TLS();
     rsc->setupProgramStore();
@@ -438,10 +420,6 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z12rsgGetHeightv", (void *)&SC_getHeight, false },
 
     { "_Z20rsgAllocationSyncAll13rs_allocation", (void *)&SC_allocationSyncAll, false },
-
-    { "_Z18rsgUploadToTexture13rs_allocationj", (void *)&SC_uploadToTexture2, false },
-    { "_Z18rsgUploadToTexture13rs_allocation", (void *)&SC_uploadToTexture, false },
-    { "_Z23rsgUploadToBufferObject13rs_allocation", (void *)&SC_uploadToBufferObject, false },
 
     { "_Z11rsgDrawRectfffff", (void *)&SC_drawRect, false },
     { "_Z11rsgDrawQuadffffffffffff", (void *)&SC_drawQuad, false },

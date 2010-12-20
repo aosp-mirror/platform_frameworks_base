@@ -38,13 +38,6 @@ extern void __attribute__((overloadable))
     rsgAllocationSyncAll(rs_allocation);
 
 extern void __attribute__((overloadable))
-    rsgUploadToTexture(rs_allocation);
-extern void __attribute__((overloadable))
-    rsgUploadToTexture(rs_allocation, uint mipLevel);
-extern void __attribute__((overloadable))
-    rsgUploadToBufferObject(rs_allocation);
-
-extern void __attribute__((overloadable))
     rsgDrawRect(float x1, float y1, float x2, float y2, float z);
 extern void __attribute__((overloadable))
     rsgDrawQuad(float x1, float y1, float z1,
