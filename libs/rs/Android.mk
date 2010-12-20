@@ -113,11 +113,11 @@ LOCAL_SRC_FILES:= \
 	rsVertexArray.cpp
 
 
-LOCAL_SHARED_LIBRARIES += libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libbcc
+LOCAL_SHARED_LIBRARIES += libz libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libbcc
 
-LOCAL_STATIC_LIBRARIES := libft2 librslib_rt
+LOCAL_STATIC_LIBRARIES := libdex libft2 librslib_rt
 
-LOCAL_C_INCLUDES += external/freetype/include
+LOCAL_C_INCLUDES += external/freetype/include external/zlib dalvik
 
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libRS

@@ -417,9 +417,9 @@ public class RenderScript {
     synchronized void nScriptCSetScript(byte[] script, int offset, int length) {
         rsnScriptCSetScript(mContext, script, offset, length);
     }
-    native int  rsnScriptCCreate(int con, String val, String cacheDir);
-    synchronized int nScriptCCreate(String resName, String cacheDir) {
-      return rsnScriptCCreate(mContext, resName, cacheDir);
+    native int  rsnScriptCCreate(int con, String packageName, String resName, String cacheDir);
+    synchronized int nScriptCCreate(String packageName, String resName, String cacheDir) {
+        return rsnScriptCCreate(mContext, packageName, resName, cacheDir);
     }
 
     native void rsnSamplerBegin(int con);
