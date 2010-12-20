@@ -174,7 +174,7 @@ public class InputMethodButton extends ImageView {
         switch (visibility) {
             case ID_IME_BUTTON_VISIBILITY_AUTO:
                 return size > 1 || (size == 1
-                        && mImm.getEnabledInputMethodSubtypeList(imis.get(0)).size() > 1);
+                        && mImm.getEnabledInputMethodSubtypeList(imis.get(0), false).size() > 1);
             case ID_IME_BUTTON_VISIBILITY_ALWAYS_SHOW:
                 return true;
             case ID_IME_BUTTON_VISIBILITY_ALWAYS_HIDE:

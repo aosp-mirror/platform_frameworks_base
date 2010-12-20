@@ -506,9 +506,10 @@ public final class InputMethodManager {
         }
     }
 
-    public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(InputMethodInfo imi) {
+    public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(InputMethodInfo imi,
+            boolean allowsImplicitlySelectedSubtypes) {
         try {
-            return mService.getEnabledInputMethodSubtypeList(imi);
+            return mService.getEnabledInputMethodSubtypeList(imi, allowsImplicitlySelectedSubtypes);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }

@@ -31,7 +31,8 @@ import com.android.internal.view.IInputMethodClient;
 interface IInputMethodManager {
     List<InputMethodInfo> getInputMethodList();
     List<InputMethodInfo> getEnabledInputMethodList();
-    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in InputMethodInfo imi);
+    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in InputMethodInfo imi,
+            boolean allowsImplicitlySelectedSubtypes);
     // TODO: We should change the return type from List to List<Parcelable>
     // Currently there is a bug that aidl doesn't accept List<Parcelable>
     List getShortcutInputMethodsAndSubtypes();
