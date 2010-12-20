@@ -684,14 +684,6 @@ final class WebViewCore {
                                 }
                                 BrowserFrame.sJavaBridge.removePackageName((String) msg.obj);
                                 break;
-
-                            case EventHub.PROXY_CHANGED:
-                                if (BrowserFrame.sJavaBridge == null) {
-                                    throw new IllegalStateException(
-                                            "No WebView has been created in this process!");
-                                }
-                                BrowserFrame.sJavaBridge.updateProxy((String) msg.obj);
-                                break;
                         }
                     }
                 };
@@ -990,8 +982,6 @@ final class WebViewCore {
         static final int USE_MOCK_DEVICE_ORIENTATION = 191;
 
         static final int AUTOFILL_FORM = 192;
-
-        static final int PROXY_CHANGED = 193;
 
         // private message ids
         private static final int DESTROY =     200;
