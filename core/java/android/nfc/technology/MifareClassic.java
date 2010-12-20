@@ -161,7 +161,9 @@ public final class MifareClassic extends BasicTagTechnology {
                 mSize = SIZE_4K;
                 break;
             default:
-                // Unknown, not MIFARE
+                // Unknown mifare
+                mType = TYPE_UNKNOWN;
+                mSize = SIZE_UNKNOWN;
                 break;
         }
     }
@@ -226,9 +228,10 @@ public final class MifareClassic extends BasicTagTechnology {
 
     // Methods that require connect()
     /**
-     * Authenticate for a given sector.
+     * Authenticate for a given block.
+     * Note that this will authenticate the entire sector the block belongs to.
      */
-    public boolean authenticateSector(int sector, byte[] key, boolean keyA) {
+    public boolean authenticateBlock(int block, byte[] key, boolean keyA) {
         checkConnected();
 
         byte[] cmd = new byte[12];
@@ -241,7 +244,7 @@ public final class MifareClassic extends BasicTagTechnology {
         }
 
         // Second byte is block address
-        cmd[1] = firstBlockInSector(sector);
+        cmd[1] = (byte) block;
 
         // Next 4 bytes are last 4 bytes of UID
         byte[] uid = getTag().getId();
@@ -261,6 +264,19 @@ public final class MifareClassic extends BasicTagTechnology {
     }
 
     /**
+     * Authenticate for a given sector.
+     */
+    public boolean authenticateSector(int sector, byte[] key, boolean keyA) {
+        checkConnected();
+
+        byte addr = (byte) ((firstBlockInSector(sector)) & 0xff);
+
+        // Note that authenticating a block of a sector, will authenticate
+        // the entire sector.
+        return authenticateBlock(addr, key, keyA);
+    }
+
+    /**
      * Sector indexing starts at 0.
      * Block indexing starts at 0, and resets in each sector.
      * @throws IOException
@@ -269,28 +285,69 @@ public final class MifareClassic extends BasicTagTechnology {
         checkConnected();
 
         byte addr = (byte) ((firstBlockInSector(sector) + block) & 0xff);
-        byte[] blockread_cmd = { 0x30, addr }; // phHal_eMifareRead
+        return readBlock(addr);
 
-        // TODO deal with authentication problems
+    }
+
+    /**
+     * Reads absolute block index.
+     * @throws IOException
+     */
+    public byte[] readBlock(int block) throws IOException {
+        checkConnected();
+
+        byte addr = (byte) block;
+        byte[] blockread_cmd = { 0x30, addr };
+
         return transceive(blockread_cmd);
     }
 
-//    public byte[] readSector(int sector);
-    //TODO: define an enumeration for access control settings
-//    public int readSectorAccessControl(int sector);
+    /**
+     * Writes absolute block index.
+     * @throws IOException
+     */
+    public void writeBlock(int block, byte[] data) throws IOException {
+        checkConnected();
+
+        byte addr = (byte) block;
+        byte[] blockwrite_cmd = new byte[data.length + 2];
+        blockwrite_cmd[0] = (byte) 0xA0; // MF write command
+        blockwrite_cmd[1] = addr;
+        System.arraycopy(data, 0, blockwrite_cmd, 2, data.length);
+
+        transceive(blockwrite_cmd);
+    }
 
     /**
+     * Writes relative block in sector.
      * @throws IOException
-     * @throws NotAuthenticatedException
      */
-/*
-    public void writeBlock(int block, byte[] data);
-    public void writeSector(int block, byte[] sector);
-    public void writeSectorAccessControl(int sector, int access);
-    public void increment(int block);
-    public void decrement(int block);
+    public void writeBlock(int sector, int block, byte[] data) throws IOException {
+        checkConnected();
 
-*/
+        byte addr = (byte) ((firstBlockInSector(sector) + block) & 0xff);
+
+        writeBlock(addr, data);
+    }
+
+    public void increment(int block) throws IOException {
+        checkConnected();
+
+        byte addr = (byte) block;
+        byte[] incr_cmd = { (byte) 0xC1, (byte) block };
+
+        transceive(incr_cmd);
+    }
+
+    public void decrement(int block) throws IOException {
+        checkConnected();
+
+        byte addr = (byte) block;
+        byte[] incr_cmd = { (byte) 0xC0, (byte) block };
+
+        transceive(incr_cmd);
+    }
+
     /**
      * Send data to a tag and receive the response.
      * <p>
