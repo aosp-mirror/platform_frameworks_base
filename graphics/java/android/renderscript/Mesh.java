@@ -93,20 +93,23 @@ public class Mesh extends BaseObj {
 
     public static class Builder {
         RenderScript mRS;
+        int mUsage;
 
         class Entry {
             Type t;
             Element e;
             int size;
             Primitive prim;
+            int usage;
         }
 
         int mVertexTypeCount;
         Entry[] mVertexTypes;
         Vector mIndexTypes;
 
-        public Builder(RenderScript rs) {
+        public Builder(RenderScript rs, int usage) {
             mRS = rs;
+            mUsage = usage;
             mVertexTypeCount = 0;
             mVertexTypes = new Entry[16];
             mIndexTypes = new Vector();
@@ -190,10 +193,10 @@ public class Mesh extends BaseObj {
                 Allocation alloc = null;
                 Entry entry = (Entry)b.mIndexTypes.elementAt(ct);
                 if (entry.t != null) {
-                    alloc = Allocation.createTyped(rs, entry.t);
+                    alloc = Allocation.createTyped(rs, entry.t, b.mUsage);
                 }
                 else if(entry.e != null) {
-                    alloc = Allocation.createSized(rs, entry.e, entry.size);
+                    alloc = Allocation.createSized(rs, entry.e, entry.size, b.mUsage);
                 }
                 int allocID = (alloc == null) ? 0 : alloc.getID();
                 rs.nMeshBindIndex(id, allocID, entry.prim.mID, ct);
@@ -205,9 +208,9 @@ public class Mesh extends BaseObj {
                 Allocation alloc = null;
                 Entry entry = b.mVertexTypes[ct];
                 if (entry.t != null) {
-                    alloc = Allocation.createTyped(rs, entry.t);
+                    alloc = Allocation.createTyped(rs, entry.t, b.mUsage);
                 } else if(entry.e != null) {
-                    alloc = Allocation.createSized(rs, entry.e, entry.size);
+                    alloc = Allocation.createSized(rs, entry.e, entry.size, b.mUsage);
                 }
                 rs.nMeshBindVertex(id, alloc.getID(), ct);
                 newMesh.mVertexBuffers[ct] = alloc;
@@ -460,7 +463,12 @@ public class Mesh extends BaseObj {
             }
             mElement = b.create();
 
-            Builder smb = new Builder(mRS);
+            int usage = Allocation.USAGE_SCRIPT;
+            if (uploadToBufferObject) {
+                usage |= Allocation.USAGE_GRAPHICS_VERTEX;
+            }
+
+            Builder smb = new Builder(mRS, usage);
             smb.addVertexType(mElement, mVtxCount / floatCount);
             smb.addIndexType(Element.U16(mRS), mIndexCount, Primitive.TRIANGLE);
 
@@ -468,11 +476,15 @@ public class Mesh extends BaseObj {
 
             sm.getVertexAllocation(0).copyFrom(mVtxData);
             if(uploadToBufferObject) {
-                sm.getVertexAllocation(0).uploadToBufferObject();
+                if (uploadToBufferObject) {
+                    sm.getVertexAllocation(0).syncAll(Allocation.USAGE_SCRIPT);
+                }
             }
 
             sm.getIndexAllocation(0).copyFrom(mIndexData);
-            sm.getIndexAllocation(0).uploadToBufferObject();
+            if (uploadToBufferObject) {
+                sm.getIndexAllocation(0).syncAll(Allocation.USAGE_SCRIPT);
+            }
 
             return sm;
         }

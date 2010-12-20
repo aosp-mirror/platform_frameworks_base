@@ -102,12 +102,6 @@ public class Allocation extends BaseObj {
         mRS.nAllocationSyncAll(getID(), srcLocation);
     }
 
-    public void uploadToBufferObject() {
-        mRS.validate();
-        mRS.nAllocationUploadToBufferObject(getID());
-    }
-
-
     public void copyFrom(BaseObj[] d) {
         mRS.validate();
         if (d.length != mType.getCount()) {
@@ -516,19 +510,6 @@ public class Allocation extends BaseObj {
                                         USAGE_GRAPHICS_TEXTURE);
     }
 
-/*
-    static public Allocation createFromBitmapResource(RenderScript rs,
-                                                      Resources res,
-                                                      int id,
-                                                      Element dstFmt,
-                                                      boolean genMips) {
-        MipmapControl mc = MipmapControl.MIPMAP_NONE;
-        if (genMips) {
-            mc = MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE;
-        }
-        return createFromBitmapResource(rs, res, id, mc, USAGE_GRAPHICS_TEXTURE);
-    }
-*/
     static public Allocation createFromString(RenderScript rs,
                                               String str,
                                               int usage) {
