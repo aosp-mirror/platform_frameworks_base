@@ -18,7 +18,6 @@ package android.database.sqlite;
 
 import android.app.AppGlobals;
 import android.content.ContentValues;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseErrorHandler;
 import android.database.DatabaseUtils;
@@ -2671,22 +2670,4 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @param statementId statement to be finzlied by sqlite
      */
     private final native void native_finalize(int statementId);
-
-    /**
-     * set sqlite soft heap limit
-     * http://www.sqlite.org/c3ref/soft_heap_limit64.html
-     */
-
-    /** sqlite soft heap limit http://www.sqlite.org/c3ref/soft_heap_limit64.html
-     * set it to 4 times the default cursor window size.
-     * TODO what is an appropriate value, considring the WAL feature which could burn
-     * a lot of memory with many connections to the database. needs testing to figure out
-     * optimal value for this.
-     */
-    static {
-        int limit = Resources.getSystem().getInteger(
-                com.android.internal.R.integer.config_cursorWindowSize) * 1024 * 4;
-        native_setSqliteSoftHeapLimit(limit);
-    }
-    private final static native void native_setSqliteSoftHeapLimit(int softHeapLimit);
 }
