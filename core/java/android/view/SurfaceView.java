@@ -65,7 +65,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Surface is created and destroyed as the window is shown and hidden.
  * 
  * <p>One of the purposes of this class is to provide a surface in which a
- * secondary thread can render in to the screen.  If you are going to use it
+ * secondary thread can render into the screen.  If you are going to use it
  * this way, you need to be aware of some threading semantics:
  * 
  * <ul>

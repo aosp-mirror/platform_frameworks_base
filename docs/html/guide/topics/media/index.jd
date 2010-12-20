@@ -115,9 +115,8 @@ Resume playback from where you paused with
 <p>{@link android.media.MediaPlayer#stop() stop()} and 
 {@link android.media.MediaPlayer#pause() pause()} work the same as discussed
 above.</p>
-  <p class="note"><strong>Note:</strong> It is possible that <code>mp</code> could be
-  null, so good code should <code>null</code> check after the <code>new</code>.
-  Also, <code>IllegalArgumentException</code> and <code>IOException</code> either
+  <p class="note"><strong>Note:</strong>
+  <code>IllegalArgumentException</code> and <code>IOException</code> either
   need to be caught or passed on when using <code>setDataSource()</code>, since
   the file you are referencing may not exist.</p>
 <p class="note"><strong>Note:</strong>
