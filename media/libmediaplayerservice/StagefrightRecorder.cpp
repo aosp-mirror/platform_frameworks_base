@@ -358,6 +358,8 @@ status_t StagefrightRecorder::setParamVideoRotation(int32_t degrees) {
 
 status_t StagefrightRecorder::setParamMaxFileDurationUs(int64_t timeUs) {
     LOGV("setParamMaxFileDurationUs: %lld us", timeUs);
+
+    // This is meant for backward compatibility for MediaRecorder.java
     if (timeUs <= 0) {
         LOGW("Max file duration is not positive: %lld us. Disabling duration limit.", timeUs);
         timeUs = 0; // Disable the duration limit for zero or negative values.
@@ -375,7 +377,13 @@ status_t StagefrightRecorder::setParamMaxFileDurationUs(int64_t timeUs) {
 
 status_t StagefrightRecorder::setParamMaxFileSizeBytes(int64_t bytes) {
     LOGV("setParamMaxFileSizeBytes: %lld bytes", bytes);
-    if (bytes <= 1024) {  // XXX: 1 kB
+
+    // This is meant for backward compatibility for MediaRecorder.java
+    if (bytes <= 0) {
+        LOGW("Max file size is not positive: %lld bytes. "
+             "Disabling file size limit.", bytes);
+        bytes = 0; // Disable the file size limit for zero or negative values.
+    } else if (bytes <= 1024) {  // XXX: 1 kB
         LOGE("Max file size is too small: %lld bytes", bytes);
         return BAD_VALUE;
     }
