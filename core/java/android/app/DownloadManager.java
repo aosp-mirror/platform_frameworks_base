@@ -453,7 +453,19 @@ public class DownloadManager {
          * @return this object
          */
         public Request setDestinationInExternalPublicDir(String dirType, String subPath) {
-            setDestinationFromBase(Environment.getExternalStoragePublicDirectory(dirType), subPath);
+            File file = Environment.getExternalStoragePublicDirectory(dirType);
+            if (file.exists()) {
+                if (!file.isDirectory()) {
+                    throw new IllegalStateException(file.getAbsolutePath() +
+                            " already exists and is not a directory");
+                }
+            } else {
+                if (!file.mkdir()) {
+                    throw new IllegalStateException("Unable to create directory: "+
+                            file.getAbsolutePath());
+                }
+            }
+            setDestinationFromBase(file, subPath);
             return this;
         }
 
