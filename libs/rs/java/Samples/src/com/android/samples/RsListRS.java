@@ -134,7 +134,7 @@ public class RsListRS {
 
         mScript.bind_gList(mListAllocs);
 
-        mItalic = Font.createFromFamily(mRS, mRes, "serif", Font.Style.BOLD_ITALIC, 8);
+        mItalic = Font.create(mRS, mRes, "serif", Font.Style.BOLD_ITALIC, 8);
         mScript.set_gItalic(mItalic);
 
         mRS.bindRootScript(mScript);

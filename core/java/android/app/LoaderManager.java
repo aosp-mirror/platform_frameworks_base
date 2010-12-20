@@ -147,7 +147,10 @@ public abstract class LoaderManager {
             LoaderManager.LoaderCallbacks<D> callback);
 
     /**
-     * Stops and removes the loader with the given ID.
+     * Stops and removes the loader with the given ID.  If this loader
+     * had previously reported data to the client through
+     * {@link LoaderCallbacks#onLoadFinished(Loader, Object)}, a call
+     * will be made to {@link LoaderCallbacks#onLoaderReset(Loader)}.
      */
     public abstract void destroyLoader(int id);
 
@@ -397,7 +400,8 @@ class LoaderManagerImpl extends LoaderManager {
             writer.print(prefix); writer.print("mData="); writer.println(mData);
             writer.print(prefix); writer.print("mStarted="); writer.print(mStarted);
                     writer.print(" mRetaining="); writer.print(mRetaining);
-                    writer.print(" mDestroyed="); writer.print(mDestroyed);
+                    writer.print(" mDestroyed="); writer.println(mDestroyed);
+            writer.print(prefix); writer.print("mNeedReset="); writer.print(mNeedReset);
                     writer.print(" mListenerRegistered="); writer.println(mListenerRegistered);
         }
     }
@@ -489,6 +493,12 @@ class LoaderManagerImpl extends LoaderManager {
         if (idx >= 0) {
             LoaderInfo info = mLoaders.valueAt(idx);
             mLoaders.removeAt(idx);
+            info.destroy();
+        }
+        idx = mInactiveLoaders.indexOfKey(id);
+        if (idx >= 0) {
+            LoaderInfo info = mInactiveLoaders.valueAt(idx);
+            mInactiveLoaders.removeAt(idx);
             info.destroy();
         }
     }

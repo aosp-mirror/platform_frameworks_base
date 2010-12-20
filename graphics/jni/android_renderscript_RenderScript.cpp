@@ -623,7 +623,7 @@ nFileA3DGetEntryByIndex(JNIEnv *_env, jobject _this, RsContext con, jint fileA3D
 // -----------------------------------
 
 static int
-nFontCreateFromFile(JNIEnv *_env, jobject _this, RsContext con, jstring fileName, jint fontSize, jint dpi)
+nFontCreateFromFile(JNIEnv *_env, jobject _this, RsContext con, jstring fileName, jfloat fontSize, jint dpi)
 {
     const char* fileNameUTF = _env->GetStringUTFChars(fileName, NULL);
 
@@ -902,12 +902,14 @@ exit:
 }
 
 static jint
-nScriptCCreate(JNIEnv *_env, jobject _this, RsContext con, jstring resName, jstring cacheDir)
+nScriptCCreate(JNIEnv *_env, jobject _this, RsContext con, jstring packageName, jstring resName, jstring cacheDir)
 {
     LOG_API("nScriptCCreate, con(%p)", con);
+    const char* packageNameUTF = _env->GetStringUTFChars(packageName, NULL);
     const char* resNameUTF = _env->GetStringUTFChars(resName, NULL);
     const char* cacheDirUTF = _env->GetStringUTFChars(cacheDir, NULL);
-    jint i = (jint)rsScriptCCreate(con, resNameUTF, cacheDirUTF);
+    jint i = (jint)rsScriptCCreate(con, packageNameUTF, resNameUTF, cacheDirUTF);
+    _env->ReleaseStringUTFChars(packageName, packageNameUTF);
     _env->ReleaseStringUTFChars(resName, resNameUTF);
     _env->ReleaseStringUTFChars(cacheDir, cacheDirUTF);
     return i;
@@ -1239,7 +1241,7 @@ static JNINativeMethod methods[] = {
 {"rsnFileA3DGetIndexEntries",        "(III[I[Ljava/lang/String;)V",           (void*)nFileA3DGetIndexEntries },
 {"rsnFileA3DGetEntryByIndex",        "(III)I",                                (void*)nFileA3DGetEntryByIndex },
 
-{"rsnFontCreateFromFile",            "(ILjava/lang/String;II)I",              (void*)nFontCreateFromFile },
+{"rsnFontCreateFromFile",            "(ILjava/lang/String;FI)I",              (void*)nFontCreateFromFile },
 
 {"rsnElementCreate",                 "(IIIZI)I",                              (void*)nElementCreate },
 {"rsnElementCreate2",                "(I[I[Ljava/lang/String;[I)I",           (void*)nElementCreate2 },
@@ -1301,7 +1303,7 @@ static JNINativeMethod methods[] = {
 
 {"rsnScriptCBegin",                  "(I)V",                                  (void*)nScriptCBegin },
 {"rsnScriptCSetScript",              "(I[BII)V",                              (void*)nScriptCSetScript },
-{"rsnScriptCCreate",                 "(ILjava/lang/String;Ljava/lang/String;)I",  (void*)nScriptCCreate },
+{"rsnScriptCCreate",                 "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",  (void*)nScriptCCreate },
 
 {"rsnProgramStoreBegin",             "(III)V",                                (void*)nProgramStoreBegin },
 {"rsnProgramStoreDepthFunc",         "(II)V",                                 (void*)nProgramStoreDepthFunc },

@@ -991,10 +991,10 @@ public class WebView extends AbsoluteLayout
     }
 
     /*
-     * The intent receiver that monitors for changes to relevant packages (e.g.,
-     * sGoogleApps) and notifies WebViewCore of their existence.
+     * A variable to track if there is a receiver added for ACTION_PACKAGE_ADDED
+     * or ACTION_PACKAGE_REMOVED.
      */
-    private static BroadcastReceiver sPackageInstallationReceiver = null;
+    private static boolean sPackageInstallationReceiverAdded = false;
 
     /*
      * A set of Google packages we monitor for the
@@ -1005,6 +1005,32 @@ public class WebView extends AbsoluteLayout
     static {
         sGoogleApps = new HashSet<String>();
         sGoogleApps.add("com.google.android.youtube");
+    }
+
+    private static class PackageListener extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            final String packageName = intent.getData().getSchemeSpecificPart();
+            final boolean replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+            if (Intent.ACTION_PACKAGE_REMOVED.equals(action) && replacing) {
+                // if it is replacing, refreshPlugins() when adding
+                return;
+            }
+
+            if (sGoogleApps.contains(packageName)) {
+                if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
+                    WebViewCore.sendStaticMessage(EventHub.ADD_PACKAGE_NAME, packageName);
+                } else {
+                    WebViewCore.sendStaticMessage(EventHub.REMOVE_PACKAGE_NAME, packageName);
+                }
+            }
+
+            PluginManager pm = PluginManager.getInstance(context);
+            if (pm.containsPluginPermissionAndSignatures(packageName)) {
+                pm.refreshPlugins(Intent.ACTION_PACKAGE_ADDED.equals(action));
+            }
+        }
     }
 
     private void setupPackageListener(Context context) {
@@ -1018,41 +1044,16 @@ public class WebView extends AbsoluteLayout
 
             // if the receiver already exists then we do not need to register it
             // again
-            if (sPackageInstallationReceiver != null) {
+            if (sPackageInstallationReceiverAdded) {
                 return;
             }
 
             IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
             filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
             filter.addDataScheme("package");
-            sPackageInstallationReceiver = new BroadcastReceiver() {
-
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    final String action = intent.getAction();
-                    final String packageName = intent.getData().getSchemeSpecificPart();
-                    final boolean replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
-                    if (Intent.ACTION_PACKAGE_REMOVED.equals(action) && replacing) {
-                        // if it is replacing, refreshPlugins() when adding
-                        return;
-                    }
-
-                    if (sGoogleApps.contains(packageName) && mWebViewCore != null) {
-                        if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
-                            mWebViewCore.sendMessage(EventHub.ADD_PACKAGE_NAME, packageName);
-                        } else {
-                            mWebViewCore.sendMessage(EventHub.REMOVE_PACKAGE_NAME, packageName);
-                        }
-                    }
-
-                    PluginManager pm = PluginManager.getInstance(context);
-                    if (pm.containsPluginPermissionAndSignatures(packageName)) {
-                        pm.refreshPlugins(Intent.ACTION_PACKAGE_ADDED.equals(action));
-                    }
-                }
-            };
-
-            context.getApplicationContext().registerReceiver(sPackageInstallationReceiver, filter);
+            BroadcastReceiver packageListener = new PackageListener();
+            context.getApplicationContext().registerReceiver(packageListener, filter);
+            sPackageInstallationReceiverAdded = true;
         }
 
         // check if any of the monitored apps are already installed

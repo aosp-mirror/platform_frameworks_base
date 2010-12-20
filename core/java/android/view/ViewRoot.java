@@ -2415,81 +2415,78 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
     /**
-     * @param keyCode The key code
-     * @return True if the key is directional.
+     * Returns true if the key is used for keyboard navigation.
+     * @param keyEvent The key event.
+     * @return True if the key is used for keyboard navigation.
      */
-    static boolean isDirectional(int keyCode) {
-        switch (keyCode) {
+    private static boolean isNavigationKey(KeyEvent keyEvent) {
+        switch (keyEvent.getKeyCode()) {
         case KeyEvent.KEYCODE_DPAD_LEFT:
         case KeyEvent.KEYCODE_DPAD_RIGHT:
         case KeyEvent.KEYCODE_DPAD_UP:
         case KeyEvent.KEYCODE_DPAD_DOWN:
+        case KeyEvent.KEYCODE_DPAD_CENTER:
+        case KeyEvent.KEYCODE_PAGE_UP:
+        case KeyEvent.KEYCODE_PAGE_DOWN:
+        case KeyEvent.KEYCODE_MOVE_HOME:
+        case KeyEvent.KEYCODE_MOVE_END:
+        case KeyEvent.KEYCODE_TAB:
+        case KeyEvent.KEYCODE_SPACE:
+        case KeyEvent.KEYCODE_ENTER:
             return true;
         }
         return false;
     }
 
     /**
-     * Returns true if this key is a keyboard key.
+     * Returns true if the key is used for typing.
      * @param keyEvent The key event.
-     * @return whether this key is a keyboard key.
+     * @return True if the key is used for typing.
      */
-    private static boolean isKeyboardKey(KeyEvent keyEvent) {
-      final int convertedKey = keyEvent.getUnicodeChar();
-        return convertedKey > 0;
+    private static boolean isTypingKey(KeyEvent keyEvent) {
+        return keyEvent.getUnicodeChar() > 0;
     }
 
-
-
     /**
-     * See if the key event means we should leave touch mode (and leave touch
-     * mode if so).
+     * See if the key event means we should leave touch mode (and leave touch mode if so).
      * @param event The key event.
      * @return Whether this key event should be consumed (meaning the act of
      *   leaving touch mode alone is considered the event).
      */
     private boolean checkForLeavingTouchModeAndConsume(KeyEvent event) {
-        final int action = event.getAction();
-        if (action != KeyEvent.ACTION_DOWN && action != KeyEvent.ACTION_MULTIPLE) {
-            return false;
-        }
-        if ((event.getFlags()&KeyEvent.FLAG_KEEP_TOUCH_MODE) != 0) {
-            return false;
-        }
-
-        // only relevant if we are in touch mode
+        // Only relevant in touch mode.
         if (!mAttachInfo.mInTouchMode) {
             return false;
         }
 
-        // if something like an edit text has focus and the user is typing,
-        // leave touch mode
-        //
-        // note: the condition of not being a keyboard key is kind of a hacky
-        // approximation of whether we think the focused view will want the
-        // key; if we knew for sure whether the focused view would consume
-        // the event, that would be better.
-        if (isKeyboardKey(event) && mView != null && mView.hasFocus()) {
-            mFocusedView = mView.findFocus();
-            if ((mFocusedView instanceof ViewGroup)
-                    && ((ViewGroup) mFocusedView).getDescendantFocusability() ==
-                    ViewGroup.FOCUS_AFTER_DESCENDANTS) {
-                // something has focus, but is holding it weakly as a container
-                return false;
-            }
-            if (ensureTouchMode(false)) {
-                throw new IllegalStateException("should not have changed focus "
-                        + "when leaving touch mode while a view has focus.");
-            }
+        // Only consider leaving touch mode on DOWN or MULTIPLE actions, never on UP.
+        final int action = event.getAction();
+        if (action != KeyEvent.ACTION_DOWN && action != KeyEvent.ACTION_MULTIPLE) {
             return false;
         }
 
-        if (isDirectional(event.getKeyCode())) {
-            // no view has focus, so we leave touch mode (and find something
-            // to give focus to).  the event is consumed if we were able to
-            // find something to give focus to.
+        // Don't leave touch mode if the IME told us not to.
+        if ((event.getFlags() & KeyEvent.FLAG_KEEP_TOUCH_MODE) != 0) {
+            return false;
+        }
+
+        // If the key can be used for keyboard navigation then leave touch mode
+        // and select a focused view if needed (in ensureTouchMode).
+        // When a new focused view is selected, we consume the navigation key because
+        // navigation doesn't make much sense unless a view already has focus so
+        // the key's purpose is to set focus.
+        if (isNavigationKey(event)) {
             return ensureTouchMode(false);
         }
+
+        // If the key can be used for typing then leave touch mode
+        // and select a focused view if needed (in ensureTouchMode).
+        // Always allow the view to process the typing key.
+        if (isTypingKey(event)) {
+            ensureTouchMode(false);
+            return false;
+        }
+
         return false;
     }
 
@@ -2640,16 +2637,31 @@ public final class ViewRoot extends Handler implements ViewParent,
             int direction = 0;
             switch (event.getKeyCode()) {
             case KeyEvent.KEYCODE_DPAD_LEFT:
-                direction = View.FOCUS_LEFT;
+                if (event.hasNoModifiers()) {
+                    direction = View.FOCUS_LEFT;
+                }
                 break;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
-                direction = View.FOCUS_RIGHT;
+                if (event.hasNoModifiers()) {
+                    direction = View.FOCUS_RIGHT;
+                }
                 break;
             case KeyEvent.KEYCODE_DPAD_UP:
-                direction = View.FOCUS_UP;
+                if (event.hasNoModifiers()) {
+                    direction = View.FOCUS_UP;
+                }
                 break;
             case KeyEvent.KEYCODE_DPAD_DOWN:
-                direction = View.FOCUS_DOWN;
+                if (event.hasNoModifiers()) {
+                    direction = View.FOCUS_DOWN;
+                }
+                break;
+            case KeyEvent.KEYCODE_TAB:
+                if (event.hasNoModifiers()) {
+                    direction = View.FOCUS_FORWARD;
+                } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
+                    direction = View.FOCUS_BACKWARD;
+                }
                 break;
             }
 

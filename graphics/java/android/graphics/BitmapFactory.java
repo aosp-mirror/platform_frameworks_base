@@ -213,19 +213,6 @@ public class BitmapFactory {
         public boolean inInputShareable;
 
         /**
-         * Normally bitmap allocations count against the dalvik heap, which
-         * means they help trigger GCs when a lot have been allocated. However,
-         * in rare cases, the caller may want to allocate the bitmap outside of
-         * that heap. To request that, set inNativeAlloc to true. In these
-         * rare instances, it is solely up to the caller to ensure that OOM is
-         * managed explicitly by calling bitmap.recycle() as soon as such a
-         * bitmap is no longer needed.
-         *
-         * @hide pending API council approval
-         */
-        public boolean inNativeAlloc;
-
-        /**
          * If inPreferQualityOverSpeed is set to true, the decoder will try to
          * decode the reconstructed image to a higher quality even at the
          * expense of the decoding speed. Currently the field only affects JPEG

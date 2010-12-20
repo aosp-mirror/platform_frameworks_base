@@ -388,7 +388,14 @@ public class MediaScanner
         String prop = SystemProperties.get("drm.service.enabled");
         return prop != null && prop.equals("true");
     }
-    
+
+    private final String mediaToExternalPath(String path) {
+        if (mMediaStoragePath != null && path.startsWith(mMediaStoragePath)) {
+            path = mExternalStoragePath + path.substring(mMediaStoragePath.length());
+        }
+        return path;
+    }
+
     private class MyMediaScannerClient implements MediaScannerClient {
 
         private String mArtist;
@@ -407,70 +414,74 @@ public class MediaScanner
         private long mFileSize;
         private String mWriter;
 
-        public FileCacheEntry beginFile(String path, String mimeType, long lastModified, long fileSize) {
-
-            // special case certain file names
-            // I use regionMatches() instead of substring() below
-            // to avoid memory allocation
-            int lastSlash = path.lastIndexOf('/');
-            if (lastSlash >= 0 && lastSlash + 2 < path.length()) {
-                // ignore those ._* files created by MacOS
-                if (path.regionMatches(lastSlash + 1, "._", 0, 2)) {
-                    return null;
-                }
-
-                // ignore album art files created by Windows Media Player:
-                // Folder.jpg, AlbumArtSmall.jpg, AlbumArt_{...}_Large.jpg and AlbumArt_{...}_Small.jpg
-                if (path.regionMatches(true, path.length() - 4, ".jpg", 0, 4)) {
-                    if (path.regionMatches(true, lastSlash + 1, "AlbumArt_{", 0, 10) ||
-                            path.regionMatches(true, lastSlash + 1, "AlbumArt.", 0, 9)) {
-                        return null;
-                    }
-                    int length = path.length() - lastSlash - 1;
-                    if ((length == 17 && path.regionMatches(true, lastSlash + 1, "AlbumArtSmall", 0, 13)) ||
-                            (length == 10 && path.regionMatches(true, lastSlash + 1, "Folder", 0, 6))) {
-                        return null;
-                    }
-                }
-            }
-
+        public FileCacheEntry beginFile(String path, String mimeType, long lastModified,
+                long fileSize, boolean isDirectory) {
             mMimeType = mimeType;
             mFileType = 0;
             mFileSize = fileSize;
 
-            // try mimeType first, if it is specified
-            if (mimeType != null) {
-                mFileType = MediaFile.getFileTypeForMimeType(mimeType);
-            }
-
-            // if mimeType was not specified, compute file type based on file extension.
-            if (mFileType == 0) {
-                MediaFile.MediaFileType mediaFileType = MediaFile.getFileType(path);
-                if (mediaFileType != null) {
-                    mFileType = mediaFileType.fileType;
-                    if (mMimeType == null) {
-                        mMimeType = mediaFileType.mimeType;
+            if (!isDirectory) {
+                // special case certain file names
+                // I use regionMatches() instead of substring() below
+                // to avoid memory allocation
+                int lastSlash = path.lastIndexOf('/');
+                if (lastSlash >= 0 && lastSlash + 2 < path.length()) {
+                    // ignore those ._* files created by MacOS
+                    if (path.regionMatches(lastSlash + 1, "._", 0, 2)) {
+                        return null;
                     }
+
+                    // ignore album art files created by Windows Media Player:
+                    // Folder.jpg, AlbumArtSmall.jpg, AlbumArt_{...}_Large.jpg
+                    // and AlbumArt_{...}_Small.jpg
+                    if (path.regionMatches(true, path.length() - 4, ".jpg", 0, 4)) {
+                        if (path.regionMatches(true, lastSlash + 1, "AlbumArt_{", 0, 10) ||
+                                path.regionMatches(true, lastSlash + 1, "AlbumArt.", 0, 9)) {
+                            return null;
+                        }
+                        int length = path.length() - lastSlash - 1;
+                        if ((length == 17 && path.regionMatches(
+                                true, lastSlash + 1, "AlbumArtSmall", 0, 13)) ||
+                                (length == 10
+                                 && path.regionMatches(true, lastSlash + 1, "Folder", 0, 6))) {
+                            return null;
+                        }
+                    }
+                }
+
+                // try mimeType first, if it is specified
+                if (mimeType != null) {
+                    mFileType = MediaFile.getFileTypeForMimeType(mimeType);
+                }
+
+                // if mimeType was not specified, compute file type based on file extension.
+                if (mFileType == 0) {
+                    MediaFile.MediaFileType mediaFileType = MediaFile.getFileType(path);
+                    if (mediaFileType != null) {
+                        mFileType = mediaFileType.fileType;
+                        if (mMimeType == null) {
+                            mMimeType = mediaFileType.mimeType;
+                        }
+                    }
+                }
+
+                if (isDrmEnabled() && MediaFile.isDrmFileType(mFileType)) {
+                    mFileType = getFileTypeFromDrm(path);
                 }
             }
 
-            if (isDrmEnabled() && MediaFile.isDrmFileType(mFileType)) {
-                mFileType = getFileTypeFromDrm(path);
-            }
-
-            String key = path;
-            if (mMediaStoragePath != null && key.startsWith(mMediaStoragePath)) {
-                // MediaProvider uses external variant of path for _data, so we need to match
-                // against that path instead.
-                key = mExternalStoragePath + key.substring(mMediaStoragePath.length());
-            }
+            // MediaProvider uses external variant of path for _data, so we need to match
+            // against that path instead.
+            String key = mediaToExternalPath(path);
             if (mCaseInsensitivePaths) {
                 key = path.toLowerCase();
             }
             FileCacheEntry entry = mFileCache.get(key);
             if (entry == null) {
                 Uri tableUri;
-                if (MediaFile.isVideoFileType(mFileType)) {
+                if (isDirectory) {
+                    tableUri = mFilesUri;
+                } else if (MediaFile.isVideoFileType(mFileType)) {
                     tableUri = mVideoUri;
                 } else if (MediaFile.isImageFileType(mFileType)) {
                     tableUri = mImagesUri;
@@ -479,7 +490,8 @@ public class MediaScanner
                 } else {
                     tableUri = mFilesUri;
                 }
-                entry = new FileCacheEntry(tableUri, 0, path, 0, 0);
+                entry = new FileCacheEntry(tableUri, 0, path, 0,
+                        (isDirectory ? MtpConstants.FORMAT_ASSOCIATION : 0));
                 mFileCache.put(key, entry);
             }
             entry.mSeenInFileSystem = true;
@@ -514,22 +526,19 @@ public class MediaScanner
             return entry;
         }
 
-        public void scanFile(String path, long lastModified, long fileSize) {
+        public void scanFile(String path, long lastModified, long fileSize, boolean isDirectory) {
             // This is the callback funtion from native codes.
             // Log.v(TAG, "scanFile: "+path);
-            doScanFile(path, null, lastModified, fileSize, false);
-        }
-
-        public void scanFile(String path, String mimeType, long lastModified, long fileSize) {
-            doScanFile(path, mimeType, lastModified, fileSize, false);
+            doScanFile(path, null, lastModified, fileSize, isDirectory, false);
         }
 
         public Uri doScanFile(String path, String mimeType, long lastModified,
-                long fileSize, boolean scanAlways) {
+                long fileSize, boolean isDirectory, boolean scanAlways) {
             Uri result = null;
 //            long t1 = System.currentTimeMillis();
             try {
-                FileCacheEntry entry = beginFile(path, mimeType, lastModified, fileSize);
+                FileCacheEntry entry = beginFile(path, mimeType, lastModified,
+                        fileSize, isDirectory);
                 // rescan for metadata if file was modified since last scan
                 if (entry != null && (entry.mLastModifiedChanged || scanAlways)) {
                     String lowpath = path.toLowerCase();
@@ -775,7 +784,11 @@ public class MediaScanner
                     values.put(MediaStore.MediaColumns.MEDIA_SCANNER_NEW_OBJECT_ID, mMtpObjectHandle);
                 }
                 if (tableUri == mFilesUri) {
-                    values.put(Files.FileColumns.FORMAT, MediaFile.getFormatCode(entry.mPath, mMimeType));
+                    int format = entry.mFormat;
+                    if (format == 0) {
+                        format = MediaFile.getFormatCode(entry.mPath, mMimeType);
+                    }
+                    values.put(Files.FileColumns.FORMAT, format);
                 }
                 // new file, insert it
                 result = mMediaProvider.insert(tableUri, values);
@@ -872,6 +885,8 @@ public class MediaScanner
         }
 
         public void addNoMediaFolder(String path) {
+            path = mediaToExternalPath(path);
+
             ContentValues values = new ContentValues();
             values.put(MediaStore.Images.ImageColumns.DATA, "");
             String [] pathSpec = new String[] {path + '%'};
@@ -930,11 +945,9 @@ public class MediaScanner
         }
 
         if (filePath != null) {
-            if (mMediaStoragePath != null && filePath.startsWith(mMediaStoragePath)) {
-                // MediaProvider uses external variant of path for _data, so we need to query
-                // using that path instead.
-                filePath = mExternalStoragePath + filePath.substring(mMediaStoragePath.length());
-            }
+            // MediaProvider uses external variant of path for _data, so we need to query
+            // using that path instead.
+            filePath = mediaToExternalPath(filePath);
 
             // query for only one file
             where = Files.FileColumns.DATA + "=?";
@@ -1060,8 +1073,7 @@ public class MediaScanner
             boolean fileMissing = false;
 
             if (!entry.mSeenInFileSystem && !MtpConstants.isAbstractObject(entry.mFormat)) {
-                if (entry.mFormat != MtpConstants.FORMAT_ASSOCIATION &&
-                        inScanDirectory(path, directories)) {
+                if (inScanDirectory(path, directories)) {
                     // we didn't see this file in the scan directory.
                     fileMissing = true;
                 } else {
@@ -1180,7 +1192,7 @@ public class MediaScanner
             long lastModifiedSeconds = file.lastModified() / 1000;
 
             // always scan the file, so we can return the content://media Uri for existing files
-            return mClient.doScanFile(path, mimeType, lastModifiedSeconds, file.length(), true);
+            return mClient.doScanFile(path, mimeType, lastModifiedSeconds, file.length(),false, true);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in MediaScanner.scanFile()", e);
             return null;
@@ -1204,12 +1216,9 @@ public class MediaScanner
                 // build file cache so we can look up tracks in the playlist
                 prescan(null, true);
 
-                String key = path;
-                if (mMediaStoragePath != null && key.startsWith(mMediaStoragePath)) {
-                    // MediaProvider uses external variant of path for _data, so we need to match
-                    // against that path instead.
-                    key = mExternalStoragePath + key.substring(mMediaStoragePath.length());
-                }
+                // MediaProvider uses external variant of path for _data, so we need to match
+                // against that path instead.
+                String key = mediaToExternalPath(path);
                 if (mCaseInsensitivePaths) {
                     key = path.toLowerCase();
                 }
@@ -1227,7 +1236,8 @@ public class MediaScanner
                 long lastModifiedSeconds = file.lastModified() / 1000;
 
                 // always scan the file, so we can return the content://media Uri for existing files
-                mClient.doScanFile(path, mediaFileType.mimeType, lastModifiedSeconds, file.length(), true);
+                mClient.doScanFile(path, mediaFileType.mimeType, lastModifiedSeconds, file.length(),
+                    (format == MtpConstants.FORMAT_ASSOCIATION), true);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in MediaScanner.scanFile()", e);

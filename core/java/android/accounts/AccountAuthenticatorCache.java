@@ -38,7 +38,7 @@ import java.io.IOException;
  * @hide
  */
 /* package private */ class AccountAuthenticatorCache
-        extends RegisteredServicesCache<AuthenticatorDescription> 
+        extends RegisteredServicesCache<AuthenticatorDescription>
         implements IAccountAuthenticatorCache {
     private static final String TAG = "Account";
     private static final MySerializer sSerializer = new MySerializer();
@@ -64,11 +64,13 @@ import java.io.IOException;
                     com.android.internal.R.styleable.AccountAuthenticator_smallIcon, 0);
             final int prefId = sa.getResourceId(
                     com.android.internal.R.styleable.AccountAuthenticator_accountPreferences, 0);
+            final boolean customTokens = sa.getBoolean(
+                    com.android.internal.R.styleable.AccountAuthenticator_customTokens, false);
             if (TextUtils.isEmpty(accountType)) {
                 return null;
             }
-            return new AuthenticatorDescription(accountType, packageName, labelId, iconId, 
-                    smallIconId, prefId);
+            return new AuthenticatorDescription(accountType, packageName, labelId, iconId,
+                    smallIconId, prefId, customTokens);
         } finally {
             sa.recycle();
         }

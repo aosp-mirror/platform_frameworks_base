@@ -17,6 +17,7 @@
 package android.widget;
 
 import com.android.internal.R;
+import com.android.internal.util.Predicate;
 import com.google.android.collect.Lists;
 
 import android.content.Context;
@@ -103,7 +104,7 @@ public class ListView extends AbsListView {
 
     Drawable mDivider;
     int mDividerHeight;
-    
+
     Drawable mOverScrollHeader;
     Drawable mOverScrollFooter;
 
@@ -1535,7 +1536,6 @@ public class ListView extends AbsListView {
             // reset the focus restoration
             View focusLayoutRestoreDirectChild = null;
 
-
             // Don't put header or footer views into the Recycler. Those are
             // already cached in mHeaderViews;
             if (dataChanged) {
@@ -2078,51 +2078,47 @@ public class ListView extends AbsListView {
         int action = event.getAction();
 
         if (action != KeyEvent.ACTION_UP) {
-            if (mSelectedPosition < 0) {
-                switch (keyCode) {
-                case KeyEvent.KEYCODE_DPAD_UP:
-                case KeyEvent.KEYCODE_DPAD_DOWN:
-                case KeyEvent.KEYCODE_DPAD_CENTER:
-                case KeyEvent.KEYCODE_ENTER:
-                case KeyEvent.KEYCODE_SPACE:
-                    if (resurrectSelection()) {
-                        return true;
-                    }
-                }
-            }
             switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_UP:
-                if (!event.isAltPressed()) {
-                    while (count > 0) {
-                        handled = arrowScroll(FOCUS_UP);
-                        count--;
+                if (event.hasNoModifiers()) {
+                    if (ensureSelectionOnMovementKey()) {
+                        while (count-- > 0) {
+                            handled |= arrowScroll(FOCUS_UP);
+                        }
                     }
-                } else {
-                    handled = fullScroll(FOCUS_UP);
+                } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
+                    handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_UP);
                 }
                 break;
 
             case KeyEvent.KEYCODE_DPAD_DOWN:
-                if (!event.isAltPressed()) {
-                    while (count > 0) {
-                        handled = arrowScroll(FOCUS_DOWN);
-                        count--;
+                if (event.hasNoModifiers()) {
+                    if (ensureSelectionOnMovementKey()) {
+                        while (count-- > 0) {
+                            handled |= arrowScroll(FOCUS_DOWN);
+                        }
                     }
-                } else {
-                    handled = fullScroll(FOCUS_DOWN);
+                } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
+                    handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_DOWN);
                 }
                 break;
 
             case KeyEvent.KEYCODE_DPAD_LEFT:
-                handled = handleHorizontalFocusWithinListItem(View.FOCUS_LEFT);
+                if (event.hasNoModifiers()) {
+                    handled = handleHorizontalFocusWithinListItem(View.FOCUS_LEFT);
+                }
                 break;
+
             case KeyEvent.KEYCODE_DPAD_RIGHT:
-                handled = handleHorizontalFocusWithinListItem(View.FOCUS_RIGHT);
+                if (event.hasNoModifiers()) {
+                    handled = handleHorizontalFocusWithinListItem(View.FOCUS_RIGHT);
+                }
                 break;
 
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_ENTER:
                 if (mItemCount > 0 && event.getRepeatCount() == 0) {
+                    ensureSelectionOnMovementKey();
                     keyPressed();
                 }
                 handled = true;
@@ -2130,12 +2126,56 @@ public class ListView extends AbsListView {
 
             case KeyEvent.KEYCODE_SPACE:
                 if (mPopup == null || !mPopup.isShowing()) {
-                    if (!event.isShiftPressed()) {
-                        pageScroll(FOCUS_DOWN);
-                    } else {
-                        pageScroll(FOCUS_UP);
+                    if (event.hasNoModifiers()) {
+                        handled = ensureSelectionOnMovementKey() && pageScroll(FOCUS_DOWN);
+                    } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
+                        handled = ensureSelectionOnMovementKey() && pageScroll(FOCUS_UP);
                     }
                     handled = true;
+                }
+                break;
+
+            case KeyEvent.KEYCODE_PAGE_UP:
+                if (event.hasNoModifiers()) {
+                    handled = ensureSelectionOnMovementKey() && pageScroll(FOCUS_UP);
+                } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
+                    handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_UP);
+                }
+                break;
+
+            case KeyEvent.KEYCODE_PAGE_DOWN:
+                if (event.hasNoModifiers()) {
+                    handled = ensureSelectionOnMovementKey() && pageScroll(FOCUS_DOWN);
+                } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
+                    handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_DOWN);
+                }
+                break;
+
+            case KeyEvent.KEYCODE_MOVE_HOME:
+                if (event.hasNoModifiers()) {
+                    handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_UP);
+                }
+                break;
+
+            case KeyEvent.KEYCODE_MOVE_END:
+                if (event.hasNoModifiers()) {
+                    handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_DOWN);
+                }
+                break;
+
+            case KeyEvent.KEYCODE_TAB:
+                // XXX Sometimes it is useful to be able to TAB through the items in
+                //     a ListView sequentially.  Unfortunately this can create an
+                //     asymmetry in TAB navigation order unless the list selection
+                //     always reverts to the top or bottom when receiving TAB focus from
+                //     another widget.  Leaving this behavior disabled for now but
+                //     perhaps it should be configurable (and more comprehensive).
+                if (false) {
+                    if (event.hasNoModifiers()) {
+                        handled = ensureSelectionOnMovementKey() && arrowScroll(FOCUS_DOWN);
+                    } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
+                        handled = ensureSelectionOnMovementKey() && arrowScroll(FOCUS_UP);
+                    }
                 }
                 break;
             }
@@ -3402,7 +3442,7 @@ public class ListView extends AbsListView {
     }
 
     /* (non-Javadoc)
-     * @see android.view.View#findViewWithTag(String)
+     * @see android.view.View#findViewWithTag(Object)
      * First look in our children, then in any header and footer views that may be scrolled off.
      */
     @Override
@@ -3410,12 +3450,12 @@ public class ListView extends AbsListView {
         View v;
         v = super.findViewWithTagTraversal(tag);
         if (v == null) {
-            v = findViewTagInHeadersOrFooters(mHeaderViewInfos, tag);
+            v = findViewWithTagInHeadersOrFooters(mHeaderViewInfos, tag);
             if (v != null) {
                 return v;
             }
 
-            v = findViewTagInHeadersOrFooters(mFooterViewInfos, tag);
+            v = findViewWithTagInHeadersOrFooters(mFooterViewInfos, tag);
             if (v != null) {
                 return v;
             }
@@ -3427,7 +3467,7 @@ public class ListView extends AbsListView {
      *
      * Look in the passed in list of headers or footers for the view with the tag.
      */
-    View findViewTagInHeadersOrFooters(ArrayList<FixedViewInfo> where, Object tag) {
+    View findViewWithTagInHeadersOrFooters(ArrayList<FixedViewInfo> where, Object tag) {
         if (where != null) {
             int len = where.size();
             View v;
@@ -3437,6 +3477,55 @@ public class ListView extends AbsListView {
 
                 if (!v.isRootNamespace()) {
                     v = v.findViewWithTag(tag);
+
+                    if (v != null) {
+                        return v;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @hide
+     * @see android.view.View#findViewByPredicate(Predicate)
+     * First look in our children, then in any header and footer views that may be scrolled off.
+     */
+    @Override
+    protected View findViewByPredicateTraversal(Predicate<View> predicate) {
+        View v;
+        v = super.findViewByPredicateTraversal(predicate);
+        if (v == null) {
+            v = findViewByPredicateInHeadersOrFooters(mHeaderViewInfos, predicate);
+            if (v != null) {
+                return v;
+            }
+
+            v = findViewByPredicateInHeadersOrFooters(mFooterViewInfos, predicate);
+            if (v != null) {
+                return v;
+            }
+        }
+        return v;
+    }
+
+    /* (non-Javadoc)
+     *
+     * Look in the passed in list of headers or footers for the first view that matches
+     * the predicate.
+     */
+    View findViewByPredicateInHeadersOrFooters(ArrayList<FixedViewInfo> where,
+            Predicate<View> predicate) {
+        if (where != null) {
+            int len = where.size();
+            View v;
+
+            for (int i = 0; i < len; i++) {
+                v = where.get(i).view;
+
+                if (!v.isRootNamespace()) {
+                    v = v.findViewByPredicate(predicate);
 
                     if (v != null) {
                         return v;

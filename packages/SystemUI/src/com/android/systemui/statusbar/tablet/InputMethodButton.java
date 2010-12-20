@@ -48,6 +48,11 @@ public class InputMethodButton extends ImageView {
     // IME shortcut button is disabled.
     private static final int ID_IME_SHORTCUT_BUTTON = 0;
 
+    // These values are defined in Settings application.
+    private static final int ID_IME_BUTTON_VISIBILITY_AUTO = 0;
+    private static final int ID_IME_BUTTON_VISIBILITY_ALWAYS_SHOW = 1;
+    private static final int ID_IME_BUTTON_VISIBILITY_ALWAYS_HIDE = 2;
+
     // other services we wish to talk to
     private final InputMethodManager mImm;
     private final int mId;
@@ -56,14 +61,14 @@ public class InputMethodButton extends ImageView {
             new HashMap<String, InputMethodInfo>();
     private ImageView mIcon;
     private IBinder mToken;
-    private boolean mKeyboardShown;
+    private boolean mKeyboardVisible = false;
+    private boolean mScreenLocked = false;
     private InputMethodInfo mShortcutInfo;
     private InputMethodSubtype mShortcutSubtype;
 
     public InputMethodButton(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mKeyboardShown = false;
         // Resource Id of the input method button. This id is defined in status_bar.xml
         mId = getId();
         // IME hookup
@@ -94,7 +99,7 @@ public class InputMethodButton extends ImageView {
     protected void onAttachedToWindow() {
         mIcon = (ImageView) findViewById(mId);
 
-        refreshStatusIcon(mKeyboardShown);
+        refreshStatusIcon();
     }
 
     private InputMethodInfo getCurrentInputMethodInfo() {
@@ -162,14 +167,24 @@ public class InputMethodButton extends ImageView {
     // * There are no explicitly enabled (by the user) subtypes of the IME, or the IME doesn't have
     // its subtypes at all
     private boolean needsToShowIMEButton() {
+        if (!mKeyboardVisible || mScreenLocked) return false;
         List<InputMethodInfo> imis = mImm.getEnabledInputMethodList();
         final int size = imis.size();
-        return size > 1
-                || (size == 1 && mImm.getEnabledInputMethodSubtypeList(imis.get(0)).size() > 1);
+        final int visibility = loadInputMethodSelectorVisibility();
+        switch (visibility) {
+            case ID_IME_BUTTON_VISIBILITY_AUTO:
+                return size > 1 || (size == 1
+                        && mImm.getEnabledInputMethodSubtypeList(imis.get(0)).size() > 1);
+            case ID_IME_BUTTON_VISIBILITY_ALWAYS_SHOW:
+                return true;
+            case ID_IME_BUTTON_VISIBILITY_ALWAYS_HIDE:
+                return false;
+        }
+        return false;
     }
 
-    private void refreshStatusIcon(boolean keyboardShown) {
-        if (!keyboardShown) {
+    private void refreshStatusIcon() {
+        if (!needsToShowIMEButton()) {
             setVisibility(View.INVISIBLE);
             return;
         } else {
@@ -196,9 +211,19 @@ public class InputMethodButton extends ImageView {
         }
     }
 
-    public void setIMEButtonVisible(IBinder token, boolean visible) {
+    private int loadInputMethodSelectorVisibility() {
+        return Settings.Secure.getInt(getContext().getContentResolver(),
+                Settings.Secure.INPUT_METHOD_SELECTOR_VISIBILITY, ID_IME_BUTTON_VISIBILITY_AUTO);
+    }
+
+    public void setIMEButtonVisible(IBinder token, boolean keyboardVisible) {
         mToken = token;
-        mKeyboardShown = visible ? needsToShowIMEButton() : false;
-        refreshStatusIcon(mKeyboardShown);
+        mKeyboardVisible = keyboardVisible;
+        refreshStatusIcon();
+    }
+
+    public void setScreenLocked(boolean locked) {
+        mScreenLocked = locked;
+        refreshStatusIcon();
     }
 }

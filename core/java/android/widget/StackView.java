@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import java.lang.ref.WeakReference;
+
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
@@ -54,6 +56,7 @@ public class StackView extends AdapterViewAnimator {
     private static final int DEFAULT_ANIMATION_DURATION = 400;
     private static final int FADE_IN_ANIMATION_DURATION = 800;
     private static final int MINIMUM_ANIMATION_DURATION = 50;
+    private static final int STACK_RELAYOUT_DURATION = 100;
 
     /**
      * Parameters effecting the perspective visuals
@@ -192,11 +195,15 @@ public class StackView extends AdapterViewAnimator {
      * Animate the views between different relative indexes within the {@link AdapterViewAnimator}
      */
     void animateViewForTransition(int fromIndex, int toIndex, View view) {
-        if (fromIndex == -1 && toIndex > 0) {
+        if (fromIndex == -1 && toIndex == NUM_ACTIVE_VIEWS -1) {
             // Fade item in
             if (view.getAlpha() == 1) {
                 view.setAlpha(0);
             }
+            view.setScaleX(1 - PERSPECTIVE_SCALE_FACTOR);
+            view.setScaleY(1 - PERSPECTIVE_SCALE_FACTOR);
+            view.setTranslationX(mPerspectiveShiftX);
+            view.setTranslationY(0);
             view.setVisibility(VISIBLE);
 
             ObjectAnimator fadeIn = ObjectAnimator.ofFloat(view, "alpha", view.getAlpha(), 1.0f);
@@ -234,10 +241,13 @@ public class StackView extends AdapterViewAnimator {
             view.setVisibility(INVISIBLE);
             LayoutParams lp = (LayoutParams) view.getLayoutParams();
             lp.setVerticalOffset(-mSlideAmount);
+        } else if (fromIndex == -1) {
+            view.setAlpha(1.0f);
+            view.setVisibility(VISIBLE);
         } else if (toIndex == -1) {
             // Fade item out
             ObjectAnimator fadeOut = ObjectAnimator.ofFloat(view, "alpha", view.getAlpha(), 0.0f);
-            fadeOut.setDuration(DEFAULT_ANIMATION_DURATION);
+            fadeOut.setDuration(STACK_RELAYOUT_DURATION);
             fadeOut.start();
         }
 
@@ -277,13 +287,17 @@ public class StackView extends AdapterViewAnimator {
 
             ObjectAnimator oa = ObjectAnimator.ofPropertyValuesHolder(view, scalePropX, scalePropY,
                     translationY, translationX);
-            oa.setDuration(100);
-            view.setTagInternal(com.android.internal.R.id.viewAnimation, oa);
+            oa.setDuration(STACK_RELAYOUT_DURATION);
+            view.setTagInternal(com.android.internal.R.id.viewAnimation, 
+                    new WeakReference<ObjectAnimator>(oa));
             oa.start();
         } else {
             Object tag = view.getTag(com.android.internal.R.id.viewAnimation);
-            if (tag instanceof ObjectAnimator) {
-                ((ObjectAnimator) tag).cancel();
+            if (tag instanceof WeakReference<?>) {
+                Object obj = ((WeakReference<?>) tag).get();
+                if (obj instanceof ObjectAnimator) {
+                    ((ObjectAnimator) obj).cancel();
+                }
             }
 
             view.setTranslationX(transX);

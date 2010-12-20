@@ -64,6 +64,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ScrollBarDrawable;
 import com.android.internal.R;
+import com.android.internal.util.Predicate;
 import com.android.internal.view.menu.MenuBuilder;
 
 import java.lang.ref.WeakReference;
@@ -2066,6 +2067,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     private int mNextFocusDownId = View.NO_ID;
 
+    /**
+     * When this view has focus and the next focus is {@link #FOCUS_FORWARD},
+     * the user may specify which view to go to next.
+     */
+    int mNextFocusForwardId = View.NO_ID;
+
     private CheckForLongPress mPendingCheckForLongPress;
     private CheckForTap mPendingCheckForTap = null;
     private PerformClick mPerformClick;
@@ -2423,6 +2430,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     break;
                 case R.styleable.View_nextFocusDown:
                     mNextFocusDownId = a.getResourceId(attr, View.NO_ID);
+                    break;
+                case R.styleable.View_nextFocusForward:
+                    mNextFocusForwardId = a.getResourceId(attr, View.NO_ID);
                     break;
                 case R.styleable.View_minWidth:
                     mMinWidth = a.getDimensionPixelSize(attr, 0);
@@ -3112,9 +3122,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param gainFocus True if the View has focus; false otherwise.
      * @param direction The direction focus has moved when requestFocus()
      *                  is called to give this view focus. Values are
-     *                  {@link #FOCUS_UP}, {@link #FOCUS_DOWN}, {@link #FOCUS_LEFT} or
-     *                  {@link #FOCUS_RIGHT}. It may not always apply, in which
-     *                  case use the default.
+     *                  {@link #FOCUS_UP}, {@link #FOCUS_DOWN}, {@link #FOCUS_LEFT},
+     *                  {@link #FOCUS_RIGHT}, {@link #FOCUS_FORWARD}, or {@link #FOCUS_BACKWARD}.
+     *                  It may not always apply, in which case use the default.
      * @param previouslyFocusedRect The rectangle, in this view's coordinate
      *        system, of the previously focused view.  If applicable, this will be
      *        passed in as finer grained information about where the focus is coming
@@ -3359,7 +3369,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * @return The user specified next focus ID.
+     * Gets the id of the view to use when the next focus is {@link #FOCUS_LEFT}.
+     * @return The next focus ID, or {@link #NO_ID} if the framework should decide automatically.
      *
      * @attr ref android.R.styleable#View_nextFocusLeft
      */
@@ -3368,9 +3379,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Set the id of the view to use for the next focus
-     *
-     * @param nextFocusLeftId
+     * Sets the id of the view to use when the next focus is {@link #FOCUS_LEFT}.
+     * @param nextFocusLeftId The next focus ID, or {@link #NO_ID} if the framework should
+     * decide automatically.
      *
      * @attr ref android.R.styleable#View_nextFocusLeft
      */
@@ -3379,7 +3390,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * @return The user specified next focus ID.
+     * Gets the id of the view to use when the next focus is {@link #FOCUS_RIGHT}.
+     * @return The next focus ID, or {@link #NO_ID} if the framework should decide automatically.
      *
      * @attr ref android.R.styleable#View_nextFocusRight
      */
@@ -3388,9 +3400,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Set the id of the view to use for the next focus
-     *
-     * @param nextFocusRightId
+     * Sets the id of the view to use when the next focus is {@link #FOCUS_RIGHT}.
+     * @param nextFocusRightId The next focus ID, or {@link #NO_ID} if the framework should
+     * decide automatically.
      *
      * @attr ref android.R.styleable#View_nextFocusRight
      */
@@ -3399,7 +3411,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * @return The user specified next focus ID.
+     * Gets the id of the view to use when the next focus is {@link #FOCUS_UP}.
+     * @return The next focus ID, or {@link #NO_ID} if the framework should decide automatically.
      *
      * @attr ref android.R.styleable#View_nextFocusUp
      */
@@ -3408,9 +3421,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Set the id of the view to use for the next focus
-     *
-     * @param nextFocusUpId
+     * Sets the id of the view to use when the next focus is {@link #FOCUS_UP}.
+     * @param nextFocusUpId The next focus ID, or {@link #NO_ID} if the framework should
+     * decide automatically.
      *
      * @attr ref android.R.styleable#View_nextFocusUp
      */
@@ -3419,7 +3432,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * @return The user specified next focus ID.
+     * Gets the id of the view to use when the next focus is {@link #FOCUS_DOWN}.
+     * @return The next focus ID, or {@link #NO_ID} if the framework should decide automatically.
      *
      * @attr ref android.R.styleable#View_nextFocusDown
      */
@@ -3428,14 +3442,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Set the id of the view to use for the next focus
-     *
-     * @param nextFocusDownId
+     * Sets the id of the view to use when the next focus is {@link #FOCUS_DOWN}.
+     * @param nextFocusDownId The next focus ID, or {@link #NO_ID} if the framework should
+     * decide automatically.
      *
      * @attr ref android.R.styleable#View_nextFocusDown
      */
     public void setNextFocusDownId(int nextFocusDownId) {
         mNextFocusDownId = nextFocusDownId;
+    }
+
+    /**
+     * Gets the id of the view to use when the next focus is {@link #FOCUS_FORWARD}.
+     * @return The next focus ID, or {@link #NO_ID} if the framework should decide automatically.
+     *
+     * @attr ref android.R.styleable#View_nextFocusForward
+     */
+    public int getNextFocusForwardId() {
+        return mNextFocusForwardId;
+    }
+
+    /**
+     * Sets the id of the view to use when the next focus is {@link #FOCUS_FORWARD}.
+     * @param nextFocusForwardId The next focus ID, or {@link #NO_ID} if the framework should
+     * decide automatically.
+     *
+     * @attr ref android.R.styleable#View_nextFocusForward
+     */
+    public void setNextFocusForwardId(int nextFocusForwardId) {
+        mNextFocusForwardId = nextFocusForwardId;
     }
 
     /**
@@ -3949,10 +3984,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * If a user manually specified the next view id for a particular direction,
-     * use the root to look up the view.  Once a view is found, it is cached
-     * for future lookups.
+     * use the root to look up the view.
      * @param root The root view of the hierarchy containing this view.
-     * @param direction One of FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, and FOCUS_RIGHT
+     * @param direction One of FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, FOCUS_RIGHT, FOCUS_FORWARD,
+     * or FOCUS_BACKWARD.
      * @return The user specified next view, or null if there is none.
      */
     View findUserSetNextFocus(View root, int direction) {
@@ -3969,6 +4004,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             case FOCUS_DOWN:
                 if (mNextFocusDownId == View.NO_ID) return null;
                 return findViewShouldExist(root, mNextFocusDownId);
+            case FOCUS_FORWARD:
+                if (mNextFocusForwardId == View.NO_ID) return null;
+                return findViewShouldExist(root, mNextFocusForwardId);
+            case FOCUS_BACKWARD: {
+                final int id = mID;
+                return root.findViewByPredicate(new Predicate<View>() {
+                    @Override
+                    public boolean apply(View t) {
+                        return t.mNextFocusForwardId == id;
+                    }
+                });
+            }
         }
         return null;
     }
@@ -8206,8 +8253,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Manually render this view (and all of its children) to the given Canvas.
      * The view must have already done a full layout before this function is
-     * called.  When implementing a view, do not override this method; instead,
-     * you should implement {@link #onDraw}.
+     * called.  When implementing a view, implement {@link #onDraw} instead of
+     * overriding this method. If you do need to override this method, call
+     * the superclass version.
      *
      * @param canvas The Canvas to which the View is rendered.
      */
@@ -9358,6 +9406,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * {@hide}
+     * @param predicate The predicate to evaluate.
+     * @return The first view that matches the predicate or null.
+     */
+    protected View findViewByPredicateTraversal(Predicate<View> predicate) {
+        if (predicate.apply(this)) {
+            return this;
+        }
+        return null;
+    }
+
+    /**
      * Look for a child view with the given id.  If this view has the given
      * id, return this view.
      *
@@ -9383,6 +9443,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             return null;
         }
         return findViewWithTagTraversal(tag);
+    }
+
+    /**
+     * {@hide}
+     * Look for a child view that matches the specified predicate.
+     * If this view matches the predicate, return this view.
+     *
+     * @param predicate The predicate to evaluate.
+     * @return The first view that matches the predicate or null.
+     */
+    public final View findViewByPredicate(Predicate<View> predicate) {
+        return findViewByPredicateTraversal(predicate);
     }
 
     /**

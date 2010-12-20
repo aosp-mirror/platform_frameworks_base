@@ -321,6 +321,7 @@ ScriptCSetText {
 	}
 
 ScriptCCreate {
+        param const char * packageName
         param const char * resName
         param const char * cacheDir
 	ret RsScript
@@ -420,7 +421,7 @@ FileOpen {
 
 FontCreateFromFile {
 	param const char *name
-	param uint32_t fontSize
+	param float fontSize
 	param uint32_t dpi
 	ret RsFont
 	}

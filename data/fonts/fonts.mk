@@ -26,4 +26,6 @@ PRODUCT_COPY_FILES := \
     frameworks/base/data/fonts/DroidSerif-BoldItalic.ttf:system/fonts/DroidSerif-BoldItalic.ttf \
     frameworks/base/data/fonts/DroidSansMono.ttf:system/fonts/DroidSansMono.ttf \
     frameworks/base/data/fonts/Clockopia.ttf:system/fonts/Clockopia.ttf \
-    frameworks/base/data/fonts/DroidSansFallback.ttf:system/fonts/DroidSansFallback.ttf
+    frameworks/base/data/fonts/DroidSansFallback.ttf:system/fonts/DroidSansFallback.ttf \
+    frameworks/base/data/fonts/AndroidClock.ttf:system/fonts/AndroidClock.ttf \
+    frameworks/base/data/fonts/AndroidClock_Highlight.ttf:system/fonts/AndroidClock_Highlight.ttf 

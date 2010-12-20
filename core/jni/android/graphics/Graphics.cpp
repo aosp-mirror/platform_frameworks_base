@@ -9,9 +9,6 @@
 #include "SkRegion.h"
 #include <android_runtime/AndroidRuntime.h>
 
-//#define REPORT_SIZE_TO_JVM
-//#define TRACK_LOCK_COUNT
-
 void doThrow(JNIEnv* env, const char* exc, const char* msg) {
     // don't throw a new exception if we already have one pending
     if (env->ExceptionCheck() == JNI_FALSE) {
@@ -185,10 +182,6 @@ static jfieldID gPicture_nativeInstanceID;
 static jclass   gRegion_class;
 static jfieldID gRegion_nativeInstanceID;
 static jmethodID gRegion_constructorMethodID;
-
-static jobject   gVMRuntime_singleton;
-static jmethodID gVMRuntime_trackExternalAllocationMethodID;
-static jmethodID gVMRuntime_trackExternalFreeMethodID;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -428,10 +421,6 @@ static JNIEnv* vm2env(JavaVM* vm)
     return env;
 }
 
-#ifdef TRACK_LOCK_COUNT
-    static int gLockCount;
-#endif
-
 ///////////////////////////////////////////////////////////////////////////////
 
 AndroidPixelRef::AndroidPixelRef(JNIEnv* env, void* storage, size_t size, jbyteArray storageObj,
@@ -539,36 +528,10 @@ jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
     return arrayObj;
 }
 
-bool GraphicsJNI::mallocPixelRef(JNIEnv* env, SkBitmap* bitmap, SkColorTable* ctable) {
-    Sk64 size64 = bitmap->getSize64();
-    if (size64.isNeg() || !size64.is32()) {
-        doThrow(env, "java/lang/IllegalArgumentException",
-                     "bitmap size exceeds 32bits");
-        return false;
-    }
-
-    size_t size = size64.get32();
-
-    // call the version of malloc that returns null on failure
-    void* addr = sk_malloc_flags(size, 0);
-
-    if (NULL == addr) {
-        return false;
-    }
-
-    SkPixelRef* pr = new AndroidPixelRef(env, addr, size, NULL, ctable);
-    bitmap->setPixelRef(pr)->unref();
-    // since we're already allocated, we lockPixels right away
-    // HeapAllocator behaves this way too
-    bitmap->lockPixels();
-    return true;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
-JavaPixelAllocator::JavaPixelAllocator(JNIEnv* env, bool allocateInJavaHeap)
-    : fAllocateInJavaHeap(allocateInJavaHeap),
-      fStorageObj(NULL),
+JavaPixelAllocator::JavaPixelAllocator(JNIEnv* env)
+    : fStorageObj(NULL),
       fAllocCount(0) {
     if (env->GetJavaVM(&fVM) != JNI_OK) {
         SkDebugf("------ [%p] env->GetJavaVM failed\n", env);
@@ -585,49 +548,9 @@ bool JavaPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
         SkDebugf("WARNING: One-shot allocator has already allocated (alloc count = %d)\n", fAllocCount);
 //        sk_throw();
     }
-
-    if (fAllocateInJavaHeap) {
-        fStorageObj = GraphicsJNI::allocateJavaPixelRef(env, bitmap, ctable);
-        fAllocCount += 1;
-        return fStorageObj != NULL;
-    }
-    return GraphicsJNI::mallocPixelRef(env, bitmap, ctable);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-JavaMemoryUsageReporter::JavaMemoryUsageReporter(JNIEnv* env)
-    : fTotalSize(0) {
-    if (env->GetJavaVM(&fVM) != JNI_OK) {
-        SkDebugf("------ [%p] env->GetJavaVM failed\n", env);
-        sk_throw();
-    }
-}
-
-JavaMemoryUsageReporter::~JavaMemoryUsageReporter() {
-    JNIEnv* env = vm2env(fVM);
-    jlong jtotalSize = fTotalSize;
-    env->CallVoidMethod(gVMRuntime_singleton,
-            gVMRuntime_trackExternalFreeMethodID,
-            jtotalSize);
-}
-
-bool JavaMemoryUsageReporter::reportMemory(size_t memorySize) {
-    jlong jsize = memorySize;  // the VM wants longs for the size
-    JNIEnv* env = vm2env(fVM);
-    bool r = env->CallBooleanMethod(gVMRuntime_singleton,
-            gVMRuntime_trackExternalAllocationMethodID,
-            jsize);
-    if (GraphicsJNI::hasException(env)) {
-        return false;
-    }
-    if (!r) {
-        LOGE("VM won't let us allocate %zd bytes\n", memorySize);
-        doThrowOOME(env, "bitmap size exceeds VM budget");
-        return false;
-    }
-    fTotalSize += memorySize;
-    return true;
+    fStorageObj = GraphicsJNI::allocateJavaPixelRef(env, bitmap, ctable);
+    fAllocCount += 1;
+    return fStorageObj != NULL;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -716,21 +639,5 @@ int register_android_graphics_Graphics(JNIEnv* env)
     gRegion_constructorMethodID = env->GetMethodID(gRegion_class, "<init>",
         "(II)V");
     
-    // Get the VMRuntime class.
-    c = env->FindClass("dalvik/system/VMRuntime");
-    SkASSERT(c);
-    // Look up VMRuntime.getRuntime().
-    m = env->GetStaticMethodID(c, "getRuntime", "()Ldalvik/system/VMRuntime;");
-    SkASSERT(m);
-    // Call VMRuntime.getRuntime() and hold onto its result.
-    gVMRuntime_singleton = env->CallStaticObjectMethod(c, m);
-    SkASSERT(gVMRuntime_singleton);
-    gVMRuntime_singleton = (jobject)env->NewGlobalRef(gVMRuntime_singleton);
-    // Look up the VMRuntime methods we'll be using.
-    gVMRuntime_trackExternalAllocationMethodID =
-                        env->GetMethodID(c, "trackExternalAllocation", "(J)Z");
-    gVMRuntime_trackExternalFreeMethodID =
-                            env->GetMethodID(c, "trackExternalFree", "(J)V");
-
     return 0;
 }

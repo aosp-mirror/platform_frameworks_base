@@ -148,11 +148,6 @@ public class RemoteViewsAdapter extends BaseAdapter {
             adapter.mMainQueue.removeMessages(0);
             adapter.mWorkerQueue.removeMessages(0);
 
-            // Clear the cache (the meta data will be re-requested on service re-connection)
-            synchronized (adapter.mCache) {
-                adapter.mCache.reset();
-            }
-
             final RemoteAdapterConnectionCallback callback = adapter.mCallback.get();
             if (callback != null) {
                 callback.onRemoteAdapterDisconnected();
@@ -335,8 +330,8 @@ public class RemoteViewsAdapter extends BaseAdapter {
 
                     // Compose the loading view text
                     TextView loadingTextView = (TextView) mLayoutInflater.inflate(
-				com.android.internal.R.layout.remote_views_adapter_default_loading_view,
-				layout, false);
+                            com.android.internal.R.layout.remote_views_adapter_default_loading_view,
+                            layout, false);
                     loadingTextView.setHeight(mFirstViewHeight);
                     loadingTextView.setTag(new Integer(0));
 
@@ -880,7 +875,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
         // a chance to update itself and return new meta data associated with the new data.
     }
 
-    private void superNotifyDataSetChanged() {
+    void superNotifyDataSetChanged() {
         super.notifyDataSetChanged();
     }
 

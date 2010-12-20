@@ -44,7 +44,10 @@ import org.bouncycastle.crypto.digests.SHA1Digest;
  * this component and if they can not be resolved by the cache, the HTTP headers
  * are attached, as appropriate, to the request for revalidation of content. The
  * class also manages the cache size.
+ *
+ * @deprecated Access to the HTTP cache will be removed in a future release.
  */
+@Deprecated
 public final class CacheManager {
 
     private static final String LOGTAG = "cache";
@@ -85,7 +88,10 @@ public final class CacheManager {
      * This class represents a resource retrieved from the HTTP cache.
      * Instances of this class can be obtained by invoking the
      * CacheManager.getCacheFile() method.
+     *
+     * @deprecated Access to the HTTP cache will be removed in a future release.
      */
+    @Deprecated
     public static class CacheResult {
         // these fields are saved to the database
         int httpStatusCode;
@@ -220,9 +226,12 @@ public final class CacheManager {
     /**
      * get the base directory of the cache. With localPath of the CacheResult,
      * it identifies the cache file.
-     * 
+     *
      * @return File The base directory of the cache.
+     *
+     * @deprecated Access to the HTTP cache will be removed in a future release.
      */
+    @Deprecated
     public static File getCacheFileBaseDir() {
         return mBaseDir;
     }
@@ -244,9 +253,12 @@ public final class CacheManager {
 
     /**
      * get the state of the current cache, enabled or disabled
-     * 
+     *
      * @return return if it is disabled
+     *
+     * @deprecated Access to the HTTP cache will be removed in a future release.
      */
+    @Deprecated
     public static boolean cacheDisabled() {
         return mDisabled;
     }
@@ -314,8 +326,11 @@ public final class CacheManager {
      * HEADER_KEY_IFNONEMATCH or HEADER_KEY_IFMODIFIEDSINCE will be set in the
      * cached headers.
      * 
-     * @return the CacheResult for a given url
+     * @return the CacheResult for a given url.
+     *
+     * @deprecated Access to the HTTP cache will be removed in a future release.
      */
+    @Deprecated
     public static CacheResult getCacheFile(String url,
             Map<String, String> headers) {
         return getCacheFile(url, 0, headers);
@@ -390,7 +405,10 @@ public final class CacheManager {
      * @return CacheResult for a given url
      * @hide - hide createCacheFile since it has a parameter of type headers, which is
      * in a hidden package.
+     *
+     * @deprecated Access to the HTTP cache will be removed in a future release.
      */
+    @Deprecated
     public static CacheResult createCacheFile(String url, int statusCode,
             Headers headers, String mimeType, boolean forceCache) {
         return createCacheFile(url, statusCode, headers, mimeType, 0,
@@ -455,7 +473,10 @@ public final class CacheManager {
     /**
      * Save the info of a cache file for a given url to the CacheMap so that it
      * can be reused later
+     *
+     * @deprecated Access to the HTTP cache will be removed in a future release.
      */
+    @Deprecated
     public static void saveCacheFile(String url, CacheResult cacheRet) {
         saveCacheFile(url, 0, cacheRet);
     }

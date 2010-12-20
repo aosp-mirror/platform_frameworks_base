@@ -534,7 +534,7 @@ public class NumberPicker extends LinearLayout {
         });
 
         // create the fling and adjust scrollers
-        mFlingScroller = new Scroller(getContext());
+        mFlingScroller = new Scroller(getContext(), null, true);
         mAdjustScroller = new Scroller(getContext(), new OvershootInterpolator());
 
         updateInputTextView();
@@ -798,6 +798,7 @@ public class NumberPicker extends LinearLayout {
      */
     public void setFormatter(Formatter formatter) {
         mFormatter = formatter;
+        resetSelectorIndices();
     }
 
     /**
@@ -979,10 +980,7 @@ public class NumberPicker extends LinearLayout {
         // children
         // after we have completed drawing ourselves.
 
-        // Draw the selector wheel if needed
-        if (mDrawSelectorWheel) {
-            super.draw(canvas);
-        }
+        super.draw(canvas);
 
         // Draw our children if we are not showing the selector wheel of fading
         // it out

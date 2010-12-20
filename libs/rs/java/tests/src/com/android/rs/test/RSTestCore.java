@@ -94,7 +94,7 @@ public class RSTestCore {
 
         mScript.bind_gList(mListAllocs);
 
-        mFont = Font.createFromFamily(mRS, mRes, "serif", Font.Style.BOLD, 8);
+        mFont = Font.create(mRS, mRes, "serif", Font.Style.BOLD, 8);
         mScript.set_gFont(mFont);
 
         mRS.bindRootScript(mScript);

@@ -82,8 +82,6 @@ public class AccountManagerService
         implements RegisteredServicesCacheListener<AuthenticatorDescription> {
     private static final String GOOGLE_ACCOUNT_TYPE = "com.google";
 
-    private static final String NO_BROADCAST_FLAG = "nobroadcast";
-
     private static final String TAG = "AccountManagerService";
 
     private static final int TIMEOUT_DELAY_MS = 1000 * 60;
@@ -375,14 +373,6 @@ public class AccountManagerService
         if (account == null) {
             return false;
         }
-        final boolean noBroadcast = account.type.equals(GOOGLE_ACCOUNT_TYPE)
-                && extras != null && extras.getBoolean(NO_BROADCAST_FLAG, false);
-        // Remove the 'nobroadcast' flag since we don't want it to persist in the db. It is instead
-        // used as a control signal to indicate whether or not this insertion should result in
-        // an accounts changed broadcast being sent.
-        if (extras != null) {
-            extras.remove(NO_BROADCAST_FLAG);
-        }
         db.beginTransaction();
         try {
             long numMatches = DatabaseUtils.longForQuery(db,
@@ -419,9 +409,7 @@ public class AccountManagerService
         } finally {
             db.endTransaction();
         }
-        if (!noBroadcast) {
-            sendAccountsChangedBroadcast();
-        }
+        sendAccountsChangedBroadcast();
         return true;
     }
 
@@ -776,10 +764,6 @@ public class AccountManagerService
         if (account == null) throw new IllegalArgumentException("account is null");
         checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
-        if (account.type.equals(GOOGLE_ACCOUNT_TYPE) && key.equals("broadcast")) {
-            sendAccountsChangedBroadcast();
-            return;
-        }
         try {
             writeUserdataIntoDatabase(account, key, value);
         } finally {
@@ -893,13 +877,29 @@ public class AccountManagerService
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         checkBinderPermission(Manifest.permission.USE_CREDENTIALS);
         final int callerUid = Binder.getCallingUid();
-        final boolean permissionGranted = permissionIsGranted(account, authTokenType, callerUid);
+        final int callerPid = Binder.getCallingPid();
+
+        AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription> authenticatorInfo =
+            mAuthenticatorCache.getServiceInfo(
+                    AuthenticatorDescription.newKey(account.type));
+        final boolean customTokens =
+            authenticatorInfo != null && authenticatorInfo.type.customTokens;
+
+        // skip the check if customTokens
+        final boolean permissionGranted = customTokens ||
+            permissionIsGranted(account, authTokenType, callerUid);
+
+        if (customTokens) {
+            // let authenticator know the identity of the caller
+            loginOptions.putInt(AccountManager.KEY_CALLER_UID, callerUid);
+            loginOptions.putInt(AccountManager.KEY_CALLER_PID, callerPid);
+        }
 
         long identityToken = clearCallingIdentity();
         try {
             // if the caller has permission, do the peek. otherwise go the more expensive
             // route of starting a Session
-            if (permissionGranted) {
+            if (!customTokens && permissionGranted) {
                 String authToken = readAuthTokenFromCache(account, authTokenType);
                 if (authToken != null) {
                     Bundle result = new Bundle();
@@ -953,8 +953,10 @@ public class AccountManagerService
                                         "the type and name should not be empty");
                                 return;
                             }
-                            saveAuthTokenToDatabase(new Account(name, type),
-                                    authTokenType, authToken);
+                            if (!customTokens) {
+                                saveAuthTokenToDatabase(new Account(name, type),
+                                        authTokenType, authToken);
+                            }
                         }
 
                         Intent intent = result.getParcelable(AccountManager.KEY_INTENT);

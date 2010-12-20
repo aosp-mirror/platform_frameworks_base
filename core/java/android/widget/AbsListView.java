@@ -4382,6 +4382,18 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         requestLayout();
         invalidate();
     }
+    
+    /**
+     * If there is a selection returns true.
+     * Otherwise resurrects the selection and returns false.
+     */
+    boolean ensureSelectionOnMovementKey() {
+        if (mSelectedPosition < 0) {
+            resurrectSelection();
+            return false;
+        }
+        return true;
+    }
 
     /**
      * Makes the item at the supplied position selected.
@@ -4718,9 +4730,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             dX = dest.left + dest.width() / 2;
             dY = dest.bottom;
             break;
+        case View.FOCUS_FORWARD:
+        case View.FOCUS_BACKWARD:
+            sX = source.right + source.width() / 2;
+            sY = source.top + source.height() / 2;
+            dX = dest.left + dest.width() / 2;
+            dY = dest.top + dest.height() / 2;
+            break;
         default:
             throw new IllegalArgumentException("direction must be one of "
-                    + "{FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, FOCUS_RIGHT}.");
+                    + "{FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, FOCUS_RIGHT, "
+                    + "FOCUS_FORWARD, FOCUS_BACKWARD}.");
         }
         int deltaX = dX - sX;
         int deltaY = dY - sY;
@@ -5184,6 +5204,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public void onRemoteAdapterConnected() {
         if (mRemoteAdapter != mAdapter) {
             setAdapter(mRemoteAdapter);
+        } else if (mRemoteAdapter != null) {
+            mRemoteAdapter.superNotifyDataSetChanged();
         }
     }
 
@@ -5191,10 +5213,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Called back when the adapter disconnects from the RemoteViewsService.
      */
     public void onRemoteAdapterDisconnected() {
-        if (mRemoteAdapter == mAdapter) {
-            mRemoteAdapter = null;
-            setAdapter(null);
-        }
+        // If the remote adapter disconnects, we keep it around
+        // since the currently displayed items are still cached.
+        // Further, we want the service to eventually reconnect
+        // when necessary, as triggered by this view requesting
+        // items from the Adapter.
     }
 
     /**

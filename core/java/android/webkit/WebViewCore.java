@@ -668,6 +668,22 @@ final class WebViewCore {
                                 Process.setThreadPriority(
                                         Process.THREAD_PRIORITY_DEFAULT);
                                 break;
+
+                            case EventHub.ADD_PACKAGE_NAME:
+                                if (BrowserFrame.sJavaBridge == null) {
+                                    throw new IllegalStateException(
+                                            "No WebView has been created in this process!");
+                                }
+                                BrowserFrame.sJavaBridge.addPackageName((String) msg.obj);
+                                break;
+
+                            case EventHub.REMOVE_PACKAGE_NAME:
+                                if (BrowserFrame.sJavaBridge == null) {
+                                    throw new IllegalStateException(
+                                            "No WebView has been created in this process!");
+                                }
+                                BrowserFrame.sJavaBridge.removePackageName((String) msg.obj);
+                                break;
                         }
                     }
                 };
@@ -1486,24 +1502,6 @@ final class WebViewCore {
                             }
                             BrowserFrame.sJavaBridge.addPackageNames(
                                     (Set<String>) msg.obj);
-                            break;
-
-                        case ADD_PACKAGE_NAME:
-                            if (BrowserFrame.sJavaBridge == null) {
-                                throw new IllegalStateException("No WebView " +
-                                        "has been created in this process!");
-                            }
-                            BrowserFrame.sJavaBridge.addPackageName(
-                                    (String) msg.obj);
-                            break;
-
-                        case REMOVE_PACKAGE_NAME:
-                            if (BrowserFrame.sJavaBridge == null) {
-                                throw new IllegalStateException("No WebView " +
-                                        "has been created in this process!");
-                            }
-                            BrowserFrame.sJavaBridge.removePackageName(
-                                    (String) msg.obj);
                             break;
 
                         case GET_TOUCH_HIGHLIGHT_RECTS:

@@ -19,6 +19,7 @@ package com.android.internal.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.widget.FrameLayout;
 
 /**
@@ -38,5 +39,11 @@ public class ActionBarContainer extends FrameLayout {
                 com.android.internal.R.styleable.ActionBar);
         setBackgroundDrawable(a.getDrawable(com.android.internal.R.styleable.ActionBar_background));
         a.recycle();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        super.onTouchEvent(ev);
+        return true;
     }
 }

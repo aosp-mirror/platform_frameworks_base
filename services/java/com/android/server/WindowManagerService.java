@@ -6239,7 +6239,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mDisplay = wm.getDefaultDisplay();
             mInitialDisplayWidth = mDisplay.getWidth();
             mInitialDisplayHeight = mDisplay.getHeight();
-            mInputManager.setDisplaySize(0, mInitialDisplayWidth, mInitialDisplayHeight);
+            mInputManager.setDisplaySize(0, Display.unmapDisplaySize(mInitialDisplayWidth),
+                    Display.unmapDisplaySize(mInitialDisplayHeight));
         }
 
         try {

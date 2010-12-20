@@ -20,6 +20,9 @@
 #include "../../compile/libbcc/include/bcc/bcc.h"
 #include "utils/Timers.h"
 #include "utils/StopWatch.h"
+extern "C" {
+#include "libdex/ZipArchive.h"
+}
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -402,7 +405,12 @@ static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name) {
 extern const char rs_runtime_lib_bc[];
 extern unsigned rs_runtime_lib_bc_size;
 
-void ScriptCState::runCompiler(Context *rsc, ScriptC *s, const char *resName, const char *cacheDir) {
+void ScriptCState::runCompiler(Context *rsc,
+                               ScriptC *s,
+                               long modWhen,
+                               long crc32,
+                               const char *resName,
+                               const char *cacheDir) {
     {
         s->mBccScript = bccCreateScript();
         s->mEnviroment.mIsThreadable = true;
@@ -413,6 +421,8 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s, const char *resName, co
         if (bccReadBC(s->mBccScript,
                       s->mEnviroment.mScriptText,
                       s->mEnviroment.mScriptTextLength,
+                      modWhen,
+                      crc32,
                       resName,
                       cacheDir) >= 0) {
           //bccLinkBC(s->mBccScript, rs_runtime_lib_bc, rs_runtime_lib_bc_size);
@@ -424,6 +434,8 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s, const char *resName, co
             bccReadBC(s->mBccScript,
                       s->mEnviroment.mScriptText,
                       s->mEnviroment.mScriptTextLength,
+                      modWhen,
+                      crc32,
                       NULL,
                       cacheDir);
             bccCompileBC(s->mBccScript);
@@ -542,7 +554,11 @@ void rsi_ScriptCSetText(Context *rsc, const char *text, uint32_t len) {
     ss->mScript->mEnviroment.mScriptTextLength = len;
 }
 
-RsScript rsi_ScriptCCreate(Context * rsc, const char *resName, const char *cacheDir)
+
+RsScript rsi_ScriptCCreate(Context *rsc,
+                           const char *packageName,
+                           const char *resName,
+                           const char *cacheDir)
 {
     ScriptCState *ss = &rsc->mScriptC;
 
@@ -550,7 +566,34 @@ RsScript rsi_ScriptCCreate(Context * rsc, const char *resName, const char *cache
     ss->mScript.clear();
     s->incUserRef();
 
-    ss->runCompiler(rsc, s.get(), resName, cacheDir);
+    // Open the apk and return the ZipArchive:
+    //  int dexZipOpenArchive(const char* fileName, ZipArchive* pArchive)
+    ZipArchive archive;
+    long modWhen;
+    long crc32;
+    if (!dexZipOpenArchive(packageName, &archive)) {  // Success
+      ZipEntry entry = dexZipFindEntry(&archive, resName);
+
+      int method;
+      size_t uncompLen;
+      size_t compLen;
+      off_t offset;
+      if (!dexZipGetEntryInfo(&archive,
+                              entry,
+                              &method,
+                              &uncompLen,
+                              &compLen,
+                              &offset,
+                              &modWhen,
+                              &crc32)) {
+      } else {
+        LOGI("Coudn't get entry info for the bitcode in an apk");
+      }
+    } else {
+      LOGI("Couldn't open the archive and read the bitcode");
+    }
+
+    ss->runCompiler(rsc, s.get(), modWhen, crc32, resName, cacheDir);
     ss->clear(rsc);
     return s.get();
 }

@@ -692,9 +692,11 @@ public class TabletStatusBar extends StatusBar {
             if ((state & StatusBarManager.DISABLE_NAVIGATION) != 0) {
                 Slog.d(TAG, "DISABLE_NAVIGATION: yes");
                 mNavigationArea.setVisibility(View.GONE);
+                mInputMethodSwitchButton.setScreenLocked(true);
             } else {
                 Slog.d(TAG, "DISABLE_NAVIGATION: no");
                 mNavigationArea.setVisibility(View.VISIBLE);
+                mInputMethodSwitchButton.setScreenLocked(false);
             }
         }
     }

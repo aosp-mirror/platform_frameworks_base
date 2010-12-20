@@ -2157,9 +2157,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             }
             CharSequence authorityName = providerInfo.loadLabel(mContext.getPackageManager());
 
-            Intent clickIntent = new Intent();
-            clickIntent.setClassName("com.android.providers.subscribedfeeds",
-                    "com.android.settings.SyncActivityTooManyDeletes");
+            Intent clickIntent = new Intent(mContext, SyncActivityTooManyDeletes.class);
             clickIntent.putExtra("account", account);
             clickIntent.putExtra("authority", authority);
             clickIntent.putExtra("provider", authorityName.toString());

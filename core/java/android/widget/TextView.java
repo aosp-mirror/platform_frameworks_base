@@ -864,6 +864,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mInputType = EditorInfo.TYPE_NULL;
             mInput = null;
             bufferType = BufferType.SPANNABLE;
+            // Required to request focus while in touch mode.
             setFocusableInTouchMode(true);
             // So that selection can be changed using arrow keys and touch is handled.
             setMovementMethod(ArrowKeyMovementMethod.getInstance());
@@ -2748,7 +2749,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                  */
                 mText = text;
 
-                if (mLinksClickable) {
+                // Do not change the movement method for text that support text selection as it
+                // would prevent an arbitrary cursor displacement.
+                final boolean hasTextSelection = this instanceof EditText || mTextIsSelectable;
+                if (mLinksClickable && !hasTextSelection) {
                     setMovementMethod(LinkMovementMethod.getInstance());
                 }
             }
@@ -3876,7 +3880,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // - ExtractEditText does not call onFocus when it is displayed. Fixing this issue would
         //   allow to test for hasSelection in onFocusChanged, which would trigger a
         //   startTextSelectionMode here. TODO
-        if (this instanceof ExtractEditText && hasSelection() && hasSelectionController()) {
+        if (this instanceof ExtractEditText && hasSelection() && canSelectText()) {
             startSelectionActionMode();
         }
 
@@ -4073,7 +4077,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * Use {@link #setTextIsSelectable(boolean)} or the
      * {@link android.R.styleable#TextView_textIsSelectable} XML attribute to make this TextView
-     * selectable (the text is not selectable by default). 
+     * selectable (text is not selectable by default).
      *
      * Note that the content of an EditText is always selectable.
      *
@@ -4088,8 +4092,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Sets whether or not (default) the content of this view is selectable by the user.
      * 
-     * Note that this methods affect the {@link #setFocusableInTouchMode(boolean)},
-     * {@link #setFocusable(boolean)}, {@link #setClickable(boolean)} and
+     * Note that this methods affect the {@link #setFocusable(boolean)},
+     * {@link #setFocusableInTouchMode(boolean)} {@link #setClickable(boolean)} and
      * {@link #setLongClickable(boolean)} states and you may want to restore these if they were
      * customized.
      *
@@ -4582,14 +4586,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if ((mInputType & EditorInfo.TYPE_MASK_CLASS) == EditorInfo.TYPE_CLASS_TEXT) {
             int variation = mInputType & EditorInfo.TYPE_MASK_VARIATION;
-
-            if (variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
-                variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_SUBJECT) {
+            if (variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                    || variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_SUBJECT) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Returns true if pressing TAB in this field advances focus instead
+     * of inserting the character.  Insert tabs only in multi-line editors.
+     */
+    private boolean shouldAdvanceFocusOnTab() {
+        if (mInput != null && !mSingleLine) {
+            if ((mInputType & EditorInfo.TYPE_MASK_CLASS) == EditorInfo.TYPE_CLASS_TEXT) {
+                int variation = mInputType & EditorInfo.TYPE_MASK_VARIATION;
+                if (variation == EditorInfo.TYPE_TEXT_FLAG_IME_MULTI_LINE
+                        || variation == EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private int doKeyDown(int keyCode, KeyEvent event, KeyEvent otherEvent) {
@@ -4600,16 +4620,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENTER:
                 mEnterKeyIsDown = true;
-                // If ALT modifier is held, then we always insert a
-                // newline character.
-                if ((event.getMetaState()&KeyEvent.META_ALT_ON) == 0) {
-                    
+                if (event.hasNoModifiers()) {
                     // When mInputContentType is set, we know that we are
                     // running in a "modern" cupcake environment, so don't need
                     // to worry about the application trying to capture
                     // enter key events.
                     if (mInputContentType != null) {
-                        
                         // If there is an action listener, given them a
                         // chance to consume the event.
                         if (mInputContentType.onEditorActionListener != null &&
@@ -4620,11 +4636,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             return -1;
                         }
                     }
-                    
+
                     // If our editor should move focus when enter is pressed, or
                     // this is a generated event from an IME action button, then
                     // don't let it be inserted into the text.
-                    if ((event.getFlags()&KeyEvent.FLAG_EDITOR_ACTION) != 0
+                    if ((event.getFlags() & KeyEvent.FLAG_EDITOR_ACTION) != 0
                             || shouldAdvanceFocusOnEnter()) {
                         return -1;
                     }
@@ -4633,8 +4649,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 mDPadCenterIsDown = true;
-                if (shouldAdvanceFocusOnEnter()) {
-                    return 0;
+                if (event.hasNoModifiers()) {
+                    if (shouldAdvanceFocusOnEnter()) {
+                        return 0;
+                    }
+                }
+                break;
+
+            case KeyEvent.KEYCODE_TAB:
+                if (event.hasNoModifiers() || event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
+                    if (shouldAdvanceFocusOnTab()) {
+                        return 0;
+                    }
                 }
                 break;
 
@@ -4729,76 +4755,80 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 mDPadCenterIsDown = false;
-                /*
-                 * If there is a click listener, just call through to
-                 * super, which will invoke it.
-                 *
-                 * If there isn't a click listener, try to show the soft
-                 * input method.  (It will also
-                 * call performClick(), but that won't do anything in
-                 * this case.)
-                 */
-                if (mOnClickListener == null) {
-                    if (mMovement != null && mText instanceof Editable
-                            && mLayout != null && onCheckIsTextEditor()) {
-                        InputMethodManager imm = (InputMethodManager)
-                                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.showSoftInput(this, 0);
-                    }
-                }
-                return super.onKeyUp(keyCode, event);
-                
-            case KeyEvent.KEYCODE_ENTER:
-                mEnterKeyIsDown = false;
-                if (mInputContentType != null
-                        && mInputContentType.onEditorActionListener != null
-                        && mInputContentType.enterDown) {
-                    mInputContentType.enterDown = false;
-                    if (mInputContentType.onEditorActionListener.onEditorAction(
-                            this, EditorInfo.IME_NULL, event)) {
-                        return true;
-                    }
-                }
-                
-                if ((event.getFlags()&KeyEvent.FLAG_EDITOR_ACTION) != 0
-                        || shouldAdvanceFocusOnEnter()) {
+                if (event.hasNoModifiers()) {
                     /*
                      * If there is a click listener, just call through to
                      * super, which will invoke it.
                      *
-                     * If there isn't a click listener, try to advance focus,
-                     * but still call through to super, which will reset the
-                     * pressed state and longpress state.  (It will also
+                     * If there isn't a click listener, try to show the soft
+                     * input method.  (It will also
                      * call performClick(), but that won't do anything in
                      * this case.)
                      */
                     if (mOnClickListener == null) {
-                        View v = focusSearch(FOCUS_DOWN);
+                        if (mMovement != null && mText instanceof Editable
+                                && mLayout != null && onCheckIsTextEditor()) {
+                            InputMethodManager imm = (InputMethodManager)
+                                    getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.showSoftInput(this, 0);
+                        }
+                    }
+                }
+                return super.onKeyUp(keyCode, event);
 
-                        if (v != null) {
-                            if (!v.requestFocus(FOCUS_DOWN)) {
-                                throw new IllegalStateException("focus search returned a view " +
-                                        "that wasn't able to take focus!");
-                            }
-
-                            /*
-                             * Return true because we handled the key; super
-                             * will return false because there was no click
-                             * listener.
-                             */
-                            super.onKeyUp(keyCode, event);
+            case KeyEvent.KEYCODE_ENTER:
+                mEnterKeyIsDown = false;
+                if (event.hasNoModifiers()) {
+                    if (mInputContentType != null
+                            && mInputContentType.onEditorActionListener != null
+                            && mInputContentType.enterDown) {
+                        mInputContentType.enterDown = false;
+                        if (mInputContentType.onEditorActionListener.onEditorAction(
+                                this, EditorInfo.IME_NULL, event)) {
                             return true;
-                        } else if ((event.getFlags()
-                                & KeyEvent.FLAG_EDITOR_ACTION) != 0) {
-                            // No target for next focus, but make sure the IME
-                            // if this came from it.
-                            InputMethodManager imm = InputMethodManager.peekInstance();
-                            if (imm != null) {
-                                imm.hideSoftInputFromWindow(getWindowToken(), 0);
-                            }
                         }
                     }
 
+                    if ((event.getFlags() & KeyEvent.FLAG_EDITOR_ACTION) != 0
+                            || shouldAdvanceFocusOnEnter()) {
+                        /*
+                         * If there is a click listener, just call through to
+                         * super, which will invoke it.
+                         *
+                         * If there isn't a click listener, try to advance focus,
+                         * but still call through to super, which will reset the
+                         * pressed state and longpress state.  (It will also
+                         * call performClick(), but that won't do anything in
+                         * this case.)
+                         */
+                        if (mOnClickListener == null) {
+                            View v = focusSearch(FOCUS_DOWN);
+
+                            if (v != null) {
+                                if (!v.requestFocus(FOCUS_DOWN)) {
+                                    throw new IllegalStateException(
+                                            "focus search returned a view " +
+                                            "that wasn't able to take focus!");
+                                }
+
+                                /*
+                                 * Return true because we handled the key; super
+                                 * will return false because there was no click
+                                 * listener.
+                                 */
+                                super.onKeyUp(keyCode, event);
+                                return true;
+                            } else if ((event.getFlags()
+                                    & KeyEvent.FLAG_EDITOR_ACTION) != 0) {
+                                // No target for next focus, but make sure the IME
+                                // if this came from it.
+                                InputMethodManager imm = InputMethodManager.peekInstance();
+                                if (imm != null) {
+                                    imm.hideSoftInputFromWindow(getWindowToken(), 0);
+                                }
+                            }
+                        }
+                    }
                     return super.onKeyUp(keyCode, event);
                 }
                 break;
@@ -7519,10 +7549,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return super.onKeyShortcut(keyCode, event);
     }
 
+    /**
+     * Unlike {@link #textCanBeSelected()}, this method is based on the <i>current</i> state of the
+     * TextView. {@link #textCanBeSelected()} has to be true (this is one of the conditions to have
+     * a selection controller (see {@link #prepareCursorControllers()}), but this is not sufficient.
+     */
     private boolean canSelectText() {
         return hasSelectionController() && mText.length() != 0;
     }
 
+    /**
+     * Test based on the <i>intrinsic</i> charateristics of the TextView.
+     * The text must be spannable and the movement method must allow for arbitary selection.
+     * 
+     * See also {@link #canSelectText()}.
+     */
     private boolean textCanBeSelected() {
         // prepareCursorController() relies on this method.
         // If you change this condition, make sure prepareCursorController is called anywhere
@@ -7675,12 +7716,44 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (hasPasswordTransformationMethod()) {
             // selectCurrentWord is not available on a password field and would return an
             // arbitrary 10-charater selection around pressed position. Select all instead.
-            // Note that cut/copy menu entries are not available for passwords.
-            // This is however useful to delete or paste to replace the entire content.
+            // Cut/copy menu entries are not available for passwords, but being able to select all
+            // is however useful to delete or paste to replace the entire content.
             selectAll();
             return;
         }
 
+        long lastTouchOffset = getLastTouchOffsets();
+        final int minOffset = extractRangeStartFromLong(lastTouchOffset);
+        final int maxOffset = extractRangeEndFromLong(lastTouchOffset);
+
+        int selectionStart, selectionEnd;
+
+        // If a URLSpan (web address, email, phone...) is found at that position, select it.
+        URLSpan[] urlSpans = ((Spanned) mText).getSpans(minOffset, maxOffset, URLSpan.class);
+        if (urlSpans.length == 1) {
+            URLSpan url = urlSpans[0];
+            selectionStart = ((Spanned) mText).getSpanStart(url);
+            selectionEnd = ((Spanned) mText).getSpanEnd(url);
+        } else {
+            long wordLimits = getWordLimitsAt(minOffset);
+            if (wordLimits >= 0) {
+                selectionStart = extractRangeStartFromLong(wordLimits);
+            } else {
+                selectionStart = Math.max(minOffset - 5, 0);
+            }
+
+            wordLimits = getWordLimitsAt(maxOffset);
+            if (wordLimits >= 0) {
+                selectionEnd = extractRangeEndFromLong(wordLimits);
+            } else {
+                selectionEnd = Math.min(maxOffset + 5, mText.length());
+            }
+        }
+
+        Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
+    }
+
+    private long getLastTouchOffsets() {
         int minOffset, maxOffset;
 
         if (mContextMenuTriggeredByKey) {
@@ -7692,23 +7765,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             maxOffset = selectionController.getMaxTouchOffset();
         }
 
-        int selectionStart, selectionEnd;
-
-        long wordLimits = getWordLimitsAt(minOffset);
-        if (wordLimits >= 0) {
-            selectionStart = extractRangeStartFromLong(wordLimits);
-        } else {
-            selectionStart = Math.max(minOffset - 5, 0);
-        }
-
-        wordLimits = getWordLimitsAt(maxOffset);
-        if (wordLimits >= 0) {
-            selectionEnd = extractRangeEndFromLong(wordLimits);
-        } else {
-            selectionEnd = Math.min(maxOffset + 5, mText.length());
-        }
-
-        Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
+        return packRangeInLong(minOffset, maxOffset);
     }
 
     @Override
@@ -7753,28 +7810,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         boolean added = false;
         mContextMenuTriggeredByKey = mDPadCenterIsDown || mEnterKeyIsDown;
         // Problem with context menu on long press: the menu appears while the key in down and when
-        // the key is released, the view does not receive the key_up event. This ensures that the
-        // state is reset whenever the context menu action is displayed.
-        // mContextMenuTriggeredByKey saved that state so that it is available in
-        // onTextContextMenuItem. We cannot simply clear these flags in onTextContextMenuItem since
+        // the key is released, the view does not receive the key_up event.
+        // We need two layers of flags: mDPadCenterIsDown and mEnterKeyIsDown are set in key down/up
+        // events. We cannot simply clear these flags in onTextContextMenuItem since
         // it may not be called (if the user/ discards the context menu with the back key).
+        // We clear these flags here and mContextMenuTriggeredByKey saves that state so that it is
+        // available in onTextContextMenuItem.
         mDPadCenterIsDown = mEnterKeyIsDown = false;
 
         MenuHandler handler = new MenuHandler();
 
         if (mText instanceof Spanned) {
-            int selStart = getSelectionStart();
-            int selEnd = getSelectionEnd();
+            long lastTouchOffset = getLastTouchOffsets();
+            final int selStart = extractRangeStartFromLong(lastTouchOffset);
+            final int selEnd = extractRangeEndFromLong(lastTouchOffset);
 
-            int min = Math.min(selStart, selEnd);
-            int max = Math.max(selStart, selEnd);
-
-            URLSpan[] urls = ((Spanned) mText).getSpans(min, max,
-                                                        URLSpan.class);
-            if (urls.length == 1) {
-                menu.add(0, ID_COPY_URL, 0,
-                         com.android.internal.R.string.copyUrl).
-                            setOnMenuItemClickListener(handler);
+            URLSpan[] urls = ((Spanned) mText).getSpans(selStart, selEnd, URLSpan.class);
+            if (urls.length > 0) {
+                menu.add(0, ID_COPY_URL, 0, com.android.internal.R.string.copyUrl).
+                        setOnMenuItemClickListener(handler);
 
                 added = true;
             }
@@ -7786,7 +7840,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // populates the menu AFTER this call.
         if (menu.size() > 0) {
             menu.add(0, ID_SELECTION_MODE, 0, com.android.internal.R.string.selectTextMode).
-            setOnMenuItemClickListener(handler);
+                    setOnMenuItemClickListener(handler);
             added = true;
         }
 
@@ -7855,10 +7909,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         setPrimaryClip(clip);
                     }
                 }
+                stopSelectionActionMode();
                 return true;
 
             case ID_SELECTION_MODE:
-                startSelectionActionMode();
+                if (mSelectionActionMode != null) {
+                    // Selection mode is already started, simply change selected part.
+                    updateSelectedRegion();
+                } else {
+                    startSelectionActionMode();
+                }
                 return true;
             }
 
@@ -7979,9 +8039,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 startDrag(data, getTextThumbnailBuilder(selectedText), false, localState);
                 stopSelectionActionMode();
             } else {
-                // Start a new selection at current position, keep selectionAction mode on
-                selectCurrentWord();
-                getSelectionController().show();
+                updateSelectedRegion();
             }
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             mDiscardNextActionUp = true;
@@ -7996,6 +8054,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return false;
+    }
+
+    /**
+     * When selection mode is already started, this method simply updates the selected part of text
+     * to the text under the finger.
+     */
+    private void updateSelectedRegion() {
+        // Start a new selection at current position, keep selectionAction mode on
+        selectCurrentWord();
+        // Updates handles' positions
+        getSelectionController().show();
     }
 
     private boolean touchPositionIsInSelection() {
@@ -8060,6 +8129,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean startSelectionActionMode() {
         if (mSelectionActionMode != null) {
             // Selection action mode is already started
+            return false;
+        }
+
+        if (!canSelectText() || !requestFocus()) {
+            Log.w(LOG_TAG, "TextView does not support text selection. Action mode cancelled.");
             return false;
         }
 
@@ -8139,26 +8213,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            if (!hasSelectionController()) {
-                Log.w(LOG_TAG, "TextView has no selection controller. Action mode cancelled.");
-                return false;
-            }
-
-            if (!requestFocus()) {
-                return false;
-            }
-
             TypedArray styledAttributes = mContext.obtainStyledAttributes(R.styleable.Theme);
 
             mode.setTitle(mContext.getString(com.android.internal.R.string.textSelectionCABTitle));
             mode.setSubtitle(null);
 
-            if (canSelectText()) {
-                menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
+            menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
                     setAlphabeticShortcut('a').
                     setShowAsAction(
                             MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-            }
 
             if (canCut()) {
                 menu.add(0, ID_CUT, 0, com.android.internal.R.string.cut).

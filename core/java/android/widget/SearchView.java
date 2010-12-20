@@ -623,14 +623,16 @@ public class SearchView extends LinearLayout {
 
             // If there is text in the query box, handle enter, and action keys
             // The search key is handled by the dialog's onKeyDown().
-            if (!mQueryTextView.isEmpty()) {
-                if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
-                    v.cancelLongPress();
+            if (!mQueryTextView.isEmpty() && event.hasNoModifiers()) {
+                if (event.getAction() == KeyEvent.ACTION_UP) {
+                    if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                        v.cancelLongPress();
 
-                    // Launch as a regular search.
-                    launchQuerySearch(KeyEvent.KEYCODE_UNKNOWN, null, mQueryTextView.getText()
-                            .toString());
-                    return true;
+                        // Launch as a regular search.
+                        launchQuerySearch(KeyEvent.KEYCODE_UNKNOWN, null, mQueryTextView.getText()
+                                .toString());
+                        return true;
+                    }
                 }
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
                     SearchableInfo.ActionKeyInfo actionKey = mSearchable.findActionKey(keyCode);
@@ -658,11 +660,11 @@ public class SearchView extends LinearLayout {
         if (mSuggestionsAdapter == null) {
             return false;
         }
-        if (event.getAction() == KeyEvent.ACTION_DOWN) {
-
+        if (event.getAction() == KeyEvent.ACTION_DOWN && event.hasNoModifiers()) {
             // First, check for enter or search (both of which we'll treat as a
             // "click")
-            if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_SEARCH) {
+            if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_SEARCH
+                    || keyCode == KeyEvent.KEYCODE_TAB) {
                 int position = mQueryTextView.getListSelection();
                 return onItemClicked(position, KeyEvent.KEYCODE_UNKNOWN, null);
             }

@@ -630,7 +630,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             // from the drop down as its content
             case KeyEvent.KEYCODE_ENTER:
             case KeyEvent.KEYCODE_DPAD_CENTER:
-                performCompletion();
+            case KeyEvent.KEYCODE_TAB:
+                if (event.hasNoModifiers()) {
+                    performCompletion();
+                }
                 return true;
             }
         }
@@ -646,7 +649,9 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         if (!isPopupShowing()) {
             switch(keyCode) {
             case KeyEvent.KEYCODE_DPAD_DOWN:
-                performValidation();
+                if (event.hasNoModifiers()) {
+                    performValidation();
+                }
             }
         }
 
