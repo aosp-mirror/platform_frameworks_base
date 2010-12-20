@@ -23,9 +23,10 @@ package android.graphics;
 public class BitmapShader extends Shader {
     /**
      * Prevent garbage collection.
+     * @hide
      */
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
-    private final Bitmap mBitmap;
+    public final Bitmap mBitmap;
 
     /**
      * Call this to create a new shader that will draw with a bitmap.

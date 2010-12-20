@@ -34,11 +34,6 @@ import android.text.GraphicsOperations;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
-import android.util.Finalizers;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * An implementation of Canvas on top of OpenGL ES 2.0.
@@ -46,7 +41,11 @@ import java.util.Set;
 class GLES20Canvas extends HardwareCanvas {
     private final boolean mOpaque;
     private int mRenderer;
-    
+
+    // The native renderer will be destroyed when this object dies.
+    // DO NOT overwrite this reference once it is set.
+    private CanvasFinalizer mFinalizer;
+
     private int mWidth;
     private int mHeight;
     
@@ -78,7 +77,7 @@ class GLES20Canvas extends HardwareCanvas {
         this(false, translucent);
     }
     
-    GLES20Canvas(boolean record, boolean translucent) {
+    protected GLES20Canvas(boolean record, boolean translucent) {
         mOpaque = !translucent;
 
         if (record) {
@@ -90,7 +89,7 @@ class GLES20Canvas extends HardwareCanvas {
         if (mRenderer == 0) {
             throw new IllegalStateException("Could not create GLES20Canvas renderer");
         } else {
-            new CanvasFinalizer(this);
+            mFinalizer = new CanvasFinalizer(mRenderer);
         }
     }
 
@@ -99,22 +98,16 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native void nDestroyRenderer(int renderer);
 
-    private static class CanvasFinalizer extends Finalizers.ReclaimableReference<GLES20Canvas> {
-        private static final Set<CanvasFinalizer> sFinalizers = Collections.synchronizedSet(
-                new HashSet<CanvasFinalizer>());
+    private static class CanvasFinalizer {
+        final int mRenderer;
 
-        private int mRenderer;
-
-        CanvasFinalizer(GLES20Canvas canvas) {
-            super(canvas, Finalizers.getQueue());
-            mRenderer = canvas.mRenderer;
-            sFinalizers.add(this);
+        CanvasFinalizer(int renderer) {
+            mRenderer = renderer;
         }
 
         @Override
-        public void reclaim() {
+        protected void finalize() throws Throwable {
             nDestroyRenderer(mRenderer);
-            sFinalizers.remove(this);
         }
     }
 

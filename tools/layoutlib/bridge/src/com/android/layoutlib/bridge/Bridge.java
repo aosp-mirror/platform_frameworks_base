@@ -32,7 +32,6 @@ import com.android.tools.layoutlib.create.OverrideMethod;
 import android.graphics.Bitmap;
 import android.graphics.Typeface_Delegate;
 import android.os.Looper;
-import android.util.Finalizers;
 
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
@@ -197,8 +196,6 @@ public final class Bridge extends LayoutBridge {
                 Capability.VIEW_MANIPULATION,
                 Capability.ANIMATE);
 
-
-        Finalizers.init();
 
         BridgeAssetManager.initSystem();
 
