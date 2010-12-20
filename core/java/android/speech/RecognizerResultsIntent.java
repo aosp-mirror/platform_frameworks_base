@@ -34,8 +34,6 @@ import java.util.ArrayList;
  * the search results. If that is not available, then the corresponding url for that result in
  * {@link #EXTRA_VOICE_SEARCH_RESULT_URLS} should be used. And if even that is not available,
  * then a search url should be constructed from the actual recognition result string.
- * 
- * @hide for making public in a later release
  */
 public class RecognizerResultsIntent {
     private RecognizerResultsIntent() {
@@ -58,8 +56,6 @@ public class RecognizerResultsIntent {
      * and, possibly, the full html to display for that result at index N of
      * {@link #EXTRA_VOICE_SEARCH_RESULT_HTML}. If full html is provided, a base url (or
      * list of base urls) should be provided with {@link #EXTRA_VOICE_SEARCH_RESULT_HTML_BASE_URLS}.
-     * 
-     * @hide for making public in a later release
      */
     public static final String ACTION_VOICE_SEARCH_RESULTS =
             "android.speech.action.VOICE_SEARCH_RESULTS";
@@ -67,8 +63,6 @@ public class RecognizerResultsIntent {
     /**
      * The key to an extra {@link ArrayList} of {@link String}s that contains the list of
      * recognition alternates from voice search, in order from highest to lowest confidence.
-     * 
-     * @hide for making public in a later release
      */
     public static final String EXTRA_VOICE_SEARCH_RESULT_STRINGS =
             "android.speech.extras.VOICE_SEARCH_RESULT_STRINGS";
@@ -81,8 +75,6 @@ public class RecognizerResultsIntent {
      * search url, that entry in this ArrayList should be <code>null</code>, and the implementor of
      * {@link #ACTION_VOICE_SEARCH_RESULTS} should execute a search of its own choosing,
      * based on the recognition result string.
-     * 
-     * @hide for making public in a later release
      */
     public static final String EXTRA_VOICE_SEARCH_RESULT_URLS =
             "android.speech.extras.VOICE_SEARCH_RESULT_URLS";
@@ -102,8 +94,6 @@ public class RecognizerResultsIntent {
      * uri or some other identifier. Anyone who reads this extra should confirm that a result is
      * in fact an "inline:" uri and back off to the urls or strings gracefully if it is not, thus
      * maintaining future backwards compatibility if this changes.
-     * 
-     * @hide not to be exposed immediately as the implementation details may change
      */
     public static final String EXTRA_VOICE_SEARCH_RESULT_HTML =
             "android.speech.extras.VOICE_SEARCH_RESULT_HTML";
@@ -116,8 +106,6 @@ public class RecognizerResultsIntent {
      * A list of the same size as {@link #EXTRA_VOICE_SEARCH_RESULT_STRINGS} may be provided
      * to apply different base urls to each different html result in the
      * {@link #EXTRA_VOICE_SEARCH_RESULT_HTML} list.
-     * 
-     * @hide not to be exposed immediately as the implementation details may change
      */
     public static final String EXTRA_VOICE_SEARCH_RESULT_HTML_BASE_URLS =
             "android.speech.extras.VOICE_SEARCH_RESULT_HTML_BASE_URLS";
@@ -132,16 +120,14 @@ public class RecognizerResultsIntent {
      * apply different HTTP headers to each different web result in the list. These headers will
      * only be used in the case that the url for a particular web result (from
      * {@link #EXTRA_VOICE_SEARCH_RESULT_URLS}) is loaded.
-     *
-     * @hide not to be exposed immediately as the implementation details may change
      */
     public static final String EXTRA_VOICE_SEARCH_RESULT_HTTP_HEADERS =
             "android.speech.extras.EXTRA_VOICE_SEARCH_RESULT_HTTP_HEADERS";
 
     /**
      * The scheme used currently for html content in {@link #EXTRA_VOICE_SEARCH_RESULT_HTML}.
-     * 
-     * @hide not to be exposed immediately as the implementation details may change
+     * Note that this should only be used in tandem with this particular extra; it should
+     * NOT be used for generic URIs such as those found in the data field of an Intent.
      */
     public static final String URI_SCHEME_INLINE = "inline";
 }
