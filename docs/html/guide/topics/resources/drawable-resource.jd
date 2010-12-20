@@ -474,7 +474,7 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
         android:right="<em>dimension</em>"
         android:bottom="<em>dimension</em>"
         android:left="<em>dimension</em>" /&gt;
-&lt;/selector>
+&lt;/layer-list>
 </pre>
 </dd>
 
@@ -906,7 +906,7 @@ xmlns:android="http://schemas.android.com/apk/res/android" &gt;
         android:right="<em>dimension</em>"
         android:bottom="<em>dimension</em>"
         android:left="<em>dimension</em>" /&gt;
-&lt;/selector>
+&lt;/transition>
 </pre>
 </dd>
 
@@ -926,8 +926,8 @@ xmlns:android="http://schemas.android.com/apk/res/android" &gt;
       </dl>
     </dd>
   <dt id="transition-item-element"><code>&lt;item&gt;</code></dt>
-    <dd>Defines a drawable to place in the layer drawable, in a position defined by its attributes.
-Must be a child of a <code>&lt;selector&gt;</code> element. Accepts child {@code &lt;bitmap&gt;}
+    <dd>Defines a drawable to use as part of the drawable transition.
+Must be a child of a <code>&lt;transition&gt;</code> element. Accepts child {@code &lt;bitmap&gt;}
 elements.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
@@ -963,7 +963,7 @@ View.findViewById()} or {@link android.app.Activity#findViewById(int) Activity.f
 &lt;transition xmlns:android="http://schemas.android.com/apk/res/android"&gt;
     &lt;item android:drawable="@drawable/on" /&gt;
     &lt;item android:drawable="@drawable/off" /&gt;
-&lt;/layer-list&gt;
+&lt;/transition&gt;
 </pre>
 
 <p>This layout XML applies the drawable to a View:</p>
@@ -1226,11 +1226,11 @@ the right edge, a right gravity clips the left edge, and neither clips both edge
 <dd>XML file saved at <code>res/drawable/clip.xml</code>:
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
-&lt;shape xmlns:android="http://schemas.android.com/apk/res/android"
+&lt;clip xmlns:android="http://schemas.android.com/apk/res/android"
     android:drawable="@drawable/android"
     android:clipOrientation="horizontal"
     android:gravity="left" /&gt;
-&lt;/shape>
+&lt;/clip>
 </pre>
     <p>The following layout XML applies the clip drawable to a View:</p>
 <pre>
