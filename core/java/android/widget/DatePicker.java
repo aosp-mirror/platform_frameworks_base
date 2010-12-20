@@ -104,6 +104,14 @@ public class DatePicker extends FrameLayout {
             }
         };
 
+        // mini-month day-picker
+        mMiniMonthDayPicker = (DayPicker) findViewById(R.id.mini_month_day_picker);
+        mMiniMonthDayPicker.setOnDateChangeListener(new DayPicker.OnSelectedDayChangeListener() {
+            public void onSelectedDayChange(DayPicker view, int year, int month, int monthDay) {
+                updateDateUnchecked(year, month, monthDay);
+            }
+        });
+
         // day
         mDayPicker = (NumberPicker) findViewById(R.id.day);
         mDayPicker.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
@@ -121,24 +129,11 @@ public class DatePicker extends FrameLayout {
         mYearPicker.setOnLongPressUpdateInterval(100);
         mYearPicker.setOnChangeListener(onChangeListener);
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DatePicker);
-        int mStartYear = a.getInt(R.styleable.DatePicker_startYear, DEFAULT_START_YEAR);
-        int mEndYear = a.getInt(R.styleable.DatePicker_endYear, DEFAULT_END_YEAR);
-        mYearPicker.setRange(mStartYear, mEndYear);
+        int startYear = a.getInt(R.styleable.DatePicker_startYear, DEFAULT_START_YEAR);
+        int endYear = a.getInt(R.styleable.DatePicker_endYear, DEFAULT_END_YEAR);
+        setRange(startYear, endYear);
         a.recycle();
 
-        // mini-month day-picker
-        mMiniMonthDayPicker = (DayPicker) findViewById(R.id.mini_month_day_picker);
-        mTempCalendar.clear();
-        mTempCalendar.set(mStartYear, 0, 1);
-        Calendar endRangeDate = (Calendar) mTempCalendar.clone();
-        endRangeDate.set(mEndYear, 11, 31);
-        mMiniMonthDayPicker.setRange(mTempCalendar, endRangeDate);
-        mMiniMonthDayPicker.setOnDateChangeListener(new DayPicker.OnSelectedDayChangeListener() {
-            public void onSelectedDayChange(DayPicker view, int year, int month, int monthDay) {
-                updateDateUnchecked(year, month, monthDay);
-            }
-        });
-        
         // initialize to current date
         mTempCalendar.setTimeInMillis(System.currentTimeMillis());
         init(mTempCalendar.get(Calendar.YEAR), mTempCalendar.get(Calendar.MONTH),
@@ -146,6 +141,40 @@ public class DatePicker extends FrameLayout {
 
         // re-order the number pickers to match the current date format
         reorderPickers();
+    }
+
+    /**
+     * Sets the range of years in which dates can be selected.
+     * <p>
+     * Note: If the range is set to a value that does not include the currently
+     * selected date the value of this picker will be updated to the closest
+     * date in the range.
+     * </p>
+     *
+     * @param startYear The start year of the range.
+     * @param endYear The end year of the range.
+     */
+    public void setRange(int startYear, int endYear) {
+        // set ranges of the widgets
+        mYearPicker.setRange(startYear, endYear);
+        mTempCalendar.clear();
+        Calendar startRangeDate = (Calendar) mTempCalendar.clone();
+        startRangeDate.set(startYear, 0, 1);
+        Calendar endRangeDate = (Calendar) mTempCalendar.clone();
+        endRangeDate.set(endYear, 11, 31);
+        mMiniMonthDayPicker.setRange(startRangeDate, endRangeDate);
+
+        // update state if current date is outside of the range
+        mTempCalendar.set(Calendar.YEAR, getYear());
+        mTempCalendar.set(Calendar.MONTH, getMonth());
+        mTempCalendar.set(Calendar.DAY_OF_MONTH, getDayOfMonth());
+        if (mTempCalendar.before(startRangeDate)) {
+            updateDate(startRangeDate.get(Calendar.YEAR), startRangeDate.get(Calendar.MONTH),
+                    startRangeDate.get(Calendar.DAY_OF_MONTH));
+        } else if (mTempCalendar.after(endRangeDate)) {
+            updateDate(endRangeDate.get(Calendar.YEAR), endRangeDate.get(Calendar.MONTH),
+                    endRangeDate.get(Calendar.DAY_OF_MONTH));
+        }
     }
 
     @Override

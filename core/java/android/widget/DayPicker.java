@@ -366,22 +366,38 @@ public class DayPicker extends FrameLayout {
      * @param endRangeDate The end date.
      */
     public void setRange(Calendar startRangeDate, Calendar endRangeDate) {
-        boolean doSetupAdapter = false;
+        boolean rangeChanged = false;
         if (mRangeStartDate.get(Calendar.DAY_OF_YEAR) != startRangeDate.get(Calendar.DAY_OF_YEAR)
                 || mRangeStartDate.get(Calendar.YEAR) != startRangeDate.get(Calendar.YEAR)) {
             mRangeStartDate.setTimeInMillis(startRangeDate.getTimeInMillis());
             mRangeStartDate.setTimeZone(startRangeDate.getTimeZone());
-            doSetupAdapter = true;
+            rangeChanged = true;
         }
         if (mRangeEndDate.get(Calendar.DAY_OF_YEAR) != endRangeDate.get(Calendar.DAY_OF_YEAR)
                 || mRangeEndDate.get(Calendar.YEAR) != endRangeDate.get(Calendar.YEAR)) {
             mRangeEndDate.setTimeInMillis(endRangeDate.getTimeInMillis());
             mRangeEndDate.setTimeZone(endRangeDate.getTimeZone());
-            doSetupAdapter = true;
-            
+            rangeChanged = true;
         }
-        if (doSetupAdapter) {
-            setUpAdapter();
+
+        if (!rangeChanged) {
+            return;
+        }
+
+        // now recreate the adapter since we have a new range to handle
+        mAdapter = null;
+        setUpAdapter();
+
+        // set the current date to today if in the range
+        // otherwise to the closest end of the range
+        mTempCalendar.clear();
+        mTempCalendar.setTimeInMillis(System.currentTimeMillis());
+        if (mTempCalendar.before(mRangeStartDate)) {
+            goTo(mRangeStartDate, false, true, true);
+        } else if (mTempCalendar.after(mRangeEndDate)) {
+            goTo(mRangeEndDate, false, true, true);
+        } else {
+            goTo(mTempCalendar, false, true, true);
         }
     }
 
@@ -629,7 +645,6 @@ public class DayPicker extends FrameLayout {
         }
 
         // Figure out where we are
-        int offset = child.getBottom() < mWeekMinVisibleHeight ? 1 : 0;
         long currScroll = view.getFirstVisiblePosition() * child.getHeight() - child.getBottom();
 
         // If we have moved since our last call update the direction
@@ -645,6 +660,7 @@ public class DayPicker extends FrameLayout {
         // causes the month to transition when two full weeks of a month are
         // visible when scrolling up, and when the first day in a month reaches
         // the top of the screen when scrolling down.
+        int offset = child.getBottom() < mWeekMinVisibleHeight ? 1 : 0;
         if (mIsScrollingUp) {
             child = (WeekView) view.getChildAt(SCROLL_HYST_WEEKS + offset);
         } else if (offset != 0) {
@@ -712,8 +728,9 @@ public class DayPicker extends FrameLayout {
             throw new IllegalArgumentException("fromDate: " + mRangeStartDate.getTime()
                     + " does not precede toDate: " + toDate.getTime());
         }
+
         int fromDateDayOfWeek = mRangeStartDate.get(Calendar.DAY_OF_WEEK);
-        long diff = (fromDateDayOfWeek - toDate.getFirstDayOfWeek()) * MILLIS_IN_DAY;
+        long diff = (fromDateDayOfWeek - mFirstDayOfWeek) * MILLIS_IN_DAY;
         if (diff < 0) {
             diff = diff + MILLIS_IN_WEEK;
         }
@@ -874,7 +891,16 @@ public class DayPicker extends FrameLayout {
         protected void init() {
             mGestureDetector = new GestureDetector(mContext, new CalendarGestureListener());
             mSelectedWeek = getWeeksDelta(mSelectedDay);
-            mTotalWeekCount = getWeeksDelta(mRangeEndDate);
+
+            // make adjustment to fit the range last week with needed overflow
+            mTempCalendar.setTimeInMillis(mRangeEndDate.getTimeInMillis());
+            mTempCalendar.setTimeZone(mRangeEndDate.getTimeZone());
+            int diff = mFirstDayOfWeek - mRangeEndDate.get(Calendar.DAY_OF_WEEK);
+            if (diff < 0) {
+                diff += DAYS_PER_WEEK;
+            }
+            mTempCalendar.add(Calendar.DAY_OF_WEEK, diff);
+            mTotalWeekCount = getWeeksDelta(mTempCalendar);
         }
 
         /**
@@ -892,7 +918,6 @@ public class DayPicker extends FrameLayout {
             mSelectedWeek = getWeeksDelta(mSelectedDay);
             mFocusMonth = mSelectedDay.get(Calendar.MONTH);
             notifyDataSetChanged();
-            invalidate();  // Test
         }
 
         /**
@@ -1004,9 +1029,12 @@ public class DayPicker extends FrameLayout {
             if (mGestureDetector.onTouchEvent(event)) {
                 WeekView weekView = (WeekView) v;
                 weekView.getDayFromLocation(event.getX(), mTempCalendar);
-                if (mTempCalendar.get(Calendar.YEAR) != 0) {
-                    onDayTapped(mTempCalendar);
+                // it is possible that the touched day is outside the valid range
+                // we draw whole weeks but range end can fall not on the week end
+                if (mTempCalendar.before(mRangeStartDate) || mTempCalendar.after(mRangeEndDate)) {
+                    return true;
                 }
+                onDayTapped(mTempCalendar);
                 return true;
             }
             return false;
@@ -1019,6 +1047,7 @@ public class DayPicker extends FrameLayout {
          */
         protected void onDayTapped(Calendar day) {
             setSelectedDay(day);
+            setMonthDisplayed(day);
         }
 
         /**
@@ -1244,8 +1273,8 @@ public class DayPicker extends FrameLayout {
                 mNumCells = mShowWeekNumber ? mWeekDayCount + 1 : mWeekDayCount;
             }
             mWeek = ((int[]) params.get(VIEW_PARAMS_WEEK))[0];
-            mTempCalendar.clear();
-            mTempCalendar.set(1900, 0, 1);
+            mTempCalendar.setTimeInMillis(mRangeStartDate.getTimeInMillis());
+            mTempCalendar.setTimeZone(mRangeStartDate.getTimeZone());
             mTempCalendar.add(Calendar.WEEK_OF_YEAR, mWeek);
             if (params.containsKey(VIEW_PARAMS_WEEK_START)) {
                 mTempCalendar.setFirstDayOfWeek(((int[]) params.get(VIEW_PARAMS_WEEK_START))[0]);
@@ -1277,7 +1306,12 @@ public class DayPicker extends FrameLayout {
 
             for (; i < mNumCells; i++) {
                 mFocusDay[i] = (mTempCalendar.get(Calendar.MONTH) == focusMonth);
-                mDayNumbers[i] = Integer.toString(mTempCalendar.get(Calendar.DAY_OF_MONTH));
+                // do not draw dates outside the valid range to avoid user confusion
+                if (mTempCalendar.before(mRangeStartDate) || mTempCalendar.after(mRangeEndDate)) {
+                    mDayNumbers[i] = "";
+                } else {
+                    mDayNumbers[i] = Integer.toString(mTempCalendar.get(Calendar.DAY_OF_MONTH));
+                }
                 mTempCalendar.add(Calendar.DAY_OF_MONTH, 1);
             }
             // We do one extra add at the end of the loop, if that pushed us to

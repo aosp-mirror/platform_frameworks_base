@@ -21,7 +21,6 @@ import com.android.internal.R;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -118,6 +117,28 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
         mDatePicker.init(year, month, day, null);
     }
 
+    /**
+     * Sets the range of years in which dates can be selected.
+     * <p>
+     * Note: If the range is set to a value that does not include the currently
+     * selected date the value of the picker shown by this dialog will be
+     * updated to the closest date in the range.
+     * </p>
+     *
+     * @param startYear The start year of the range.
+     * @param endYear The end year of the range.
+     */
+    public void setRange(int startYear, int endYear) {
+        mDatePicker.setRange(startYear, endYear);
+    }
+
+    /**
+     * Sets the current date.
+     *
+     * @param year The date year.
+     * @param monthOfYear The date month.
+     * @param dayOfMonth The date day of month.
+     */
     public void updateDate(int year, int monthOfYear, int dayOfMonth) {
         mDatePicker.updateDate(year, monthOfYear, dayOfMonth);
     }

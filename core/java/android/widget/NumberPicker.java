@@ -1189,9 +1189,9 @@ public class NumberPicker extends LinearLayout {
      */
     private int getWrappedSelectorIndex(int selectorIndex) {
         if (selectorIndex > mEnd) {
-            return mStart + (selectorIndex - mEnd) % (mEnd - mStart);
+            return mStart + (selectorIndex - mEnd) % (mEnd - mStart) - 1;
         } else if (selectorIndex < mStart) {
-            return mEnd - (mStart - selectorIndex) % (mEnd - mStart);
+            return mEnd - (mStart - selectorIndex) % (mEnd - mStart) + 1;
         }
         return selectorIndex;
     }
