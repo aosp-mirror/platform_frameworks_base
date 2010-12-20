@@ -5774,7 +5774,10 @@ class PackageManagerService extends IPackageManager.Stub {
         res.removedInfo.removedPackage = packageName;
         // Remove existing system package
         removePackageLI(oldPkg, true);
-
+        synchronized (mPackages) {
+            mSettings.disableSystemPackageLP(packageName);
+        }
+        
         // Successfully disabled the old package. Now proceed with re-installation
         mLastScanError = PackageManager.INSTALL_SUCCEEDED;
         pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
