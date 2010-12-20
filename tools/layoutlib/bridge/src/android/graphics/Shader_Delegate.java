@@ -18,7 +18,7 @@ package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
-import java.awt.geom.AffineTransform;
+import android.graphics.Shader.TileMode;
 
 /**
  * Delegate implementing the native methods of android.graphics.Shader
@@ -52,7 +52,25 @@ public abstract class Shader_Delegate {
         return sManager.getDelegate(nativeShader);
     }
 
+    /**
+     * Returns the {@link TileMode} matching the given int.
+     * @param tileMode the tile mode int value
+     * @return the TileMode enum.
+     */
+    public static TileMode getTileMode(int tileMode) {
+        for (TileMode tm : TileMode.values()) {
+            if (tm.nativeInt == tileMode) {
+                return tm;
+            }
+        }
+
+        assert false;
+        return TileMode.CLAMP;
+    }
+
     public abstract java.awt.Paint getJavaPaint();
+    public abstract boolean isSupported();
+    public abstract String getSupportMessage();
 
     // ---- native methods ----
 
@@ -111,19 +129,19 @@ public abstract class Shader_Delegate {
 
     // ---- Private delegate/helper methods ----
 
-    protected AffineTransform getLocalMatrix() {
+    protected java.awt.geom.AffineTransform getLocalMatrix() {
         Matrix_Delegate localMatrixDelegate = null;
         if (mLocalMatrix > 0) {
             localMatrixDelegate = Matrix_Delegate.getDelegate(mLocalMatrix);
             if (localMatrixDelegate == null) {
                 assert false;
-                return new AffineTransform();
+                return new java.awt.geom.AffineTransform();
             }
 
             return localMatrixDelegate.getAffineTransform();
         }
 
-        return new AffineTransform();
+        return new java.awt.geom.AffineTransform();
     }
 
 }

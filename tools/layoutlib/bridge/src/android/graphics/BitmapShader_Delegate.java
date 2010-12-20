@@ -22,14 +22,14 @@ import com.android.layoutlib.bridge.impl.DelegateManager;
 import android.graphics.Shader.TileMode;
 
 /**
- * Delegate implementing the native methods of android.graphics.LinearGradient
+ * Delegate implementing the native methods of android.graphics.BitmapShader
  *
- * Through the layoutlib_create tool, the original native methods of LinearGradient have been
+ * Through the layoutlib_create tool, the original native methods of BitmapShader have been
  * replaced by calls to methods of the same name in this delegate class.
  *
  * This class behaves like the original native implementation, but in Java, keeping previously
  * native data into its own objects and mapping them to int that are sent back and forth between
- * it and the original LinearGradient class.
+ * it and the original BitmapShader class.
  *
  * Because this extends {@link Shader_Delegate}, there's no need to use a {@link DelegateManager},
  * as all the Shader classes will be added to the manager owned by {@link Shader_Delegate}.
@@ -37,7 +37,7 @@ import android.graphics.Shader.TileMode;
  * @see Shader_Delegate
  *
  */
-public final class LinearGradient_Delegate extends Gradient_Delegate {
+public class BitmapShader_Delegate extends Shader_Delegate {
 
     // ---- delegate data ----
     private java.awt.Paint mJavaPaint;
@@ -49,78 +49,57 @@ public final class LinearGradient_Delegate extends Gradient_Delegate {
         return mJavaPaint;
     }
 
+    @Override
+    public boolean isSupported() {
+        return true;
+    }
+
+    @Override
+    public String getSupportMessage() {
+        // no message since isSupported returns true;
+        return null;
+    }
+
     // ---- native methods ----
 
-    /*package*/ static int nativeCreate1(LinearGradient thisGradient,
-            float x0, float y0, float x1, float y1,
-            int colors[], float positions[], int tileMode) {
-        LinearGradient_Delegate newDelegate = new LinearGradient_Delegate(x0, y0, x1, y1,
-                colors, positions, Shader_Delegate.getTileMode(tileMode));
+    /*package*/ static int nativeCreate(int native_bitmap, int shaderTileModeX,
+            int shaderTileModeY) {
+        Bitmap_Delegate bitmap = Bitmap_Delegate.getDelegate(native_bitmap);
+        assert bitmap != null;
+        if (bitmap == null) {
+            return 0;
+        }
+
+        BitmapShader_Delegate newDelegate = new BitmapShader_Delegate(
+                bitmap.getImage(),
+                Shader_Delegate.getTileMode(shaderTileModeX),
+                Shader_Delegate.getTileMode(shaderTileModeY));
         return sManager.addDelegate(newDelegate);
     }
-    /*package*/ static int nativeCreate2(LinearGradient thisGradient,
-            float x0, float y0, float x1, float y1,
-            int color0, int color1, int tileMode) {
-        return nativeCreate1(thisGradient,
-                x0, y0, x1, y1, new int[] { color0, color1}, null /*positions*/,
-                tileMode);
-    }
-    /*package*/ static int nativePostCreate1(LinearGradient thisGradient,
-            int native_shader, float x0, float y0, float x1, float y1,
-            int colors[], float positions[], int tileMode) {
-        // nothing to be done here.
-        return 0;
-    }
-    /*package*/ static int nativePostCreate2(LinearGradient thisGradient,
-            int native_shader, float x0, float y0, float x1, float y1,
-            int color0, int color1, int tileMode) {
-        // nothing to be done here.
+
+    /*package*/ static int nativePostCreate(int native_shader, int native_bitmap,
+            int shaderTileModeX, int shaderTileModeY) {
+        // pass, not needed.
         return 0;
     }
 
     // ---- Private delegate/helper methods ----
 
-    /**
-     * Create a shader that draws a linear gradient along a line.
-     *
-     * @param x0 The x-coordinate for the start of the gradient line
-     * @param y0 The y-coordinate for the start of the gradient line
-     * @param x1 The x-coordinate for the end of the gradient line
-     * @param y1 The y-coordinate for the end of the gradient line
-     * @param colors The colors to be distributed along the gradient line
-     * @param positions May be null. The relative positions [0..1] of each
-     *            corresponding color in the colors array. If this is null, the
-     *            the colors are distributed evenly along the gradient line.
-     * @param tile The Shader tiling mode
-     */
-    private LinearGradient_Delegate(float x0, float y0, float x1, float y1,
-            int colors[], float positions[], TileMode tile) {
-        super(colors, positions);
-        mJavaPaint = new LinearGradientPaint(x0, y0, x1, y1, mColors, mPositions, tile);
+    private BitmapShader_Delegate(java.awt.image.BufferedImage image,
+            TileMode tileModeX, TileMode tileModeY) {
+        mJavaPaint = new BitmapShaderPaint(image, tileModeX, tileModeY);
     }
 
-    // ---- Custom Java Paint ----
-    /**
-     * Linear Gradient (Java) Paint able to handle more than 2 points, as
-     * {@link java.awt.GradientPaint} only supports 2 points and does not support Android's tile
-     * modes.
-     */
-    private class LinearGradientPaint extends GradientPaint {
+    private class BitmapShaderPaint implements java.awt.Paint {
+        private final java.awt.image.BufferedImage mImage;
+        private final TileMode mTileModeX;
+        private final TileMode mTileModeY;
 
-        private final float mX0;
-        private final float mY0;
-        private final float mDx;
-        private final float mDy;
-        private final float mDSize2;
-
-        public LinearGradientPaint(float x0, float y0, float x1, float y1, int colors[],
-                float positions[], TileMode tile) {
-            super(colors, positions, tile);
-            mX0 = x0;
-            mY0 = y0;
-            mDx = x1 - x0;
-            mDy = y1 - y0;
-            mDSize2 = mDx * mDx + mDy * mDy;
+        BitmapShaderPaint(java.awt.image.BufferedImage image,
+                TileMode tileModeX, TileMode tileModeY) {
+            mImage = image;
+            mTileModeX = tileModeX;
+            mTileModeY = tileModeY;
         }
 
         public java.awt.PaintContext createContext(
@@ -129,13 +108,12 @@ public final class LinearGradient_Delegate extends Gradient_Delegate {
                 java.awt.geom.Rectangle2D      userBounds,
                 java.awt.geom.AffineTransform  xform,
                 java.awt.RenderingHints        hints) {
-            precomputeGradientColors();
 
             java.awt.geom.AffineTransform canvasMatrix;
             try {
                 canvasMatrix = xform.createInverse();
             } catch (java.awt.geom.NoninvertibleTransformException e) {
-                Bridge.getLog().error(null, "Unable to inverse matrix in LinearGradient", e);
+                Bridge.getLog().error(null, "Unable to inverse matrix in BitmapShader", e);
                 canvasMatrix = new java.awt.geom.AffineTransform();
             }
 
@@ -143,20 +121,20 @@ public final class LinearGradient_Delegate extends Gradient_Delegate {
             try {
                 localMatrix = localMatrix.createInverse();
             } catch (java.awt.geom.NoninvertibleTransformException e) {
-                Bridge.getLog().error(null, "Unable to inverse matrix in LinearGradient", e);
+                Bridge.getLog().error(null, "Unable to inverse matrix in BitmapShader", e);
                 localMatrix = new java.awt.geom.AffineTransform();
             }
 
-            return new LinearGradientPaintContext(canvasMatrix, localMatrix, colorModel);
+            return new BitmapShaderContext(canvasMatrix, localMatrix, colorModel);
         }
 
-        private class LinearGradientPaintContext implements java.awt.PaintContext {
+        private class BitmapShaderContext implements java.awt.PaintContext {
 
             private final java.awt.geom.AffineTransform mCanvasMatrix;
             private final java.awt.geom.AffineTransform mLocalMatrix;
             private final java.awt.image.ColorModel mColorModel;
 
-            private LinearGradientPaintContext(
+            public BitmapShaderContext(
                     java.awt.geom.AffineTransform canvasMatrix,
                     java.awt.geom.AffineTransform localMatrix,
                     java.awt.image.ColorModel colorModel) {
@@ -206,13 +184,59 @@ public final class LinearGradient_Delegate extends Gradient_Delegate {
         /**
          * Returns a color for an arbitrary point.
          */
-        private int getColor(float x, float y) {
-            // find the x position on the gradient vector.
-            float _x = (mDx*mDy*(y-mY0) + mDy*mDy*mX0 + mDx*mDx*x) / mDSize2;
-            // from it get the position relative to the vector
-            float pos = (float) ((_x - mX0) / mDx);
+        private int getColor(float fx, float fy) {
+            int x = getCoordinate(Math.round(fx), mImage.getWidth(), mTileModeX);
+            int y = getCoordinate(Math.round(fy), mImage.getHeight(), mTileModeY);
 
-            return getGradientColor(pos);
+            return mImage.getRGB(x, y);
+        }
+
+        private int getCoordinate(int i, int size, TileMode mode) {
+            if (i < 0) {
+                switch (mode) {
+                    case CLAMP:
+                        i = 0;
+                        break;
+                    case REPEAT:
+                        i = size - 1 - (-i % size);
+                        break;
+                    case MIRROR:
+                        // this is the same as the positive side, just make the value positive
+                        // first.
+                        i = -i;
+                        int count = i / size;
+                        i = i % size;
+
+                        if ((count % 2) == 1) {
+                            i = size - 1 - i;
+                        }
+                        break;
+                }
+            } else if (i >= size) {
+                switch (mode) {
+                    case CLAMP:
+                        i = size - 1;
+                        break;
+                    case REPEAT:
+                        i = i % size;
+                        break;
+                    case MIRROR:
+                        int count = i / size;
+                        i = i % size;
+
+                        if ((count % 2) == 1) {
+                            i = size - 1 - i;
+                        }
+                        break;
+                }
+            }
+
+            return i;
+        }
+
+
+        public int getTransparency() {
+            return java.awt.Paint.TRANSLUCENT;
         }
     }
 }

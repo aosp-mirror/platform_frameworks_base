@@ -1052,6 +1052,4 @@ public final class Matrix_Delegate {
 
         return tmp;
     }
-
-
 }

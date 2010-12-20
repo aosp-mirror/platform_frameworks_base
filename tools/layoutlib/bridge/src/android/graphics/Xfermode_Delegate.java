@@ -18,6 +18,8 @@ package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
+import java.awt.Composite;
+
 /**
  * Delegate implementing the native methods of android.graphics.Xfermode
  *
@@ -33,7 +35,7 @@ import com.android.layoutlib.bridge.impl.DelegateManager;
  * @see DelegateManager
  *
  */
-public class Xfermode_Delegate {
+public abstract class Xfermode_Delegate {
 
     // ---- delegate manager ----
     protected static final DelegateManager<Xfermode_Delegate> sManager =
@@ -48,6 +50,11 @@ public class Xfermode_Delegate {
     public static Xfermode_Delegate getDelegate(int native_instance) {
         return sManager.getDelegate(native_instance);
     }
+
+    public abstract Composite getComposite();
+    public abstract boolean isSupported();
+    public abstract String getSupportMessage();
+
 
     // ---- native methods ----
 

@@ -23,12 +23,14 @@ import com.android.layoutlib.bridge.impl.GcSnapshot;
 import android.graphics.Paint_Delegate.FontInfo;
 import android.text.TextUtils;
 
-import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -47,13 +49,17 @@ import java.util.List;
  * @see DelegateManager
  *
  */
-public class Canvas_Delegate {
+public final class Canvas_Delegate {
 
     // ---- delegate manager ----
     private static final DelegateManager<Canvas_Delegate> sManager =
             new DelegateManager<Canvas_Delegate>();
 
     // ---- delegate helper data ----
+
+    private interface Drawable {
+        void draw(Graphics2D graphics, Paint_Delegate paint);
+    }
 
     // ---- delegate data ----
     private BufferedImage mBufferedImage;
@@ -403,9 +409,9 @@ public class Canvas_Delegate {
 
         if (matrixDelegate.hasPerspective()) {
             assert false;
-            Bridge.getLog().warning(null,
+            Bridge.getLog().fidelityWarning(null,
                     "android.graphics.Canvas#setMatrix(android.graphics.Matrix) only " +
-                    "supports affine transformations in the Layout Preview.");
+                    "supports affine transformations in the Layout Preview.", null);
         }
     }
 
@@ -522,7 +528,10 @@ public class Canvas_Delegate {
             // set the color
             graphics.setColor(new Color(color, true /*alpha*/));
 
-            setModeInGraphics(graphics, mode);
+            Composite composite = PorterDuffXfermode_Delegate.getComposite(mode);
+            if (composite != null) {
+                graphics.setComposite(composite);
+            }
 
             graphics.fillRect(0, 0, canvasDelegate.mBufferedImage.getWidth(),
                     canvasDelegate.mBufferedImage.getHeight());
@@ -709,8 +718,28 @@ public class Canvas_Delegate {
 
     /*package*/ static void native_drawPath(int nativeCanvas, int path,
                                                int paint) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        final Path_Delegate pathDelegate = Path_Delegate.getDelegate(path);
+        if (pathDelegate == null) {
+            assert false;
+            return;
+        }
+
+        draw(nativeCanvas, paint, new Drawable() {
+            public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                Shape shape = pathDelegate.getJavaShape();
+                int style = paint.getStyle();
+
+                if (style == Paint.Style.FILL.nativeInt ||
+                        style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                    graphics.fill(shape);
+                }
+
+                if (style == Paint.Style.STROKE.nativeInt ||
+                        style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                    graphics.draw(shape);
+                }
+            }
+        });
     }
 
     /*package*/ static void native_drawBitmap(Canvas thisCanvas, int nativeCanvas, int bitmap,
@@ -719,8 +748,20 @@ public class Canvas_Delegate {
                                                  int canvasDensity,
                                                  int screenDensity,
                                                  int bitmapDensity) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(bitmap);
+        if (bitmapDelegate == null) {
+            assert false;
+            return;
+        }
+
+        BufferedImage image = bitmapDelegate.getImage();
+        float right = left + image.getWidth();
+        float bottom = top + image.getHeight();
+
+        drawBitmap(nativeCanvas, image, nativePaintOrZero,
+                0, 0, image.getWidth(), image.getHeight(),
+                (int)left, (int)top, (int)right, (int)bottom);
     }
 
     /*package*/ static void native_drawBitmap(Canvas thisCanvas, int nativeCanvas, int bitmap,
@@ -998,6 +1039,34 @@ public class Canvas_Delegate {
 
     // ---- Private delegate/helper methods ----
 
+    /**
+     * Executes a {@link Drawable} with a given canvas and paint.
+     */
+    private static void draw(int nCanvas, int nPaint, Drawable runnable) {
+        // get the delegate from the native int.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
+        if (canvasDelegate == null) {
+            assert false;
+            return;
+        }
+
+        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(nPaint);
+        if (paintDelegate == null) {
+            assert false;
+            return;
+        }
+
+        // get a Graphics2D object configured with the drawing parameters.
+        Graphics2D g = canvasDelegate.createCustomGraphics(paintDelegate);
+
+        try {
+            runnable.draw(g, paintDelegate);
+        } finally {
+            // dispose Graphics2D object
+            g.dispose();
+        }
+    }
+
     private Canvas_Delegate(BufferedImage image) {
         setBitmap(image);
     }
@@ -1069,18 +1138,23 @@ public class Canvas_Delegate {
         boolean useColorPaint = true;
 
         // get the shader first, as it'll replace the color if it can be used it.
-        Shader_Delegate shaderDelegate = Shader_Delegate.getDelegate(paint.getShader());
-        if (shaderDelegate != null) {
-            java.awt.Paint shaderPaint = shaderDelegate.getJavaPaint();
-            assert shaderPaint != null;
-            if (shaderPaint != null) {
-                g.setPaint(shaderPaint);
-                useColorPaint = false;
-            } else {
-                Bridge.getLog().warning(null,
-                        String.format(
-                            "Shader '%1$s' is not supported in the Layout Preview.",
-                            shaderDelegate.getClass().getCanonicalName()));
+        int nativeShader = paint.getShader();
+        if (nativeShader > 0) {
+            Shader_Delegate shaderDelegate = Shader_Delegate.getDelegate(nativeShader);
+            assert shaderDelegate != null;
+            if (shaderDelegate != null) {
+                if (shaderDelegate.isSupported()) {
+                    java.awt.Paint shaderPaint = shaderDelegate.getJavaPaint();
+                    assert shaderPaint != null;
+                    if (shaderPaint != null) {
+                        g.setPaint(shaderPaint);
+                        useColorPaint = false;
+                    }
+                } else {
+                    Bridge.getLog().fidelityWarning(null,
+                            shaderDelegate.getSupportMessage(),
+                            null);
+                }
             }
         }
 
@@ -1092,19 +1166,30 @@ public class Canvas_Delegate {
         if (style == Paint.Style.STROKE.nativeInt ||
                 style == Paint.Style.FILL_AND_STROKE.nativeInt) {
 
-            PathEffect_Delegate effectDelegate = PathEffect_Delegate.getDelegate(
-                    paint.getPathEffect());
+            boolean customStroke = false;
 
-            if (effectDelegate instanceof DashPathEffect_Delegate) {
-                DashPathEffect_Delegate dpe = (DashPathEffect_Delegate)effectDelegate;
-                g.setStroke(new BasicStroke(
-                        paint.getStrokeWidth(),
-                        paint.getJavaCap(),
-                        paint.getJavaJoin(),
-                        paint.getStrokeMiter(),
-                        dpe.getIntervals(),
-                        dpe.getPhase()));
-            } else {
+            int pathEffect = paint.getPathEffect();
+            if (pathEffect > 0) {
+                PathEffect_Delegate effectDelegate = PathEffect_Delegate.getDelegate(pathEffect);
+                assert effectDelegate != null;
+                if (effectDelegate != null) {
+                    if (effectDelegate.isSupported()) {
+                        Stroke stroke = effectDelegate.getStroke(paint);
+                        assert stroke != null;
+                        if (stroke != null) {
+                            g.setStroke(stroke);
+                            customStroke = true;
+                        }
+                    } else {
+                        Bridge.getLog().fidelityWarning(null,
+                                effectDelegate.getSupportMessage(),
+                                null);
+                    }
+                }
+            }
+
+            // if no custom stroke as been set, set the default one.
+            if (customStroke == false) {
                 g.setStroke(new BasicStroke(
                         paint.getStrokeWidth(),
                         paint.getJavaCap(),
@@ -1113,86 +1198,27 @@ public class Canvas_Delegate {
             }
         }
 
-        Xfermode_Delegate xfermodeDelegate = Xfermode_Delegate.getDelegate(paint.getXfermode());
-        if (xfermodeDelegate instanceof PorterDuffXfermode_Delegate) {
-            int mode = ((PorterDuffXfermode_Delegate)xfermodeDelegate).getMode();
-
-            setModeInGraphics(g, mode);
-        } else {
-            // default mode is src_over
-            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
-
-            // if xfermode wasn't null, then it's something we don't support. log it.
+        int xfermode = paint.getXfermode();
+        if (xfermode > 0) {
+            Xfermode_Delegate xfermodeDelegate = Xfermode_Delegate.getDelegate(paint.getXfermode());
+            assert xfermodeDelegate != null;
             if (xfermodeDelegate != null) {
-                assert false;
-                Bridge.getLog().warning(null,
-                        String.format(
-                            "Xfermode '%1$s' is not supported in the Layout Preview.",
-                            xfermodeDelegate.getClass().getCanonicalName()));
+                if (xfermodeDelegate.isSupported()) {
+                    Composite composite = xfermodeDelegate.getComposite();
+                    assert composite != null;
+                    if (composite != null) {
+                        g.setComposite(composite);
+                    }
+                } else {
+                    Bridge.getLog().fidelityWarning(null,
+                            xfermodeDelegate.getSupportMessage(),
+                            null);
+                }
             }
         }
 
         return g;
     }
-
-    private static void setModeInGraphics(Graphics2D g, int mode) {
-        for (PorterDuff.Mode m : PorterDuff.Mode.values()) {
-            if (m.nativeInt == mode) {
-                setModeInGraphics(g, m);
-                return;
-            }
-        }
-    }
-
-    private static void setModeInGraphics(Graphics2D g, PorterDuff.Mode mode) {
-        switch (mode) {
-            case CLEAR:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 1.0f /*alpha*/));
-                break;
-            case DARKEN:
-                break;
-            case DST:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST, 1.0f /*alpha*/));
-                break;
-            case DST_ATOP:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_ATOP, 1.0f /*alpha*/));
-                break;
-            case DST_IN:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_IN, 1.0f /*alpha*/));
-                break;
-            case DST_OUT:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OUT, 1.0f /*alpha*/));
-                break;
-            case DST_OVER:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OVER, 1.0f /*alpha*/));
-                break;
-            case LIGHTEN:
-                break;
-            case MULTIPLY:
-                break;
-            case SCREEN:
-                break;
-            case SRC:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, 1.0f /*alpha*/));
-                break;
-            case SRC_ATOP:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 1.0f /*alpha*/));
-                break;
-            case SRC_IN:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_IN, 1.0f /*alpha*/));
-                break;
-            case SRC_OUT:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OUT, 1.0f /*alpha*/));
-                break;
-            case SRC_OVER:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f /*alpha*/));
-                break;
-            case XOR:
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.XOR, 1.0f /*alpha*/));
-                break;
-        }
-    }
-
 
     private static void drawBitmap(
             int nativeCanvas,
@@ -1228,6 +1254,7 @@ public class Canvas_Delegate {
             Paint_Delegate paintDelegate,
             int sleft, int stop, int sright, int sbottom,
             int dleft, int dtop, int dright, int dbottom) {
+        //FIXME add support for canvas, screen and bitmap densities.
 
         Graphics2D g = canvasDelegate.getGcSnapshot().create();
         try {

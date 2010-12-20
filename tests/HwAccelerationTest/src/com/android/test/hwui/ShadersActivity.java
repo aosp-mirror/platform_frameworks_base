@@ -39,7 +39,7 @@ public class ShadersActivity extends Activity {
         setContentView(new ShadersView(this));
     }
 
-    static class ShadersView extends View {
+    public static class ShadersView extends View {
         private BitmapShader mRepeatShader;
         private BitmapShader mTranslatedShader;
         private BitmapShader mScaledShader;
@@ -53,7 +53,7 @@ public class ShadersActivity extends Activity {
         private LinearGradient mVertGradient;
         private Bitmap mTexture;
 
-        ShadersView(Context c) {
+        public ShadersView(Context c) {
             super(c);
 
             mTexture = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset1);
@@ -71,7 +71,7 @@ public class ShadersActivity extends Activity {
             m1.setTranslate(mTexWidth / 2.0f, mTexHeight / 2.0f);
             m1.postRotate(45, 0, 0);
             mTranslatedShader.setLocalMatrix(m1);
-            
+
             mScaledShader = new BitmapShader(mTexture, Shader.TileMode.MIRROR,
                     Shader.TileMode.MIRROR);
             Matrix m2 = new Matrix();
@@ -85,10 +85,10 @@ public class ShadersActivity extends Activity {
             m3.postRotate(-90.0f);
             m3.postTranslate(0.0f, mDrawHeight);
             mHorGradient.setLocalMatrix(m3);
-            
+
             mDiagGradient = new LinearGradient(0.0f, 0.0f, mDrawWidth / 1.5f, mDrawHeight,
                     Color.BLUE, Color.MAGENTA, Shader.TileMode.CLAMP);
-            
+
             mVertGradient = new LinearGradient(0.0f, 0.0f, 0.0f, mDrawHeight / 2.0f,
                     Color.YELLOW, Color.MAGENTA, Shader.TileMode.MIRROR);
 
@@ -107,7 +107,7 @@ public class ShadersActivity extends Activity {
 
             mPaint.setShader(mRepeatShader);
             canvas.drawRect(0.0f, 0.0f, mDrawWidth, mDrawHeight, mPaint);
-            
+
             canvas.translate(0.0f, 40.0f + mDrawHeight);
             mPaint.setShader(mTranslatedShader);
             canvas.drawRect(0.0f, 0.0f, mDrawWidth, mDrawHeight, mPaint);
@@ -124,7 +124,7 @@ public class ShadersActivity extends Activity {
 
             mPaint.setShader(mHorGradient);
             canvas.drawRect(0.0f, 0.0f, mDrawWidth, mDrawHeight, mPaint);
-            
+
             canvas.translate(0.0f, 40.0f + mDrawHeight);
             mPaint.setShader(mDiagGradient);
             canvas.drawRect(0.0f, 0.0f, mDrawWidth, mDrawHeight, mPaint);
@@ -132,7 +132,7 @@ public class ShadersActivity extends Activity {
             canvas.translate(0.0f, 40.0f + mDrawHeight);
             mPaint.setShader(mVertGradient);
             canvas.drawRect(0.0f, 0.0f, mDrawWidth, mDrawHeight, mPaint);
-            
+
             canvas.restore();
         }
     }

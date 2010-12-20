@@ -37,7 +37,7 @@ public class PathsActivity extends Activity {
         setContentView(view);
     }
 
-    static class PathsView extends View {
+    public static class PathsView extends View {
         private final Bitmap mBitmap1;
         private final Paint mSmallPaint;
         private final Paint mMediumPaint;
@@ -50,7 +50,7 @@ public class PathsActivity extends Activity {
         private final float mOffset;
         private final Paint mLinePaint;
 
-        PathsView(Context c) {
+        public PathsView(Context c) {
             super(c);
 
             mBitmap1 = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset1);
@@ -60,7 +60,7 @@ public class PathsActivity extends Activity {
             mSmallPaint.setColor(0xffff0000);
             mSmallPaint.setStrokeWidth(1.0f);
             mSmallPaint.setStyle(Paint.Style.STROKE);
-            
+
             mLinePaint = new Paint();
             mLinePaint.setAntiAlias(true);
             mLinePaint.setColor(0xffff00ff);
@@ -112,7 +112,7 @@ public class PathsActivity extends Activity {
             canvas.save();
             canvas.translate(200.0f, 60.0f);
             canvas.drawPath(mPath, mSmallPaint);
-            
+
             canvas.translate(350.0f, 0.0f);
             canvas.drawPath(mPath, mMediumPaint);
 
@@ -121,12 +121,12 @@ public class PathsActivity extends Activity {
             canvas.drawPath(mPath, mLargePaint);
             mLargePaint.setShader(null);
             canvas.restore();
-            
+
             canvas.save();
             canvas.translate(200.0f, 360.0f);
             canvas.drawPath(mPath, mSmallPaint);
             canvas.drawRect(mPathBounds, mBoundsPaint);
-            
+
             canvas.translate(350.0f, 0.0f);
             canvas.drawBitmap(mBitmap, mPathBounds.left - mOffset * 1.5f,
                     mPathBounds.top - mOffset * 1.5f, null);

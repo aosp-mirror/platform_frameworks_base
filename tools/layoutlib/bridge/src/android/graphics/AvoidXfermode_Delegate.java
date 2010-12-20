@@ -18,70 +18,51 @@ package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
-import java.awt.BasicStroke;
-import java.awt.Stroke;
+import java.awt.Composite;
 
 /**
- * Delegate implementing the native methods of android.graphics.DashPathEffect
+ * Delegate implementing the native methods of android.graphics.AvoidXfermode
  *
- * Through the layoutlib_create tool, the original native methods of DashPathEffect have been
+ * Through the layoutlib_create tool, the original native methods of AvoidXfermode have been
  * replaced by calls to methods of the same name in this delegate class.
  *
  * This class behaves like the original native implementation, but in Java, keeping previously
  * native data into its own objects and mapping them to int that are sent back and forth between
- * it and the original DashPathEffect class.
+ * it and the original AvoidXfermode class.
  *
- * Because this extends {@link PathEffect_Delegate}, there's no need to use a
+ * Because this extends {@link Xfermode_Delegate}, there's no need to use a
  * {@link DelegateManager}, as all the PathEffect classes will be added to the manager owned by
- * {@link PathEffect_Delegate}.
- *
- * @see PathEffect_Delegate
+ * {@link Xfermode_Delegate}.
  *
  */
-public final class DashPathEffect_Delegate extends PathEffect_Delegate {
+public class AvoidXfermode_Delegate extends Xfermode_Delegate {
 
     // ---- delegate data ----
-
-    private final float[] mIntervals;
-    private final float mPhase;
 
     // ---- Public Helper methods ----
 
     @Override
-    public Stroke getStroke(Paint_Delegate paint) {
-        return new BasicStroke(
-                paint.getStrokeWidth(),
-                paint.getJavaCap(),
-                paint.getJavaJoin(),
-                paint.getStrokeMiter(),
-                mIntervals,
-                mPhase);
+    public Composite getComposite() {
+        // FIXME
+        return null;
     }
 
     @Override
     public boolean isSupported() {
-        return true;
+        return false;
     }
 
     @Override
     public String getSupportMessage() {
-        // no message since isSupported returns true;
-        return null;
+        return "Avoid Xfermodes are not supported in Layout Preview mode.";
     }
 
     // ---- native methods ----
 
-    /*package*/ static int nativeCreate(float intervals[], float phase) {
-        DashPathEffect_Delegate newDelegate = new DashPathEffect_Delegate(intervals, phase);
+    /*package*/ static int nativeCreate(int opColor, int tolerance, int nativeMode) {
+        AvoidXfermode_Delegate newDelegate = new AvoidXfermode_Delegate();
         return sManager.addDelegate(newDelegate);
     }
 
     // ---- Private delegate/helper methods ----
-
-    private DashPathEffect_Delegate(float intervals[], float phase) {
-        mIntervals = new float[intervals.length];
-        System.arraycopy(intervals, 0, mIntervals, 0, intervals.length);
-        mPhase = phase;
-    }
 }
-

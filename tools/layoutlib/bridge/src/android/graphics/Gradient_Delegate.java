@@ -26,6 +26,18 @@ public abstract class Gradient_Delegate extends Shader_Delegate {
     protected final int[] mColors;
     protected final float[] mPositions;
 
+    @Override
+    public boolean isSupported() {
+        // all gradient shaders are supported.
+        return true;
+    }
+
+    @Override
+    public String getSupportMessage() {
+        // all gradient shaders are supported, no need for a gradient support
+        return null;
+    }
+
     /**
      * Creates the base shader and do some basic test on the parameters.
      *

@@ -43,7 +43,7 @@ import java.util.Map;
  * around to map int to instance of the delegate.
  *
  */
-public class NinePatch_Delegate {
+public final class NinePatch_Delegate {
 
     /**
      * Cache map for {@link NinePatchChunk}.

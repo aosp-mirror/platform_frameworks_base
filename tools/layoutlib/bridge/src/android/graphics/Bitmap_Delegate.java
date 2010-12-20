@@ -45,7 +45,7 @@ import javax.imageio.ImageIO;
  * @see DelegateManager
  *
  */
-public class Bitmap_Delegate {
+public final class Bitmap_Delegate {
 
     // ---- delegate manager ----
     private static final DelegateManager<Bitmap_Delegate> sManager =
