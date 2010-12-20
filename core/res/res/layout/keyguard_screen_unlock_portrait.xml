@@ -68,7 +68,7 @@
                 android:textSize="56sp"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:layout_marginBottom="6dip"
-                android:textColor="#999999"
+                android:textColor="@color/lockscreen_clock_background"
                 />
 
             <TextView android:id="@+id/timeDisplayForeground"
@@ -79,7 +79,7 @@
                 android:textSize="56sp"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:layout_marginBottom="6dip"
-                android:textColor="#666666"
+                android:textColor="@color/lockscreen_clock_foreground"
                 />
 
             <TextView android:id="@+id/am_pm"
@@ -92,6 +92,7 @@
                 android:textSize="18sp"
                 android:layout_marginLeft="4dip"
                 android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/lockscreen_clock_am_pm"
                 />
 
         </com.android.internal.widget.DigitalClock>
