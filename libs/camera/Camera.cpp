@@ -182,6 +182,20 @@ status_t Camera::setPreviewDisplay(const sp<Surface>& surface)
     }
 }
 
+// pass the buffered ISurfaceTexture to the camera service
+status_t Camera::setPreviewTexture(const sp<ISurfaceTexture>& surfaceTexture)
+{
+    LOGV("setPreviewTexture(%p)", surfaceTexture.get());
+    sp <ICamera> c = mCamera;
+    if (c == 0) return NO_INIT;
+    if (surfaceTexture != 0) {
+        return c->setPreviewTexture(surfaceTexture);
+    } else {
+        LOGD("app passed NULL surface");
+        return c->setPreviewTexture(0);
+    }
+}
+
 // start preview mode
 status_t Camera::startPreview()
 {

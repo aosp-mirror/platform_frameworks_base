@@ -19,6 +19,7 @@
 
 #include <utils/Timers.h>
 #include <camera/ICameraClient.h>
+#include <gui/ISurfaceTexture.h>
 
 namespace android {
 
@@ -174,6 +175,9 @@ public:
 
             // pass the buffered Surface to the camera service
             status_t    setPreviewDisplay(const sp<Surface>& surface);
+
+            // pass the buffered ISurfaceTexture to the camera service
+            status_t    setPreviewTexture(const sp<ISurfaceTexture>& surfaceTexture);
 
             // start preview mode, must call setPreviewDisplay first
             status_t    startPreview();
