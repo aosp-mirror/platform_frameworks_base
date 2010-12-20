@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.DebugUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
@@ -251,6 +252,15 @@ public abstract class FragmentManager {
      * @param args Additional arguments to the dump request.
      */
     public abstract void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args);
+
+    /**
+     * Control whether the framework's internal fragment manager debugging
+     * logs are turned on.  If enabled, you will see output in logcat as
+     * the framework performs fragment operations.
+     */
+    public static void enableDebugLogging(boolean enabled) {
+        FragmentManagerImpl.DEBUG = enabled;
+    }
 }
 
 final class FragmentManagerState implements Parcelable {
@@ -293,7 +303,7 @@ final class FragmentManagerState implements Parcelable {
  * Container for fragments associated with an activity.
  */
 final class FragmentManagerImpl extends FragmentManager {
-    static final boolean DEBUG = false;
+    static boolean DEBUG = true;
     static final String TAG = "FragmentManager";
     
     static final String TARGET_REQUEST_CODE_STATE_TAG = "android:target_req_state";
@@ -448,6 +458,17 @@ final class FragmentManagerImpl extends FragmentManager {
                     + key + ": index " + index);
         }
         return f;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("FragmentManager{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(" in ");
+        DebugUtils.buildShortClassTag(mActivity, sb);
+        sb.append("}}");
+        return sb.toString();
     }
 
     @Override

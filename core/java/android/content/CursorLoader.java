@@ -20,20 +20,24 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.Arrays;
+
 /**
  * A loader that queries the {@link ContentResolver} and returns a {@link Cursor}.
  */
 public class CursorLoader extends AsyncTaskLoader<Cursor> {
-    Cursor mCursor;
-    ForceLoadContentObserver mObserver;
-    boolean mStopped;
-    boolean mContentChanged;
-    boolean mReset;
+    final ForceLoadContentObserver mObserver;
+
     Uri mUri;
     String[] mProjection;
     String mSelection;
     String[] mSelectionArgs;
     String mSortOrder;
+
+    Cursor mCursor;
+    boolean mContentChanged;
 
     /* Runs on a worker thread */
     @Override
@@ -69,7 +73,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
         Cursor oldCursor = mCursor;
         mCursor = cursor;
 
-        if (!mStopped) {
+        if (isStarted()) {
             super.deliverResult(cursor);
         }
 
@@ -97,10 +101,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
      * Must be called from the UI thread
      */
     @Override
-    public void startLoading() {
-        mStopped = false;
-        mReset = false;
-
+    protected void onStartLoading() {
         if (mCursor != null) {
             deliverResult(mCursor);
         }
@@ -114,17 +115,14 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
      * Must be called from the UI thread
      */
     @Override
-    public void stopLoading() {
+    protected void onStopLoading() {
         // Attempt to cancel the current load task if possible.
         cancelLoad();
-
-        // Make sure that any outstanding loads clean themselves up properly
-        mStopped = true;
     }
 
     @Override
     public void onContentChanged() {
-        if (mStopped) {
+        if (!isStarted()) {
             // This loader has been stopped, so we don't want to load
             // new data right now...  but keep track of it changing to
             // refresh later if we start again.
@@ -142,7 +140,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     }
 
     @Override
-    public void reset() {
+    protected void onReset() {
         mReset = true;
 
         // Ensure the loader is stopped
@@ -192,5 +190,19 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
 
     public void setSortOrder(String sortOrder) {
         mSortOrder = sortOrder;
+    }
+
+    @Override
+    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+        super.dump(prefix, fd, writer, args);
+        writer.print(prefix); writer.print("mUri="); writer.println(mUri);
+        writer.print(prefix); writer.print("mProjection=");
+                writer.println(Arrays.toString(mProjection));
+        writer.print(prefix); writer.print("mSelection="); writer.println(mSelection);
+        writer.print(prefix); writer.print("mSelectionArgs=");
+                writer.println(Arrays.toString(mSelectionArgs));
+        writer.print(prefix); writer.print("mSortOrder="); writer.println(mSortOrder);
+        writer.print(prefix); writer.print("mCursor="); writer.println(mCursor);
+        writer.print(prefix); writer.print("mContentChanged="); writer.println(mContentChanged);
     }
 }

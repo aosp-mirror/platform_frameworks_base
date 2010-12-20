@@ -53,12 +53,8 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
         super(context);
     }
 
-    /**
-     * Force an asynchronous load. Unlike {@link #startLoading()} this will ignore a previously
-     * loaded data set and load a new one.
-     */
     @Override
-    public void forceLoad() {
+    protected void onForceLoad() {
         cancelLoad();
         mTask = new LoadTask();
         mTask.execute((Void[]) null);

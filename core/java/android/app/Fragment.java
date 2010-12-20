@@ -27,6 +27,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AndroidRuntimeException;
 import android.util.AttributeSet;
+import android.util.DebugUtils;
 import android.util.SparseArray;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -526,17 +527,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(128);
-        String simpleName = getClass().getSimpleName();
-        if (simpleName == null || simpleName.isEmpty()) {
-            simpleName = getClass().getName();
-            int end = simpleName.lastIndexOf('.');
-            if (end > 0) {
-                simpleName = simpleName.substring(end+1);
-            }
-        }
-        sb.append(simpleName);
-        sb.append("{");
-        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        DebugUtils.buildShortClassTag(this, sb);
         if (mIndex >= 0) {
             sb.append(" #");
             sb.append(mIndex);
