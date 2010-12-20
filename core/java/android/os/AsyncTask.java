@@ -281,7 +281,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     /**
      * Runs on the UI thread after {@link #doInBackground}. The
      * specified result is the value returned by {@link #doInBackground}
-     * or null if the task was cancelled or an exception occured.
+     * or null if the task was cancelled or an exception occurred.
      *
      * @param result The result of the operation computed by {@link #doInBackground}.
      *
