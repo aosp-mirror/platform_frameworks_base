@@ -24,6 +24,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +44,9 @@ import android.view.ViewGroup;
 public class Spinner extends AbsSpinner implements OnClickListener {
     private static final String TAG = "Spinner";
     
+    // Only measure this many items to get a decent max width.
+    private static final int MAX_ITEMS_MEASURED = 15;
+
     /**
      * Use a dialog window for selecting spinner options.
      */
@@ -584,6 +588,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         private CharSequence mHintText;
         private TextView mHintView;
         private int mHintResource;
+        private int mPopupMaxWidth;
         
         public DropdownPopup(Context context, AttributeSet attrs,
                 int defStyleRes, int hintResource) {
@@ -591,6 +596,9 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             
             mHintResource = hintResource;
             
+            final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+            mPopupMaxWidth = metrics.widthPixels / 2;
+
             setAnchorView(Spinner.this);
             setModal(true);
             setPromptPosition(POSITION_PROMPT_ABOVE);
@@ -622,9 +630,46 @@ public class Spinner extends AbsSpinner implements OnClickListener {
                 setPromptView(textView);
                 mHintView = textView;
             }
+            setContentWidth(Math.min(
+                    Math.max(measureContentWidth(getAdapter()), Spinner.this.getWidth()),
+                    mPopupMaxWidth));
             super.show();
             getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             setSelection(Spinner.this.getSelectedItemPosition());
+        }
+
+        private int measureContentWidth(SpinnerAdapter adapter) {
+            int width = 0;
+            View itemView = null;
+            int itemType = 0;
+            final int widthMeasureSpec =
+                MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+            final int heightMeasureSpec =
+                MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+
+            // Make sure the number of items we'll measure is capped. If it's a huge data set
+            // with wildly varying sizes, oh well.
+            final int start = Math.max(0, getSelectedItemPosition());
+            final int count = Math.min(adapter.getCount(), start + MAX_ITEMS_MEASURED);
+            for (int i = start; i < count; i++) {
+                final int positionType = adapter.getItemViewType(i);
+                if (positionType != itemType) {
+                    itemType = positionType;
+                    itemView = null;
+                }
+                itemView = adapter.getDropDownView(i, itemView, Spinner.this);
+                if (itemView.getLayoutParams() == null) {
+                    itemView.setLayoutParams(generateDefaultLayoutParams());
+                }
+                itemView.measure(widthMeasureSpec, heightMeasureSpec);
+                width = Math.max(width, itemView.getMeasuredWidth());
+            }
+            return width;
+        }
+
+        private ViewGroup.LayoutParams generateDefaultLayoutParams() {
+            return new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
         }
     }
 }

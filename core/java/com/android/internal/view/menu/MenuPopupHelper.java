@@ -142,12 +142,18 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         // Menus don't tend to be long, so this is more sane than it looks.
         int width = 0;
         View itemView = null;
+        int itemType = 0;
         final int widthMeasureSpec =
             MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         final int heightMeasureSpec =
             MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         final int count = adapter.getCount();
         for (int i = 0; i < count; i++) {
+            final int positionType = adapter.getItemViewType(i);
+            if (positionType != itemType) {
+                itemType = positionType;
+                itemView = null;
+            }
             itemView = adapter.getView(i, itemView, null);
             itemView.measure(widthMeasureSpec, heightMeasureSpec);
             width = Math.max(width, itemView.getMeasuredWidth());
