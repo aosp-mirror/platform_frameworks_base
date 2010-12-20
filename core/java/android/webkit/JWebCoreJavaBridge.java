@@ -307,5 +307,4 @@ final class JWebCoreJavaBridge extends Handler {
     public native void addPackageNames(Set<String> packageNames);
     public native void addPackageName(String packageName);
     public native void removePackageName(String packageName);
-    public native void updateProxy(String newProxy);
 }
