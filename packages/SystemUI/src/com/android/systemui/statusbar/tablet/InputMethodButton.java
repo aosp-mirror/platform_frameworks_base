@@ -48,6 +48,11 @@ public class InputMethodButton extends ImageView {
     // IME shortcut button is disabled.
     private static final int ID_IME_SHORTCUT_BUTTON = 0;
 
+    // These values are defined in Settings application.
+    private static final int ID_IME_BUTTON_VISIBILITY_AUTO = 0;
+    private static final int ID_IME_BUTTON_VISIBILITY_ALWAYS_SHOW = 1;
+    private static final int ID_IME_BUTTON_VISIBILITY_ALWAYS_HIDE = 2;
+
     // other services we wish to talk to
     private final InputMethodManager mImm;
     private final int mId;
@@ -164,8 +169,17 @@ public class InputMethodButton extends ImageView {
     private boolean needsToShowIMEButton() {
         List<InputMethodInfo> imis = mImm.getEnabledInputMethodList();
         final int size = imis.size();
-        return size > 1
-                || (size == 1 && mImm.getEnabledInputMethodSubtypeList(imis.get(0)).size() > 1);
+        final int visibility = loadInputMethodSelectorVisibility();
+        switch (visibility) {
+            case ID_IME_BUTTON_VISIBILITY_AUTO:
+                return size > 1 || (size == 1
+                        && mImm.getEnabledInputMethodSubtypeList(imis.get(0)).size() > 1);
+            case ID_IME_BUTTON_VISIBILITY_ALWAYS_SHOW:
+                return true;
+            case ID_IME_BUTTON_VISIBILITY_ALWAYS_HIDE:
+                return false;
+        }
+        return false;
     }
 
     private void refreshStatusIcon(boolean keyboardShown) {
@@ -194,6 +208,11 @@ public class InputMethodButton extends ImageView {
                 mIcon.setImageDrawable(icon);
             }
         }
+    }
+
+    private int loadInputMethodSelectorVisibility() {
+        return Settings.Secure.getInt(getContext().getContentResolver(),
+                Settings.Secure.INPUT_METHOD_SELECTOR_VISIBILITY, ID_IME_BUTTON_VISIBILITY_AUTO);
     }
 
     public void setIMEButtonVisible(IBinder token, boolean visible) {
