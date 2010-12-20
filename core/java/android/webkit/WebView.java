@@ -48,6 +48,8 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
+import android.net.Proxy;
+import android.net.ProxyProperties;
 import android.net.Uri;
 import android.net.http.SslCertificate;
 import android.os.AsyncTask;
@@ -981,6 +983,7 @@ public class WebView extends AbsoluteLayout
          */
         init();
         setupPackageListener(context);
+        setupProxyListener(context);
         updateMultiTouchSupport(context);
 
         if (privateBrowsing) {
@@ -988,6 +991,42 @@ public class WebView extends AbsoluteLayout
         }
 
         mAutoFillData = new WebViewCore.AutoFillData();
+    }
+
+    private static class ProxyReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Proxy.PROXY_CHANGE_ACTION)) {
+                handleProxyBroadcast(intent);
+            }
+        }
+    }
+
+    private static void setupProxyListener(Context context) {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Proxy.PROXY_CHANGE_ACTION);
+        Intent currentProxy = context.registerReceiver(new ProxyReceiver(), filter);
+        if (currentProxy != null) {
+            handleProxyBroadcast(currentProxy);
+        }
+    }
+
+    private static void handleProxyBroadcast(Intent intent) {
+        ProxyProperties proxyProperties = (ProxyProperties)intent.getExtra(Proxy.EXTRA_PROXY_INFO);
+        if (proxyProperties == null) {
+            WebViewCore.sendStaticMessage(EventHub.PROXY_CHANGED, "");
+            return;
+        }
+
+        String host = proxyProperties.getHost();
+        int port = proxyProperties.getPort();
+        host += ": " + port;
+
+        // TODO: Handle exclusion list
+        // The plan is to make an AndroidProxyResolver, and handle the blacklist
+        // there
+        String exclusionList = proxyProperties.getExclusionList();
+        WebViewCore.sendStaticMessage(EventHub.PROXY_CHANGED, host);
     }
 
     /*
