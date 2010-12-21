@@ -84,12 +84,13 @@ static bool MakeURL(const char *baseURL, const char *url, AString *out) {
     out->clear();
 
     if (strncasecmp("http://", baseURL, 7)
+            && strncasecmp("https://", baseURL, 8)
             && strncasecmp("file://", baseURL, 7)) {
         // Base URL must be absolute
         return false;
     }
 
-    if (!strncasecmp("http://", url, 7)) {
+    if (!strncasecmp("http://", url, 7) || !strncasecmp("https://", url, 8)) {
         // "url" is already an absolute URL, ignore base URL.
         out->setTo(url);
 
