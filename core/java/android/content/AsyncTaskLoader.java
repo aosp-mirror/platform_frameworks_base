@@ -38,7 +38,7 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
         /* Runs on the UI thread */
         @Override
         protected void onPostExecute(D data) {
-            AsyncTaskLoader.this.dispatchOnLoadComplete(data);
+            AsyncTaskLoader.this.dispatchOnLoadComplete(this, data);
         }
 
         @Override
@@ -55,6 +55,7 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
 
     @Override
     protected void onForceLoad() {
+        super.onForceLoad();
         cancelLoad();
         mTask = new LoadTask();
         mTask.execute((Void[]) null);
@@ -85,9 +86,13 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
     public void onCancelled(D data) {
     }
 
-    void dispatchOnLoadComplete(D data) {
-        mTask = null;
-        deliverResult(data);
+    void dispatchOnLoadComplete(LoadTask task, D data) {
+        if (mTask != task) {
+            onCancelled(data);
+        } else {
+            mTask = null;
+            deliverResult(data);
+        }
     }
 
     /**

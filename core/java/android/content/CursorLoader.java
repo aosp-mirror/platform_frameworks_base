@@ -37,7 +37,6 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     String mSortOrder;
 
     Cursor mCursor;
-    boolean mContentChanged;
 
     /* Runs on a worker thread */
     @Override
@@ -63,7 +62,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     /* Runs on the UI thread */
     @Override
     public void deliverResult(Cursor cursor) {
-        if (mReset) {
+        if (isReset()) {
             // An async query came in while the loader is stopped
             if (cursor != null) {
                 cursor.close();
@@ -105,8 +104,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
         if (mCursor != null) {
             deliverResult(mCursor);
         }
-        if (mCursor == null || mContentChanged) {
-            mContentChanged = false;
+        if (takeContentChanged() || mCursor == null) {
             forceLoad();
         }
     }
@@ -121,18 +119,6 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     }
 
     @Override
-    public void onContentChanged() {
-        if (!isStarted()) {
-            // This loader has been stopped, so we don't want to load
-            // new data right now...  but keep track of it changing to
-            // refresh later if we start again.
-            mContentChanged = true;
-            return;
-        }
-        super.onContentChanged();
-    }
-    
-    @Override
     public void onCancelled(Cursor cursor) {
         if (cursor != null && !cursor.isClosed()) {
             cursor.close();
@@ -141,10 +127,10 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
 
     @Override
     protected void onReset() {
-        mReset = true;
-
+        super.onReset();
+        
         // Ensure the loader is stopped
-        stopLoading();
+        onStopLoading();
 
         if (mCursor != null && !mCursor.isClosed()) {
             mCursor.close();

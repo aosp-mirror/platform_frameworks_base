@@ -24,6 +24,7 @@ import android.util.SparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.reflect.Modifier;
 
 /**
  * Interface associated with an {@link Activity} or {@link Fragment} for managing
@@ -217,8 +218,8 @@ class LoaderManagerImpl extends LoaderManager {
         LoaderManager.LoaderCallbacks<Object> mCallbacks;
         Loader<Object> mLoader;
         Object mData;
+        Object mDeliveredData;
         boolean mStarted;
-        boolean mNeedReset;
         boolean mRetaining;
         boolean mRetainingStarted;
         boolean mDestroyed;
@@ -244,14 +245,17 @@ class LoaderManagerImpl extends LoaderManager {
                 return;
             }
 
+            mStarted = true;
+            
             if (DEBUG) Log.v(TAG, "  Starting: " + this);
             if (mLoader == null && mCallbacks != null) {
                mLoader = mCallbacks.onCreateLoader(mId, mArgs);
             }
             if (mLoader != null) {
-                if (mLoader.getClass().isMemberClass()) {
+                if (mLoader.getClass().isMemberClass()
+                        && !Modifier.isStatic(mLoader.getClass().getModifiers())) {
                     throw new IllegalArgumentException(
-                            "Object returned from onCreateLoader must not be a member class: "
+                            "Object returned from onCreateLoader must not be a non-static inner member class: "
                             + mLoader);
                 }
                 if (!mListenerRegistered) {
@@ -259,7 +263,6 @@ class LoaderManagerImpl extends LoaderManager {
                     mListenerRegistered = true;
                 }
                 mLoader.startLoading();
-                mStarted = true;
             }
         }
         
@@ -312,8 +315,8 @@ class LoaderManagerImpl extends LoaderManager {
         void destroy() {
             if (DEBUG) Log.v(TAG, "  Destroying: " + this);
             mDestroyed = true;
-            boolean needReset = mNeedReset;
-            mNeedReset = false;
+            boolean needReset = mDeliveredData != null;
+            mDeliveredData = null;
             if (mCallbacks != null && mLoader != null && mData != null && needReset) {
                 if (DEBUG) Log.v(TAG, "  Reseting: " + this);
                 String lastBecause = null;
@@ -350,9 +353,11 @@ class LoaderManagerImpl extends LoaderManager {
             
             // Notify of the new data so the app can switch out the old data before
             // we try to destroy it.
-            mData = data;
-            if (mStarted) {
-                callOnLoadFinished(loader, data);
+            if (mData != data) {
+                mData = data;
+                if (mStarted) {
+                    callOnLoadFinished(loader, data);
+                }
             }
 
             //if (DEBUG) Log.v(TAG, "  onLoadFinished returned: " + this);
@@ -363,7 +368,7 @@ class LoaderManagerImpl extends LoaderManager {
             // clean it up.
             LoaderInfo info = mInactiveLoaders.get(mId);
             if (info != null && info != this) {
-                info.mNeedReset = false;
+                info.mDeliveredData = null;
                 info.destroy();
                 mInactiveLoaders.remove(mId);
             }
@@ -385,7 +390,7 @@ class LoaderManagerImpl extends LoaderManager {
                         mActivity.mFragments.mNoTransactionsBecause = lastBecause;
                     }
                 }
-                mNeedReset = true;
+                mDeliveredData = data;
             }
         }
         
@@ -411,11 +416,12 @@ class LoaderManagerImpl extends LoaderManager {
                 mLoader.dump(prefix + "  ", fd, writer, args);
             }
             writer.print(prefix); writer.print("mData="); writer.println(mData);
+            writer.print(prefix); writer.print("mDeliveredData="); writer.println(mDeliveredData);
             writer.print(prefix); writer.print("mStarted="); writer.print(mStarted);
                     writer.print(" mRetaining="); writer.print(mRetaining);
                     writer.print(" mDestroyed="); writer.println(mDestroyed);
-            writer.print(prefix); writer.print("mNeedReset="); writer.print(mNeedReset);
-                    writer.print(" mListenerRegistered="); writer.println(mListenerRegistered);
+            writer.print(prefix); writer.print("mListenerRegistered=");
+                    writer.println(mListenerRegistered);
         }
     }
     
@@ -479,7 +485,7 @@ class LoaderManagerImpl extends LoaderManager {
                     // yet destroyed the last inactive loader.  So just do
                     // that now.
                     if (DEBUG) Log.v(TAG, "  Removing last inactive loader: " + info);
-                    inactive.mNeedReset = false;
+                    inactive.mDeliveredData = null;
                     inactive.destroy();
                     mInactiveLoaders.put(id, info);
                 } else {

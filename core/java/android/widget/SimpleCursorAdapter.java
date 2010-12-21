@@ -337,10 +337,11 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
     }
 
     @Override
-    public void changeCursor(Cursor c) {
-        super.changeCursor(c);
+    public Cursor swapCursor(Cursor c) {
+        Cursor res = super.swapCursor(c);
         // rescan columns in case cursor layout is different
         findColumns(mOriginalFrom);
+        return res;
     }
     
     /**
