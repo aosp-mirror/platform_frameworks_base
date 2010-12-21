@@ -64,19 +64,4 @@ public final class IsoDep extends BasicTagTechnology {
      * 3B only
      */
     public byte[] getAttrib() { return mAttrib; }
-
-    /**
-     * Attempts to select the given application on the tag. Note that this only works
-     * if the tag supports ISO7816-4, which not all IsoDep tags support. If the tag doesn't
-     * support ISO7816-4 this will throw {@link UnsupportedOperationException}.
-     *
-     * This method requires that you call {@link #connect} before calling it.
-     *
-     * @throws IOException, UnsupportedOperationException
-     */
-    public void selectAid(byte[] aid) throws IOException, UnsupportedOperationException {
-        checkConnected();
-
-        throw new UnsupportedOperationException();
-    }
 }
