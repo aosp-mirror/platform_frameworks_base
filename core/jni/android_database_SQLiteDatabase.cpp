@@ -46,7 +46,6 @@
 
 #define UTF16_STORAGE 0
 #define INVALID_VERSION -1
-#define SQLITE_SOFT_HEAP_LIMIT (4 * 1024 * 1024)
 #define ANDROID_TABLE "android_metadata"
 /* uncomment the next line to force-enable logging of all statements */
 // #define DB_LOG_STATEMENTS
@@ -66,6 +65,7 @@ enum {
 static jfieldID offset_db_handle;
 static jmethodID method_custom_function_callback;
 static jclass string_class = NULL;
+static jint sSqliteSoftHeapLimit = 0;
 
 static char *createStr(const char *path, short extra) {
     int len = strlen(path) + extra;
@@ -129,7 +129,7 @@ static void dbopen(JNIEnv* env, jobject object, jstring pathString, jint flags)
     // The soft heap limit prevents the page cache allocations from growing
     // beyond the given limit, no matter what the max page cache sizes are
     // set to. The limit does not, as of 3.5.0, affect any other allocations.
-    sqlite3_soft_heap_limit(SQLITE_SOFT_HEAP_LIMIT);
+    sqlite3_soft_heap_limit(sSqliteSoftHeapLimit);
 
     // Set the default busy handler to retry for 1000ms and then return SQLITE_BUSY
     err = sqlite3_busy_timeout(handle, 1000 /* ms */);
@@ -379,10 +379,14 @@ done:
     if (meta != NULL) sqlite3_free_table(meta);
 }
 
+static void native_setSqliteSoftHeapLimit(JNIEnv* env, jobject clazz, jint limit) {
+    sSqliteSoftHeapLimit = limit;
+}
+
 static jint native_releaseMemory(JNIEnv *env, jobject clazz)
 {
     // Attempt to release as much memory from the
-    return sqlite3_release_memory(SQLITE_SOFT_HEAP_LIMIT);
+    return sqlite3_release_memory(sSqliteSoftHeapLimit);
 }
 
 static void native_finalize(JNIEnv* env, jobject object, jint statementId)
@@ -466,6 +470,7 @@ static JNINativeMethod sMethods[] =
     {"enableSqlProfiling", "(Ljava/lang/String;S)V", (void *)enableSqlProfiling},
     {"native_setLocale", "(Ljava/lang/String;I)V", (void *)native_setLocale},
     {"native_getDbLookaside", "()I", (void *)native_getDbLookaside},
+    {"native_setSqliteSoftHeapLimit", "(I)V", (void *)native_setSqliteSoftHeapLimit},
     {"releaseMemory", "()I", (void *)native_releaseMemory},
     {"native_finalize", "(I)V", (void *)native_finalize},
     {"native_addCustomFunction",

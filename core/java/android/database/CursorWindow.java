@@ -16,6 +16,7 @@
 
 package android.database;
 
+import android.content.res.Resources;
 import android.database.sqlite.SQLiteClosable;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -25,6 +26,13 @@ import android.os.Parcelable;
  * A buffer containing multiple cursor rows.
  */
 public class CursorWindow extends SQLiteClosable implements Parcelable {
+    /** The cursor window size. resource xml file specifies the value in kB.
+     * convert it to bytes here by multiplying with 1024.
+     */
+    private static final int sCursorWindowSize =
+        Resources.getSystem().getInteger(
+                com.android.internal.R.integer.config_cursorWindowSize) * 1024;
+
     /** The pointer to the native window class */
     @SuppressWarnings("unused")
     private int nWindow;
@@ -38,7 +46,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      */
     public CursorWindow(boolean localWindow) {
         mStartPos = 0;
-        native_init(localWindow);
+        native_init(sCursorWindowSize, localWindow);
     }
 
     /**
@@ -574,7 +582,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     private native IBinder native_getBinder();
 
     /** Does the native side initialization for an empty window */
-    private native void native_init(boolean localOnly);
+    private native void native_init(int cursorWindowSize, boolean localOnly);
 
     /** Does the native side initialization with an existing binder from another process */
     private native void native_init(IBinder nativeBinder);
