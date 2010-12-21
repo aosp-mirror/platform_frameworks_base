@@ -79,14 +79,16 @@ private:
         NONE,
         AWAITING_DISCONTINUITY,
         FLUSHING_DECODER,
-        FLUSHED
+        SHUTTING_DOWN_DECODER,
+        FLUSHED,
+        SHUT_DOWN,
     };
 
     FlushStatus mFlushingAudio;
     FlushStatus mFlushingVideo;
 
     status_t instantiateDecoder(
-            bool audio, sp<Decoder> *decoder);
+            bool audio, sp<Decoder> *decoder, bool ignoreCodecSpecificData);
 
     status_t feedDecoderInputData(bool audio, const sp<AMessage> &msg);
     void renderBuffer(bool audio, const sp<AMessage> &msg);
@@ -99,6 +101,8 @@ private:
 
     void feedMoreTSData();
     void notifyListener(int msg, int ext1, int ext2);
+
+    void finishFlushIfPossible();
 
     DISALLOW_EVIL_CONSTRUCTORS(NuPlayer);
 };

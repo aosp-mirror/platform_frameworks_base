@@ -39,7 +39,9 @@ NuPlayer::Renderer::Renderer(
       mAnchorTimeRealUs(-1),
       mFlushingAudio(false),
       mFlushingVideo(false),
-      mSyncQueues(true) {
+      mHasAudio(mAudioSink != NULL),
+      mHasVideo(true),
+      mSyncQueues(mHasAudio && mHasVideo) {
 }
 
 NuPlayer::Renderer::~Renderer() {
@@ -87,7 +89,7 @@ void NuPlayer::Renderer::signalTimeDiscontinuity() {
     CHECK(mVideoQueue.empty());
     mAnchorTimeMediaUs = -1;
     mAnchorTimeRealUs = -1;
-    mSyncQueues = true;
+    mSyncQueues = mHasAudio && mHasVideo;
 }
 
 void NuPlayer::Renderer::onMessageReceived(const sp<AMessage> &msg) {
@@ -142,6 +144,12 @@ void NuPlayer::Renderer::onMessageReceived(const sp<AMessage> &msg) {
             break;
         }
 
+        case kWhatAudioSinkChanged:
+        {
+            onAudioSinkChanged();
+            break;
+        }
+
         default:
             TRESPASS();
             break;
@@ -161,6 +169,10 @@ void NuPlayer::Renderer::postDrainAudioQueue() {
     sp<AMessage> msg = new AMessage(kWhatDrainAudioQueue, id());
     msg->setInt32("generation", mAudioQueueGeneration);
     msg->post(10000);
+}
+
+void NuPlayer::Renderer::signalAudioSinkChanged() {
+    (new AMessage(kWhatAudioSinkChanged, id()))->post();
 }
 
 void NuPlayer::Renderer::onDrainAudioQueue() {
@@ -264,7 +276,7 @@ void NuPlayer::Renderer::postDrainVideoQueue() {
         if (mAnchorTimeMediaUs < 0) {
             delayUs = 0;
 
-            if (mAudioSink == NULL) {
+            if (!mHasAudio) {
                 mAnchorTimeMediaUs = mediaTimeUs;
                 mAnchorTimeRealUs = ALooper::GetNowUs();
             }
@@ -490,6 +502,11 @@ bool NuPlayer::Renderer::dropBufferWhileFlushing(
     }
 
     return true;
+}
+
+void NuPlayer::Renderer::onAudioSinkChanged() {
+    CHECK(!mDrainAudioQueuePending);
+    mNumFramesWritten = 0;
 }
 
 }  // namespace android

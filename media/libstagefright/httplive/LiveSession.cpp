@@ -468,13 +468,16 @@ void LiveSession::onDownloadNext() {
         return;
     }
 
-    if (explicitDiscontinuity
-            || (mPrevBandwidthIndex >= 0
-                && (size_t)mPrevBandwidthIndex != bandwidthIndex)) {
+    bool bandwidthChanged =
+        mPrevBandwidthIndex >= 0
+            && (size_t)mPrevBandwidthIndex != bandwidthIndex;
+
+    if (explicitDiscontinuity || bandwidthChanged) {
         // Signal discontinuity.
 
         sp<ABuffer> tmp = new ABuffer(188);
         memset(tmp->data(), 0, tmp->size());
+        tmp->data()[1] = bandwidthChanged;
 
         mDataSource->queueBuffer(tmp);
     }

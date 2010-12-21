@@ -42,7 +42,8 @@ NuPlayer::Decoder::Decoder(
 NuPlayer::Decoder::~Decoder() {
 }
 
-void NuPlayer::Decoder::configure(const sp<MetaData> &meta) {
+void NuPlayer::Decoder::configure(
+        const sp<MetaData> &meta, bool ignoreCodecSpecificData) {
     CHECK(mCodec == NULL);
     CHECK(mWrapper == NULL);
 
@@ -53,6 +54,10 @@ void NuPlayer::Decoder::configure(const sp<MetaData> &meta) {
         new AMessage(kWhatCodecNotify, id());
 
     sp<AMessage> format = makeFormat(meta);
+
+    if (ignoreCodecSpecificData) {
+        mCSD.clear();
+    }
 
     if (mSurface != NULL) {
         format->setObject("surface", mSurface);
@@ -279,6 +284,15 @@ void NuPlayer::Decoder::signalResume() {
     } else {
         CHECK(mWrapper != NULL);
         mWrapper->signalResume();
+    }
+}
+
+void NuPlayer::Decoder::initiateShutdown() {
+    if (mCodec != NULL) {
+        mCodec->initiateShutdown();
+    } else {
+        CHECK(mWrapper != NULL);
+        mWrapper->initiateShutdown();
     }
 }
 

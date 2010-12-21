@@ -66,6 +66,7 @@ private:
     bool mFlushing;
 
     void onSetup(const sp<AMessage> &msg);
+    void onShutdown();
     void onFlush();
     void onResume();
 
