@@ -23,14 +23,12 @@ import com.android.layoutlib.bridge.impl.GcSnapshot;
 import android.graphics.Paint_Delegate.FontInfo;
 import android.text.TextUtils;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -57,13 +55,9 @@ public final class Canvas_Delegate {
 
     // ---- delegate helper data ----
 
-    private interface Drawable {
-        void draw(Graphics2D graphics, Paint_Delegate paint);
-    }
-
     // ---- delegate data ----
     private BufferedImage mBufferedImage;
-    private GcSnapshot mSnapshot = new GcSnapshot();
+    private GcSnapshot mSnapshot;
 
     // ---- Public Helper methods ----
 
@@ -84,7 +78,7 @@ public final class Canvas_Delegate {
     /**
      * Returns the current {@link Graphics2D} used to draw.
      */
-    public GcSnapshot getGcSnapshot() {
+    public GcSnapshot getSnapshot() {
         return mSnapshot;
     }
 
@@ -125,7 +119,7 @@ public final class Canvas_Delegate {
             return;
         }
 
-        canvasDelegate.getGcSnapshot().translate(dx, dy);
+        canvasDelegate.getSnapshot().translate(dx, dy);
     }
 
     /*package*/ static void rotate(Canvas thisCanvas, float degrees) {
@@ -136,7 +130,7 @@ public final class Canvas_Delegate {
             return;
         }
 
-        canvasDelegate.getGcSnapshot().rotate(Math.toRadians(degrees));
+        canvasDelegate.getSnapshot().rotate(Math.toRadians(degrees));
     }
 
     /*package*/ static void scale(Canvas thisCanvas, float sx, float sy) {
@@ -147,7 +141,7 @@ public final class Canvas_Delegate {
             return;
         }
 
-        canvasDelegate.getGcSnapshot().scale(sx, sy);
+        canvasDelegate.getSnapshot().scale(sx, sy);
     }
 
     /*package*/ static void skew(Canvas thisCanvas, float kx, float ky) {
@@ -159,7 +153,7 @@ public final class Canvas_Delegate {
         }
 
         // get the current top graphics2D object.
-        GcSnapshot g = canvasDelegate.getGcSnapshot();
+        GcSnapshot g = canvasDelegate.getSnapshot();
 
         // get its current matrix
         AffineTransform currentTx = g.getTransform();
@@ -235,7 +229,7 @@ public final class Canvas_Delegate {
             return 0;
         }
 
-        return canvasDelegate.getGcSnapshot().size();
+        return canvasDelegate.getSnapshot().size();
     }
 
     /*package*/ static void restoreToCount(Canvas thisCanvas, int saveCount) {
@@ -260,33 +254,18 @@ public final class Canvas_Delegate {
         throw new UnsupportedOperationException();
     }
 
-    /*package*/ static void drawLines(Canvas thisCanvas, float[] pts, int offset, int count,
+    /*package*/ static void drawLines(Canvas thisCanvas,
+            final float[] pts, final int offset, final int count,
             Paint paint) {
-        // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
-        if (canvasDelegate == null) {
-            assert false;
-            return;
-        }
-
-        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(paint.mNativePaint);
-        if (paintDelegate == null) {
-            assert false;
-            return;
-        }
-
-        // get a Graphics2D object configured with the drawing parameters.
-        Graphics2D g = canvasDelegate.createCustomGraphics(paintDelegate);
-
-        try {
-            for (int i = 0 ; i < count ; i += 4) {
-                g.drawLine((int)pts[i + offset], (int)pts[i + offset + 1],
-                        (int)pts[i + offset + 2], (int)pts[i + offset + 3]);
-            }
-        } finally {
-            // dispose Graphics2D object
-            g.dispose();
-        }
+        draw(thisCanvas.mNativeCanvas, paint.mNativePaint, false /*compositeOnly*/,
+                new GcSnapshot.Drawable() {
+                    public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                        for (int i = 0 ; i < count ; i += 4) {
+                            graphics.drawLine((int)pts[i + offset], (int)pts[i + offset + 1],
+                                    (int)pts[i + offset + 2], (int)pts[i + offset + 3]);
+                        }
+                    }
+                });
     }
 
     /*package*/ static void freeCaches() {
@@ -331,29 +310,66 @@ public final class Canvas_Delegate {
 
     /*package*/ static int native_saveLayer(int nativeCanvas, RectF bounds,
                                                int paint, int layerFlags) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
+        if (canvasDelegate == null) {
+            assert false;
+            return 0;
+        }
+
+        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(paint);
+        if (paintDelegate == null) {
+            assert false;
+            return 0;
+        }
+
+        return canvasDelegate.saveLayer(bounds, paintDelegate, layerFlags);
     }
 
     /*package*/ static int native_saveLayer(int nativeCanvas, float l,
                                                float t, float r, float b,
                                                int paint, int layerFlags) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
+        if (canvasDelegate == null) {
+            assert false;
+            return 0;
+        }
+
+        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(paint);
+        if (paintDelegate == null) {
+            assert false;
+            return 0;
+        }
+
+        return canvasDelegate.saveLayer(new RectF(l, t, r, b),
+                paintDelegate, layerFlags);
     }
 
     /*package*/ static int native_saveLayerAlpha(int nativeCanvas,
                                                     RectF bounds, int alpha,
                                                     int layerFlags) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
+        if (canvasDelegate == null) {
+            assert false;
+            return 0;
+        }
+
+        return canvasDelegate.saveLayerAlpha(bounds, alpha, layerFlags);
     }
 
     /*package*/ static int native_saveLayerAlpha(int nativeCanvas, float l,
                                                     float t, float r, float b,
                                                     int alpha, int layerFlags) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
+        if (canvasDelegate == null) {
+            assert false;
+            return 0;
+        }
+
+        return canvasDelegate.saveLayerAlpha(new RectF(l, t, r, b), alpha, layerFlags);
     }
 
 
@@ -372,7 +388,7 @@ public final class Canvas_Delegate {
         }
 
         // get the current top graphics2D object.
-        GcSnapshot snapshot = canvasDelegate.getGcSnapshot();
+        GcSnapshot snapshot = canvasDelegate.getSnapshot();
 
         // get its current matrix
         AffineTransform currentTx = snapshot.getTransform();
@@ -399,7 +415,7 @@ public final class Canvas_Delegate {
         }
 
         // get the current top graphics2D object.
-        GcSnapshot snapshot = canvasDelegate.getGcSnapshot();
+        GcSnapshot snapshot = canvasDelegate.getSnapshot();
 
         // get the AffineTransform of the given matrix
         AffineTransform matrixTx = matrixDelegate.getAffineTransform();
@@ -458,7 +474,7 @@ public final class Canvas_Delegate {
             return false;
         }
 
-        Rectangle rect = canvasDelegate.getGcSnapshot().getClip().getBounds();
+        Rectangle rect = canvasDelegate.getSnapshot().getClip().getBounds();
         if (rect != null) {
             bounds.left = rect.x;
             bounds.top = rect.y;
@@ -511,7 +527,7 @@ public final class Canvas_Delegate {
         native_drawColor(nativeCanvas, color, PorterDuff.Mode.SRC_OVER.nativeInt);
     }
 
-    /*package*/ static void native_drawColor(int nativeCanvas, int color, int mode) {
+    /*package*/ static void native_drawColor(int nativeCanvas, final int color, final int mode) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
@@ -519,27 +535,26 @@ public final class Canvas_Delegate {
             return;
         }
 
-        // get a new graphics context.
-        Graphics2D graphics = (Graphics2D)canvasDelegate.getGcSnapshot().create();
-        try {
-            // reset its transform just in case
-            graphics.setTransform(new AffineTransform());
+        final int w = canvasDelegate.mBufferedImage.getWidth();
+        final int h = canvasDelegate.mBufferedImage.getHeight();
+        draw(nativeCanvas, new GcSnapshot.Drawable() {
 
-            // set the color
-            graphics.setColor(new Color(color, true /*alpha*/));
+            public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                // reset its transform just in case
+                graphics.setTransform(new AffineTransform());
 
-            Composite composite = PorterDuffXfermode_Delegate.getComposite(
-                    PorterDuffXfermode_Delegate.getPorterDuffMode(mode), 0xFF);
-            if (composite != null) {
-                graphics.setComposite(composite);
+                // set the color
+                graphics.setColor(new Color(color, true /*alpha*/));
+
+                Composite composite = PorterDuffXfermode_Delegate.getComposite(
+                        PorterDuffXfermode_Delegate.getPorterDuffMode(mode), 0xFF);
+                if (composite != null) {
+                    graphics.setComposite(composite);
+                }
+
+                graphics.fillRect(0, 0, w, h);
             }
-
-            graphics.fillRect(0, 0, canvasDelegate.mBufferedImage.getWidth(),
-                    canvasDelegate.mBufferedImage.getHeight());
-        } finally {
-            // dispose Graphics2D object
-            graphics.dispose();
-        }
+        });
     }
 
     /*package*/ static void native_drawPaint(int nativeCanvas, int paint) {
@@ -547,32 +562,15 @@ public final class Canvas_Delegate {
         throw new UnsupportedOperationException();
     }
 
-    /*package*/ static void native_drawLine(int nativeCanvas, float startX,
-                                               float startY, float stopX,
-                                               float stopY, int paint) {
-        // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
-        if (canvasDelegate == null) {
-            assert false;
-            return;
-        }
+    /*package*/ static void native_drawLine(int nativeCanvas,
+            final float startX, final float startY, final float stopX, final float stopY,
+            int paint) {
 
-        // get the delegate from the native int.
-        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(paint);
-        if (paintDelegate == null) {
-            assert false;
-            return;
-        }
-
-        // get a Graphics2D object configured with the drawing parameters.
-        Graphics2D g = canvasDelegate.createCustomGraphics(paintDelegate);
-
-        try {
-            g.drawLine((int)startX, (int)startY, (int)stopX, (int)stopY);
-        } finally {
-            // dispose Graphics2D object
-            g.dispose();
-        }
+        draw(nativeCanvas, paint, false /*compositeOnly*/, new GcSnapshot.Drawable() {
+            public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                graphics.drawLine((int)startX, (int)startY, (int)stopX, (int)stopY);
+            }
+        });
     }
 
     /*package*/ static void native_drawRect(int nativeCanvas, RectF rect,
@@ -580,82 +578,47 @@ public final class Canvas_Delegate {
         native_drawRect(nativeCanvas, rect.left, rect.top, rect.right, rect.bottom, paint);
     }
 
-    /*package*/ static void native_drawRect(int nativeCanvas, float left,
-                                               float top, float right,
-                                               float bottom, int paint) {
-        // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
-        if (canvasDelegate == null) {
-            assert false;
-            return;
-        }
+    /*package*/ static void native_drawRect(int nativeCanvas,
+            final float left, final float top, final float right, final float bottom, int paint) {
 
-        // get the delegate from the native int.
-        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(paint);
-        if (paintDelegate == null) {
-            assert false;
-            return;
-        }
-
-        if (right > left && bottom > top) {
-            // get a Graphics2D object configured with the drawing parameters.
-            Graphics2D g = canvasDelegate.createCustomGraphics(paintDelegate);
-
-            try {
-                int style = paintDelegate.getStyle();
+        draw(nativeCanvas, paint, false /*compositeOnly*/, new GcSnapshot.Drawable() {
+            public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                int style = paint.getStyle();
 
                 // draw
                 if (style == Paint.Style.FILL.nativeInt ||
                         style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-                    g.fillRect((int)left, (int)top, (int)(right-left), (int)(bottom-top));
+                    graphics.fillRect((int)left, (int)top, (int)(right-left), (int)(bottom-top));
                 }
 
                 if (style == Paint.Style.STROKE.nativeInt ||
                         style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-                    g.drawRect((int)left, (int)top, (int)(right-left), (int)(bottom-top));
+                    graphics.drawRect((int)left, (int)top, (int)(right-left), (int)(bottom-top));
                 }
-            } finally {
-                // dispose Graphics2D object
-                g.dispose();
             }
-        }
+        });
     }
 
-    /*package*/ static void native_drawOval(int nativeCanvas, RectF oval,
-                                               int paint) {
-        // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
-        if (canvasDelegate == null) {
-            assert false;
-            return;
-        }
-
-        // get the delegate from the native int.
-        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(paint);
-        if (paintDelegate == null) {
-            assert false;
-            return;
-        }
-
+    /*package*/ static void native_drawOval(int nativeCanvas, final RectF oval, int paint) {
         if (oval.right > oval.left && oval.bottom > oval.top) {
-            // get a Graphics2D object configured with the drawing parameters.
-            Graphics2D g = canvasDelegate.createCustomGraphics(paintDelegate);
+            draw(nativeCanvas, paint, false /*compositeOnly*/, new GcSnapshot.Drawable() {
+                public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                    int style = paint.getStyle();
 
-            int style = paintDelegate.getStyle();
+                    // draw
+                    if (style == Paint.Style.FILL.nativeInt ||
+                            style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                        graphics.fillOval((int)oval.left, (int)oval.top,
+                                (int)oval.width(), (int)oval.height());
+                    }
 
-            // draw
-            if (style == Paint.Style.FILL.nativeInt ||
-                    style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-                g.fillOval((int)oval.left, (int)oval.top, (int)oval.width(), (int)oval.height());
-            }
-
-            if (style == Paint.Style.STROKE.nativeInt ||
-                    style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-                g.drawOval((int)oval.left, (int)oval.top, (int)oval.width(), (int)oval.height());
-            }
-
-            // dispose Graphics2D object
-            g.dispose();
+                    if (style == Paint.Style.STROKE.nativeInt ||
+                            style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                        graphics.drawOval((int)oval.left, (int)oval.top,
+                                (int)oval.width(), (int)oval.height());
+                    }
+                }
+            });
         }
     }
 
@@ -675,46 +638,29 @@ public final class Canvas_Delegate {
     }
 
     /*package*/ static void native_drawRoundRect(int nativeCanvas,
-                                                    RectF rect, float rx,
-                                                    float ry, int paint) {
-        // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
-        if (canvasDelegate == null) {
-            assert false;
-            return;
-        }
+            final RectF rect, final float rx, final float ry, int paint) {
 
-        // get the delegate from the native int.
-        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(paint);
-        if (paintDelegate == null) {
-            assert false;
-            return;
-        }
+        draw(nativeCanvas, paint, false /*compositeOnly*/, new GcSnapshot.Drawable() {
 
-        if (rect.right > rect.left && rect.bottom > rect.top) {
-            // get a Graphics2D object configured with the drawing parameters.
-            Graphics2D g = canvasDelegate.createCustomGraphics(paintDelegate);
+            public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                int style = paint.getStyle();
 
-            int style = paintDelegate.getStyle();
+                // draw
+                if (style == Paint.Style.FILL.nativeInt ||
+                        style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                    graphics.fillRoundRect(
+                            (int)rect.left, (int)rect.top, (int)rect.width(), (int)rect.height(),
+                            (int)rx, (int)ry);
+                }
 
-            // draw
-            if (style == Paint.Style.FILL.nativeInt ||
-                    style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-                g.fillRoundRect(
-                        (int)rect.left, (int)rect.top, (int)rect.width(), (int)rect.height(),
-                        (int)rx, (int)ry);
+                if (style == Paint.Style.STROKE.nativeInt ||
+                        style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                    graphics.drawRoundRect(
+                            (int)rect.left, (int)rect.top, (int)rect.width(), (int)rect.height(),
+                            (int)rx, (int)ry);
+                }
             }
-
-            if (style == Paint.Style.STROKE.nativeInt ||
-                    style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-                g.drawRoundRect(
-                        (int)rect.left, (int)rect.top, (int)rect.width(), (int)rect.height(),
-                        (int)rx, (int)ry);
-            }
-
-            // dispose Graphics2D object
-            g.dispose();
-        }
+        });
     }
 
     /*package*/ static void native_drawPath(int nativeCanvas, int path,
@@ -725,7 +671,7 @@ public final class Canvas_Delegate {
             return;
         }
 
-        draw(nativeCanvas, paint, new Drawable() {
+        draw(nativeCanvas, paint, false /*compositeOnly*/, new GcSnapshot.Drawable() {
             public void draw(Graphics2D graphics, Paint_Delegate paint) {
                 Shape shape = pathDelegate.getJavaShape();
                 int style = paint.getStyle();
@@ -846,116 +792,103 @@ public final class Canvas_Delegate {
         throw new UnsupportedOperationException();
     }
 
-    /*package*/ static void native_drawText(int nativeCanvas, char[] text,
-                                               int index, int count, float x,
-                                               float y, int flags, int paint) {
-        // WARNING: the logic in this method is similar to Paint.measureText.
-        // Any change to this method should be reflected in Paint.measureText
+    /*package*/ static void native_drawText(int nativeCanvas,
+            final char[] text, final int index, final int count,
+            final float startX, final float startY, int flags, int paint) {
+        draw(nativeCanvas, paint, false /*compositeOnly*/, new GcSnapshot.Drawable() {
 
-        // get the delegate from the native int.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
-        if (canvasDelegate == null) {
-            assert false;
-            return;
-        }
-
-        // get the delegate from the native int.
-        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(paint);
-        if (paintDelegate == null) {
-            assert false;
-            return;
-        }
-
-        Graphics2D g = (Graphics2D) canvasDelegate.createCustomGraphics(paintDelegate);
-        try {
-            // Paint.TextAlign indicates how the text is positioned relative to X.
-            // LEFT is the default and there's nothing to do.
-            if (paintDelegate.getTextAlign() != Paint.Align.LEFT.nativeInt) {
-                float m = paintDelegate.measureText(text, index, count);
-                if (paintDelegate.getTextAlign() == Paint.Align.CENTER.nativeInt) {
-                    x -= m / 2;
-                } else if (paintDelegate.getTextAlign() == Paint.Align.RIGHT.nativeInt) {
-                    x -= m;
-                }
-            }
-
-            List<FontInfo> fonts = paintDelegate.getFonts();
-
-            if (fonts.size() > 0) {
-                FontInfo mainFont = fonts.get(0);
-                int i = index;
-                int lastIndex = index + count;
-                while (i < lastIndex) {
-                    // always start with the main font.
-                    int upTo = mainFont.mFont.canDisplayUpTo(text, i, lastIndex);
-                    if (upTo == -1) {
-                        // draw all the rest and exit.
-                        g.setFont(mainFont.mFont);
-                        g.drawChars(text, i, lastIndex - i, (int)x, (int)y);
-                        return;
-                    } else if (upTo > 0) {
-                        // draw what's possible
-                        g.setFont(mainFont.mFont);
-                        g.drawChars(text, i, upTo - i, (int)x, (int)y);
-
-                        // compute the width that was drawn to increase x
-                        x += mainFont.mMetrics.charsWidth(text, i, upTo - i);
-
-                        // move index to the first non displayed char.
-                        i = upTo;
-
-                        // don't call continue at this point. Since it is certain the main font
-                        // cannot display the font a index upTo (now ==i), we move on to the
-                        // fallback fonts directly.
+            public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                // WARNING: the logic in this method is similar to Paint.measureText.
+                // Any change to this method should be reflected in Paint.measureText
+                // Paint.TextAlign indicates how the text is positioned relative to X.
+                // LEFT is the default and there's nothing to do.
+                float x = startX;
+                float y = startY;
+                if (paint.getTextAlign() != Paint.Align.LEFT.nativeInt) {
+                    float m = paint.measureText(text, index, count);
+                    if (paint.getTextAlign() == Paint.Align.CENTER.nativeInt) {
+                        x -= m / 2;
+                    } else if (paint.getTextAlign() == Paint.Align.RIGHT.nativeInt) {
+                        x -= m;
                     }
+                }
 
-                    // no char supported, attempt to read the next char(s) with the
-                    // fallback font. In this case we only test the first character
-                    // and then go back to test with the main font.
-                    // Special test for 2-char characters.
-                    boolean foundFont = false;
-                    for (int f = 1 ; f < fonts.size() ; f++) {
-                        FontInfo fontInfo = fonts.get(f);
+                List<FontInfo> fonts = paint.getFonts();
 
-                        // need to check that the font can display the character. We test
-                        // differently if the char is a high surrogate.
-                        int charCount = Character.isHighSurrogate(text[i]) ? 2 : 1;
-                        upTo = fontInfo.mFont.canDisplayUpTo(text, i, i + charCount);
+                if (fonts.size() > 0) {
+                    FontInfo mainFont = fonts.get(0);
+                    int i = index;
+                    int lastIndex = index + count;
+                    while (i < lastIndex) {
+                        // always start with the main font.
+                        int upTo = mainFont.mFont.canDisplayUpTo(text, i, lastIndex);
                         if (upTo == -1) {
-                            // draw that char
-                            g.setFont(fontInfo.mFont);
-                            g.drawChars(text, i, charCount, (int)x, (int)y);
+                            // draw all the rest and exit.
+                            graphics.setFont(mainFont.mFont);
+                            graphics.drawChars(text, i, lastIndex - i, (int)x, (int)y);
+                            return;
+                        } else if (upTo > 0) {
+                            // draw what's possible
+                            graphics.setFont(mainFont.mFont);
+                            graphics.drawChars(text, i, upTo - i, (int)x, (int)y);
 
-                            // update x
-                            x += fontInfo.mMetrics.charsWidth(text, i, charCount);
+                            // compute the width that was drawn to increase x
+                            x += mainFont.mMetrics.charsWidth(text, i, upTo - i);
 
-                            // update the index in the text, and move on
+                            // move index to the first non displayed char.
+                            i = upTo;
+
+                            // don't call continue at this point. Since it is certain the main font
+                            // cannot display the font a index upTo (now ==i), we move on to the
+                            // fallback fonts directly.
+                        }
+
+                        // no char supported, attempt to read the next char(s) with the
+                        // fallback font. In this case we only test the first character
+                        // and then go back to test with the main font.
+                        // Special test for 2-char characters.
+                        boolean foundFont = false;
+                        for (int f = 1 ; f < fonts.size() ; f++) {
+                            FontInfo fontInfo = fonts.get(f);
+
+                            // need to check that the font can display the character. We test
+                            // differently if the char is a high surrogate.
+                            int charCount = Character.isHighSurrogate(text[i]) ? 2 : 1;
+                            upTo = fontInfo.mFont.canDisplayUpTo(text, i, i + charCount);
+                            if (upTo == -1) {
+                                // draw that char
+                                graphics.setFont(fontInfo.mFont);
+                                graphics.drawChars(text, i, charCount, (int)x, (int)y);
+
+                                // update x
+                                x += fontInfo.mMetrics.charsWidth(text, i, charCount);
+
+                                // update the index in the text, and move on
+                                i += charCount;
+                                foundFont = true;
+                                break;
+
+                            }
+                        }
+
+                        // in case no font can display the char, display it with the main font.
+                        // (it'll put a square probably)
+                        if (foundFont == false) {
+                            int charCount = Character.isHighSurrogate(text[i]) ? 2 : 1;
+
+                            graphics.setFont(mainFont.mFont);
+                            graphics.drawChars(text, i, charCount, (int)x, (int)y);
+
+                            // measure it to advance x
+                            x += mainFont.mMetrics.charsWidth(text, i, charCount);
+
+                            // and move to the next chars.
                             i += charCount;
-                            foundFont = true;
-                            break;
-
                         }
                     }
-
-                    // in case no font can display the char, display it with the main font.
-                    // (it'll put a square probably)
-                    if (foundFont == false) {
-                        int charCount = Character.isHighSurrogate(text[i]) ? 2 : 1;
-
-                        g.setFont(mainFont.mFont);
-                        g.drawChars(text, i, charCount, (int)x, (int)y);
-
-                        // measure it to advance x
-                        x += mainFont.mMetrics.charsWidth(text, i, charCount);
-
-                        // and move to the next chars.
-                        i += charCount;
-                    }
                 }
             }
-        } finally {
-            g.dispose();
-        }
+        });
     }
 
     /*package*/ static void native_drawText(int nativeCanvas, String text,
@@ -1042,8 +975,11 @@ public final class Canvas_Delegate {
 
     /**
      * Executes a {@link Drawable} with a given canvas and paint.
+     * <p>Note that the drawable may actually be executed several times if there are
+     * layers involved (see {@link #saveLayer(RectF, int, int)}.
      */
-    private static void draw(int nCanvas, int nPaint, Drawable drawable) {
+    private static void draw(int nCanvas, int nPaint, boolean compositeOnly,
+            GcSnapshot.Drawable drawable) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
         if (canvasDelegate == null) {
@@ -1051,28 +987,42 @@ public final class Canvas_Delegate {
             return;
         }
 
-        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(nPaint);
-        if (paintDelegate == null) {
+        // paint could be 0 meaning no paint
+        Paint_Delegate paintDelegate = null;
+        if (nPaint > 0) {
+            paintDelegate = Paint_Delegate.getDelegate(nPaint);
+            if (paintDelegate == null) {
+                assert false;
+                return;
+            }
+        }
+
+        canvasDelegate.getSnapshot().draw(drawable, paintDelegate, compositeOnly);
+    }
+
+    /**
+     * Executes a {@link Drawable} with a given canvas. No paint object will be provided
+     * to {@link GcSnapshot.Drawable#draw(Graphics2D, Paint_Delegate)}.
+     * <p>Note that the drawable may actually be executed several times if there are
+     * layers involved (see {@link #saveLayer(RectF, int, int)}.
+     */
+    private static void draw(int nCanvas, GcSnapshot.Drawable drawable) {
+        // get the delegate from the native int.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
+        if (canvasDelegate == null) {
             assert false;
             return;
         }
 
-        // get a Graphics2D object configured with the drawing parameters.
-        Graphics2D g = canvasDelegate.createCustomGraphics(paintDelegate);
-
-        try {
-            drawable.draw(g, paintDelegate);
-        } finally {
-            // dispose Graphics2D object
-            g.dispose();
-        }
+        canvasDelegate.mSnapshot.draw(drawable);
     }
 
     private Canvas_Delegate(BufferedImage image) {
-        setBitmap(image);
+        mSnapshot = GcSnapshot.createDefaultSnapshot(mBufferedImage = image);
     }
 
     private Canvas_Delegate() {
+        mSnapshot = GcSnapshot.createDefaultSnapshot(null /*image*/);
     }
 
     /**
@@ -1086,8 +1036,23 @@ public final class Canvas_Delegate {
         // get the current save count
         int count = mSnapshot.size();
 
-        // create a new snapshot and add it to the stack
-        mSnapshot = new GcSnapshot(mSnapshot, saveFlags);
+        mSnapshot = mSnapshot.save(saveFlags);
+
+        // return the old save count
+        return count;
+    }
+
+    private int saveLayerAlpha(RectF rect, int alpha, int saveFlags) {
+        Paint_Delegate paint = new Paint_Delegate();
+        paint.setAlpha(alpha);
+        return saveLayer(rect, paint, saveFlags);
+    }
+
+    private int saveLayer(RectF rect, Paint_Delegate paint, int saveFlags) {
+        // get the current save count
+        int count = mSnapshot.size();
+
+        mSnapshot = mSnapshot.saveLayer(rect, paint, saveFlags);
 
         // return the old save count
         return count;
@@ -1116,126 +1081,16 @@ public final class Canvas_Delegate {
     private void setBitmap(BufferedImage image) {
         mBufferedImage = image;
         assert mSnapshot.size() == 1;
-        mSnapshot.setGraphics2D(mBufferedImage.createGraphics());
-    }
-
-    /**
-     * Creates a new {@link Graphics2D} based on the {@link Paint} parameters.
-     * <p/>The object must be disposed ({@link Graphics2D#dispose()}) after being used.
-     */
-    /*package*/ Graphics2D createCustomGraphics(Paint_Delegate paint) {
-        // make new one
-        Graphics2D g = getGcSnapshot().create();
-
-        // configure it
-
-        if (paint.isAntiAliased()) {
-            g.setRenderingHint(
-                    RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g.setRenderingHint(
-                    RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        }
-
-        // get the shader first, as it'll replace the color if it can be used it.
-        boolean customShader = false;
-        int nativeShader = paint.getShader();
-        if (nativeShader > 0) {
-            Shader_Delegate shaderDelegate = Shader_Delegate.getDelegate(nativeShader);
-            assert shaderDelegate != null;
-            if (shaderDelegate != null) {
-                if (shaderDelegate.isSupported()) {
-                    java.awt.Paint shaderPaint = shaderDelegate.getJavaPaint();
-                    assert shaderPaint != null;
-                    if (shaderPaint != null) {
-                        g.setPaint(shaderPaint);
-                        customShader = true;
-                    }
-                } else {
-                    Bridge.getLog().fidelityWarning(null,
-                            shaderDelegate.getSupportMessage(),
-                            null);
-                }
-            }
-        }
-
-        // if no shader, use the paint color
-        if (customShader == false) {
-            g.setColor(new Color(paint.getColor(), true /*hasAlpha*/));
-        }
-
-        boolean customStroke = false;
-        int pathEffect = paint.getPathEffect();
-        if (pathEffect > 0) {
-            PathEffect_Delegate effectDelegate = PathEffect_Delegate.getDelegate(pathEffect);
-            assert effectDelegate != null;
-            if (effectDelegate != null) {
-                if (effectDelegate.isSupported()) {
-                    Stroke stroke = effectDelegate.getStroke(paint);
-                    assert stroke != null;
-                    if (stroke != null) {
-                        g.setStroke(stroke);
-                        customStroke = true;
-                    }
-                } else {
-                    Bridge.getLog().fidelityWarning(null,
-                            effectDelegate.getSupportMessage(),
-                            null);
-                }
-            }
-        }
-
-        // if no custom stroke as been set, set the default one.
-        if (customStroke == false) {
-            g.setStroke(new BasicStroke(
-                    paint.getStrokeWidth(),
-                    paint.getJavaCap(),
-                    paint.getJavaJoin(),
-                    paint.getJavaStrokeMiter()));
-        }
-
-        // the alpha for the composite. Always opaque if the normal paint color is used since
-        // it contains the alpha
-        int alpha = customShader ? paint.getAlpha() : 0xFF;
-
-        boolean customXfermode = false;
-        int xfermode = paint.getXfermode();
-        if (xfermode > 0) {
-            Xfermode_Delegate xfermodeDelegate = Xfermode_Delegate.getDelegate(paint.getXfermode());
-            assert xfermodeDelegate != null;
-            if (xfermodeDelegate != null) {
-                if (xfermodeDelegate.isSupported()) {
-                    Composite composite = xfermodeDelegate.getComposite(alpha);
-                    assert composite != null;
-                    if (composite != null) {
-                        g.setComposite(composite);
-                        customXfermode = true;
-                    }
-                } else {
-                    Bridge.getLog().fidelityWarning(null,
-                            xfermodeDelegate.getSupportMessage(),
-                            null);
-                }
-            }
-        }
-
-        // if there was no custom xfermode, but we have alpha (due to a shader and a non
-        // opaque alpha channel in the paint color), then we create an AlphaComposite anyway
-        // that will handle the alpha.
-        if (customXfermode == false && alpha != 0xFF) {
-            g.setComposite(PorterDuffXfermode_Delegate.getComposite(
-                    PorterDuff.Mode.SRC_OVER, alpha));
-        }
-
-        return g;
+        mSnapshot.setImage(mBufferedImage);
     }
 
     private static void drawBitmap(
             int nativeCanvas,
-            BufferedImage image,
-            Bitmap.Config mBitmapConfig,
+            final BufferedImage image,
+            final Bitmap.Config mBitmapConfig,
             int nativePaintOrZero,
-            int sleft, int stop, int sright, int sbottom,
-            int dleft, int dtop, int dright, int dbottom) {
+            final int sleft, final int stop, final int sright, final int sbottom,
+            final int dleft, final int dtop, final int dright, final int dbottom) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
@@ -1253,47 +1108,35 @@ public final class Canvas_Delegate {
             }
         }
 
-        drawBitmap(canvasDelegate, image, mBitmapConfig, paintDelegate,
-                sleft, stop, sright, sbottom,
-                dleft, dtop, dright, dbottom);
-    }
+        // if the bitmap config is alpha_8, then we erase all color value from it
+        // before drawing it.
+        if (mBitmapConfig == Bitmap.Config.ALPHA_8) {
+            int w = image.getWidth();
+            int h = image.getHeight();
+            int[] argb = new int[w*h];
+            image.getRGB(0, 0, image.getWidth(), image.getHeight(),
+                    argb, 0, image.getWidth());
 
-    private static void drawBitmap(
-            Canvas_Delegate canvasDelegate,
-            BufferedImage image,
-            Bitmap.Config mBitmapConfig,
-            Paint_Delegate paintDelegate,
-            int sleft, int stop, int sright, int sbottom,
-            int dleft, int dtop, int dright, int dbottom) {
-        //FIXME add support for canvas, screen and bitmap densities.
-
-        Graphics2D g = canvasDelegate.getGcSnapshot().create();
-        try {
-            if (paintDelegate != null && paintDelegate.isFilterBitmap()) {
-                g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                        RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            final int length = argb.length;
+            for (int i = 0 ; i < length; i++) {
+                argb[i] &= 0xFF000000;
             }
-
-            // if the bitmap config is alpha_8, then we erase all color value from it
-            // before drawing it.
-            if (mBitmapConfig == Bitmap.Config.ALPHA_8) {
-                int w = image.getWidth();
-                int h = image.getHeight();
-                int[] argb = new int[w*h];
-                image.getRGB(0, 0, image.getWidth(), image.getHeight(), argb, 0, image.getWidth());
-
-                final int length = argb.length;
-                for (int i = 0 ; i < length; i++) {
-                    argb[i] &= 0xFF000000;
-                }
-                image.setRGB(0, 0, w, h, argb, 0, w);
-            }
-
-            g.drawImage(image, dleft, dtop, dright, dbottom,
-                    sleft, stop, sright, sbottom, null);
-        } finally {
-            g.dispose();
+            image.setRGB(0, 0, w, h, argb, 0, w);
         }
+
+        draw(nativeCanvas, nativePaintOrZero, true /*compositeOnly*/,
+                new GcSnapshot.Drawable() {
+                    public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                        if (paint != null && paint.isFilterBitmap()) {
+                            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                                    RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                        }
+
+                        //FIXME add support for canvas, screen and bitmap densities.
+                        graphics.drawImage(image, dleft, dtop, dright, dbottom,
+                                sleft, stop, sright, sbottom, null);
+                    }
+        });
     }
 }
 

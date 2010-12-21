@@ -55,7 +55,7 @@ public class ComposeShader_Delegate extends Shader_Delegate {
 
     @Override
     public String getSupportMessage() {
-        return "Compose Shader are not supported in Layout Preview mode.";
+        return "Compose Shaders are not supported in Layout Preview mode.";
     }
 
 
