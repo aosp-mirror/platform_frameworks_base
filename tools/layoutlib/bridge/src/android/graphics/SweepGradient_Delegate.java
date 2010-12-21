@@ -19,10 +19,6 @@ package android.graphics;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
-import java.awt.Paint;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.NoninvertibleTransformException;
-
 /**
  * Delegate implementing the native methods of android.graphics.SweepGradient
  *
@@ -47,7 +43,7 @@ public class SweepGradient_Delegate extends Gradient_Delegate {
     // ---- Public Helper methods ----
 
     @Override
-    public Paint getJavaPaint() {
+    public java.awt.Paint getJavaPaint() {
         return mJavaPaint;
     }
 
@@ -116,20 +112,20 @@ public class SweepGradient_Delegate extends Gradient_Delegate {
                 java.awt.RenderingHints       hints) {
             precomputeGradientColors();
 
-            AffineTransform canvasMatrix;
+            java.awt.geom.AffineTransform canvasMatrix;
             try {
                 canvasMatrix = xform.createInverse();
-            } catch (NoninvertibleTransformException e) {
+            } catch (java.awt.geom.NoninvertibleTransformException e) {
                 Bridge.getLog().error(null, "Unable to inverse matrix in SweepGradient", e);
-                canvasMatrix = new AffineTransform();
+                canvasMatrix = new java.awt.geom.AffineTransform();
             }
 
-            AffineTransform localMatrix = getLocalMatrix();
+            java.awt.geom.AffineTransform localMatrix = getLocalMatrix();
             try {
                 localMatrix = localMatrix.createInverse();
-            } catch (NoninvertibleTransformException e) {
+            } catch (java.awt.geom.NoninvertibleTransformException e) {
                 Bridge.getLog().error(null, "Unable to inverse matrix in SweepGradient", e);
-                localMatrix = new AffineTransform();
+                localMatrix = new java.awt.geom.AffineTransform();
             }
 
             return new SweepGradientPaintContext(canvasMatrix, localMatrix, colorModel);
@@ -137,12 +133,14 @@ public class SweepGradient_Delegate extends Gradient_Delegate {
 
         private class SweepGradientPaintContext implements java.awt.PaintContext {
 
-            private final AffineTransform mCanvasMatrix;
-            private final AffineTransform mLocalMatrix;
+            private final java.awt.geom.AffineTransform mCanvasMatrix;
+            private final java.awt.geom.AffineTransform mLocalMatrix;
             private final java.awt.image.ColorModel mColorModel;
 
-            public SweepGradientPaintContext(AffineTransform canvasMatrix,
-                    AffineTransform localMatrix, java.awt.image.ColorModel colorModel) {
+            public SweepGradientPaintContext(
+                    java.awt.geom.AffineTransform canvasMatrix,
+                    java.awt.geom.AffineTransform localMatrix,
+                    java.awt.image.ColorModel colorModel) {
                 mCanvasMatrix = canvasMatrix;
                 mLocalMatrix = localMatrix;
                 mColorModel = colorModel;

@@ -16,7 +16,11 @@
 
 package android.graphics;
 
+import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
+
+import java.awt.AlphaComposite;
+import java.awt.Composite;
 
 /**
  * Delegate implementing the native methods of android.graphics.PorterDuffXfermode
@@ -41,8 +45,64 @@ public class PorterDuffXfermode_Delegate extends Xfermode_Delegate {
 
     // ---- Public Helper methods ----
 
-    public int getMode() {
-        return mMode;
+    @Override
+    public Composite getComposite() {
+        return getComposite(mMode);
+    }
+
+    @Override
+    public boolean isSupported() {
+        return true;
+    }
+
+    @Override
+    public String getSupportMessage() {
+        // no message since isSupported returns true;
+        return null;
+    }
+
+    public static Composite getComposite(int mode) {
+        PorterDuff.Mode m = getMode(mode);
+        switch (m) {
+            case CLEAR:
+                return AlphaComposite.getInstance(AlphaComposite.CLEAR, 1.0f /*alpha*/);
+            case DARKEN:
+                break;
+            case DST:
+                return AlphaComposite.getInstance(AlphaComposite.DST, 1.0f /*alpha*/);
+            case DST_ATOP:
+                return AlphaComposite.getInstance(AlphaComposite.DST_ATOP, 1.0f /*alpha*/);
+            case DST_IN:
+                return AlphaComposite.getInstance(AlphaComposite.DST_IN, 1.0f /*alpha*/);
+            case DST_OUT:
+                return AlphaComposite.getInstance(AlphaComposite.DST_OUT, 1.0f /*alpha*/);
+            case DST_OVER:
+                return AlphaComposite.getInstance(AlphaComposite.DST_OVER, 1.0f /*alpha*/);
+            case LIGHTEN:
+                break;
+            case MULTIPLY:
+                break;
+            case SCREEN:
+                break;
+            case SRC:
+                return AlphaComposite.getInstance(AlphaComposite.SRC, 1.0f /*alpha*/);
+            case SRC_ATOP:
+                return AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 1.0f /*alpha*/);
+            case SRC_IN:
+                return AlphaComposite.getInstance(AlphaComposite.SRC_IN, 1.0f /*alpha*/);
+            case SRC_OUT:
+                return AlphaComposite.getInstance(AlphaComposite.SRC_OUT, 1.0f /*alpha*/);
+            case SRC_OVER:
+                return AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f /*alpha*/);
+            case XOR:
+                return AlphaComposite.getInstance(AlphaComposite.XOR, 1.0f /*alpha*/);
+        }
+
+        Bridge.getLog().fidelityWarning(null,
+                String.format("Unsupported PorterDuff Mode: %s", m.name()),
+                null);
+
+        return AlphaComposite.getInstance(AlphaComposite.SRC_OVER);
     }
 
     // ---- native methods ----
@@ -58,4 +118,15 @@ public class PorterDuffXfermode_Delegate extends Xfermode_Delegate {
         mMode = mode;
     }
 
+    private static PorterDuff.Mode getMode(int mode) {
+        for (PorterDuff.Mode m : PorterDuff.Mode.values()) {
+            if (m.nativeInt == mode) {
+                return m;
+            }
+        }
+
+        Bridge.getLog().error(null, String.format("Unknown PorterDuff.Mode: %d", mode));
+        assert false;
+        return PorterDuff.Mode.SRC_OVER;
+    }
 }

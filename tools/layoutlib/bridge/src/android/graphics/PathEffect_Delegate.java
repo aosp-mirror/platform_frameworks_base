@@ -18,6 +18,8 @@ package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
+import java.awt.Stroke;
+
 /**
  * Delegate implementing the native methods of android.graphics.PathEffect
  *
@@ -33,7 +35,7 @@ import com.android.layoutlib.bridge.impl.DelegateManager;
  * @see DelegateManager
  *
  */
-public class PathEffect_Delegate {
+public abstract class PathEffect_Delegate {
 
     // ---- delegate manager ----
     protected static final DelegateManager<PathEffect_Delegate> sManager =
@@ -48,6 +50,11 @@ public class PathEffect_Delegate {
     public static PathEffect_Delegate getDelegate(int nativeShader) {
         return sManager.getDelegate(nativeShader);
     }
+
+    public abstract Stroke getStroke(Paint_Delegate paint);
+    public abstract boolean isSupported();
+    public abstract String getSupportMessage();
+
 
     // ---- native methods ----
 
