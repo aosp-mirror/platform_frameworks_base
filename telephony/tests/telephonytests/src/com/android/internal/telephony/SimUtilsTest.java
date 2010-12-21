@@ -82,6 +82,30 @@ public class SimUtilsTest extends TestCase {
         data = IccUtils.hexStringToBytes("820505302D82d32d31");
         // Example from 3GPP TS 11.11 V18.1.3.0 annex B
         assertEquals("-\u0532\u0583-1", IccUtils.adnStringFieldToString(data, 0, data.length));
+
+        /*
+         * adnStringFieldToStringKsc5601Support()
+         * Tests equal the ones above, and will only be run if the SIM is NOT korean.
+         */
+
+        if (SimRegionCache.getRegion() != SimRegionCache.MCC_KOREAN) {
+            data = IccUtils.hexStringToBytes("00566f696365204d61696c07918150367742f3ffffffffffff");
+            // Again, skip prepended 0
+            // (this is an EF[ADN] record)
+            assertEquals("Voice Mail", IccUtils.adnStringFieldToStringKsc5601Support(data, 1, data.length - 15));
+
+            data = IccUtils.hexStringToBytes("809673539A5764002F004DFFFFFFFFFF");
+            // (this is from an EF[ADN] record)
+            assertEquals("\u9673\u539A\u5764/M", IccUtils.adnStringFieldToStringKsc5601Support(data, 0, data.length));
+
+            data = IccUtils.hexStringToBytes("810A01566fec6365204de0696cFFFFFF");
+            // (this is made up to test since I don't have a real one)
+            assertEquals("Vo\u00ECce M\u00E0il", IccUtils.adnStringFieldToStringKsc5601Support(data, 0, data.length));
+
+            data = IccUtils.hexStringToBytes("820505302D82d32d31");
+            // Example from 3GPP TS 11.11 V18.1.3.0 annex B
+            assertEquals("-\u0532\u0583-1", IccUtils.adnStringFieldToStringKsc5601Support(data, 0, data.length));
+        }
     }
 
 }

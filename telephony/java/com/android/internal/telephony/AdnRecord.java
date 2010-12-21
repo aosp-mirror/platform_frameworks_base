@@ -283,7 +283,7 @@ public class AdnRecord implements Parcelable {
     private void
     parseRecord(byte[] record) {
         try {
-            alphaTag = IccUtils.adnStringFieldToString(
+            alphaTag = IccUtils.adnStringFieldToStringKsc5601Support(
                             record, 0, record.length - FOOTER_SIZE_BYTES);
 
             int footerOffset = record.length - FOOTER_SIZE_BYTES;

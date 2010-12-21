@@ -150,6 +150,47 @@ public class IccUtils {
      */
     public static String
     adnStringFieldToString(byte[] data, int offset, int length) {
+        String s = adnStringFieldToStringUcs2Helper(data, offset, length);
+        if (s == null) {
+            s = adnStringFieldToStringGsm8BitHelper(data, offset, length);
+        }
+        return s;
+    }
+
+    /**
+     * Almost identical to the method {@link #adnStringFieldToString}.
+     *
+     * Exception:
+     * If the SIM is Korean (MCC equals "450"), KSC5601 encoding will be
+     * assumed (instead of GSM8Bit). This could lead to unintended consequences,
+     * if the ADN alphaTag was saved with GSM8Bit. This is considered an
+     * acceptable risk.
+     */
+    public static String
+    adnStringFieldToStringKsc5601Support(byte[] data, int offset, int length) {
+        String s = adnStringFieldToStringUcs2Helper(data, offset, length);
+
+        if (s == null) {
+            if (SimRegionCache.getRegion() == SimRegionCache.MCC_KOREAN) {
+                try {
+                    int len = offset;
+                    byte stop = (byte)0xFF;
+                    while (len < length && data[len] != stop) {
+                        len++;
+                    }
+                    return new String(data, offset, len, "KSC5601");
+                } catch (UnsupportedEncodingException e) {
+                    Log.e(LOG_TAG, "implausible UnsupportedEncodingException", e);
+                }
+            }
+
+            return adnStringFieldToStringGsm8BitHelper(data, offset, length);
+        }
+        return s;
+    }
+
+    private static String
+    adnStringFieldToStringUcs2Helper(byte[] data, int offset, int length) {
         if (length >= 1) {
             if (data[offset] == (byte) 0x80) {
                 int ucslen = (length - 1) / 2;
@@ -225,6 +266,11 @@ public class IccUtils {
             return ret.toString();
         }
 
+        return null;
+    }
+
+    private static String
+    adnStringFieldToStringGsm8BitHelper(byte[] data, int offset, int length) {
         return GsmAlphabet.gsm8BitUnpackedToString(data, offset, length);
     }
 
