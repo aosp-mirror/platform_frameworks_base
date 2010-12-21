@@ -30,18 +30,14 @@
 
         <LinearLayout
             android:id="@+id/headers"
+            style="?attr/preferencePanelStyle"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginRight="@dimen/preference_screen_side_margin"
-            android:layout_marginLeft="@dimen/preference_screen_side_margin"
-            android:layout_marginTop="48dp"
-            android:layout_marginBottom="48dp"
             android:paddingLeft="32dip"
             android:paddingRight="32dip"
             android:paddingTop="32dip"
-            android:paddingBottom="32dip"
-            android:background="?attr/preferencePanelBackground">
+            android:paddingBottom="32dip" >
 
             <ListView android:id="@android:id/list"
                 android:layout_width="match_parent"
