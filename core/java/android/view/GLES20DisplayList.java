@@ -16,12 +16,6 @@
 
 package android.view;
 
-import android.util.Finalizers;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * An implementation of display list for OpenGL ES 2.0.
  */
@@ -33,13 +27,18 @@ class GLES20DisplayList extends DisplayList {
 
     int mNativeDisplayList;
 
+    // The native display list will be destroyed when this object dies.
+    // DO NOT overwrite this reference once it is set.
+    @SuppressWarnings("unused")
+    private DisplayListFinalizer mFinalizer;
+
     @Override
     HardwareCanvas start() {
         if (mStarted) {
             throw new IllegalStateException("Recording has already started");
         }
 
-        mCanvas = new GLES20Canvas(true, true);
+        mCanvas = new GLES20RecordingCanvas(true);
         mStarted = true;
         mRecorded = false;
 
@@ -53,7 +52,7 @@ class GLES20DisplayList extends DisplayList {
             mRecorded = true;
 
             mNativeDisplayList = mCanvas.getDisplayList();
-            new DisplayListFinalizer(this);
+            mFinalizer = new DisplayListFinalizer(mNativeDisplayList);
         }
     }
 
@@ -62,22 +61,16 @@ class GLES20DisplayList extends DisplayList {
         return !mStarted && mRecorded;
     }
 
-    private static class DisplayListFinalizer extends Finalizers.ReclaimableReference<DisplayList> {
-        private static final Set<DisplayListFinalizer> sFinalizers = Collections.synchronizedSet(
-                new HashSet<DisplayListFinalizer>());
+    private static class DisplayListFinalizer {
+        int mNativeDisplayList;
 
-        private int mNativeDisplayList;
-
-        DisplayListFinalizer(GLES20DisplayList displayList) {
-            super(displayList, Finalizers.getQueue());
-            mNativeDisplayList = displayList.mNativeDisplayList;
-            sFinalizers.add(this);
+        DisplayListFinalizer(int nativeDisplayList) {
+            mNativeDisplayList = nativeDisplayList;
         }
 
         @Override
-        public void reclaim() {
+        protected void finalize() throws Throwable {
             GLES20Canvas.destroyDisplayList(mNativeDisplayList);
-            sFinalizers.remove(this);
         }
     }
 }

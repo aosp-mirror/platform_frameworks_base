@@ -24,7 +24,6 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.util.Config;
-import android.util.Finalizers;
 import android.util.Log;
 import android.util.Slog;
 
@@ -141,12 +140,6 @@ public class RuntimeInit {
             Slog.i(TAG, "NOTE: emulator trace profiling enabled");
             Debug.enableEmulatorTraceOutput();
         }
-
-        /**
-         * Initialize the thread used to reclaim resources without
-         * going through finalizers.
-         */
-        Finalizers.init();
 
         initialized = true;
     }

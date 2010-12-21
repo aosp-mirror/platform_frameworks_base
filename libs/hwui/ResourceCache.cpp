@@ -60,9 +60,7 @@ void ResourceCache::incrementRefcount(void* resource, ResourceType resourceType)
 }
 
 void ResourceCache::incrementRefcount(SkBitmap* bitmapResource) {
-    SkPixelRef* pixref = bitmapResource->pixelRef();
-    if (pixref) pixref->globalRef();
-
+    bitmapResource->pixelRef()->safeRef();
     bitmapResource->getColorTable()->safeRef();
     incrementRefcount((void*)bitmapResource, kBitmap);
 }
@@ -91,9 +89,7 @@ void ResourceCache::decrementRefcount(void* resource) {
 }
 
 void ResourceCache::decrementRefcount(SkBitmap* bitmapResource) {
-    SkPixelRef* pixref = bitmapResource->pixelRef();
-    if (pixref) pixref->globalUnref();
-
+    bitmapResource->pixelRef()->safeUnref();
     bitmapResource->getColorTable()->safeUnref();
     decrementRefcount((void*)bitmapResource);
 }
