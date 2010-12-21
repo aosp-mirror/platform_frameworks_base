@@ -997,6 +997,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     // a positive report we don't want to overwrite, but if not we need to clear this now
                     // to turn our cellular sig strength white
                     mDefaultInetConditionPublished = 0;
+                    intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
                 }
                 intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO, switchTo);
             } else {
