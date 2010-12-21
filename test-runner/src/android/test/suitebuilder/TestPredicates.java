@@ -17,7 +17,6 @@
 package android.test.suitebuilder;
 
 import android.test.InstrumentationTestCase;
-import android.test.PerformanceTestBase;
 import android.test.suitebuilder.annotation.HasAnnotation;
 import android.test.suitebuilder.annotation.Suppress;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -43,7 +42,5 @@ public class TestPredicates {
     public static final Predicate<TestMethod> SELECT_LARGE = new HasAnnotation(LargeTest.class);
     public static final Predicate<TestMethod> REJECT_SUPPRESSED =
             Predicates.not(new HasAnnotation(Suppress.class));
-    public static final Predicate<TestMethod> REJECT_PERFORMANCE =
-            Predicates.not(new AssignableFrom(PerformanceTestBase.class));
 
 }
