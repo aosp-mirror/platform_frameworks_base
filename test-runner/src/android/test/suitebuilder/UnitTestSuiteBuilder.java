@@ -18,7 +18,7 @@ package android.test.suitebuilder;
 
 /**
  * A suite builder that finds unit tests.
- * 
+ *
  * {@hide} Not needed for 1.0 SDK.
  */
 public class UnitTestSuiteBuilder extends TestSuiteBuilder {
@@ -31,6 +31,5 @@ public class UnitTestSuiteBuilder extends TestSuiteBuilder {
     public UnitTestSuiteBuilder(String name, ClassLoader classLoader) {
         super(name, classLoader);
         addRequirements(TestPredicates.REJECT_INSTRUMENTATION);
-        addRequirements(TestPredicates.REJECT_PERFORMANCE);
     }
 }

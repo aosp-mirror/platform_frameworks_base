@@ -24,7 +24,6 @@ import com.android.internal.util.Predicate;
 import com.google.android.collect.Lists;
 import static android.test.suitebuilder.TestGrouping.SORT_BY_FULLY_QUALIFIED_NAME;
 import static android.test.suitebuilder.TestPredicates.REJECT_SUPPRESSED;
-import static android.test.suitebuilder.TestPredicates.REJECT_PERFORMANCE;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -71,9 +70,9 @@ public class TestSuiteBuilder {
         this.testCases = Lists.newArrayList();
         addRequirements(REJECT_SUPPRESSED);
     }
-    
+
     /** @hide pending API Council approval */
-    public TestSuiteBuilder addTestClassByName(String testClassName, String testMethodName, 
+    public TestSuiteBuilder addTestClassByName(String testClassName, String testMethodName,
             Context context) {
 
         AndroidTestRunner atr = new AndroidTestRunner();
@@ -83,7 +82,7 @@ public class TestSuiteBuilder {
         this.testCases.addAll(atr.getTestCases());
         return this;
     }
-    
+
     /** @hide pending API Council approval */
     public TestSuiteBuilder addTestSuite(TestSuite testSuite) {
         for (TestCase testCase : (List<TestCase>) TestCaseUtil.getTests(testSuite, true)) {
@@ -242,7 +241,7 @@ public class TestSuiteBuilder {
 
     /**
      * @return the test package that represents the packages that were included for our test suite.
-     * 
+     *
      * {@hide} Not needed for 1.0 SDK.
      */
     protected TestGrouping getTestGrouping() {
@@ -262,7 +261,7 @@ public class TestSuiteBuilder {
         addSuiteIfNecessary(testMethod.getEnclosingClassname());
         suiteForCurrentClass.addTest(testMethod.createTest());
     }
-    
+
     private void addTest(Test test) {
         addSuiteIfNecessary(test.getClass().getName());
         suiteForCurrentClass.addTest(test);

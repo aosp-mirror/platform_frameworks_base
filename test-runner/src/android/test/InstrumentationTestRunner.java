@@ -172,8 +172,6 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     /** @hide */
     public static final String ARGUMENT_TEST_SIZE_PREDICATE = "size";
     /** @hide */
-    public static final String ARGUMENT_INCLUDE_PERF = "perf";
-    /** @hide */
     public static final String ARGUMENT_DELAY_MSEC = "delay_msec";
 
     private static final String SMALL_SUITE = "small";
@@ -305,7 +303,6 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         Predicate<TestMethod> testSizePredicate = null;
         Predicate<TestMethod> testAnnotationPredicate = null;
         Predicate<TestMethod> testNotAnnotationPredicate = null;
-        boolean includePerformance = false;
         String testClassesArg = null;
         boolean logOnly = false;
 
@@ -323,7 +320,6 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             testNotAnnotationPredicate = getNotAnnotationPredicate(
                     arguments.getString(ARGUMENT_NOT_ANNOTATION));
 
-            includePerformance = getBooleanArgument(arguments, ARGUMENT_INCLUDE_PERF);
             logOnly = getBooleanArgument(arguments, ARGUMENT_LOG_ONLY);
             mCoverage = getBooleanArgument(arguments, "coverage");
             mCoverageFilePath = arguments.getString("coverageFile");
@@ -347,9 +343,6 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         }
         if (testNotAnnotationPredicate != null) {
             testSuiteBuilder.addRequirements(testNotAnnotationPredicate);
-        }
-        if (!includePerformance) {
-            testSuiteBuilder.addRequirements(REJECT_PERFORMANCE);
         }
 
         if (testClassesArg == null) {
