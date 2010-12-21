@@ -26,7 +26,10 @@ import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiConfiguration.AuthAlgorithm;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
+import android.os.IPowerManager;
 import android.os.PowerManager;
+import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
@@ -46,7 +49,6 @@ public class WifiApStress
     private final static String OUTPUT_FILE = "WifiStressTestOutput.txt";
     private ConnectivityManagerTestActivity mAct;
     private int iterations;
-    private PowerManager.WakeLock mWakelock = null;
     private BufferedWriter mOutputWriter = null;
     private int mLastIteration = 0;
 
@@ -61,17 +63,11 @@ public class WifiApStress
         ConnectivityManagerStressTestRunner mRunner =
             (ConnectivityManagerStressTestRunner)getInstrumentation();
         iterations = mRunner.mSoftapIterations;
-        PowerManager pm =
-            (PowerManager)mRunner.getContext().getSystemService(Context.POWER_SERVICE);
-        mWakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "wifiApStress");
-        mWakelock.acquire();
+        mAct.turnScreenOn();
     }
 
     @Override
     public void tearDown() throws Exception {
-        if (mWakelock != null) {
-            mWakelock.release();
-        }
         // write the total number of iterations into output file
         mOutputWriter = new BufferedWriter(new FileWriter(new File(
                 Environment.getExternalStorageDirectory(), OUTPUT_FILE)));

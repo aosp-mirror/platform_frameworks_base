@@ -22,6 +22,10 @@ import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.IPowerManager;
+import android.os.PowerManager;
+import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -458,6 +462,26 @@ public class ConnectivityManagerTestActivity extends Activity {
 
     public boolean enableWifi() {
         return mWifiManager.setWifiEnabled(true);
+    }
+
+    // Turn screen off
+    public void turnScreenOff() {
+        log("Turn screen off");
+        PowerManager pm =
+            (PowerManager) getSystemService(Context.POWER_SERVICE);
+        pm.goToSleep(SystemClock.uptimeMillis() + 100);
+    }
+
+    // Turn screen on
+    public void turnScreenOn() {
+        log("Turn screen on");
+        IPowerManager mPowerManagerService = IPowerManager.Stub.asInterface(
+                ServiceManager.getService("power"));;
+        try {
+            mPowerManagerService.userActivityWithForce(SystemClock.uptimeMillis(), false, true);
+        } catch (Exception e) {
+            log(e.toString());
+        }
     }
 
     /**
