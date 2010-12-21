@@ -16,8 +16,6 @@
 
 package android.test;
 
-import static android.test.suitebuilder.TestPredicates.REJECT_PERFORMANCE;
-
 import com.android.internal.util.Predicate;
 import com.android.internal.util.Predicates;
 
