@@ -79,11 +79,6 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
         start();
     }
 
-    public void resetSupplicantState() {
-        transitionTo(mUninitializedState);
-    }
-
-
     private void transitionOnSupplicantStateChange(StateChangeResult stateChangeResult) {
         SupplicantState supState = (SupplicantState) stateChangeResult.state;
 
@@ -121,11 +116,11 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
         }
     }
 
-    private void sendSupplicantStateChangedBroadcast(StateChangeResult sc, boolean failedAuth) {
+    private void sendSupplicantStateChangedBroadcast(SupplicantState state, boolean failedAuth) {
         Intent intent = new Intent(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
                 | Intent.FLAG_RECEIVER_REPLACE_PENDING);
-        intent.putExtra(WifiManager.EXTRA_NEW_STATE, (Parcelable)sc.state);
+        intent.putExtra(WifiManager.EXTRA_NEW_STATE, (Parcelable) state);
         if (failedAuth) {
             intent.putExtra(
                 WifiManager.EXTRA_SUPPLICANT_ERROR,
@@ -153,10 +148,13 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
                     break;
                 case WifiStateMachine.SUPPLICANT_STATE_CHANGE_EVENT:
                     StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
-                    sendSupplicantStateChangedBroadcast(stateChangeResult,
-                            mAuthFailureInSupplicantBroadcast);
+                    SupplicantState state = stateChangeResult.state;
+                    sendSupplicantStateChangedBroadcast(state, mAuthFailureInSupplicantBroadcast);
                     mAuthFailureInSupplicantBroadcast = false;
                     transitionOnSupplicantStateChange(stateChangeResult);
+                    break;
+                case WifiStateMachine.CMD_RESET_SUPPLICANT_STATE:
+                    transitionTo(mUninitializedState);
                     break;
                 default:
                     Log.e(TAG, "Ignoring " + message);
@@ -166,6 +164,14 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
         }
     }
 
+    /*
+     * This indicates that the supplicant state as seen
+     * by the framework is not initialized yet. We are
+     * in this state right after establishing a control
+     * channel connection before any supplicant events
+     * or after we have lost the control channel
+     * connection to the supplicant
+     */
     class UninitializedState extends HierarchicalState {
         @Override
          public void enter() {
@@ -239,7 +245,7 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
             switch (message.what) {
                 case WifiStateMachine.SUPPLICANT_STATE_CHANGE_EVENT:
                     StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
-                    SupplicantState state = (SupplicantState) stateChangeResult.state;
+                    SupplicantState state = stateChangeResult.state;
                     if (state == SupplicantState.ASSOCIATING ||
                             state == SupplicantState.ASSOCIATED ||
                             state == SupplicantState.FOUR_WAY_HANDSHAKE ||
@@ -253,7 +259,7 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
                             WifiConfigStore.disableNetwork(stateChangeResult.networkId);
                         }
                         mLoopDetectIndex = state.ordinal();
-                        sendSupplicantStateChangedBroadcast(stateChangeResult,
+                        sendSupplicantStateChangedBroadcast(state,
                                 mAuthFailureInSupplicantBroadcast);
                     } else {
                         //Have the DefaultState handle the transition
@@ -280,9 +286,8 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
             switch(message.what) {
                 case WifiStateMachine.SUPPLICANT_STATE_CHANGE_EVENT:
                     StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
-                    SupplicantState state = (SupplicantState) stateChangeResult.state;
-                    sendSupplicantStateChangedBroadcast(stateChangeResult,
-                            mAuthFailureInSupplicantBroadcast);
+                    SupplicantState state = stateChangeResult.state;
+                    sendSupplicantStateChangedBroadcast(state, mAuthFailureInSupplicantBroadcast);
                     /* Ignore a re-auth in completed state */
                     if (state == SupplicantState.ASSOCIATING ||
                             state == SupplicantState.ASSOCIATED ||
@@ -292,6 +297,10 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
                         break;
                     }
                     transitionOnSupplicantStateChange(stateChangeResult);
+                    break;
+                case WifiStateMachine.CMD_RESET_SUPPLICANT_STATE:
+                    sendSupplicantStateChangedBroadcast(SupplicantState.DISCONNECTED, false);
+                    transitionTo(mUninitializedState);
                     break;
                 default:
                     return NOT_HANDLED;

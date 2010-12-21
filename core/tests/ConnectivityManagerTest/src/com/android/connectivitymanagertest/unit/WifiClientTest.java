@@ -18,14 +18,17 @@ package com.android.connectivitymanagertest.unit;
 
 import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.Context;
 import android.app.Instrumentation;
 import android.os.Handler;
 import android.os.Message;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiConfiguration.Status;
+import android.net.wifi.SupplicantState;
 
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.AndroidTestCase;
@@ -45,10 +48,62 @@ public class WifiClientTest extends AndroidTestCase {
 
     //10s delay for turning on wifi
     private static final int DELAY = 10000;
+    private WifiStateListener mWifiStateListener;
+    int mWifiState;
+    int mDisableBroadcastCounter = 0;
+    int mEnableBroadcastCounter = 0;
+    NetworkInfo mNetworkInfo;
+    boolean mSupplicantConnection;
+    SupplicantState mSupplicantState;
+
+    private class WifiStateListener extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
+                mWifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
+                        WifiManager.WIFI_STATE_UNKNOWN);
+                switch (mWifiState) {
+                    case WifiManager.WIFI_STATE_DISABLING:
+                        if (mDisableBroadcastCounter == 0) mDisableBroadcastCounter++;
+                        break;
+                    case WifiManager.WIFI_STATE_DISABLED:
+                        if (mDisableBroadcastCounter == 1) mDisableBroadcastCounter++;
+                        break;
+                    case WifiManager.WIFI_STATE_ENABLING:
+                        if (mEnableBroadcastCounter == 0) mEnableBroadcastCounter++;
+                        break;
+                    case WifiManager.WIFI_STATE_ENABLED:
+                        if (mEnableBroadcastCounter == 1) mEnableBroadcastCounter++;
+                        break;
+                }
+            } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
+                mNetworkInfo = (NetworkInfo)
+                        intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+            } else if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
+                mSupplicantState = (SupplicantState)
+                        intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+            } else if (action.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
+                mSupplicantConnection =
+                        intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false);
+            }
+        }
+    }
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+
+        // register a connectivity receiver for CONNECTIVITY_ACTION;
+
+        mWifiStateListener = new WifiStateListener();
+        IntentFilter mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        mIntentFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+        mIntentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+        mIntentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        getContext().registerReceiver(mWifiStateListener, mIntentFilter);
+
         mWifiManager = (WifiManager) getContext().getSystemService(Context.WIFI_SERVICE);
         mWifiManager.setWifiEnabled(true);
         assertNotNull(mWifiManager);
@@ -183,4 +238,37 @@ public class WifiClientTest extends AndroidTestCase {
         assertTrue(ret);
         mWifiManager.saveConfiguration();
     }
+
+    // Test case 5: test wifi state change broadcasts
+    @LargeTest
+    public void testWifiBroadcasts() {
+
+        /* Initialize */
+        mWifiManager.setWifiEnabled(false);
+        sleepAfterWifiEnable();
+        mDisableBroadcastCounter = 0;
+        mEnableBroadcastCounter = 0;
+        mSupplicantConnection = false;
+        mNetworkInfo = null;
+        mSupplicantState = null;
+
+        /* Enable wifi */
+        mWifiManager.setWifiEnabled(true);
+        sleepAfterWifiEnable();
+        assertTrue(mEnableBroadcastCounter == 2);
+        assertTrue(mSupplicantConnection == true);
+        assertTrue(mNetworkInfo.isConnected());
+        assertTrue(mSupplicantState == SupplicantState.COMPLETED);
+
+
+        /* Disable wifi */
+        mWifiManager.setWifiEnabled(false);
+        sleepAfterWifiEnable();
+        assertTrue(mDisableBroadcastCounter == 2);
+        assertTrue(mSupplicantConnection == false);
+        assertTrue(!mNetworkInfo.isConnected());
+        assertTrue(mSupplicantState != SupplicantState.COMPLETED);
+
+    }
+
 }
