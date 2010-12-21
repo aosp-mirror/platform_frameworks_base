@@ -234,6 +234,7 @@
         <item name="editTextPreferenceStyle">@android:style/Preference.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@android:style/Preference.RingtonePreference</item>
         <item name="preferenceLayoutChild">@android:layout/preference_child</item>
+        <item name="preferencePanelStyle">@style/PreferencePanel</item>
         <item name="preferencePanelBackground">@android:drawable/panel_bg_holo_dark</item>
 
         <!-- Search widget styles -->
@@ -1306,7 +1307,7 @@
          (large, xlarge). -->
     <style name="Theme.Holo.DialogWhenLarge.NoActionBar" parent="@android:style/Theme.Holo.NoActionBar">
     </style>
-    
+
     <!-- Light holo dialog themes -->
 
     <!-- Holo light theme for dialog windows and activities, which is used by the

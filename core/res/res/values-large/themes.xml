@@ -19,9 +19,11 @@
 <resources>
     <style name="Theme.Holo.DialogWhenLarge"
             parent="@android:style/Theme.Holo.Dialog">
+        <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
     </style>
     <style name="Theme.Holo.DialogWhenLarge.NoActionBar"
             parent="@android:style/Theme.Holo.Dialog.NoActionBar">
+        <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
     </style>
     <style name="Theme.Holo.Light.DialogWhenLarge"
             parent="@android:style/Theme.Holo.Light.Dialog">

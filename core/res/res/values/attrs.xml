@@ -606,6 +606,8 @@
         <attr name="preferenceLayoutChild" format="reference" />
         <!-- Preference panel background -->
         <attr name="preferencePanelBackground" format="reference" />
+        <!-- Preference panel style -->
+        <attr name="preferencePanelStyle" format="reference" />
 
         <!-- ============================ -->
         <!-- Text selection handle styles -->

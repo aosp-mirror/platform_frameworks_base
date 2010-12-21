@@ -915,6 +915,20 @@
         <item name="android:widgetLayout">@android:layout/preference_dialog</item>
     </style>
 
+    <!-- No margins or background by default. Could be different for x-large screens -->
+    <style name="PreferencePanel">
+    </style>
+
+    <!-- The attributes are overridden here because the x-large or large resources may have
+         changed the margins and background in the parent PreferencePanel style. -->
+    <style name="PreferencePanel.Dialog">
+        <item name="android:layout_marginLeft">0dip</item>
+        <item name="android:layout_marginRight">0dip</item>
+        <item name="android:layout_marginTop">0dip</item>
+        <item name="android:layout_marginBottom">0dip</item>
+        <item name="android:background">@null</item>
+    </style>
+
     <!-- Other Misc Styles -->
     <eat-comment />
 
