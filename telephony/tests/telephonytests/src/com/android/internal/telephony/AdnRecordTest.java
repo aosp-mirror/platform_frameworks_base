@@ -170,6 +170,18 @@ public class AdnRecordTest extends TestCase {
         assertEquals("Adgjm", adn.getAlphaTag());
         assertEquals("+18885551212,12345678", adn.getNumber());
         assertFalse(adn.isEmpty());
+
+        //
+        // Test that a ADN record with KSC5601 will get converted correctly
+        // This test will only be run when using a Korean SIM
+        //
+        if (SimRegionCache.getRegion() == SimRegionCache.MCC_KOREAN) {
+            adn = new AdnRecord(IccUtils.hexStringToBytes(
+                  "3030312C20C8AB41B1E6FFFFFFFFFFFF07811010325476F8FFFFFFFFFFFF"));
+            assertEquals("001, \uD64DA\uAE38", adn.getAlphaTag());
+            assertEquals("01012345678", adn.getNumber());
+            assertFalse(adn.isEmpty());
+        }
     }
 }
 

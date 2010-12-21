@@ -24,6 +24,7 @@ import android.util.Log;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.EncodeException;
 import com.android.internal.telephony.GsmAlphabet;
+import com.android.internal.telephony.SimRegionCache;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
@@ -47,6 +48,12 @@ import static android.telephony.SmsMessage.MessageClass;
  */
 public class SmsMessage extends SmsMessageBase{
     static final String LOG_TAG = "GSM";
+
+    /**
+     * Used with the ENCODING_ constants from {@link android.telephony.SmsMessage}
+     * Not a part of the public API, therefore not in order with those constants.
+     */
+    private static final int ENCODING_KSC5601 = 4000;
 
     private MessageClass messageClass;
 
@@ -781,6 +788,28 @@ public class SmsMessage extends SmsMessageBase{
             return ret;
         }
 
+        /**
+         * Interprets the user data payload as KSC5601 characters, and
+         * decodes them into a String
+         *
+         * @param byteCount the number of bytes in the user data payload
+         * @return a String with the decoded characters
+         */
+        String getUserDataKSC5601(int byteCount) {
+            String ret;
+
+            try {
+                ret = new String(pdu, cur, byteCount, "KSC5601");
+            } catch (UnsupportedEncodingException ex) {
+                // Should return same as ENCODING_UNKNOWN on error.
+                ret = null;
+                Log.e(LOG_TAG, "implausible UnsupportedEncodingException", ex);
+            }
+
+            cur += byteCount;
+            return ret;
+        }
+
         boolean moreDataPresent() {
             return (pdu.length > cur);
         }
@@ -1110,6 +1139,10 @@ public class SmsMessage extends SmsMessageBase{
         } else {
             Log.w(LOG_TAG, "3 - Unsupported SMS data coding scheme "
                     + (dataCodingScheme & 0xff));
+            if (SimRegionCache.getRegion() == SimRegionCache.MCC_KOREAN) {
+                Log.w(LOG_TAG, "Korean SIM, using KSC5601 for decoding.");
+                encodingType = ENCODING_KSC5601;
+            }
         }
 
         // set both the user data and the user data header.
@@ -1130,6 +1163,10 @@ public class SmsMessage extends SmsMessageBase{
 
         case ENCODING_16BIT:
             messageBody = p.getUserDataUCS2(count);
+            break;
+
+        case ENCODING_KSC5601:
+            messageBody = p.getUserDataKSC5601(count);
             break;
         }
 
