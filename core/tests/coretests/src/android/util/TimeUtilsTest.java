@@ -429,4 +429,22 @@ public class TimeUtilsTest extends TestCase {
                                      c.getTimeInMillis(),
                                      country);
     }
+
+    public void testFormatDuration() {
+        assertFormatDuration("0", 0);
+        assertFormatDuration("-1ms", -1);
+        assertFormatDuration("+1ms", 1);
+        assertFormatDuration("+10ms", 10);
+        assertFormatDuration("+100ms", 100);
+        assertFormatDuration("+101ms", 101);
+        assertFormatDuration("+330ms", 330);
+        assertFormatDuration("+1s330ms", 1330);
+        assertFormatDuration("+10s24ms", 10024);
+    }
+
+    private void assertFormatDuration(String expected, long duration) {
+        StringBuilder sb = new StringBuilder();
+        TimeUtils.formatDuration(duration, sb);
+        assertEquals("formatDuration(" + duration + ")", expected, sb.toString());
+    }
 }
