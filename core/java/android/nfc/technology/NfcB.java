@@ -37,20 +37,34 @@ import android.os.RemoteException;
  */
 public final class NfcB extends BasicTagTechnology {
     /** @hide */
-    public static final String EXTRA_ATQB = "atqb";
+    public static final String EXTRA_APPDATA = "appdata";
+    /** @hide */
+    public static final String EXTRA_PROTINFO = "protinfo";
 
-    private byte[] mAtqb;
+    private byte[] mAppData;
+    private byte[] mProtInfo;
 
     public NfcB(NfcAdapter adapter, Tag tag, Bundle extras)
             throws RemoteException {
         super(adapter, tag, TagTechnology.NFC_B);
-        mAtqb = extras.getByteArray(EXTRA_ATQB);
+        mAppData = extras.getByteArray(EXTRA_APPDATA);
+        mProtInfo = extras.getByteArray(EXTRA_PROTINFO);
     }
 
     /**
-     * Returns the ATQB/SENSB_RES bytes discovered at tag discovery.
+     * Returns the Application Data bytes from the ATQB/SENSB_RES
+     * bytes discovered at tag discovery.
      */
-    public byte[] getAtqb() {
-        return mAtqb;
+    public byte[] getApplicationData() {
+        return mAppData;
     }
+
+    /**
+     * Returns the Protocol Info bytes from the ATQB/SENSB_RES
+     * bytes discovered at tag discovery.
+     */
+    public byte[] getProtocolInfo() {
+        return mProtInfo;
+    }
+
 }

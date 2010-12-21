@@ -39,18 +39,18 @@ import java.io.IOException;
  */
 public final class IsoDep extends BasicTagTechnology {
     /** @hide */
-    public static final String EXTRA_ATTRIB = "attrib";
+    public static final String EXTRA_HI_LAYER_RESP = "hiresp";
     /** @hide */
     public static final String EXTRA_HIST_BYTES = "histbytes";
 
-    private byte[] mAttrib = null;
+    private byte[] mHiLayerResponse = null;
     private byte[] mHistBytes = null;
 
     public IsoDep(NfcAdapter adapter, Tag tag, Bundle extras)
             throws RemoteException {
         super(adapter, tag, TagTechnology.ISO_DEP);
         if (extras != null) {
-            mAttrib = extras.getByteArray(EXTRA_ATTRIB);
+            mHiLayerResponse = extras.getByteArray(EXTRA_HI_LAYER_RESP);
             mHistBytes = extras.getByteArray(EXTRA_HIST_BYTES);
         }
     }
@@ -63,5 +63,5 @@ public final class IsoDep extends BasicTagTechnology {
     /**
      * 3B only
      */
-    public byte[] getAttrib() { return mAttrib; }
+    public byte[] getHiLayerResponse() { return mHiLayerResponse; }
 }
