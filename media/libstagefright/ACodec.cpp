@@ -1157,6 +1157,9 @@ void ACodec::BaseState::onInputBufferFilled(const sp<AMessage> &msg) {
     if (!msg->findObject("buffer", &obj)) {
         CHECK(msg->findInt32("err", &err));
 
+        LOGV("[%s] saw error %d instead of an input buffer",
+             mCodec->mComponentName.c_str(), err);
+
         obj.clear();
     }
 

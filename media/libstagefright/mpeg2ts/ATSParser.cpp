@@ -284,7 +284,7 @@ ATSParser::Stream::Stream(
     : mProgram(program),
       mElementaryPID(elementaryPID),
       mStreamType(streamType),
-      mBuffer(new ABuffer(128 * 1024)),
+      mBuffer(new ABuffer(192 * 1024)),
       mPayloadStarted(false),
       mQueue(streamType == 0x1b
               ? ElementaryStreamQueue::H264 : ElementaryStreamQueue::AAC) {

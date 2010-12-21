@@ -29,9 +29,12 @@ struct DecoderWrapper;
 struct NuPlayer::Decoder : public AHandler {
     Decoder(const sp<AMessage> &notify, const sp<Surface> &surface = NULL);
 
-    void configure(const sp<MetaData> &meta);
+    void configure(
+            const sp<MetaData> &meta, bool ignoreCodecSpecificData);
+
     void signalFlush();
     void signalResume();
+    void initiateShutdown();
 
 protected:
     virtual ~Decoder();

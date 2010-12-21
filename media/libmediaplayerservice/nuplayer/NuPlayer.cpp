@@ -23,6 +23,7 @@
 #include "NuPlayerRenderer.h"
 #include "NuPlayerStreamListener.h"
 
+#include <media/stagefright/foundation/hexdump.h>
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
@@ -30,6 +31,8 @@
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
 #include <surfaceflinger/Surface.h>
+
+#define SHUTDOWN_ON_DISCONTINUITY       0
 
 namespace android {
 
@@ -132,10 +135,16 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
 
         case kWhatScanSources:
         {
-            instantiateDecoder(false, &mVideoDecoder);
+            instantiateDecoder(
+                    false,
+                    &mVideoDecoder,
+                    false /* ignoreCodecSpecificData */);
 
             if (mAudioSink != NULL) {
-                instantiateDecoder(true, &mAudioDecoder);
+                instantiateDecoder(
+                        true,
+                        &mAudioDecoder,
+                        false /* ignoreCodecSpecificData */);
             }
 
             if (mEOS) {
@@ -182,22 +191,20 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
 
                 LOGI("decoder %s flush completed", audio ? "audio" : "video");
 
-                if (mFlushingAudio == FLUSHED && mFlushingVideo == FLUSHED) {
-                    LOGI("both audio and video are flushed now.");
+#if SHUTDOWN_ON_DISCONTINUITY
+                LOGI("initiating %s decoder shutdown",
+                     audio ? "audio" : "video");
 
-                    mRenderer->signalTimeDiscontinuity();
+                (audio ? mAudioDecoder : mVideoDecoder)->initiateShutdown();
 
-                    if (mAudioDecoder != NULL) {
-                        mAudioDecoder->signalResume();
-                    }
-
-                    if (mVideoDecoder != NULL) {
-                        mVideoDecoder->signalResume();
-                    }
-
-                    mFlushingAudio = NONE;
-                    mFlushingVideo = NONE;
+                if (audio) {
+                    mFlushingAudio = SHUTTING_DOWN_DECODER;
+                } else {
+                    mFlushingVideo = SHUTTING_DOWN_DECODER;
                 }
+#endif
+
+                finishFlushIfPossible();
             } else if (what == ACodec::kWhatOutputFormatChanged) {
                 CHECK(audio);
 
@@ -213,6 +220,23 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                 mAudioSink->close();
                 CHECK_EQ(mAudioSink->open(sampleRate, numChannels), (status_t)OK);
                 mAudioSink->start();
+
+                mRenderer->signalAudioSinkChanged();
+            } else if (what == ACodec::kWhatShutdownCompleted) {
+                LOGI("%s shutdown completed", audio ? "audio" : "video");
+                if (audio) {
+                    mAudioDecoder.clear();
+
+                    CHECK_EQ((int)mFlushingAudio, (int)SHUTTING_DOWN_DECODER);
+                    mFlushingAudio = SHUT_DOWN;
+                } else {
+                    mVideoDecoder.clear();
+
+                    CHECK_EQ((int)mFlushingVideo, (int)SHUTTING_DOWN_DECODER);
+                    mFlushingVideo = SHUT_DOWN;
+                }
+
+                finishFlushIfPossible();
             } else {
                 CHECK_EQ((int)what, (int)ACodec::kWhatDrainThisBuffer);
 
@@ -265,6 +289,43 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
     }
 }
 
+void NuPlayer::finishFlushIfPossible() {
+    if (mFlushingAudio != FLUSHED && mFlushingAudio != SHUT_DOWN) {
+        return;
+    }
+
+    if (mFlushingVideo != FLUSHED && mFlushingVideo != SHUT_DOWN) {
+        return;
+    }
+
+    LOGI("both audio and video are flushed now.");
+
+    mRenderer->signalTimeDiscontinuity();
+
+    if (mFlushingAudio == SHUT_DOWN) {
+        instantiateDecoder(
+                true,
+                &mAudioDecoder,
+                true /* ignoreCodecSpecificData */);
+        CHECK(mAudioDecoder != NULL);
+    } else if (mAudioDecoder != NULL) {
+        mAudioDecoder->signalResume();
+    }
+
+    if (mFlushingVideo == SHUT_DOWN) {
+        instantiateDecoder(
+                false,
+                &mVideoDecoder,
+                true /* ignoreCodecSpecificData */);
+        CHECK(mVideoDecoder != NULL);
+    } else if (mVideoDecoder != NULL) {
+        mVideoDecoder->signalResume();
+    }
+
+    mFlushingAudio = NONE;
+    mFlushingVideo = NONE;
+}
+
 void NuPlayer::feedMoreTSData() {
     CHECK(!mEOS);
 
@@ -285,7 +346,10 @@ void NuPlayer::feedMoreTSData() {
         } else {
             if (buffer[0] == 0x00) {
                 // XXX legacy
-                mTSParser->signalDiscontinuity(ATSParser::DISCONTINUITY_SEEK);
+                mTSParser->signalDiscontinuity(
+                        buffer[1] == 0x00
+                            ? ATSParser::DISCONTINUITY_SEEK
+                            : ATSParser::DISCONTINUITY_FORMATCHANGE);
             } else {
                 mTSParser->feedTSPacket(buffer, sizeof(buffer));
             }
@@ -354,7 +418,7 @@ status_t NuPlayer::dequeueAccessUnit(
 }
 
 status_t NuPlayer::instantiateDecoder(
-        bool audio, sp<Decoder> *decoder) {
+        bool audio, sp<Decoder> *decoder, bool ignoreCodecSpecificData) {
     if (*decoder != NULL) {
         return OK;
     }
@@ -378,7 +442,7 @@ status_t NuPlayer::instantiateDecoder(
     looper()->registerHandler(*decoder);
 
     const sp<MetaData> &meta = source->getFormat();
-    (*decoder)->configure(meta);
+    (*decoder)->configure(meta, ignoreCodecSpecificData);
 
     return OK;
 }

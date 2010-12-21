@@ -151,6 +151,7 @@ struct DecoderWrapper::WrapperReader : public AHandler {
             const sp<AMessage> &notify);
 
     void start();
+    void stop();
     void readMore(bool flush = false);
 
 protected:
@@ -187,6 +188,10 @@ DecoderWrapper::WrapperReader::~WrapperReader() {
 void DecoderWrapper::WrapperReader::start() {
     CHECK_EQ(mDecoder->start(), (status_t)OK);
     readMore();
+}
+
+void DecoderWrapper::WrapperReader::stop() {
+    CHECK_EQ(mDecoder->stop(), (status_t)OK);
 }
 
 void DecoderWrapper::WrapperReader::readMore(bool flush) {
@@ -351,6 +356,10 @@ void DecoderWrapper::onMessageReceived(const sp<AMessage> &msg) {
             onSetup(msg);
             break;
 
+        case kWhatShutdown:
+            onShutdown();
+            break;
+
         case kWhatInputDataRequested:
         {
             postFillBuffer();
@@ -491,6 +500,25 @@ void DecoderWrapper::onSetup(const sp<AMessage> &msg) {
 
     mReader->start();
     ++mNumPendingDecodes;
+}
+
+void DecoderWrapper::onShutdown() {
+    mReaderLooper->stop();
+    mReaderLooper.clear();
+
+    mReader->stop();
+    mReader.clear();
+
+    mSource.clear();
+
+    mNumOutstandingInputBuffers = 0;
+    mNumOutstandingOutputBuffers = 0;
+    mNumPendingDecodes = 0;
+    mFlushing = false;
+
+    sp<AMessage> notify = mNotify->dup();
+    notify->setInt32("what", ACodec::kWhatShutdownCompleted);
+    notify->post();
 }
 
 void DecoderWrapper::postFillBuffer() {
