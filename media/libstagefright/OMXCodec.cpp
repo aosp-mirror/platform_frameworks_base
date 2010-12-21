@@ -3361,7 +3361,15 @@ status_t OMXCodec::read(
     }
 
     while (mState != ERROR && !mNoMoreOutputData && mFilledBuffers.empty()) {
-        mBufferFilled.wait(mLock);
+        if (mIsEncoder) {
+            if (NO_ERROR != mBufferFilled.waitRelative(mLock, 3000000000LL)) {
+                LOGW("Timed out waiting for buffers from video encoder: %d/%d",
+                    countBuffersWeOwn(mPortBuffers[kPortIndexInput]),
+                    countBuffersWeOwn(mPortBuffers[kPortIndexOutput]));
+            }
+        } else {
+            mBufferFilled.wait(mLock);
+        }
     }
 
     if (mState == ERROR) {

@@ -573,7 +573,7 @@ void CameraSource::releaseCamera() {
 }
 
 status_t CameraSource::stop() {
-    LOGV("stop");
+    LOGD("stop: E");
     Mutex::Autolock autoLock(mLock);
     mStarted = false;
     mFrameAvailableCondition.signal();
@@ -581,9 +581,11 @@ status_t CameraSource::stop() {
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
     releaseQueuedFrames();
     while (!mFramesBeingEncoded.empty()) {
-        LOGI("Waiting for outstanding frames being encoded: %d",
+        if (NO_ERROR !=
+            mFrameCompleteCondition.waitRelative(mLock, 3000000000LL)) {
+            LOGW("Timed out waiting for outstanding frames being encoded: %d",
                 mFramesBeingEncoded.size());
-        mFrameCompleteCondition.wait(mLock);
+        }
     }
     stopCameraRecording();
     releaseCamera();
@@ -601,6 +603,7 @@ status_t CameraSource::stop() {
     }
 
     CHECK_EQ(mNumFramesReceived, mNumFramesEncoded + mNumFramesDropped);
+    LOGD("stop: X");
     return OK;
 }
 
@@ -666,7 +669,11 @@ status_t CameraSource::read(
     {
         Mutex::Autolock autoLock(mLock);
         while (mStarted && mFramesReceived.empty()) {
-            mFrameAvailableCondition.wait(mLock);
+            if (NO_ERROR !=
+                mFrameAvailableCondition.waitRelative(mLock, 3000000000LL)) {
+                LOGW("Timed out waiting for incoming camera video frames: %lld us",
+                    mLastFrameTimestampUs);
+            }
         }
         if (!mStarted) {
             return OK;
