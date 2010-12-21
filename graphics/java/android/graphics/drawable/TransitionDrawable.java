@@ -137,7 +137,7 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
         final long time = SystemClock.uptimeMillis();
         // Animation is over
         if (time - mStartTimeMillis > mDuration) {
-            if (mAlpha == 0) {
+            if (mTo == 0) {
                 mFrom = 0;
                 mTo = 255;
                 mAlpha = 0;
