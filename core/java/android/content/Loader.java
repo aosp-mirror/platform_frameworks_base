@@ -39,6 +39,7 @@ public class Loader<D> {
     Context mContext;
     boolean mStarted = false;
     boolean mReset = true;
+    boolean mContentChanged = false;
 
     public final class ForceLoadContentObserver extends ContentObserver {
         public ForceLoadContentObserver() {
@@ -161,7 +162,7 @@ public class Loader<D> {
      *
      * <p>Must be called from the UI thread.
      */
-    public void startLoading() {
+    public final void startLoading() {
         mStarted = true;
         mReset = false;
         onStartLoading();
@@ -178,11 +179,12 @@ public class Loader<D> {
     /**
      * Force an asynchronous load. Unlike {@link #startLoading()} this will ignore a previously
      * loaded data set and load a new one.  This simply calls through to the
-     * implementation's {@link #onForceLoad()}.
+     * implementation's {@link #onForceLoad()}.  You generally should only call this
+     * when the loader is started -- that is, {@link #isStarted()} returns true.
      *
      * <p>Must be called from the UI thread.
      */
-    public void forceLoad() {
+    public final void forceLoad() {
         onForceLoad();
     }
 
@@ -194,6 +196,11 @@ public class Loader<D> {
 
     /**
      * Stops delivery of updates until the next time {@link #startLoading()} is called.
+     * Implementations should <em>not</em> invalidate their data at this point --
+     * clients are still free to use the last data the loader reported.  They will,
+     * however, typically stop reporting new data if the data changes; they can
+     * still monitor for changes, but must not report them to the client until and
+     * if {@link #startLoading()} is later called.
      *
      * <p>This updates the Loader's internal state so that
      * {@link #isStarted()} will return the correct
@@ -201,7 +208,7 @@ public class Loader<D> {
      *
      * <p>Must be called from the UI thread.
      */
-    public void stopLoading() {
+    public final void stopLoading() {
         mStarted = false;
         onStopLoading();
     }
@@ -226,10 +233,11 @@ public class Loader<D> {
      *
      * <p>Must be called from the UI thread.
      */
-    public void reset() {
+    public final void reset() {
         onReset();
         mReset = true;
         mStarted = false;
+        mContentChanged = false;
     }
 
     /**
@@ -241,13 +249,33 @@ public class Loader<D> {
     }
 
     /**
-     * Called when {@link ForceLoadContentObserver} detects a change.  Calls {@link #forceLoad()}
-     * by default.
+     * Take the current flag indicating whether the loader's content had
+     * changed while it was stopped.  If it had, true is returned and the
+     * flag is cleared.
+     */
+    public boolean takeContentChanged() {
+        boolean res = mContentChanged;
+        mContentChanged = false;
+        return res;
+    }
+    
+    /**
+     * Called when {@link ForceLoadContentObserver} detects a change.  The
+     * default implementation checks to see if the loader is currently started;
+     * if so, it simply calls {@link #forceLoad()}; otherwise, it sets a flag
+     * so that {@link #takeContentChanged()} returns true.
      *
-     * <p>Must be called from the UI thread
+     * <p>Must be called from the UI thread.
      */
     public void onContentChanged() {
-        forceLoad();
+        if (mStarted) {
+            forceLoad();
+        } else {
+            // This loader has been stopped, so we don't want to load
+            // new data right now...  but keep track of it changing to
+            // refresh later if we start again.
+            mContentChanged = true;
+        }
     }
 
     /**
@@ -283,6 +311,7 @@ public class Loader<D> {
         writer.print(prefix); writer.print("mId="); writer.print(mId);
                 writer.print(" mListener="); writer.println(mListener);
         writer.print(prefix); writer.print("mStarted="); writer.print(mStarted);
+                writer.print(" mContentChanged="); writer.print(mContentChanged);
                 writer.print(" mReset="); writer.println(mReset);
     }
 }
