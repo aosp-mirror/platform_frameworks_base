@@ -361,101 +361,103 @@ public class StaticLayout extends Layout
                             if (fitbottom > okbottom)
                                 okbottom = fitbottom;
                         }
-                    } else if (breakOnlyAtSpaces) {
-                        if (ok != here) {
-                            // Log.e("text", "output ok " + here + " to " +ok);
-
-                            while (ok < spanEnd && chs[ok - paraStart] == ' ') {
-                                ok++;
-                            }
-
-                            v = out(source,
-                                    here, ok,
-                                    okascent, okdescent, oktop, okbottom,
-                                    v,
-                                    spacingmult, spacingadd, chooseht,
-                                    choosehtv, fm, hasTabOrEmoji,
-                                    needMultiply, paraStart, chdirs, dir, easy,
-                                    ok == bufend, includepad, trackpad,
-                                    chs, widths, here - paraStart,
-                                    where, ellipsizedWidth, okwidth,
-                                    paint);
-
-                            here = ok;
-                        } else {
-                            // Act like it fit even though it didn't.
-
-                            fitwidth = w;
-                            fit = j + 1;
-
-                            if (fmtop < fittop)
-                                fittop = fmtop;
-                            if (fmascent < fitascent)
-                                fitascent = fmascent;
-                            if (fmdescent > fitdescent)
-                                fitdescent = fmdescent;
-                            if (fmbottom > fitbottom)
-                                fitbottom = fmbottom;
-                        }
                     } else {
-                        if (ok != here) {
-                            // Log.e("text", "output ok " + here + " to " +ok);
+                        if (breakOnlyAtSpaces) {
+                            if (ok != here) {
+                                // Log.e("text", "output ok " + here + " to " +ok);
 
-                            while (ok < spanEnd && chs[ok - paraStart] == ' ') {
-                                ok++;
+                                while (ok < spanEnd && chs[ok - paraStart] == ' ') {
+                                    ok++;
+                                }
+
+                                v = out(source,
+                                        here, ok,
+                                        okascent, okdescent, oktop, okbottom,
+                                        v,
+                                        spacingmult, spacingadd, chooseht,
+                                        choosehtv, fm, hasTabOrEmoji,
+                                        needMultiply, paraStart, chdirs, dir, easy,
+                                        ok == bufend, includepad, trackpad,
+                                        chs, widths, here - paraStart,
+                                        where, ellipsizedWidth, okwidth,
+                                        paint);
+
+                                here = ok;
+                            } else {
+                                // Act like it fit even though it didn't.
+
+                                fitwidth = w;
+                                fit = j + 1;
+
+                                if (fmtop < fittop)
+                                    fittop = fmtop;
+                                if (fmascent < fitascent)
+                                    fitascent = fmascent;
+                                if (fmdescent > fitdescent)
+                                    fitdescent = fmdescent;
+                                if (fmbottom > fitbottom)
+                                    fitbottom = fmbottom;
                             }
-
-                            v = out(source,
-                                    here, ok,
-                                    okascent, okdescent, oktop, okbottom,
-                                    v,
-                                    spacingmult, spacingadd, chooseht,
-                                    choosehtv, fm, hasTabOrEmoji,
-                                    needMultiply, paraStart, chdirs, dir, easy,
-                                    ok == bufend, includepad, trackpad,
-                                    chs, widths, here - paraStart,
-                                    where, ellipsizedWidth, okwidth,
-                                    paint);
-
-                            here = ok;
-                        } else if (fit != here) {
-                            // Log.e("text", "output fit " + here + " to " +fit);
-                            v = out(source,
-                                    here, fit,
-                                    fitascent, fitdescent,
-                                    fittop, fitbottom,
-                                    v,
-                                    spacingmult, spacingadd, chooseht,
-                                    choosehtv, fm, hasTabOrEmoji,
-                                    needMultiply, paraStart, chdirs, dir, easy,
-                                    fit == bufend, includepad, trackpad,
-                                    chs, widths, here - paraStart,
-                                    where, ellipsizedWidth, fitwidth,
-                                    paint);
-
-                            here = fit;
                         } else {
-                            // Log.e("text", "output one " + here + " to " +(here + 1));
-                            // XXX not sure why the existing fm wasn't ok.
-                            // measureText(paint, mWorkPaint,
-                            //             source, here, here + 1, fm, tab,
-                            //             null);
+                            if (ok != here) {
+                                // Log.e("text", "output ok " + here + " to " +ok);
 
-                            v = out(source,
-                                    here, here+1,
-                                    fm.ascent, fm.descent,
-                                    fm.top, fm.bottom,
-                                    v,
-                                    spacingmult, spacingadd, chooseht,
-                                    choosehtv, fm, hasTabOrEmoji,
-                                    needMultiply, paraStart, chdirs, dir, easy,
-                                    here + 1 == bufend, includepad,
-                                    trackpad,
-                                    chs, widths, here - paraStart,
-                                    where, ellipsizedWidth,
-                                    widths[here - paraStart], paint);
+                                while (ok < spanEnd && chs[ok - paraStart] == ' ') {
+                                    ok++;
+                                }
 
-                            here = here + 1;
+                                v = out(source,
+                                        here, ok,
+                                        okascent, okdescent, oktop, okbottom,
+                                        v,
+                                        spacingmult, spacingadd, chooseht,
+                                        choosehtv, fm, hasTabOrEmoji,
+                                        needMultiply, paraStart, chdirs, dir, easy,
+                                        ok == bufend, includepad, trackpad,
+                                        chs, widths, here - paraStart,
+                                        where, ellipsizedWidth, okwidth,
+                                        paint);
+
+                                here = ok;
+                            } else if (fit != here) {
+                                // Log.e("text", "output fit " + here + " to " +fit);
+                                v = out(source,
+                                        here, fit,
+                                        fitascent, fitdescent,
+                                        fittop, fitbottom,
+                                        v,
+                                        spacingmult, spacingadd, chooseht,
+                                        choosehtv, fm, hasTabOrEmoji,
+                                        needMultiply, paraStart, chdirs, dir, easy,
+                                        fit == bufend, includepad, trackpad,
+                                        chs, widths, here - paraStart,
+                                        where, ellipsizedWidth, fitwidth,
+                                        paint);
+
+                                here = fit;
+                            } else {
+                                // Log.e("text", "output one " + here + " to " +(here + 1));
+                                // XXX not sure why the existing fm wasn't ok.
+                                // measureText(paint, mWorkPaint,
+                                //             source, here, here + 1, fm, tab,
+                                //             null);
+
+                                v = out(source,
+                                        here, here+1,
+                                        fm.ascent, fm.descent,
+                                        fm.top, fm.bottom,
+                                        v,
+                                        spacingmult, spacingadd, chooseht,
+                                        choosehtv, fm, hasTabOrEmoji,
+                                        needMultiply, paraStart, chdirs, dir, easy,
+                                        here + 1 == bufend, includepad,
+                                        trackpad,
+                                        chs, widths, here - paraStart,
+                                        where, ellipsizedWidth,
+                                        widths[here - paraStart], paint);
+
+                                here = here + 1;
+                            }
                         }
 
                         if (here < spanStart) {
