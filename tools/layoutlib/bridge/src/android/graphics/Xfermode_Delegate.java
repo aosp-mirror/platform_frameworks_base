@@ -51,7 +51,7 @@ public abstract class Xfermode_Delegate {
         return sManager.getDelegate(native_instance);
     }
 
-    public abstract Composite getComposite();
+    public abstract Composite getComposite(int alpha);
     public abstract boolean isSupported();
     public abstract String getSupportMessage();
 

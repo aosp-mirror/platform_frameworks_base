@@ -42,7 +42,7 @@ public class AvoidXfermode_Delegate extends Xfermode_Delegate {
     // ---- Public Helper methods ----
 
     @Override
-    public Composite getComposite() {
+    public Composite getComposite(int alpha) {
         // FIXME
         return null;
     }

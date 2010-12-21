@@ -53,7 +53,7 @@ public final class DashPathEffect_Delegate extends PathEffect_Delegate {
                 paint.getStrokeWidth(),
                 paint.getJavaCap(),
                 paint.getJavaJoin(),
-                paint.getStrokeMiter(),
+                paint.getJavaStrokeMiter(),
                 mIntervals,
                 mPhase);
     }

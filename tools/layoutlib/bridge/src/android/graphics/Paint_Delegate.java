@@ -114,6 +114,10 @@ public class Paint_Delegate {
         return mColor;
     }
 
+    public int getAlpha() {
+        return mColor >>> 24;
+    }
+
     public int getTextAlign() {
         return mTextAlign;
     }
@@ -122,8 +126,11 @@ public class Paint_Delegate {
         return mStrokeWidth;
     }
 
-    public float getStrokeMiter() {
-        return mStrokeMiter;
+    /**
+     * returns the value of stroke miter needed by the java api.
+     */
+    public float getJavaStrokeMiter() {
+        return mStrokeMiter * mStrokeWidth;
     }
 
     public int getJavaCap() {
@@ -256,7 +263,7 @@ public class Paint_Delegate {
             return 0;
         }
 
-        return delegate.mColor >>> 24;
+        return delegate.getAlpha();
     }
 
     /*package*/ static void setAlpha(Paint thisPaint, int a) {
@@ -860,9 +867,9 @@ public class Paint_Delegate {
     private void reset() {
         mFlags = Paint.DEFAULT_PAINT_FLAGS;
         mColor = 0;
-        mStyle = 0;
-        mCap = 0;
-        mJoin = 0;
+        mStyle = Paint.Style.FILL.nativeInt;
+        mCap = Paint.Cap.BUTT.nativeInt;
+        mJoin = Paint.Join.MITER.nativeInt;
         mTextAlign = 0;
         mTypeface = Typeface.sDefaults[0].native_instance;
         mStrokeWidth = 1.f;

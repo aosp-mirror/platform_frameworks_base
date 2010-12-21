@@ -207,10 +207,17 @@ public final class LinearGradient_Delegate extends Gradient_Delegate {
          * Returns a color for an arbitrary point.
          */
         private int getColor(float x, float y) {
-            // find the x position on the gradient vector.
-            float _x = (mDx*mDy*(y-mY0) + mDy*mDy*mX0 + mDx*mDx*x) / mDSize2;
-            // from it get the position relative to the vector
-            float pos = (float) ((_x - mX0) / mDx);
+            float pos;
+            if (mDx == 0) {
+                pos = (y - mY0) / mDy;
+            } else if (mDy == 0) {
+                pos = (x - mX0) / mDx;
+            } else {
+                // find the x position on the gradient vector.
+                float _x = (mDx*mDy*(y-mY0) + mDy*mDy*mX0 + mDx*mDx*x) / mDSize2;
+                // from it get the position relative to the vector
+                pos = (_x - mX0) / mDx;
+            }
 
             return getGradientColor(pos);
         }

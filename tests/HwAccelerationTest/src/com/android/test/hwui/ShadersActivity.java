@@ -52,6 +52,9 @@ public class ShadersActivity extends Activity {
         private LinearGradient mDiagGradient;
         private LinearGradient mVertGradient;
         private Bitmap mTexture;
+        private Matrix mMtx1;
+        private Matrix mMtx2;
+        private Matrix mMtx3;
 
         public ShadersView(Context c) {
             super(c);
@@ -67,24 +70,24 @@ public class ShadersActivity extends Activity {
 
             mTranslatedShader = new BitmapShader(mTexture, Shader.TileMode.REPEAT,
                     Shader.TileMode.REPEAT);
-            Matrix m1 = new Matrix();
-            m1.setTranslate(mTexWidth / 2.0f, mTexHeight / 2.0f);
-            m1.postRotate(45, 0, 0);
-            mTranslatedShader.setLocalMatrix(m1);
+            mMtx1 = new Matrix();
+            mMtx1.setTranslate(mTexWidth / 2.0f, mTexHeight / 2.0f);
+            mMtx1.postRotate(45, 0, 0);
+            mTranslatedShader.setLocalMatrix(mMtx1);
 
             mScaledShader = new BitmapShader(mTexture, Shader.TileMode.MIRROR,
                     Shader.TileMode.MIRROR);
-            Matrix m2 = new Matrix();
-            m2.setScale(0.5f, 0.5f);
-            mScaledShader.setLocalMatrix(m2);
+            mMtx2 = new Matrix();
+            mMtx2.setScale(0.5f, 0.5f);
+            mScaledShader.setLocalMatrix(mMtx2);
 
             mHorGradient = new LinearGradient(0.0f, 0.0f, 1.0f, 0.0f,
                     Color.RED, Color.GREEN, Shader.TileMode.CLAMP);
-            Matrix m3 = new Matrix();
-            m3.setScale(mDrawHeight, 1.0f);
-            m3.postRotate(-90.0f);
-            m3.postTranslate(0.0f, mDrawHeight);
-            mHorGradient.setLocalMatrix(m3);
+            mMtx3 = new Matrix();
+            mMtx3.setScale(mDrawHeight, 1.0f);
+            mMtx3.postRotate(-90.0f);
+            mMtx3.postTranslate(0.0f, mDrawHeight);
+            mHorGradient.setLocalMatrix(mMtx3);
 
             mDiagGradient = new LinearGradient(0.0f, 0.0f, mDrawWidth / 1.5f, mDrawHeight,
                     Color.BLUE, Color.MAGENTA, Shader.TileMode.CLAMP);
