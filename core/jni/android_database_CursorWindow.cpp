@@ -50,13 +50,14 @@ CursorWindow * get_window_from_object(JNIEnv * env, jobject javaWindow)
     return GET_WINDOW(env, javaWindow);
 }
 
-static void native_init_empty(JNIEnv * env, jobject object, jboolean localOnly)
+static void native_init_empty(JNIEnv * env, jobject object, jint cursorWindowSize,
+        jboolean localOnly)
 {
     uint8_t * data;
     size_t size;
     CursorWindow * window;
 
-    window = new CursorWindow(MAX_WINDOW_SIZE);
+    window = new CursorWindow(cursorWindowSize);
     if (!window) {
         jniThrowException(env, "java/lang/RuntimeException", "No memory for native window object");
         return;
@@ -614,7 +615,7 @@ static jint getType_native(JNIEnv* env, jobject object, jint row, jint column)
 static JNINativeMethod sMethods[] =
 {
      /* name, signature, funcPtr */
-    {"native_init", "(Z)V", (void *)native_init_empty},
+    {"native_init", "(IZ)V", (void *)native_init_empty},
     {"native_init", "(Landroid/os/IBinder;)V", (void *)native_init_memory},
     {"native_getBinder", "()Landroid/os/IBinder;", (void *)native_getBinder},
     {"native_clear", "()V", (void *)native_clear},
