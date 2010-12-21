@@ -34,7 +34,7 @@ public class FountainRS {
         mRS = rs;
         mRes = res;
 
-        ProgramFragment.Builder pfb = new ProgramFragment.Builder(rs);
+        ProgramFragmentFixedFunction.Builder pfb = new ProgramFragmentFixedFunction.Builder(rs);
         pfb.setVaryingColor(true);
         rs.bindProgramFragment(pfb.create());
 
@@ -43,7 +43,7 @@ public class FountainRS {
 
         Mesh.AllocationBuilder smb = new Mesh.AllocationBuilder(mRS);
         smb.addVertexAllocation(points.getAllocation());
-        smb.addIndexType(Primitive.POINT);
+        smb.addIndexSetType(Mesh.Primitive.POINT);
         Mesh sm = smb.create();
 
         mScript = new ScriptC_fountain(mRS, mRes, R.raw.fountain);

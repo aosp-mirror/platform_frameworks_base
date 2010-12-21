@@ -26,6 +26,8 @@ import android.renderscript.Allocation.CubemapLayout;
 import android.renderscript.Allocation.MipmapControl;
 import android.renderscript.Program.TextureType;
 import android.renderscript.ProgramStore.DepthFunc;
+import android.renderscript.ProgramStore.BlendSrcFunc;
+import android.renderscript.ProgramStore.BlendDstFunc;
 import android.renderscript.Sampler.Value;
 import android.util.Log;
 
@@ -69,7 +71,7 @@ public class RsBenchRS {
     private ProgramFragment mProgFragmentColor;
 
     private ProgramVertex mProgVertex;
-    private ProgramVertex.MatrixAllocation mPVA;
+    private ProgramVertexFixedFunction.Constants mPVA;
 
     // Custom shaders
     private ProgramVertex mProgVertexCustom;
@@ -122,6 +124,15 @@ public class RsBenchRS {
         mScript.set_gDisplayMode(mMode);
     }
 
+    ProgramStore BLEND_ADD_DEPTH_NONE(RenderScript rs) {
+        ProgramStore.Builder builder = new ProgramStore.Builder(rs);
+        builder.setDepthFunc(ProgramStore.DepthFunc.ALWAYS);
+        builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ONE);
+        builder.setDitherEnabled(false);
+        builder.setDepthMaskEnabled(false);
+        return builder.create();
+    }
+
     private Mesh getMbyNMesh(float width, float height, int wResolution, int hResolution) {
 
         Mesh.TriangleMeshBuilder tmb = new Mesh.TriangleMeshBuilder(mRS,
@@ -155,18 +166,18 @@ public class RsBenchRS {
     private void initProgramStore() {
         // Use stock the stock program store object
         mProgStoreBlendNoneDepth = ProgramStore.BLEND_NONE_DEPTH_TEST(mRS);
-        mProgStoreBlendNone = ProgramStore.BLEND_NONE_DEPTH_NO_DEPTH(mRS);
+        mProgStoreBlendNone = ProgramStore.BLEND_NONE_DEPTH_NONE(mRS);
 
         // Create a custom program store
         ProgramStore.Builder builder = new ProgramStore.Builder(mRS);
         builder.setDepthFunc(ProgramStore.DepthFunc.ALWAYS);
         builder.setBlendFunc(ProgramStore.BlendSrcFunc.SRC_ALPHA,
                              ProgramStore.BlendDstFunc.ONE_MINUS_SRC_ALPHA);
-        builder.setDitherEnable(false);
-        builder.setDepthMask(false);
+        builder.setDitherEnabled(false);
+        builder.setDepthMaskEnabled(false);
         mProgStoreBlendAlpha = builder.create();
 
-        mProgStoreBlendAdd = ProgramStore.BLEND_ADD_DEPTH_NO_DEPTH(mRS);
+        mProgStoreBlendAdd = BLEND_ADD_DEPTH_NONE(mRS);
 
         mScript.set_gProgStoreBlendNoneDepth(mProgStoreBlendNoneDepth);
         mScript.set_gProgStoreBlendNone(mProgStoreBlendNone);
@@ -176,13 +187,13 @@ public class RsBenchRS {
 
     private void initProgramFragment() {
 
-        ProgramFragment.Builder texBuilder = new ProgramFragment.Builder(mRS);
-        texBuilder.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
-                              ProgramFragment.Builder.Format.RGBA, 0);
+        ProgramFragmentFixedFunction.Builder texBuilder = new ProgramFragmentFixedFunction.Builder(mRS);
+        texBuilder.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.REPLACE,
+                              ProgramFragmentFixedFunction.Builder.Format.RGBA, 0);
         mProgFragmentTexture = texBuilder.create();
         mProgFragmentTexture.bindSampler(mLinearClamp, 0);
 
-        ProgramFragment.Builder colBuilder = new ProgramFragment.Builder(mRS);
+        ProgramFragmentFixedFunction.Builder colBuilder = new ProgramFragmentFixedFunction.Builder(mRS);
         colBuilder.setVaryingColor(false);
         mProgFragmentColor = colBuilder.create();
 
@@ -191,12 +202,14 @@ public class RsBenchRS {
     }
 
     private void initProgramVertex() {
-        ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS);
+        ProgramVertexFixedFunction.Builder pvb = new ProgramVertexFixedFunction.Builder(mRS);
         mProgVertex = pvb.create();
 
-        mPVA = new ProgramVertex.MatrixAllocation(mRS);
-        mProgVertex.bindAllocation(mPVA);
-        mPVA.setupOrthoWindow(mWidth, mHeight);
+        mPVA = new ProgramVertexFixedFunction.Constants(mRS);
+        ((ProgramVertexFixedFunction)mProgVertex).bindConstants(mPVA);
+        Matrix4f proj = new Matrix4f();
+        proj.loadOrthoWindow(mWidth, mHeight);
+        mPVA.setProjection(proj);
 
         mScript.set_gProgVertex(mProgVertex);
     }
@@ -213,7 +226,7 @@ public class RsBenchRS {
         mScript.bind_gFSConstPixel(mFSConstPixel);
 
         // Initialize the shader builder
-        ProgramVertex.ShaderBuilder pvbCustom = new ProgramVertex.ShaderBuilder(mRS);
+        ProgramVertex.Builder pvbCustom = new ProgramVertex.Builder(mRS);
         // Specify the resource that contains the shader string
         pvbCustom.setShader(mRes, R.raw.shaderv);
         // Use a script field to specify the input layout
@@ -224,7 +237,7 @@ public class RsBenchRS {
         // Bind the source of constant data
         mProgVertexCustom.bindConstants(mVSConst.getAllocation(), 0);
 
-        ProgramFragment.ShaderBuilder pfbCustom = new ProgramFragment.ShaderBuilder(mRS);
+        ProgramFragment.Builder pfbCustom = new ProgramFragment.Builder(mRS);
         // Specify the resource that contains the shader string
         pfbCustom.setShader(mRes, R.raw.shaderf);
         // Tell the builder how many textures we have
@@ -236,42 +249,44 @@ public class RsBenchRS {
         mProgFragmentCustom.bindConstants(mFSConst.getAllocation(), 0);
 
         // Cubemap test shaders
-        pvbCustom = new ProgramVertex.ShaderBuilder(mRS);
+        pvbCustom = new ProgramVertex.Builder(mRS);
         pvbCustom.setShader(mRes, R.raw.shadercubev);
         pvbCustom.addInput(ScriptField_VertexShaderInputs_s.createElement(mRS));
         pvbCustom.addConstant(mVSConst.getAllocation().getType());
         mProgVertexCube = pvbCustom.create();
         mProgVertexCube.bindConstants(mVSConst.getAllocation(), 0);
 
-        pfbCustom = new ProgramFragment.ShaderBuilder(mRS);
+        pfbCustom = new ProgramFragment.Builder(mRS);
         pfbCustom.setShader(mRes, R.raw.shadercubef);
         pfbCustom.addTexture(Program.TextureType.TEXTURE_CUBE);
         mProgFragmentCube = pfbCustom.create();
 
-        pvbCustom = new ProgramVertex.ShaderBuilder(mRS);
+        pvbCustom = new ProgramVertex.Builder(mRS);
         pvbCustom.setShader(mRes, R.raw.shader2v);
         pvbCustom.addInput(ScriptField_VertexShaderInputs_s.createElement(mRS));
         pvbCustom.addConstant(mVSConstPixel.getAllocation().getType());
         mProgVertexPixelLight = pvbCustom.create();
         mProgVertexPixelLight.bindConstants(mVSConstPixel.getAllocation(), 0);
 
-        pvbCustom = new ProgramVertex.ShaderBuilder(mRS);
+        pvbCustom = new ProgramVertex.Builder(mRS);
         pvbCustom.setShader(mRes, R.raw.shader2movev);
         pvbCustom.addInput(ScriptField_VertexShaderInputs_s.createElement(mRS));
         pvbCustom.addConstant(mVSConstPixel.getAllocation().getType());
         mProgVertexPixelLightMove = pvbCustom.create();
         mProgVertexPixelLightMove.bindConstants(mVSConstPixel.getAllocation(), 0);
 
-        pfbCustom = new ProgramFragment.ShaderBuilder(mRS);
+        pfbCustom = new ProgramFragment.Builder(mRS);
         pfbCustom.setShader(mRes, R.raw.shader2f);
         pfbCustom.addTexture(Program.TextureType.TEXTURE_2D);
         pfbCustom.addConstant(mFSConstPixel.getAllocation().getType());
         mProgFragmentPixelLight = pfbCustom.create();
         mProgFragmentPixelLight.bindConstants(mFSConstPixel.getAllocation(), 0);
 
-        pfbCustom = new ProgramFragment.ShaderBuilder(mRS);
+        pfbCustom = new ProgramFragment.Builder(mRS);
         pfbCustom.setShader(mRes, R.raw.multitexf);
-        pfbCustom.setTextureCount(3);
+        for (int texCount = 0; texCount < 3; texCount ++) {
+            pfbCustom.addTexture(Program.TextureType.TEXTURE_2D);
+        }
         mProgFragmentMultitex = pfbCustom.create();
 
         mScript.set_gProgVertexCustom(mProgVertexCustom);
@@ -354,8 +369,8 @@ public class RsBenchRS {
 
     private void initSamplers() {
         Sampler.Builder bs = new Sampler.Builder(mRS);
-        bs.setMin(Sampler.Value.LINEAR);
-        bs.setMag(Sampler.Value.LINEAR);
+        bs.setMinification(Sampler.Value.LINEAR);
+        bs.setMagnification(Sampler.Value.LINEAR);
         bs.setWrapS(Sampler.Value.WRAP);
         bs.setWrapT(Sampler.Value.WRAP);
         mLinearWrap = bs.create();
@@ -365,8 +380,8 @@ public class RsBenchRS {
         mMipLinearWrap = Sampler.WRAP_LINEAR_MIP_LINEAR(mRS);
 
         bs = new Sampler.Builder(mRS);
-        bs.setMin(Sampler.Value.LINEAR_MIP_LINEAR);
-        bs.setMag(Sampler.Value.LINEAR);
+        bs.setMinification(Sampler.Value.LINEAR_MIP_LINEAR);
+        bs.setMagnification(Sampler.Value.LINEAR);
         bs.setWrapS(Sampler.Value.WRAP);
         bs.setWrapT(Sampler.Value.WRAP);
         bs.setAnisotropy(8.0f);

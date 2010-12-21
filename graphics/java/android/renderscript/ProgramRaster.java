@@ -109,18 +109,8 @@ public class ProgramRaster extends BaseObj {
             mCullMode = CullMode.BACK;
         }
 
-        public Builder setPointSpriteEnable(boolean enable) {
+        public Builder setPointSpriteEnabled(boolean enable) {
             mPointSprite = enable;
-            return this;
-        }
-
-        public Builder setPointSmoothEnable(boolean enable) {
-            mPointSmooth = enable;
-            return this;
-        }
-
-        public Builder setLineSmoothEnable(boolean enable) {
-            mLineSmooth = enable;
             return this;
         }
 
