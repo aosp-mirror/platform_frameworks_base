@@ -118,18 +118,12 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
     }
 
     /**
-     * Sets the range of years in which dates can be selected.
-     * <p>
-     * Note: If the range is set to a value that does not include the currently
-     * selected date the value of the picker shown by this dialog will be
-     * updated to the closest date in the range.
-     * </p>
+     * Gets the {@link DatePicker} contained in this dialog.
      *
-     * @param startYear The start year of the range.
-     * @param endYear The end year of the range.
+     * @return The calendar view.
      */
-    public void setRange(int startYear, int endYear) {
-        mDatePicker.setRange(startYear, endYear);
+    public DatePicker getDatePicker() {
+        return mDatePicker;
     }
 
     /**

@@ -504,21 +504,17 @@
         <!-- Default PopupMenu style. -->
         <attr name="popupMenuStyle" format="reference" />
 
-        <!-- @hide NumberPicker up button style -->
+        <!-- NumberPicker style. -->
+        <attr name="numberPickerStyle" format="reference" />
+        <!-- NumberPicker up button style. -->
         <attr name="numberPickerUpButtonStyle" format="reference" />
-        <!-- @hide NumberPicker down button style -->
+        <!-- NumberPicker down button style. -->
         <attr name="numberPickerDownButtonStyle" format="reference" />
-        <!-- @hide NumberPicker input text style -->
+        <!-- NumberPicker input text style. -->
         <attr name="numberPickerInputTextStyle" format="reference" />
 
-        <!-- @hide NumberPicker the fading edge length of the selector wheel -->
-        <attr name="numberPickerStyle" format="reference" />
-
-        <!-- @hide DayPicker$WeekView style-->
-        <attr name="dayPickerWeekViewStyle" format="reference" />
-
-        <!-- @hide DayPickerDayView style-->
-        <attr name="dayPickerWeekDayViewStyle" format="reference" />
+        <!-- The CalndarView style. -->
+        <attr name="calendarViewStyle" format="reference" />
 
         <!-- Fast scroller styles -->
         <eat-comment />
@@ -2826,6 +2822,14 @@
         <attr name="startYear" format="integer" />
         <!-- The last year (inclusive), for example "2010". -->
         <attr name="endYear" format="integer" />
+        <!-- Whether the spinners are shown. -->
+        <attr name="spinnersShown" format="boolean" />
+        <!-- Whether the calendar view is shown. -->
+        <attr name="calendarViewShown" format="boolean" />
+        <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
+        <attr name="minDate" format="string" />
+        <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
+        <attr name="maxDate" format="string" />
     </declare-styleable>
 
     <declare-styleable name="TwoLineListItem">
@@ -2994,27 +2998,38 @@
         <attr name="minorWeightMax" format="float" />
     </declare-styleable>
 
-    <!-- @hide -->
-    <declare-styleable name="DayPickerWeekView">
-        <attr name="height" />
-        <attr name="weekStartDay" format="integer|reference" />
-        <attr name="weekDayCount" format="integer|reference" />
-        <attr name="showWeekNumber" format="boolean|reference" />
-        <attr name="weekSeperatorWidth" format="dimension" />
-        <attr name="textSize" />
-        <attr name="weekDayPadding" format="dimension" />
-        <attr name="selectedDayLineWidth" format="dimension" />
-        <attr name="selectionBackgroundColor" format="color|reference" />
+    <declare-styleable name="CalendarView">
+        <!-- The first day of week according to {@link java.util.Calendar}. -->
+        <attr name="firstDayOfWeek" format="integer" />
+        <!-- Whether do show week numbers. -->
+        <attr name="showWeekNumber" format="boolean" />
+        <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
+        <attr name="minDate" />
+        <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
+        <attr name="maxDate" />
+        <!-- The number of weeks to be shown. -->
+        <attr name="shownWeekCount" format="integer"/>
+        <!-- The background color for the selected week. -->
+        <attr name="selectedWeekBackgroundColor" format="color|reference" />
+        <!-- The color for the dates of the selected month. -->
         <attr name="focusedMonthDateColor" format="color|reference" />
-        <attr name="otherMonthDateColor" format="color|reference" />
+        <!-- The color for the dates of an unfocused month. -->
+        <attr name="unfocusedMonthDateColor" format="color|reference" />
+        <!-- The color for the week numbers. -->
         <attr name="weekNumberColor" format="color|reference" />
-        <attr name="gridLinesColor" format="color|reference" />
-        <attr name="selectedDayLine" format="reference" />
+        <!-- The color for the sepatator line between weeks. -->
+        <attr name="weekSeparatorLineColor" format="color|reference" />
+        <!-- Drawable for the vertical bar shown at the beggining and at the end of a selected date. -->
+        <attr name="selectedDateVerticalBar" format="reference" />
+        <!-- The text appearance for the week day abbreviation of the calendar header. -->
+        <attr name="weekDayTextAppearance" format="reference" />
+        <!-- The text appearance for the calendar dates. -->
+        <attr name="dateTextAppearance" format="reference" />
     </declare-styleable>
 
-    <!-- @hide -->
     <declare-styleable name="NumberPicker">
         <attr name="orientation" />
+        <!-- Color for the solid color background if such for optimized rendering. -->
         <attr name="solidColor" format="color|reference" />
     </declare-styleable>
 

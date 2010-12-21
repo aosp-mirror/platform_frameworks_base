@@ -273,7 +273,6 @@
         <item name="searchViewEditQuery">@android:drawable/ic_commit</item>
         <item name="searchViewEditQueryBackground">?attr/selectableItemBackground</item>
 
-
         <!-- PreferenceFrameLayout attributes -->
         <item name="preferenceFrameLayoutStyle">@android:style/Widget.PreferenceFrameLayout</item>
 
@@ -283,11 +282,8 @@
         <item name="numberPickerInputTextStyle">@style/Widget.EditText.NumberPickerInputText</item>
         <item name="numberPickerStyle">@style/Widget.NumberPicker</item>
 
-        <!-- DayPicker$WeekView style-->
-        <item name="dayPickerWeekViewStyle">@style/Widget.DayPickerWeekView</item>
-
-        <!-- DayPickerWeekDayView style-->
-        <item name="dayPickerWeekDayViewStyle">@style/TextAppearance.Small.DayPickerWeekDayView</item>
+        <!-- CalendarView style-->
+        <item name="calendarViewStyle">@style/Widget.CalendarView</item>
 
         <item name="fastScrollThumbDrawable">@android:drawable/scrollbar_handle_accelerated_anim2</item>
         <item name="fastScrollTrackDrawable">@null</item>
@@ -937,11 +933,8 @@
         <item name="numberPickerDownButtonStyle">@style/Widget.Holo.ImageButton.NumberPickerDownButton</item>
         <item name="numberPickerInputTextStyle">@style/Widget.Holo.EditText.NumberPickerInputText</item>
 
-        <!-- DayPicker$WeekView style-->
-        <item name="dayPickerWeekViewStyle">@style/Widget.Holo.DayPickerWeekView</item>
-
-        <!-- DayPickerWeekDayView style-->
-        <item name="dayPickerWeekDayViewStyle">@style/TextAppearance.Holo.DayPickerWeekDayView</item>
+        <!-- CalendarView style-->
+        <item name="calendarViewStyle">@style/Widget.Holo.CalendarView</item>
 
         <item name="fastScrollThumbDrawable">@android:drawable/fastscroll_thumb_holo</item>
         <item name="fastScrollPreviewBackgroundLeft">@android:drawable/fastscroll_label_left_holo_dark</item>
@@ -1194,11 +1187,8 @@
         <item name="numberPickerDownButtonStyle">@style/Widget.Holo.Light.ImageButton.NumberPickerDownButton</item>
         <item name="numberPickerInputTextStyle">@style/Widget.Holo.Light.EditText.NumberPickerInputText</item>
 
-        <!-- DayPicker$WeekView style-->
-        <item name="dayPickerWeekViewStyle">@style/Widget.Holo.Light.DayPickerWeekView</item>
-
-        <!-- DayPickerWeekDayView style-->
-        <item name="dayPickerWeekDayViewStyle">@style/TextAppearance.Holo.Light.DayPickerWeekDayView</item>
+        <!-- CalendarView style-->
+        <item name="calendarViewStyle">@style/Widget.Holo.Light.CalendarView</item>
 
         <item name="fastScrollThumbDrawable">@android:drawable/fastscroll_thumb_holo</item>
         <item name="fastScrollPreviewBackgroundLeft">@android:drawable/fastscroll_label_left_holo_light</item>
