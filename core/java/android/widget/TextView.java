@@ -81,6 +81,7 @@ import android.text.method.SingleLineTransformationMethod;
 import android.text.method.TextKeyListener;
 import android.text.method.TimeKeyListener;
 import android.text.method.TransformationMethod;
+import android.text.style.ClickableSpan;
 import android.text.style.ParagraphStyle;
 import android.text.style.URLSpan;
 import android.text.style.UpdateAppearance;
@@ -7236,6 +7237,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (mMovement != null) {
                 handled |= mMovement.onTouchEvent(this, (Spannable) mText, event);
+            }
+
+            if (mLinksClickable && mAutoLinkMask != 0 && mTextIsSelectable &&
+                    action == MotionEvent.ACTION_UP && !mIgnoreActionUpEvent && isFocused()) {
+                // The LinkMovementMethod which should handle taps on links has not been installed
+                // to support text selection. We reproduce its behavior here to open links.
+                ClickableSpan[] links = ((Spannable) mText).getSpans(getSelectionStart(),
+                        getSelectionEnd(), ClickableSpan.class);
+
+                if (links.length != 0) {
+                    links[0].onClick(this);
+                    handled = true;
+                }
             }
 
             if (isTextEditable() || mTextIsSelectable) {
