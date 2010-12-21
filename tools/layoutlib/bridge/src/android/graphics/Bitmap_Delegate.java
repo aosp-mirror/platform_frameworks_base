@@ -54,8 +54,10 @@ public final class Bitmap_Delegate {
     // ---- delegate helper data ----
 
     // ---- delegate data ----
+    private final Config mConfig;
     private BufferedImage mImage;
     private boolean mHasAlpha = true;
+
 
     // ---- Public Helper methods ----
 
@@ -86,7 +88,7 @@ public final class Bitmap_Delegate {
     public static Bitmap createBitmap(File input, boolean isMutable, ResourceDensity density)
             throws IOException {
         // create a delegate with the content of the file.
-        Bitmap_Delegate delegate = new Bitmap_Delegate(ImageIO.read(input));
+        Bitmap_Delegate delegate = new Bitmap_Delegate(ImageIO.read(input), Config.ARGB_8888);
 
         return createBitmap(delegate, isMutable, density.getDpi());
     }
@@ -104,7 +106,7 @@ public final class Bitmap_Delegate {
     public static Bitmap createBitmap(InputStream input, boolean isMutable, ResourceDensity density)
             throws IOException {
         // create a delegate with the content of the stream.
-        Bitmap_Delegate delegate = new Bitmap_Delegate(ImageIO.read(input));
+        Bitmap_Delegate delegate = new Bitmap_Delegate(ImageIO.read(input), Config.ARGB_8888);
 
         return createBitmap(delegate, isMutable, density.getDpi());
     }
@@ -122,7 +124,7 @@ public final class Bitmap_Delegate {
     public static Bitmap createBitmap(BufferedImage image, boolean isMutable,
             ResourceDensity density) throws IOException {
         // create a delegate with the given image.
-        Bitmap_Delegate delegate = new Bitmap_Delegate(image);
+        Bitmap_Delegate delegate = new Bitmap_Delegate(image, Config.ARGB_8888);
 
         return createBitmap(delegate, isMutable, density.getDpi());
     }
@@ -163,6 +165,15 @@ public final class Bitmap_Delegate {
         return mImage;
     }
 
+    /**
+     * Returns the Android bitmap config. Note that this not the config of the underlying
+     * Java2D bitmap.
+     */
+    public Config getConfig() {
+        return mConfig;
+    }
+
+
     // ---- native methods ----
 
     /*package*/ static Bitmap nativeCreate(int[] colors, int offset, int stride, int width,
@@ -175,7 +186,7 @@ public final class Bitmap_Delegate {
         // FIXME fill the bitmap!
 
         // create a delegate with the content of the stream.
-        Bitmap_Delegate delegate = new Bitmap_Delegate(image);
+        Bitmap_Delegate delegate = new Bitmap_Delegate(image, Config.sConfigs[nativeConfig]);
 
         return createBitmap(delegate, mutable, Bitmap.getDefaultDensity());
     }
@@ -211,10 +222,7 @@ public final class Bitmap_Delegate {
 
         Graphics2D g = image.createGraphics();
         try {
-            if (delegate.mHasAlpha == false) {
-                color |= color & 0xFF000000;
-            }
-            g.setColor(new java.awt.Color(color));
+            g.setColor(new java.awt.Color(color, delegate.mHasAlpha));
 
             g.fillRect(0, 0, image.getWidth(), image.getHeight());
         } finally {
@@ -256,7 +264,14 @@ public final class Bitmap_Delegate {
     }
 
     /*package*/ static int nativeConfig(int nativeBitmap) {
-        return Config.ARGB_8888.nativeInt;
+        // get the delegate from the native int.
+        Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
+        if (delegate == null) {
+            assert false;
+            return 0;
+        }
+
+        return delegate.mConfig.nativeInt;
     }
 
     /*package*/ static boolean nativeHasAlpha(int nativeBitmap) {
@@ -355,8 +370,9 @@ public final class Bitmap_Delegate {
 
     // ---- Private delegate/helper methods ----
 
-    private Bitmap_Delegate(BufferedImage image) {
+    private Bitmap_Delegate(BufferedImage image, Config config) {
         mImage = image;
+        mConfig = config;
     }
 
     private static Bitmap createBitmap(Bitmap_Delegate delegate, boolean isMutable, int density) {

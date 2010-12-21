@@ -528,7 +528,8 @@ public final class Canvas_Delegate {
             // set the color
             graphics.setColor(new Color(color, true /*alpha*/));
 
-            Composite composite = PorterDuffXfermode_Delegate.getComposite(mode);
+            Composite composite = PorterDuffXfermode_Delegate.getComposite(
+                    PorterDuffXfermode_Delegate.getPorterDuffMode(mode), 0xFF);
             if (composite != null) {
                 graphics.setComposite(composite);
             }
@@ -759,7 +760,7 @@ public final class Canvas_Delegate {
         float right = left + image.getWidth();
         float bottom = top + image.getHeight();
 
-        drawBitmap(nativeCanvas, image, nativePaintOrZero,
+        drawBitmap(nativeCanvas, image, bitmapDelegate.getConfig(), nativePaintOrZero,
                 0, 0, image.getWidth(), image.getHeight(),
                 (int)left, (int)top, (int)right, (int)bottom);
     }
@@ -779,11 +780,11 @@ public final class Canvas_Delegate {
         BufferedImage image = bitmapDelegate.getImage();
 
         if (src == null) {
-            drawBitmap(nativeCanvas, image, nativePaintOrZero,
+            drawBitmap(nativeCanvas, image, bitmapDelegate.getConfig(), nativePaintOrZero,
                     0, 0, image.getWidth(), image.getHeight(),
                     (int)dst.left, (int)dst.top, (int)dst.right, (int)dst.bottom);
         } else {
-            drawBitmap(nativeCanvas, image, nativePaintOrZero,
+            drawBitmap(nativeCanvas, image, bitmapDelegate.getConfig(), nativePaintOrZero,
                     src.left, src.top, src.width(), src.height(),
                     (int)dst.left, (int)dst.top, (int)dst.right, (int)dst.bottom);
         }
@@ -804,11 +805,11 @@ public final class Canvas_Delegate {
         BufferedImage image = bitmapDelegate.getImage();
 
         if (src == null) {
-            drawBitmap(nativeCanvas, image, nativePaintOrZero,
+            drawBitmap(nativeCanvas, image, bitmapDelegate.getConfig(), nativePaintOrZero,
                     0, 0, image.getWidth(), image.getHeight(),
                     dst.left, dst.top, dst.right, dst.bottom);
         } else {
-            drawBitmap(nativeCanvas, image, nativePaintOrZero,
+            drawBitmap(nativeCanvas, image, bitmapDelegate.getConfig(), nativePaintOrZero,
                     src.left, src.top, src.width(), src.height(),
                     dst.left, dst.top, dst.right, dst.bottom);
         }
@@ -1042,7 +1043,7 @@ public final class Canvas_Delegate {
     /**
      * Executes a {@link Drawable} with a given canvas and paint.
      */
-    private static void draw(int nCanvas, int nPaint, Drawable runnable) {
+    private static void draw(int nCanvas, int nPaint, Drawable drawable) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
         if (canvasDelegate == null) {
@@ -1060,7 +1061,7 @@ public final class Canvas_Delegate {
         Graphics2D g = canvasDelegate.createCustomGraphics(paintDelegate);
 
         try {
-            runnable.draw(g, paintDelegate);
+            drawable.draw(g, paintDelegate);
         } finally {
             // dispose Graphics2D object
             g.dispose();
@@ -1135,9 +1136,8 @@ public final class Canvas_Delegate {
                     RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         }
 
-        boolean useColorPaint = true;
-
         // get the shader first, as it'll replace the color if it can be used it.
+        boolean customShader = false;
         int nativeShader = paint.getShader();
         if (nativeShader > 0) {
             Shader_Delegate shaderDelegate = Shader_Delegate.getDelegate(nativeShader);
@@ -1148,7 +1148,7 @@ public final class Canvas_Delegate {
                     assert shaderPaint != null;
                     if (shaderPaint != null) {
                         g.setPaint(shaderPaint);
-                        useColorPaint = false;
+                        customShader = true;
                     }
                 } else {
                     Bridge.getLog().fidelityWarning(null,
@@ -1158,56 +1158,57 @@ public final class Canvas_Delegate {
             }
         }
 
-        if (useColorPaint) {
+        // if no shader, use the paint color
+        if (customShader == false) {
             g.setColor(new Color(paint.getColor(), true /*hasAlpha*/));
         }
 
-        int style = paint.getStyle();
-        if (style == Paint.Style.STROKE.nativeInt ||
-                style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-
-            boolean customStroke = false;
-
-            int pathEffect = paint.getPathEffect();
-            if (pathEffect > 0) {
-                PathEffect_Delegate effectDelegate = PathEffect_Delegate.getDelegate(pathEffect);
-                assert effectDelegate != null;
-                if (effectDelegate != null) {
-                    if (effectDelegate.isSupported()) {
-                        Stroke stroke = effectDelegate.getStroke(paint);
-                        assert stroke != null;
-                        if (stroke != null) {
-                            g.setStroke(stroke);
-                            customStroke = true;
-                        }
-                    } else {
-                        Bridge.getLog().fidelityWarning(null,
-                                effectDelegate.getSupportMessage(),
-                                null);
+        boolean customStroke = false;
+        int pathEffect = paint.getPathEffect();
+        if (pathEffect > 0) {
+            PathEffect_Delegate effectDelegate = PathEffect_Delegate.getDelegate(pathEffect);
+            assert effectDelegate != null;
+            if (effectDelegate != null) {
+                if (effectDelegate.isSupported()) {
+                    Stroke stroke = effectDelegate.getStroke(paint);
+                    assert stroke != null;
+                    if (stroke != null) {
+                        g.setStroke(stroke);
+                        customStroke = true;
                     }
+                } else {
+                    Bridge.getLog().fidelityWarning(null,
+                            effectDelegate.getSupportMessage(),
+                            null);
                 }
-            }
-
-            // if no custom stroke as been set, set the default one.
-            if (customStroke == false) {
-                g.setStroke(new BasicStroke(
-                        paint.getStrokeWidth(),
-                        paint.getJavaCap(),
-                        paint.getJavaJoin(),
-                        paint.getStrokeMiter()));
             }
         }
 
+        // if no custom stroke as been set, set the default one.
+        if (customStroke == false) {
+            g.setStroke(new BasicStroke(
+                    paint.getStrokeWidth(),
+                    paint.getJavaCap(),
+                    paint.getJavaJoin(),
+                    paint.getJavaStrokeMiter()));
+        }
+
+        // the alpha for the composite. Always opaque if the normal paint color is used since
+        // it contains the alpha
+        int alpha = customShader ? paint.getAlpha() : 0xFF;
+
+        boolean customXfermode = false;
         int xfermode = paint.getXfermode();
         if (xfermode > 0) {
             Xfermode_Delegate xfermodeDelegate = Xfermode_Delegate.getDelegate(paint.getXfermode());
             assert xfermodeDelegate != null;
             if (xfermodeDelegate != null) {
                 if (xfermodeDelegate.isSupported()) {
-                    Composite composite = xfermodeDelegate.getComposite();
+                    Composite composite = xfermodeDelegate.getComposite(alpha);
                     assert composite != null;
                     if (composite != null) {
                         g.setComposite(composite);
+                        customXfermode = true;
                     }
                 } else {
                     Bridge.getLog().fidelityWarning(null,
@@ -1217,12 +1218,21 @@ public final class Canvas_Delegate {
             }
         }
 
+        // if there was no custom xfermode, but we have alpha (due to a shader and a non
+        // opaque alpha channel in the paint color), then we create an AlphaComposite anyway
+        // that will handle the alpha.
+        if (customXfermode == false && alpha != 0xFF) {
+            g.setComposite(PorterDuffXfermode_Delegate.getComposite(
+                    PorterDuff.Mode.SRC_OVER, alpha));
+        }
+
         return g;
     }
 
     private static void drawBitmap(
             int nativeCanvas,
             BufferedImage image,
+            Bitmap.Config mBitmapConfig,
             int nativePaintOrZero,
             int sleft, int stop, int sright, int sbottom,
             int dleft, int dtop, int dright, int dbottom) {
@@ -1243,7 +1253,7 @@ public final class Canvas_Delegate {
             }
         }
 
-        drawBitmap(canvasDelegate, image, paintDelegate,
+        drawBitmap(canvasDelegate, image, mBitmapConfig, paintDelegate,
                 sleft, stop, sright, sbottom,
                 dleft, dtop, dright, dbottom);
     }
@@ -1251,6 +1261,7 @@ public final class Canvas_Delegate {
     private static void drawBitmap(
             Canvas_Delegate canvasDelegate,
             BufferedImage image,
+            Bitmap.Config mBitmapConfig,
             Paint_Delegate paintDelegate,
             int sleft, int stop, int sright, int sbottom,
             int dleft, int dtop, int dright, int dbottom) {
@@ -1261,6 +1272,21 @@ public final class Canvas_Delegate {
             if (paintDelegate != null && paintDelegate.isFilterBitmap()) {
                 g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
                         RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            }
+
+            // if the bitmap config is alpha_8, then we erase all color value from it
+            // before drawing it.
+            if (mBitmapConfig == Bitmap.Config.ALPHA_8) {
+                int w = image.getWidth();
+                int h = image.getHeight();
+                int[] argb = new int[w*h];
+                image.getRGB(0, 0, image.getWidth(), image.getHeight(), argb, 0, image.getWidth());
+
+                final int length = argb.length;
+                for (int i = 0 ; i < length; i++) {
+                    argb[i] &= 0xFF000000;
+                }
+                image.setRGB(0, 0, w, h, argb, 0, w);
             }
 
             g.drawImage(image, dleft, dtop, dright, dbottom,

@@ -35,7 +35,7 @@ public class LinesActivity extends Activity {
         setContentView(view);
     }
 
-    static class LinesView extends View {
+    public static class LinesView extends View {
         private static final boolean LINE_AA = false;
 
         private final Bitmap mBitmap1;
@@ -47,7 +47,7 @@ public class LinesActivity extends Activity {
         private final Paint mAlphaPaint;
         private final Paint mHairLinePaint;
 
-        LinesView(Context c) {
+        public LinesView(Context c) {
             super(c);
 
             mBitmap1 = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset1);
@@ -71,7 +71,7 @@ public class LinesActivity extends Activity {
             mAlphaPaint.setAntiAlias(LINE_AA);
             mAlphaPaint.setColor(0x7fff0050);
             mAlphaPaint.setStrokeWidth(10.0f);
-            
+
             mHairLinePaint = new Paint();
             mHairLinePaint.setAntiAlias(LINE_AA);
             mHairLinePaint.setColor(0xff0000ff);
@@ -99,11 +99,11 @@ public class LinesActivity extends Activity {
             canvas.drawLine(0.0f, 0.0f, 40.0f, 400.0f, mSmallPaint);
             canvas.drawLine(5.0f, 0.0f, 95.0f, 400.0f, mMediumPaint);
             canvas.drawLine(22.0f, 0.0f, 162.0f, 400.0f, mLargePaint);
-            
+
             mLargePaint.setShader(mShader);
             canvas.drawLine(42.0f, 0.0f, 222.0f, 400.0f, mLargePaint);
             mLargePaint.setShader(null);
-            
+
             canvas.drawLines(mPoints, mAlphaPaint);
 
             mSmallPaint.setAntiAlias(false);
@@ -111,14 +111,14 @@ public class LinesActivity extends Activity {
             mSmallPaint.setAntiAlias(LINE_AA);
             canvas.drawLine(0.0f, 0.0f, 0.0f, 400.0f, mSmallPaint);
             canvas.drawLine(0.0f, 400.0f, 400.0f, 400.0f, mSmallPaint);
-            
+
             canvas.translate(120.0f, 0.0f);
-            mAlphaPaint.setShader(mShader);            
+            mAlphaPaint.setShader(mShader);
             canvas.drawLines(mPoints, mAlphaPaint);
             mAlphaPaint.setShader(null);
 
             canvas.restore();
-            
+
             canvas.scale(10.0f, 10.0f);
             canvas.drawLine(50.0f, 40.0f, 10.0f, 40.0f, mSmallPaint);
             canvas.drawLine(10.0f, 50.0f, 50.0f, 50.0f, mSmallPaint);
