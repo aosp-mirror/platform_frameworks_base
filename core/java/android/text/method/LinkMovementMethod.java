@@ -16,10 +16,13 @@
 
 package android.text.method;
 
+import android.text.Layout;
+import android.text.NoCopySpan;
+import android.text.Selection;
+import android.text.Spannable;
+import android.text.style.ClickableSpan;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.text.*;
-import android.text.style.*;
 import android.view.View;
 import android.widget.TextView;
 
