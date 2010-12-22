@@ -310,8 +310,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     int mTextSelectHandleRes;
     int mTextEditPasteWindowLayout;
     int mTextEditNoPasteWindowLayout;
-    Drawable mEditTextMultilineBackground;
-    Drawable mEditTextSingleLineBackground;
 
     Drawable mSelectHandleLeft;
     Drawable mSelectHandleRight;
@@ -765,10 +763,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mTextEditNoPasteWindowLayout = a.getResourceId(attr, 0);
                 break;
 
-            case com.android.internal.R.styleable.TextView_multilineBackground:
-                mEditTextMultilineBackground = a.getDrawable(attr);
-                break;
-
             case com.android.internal.R.styleable.TextView_textIsSelectable:
                 mTextIsSelectable = a.getBoolean(attr, false);
                 break;
@@ -776,7 +770,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         a.recycle();
 
-        mEditTextSingleLineBackground = getBackground();
         BufferType bufferType = BufferType.EDITABLE;
 
         final int variation =
@@ -6385,7 +6378,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (applyTransformation) {
                 setTransformationMethod(SingleLineTransformationMethod.getInstance());
             }
-            setBackgroundDrawable(mEditTextSingleLineBackground);
+            // TODO setState
         } else {
             if (changeMaxLines) {
                 setMaxLines(Integer.MAX_VALUE);
@@ -6394,13 +6387,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (applyTransformation) {
                 setTransformationMethod(null);
             }
-            // mEditTextMultilineBackground is defined and used only in EditText
-            if (mEditTextMultilineBackground != null) {
-                setBackgroundDrawable(mEditTextMultilineBackground);
-            }
+            // TODO setState
         }
     }
-    
+
     /**
      * Causes words in the text that are longer than the view is wide
      * to be ellipsized instead of broken in the middle.  You may also
