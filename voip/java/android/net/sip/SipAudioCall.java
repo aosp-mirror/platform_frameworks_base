@@ -519,10 +519,15 @@ public class SipAudioCall {
      * @param session the session that receives the incoming call
      * @param sessionDescription the session description of the incoming call
      * @throws SipException if the SIP service fails to attach this object to
-     *        the session
+     *        the session or VOIP API is not supported by the device
+     * @see SipManager#isVoipSupported
      */
     public void attachCall(SipSession session, String sessionDescription)
             throws SipException {
+        if (!SipManager.isVoipSupported(mContext)) {
+            throw new SipException("VOIP API is not supported");
+        }
+
         synchronized (this) {
             mSipSession = session;
             mPeerSd = sessionDescription;
@@ -548,10 +553,15 @@ public class SipAudioCall {
      *        SIP protocol) is used if {@code timeout} is zero or negative.
      * @see Listener#onError
      * @throws SipException if the SIP service fails to create a session for the
-     *        call
+     *        call or VOIP API is not supported by the device
+     * @see SipManager#isVoipSupported
      */
     public void makeCall(SipProfile peerProfile, SipSession sipSession,
             int timeout) throws SipException {
+        if (!SipManager.isVoipSupported(mContext)) {
+            throw new SipException("VOIP API is not supported");
+        }
+
         synchronized (this) {
             mSipSession = sipSession;
             try {
@@ -595,6 +605,9 @@ public class SipAudioCall {
     public void holdCall(int timeout) throws SipException {
         synchronized (this) {
             if (mHold) return;
+            if (mSipSession == null) {
+                throw new SipException("Not in a call to hold call");
+            }
             mSipSession.changeCall(createHoldOffer().encode(), timeout);
             mHold = true;
             setAudioGroupMode();
@@ -614,6 +627,9 @@ public class SipAudioCall {
      */
     public void answerCall(int timeout) throws SipException {
         synchronized (this) {
+            if (mSipSession == null) {
+                throw new SipException("No call to answer");
+            }
             try {
                 mAudioStream = new AudioStream(InetAddress.getByName(
                         getLocalIp()));
