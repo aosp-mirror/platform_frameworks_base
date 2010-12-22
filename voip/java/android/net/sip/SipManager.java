@@ -133,7 +133,7 @@ public class SipManager {
     }
 
     /**
-     * Returns true if the system supports SIP-based VoIP.
+     * Returns true if the system supports SIP-based VOIP API.
      */
     public static boolean isVoipSupported(Context context) {
         return context.getPackageManager().hasSystemFeature(
@@ -305,12 +305,17 @@ public class SipManager {
      * @param timeout the timeout value in seconds. Default value (defined by
      *        SIP protocol) is used if {@code timeout} is zero or negative.
      * @return a {@link SipAudioCall} object
-     * @throws SipException if calling the SIP service results in an error
+     * @throws SipException if calling the SIP service results in an error or
+     *      VOIP API is not supported by the device
      * @see SipAudioCall.Listener#onError
+     * @see #isVoipSupported
      */
     public SipAudioCall makeAudioCall(SipProfile localProfile,
             SipProfile peerProfile, SipAudioCall.Listener listener, int timeout)
             throws SipException {
+        if (!isVoipSupported(mContext)) {
+            throw new SipException("VOIP API is not supported");
+        }
         SipAudioCall call = new SipAudioCall(mContext, localProfile);
         call.setListener(listener);
         SipSession s = createSipSession(localProfile, null);
@@ -332,12 +337,17 @@ public class SipManager {
      * @param timeout the timeout value in seconds. Default value (defined by
      *        SIP protocol) is used if {@code timeout} is zero or negative.
      * @return a {@link SipAudioCall} object
-     * @throws SipException if calling the SIP service results in an error
+     * @throws SipException if calling the SIP service results in an error or
+     *      VOIP API is not supported by the device
      * @see SipAudioCall.Listener#onError
+     * @see #isVoipSupported
      */
     public SipAudioCall makeAudioCall(String localProfileUri,
             String peerProfileUri, SipAudioCall.Listener listener, int timeout)
             throws SipException {
+        if (!isVoipSupported(mContext)) {
+            throw new SipException("VOIP API is not supported");
+        }
         try {
             return makeAudioCall(
                     new SipProfile.Builder(localProfileUri).build(),
