@@ -32,8 +32,6 @@
 #include <media/stagefright/MetaData.h>
 #include <surfaceflinger/Surface.h>
 
-#define SHUTDOWN_ON_DISCONTINUITY       0
-
 namespace android {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,6 +74,26 @@ void NuPlayer::setAudioSink(const sp<MediaPlayerBase::AudioSink> &sink) {
 
 void NuPlayer::start() {
     (new AMessage(kWhatStart, id()))->post();
+}
+
+// static
+bool NuPlayer::IsFlushingState(FlushStatus state, bool *formatChange) {
+    switch (state) {
+        case FLUSHING_DECODER:
+            if (formatChange != NULL) {
+                *formatChange = false;
+            }
+            return true;
+
+        case FLUSHING_DECODER_FORMATCHANGE:
+            if (formatChange != NULL) {
+                *formatChange = true;
+            }
+            return true;
+
+        default:
+            return false;
+    }
 }
 
 void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
@@ -181,28 +199,30 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
             } else if (what == ACodec::kWhatEOS) {
                 mRenderer->queueEOS(audio, ERROR_END_OF_STREAM);
             } else if (what == ACodec::kWhatFlushCompleted) {
+                bool formatChange;
+
                 if (audio) {
-                    CHECK_EQ((int)mFlushingAudio, (int)FLUSHING_DECODER);
+                    CHECK(IsFlushingState(mFlushingAudio, &formatChange));
                     mFlushingAudio = FLUSHED;
                 } else {
-                    CHECK_EQ((int)mFlushingVideo, (int)FLUSHING_DECODER);
+                    CHECK(IsFlushingState(mFlushingVideo, &formatChange));
                     mFlushingVideo = FLUSHED;
                 }
 
                 LOGI("decoder %s flush completed", audio ? "audio" : "video");
 
-#if SHUTDOWN_ON_DISCONTINUITY
-                LOGI("initiating %s decoder shutdown",
-                     audio ? "audio" : "video");
+                if (formatChange) {
+                    LOGI("initiating %s decoder shutdown",
+                         audio ? "audio" : "video");
 
-                (audio ? mAudioDecoder : mVideoDecoder)->initiateShutdown();
+                    (audio ? mAudioDecoder : mVideoDecoder)->initiateShutdown();
 
-                if (audio) {
-                    mFlushingAudio = SHUTTING_DOWN_DECODER;
-                } else {
-                    mFlushingVideo = SHUTTING_DOWN_DECODER;
+                    if (audio) {
+                        mFlushingAudio = SHUTTING_DOWN_DECODER;
+                    } else {
+                        mFlushingVideo = SHUTTING_DOWN_DECODER;
+                    }
                 }
-#endif
 
                 finishFlushIfPossible();
             } else if (what == ACodec::kWhatOutputFormatChanged) {
@@ -451,8 +471,8 @@ status_t NuPlayer::feedDecoderInputData(bool audio, const sp<AMessage> &msg) {
     sp<AMessage> reply;
     CHECK(msg->findMessage("reply", &reply));
 
-    if ((audio && mFlushingAudio == FLUSHING_DECODER)
-            || (!audio && mFlushingVideo == FLUSHING_DECODER)) {
+    if ((audio && IsFlushingState(mFlushingAudio))
+            || (!audio && IsFlushingState(mFlushingVideo))) {
         reply->setInt32("err", INFO_DISCONTINUITY);
         reply->post();
         return OK;
@@ -467,14 +487,25 @@ status_t NuPlayer::feedDecoderInputData(bool audio, const sp<AMessage> &msg) {
         return err;
     } else if (err != OK) {
         if (err == INFO_DISCONTINUITY) {
-            LOGI("%s discontinuity", audio ? "audio" : "video");
+            int32_t formatChange;
+            if (!accessUnit->meta()->findInt32(
+                        "format-change", &formatChange)) {
+                formatChange = 0;
+            }
+
+            LOGI("%s discontinuity (formatChange=%d)",
+                 audio ? "audio" : "video", formatChange);
+
             (audio ? mAudioDecoder : mVideoDecoder)->signalFlush();
             mRenderer->flush(audio);
 
             if (audio) {
                 CHECK(mFlushingAudio == NONE
                         || mFlushingAudio == AWAITING_DISCONTINUITY);
-                mFlushingAudio = FLUSHING_DECODER;
+
+                mFlushingAudio = formatChange
+                    ? FLUSHING_DECODER_FORMATCHANGE : FLUSHING_DECODER;
+
                 if (mFlushingVideo == NONE) {
                     mFlushingVideo = (mVideoDecoder != NULL)
                         ? AWAITING_DISCONTINUITY
@@ -483,7 +514,10 @@ status_t NuPlayer::feedDecoderInputData(bool audio, const sp<AMessage> &msg) {
             } else {
                 CHECK(mFlushingVideo == NONE
                         || mFlushingVideo == AWAITING_DISCONTINUITY);
-                mFlushingVideo = FLUSHING_DECODER;
+
+                mFlushingVideo = formatChange
+                    ? FLUSHING_DECODER_FORMATCHANGE : FLUSHING_DECODER;
+
                 if (mFlushingAudio == NONE) {
                     mFlushingAudio = (mAudioDecoder != NULL)
                         ? AWAITING_DISCONTINUITY

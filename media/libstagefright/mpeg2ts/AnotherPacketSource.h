@@ -42,7 +42,7 @@ struct AnotherPacketSource : public MediaSource {
     status_t nextBufferTime(int64_t *timeUs);
 
     void queueAccessUnit(const sp<ABuffer> &buffer);
-    void queueDiscontinuity();
+    void queueDiscontinuity(bool formatChange);
     void signalEOS(status_t result);
 
     void clear();

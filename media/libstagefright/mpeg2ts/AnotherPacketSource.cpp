@@ -63,8 +63,6 @@ status_t AnotherPacketSource::dequeueAccessUnit(sp<ABuffer> *buffer) {
         int32_t discontinuity;
         if ((*buffer)->meta()->findInt32("discontinuity", &discontinuity)
                 && discontinuity) {
-            buffer->clear();
-
             return INFO_DISCONTINUITY;
         }
 
@@ -125,9 +123,13 @@ void AnotherPacketSource::queueAccessUnit(const sp<ABuffer> &buffer) {
     mCondition.signal();
 }
 
-void AnotherPacketSource::queueDiscontinuity() {
+void AnotherPacketSource::queueDiscontinuity(bool formatChange) {
     sp<ABuffer> buffer = new ABuffer(0);
     buffer->meta()->setInt32("discontinuity", true);
+
+    if (formatChange) {
+        buffer->meta()->setInt32("format-change", true);
+    }
 
     Mutex::Autolock autoLock(mLock);
 

@@ -79,6 +79,7 @@ private:
         NONE,
         AWAITING_DISCONTINUITY,
         FLUSHING_DECODER,
+        FLUSHING_DECODER_FORMATCHANGE,
         SHUTTING_DOWN_DECODER,
         FLUSHED,
         SHUT_DOWN,
@@ -103,6 +104,8 @@ private:
     void notifyListener(int msg, int ext1, int ext2);
 
     void finishFlushIfPossible();
+
+    static bool IsFlushingState(FlushStatus state, bool *formatChange = NULL);
 
     DISALLOW_EVIL_CONSTRUCTORS(NuPlayer);
 };

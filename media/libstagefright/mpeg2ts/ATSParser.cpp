@@ -334,7 +334,7 @@ void ATSParser::Stream::signalDiscontinuity(DiscontinuityType type) {
 
             if (mStreamType == 0x1b && mSource != NULL) {
                 // Don't signal discontinuities on audio streams.
-                mSource->queueDiscontinuity();
+                mSource->queueDiscontinuity(true /* formatChange */);
             }
             break;
         }
@@ -348,7 +348,7 @@ void ATSParser::Stream::signalDiscontinuity(DiscontinuityType type) {
 
             if (mSource != NULL) {
                 mSource->clear();
-                mSource->queueDiscontinuity();
+                mSource->queueDiscontinuity(!isASeek);
             }
             break;
         }
