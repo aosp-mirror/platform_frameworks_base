@@ -5830,6 +5830,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate();
             }
+            mBackgroundSizeChanged = true;
         }
     }
 
@@ -5882,6 +5883,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate();
             }
+            mBackgroundSizeChanged = true;
         }
     }
 
@@ -5937,7 +5939,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate();
             }
-
+            mBackgroundSizeChanged = true;
         }
     }
 
@@ -5990,6 +5992,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate();
             }
+            mBackgroundSizeChanged = true;
         }
     }
 
