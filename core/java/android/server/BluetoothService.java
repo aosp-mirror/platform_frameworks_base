@@ -1515,7 +1515,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
         handlePanDeviceStateChange(device, BluetoothPan.STATE_CONNECTING,
                                            BluetoothPan.LOCAL_PANU_ROLE);
-        if (connectPanDeviceNative(objectPath, "nap", "panu")) {
+        if (connectPanDeviceNative(objectPath, "nap")) {
             log ("connecting to PAN");
             return true;
         } else {
