@@ -34,6 +34,7 @@ import android.bluetooth.BluetoothPan;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothProfileState;
 import android.bluetooth.BluetoothSocket;
+import android.bluetooth.BluetoothTetheringDataTracker;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetooth;
 import android.bluetooth.IBluetoothCallback;
@@ -54,7 +55,6 @@ import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemService;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
@@ -79,11 +79,9 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class BluetoothService extends IBluetooth.Stub {
     private static final String TAG = "BluetoothService";
@@ -168,6 +166,8 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private static String mDockAddress;
     private String mDockPin;
+
+    private String mIface;
 
     private int mAdapterConnectionState = BluetoothAdapter.STATE_DISCONNECTED;
 
@@ -1582,7 +1582,6 @@ public class BluetoothService extends IBluetooth.Stub {
         }
         if (prevState == state) return;
 
-        // TODO: We might need this for PANU role too.
         if (role == BluetoothPan.LOCAL_NAP_ROLE) {
             if (state == BluetoothPan.STATE_CONNECTED) {
                 ifaceAddr = enableTethering(iface);
@@ -1592,6 +1591,16 @@ public class BluetoothService extends IBluetooth.Stub {
                     mBluetoothIfaceAddresses.remove(ifaceAddr);
                     ifaceAddr = null;
                 }
+            }
+        } else {
+            // PANU Role = reverse Tether
+            if (state == BluetoothPan.STATE_CONNECTED) {
+                mIface = iface;
+                BluetoothTetheringDataTracker.getInstance().startReverseTether(iface, device);
+            } else if (state == BluetoothPan.STATE_DISCONNECTED &&
+                  (prevState == BluetoothPan.STATE_CONNECTED ||
+                  prevState == BluetoothPan.STATE_DISCONNECTING)) {
+                BluetoothTetheringDataTracker.getInstance().stopReverseTether(mIface);
             }
         }
 

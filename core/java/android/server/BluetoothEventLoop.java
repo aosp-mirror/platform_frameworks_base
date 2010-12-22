@@ -425,9 +425,11 @@ class BluetoothEventLoop {
             }
         } else if (name.equals("Interface")) {
             String iface = propValues[1];
-            mBluetoothService.handlePanDeviceStateChange(device, iface,
-                                          BluetoothPan.STATE_CONNECTED,
-                                          BluetoothPan.LOCAL_PANU_ROLE);
+            if (!iface.equals("")) {
+                mBluetoothService.handlePanDeviceStateChange(device, iface,
+                                              BluetoothPan.STATE_CONNECTED,
+                                              BluetoothPan.LOCAL_PANU_ROLE);
+            }
         }
     }
 
