@@ -572,6 +572,9 @@ public class ActivityStack {
             r.stopped = false;
             mResumedActivity = r;
             r.task.touchActiveTime();
+            if (mMainStack) {
+                mService.addRecentTaskLocked(r.task);
+            }
             completeResumeLocked(r);
             pauseIfSleepingLocked();                
         } else {
@@ -1249,6 +1252,9 @@ public class ActivityStack {
             next.state = ActivityState.RESUMED;
             mResumedActivity = next;
             next.task.touchActiveTime();
+            if (mMainStack) {
+                mService.addRecentTaskLocked(next.task);
+            }
             mService.updateLruProcessLocked(next.app, true, true);
             updateLRUListLocked(next);
 
@@ -1638,9 +1644,6 @@ public class ActivityStack {
                             taskTopI = -1;
                         }
                         replyChainEnd = -1;
-                        if (mMainStack) {
-                            mService.addRecentTaskLocked(target.task);
-                        }
                     } else if (forceReset || finishOnTaskLaunch
                             || clearWhenTaskReset) {
                         // If the activity should just be removed -- either
@@ -2409,9 +2412,6 @@ public class ActivityStack {
                 r.task = reuseTask;
             }
             newTask = true;
-            if (mMainStack) {
-                mService.addRecentTaskLocked(r.task);
-            }
             moveHomeToFrontFromLaunchLocked(launchFlags);
             
         } else if (sourceRecord != null) {
@@ -3472,17 +3472,12 @@ public class ActivityStack {
             ActivityRecord r = (ActivityRecord)mHistory.get(pos);
             if (localLOGV) Slog.v(
                 TAG, "At " + pos + " ckp " + r.task + ": " + r);
-            boolean first = true;
             if (r.task.taskId == task) {
                 if (localLOGV) Slog.v(TAG, "Removing and adding at " + top);
                 mHistory.remove(pos);
                 mHistory.add(top, r);
                 moved.add(0, r);
                 top--;
-                if (first && mMainStack) {
-                    mService.addRecentTaskLocked(r.task);
-                    first = false;
-                }
             }
             pos--;
         }
