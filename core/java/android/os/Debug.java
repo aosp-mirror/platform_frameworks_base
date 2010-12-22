@@ -559,18 +559,55 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
         /* cumulative elapsed time for class initialization, in usec */
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_TIME);
     }
+
+    /**
+     * Returns the global count of external allocation requests.  Now
+     * that external allocation tracking no longer exists this method
+     * always returns 0.
+     *
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
     public static int getGlobalExternalAllocCount() {
-        return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_EXT_ALLOCATED_OBJECTS);
+        return 0;
     }
+
+    /**
+     * Returns the global count of bytes externally allocated.  Now
+     * that external allocation tracking no longer exists this method
+     * always returns 0.
+     *
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
     public static int getGlobalExternalAllocSize() {
-        return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_EXT_ALLOCATED_BYTES);
+        return 0;
     }
+
+    /**
+     * Returns the global count of freed external allocation requests.
+     * Now that external allocation tracking no longer exists this
+     * method always returns 0.
+     *
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
     public static int getGlobalExternalFreedCount() {
-        return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_EXT_FREED_OBJECTS);
+        return 0;
     }
+
+    /**
+     * Returns the global count of freed bytes from external
+     * allocation requests.  Now that external allocation tracking no
+     * longer exists this method always returns 0.
+     *
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
     public static int getGlobalExternalFreedSize() {
-        return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_EXT_FREED_BYTES);
+        return 0;
     }
+
     public static int getGlobalGcInvocationCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_GC_INVOCATIONS);
     }
@@ -580,12 +617,31 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     public static int getThreadAllocSize() {
         return VMDebug.getAllocCount(VMDebug.KIND_THREAD_ALLOCATED_BYTES);
     }
+
+    /**
+     * Returns the count of external allocation requests made by the
+     * current thread.  Now that external allocation tracking no
+     * longer exists this method always returns 0.
+     *
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
     public static int getThreadExternalAllocCount() {
-        return VMDebug.getAllocCount(VMDebug.KIND_THREAD_EXT_ALLOCATED_OBJECTS);
+        return 0;
     }
+
+    /**
+     * Returns the global count of bytes externally allocated.  Now
+     * that external allocation tracking no longer exists this method
+     * always returns 0.
+     *
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
     public static int getThreadExternalAllocSize() {
-        return VMDebug.getAllocCount(VMDebug.KIND_THREAD_EXT_ALLOCATED_BYTES);
+        return 0;
     }
+
     public static int getThreadGcInvocationCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_THREAD_GC_INVOCATIONS);
     }
@@ -608,18 +664,47 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     public static void resetGlobalClassInitTime() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_TIME);
     }
-    public static void resetGlobalExternalAllocCount() {
-        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_EXT_ALLOCATED_OBJECTS);
-    }
-    public static void resetGlobalExternalAllocSize() {
-        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_EXT_ALLOCATED_BYTES);
-    }
-    public static void resetGlobalExternalFreedCount() {
-        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_EXT_FREED_OBJECTS);
-    }
-    public static void resetGlobalExternalFreedSize() {
-        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_EXT_FREED_BYTES);
-    }
+
+    /**
+     * Resets the global count of external allocation requests.  Now
+     * that external allocation tracking has been removed this method
+     * has no effect.
+     *
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
+    public static void resetGlobalExternalAllocCount() {}
+
+    /**
+     * Resets the global count of bytes externally allocated.  Now
+     * that external allocation tracking has been removed this method
+     * has no effect.
+     *
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
+    public static void resetGlobalExternalAllocSize() {}
+
+    /**
+     * Resets the global count of freed external allocations.  Now
+     * that external allocation tracking has been removed this method
+     * has no effect.
+     *
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
+    public static void resetGlobalExternalFreedCount() {}
+
+    /**
+     * Resets the global count counter of freed bytes from external
+     * allocations.  Now that external allocation tracking has been
+     * removed this method has no effect.
+     *
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
+    public static void resetGlobalExternalFreedSize() {}
+
     public static void resetGlobalGcInvocationCount() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_GC_INVOCATIONS);
     }
@@ -629,12 +714,27 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     public static void resetThreadAllocSize() {
         VMDebug.resetAllocCount(VMDebug.KIND_THREAD_ALLOCATED_BYTES);
     }
-    public static void resetThreadExternalAllocCount() {
-        VMDebug.resetAllocCount(VMDebug.KIND_THREAD_EXT_ALLOCATED_OBJECTS);
-    }
-    public static void resetThreadExternalAllocSize() {
-        VMDebug.resetAllocCount(VMDebug.KIND_THREAD_EXT_ALLOCATED_BYTES);
-    }
+
+    /**
+     * Resets the count of external allocation requests made by the
+     * current thread.  Now that external allocation tracking has been
+     * removed this method has no effect.
+     *
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
+    public static void resetThreadExternalAllocCount() {}
+
+    /**
+     * Resets the count of bytes externally allocated by the current
+     * thread.  Now that external allocation tracking has been removed
+     * this method has no effect.
+     *
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
+    public static void resetThreadExternalAllocSize() {}
+
     public static void resetThreadGcInvocationCount() {
         VMDebug.resetAllocCount(VMDebug.KIND_THREAD_GC_INVOCATIONS);
     }
