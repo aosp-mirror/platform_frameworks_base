@@ -877,6 +877,7 @@ public class WifiService extends IWifiManager.Stub {
                 // because of any locks so clear that tracking immediately.
                 reportStartWorkSource();
                 mWifiStateMachine.enableRssiPolling(true);
+                mWifiStateMachine.enableAllNetworks();
                 updateWifiState();
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 if (DBG) {

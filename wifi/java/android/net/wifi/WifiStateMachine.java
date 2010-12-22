@@ -161,10 +161,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private SupplicantStateTracker mSupplicantStateTracker;
     private WpsStateMachine mWpsStateMachine;
 
-    /* Connection to a specific network involves disabling all networks,
-     * this flag tracks if networks need to be re-enabled */
-    private boolean mEnableAllNetworks = false;
-
     private AlarmManager mAlarmManager;
     private PendingIntent mScanIntent;
     /* Tracks current frequency mode */
@@ -243,14 +239,16 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     static final int CMD_REMOVE_NETWORK                   = 53;
     /* Enable a network. The device will attempt a connection to the given network. */
     static final int CMD_ENABLE_NETWORK                   = 54;
+    /* Enable all networks */
+    static final int CMD_ENABLE_ALL_NETWORKS              = 55;
     /* Disable a network. The device does not attempt a connection to the given network. */
-    static final int CMD_DISABLE_NETWORK                  = 55;
+    static final int CMD_DISABLE_NETWORK                  = 56;
     /* Blacklist network. De-prioritizes the given BSSID for connection. */
-    static final int CMD_BLACKLIST_NETWORK                = 56;
+    static final int CMD_BLACKLIST_NETWORK                = 57;
     /* Clear the blacklist network list */
-    static final int CMD_CLEAR_BLACKLIST                  = 57;
+    static final int CMD_CLEAR_BLACKLIST                  = 58;
     /* Save configuration */
-    static final int CMD_SAVE_CONFIG                      = 58;
+    static final int CMD_SAVE_CONFIG                      = 59;
 
     /* Supplicant commands after driver start*/
     /* Initiate a scan */
@@ -852,6 +850,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
        sendMessage(obtainMessage(CMD_ENABLE_RSSI_POLL, enabled ? 1 : 0, 0));
     }
 
+    public void enableAllNetworks() {
+        sendMessage(CMD_ENABLE_ALL_NETWORKS);
+    }
+
     /**
      * Start packet filtering
      */
@@ -1004,7 +1006,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         sb.append("mLastSignalLevel ").append(mLastSignalLevel).append(LS);
         sb.append("mLastBssid ").append(mLastBssid).append(LS);
         sb.append("mLastNetworkId ").append(mLastNetworkId).append(LS);
-        sb.append("mEnableAllNetworks ").append(mEnableAllNetworks).append(LS);
         sb.append("mReconnectCount ").append(mReconnectCount).append(LS);
         sb.append("mIsScanMode ").append(mIsScanMode).append(LS);
         sb.append("Supplicant status").append(LS)
@@ -1618,6 +1619,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SAVE_NETWORK:
                 case CMD_FORGET_NETWORK:
                 case CMD_RSSI_POLL:
+                case CMD_ENABLE_ALL_NETWORKS:
                     break;
                 case CMD_START_WPS:
                     WpsConfiguration config = (WpsConfiguration) message.obj;
@@ -1986,9 +1988,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             WifiConfiguration config;
+            boolean eventLoggingEnabled = true;
             switch(message.what) {
                 case CMD_STOP_SUPPLICANT:   /* Supplicant stopped by user */
-                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
                     Log.d(TAG, "stopping supplicant");
                     if (!WifiNative.stopSupplicant()) {
                         Log.e(TAG, "Failed to stop supplicant, issue kill");
@@ -2001,7 +2003,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     transitionTo(mSupplicantStoppingState);
                     break;
                 case SUP_DISCONNECTION_EVENT:  /* Supplicant connection lost */
-                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
                     Log.e(TAG, "Connection lost, restart supplicant");
                     WifiNative.killSupplicant();
                     WifiNative.closeSupplicantConnection();
@@ -2012,6 +2013,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     sendMessageDelayed(CMD_START_SUPPLICANT, SUPPLICANT_RESTART_INTERVAL_MSECS);
                     break;
                 case SCAN_RESULTS_EVENT:
+                    eventLoggingEnabled = false;
                     setScanResults(WifiNative.scanResultsCommand());
                     sendScanResultsAvailableBroadcast();
                     break;
@@ -2020,28 +2022,26 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_ADD_OR_UPDATE_NETWORK:
-                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
                     config = (WifiConfiguration) message.obj;
                     mReplyChannel.replyToMessage(message, CMD_ADD_OR_UPDATE_NETWORK,
                             WifiConfigStore.addOrUpdateNetwork(config));
                     break;
                 case CMD_REMOVE_NETWORK:
-                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
                     ok = WifiConfigStore.removeNetwork(message.arg1);
                     mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_ENABLE_NETWORK:
-                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
                     ok = WifiConfigStore.enableNetwork(message.arg1, message.arg2 == 1);
                     mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
+                case CMD_ENABLE_ALL_NETWORKS:
+                    WifiConfigStore.enableAllNetworks();
+                    break;
                 case CMD_DISABLE_NETWORK:
-                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
                     ok = WifiConfigStore.disableNetwork(message.arg1);
                     mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_BLACKLIST_NETWORK:
-                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
                     WifiNative.addToBlacklistCommand((String)message.obj);
                     break;
                 case CMD_CLEAR_BLACKLIST:
@@ -2065,7 +2065,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     /* Cannot start soft AP while in client mode */
                 case CMD_START_AP:
                     Log.d(TAG, "Failed to start soft AP with a running supplicant");
-                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
                     setWifiApState(WIFI_AP_STATE_FAILED);
                     break;
                 case CMD_SET_SCAN_MODE:
@@ -2080,6 +2079,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     break;
                 default:
                     return NOT_HANDLED;
+            }
+            if (eventLoggingEnabled) {
+                EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             }
             return HANDLED;
         }
@@ -2201,6 +2203,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         @Override
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            boolean eventLoggingEnabled = true;
             switch(message.what) {
                 case CMD_SET_SCAN_TYPE:
                     if (message.arg1 == SCAN_ACTIVE) {
@@ -2210,6 +2213,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     }
                     break;
                 case CMD_START_SCAN:
+                    eventLoggingEnabled = false;
                     WifiNative.scanCommand(message.arg1 == SCAN_ACTIVE);
                     break;
                 case CMD_SET_HIGH_PERF_MODE:
@@ -2254,7 +2258,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            if (eventLoggingEnabled) {
+                EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            }
             return HANDLED;
         }
         @Override
@@ -2424,11 +2430,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         WifiConfigStore.selectNetwork(netId);
                     }
 
-                    /* Save a flag to indicate that we need to enable all
-                     * networks after supplicant indicates a network
-                     * state change event
-                     */
-                    mEnableAllNetworks = true;
+                    /* The state tracker handles enabling networks upon completion/failure */
+                    mSupplicantStateTracker.sendMessage(CMD_CONNECT_NETWORK);
 
                     WifiNative.reconnectCommand();
 
@@ -2669,6 +2672,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         @Override
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            boolean eventLoggingEnabled = true;
             switch (message.what) {
                 case CMD_DISCONNECT:
                     WifiNative.disconnectCommand();
@@ -2692,6 +2696,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     }
                     break;
                 case CMD_START_SCAN:
+                    eventLoggingEnabled = false;
                     /* When the network is connected, re-scanning can trigger
                      * a reconnection. Put it in scan-only mode during scan.
                      * When scan results are received, the mode is switched
@@ -2727,6 +2732,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case NETWORK_CONNECTION_EVENT:
                     break;
                 case CMD_RSSI_POLL:
+                    eventLoggingEnabled = false;
                     if (message.arg1 == mRssiPollToken) {
                         // Get Info and continue polling
                         fetchRssiAndLinkSpeedNative();
@@ -2749,7 +2755,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            if (eventLoggingEnabled) {
+                EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            }
             return HANDLED;
         }
     }
@@ -2781,13 +2789,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             }
             EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
-        }
-        @Override
-        public void exit() {
-            if (mEnableAllNetworks) {
-                mEnableAllNetworks = false;
-                WifiConfigStore.enableAllNetworks();
-            }
         }
     }
 
