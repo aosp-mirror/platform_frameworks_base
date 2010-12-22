@@ -118,9 +118,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private static final int NOT_A_SUBTYPE_ID = -1;
     private static final String NOT_A_SUBTYPE_ID_STR = String.valueOf(NOT_A_SUBTYPE_ID);
-    // If IME doesn't support the system locale, the default subtype will be the first defined one.
-    private static final int DEFAULT_SUBTYPE_ID = 0;
-
     private static final String EXTRA_INPUT_METHOD_ID = "input_method_id";
     private static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
     private static final String SUBTYPE_MODE_VOICE = "voice";
@@ -2001,7 +1998,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         if (!containsKeyboardSubtype) {
             InputMethodSubtype lastResortKeyboardSubtype = findLastResortApplicableSubtypeLocked(
-                    subtypes, SUBTYPE_MODE_KEYBOARD, systemLocale, DEFAULT_SUBTYPE_ID);
+                    subtypes, SUBTYPE_MODE_KEYBOARD, systemLocale, true);
             if (lastResortKeyboardSubtype != null) {
                 applicableSubtypes.add(lastResortKeyboardSubtype);
             }
@@ -2015,12 +2012,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * @param subtypes this function will search the most applicable subtype in subtypes
      * @param mode subtypes will be filtered by mode
      * @param locale subtypes will be filtered by locale
-     * @param defaultSubtypeId if this function can't find the most applicable subtype, it will
-     * return defaultSubtypeId filtered by mode
+     * @param canIgnoreLocaleAsLastResort if this function can't find the most applicable subtype,
+     * it will return the first subtype matched with mode
      * @return the most applicable subtypeId
      */
     private InputMethodSubtype findLastResortApplicableSubtypeLocked(
-            List<InputMethodSubtype> subtypes, String mode, String locale, int defaultSubtypeId) {
+            List<InputMethodSubtype> subtypes, String mode, String locale,
+            boolean canIgnoreLocaleAsLastResort) {
         if (subtypes == null || subtypes.size() == 0) {
             return null;
         }
@@ -2030,12 +2028,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final String language = locale.substring(0, 2);
         boolean partialMatchFound = false;
         InputMethodSubtype applicableSubtype = null;
+        InputMethodSubtype firstMatchedModeSubtype = null;
         final int N = subtypes.size();
         for (int i = 0; i < N; ++i) {
             InputMethodSubtype subtype = subtypes.get(i);
             final String subtypeLocale = subtype.getLocale();
             // An applicable subtype should match "mode".
             if (subtypes.get(i).getMode().equalsIgnoreCase(mode)) {
+                if (firstMatchedModeSubtype == null) {
+                    firstMatchedModeSubtype = subtype;
+                }
                 if (locale.equals(subtypeLocale)) {
                     // Exact match (e.g. system locale is "en_US" and subtype locale is "en_US")
                     applicableSubtype = subtype;
@@ -2048,13 +2050,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
 
-        if (applicableSubtype == null && defaultSubtypeId != NOT_A_SUBTYPE_ID) {
-            if (defaultSubtypeId >= 0 && N > defaultSubtypeId) {
-                InputMethodSubtype defaultSubtype = subtypes.get(defaultSubtypeId);
-                if (defaultSubtype.getMode().equalsIgnoreCase(mode)) {
-                    return defaultSubtype;
-                }
-            }
+        if (applicableSubtype == null && canIgnoreLocaleAsLastResort) {
+            return firstMatchedModeSubtype;
         }
 
         // The first subtype applicable to the system locale will be defined as the most applicable
@@ -2078,44 +2075,49 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         // Search applicable subtype for each InputMethodInfo
         for (InputMethodInfo imi: imis) {
+            final String imiId = imi.getId();
+            if (foundInSystemIME && !imiId.equals(mCurMethodId)) {
+                continue;
+            }
             InputMethodSubtype subtype = null;
+            final List<InputMethodSubtype> explicitlyEnabledSubtypes =
+                    mSettings.getEnabledInputMethodSubtypeListLocked(imi);
+            // 1. Search by the current subtype's locale from explicitlyEnabledSubtypes.
             if (mCurrentSubtype != null) {
-                // 1. Search with the current subtype's locale and the enabled subtypes
                 subtype = findLastResortApplicableSubtypeLocked(
-                        mSettings.getEnabledInputMethodSubtypeListLocked(
-                        imi), mode, mCurrentSubtype.getLocale(), NOT_A_SUBTYPE_ID);
-                if (subtype == null) {
-                    // 2. Search with the current subtype's locale and all subtypes
-                    subtype = findLastResortApplicableSubtypeLocked(imi.getSubtypes(),
-                            mode, mCurrentSubtype.getLocale(), NOT_A_SUBTYPE_ID);
-                }
+                        explicitlyEnabledSubtypes, mode, mCurrentSubtype.getLocale(), false);
             }
-            // 3. Search with the system locale and the enabled subtypes
+            // 2. Search by the system locale from explicitlyEnabledSubtypes.
+            // 3. Search the first enabled subtype matched with mode from explicitlyEnabledSubtypes.
             if (subtype == null) {
                 subtype = findLastResortApplicableSubtypeLocked(
-                        mSettings.getEnabledInputMethodSubtypeListLocked(
-                        imi), mode, null, NOT_A_SUBTYPE_ID);
+                        explicitlyEnabledSubtypes, mode, null, true);
             }
+            // 4. Search by the current subtype's locale from all subtypes.
+            if (subtype == null && mCurrentSubtype != null) {
+                subtype = findLastResortApplicableSubtypeLocked(
+                        imi.getSubtypes(), mode, mCurrentSubtype.getLocale(), false);
+            }
+            // 5. Search by the system locale from all subtypes.
+            // 6. Search the first enabled subtype matched with mode from all subtypes.
             if (subtype == null) {
-                // 4. Search with the system locale and all subtypes
-                subtype = findLastResortApplicableSubtypeLocked(imi.getSubtypes(),
-                        mode, null, NOT_A_SUBTYPE_ID);
+                subtype = findLastResortApplicableSubtypeLocked(
+                        imi.getSubtypes(), mode, null, true);
             }
             if (subtype != null) {
-                if (imi.getId().equals(mCurMethodId)) {
+                if (imiId.equals(mCurMethodId)) {
                     // The current input method is the most applicable IME.
                     mostApplicableIMI = imi;
                     mostApplicableSubtype = subtype;
                     break;
-                } else if ((imi.getServiceInfo().applicationInfo.flags
-                        & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                } else if (!foundInSystemIME) {
                     // The system input method is 2nd applicable IME.
                     mostApplicableIMI = imi;
                     mostApplicableSubtype = subtype;
-                    foundInSystemIME = true;
-                } else if (!foundInSystemIME) {
-                    mostApplicableIMI = imi;
-                    mostApplicableSubtype = subtype;
+                    if ((imi.getServiceInfo().applicationInfo.flags
+                            & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                        foundInSystemIME = true;
+                    }
                 }
             }
         }
@@ -2161,7 +2163,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         // SUBTYPE_MODE_KEYBOARD. This is an exceptional case, so we will hardcode
                         // the mode.
                         mCurrentSubtype = findLastResortApplicableSubtypeLocked(imi.getSubtypes(),
-                                SUBTYPE_MODE_KEYBOARD, null, DEFAULT_SUBTYPE_ID);
+                                SUBTYPE_MODE_KEYBOARD, null, true);
                     }
                 } else {
                     mCurrentSubtype =
@@ -2193,7 +2195,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 Pair<InputMethodInfo, InputMethodSubtype> info =
                     findLastResortApplicableShortcutInputMethodAndSubtypeLocked(
                             SUBTYPE_MODE_VOICE);
-                addShortcutInputMethodAndSubtypes(info.first, info.second);
+                if (info != null) {
+                    addShortcutInputMethodAndSubtypes(info.first, info.second);
+                }
             }
             ArrayList<Object> ret = new ArrayList<Object>();
             for (InputMethodInfo imi: mShortcutInputMethodsAndSubtypes.keySet()) {
