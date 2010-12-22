@@ -45,6 +45,10 @@ public class PorterDuffXfermode_Delegate extends Xfermode_Delegate {
 
     // ---- Public Helper methods ----
 
+    public PorterDuff.Mode getMode() {
+        return getPorterDuffMode(mMode);
+    }
+
     @Override
     public Composite getComposite(int alpha) {
         return getComposite(getPorterDuffMode(mMode), alpha);

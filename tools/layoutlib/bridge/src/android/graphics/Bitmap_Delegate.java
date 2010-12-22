@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.ide.common.rendering.api.ResourceDensity;
+import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
 import android.graphics.Bitmap.Config;
@@ -29,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.Buffer;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
@@ -57,6 +59,7 @@ public final class Bitmap_Delegate {
     private final Config mConfig;
     private BufferedImage mImage;
     private boolean mHasAlpha = true;
+    private int mGenerationId = 0;
 
 
     // ---- Public Helper methods ----
@@ -173,6 +176,22 @@ public final class Bitmap_Delegate {
         return mConfig;
     }
 
+    /**
+     * Returns the hasAlpha rendering hint
+     * @return true if the bitmap alpha should be used at render time
+     */
+    public boolean hasAlpha() {
+        return mHasAlpha && mConfig != Config.RGB_565;
+    }
+
+    /**
+     * Update the generationId.
+     *
+     * @see Bitmap#getGenerationId()
+     */
+    public void change() {
+        mGenerationId++;
+    }
 
     // ---- native methods ----
 
@@ -183,7 +202,9 @@ public final class Bitmap_Delegate {
         // create the image
         BufferedImage image = new BufferedImage(width, height, imageType);
 
-        // FIXME fill the bitmap!
+        if (colors != null) {
+            image.setRGB(0, 0, width, height, colors, offset, stride);
+        }
 
         // create a delegate with the content of the stream.
         Bitmap_Delegate delegate = new Bitmap_Delegate(image, Config.sConfigs[nativeConfig]);
@@ -192,8 +213,31 @@ public final class Bitmap_Delegate {
     }
 
     /*package*/ static Bitmap nativeCopy(int srcBitmap, int nativeConfig, boolean isMutable) {
-        // FIXME implement native delegate
-        throw new UnsupportedOperationException("Native delegate needed for Bitmap");
+        Bitmap_Delegate srcBmpDelegate = sManager.getDelegate(srcBitmap);
+        if (srcBmpDelegate == null) {
+            assert false;
+            return null;
+        }
+
+        BufferedImage srcImage = srcBmpDelegate.getImage();
+
+        int width = srcImage.getWidth();
+        int height = srcImage.getHeight();
+
+        int imageType = getBufferedImageType(nativeConfig);
+
+        // create the image
+        BufferedImage image = new BufferedImage(width, height, imageType);
+
+        // copy the source image into the image.
+        int[] argb = new int[width * height];
+        srcImage.getRGB(0, 0, width, height, argb, 0, width);
+        image.setRGB(0, 0, width, height, argb, 0, width);
+
+        // create a delegate with the content of the stream.
+        Bitmap_Delegate delegate = new Bitmap_Delegate(image, Config.sConfigs[nativeConfig]);
+
+        return createBitmap(delegate, isMutable, Bitmap.getDefaultDensity());
     }
 
     /*package*/ static void nativeDestructor(int nativeBitmap) {
@@ -206,8 +250,8 @@ public final class Bitmap_Delegate {
 
     /*package*/ static boolean nativeCompress(int nativeBitmap, int format, int quality,
             OutputStream stream, byte[] tempStorage) {
-        // FIXME implement native delegate
-        throw new UnsupportedOperationException("Native delegate needed for Bitmap");
+        Bridge.getLog().error(null, "Bitmap.compress() is not supported");
+        return true;
     }
 
     /*package*/ static void nativeErase(int nativeBitmap, int color) {
@@ -222,7 +266,7 @@ public final class Bitmap_Delegate {
 
         Graphics2D g = image.createGraphics();
         try {
-            g.setColor(new java.awt.Color(color, delegate.mHasAlpha));
+            g.setColor(new java.awt.Color(color, true));
 
             g.fillRect(0, 0, image.getWidth(), image.getHeight());
         } finally {
@@ -298,20 +342,35 @@ public final class Bitmap_Delegate {
 
     /*package*/ static void nativeGetPixels(int nativeBitmap, int[] pixels, int offset,
             int stride, int x, int y, int width, int height) {
-        // FIXME implement native delegate
-        throw new UnsupportedOperationException("Native delegate needed for Bitmap.nativeGetPixels");
+        Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
+        if (delegate == null) {
+            assert false;
+            return;
+        }
+
+        delegate.getImage().getRGB(x, y, width, height, pixels, offset, stride);
     }
 
 
     /*package*/ static void nativeSetPixel(int nativeBitmap, int x, int y, int color) {
-        // FIXME implement native delegate
-        throw new UnsupportedOperationException("Native delegate needed for Bitmap.nativeSetPixel");
+        Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
+        if (delegate == null) {
+            assert false;
+            return;
+        }
+
+        delegate.getImage().setRGB(x, y, color);
     }
 
     /*package*/ static void nativeSetPixels(int nativeBitmap, int[] colors, int offset,
             int stride, int x, int y, int width, int height) {
-        // FIXME implement native delegate
-        throw new UnsupportedOperationException("Native delegate needed for Bitmap.nativeSetPixels");
+        Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
+        if (delegate == null) {
+            assert false;
+            return;
+        }
+
+        delegate.getImage().setRGB(x, y, width, height, colors, offset, stride);
     }
 
     /*package*/ static void nativeCopyPixelsToBuffer(int nativeBitmap, Buffer dst) {
@@ -325,31 +384,68 @@ public final class Bitmap_Delegate {
     }
 
     /*package*/ static int nativeGenerationId(int nativeBitmap) {
-        // FIXME implement native delegate
-        throw new UnsupportedOperationException("Native delegate needed for Bitmap.nativeGenerationId");
+        Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
+        if (delegate == null) {
+            assert false;
+            return 0;
+        }
+
+        return delegate.mGenerationId;
     }
 
     /*package*/ static Bitmap nativeCreateFromParcel(Parcel p) {
-        // FIXME implement native delegate
-        throw new UnsupportedOperationException("Native delegate needed for Bitmap.nativeCreateFromParcel");
+        // This is only called by Bitmap.CREATOR (Parcelable.Creator<Bitmap>), which is only
+        // used during aidl call so really this should not be called.
+        Bridge.getLog().error(null,
+                "AIDL is not suppored, and therefore bitmap cannot be created from parcels");
+        return null;
     }
 
     /*package*/ static boolean nativeWriteToParcel(int nativeBitmap, boolean isMutable,
             int density, Parcel p) {
-        // FIXME implement native delegate
-        throw new UnsupportedOperationException("Native delegate needed for Bitmap.nativeWriteToParcel");
+        // This is only called when sending a bitmap through aidl, so really this should not
+        // be called.
+        Bridge.getLog().error(null,
+                "AIDL is not suppored, and therefore bitmap cannot be written to parcels");
+        return false;
     }
 
     /*package*/ static Bitmap nativeExtractAlpha(int nativeBitmap, int nativePaint,
             int[] offsetXY) {
-        // FIXME implement native delegate
-        throw new UnsupportedOperationException("Native delegate needed for Bitmap.nativeExtractAlpha");
+        Bitmap_Delegate bitmap = sManager.getDelegate(nativeBitmap);
+        if (bitmap == null) {
+            assert false;
+            return null;
+        }
+
+        Paint_Delegate paint = null;
+        if (nativePaint > 0) {
+            paint = Paint_Delegate.getDelegate(nativePaint);
+            if (paint == null) {
+                assert false;
+                return null;
+            }
+        }
+
+        if (paint != null && paint.getMaskFilter() != 0) {
+            Bridge.getLog().fidelityWarning(null,
+                    "MaskFilter not supported in Bitmap.extractAlpha",
+                    null);
+        }
+
+        int alpha = paint != null ? paint.getAlpha() : 0xFF;
+        BufferedImage image = createCopy(bitmap.getImage(), BufferedImage.TYPE_INT_ARGB, alpha);
+
+        // create the delegate. The actual Bitmap config is only an alpha channel
+        Bitmap_Delegate delegate = new Bitmap_Delegate(image, Config.ALPHA_8);
+
+        // the density doesn't matter, it's set by the Java method.
+        return createBitmap(delegate, false /*isMutable*/,
+                ResourceDensity.DEFAULT_DENSITY /*density*/);
     }
 
-
     /*package*/ static void nativePrepareToDraw(int nativeBitmap) {
-        // FIXME implement native delegate
-        throw new UnsupportedOperationException("Native delegate needed for Bitmap.nativePrepareToDraw");
+        // nothing to be done here.
     }
 
     /*package*/ static void nativeSetHasAlpha(int nativeBitmap, boolean hasAlpha) {
@@ -364,8 +460,48 @@ public final class Bitmap_Delegate {
     }
 
     /*package*/ static boolean nativeSameAs(int nb0, int nb1) {
-        // FIXME implement native delegate
-        throw new UnsupportedOperationException("Native delegate needed for Bitmap.nativeSameAs");
+        Bitmap_Delegate delegate1 = sManager.getDelegate(nb0);
+        if (delegate1 == null) {
+            assert false;
+            return false;
+        }
+
+        Bitmap_Delegate delegate2 = sManager.getDelegate(nb1);
+        if (delegate2 == null) {
+            assert false;
+            return false;
+        }
+
+        BufferedImage image1 = delegate1.getImage();
+        BufferedImage image2 = delegate2.getImage();
+        if (delegate1.mConfig != delegate2.mConfig ||
+                image1.getWidth() != image2.getWidth() ||
+                image1.getHeight() != image2.getHeight()) {
+            return false;
+        }
+
+        // get the internal data
+        int w = image1.getWidth();
+        int h = image2.getHeight();
+        int[] argb1 = new int[w*h];
+        int[] argb2 = new int[w*h];
+
+        image1.getRGB(0, 0, w, h, argb1, 0, w);
+        image2.getRGB(0, 0, w, h, argb2, 0, w);
+
+        // compares
+        if (delegate1.mConfig == Config.ALPHA_8) {
+            // in this case we have to manually compare the alpha channel as the rest is garbage.
+            final int length = w*h;
+            for (int i = 0 ; i < length ; i++) {
+                if ((argb1[i] & 0xFF000000) != (argb2[i] & 0xFF000000)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        return Arrays.equals(argb1, argb2);
     }
 
     // ---- Private delegate/helper methods ----
@@ -382,4 +518,37 @@ public final class Bitmap_Delegate {
         // and create/return a new Bitmap with it
         return new Bitmap(nativeInt, null /* buffer */, isMutable, null /*ninePatchChunk*/, density);
     }
+
+    /**
+     * Creates and returns a copy of a given BufferedImage.
+     * <p/>
+     * if alpha is different than 255, then it is applied to the alpha channel of each pixel.
+     *
+     * @param image the image to copy
+     * @param imageType the type of the new image
+     * @param alpha an optional alpha modifier
+     * @return a new BufferedImage
+     */
+    /*package*/ static BufferedImage createCopy(BufferedImage image, int imageType, int alpha) {
+        int w = image.getWidth();
+        int h = image.getHeight();
+
+        BufferedImage result = new BufferedImage(w, h, imageType);
+
+        int[] argb = new int[w * h];
+        image.getRGB(0, 0, image.getWidth(), image.getHeight(), argb, 0, image.getWidth());
+
+        if (alpha != 255) {
+            final int length = argb.length;
+            for (int i = 0 ; i < length; i++) {
+                int a = (argb[i] >>> 24 * alpha) / 255;
+                argb[i] = (a << 24) | (argb[i] & 0x00FFFFFF);
+            }
+        }
+
+        result.setRGB(0, 0, w, h, argb, 0, w);
+
+        return result;
+    }
+
 }
