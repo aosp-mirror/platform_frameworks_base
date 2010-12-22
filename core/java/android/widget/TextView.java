@@ -7530,36 +7530,31 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public boolean onKeyShortcut(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-        case KeyEvent.KEYCODE_A:
-            if (canSelectText()) {
-                return onTextContextMenuItem(ID_SELECT_ALL);
+        final int filteredMetaState = event.getMetaState() & ~KeyEvent.META_CTRL_MASK;
+        if (KeyEvent.metaStateHasNoModifiers(filteredMetaState)) {
+            switch (keyCode) {
+            case KeyEvent.KEYCODE_A:
+                if (canSelectText()) {
+                    return onTextContextMenuItem(ID_SELECT_ALL);
+                }
+                break;
+            case KeyEvent.KEYCODE_X:
+                if (canCut()) {
+                    return onTextContextMenuItem(ID_CUT);
+                }
+                break;
+            case KeyEvent.KEYCODE_C:
+                if (canCopy()) {
+                    return onTextContextMenuItem(ID_COPY);
+                }
+                break;
+            case KeyEvent.KEYCODE_V:
+                if (canPaste()) {
+                    return onTextContextMenuItem(ID_PASTE);
+                }
+                break;
             }
-
-            break;
-
-        case KeyEvent.KEYCODE_X:
-            if (canCut()) {
-                return onTextContextMenuItem(ID_CUT);
-            }
-
-            break;
-
-        case KeyEvent.KEYCODE_C:
-            if (canCopy()) {
-                return onTextContextMenuItem(ID_COPY);
-            }
-
-            break;
-
-        case KeyEvent.KEYCODE_V:
-            if (canPaste()) {
-                return onTextContextMenuItem(ID_PASTE);
-            }
-
-            break;
         }
-
         return super.onKeyShortcut(keyCode, event);
     }
 
@@ -7889,7 +7884,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Called when a context menu option for the text view is selected.  Currently
-     * this will be {@link android.R.id#copyUrl} or {@link android.R.id#selectTextMode}.
+     * this will be {@link android.R.id#copyUrl}, {@link android.R.id#selectTextMode},
+     * {@link android.R.id#selectAll}, {@link android.R.id#paste}, {@link android.R.id#cut}
+     * or {@link android.R.id#copy}.
      */
     public boolean onTextContextMenuItem(int id) {
         int min = 0;
@@ -7934,8 +7931,32 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     startSelectionActionMode();
                 }
                 return true;
-            }
 
+            case ID_SELECT_ALL:
+                selectAll();
+                // Update controller positions after selection change.
+                if (hasSelectionController()) {
+                    getSelectionController().show();
+                }
+                return true;
+
+            case ID_PASTE:
+                paste(min, max);
+                return true;
+
+            case ID_CUT:
+                setPrimaryClip(ClipData.newPlainText(null, null,
+                        mTransformed.subSequence(min, max)));
+                ((Editable) mText).delete(min, max);
+                stopSelectionActionMode();
+                return true;
+
+            case ID_COPY:
+                setPrimaryClip(ClipData.newPlainText(null, null,
+                        mTransformed.subSequence(min, max)));
+                stopSelectionActionMode();
+                return true;
+        }
         return false;
     }
 
@@ -8292,49 +8313,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                  mCustomSelectionActionModeCallback.onActionItemClicked(mode, item)) {
                 return true;
             }
-
-            final int itemId = item.getItemId();
-
-            if (itemId == ID_SELECT_ALL) {
-                selectAll();
-                // Update controller positions after selection change.
-                if (hasSelectionController()) {
-                    getSelectionController().show();
-                }
-                return true;
-            }
-
-            int min = 0;
-            int max = mText.length();
-
-            if (isFocused()) {
-                final int selStart = getSelectionStart();
-                final int selEnd = getSelectionEnd();
-
-                min = Math.max(0, Math.min(selStart, selEnd));
-                max = Math.max(0, Math.max(selStart, selEnd));
-            }
-
-            switch (item.getItemId()) {
-                case ID_PASTE:
-                    paste(min, max);
-                    return true;
-
-                case ID_CUT:
-                    setPrimaryClip(ClipData.newPlainText(null, null,
-                            mTransformed.subSequence(min, max)));
-                    ((Editable) mText).delete(min, max);
-                    stopSelectionActionMode();
-                    return true;
-
-                case ID_COPY:
-                    setPrimaryClip(ClipData.newPlainText(null, null,
-                            mTransformed.subSequence(min, max)));
-                    stopSelectionActionMode();
-                    return true;
-            }
-
-            return false;
+            return onTextContextMenuItem(item.getItemId());
         }
 
         @Override

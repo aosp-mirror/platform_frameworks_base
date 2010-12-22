@@ -2626,6 +2626,16 @@ public final class ViewRoot extends Handler implements ViewParent,
             return;
         }
 
+        // If the Control modifier is held, try to interpret the key as a shortcut.
+        if (event.getAction() == KeyEvent.ACTION_UP
+                && event.isCtrlPressed()
+                && !KeyEvent.isModifierKey(event.getKeyCode())) {
+            if (mView.dispatchKeyShortcutEvent(event)) {
+                finishKeyEvent(event, sendDone, true);
+                return;
+            }
+        }
+
         // Apply the fallback event policy.
         if (mFallbackEventHandler.dispatchKeyEvent(event)) {
             finishKeyEvent(event, sendDone, true);
