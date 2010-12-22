@@ -2314,8 +2314,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     final void addRecentTaskLocked(TaskRecord task) {
-        // Remove any existing entries that are the same kind of task.
         int N = mRecentTasks.size();
+        // Quick case: check if the top-most recent task is the same.
+        if (N > 0 && mRecentTasks.get(0) == task) {
+            return;
+        }
+        // Remove any existing entries that are the same kind of task.
         for (int i=0; i<N; i++) {
             TaskRecord tr = mRecentTasks.get(i);
             if ((task.affinity != null && task.affinity.equals(tr.affinity))
