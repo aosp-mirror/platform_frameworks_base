@@ -26,6 +26,7 @@ import android.database.DatabaseUtils;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.BrowserContract.Bookmarks;
+import android.provider.BrowserContract.Combined;
 import android.provider.BrowserContract.History;
 import android.provider.BrowserContract.Searches;
 import android.util.Log;
@@ -244,8 +245,9 @@ public class Browser {
      */
     public static final Cursor getAllVisitedUrls(ContentResolver cr) throws
             IllegalStateException {
-        return cr.query(History.CONTENT_URI,
-                new String[] { History.URL }, null, null, null);
+        return cr.query(Combined.CONTENT_URI,
+                new String[] { Combined.URL }, null, null,
+                Combined.DATE_CREATED + " ASC");
     }
 
     private static final void addOrUrlEquals(StringBuilder sb) {
