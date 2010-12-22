@@ -1513,12 +1513,14 @@ public class BluetoothService extends IBluetooth.Stub {
             return false;
         }
 
-        handlePanDeviceStateChange(device, BluetoothPan.STATE_CONNECTING);
-        if (connectPanDeviceNative(objectPath, "nap")) {
+        handlePanDeviceStateChange(device, BluetoothPan.STATE_CONNECTING,
+                                           BluetoothPan.LOCAL_PANU_ROLE);
+        if (connectPanDeviceNative(objectPath, "nap", "panu")) {
             log ("connecting to PAN");
             return true;
         } else {
-            handlePanDeviceStateChange(device, BluetoothPan.STATE_DISCONNECTED);
+            handlePanDeviceStateChange(device, BluetoothPan.STATE_DISCONNECTED,
+                                                BluetoothPan.LOCAL_PANU_ROLE);
             log ("could not connect to PAN");
             return false;
         }
@@ -1560,13 +1562,15 @@ public class BluetoothService extends IBluetooth.Stub {
         if (getPanDeviceState(device) != BluetoothPan.STATE_CONNECTED) {
             log (device + " already disconnected from PAN");
         }
-        handlePanDeviceStateChange(device, BluetoothPan.STATE_DISCONNECTING);
+        handlePanDeviceStateChange(device, BluetoothPan.STATE_DISCONNECTING,
+                                    BluetoothPan.LOCAL_PANU_ROLE);
         return disconnectPanDeviceNative(objectPath);
     }
 
     /*package*/ synchronized void handlePanDeviceStateChange(BluetoothDevice device,
                                                              String iface,
-                                                             int state) {
+                                                             int state,
+                                                             int role) {
         int prevState;
         String ifaceAddr = null;
 
@@ -1578,13 +1582,16 @@ public class BluetoothService extends IBluetooth.Stub {
         }
         if (prevState == state) return;
 
-        if (state == BluetoothPan.STATE_CONNECTED) {
-            ifaceAddr = enableTethering(iface);
-            if (ifaceAddr == null) Log.e(TAG, "Error seting up tether interface");
-        } else if (state == BluetoothPan.STATE_DISCONNECTED) {
-            if (ifaceAddr != null) {
-                mBluetoothIfaceAddresses.remove(ifaceAddr);
-                ifaceAddr = null;
+        // TODO: We might need this for PANU role too.
+        if (role == BluetoothPan.LOCAL_NAP_ROLE) {
+            if (state == BluetoothPan.STATE_CONNECTED) {
+                ifaceAddr = enableTethering(iface);
+                if (ifaceAddr == null) Log.e(TAG, "Error seting up tether interface");
+            } else if (state == BluetoothPan.STATE_DISCONNECTED) {
+                if (ifaceAddr != null) {
+                    mBluetoothIfaceAddresses.remove(ifaceAddr);
+                    ifaceAddr = null;
+                }
             }
         }
 
@@ -1595,6 +1602,7 @@ public class BluetoothService extends IBluetooth.Stub {
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
         intent.putExtra(BluetoothPan.EXTRA_PREVIOUS_PAN_STATE, prevState);
         intent.putExtra(BluetoothPan.EXTRA_PAN_STATE, state);
+        intent.putExtra(BluetoothPan.EXTRA_LOCAL_ROLE, role);
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
 
         if (DBG) log("Pan Device state : device: " + device + " State:" + prevState + "->" + state);
@@ -1602,8 +1610,8 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     /*package*/ synchronized void handlePanDeviceStateChange(BluetoothDevice device,
-                                                             int state) {
-        handlePanDeviceStateChange(device, null, state);
+                                                             int state, int role) {
+        handlePanDeviceStateChange(device, null, state, role);
     }
 
     private String createNewTetheringAddressLocked() {

@@ -420,12 +420,14 @@ class BluetoothEventLoop {
         if (name.equals("Connected")) {
             if (propValues[1].equals("false")) {
                 mBluetoothService.handlePanDeviceStateChange(device,
-                                          BluetoothInputDevice.STATE_DISCONNECTED);
+                                          BluetoothPan.STATE_DISCONNECTED,
+                                          BluetoothPan.LOCAL_PANU_ROLE);
             }
         } else if (name.equals("Interface")) {
             String iface = propValues[1];
             mBluetoothService.handlePanDeviceStateChange(device, iface,
-                                            BluetoothInputDevice.STATE_CONNECTED);
+                                          BluetoothPan.STATE_CONNECTED,
+                                          BluetoothPan.LOCAL_PANU_ROLE);
         }
     }
 
@@ -751,18 +753,21 @@ class BluetoothEventLoop {
             }
             int newState = connected? BluetoothPan.STATE_CONNECTED :
                 BluetoothPan.STATE_DISCONNECTED;
-            mBluetoothService.handlePanDeviceStateChange(device, newState);
+            mBluetoothService.handlePanDeviceStateChange(device, newState,
+                                                  BluetoothPan.LOCAL_PANU_ROLE);
         }
     }
 
     private void onNetworkDeviceDisconnected(String address) {
         BluetoothDevice device = mAdapter.getRemoteDevice(address);
-        mBluetoothService.handlePanDeviceStateChange(device, BluetoothPan.STATE_DISCONNECTED);
+        mBluetoothService.handlePanDeviceStateChange(device, BluetoothPan.STATE_DISCONNECTED,
+                                                      BluetoothPan.LOCAL_NAP_ROLE);
     }
 
     private void onNetworkDeviceConnected(String address, String iface, int destUuid) {
         BluetoothDevice device = mAdapter.getRemoteDevice(address);
-        mBluetoothService.handlePanDeviceStateChange(device, iface, BluetoothPan.STATE_CONNECTED);
+        mBluetoothService.handlePanDeviceStateChange(device, iface, BluetoothPan.STATE_CONNECTED,
+                                                      BluetoothPan.LOCAL_NAP_ROLE);
     }
 
     private void onRestartRequired() {
