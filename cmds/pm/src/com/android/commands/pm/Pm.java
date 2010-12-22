@@ -18,9 +18,11 @@ package com.android.commands.pm;
 
 import com.android.internal.content.PackageHelper;
 
+import android.app.ActivityManagerNative;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
+import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageManager;
@@ -97,6 +99,11 @@ public final class Pm {
 
         if ("uninstall".equals(op)) {
             runUninstall();
+            return;
+        }
+
+        if ("clear".equals(op)) {
+            runClear();
             return;
         }
 
@@ -809,6 +816,55 @@ public final class Pm {
         return obs.result;
     }
 
+    class ClearDataObserver extends IPackageDataObserver.Stub {
+        boolean finished;
+        boolean result;
+
+        @Override
+        public void onRemoveCompleted(String packageName, boolean succeeded) throws RemoteException {
+            synchronized (this) {
+                finished = true;
+                result = succeeded;
+                notifyAll();
+            }
+        }
+
+    }
+
+    private void runClear() {
+        String pkg = nextArg();
+        if (pkg == null) {
+            System.err.println("Error: no package specified");
+            showUsage();
+            return;
+        }
+
+        ClearDataObserver obs = new ClearDataObserver();
+        try {
+            if (!ActivityManagerNative.getDefault().clearApplicationUserData(pkg, obs)) {
+                System.err.println("Failed");
+            }
+
+            synchronized (obs) {
+                while (!obs.finished) {
+                    try {
+                        obs.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+
+            if (obs.result) {
+                System.err.println("Success");
+            } else {
+                System.err.println("Failed");
+            }
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+        }
+    }
+
     private static String enabledSettingToString(int state) {
         switch (state) {
             case PackageManager.COMPONENT_ENABLED_STATE_DEFAULT:
@@ -944,6 +1000,7 @@ public final class Pm {
         System.err.println("       pm path PACKAGE");
         System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] [-s] [-f] PATH");
         System.err.println("       pm uninstall [-k] PACKAGE");
+        System.err.println("       pm clear PACKAGE");
         System.err.println("       pm enable PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable PACKAGE_OR_COMPONENT");
         System.err.println("       pm setInstallLocation [0/auto] [1/internal] [2/external]");
@@ -985,6 +1042,8 @@ public final class Pm {
         System.err.println("The uninstall command removes a package from the system. Options:");
         System.err.println("  -k: keep the data and cache directories around.");
         System.err.println("after the package removal.");
+        System.err.println("");
+        System.err.println("The clear command deletes all data associated with a package.");
         System.err.println("");
         System.err.println("The enable and disable commands change the enabled state of");
         System.err.println("a given package or component (written as \"package/class\").");
