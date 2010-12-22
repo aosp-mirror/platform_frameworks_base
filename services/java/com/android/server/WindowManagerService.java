@@ -6814,6 +6814,11 @@ public class WindowManagerService extends IWindowManager.Stub
         // Input channel
         InputChannel mInputChannel;
         
+        // Used to improve performance of toString()
+        String mStringNameCache;
+        CharSequence mLastTitle;
+        boolean mWasPaused;
+
         WindowState(Session s, IWindow c, WindowToken token,
                WindowState attachedWindow, WindowManager.LayoutParams a,
                int viewVisibility) {
@@ -8131,9 +8136,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public String toString() {
-            return "Window{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " " + mAttrs.getTitle() + " paused=" + mToken.paused + "}";
+            if (mStringNameCache == null || mLastTitle != mAttrs.getTitle()
+                    || mWasPaused != mToken.paused) {
+                mLastTitle = mAttrs.getTitle();
+                mWasPaused = mToken.paused;
+                mStringNameCache = "Window{" + Integer.toHexString(System.identityHashCode(this))
+                        + " " + mLastTitle + " paused=" + mWasPaused + "}";
+            }
+            return mStringNameCache;
         }
     }
 
