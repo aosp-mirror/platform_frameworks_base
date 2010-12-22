@@ -58,9 +58,9 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
     private static final int COLLAPSE_DURATION = 360;
     private static final String TAG = "RecentAppsPanel";
     private static final boolean DEBUG = TabletStatusBar.DEBUG;
-    private static final int DISPLAY_TASKS_PORTRAIT = 8;
+    private static final int DISPLAY_TASKS_PORTRAIT = 7; // Limited by max binder transaction size
     private static final int DISPLAY_TASKS_LANDSCAPE = 5; // number of recent tasks to display
-    private static final int MAX_TASKS = DISPLAY_TASKS_PORTRAIT + 2; // allow extra for non-apps
+    private static final int MAX_TASKS = DISPLAY_TASKS_PORTRAIT + 1; // allow extra for non-apps
     private static final int STAGGER_ANIMATION_DELAY = 30;
     private static final long ALPHA_ANIMATION_DURATION = 120;
     private TabletStatusBar mBar;
