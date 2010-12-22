@@ -146,7 +146,7 @@ Word16 AacEncEncode(AAC_ENCODER *aacEnc,		/*!< an encoder handle */
                     const UWord8 *ancBytes,     /*!< pointer to ancillary data bytes */
                     Word16 *numAncBytes,		/*!< number of ancillary Data Bytes */
                     UWord8 *outBytes,           /*!< pointer to output buffer (must be large MINBITS_COEF/8*MAX_CHANNELS bytes) */
-                    Word32 *numOutBytes         /*!< number of bytes in output buffer after processing */
+                    VO_U32 *numOutBytes         /*!< number of bytes in output buffer after processing */
                     )
 {
   ELEMENT_INFO *elInfo = &aacEnc->elInfo;

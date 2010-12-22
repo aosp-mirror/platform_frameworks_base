@@ -102,7 +102,7 @@ Word16 AacEncEncode(AAC_ENCODER		   *hAacEnc,
                     const UWord8       *ancBytes,      /*!< pointer to ancillary data bytes */
                     Word16             *numAncBytes,   /*!< number of ancillary Data Bytes, send as fill element  */
                     UWord8             *outBytes,      /*!< pointer to output buffer            */
-                    Word32             *numOutBytes    /*!< number of bytes in output buffer */
+                    VO_U32             *numOutBytes    /*!< number of bytes in output buffer */
                     );
 
 /*---------------------------------------------------------------------------
