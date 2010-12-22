@@ -4132,7 +4132,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected int[] onCreateDrawableState(int extraSpace) {
-        final int[] drawableState = super.onCreateDrawableState(extraSpace);
+        final int[] drawableState = super.onCreateDrawableState(extraSpace + 1);
+
+        if (!mSingleLine) {
+            mergeDrawableStates(drawableState, MULTILINE_STATE_SET);
+        }
+
         if (mTextIsSelectable) {
             // Disable pressed state, which was introduced when TextView was made clickable.
             // Prevents text color change.
@@ -4148,6 +4153,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
         }
+
         return drawableState;
     }
 
@@ -9488,4 +9494,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static long sLastCutOrCopyTime;
     // Used to highlight a word when it is corrected by the IME
     private CorrectionHighlighter mCorrectionHighlighter;
+    // New state used to change background based on whether this TextView is multiline.
+    private static final int[] MULTILINE_STATE_SET = { R.attr.state_multiline };
 }

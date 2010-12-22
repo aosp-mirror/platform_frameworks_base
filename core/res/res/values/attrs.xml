@@ -3692,6 +3692,10 @@
         <!-- State identifier indicating the popup will be above the anchor. -->
         <attr name="state_above_anchor" format="boolean" />
     </declare-styleable>
+    <declare-styleable name="TextViewMultiLineBackgroundState">
+        <!-- State identifier indicating a TextView has a multi-line layout. -->
+        <attr name="state_multiline" format="boolean" />
+    </declare-styleable>
 
     <!-- ***************************************************************** -->
     <!-- Support for Searchable activities. -->

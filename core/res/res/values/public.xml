@@ -1425,6 +1425,7 @@
   <public type="attr" name="solidColor" />
   <public type="attr" name="spinnersShown" />
   <public type="attr" name="calendarViewShown" />
+  <public type="attr" name="state_multiline" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
