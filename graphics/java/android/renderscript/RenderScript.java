@@ -589,16 +589,8 @@ public class RenderScript {
 
     ProgramStore mProgramStore_BLEND_NONE_DEPTH_TEST;
     ProgramStore mProgramStore_BLEND_NONE_DEPTH_NO_DEPTH;
-    ProgramStore mProgramStore_BLEND_NONE_DEPTH_NO_TEST;
-    ProgramStore mProgramStore_BLEND_NONE_DEPTH_NO_WRITE;
     ProgramStore mProgramStore_BLEND_ALPHA_DEPTH_TEST;
     ProgramStore mProgramStore_BLEND_ALPHA_DEPTH_NO_DEPTH;
-    ProgramStore mProgramStore_BLEND_ALPHA_DEPTH_NO_TEST;
-    ProgramStore mProgramStore_BLEND_ALPHA_DEPTH_NO_WRITE;
-    ProgramStore mProgramStore_BLEND_ADD_DEPTH_TEST;
-    ProgramStore mProgramStore_BLEND_ADD_DEPTH_NO_DEPTH;
-    ProgramStore mProgramStore_BLEND_ADD_DEPTH_NO_TEST;
-    ProgramStore mProgramStore_BLEND_ADD_DEPTH_NO_WRITE;
 
     ProgramRaster mProgramRaster_CULL_BACK;
     ProgramRaster mProgramRaster_CULL_FRONT;

@@ -177,36 +177,15 @@ public class Program extends BaseObj {
             return this;
         }
 
-        public void addInput(Element e) throws IllegalStateException {
-            // Should check for consistant and non-conflicting names...
-            if(mInputCount >= MAX_INPUT) {
-                throw new RSIllegalArgumentException("Max input count exceeded.");
-            }
-            if (e.isComplex()) {
-                throw new RSIllegalArgumentException("Complex elements not allowed.");
-            }
-            mInputs[mInputCount++] = e;
+        public int getCurrentConstantIndex() {
+            return mConstantCount - 1;
         }
 
-        public void addOutput(Element e) throws IllegalStateException {
-            // Should check for consistant and non-conflicting names...
-            if(mOutputCount >= MAX_OUTPUT) {
-                throw new RSIllegalArgumentException("Max output count exceeded.");
-            }
-            if (e.isComplex()) {
-                throw new RSIllegalArgumentException("Complex elements not allowed.");
-            }
-            mOutputs[mOutputCount++] = e;
+        public int getCurrentTextureIndex() {
+            return mTextureCount - 1;
         }
 
-        void resetConstant() {
-            mConstantCount = 0;
-            for(int i = 0; i < MAX_CONSTANT; i ++) {
-                mConstants[i] = null;
-            }
-        }
-
-        public int addConstant(Type t) throws IllegalStateException {
+        public BaseProgramBuilder addConstant(Type t) throws IllegalStateException {
             // Should check for consistant and non-conflicting names...
             if(mConstantCount >= MAX_CONSTANT) {
                 throw new RSIllegalArgumentException("Max input count exceeded.");
@@ -215,18 +194,7 @@ public class Program extends BaseObj {
                 throw new RSIllegalArgumentException("Complex elements not allowed.");
             }
             mConstants[mConstantCount] = t;
-            return mConstantCount++;
-        }
-
-        public BaseProgramBuilder setTextureCount(int count) throws IllegalArgumentException {
-            // Should check for consistant and non-conflicting names...
-            if(count >= MAX_TEXTURE) {
-                throw new IllegalArgumentException("Max texture count exceeded.");
-            }
-            mTextureCount = count;
-            for (int i = 0; i < mTextureCount; i ++) {
-                mTextureTypes[i] = TextureType.TEXTURE_2D;
-            }
+            mConstantCount++;
             return this;
         }
 

@@ -50,7 +50,7 @@ public class BallsRS {
     private void createProgramVertex() {
         updateProjectionMatrices();
 
-        ProgramVertex.ShaderBuilder sb = new ProgramVertex.ShaderBuilder(mRS);
+        ProgramVertex.Builder sb = new ProgramVertex.Builder(mRS);
         String t =  "varying vec4 varColor;\n" +
                     "void main() {\n" +
                     "  vec4 pos = vec4(0.0, 0.0, 0.0, 1.0);\n" +
@@ -75,18 +75,27 @@ public class BallsRS {
         return allocation;
     }
 
+    ProgramStore BLEND_ADD_DEPTH_NONE(RenderScript rs) {
+        ProgramStore.Builder builder = new ProgramStore.Builder(rs);
+        builder.setDepthFunc(ProgramStore.DepthFunc.ALWAYS);
+        builder.setBlendFunc(ProgramStore.BlendSrcFunc.ONE, ProgramStore.BlendDstFunc.ONE);
+        builder.setDitherEnabled(false);
+        builder.setDepthMaskEnabled(false);
+        return builder.create();
+    }
+
     public void init(RenderScriptGL rs, Resources res, int width, int height) {
         mRS = rs;
         mRes = res;
 
-        ProgramFragment.Builder pfb = new ProgramFragment.Builder(rs);
+        ProgramFragmentFixedFunction.Builder pfb = new ProgramFragmentFixedFunction.Builder(rs);
         pfb.setPointSpriteTexCoordinateReplacement(true);
-        pfb.setTexture(ProgramFragment.Builder.EnvMode.MODULATE,
-                           ProgramFragment.Builder.Format.RGBA, 0);
+        pfb.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.MODULATE,
+                           ProgramFragmentFixedFunction.Builder.Format.RGBA, 0);
         pfb.setVaryingColor(true);
         mPFPoints = pfb.create();
 
-        pfb = new ProgramFragment.Builder(rs);
+        pfb = new ProgramFragmentFixedFunction.Builder(rs);
         pfb.setVaryingColor(true);
         mPFLines = pfb.create();
 
@@ -97,7 +106,7 @@ public class BallsRS {
 
         Mesh.AllocationBuilder smb = new Mesh.AllocationBuilder(mRS);
         smb.addVertexAllocation(mPoints.getAllocation());
-        smb.addIndexType(Primitive.POINT);
+        smb.addIndexSetType(Mesh.Primitive.POINT);
         Mesh smP = smb.create();
 
         mPhysicsScript = new ScriptC_ball_physics(mRS, mRes, R.raw.ball_physics);
@@ -113,7 +122,7 @@ public class BallsRS {
         mScript.set_gPFPoints(mPFPoints);
         createProgramVertex();
 
-        mRS.bindProgramStore(ProgramStore.BLEND_ADD_DEPTH_NO_DEPTH(mRS));
+        mRS.bindProgramStore(BLEND_ADD_DEPTH_NONE(mRS));
 
         mPhysicsScript.set_gMinPos(new Float2(5, 5));
         mPhysicsScript.set_gMaxPos(new Float2(width - 5, height - 5));

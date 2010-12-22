@@ -65,8 +65,8 @@ public class Sampler extends BaseObj {
     public static Sampler CLAMP_NEAREST(RenderScript rs) {
         if(rs.mSampler_CLAMP_NEAREST == null) {
             Builder b = new Builder(rs);
-            b.setMin(Value.NEAREST);
-            b.setMag(Value.NEAREST);
+            b.setMinification(Value.NEAREST);
+            b.setMagnification(Value.NEAREST);
             b.setWrapS(Value.CLAMP);
             b.setWrapT(Value.CLAMP);
             rs.mSampler_CLAMP_NEAREST = b.create();
@@ -85,8 +85,8 @@ public class Sampler extends BaseObj {
     public static Sampler CLAMP_LINEAR(RenderScript rs) {
         if(rs.mSampler_CLAMP_LINEAR == null) {
             Builder b = new Builder(rs);
-            b.setMin(Value.LINEAR);
-            b.setMag(Value.LINEAR);
+            b.setMinification(Value.LINEAR);
+            b.setMagnification(Value.LINEAR);
             b.setWrapS(Value.CLAMP);
             b.setWrapT(Value.CLAMP);
             rs.mSampler_CLAMP_LINEAR = b.create();
@@ -105,8 +105,8 @@ public class Sampler extends BaseObj {
     public static Sampler CLAMP_LINEAR_MIP_LINEAR(RenderScript rs) {
         if(rs.mSampler_CLAMP_LINEAR_MIP_LINEAR == null) {
             Builder b = new Builder(rs);
-            b.setMin(Value.LINEAR_MIP_LINEAR);
-            b.setMag(Value.LINEAR);
+            b.setMinification(Value.LINEAR_MIP_LINEAR);
+            b.setMagnification(Value.LINEAR);
             b.setWrapS(Value.CLAMP);
             b.setWrapT(Value.CLAMP);
             rs.mSampler_CLAMP_LINEAR_MIP_LINEAR = b.create();
@@ -125,8 +125,8 @@ public class Sampler extends BaseObj {
     public static Sampler WRAP_NEAREST(RenderScript rs) {
         if(rs.mSampler_WRAP_NEAREST == null) {
             Builder b = new Builder(rs);
-            b.setMin(Value.NEAREST);
-            b.setMag(Value.NEAREST);
+            b.setMinification(Value.NEAREST);
+            b.setMagnification(Value.NEAREST);
             b.setWrapS(Value.WRAP);
             b.setWrapT(Value.WRAP);
             rs.mSampler_WRAP_NEAREST = b.create();
@@ -145,8 +145,8 @@ public class Sampler extends BaseObj {
     public static Sampler WRAP_LINEAR(RenderScript rs) {
         if(rs.mSampler_WRAP_LINEAR == null) {
             Builder b = new Builder(rs);
-            b.setMin(Value.LINEAR);
-            b.setMag(Value.LINEAR);
+            b.setMinification(Value.LINEAR);
+            b.setMagnification(Value.LINEAR);
             b.setWrapS(Value.WRAP);
             b.setWrapT(Value.WRAP);
             rs.mSampler_WRAP_LINEAR = b.create();
@@ -165,8 +165,8 @@ public class Sampler extends BaseObj {
     public static Sampler WRAP_LINEAR_MIP_LINEAR(RenderScript rs) {
         if(rs.mSampler_WRAP_LINEAR_MIP_LINEAR == null) {
             Builder b = new Builder(rs);
-            b.setMin(Value.LINEAR_MIP_LINEAR);
-            b.setMag(Value.LINEAR);
+            b.setMinification(Value.LINEAR_MIP_LINEAR);
+            b.setMagnification(Value.LINEAR);
             b.setWrapS(Value.WRAP);
             b.setWrapT(Value.WRAP);
             rs.mSampler_WRAP_LINEAR_MIP_LINEAR = b.create();
@@ -199,7 +199,7 @@ public class Sampler extends BaseObj {
             mAniso = 1.0f;
         }
 
-        public void setMin(Value v) {
+        public void setMinification(Value v) {
             if (v == Value.NEAREST ||
                 v == Value.LINEAR ||
                 v == Value.LINEAR_MIP_LINEAR ||
@@ -210,7 +210,7 @@ public class Sampler extends BaseObj {
             }
         }
 
-        public void setMag(Value v) {
+        public void setMagnification(Value v) {
             if (v == Value.NEAREST || v == Value.LINEAR) {
                 mMag = v;
             } else {
@@ -229,14 +229,6 @@ public class Sampler extends BaseObj {
         public void setWrapT(Value v) {
             if (v == Value.WRAP || v == Value.CLAMP) {
                 mWrapT = v;
-            } else {
-                throw new IllegalArgumentException("Invalid value");
-            }
-        }
-
-        public void setWrapR(Value v) {
-            if (v == Value.WRAP || v == Value.CLAMP) {
-                mWrapR = v;
             } else {
                 throw new IllegalArgumentException("Invalid value");
             }

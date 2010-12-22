@@ -57,7 +57,7 @@ public class Matrix2f {
     }
 
     public void load(Matrix2f src) {
-        System.arraycopy(mMat, 0, src, 0, 4);
+        System.arraycopy(mMat, 0, src.getArray(), 0, 4);
     }
 
     public void loadRotate(float rot) {

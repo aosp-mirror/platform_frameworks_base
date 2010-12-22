@@ -54,7 +54,7 @@ public class SceneGraphRS {
     private ProgramStore mPSBackground;
     private ProgramFragment mPFBackground;
     private ProgramVertex mPVBackground;
-    private ProgramVertex.MatrixAllocation mPVA;
+    private ProgramVertexFixedFunction.Constants mPVA;
 
     private Allocation mGridImage;
     private Allocation mAllocPV;
@@ -94,8 +94,8 @@ public class SceneGraphRS {
         ProgramStore.Builder b = new ProgramStore.Builder(mRS);
 
         b.setDepthFunc(ProgramStore.DepthFunc.LESS);
-        b.setDitherEnable(false);
-        b.setDepthMask(true);
+        b.setDitherEnabled(false);
+        b.setDepthMaskEnabled(true);
         mPSBackground = b.create();
 
         mScript.set_gPFSBackground(mPSBackground);
@@ -103,15 +103,15 @@ public class SceneGraphRS {
 
     private void initPF() {
         Sampler.Builder bs = new Sampler.Builder(mRS);
-        bs.setMin(Sampler.Value.LINEAR);
-        bs.setMag(Sampler.Value.LINEAR);
+        bs.setMinification(Sampler.Value.LINEAR);
+        bs.setMagnification(Sampler.Value.LINEAR);
         bs.setWrapS(Sampler.Value.CLAMP);
         bs.setWrapT(Sampler.Value.CLAMP);
         mSampler = bs.create();
 
-        ProgramFragment.Builder b = new ProgramFragment.Builder(mRS);
-        b.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
-                     ProgramFragment.Builder.Format.RGBA, 0);
+        ProgramFragmentFixedFunction.Builder b = new ProgramFragmentFixedFunction.Builder(mRS);
+        b.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.REPLACE,
+                     ProgramFragmentFixedFunction.Builder.Format.RGBA, 0);
         mPFBackground = b.create();
         mPFBackground.bindSampler(mSampler, 0);
 
@@ -119,11 +119,11 @@ public class SceneGraphRS {
     }
 
     private void initPV() {
-        ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS);
+        ProgramVertexFixedFunction.Builder pvb = new ProgramVertexFixedFunction.Builder(mRS);
         mPVBackground = pvb.create();
 
-        mPVA = new ProgramVertex.MatrixAllocation(mRS);
-        mPVBackground.bindAllocation(mPVA);
+        mPVA = new ProgramVertexFixedFunction.Constants(mRS);
+        ((ProgramVertexFixedFunction)mPVBackground).bindConstants(mPVA);
 
         mScript.set_gPVBackground(mPVBackground);
     }

@@ -248,27 +248,6 @@ public class FieldPacker {
         addU32(v.w);
     }
 
-    // to be removed on cleanup
-    public void addObj(Matrix4f v) {
-        for (int i=0; i < v.mMat.length; i++) {
-            addF32(v.mMat[i]);
-        }
-    }
-
-    // to be removed on cleanup
-    public void addObj(Matrix3f v) {
-        for (int i=0; i < v.mMat.length; i++) {
-            addF32(v.mMat[i]);
-        }
-    }
-
-    // to be removed on cleanup
-    public void addObj(Matrix2f v) {
-        for (int i=0; i < v.mMat.length; i++) {
-            addF32(v.mMat[i]);
-        }
-    }
-
     public void addMatrix(Matrix4f v) {
         for (int i=0; i < v.mMat.length; i++) {
             addF32(v.mMat[i]);

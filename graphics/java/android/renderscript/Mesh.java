@@ -27,6 +27,20 @@ import android.util.Log;
  **/
 public class Mesh extends BaseObj {
 
+    public enum Primitive {
+        POINT (0),
+        LINE (1),
+        LINE_STRIP (2),
+        TRIANGLE (3),
+        TRIANGLE_STRIP (4),
+        TRIANGLE_FAN (5);
+
+        int mID;
+        Primitive(int id) {
+            mID = id;
+        }
+    }
+
     Allocation[] mVertexBuffers;
     Allocation[] mIndexBuffers;
     Primitive[] mPrimitives;
@@ -51,7 +65,7 @@ public class Mesh extends BaseObj {
         }
         return mIndexBuffers.length;
     }
-    public Allocation getIndexAllocation(int slot) {
+    public Allocation getIndexSetAllocation(int slot) {
         return mIndexBuffers[slot];
     }
     public Primitive getPrimitive(int slot) {
@@ -115,64 +129,67 @@ public class Mesh extends BaseObj {
             mIndexTypes = new Vector();
         }
 
-        public int addVertexType(Type t) throws IllegalStateException {
+        public int getCurrentVertexTypeIndex() {
+            return mVertexTypeCount - 1;
+        }
+
+        public int getCurrentIndexSetIndex() {
+            return mIndexTypes.size() - 1;
+        }
+
+        public Builder addVertexType(Type t) throws IllegalStateException {
             if (mVertexTypeCount >= mVertexTypes.length) {
                 throw new IllegalStateException("Max vertex types exceeded.");
             }
 
-            int addedIndex = mVertexTypeCount;
             mVertexTypes[mVertexTypeCount] = new Entry();
             mVertexTypes[mVertexTypeCount].t = t;
             mVertexTypes[mVertexTypeCount].e = null;
             mVertexTypeCount++;
-            return addedIndex;
+            return this;
         }
 
-        public int addVertexType(Element e, int size) throws IllegalStateException {
+        public Builder addVertexType(Element e, int size) throws IllegalStateException {
             if (mVertexTypeCount >= mVertexTypes.length) {
                 throw new IllegalStateException("Max vertex types exceeded.");
             }
 
-            int addedIndex = mVertexTypeCount;
             mVertexTypes[mVertexTypeCount] = new Entry();
             mVertexTypes[mVertexTypeCount].t = null;
             mVertexTypes[mVertexTypeCount].e = e;
             mVertexTypes[mVertexTypeCount].size = size;
             mVertexTypeCount++;
-            return addedIndex;
+            return this;
         }
 
-        public int addIndexType(Type t, Primitive p) {
-            int addedIndex  = mIndexTypes.size();
+        public Builder addIndexSetType(Type t, Primitive p) {
             Entry indexType = new Entry();
             indexType.t = t;
             indexType.e = null;
             indexType.size = 0;
             indexType.prim = p;
             mIndexTypes.addElement(indexType);
-            return addedIndex;
+            return this;
         }
 
-        public int addIndexType(Primitive p) {
-            int addedIndex  = mIndexTypes.size();
+        public Builder addIndexSetType(Primitive p) {
             Entry indexType = new Entry();
             indexType.t = null;
             indexType.e = null;
             indexType.size = 0;
             indexType.prim = p;
             mIndexTypes.addElement(indexType);
-            return addedIndex;
+            return this;
         }
 
-        public int addIndexType(Element e, int size, Primitive p) {
-            int addedIndex  = mIndexTypes.size();
+        public Builder addIndexSetType(Element e, int size, Primitive p) {
             Entry indexType = new Entry();
             indexType.t = null;
             indexType.e = e;
             indexType.size = size;
             indexType.prim = p;
             mIndexTypes.addElement(indexType);
-            return addedIndex;
+            return this;
         }
 
         Type newType(Element e, int size) {
@@ -247,34 +264,39 @@ public class Mesh extends BaseObj {
             mIndexTypes = new Vector();
         }
 
-        public int addVertexAllocation(Allocation a) throws IllegalStateException {
+        public int getCurrentVertexTypeIndex() {
+            return mVertexTypeCount - 1;
+        }
+
+        public int getCurrentIndexSetIndex() {
+            return mIndexTypes.size() - 1;
+        }
+
+        public AllocationBuilder addVertexAllocation(Allocation a) throws IllegalStateException {
             if (mVertexTypeCount >= mVertexTypes.length) {
                 throw new IllegalStateException("Max vertex types exceeded.");
             }
 
-            int addedIndex = mVertexTypeCount;
             mVertexTypes[mVertexTypeCount] = new Entry();
             mVertexTypes[mVertexTypeCount].a = a;
             mVertexTypeCount++;
-            return addedIndex;
+            return this;
         }
 
-        public int addIndexAllocation(Allocation a, Primitive p) {
-            int addedIndex  = mIndexTypes.size();
+        public AllocationBuilder addIndexSetAllocation(Allocation a, Primitive p) {
             Entry indexType = new Entry();
             indexType.a = a;
             indexType.prim = p;
             mIndexTypes.addElement(indexType);
-            return addedIndex;
+            return this;
         }
 
-        public int addIndexType(Primitive p) {
-            int addedIndex  = mIndexTypes.size();
+        public AllocationBuilder addIndexSetType(Primitive p) {
             Entry indexType = new Entry();
             indexType.a = null;
             indexType.prim = p;
             mIndexTypes.addElement(indexType);
-            return addedIndex;
+            return this;
         }
 
         static synchronized Mesh internalCreate(RenderScript rs, AllocationBuilder b) {
@@ -379,7 +401,7 @@ public class Mesh extends BaseObj {
             }
         }
 
-        public void addVertex(float x, float y) {
+        public TriangleMeshBuilder addVertex(float x, float y) {
             if (mVtxSize != 2) {
                 throw new IllegalStateException("add mistmatch with declared components.");
             }
@@ -387,9 +409,10 @@ public class Mesh extends BaseObj {
             mVtxData[mVtxCount++] = x;
             mVtxData[mVtxCount++] = y;
             latch();
+            return this;
         }
 
-        public void addVertex(float x, float y, float z) {
+        public TriangleMeshBuilder addVertex(float x, float y, float z) {
             if (mVtxSize != 3) {
                 throw new IllegalStateException("add mistmatch with declared components.");
             }
@@ -398,26 +421,29 @@ public class Mesh extends BaseObj {
             mVtxData[mVtxCount++] = y;
             mVtxData[mVtxCount++] = z;
             latch();
+            return this;
         }
 
-        public void setTexture(float s, float t) {
+        public TriangleMeshBuilder setTexture(float s, float t) {
             if ((mFlags & TEXTURE_0) == 0) {
                 throw new IllegalStateException("add mistmatch with declared components.");
             }
             mS0 = s;
             mT0 = t;
+            return this;
         }
 
-        public void setNormal(float x, float y, float z) {
+        public TriangleMeshBuilder setNormal(float x, float y, float z) {
             if ((mFlags & NORMAL) == 0) {
                 throw new IllegalStateException("add mistmatch with declared components.");
             }
             mNX = x;
             mNY = y;
             mNZ = z;
+            return this;
         }
 
-        public void setColor(float r, float g, float b, float a) {
+        public TriangleMeshBuilder setColor(float r, float g, float b, float a) {
             if ((mFlags & COLOR) == 0) {
                 throw new IllegalStateException("add mistmatch with declared components.");
             }
@@ -425,9 +451,10 @@ public class Mesh extends BaseObj {
             mG = g;
             mB = b;
             mA = a;
+            return this;
         }
 
-        public void addTriangle(int idx1, int idx2, int idx3) {
+        public TriangleMeshBuilder addTriangle(int idx1, int idx2, int idx3) {
             if((idx1 >= mVtxCount) || (idx1 < 0) ||
                (idx2 >= mVtxCount) || (idx2 < 0) ||
                (idx3 >= mVtxCount) || (idx3 < 0)) {
@@ -441,6 +468,7 @@ public class Mesh extends BaseObj {
             mIndexData[mIndexCount++] = (short)idx1;
             mIndexData[mIndexCount++] = (short)idx2;
             mIndexData[mIndexCount++] = (short)idx3;
+            return this;
         }
 
         public Mesh create(boolean uploadToBufferObject) {
@@ -470,7 +498,7 @@ public class Mesh extends BaseObj {
 
             Builder smb = new Builder(mRS, usage);
             smb.addVertexType(mElement, mVtxCount / floatCount);
-            smb.addIndexType(Element.U16(mRS), mIndexCount, Primitive.TRIANGLE);
+            smb.addIndexSetType(Element.U16(mRS), mIndexCount, Primitive.TRIANGLE);
 
             Mesh sm = smb.create();
 
@@ -481,9 +509,9 @@ public class Mesh extends BaseObj {
                 }
             }
 
-            sm.getIndexAllocation(0).copyFrom(mIndexData);
+            sm.getIndexSetAllocation(0).copyFrom(mIndexData);
             if (uploadToBufferObject) {
-                sm.getIndexAllocation(0).syncAll(Allocation.USAGE_SCRIPT);
+                sm.getIndexSetAllocation(0).syncAll(Allocation.USAGE_SCRIPT);
             }
 
             return sm;

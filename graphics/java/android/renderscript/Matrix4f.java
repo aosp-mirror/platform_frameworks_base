@@ -71,7 +71,7 @@ public class Matrix4f {
     }
 
     public void load(Matrix4f src) {
-        System.arraycopy(mMat, 0, src, 0, 16);
+        System.arraycopy(mMat, 0, src.getArray(), 0, 16);
     }
 
     public void loadRotate(float rot, float x, float y, float z) {
@@ -179,6 +179,32 @@ public class Matrix4f {
         float right = top * aspect;
         loadFrustum(left, right, bottom, top, near, far);
     }
+
+    public void loadProjectionNormalized(int w, int h) {
+        // range -1,1 in the narrow axis at z = 0.
+        Matrix4f m1 = new Matrix4f();
+        Matrix4f m2 = new Matrix4f();
+
+        if(w > h) {
+            float aspect = ((float)w) / h;
+            m1.loadFrustum(-aspect,aspect,  -1,1,  1,100);
+        } else {
+            float aspect = ((float)h) / w;
+            m1.loadFrustum(-1,1, -aspect,aspect, 1,100);
+        }
+
+        m2.loadRotate(180, 0, 1, 0);
+        m1.loadMultiply(m1, m2);
+
+        m2.loadScale(-2, 2, 1);
+        m1.loadMultiply(m1, m2);
+
+        m2.loadTranslate(0, 0, 2);
+        m1.loadMultiply(m1, m2);
+
+        load(m1);
+    }
+
 
     public void multiply(Matrix4f rhs) {
         Matrix4f tmp = new Matrix4f();
