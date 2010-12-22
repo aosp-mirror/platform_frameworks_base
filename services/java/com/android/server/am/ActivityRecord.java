@@ -413,7 +413,7 @@ class ActivityRecord extends IApplicationToken.Stub {
         // an application, and that application is not blocked or unresponding.
         // In any other case, we can't count on getting the screen unfrozen,
         // so it is best to leave as-is.
-        return app == null || (!app.crashing && !app.notResponding);
+        return app != null && !app.crashing && !app.notResponding;
     }
     
     public void startFreezingScreenLocked(ProcessRecord app, int configChanges) {
