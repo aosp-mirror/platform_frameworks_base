@@ -22,6 +22,20 @@
 #include <utils/Log.h>
 #include <utils/threads.h>
 #include <core/SkBitmap.h>
+
+// Please do not enable "USE_PRIVATE_NATIVE_BITMAP_CONSTUCTOR"
+// This mode will be removed and it is kept here for
+// convenient comparsion just in case. Will be removed soon.
+// Tests show that this mode is also ~30ms slower,
+// when rotation is involved.
+#define USE_PRIVATE_NATIVE_BITMAP_CONSTUCTOR 0
+
+#if (!USE_PRIVATE_NATIVE_BITMAP_CONSTUCTOR)
+#include <core/SkCanvas.h>
+#include <core/SkDevice.h>
+#include <core/SkScalar.h>
+#endif
+
 #include <media/mediametadataretriever.h>
 #include <private/media/VideoFrame.h>
 
@@ -35,8 +49,15 @@ using namespace android;
 struct fields_t {
     jfieldID context;
     jclass bitmapClazz;
+#if USE_PRIVATE_NATIVE_BITMAP_CONSTUCTOR
     jmethodID bitmapConstructor;
+    jmethodID createBitmapRotationMethod;
+#else
+    jfieldID nativeBitmap;
     jmethodID createBitmapMethod;
+    jclass configClazz;
+    jmethodID createConfigMethod;
+#endif
 };
 
 static fields_t fields;
@@ -162,6 +183,12 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
         return NULL;
     }
 
+    LOGV("Dimension = %dx%d and bytes = %d",
+            videoFrame->mDisplayWidth,
+            videoFrame->mDisplayHeight,
+            videoFrame->mSize);
+
+#if USE_PRIVATE_NATIVE_BITMAP_CONSTUCTOR
     jobject matrix = NULL;
     if (videoFrame->mRotationAngle != 0) {
         LOGD("Create a rotation matrix: %d degrees", videoFrame->mRotationAngle);
@@ -217,9 +244,9 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
     jobject jSrcBitmap = env->NewObject(fields.bitmapClazz,
             fields.bitmapConstructor, (int) bitmap, NULL, true, NULL, -1);
 
-    LOGV("Return a new bitmap constructed with the rotation matrix");
-    return env->CallStaticObjectMethod(
-                fields.bitmapClazz, fields.createBitmapMethod,
+    jobject jBitmap = env->CallStaticObjectMethod(
+                fields.bitmapClazz,
+                fields.createBitmapRotationMethod,
                 jSrcBitmap,                     // source Bitmap
                 0,                              // x
                 0,                              // y
@@ -227,6 +254,39 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
                 videoFrame->mDisplayHeight,     // height
                 matrix,                         // transform matrix
                 false);                         // filter
+
+#else
+
+    jobject config = env->CallStaticObjectMethod(
+                        fields.configClazz,
+                        fields.createConfigMethod,
+                        SkBitmap::kRGB_565_Config);
+
+    jobject jBitmap = env->CallStaticObjectMethod(
+                            fields.bitmapClazz,
+                            fields.createBitmapMethod,
+                            videoFrame->mDisplayWidth,
+                            videoFrame->mDisplayHeight,
+                            config);
+    SkBitmap *bitmap =
+            (SkBitmap *) env->GetIntField(jBitmap, fields.nativeBitmap);
+
+    bitmap->lockPixels();
+
+    memcpy((uint8_t*)bitmap->getPixels(),
+            (uint8_t*)videoFrame + sizeof(VideoFrame), videoFrame->mSize);
+
+    bitmap->unlockPixels();
+
+    if (videoFrame->mRotationAngle != 0) {
+        SkDevice device(*bitmap);
+        SkCanvas canvas(&device);
+        canvas.rotate((SkScalar) (videoFrame->mRotationAngle * 1.0));
+        canvas.drawBitmap(*bitmap, 0, 0);
+    }
+#endif
+    LOGV("Return a new bitmap constructed with the rotation matrix");
+    return jBitmap;
 }
 
 static jbyteArray android_media_MediaMetadataRetriever_extractAlbumArt(JNIEnv *env, jobject thiz)
@@ -293,7 +353,6 @@ static void android_media_MediaMetadataRetriever_release(JNIEnv *env, jobject th
 static void android_media_MediaMetadataRetriever_native_finalize(JNIEnv *env, jobject thiz)
 {
     LOGV("native_finalize");
-    
     // No lock is needed, since android_media_MediaMetadataRetriever_release() is protected
     android_media_MediaMetadataRetriever_release(env, thiz);
 }
@@ -320,21 +379,52 @@ static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
         jniThrowException(env, "java/lang/RuntimeException", "Can't find android/graphics/Bitmap");
         return;
     }
-
+#if USE_PRIVATE_NATIVE_BITMAP_CONSTUCTOR
     fields.bitmapConstructor = env->GetMethodID(fields.bitmapClazz, "<init>", "(I[BZ[BI)V");
     if (fields.bitmapConstructor == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Can't find Bitmap constructor");
         return;
     }
-    fields.createBitmapMethod =
+    fields.createBitmapRotationMethod =
             env->GetStaticMethodID(fields.bitmapClazz, "createBitmap",
                     "(Landroid/graphics/Bitmap;IIIILandroid/graphics/Matrix;Z)"
                     "Landroid/graphics/Bitmap;");
-    if (fields.createBitmapMethod == NULL) {
+    if (fields.createBitmapRotationMethod == NULL) {
         jniThrowException(env, "java/lang/RuntimeException",
                 "Can't find Bitmap.createBitmap method");
         return;
     }
+#else
+    fields.createBitmapMethod =
+            env->GetStaticMethodID(fields.bitmapClazz, "createBitmap",
+                    "(IILandroid/graphics/Bitmap$Config;)"
+                    "Landroid/graphics/Bitmap;");
+    if (fields.createBitmapMethod == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException",
+                "Can't find Bitmap.createBitmap(int, int, Config)  method");
+        return;
+    }
+    fields.nativeBitmap = env->GetFieldID(fields.bitmapClazz, "mNativeBitmap", "I");
+    if (fields.nativeBitmap == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException",
+                "Can't find Bitmap.mNativeBitmap field");
+    }
+
+    fields.configClazz = env->FindClass("android/graphics/Bitmap$Config");
+    if (fields.configClazz == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException",
+                               "Can't find Bitmap$Config class");
+        return;
+    }
+    fields.createConfigMethod =
+            env->GetStaticMethodID(fields.configClazz, "nativeToConfig",
+                    "(I)Landroid/graphics/Bitmap$Config;");
+    if (fields.createConfigMethod == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException",
+                "Can't find Bitmap$Config.nativeToConfig(int)  method");
+        return;
+    }
+#endif
 }
 
 static void android_media_MediaMetadataRetriever_native_setup(JNIEnv *env, jobject thiz)
