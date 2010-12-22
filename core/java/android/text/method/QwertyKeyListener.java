@@ -295,7 +295,9 @@ public class QwertyKeyListener extends BaseKeyListener {
             }
 
             return true;
-        } else if (keyCode == KeyEvent.KEYCODE_DEL && selStart == selEnd) {
+        } else if (keyCode == KeyEvent.KEYCODE_DEL
+                && (event.hasNoModifiers() || event.hasModifiers(KeyEvent.META_ALT_ON))
+                && selStart == selEnd) {
             // special backspace case for undoing autotext
 
             int consider = 1;
