@@ -658,7 +658,8 @@ static Word16 advancePsychShort(PSY_DATA* psyData,
   Word32 normEnergyShift = (psyData->mdctScale + 1) << 1; /* in reference code, mdct spectrum must be multipied with 2, so +1 */
   Word32 clipEnergy = hPsyConfShort->clipEnergy >> normEnergyShift;
   Word32 wOffset = 0;
-  Word32 *data0, *data1;
+  Word32 *data0;
+  const Word32 *data1;
 
   for(w = 0; w < TRANS_FAC; w++) {
     Word32 i, tdata;

@@ -99,8 +99,8 @@ void BuildInterface(Word32                  *groupedMdctSpectrum,
     Word32 i;
     Word32 accuSumMS=0;
     Word32 accuSumLR=0;
-	Word32 *pSumMS = sfbEnergySumMS.sfbShort;
-	Word32 *pSumLR = sfbEnergySumLR.sfbShort;
+    const Word32 *pSumMS = sfbEnergySumMS.sfbShort;
+    const Word32 *pSumLR = sfbEnergySumLR.sfbShort;
 
     for (i=TRANS_FAC; i; i--) {
       accuSumLR = L_add(accuSumLR, *pSumLR); pSumLR++;

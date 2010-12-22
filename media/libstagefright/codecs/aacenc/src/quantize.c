@@ -110,7 +110,7 @@ static void quantizeLines(const Word16 gain,
   Word32 m = gain&3;
   Word32 g = (gain >> 2) + 4;
   Word32 mdctSpeL;
-  Word16 *pquat;
+  const Word16 *pquat;
     /* gain&3 */
 
   pquat = quantBorders[m];
@@ -333,7 +333,7 @@ Word32 calcSfbDist(const Word32 *spec,
   Word32 m = gain&3;
   Word32 g = (gain >> 2) + 4;
   Word32 g2 = (g << 1) + 1;
-  Word16 *pquat, *repquat;
+  const Word16 *pquat, *repquat;
     /* gain&3 */
 
   pquat = quantBorders[m];
