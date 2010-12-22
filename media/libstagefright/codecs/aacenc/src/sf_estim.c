@@ -400,7 +400,7 @@ static void assimilateSingleScf(PSY_OUT_CHANNEL *psyOutChan,
                                 Word16 *minScfCalculated,
                                 Flag    restartOnSuccess)
 {
-	Word32 sfbLast, sfbAct, sfbNext, scfAct, scfMin;
+	Word16 sfbLast, sfbAct, sfbNext, scfAct, scfMin;
 	Word16 *scfLast, *scfNext;
 	Word32 sfbPeOld, sfbPeNew;
 	Word32 sfbDistNew;
