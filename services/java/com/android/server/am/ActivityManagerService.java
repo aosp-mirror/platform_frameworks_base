@@ -129,7 +129,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.lang.IllegalStateException;
 import java.lang.ref.WeakReference;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -11750,14 +11749,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         if (starting != null) {
             kept = mMainStack.ensureActivityConfigurationLocked(starting, changes);
-            if (kept) {
-                // If this didn't result in the starting activity being
-                // destroyed, then we need to make sure at this point that all
-                // other activities are made visible.
-                if (DEBUG_SWITCH) Slog.i(TAG, "Config didn't destroy " + starting
-                        + ", ensuring others are correct.");
-                mMainStack.ensureActivitiesVisibleLocked(starting, changes);
-            }
+            // And we need to make sure at this point that all other activities
+            // are made visible with the correct configuration.
+            mMainStack.ensureActivitiesVisibleLocked(starting, changes);
         }
         
         if (values != null && mWindowManager != null) {
