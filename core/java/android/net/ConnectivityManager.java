@@ -213,10 +213,16 @@ public class ConnectivityManager
      */
     public static final int TYPE_WIMAX       = 6;
 
+    /**
+     * Bluetooth data connection. This is used for Bluetooth reverse tethering.
+     * @hide
+     */
+    public static final int TYPE_BLUETOOTH   = 7;
+
     /** {@hide} */
-    public static final int TYPE_DUMMY       = 7;
+    public static final int TYPE_DUMMY       = 8;
     /** {@hide} TODO: Need to adjust this for WiMAX. */
-    public static final int MAX_RADIO_TYPE   = TYPE_WIFI;
+    public static final int MAX_RADIO_TYPE   = TYPE_DUMMY;
     /** {@hide} TODO: Need to adjust this for WiMAX. */
     public static final int MAX_NETWORK_TYPE = TYPE_DUMMY;
 

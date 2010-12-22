@@ -16,8 +16,7 @@
 
 package com.android.server;
 
-import android.app.Notification;
-import android.app.NotificationManager;
+import android.bluetooth.BluetoothTetheringDataTracker;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,9 +25,9 @@ import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.DummyDataStateTracker;
 import android.net.IConnectivityManager;
+import android.net.LinkProperties;
 import android.net.MobileDataStateTracker;
 import android.net.NetworkInfo;
-import android.net.LinkProperties;
 import android.net.NetworkStateTracker;
 import android.net.NetworkUtils;
 import android.net.Proxy;
@@ -50,7 +49,6 @@ import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.internal.telephony.Phone;
-
 import com.android.server.connectivity.Tethering;
 
 import java.io.FileDescriptor;
@@ -58,7 +56,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -410,6 +407,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             case ConnectivityManager.TYPE_DUMMY:
                 mNetTrackers[netType] = new DummyDataStateTracker(netType,
                         mNetAttributes[netType].mName);
+                mNetTrackers[netType].startMonitoring(context, mHandler);
+                break;
+            case ConnectivityManager.TYPE_BLUETOOTH:
+                mNetTrackers[netType] = BluetoothTetheringDataTracker.getInstance();
                 mNetTrackers[netType].startMonitoring(context, mHandler);
                 break;
             default:
