@@ -18,6 +18,7 @@ package com.android.server;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.net.EthernetDataTracker;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -410,6 +411,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             case ConnectivityManager.TYPE_DUMMY:
                 mNetTrackers[netType] = new DummyDataStateTracker(netType,
                         mNetAttributes[netType].mName);
+                mNetTrackers[netType].startMonitoring(context, mHandler);
+                break;
+            case ConnectivityManager.TYPE_ETHERNET:
+                mNetTrackers[netType] = EthernetDataTracker.getInstance();
                 mNetTrackers[netType].startMonitoring(context, mHandler);
                 break;
             default:

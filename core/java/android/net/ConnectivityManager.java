@@ -213,10 +213,16 @@ public class ConnectivityManager
      */
     public static final int TYPE_WIMAX       = 6;
 
+    /**
+     * Ethernet data connection
+     * @hide
+     */
+    public static final int TYPE_ETHERNET   = 8;
+
     /** {@hide} */
-    public static final int TYPE_DUMMY       = 7;
+    public static final int TYPE_DUMMY       = 9;
     /** {@hide} TODO: Need to adjust this for WiMAX. */
-    public static final int MAX_RADIO_TYPE   = TYPE_WIFI;
+    public static final int MAX_RADIO_TYPE   = TYPE_DUMMY;
     /** {@hide} TODO: Need to adjust this for WiMAX. */
     public static final int MAX_NETWORK_TYPE = TYPE_DUMMY;
 
