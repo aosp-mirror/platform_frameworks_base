@@ -140,6 +140,7 @@ public final class Ndef extends BasicTagTechnology {
             return null;
         }
     }
+
     /**
      * Overwrite the primary NDEF message
      * @throws IOException
