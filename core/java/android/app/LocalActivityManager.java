@@ -493,7 +493,7 @@ public class LocalActivityManager {
                 // We need to save the state now, if we don't currently
                 // already have it or the activity is currently resumed.
                 final Bundle childState = new Bundle();
-                r.activity.onSaveInstanceState(childState);
+                r.activity.performSaveInstanceState(childState);
                 r.instanceState = childState;
             }
             if (r.instanceState != null) {
