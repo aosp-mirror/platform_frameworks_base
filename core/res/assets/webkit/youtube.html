@@ -38,19 +38,29 @@
                 // All images are loaded, so display them.
                 // (Note that the images are loaded from javascript, so might load
                 // after document.onload fires)
-                ctx.drawImage(background, 0, 0, width, height);
+
                 playWidth = play.width;
                 playHeight = play.height;
                 logoWidth = logo.width;
                 logoHeight = logo.height;
                 var ratio = 1;
                 // If the page is smaller than it 'should' be in either dimension
-                // we scale the play button and logo according to the dimension that
-                // has been shrunk the most.
+                // we scale the background, play button and logo according to the
+                // dimension that has been shrunk the most.
                 if (width / height > defWidth / defHeight && height < defHeight) {
                     ratio = height / defHeight;
+                    // Stretch the background in this dimension only.
+                    backgroundHeight = background.height / ratio;
+                    ctx.drawImage(background, 0, 0, background.width, background.height,
+                        0, (height - backgroundHeight) / 2, width, backgroundHeight);
                 } else if (width / height < defWidth / defHeight && width < defWidth) {
                     ratio = width / defWidth;
+                    backgroundWidth = background.width / ratio;
+                    ctx.drawImage(background, 0, 0, background.width, background.height,
+                        (width - backgroundWidth) / 2, 0, backgroundWidth, height);
+                } else {
+                    // In this case stretch the background in both dimensions to fill the space.
+                    ctx.drawImage(background, 0, 0, width, height);
                 }
                 playWidth *= ratio;
                 playHeight *= ratio;
