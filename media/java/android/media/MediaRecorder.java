@@ -188,11 +188,12 @@ public class MediaRecorder
 
         /** The following formats are audio only .aac or .amr formats **/
         /** @deprecated  Deprecated in favor of AMR_NB */
-        /** TODO: change link when AMR_NB is exposed. Deprecated in favor of MediaRecorder.OutputFormat.AMR_NB */
+        /** Deprecated in favor of MediaRecorder.OutputFormat.AMR_NB */
+        /** AMR NB file format */
         public static final int RAW_AMR = 3;
-        /** @hide AMR NB file format */
+        /** AMR NB file format */
         public static final int AMR_NB = 3;
-        /** @hide AMR WB file format */
+        /** AMR WB file format */
         public static final int AMR_WB = 4;
         /** @hide AAC ADIF file format */
         public static final int AAC_ADIF = 5;
@@ -218,9 +219,9 @@ public class MediaRecorder
         public static final int DEFAULT = 0;
         /** AMR (Narrowband) audio codec */
         public static final int AMR_NB = 1;
-        /** @hide AMR (Wideband) audio codec */
+        /** AMR (Wideband) audio codec */
         public static final int AMR_WB = 2;
-        /** @hide AAC audio codec */
+        /** AAC audio codec */
         public static final int AAC = 3;
         /** @hide enhanced AAC audio codec */
         public static final int AAC_PLUS = 4;
