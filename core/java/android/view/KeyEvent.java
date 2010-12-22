@@ -990,6 +990,22 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public static final int META_SCROLL_LOCK_ON = 0x400000;
 
+    /** {@hide} */
+    public static final int META_SHIFT_MASK = META_SHIFT_ON
+            | META_SHIFT_LEFT_ON | META_SHIFT_RIGHT_ON;
+
+    /** {@hide} */
+    public static final int META_ALT_MASK = META_ALT_ON
+            | META_ALT_LEFT_ON | META_ALT_RIGHT_ON;
+
+    /** {@hide} */
+    public static final int META_CTRL_MASK = META_CTRL_ON
+            | META_CTRL_LEFT_ON | META_CTRL_RIGHT_ON;
+
+    /** {@hide} */
+    public static final int META_META_MASK = META_ALT_ON
+            | META_META_LEFT_ON | META_META_RIGHT_ON;
+
     /**
      * This mask is set if the device woke because of this key event.
      */
