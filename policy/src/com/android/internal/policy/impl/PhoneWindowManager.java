@@ -2360,15 +2360,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             Display d = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                     .getDefaultDisplay();
             if (d.getWidth() > d.getHeight()) {
-                mPortraitRotation = Surface.ROTATION_90;
                 mLandscapeRotation = Surface.ROTATION_0;
-                mUpsideDownRotation = Surface.ROTATION_270;
                 mSeascapeRotation = Surface.ROTATION_180;
+                if (mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_reverseDefaultRotation)) {
+                    mPortraitRotation = Surface.ROTATION_90;
+                    mUpsideDownRotation = Surface.ROTATION_270;
+                } else {
+                    mPortraitRotation = Surface.ROTATION_270;
+                    mUpsideDownRotation = Surface.ROTATION_90;
+                }
             } else {
                 mPortraitRotation = Surface.ROTATION_0;
-                mLandscapeRotation = Surface.ROTATION_90;
                 mUpsideDownRotation = Surface.ROTATION_180;
-                mSeascapeRotation = Surface.ROTATION_270;
+                if (mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_reverseDefaultRotation)) {
+                    mLandscapeRotation = Surface.ROTATION_270;
+                    mSeascapeRotation = Surface.ROTATION_90;
+                } else {
+                    mLandscapeRotation = Surface.ROTATION_90;
+                    mSeascapeRotation = Surface.ROTATION_270;
+                }
             }
         }
 
