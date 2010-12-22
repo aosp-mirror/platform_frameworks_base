@@ -15,10 +15,6 @@ page.title=Developing on a Device
   <ol>
     <li><a
     href="{@docRoot}sdk/win-usb.html">USB Driver for Windows</a></li>
-    <li><a
-href="{@docRoot}guide/developing/eclipse-adt.html">Developing in Eclipse, with ADT</a></li>
-    <li><a
-href="{@docRoot}guide/developing/other-ide.html">Developing in other IDEs</a></li>
   </ol>
 </div>
 </div>
@@ -30,10 +26,7 @@ environment and Android-powered device for testing and debugging on the device.<
 <p>You can use any Android-powered device as an environment for running,
 debugging, and testing your applications. The tools included in the SDK make it easy to install and
 run your application on the device each time you compile. You can install your application on the
-device <a
-href="{@docRoot}guide/developing/eclipse-adt.html#RunningOnDevice">directly from
-Eclipse</a> or <a href="{@docRoot}guide/developing/other-ide.html#RunningOnDevice">from the
-command line</a>. If
+device directly from Eclipse or from the command line with ADB. If
 you don't yet have a device, check with the service providers in your area to determine which
 Android-powered devices are available.</p>
 

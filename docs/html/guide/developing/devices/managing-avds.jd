@@ -1,0 +1,239 @@
+page.title=Creating and Managing AVDs with AVD Manager
+@jd:body
+
+  <div id="qv-wrapper">
+    <div id="qv">
+      <h2>In this document</h2>
+
+      <ol>
+        <li><a href="#AVDEclipse">Creating an AVD</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <p>The AVD Manager is an easy to use user interface to manage your AVD (Android Virtual Device)
+  configurations. An AVD is a device configuration for the Android emulator that allows you to
+  model different configurations of Android-powered devices. When you start the AVD Manager in Eclipse 
+  or run the <code>android</code> tool on the command line, you will see the AVD Manager as shown in
+  figure 1:</p>
+  
+  <img src="{@docRoot}images/avd-manager.png">
+  
+  <p class="img-caption"><strong>Figure 1. </strong>Screenshot of the AVD Manager. </p>
+  
+  <p>From the main screen, you can create, delete, repair and start AVDs as well as see the details
+  of each AVD. </p>
+
+  
+  <h2>Creating an AVD</h2>
+
+  <p>You can create as many AVDs as you would like to test on. It is recommended that you test your
+  applications on all API levels higher than the target API level for your application.</p>
+
+  <p>To create an AVD:</p>
+
+  <ol>
+    <li>Start the AVD Manager:
+
+      <ul>
+        <li>In Eclipse: select <strong>Window &gt; Android SDK and AVD Manager</strong>, or click
+        the Android SDK and AVD Manager icon in the Eclipse toolbar.</li>
+
+        <li>In other IDEs: Navigate to your SDK's <code>tools/</code> directory and execute the
+        <code>android</code> tool with no arguments.</li>
+      </ul>
+    </li>
+
+    <li><p>In the <em>Virtual Devices</em> panel, you'll see a list of existing AVDs. Click
+    <strong>New</strong> to create a new AVD. The <strong>Create New AVD</strong> dialog appears.</p>
+      
+      <img src="{@docRoot}images/developing/avd-dialog.png" alt="AVD Dialog">
+      <p class="img-caption"><strong>Figure 2.</strong> Screenshot of the Create AVD window</p>
+    </li>
+
+    <li>Fill in the details for the AVD.
+
+      <p>Give it a name, a platform target, an SD card size, and a skin (HVGA is default). You can
+      also add specific hardware features of the emulated device by clicking the
+      <strong>New...</strong> button and selecting the feature. For a list of hardware features,
+      see <a href="#hardwareopts">Hardware options</a>.</p>
+
+      <p class="note"><strong>Note:</strong> Be sure to define a target for your AVD that satisfies
+      your application's Build Target (the AVD platform target must have an API Level equal to or
+      greater than the API Level that your application compiles against).</p>
+    </li>
+
+    <li>Click <strong>Create AVD</strong>.</li>
+  </ol>
+
+  <p>Your AVD is now ready and you can either close the SDK and AVD Manager, create more AVDs, or
+  launch an emulator with the AVD by selecting a device and clicking <strong>Start</strong>.</p>
+
+<h3 id="hardwareopts">Hardware options</h3>
+<p>If you are creating a new AVD, you can specify the following hardware options for the AVD
+to emulate:</p>
+
+  <table>
+    <tr>
+      <th>Characteristic</th>
+
+      <th>Description</th>
+
+      <th>Property</th>
+    </tr>
+
+    <tr>
+      <td>Device ram size</td>
+
+      <td>The amount of physical RAM on the device, in megabytes. Default value is "96".</td>
+
+      <td>hw.ramSize</td>
+    </tr>
+
+    <tr>
+      <td>Touch-screen support</td>
+
+      <td>Whether there is a touch screen or not on the device. Default value is "yes".</td>
+
+      <td>hw.touchScreen</td>
+    </tr>
+
+    <tr>
+      <td>Trackball support</td>
+
+      <td>Whether there is a trackball on the device. Default value is "yes".</td>
+
+      <td>hw.trackBall</td>
+    </tr>
+
+    <tr>
+      <td>Keyboard support</td>
+
+      <td>Whether the device has a QWERTY keyboard. Default value is "yes".</td>
+
+      <td>hw.keyboard</td>
+    </tr>
+
+    <tr>
+      <td>DPad support</td>
+
+      <td>Whether the device has DPad keys. Default value is "yes".</td>
+
+      <td>hw.dPad</td>
+    </tr>
+
+    <tr>
+      <td>GSM modem support</td>
+
+      <td>Whether there is a GSM modem in the device. Default value is "yes".</td>
+
+      <td>hw.gsmModem</td>
+    </tr>
+
+    <tr>
+      <td>Camera support</td>
+
+      <td>Whether the device has a camera. Default value is "no".</td>
+
+      <td>hw.camera</td>
+    </tr>
+
+    <tr>
+      <td>Maximum horizontal camera pixels</td>
+
+      <td>Default value is "640".</td>
+
+      <td>hw.camera.maxHorizontalPixels</td>
+    </tr>
+
+    <tr>
+      <td>Maximum vertical camera pixels</td>
+
+      <td>Default value is "480".</td>
+
+      <td>hw.camera.maxVerticalPixels</td>
+    </tr>
+
+    <tr>
+      <td>GPS support</td>
+
+      <td>Whether there is a GPS in the device. Default value is "yes".</td>
+
+      <td>hw.gps</td>
+    </tr>
+
+    <tr>
+      <td>Battery support</td>
+
+      <td>Whether the device can run on a battery. Default value is "yes".</td>
+
+      <td>hw.battery</td>
+    </tr>
+
+    <tr>
+      <td>Accelerometer</td>
+
+      <td>Whether there is an accelerometer in the device. Default value is "yes".</td>
+
+      <td>hw.accelerometer</td>
+    </tr>
+
+    <tr>
+      <td>Audio recording support</td>
+
+      <td>Whether the device can record audio. Default value is "yes".</td>
+
+      <td>hw.audioInput</td>
+    </tr>
+
+    <tr>
+      <td>Audio playback support</td>
+
+      <td>Whether the device can play audio. Default value is "yes".</td>
+
+      <td>hw.audioOutput</td>
+    </tr>
+
+    <tr>
+      <td>SD Card support</td>
+
+      <td>Whether the device supports insertion/removal of virtual SD Cards. Default value is
+      "yes".</td>
+
+      <td>hw.sdCard</td>
+    </tr>
+
+    <tr>
+      <td>Cache partition support</td>
+
+      <td>Whether we use a /cache partition on the device. Default value is "yes".</td>
+
+      <td>disk.cachePartition</td>
+    </tr>
+
+    <tr>
+      <td>Cache partition size</td>
+
+      <td>Default value is "66MB".</td>
+
+      <td>disk.cachePartition.size</td>
+    </tr>
+
+    <tr>
+      <td>Abstracted LCD density</td>
+
+      <td>Sets the generalized density characteristic used by the AVD's screen. Default value is
+      "160".</td>
+
+      <td>hw.lcd.density</td>
+    </tr>
+
+    <tr>
+      <td>Trackball support</td>
+
+      <td>Whether there is a trackball present.</td>
+
+      <td>hw.trackBall</td>
+    </tr>
+  </table>
+
