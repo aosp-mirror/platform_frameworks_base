@@ -164,7 +164,7 @@ public final class NinePatch_Delegate {
                    chunkObject.draw(bitmap_delegate.getImage(), graphics,
                            left, top, right - left, bottom - top, destDensity, srcDensity);
                }
-           }, paint_delegate, true /*compositeOnly*/);
+           }, paint_delegate, true /*compositeOnly*/, false /*forceSrcMode*/);
 
     }
 

@@ -18,12 +18,11 @@ package com.android.layoutlib.bridge.impl;
 
 import com.android.layoutlib.bridge.Bridge;
 
+import android.graphics.Bitmap_Delegate;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint_Delegate;
 import android.graphics.PathEffect_Delegate;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode_Delegate;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
@@ -81,11 +80,33 @@ public class GcSnapshot {
      */
     private static class Layer {
         private final Graphics2D mGraphics;
+        private final Bitmap_Delegate mBitmap;
         private final BufferedImage mImage;
         private BufferedImage mOriginalCopy;
 
+        /**
+         * Creates a layer with a graphics and a bitmap.
+         *
+         * @param graphics the graphics
+         * @param bitmap the bitmap
+         */
+        Layer(Graphics2D graphics, Bitmap_Delegate bitmap) {
+            mGraphics = graphics;
+            mBitmap = bitmap;
+            mImage = mBitmap.getImage();
+        }
+
+        /**
+         * Creates a layer with a graphics and an image. If the image belongs to a
+         * {@link Bitmap_Delegate}, then {@link Layer#Layer(Graphics2D, Bitmap_Delegate)} should
+         * be used.
+         *
+         * @param graphics the graphics
+         * @param image the image
+         */
         Layer(Graphics2D graphics, BufferedImage image) {
             mGraphics = graphics;
+            mBitmap = null;
             mImage = image;
         }
 
@@ -100,6 +121,10 @@ public class GcSnapshot {
         }
 
         Layer makeCopy() {
+            if (mBitmap != null) {
+                return new Layer((Graphics2D) mGraphics.create(), mBitmap);
+            }
+
             return new Layer((Graphics2D) mGraphics.create(), mImage);
         }
 
@@ -111,22 +136,28 @@ public class GcSnapshot {
         BufferedImage getOriginalCopy() {
             return mOriginalCopy;
         }
+
+        void change() {
+            if (mBitmap != null) {
+                mBitmap.change();
+            }
+        }
     }
 
     /**
-     * Creates the root snapshot associating it with a given image.
+     * Creates the root snapshot associating it with a given bitmap.
      * <p>
-     * If <var>image</var> is null, then {@link GcSnapshot#setImage(BufferedImage)} must be
+     * If <var>bitmap</var> is null, then {@link GcSnapshot#setBitmap(Bitmap_Delegate)} must be
      * called before the snapshot can be used to draw. Transform and clip operations are permitted
      * before.
      *
      * @param image the image to associate to the snapshot or null.
      * @return the root snapshot
      */
-    public static GcSnapshot createDefaultSnapshot(BufferedImage image) {
+    public static GcSnapshot createDefaultSnapshot(Bitmap_Delegate bitmap) {
         GcSnapshot snapshot = new GcSnapshot();
-        if (image != null) {
-            snapshot.setImage(image);
+        if (bitmap != null) {
+            snapshot.setBitmap(bitmap);
         }
 
         return snapshot;
@@ -295,19 +326,19 @@ public class GcSnapshot {
     }
 
     /**
-     * Link the snapshot to a BufferedImage.
+     * Link the snapshot to a Bitmap_Delegate.
      * <p/>
      * This is only for the case where the snapshot was created with a null image when calling
-     * {@link #createDefaultSnapshot(BufferedImage)}, and is therefore not yet linked to
+     * {@link #createDefaultSnapshot(Bitmap_Delegate)}, and is therefore not yet linked to
      * a previous snapshot.
      * <p/>
      * If any transform or clip information was set before, they are put into the Graphics object.
-     * @param image the buffered image to link to.
+     * @param bitmap the bitmap to link to.
      */
-    public void setImage(BufferedImage image) {
+    public void setBitmap(Bitmap_Delegate bitmap) {
         assert mLayers.size() == 0;
-        Graphics2D graphics2D = image.createGraphics();
-        mLayers.add(new Layer(graphics2D, image));
+        Graphics2D graphics2D = bitmap.getImage().createGraphics();
+        mLayers.add(new Layer(graphics2D, bitmap));
         if (mTransform != null) {
             graphics2D.setTransform(mTransform);
             mTransform = null;
@@ -483,7 +514,7 @@ public class GcSnapshot {
      * @param drawable
      */
     public void draw(Drawable drawable) {
-        draw(drawable, null, false /*compositeOnly*/);
+        draw(drawable, null, false /*compositeOnly*/, false /*forceSrcMode*/);
     }
 
     /**
@@ -494,30 +525,33 @@ public class GcSnapshot {
      * @param paint
      * @param compositeOnly whether the paint is used for composite only. This is typically
      *          the case for bitmaps.
+     * @param forceSrcMode if true, this overrides the composite to be SRC
      */
-    public void draw(Drawable drawable, Paint_Delegate paint, boolean compositeOnly) {
+    public void draw(Drawable drawable, Paint_Delegate paint, boolean compositeOnly,
+            boolean forceSrcMode) {
         // if we clip to the layer, then we only draw in the layer
         if (mLocalLayer != null && (mFlags & Canvas.CLIP_TO_LAYER_SAVE_FLAG) != 0) {
-            drawInLayer(mLocalLayer, drawable, paint, compositeOnly);
+            drawInLayer(mLocalLayer, drawable, paint, compositeOnly, forceSrcMode);
         } else {
             // draw in all the layers
             for (Layer layer : mLayers) {
-                drawInLayer(layer, drawable, paint, compositeOnly);
+                drawInLayer(layer, drawable, paint, compositeOnly, forceSrcMode);
             }
         }
     }
 
     private void drawInLayer(Layer layer, Drawable drawable, Paint_Delegate paint,
-            boolean compositeOnly) {
+            boolean compositeOnly, boolean forceSrcMode) {
         Graphics2D originalGraphics = layer.getGraphics();
         // get a Graphics2D object configured with the drawing parameters.
         Graphics2D configuredGraphics2D =
             paint != null ?
-                    createCustomGraphics(originalGraphics, paint, compositeOnly) :
+                    createCustomGraphics(originalGraphics, paint, compositeOnly, forceSrcMode) :
                         (Graphics2D) originalGraphics.create();
 
         try {
             drawable.draw(configuredGraphics2D, paint);
+            layer.change();
         } finally {
             // dispose Graphics2D object
             configuredGraphics2D.dispose();
@@ -557,7 +591,7 @@ public class GcSnapshot {
                     // now draw put the content of the local layer onto the layer, using the paint
                     // information
                     Graphics2D g = createCustomGraphics(baseGfx, mLocalLayerPaint,
-                            true /*alphaOnly*/);
+                            true /*alphaOnly*/, false /*forceSrcMode*/);
 
                     g.drawImage(mLocalLayer.getImage(),
                             mLocalLayerRegion.left, mLocalLayerRegion.top,
@@ -603,7 +637,7 @@ public class GcSnapshot {
      * <p/>The object must be disposed ({@link Graphics2D#dispose()}) after being used.
      */
     private Graphics2D createCustomGraphics(Graphics2D original, Paint_Delegate paint,
-            boolean compositeOnly) {
+            boolean compositeOnly, boolean forceSrcMode) {
         // make new one graphics
         Graphics2D g = (Graphics2D) original.create();
 
@@ -680,38 +714,42 @@ public class GcSnapshot {
         // it contains the alpha
         int alpha = (compositeOnly || customShader) ? paint.getAlpha() : 0xFF;
 
-        boolean customXfermode = false;
-        int xfermode = paint.getXfermode();
-        if (xfermode > 0) {
-            Xfermode_Delegate xfermodeDelegate = Xfermode_Delegate.getDelegate(paint.getXfermode());
-            assert xfermodeDelegate != null;
-            if (xfermodeDelegate != null) {
-                if (xfermodeDelegate.isSupported()) {
-                    Composite composite = xfermodeDelegate.getComposite(alpha);
-                    assert composite != null;
-                    if (composite != null) {
-                        g.setComposite(composite);
-                        customXfermode = true;
+        if (forceSrcMode) {
+            g.setComposite(AlphaComposite.getInstance(
+                    AlphaComposite.SRC, (float) alpha / 255.f));
+        } else {
+            boolean customXfermode = false;
+            int xfermode = paint.getXfermode();
+            if (xfermode > 0) {
+                Xfermode_Delegate xfermodeDelegate = Xfermode_Delegate.getDelegate(xfermode);
+                assert xfermodeDelegate != null;
+                if (xfermodeDelegate != null) {
+                    if (xfermodeDelegate.isSupported()) {
+                        Composite composite = xfermodeDelegate.getComposite(alpha);
+                        assert composite != null;
+                        if (composite != null) {
+                            g.setComposite(composite);
+                            customXfermode = true;
+                        }
+                    } else {
+                        Bridge.getLog().fidelityWarning(null,
+                                xfermodeDelegate.getSupportMessage(),
+                                null);
                     }
-                } else {
-                    Bridge.getLog().fidelityWarning(null,
-                            xfermodeDelegate.getSupportMessage(),
-                            null);
                 }
             }
-        }
 
-        // if there was no custom xfermode, but we have alpha (due to a shader and a non
-        // opaque alpha channel in the paint color), then we create an AlphaComposite anyway
-        // that will handle the alpha.
-        if (customXfermode == false && alpha != 0xFF) {
-            g.setComposite(PorterDuffXfermode_Delegate.getComposite(
-                    PorterDuff.Mode.SRC_OVER, alpha));
+            // if there was no custom xfermode, but we have alpha (due to a shader and a non
+            // opaque alpha channel in the paint color), then we create an AlphaComposite anyway
+            // that will handle the alpha.
+            if (customXfermode == false && alpha != 0xFF) {
+                g.setComposite(AlphaComposite.getInstance(
+                        AlphaComposite.SRC_OVER, (float) alpha / 255.f));
+            }
         }
 
         return g;
     }
-
 
     private void mapRect(AffineTransform matrix, RectF dst, RectF src) {
         // array with 4 corners

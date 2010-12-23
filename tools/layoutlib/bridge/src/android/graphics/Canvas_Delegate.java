@@ -55,8 +55,10 @@ public final class Canvas_Delegate {
 
     // ---- delegate helper data ----
 
+    private final static boolean[] sBoolOut = new boolean[1];
+
     // ---- delegate data ----
-    private BufferedImage mBufferedImage;
+    private Bitmap_Delegate mBitmap;
     private GcSnapshot mSnapshot;
 
     // ---- Public Helper methods ----
@@ -97,7 +99,7 @@ public final class Canvas_Delegate {
             return 0;
         }
 
-        return canvasDelegate.mBufferedImage.getWidth();
+        return canvasDelegate.mBitmap.getImage().getWidth();
     }
 
     /*package*/ static int getHeight(Canvas thisCanvas) {
@@ -108,7 +110,7 @@ public final class Canvas_Delegate {
             return 0;
         }
 
-        return canvasDelegate.mBufferedImage.getHeight();
+        return canvasDelegate.mBitmap.getImage().getHeight();
     }
 
     /*package*/ static void translate(Canvas thisCanvas, float dx, float dy) {
@@ -258,7 +260,7 @@ public final class Canvas_Delegate {
             final float[] pts, final int offset, final int count,
             Paint paint) {
         draw(thisCanvas.mNativeCanvas, paint.mNativePaint, false /*compositeOnly*/,
-                new GcSnapshot.Drawable() {
+                false /*forceSrcMode*/, new GcSnapshot.Drawable() {
                     public void draw(Graphics2D graphics, Paint_Delegate paint) {
                         for (int i = 0 ; i < count ; i += 4) {
                             graphics.drawLine((int)pts[i + offset], (int)pts[i + offset + 1],
@@ -279,7 +281,7 @@ public final class Canvas_Delegate {
             Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(nativeBitmapOrZero);
 
             // create a new Canvas_Delegate with the given bitmap and return its new native int.
-            Canvas_Delegate newDelegate = new Canvas_Delegate(bitmapDelegate.getImage());
+            Canvas_Delegate newDelegate = new Canvas_Delegate(bitmapDelegate);
 
             return sManager.addDelegate(newDelegate);
         } else {
@@ -305,7 +307,7 @@ public final class Canvas_Delegate {
             return;
         }
 
-        canvasDelegate.setBitmap(bitmapDelegate.getImage());
+        canvasDelegate.setBitmap(bitmapDelegate);
     }
 
     /*package*/ static int native_saveLayer(int nativeCanvas, RectF bounds,
@@ -535,8 +537,8 @@ public final class Canvas_Delegate {
             return;
         }
 
-        final int w = canvasDelegate.mBufferedImage.getWidth();
-        final int h = canvasDelegate.mBufferedImage.getHeight();
+        final int w = canvasDelegate.mBitmap.getImage().getWidth();
+        final int h = canvasDelegate.mBitmap.getImage().getHeight();
         draw(nativeCanvas, new GcSnapshot.Drawable() {
 
             public void draw(Graphics2D graphics, Paint_Delegate paint) {
@@ -566,10 +568,11 @@ public final class Canvas_Delegate {
             final float startX, final float startY, final float stopX, final float stopY,
             int paint) {
 
-        draw(nativeCanvas, paint, false /*compositeOnly*/, new GcSnapshot.Drawable() {
-            public void draw(Graphics2D graphics, Paint_Delegate paint) {
-                graphics.drawLine((int)startX, (int)startY, (int)stopX, (int)stopY);
-            }
+        draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
+                new GcSnapshot.Drawable() {
+                    public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                        graphics.drawLine((int)startX, (int)startY, (int)stopX, (int)stopY);
+                    }
         });
     }
 
@@ -581,43 +584,47 @@ public final class Canvas_Delegate {
     /*package*/ static void native_drawRect(int nativeCanvas,
             final float left, final float top, final float right, final float bottom, int paint) {
 
-        draw(nativeCanvas, paint, false /*compositeOnly*/, new GcSnapshot.Drawable() {
-            public void draw(Graphics2D graphics, Paint_Delegate paint) {
-                int style = paint.getStyle();
+        draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
+                new GcSnapshot.Drawable() {
+                    public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                        int style = paint.getStyle();
 
-                // draw
-                if (style == Paint.Style.FILL.nativeInt ||
-                        style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-                    graphics.fillRect((int)left, (int)top, (int)(right-left), (int)(bottom-top));
-                }
+                        // draw
+                        if (style == Paint.Style.FILL.nativeInt ||
+                                style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                            graphics.fillRect((int)left, (int)top,
+                                    (int)(right-left), (int)(bottom-top));
+                        }
 
-                if (style == Paint.Style.STROKE.nativeInt ||
-                        style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-                    graphics.drawRect((int)left, (int)top, (int)(right-left), (int)(bottom-top));
-                }
-            }
+                        if (style == Paint.Style.STROKE.nativeInt ||
+                                style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                            graphics.drawRect((int)left, (int)top,
+                                    (int)(right-left), (int)(bottom-top));
+                        }
+                    }
         });
     }
 
     /*package*/ static void native_drawOval(int nativeCanvas, final RectF oval, int paint) {
         if (oval.right > oval.left && oval.bottom > oval.top) {
-            draw(nativeCanvas, paint, false /*compositeOnly*/, new GcSnapshot.Drawable() {
-                public void draw(Graphics2D graphics, Paint_Delegate paint) {
-                    int style = paint.getStyle();
+            draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
+                    new GcSnapshot.Drawable() {
+                        public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                            int style = paint.getStyle();
 
-                    // draw
-                    if (style == Paint.Style.FILL.nativeInt ||
-                            style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-                        graphics.fillOval((int)oval.left, (int)oval.top,
-                                (int)oval.width(), (int)oval.height());
-                    }
+                            // draw
+                            if (style == Paint.Style.FILL.nativeInt ||
+                                    style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                                graphics.fillOval((int)oval.left, (int)oval.top,
+                                        (int)oval.width(), (int)oval.height());
+                            }
 
-                    if (style == Paint.Style.STROKE.nativeInt ||
-                            style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-                        graphics.drawOval((int)oval.left, (int)oval.top,
-                                (int)oval.width(), (int)oval.height());
-                    }
-                }
+                            if (style == Paint.Style.STROKE.nativeInt ||
+                                    style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                                graphics.drawOval((int)oval.left, (int)oval.top,
+                                        (int)oval.width(), (int)oval.height());
+                            }
+                        }
             });
         }
     }
@@ -640,26 +647,28 @@ public final class Canvas_Delegate {
     /*package*/ static void native_drawRoundRect(int nativeCanvas,
             final RectF rect, final float rx, final float ry, int paint) {
 
-        draw(nativeCanvas, paint, false /*compositeOnly*/, new GcSnapshot.Drawable() {
+        draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
+                new GcSnapshot.Drawable() {
+                    public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                        int style = paint.getStyle();
 
-            public void draw(Graphics2D graphics, Paint_Delegate paint) {
-                int style = paint.getStyle();
+                        // draw
+                        if (style == Paint.Style.FILL.nativeInt ||
+                                style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                            graphics.fillRoundRect(
+                                    (int)rect.left, (int)rect.top,
+                                    (int)rect.width(), (int)rect.height(),
+                                    (int)rx, (int)ry);
+                        }
 
-                // draw
-                if (style == Paint.Style.FILL.nativeInt ||
-                        style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-                    graphics.fillRoundRect(
-                            (int)rect.left, (int)rect.top, (int)rect.width(), (int)rect.height(),
-                            (int)rx, (int)ry);
-                }
-
-                if (style == Paint.Style.STROKE.nativeInt ||
-                        style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-                    graphics.drawRoundRect(
-                            (int)rect.left, (int)rect.top, (int)rect.width(), (int)rect.height(),
-                            (int)rx, (int)ry);
-                }
-            }
+                        if (style == Paint.Style.STROKE.nativeInt ||
+                                style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                            graphics.drawRoundRect(
+                                    (int)rect.left, (int)rect.top,
+                                    (int)rect.width(), (int)rect.height(),
+                                    (int)rx, (int)ry);
+                        }
+                    }
         });
     }
 
@@ -671,21 +680,22 @@ public final class Canvas_Delegate {
             return;
         }
 
-        draw(nativeCanvas, paint, false /*compositeOnly*/, new GcSnapshot.Drawable() {
-            public void draw(Graphics2D graphics, Paint_Delegate paint) {
-                Shape shape = pathDelegate.getJavaShape();
-                int style = paint.getStyle();
+        draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
+                new GcSnapshot.Drawable() {
+                    public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                        Shape shape = pathDelegate.getJavaShape();
+                        int style = paint.getStyle();
 
-                if (style == Paint.Style.FILL.nativeInt ||
-                        style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-                    graphics.fill(shape);
-                }
+                        if (style == Paint.Style.FILL.nativeInt ||
+                                style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                            graphics.fill(shape);
+                        }
 
-                if (style == Paint.Style.STROKE.nativeInt ||
-                        style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-                    graphics.draw(shape);
-                }
-            }
+                        if (style == Paint.Style.STROKE.nativeInt ||
+                                style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                            graphics.draw(shape);
+                        }
+                    }
         });
     }
 
@@ -706,7 +716,7 @@ public final class Canvas_Delegate {
         float right = left + image.getWidth();
         float bottom = top + image.getHeight();
 
-        drawBitmap(nativeCanvas, image, bitmapDelegate.getConfig(), nativePaintOrZero,
+        drawBitmap(nativeCanvas, bitmapDelegate, nativePaintOrZero,
                 0, 0, image.getWidth(), image.getHeight(),
                 (int)left, (int)top, (int)right, (int)bottom);
     }
@@ -726,11 +736,11 @@ public final class Canvas_Delegate {
         BufferedImage image = bitmapDelegate.getImage();
 
         if (src == null) {
-            drawBitmap(nativeCanvas, image, bitmapDelegate.getConfig(), nativePaintOrZero,
+            drawBitmap(nativeCanvas, bitmapDelegate, nativePaintOrZero,
                     0, 0, image.getWidth(), image.getHeight(),
                     (int)dst.left, (int)dst.top, (int)dst.right, (int)dst.bottom);
         } else {
-            drawBitmap(nativeCanvas, image, bitmapDelegate.getConfig(), nativePaintOrZero,
+            drawBitmap(nativeCanvas, bitmapDelegate, nativePaintOrZero,
                     src.left, src.top, src.width(), src.height(),
                     (int)dst.left, (int)dst.top, (int)dst.right, (int)dst.bottom);
         }
@@ -751,29 +761,87 @@ public final class Canvas_Delegate {
         BufferedImage image = bitmapDelegate.getImage();
 
         if (src == null) {
-            drawBitmap(nativeCanvas, image, bitmapDelegate.getConfig(), nativePaintOrZero,
+            drawBitmap(nativeCanvas, bitmapDelegate, nativePaintOrZero,
                     0, 0, image.getWidth(), image.getHeight(),
                     dst.left, dst.top, dst.right, dst.bottom);
         } else {
-            drawBitmap(nativeCanvas, image, bitmapDelegate.getConfig(), nativePaintOrZero,
+            drawBitmap(nativeCanvas, bitmapDelegate, nativePaintOrZero,
                     src.left, src.top, src.width(), src.height(),
                     dst.left, dst.top, dst.right, dst.bottom);
         }
     }
 
     /*package*/ static void native_drawBitmap(int nativeCanvas, int[] colors,
-                                                int offset, int stride, float x,
-                                                 float y, int width, int height,
+                                                int offset, int stride, final float x,
+                                                 final float y, int width, int height,
                                                  boolean hasAlpha,
                                                  int nativePaintOrZero) {
-        // FIXME
-        throw new UnsupportedOperationException();
+
+        // create a temp BufferedImage containing the content.
+        final BufferedImage image = new BufferedImage(width, height,
+                hasAlpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
+        image.setRGB(0, 0, width, height, colors, offset, stride);
+
+        draw(nativeCanvas, nativePaintOrZero, true /*compositeOnly*/, false /*forceSrcMode*/,
+                new GcSnapshot.Drawable() {
+                    public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                        if (paint != null && paint.isFilterBitmap()) {
+                            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                                    RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                        }
+
+                        graphics.drawImage(image, (int) x, (int) y, null);
+                    }
+        });
     }
 
     /*package*/ static void nativeDrawBitmapMatrix(int nCanvas, int nBitmap,
                                                       int nMatrix, int nPaint) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
+        if (canvasDelegate == null) {
+            assert false;
+            return;
+        }
+
+        // get the delegate from the native int.
+        Paint_Delegate paintDelegate = null;
+        if (nPaint > 0) {
+            paintDelegate = Paint_Delegate.getDelegate(nPaint);
+            if (paintDelegate == null) {
+                assert false;
+                return;
+            }
+        }
+
+        // get the delegate from the native int.
+        Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(nBitmap);
+        if (bitmapDelegate == null) {
+            assert false;
+            return;
+        }
+
+        final BufferedImage image = getImageToDraw(bitmapDelegate, paintDelegate, sBoolOut);
+
+        Matrix_Delegate matrixDelegate = Matrix_Delegate.getDelegate(nMatrix);
+        if (matrixDelegate == null) {
+            assert false;
+            return;
+        }
+
+        final AffineTransform mtx = matrixDelegate.getAffineTransform();
+
+        canvasDelegate.getSnapshot().draw(new GcSnapshot.Drawable() {
+                public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                    if (paint != null && paint.isFilterBitmap()) {
+                        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                    }
+
+                    //FIXME add support for canvas, screen and bitmap densities.
+                    graphics.drawImage(image, mtx, null);
+                }
+        }, paintDelegate, true /*compositeOnly*/, false /*forceSrcMode*/);
     }
 
     /*package*/ static void nativeDrawBitmapMesh(int nCanvas, int nBitmap,
@@ -795,8 +863,8 @@ public final class Canvas_Delegate {
     /*package*/ static void native_drawText(int nativeCanvas,
             final char[] text, final int index, final int count,
             final float startX, final float startY, int flags, int paint) {
-        draw(nativeCanvas, paint, false /*compositeOnly*/, new GcSnapshot.Drawable() {
-
+        draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
+                new GcSnapshot.Drawable() {
             public void draw(Graphics2D graphics, Paint_Delegate paint) {
                 // WARNING: the logic in this method is similar to Paint.measureText.
                 // Any change to this method should be reflected in Paint.measureText
@@ -974,11 +1042,11 @@ public final class Canvas_Delegate {
     // ---- Private delegate/helper methods ----
 
     /**
-     * Executes a {@link Drawable} with a given canvas and paint.
+     * Executes a {@link GcSnapshot.Drawable} with a given canvas and paint.
      * <p>Note that the drawable may actually be executed several times if there are
      * layers involved (see {@link #saveLayer(RectF, int, int)}.
      */
-    private static void draw(int nCanvas, int nPaint, boolean compositeOnly,
+    private static void draw(int nCanvas, int nPaint, boolean compositeOnly, boolean forceSrcMode,
             GcSnapshot.Drawable drawable) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
@@ -997,11 +1065,11 @@ public final class Canvas_Delegate {
             }
         }
 
-        canvasDelegate.getSnapshot().draw(drawable, paintDelegate, compositeOnly);
+        canvasDelegate.getSnapshot().draw(drawable, paintDelegate, compositeOnly, forceSrcMode);
     }
 
     /**
-     * Executes a {@link Drawable} with a given canvas. No paint object will be provided
+     * Executes a {@link GcSnapshot.Drawable} with a given canvas. No paint object will be provided
      * to {@link GcSnapshot.Drawable#draw(Graphics2D, Paint_Delegate)}.
      * <p>Note that the drawable may actually be executed several times if there are
      * layers involved (see {@link #saveLayer(RectF, int, int)}.
@@ -1017,8 +1085,8 @@ public final class Canvas_Delegate {
         canvasDelegate.mSnapshot.draw(drawable);
     }
 
-    private Canvas_Delegate(BufferedImage image) {
-        mSnapshot = GcSnapshot.createDefaultSnapshot(mBufferedImage = image);
+    private Canvas_Delegate(Bitmap_Delegate bitmap) {
+        mSnapshot = GcSnapshot.createDefaultSnapshot(mBitmap = bitmap);
     }
 
     private Canvas_Delegate() {
@@ -1078,16 +1146,15 @@ public final class Canvas_Delegate {
         return mSnapshot.clipRect(left, top, right, bottom, regionOp);
     }
 
-    private void setBitmap(BufferedImage image) {
-        mBufferedImage = image;
+    private void setBitmap(Bitmap_Delegate bitmap) {
+        mBitmap = bitmap;
         assert mSnapshot.size() == 1;
-        mSnapshot.setImage(mBufferedImage);
+        mSnapshot.setBitmap(mBitmap);
     }
 
     private static void drawBitmap(
             int nativeCanvas,
-            final BufferedImage image,
-            final Bitmap.Config mBitmapConfig,
+            Bitmap_Delegate bitmap,
             int nativePaintOrZero,
             final int sleft, final int stop, final int sright, final int sbottom,
             final int dleft, final int dtop, final int dright, final int dbottom) {
@@ -1108,23 +1175,9 @@ public final class Canvas_Delegate {
             }
         }
 
-        // if the bitmap config is alpha_8, then we erase all color value from it
-        // before drawing it.
-        if (mBitmapConfig == Bitmap.Config.ALPHA_8) {
-            int w = image.getWidth();
-            int h = image.getHeight();
-            int[] argb = new int[w*h];
-            image.getRGB(0, 0, image.getWidth(), image.getHeight(),
-                    argb, 0, image.getWidth());
+        final BufferedImage image = getImageToDraw(bitmap, paintDelegate, sBoolOut);
 
-            final int length = argb.length;
-            for (int i = 0 ; i < length; i++) {
-                argb[i] &= 0xFF000000;
-            }
-            image.setRGB(0, 0, w, h, argb, 0, w);
-        }
-
-        draw(nativeCanvas, nativePaintOrZero, true /*compositeOnly*/,
+        draw(nativeCanvas, nativePaintOrZero, true /*compositeOnly*/, sBoolOut[0],
                 new GcSnapshot.Drawable() {
                     public void draw(Graphics2D graphics, Paint_Delegate paint) {
                         if (paint != null && paint.isFilterBitmap()) {
@@ -1137,6 +1190,70 @@ public final class Canvas_Delegate {
                                 sleft, stop, sright, sbottom, null);
                     }
         });
+    }
+
+
+    /**
+     * Returns a BufferedImage ready for drawing, based on the bitmap and paint delegate.
+     * The image returns, through a 1-size boolean array, whether the drawing code should
+     * use a SRC composite no matter what the paint says.
+     *
+     * @param bitmap the bitmap
+     * @param paint the paint that will be used to draw
+     * @param forceSrcMode whether the composite will have to be SRC
+     * @return the image to draw
+     */
+    private static BufferedImage getImageToDraw(Bitmap_Delegate bitmap, Paint_Delegate paint,
+            boolean[] forceSrcMode) {
+        BufferedImage image = bitmap.getImage();
+        forceSrcMode[0] = false;
+
+        // if the bitmap config is alpha_8, then we erase all color value from it
+        // before drawing it.
+        if (bitmap.getConfig() == Bitmap.Config.ALPHA_8) {
+            fixAlpha8Bitmap(image);
+        } else if (bitmap.hasAlpha() == false) {
+            // hasAlpha is merely a rendering hint. There can in fact be alpha values
+            // in the bitmap but it should be ignored at drawing time.
+            // There is two ways to do this:
+            // - override the composite to be SRC. This can only be used if the composite
+            //   was going to be SRC or SRC_OVER in the first place
+            // - Create a different bitmap to draw in which all the alpha channel values is set
+            //   to 0xFF.
+            if (paint != null) {
+                int xfermode = paint.getXfermode();
+                if (xfermode > 0) {
+                    Xfermode_Delegate xfermodeDelegate = Xfermode_Delegate.getDelegate(xfermode);
+                    if (xfermodeDelegate instanceof PorterDuffXfermode_Delegate) {
+                        PorterDuff.Mode mode =
+                            ((PorterDuffXfermode_Delegate)xfermodeDelegate).getMode();
+
+                        forceSrcMode[0] = mode == PorterDuff.Mode.SRC_OVER ||
+                                mode == PorterDuff.Mode.SRC;
+                    }
+                }
+            }
+
+            // if we can't force SRC mode, then create a temp bitmap of TYPE_RGB
+            if (forceSrcMode[0] == false) {
+                image = Bitmap_Delegate.createCopy(image, BufferedImage.TYPE_INT_RGB, 0xFF);
+            }
+        }
+
+        return image;
+    }
+
+    private static void fixAlpha8Bitmap(final BufferedImage image) {
+        int w = image.getWidth();
+        int h = image.getHeight();
+        int[] argb = new int[w * h];
+        image.getRGB(0, 0, image.getWidth(), image.getHeight(), argb, 0, image.getWidth());
+
+        final int length = argb.length;
+        for (int i = 0 ; i < length; i++) {
+            argb[i] &= 0xFF000000;
+        }
+        image.setRGB(0, 0, w, h, argb, 0, w);
     }
 }
 
