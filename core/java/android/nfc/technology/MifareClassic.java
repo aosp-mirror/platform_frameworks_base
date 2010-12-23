@@ -26,13 +26,13 @@ import java.io.IOException;
 /**
  * Concrete class for TagTechnology.MIFARE_CLASSIC
  *
- * Mifare classic has n sectors, with varying sizes, although
- * they are at least the same pattern for any one mifare classic
+ * MIFARE Classic has n sectors, with varying sizes, although
+ * they are at least the same pattern for any one MIFARE Classic
  * product. Each sector has two keys. Authentication with the correct
  * key is needed before access to any sector.
  *
  * Each sector has k blocks.
- * Block size is constant across the whole mifare classic family.
+ * Block size is constant across the whole MIFARE classic family.
  */
 public final class MifareClassic extends BasicTagTechnology {
     /**
@@ -43,12 +43,12 @@ public final class MifareClassic extends BasicTagTechnology {
     public static final byte[] KEY_DEFAULT =
             {(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF};
     /**
-     * The well-known, default Mifare Application Directory read key.
+     * The well-known, default MIFARE Application Directory read key.
      */
     public static final byte[] KEY_MIFARE_APPLICATION_DIRECTORY =
             {(byte)0xA0,(byte)0xA1,(byte)0xA2,(byte)0xA3,(byte)0xA4,(byte)0xA5};
     /**
-     * The well-known, default read key for NDEF data on a Mifare Classic
+     * The well-known, default read key for NDEF data on a MIFARE Classic
      */
     public static final byte[] KEY_NFC_FORUM =
             {(byte)0xD3,(byte)0xF7,(byte)0xD3,(byte)0xF7,(byte)0xD3,(byte)0xF7};

@@ -43,7 +43,6 @@ public final class NfcAdapter {
      *
      * If any activities respond to this intent neither
      * {@link #ACTION_TECHNOLOGY_DISCOVERED} or {@link #ACTION_TAG_DISCOVERED} will be started.
-     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
@@ -57,7 +56,6 @@ public final class NfcAdapter {
      * {@link #ACTION_TAG_DISCOVERED}
      *
      * If any activities respond to this intent {@link #ACTION_TAG_DISCOVERED} will not be started.
-     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_TECHNOLOGY_DISCOVERED = "android.nfc.action.TECH_DISCOVERED";
@@ -76,7 +74,6 @@ public final class NfcAdapter {
 
     /**
      * Mandatory Tag extra for the ACTION_TAG intents.
-     * @hide
      */
     public static final String EXTRA_TAG = "android.nfc.extra.TAG";
 
