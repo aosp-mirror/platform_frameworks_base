@@ -37,13 +37,16 @@ using namespace android::renderscript;
 
 
 ScriptC::ScriptC(Context *rsc) : Script(rsc) {
+    LOGD(">>>> ScriptC ctor called, obj=%x", this);
     mBccScript = NULL;
     memset(&mProgram, 0, sizeof(mProgram));
 }
 
 ScriptC::~ScriptC() {
+    LOGD(">>>> ~ScriptC()");
     if (mBccScript) {
         bccDeleteScript(mBccScript);
+        LOGD(">>>> ~ScriptC(mBCCScript)");
     }
     free(mEnviroment.mScriptText);
     mEnviroment.mScriptText = NULL;
@@ -436,7 +439,7 @@ void ScriptCState::runCompiler(Context *rsc,
                       s->mEnviroment.mScriptTextLength,
                       modWhen,
                       crc32,
-                      NULL,
+                      resName,
                       cacheDir);
             bccCompileBC(s->mBccScript);
           }
