@@ -50,7 +50,7 @@ protected:
 private:
     enum {
         kMaxNumQueuedFragments = 2,
-        kMaxNumRetries         = 3,
+        kMaxNumRetries         = 5,
     };
 
     static const int64_t kMaxPlaylistAgeUs;

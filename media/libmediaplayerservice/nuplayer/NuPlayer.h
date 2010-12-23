@@ -21,9 +21,6 @@
 #include <media/MediaPlayerInterface.h>
 #include <media/stagefright/foundation/AHandler.h>
 
-#include "ATSParser.h"
-#include "AnotherPacketSource.h"
-
 namespace android {
 
 struct ACodec;
@@ -35,6 +32,10 @@ struct NuPlayer : public AHandler {
     void setListener(const wp<MediaPlayerBase> &listener);
 
     void setDataSource(const sp<IStreamSource> &source);
+
+    void setDataSource(
+            const char *url, const KeyedVector<String8, String8> *headers);
+
     void setVideoSurface(const sp<Surface> &surface);
     void setAudioSink(const sp<MediaPlayerBase::AudioSink> &sink);
     void start();
@@ -45,9 +46,12 @@ protected:
     virtual void onMessageReceived(const sp<AMessage> &msg);
 
 private:
-    struct Renderer;
     struct Decoder;
+    struct HTTPLiveSource;
     struct NuPlayerStreamListener;
+    struct Renderer;
+    struct Source;
+    struct StreamingSource;
 
     enum {
         kWhatSetDataSource,
@@ -62,11 +66,9 @@ private:
     };
 
     wp<MediaPlayerBase> mListener;
-    sp<IStreamSource> mSource;
+    sp<Source> mSource;
     sp<Surface> mSurface;
     sp<MediaPlayerBase::AudioSink> mAudioSink;
-    sp<NuPlayerStreamListener> mStreamListener;
-    sp<ATSParser> mTSParser;
     sp<Decoder> mVideoDecoder;
     sp<Decoder> mAudioDecoder;
     sp<Renderer> mRenderer;
@@ -74,6 +76,8 @@ private:
     bool mEOS;
     bool mAudioEOS;
     bool mVideoEOS;
+
+    bool mScanSourcesPending;
 
     enum FlushStatus {
         NONE,
@@ -88,19 +92,11 @@ private:
     FlushStatus mFlushingAudio;
     FlushStatus mFlushingVideo;
 
-    status_t instantiateDecoder(
-            bool audio, sp<Decoder> *decoder, bool ignoreCodecSpecificData);
+    status_t instantiateDecoder(bool audio, sp<Decoder> *decoder);
 
     status_t feedDecoderInputData(bool audio, const sp<AMessage> &msg);
     void renderBuffer(bool audio, const sp<AMessage> &msg);
 
-    status_t dequeueNextAccessUnit(
-            ATSParser::SourceType *type, sp<ABuffer> *accessUnit);
-
-    status_t dequeueAccessUnit(
-            ATSParser::SourceType type, sp<ABuffer> *accessUnit);
-
-    void feedMoreTSData();
     void notifyListener(int msg, int ext1, int ext2);
 
     void finishFlushIfPossible();

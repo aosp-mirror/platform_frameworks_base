@@ -60,6 +60,7 @@ protected:
 private:
     sp<ALooper> mLooper;
     sp<NuPlayer> mPlayer;
+    bool mPlaying;
 
     DISALLOW_EVIL_CONSTRUCTORS(NuPlayerDriver);
 };

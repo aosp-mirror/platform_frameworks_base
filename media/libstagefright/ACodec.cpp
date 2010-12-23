@@ -1082,7 +1082,7 @@ bool ACodec::BaseState::onOMXMessage(const sp<AMessage> &msg) {
 bool ACodec::BaseState::onOMXEvent(
         OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2) {
     if (event != OMX_EventError) {
-        LOGI("[%s] EVENT(%d, 0x%08lx, 0x%08lx)",
+        LOGV("[%s] EVENT(%d, 0x%08lx, 0x%08lx)",
              mCodec->mComponentName.c_str(), event, data1, data2);
 
         return false;
@@ -1520,7 +1520,7 @@ ACodec::LoadedToIdleState::LoadedToIdleState(ACodec *codec)
 }
 
 void ACodec::LoadedToIdleState::stateEntered() {
-    LOGI("[%s] Now Loaded->Idle", mCodec->mComponentName.c_str());
+    LOGV("[%s] Now Loaded->Idle", mCodec->mComponentName.c_str());
 
     CHECK_EQ(allocateBuffers(), (status_t)OK);
 }
@@ -1577,7 +1577,7 @@ ACodec::IdleToExecutingState::IdleToExecutingState(ACodec *codec)
 }
 
 void ACodec::IdleToExecutingState::stateEntered() {
-    LOGI("[%s] Now Idle->Executing", mCodec->mComponentName.c_str());
+    LOGV("[%s] Now Idle->Executing", mCodec->mComponentName.c_str());
 }
 
 bool ACodec::IdleToExecutingState::onMessageReceived(const sp<AMessage> &msg) {
@@ -1661,7 +1661,7 @@ void ACodec::ExecutingState::resume() {
 }
 
 void ACodec::ExecutingState::stateEntered() {
-    LOGI("[%s] Now Executing", mCodec->mComponentName.c_str());
+    LOGV("[%s] Now Executing", mCodec->mComponentName.c_str());
 
     mCodec->processDeferredMessages();
 }
@@ -1787,7 +1787,7 @@ bool ACodec::OutputPortSettingsChangedState::onMessageReceived(
 }
 
 void ACodec::OutputPortSettingsChangedState::stateEntered() {
-    LOGI("[%s] Now handling output port settings change",
+    LOGV("[%s] Now handling output port settings change",
          mCodec->mComponentName.c_str());
 }
 
@@ -1868,7 +1868,7 @@ bool ACodec::ExecutingToIdleState::onMessageReceived(const sp<AMessage> &msg) {
 }
 
 void ACodec::ExecutingToIdleState::stateEntered() {
-    LOGI("[%s] Now Executing->Idle", mCodec->mComponentName.c_str());
+    LOGV("[%s] Now Executing->Idle", mCodec->mComponentName.c_str());
 }
 
 bool ACodec::ExecutingToIdleState::onOMXEvent(
@@ -1950,7 +1950,7 @@ bool ACodec::IdleToLoadedState::onMessageReceived(const sp<AMessage> &msg) {
 }
 
 void ACodec::IdleToLoadedState::stateEntered() {
-    LOGI("[%s] Now Idle->Loaded", mCodec->mComponentName.c_str());
+    LOGV("[%s] Now Idle->Loaded", mCodec->mComponentName.c_str());
 }
 
 bool ACodec::IdleToLoadedState::onOMXEvent(
@@ -1961,7 +1961,7 @@ bool ACodec::IdleToLoadedState::onOMXEvent(
             CHECK_EQ(data1, (OMX_U32)OMX_CommandStateSet);
             CHECK_EQ(data2, (OMX_U32)OMX_StateLoaded);
 
-            LOGI("[%s] Now Loaded", mCodec->mComponentName.c_str());
+            LOGV("[%s] Now Loaded", mCodec->mComponentName.c_str());
 
             CHECK_EQ(mCodec->mOMX->freeNode(mCodec->mNode), (status_t)OK);
 
@@ -1995,12 +1995,12 @@ bool ACodec::ErrorState::onMessageReceived(const sp<AMessage> &msg) {
 }
 
 void ACodec::ErrorState::stateEntered() {
-    LOGI("[%s] Now in ErrorState", mCodec->mComponentName.c_str());
+    LOGV("[%s] Now in ErrorState", mCodec->mComponentName.c_str());
 }
 
 bool ACodec::ErrorState::onOMXEvent(
         OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2) {
-    LOGI("EVENT(%d, 0x%08lx, 0x%08lx)", event, data1, data2);
+    LOGV("EVENT(%d, 0x%08lx, 0x%08lx)", event, data1, data2);
     return true;
 }
 
@@ -2011,7 +2011,7 @@ ACodec::FlushingState::FlushingState(ACodec *codec)
 }
 
 void ACodec::FlushingState::stateEntered() {
-    LOGI("[%s] Now Flushing", mCodec->mComponentName.c_str());
+    LOGV("[%s] Now Flushing", mCodec->mComponentName.c_str());
 
     mFlushComplete[kPortIndexInput] = mFlushComplete[kPortIndexOutput] = false;
 }

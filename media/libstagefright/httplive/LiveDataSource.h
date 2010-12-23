@@ -33,6 +33,7 @@ struct LiveDataSource : public DataSource {
     virtual status_t initCheck() const;
 
     virtual ssize_t readAt(off64_t offset, void *data, size_t size);
+    ssize_t readAtNonBlocking(off64_t offset, void *data, size_t size);
 
     void queueBuffer(const sp<ABuffer> &buffer);
     void queueEOS(status_t finalResult);
@@ -52,6 +53,8 @@ private:
     status_t mFinalResult;
 
     FILE *mBackupFile;
+
+    ssize_t readAt_l(off64_t offset, void *data, size_t size);
 
     DISALLOW_EVIL_CONSTRUCTORS(LiveDataSource);
 };

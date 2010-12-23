@@ -33,6 +33,11 @@ AnotherPacketSource::AnotherPacketSource(const sp<MetaData> &meta)
       mEOSResult(OK) {
 }
 
+void AnotherPacketSource::setFormat(const sp<MetaData> &meta) {
+    CHECK(mFormat == NULL);
+    mFormat = meta;
+}
+
 AnotherPacketSource::~AnotherPacketSource() {
 }
 
@@ -61,8 +66,12 @@ status_t AnotherPacketSource::dequeueAccessUnit(sp<ABuffer> *buffer) {
         mBuffers.erase(mBuffers.begin());
 
         int32_t discontinuity;
-        if ((*buffer)->meta()->findInt32("discontinuity", &discontinuity)
-                && discontinuity) {
+        if ((*buffer)->meta()->findInt32("discontinuity", &discontinuity)) {
+
+            if (discontinuity == ATSParser::DISCONTINUITY_FORMATCHANGE) {
+                mFormat.clear();
+            }
+
             return INFO_DISCONTINUITY;
         }
 
@@ -86,8 +95,11 @@ status_t AnotherPacketSource::read(
         mBuffers.erase(mBuffers.begin());
 
         int32_t discontinuity;
-        if (buffer->meta()->findInt32("discontinuity", &discontinuity)
-                && discontinuity) {
+        if (buffer->meta()->findInt32("discontinuity", &discontinuity)) {
+            if (discontinuity == ATSParser::DISCONTINUITY_FORMATCHANGE) {
+                mFormat.clear();
+            }
+
             return INFO_DISCONTINUITY;
         } else {
             int64_t timeUs;
@@ -123,13 +135,10 @@ void AnotherPacketSource::queueAccessUnit(const sp<ABuffer> &buffer) {
     mCondition.signal();
 }
 
-void AnotherPacketSource::queueDiscontinuity(bool formatChange) {
+void AnotherPacketSource::queueDiscontinuity(
+        ATSParser::DiscontinuityType type) {
     sp<ABuffer> buffer = new ABuffer(0);
-    buffer->meta()->setInt32("discontinuity", true);
-
-    if (formatChange) {
-        buffer->meta()->setInt32("format-change", true);
-    }
+    buffer->meta()->setInt32("discontinuity", static_cast<int32_t>(type));
 
     Mutex::Autolock autoLock(mLock);
 

@@ -19,9 +19,14 @@
 #include <utils/Log.h>
 
 #include "NuPlayer.h"
+
+#include "HTTPLiveSource.h"
 #include "NuPlayerDecoder.h"
 #include "NuPlayerRenderer.h"
-#include "NuPlayerStreamListener.h"
+#include "NuPlayerSource.h"
+#include "StreamingSource.h"
+
+#include "ATSParser.h"
 
 #include <media/stagefright/foundation/hexdump.h>
 #include <media/stagefright/foundation/ABuffer.h>
@@ -37,9 +42,9 @@ namespace android {
 ////////////////////////////////////////////////////////////////////////////////
 
 NuPlayer::NuPlayer()
-    : mEOS(false),
-      mAudioEOS(false),
+    : mAudioEOS(false),
       mVideoEOS(false),
+      mScanSourcesPending(false),
       mFlushingAudio(NONE),
       mFlushingVideo(NONE) {
 }
@@ -54,9 +59,15 @@ void NuPlayer::setListener(const wp<MediaPlayerBase> &listener) {
 void NuPlayer::setDataSource(const sp<IStreamSource> &source) {
     sp<AMessage> msg = new AMessage(kWhatSetDataSource, id());
 
-    source->incStrong(this);
-    msg->setPointer("source", source.get());  // XXX unsafe.
+    msg->setObject("source", new StreamingSource(source));
+    msg->post();
+}
 
+void NuPlayer::setDataSource(
+        const char *url, const KeyedVector<String8, String8> *headers) {
+    sp<AMessage> msg = new AMessage(kWhatSetDataSource, id());
+
+    msg->setObject("source", new HTTPLiveSource(url));
     msg->post();
 }
 
@@ -104,14 +115,10 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
 
             CHECK(mSource == NULL);
 
-            void *ptr;
-            CHECK(msg->findPointer("source", &ptr));
+            sp<RefBase> obj;
+            CHECK(msg->findObject("source", &obj));
 
-            mSource = static_cast<IStreamSource *>(ptr);
-            mSource->decStrong(this);
-
-            mStreamListener = new NuPlayerStreamListener(mSource, id());
-            mTSParser = new ATSParser;
+            mSource = static_cast<Source *>(obj.get());
             break;
         }
 
@@ -139,7 +146,7 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
 
         case kWhatStart:
         {
-            mStreamListener->start();
+            mSource->start();
 
             mRenderer = new Renderer(
                     mAudioSink,
@@ -148,31 +155,27 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
             looper()->registerHandler(mRenderer);
 
             (new AMessage(kWhatScanSources, id()))->post();
+            mScanSourcesPending = true;
             break;
         }
 
         case kWhatScanSources:
         {
-            instantiateDecoder(
-                    false,
-                    &mVideoDecoder,
-                    false /* ignoreCodecSpecificData */);
+            mScanSourcesPending = false;
+
+            instantiateDecoder(false, &mVideoDecoder);
 
             if (mAudioSink != NULL) {
-                instantiateDecoder(
-                        true,
-                        &mAudioDecoder,
-                        false /* ignoreCodecSpecificData */);
+                instantiateDecoder(true, &mAudioDecoder);
             }
 
-            if (mEOS) {
+            if (!mSource->feedMoreTSData()) {
                 break;
             }
 
-            feedMoreTSData();
-
             if (mAudioDecoder == NULL || mVideoDecoder == NULL) {
                 msg->post(100000ll);
+                mScanSourcesPending = true;
             }
             break;
         }
@@ -192,9 +195,10 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                 status_t err = feedDecoderInputData(
                         audio, codecRequest);
 
-                if (err == -EWOULDBLOCK && !mEOS) {
-                    feedMoreTSData();
-                    msg->post();
+                if (err == -EWOULDBLOCK) {
+                    if (mSource->feedMoreTSData()) {
+                        msg->post();
+                    }
                 }
             } else if (what == ACodec::kWhatEOS) {
                 mRenderer->queueEOS(audio, ERROR_END_OF_STREAM);
@@ -322,135 +326,37 @@ void NuPlayer::finishFlushIfPossible() {
 
     mRenderer->signalTimeDiscontinuity();
 
+    bool scanSourcesAgain = false;
+
     if (mFlushingAudio == SHUT_DOWN) {
-        instantiateDecoder(
-                true,
-                &mAudioDecoder,
-                true /* ignoreCodecSpecificData */);
-        CHECK(mAudioDecoder != NULL);
+        scanSourcesAgain = true;
     } else if (mAudioDecoder != NULL) {
         mAudioDecoder->signalResume();
     }
 
     if (mFlushingVideo == SHUT_DOWN) {
-        instantiateDecoder(
-                false,
-                &mVideoDecoder,
-                true /* ignoreCodecSpecificData */);
-        CHECK(mVideoDecoder != NULL);
+        scanSourcesAgain = true;
     } else if (mVideoDecoder != NULL) {
         mVideoDecoder->signalResume();
     }
 
     mFlushingAudio = NONE;
     mFlushingVideo = NONE;
-}
 
-void NuPlayer::feedMoreTSData() {
-    CHECK(!mEOS);
-
-    for (int32_t i = 0; i < 10; ++i) {
-        char buffer[188];
-        ssize_t n = mStreamListener->read(buffer, sizeof(buffer));
-
-        if (n == 0) {
-            LOGI("input data EOS reached.");
-            mTSParser->signalEOS(ERROR_END_OF_STREAM);
-            mEOS = true;
-            break;
-        } else if (n == INFO_DISCONTINUITY) {
-            mTSParser->signalDiscontinuity(ATSParser::DISCONTINUITY_SEEK);
-        } else if (n < 0) {
-            CHECK_EQ(n, -EWOULDBLOCK);
-            break;
-        } else {
-            if (buffer[0] == 0x00) {
-                // XXX legacy
-                mTSParser->signalDiscontinuity(
-                        buffer[1] == 0x00
-                            ? ATSParser::DISCONTINUITY_SEEK
-                            : ATSParser::DISCONTINUITY_FORMATCHANGE);
-            } else {
-                mTSParser->feedTSPacket(buffer, sizeof(buffer));
-            }
-        }
+    if (scanSourcesAgain && !mScanSourcesPending) {
+        mScanSourcesPending = true;
+        (new AMessage(kWhatScanSources, id()))->post();
     }
 }
 
-status_t NuPlayer::dequeueNextAccessUnit(
-        ATSParser::SourceType *type, sp<ABuffer> *accessUnit) {
-    accessUnit->clear();
-
-    status_t audioErr = -EWOULDBLOCK;
-    int64_t audioTimeUs;
-
-    sp<AnotherPacketSource> audioSource =
-        static_cast<AnotherPacketSource *>(
-                mTSParser->getSource(ATSParser::MPEG2ADTS_AUDIO).get());
-
-    if (audioSource != NULL) {
-        audioErr = audioSource->nextBufferTime(&audioTimeUs);
-    }
-
-    status_t videoErr = -EWOULDBLOCK;
-    int64_t videoTimeUs;
-
-    sp<AnotherPacketSource> videoSource =
-        static_cast<AnotherPacketSource *>(
-                mTSParser->getSource(ATSParser::AVC_VIDEO).get());
-
-    if (videoSource != NULL) {
-        videoErr = videoSource->nextBufferTime(&videoTimeUs);
-    }
-
-    if (audioErr == -EWOULDBLOCK || videoErr == -EWOULDBLOCK) {
-        return -EWOULDBLOCK;
-    }
-
-    if (audioErr != OK && videoErr != OK) {
-        return audioErr;
-    }
-
-    if (videoErr != OK || (audioErr == OK && audioTimeUs < videoTimeUs)) {
-        *type = ATSParser::MPEG2ADTS_AUDIO;
-        return audioSource->dequeueAccessUnit(accessUnit);
-    } else {
-        *type = ATSParser::AVC_VIDEO;
-        return videoSource->dequeueAccessUnit(accessUnit);
-    }
-}
-
-status_t NuPlayer::dequeueAccessUnit(
-        ATSParser::SourceType type, sp<ABuffer> *accessUnit) {
-    sp<AnotherPacketSource> source =
-        static_cast<AnotherPacketSource *>(mTSParser->getSource(type).get());
-
-    if (source == NULL) {
-        return -EWOULDBLOCK;
-    }
-
-    status_t finalResult;
-    if (!source->hasBufferAvailable(&finalResult)) {
-        return finalResult == OK ? -EWOULDBLOCK : finalResult;
-    }
-
-    return source->dequeueAccessUnit(accessUnit);
-}
-
-status_t NuPlayer::instantiateDecoder(
-        bool audio, sp<Decoder> *decoder, bool ignoreCodecSpecificData) {
+status_t NuPlayer::instantiateDecoder(bool audio, sp<Decoder> *decoder) {
     if (*decoder != NULL) {
         return OK;
     }
 
-    ATSParser::SourceType type =
-        audio ? ATSParser::MPEG2ADTS_AUDIO : ATSParser::AVC_VIDEO;
+    sp<MetaData> meta = mSource->getFormat(audio);
 
-    sp<AnotherPacketSource> source =
-        static_cast<AnotherPacketSource *>(
-                mTSParser->getSource(type).get());
-
-    if (source == NULL) {
+    if (meta == NULL) {
         return -EWOULDBLOCK;
     }
 
@@ -461,8 +367,7 @@ status_t NuPlayer::instantiateDecoder(
     *decoder = new Decoder(notify, audio ? NULL : mSurface);
     looper()->registerHandler(*decoder);
 
-    const sp<MetaData> &meta = source->getFormat();
-    (*decoder)->configure(meta, ignoreCodecSpecificData);
+    (*decoder)->configure(meta);
 
     return OK;
 }
@@ -479,19 +384,17 @@ status_t NuPlayer::feedDecoderInputData(bool audio, const sp<AMessage> &msg) {
     }
 
     sp<ABuffer> accessUnit;
-    status_t err = dequeueAccessUnit(
-            audio ? ATSParser::MPEG2ADTS_AUDIO : ATSParser::AVC_VIDEO,
-            &accessUnit);
+    status_t err = mSource->dequeueAccessUnit(audio, &accessUnit);
 
     if (err == -EWOULDBLOCK) {
         return err;
     } else if (err != OK) {
         if (err == INFO_DISCONTINUITY) {
-            int32_t formatChange;
-            if (!accessUnit->meta()->findInt32(
-                        "format-change", &formatChange)) {
-                formatChange = 0;
-            }
+            int32_t type;
+            CHECK(accessUnit->meta()->findInt32("discontinuity", &type));
+
+            bool formatChange =
+                type == ATSParser::DISCONTINUITY_FORMATCHANGE;
 
             LOGI("%s discontinuity (formatChange=%d)",
                  audio ? "audio" : "video", formatChange);
