@@ -115,7 +115,7 @@ public class ClipboardService extends IClipboard.Stub {
 
     public ClipDescription getPrimaryClipDescription() {
         synchronized (this) {
-            return mPrimaryClip.getDescription();
+            return mPrimaryClip != null ? mPrimaryClip.getDescription() : null;
         }
     }
 
@@ -211,7 +211,7 @@ public class ClipboardService extends IClipboard.Stub {
         } catch (NameNotFoundException e) {
             throw new IllegalArgumentException("Unknown package " + pkg, e);
         }
-        if (!mActivePermissionOwners.contains(pkg)) {
+        if (mPrimaryClip != null && !mActivePermissionOwners.contains(pkg)) {
             final int N = mPrimaryClip.getItemCount();
             for (int i=0; i<N; i++) {
                 grantItemLocked(mPrimaryClip.getItem(i), pkg);
