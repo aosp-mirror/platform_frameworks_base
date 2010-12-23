@@ -4674,8 +4674,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Default implementation of {@link KeyEvent.Callback#onKeyMultiple(int, int, KeyEvent)
-     * KeyEvent.Callback.onKeyMultiple()}: perform press of the view
+     * Default implementation of {@link KeyEvent.Callback#onKeyDown(int, KeyEvent)
+     * KeyEvent.Callback.onKeyDown()}: perform press of the view
      * when {@link KeyEvent#KEYCODE_DPAD_CENTER} or {@link KeyEvent#KEYCODE_ENTER}
      * is released, if the view is enabled and clickable.
      *
@@ -4718,8 +4718,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Default implementation of {@link KeyEvent.Callback#onKeyMultiple(int, int, KeyEvent)
-     * KeyEvent.Callback.onKeyMultiple()}: perform clicking of the view
+     * Default implementation of {@link KeyEvent.Callback#onKeyUp(int, KeyEvent)
+     * KeyEvent.Callback.onKeyUp()}: perform clicking of the view
      * when {@link KeyEvent#KEYCODE_DPAD_CENTER} or
      * {@link KeyEvent#KEYCODE_ENTER} is released.
      *
