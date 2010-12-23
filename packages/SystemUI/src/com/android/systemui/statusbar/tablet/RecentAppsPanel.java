@@ -23,8 +23,6 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
-import android.app.IThumbnailReceiver;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -33,20 +31,20 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -55,7 +53,7 @@ import android.widget.TextView;
 import com.android.systemui.R;
 
 public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnClickListener {
-    private static final int COLLAPSE_DURATION = 360;
+    private static final int GLOW_PADDING = 15;
     private static final String TAG = "RecentAppsPanel";
     private static final boolean DEBUG = TabletStatusBar.DEBUG;
     private static final int DISPLAY_TASKS_PORTRAIT = 7; // Limited by max binder transaction size
@@ -70,6 +68,7 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
     private int mIconDpi;
     private AnimatorSet mAnimationSet;
     private View mBackgroundProtector;
+    private Bitmap mGlowBitmap;
 
     static class ActivityDescription {
         int id;
@@ -121,6 +120,7 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
                 & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_XLARGE;
 
         mIconDpi = xlarge ? DisplayMetrics.DENSITY_HIGH : res.getDisplayMetrics().densityDpi;
+        mGlowBitmap = BitmapFactory.decodeResource(res, R.drawable.recents_thumbnail_bg);
     }
 
     @Override
@@ -225,8 +225,8 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
                 if (title != null && title.length() > 0 && icon != null) {
                     if (DEBUG) Log.v(TAG, "creating activity desc for id=" + id + ", label=" + title);
                     ActivityDescription item = new ActivityDescription(
-                            crop(recentInfo.thumbnail), icon, title, recentInfo.description,
-                            intent, id, index, info.packageName);
+                            recentInfo.thumbnail, icon, title,
+                            recentInfo.description, intent, id, index, info.packageName);
                     activityDescriptions.add(item);
                     ++index;
                 } else {
@@ -255,21 +255,22 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         updateUiElements(getResources().getConfiguration(), true);
     }
 
-    private Bitmap crop(Bitmap bitmap) {
-        if (bitmap == null || bitmap.getWidth() >= bitmap.getHeight()) {
-            return bitmap;
-        }
-        final int width = bitmap.getWidth();
-        final int height = bitmap.getHeight();
-        Bitmap outBitmap = Bitmap.createBitmap(height, width, bitmap.getConfig());
+    private Bitmap compositeBitmap(Bitmap background, Bitmap thumbnail) {
+        Bitmap outBitmap = background.copy(background.getConfig(), true);
         Canvas canvas = new Canvas(outBitmap);
         Paint paint = new Paint();
         paint.setAntiAlias(true);
         paint.setFilterBitmap(true);
-        canvas.drawBitmap(bitmap,
-                new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight() - height * width / height),
-                new Rect(0, 0, outBitmap.getWidth(), outBitmap.getHeight()),
-                paint);
+        paint.setAlpha(255);
+        final int srcWidth = thumbnail.getWidth();
+        final int height = thumbnail.getHeight();
+        final int srcHeight = srcWidth > height ? height : (height - height * srcWidth / height);
+        canvas.drawBitmap(thumbnail,
+                new Rect(0, 0, srcWidth-1, srcHeight-1),
+                new RectF(GLOW_PADDING,
+                        GLOW_PADDING - 4.0f,
+                        outBitmap.getWidth() - GLOW_PADDING + 2.0f,
+                        outBitmap.getHeight() - GLOW_PADDING + 3.0f), paint);
         return outBitmap;
     }
 
@@ -291,7 +292,7 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
             TextView appLabel = (TextView) view.findViewById(R.id.app_label);
             TextView appDesc = (TextView) view.findViewById(R.id.app_description);
             final Bitmap thumb = activityDescription.thumbnail;
-            appThumbnail.setImageBitmap(crop(thumb));
+            appThumbnail.setImageBitmap(compositeBitmap(mGlowBitmap, thumb));
             appIcon.setImageDrawable(activityDescription.icon);
             appLabel.setText(activityDescription.label);
             appDesc.setText(activityDescription.description);
