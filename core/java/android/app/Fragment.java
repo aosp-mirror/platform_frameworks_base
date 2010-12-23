@@ -323,6 +323,15 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     
     int mState = INITIALIZING;
     
+    // Non-null if the fragment's view hierarchy is currently animating away,
+    // meaning we need to wait a bit on completely destroying it.  This is the
+    // animation that is running.
+    Animator mAnimatingAway;
+
+    // If mAnimatingAway != null, this is the state we should move to once the
+    // animation is done.
+    int mStateAfterAnimating;
+
     // When instantiated from saved state, this is the saved state.
     Bundle mSavedFragmentState;
     SparseArray<Parcelable> mSavedViewState;
@@ -1239,6 +1248,11 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
         }
         if (mView != null) {
             writer.print(prefix); writer.print("mView="); writer.println(mView);
+        }
+        if (mAnimatingAway != null) {
+            writer.print(prefix); writer.print("mAnimatingAway="); writer.println(mAnimatingAway);
+            writer.print(prefix); writer.print("mStateAfterAnimating=");
+                    writer.println(mStateAfterAnimating);
         }
         if (mLoaderManager != null) {
             writer.print(prefix); writer.println("Loader Manager:");

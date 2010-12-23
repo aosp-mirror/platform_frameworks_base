@@ -38,6 +38,7 @@ import android.view.ViewGroup;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Interface for interacting with {@link Fragment} objects inside of an
@@ -331,6 +332,7 @@ final class FragmentManagerImpl extends FragmentManager {
     
     boolean mNeedMenuInvalidate;
     boolean mStateSaved;
+    boolean mDestroyed;
     String mNoTransactionsBecause;
     
     // Temporary vars for state save and restore.
@@ -473,23 +475,23 @@ final class FragmentManagerImpl extends FragmentManager {
 
     @Override
     public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
-        if (mActive == null || mActive.size() <= 0) {
-            return;
-        }
-
-        writer.print(prefix); writer.print("Active Fragments in ");
-                writer.print(Integer.toHexString(System.identityHashCode(this)));
-                writer.println(":");
-
         String innerPrefix = prefix + "    ";
 
-        int N = mActive.size();
-        for (int i=0; i<N; i++) {
-            Fragment f = mActive.get(i);
-            if (f != null) {
-                writer.print(prefix); writer.print("  #"); writer.print(i);
-                        writer.print(": "); writer.println(f.toString());
-                f.dump(innerPrefix, fd, writer, args);
+        int N;
+        if (mActive != null) {
+            N = mActive.size();
+            if (N > 0) {
+                writer.print(prefix); writer.print("Active Fragments in ");
+                        writer.print(Integer.toHexString(System.identityHashCode(this)));
+                        writer.println(":");
+                for (int i=0; i<N; i++) {
+                    Fragment f = mActive.get(i);
+                    writer.print(prefix); writer.print("  #"); writer.print(i);
+                            writer.print(": "); writer.println(f);
+                    if (f != null) {
+                        f.dump(innerPrefix, fd, writer, args);
+                    }
+                }
             }
         }
 
@@ -499,6 +501,18 @@ final class FragmentManagerImpl extends FragmentManager {
                 writer.print(prefix); writer.println("Added Fragments:");
                 for (int i=0; i<N; i++) {
                     Fragment f = mAdded.get(i);
+                    writer.print(prefix); writer.print("  #"); writer.print(i);
+                            writer.print(": "); writer.println(f.toString());
+                }
+            }
+        }
+
+        if (mCreatedMenus != null) {
+            N = mCreatedMenus.size();
+            if (N > 0) {
+                writer.print(prefix); writer.println("Fragments Created Menus:");
+                for (int i=0; i<N; i++) {
+                    Fragment f = mCreatedMenus.get(i);
                     writer.print(prefix); writer.print("  #"); writer.print(i);
                             writer.print(": "); writer.println(f.toString());
                 }
@@ -516,6 +530,54 @@ final class FragmentManagerImpl extends FragmentManager {
                     bs.dump(innerPrefix, fd, writer, args);
                 }
             }
+        }
+
+        synchronized (this) {
+            if (mBackStackIndices != null) {
+                N = mBackStackIndices.size();
+                if (N > 0) {
+                    writer.print(prefix); writer.println("Back Stack Indices:");
+                    for (int i=0; i<N; i++) {
+                        BackStackRecord bs = mBackStackIndices.get(i);
+                        writer.print(prefix); writer.print("  #"); writer.print(i);
+                                writer.print(": "); writer.println(bs);
+                    }
+                }
+            }
+
+            if (mAvailBackStackIndices != null && mAvailBackStackIndices.size() > 0) {
+                writer.print(prefix); writer.print("mAvailBackStackIndices: ");
+                        writer.println(Arrays.toString(mAvailBackStackIndices.toArray()));
+            }
+        }
+
+        if (mPendingActions != null) {
+            N = mPendingActions.size();
+            if (N > 0) {
+                writer.print(prefix); writer.println("Pending Actions:");
+                for (int i=0; i<N; i++) {
+                    Runnable r = mPendingActions.get(i);
+                    writer.print(prefix); writer.print("  #"); writer.print(i);
+                            writer.print(": "); writer.println(r);
+                }
+            }
+        }
+
+        writer.print(prefix); writer.println("FragmentManager misc state:");
+        writer.print(prefix); writer.print("  mCurState="); writer.print(mCurState);
+                writer.print(" mStateSaved="); writer.print(mStateSaved);
+                writer.print(" mDestroyed="); writer.println(mDestroyed);
+        if (mNeedMenuInvalidate) {
+            writer.print(prefix); writer.print("  mNeedMenuInvalidate=");
+                    writer.println(mNeedMenuInvalidate);
+        }
+        if (mNoTransactionsBecause != null) {
+            writer.print(prefix); writer.print("  mNoTransactionsBecause=");
+                    writer.println(mNoTransactionsBecause);
+        }
+        if (mAvailIndices != null && mAvailIndices.size() > 0) {
+            writer.print(prefix); writer.print("  mAvailIndices: ");
+                    writer.println(Arrays.toString(mAvailIndices.toArray()));
         }
     }
 
@@ -569,6 +631,14 @@ final class FragmentManagerImpl extends FragmentManager {
         }
         
         if (f.mState < newState) {
+            if (f.mAnimatingAway != null) {
+                // The fragment is currently being animated...  but!  Now we
+                // want to move our state back up.  Give up on waiting for the
+                // animation, move to whatever the final state should be once
+                // the animation is done, and then we can proceed from there.
+                f.mAnimatingAway = null;
+                moveToState(f, f.mStateAfterAnimating, 0, 0);
+            }
             switch (f.mState) {
                 case Fragment.INITIALIZING:
                     if (DEBUG) Log.v(TAG, "moveto CREATED: " + f);
@@ -716,18 +786,26 @@ final class FragmentManagerImpl extends FragmentManager {
                         }
                         if (f.mView != null && f.mContainer != null) {
                             Animator anim = null;
-                            if (mCurState > Fragment.INITIALIZING) {
+                            if (mCurState > Fragment.INITIALIZING && !mDestroyed) {
                                 anim = loadAnimator(f, transit, false,
                                         transitionStyle);
                             }
                             if (anim != null) {
                                 final ViewGroup container = f.mContainer;
                                 final View view = f.mView;
+                                final Fragment fragment = f;
                                 container.startViewTransition(view);
+                                f.mAnimatingAway = anim;
+                                f.mStateAfterAnimating = newState;
                                 anim.addListener(new AnimatorListenerAdapter() {
                                     @Override
                                     public void onAnimationEnd(Animator anim) {
                                         container.endViewTransition(view);
+                                        if (fragment.mAnimatingAway != null) {
+                                            fragment.mAnimatingAway = null;
+                                            moveToState(fragment, fragment.mStateAfterAnimating,
+                                                    0, 0);
+                                        }
                                     }
                                 });
                                 anim.setTarget(f.mView);
@@ -741,25 +819,45 @@ final class FragmentManagerImpl extends FragmentManager {
                     }
                 case Fragment.CREATED:
                     if (newState < Fragment.CREATED) {
-                        if (DEBUG) Log.v(TAG, "movefrom CREATED: " + f);
-                        if (!f.mRetaining) {
-                            f.mCalled = false;
-                            f.onDestroy();
-                            if (!f.mCalled) {
-                                throw new SuperNotCalledException("Fragment " + f
-                                        + " did not call through to super.onDestroy()");
+                        if (mDestroyed) {
+                            if (f.mAnimatingAway != null) {
+                                // The fragment's containing activity is
+                                // being destroyed, but this fragment is
+                                // currently animating away.  Stop the
+                                // animation right now -- it is not needed,
+                                // and we can't wait any more on destroying
+                                // the fragment.
+                                f.mAnimatingAway = null;
+                                f.mAnimatingAway.cancel();
                             }
                         }
-                        
-                        f.mCalled = false;
-                        f.onDetach();
-                        if (!f.mCalled) {
-                            throw new SuperNotCalledException("Fragment " + f
-                                    + " did not call through to super.onDetach()");
+                        if (f.mAnimatingAway != null) {
+                            // We are waiting for the fragment's view to finish
+                            // animating away.  Just make a note of the state
+                            // the fragment now should move to once the animation
+                            // is done.
+                            f.mStateAfterAnimating = newState;
+                        } else {
+                            if (DEBUG) Log.v(TAG, "movefrom CREATED: " + f);
+                            if (!f.mRetaining) {
+                                f.mCalled = false;
+                                f.onDestroy();
+                                if (!f.mCalled) {
+                                    throw new SuperNotCalledException("Fragment " + f
+                                            + " did not call through to super.onDestroy()");
+                                }
+                            }
+
+                            f.mCalled = false;
+                            f.onDetach();
+                            if (!f.mCalled) {
+                                throw new SuperNotCalledException("Fragment " + f
+                                        + " did not call through to super.onDetach()");
+                            }
+                            f.mImmediateActivity = null;
+                            f.mActivity = null;
+                            f.mFragmentManager = null;
                         }
-                        f.mImmediateActivity = null;
-                        f.mActivity = null;
-                        f.mFragmentManager = null;
                     }
             }
         }
@@ -1442,6 +1540,7 @@ final class FragmentManagerImpl extends FragmentManager {
     }
     
     public void dispatchDestroy() {
+        mDestroyed = true;
         moveToState(Fragment.INITIALIZING, false);
         mActivity = null;
     }

@@ -512,6 +512,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private AbsListView.PerformClick mPerformClick;
 
     /**
+     * Delayed action for touch mode.
+     */
+    private Runnable mTouchModeReset;
+
+    /**
      * This view is in transcript mode -- it shows the bottom of the list when the data
      * changes
      */
@@ -2322,6 +2327,27 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mFlingStrictSpan.finish();
             mFlingStrictSpan = null;
         }
+
+        if (mFlingRunnable != null) {
+            removeCallbacks(mFlingRunnable);
+        }
+
+        if (mPositionScroller != null) {
+            removeCallbacks(mPositionScroller);
+        }
+
+        if (mClearScrollingCache != null) {
+            removeCallbacks(mClearScrollingCache);
+        }
+
+        if (mPerformClick != null) {
+            removeCallbacks(mPerformClick);
+        }
+
+        if (mTouchModeReset != null) {
+            removeCallbacks(mTouchModeReset);
+            mTouchModeReset = null;
+        }
     }
 
     @Override
@@ -3020,7 +3046,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     ((TransitionDrawable) d).resetTransition();
                                 }
                             }
-                            postDelayed(new Runnable() {
+                            if (mTouchModeReset != null) {
+                                removeCallbacks(mTouchModeReset);
+                            }
+                            mTouchModeReset = new Runnable() {
+                                @Override
                                 public void run() {
                                     mTouchMode = TOUCH_MODE_REST;
                                     child.setPressed(false);
@@ -3029,7 +3059,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                         post(performClick);
                                     }
                                 }
-                            }, ViewConfiguration.getPressedStateDuration());
+                            };
+                            postDelayed(mTouchModeReset,
+                                    ViewConfiguration.getPressedStateDuration());
                         } else {
                             mTouchMode = TOUCH_MODE_REST;
                             updateSelectorState();
