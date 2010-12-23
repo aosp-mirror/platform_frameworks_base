@@ -1005,7 +1005,7 @@ public class WebView extends AbsoluteLayout
     private static void setupProxyListener(Context context) {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Proxy.PROXY_CHANGE_ACTION);
-        Intent currentProxy = context.registerReceiver(new ProxyReceiver(), filter);
+        Intent currentProxy = context.getApplicationContext().registerReceiver(new ProxyReceiver(), filter);
         if (currentProxy != null) {
             handleProxyBroadcast(currentProxy);
         }
