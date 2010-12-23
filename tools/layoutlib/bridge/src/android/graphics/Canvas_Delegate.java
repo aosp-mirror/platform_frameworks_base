@@ -271,8 +271,7 @@ public final class Canvas_Delegate {
     }
 
     /*package*/ static void freeCaches() {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // nothing to be done here.
     }
 
     /*package*/ static int initRaster(int nativeBitmapOrZero) {
@@ -440,15 +439,33 @@ public final class Canvas_Delegate {
     /*package*/ static boolean native_clipPath(int nativeCanvas,
                                                   int nativePath,
                                                   int regionOp) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
+        if (canvasDelegate == null) {
+            return true;
+        }
+
+        Path_Delegate pathDelegate = Path_Delegate.getDelegate(nativePath);
+        if (pathDelegate == null) {
+            return true;
+        }
+
+        return canvasDelegate.mSnapshot.clip(pathDelegate.getJavaShape(), regionOp);
     }
 
     /*package*/ static boolean native_clipRegion(int nativeCanvas,
                                                     int nativeRegion,
                                                     int regionOp) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
+        if (canvasDelegate == null) {
+            return true;
+        }
+
+        Region_Delegate region = Region_Delegate.getDelegate(nativeRegion);
+        if (region == null) {
+            return true;
+        }
+
+        return canvasDelegate.mSnapshot.clip(region.getJavaArea(), regionOp);
     }
 
     /*package*/ static void nativeSetDrawFilter(int nativeCanvas,

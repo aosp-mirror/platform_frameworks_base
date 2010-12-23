@@ -136,6 +136,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.PorterDuffXfermode",
         "android.graphics.RadialGradient",
         "android.graphics.Rasterizer",
+        "android.graphics.Region",
         "android.graphics.Shader",
         "android.graphics.SumPathEffect",
         "android.graphics.SweepGradient",

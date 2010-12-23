@@ -22,21 +22,19 @@ import android.graphics.Bitmap_Delegate;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint_Delegate;
-import android.graphics.PathEffect_Delegate;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.graphics.Region_Delegate;
 import android.graphics.Shader_Delegate;
 import android.graphics.Xfermode_Delegate;
 
 import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
@@ -448,70 +446,37 @@ public class GcSnapshot {
         }
     }
 
-    public boolean clipRect(float left, float top, float right, float bottom, int regionOp) {
+    public boolean clip(Shape shape, int regionOp) {
+        Area area = null;
+        if (regionOp == Region.Op.REPLACE.nativeInt) {
+            area = new Area(shape);
+        } else {
+            area = Region_Delegate.combineShapes(getClip(), shape, regionOp);
+        }
+
+        assert area != null;
+
         if (mLayers.size() > 0) {
-            Shape clip = null;
-            if (regionOp == Region.Op.DIFFERENCE.nativeInt) {
-                Area newClip = new Area(getClip());
-                newClip.subtract(new Area(
-                        new Rectangle2D.Float(left, top, right - left, bottom - top)));
-                clip = newClip;
-
-            } else if (regionOp == Region.Op.INTERSECT.nativeInt) {
+            if (area != null) {
                 for (Layer layer : mLayers) {
-                    layer.getGraphics().clipRect(
-                            (int) left, (int) top, (int) (right - left), (int) (bottom - top));
-                }
-
-            } else if (regionOp == Region.Op.UNION.nativeInt) {
-                Area newClip = new Area(getClip());
-                newClip.add(new Area(
-                        new Rectangle2D.Float(left, top, right - left, bottom - top)));
-                clip = newClip;
-
-            } else if (regionOp == Region.Op.XOR.nativeInt) {
-                Area newClip = new Area(getClip());
-                newClip.exclusiveOr(new Area(
-                        new Rectangle2D.Float(left, top, right - left, bottom - top)));
-                clip = newClip;
-
-            } else if (regionOp == Region.Op.REVERSE_DIFFERENCE.nativeInt) {
-                Area newClip = new Area(
-                        new Rectangle2D.Float(left, top, right - left, bottom - top));
-                newClip.subtract(new Area(getClip()));
-                clip = newClip;
-
-            } else if (regionOp == Region.Op.REPLACE.nativeInt) {
-                for (Layer layer : mLayers) {
-                    layer.getGraphics().setClip(
-                            (int) left, (int) top, (int) (right - left), (int) (bottom - top));
-                }
-            }
-
-            if (clip != null) {
-                for (Layer layer : mLayers) {
-                    layer.getGraphics().setClip(clip);
+                    layer.getGraphics().setClip(area);
                 }
             }
 
             return getClip().getBounds().isEmpty() == false;
         } else {
-            if (mClip == null) {
+            if (area != null) {
+                mClip = area;
+            } else {
                 mClip = new Area();
-            }
-
-            if (regionOp == Region.Op.DIFFERENCE.nativeInt) {
-                //FIXME
-            } else if (regionOp == Region.Op.DIFFERENCE.nativeInt) {
-            } else if (regionOp == Region.Op.INTERSECT.nativeInt) {
-            } else if (regionOp == Region.Op.UNION.nativeInt) {
-            } else if (regionOp == Region.Op.XOR.nativeInt) {
-            } else if (regionOp == Region.Op.REVERSE_DIFFERENCE.nativeInt) {
-            } else if (regionOp == Region.Op.REPLACE.nativeInt) {
             }
 
             return mClip.getBounds().isEmpty() == false;
         }
+    }
+
+    public boolean clipRect(float left, float top, float right, float bottom, int regionOp) {
+        return clip(new Rectangle2D.Float(left, top, right - left, bottom - top), regionOp);
     }
 
     public Shape getClip() {
@@ -727,31 +692,8 @@ public class GcSnapshot {
                 g.setColor(new Color(paint.getColor(), true /*hasAlpha*/));
             }
 
-            boolean customStroke = false;
-            PathEffect_Delegate effectDelegate = paint.getPathEffect();
-            if (effectDelegate != null) {
-                if (effectDelegate.isSupported()) {
-                    Stroke stroke = effectDelegate.getStroke(paint);
-                    assert stroke != null;
-                    if (stroke != null) {
-                        g.setStroke(stroke);
-                        customStroke = true;
-                    }
-                } else {
-                    Bridge.getLog().fidelityWarning(null,
-                            effectDelegate.getSupportMessage(),
-                            null);
-                }
-            }
-
-            // if no custom stroke as been set, set the default one.
-            if (customStroke == false) {
-                g.setStroke(new BasicStroke(
-                        paint.getStrokeWidth(),
-                        paint.getJavaCap(),
-                        paint.getJavaJoin(),
-                        paint.getJavaStrokeMiter()));
-            }
+            // set the stroke
+            g.setStroke(paint.getJavaStroke());
         }
 
         // the alpha for the composite. Always opaque if the normal paint color is used since

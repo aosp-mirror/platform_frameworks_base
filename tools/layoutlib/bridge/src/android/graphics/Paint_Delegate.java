@@ -25,6 +25,8 @@ import android.text.TextUtils;
 
 import java.awt.BasicStroke;
 import java.awt.Font;
+import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
@@ -167,6 +169,30 @@ public class Paint_Delegate {
         }
     }
 
+    public Stroke getJavaStroke() {
+        PathEffect_Delegate effectDelegate = PathEffect_Delegate.getDelegate(mPathEffect);
+        if (effectDelegate != null) {
+            if (effectDelegate.isSupported()) {
+                Stroke stroke = effectDelegate.getStroke(this);
+                assert stroke != null;
+                if (stroke != null) {
+                    return stroke;
+                }
+            } else {
+                Bridge.getLog().fidelityWarning(null,
+                        effectDelegate.getSupportMessage(),
+                        null);
+            }
+        }
+
+        // if no custom stroke as been set, set the default one.
+        return new BasicStroke(
+                    getStrokeWidth(),
+                    getJavaCap(),
+                    getJavaJoin(),
+                    getJavaStrokeMiter());
+    }
+
     /**
      * Returns the {@link Xfermode} delegate or null if none have been set
      *
@@ -192,15 +218,6 @@ public class Paint_Delegate {
      */
     public Shader_Delegate getShader() {
         return Shader_Delegate.getDelegate(mShader);
-    }
-
-    /**
-     * Returns the {@link PathEffect} delegate or null if none have been set
-     *
-     * @return the delegate or null.
-     */
-    public PathEffect_Delegate getPathEffect() {
-        return PathEffect_Delegate.getDelegate(mPathEffect);
     }
 
     /**
@@ -628,8 +645,28 @@ public class Paint_Delegate {
     }
 
     /*package*/ static boolean native_getFillPath(int native_object, int src, int dst) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        Paint_Delegate paint = sManager.getDelegate(native_object);
+        if (paint == null) {
+            return false;
+        }
+
+        Path_Delegate srcPath = Path_Delegate.getDelegate(src);
+        if (srcPath == null) {
+            return true;
+        }
+
+        Path_Delegate dstPath = Path_Delegate.getDelegate(dst);
+        if (dstPath == null) {
+            return true;
+        }
+
+        Stroke stroke = paint.getJavaStroke();
+        Shape strokeShape = stroke.createStrokedShape(srcPath.getJavaShape());
+
+        dstPath.setJavaShape(strokeShape);
+
+        // FIXME figure out the return value?
+        return true;
     }
 
     /*package*/ static int native_setShader(int native_object, int shader) {

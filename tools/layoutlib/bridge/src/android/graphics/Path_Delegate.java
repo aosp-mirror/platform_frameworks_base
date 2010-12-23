@@ -67,6 +67,20 @@ public final class Path_Delegate {
         return mPath;
     }
 
+    public void setJavaShape(Shape shape) {
+        mPath.reset();
+        mPath.append(shape, false /*connect*/);
+    }
+
+    public void reset() {
+        mPath.reset();
+    }
+
+    public void setPathIterator(PathIterator iterator) {
+        mPath.reset();
+        mPath.append(iterator, false /*connect*/);
+    }
+
     // ---- native methods ----
 
     /*package*/ static int init1() {

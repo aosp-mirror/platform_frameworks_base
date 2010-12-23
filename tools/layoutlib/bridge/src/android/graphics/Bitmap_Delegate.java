@@ -384,7 +384,7 @@ public final class Bitmap_Delegate {
         // This is only called by Bitmap.CREATOR (Parcelable.Creator<Bitmap>), which is only
         // used during aidl call so really this should not be called.
         Bridge.getLog().error(null,
-                "AIDL is not suppored, and therefore bitmap cannot be created from parcels");
+                "AIDL is not suppored, and therefore Bitmaps cannot be created from parcels.");
         return null;
     }
 
@@ -393,7 +393,7 @@ public final class Bitmap_Delegate {
         // This is only called when sending a bitmap through aidl, so really this should not
         // be called.
         Bridge.getLog().error(null,
-                "AIDL is not suppored, and therefore bitmap cannot be written to parcels");
+                "AIDL is not suppored, and therefore Bitmaps cannot be written to parcels.");
         return false;
     }
 
