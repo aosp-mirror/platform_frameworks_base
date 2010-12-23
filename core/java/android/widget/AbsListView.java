@@ -974,8 +974,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             ss.position = getSelectedItemPosition();
             ss.firstId = INVALID_POSITION;
         } else {
-            if (haveChildren) {
-                // Remember the position of the first child
+            if (haveChildren && mFirstPosition > 0) {
+                // Remember the position of the first child.
+                // We only do this if we are not currently at the top of
+                // the list, for two reasons:
+                // (1) The list may be in the process of becoming empty, in
+                // which case mItemCount may not be 0, but if we try to
+                // ask for any information about position 0 we will crash.
+                // (2) Being "at the top" seems like a special case, anyway,
+                // and the user wouldn't expect to end up somewhere else when
+                // they revisit the list even if its content has changed.
                 View v = getChildAt(0);
                 ss.viewTop = v.getTop();
                 int firstPos = mFirstPosition;
