@@ -326,13 +326,16 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /* Set the frequency band */
     static final int CMD_SET_FREQUENCY_BAND               = 90;
 
-    /* Commands from the SupplicantStateTracker */
+    /* Commands from/to the SupplicantStateTracker */
     /* Indicates whether a wifi network is available for connection */
-    static final int CMD_SET_NETWORK_AVAILABLE             = 111;
+    static final int CMD_SET_NETWORK_AVAILABLE            = 111;
+    /* Reset the supplicant state tracker */
+    static final int CMD_RESET_SUPPLICANT_STATE           = 112;
+
 
     /* Commands/events reported by WpsStateMachine */
     /* Indicates the completion of WPS activity */
-    static final int WPS_COMPLETED_EVENT                   = 121;
+    static final int WPS_COMPLETED_EVENT                  = 121;
 
     private static final int CONNECT_MODE   = 1;
     private static final int SCAN_ONLY_MODE = 2;
@@ -1453,20 +1456,17 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      ********************************************************/
 
     /**
-     * A structure for supplying information about a supplicant state
-     * change in the STATE_CHANGE event message that comes from the
-     * WifiMonitor
-     * thread.
+     * Stores supplicant state change information passed from WifiMonitor
      */
     static class StateChangeResult {
-        StateChangeResult(int networkId, String BSSID, Object state) {
+        StateChangeResult(int networkId, String BSSID, SupplicantState state) {
             this.state = state;
             this.BSSID = BSSID;
             this.networkId = networkId;
         }
         int networkId;
         String BSSID;
-        Object state;
+        SupplicantState state;
     }
 
     /**
@@ -1505,11 +1505,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      */
     void notifyNetworkStateChange(DetailedState newState, String BSSID, int networkId) {
         if (newState == NetworkInfo.DetailedState.CONNECTED) {
-            sendMessage(obtainMessage(NETWORK_CONNECTION_EVENT,
-                    new StateChangeResult(networkId, BSSID, newState)));
+            sendMessage(obtainMessage(NETWORK_CONNECTION_EVENT, networkId, 0, BSSID));
         } else {
-            sendMessage(obtainMessage(NETWORK_DISCONNECTION_EVENT,
-                    new StateChangeResult(networkId, BSSID, newState)));
+            sendMessage(obtainMessage(NETWORK_DISCONNECTION_EVENT, networkId, 0, BSSID));
         }
     }
 
@@ -1755,7 +1753,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     if(WifiNative.startSupplicant()) {
                         Log.d(TAG, "Supplicant start successful");
                         mWifiMonitor.startMonitoring();
-                        setWifiState(WIFI_STATE_ENABLED);
                         transitionTo(mSupplicantStartingState);
                     } else {
                         Log.e(TAG, "Failed to start supplicant!");
@@ -1914,8 +1911,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             switch(message.what) {
                 case SUP_CONNECTION_EVENT:
                     Log.d(TAG, "Supplicant connection established");
+                    setWifiState(WIFI_STATE_ENABLED);
                     mSupplicantRestartCount = 0;
-                    mSupplicantStateTracker.resetSupplicantState();
+                    /* Reset the supplicant state to indicate the supplicant
+                     * state is not known at this time */
+                    mSupplicantStateTracker.sendMessage(CMD_RESET_SUPPLICANT_STATE);
                     /* Initialize data structures */
                     mLastBssid = null;
                     mLastNetworkId = -1;
@@ -1944,7 +1944,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         Log.e(TAG, "Failed " + mSupplicantRestartCount +
                                 " times to start supplicant, unload driver");
                         transitionTo(mDriverLoadedState);
-                        sendMessage(CMD_UNLOAD_DRIVER);
+                        sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_STATE_UNKNOWN, 0));
                     }
                     break;
                 case CMD_LOAD_DRIVER:
@@ -1995,8 +1995,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         WifiNative.killSupplicant();
                     }
                     handleNetworkDisconnect();
+                    setWifiState(WIFI_STATE_DISABLING);
                     sendSupplicantConnectionChangedBroadcast(false);
-                    mSupplicantStateTracker.resetSupplicantState();
+                    mSupplicantStateTracker.sendMessage(CMD_RESET_SUPPLICANT_STATE);
                     transitionTo(mSupplicantStoppingState);
                     break;
                 case SUP_DISCONNECTION_EVENT:  /* Supplicant connection lost */
@@ -2006,7 +2007,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     WifiNative.closeSupplicantConnection();
                     handleNetworkDisconnect();
                     sendSupplicantConnectionChangedBroadcast(false);
-                    mSupplicantStateTracker.resetSupplicantState();
+                    mSupplicantStateTracker.sendMessage(CMD_RESET_SUPPLICANT_STATE);
                     transitionTo(mDriverLoadedState);
                     sendMessageDelayed(CMD_START_SUPPLICANT, SUPPLICANT_RESTART_INTERVAL_MSECS);
                     break;
@@ -2380,7 +2381,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     break;
                 case SUPPLICANT_STATE_CHANGE_EVENT:
                     stateChangeResult = (StateChangeResult) message.obj;
-                    SupplicantState state = (SupplicantState) stateChangeResult.state;
+                    SupplicantState state = stateChangeResult.state;
                     // Supplicant state change
                     // [31-13] Reserved for future use
                     // [8 - 0] Supplicant state (as defined in SupplicantState.java)
@@ -2445,13 +2446,13 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     return NOT_HANDLED;
                 case NETWORK_CONNECTION_EVENT:
                     Log.d(TAG,"Network connection established");
-                    stateChangeResult = (StateChangeResult) message.obj;
+                    mLastNetworkId = message.arg1;
+                    mLastBssid = (String) message.obj;
 
                     //TODO: make supplicant modification to push this in events
                     mWifiInfo.setSSID(fetchSSID());
-                    mWifiInfo.setBSSID(mLastBssid = stateChangeResult.BSSID);
-                    mWifiInfo.setNetworkId(stateChangeResult.networkId);
-                    mLastNetworkId = stateChangeResult.networkId;
+                    mWifiInfo.setBSSID(mLastBssid);
+                    mWifiInfo.setNetworkId(mLastNetworkId);
                     /* send event to CM & network change broadcast */
                     setNetworkDetailedState(DetailedState.OBTAINING_IPADDR);
                     sendNetworkStateChangeBroadcast(mLastBssid);
@@ -2825,8 +2826,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     break;
                 case SUPPLICANT_STATE_CHANGE_EVENT:
                     StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
-                    SupplicantState state = (SupplicantState) stateChangeResult.state;
-                    setNetworkDetailedState(WifiInfo.getDetailedStateOf(state));
+                    setNetworkDetailedState(WifiInfo.getDetailedStateOf(stateChangeResult.state));
                     /* DriverStartedState does the rest of the handling */
                     return NOT_HANDLED;
                 default:
