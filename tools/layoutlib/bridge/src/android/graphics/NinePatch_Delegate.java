@@ -130,7 +130,6 @@ public final class NinePatch_Delegate {
        // get the delegate from the native int.
        final Bitmap_Delegate bitmap_delegate = Bitmap_Delegate.getDelegate(bitmap_instance);
        if (bitmap_delegate == null) {
-           assert false;
            return;
        }
 
@@ -152,7 +151,6 @@ public final class NinePatch_Delegate {
 
        Canvas_Delegate canvas_delegate = Canvas_Delegate.getDelegate(canvas_instance);
        if (canvas_delegate == null) {
-           assert false;
            return;
        }
 

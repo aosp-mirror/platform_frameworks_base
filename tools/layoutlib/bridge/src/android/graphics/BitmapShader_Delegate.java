@@ -65,7 +65,6 @@ public class BitmapShader_Delegate extends Shader_Delegate {
     /*package*/ static int nativeCreate(int native_bitmap, int shaderTileModeX,
             int shaderTileModeY) {
         Bitmap_Delegate bitmap = Bitmap_Delegate.getDelegate(native_bitmap);
-        assert bitmap != null;
         if (bitmap == null) {
             return 0;
         }

@@ -139,7 +139,6 @@ public final class Bitmap_Delegate {
         // get the delegate from the native int.
         Bitmap_Delegate delegate = sManager.getDelegate(bitmap.mNativeBitmap);
         if (delegate == null) {
-            assert false;
             return null;
         }
 
@@ -215,7 +214,6 @@ public final class Bitmap_Delegate {
     /*package*/ static Bitmap nativeCopy(int srcBitmap, int nativeConfig, boolean isMutable) {
         Bitmap_Delegate srcBmpDelegate = sManager.getDelegate(srcBitmap);
         if (srcBmpDelegate == null) {
-            assert false;
             return null;
         }
 
@@ -258,7 +256,6 @@ public final class Bitmap_Delegate {
         // get the delegate from the native int.
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -278,7 +275,6 @@ public final class Bitmap_Delegate {
         // get the delegate from the native int.
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -289,7 +285,6 @@ public final class Bitmap_Delegate {
         // get the delegate from the native int.
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -300,7 +295,6 @@ public final class Bitmap_Delegate {
         // get the delegate from the native int.
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -311,7 +305,6 @@ public final class Bitmap_Delegate {
         // get the delegate from the native int.
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -322,7 +315,6 @@ public final class Bitmap_Delegate {
         // get the delegate from the native int.
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {
-            assert false;
             return true;
         }
 
@@ -333,7 +325,6 @@ public final class Bitmap_Delegate {
         // get the delegate from the native int.
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -344,7 +335,6 @@ public final class Bitmap_Delegate {
             int stride, int x, int y, int width, int height) {
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -355,7 +345,6 @@ public final class Bitmap_Delegate {
     /*package*/ static void nativeSetPixel(int nativeBitmap, int x, int y, int color) {
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -366,7 +355,6 @@ public final class Bitmap_Delegate {
             int stride, int x, int y, int width, int height) {
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -386,7 +374,6 @@ public final class Bitmap_Delegate {
     /*package*/ static int nativeGenerationId(int nativeBitmap) {
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -414,20 +401,13 @@ public final class Bitmap_Delegate {
             int[] offsetXY) {
         Bitmap_Delegate bitmap = sManager.getDelegate(nativeBitmap);
         if (bitmap == null) {
-            assert false;
             return null;
         }
 
-        Paint_Delegate paint = null;
-        if (nativePaint > 0) {
-            paint = Paint_Delegate.getDelegate(nativePaint);
-            if (paint == null) {
-                assert false;
-                return null;
-            }
-        }
+        // get the paint which can be null if nativePaint is 0.
+        Paint_Delegate paint = Paint_Delegate.getDelegate(nativePaint);
 
-        if (paint != null && paint.getMaskFilter() != 0) {
+        if (paint != null && paint.getMaskFilter() != null) {
             Bridge.getLog().fidelityWarning(null,
                     "MaskFilter not supported in Bitmap.extractAlpha",
                     null);
@@ -452,7 +432,6 @@ public final class Bitmap_Delegate {
         // get the delegate from the native int.
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -462,13 +441,11 @@ public final class Bitmap_Delegate {
     /*package*/ static boolean nativeSameAs(int nb0, int nb1) {
         Bitmap_Delegate delegate1 = sManager.getDelegate(nb0);
         if (delegate1 == null) {
-            assert false;
             return false;
         }
 
         Bitmap_Delegate delegate2 = sManager.getDelegate(nb1);
         if (delegate2 == null) {
-            assert false;
             return false;
         }
 

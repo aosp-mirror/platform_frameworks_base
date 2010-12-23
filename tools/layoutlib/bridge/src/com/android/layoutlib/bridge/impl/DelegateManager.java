@@ -55,11 +55,21 @@ public final class DelegateManager<T> {
 
     /**
      * Returns the delegate from the given native int.
+     * <p>
+     * If the int is zero, then this will always return null.
+     * <p>
+     * If the int is non zero and the delegate is not found, this will throw an assert.
+     *
      * @param native_object the native int.
      * @return the delegate or null if not found.
      */
     public T getDelegate(int native_object) {
-        return mDelegates.get(native_object);
+        if (native_object > 0) {
+            T delegate =  mDelegates.get(native_object);
+            assert delegate != null;
+            return delegate;
+        }
+        return null;
     }
 
     /**

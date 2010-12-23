@@ -80,14 +80,9 @@ public final class Path_Delegate {
         // create the delegate
         Path_Delegate newDelegate = new Path_Delegate();
 
-        // get the delegate to copy
-        if (nPath > 0) {
-            Path_Delegate pathDelegate = sManager.getDelegate(nPath);
-            if (pathDelegate == null) {
-                assert false;
-                return 0;
-            }
-
+        // get the delegate to copy, which could be null if nPath is 0
+        Path_Delegate pathDelegate = sManager.getDelegate(nPath);
+        if (pathDelegate != null) {
             newDelegate.set(pathDelegate);
         }
 
@@ -97,7 +92,6 @@ public final class Path_Delegate {
     /*package*/ static void native_reset(int nPath) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
@@ -113,13 +107,11 @@ public final class Path_Delegate {
     /*package*/ static void native_set(int native_dst, int native_src) {
         Path_Delegate pathDstDelegate = sManager.getDelegate(native_dst);
         if (pathDstDelegate == null) {
-            assert false;
             return;
         }
 
         Path_Delegate pathSrcDelegate = sManager.getDelegate(native_src);
         if (pathSrcDelegate == null) {
-            assert false;
             return;
         }
 
@@ -129,7 +121,6 @@ public final class Path_Delegate {
     /*package*/ static int native_getFillType(int nPath) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return 0;
         }
 
@@ -139,7 +130,6 @@ public final class Path_Delegate {
     /*package*/ static void native_setFillType(int nPath, int ft) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
@@ -149,7 +139,6 @@ public final class Path_Delegate {
     /*package*/ static boolean native_isEmpty(int nPath) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return true;
         }
 
@@ -159,7 +148,6 @@ public final class Path_Delegate {
     /*package*/ static boolean native_isRect(int nPath, RectF rect) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return false;
         }
 
@@ -179,7 +167,6 @@ public final class Path_Delegate {
     /*package*/ static void native_computeBounds(int nPath, RectF bounds) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
@@ -194,7 +181,6 @@ public final class Path_Delegate {
     /*package*/ static void native_moveTo(int nPath, float x, float y) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
@@ -204,7 +190,6 @@ public final class Path_Delegate {
     /*package*/ static void native_rMoveTo(int nPath, float dx, float dy) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
@@ -214,7 +199,6 @@ public final class Path_Delegate {
     /*package*/ static void native_lineTo(int nPath, float x, float y) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
@@ -224,7 +208,6 @@ public final class Path_Delegate {
     /*package*/ static void native_rLineTo(int nPath, float dx, float dy) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
@@ -234,7 +217,6 @@ public final class Path_Delegate {
     /*package*/ static void native_quadTo(int nPath, float x1, float y1, float x2, float y2) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
@@ -245,7 +227,6 @@ public final class Path_Delegate {
                                               float dx2, float dy2) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
@@ -256,7 +237,6 @@ public final class Path_Delegate {
                 float x2, float y2, float x3, float y3) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
@@ -267,7 +247,6 @@ public final class Path_Delegate {
                 float x2, float y2, float x3, float y3) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
@@ -278,7 +257,6 @@ public final class Path_Delegate {
                     float startAngle, float sweepAngle, boolean forceMoveTo) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
@@ -288,7 +266,6 @@ public final class Path_Delegate {
     /*package*/ static void native_close(int nPath) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
@@ -298,7 +275,6 @@ public final class Path_Delegate {
     /*package*/ static void native_addRect(int nPath, RectF rect, int dir) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
@@ -309,7 +285,6 @@ public final class Path_Delegate {
                                             float right, float bottom, int dir) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
@@ -365,18 +340,11 @@ public final class Path_Delegate {
                                              int dst_path) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
-        Path_Delegate dstDelegate = null;
-        if (dst_path > 0) {
-            dstDelegate = sManager.getDelegate(dst_path);
-            if (dstDelegate == null) {
-                assert false;
-                return;
-            }
-        }
+        // could be null if the int is 0;
+        Path_Delegate dstDelegate = sManager.getDelegate(dst_path);
 
         pathDelegate.offset(dx, dy, dstDelegate);
     }
@@ -388,7 +356,6 @@ public final class Path_Delegate {
     /*package*/ static void native_setLastPoint(int nPath, float dx, float dy) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
@@ -400,24 +367,16 @@ public final class Path_Delegate {
                                                 int dst_path) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
         Matrix_Delegate matrixDelegate = Matrix_Delegate.getDelegate(matrix);
         if (matrixDelegate == null) {
-            assert false;
             return;
         }
 
-        Path_Delegate dstDelegate = null;
-        if (dst_path > 0) {
-            dstDelegate = sManager.getDelegate(dst_path);
-            if (dstDelegate == null) {
-                assert false;
-                return;
-            }
-        }
+        // this can be null if dst_path is 0
+        Path_Delegate dstDelegate = sManager.getDelegate(dst_path);
 
         pathDelegate.transform(matrixDelegate, dstDelegate);
     }

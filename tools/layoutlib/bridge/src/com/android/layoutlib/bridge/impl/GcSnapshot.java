@@ -706,23 +706,19 @@ public class GcSnapshot {
 
         // get the shader first, as it'll replace the color if it can be used it.
         if (compositeOnly == false) {
-            int nativeShader = paint.getShader();
-            if (nativeShader > 0) {
-                Shader_Delegate shaderDelegate = Shader_Delegate.getDelegate(nativeShader);
-                assert shaderDelegate != null;
-                if (shaderDelegate != null) {
-                    if (shaderDelegate.isSupported()) {
-                        java.awt.Paint shaderPaint = shaderDelegate.getJavaPaint();
-                        assert shaderPaint != null;
-                        if (shaderPaint != null) {
-                            g.setPaint(shaderPaint);
-                            customShader = true;
-                        }
-                    } else {
-                        Bridge.getLog().fidelityWarning(null,
-                                shaderDelegate.getSupportMessage(),
-                                null);
+            Shader_Delegate shaderDelegate = paint.getShader();
+            if (shaderDelegate != null) {
+                if (shaderDelegate.isSupported()) {
+                    java.awt.Paint shaderPaint = shaderDelegate.getJavaPaint();
+                    assert shaderPaint != null;
+                    if (shaderPaint != null) {
+                        g.setPaint(shaderPaint);
+                        customShader = true;
                     }
+                } else {
+                    Bridge.getLog().fidelityWarning(null,
+                            shaderDelegate.getSupportMessage(),
+                            null);
                 }
             }
 
@@ -732,23 +728,19 @@ public class GcSnapshot {
             }
 
             boolean customStroke = false;
-            int pathEffect = paint.getPathEffect();
-            if (pathEffect > 0) {
-                PathEffect_Delegate effectDelegate = PathEffect_Delegate.getDelegate(pathEffect);
-                assert effectDelegate != null;
-                if (effectDelegate != null) {
-                    if (effectDelegate.isSupported()) {
-                        Stroke stroke = effectDelegate.getStroke(paint);
-                        assert stroke != null;
-                        if (stroke != null) {
-                            g.setStroke(stroke);
-                            customStroke = true;
-                        }
-                    } else {
-                        Bridge.getLog().fidelityWarning(null,
-                                effectDelegate.getSupportMessage(),
-                                null);
+            PathEffect_Delegate effectDelegate = paint.getPathEffect();
+            if (effectDelegate != null) {
+                if (effectDelegate.isSupported()) {
+                    Stroke stroke = effectDelegate.getStroke(paint);
+                    assert stroke != null;
+                    if (stroke != null) {
+                        g.setStroke(stroke);
+                        customStroke = true;
                     }
+                } else {
+                    Bridge.getLog().fidelityWarning(null,
+                            effectDelegate.getSupportMessage(),
+                            null);
                 }
             }
 
@@ -771,23 +763,19 @@ public class GcSnapshot {
                     AlphaComposite.SRC, (float) alpha / 255.f));
         } else {
             boolean customXfermode = false;
-            int xfermode = paint.getXfermode();
-            if (xfermode > 0) {
-                Xfermode_Delegate xfermodeDelegate = Xfermode_Delegate.getDelegate(xfermode);
-                assert xfermodeDelegate != null;
-                if (xfermodeDelegate != null) {
-                    if (xfermodeDelegate.isSupported()) {
-                        Composite composite = xfermodeDelegate.getComposite(alpha);
-                        assert composite != null;
-                        if (composite != null) {
-                            g.setComposite(composite);
-                            customXfermode = true;
-                        }
-                    } else {
-                        Bridge.getLog().fidelityWarning(null,
-                                xfermodeDelegate.getSupportMessage(),
-                                null);
+            Xfermode_Delegate xfermodeDelegate = paint.getXfermode();
+            if (xfermodeDelegate != null) {
+                if (xfermodeDelegate.isSupported()) {
+                    Composite composite = xfermodeDelegate.getComposite(alpha);
+                    assert composite != null;
+                    if (composite != null) {
+                        g.setComposite(composite);
+                        customXfermode = true;
                     }
+                } else {
+                    Bridge.getLog().fidelityWarning(null,
+                            xfermodeDelegate.getSupportMessage(),
+                            null);
                 }
             }
 

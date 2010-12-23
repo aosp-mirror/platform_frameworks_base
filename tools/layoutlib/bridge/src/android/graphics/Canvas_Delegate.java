@@ -61,6 +61,8 @@ public final class Canvas_Delegate {
     private Bitmap_Delegate mBitmap;
     private GcSnapshot mSnapshot;
 
+    private int mDrawFilter = 0;
+
     // ---- Public Helper methods ----
 
     /**
@@ -84,6 +86,15 @@ public final class Canvas_Delegate {
         return mSnapshot;
     }
 
+    /**
+     * Returns the {@link DrawFilter} delegate or null if none have been set.
+     *
+     * @return the delegate or null.
+     */
+    public DrawFilter_Delegate getDrawFilter() {
+        return DrawFilter_Delegate.getDelegate(mDrawFilter);
+    }
+
     // ---- native methods ----
 
     /*package*/ static boolean isOpaque(Canvas thisCanvas) {
@@ -95,7 +106,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return 0;
         }
 
@@ -106,7 +116,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return 0;
         }
 
@@ -117,7 +126,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return;
         }
 
@@ -128,7 +136,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return;
         }
 
@@ -139,7 +146,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return;
         }
 
@@ -150,7 +156,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return;
         }
 
@@ -184,7 +189,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return false;
         }
 
@@ -205,7 +209,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return 0;
         }
 
@@ -216,7 +219,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return;
         }
 
@@ -227,7 +229,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return 0;
         }
 
@@ -238,7 +239,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return;
         }
 
@@ -296,14 +296,12 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return;
         }
 
         // get the delegate from the native int.
         Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(bitmap);
         if (bitmapDelegate == null) {
-            assert false;
             return;
         }
 
@@ -315,13 +313,11 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return 0;
         }
 
         Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(paint);
         if (paintDelegate == null) {
-            assert false;
             return 0;
         }
 
@@ -334,13 +330,11 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return 0;
         }
 
         Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(paint);
         if (paintDelegate == null) {
-            assert false;
             return 0;
         }
 
@@ -354,7 +348,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return 0;
         }
 
@@ -367,7 +360,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return 0;
         }
 
@@ -379,13 +371,11 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return;
         }
 
         Matrix_Delegate matrixDelegate = Matrix_Delegate.getDelegate(nMatrix);
         if (matrixDelegate == null) {
-            assert false;
             return;
         }
 
@@ -408,12 +398,12 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
         if (canvasDelegate == null) {
-            assert false;
+            return;
         }
 
         Matrix_Delegate matrixDelegate = Matrix_Delegate.getDelegate(nMatrix);
         if (matrixDelegate == null) {
-            assert false;
+            return;
         }
 
         // get the current top graphics2D object.
@@ -441,7 +431,7 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
         if (canvasDelegate == null) {
-            assert false;
+            return false;
         }
 
         return canvasDelegate.clipRect(left, top, right, bottom, regionOp);
@@ -463,8 +453,24 @@ public final class Canvas_Delegate {
 
     /*package*/ static void nativeSetDrawFilter(int nativeCanvas,
                                                    int nativeFilter) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
+        if (canvasDelegate == null) {
+            return;
+        }
+
+        canvasDelegate.mDrawFilter = nativeFilter;
+
+        // get the delegate only because we don't support them at all for the moment, so
+        // we can display the message now.
+
+        DrawFilter_Delegate filterDelegate = DrawFilter_Delegate.getDelegate(nativeFilter);
+        if (canvasDelegate == null) {
+            return;
+        }
+
+        if (filterDelegate.isSupported() == false) {
+            Bridge.getLog().fidelityWarning(null, filterDelegate.getSupportMessage(), null);
+        }
     }
 
     /*package*/ static boolean native_getClipBounds(int nativeCanvas,
@@ -472,7 +478,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return false;
         }
 
@@ -533,7 +538,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return;
         }
 
@@ -676,7 +680,6 @@ public final class Canvas_Delegate {
                                                int paint) {
         final Path_Delegate pathDelegate = Path_Delegate.getDelegate(path);
         if (pathDelegate == null) {
-            assert false;
             return;
         }
 
@@ -708,7 +711,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(bitmap);
         if (bitmapDelegate == null) {
-            assert false;
             return;
         }
 
@@ -729,7 +731,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(bitmap);
         if (bitmapDelegate == null) {
-            assert false;
             return;
         }
 
@@ -754,7 +755,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(bitmap);
         if (bitmapDelegate == null) {
-            assert false;
             return;
         }
 
@@ -800,24 +800,15 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return;
         }
 
-        // get the delegate from the native int.
-        Paint_Delegate paintDelegate = null;
-        if (nPaint > 0) {
-            paintDelegate = Paint_Delegate.getDelegate(nPaint);
-            if (paintDelegate == null) {
-                assert false;
-                return;
-            }
-        }
+        // get the delegate from the native int, which can be null
+        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(nPaint);
 
         // get the delegate from the native int.
         Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(nBitmap);
         if (bitmapDelegate == null) {
-            assert false;
             return;
         }
 
@@ -825,7 +816,6 @@ public final class Canvas_Delegate {
 
         Matrix_Delegate matrixDelegate = Matrix_Delegate.getDelegate(nMatrix);
         if (matrixDelegate == null) {
-            assert false;
             return;
         }
 
@@ -1029,7 +1019,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int so that it can be disposed.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return;
         }
 
@@ -1051,19 +1040,11 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return;
         }
 
-        // paint could be 0 meaning no paint
-        Paint_Delegate paintDelegate = null;
-        if (nPaint > 0) {
-            paintDelegate = Paint_Delegate.getDelegate(nPaint);
-            if (paintDelegate == null) {
-                assert false;
-                return;
-            }
-        }
+        // get the paint which can be null if nPaint is 0;
+        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(nPaint);
 
         canvasDelegate.getSnapshot().draw(drawable, paintDelegate, compositeOnly, forceSrcMode);
     }
@@ -1078,7 +1059,6 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return;
         }
 
@@ -1161,19 +1141,11 @@ public final class Canvas_Delegate {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
-            assert false;
             return;
         }
 
-        // get the delegate from the native int.
-        Paint_Delegate paintDelegate = null;
-        if (nativePaintOrZero > 0) {
-            paintDelegate = Paint_Delegate.getDelegate(nativePaintOrZero);
-            if (paintDelegate == null) {
-                assert false;
-                return;
-            }
-        }
+        // get the paint, which could be null if the int is 0
+        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(nativePaintOrZero);
 
         final BufferedImage image = getImageToDraw(bitmap, paintDelegate, sBoolOut);
 
@@ -1221,16 +1193,13 @@ public final class Canvas_Delegate {
             // - Create a different bitmap to draw in which all the alpha channel values is set
             //   to 0xFF.
             if (paint != null) {
-                int xfermode = paint.getXfermode();
-                if (xfermode > 0) {
-                    Xfermode_Delegate xfermodeDelegate = Xfermode_Delegate.getDelegate(xfermode);
-                    if (xfermodeDelegate instanceof PorterDuffXfermode_Delegate) {
-                        PorterDuff.Mode mode =
-                            ((PorterDuffXfermode_Delegate)xfermodeDelegate).getMode();
+                Xfermode_Delegate xfermodeDelegate = paint.getXfermode();
+                if (xfermodeDelegate instanceof PorterDuffXfermode_Delegate) {
+                    PorterDuff.Mode mode =
+                        ((PorterDuffXfermode_Delegate)xfermodeDelegate).getMode();
 
-                        forceSrcMode[0] = mode == PorterDuff.Mode.SRC_OVER ||
-                                mode == PorterDuff.Mode.SRC;
-                    }
+                    forceSrcMode[0] = mode == PorterDuff.Mode.SRC_OVER ||
+                            mode == PorterDuff.Mode.SRC;
                 }
             }
 

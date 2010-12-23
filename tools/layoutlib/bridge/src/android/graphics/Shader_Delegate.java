@@ -82,27 +82,16 @@ public abstract class Shader_Delegate {
         // get the delegate from the native int.
         Shader_Delegate shaderDelegate = sManager.getDelegate(native_shader);
         if (shaderDelegate == null) {
-            assert false;
             return false;
         }
 
-        Matrix_Delegate localMatrixDelegate = null;
-        if (shaderDelegate.mLocalMatrix > 0) {
-            localMatrixDelegate = Matrix_Delegate.getDelegate(shaderDelegate.mLocalMatrix);
-            if (localMatrixDelegate == null) {
-                assert false;
-                return false;
-            }
-        }
+        // can be null if shader has no matrix (int is 0)
+        Matrix_Delegate localMatrixDelegate = Matrix_Delegate.getDelegate(
+                shaderDelegate.mLocalMatrix);
 
-        Matrix_Delegate destMatrixDelegate = null;
-        if (matrix_instance > 0) {
-            destMatrixDelegate = Matrix_Delegate.getDelegate(shaderDelegate.mLocalMatrix);
-            if (destMatrixDelegate == null) {
-                assert false;
-                return false;
-            }
-
+        // can be null if the int is 0.
+        Matrix_Delegate destMatrixDelegate = Matrix_Delegate.getDelegate(matrix_instance);
+        if (destMatrixDelegate != null) {
             if (localMatrixDelegate != null) {
                 destMatrixDelegate.set(localMatrixDelegate);
             } else {
@@ -120,7 +109,6 @@ public abstract class Shader_Delegate {
         // get the delegate from the native int.
         Shader_Delegate shaderDelegate = sManager.getDelegate(native_shader);
         if (shaderDelegate == null) {
-            assert false;
             return;
         }
 
@@ -130,14 +118,8 @@ public abstract class Shader_Delegate {
     // ---- Private delegate/helper methods ----
 
     protected java.awt.geom.AffineTransform getLocalMatrix() {
-        Matrix_Delegate localMatrixDelegate = null;
-        if (mLocalMatrix > 0) {
-            localMatrixDelegate = Matrix_Delegate.getDelegate(mLocalMatrix);
-            if (localMatrixDelegate == null) {
-                assert false;
-                return new java.awt.geom.AffineTransform();
-            }
-
+        Matrix_Delegate localMatrixDelegate = Matrix_Delegate.getDelegate(mLocalMatrix);
+        if (localMatrixDelegate != null) {
             return localMatrixDelegate.getAffineTransform();
         }
 

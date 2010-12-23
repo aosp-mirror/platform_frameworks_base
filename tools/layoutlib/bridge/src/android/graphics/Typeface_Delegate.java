@@ -78,7 +78,6 @@ public final class Typeface_Delegate {
     public static List<Font> getFonts(int native_int) {
         Typeface_Delegate delegate = sManager.getDelegate(native_int);
         if (delegate == null) {
-            assert false;
             return null;
         }
 
@@ -109,7 +108,6 @@ public final class Typeface_Delegate {
     /*package*/ static synchronized int nativeCreateFromTypeface(int native_instance, int style) {
         Typeface_Delegate delegate = sManager.getDelegate(native_instance);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -143,7 +141,6 @@ public final class Typeface_Delegate {
     /*package*/ static int nativeGetStyle(int native_instance) {
         Typeface_Delegate delegate = sManager.getDelegate(native_instance);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 

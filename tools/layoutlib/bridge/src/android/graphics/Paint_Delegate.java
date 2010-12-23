@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
 import android.graphics.Paint.FontMetrics;
@@ -82,6 +83,7 @@ public class Paint_Delegate {
     private int mShader;
     private int mPathEffect;
     private int mMaskFilter;
+    private int mRasterizer;
 
 
     // ---- Public Helper methods ----
@@ -165,24 +167,58 @@ public class Paint_Delegate {
         }
     }
 
-    public int getXfermode() {
-        return mXfermode;
+    /**
+     * Returns the {@link Xfermode} delegate or null if none have been set
+     *
+     * @return the delegate or null.
+     */
+    public Xfermode_Delegate getXfermode() {
+        return  Xfermode_Delegate.getDelegate(mXfermode);
     }
 
-    public int getColorFilter() {
-        return mColorFilter;
+    /**
+     * Returns the {@link ColorFilter} delegate or null if none have been set
+     *
+     * @return the delegate or null.
+     */
+    public ColorFilter_Delegate getColorFilter() {
+        return ColorFilter_Delegate.getDelegate(mColorFilter);
     }
 
-    public int getShader() {
-        return mShader;
+    /**
+     * Returns the {@link Shader} delegate or null if none have been set
+     *
+     * @return the delegate or null.
+     */
+    public Shader_Delegate getShader() {
+        return Shader_Delegate.getDelegate(mShader);
     }
 
-    public int getPathEffect() {
-        return mPathEffect;
+    /**
+     * Returns the {@link PathEffect} delegate or null if none have been set
+     *
+     * @return the delegate or null.
+     */
+    public PathEffect_Delegate getPathEffect() {
+        return PathEffect_Delegate.getDelegate(mPathEffect);
     }
 
-    public int getMaskFilter() {
-        return mMaskFilter;
+    /**
+     * Returns the {@link MaskFilter} delegate or null if none have been set
+     *
+     * @return the delegate or null.
+     */
+    public MaskFilter_Delegate getMaskFilter() {
+        return MaskFilter_Delegate.getDelegate(mMaskFilter);
+    }
+
+    /**
+     * Returns the {@link Rasterizer} delegate or null if none have been set
+     *
+     * @return the delegate or null.
+     */
+    public Rasterizer_Delegate getRasterizer() {
+        return Rasterizer_Delegate.getDelegate(mRasterizer);
     }
 
     // ---- native methods ----
@@ -191,7 +227,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -202,7 +237,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -245,7 +279,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -256,7 +289,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -267,7 +299,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -278,7 +309,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -289,7 +319,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return 1.f;
         }
 
@@ -300,7 +329,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -311,7 +339,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return 1.f;
         }
 
@@ -322,7 +349,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -339,7 +365,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return 1.f;
         }
 
@@ -350,7 +375,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -362,7 +386,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return 1.f;
         }
 
@@ -373,7 +396,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -385,7 +407,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return 1.f;
         }
 
@@ -396,7 +417,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -408,7 +428,6 @@ public class Paint_Delegate {
         // get the delegate
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -425,7 +444,6 @@ public class Paint_Delegate {
         // get the delegate
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -442,7 +460,6 @@ public class Paint_Delegate {
         // get the delegate
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -453,7 +470,6 @@ public class Paint_Delegate {
         // get the delegate
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -482,7 +498,6 @@ public class Paint_Delegate {
         // get the delegate
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -519,7 +534,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(paint);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -531,7 +545,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -542,14 +555,12 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate_dst = sManager.getDelegate(native_dst);
         if (delegate_dst == null) {
-            assert false;
             return;
         }
 
         // get the delegate from the native int.
         Paint_Delegate delegate_src = sManager.getDelegate(native_src);
         if (delegate_src == null) {
-            assert false;
             return;
         }
 
@@ -560,7 +571,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -571,7 +581,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -582,7 +591,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -593,7 +601,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -604,7 +611,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -615,7 +621,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -631,7 +636,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
-            assert false;
             return shader;
         }
 
@@ -642,18 +646,24 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
-            assert false;
             return filter;
         }
 
-        return delegate.mColorFilter = filter;
+        delegate.mColorFilter = filter;
+
+        // since none of those are supported, display a fidelity warning right away
+        ColorFilter_Delegate filterDelegate = delegate.getColorFilter();
+        if (filterDelegate != null && filterDelegate.isSupported() == false) {
+            Bridge.getLog().fidelityWarning(null, filterDelegate.getSupportMessage(), null);
+        }
+
+        return filter;
     }
 
     /*package*/ static int native_setXfermode(int native_object, int xfermode) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
-            assert false;
             return xfermode;
         }
 
@@ -664,7 +674,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
-            assert false;
             return effect;
         }
 
@@ -675,18 +684,24 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
-            assert false;
             return maskfilter;
         }
 
-        return delegate.mMaskFilter = maskfilter;
+        delegate.mMaskFilter = maskfilter;
+
+        // since none of those are supported, display a fidelity warning right away
+        MaskFilter_Delegate filterDelegate = delegate.getMaskFilter();
+        if (filterDelegate != null && filterDelegate.isSupported() == false) {
+            Bridge.getLog().fidelityWarning(null, filterDelegate.getSupportMessage(), null);
+        }
+
+        return maskfilter;
     }
 
     /*package*/ static int native_setTypeface(int native_object, int typeface) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -696,15 +711,27 @@ public class Paint_Delegate {
     }
 
     /*package*/ static int native_setRasterizer(int native_object, int rasterizer) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Paint_Delegate delegate = sManager.getDelegate(native_object);
+        if (delegate == null) {
+            return rasterizer;
+        }
+
+        delegate.mRasterizer = rasterizer;
+
+        // since none of those are supported, display a fidelity warning right away
+        Rasterizer_Delegate rasterizerDelegate = delegate.getRasterizer();
+        if (rasterizerDelegate != null && rasterizerDelegate.isSupported() == false) {
+            Bridge.getLog().fidelityWarning(null, rasterizerDelegate.getSupportMessage(), null);
+        }
+
+        return rasterizer;
     }
 
     /*package*/ static int native_getTextAlign(int native_object) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
-            assert false;
             return 0;
         }
 
@@ -715,7 +742,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
-            assert false;
             return;
         }
 
@@ -726,7 +752,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_paint);
         if (delegate == null) {
-            assert false;
             return 0.f;
         }
 
@@ -751,7 +776,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
-            assert false;
             return 0.f;
         }
 
@@ -869,6 +893,7 @@ public class Paint_Delegate {
         mShader = paint.mShader;
         mPathEffect = paint.mPathEffect;
         mMaskFilter = paint.mMaskFilter;
+        mRasterizer = paint.mRasterizer;
         updateFontObject();
     }
 
@@ -890,12 +915,14 @@ public class Paint_Delegate {
         mShader = 0;
         mPathEffect = 0;
         mMaskFilter = 0;
+        mRasterizer = 0;
         updateFontObject();
     }
 
     /**
      * Update the {@link Font} object from the typeface, text size and scaling
      */
+    @SuppressWarnings("deprecation")
     private void updateFontObject() {
         if (mTypeface != 0) {
             // Get the fonts from the TypeFace object.
@@ -998,7 +1025,6 @@ public class Paint_Delegate {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
-            assert false;
             return;
         }
 
