@@ -321,6 +321,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private Callback mCustomSelectionActionModeCallback;
 
     private final int mSquaredTouchSlopDistance;
+    // Set when this TextView gained focus with some text selected. Will start selection mode.
+    private boolean mCreatedWithASelection = false;
 
     /*
      * Kick-start the font cache for the zygote process (to pay the cost of
@@ -3887,10 +3889,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // This has to be checked here since:
         // - onFocusChanged cannot start it when focus is given to a view with selected text (after
         //   a screen rotation) since layout is not yet initialized at that point.
-        // - ExtractEditText does not call onFocus when it is displayed. Fixing this issue would
-        //   allow to test for hasSelection in onFocusChanged, which would trigger a
-        //   startTextSelectionMode here. TODO
-        if (this instanceof ExtractEditText && hasSelection() && canSelectText()) {
+        if (mCreatedWithASelection) {
+            startSelectionActionMode();
+            mCreatedWithASelection = false;
+        }
+
+        // Phone specific code (there is no ExtractEditText on tablets).
+        // ExtractEditText does not call onFocus when it is displayed, and mHasSelectionOnFocus can
+        // not be set. Do the test here instead.
+        if (this instanceof ExtractEditText && hasSelection()) {
             startSelectionActionMode();
         }
 
@@ -7008,6 +7015,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             int selStart = getSelectionStart();
             int selEnd = getSelectionEnd();
 
+            // SelectAllOnFocus fields are highlighted and not selected. Do not start text selection
+            // mode for these, unless there was a specific selection already started.
+            final boolean isFocusHighlighted = mSelectAllOnFocus && selStart == 0 &&
+                    selEnd == mText.length();
+            mCreatedWithASelection = mFrozenWithFocus && hasSelection() && !isFocusHighlighted;
+
             if (!mFrozenWithFocus || (selStart < 0 || selEnd < 0)) {
                 // If a tap was used to give focus to that view, move cursor at tap position.
                 // Has to be done before onTakeFocus, which can be overloaded.
@@ -8179,10 +8192,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return false;
         }
 
-        selectCurrentWord();
+        if (!hasSelection()) {
+            // If selection mode is started after a device rotation, there is already a selection.
+            selectCurrentWord();
+        }
+
         final InputMethodManager imm = (InputMethodManager)
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(this, 0, null);
+
         ActionMode.Callback actionModeCallback = new SelectionActionModeCallback();
         mSelectionActionMode = startActionMode(actionModeCallback);
         return mSelectionActionMode != null;
