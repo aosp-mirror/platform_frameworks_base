@@ -7979,43 +7979,48 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Prepare text so that there are not zero or two spaces at beginning and end of region defined
      * by [min, max] when replacing this region by paste.
-     * Note that if there was two spaces (or more) at that position before, they are kept. We just
+     * Note that if there were two spaces (or more) at that position before, they are kept. We just
      * make sure we do not add an extra one from the paste content.
      */
     private long prepareSpacesAroundPaste(int min, int max, CharSequence paste) {
-        // Paste adds/removes spaces before or after insertion as needed.
-        if (paste.length() > 0 && Character.isSpaceChar(paste.charAt(0))) {
-            if (min > 0 && Character.isSpaceChar(mTransformed.charAt(min - 1))) {
-                // Two spaces at beginning of paste: remove one
-                final int originalLength = mText.length();
-                ((Editable) mText).delete(min - 1, min);
-                // Due to filters, there is no guarantee that exactly one character was
-                // removed. Count instead.
-                final int delta = mText.length() - originalLength;
-                min += delta;
-                max += delta;
-            }
-        } else {
-            if (min > 0 && !Character.isSpaceChar(mTransformed.charAt(min - 1))) {
-                // No space at beginning of paste: add one
-                final int originalLength = mText.length();
-                ((Editable) mText).replace(min, min, " ");
-                // Taking possible filters into account as above.
-                final int delta = mText.length() - originalLength;
-                min += delta;
-                max += delta;
-            }
-        }
+        if (paste.length() > 0) {
+            if (min > 0) {
+                final char charBefore = mTransformed.charAt(min - 1);
+                final char charAfter = paste.charAt(0);
 
-        if (paste.length() > 0 && Character.isSpaceChar(paste.charAt(paste.length() - 1))) {
-            if (max < mText.length() && Character.isSpaceChar(mTransformed.charAt(max))) {
-                // Two spaces at end of paste: remove one
-                ((Editable) mText).delete(max, max + 1);
+                if (Character.isSpaceChar(charBefore) && Character.isSpaceChar(charAfter)) {
+                    // Two spaces at beginning of paste: remove one
+                    final int originalLength = mText.length();
+                    ((Editable) mText).delete(min - 1, min);
+                    // Due to filters, there is no guarantee that exactly one character was
+                    // removed: count instead.
+                    final int delta = mText.length() - originalLength;
+                    min += delta;
+                    max += delta;
+                } else if (!Character.isSpaceChar(charBefore) && charBefore != '\n' &&
+                        !Character.isSpaceChar(charAfter) && charAfter != '\n') {
+                    // No space at beginning of paste: add one
+                    final int originalLength = mText.length();
+                    ((Editable) mText).replace(min, min, " ");
+                    // Taking possible filters into account as above.
+                    final int delta = mText.length() - originalLength;
+                    min += delta;
+                    max += delta;
+                }
             }
-        } else {
-            if (max < mText.length() && !Character.isSpaceChar(mTransformed.charAt(max))) {
-                // No space at end of paste: add one
-                ((Editable) mText).replace(max, max, " ");
+
+            if (max < mText.length()) {
+                final char charBefore = paste.charAt(paste.length() - 1);
+                final char charAfter = mTransformed.charAt(max);
+
+                if (Character.isSpaceChar(charBefore) && Character.isSpaceChar(charAfter)) {
+                    // Two spaces at end of paste: remove one
+                    ((Editable) mText).delete(max, max + 1);
+                } else if (!Character.isSpaceChar(charBefore) && charBefore != '\n' &&
+                        !Character.isSpaceChar(charAfter) && charAfter != '\n') {
+                    // No space at end of paste: add one
+                    ((Editable) mText).replace(max, max, " ");
+                }
             }
         }
 
