@@ -333,7 +333,12 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
             mSelector.setRightHintText(mSilentMode ? R.string.lockscreen_sound_on_label
                     : R.string.lockscreen_sound_off_label);
         }
-        mCallback.pokeWakelock();
+        // Don't poke the wake lock when returning to a state where the handle is
+        // not grabbed since that can happen when the system (instead of the user)
+        // cancels the grab.
+        if (grabbedState != SlidingTab.OnTriggerListener.NO_HANDLE) {
+            mCallback.pokeWakelock();
+        }
     }
 
     /**
