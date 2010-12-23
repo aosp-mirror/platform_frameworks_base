@@ -152,7 +152,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"El modo avión está Encendido"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"El modo avión está Apagado"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modo seguro"</string>
-    <string name="android_system_label" msgid="6577375335728551336">"Sistema Androide"</string>
+    <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Servicios que te cuestan dinero"</string>
     <string name="permgroupdesc_costMoney" msgid="8193824940620517189">"Admite aplicaciones que realizan actividades que te pueden costar dinero."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Tus mensajes"</string>
@@ -211,7 +211,7 @@
     <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Permite que una aplicación habilite el modo auto."</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"eliminar los procesos de fondo"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Permite que una aplicación elimine los procesos de fondo de otras aplicaciones, aun si la memoria no es baja."</string>
-    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"provocar la detención de otras aplicaciones"</string>
+    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"forzar la detención de otras aplicaciones"</string>
     <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Permite que una aplicación provoque la detención de otras aplicaciones."</string>
     <string name="permlab_forceBack" msgid="1804196839880393631">"provocar que la aplicación se acerque"</string>
     <string name="permdesc_forceBack" msgid="6534109744159919013">"Admite una aplicación que provoca que cualquier actividad del fondo se acerque y vuelva a alejarse. Se debe evitar utilizarlo en aplicaciones normales."</string>
@@ -373,8 +373,8 @@
     <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Permite activar y desactivar las notificaciones de actualización de ubicación de la radio. Las aplicaciones normales no deben utilizarlo."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"acceder a las propiedades de protección"</string>
     <string name="permdesc_checkinProperties" msgid="7150307006141883832">"Admite el acceso de lectura y escritura a las propiedades subidas por el servicio de protección. Las aplicaciones normales no deben utilizarlo."</string>
-    <string name="permlab_bindGadget" msgid="776905339015863471">"elegir controles"</string>
-    <string name="permdesc_bindGadget" msgid="2098697834497452046">"Admite que la aplicación indique al sistema cuáles controles puede utilizar cada aplicación. Con este permiso, las aplicaciones pueden brindar acceso a los datos personales a otras aplicaciones. Las aplicaciones normales no deben utilizarlo."</string>
+    <string name="permlab_bindGadget" msgid="776905339015863471">"elegir widgets"</string>
+    <string name="permdesc_bindGadget" msgid="2098697834497452046">"Admite que la aplicación indique al sistema qué widgets puede utilizar cada aplicación. Con este permiso, las aplicaciones pueden brindar acceso a los datos personales a otras aplicaciones. Las aplicaciones normales no deben utilizarlo."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"modificar el estado del teléfono"</string>
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Admite que la aplicación controle las funciones telefónicas del dispositivo. Una aplicación con este permiso puede cambiar las redes, encender y apagar la radio del teléfono y funciones similares sin notificarte en ningún momento."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"leer el estado del teléfono y la identidad"</string>
@@ -606,7 +606,7 @@
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Pantalla bloqueada."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Presiona el Menú para desbloquear o realizar una llamada de emergencia."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Presionar Menú para desbloquear."</string>
-    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Extraer el patrón para desbloquear"</string>
+    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Dibujar el patrón de desbloqueo"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Llamada de emergencia"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Regresar a llamada"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Correcto"</string>
@@ -614,7 +614,7 @@
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Lo sentimos, vuelve a intentarlo"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Cargando (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Cargada."</string>
-    <string name="lockscreen_battery_short" msgid="3617549178603354656">"Segmento <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Conecta tu cargador."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"No hay tarjeta SIM."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"No hay tarjeta SIM en el tablet."</string>
@@ -657,7 +657,7 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"¿Deseas salir de esta página?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Selecciona Aceptar para continuar o Cancelar para permanecer en la página actual."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Confirmar"</string>
-    <string name="double_tap_toast" msgid="1068216937244567247">"Sugerencia: presiona dos veces para acercar y alejar"</string>
+    <string name="double_tap_toast" msgid="1068216937244567247">"Sugerencia: presiona dos veces para acercar o alejar (zoom)"</string>
     <string name="autofill_this_form" msgid="1272247532604569872">"Autocompl."</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Conf func Autocompl"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
@@ -784,7 +784,7 @@
     <string name="Midnight" msgid="5630806906897892201">"Medianoche"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll" msgid="6876518925844129331">"Seleccionar todos"</string>
+    <string name="selectAll" msgid="6876518925844129331">"Seleccionar todo"</string>
     <string name="cut" msgid="3092569408438626261">"Cortar"</string>
     <string name="copy" msgid="2681946229533511987">"Copiar"</string>
     <string name="paste" msgid="5629880836805036433">"Pegar"</string>
@@ -820,7 +820,7 @@
     <string name="anr_process" msgid="1246866008169975783">"El proceso <xliff:g id="PROCESS">%1$s</xliff:g> no responde."</string>
     <string name="force_close" msgid="3653416315450806396">"Forzar cierre"</string>
     <string name="report" msgid="4060218260984795706">"Notificar"</string>
-    <string name="wait" msgid="7147118217226317732">"Espera"</string>
+    <string name="wait" msgid="7147118217226317732">"Esperar"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"Se redirigió la aplicación"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> se está ejecutando ahora."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> se inició originalmente."</string>
@@ -995,8 +995,7 @@
     <string name="media_unknown_state" msgid="729192782197290385">"Medios externos en estado desconocido."</string>
     <string name="share" msgid="1778686618230011964">"Compartir"</string>
     <string name="find" msgid="4808270900322985960">"Buscar"</string>
-    <!-- no translation found for websearch (4337157977400211589) -->
-    <skip />
+    <string name="websearch" msgid="4337157977400211589">"Buscar en la Web"</string>
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />
     <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
@@ -1006,5 +1005,15 @@
     <!-- no translation found for gpsVerifYes (2346566072867213563) -->
     <skip />
     <!-- no translation found for gpsVerifNo (1146564937346454865) -->
+    <skip />
+    <!-- no translation found for sync_too_many_deletes (5296321850662746890) -->
+    <skip />
+    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
+    <skip />
+    <!-- no translation found for sync_really_delete (8933566316059338692) -->
+    <skip />
+    <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
+    <skip />
+    <!-- no translation found for sync_do_nothing (8717589462945226869) -->
     <skip />
 </resources>

@@ -19,38 +19,29 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_label (7164937344850004466) -->
-    <skip />
+    <string name="app_label" msgid="7164937344850004466">"رابط کاربر سیستم"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"پاک کردن"</string>
-    <!-- no translation found for status_bar_do_not_disturb_button (5812628897510997853) -->
-    <skip />
-    <!-- no translation found for status_bar_please_disturb_button (3345398298841572813) -->
-    <skip />
+    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"مزاحم نشوید"</string>
+    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"نمایش اعلان ها"</string>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"اعلانی موجود نیست"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"در حال انجام"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"اعلان ها"</string>
     <string name="battery_low_title" msgid="7923774589611311406">"لطفاً شارژر را وصل کنید"</string>
-    <!-- outdated translation 7388781709819722764 -->     <string name="battery_low_subtitle" msgid="1752040062087829196">"باتری در حال کم شدن است:"</string>
-    <!-- no translation found for battery_low_percent_format (1077244949318261761) -->
-    <skip />
-    <!-- no translation found for invalid_charger (4549105996740522523) -->
-    <skip />
+    <string name="battery_low_subtitle" msgid="1752040062087829196">"باتری در حال کم شدن است."</string>
+    <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> باقیمانده است"</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"شارژ USB پشتیبانی نمی شود."\n"فقط از شارژر ارائه شده استفاده کنید."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"استفاده از باتری"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"تنظیمات"</string>
-    <!-- no translation found for status_bar_settings_wifi_button (1733928151698311923) -->
-    <skip />
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"حالت هواپیما"</string>
     <string name="status_bar_settings_rotation_lock" msgid="8361452930058000609">"قفل جهت صفحه"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"بیصدا"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"خودکار"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"اعلان ها"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"اخیر"</string>
-    <!-- no translation found for recent_tasks_empty (1905484479067697884) -->
-    <skip />
+    <string name="recent_tasks_empty" msgid="1905484479067697884">"برنامه اخیری موجود نیست."</string>
     <!-- no translation found for recent_tasks_app_label (3796483981246752469) -->
     <skip />
-    <!-- no translation found for toast_rotation_free (2700542202836832631) -->
-    <skip />
-    <!-- no translation found for toast_rotation_locked (7484691306949652450) -->
-    <skip />
+    <string name="toast_rotation_free" msgid="2700542202836832631">"صفحه به صورت خودکار می چرخد."</string>
+    <string name="toast_rotation_locked" msgid="7484691306949652450">"چرخش صفحه اکنون قفل است."</string>
 </resources>

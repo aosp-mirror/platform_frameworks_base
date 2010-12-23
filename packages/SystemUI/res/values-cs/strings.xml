@@ -32,8 +32,7 @@
     <string name="invalid_charger" msgid="4549105996740522523">"Nabíjení pomocí rozhraní USB není podporováno."\n"Používejte pouze nabíječku, která byla dodána se zařízením."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Využití baterie"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Nastavení"</string>
-    <!-- no translation found for status_bar_settings_wifi_button (1733928151698311923) -->
-    <skip />
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Režim V letadle"</string>
     <string name="status_bar_settings_rotation_lock" msgid="8361452930058000609">"Uzamknout orientaci obrazovky"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ZTLUM."</string>

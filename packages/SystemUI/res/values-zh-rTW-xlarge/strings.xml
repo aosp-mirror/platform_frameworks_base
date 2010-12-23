@@ -21,6 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- no translation found for status_bar_clear_all_button (4722520806446512408) -->
     <skip />
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="4684094636492991496">"沒有網際網路連線"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="4684094636492991496">"沒有網路連線"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="1456658018593445677">"Wi-Fi 已連線"</string>
 </resources>
