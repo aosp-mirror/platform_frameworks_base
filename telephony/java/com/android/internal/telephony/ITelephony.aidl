@@ -66,7 +66,7 @@ interface ITelephony {
     boolean showCallScreenWithDialpad(boolean showDialpad);
 
     /**
-     * End call or go to the Home screen
+     * End call if there is a call in progress, otherwise does nothing.
      *
      * @return whether it hung up
      */
