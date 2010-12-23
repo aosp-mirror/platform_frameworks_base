@@ -60,7 +60,7 @@
             android:ellipsize="none"
             android:textSize="120sp"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="#999999"
+            android:textColor="@color/lockscreen_clock_background"
             android:layout_marginBottom="6dip"
             />
 
@@ -71,7 +71,7 @@
             android:ellipsize="none"
             android:textSize="120sp"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="#666666"
+            android:textColor="@color/lockscreen_clock_foreground"
             android:layout_alignLeft="@id/timeDisplayBackground"
             android:layout_alignTop="@id/timeDisplayBackground"
             android:layout_marginBottom="6dip"
@@ -87,6 +87,7 @@
             android:textSize="30sp"
             android:layout_marginLeft="8dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/lockscreen_clock_am_pm"
             />
 
     </com.android.internal.widget.DigitalClock>
