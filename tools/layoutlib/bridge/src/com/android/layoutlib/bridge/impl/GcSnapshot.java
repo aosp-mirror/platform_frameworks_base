@@ -52,13 +52,17 @@ import java.util.ArrayList;
  * This allows for drawing through {@link #draw(Drawable, Paint_Delegate)} and
  * {@link #draw(Drawable, Paint_Delegate)}
  *
+ * Handling of layers (created with {@link Canvas#saveLayer(RectF, Paint, int)}) is handled through
+ * a list of Graphics2D for each layers. The class actually maintains a list of {@link Layer}
+ * for each layer. Doing a save() will duplicate this list so that each graphics2D object
+ * ({@link Layer#getGraphics()}) is configured only for the new snapshot.
  */
 public class GcSnapshot {
 
     private final GcSnapshot mPrevious;
     private final int mFlags;
 
-    /** list of layers. */
+    /** list of layers. The first item in the list is always the  */
     private final ArrayList<Layer> mLayers = new ArrayList<Layer>();
 
     /** temp transform in case transformation are set before a Graphics2D exists */
@@ -67,25 +71,39 @@ public class GcSnapshot {
     private Area mClip = null;
 
     // local layer data
+    /** a local layer created with {@link Canvas#saveLayer(RectF, Paint, int)}.
+     * If this is null, this does not mean there's no layer, just that the snapshot is not the
+     * one that created the layer.
+     * @see #getLayerSnapshot()
+     */
     private final Layer mLocalLayer;
     private final Paint_Delegate mLocalLayerPaint;
-    private Rect mLocalLayerRegion;
+    private final Rect mLayerBounds;
 
     public interface Drawable {
         void draw(Graphics2D graphics, Paint_Delegate paint);
     }
 
     /**
-     * class containing information about a layer.
+     * Class containing information about a layer.
+     *
+     * This contains graphics, bitmap and layer information.
      */
     private static class Layer {
         private final Graphics2D mGraphics;
         private final Bitmap_Delegate mBitmap;
         private final BufferedImage mImage;
+        /** the flags that were used to configure the layer. This is never changed, and passed
+         * as is when {@link #makeCopy()} is called */
+        private final int mFlags;
+        /** the original content of the layer when the next object was created. This is not
+         * passed in {@link #makeCopy()} and instead is recreated when a new layer is added
+         * (depending on its flags) */
         private BufferedImage mOriginalCopy;
 
         /**
-         * Creates a layer with a graphics and a bitmap.
+         * Creates a layer with a graphics and a bitmap. This is only used to create
+         * the base layer.
          *
          * @param graphics the graphics
          * @param bitmap the bitmap
@@ -94,20 +112,23 @@ public class GcSnapshot {
             mGraphics = graphics;
             mBitmap = bitmap;
             mImage = mBitmap.getImage();
+            mFlags = 0;
         }
 
         /**
          * Creates a layer with a graphics and an image. If the image belongs to a
-         * {@link Bitmap_Delegate}, then {@link Layer#Layer(Graphics2D, Bitmap_Delegate)} should
-         * be used.
+         * {@link Bitmap_Delegate} (case of the base layer), then
+         * {@link Layer#Layer(Graphics2D, Bitmap_Delegate)} should be used.
          *
-         * @param graphics the graphics
-         * @param image the image
+         * @param graphics the graphics the new graphics for this layer
+         * @param image the image the image from which the graphics came
+         * @param flags the flags that were used to save this layer
          */
-        Layer(Graphics2D graphics, BufferedImage image) {
+        Layer(Graphics2D graphics, BufferedImage image, int flags) {
             mGraphics = graphics;
             mBitmap = null;
             mImage = image;
+            mFlags = flags;
         }
 
         /** The Graphics2D, guaranteed to be non null */
@@ -120,12 +141,21 @@ public class GcSnapshot {
             return mImage;
         }
 
+        /** Returns the layer save flags. This is only valid for additional layers.
+         * For the base layer this will always return 0;
+         * For a given layer, all further copies of this {@link Layer} object in new snapshots
+         * will always return the same value.
+         */
+        int getFlags() {
+            return mFlags;
+        }
+
         Layer makeCopy() {
             if (mBitmap != null) {
                 return new Layer((Graphics2D) mGraphics.create(), mBitmap);
             }
 
-            return new Layer((Graphics2D) mGraphics.create(), mImage);
+            return new Layer((Graphics2D) mGraphics.create(), mImage, mFlags);
         }
 
         /** sets an optional copy of the original content to be used during restore */
@@ -203,6 +233,7 @@ public class GcSnapshot {
         mFlags = 0;
         mLocalLayer = null;
         mLocalLayerPaint = null;
+        mLayerBounds = null;
     }
 
     /**
@@ -233,11 +264,11 @@ public class GcSnapshot {
             // get the current transform
             AffineTransform matrix = mLayers.get(0).getGraphics().getTransform();
 
-            // transform the layerBounds and puts it into a int rect
+            // transform the layerBounds with the current transform and stores it into a int rect
             RectF rect2 = new RectF();
             mapRect(matrix, rect2, layerBounds);
-            mLocalLayerRegion = new Rect();
-            rect2.round(mLocalLayerRegion);
+            mLayerBounds = new Rect();
+            rect2.round(mLayerBounds);
 
             // get the base layer (always at index 0)
             Layer baseLayer = mLayers.get(0);
@@ -246,7 +277,9 @@ public class GcSnapshot {
             BufferedImage layerImage = new BufferedImage(
                     baseLayer.getImage().getWidth(),
                     baseLayer.getImage().getHeight(),
-                    BufferedImage.TYPE_INT_ARGB);
+                    (mFlags & Canvas.HAS_ALPHA_LAYER_SAVE_FLAG) != 0 ?
+                            BufferedImage.TYPE_INT_ARGB :
+                                BufferedImage.TYPE_INT_RGB);
 
             // create a graphics for it so that drawing can be done.
             Graphics2D layerGraphics = layerImage.createGraphics();
@@ -260,7 +293,7 @@ public class GcSnapshot {
             layerGraphics.setClip(currentClip);
 
             // create a new layer for this new layer and add it to the list at the end.
-            mLayers.add(mLocalLayer = new Layer(layerGraphics, layerImage));
+            mLayers.add(mLocalLayer = new Layer(layerGraphics, layerImage, flags));
 
             // if the drawing is not clipped to the local layer only, we save the current content
             // of all other layers. We are only interested in the part that will actually
@@ -268,16 +301,16 @@ public class GcSnapshot {
             // This is so that we can erase the drawing that goes in the layers below that will
             // be coming from the layer itself.
             if ((mFlags & Canvas.CLIP_TO_LAYER_SAVE_FLAG) == 0) {
-                int w = mLocalLayerRegion.width();
-                int h = mLocalLayerRegion.height();
+                int w = mLayerBounds.width();
+                int h = mLayerBounds.height();
                 for (int i = 0 ; i < mLayers.size() - 1 ; i++) {
                     Layer layer = mLayers.get(i);
                     BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
                     Graphics2D graphics = image.createGraphics();
                     graphics.drawImage(layer.getImage(),
                             0, 0, w, h,
-                            mLocalLayerRegion.left, mLocalLayerRegion.top,
-                                    mLocalLayerRegion.right, mLocalLayerRegion.bottom,
+                            mLayerBounds.left, mLayerBounds.top,
+                                    mLayerBounds.right, mLayerBounds.bottom,
                             null);
                     graphics.dispose();
                     layer.setOriginalCopy(image);
@@ -285,6 +318,7 @@ public class GcSnapshot {
             }
         } else {
             mLocalLayer = null;
+            mLayerBounds = null;
         }
 
         mLocalLayerPaint  = paint;
@@ -529,14 +563,28 @@ public class GcSnapshot {
      */
     public void draw(Drawable drawable, Paint_Delegate paint, boolean compositeOnly,
             boolean forceSrcMode) {
-        // if we clip to the layer, then we only draw in the layer
-        if (mLocalLayer != null && (mFlags & Canvas.CLIP_TO_LAYER_SAVE_FLAG) != 0) {
-            drawInLayer(mLocalLayer, drawable, paint, compositeOnly, forceSrcMode);
+        // the current snapshot may not have a mLocalLayer (ie it was created on save() instead
+        // of saveLayer(), but that doesn't mean there's no layer.
+        // mLayers however saves all the information we need (flags).
+        if (mLayers.size() == 1) {
+            // no layer, only base layer. easy case.
+            drawInLayer(mLayers.get(0), drawable, paint, compositeOnly, forceSrcMode);
         } else {
-            // draw in all the layers
-            for (Layer layer : mLayers) {
+            // draw in all the layers until the layer save flags tells us to stop (ie drawing
+            // in that layer is limited to the layer itself.
+            int flags;
+            int i = mLayers.size() - 1;
+
+            do {
+                Layer layer = mLayers.get(i);
+
                 drawInLayer(layer, drawable, paint, compositeOnly, forceSrcMode);
-            }
+
+                // then go to previous layer, only if there are any left, and its flags
+                // doesn't restrict drawing to the layer itself.
+                i--;
+                flags = layer.getFlags();
+            } while (i >= 0 && (flags & Canvas.CLIP_TO_LAYER_SAVE_FLAG) == 0);
         }
     }
 
@@ -560,56 +608,26 @@ public class GcSnapshot {
 
     private GcSnapshot doRestore() {
         if (mPrevious != null) {
-            boolean forceAllSave = false;
             if (mLocalLayer != null) {
-                forceAllSave = true; // layers always save both clip and transform
+                // prepare to blit the layers in which we have draw, in the layer beneath
+                // them, starting with the top one (which is the current local layer).
+                int i = mLayers.size() - 1;
+                int flags;
+                do {
+                    Layer dstLayer = mLayers.get(i - 1);
 
-                // prepare to draw the current layer in the previous layers, ie all layers but
-                // the last one, since the last one is the local layer
-                for (int i = 0 ; i < mLayers.size() - 1 ; i++) {
-                    Layer layer = mLayers.get(i);
+                    restoreLayer(dstLayer);
 
-                    Graphics2D baseGfx = layer.getImage().createGraphics();
-
-                    // if the layer contains an original copy this means the flags
-                    // didn't restrict drawing to the local layer and we need to make sure the
-                    // layer bounds in the layer beneath didn't receive any drawing.
-                    // so we use the originalCopy to erase the new drawings in there.
-                    BufferedImage originalCopy = layer.getOriginalCopy();
-                    if (originalCopy != null) {
-                        Graphics2D g = (Graphics2D) baseGfx.create();
-                        g.setComposite(AlphaComposite.Src);
-
-                        g.drawImage(originalCopy,
-                                mLocalLayerRegion.left, mLocalLayerRegion.top,
-                                        mLocalLayerRegion.right, mLocalLayerRegion.bottom,
-                                0, 0, mLocalLayerRegion.width(), mLocalLayerRegion.height(),
-                                null);
-                        g.dispose();
-                    }
-
-                    // now draw put the content of the local layer onto the layer, using the paint
-                    // information
-                    Graphics2D g = createCustomGraphics(baseGfx, mLocalLayerPaint,
-                            true /*alphaOnly*/, false /*forceSrcMode*/);
-
-                    g.drawImage(mLocalLayer.getImage(),
-                            mLocalLayerRegion.left, mLocalLayerRegion.top,
-                                    mLocalLayerRegion.right, mLocalLayerRegion.bottom,
-                            mLocalLayerRegion.left, mLocalLayerRegion.top,
-                                    mLocalLayerRegion.right, mLocalLayerRegion.bottom,
-                            null);
-                    g.dispose();
-
-                    baseGfx.dispose();
-                }
+                    flags = dstLayer.getFlags();
+                    i--;
+                } while (i > 0 && (flags & Canvas.CLIP_TO_LAYER_SAVE_FLAG) == 0);
             }
 
             // if this snapshot does not save everything, then set the previous snapshot
             // to this snapshot content
 
             // didn't save the matrix? set the current matrix on the previous snapshot
-            if (forceAllSave == false && (mFlags & Canvas.MATRIX_SAVE_FLAG) == 0) {
+            if ((mFlags & Canvas.MATRIX_SAVE_FLAG) == 0) {
                 AffineTransform mtx = getTransform();
                 for (Layer layer : mPrevious.mLayers) {
                     layer.getGraphics().setTransform(mtx);
@@ -617,7 +635,7 @@ public class GcSnapshot {
             }
 
             // didn't save the clip? set the current clip on the previous snapshot
-            if (forceAllSave == false && (mFlags & Canvas.CLIP_SAVE_FLAG) == 0) {
+            if ((mFlags & Canvas.CLIP_SAVE_FLAG) == 0) {
                 Shape clip = getClip();
                 for (Layer layer : mPrevious.mLayers) {
                     layer.getGraphics().setClip(clip);
@@ -630,6 +648,40 @@ public class GcSnapshot {
         }
 
         return mPrevious;
+    }
+
+    private void restoreLayer(Layer dstLayer) {
+
+        Graphics2D baseGfx = dstLayer.getImage().createGraphics();
+
+        // if the layer contains an original copy this means the flags
+        // didn't restrict drawing to the local layer and we need to make sure the
+        // layer bounds in the layer beneath didn't receive any drawing.
+        // so we use the originalCopy to erase the new drawings in there.
+        BufferedImage originalCopy = dstLayer.getOriginalCopy();
+        if (originalCopy != null) {
+            Graphics2D g = (Graphics2D) baseGfx.create();
+            g.setComposite(AlphaComposite.Src);
+
+            g.drawImage(originalCopy,
+                    mLayerBounds.left, mLayerBounds.top, mLayerBounds.right, mLayerBounds.bottom,
+                    0, 0, mLayerBounds.width(), mLayerBounds.height(),
+                    null);
+            g.dispose();
+        }
+
+        // now draw put the content of the local layer onto the layer,
+        // using the paint information
+        Graphics2D g = createCustomGraphics(baseGfx, mLocalLayerPaint,
+                true /*alphaOnly*/, false /*forceSrcMode*/);
+
+        g.drawImage(mLocalLayer.getImage(),
+                mLayerBounds.left, mLayerBounds.top, mLayerBounds.right, mLayerBounds.bottom,
+                mLayerBounds.left, mLayerBounds.top, mLayerBounds.right, mLayerBounds.bottom,
+                null);
+        g.dispose();
+
+        baseGfx.dispose();
     }
 
     /**
