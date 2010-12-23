@@ -31,6 +31,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.os.Build;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -349,6 +350,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         mGroupFlags |= FLAG_ANIMATION_DONE;
         mGroupFlags |= FLAG_ANIMATION_CACHE;
         mGroupFlags |= FLAG_ALWAYS_DRAWN_WITH_CACHE;
+
+        if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB) {
+            mGroupFlags |= FLAG_SPLIT_MOTION_EVENTS;
+        }
 
         setDescendantFocusability(FOCUS_BEFORE_DESCENDANTS);
 
@@ -1568,7 +1573,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /**
      * Enable or disable the splitting of MotionEvents to multiple children during touch event
-     * dispatch. This behavior is disabled by default.
+     * dispatch. This behavior is enabled by default for applications that target an
+     * SDK version of {@link Build.VERSION_CODES#HONEYCOMB} or newer.
      *
      * <p>When this option is enabled MotionEvents may be split and dispatched to different child
      * views depending on where each pointer initially went down. This allows for user interactions
@@ -1591,6 +1597,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * Returns true if MotionEvents dispatched to this ViewGroup can be split to multiple children.
      * @return true if MotionEvents dispatched to this ViewGroup can be split to multiple children.
      */
     public boolean isMotionEventSplittingEnabled() {
