@@ -25,6 +25,7 @@
 
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
+#include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/ACodec.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
@@ -42,8 +43,7 @@ NuPlayer::Decoder::Decoder(
 NuPlayer::Decoder::~Decoder() {
 }
 
-void NuPlayer::Decoder::configure(
-        const sp<MetaData> &meta, bool ignoreCodecSpecificData) {
+void NuPlayer::Decoder::configure(const sp<MetaData> &meta) {
     CHECK(mCodec == NULL);
     CHECK(mWrapper == NULL);
 
@@ -54,10 +54,6 @@ void NuPlayer::Decoder::configure(
         new AMessage(kWhatCodecNotify, id());
 
     sp<AMessage> format = makeFormat(meta);
-
-    if (ignoreCodecSpecificData) {
-        mCSD.clear();
-    }
 
     if (mSurface != NULL) {
         format->setObject("surface", mSurface);
@@ -127,6 +123,13 @@ sp<AMessage> NuPlayer::Decoder::makeFormat(const sp<MetaData> &meta) {
         msg->setInt32("channel-count", numChannels);
         msg->setInt32("sample-rate", sampleRate);
     }
+
+    int32_t maxInputSize;
+    if (meta->findInt32(kKeyMaxInputSize, &maxInputSize)) {
+        msg->setInt32("max-input-size", maxInputSize);
+    }
+
+    mCSDIndex = 0;
 
     uint32_t type;
     const void *data;
@@ -232,13 +235,6 @@ sp<AMessage> NuPlayer::Decoder::makeFormat(const sp<MetaData> &meta) {
         msg->setObject("esds", buffer);
 #endif
     }
-
-    int32_t maxInputSize;
-    if (meta->findInt32(kKeyMaxInputSize, &maxInputSize)) {
-        msg->setInt32("max-input-size", maxInputSize);
-    }
-
-    mCSDIndex = 0;
 
     return msg;
 }

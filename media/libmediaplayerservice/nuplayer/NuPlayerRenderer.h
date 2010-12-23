@@ -22,6 +22,8 @@
 
 namespace android {
 
+struct ABuffer;
+
 struct NuPlayer::Renderer : public AHandler {
     Renderer(const sp<MediaPlayerBase::AudioSink> &sink,
              const sp<AMessage> &notify);

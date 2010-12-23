@@ -22,6 +22,8 @@
 
 #include <binder/MemoryDealer.h>
 #include <media/stagefright/foundation/ADebug.h>
+#include <media/stagefright/foundation/AMessage.h>
+#include <media/stagefright/MediaErrors.h>
 
 namespace android {
 
@@ -62,7 +64,10 @@ void NuPlayer::NuPlayerStreamListener::queueBuffer(size_t index, size_t size) {
 
     if (mSendDataNotification) {
         mSendDataNotification = false;
-        (new AMessage(kWhatMoreDataQueued, mTargetID))->post();
+
+        if (mTargetID != 0) {
+            (new AMessage(kWhatMoreDataQueued, mTargetID))->post();
+        }
     }
 }
 
@@ -80,7 +85,10 @@ void NuPlayer::NuPlayerStreamListener::issueCommand(
 
     if (mSendDataNotification) {
         mSendDataNotification = false;
-        (new AMessage(kWhatMoreDataQueued, mTargetID))->post();
+
+        if (mTargetID != 0) {
+            (new AMessage(kWhatMoreDataQueued, mTargetID))->post();
+        }
     }
 }
 

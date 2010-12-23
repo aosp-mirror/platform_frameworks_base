@@ -225,6 +225,14 @@ sp<ABuffer> ElementaryStreamQueue::dequeueAccessUnitAAC() {
 
             mFormat = MakeAACCodecSpecificData(
                     profile, sampling_freq_index, channel_configuration);
+
+            int32_t sampleRate;
+            int32_t numChannels;
+            CHECK(mFormat->findInt32(kKeySampleRate, &sampleRate));
+            CHECK(mFormat->findInt32(kKeyChannelCount, &numChannels));
+
+            LOGI("found AAC codec config (%d Hz, %d channels)",
+                 sampleRate, numChannels);
         } else {
             // profile_ObjectType, sampling_frequency_index, private_bits,
             // channel_configuration, original_copy, home

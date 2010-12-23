@@ -54,9 +54,40 @@ size_t LiveDataSource::countQueuedBuffers() {
     return mBufferQueue.size();
 }
 
-ssize_t LiveDataSource::readAt(off64_t offset, void *data, size_t size) {
+ssize_t LiveDataSource::readAtNonBlocking(
+        off64_t offset, void *data, size_t size) {
     Mutex::Autolock autoLock(mLock);
 
+    if (offset != mOffset) {
+        LOGE("Attempt at reading non-sequentially from LiveDataSource.");
+        return -EPIPE;
+    }
+
+    size_t totalAvailable = 0;
+    for (List<sp<ABuffer> >::iterator it = mBufferQueue.begin();
+         it != mBufferQueue.end(); ++it) {
+        sp<ABuffer> buffer = *it;
+
+        totalAvailable += buffer->size();
+
+        if (totalAvailable >= size) {
+            break;
+        }
+    }
+
+    if (totalAvailable < size) {
+        return mFinalResult == OK ? -EWOULDBLOCK : mFinalResult;
+    }
+
+    return readAt_l(offset, data, size);
+}
+
+ssize_t LiveDataSource::readAt(off64_t offset, void *data, size_t size) {
+    Mutex::Autolock autoLock(mLock);
+    return readAt_l(offset, data, size);
+}
+
+ssize_t LiveDataSource::readAt_l(off64_t offset, void *data, size_t size) {
     if (offset != mOffset) {
         LOGE("Attempt at reading non-sequentially from LiveDataSource.");
         return -EPIPE;

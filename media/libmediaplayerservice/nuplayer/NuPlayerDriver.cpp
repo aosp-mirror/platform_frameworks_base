@@ -27,7 +27,8 @@
 namespace android {
 
 NuPlayerDriver::NuPlayerDriver()
-    : mLooper(new ALooper) {
+    : mLooper(new ALooper),
+      mPlayer(false) {
     mLooper->setName("NuPlayerDriver Looper");
 
     mLooper->start(
@@ -51,7 +52,9 @@ status_t NuPlayerDriver::initCheck() {
 
 status_t NuPlayerDriver::setDataSource(
         const char *url, const KeyedVector<String8, String8> *headers) {
-    return INVALID_OPERATION;
+    mPlayer->setDataSource(url, headers);
+
+    return OK;
 }
 
 status_t NuPlayerDriver::setDataSource(int fd, int64_t offset, int64_t length) {
@@ -75,25 +78,30 @@ status_t NuPlayerDriver::prepare() {
 }
 
 status_t NuPlayerDriver::prepareAsync() {
+    sendEvent(MEDIA_PREPARED);
+
     return OK;
 }
 
 status_t NuPlayerDriver::start() {
     mPlayer->start();
+    mPlaying = true;
 
     return OK;
 }
 
 status_t NuPlayerDriver::stop() {
+    mPlaying = false;
     return OK;
 }
 
 status_t NuPlayerDriver::pause() {
+    mPlaying = false;
     return OK;
 }
 
 bool NuPlayerDriver::isPlaying() {
-    return false;
+    return mPlaying;
 }
 
 status_t NuPlayerDriver::seekTo(int msec) {
@@ -101,11 +109,15 @@ status_t NuPlayerDriver::seekTo(int msec) {
 }
 
 status_t NuPlayerDriver::getCurrentPosition(int *msec) {
-    return INVALID_OPERATION;
+    *msec = 0;
+
+    return OK;
 }
 
 status_t NuPlayerDriver::getDuration(int *msec) {
-    return INVALID_OPERATION;
+    *msec = 0;
+
+    return OK;
 }
 
 status_t NuPlayerDriver::reset() {

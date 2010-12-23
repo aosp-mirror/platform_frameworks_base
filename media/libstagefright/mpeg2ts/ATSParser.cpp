@@ -334,7 +334,7 @@ void ATSParser::Stream::signalDiscontinuity(DiscontinuityType type) {
 
             if (mStreamType == 0x1b && mSource != NULL) {
                 // Don't signal discontinuities on audio streams.
-                mSource->queueDiscontinuity(true /* formatChange */);
+                mSource->queueDiscontinuity(type);
             }
             break;
         }
@@ -348,7 +348,7 @@ void ATSParser::Stream::signalDiscontinuity(DiscontinuityType type) {
 
             if (mSource != NULL) {
                 mSource->clear();
-                mSource->queueDiscontinuity(!isASeek);
+                mSource->queueDiscontinuity(type);
             }
             break;
         }
@@ -561,6 +561,10 @@ void ATSParser::Stream::onPayloadData(
             // After a discontinuity we invalidate the queue's format
             // and won't enqueue any access units to the source until
             // the queue has reestablished the new format.
+
+            if (mSource->getFormat() == NULL) {
+                mSource->setFormat(mQueue.getFormat());
+            }
             mSource->queueAccessUnit(accessUnit);
         }
     }

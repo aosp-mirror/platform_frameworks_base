@@ -40,7 +40,7 @@ private:
 MyStreamSource::MyStreamSource(int fd)
     : mFd(fd),
       mFileSize(0),
-      mNextSeekTimeUs(ALooper::GetNowUs() + 5000000ll) {
+      mNextSeekTimeUs(-1) {  // ALooper::GetNowUs() + 5000000ll) {
     CHECK_GE(fd, 0);
 
     mFileSize = lseek64(fd, 0, SEEK_END);
