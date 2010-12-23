@@ -65,7 +65,9 @@ public final class Proxy {
      * that either the default connection or its proxy has changed.
      * The intent will have the following extra value:</p>
      * <ul>
-     *   <li><em>EXTRA_PROXY_INFO</em> - The ProxyProperties for the proxy
+     *   <li><em>EXTRA_PROXY_INFO</em> - The ProxyProperties for the proxy.  Non-null,
+     *                                   though if the proxy is undefined the host string
+     *                                   will be empty.
      * </ul>
      *
      * <p class="note">This is a protected intent that can only be sent by the system

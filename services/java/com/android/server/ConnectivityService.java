@@ -2154,6 +2154,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void sendProxyBroadcast(ProxyProperties proxy) {
+        if (proxy == null) proxy = new ProxyProperties("", 0, "");
         log("sending Proxy Broadcast for " + proxy);
         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
