@@ -55,7 +55,7 @@ public class ComposePathEffect_Delegate extends PathEffect_Delegate {
 
     @Override
     public String getSupportMessage() {
-        return "Composte Path Effects are not supported in Layout Preview mode.";
+        return "Compose Path Effects are not supported in Layout Preview mode.";
     }
 
     // ---- native methods ----

@@ -107,7 +107,8 @@ public class BridgeRenderSession extends RenderSession {
             Bridge.prepareThread();
             mLastResult = mSession.acquire(Params.DEFAULT_TIMEOUT);
             if (mLastResult.isSuccess()) {
-                mLastResult = mSession.insertChild((ViewGroup) parentView, childXml, index, listener);
+                mLastResult = mSession.insertChild((ViewGroup) parentView, childXml, index,
+                        listener);
             }
         } finally {
             mSession.release();

@@ -31,11 +31,11 @@ public class NewLayersActivity extends Activity {
         setContentView(new LayersView(this));
     }
 
-    static class LayersView extends View {
+    public static class LayersView extends View {
         private Paint mLayerPaint;
         private final Paint mRectPaint;
 
-        LayersView(Context c) {
+        public LayersView(Context c) {
             super(c);
 
             mLayerPaint = new Paint();
@@ -57,7 +57,7 @@ public class NewLayersActivity extends Activity {
 
             canvas.translate(0.0f, 200.0f);
             drawStuff(canvas, Canvas.HAS_ALPHA_LAYER_SAVE_FLAG);
-            
+
             canvas.restore();
         }
 

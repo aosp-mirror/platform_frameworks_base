@@ -106,6 +106,45 @@ public final class Matrix_Delegate {
         return true;
     }
 
+    public static Matrix_Delegate make(AffineTransform matrix) {
+        float[] values = new float[MATRIX_SIZE];
+        values[0] = (float) matrix.getScaleX();
+        values[1] = (float) matrix.getShearX();
+        values[2] = (float) matrix.getTranslateX();
+        values[3] = (float) matrix.getShearY();
+        values[4] = (float) matrix.getScaleY();
+        values[5] = (float) matrix.getTranslateY();
+        values[6] = 0.f;
+        values[7] = 0.f;
+        values[8] = 1.f;
+
+        return new Matrix_Delegate(values);
+    }
+
+    public boolean mapRect(RectF dst, RectF src) {
+        // array with 4 corners
+        float[] corners = new float[] {
+                src.left, src.top,
+                src.right, src.top,
+                src.right, src.bottom,
+                src.left, src.bottom,
+        };
+
+        // apply the transform to them.
+        mapPoints(corners);
+
+        // now put the result in the rect. We take the min/max of Xs and min/max of Ys
+        dst.left = Math.min(Math.min(corners[0], corners[2]), Math.min(corners[4], corners[6]));
+        dst.right = Math.max(Math.max(corners[0], corners[2]), Math.max(corners[4], corners[6]));
+
+        dst.top = Math.min(Math.min(corners[1], corners[3]), Math.min(corners[5], corners[7]));
+        dst.bottom = Math.max(Math.max(corners[1], corners[3]), Math.max(corners[5], corners[7]));
+
+
+        return (computeTypeMask() & kRectStaysRect_Mask) != 0;
+    }
+
+
     /**
      * Returns an {@link AffineTransform} matching the matrix.
      */
@@ -655,26 +694,7 @@ public final class Matrix_Delegate {
             return false;
         }
 
-        // array with 4 corners
-        float[] corners = new float[] {
-                src.left, src.top,
-                src.right, src.top,
-                src.right, src.bottom,
-                src.left, src.bottom,
-        };
-
-        // apply the transform to them.
-        d.mapPoints(corners);
-
-        // now put the result in the rect. We take the min/max of Xs and min/max of Ys
-        dst.left = Math.min(Math.min(corners[0], corners[2]), Math.min(corners[4], corners[6]));
-        dst.right = Math.max(Math.max(corners[0], corners[2]), Math.max(corners[4], corners[6]));
-
-        dst.top = Math.min(Math.min(corners[1], corners[3]), Math.min(corners[5], corners[7]));
-        dst.bottom = Math.max(Math.max(corners[1], corners[3]), Math.max(corners[5], corners[7]));
-
-
-        return (d.computeTypeMask() & kRectStaysRect_Mask) != 0;
+        return d.mapRect(dst, src);
     }
 
     /*package*/ static float native_mapRadius(int native_object, float radius) {
@@ -739,7 +759,6 @@ public final class Matrix_Delegate {
                 matrix[0], matrix[3], matrix[1],
                 matrix[4], matrix[2], matrix[5]);
     }
-
 
     /**
      * Reset a matrix to the identity
@@ -828,6 +847,10 @@ public final class Matrix_Delegate {
 
     private Matrix_Delegate() {
         reset();
+    }
+
+    private Matrix_Delegate(float[] values) {
+        System.arraycopy(values, 0, mValues, 0, MATRIX_SIZE);
     }
 
     /**

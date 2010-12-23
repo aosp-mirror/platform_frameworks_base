@@ -118,6 +118,10 @@ public class Paint_Delegate {
         return mColor >>> 24;
     }
 
+    public void setAlpha(int alpha) {
+        mColor = (alpha << 24) | (mColor & 0x00FFFFFF);
+    }
+
     public int getTextAlign() {
         return mTextAlign;
     }
@@ -130,7 +134,11 @@ public class Paint_Delegate {
      * returns the value of stroke miter needed by the java api.
      */
     public float getJavaStrokeMiter() {
-        return mStrokeMiter * mStrokeWidth;
+        float miter = mStrokeMiter * mStrokeWidth;
+        if (miter < 1.f) {
+            miter = 1.f;
+        }
+        return miter;
     }
 
     public int getJavaCap() {
@@ -274,7 +282,7 @@ public class Paint_Delegate {
             return;
         }
 
-        delegate.mColor = (a << 24) | (delegate.mColor & 0x00FFFFFF);
+        delegate.setAlpha(a);
     }
 
     /*package*/ static float getStrokeWidth(Paint thisPaint) {
@@ -835,7 +843,7 @@ public class Paint_Delegate {
 
     // ---- Private delegate/helper methods ----
 
-    private Paint_Delegate() {
+    /*package*/ Paint_Delegate() {
         reset();
     }
 
@@ -866,14 +874,14 @@ public class Paint_Delegate {
 
     private void reset() {
         mFlags = Paint.DEFAULT_PAINT_FLAGS;
-        mColor = 0;
+        mColor = 0xFF000000;
         mStyle = Paint.Style.FILL.nativeInt;
         mCap = Paint.Cap.BUTT.nativeInt;
         mJoin = Paint.Join.MITER.nativeInt;
         mTextAlign = 0;
         mTypeface = Typeface.sDefaults[0].native_instance;
         mStrokeWidth = 1.f;
-        mStrokeMiter = 2.f;
+        mStrokeMiter = 4.f;
         mTextSize = 20.f;
         mTextScaleX = 1.f;
         mTextSkewX = 0.f;

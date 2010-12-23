@@ -18,6 +18,7 @@ package android.graphics;
 
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.layoutlib.bridge.impl.GcSnapshot;
 import com.android.ninepatch.NinePatchChunk;
 
 import android.graphics.drawable.NinePatchDrawable;
@@ -123,11 +124,11 @@ public final class NinePatch_Delegate {
     }
 
    private static void draw(int canvas_instance,
-           int left, int top, int right, int bottom,
+           final int left, final int top, final int right, final int bottom,
            int bitmap_instance, byte[] c, int paint_instance_or_null,
-           int destDensity, int srcDensity) {
+           final int destDensity, final int srcDensity) {
        // get the delegate from the native int.
-       Bitmap_Delegate bitmap_delegate = Bitmap_Delegate.getDelegate(bitmap_instance);
+       final Bitmap_Delegate bitmap_delegate = Bitmap_Delegate.getDelegate(bitmap_instance);
        if (bitmap_delegate == null) {
            assert false;
            return;
@@ -143,7 +144,7 @@ public final class NinePatch_Delegate {
            return;
        }
 
-       NinePatchChunk chunkObject = getChunk(c);
+       final NinePatchChunk chunkObject = getChunk(c);
        assert chunkObject != null;
        if (chunkObject == null) {
            return;
@@ -158,19 +159,13 @@ public final class NinePatch_Delegate {
        // this one can be null
        Paint_Delegate paint_delegate = Paint_Delegate.getDelegate(paint_instance_or_null);
 
-       Graphics2D graphics;
-       if (paint_delegate != null) {
-           graphics = canvas_delegate.createCustomGraphics(paint_delegate);
-       } else {
-           graphics = canvas_delegate.getGcSnapshot().create();
-       }
+       canvas_delegate.getSnapshot().draw(new GcSnapshot.Drawable() {
+               public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                   chunkObject.draw(bitmap_delegate.getImage(), graphics,
+                           left, top, right - left, bottom - top, destDensity, srcDensity);
+               }
+           }, paint_delegate, true /*compositeOnly*/);
 
-       try {
-           chunkObject.draw(bitmap_delegate.getImage(), graphics,
-                   left, top, right - left, bottom - top, destDensity, srcDensity);
-       } finally {
-           graphics.dispose();
-       }
     }
 
     /*package*/ static int nativeGetTransparentRegion(int bitmap, byte[] chunk, Rect location) {
