@@ -64,6 +64,28 @@ public class ActivityManager {
     static public int staticGetMemoryClass() {
         // Really brain dead right now -- just take this from the configured
         // vm heap size, and assume it is in megabytes and thus ends with "m".
+        String vmHeapSize = SystemProperties.get("dalvik.vm.smallheapsize", "16m");
+        return Integer.parseInt(vmHeapSize.substring(0, vmHeapSize.length()-1));
+    }
+    
+    /**
+     * Return the approximate per-application memory class of the current
+     * device when an application is running with a large heap.  This is the
+     * space available for memory-intensive applications; most applications
+     * should not need this amount of memory, and should instead stay with the
+     * {@link #getMemoryClass()} limit.  The returned value is in megabytes.
+     * This may be the same size as {@link #getMemoryClass()} on memory
+     * constrained devices, or it may be significantly larger on devices with
+     * a large amount of available RAM.
+     */
+    public int getLargeMemoryClass() {
+        return staticGetLargeMemoryClass();
+    }
+    
+    /** @hide */
+    static public int staticGetLargeMemoryClass() {
+        // Really brain dead right now -- just take this from the configured
+        // vm heap size, and assume it is in megabytes and thus ends with "m".
         String vmHeapSize = SystemProperties.get("dalvik.vm.heapsize", "16m");
         return Integer.parseInt(vmHeapSize.substring(0, vmHeapSize.length()-1));
     }
