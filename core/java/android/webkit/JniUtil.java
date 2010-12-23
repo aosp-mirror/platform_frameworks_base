@@ -39,7 +39,7 @@ class JniUtil {
         if (initialized)
             return;
 
-        sContext = context;
+        sContext = context.getApplicationContext();
         initialized = true;
     }
 
