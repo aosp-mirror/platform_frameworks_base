@@ -34,8 +34,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Govorna pošta"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problem s vezom ili nevažeći MMI kôd."</string>
-    <!-- no translation found for mmiFdnError (5224398216385316471) -->
-    <skip />
+    <string name="mmiFdnError" msgid="5224398216385316471">"Operacija je ograničena samo na brojeve s fiksnim biranjem."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Usluga nije omogućena."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Usluga je omogućena za korisnika:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Usluga je onemogućena."</string>
@@ -126,10 +125,10 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"Sinkronizacija"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sinkronizacija"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Previše brisanja stavki <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
-    <string name="low_memory" product="tablet" msgid="2292820184396262278">"Prostor za pohranu na tablet računalo pun je! Izbrišite dio datoteka da biste oslobodili prostor."</string>
+    <string name="low_memory" product="tablet" msgid="2292820184396262278">"Pohrana tabletnog uređaja je puna! Izbrišite neke datoteke da biste oslobodili prostor."</string>
     <string name="low_memory" product="default" msgid="6632412458436461203">"Prostor za pohranu na telefonu pun je! Izbrišite dio datoteka da biste oslobodili prostor."</string>
     <string name="me" msgid="6545696007631404292">"Ja"</string>
-    <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opcije tablet računala"</string>
+    <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opcije tabletnog uređaja"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Opcije telefona"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Bešumni način"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Uključi bežični prijenos"</string>
@@ -137,13 +136,12 @@
     <string name="screen_lock" msgid="799094655496098153">"Zaključavanje zaslona"</string>
     <string name="power_off" msgid="4266614107412865048">"Isključi"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Isključivanje..."</string>
-    <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Vaše će se tablet računalo isključiti."</string>
+    <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Vaš tabletni uređaj će se isključiti."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Vaš će se telefon ipak isključiti"</string>
-    <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
-    <skip />
+    <string name="shutdown_confirm_question" msgid="6656441286856415014">"Želite li isključiti uređaj?"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nedavni"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"Nema nedavnih aplikacija."</string>
-    <string name="global_actions" product="tablet" msgid="408477140088053665">"Opcije tablet računala"</string>
+    <string name="global_actions" product="tablet" msgid="408477140088053665">"Opcije tabletnog uređaja"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Opcije telefona"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Zaključavanje zaslona"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Isključi"</string>
@@ -160,7 +158,7 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Vaše poruke"</string>
     <string name="permgroupdesc_messages" msgid="7045736972019211994">"Čitajte i pišite SMS-ove, poruke e-pošte i ostale poruke."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Vaši osobni podaci"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Izravan pristup kontaktima i kalendaru pohranjenom na tablet računalu."</string>
+    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Izravan pristup kontaktima i kalendaru pohranjenima na tabletnom uređaju."</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Izravan pristup kontaktima i kalendaru pohranjenom na telefonu."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Vaša lokacija"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Praćenje vaše fizičke lokacije"</string>
@@ -177,14 +175,12 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Razvojni alati"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Značajke potrebne samo za razvojne programere aplikacija."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Prostor za pohranu"</string>
-    <!-- outdated translation 9203302214915355774 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Pristup SD kartici."</string>
+    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Pristupi memoriji USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Pristup SD kartici."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"onemogućavanje ili izmjena trake statusa"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Aplikaciji omogućuje isključivanje trake statusa i uklanjanje sistemskih ikona."</string>
-    <!-- no translation found for permlab_statusBarService (7247281911387931485) -->
-    <skip />
-    <!-- no translation found for permdesc_statusBarService (4097605867643520920) -->
-    <skip />
+    <string name="permlab_statusBarService" msgid="7247281911387931485">"traka statusa"</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Aplikaciji omogućuje da bude traka statusa."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"proširivanje/sažimanje trake statusa"</string>
     <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Aplikaciji omogućuje širenje ili sažimanje na traci statusa."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"prekini izlazne pozive"</string>
@@ -196,10 +192,10 @@
     <string name="permlab_sendSms" msgid="5600830612147671529">"slanje SMS poruka"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Aplikaciji omogućuje slanje SMS poruka. Zlonamjerne aplikacije mogu stvarati troškove slanjem poruka bez vaše potvrde."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"čitanje SMS-a ili MMS-a"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Aplikaciji omogućuje čitanje SMS poruka pohranjenih na tablet računalu ili SIM kartici. Zlonamjerne aplikacije mogu čitati vaše povjerljive poruke."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Aplikaciji omogućuje čitanje SMS poruka pohranjenih na tabletnom uređaju ili SIM kartici. Zlonamjerne aplikacije mogu čitati vaše povjerljive poruke."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Aplikaciji omogućuje čitanje SMS poruka pohranjenih na telefonu ili SIM kartici. Zlonamjerne aplikacije mogu čitati vaše povjerljive poruke."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"uređivanje SMS-a ili MMS-a"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"Aplikaciji omogućuje pisanje na SMS poruke pohranjene na tablet računalu ili SIM kartici. Zlonamjerne aplikacije mogu izbrisati vaše poruke."</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"Aplikaciji omogućuje pisanje u SMS poruke pohranjene na tabletnom uređaju ili SIM kartici. Zlonamjerne aplikacije mogu izbrisati vaše poruke."</string>
     <string name="permdesc_writeSms" product="default" msgid="6299398896177548095">"Aplikaciji omogućuje pisanje SMS poruka za pohranjivanje na telefonu ili SIM kartici. Zlonamjerne aplikacije mogu izbrisati vaše poruke."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"primanje WAP-a"</string>
     <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Aplikaciji omogućuje primanje i obradu WAP poruka. Zlonamjerne aplikacije mogu pratiti vaše poruke ili ih izbrisati prije nego što ih vi vidite."</string>
@@ -250,7 +246,7 @@
     <string name="permlab_manageAppTokens" msgid="17124341698093865">"upravljanje tokenima aplikacije"</string>
     <string name="permdesc_manageAppTokens" msgid="977127907524195988">"Aplikacijama omogućuje stvaranje tokena i upravljanje tokenima, zaobilaženjem uobičajenog z-rasporeda. Nikad ne bi trebalo koristiti za uobičajene aplikacije."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"pritisnite tipke i gumbe za nadzor"</string>
-    <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"Aplikaciji omogućuje isporuku vlastitih događaja unosa (pritisci tipki itd.) u drugu aplikaciju. Zlonamjerne aplikacije mogu to upotrijebiti za preuzimanje tablet računala."</string>
+    <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"Aplikaciji omogućuje isporuku vlastitih događaja unosa (pritisaka tipki itd.) u drugu aplikaciju. Zlonamjerne aplikacije to mogu upotrijebiti za preuzimanje tabletnog uređaja."</string>
     <string name="permdesc_injectEvents" product="default" msgid="3946098050410874715">"Aplikaciji omogućuje isporuku vlastitih unosa događaja (pritiskom tipke itd.) u drugu aplikaciju. Zlonamjerne aplikacije to mogu koristiti za preuzimanje telefona."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"bilježi što pišete i koje radnje poduzimate"</string>
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Aplikacijama omogućuje praćenje pritisnutih tipki kod interakcije s drugom aplikacijom (primjerice kod unosa zaporke). Nikad ne bi trebalo koristiti za uobičajene aplikacije."</string>
@@ -277,18 +273,18 @@
     <string name="permlab_installPackages" msgid="335800214119051089">"izravno instaliranje aplikacija"</string>
     <string name="permdesc_installPackages" msgid="526669220850066132">"Aplikaciji omogućuje instaliranje novih ili ažuriranih paketa sustava Android. Zlonamjerne aplikacije mogu to upotrijebiti za dodavanje aplikacija uz moćna, samovoljna dopuštenja."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"brisanje svih podataka iz predmemorije aplikacije"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Aplikaciji omogućuje oslobađanje mjesta za pohranu na tablet računalu brisanjem datoteka u direktoriju predmemorije aplikacije. Pristup je veoma ograničen obično na sistemski postupak."</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Aplikaciji omogućuje oslobađanje mjesta za pohranu na tabletnom uređaju brisanjem datoteka u direktoriju predmemorije aplikacije. Pristup je veoma ograničen obično sistemskom postupku."</string>
     <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"Aplikaciji omogućuje oslobađanje mjesta za pohranu na telefonu brisanjem datoteka u direktoriju predmemorije aplikacije. Pristup je veoma ograničen obično sistemskim postupkom."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Premjesti izvore aplikacije"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Aplikaciji omogućuje premještanje resursa aplikacije iz internih na vanjske medije i obratno."</string>
-    <!-- outdated translation 4811921703882532070 -->     <string name="permlab_readLogs" msgid="6615778543198967614">"čitanje datoteka dnevnika sustava"</string>
-    <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Aplikaciji omogućuje čitanje raznih sistemskih datoteka dnevnika. Tako možemo otkriti opće informacije o tome što radite na tablet računalu, što potencijalno uključuje osobne i privatne podatke."</string>
-    <!-- outdated translation 4077356893924755294 -->     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Aplikaciji omogućuje čitanje raznih sistemskih datoteka dnevnika. Tako možemo otkriti opće informacije o tome što radite na tablet računalu, što potencijalno uključuje osobne i privatne podatke."</string>
+    <string name="permlab_readLogs" msgid="6615778543198967614">"čitaj osjetljive podatke dnevnika"</string>
+    <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Aplikaciji omogućuje čitanje raznih sistemskih datoteka dnevnika. Tako može otkriti opće informacije o tome što radite na tabletnom uređaju, što potencijalno uključuje osobne ili privatne informacije."</string>
+    <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Aplikaciji omogućuje čitanje raznih sistemskih datoteka dnevnika. Tako može otkriti opće informacije o tome što radite na telefonu, što potencijalno uključuje osobne ili privatne informacije."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"pisanje/čitanje u resursima čije je vlasnik dijagnostika"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Aplikaciji omogućuje čitanje i pisanje u bilo koji resurs u vlasništvu dijagnostičke grupe; na primjer, datoteke u stavci /dev. To potencijalno može utjecati na stabilnost i sigurnost sustava. To se treba koristiti SAMO za dijagnostiku koja se posebno odnosi na hardver od strane proizvođača ili operatera."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"omogućavanje ili onemogućavanje komponenti aplikacije"</string>
-    <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Aplikaciji omogućuje promjenu postavke omogućavanja ili onemogućavanja komponente druge aplikacije. Zlonamjerne aplikacije mogu to upotrijebiti kako bi onemogućile važne mogućnosti tablet računala. Pažljivo upotrebljavajte to dopuštenje jer postoji mogućnost dobivanja komponenata u beskorisnom, nekonzistentnom ili nestabilnom stanju."</string>
-    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Aplikaciji omogućuje promjenu postavke omogućavanja ili onemogućavanja komponente druge aplikacije. Zlonamjerne aplikacije mogu to upotrijebiti kako bi onemogućile važne mogućnosti tablet računala. Pažljivo upotrebljavajte to dopuštenje jer postoji mogućnost dobivanja komponenata u beskorisnom, nekonzistentnom ili nestabilnom stanju."</string>
+    <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Aplikaciji omogućuje promjenu postavke omogućavanja ili onemogućavanja komponente druge aplikacije. Zlonamjerne aplikacije mogu to upotrijebiti kako bi onemogućile važne mogućnosti tabletnog uređaja. Pažljivo upotrebljavajte to dopuštenje jer postoji mogućnost dobivanja komponenata u beskorisnom, nekonzistentnom ili nestabilnom stanju."</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Aplikaciji omogućuje promjenu postavke omogućavanja ili onemogućavanja komponente druge aplikacije. Zlonamjerne aplikacije mogu to upotrijebiti kako bi onemogućile važne mogućnosti telefona. Pažljivo upotrebljavajte to dopuštenje jer postoji mogućnost dobivanja komponenata u beskorisnom, nekonzistentnom ili nestabilnom stanju."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"postavljanje željene lokacije"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Aplikaciji omogućuje izmjenu željenih aplikacija. To zlonamjernim aplikacijama može omogućiti da neprimjetno mijenjaju pokrenute aplikacije uz preobrazbu postojećih aplikacija na način da prikupljaju vaše osobne podatke."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"izmjena postavki globalnog sustava"</string>
@@ -298,19 +294,19 @@
     <string name="permlab_writeGservices" msgid="2149426664226152185">"izmjena karte Google usluga"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"Aplikaciji omogućuje izmjenu karte Google usluga. Nije za upotrebu na uobičajenim aplikacijama."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"automatski pokreni ponovno pokretanje"</string>
-    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"Aplikacijama omogućuje samopokretanje odmah nakon završetka ponovnog pokretanja sustava. To može uzrokovati duže pokretanje tablet uređaja, a aplikacija može usporiti ukupan rad tablet uređaja."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"Aplikaciji omogućuje samopokretanje odmah nakon završetka pokretanja sustava. To može uzrokovati duže pokretanje tabletnog uređaja, a aplikacija ga može usporiti svojim neprekidnim radom."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="698336728415008796">"Aplikacijama omogućuje samopokretanje odmah nakon završetka ponovnog pokretanja sustava. To može uzrokovati duže pokretanje telefona, a aplikacija može usporiti ukupan rad telefona."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"slanje privlačnih prijenosa"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Aplikaciji omogućuje slanje privlačnih prijenosa, koji se zadržavaju nakon završetka prijenosa. Zlonamjerne aplikacije mogu usporiti rad tablet računala ili ga učiniti nestabilnim uz upotrebu previše memorije."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Aplikaciji omogućuje slanje privlačnih prijenosa, koji se zadržavaju nakon završetka prijenosa. Zlonamjerne aplikacije mogu usporiti rad tabletnog uređaja ili ga učiniti nestabilnim uz upotrebu previše memorije."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"Aplikaciji omogućuje slanje privlačnih prijenosa, koji se zadržavaju nakon završetka prijenosa. Zlonamjerne aplikacije mogu usporiti rad telefona ili ga učiniti nestabilnim uz upotrebu previše memorije."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"čitanje kontaktnih podataka"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Aplikaciji omogućuje čitanje svih podataka o kontaktima (adrese) koji su pohranjeni na tablet računalu. Zlonamjerne aplikacije mogu to upotrijebiti za slanje podataka drugim ljudima."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Aplikaciji omogućuje čitanje svih podataka o kontaktima (adrese) koji su pohranjeni na tabletnom uređaju. Zlonamjerne aplikacije to mogu upotrijebiti za slanje podataka drugim ljudima."</string>
     <string name="permdesc_readContacts" product="default" msgid="3371591512896545975">"Aplikaciji omogućuje čitanje svih podataka o kontaktima (adrese) koji su pohranjeni na računalu. Zlonamjerne aplikacije to mogu koristiti za slanje podataka drugim ljudima."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"pisanje kontaktnih podataka"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Aplikaciji omogućuje izmjenu kontaktnih podataka (adrese) koji su pohranjeni na vašem tablet računalu. Zlonamjerne aplikacije mogu to upotrijebiti za brisanje ili izmjenu vaših kontaktnih podataka."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Aplikaciji omogućuje izmjenu kontaktnih podataka (adrese) koji su pohranjeni na vašem tabletnom uređaju. Zlonamjerne aplikacije mogu to upotrijebiti za brisanje ili izmjenu kontaktnih podataka."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Aplikaciji omogućuje izmjenu kontaktnih podataka (adrese) koji su pohranjeni na vašem telefonu. Zlonamjerne aplikacije to mogu koristiti za brisanje ili izmjenu vaših kontaktnih podataka."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"čitanje kalendarskih događaja"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Aplikaciji omogućuje čitanje svih kalendarskih događaja pohranjenih na tablet računalu. Zlonamjerne aplikacije mogu to upotrijebiti za slanje kalendarskih događaja drugim ljudima."</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Aplikaciji omogućuje čitanje svih događaja na kalendaru koji su pohranjeni na tabletnom uređaju. Zlonamjerne aplikacije to mogu upotrijebiti za slanje događaja na kalendaru drugim ljudima."</string>
     <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Aplikaciji omogućuje čitanje svih kalendarskih događaja pohranjenih na računalu. Zlonamjerne aplikacije to mogu koristiti za slanje kalendarskih događaja drugim ljudima."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"dodavanje ili izmjena kalendarskih događaja i slanje e-pošte gostima"</string>
     <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Aplikaciji omogućuje dodavanje i promjenu događaja na kalendaru, čime se mogu slati poruke e-pošte gostima. Zlonamjerne aplikacije to mogu koristiti za brisanje ili izmjenu kalendarskih događaja ili za slanje poruka e-pošte gostima."</string>
@@ -321,10 +317,10 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"dopuštenje za instaliranje davatelja usluge lociranja"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Stvorite izvore približnih lokacija za testiranje. Zlonamjerne aplikacije to mogu koristiti za poništavanje lokacije i/ili statusa koji prikazuju pravi izvori lokacija poput GPS-a ili mrežnih davatelja ili mogu pratiti i prijavljivati vašu lokaciju vanjskom izvoru."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"ispravna (GPS) lokacija"</string>
-    <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Pristupite preciznim izvorima lokacije kao što je Global Positioning System na tablet računalu, ako je to dostupno. Zlonamjerne aplikacije mogu to upotrijebiti kako bi utvrdile vaš položaj i mogu dodatno crpiti baterijsku energiju."</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Pristupite preciznim izvorima lokacije kao što je Global Positioning System na tabletnom uređaju, gdje je to dostupno. Zlonamjerne aplikacije mogu to upotrijebiti kako bi utvrdile vaš položaj i mogu dodatno crpiti baterijsku energiju."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Pristupite izvorima lokacije kao što je Global Positioning System na telefonu, ako je to dostupno. Zlonamjerne aplikacije mogu to upotrijebiti kako bi utvrdile vaš položaj i mogu dodatno crpiti baterijsku energiju."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"široka (mrežno temeljena) lokacija"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Pristupite općim izvorima lokacije poput podatkovne baze mobilne mreže kako biste utvrdili približnu lokaciju tablet računala, ako je to dostupno. Zlonamjerne aplikacije mogu to upotrijebiti za približno utvrđivanje vašeg položaja."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Pristupite općim izvorima lokacije poput podatkovne baze mobilne mreže kako biste utvrdili približnu lokaciju telefona, ako je to dostupno. Zlonamjerne aplikacije mogu to upotrijebiti za približno utvrđivanje vašeg položaja."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8235655958070862293">"Pristupite općim izvorima lokacije poput podatkovne baze mobilne mreže kako biste utvrdili približnu lokaciju telefona, ako je to dostupno. Zlonamjerne aplikacije to mogu koristiti za približno utvrđivanje vašeg položaja."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"pristup značajci SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Aplikacijama omogućuje upotrebu niskorazinskih usluga SurfaceFlinger."</string>
@@ -334,45 +330,43 @@
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Aplikaciji omogućuje izmjenu globalnih zvučnih postavki, poput glasnoće i usmjeravanja."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"snimanje zvuka"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Aplikaciji omogućuje pristup putu za snimanje zvuka."</string>
-    <!-- outdated translation 8059288807274039014 -->     <string name="permlab_camera" msgid="3616391919559751192">"snimanje slika"</string>
-    <!-- outdated translation 9013476258810982546 -->     <string name="permdesc_camera" msgid="6004878235852154239">"Aplikacijama omogućuje snimanje slika fotoaparatom. To aplikaciji omogućuje prikupljanje slika s fotoaparata u bilo kojem trenutku."</string>
-    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"trajno onemogući tablet računalo"</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"snimi fotografije i videozapise"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"Aplikacijama omogućuje snimanje slika i videozapisa fotoaparatom. To aplikaciji omogućuje prikupljanje slika s fotoaparata u bilo kojem trenutku."</string>
+    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"trajno onemogući tabletni uređaj"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"trajno onemogućavanje telefona"</string>
-    <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"Aplikaciji omogućuje trajno isključivanje cijelog tablet računala. To je veoma opasno."</string>
+    <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"Aplikaciji omogućuje trajno isključivanje cijelog tabletnog uređaja. To je veoma opasno."</string>
     <string name="permdesc_brick" product="default" msgid="5569526552607599221">"Aplikaciji omogućuje trajno isključivanje cijelog telefona. To je veoma opasno."</string>
-    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"prisilno ponovno pokreni tablet računalo"</string>
+    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"prisilno ponovno pokretanje tabletnog uređaja"</string>
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"prisilno ponovno pokretanje telefona"</string>
-    <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"Aplikaciji omogućuje prisilno ponovno pokretanje tablet računala."</string>
+    <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"Aplikaciji omogućuje prisilno ponovno pokretanje tabletnog uređaja."</string>
     <string name="permdesc_reboot" product="default" msgid="7914933292815491782">"Aplikaciji omogućuje prisilno ponovno pokretanje telefona."</string>
     <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"učitavanje i skidanje datotečnih sustava"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Aplikaciji omogućuje uključivanje i isključivanje sustava datoteka prijenosnih uređaja za pohranjivanje."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"formatiranje vanjske pohrane"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Aplikaciji omogućuje formatiranje prijenosnog uređaja za pohranjivanje."</string>
-    <!-- outdated translation 1070364079249834666 -->     <string name="permlab_asec_access" msgid="3411338632002193846">"dobivanje informacija iz sigurnog mjesta za pohranu"</string>
-    <!-- outdated translation 7691616292170590244 -->     <string name="permdesc_asec_access" msgid="8820326551687285439">"Aplikaciji omogućuje dobivanje informacija o sigurnom pohranjivanju."</string>
-    <!-- outdated translation 7312078032326928899 -->     <string name="permlab_asec_create" msgid="6414757234789336327">"stvaranje sigurnog pohranjivanja"</string>
-    <!-- outdated translation 7041802322759014035 -->     <string name="permdesc_asec_create" msgid="2621346764995731250">"Aplikaciji omogućuje stvaranje sigurno pohranjivanje."</string>
-    <!-- outdated translation 7787322878955261006 -->     <string name="permlab_asec_destroy" msgid="526928328301618022">"uništavanje sigurnog pohranjivanja"</string>
-    <!-- outdated translation 5740754114967893169 -->     <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Aplikaciji omogućuje uklanjanje prostora za sigurno pohranjivanje."</string>
-    <!-- outdated translation 7517449694667828592 -->     <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"uključivanje/isključivanje sigurnog pohranjivanja"</string>
-    <!-- outdated translation 5438078121718738625 -->     <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Aplikaciji omogućuje uključivanje/isključivanje sigurnog pohranjivanja."</string>
-    <!-- outdated translation 5685344390439934495 -->     <string name="permlab_asec_rename" msgid="7496633954080472417">"promjena naziva sigurnog pohranjivanja"</string>
-    <!-- outdated translation 1387881770708872470 -->     <string name="permdesc_asec_rename" msgid="2152829985238876790">"Aplikaciji omogućuje promjenu naziva za sigurno pohranjivanje."</string>
+    <string name="permlab_asec_access" msgid="3411338632002193846">"dohvati informacije o unutarnjoj pohrani"</string>
+    <string name="permdesc_asec_access" msgid="8820326551687285439">"Omogućuje aplikaciji dohvaćanje informacija o unutarnjoj pohrani."</string>
+    <string name="permlab_asec_create" msgid="6414757234789336327">"stvori unutarnju pohranu"</string>
+    <string name="permdesc_asec_create" msgid="2621346764995731250">"Aplikaciji omogućuje stvaranje unutarnjeg pohranjivanja."</string>
+    <string name="permlab_asec_destroy" msgid="526928328301618022">"uništi unutarnju pohranu"</string>
+    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Aplikaciji omogućuje uništavanje unutarnjeg pohranjivanja."</string>
+    <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"uključi/isključi unutarnju pohranu"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Aplikaciji omogućuje uključivanje/isključivanje unutarnjeg pohranjivanja."</string>
+    <string name="permlab_asec_rename" msgid="7496633954080472417">"preimenuj unutarnju pohranu"</string>
+    <string name="permdesc_asec_rename" msgid="2152829985238876790">"Aplikaciji omogućuje preimenovanje unutarnjeg pohranjivanja."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"nadzor nad vibracijom"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Aplikaciji omogućuje nadzor nad vibracijom."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"nadzor bljeskalice"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Aplikaciji omogućuje nadzor nad bljeskalicom."</string>
-    <!-- no translation found for permlab_accessUsb (7362327818655760496) -->
-    <skip />
-    <!-- no translation found for permdesc_accessUsb (2414271762914049292) -->
-    <skip />
+    <string name="permlab_accessUsb" msgid="7362327818655760496">"pristupi USB uređajima"</string>
+    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Omogućuje aplikaciji pristup USB uređajima."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testiranje hardvera"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Aplikacijama omogućuje nadzor nad raznim vanjskim jedinicama u svrhu hardverskog testiranja."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"izravno pozivanje telefonskog broja"</string>
     <string name="permdesc_callPhone" msgid="3369867353692722456">"Aplikaciji omogućuje pozivanje telefonskih brojeva bez vašeg znanja. Zlonamjerne aplikacije mogu uspostavljati neočekivane pozive i opteretiti telefonski račun. Napominjemo da ovime ne omogućujete aplikaciji pozivanje hitnih službi."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"izravno pozivanje bilo kojeg telefonskog broja"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Aplikacijama omogućuje pozivanje bilo kojeg telefonskog broja, uključujući brojeve hitnih službi, bez vašeg znanja. Zlonamjerne aplikacije mogu upućivati nepotrebne i nedopuštene pozive hitnim službama."</string>
-    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"izravno pokretanje postavke CDMA tablet računala"</string>
+    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"izravno pokreni postavljanje CDMA tabletnog uređaja"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"izravno pokretanje postavke CDMA telefona"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Aplikaciji omogućuje pokretanje dobivanja značajke CDMA. Zlonamjerne aplikacije mogu nepotrebno pokrenuti dobivanje značajke CDMA"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"obavijesti o ažuriranju kontrolne lokacije"</string>
@@ -385,16 +379,16 @@
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Aplikaciji omogućuje nadzor nad telefonskim značajkama na uređaju. Aplikacija s tim dopuštenjem može mijenjati mreže, uključivati i isključivati radio na telefonu i slične stvari bez vašeg znanja."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"čitanje stanja i identiteta računala"</string>
     <string name="permdesc_readPhoneState" msgid="188877305147626781">"Aplikaciji omogućuje da pristupi telefonskim značajkama uređaja. Aplikacija s tim dopuštenjem može utvrditi telefonski broj i serijski broj telefona, može utvrditi je li poziv aktivan, broj pozivatelja i slične značajke."</string>
-    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"spriječi tablet računalo da prijeđe u stanje mirovanja"</string>
+    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"spriječi mirovanje tabletnog uređaja"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"sprečava telefon da prijeđe u stanje mirovanja"</string>
-    <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"Aplikaciji omogućuje da spriječi prelazak tablet računala u mirovanje."</string>
+    <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"Aplikaciji omogućuje da spriječi prelazak tabletnog uređaja u mirovanje."</string>
     <string name="permdesc_wakeLock" product="default" msgid="7584036471227467099">"Aplikaciji omogućuje da spriječi prelazak telefona u mirovanje."</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"uključivanje ili isključivanje tablet računala"</string>
+    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"uključivanje ili isključivanje tabletnog uređaja"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"uključivanje ili isključivanje telefona"</string>
-    <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"Aplikaciji omogućuje uključivanje ili isključivanje tablet računala."</string>
+    <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"Aplikaciji omogućuje uključivanje i isključivanje tabletnog uređaja."</string>
     <string name="permdesc_devicePower" product="default" msgid="4577331933252444818">"Aplikaciji omogućuje uključivanje ili isključivanje telefona."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"pokretanje u tvorničkom testnom načinu rada"</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Pokrenite kao niskorazinski proizvođački test, uz omogućavanje potpunog pristupa hardveru tablet računala. Dostupno je samo ako tablet računalo radi u proizvođačkom testnom načinu rada."</string>
+    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Pokrenite kao niskorazinski proizvođački test, uz omogućavanje potpunog pristupa hardveru tabletnog uređaja. Dostupno je samo ako tabletni uređaj radi u proizvođačkom testnom načinu rada."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Pokrenite kao niskorazinski proizvođački test, uz omogućavanje potpunog pristupa telefonskom hardveru. Dostupno je samo ako telefon radi u proizvođačkom testnom načinu rada."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"postavi pozadinsku sliku"</string>
     <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Aplikaciji omogućuje postavljanje sistemske pozadinske slike."</string>
@@ -403,15 +397,15 @@
     <string name="permlab_masterClear" msgid="2315750423139697397">"poništavanje sustava na tvornički zadane postavke"</string>
     <string name="permdesc_masterClear" msgid="5033465107545174514">"Aplikaciji omogućuje da potpuno poništi rad sustava na tvorničke postavke brisanjem svih podataka, konfiguracije i instaliranih aplikacija."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"postavljanje vremena"</string>
-    <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"Aplikaciji omogućuje promjenu vremena na satu tablet računala."</string>
+    <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"Aplikaciji omogućuje promjenu vremena na satu tabletnog uređaja."</string>
     <string name="permdesc_setTime" product="default" msgid="667294309287080045">"Aplikaciji omogućuje promjenu vremena na satu telefona."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"postavljanje vremenske zone"</string>
-    <string name="permdesc_setTimeZone" product="tablet" msgid="2522877107613885139">"Aplikaciji omogućuje promjenu vremenske zone na tablet računalu."</string>
+    <string name="permdesc_setTimeZone" product="tablet" msgid="2522877107613885139">"Aplikaciji omogućuje promjenu vremenske zone na tabletnom uređaju."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="1902540227418179364">"Aplikaciji omogućuje promjenu vremenske zone na telefonu."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"ima ulogu Usluge voditelja računa"</string>
     <string name="permdesc_accountManagerService" msgid="6056903274106394752">"Aplikaciji omogućuje pozivanje kontrolora autentičnosti računa"</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"otkrivanje poznatih računa"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="857622793935544694">"Aplikaciji omogućuje dobivanje popisa računa koje poznaje tablet računalo."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="857622793935544694">"Aplikaciji omogućuje dobivanje popisa računa koje tabletni uređaj poznaje."</string>
     <string name="permdesc_getAccounts" product="default" msgid="6839262446413155394">"Aplikaciji omogućuje dobivanje popisa računa koje poznaje telefon."</string>
     <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"ima ulogu kontrolora autentičnosti računa"</string>
     <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"Aplikaciji omogućuje upotrebu mogućnosti za provjeru vjerodostojnosti računa koja je dio značajke AccountManager, uključujući stvaranje računa te dobivanje i postavljanje zaporki."</string>
@@ -438,15 +432,13 @@
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"omogući višenamjenski Wi-Fi prijem"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Aplikaciji omogućuje primanje paketa koji nisu izravno upućeni na vaš uređaj. To može biti korisno za otkrivanje obližnjih usluge. Koristi više energije od višenamjenskog načina rada."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"bluetooth administracija"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Aplikaciji omogućuje konfiguraciju lokalnog Bluetooth tablet računala te otkrivanje i sparivanje s udaljenim uređajima."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Aplikaciji omogućuje konfiguraciju lokalnog tabletnog uređaja s Bluetoothom te otkrivanje i sparivanje s udaljenim uređajima."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Aplikaciji omogućuje konfiguraciju lokalnog Bluetooth telefona i otkrivanje i sparivanje s udaljenim uređajima."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"stvaranje Bluetooth veza"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"Aplikaciji omogućuje pregled konfiguracije lokalnog Bluetooth tablet računala i uspostavljanje i prihvaćanje veza sa sparenim uređajima."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"Aplikaciji omogućuje pregled konfiguracije lokalnog Bluetooth tabletnog uređaja i uspostavljanje i prihvaćanje veza sa sparenim uređajima."</string>
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Aplikaciji omogućuje pregled konfiguracije lokalnog Bluetooth telefona i uspostavljanje i prihvaćanje veza sa sparenim uređajima."</string>
-    <!-- no translation found for permlab_nfc (4423351274757876953) -->
-    <skip />
-    <!-- no translation found for permdesc_nfc (9171401851954407226) -->
-    <skip />
+    <string name="permlab_nfc" msgid="4423351274757876953">"upravljaj beskontaktnom (NFC) komunikacijom"</string>
+    <string name="permdesc_nfc" msgid="9171401851954407226">"Aplikaciji omogućuje komunikaciju s Near Field Communication (NFC) oznakama, karticama i čitačima."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"onemogući zaključavanje tipkovnice"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Aplikaciji omogućuje isključivanje zaključavanja tipkovnice i svih povezanih sigurnosnih zaporki. Jasan primjer toga daje isključivanje zaključavanja telefona kod primanja poziva, koje se ponovno aktivira nakon završetka poziva."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čitanje postavki sinkronizacije"</string>
@@ -463,40 +455,32 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Aplikaciji omogućuje čitanje osobnih riječi, imena i izraza koje je korisnik možda spremio u korisničkom rječniku."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"pisanje u korisnički definiran rječnik"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Aplikaciji omogućuje pisanje novih riječi u korisnički rječnik."</string>
-    <!-- outdated translation 8079403759001777291 -->     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"izmjena/brisanje sadržaja SD kartice"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"izmjeni/briši sadržaje memorije USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"izmjena/brisanje sadržaja SD kartice"</string>
-    <!-- outdated translation 6643963204976471878 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Aplikaciji omogućuje pisanje na SD karticu."</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Omog. pisanje na USB memoriju."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Aplikaciji omogućuje pisanje na SD karticu."</string>
-    <!-- no translation found for permlab_mediaStorageWrite (6859839199706879015) -->
-    <skip />
-    <!-- no translation found for permdesc_mediaStorageWrite (8232008512478316233) -->
-    <skip />
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"izmijeni/briši sadržaje unutarnjih medija pohrane"</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Omogućuje aplikaciji izmjenu sadržaja pohrane unutarnjih medija."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"pristup sustavu datoteka predmemorije"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Aplikaciji omogućuje čitanje i pisanje u sustav datoteka predmemorije."</string>
-    <!-- no translation found for permlab_use_sip (5986952362795870502) -->
-    <skip />
-    <!-- no translation found for permdesc_use_sip (6320376185606661843) -->
-    <skip />
-    <!-- outdated translation 4307861496302850201 -->     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ograniči zaporku"</string>
-    <!-- outdated translation 1719877245692318299 -->     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Ograničite vrste zaporki koje smijete koristiti."</string>
-    <!-- outdated translation 7374780712664285321 -->     <string name="policylab_watchLogin" msgid="914130646942199503">"Prati pokušaje prijave"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"Nadziri broj netočnih zaporki unesenih pri otključavanju zaslona i zaključaj tablet računalo ili izbriši sve podatke s njega ako je uneseno previše netočnih zaporki"</string>
-    <!-- outdated translation 933601759466308092 -->     <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"Nadziri broj netočnih zaporki unesenih pri otključavanju zaslona i zaključaj tablet računalo ili izbriši sve podatke s njega ako je uneseno previše netočnih zaporki"</string>
-    <!-- outdated translation 9084772090797485420 -->     <string name="policylab_resetPassword" msgid="2620077191242688955">"Poništi zaporku"</string>
-    <!-- outdated translation 3332167600331799991 -->     <string name="policydesc_resetPassword" msgid="5391240616981297361">"Promijenite zaporku koju vam je prethodno trebao dati administrator."</string>
-    <!-- outdated translation 5760466025247634488 -->     <string name="policylab_forceLock" msgid="2274085384704248431">"Pokreni zaključavanje"</string>
-    <!-- outdated translation 2819868664946089740 -->     <string name="policydesc_forceLock" msgid="5696964126226028442">"Nadzire trenutak zaključavanja uređaja, zahtijeva ponovni unos zaporke."</string>
+    <string name="permlab_use_sip" msgid="5986952362795870502">"zovi/primaj internetske pozive"</string>
+    <string name="permdesc_use_sip" msgid="6320376185606661843">"Aplikaciji omogućuje upotrebu SIP usluge za nazivanje/primanje internetskih poziva."</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Postavi pravila zaporke"</string>
+    <string name="policydesc_limitPassword" msgid="9083400080861728056">"Nadziri duljinu i znakove dopuštene u zaporci za otključavanje zaslona"</string>
+    <string name="policylab_watchLogin" msgid="914130646942199503">"Nadgledaj pokušaje otključavanja zaslona"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"Nadgledaj broj pogrešno unesenih zaporki za otključavanje zaslona i zaključaj tabletni uređaj ili izbriši sve podatke ako je uneseno previše pogrešnih zaporki"</string>
+    <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"Nadgledaj broj pogrešno unesenih zaporki za otključavanje zaslona i zaključaj telefon ili izbriši sve podatke ako je uneseno previše pogrešnih zaporki"</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"Promijeni zaporku za otključavanje zaslona"</string>
+    <string name="policydesc_resetPassword" msgid="5391240616981297361">"Promijeni zaporku za otključavanje zaslona"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Zaključaj zaslon"</string>
+    <string name="policydesc_forceLock" msgid="5696964126226028442">"Nadziri kako se i kada zaslon zaključava"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Izbriši sve podatke"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"Izbriši podatke tablet računala bez upozorenja, vraćanjem na tvorničko stanje"</string>
-    <!-- outdated translation 314455232799486222 -->     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Izbriši podatke tablet računala bez upozorenja, vraćanjem na tvorničko stanje"</string>
-    <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
-    <skip />
-    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
-    <skip />
-    <!-- no translation found for policylab_expirePassword (2314569545488269564) -->
-    <skip />
-    <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
-    <skip />
+    <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"Izbriši podatke tabletnog uređaja bez upozorenja vraćanjem u tvorničko stanje"</string>
+    <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Izbriši podatke telefona bez upozorenja vraćanjem u tvorničko stanje"</string>
+    <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"postavi globalni proxy uređaja"</string>
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Postavi globalni proxy uređaja za upotrebu dok su pravila omogućena. Samo prvi administrator uređaja postavlja djelotvoran globalni proxy."</string>
+    <string name="policylab_expirePassword" msgid="2314569545488269564">"Postavi istek zaporke"</string>
+    <string name="policydesc_expirePassword" msgid="7276906351852798814">"Nadzirite za koliko vremena zaporka za zaključani zaslon treba biti promijenjena"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Početna"</item>
     <item msgid="869923650527136615">"Mobilni"</item>
@@ -561,11 +545,10 @@
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Poslovni dojavljivač"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Pomoćnik"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <!-- no translation found for eventTypeCustom (7837586198458073404) -->
-    <skip />
+    <string name="eventTypeCustom" msgid="7837586198458073404">"Prilagođeno"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Rođendan"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Godišnjica"</string>
-    <!-- outdated translation 5834288791948564594 -->     <string name="eventTypeOther" msgid="7388178939010143077">"Događaj"</string>
+    <string name="eventTypeOther" msgid="7388178939010143077">"Drugo"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Prilagođeno"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Početna"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Posao"</string>
@@ -592,48 +575,28 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Posao"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Ostalo"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Prilagođeno"</string>
-    <!-- no translation found for relationTypeCustom (3542403679827297300) -->
-    <skip />
-    <!-- no translation found for relationTypeAssistant (6274334825195379076) -->
-    <skip />
-    <!-- no translation found for relationTypeBrother (8757913506784067713) -->
-    <skip />
-    <!-- no translation found for relationTypeChild (1890746277276881626) -->
-    <skip />
-    <!-- no translation found for relationTypeDomesticPartner (6904807112121122133) -->
-    <skip />
-    <!-- no translation found for relationTypeFather (5228034687082050725) -->
-    <skip />
-    <!-- no translation found for relationTypeFriend (7313106762483391262) -->
-    <skip />
-    <!-- no translation found for relationTypeManager (6365677861610137895) -->
-    <skip />
-    <!-- no translation found for relationTypeMother (4578571352962758304) -->
-    <skip />
-    <!-- no translation found for relationTypeParent (4755635567562925226) -->
-    <skip />
-    <!-- no translation found for relationTypePartner (7266490285120262781) -->
-    <skip />
-    <!-- no translation found for relationTypeReferredBy (101573059844135524) -->
-    <skip />
-    <!-- no translation found for relationTypeRelative (1799819930085610271) -->
-    <skip />
-    <!-- no translation found for relationTypeSister (1735983554479076481) -->
-    <skip />
-    <!-- no translation found for relationTypeSpouse (394136939428698117) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
-    <skip />
+    <string name="relationTypeCustom" msgid="3542403679827297300">"Prilagođeno"</string>
+    <string name="relationTypeAssistant" msgid="6274334825195379076">"Pomoćnik"</string>
+    <string name="relationTypeBrother" msgid="8757913506784067713">"Brat"</string>
+    <string name="relationTypeChild" msgid="1890746277276881626">"Dijete"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Partner u kućanstvu"</string>
+    <string name="relationTypeFather" msgid="5228034687082050725">"Otac"</string>
+    <string name="relationTypeFriend" msgid="7313106762483391262">"Prijatelj"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"Voditelj"</string>
+    <string name="relationTypeMother" msgid="4578571352962758304">"Majka"</string>
+    <string name="relationTypeParent" msgid="4755635567562925226">"Roditelj"</string>
+    <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Preporučuje"</string>
+    <string name="relationTypeRelative" msgid="1799819930085610271">"Rođak"</string>
+    <string name="relationTypeSister" msgid="1735983554479076481">"Sestra"</string>
+    <string name="relationTypeSpouse" msgid="394136939428698117">"Bračni partner"</string>
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Prilagođeno"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Početna"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"Posao"</string>
+    <string name="sipAddressTypeOther" msgid="4408436162950119849">"Drugo"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Unesite PIN kôd"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Unesite zaporku za otključavanje"</string>
-    <!-- no translation found for keyguard_password_enter_pin_password_code (638347075625491514) -->
-    <skip />
+    <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Unesite PIN za otključavanje"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Netočan PIN kôd!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Za otključavanje pritisnite Izbornik pa 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Broj hitne službe"</string>
@@ -646,14 +609,13 @@
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Uzvrati poziv"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Ispravno!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Žao nam je, pokušajte ponovo"</string>
-    <!-- no translation found for lockscreen_password_wrong (6237443657358168819) -->
-    <skip />
+    <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Pokušajte ponovno"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Punjenje (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Napunjeno."</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Priključite punjač."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Nema SIM kartice."</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"U tablet računalu nema SIM kartice."</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"U tabletnom uređaju nema SIM kartice."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"U telefonu nema SIM kartice."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Umetnite SIM karticu."</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Samo hitni pozivi"</string>
@@ -663,11 +625,9 @@
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM kartica je zaključana."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Otključavanje SIM kartice…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Netočno ste iscrtali uzorak <xliff:g id="NUMBER_0">%d</xliff:g> puta. "\n\n"Pokušajte ponovo za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
-    <!-- no translation found for lockscreen_too_many_failed_password_attempts_dialog_message (4906034376425175381) -->
-    <skip />
-    <!-- no translation found for lockscreen_too_many_failed_pin_attempts_dialog_message (6827749231465145590) -->
-    <skip />
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Netočno ste iscrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još <xliff:g id="NUMBER_1">%d</xliff:g> neuspješnih pokušaja, morat ćete otključati telefon pomoću Google prijave."\n\n" Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Netočno ste unijeli zaporku <xliff:g id="NUMBER_0">%d</xliff:g> puta. "\n\n"Pokušajte ponovno za <xliff:g id="NUMBER_1">%d</xliff:g> sekunda."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Netočno ste unijeli PIN <xliff:g id="NUMBER_0">%d</xliff:g> puta. "\n\n"Pokušajte ponovno za <xliff:g id="NUMBER_1">%d</xliff:g> sekunda."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Netočno ste iscrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još <xliff:g id="NUMBER_1">%d</xliff:g> neuspješna pokušaja, zamolit ćemo vas da otključate tabletni uređaj pomoću Google prijave."\n\n" Pokušajte ponovno za <xliff:g id="NUMBER_2">%d</xliff:g> sekunda."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Netočno ste iscrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još <xliff:g id="NUMBER_1">%d</xliff:g> neuspješna pokušaja, morat ćete otključati telefon pomoću Google prijave."\n\n" Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Pokušajte ponovno za <xliff:g id="NUMBER">%d</xliff:g> s."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Zaboravili ste uzorak?"</string>
@@ -696,25 +656,19 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Želite otići s ove lokacije?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Za nastavak odaberite U redu ili da biste ostali na trenutačnoj stranici odaberite Odustani."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Potvrdi"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Savjet: Dvaput dotaknite za povećanje i smanjivanje."</string>
-    <string name="autofill_this_form" msgid="1272247532604569872">"AutoFill"</string>
+    <string name="autofill_this_form" msgid="1272247532604569872">"Automatsko popunjavanje"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Postavi autopop."</string>
-    <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
-    <skip />
-    <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
-    <skip />
-    <!-- no translation found for autofill_address_summary_separator (7483307893170324129) -->
-    <skip />
-    <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
-    <skip />
+    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
+    <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
+    <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
+    <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"čitanje povijesti i oznaka preglednika"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Aplikaciji omogućuje čitanje svih URL-ova koje je preglednik posjetio i svih oznaka iz preglednika."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"pisanje povijesti i oznaka preglednika"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"Aplikaciji omogućuje izmjenu povijesti ili oznaka preglednika koji su pohranjeni na vašem tablet računalu. Zlonamjerne aplikacije mogu to upotrijebiti za brisanje ili izmjenu podataka o pregledniku."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"Aplikaciji omogućuje izmjenu povijesti ili oznaka preglednika koji su pohranjeni na vašem telefonu. Zlonamjerne aplikacije to mogu upotrijebiti za brisanje ili izmjenu podataka o pregledniku."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Aplikaciji omogućuje izmjenu povijesti ili oznaka preglednika koji su pohranjeni na vašem telefonu. Zlonamjerne aplikacije to mogu koristiti za brisanje ili izmjenu podataka o pregledniku."</string>
-    <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
-    <skip />
-    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
-    <skip />
+    <string name="permlab_setAlarm" msgid="5924401328803615165">"namjesti alarm na budilici"</string>
+    <string name="permdesc_setAlarm" msgid="5966966598149875082">"Omogućuje aplikaciji da namjesti alarm u instaliranoj aplikaciji budilice. Neke aplikacije budilice možda neće primijeniti ovu značajku."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Izmijeni dopuštenja za geo-lociranje u pregledniku"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Aplikaciji omogućuje izmjenu dopuštenja za geolokaciju u pregledniku. Zlonamjerne aplikacije to mogu koristiti za omogućavanje slanja informacija o lokaciji na proizvoljne web-lokacije."</string>
     <string name="save_password_message" msgid="767344687139195790">"Želite li da preglednik zapamti ovu zaporku?"</string>
@@ -830,25 +784,21 @@
     <string name="cut" msgid="3092569408438626261">"Izreži"</string>
     <string name="copy" msgid="2681946229533511987">"Kopiraj"</string>
     <string name="paste" msgid="5629880836805036433">"Zalijepi"</string>
-    <!-- no translation found for pasteDisabled (7259254654641456570) -->
-    <skip />
+    <string name="pasteDisabled" msgid="7259254654641456570">"Ništa za lijepljenje"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Kopiraj URL"</string>
-    <!-- no translation found for selectTextMode (6738556348861347240) -->
-    <skip />
-    <!-- no translation found for textSelectionCABTitle (5236850394370820357) -->
-    <skip />
+    <string name="selectTextMode" msgid="6738556348861347240">"Odabir teksta..."</string>
+    <string name="textSelectionCABTitle" msgid="5236850394370820357">"Odabir teksta"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Način unosa"</string>
-    <!-- outdated translation 1672989176958581452 -->     <string name="editTextMenuTitle" msgid="4909135564941815494">"Uredi tekst"</string>
+    <string name="editTextMenuTitle" msgid="4909135564941815494">"Radnje s tekstom"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Prostora ima sve manje"</string>
-    <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"Prostora za pohranjivanje na tablet računalu ima sve manje."</string>
+    <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"Prostora za pohranjivanje na tabletnom uređaju ima sve manje."</string>
     <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"Prostora za pohranjivanje na telefonu ima sve manje."</string>
     <string name="ok" msgid="5970060430562524910">"U redu"</string>
     <string name="cancel" msgid="6442560571259935130">"Odustani"</string>
     <string name="yes" msgid="5362982303337969312">"U redu"</string>
     <string name="no" msgid="5141531044935541497">"Odustani"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Pažnja"</string>
-    <!-- no translation found for loading (1760724998928255250) -->
-    <skip />
+    <string name="loading" msgid="1760724998928255250">"Učitavanje..."</string>
     <string name="capital_on" msgid="1544682755514494298">"Uključeno"</string>
     <string name="capital_off" msgid="6815870386972805832">"Isključeno"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Radnju dovrši pomoću stavke"</string>
@@ -867,32 +817,19 @@
     <string name="force_close" msgid="3653416315450806396">"Prisilno zatvori"</string>
     <string name="report" msgid="4060218260984795706">"Izvješće"</string>
     <string name="wait" msgid="7147118217226317732">"Pričekaj"</string>
-    <!-- no translation found for launch_warning_title (8323761616052121936) -->
-    <skip />
-    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
-    <skip />
-    <!-- no translation found for launch_warning_original (188102023021668683) -->
-    <skip />
-    <!-- no translation found for smv_application (295583804361236288) -->
-    <skip />
-    <!-- no translation found for smv_process (5120397012047462446) -->
-    <skip />
-    <!-- no translation found for heavy_weight_notification (9087063985776626166) -->
-    <skip />
-    <!-- no translation found for heavy_weight_notification_detail (2423977499339403402) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (1135403633766694316) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4592075610079319667) -->
-    <skip />
-    <!-- no translation found for old_app_action (493129172238566282) -->
-    <skip />
-    <!-- no translation found for old_app_description (942967900237208466) -->
-    <skip />
-    <!-- no translation found for new_app_action (5472756926945440706) -->
-    <skip />
-    <!-- no translation found for new_app_description (6830398339826789493) -->
-    <skip />
+    <string name="launch_warning_title" msgid="8323761616052121936">"Aplikacija preusmjerena"</string>
+    <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> se izvodi sada."</string>
+    <string name="launch_warning_original" msgid="188102023021668683">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> pokrenuta je prva."</string>
+    <string name="smv_application" msgid="295583804361236288">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) prekršila je svoje vlastito pravilo StrictMode."</string>
+    <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> prekršio je svoje vlastito pravilo StrictMode."</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"Izvodi se <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Odaberite za izmjenu aplikacije"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Izmjena aplikacija?"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Već se izvodi neka druga aplikacija koja se mora zaustaviti prije pokretanje nove."</string>
+    <string name="old_app_action" msgid="493129172238566282">"Natrag na <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="old_app_description" msgid="942967900237208466">"Ne pokreći novu aplikaciju."</string>
+    <string name="new_app_action" msgid="5472756926945440706">"Pokreni <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="6830398339826789493">"Zaustavi staru aplikaciju bez spremanja."</string>
     <string name="sendText" msgid="5132506121645618310">"Odaberite radnju za tekst"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Glasnoća zvona"</string>
     <string name="volume_music" msgid="5421651157138628171">"Glasnoća medija"</string>
@@ -931,17 +868,17 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Pokaži sve"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB masovno pohranjivanje"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB povezan"</string>
-    <!-- outdated translation 4796759646167247178 -->     <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Povezali ste računalo preko USB-a. Odaberite donji gumb ako želite kopirati datoteke s jednog računala na drugi i na SD karticu Androida."</string>
-    <!-- outdated translation 4796759646167247178 -->     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Povezali ste računalo preko USB-a. Odaberite donji gumb ako želite kopirati datoteke s jednog računala na drugi i na SD karticu Androida."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Povezali ste se s računalom putem USB-a. Dodirnite donji gumb ako želite kopirati datoteke s računala na USB memoriju svojeg Androida ili obrnuto."</string>
+    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Povezali ste se s računalom putem USB-a. Dodirnite donji gumb ako želite kopirati datoteke s računala na karticu SD svojeg Androida ili obrnuto."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Uključi USB pohranjivanje"</string>
-    <!-- outdated translation 2534784751603345363 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Došlo je do problema s upotrebom SD kartice za USB pohranjivanje."</string>
-    <!-- outdated translation 2534784751603345363 -->     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Došlo je do problema s upotrebom SD kartice za USB pohranjivanje."</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Došlo je do problema s upotrebom USB memorije za za masovnu pohranu putem USB-a."</string>
+    <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Došlo je do problema s upotrebom SD kartice za USB masovnu pohranu."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB povezan"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Odaberite za kopiranje datoteka na računalo ili s računala."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Isključi USB pohranjivanje"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Odaberite za isključivanje USB pohrane."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB pohrana se koristi"</string>
-    <!-- outdated translation 3613713396426604104 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Prije isključivanja USB pohranjivanja, morate izvaditi (“izbaciti”) SD karticu uređaja Android iz računala."</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Prije isključivanja USB pohranjivanja, morate izvaditi (“izbaciti”) USB memoriju uređaja Android iz računala."</string>
     <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Prije isključivanja USB pohranjivanja, morate izvaditi (“izbaciti”) SD karticu uređaja Android iz računala."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Isključi USB pohranjivanje"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Došlo je do problema kod isključivanja USB pohranjivanja. Provjerite jeste li odspojili USB host, a zatim pokušajte ponovo."</string>
@@ -949,9 +886,9 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Ako uključite USB pohranjivanje, neke aplikacije koje koristite zaustavit će se i možda neće biti dostupne sve dok ne isključite USB pohranjivanje."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Rad USB-a nije uspio"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"U redu"</string>
-    <!-- outdated translation 8663247929551095854 -->     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formatiraj SD karticu"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Format. USB memoriju"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formatiraj SD karticu"</string>
-    <!-- outdated translation 3621369962433523619 -->     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Jeste li sigurni da želite formatirati SD karticu? Svi podaci na kartici bit će izgubljeni."</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Formatirati USB memoriju uz brisanje svih pohranjenih datoteka? Radnja se ne može poništiti!"</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Jeste li sigurni da želite formatirati SD karticu? Svi podaci na kartici bit će izgubljeni."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Priključen je alat za uklanjanje programske pogreške USB-a"</string>
@@ -960,28 +897,28 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidati"</u></string>
-    <!-- outdated translation 5457603418970994050 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Priprema SD kartice"</string>
+    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Pripremanje memorije USB"</string>
     <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Priprema SD kartice"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Traženje pogrešaka."</string>
-    <!-- outdated translation 780477838241212997 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Prazna SD kartica"</string>
+    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Prazna memorija USB"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Prazna SD kartica"</string>
-    <!-- outdated translation 3817704088027829380 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"SD kartica je prazna ili ima nepodržani sustav datoteka."</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"Memorija USB je prazna ili ima nepodržan sustav datoteka."</string>
     <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SD kartica je prazna ili ima nepodržani sustav datoteka."</string>
-    <!-- outdated translation 6410723906019100189 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Oštećena SD kartica"</string>
+    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Oštećena USB memorija"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Oštećena SD kartica"</string>
-    <!-- outdated translation 6902531775948238989 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Oštećena je SD kartica. Možda biste je trebali preformatirati."</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Oštećena je memorija USB. Možda biste je trebali preformatirati."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"Oštećena je SD kartica. Možda biste je trebali preformatirati."</string>
-    <!-- outdated translation 6872152882604407837 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"SD kartica neočekivano je uklonjena"</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Memorija USB nenadano uklonjena"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD kartica neočekivano je uklonjena"</string>
-    <!-- outdated translation 7260183293747448241 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"SD karticu isključite na siguran način prije uklanjanja kako biste izbjegli gubitak podataka."</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Isključite USB memoriju na siguran način prije uklanjanja kako biste izbjegli gubitak podataka."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"SD karticu isključite na siguran način prije uklanjanja kako biste izbjegli gubitak podataka."</string>
-    <!-- outdated translation 6729801130790616200 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"SD kartica može se ukloniti na siguran način"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Sigurno uklanjanje memorije USB"</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD kartica može se ukloniti na siguran način"</string>
-    <!-- outdated translation 568841278138377604 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Možete ukloniti SD karticu na siguran način."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"USB memoriju možete sigurno ukloniti."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Možete ukloniti SD karticu na siguran način."</string>
-    <!-- outdated translation 8902518030404381318 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Uklonjena SD kartica"</string>
+    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Memorija USB uklonjena"</string>
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Uklonjena SD kartica"</string>
-    <!-- outdated translation 3870120652983659641 -->     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"SD kartica je uklonjena. Umetnite novu."</string>
+    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Memorija USB uklonjena. Umetnite novi medij."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD kartica je uklonjena. Umetnite novu."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Nisu pronađene podudarne radnje"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"statistika o upotrebi ažurirane komponente"</string>
@@ -995,8 +932,7 @@
     <string name="ime_action_send" msgid="2316166556349314424">"Pošalji"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Dalje"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Gotovo"</string>
-    <!-- no translation found for ime_action_previous (1443550039250105948) -->
-    <skip />
+    <string name="ime_action_previous" msgid="1443550039250105948">"Preth."</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Pokreni"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Biraj broj"\n"koristeći <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Stvori kontakt"\n"koristeći <xliff:g id="NUMBER">%s</xliff:g>"</string>
@@ -1019,64 +955,43 @@
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"Unaprijed dijeljeni L2TP/IPSec VPN temeljen na ključu"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"L2TP/IPSec VPN temeljen na certifikatu"</string>
     <string name="upload_file" msgid="2897957172366730416">"Odaberite datoteku"</string>
-    <!-- no translation found for no_file_chosen (6363648562170759465) -->
-    <skip />
+    <string name="no_file_chosen" msgid="6363648562170759465">"Nema odabranih datoteka"</string>
     <string name="reset" msgid="2448168080964209908">"Ponovo postavi"</string>
     <string name="submit" msgid="1602335572089911941">"Pošalji"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Omogućen je način rada za automobil"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Odaberite za izlaz iz načina rada za automobil."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Ograničenje ili aktivan hotspot"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Dodirnite za konfiguraciju:"</string>
-    <!-- no translation found for back_button_label (2300470004503343439) -->
-    <skip />
-    <!-- no translation found for next_button_label (1080555104677992408) -->
-    <skip />
-    <!-- no translation found for skip_button_label (1275362299471631819) -->
-    <skip />
+    <string name="back_button_label" msgid="2300470004503343439">"Natrag"</string>
+    <string name="next_button_label" msgid="1080555104677992408">"Dalje"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"Preskoči"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Upotreba velike količine mobilnih podataka"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Dotaknite da biste saznali više o upotrebi mobilnih podataka"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Prekoračeno je ograničenje za podatke na mobilnom uređaju"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Dotaknite da biste saznali više o upotrebi mobilnih podataka"</string>
-    <!-- no translation found for no_matches (8129421908915840737) -->
-    <skip />
-    <!-- no translation found for find_on_page (1946799233822820384) -->
-    <skip />
-    <!-- no translation found for matches_found:one (8167147081136579439) -->
-    <!-- no translation found for matches_found:other (4641872797067609177) -->
-    <!-- no translation found for action_mode_done (7217581640461922289) -->
-    <skip />
-    <!-- no translation found for progress_unmounting (535863554318797377) -->
-    <skip />
-    <!-- no translation found for progress_unmounting (5556813978958789471) -->
-    <skip />
-    <!-- no translation found for progress_erasing (4183664626203056915) -->
-    <skip />
-    <!-- no translation found for progress_erasing (2115214724367534095) -->
-    <skip />
-    <!-- no translation found for format_error (4320339096529911637) -->
-    <skip />
-    <!-- no translation found for format_error (1343380371925238343) -->
-    <skip />
-    <!-- no translation found for media_bad_removal (7960864061016603281) -->
-    <skip />
-    <!-- no translation found for media_checking (418188720009569693) -->
-    <skip />
-    <!-- no translation found for media_checking (7334762503904827481) -->
-    <skip />
-    <!-- no translation found for media_removed (7001526905057952097) -->
-    <skip />
-    <!-- no translation found for media_shared (5830814349250834225) -->
-    <skip />
-    <!-- no translation found for media_shared (5706130568133540435) -->
-    <skip />
-    <!-- no translation found for media_unknown_state (729192782197290385) -->
-    <skip />
-    <!-- no translation found for share (1778686618230011964) -->
-    <skip />
-    <!-- no translation found for find (4808270900322985960) -->
-    <skip />
-    <!-- no translation found for websearch (4337157977400211589) -->
-    <skip />
+    <string name="no_matches" msgid="8129421908915840737">"Nema rezultata"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"Pronađi na stranici"</string>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 podudaranje"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> od <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
+    <string name="action_mode_done" msgid="7217581640461922289">"Gotovo"</string>
+    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Isključivanje memorije USB..."</string>
+    <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Isključivanje SD kartice..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Brisanje memorije USB..."</string>
+    <string name="progress_erasing" product="default" msgid="2115214724367534095">"Brisanje SD kartice..."</string>
+    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"Brisanje memorije USB nije uspjelo."</string>
+    <string name="format_error" product="default" msgid="1343380371925238343">"Brisanje SD kartice nije uspjelo."</string>
+    <string name="media_bad_removal" msgid="7960864061016603281">"Kartica SD uklonjena je prije isključivanja."</string>
+    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Memorija USB trenutačno se provjerava."</string>
+    <string name="media_checking" product="default" msgid="7334762503904827481">"Kartica SD trenutno se provjerava."</string>
+    <string name="media_removed" msgid="7001526905057952097">"Kartica SD uklonjena je."</string>
+    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB memoriju trenutačno upotrebljava računalo."</string>
+    <string name="media_shared" product="default" msgid="5706130568133540435">"Karticu SD trenutačno upotrebljava računalo."</string>
+    <string name="media_unknown_state" msgid="729192782197290385">"Vanjski mediji u nepoznatom stanju."</string>
+    <string name="share" msgid="1778686618230011964">"Dijeli"</string>
+    <string name="find" msgid="4808270900322985960">"Pronađi"</string>
+    <string name="websearch" msgid="4337157977400211589">"Pretraž. weba"</string>
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />
     <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
@@ -1086,5 +1001,15 @@
     <!-- no translation found for gpsVerifYes (2346566072867213563) -->
     <skip />
     <!-- no translation found for gpsVerifNo (1146564937346454865) -->
+    <skip />
+    <!-- no translation found for sync_too_many_deletes (5296321850662746890) -->
+    <skip />
+    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
+    <skip />
+    <!-- no translation found for sync_really_delete (8933566316059338692) -->
+    <skip />
+    <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
+    <skip />
+    <!-- no translation found for sync_do_nothing (8717589462945226869) -->
     <skip />
 </resources>

@@ -32,8 +32,7 @@
     <string name="invalid_charger" msgid="4549105996740522523">"Opladen via USB niet ondersteund."\n"Gebruik alleen de bijgeleverde oplader."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Accugebruik"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Instellingen"</string>
-    <!-- no translation found for status_bar_settings_wifi_button (1733928151698311923) -->
-    <skip />
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Vliegmodus"</string>
     <string name="status_bar_settings_rotation_lock" msgid="8361452930058000609">"Schermstand vergrendelen"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"DEMPEN"</string>

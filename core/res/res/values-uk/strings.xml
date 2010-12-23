@@ -34,8 +34,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Голос. пошта"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Пробл. підключення чи недійсний код MMI."</string>
-    <!-- no translation found for mmiFdnError (5224398216385316471) -->
-    <skip />
+    <string name="mmiFdnError" msgid="5224398216385316471">"Операція лише для номерів фіксованого набору."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Послугу ввімкнено."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Службу ввімкнено для:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Службу вимкнено."</string>
@@ -126,10 +125,10 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"Синхр."</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Синхр."</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Забагато видалень <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
-    <string name="low_memory" product="tablet" msgid="2292820184396262278">"Пам\'ять пристрою заповнено! Видаліть файли, щоб звільнити місце."</string>
+    <string name="low_memory" product="tablet" msgid="2292820184396262278">"Пам\'ять пристр. заповнено! Видал. файли, щоб звільн. місце."</string>
     <string name="low_memory" product="default" msgid="6632412458436461203">"Пам\'ять тел. заповн.! Видаліть файли, щоб звільн. місце."</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>
-    <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Параметри пристрою"</string>
+    <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Парам. пристрою"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Параметри тел."</string>
     <string name="silent_mode" msgid="7167703389802618663">"Беззвуч. режим"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Увімкнути радіо"</string>
@@ -139,8 +138,7 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"Заверш. роботи..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Ваш пристрій буде вимкнено."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Ваш телефон буде вимкнено."</string>
-    <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
-    <skip />
+    <string name="shutdown_confirm_question" msgid="6656441286856415014">"Дійсно вимкнути?"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Останні"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"Немає останніх програм."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Парам. пристрою"</string>
@@ -177,14 +175,12 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Інструм. розробника"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Функції потрібні лише для розробників програми."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Зберігання"</string>
-    <!-- outdated translation 9203302214915355774 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Доступ до карти SD."</string>
+    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Отрим. доступу до носія USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Доступ до карти SD."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"вимикати чи змін. рядок стану"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Дозволяє програмі вимик. рядок стану чи додавати та видаляти системні піктогр."</string>
-    <!-- no translation found for permlab_statusBarService (7247281911387931485) -->
-    <skip />
-    <!-- no translation found for permdesc_statusBarService (4097605867643520920) -->
-    <skip />
+    <string name="permlab_statusBarService" msgid="7247281911387931485">"рядок стану"</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Дозволяє програмі бути рядком стану."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"розгорнути/згорн. рядок стану"</string>
     <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Дозволяє програмі розгортати чи згортати рядок стану."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"перехопл. вихідні дзвінки"</string>
@@ -196,7 +192,7 @@
     <string name="permlab_sendSms" msgid="5600830612147671529">"надсил. SMS повідом."</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Дозволяє програмі надсил. SMS повідомл. Шкідливі програми можуть спричин. збитки, надсилаючи повідомлення без вашого підтвердження."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"читати SMS або MMS"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Дозволяє програмі читати SMS повідомлення, збережені в пристрої чи SIM-карті. Шкідливі програми можуть читати ваші конфіденційні повідомлення."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Дозволяє програмі читати SMS повідомлення, збережені в пристрої чи SIM-карті. Шкідливі програми можуть читати ваші конфіденц. повідомл."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Дозволяє програмі зчитувати SMS повідомлення, збереж. у вашому тел. чи SIM-карті. Шкідливі прогр. можуть зчит. ваші конфіденційні повід."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"редаг. SMS або MMS"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"Дозволяє програмі змінювати SMS повідомлення, збережені в пристрої чи SIM-карті. Шкідливі програми можуть видаляти ваші повідомл."</string>
@@ -250,7 +246,7 @@
     <string name="permlab_manageAppTokens" msgid="17124341698093865">"керувати маркерами програми"</string>
     <string name="permdesc_manageAppTokens" msgid="977127907524195988">"Дозволяє програмам створ. і керувати власними маркерами, не застосовуючи звич. накладання по осі Z. Ніколи не потрібний для звичайних програм."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"натиск. клавіші чи кнопки керув."</string>
-    <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"Дозволяє програмі надавати власні події введення (натискання клавіш тощо) іншим програмам. Шкідливі програми можуть використовувати це для контролю над пристроєм."</string>
+    <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"Дозволяє програмі надавати власні події введення (натискання клавіш тощо) іншим програмам. Шкідливі програми можуть використов. це для контролю над пристроєм."</string>
     <string name="permdesc_injectEvents" product="default" msgid="3946098050410874715">"Дозволяє програмі надавати власні події введення (натискання клавіш і т. д.) іншим програмам. Шкідливі програми можуть використ. це для контролю над телеф."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"записувати, що ви вводите та які дії викон."</string>
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Дозволяє програмі переглядати клавіші, які ви натискаєте, навіть під час роботи з іншою програмою (наприклад, під час вводу пароля). Ніколи не потрібний для звичайних програм."</string>
@@ -281,14 +277,14 @@
     <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"Дозволяє програмі звільняти пам\'ять телефону, видаливши файли в каталозі кешування програми. Доступ зазвичай строго обмежено системним процесом."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Переміщати ресурси програми"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Дозволяє програмі переміщувати ресурси програми з внутрішніх на зовнішні носії та навпаки."</string>
-    <!-- outdated translation 4811921703882532070 -->     <string name="permlab_readLogs" msgid="6615778543198967614">"чит. файли сист. журналу"</string>
+    <string name="permlab_readLogs" msgid="6615778543198967614">"зчит. закриті дані журн."</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Дозволяє програмі здійснювати зчитування з різних файлів журналу системи. Це дозволяє дізнаватися загальну інформацію про ваші дії в пристрої, яка потенційно може містити особисті чи конфіденційні дані."</string>
-    <!-- outdated translation 4077356893924755294 -->     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Дозволяє програмі здійснювати зчитування з різних файлів журналу системи. Це дозволяє дізнаватися загальну інформацію про ваші дії в пристрої, яка потенційно може містити особисті чи конфіденційні дані."</string>
+    <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Дозволяє програмі здійснювати зчитування з різних файлів журналу системи. Це дозволяє дізнаватися загальну інформацію про ваші дії в телефоні, яка потенційно може містити особисті чи конфіденційні дані."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"чит./зап. на ресури., якими вол. діаг."</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Дозволяє програмі зчитувати та запис. на будь-який ресурс, яким володіє діагностична група; напр., файли в /dev. Це потенційно може вплинути на безпеку та стабільність системи. Це необхідно використ. ЛИШЕ для діагностики обладнання, яку виконує виробник чи оператор."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"вмикати чи вимикати компоненти програми"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Дозволяє програмі змінювати, чи ввімкнено компонент іншої програми. Шкідливі програми можуть використовувати це для вимкнення важливих можливостей пристрою. З цим типом дозволу треба поводитися обережно, оскільки компоненти програми можуть стати непридатними, невідповідними чи нестабільними."</string>
-    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Дозволяє програмі змінювати, чи ввімкнено компонент іншої програми. Шкідливі програми можуть використовувати це для вимкнення важливих можливостей пристрою. З цим типом дозволу треба поводитися обережно, оскільки компоненти програми можуть стати непридатними, невідповідними чи нестабільними."</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Дозволяє програмі змінювати, чи ввімкнено компонент іншої програми. Шкідливі програми можуть використовувати це для вимкнення важливих можливостей телефону. З цим типом дозволу треба поводитися обережно, оскільки компоненти програми можуть стати непридатними, невідповідними чи нестабільними."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"установл. потрібні програми"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Дозволяє програмі змінювати ваші вибрані програми. Це може дозволити шкідливим програмам непомітно змінювати запущені програми, примушувати існуючі програми за допомогою спуфінгу збирати ваші особисті дані."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"змін. загальні налашт-ня сист."</string>
@@ -301,13 +297,13 @@
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"Дозволяє програмі запускатися відразу після завантаження системи. Це може затримати запуск пристрою та дозволяє програмі сповільнити загальну роботу пристрою своїм постійним функціонуванням."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="698336728415008796">"Дозволяє програмі запускатися відразу після завантаження системи. Це може затримати запуск телефону та дозволяє програмі сповільнити загальну роботу телефону своїм постійним функціонуванням."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"надсилати закріпл. запис"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Дозволяє програмі надсилати закріплені записи, які залишаються після відтворення запису. Шкідливі програми можуть сповільнювати роботу пристрою, робити його нестабільним, спричиняти використання завеликої кількості пам\'яті."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Дозволяє програмі надсил. закріпл. записи, які залиш. після відтвор. запису. Шкідливі прогр. можуть сповільн. роботу пристрою, робити його нестаб., спричин. викор. завеликої к-сті пам\'яті."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"Дозволяє програмі надсил. закріпл. записи, які залиш. після відтвор. запису. Шкідливі програми можуть сповільн. роботу тел., робити його нестаб., спричин. викор. завеликої к-сті пам\'яті."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"читати контакт. дані"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Дозволяє програмі зчитувати всі контактні дані (адреси), збережені у вашому пристрої. Шкідливі програми можуть використовувати це для надсилання ваших даних іншим людям."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Дозволяє програмі зчитувати всі контактні дані (адреси), збережені у вашому пристрої. Шкідливі програми можуть використ. це для надсил. ваших даних іншим людям."</string>
     <string name="permdesc_readContacts" product="default" msgid="3371591512896545975">"Дозволяє програмі зчитувати всі дані контактів (адреси), збережені у вашому тел. Шкідливі програми можуть використ. це для надсилання ваших даних іншим людям."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"запис. контактні дані"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Дозволяє програмі змінювати контактні дані (адреси), збережені в пристрої. Шкідливі програми можуть використовувати це для видалення чи зміни ваших контактних даних."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Дозволяє програмі змінювати контактні дані (адреси), збереж. в пристрої. Шкідливі програми можуть використ. це для видалення чи зміни ваших контактних даних."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Дозволяє програмі змінювати контактні дані (адресу), збереж. в телефоні. Шкідливі програми можуть використ. це для видалення чи зміни ваших контактних даних."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"читати події календаря"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Дозволяє програмі зчитувати всі події календаря, збережені в пристрої. Шкідливі програми можуть використовувати це для надсилання ваших подій календаря іншим людям."</string>
@@ -321,10 +317,10 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"дозвіл на встановлення провайдера місцезнах."</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Створ. фіктивні джерела місцезн. для тестув. Шкідливі прогр. можуть викор. це для заміни місцезн. і/чи статусу, отрим. від дійсних джерел місцезн., таких як GPS або моб. операторів, а також для відстеж. і передачі вашого місцезн. зовн. джерелу."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"точне (GPS) місцезнах."</string>
-    <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Отримує доступ до джерел точного місцезнаходження, наприклад системи глобального позиціонування в пристрої, де це доступно. Шкідливі програми можуть використовувати це для визначення вашого місцезнаходження та споживати додаткову енергію батареї."</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Отрим. доступ до джерел точного місцезн., напр. системи глоб. позиціонування в пристрої, де це доступно. Шкідливі прогр. можуть викор. це для визначення вашого місцезн. і споживати додаткову енергію батареї."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Отрим. доступ до точних джерел місцезн., таких як сист. глоб. позиціонування в тел., де це доступно. Шкідливі прогр. можуть викор. це для визнач. вашого місцезн. і споживати додаткову енергію батареї."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"приблизне (мережеве) місцезнах."</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Отримує доступ до джерел приблизного місцезнаходження, наприклад баз даних мобільної мережі, для визначення приблизного місцезнаходження пристрою, де це доступно. Шкідливі програми можуть використовувати це, щоб приблизно визначати ваше місцезнаходження."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Отрим. доступ до джерел прибл. місцезнах., напр. баз даних моб. мережі, для визначення прибл. місцезнах. пристрою, де це доступно. Шкідливі програми можуть використов. це, щоб приблизно визначати ваше місцезнах."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8235655958070862293">"Отрим. доступ до джерел прибл. місцезн., напр. баз даних моб. мережі, для визначення прибл. місцезн. телефону, де це доступно. Шкідливі програми можуть використов. це, щоб приблизно визначати ваше місцезн."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"дост. до SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Дозволяє програмі викор. низькорівневі функції SurfaceFlinger."</string>
@@ -334,13 +330,13 @@
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Дозволяє програмі змінювати заг. налашт-ня аудіо, такі як гучність і маршрутиз."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"запис-ти аудіо"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Дозволяє програмі отрим. доступ до шляху аудіозапису."</string>
-    <!-- outdated translation 8059288807274039014 -->     <string name="permlab_camera" msgid="3616391919559751192">"фотографувати"</string>
-    <!-- outdated translation 9013476258810982546 -->     <string name="permdesc_camera" msgid="6004878235852154239">"Дозоляє програмі робити знімки за допомогою камери. Це дозволяє програмі будь-коли отримувати зображення з камери."</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"фотограф. та знімати відео"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"Дозоляє програмі фотографувати та знімати відео за допомогою камери. Це дозволяє програмі будь-коли отримувати зображення з камери."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"остаточно вимкнути пристрій"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"остаточно вимкнути телефон"</string>
     <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"Дозволяє програмі остаточно вимкнути весь пристрій. Це дуже небезпечно."</string>
     <string name="permdesc_brick" product="default" msgid="5569526552607599221">"Дозволяє програмі остаточно вимкнути весь телефон. Це дуже небезпечно."</string>
-    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"примусово перезавантажити пристрій"</string>
+    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"примус.перезав.пристр."</string>
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"примус. перезав. тел."</string>
     <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"Дозволяє програмі примусово перезавантажувати пристрій."</string>
     <string name="permdesc_reboot" product="default" msgid="7914933292815491782">"Дозволяє програмі примусово перезавантажувати телефон."</string>
@@ -348,31 +344,29 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Дозволяє програмі підкл. і відкл. файлові сист. для зберіг. на знімних носіях."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"форматувати зовн. пам\'ять"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Дозволяє програмі форматувати знімну пам\'ять."</string>
-    <!-- outdated translation 1070364079249834666 -->     <string name="permlab_asec_access" msgid="3411338632002193846">"переносити інф-ю в безпечне сховище"</string>
-    <!-- outdated translation 7691616292170590244 -->     <string name="permdesc_asec_access" msgid="8820326551687285439">"Дозволяє програмі переносити інформацію в безпечне сховище."</string>
-    <!-- outdated translation 7312078032326928899 -->     <string name="permlab_asec_create" msgid="6414757234789336327">"створ. безпечне сховище"</string>
-    <!-- outdated translation 7041802322759014035 -->     <string name="permdesc_asec_create" msgid="2621346764995731250">"Дозволяє програмі створювати безпечне сховище."</string>
-    <!-- outdated translation 7787322878955261006 -->     <string name="permlab_asec_destroy" msgid="526928328301618022">"знищ. безпечне сховище"</string>
-    <!-- outdated translation 5740754114967893169 -->     <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Дозволяє програмі знищувати безпечне сховище."</string>
-    <!-- outdated translation 7517449694667828592 -->     <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"підкл./відкл. безпечне сховище"</string>
-    <!-- outdated translation 5438078121718738625 -->     <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Дозволяє програмі підключати/відключати безпечне сховище."</string>
-    <!-- outdated translation 5685344390439934495 -->     <string name="permlab_asec_rename" msgid="7496633954080472417">"переймен. безп. сховище"</string>
-    <!-- outdated translation 1387881770708872470 -->     <string name="permdesc_asec_rename" msgid="2152829985238876790">"Дозволяє програмі перейменовувати безпечне сховище."</string>
+    <string name="permlab_asec_access" msgid="3411338632002193846">"переносити інф-ю у внутрішню пам\'ять"</string>
+    <string name="permdesc_asec_access" msgid="8820326551687285439">"Дозволяє програмі переносити інформацію у внутрішню пам\'ять."</string>
+    <string name="permlab_asec_create" msgid="6414757234789336327">"створ. внутрішню пам\'ять"</string>
+    <string name="permdesc_asec_create" msgid="2621346764995731250">"Дозволяє програмі створювати внутрішню пам\'ять."</string>
+    <string name="permlab_asec_destroy" msgid="526928328301618022">"знищувати внутрішню пам\'ять"</string>
+    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Дозволяє програмі знищувати внутрішню пам\'ять."</string>
+    <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"підключ./відключ. внутрішню пам\'ять"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Дозволяє програмі підключати/відключати внутрішню пам\'ять."</string>
+    <string name="permlab_asec_rename" msgid="7496633954080472417">"переймен. внутр. пам\'ять"</string>
+    <string name="permdesc_asec_rename" msgid="2152829985238876790">"Дозволяє програмі перейменовувати внутрішню пам\'ять."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"контрол. вібросигн."</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Дозволяє програмі контролювати вібросигнал."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"контр. блим. світло"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Дозволяє програмі контролювати світловий сигнал."</string>
-    <!-- no translation found for permlab_accessUsb (7362327818655760496) -->
-    <skip />
-    <!-- no translation found for permdesc_accessUsb (2414271762914049292) -->
-    <skip />
+    <string name="permlab_accessUsb" msgid="7362327818655760496">"отр.дост.до прист.USB"</string>
+    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Дозволяє програмі отрим. доступ до пристр. USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"тест-ти обладн."</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Дозволяє програмі контрол. різні периферійні пристрої для тестування апаратного забезпечення."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"прямо набирати номери тел."</string>
     <string name="permdesc_callPhone" msgid="3369867353692722456">"Дозволяє програмі набирати номери телефону без вашого залучення. Шкідливі програми можуть негативно впливати на стан вашого телефонного рахунку. Зауважте, що програмі не дозволено набирати номери аварійних служб."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"прямо набирати будь-які ном. тел."</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Дозволяє програмі набирати будь-який номер телефону, зокрема аварійні номери, без вашого залучення. Шкідливі програми можуть здійснювати непотрібні та незаконні дзвінки до аварійних служб."</string>
-    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"безпосередньо почати налаштування пристрою CDMA"</string>
+    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"безпосер. поч. налашт. пристр. CDMA"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"безпосер. поч. налашт-ня CDMA тел."</string>
     <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Дозволяє програмі запускати ініціалізацію CDMA. Шкідливі програми можуть без потреби запускати ініціалізацію CDMA"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"контрол. сповіщ. про оновлення місцезн."</string>
@@ -385,16 +379,16 @@
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Дозволяє програмі контролювати телефонні функції пристрою. Програма з цим дозволом може змінювати мережі, вмикати та вимикати радіо телефону тощо, не повідомляючи вас."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"читати стан телефону та ідентиф."</string>
     <string name="permdesc_readPhoneState" msgid="188877305147626781">"Дозволяє програмі отримувати доступ до телефонних функцій пристрою. Програма з цим дозволом може визначити номер телефону та серійний номер даного телефону, активність виклику, номер, на який робиться виклик та інше."</string>
-    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"не допускати перехід пристрою в режим сну"</string>
+    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"не доп.перехід пристр.в реж.сну"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"недоп. перехід тел. в реж. сну"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"Дозволяє програмі не допускати перехід пристрою в режим сну."</string>
     <string name="permdesc_wakeLock" product="default" msgid="7584036471227467099">"Дозволяє програмі не допускати перехід телефону в режим сну."</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"увімкнути чи вимкнути пристрій"</string>
+    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"увімк. чи вимк. пристрій"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"вмик. чи вимик. телефон"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"Дозволяє програмі вимикати чи вимикати пристрій."</string>
     <string name="permdesc_devicePower" product="default" msgid="4577331933252444818">"Дозволяє програмі вимикати чи вимикати телефон."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"запуск у завод. реж. тест."</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Запускає тест виробника на низькому рівні, дозволяючи повний доступ до апаратного забезпечення пристрою. Доступно лише коли пристрій запущено в режимі тестування виробником."</string>
+    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Запускає тест виробника на низьк. рівні, дозволяючи повний доступ до апарат. забезп. пристр. Доступно лише коли пристр. запущ. в режимі тестув. виробником."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Запускає тест виробника на низькому рівні, дозволяючи повний доступ до апарат. забезп. тел. Доступно лише коли тел. запущено в режимі тестув. виробником."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"устан. фон. мал."</string>
     <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Дозволяє програмі встановлювати фонов. мал. системи."</string>
@@ -438,15 +432,13 @@
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"дозвол. отримання багатоадр. Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Дозволяє програмі отрим. пакети, які не адрес. безпосер. вашому пристрою. Це може бути корисно під час виявл. пропонованих служб неподалік. Викор. більше потужності, ніж не багатоадресний реж."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"адміністрування bluetooth"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Дозволяє програмі налаштовувати локальний пристрій із Bluetooth, знаходити віддалені пристрої та створювати з ними пару."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Дозволяє програмі налашт. локальний пристрій із Bluetooth, знаходити віддалені пристрої та створ. з ними пару."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Дозволяє програмі налашт. локальний телефон із Bluetooth і знаходити та створ. пару з віддаленими пристроями."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"створюв. підключення Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"Дозволяє програмі переглядати конфігурацію локального пристрою з Bluetooth, створювати та приймати з\'єднання зі спареними пристроями."</string>
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Дозволяє програмі переглядати конфігурацію локального Bluetooth телефону, створювати та приймати з\'єднання зі спареними пристроями."</string>
-    <!-- no translation found for permlab_nfc (4423351274757876953) -->
-    <skip />
-    <!-- no translation found for permdesc_nfc (9171401851954407226) -->
-    <skip />
+    <string name="permlab_nfc" msgid="4423351274757876953">"контрол. Near Field Communication"</string>
+    <string name="permdesc_nfc" msgid="9171401851954407226">"Дозволяє прогр. обмін. даними з тегами, картками та читачами екрана Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"вимик. блок. клав."</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Дозволяє програмі вимикати блокування клавіатури та будь-який пов\'язаний захист паролем. Допустимий приклад, коли телефон вимикає блокування клавіат. при отриманні вхідного дзвінка, після завершення якого блокування клавіатури відновлюється."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"чит. налашт-ня синхр."</string>
@@ -463,40 +455,32 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Дозволяє програмі зчитувати будь-які особисті вислови, назви та фрази, які користувач може зберігати в своєму словнику."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"запис. до заданого корист. словника"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Дозволяє програмі записувати до словника користувача нові слова."</string>
-    <!-- outdated translation 8079403759001777291 -->     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"змінювати/видал. вміст карти SD"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"змін./видаляти вміст носія USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"змінювати/видал. вміст карти SD"</string>
-    <!-- outdated translation 6643963204976471878 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Дозволяє програмі записувати на карту SD."</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Дозволяє програмі записувати на носій USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Дозволяє програмі записувати на карту SD."</string>
-    <!-- no translation found for permlab_mediaStorageWrite (6859839199706879015) -->
-    <skip />
-    <!-- no translation found for permdesc_mediaStorageWrite (8232008512478316233) -->
-    <skip />
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"змін./видаляти вміст внутр. сховища медіа-файлів"</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Дозволяє програмі змінювати вміст внутрішнього сховища медіа-файлів."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"отр. дост. до файл. сист. кешу"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Дозволяє програмі зчитувати та записувати файлову сист. кешу."</string>
-    <!-- no translation found for permlab_use_sip (5986952362795870502) -->
-    <skip />
-    <!-- no translation found for permdesc_use_sip (6320376185606661843) -->
-    <skip />
-    <!-- outdated translation 4307861496302850201 -->     <string name="policylab_limitPassword" msgid="4497420728857585791">"Обмежити пароль"</string>
-    <!-- outdated translation 1719877245692318299 -->     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Обмежити типи паролів, дозволені для використання."</string>
-    <!-- outdated translation 7374780712664285321 -->     <string name="policylab_watchLogin" msgid="914130646942199503">"Перегляд спроб входу"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"Відстежує кількість неправильних паролів, введених під час розблокування екрана, і блокує телефон або видаляє всі його дані, якщо введено забагато неправильних паролів"</string>
-    <!-- outdated translation 933601759466308092 -->     <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"Відстежує кількість неправильних паролів, введених під час розблокування екрана, і блокує телефон або видаляє всі його дані, якщо введено забагато неправильних паролів"</string>
-    <!-- outdated translation 9084772090797485420 -->     <string name="policylab_resetPassword" msgid="2620077191242688955">"Змінити пароль"</string>
-    <!-- outdated translation 3332167600331799991 -->     <string name="policydesc_resetPassword" msgid="5391240616981297361">"Примусово присвоює паролю нове значення, що вимагає надання паролю адміністратором перед входом."</string>
-    <!-- outdated translation 5760466025247634488 -->     <string name="policylab_forceLock" msgid="2274085384704248431">"Примус. блок."</string>
-    <!-- outdated translation 2819868664946089740 -->     <string name="policydesc_forceLock" msgid="5696964126226028442">"Контрол., коли пристрій блок., вимагаючи повтор. ввести пароль."</string>
+    <string name="permlab_use_sip" msgid="5986952362795870502">"здійсн./отрим. Інтернет-дзвін."</string>
+    <string name="permdesc_use_sip" msgid="6320376185606661843">"Дозволяє програмі використ. службу SIP, щоб здійсн./отрим. Інтернет-дзвінки."</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Устан. правила пароля"</string>
+    <string name="policydesc_limitPassword" msgid="9083400080861728056">"Контролює довжину паролів для розблокув. екрана та дозволені в них символи"</string>
+    <string name="policylab_watchLogin" msgid="914130646942199503">"Відстежув. спроби розблок. екрана"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"Відстежує кількість неправильних паролів, введених під час розблокування екрана, і блокує пристрій або видаляє всі його дані, якщо введено забагато неправильних паролів"</string>
+    <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"Відстежує кількість неправильних паролів, введених під час розблокування екрана, і блокує телефон або видаляє всі його дані, якщо введено забагато неправильних паролів"</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"Змінити пароль для розблокув. екрана"</string>
+    <string name="policydesc_resetPassword" msgid="5391240616981297361">"Змінює пароль для розблок. екрана"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Блокувати екран"</string>
+    <string name="policydesc_forceLock" msgid="5696964126226028442">"Контролює, як і коли блокується екран"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Видалити всі дані"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"Видаляє дані пристрою без попередження, відновлюючи заводські налаштування"</string>
-    <!-- outdated translation 314455232799486222 -->     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Видаляє дані пристрою без попередження, відновлюючи заводські налаштування"</string>
-    <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
-    <skip />
-    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
-    <skip />
-    <!-- no translation found for policylab_expirePassword (2314569545488269564) -->
-    <skip />
-    <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
-    <skip />
+    <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Видаляє дані телефону без попередження, відновлюючи заводські налаштування"</string>
+    <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Установ. глоб. проксі пристрою"</string>
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Устан. використ. глоб. проксі, коли ввімкнено політику. Лише адміністратор першого пристрою встановлює активний глоб. проксі."</string>
+    <string name="policylab_expirePassword" msgid="2314569545488269564">"Установити термін дії пароля"</string>
+    <string name="policydesc_expirePassword" msgid="7276906351852798814">"Регулює, за скільки часу перед блокуванням екрана треба змінювати пароль"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Дом."</item>
     <item msgid="869923650527136615">"Мобільний"</item>
@@ -561,11 +545,10 @@
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Роб. пейджер"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Помічник"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <!-- no translation found for eventTypeCustom (7837586198458073404) -->
-    <skip />
+    <string name="eventTypeCustom" msgid="7837586198458073404">"Спеціальні"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"День нар."</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Річниця"</string>
-    <!-- outdated translation 5834288791948564594 -->     <string name="eventTypeOther" msgid="7388178939010143077">"Подія"</string>
+    <string name="eventTypeOther" msgid="7388178939010143077">"Інші"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Спеціал."</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Дом."</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Роб."</string>
@@ -592,48 +575,28 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Роб."</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Інше"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Спеціал."</string>
-    <!-- no translation found for relationTypeCustom (3542403679827297300) -->
-    <skip />
-    <!-- no translation found for relationTypeAssistant (6274334825195379076) -->
-    <skip />
-    <!-- no translation found for relationTypeBrother (8757913506784067713) -->
-    <skip />
-    <!-- no translation found for relationTypeChild (1890746277276881626) -->
-    <skip />
-    <!-- no translation found for relationTypeDomesticPartner (6904807112121122133) -->
-    <skip />
-    <!-- no translation found for relationTypeFather (5228034687082050725) -->
-    <skip />
-    <!-- no translation found for relationTypeFriend (7313106762483391262) -->
-    <skip />
-    <!-- no translation found for relationTypeManager (6365677861610137895) -->
-    <skip />
-    <!-- no translation found for relationTypeMother (4578571352962758304) -->
-    <skip />
-    <!-- no translation found for relationTypeParent (4755635567562925226) -->
-    <skip />
-    <!-- no translation found for relationTypePartner (7266490285120262781) -->
-    <skip />
-    <!-- no translation found for relationTypeReferredBy (101573059844135524) -->
-    <skip />
-    <!-- no translation found for relationTypeRelative (1799819930085610271) -->
-    <skip />
-    <!-- no translation found for relationTypeSister (1735983554479076481) -->
-    <skip />
-    <!-- no translation found for relationTypeSpouse (394136939428698117) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
-    <skip />
+    <string name="relationTypeCustom" msgid="3542403679827297300">"Спеціальні"</string>
+    <string name="relationTypeAssistant" msgid="6274334825195379076">"Помічник"</string>
+    <string name="relationTypeBrother" msgid="8757913506784067713">"Брат"</string>
+    <string name="relationTypeChild" msgid="1890746277276881626">"Дитина"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Співмешканець"</string>
+    <string name="relationTypeFather" msgid="5228034687082050725">"Батько"</string>
+    <string name="relationTypeFriend" msgid="7313106762483391262">"Друг"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"Керівник"</string>
+    <string name="relationTypeMother" msgid="4578571352962758304">"Мати"</string>
+    <string name="relationTypeParent" msgid="4755635567562925226">"Батько/мати"</string>
+    <string name="relationTypePartner" msgid="7266490285120262781">"Партнер"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Запросив(-ла)"</string>
+    <string name="relationTypeRelative" msgid="1799819930085610271">"Родич"</string>
+    <string name="relationTypeSister" msgid="1735983554479076481">"Сестра"</string>
+    <string name="relationTypeSpouse" msgid="394136939428698117">"Чоловік/дружина"</string>
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Спеціал."</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Головна"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"Робоча"</string>
+    <string name="sipAddressTypeOther" msgid="4408436162950119849">"Інша"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Введіть PIN-код"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Введіть пароль, щоб розбл."</string>
-    <!-- no translation found for keyguard_password_enter_pin_password_code (638347075625491514) -->
-    <skip />
+    <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Введ. PIN для розблок."</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Неправильний PIN-код!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Щоб розбл., натисн. меню та 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Аварійний номер"</string>
@@ -646,14 +609,13 @@
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Поверн. до дзвін."</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Правильно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Спробуйте ще"</string>
-    <!-- no translation found for lockscreen_password_wrong (6237443657358168819) -->
-    <skip />
+    <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Спробуйте ще"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Зарядж-ся (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Заряджено."</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Підкл. заряд. пристрій."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Нема SIM-карти."</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"У пристрої немає SIM-карти."</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"У пристр. нема SIM-карти."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"У тел. немає SIM-карти."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Вставте SIM-карту."</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Лише аварійні виклики"</string>
@@ -663,11 +625,9 @@
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM-карту заблок-но."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Розблокув. SIM-карти…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Неправильно намальовано ключ розблокування стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Спробуйте ще через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
-    <!-- no translation found for lockscreen_too_many_failed_password_attempts_dialog_message (4906034376425175381) -->
-    <skip />
-    <!-- no translation found for lockscreen_too_many_failed_pin_attempts_dialog_message (6827749231465145590) -->
-    <skip />
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Неправильно намальовано ключ розблокування стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. Ваш пристрій потрібно буде розблоковувати за допомогою входу в Google після стількох додаткових неуспішних спроб: <xliff:g id="NUMBER_1">%d</xliff:g>."\n\n" Спробуйте ще через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Неправильно введено пароль стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Спробуйте ще через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Неправильно введено PIN-код стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Спробуйте ще через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Неправильно намал. ключ розблокування стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. Ваш пристрій потрібно буде розблок-ти за допомогою входу в Google після стількох додатк. неуспішних спроб: <xliff:g id="NUMBER_1">%d</xliff:g>."\n\n" Спробуйте ще через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Неправильно намал. ключ розблокування стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. Ваш телефон потрібно буде розблок-ти за допомогою входу в Google після стількох додатк. неуспішних спроб: <xliff:g id="NUMBER_1">%d</xliff:g>."\n\n" Спробуйте ще через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Спробуйте ще через <xliff:g id="NUMBER">%d</xliff:g> сек."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Забули ключ?"</string>
@@ -696,25 +656,19 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Перейти з цієї стор.?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Виберіть OK, щоб продовж., або \"Скасувати\", щоб залиш. на поточній стор."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Підтверд."</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Порада: двічі нат. для збіл. або змен."</string>
-    <string name="autofill_this_form" msgid="1272247532604569872">"Автозап."</string>
+    <string name="autofill_this_form" msgid="1272247532604569872">"Автозаповн."</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Налашт. автозап."</string>
-    <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
-    <skip />
-    <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
-    <skip />
-    <!-- no translation found for autofill_address_summary_separator (7483307893170324129) -->
-    <skip />
-    <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
-    <skip />
+    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
+    <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
+    <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
+    <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"читати історію та закладки переглядача"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Дозволяє програмі зчитувати всі URL-адреси, на які заходив переглядач, і всі закладки переглядача."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"запис. історію та закладки переглядача"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"Дозволяє програмі змінювати історію чи закладки веб-переглядача, збережені в пристрої. Шкідливі програми можуть використовувати це для видалення чи зміни даних веб-переглядача."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"Дозволяє програмі змінювати історію чи закладки веб-переглядача, збережені в пристрої. Шкідливі прогр. можуть використ. це для видалення чи зміни даних веб-переглядача."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Дозволяє програмі змінювати історію чи закладки переглядача, збережені у вашому тел. Шкідливі програми можуть викор. це, щоб видаляти чи змінювати дані переглядача."</string>
-    <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
-    <skip />
-    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
-    <skip />
+    <string name="permlab_setAlarm" msgid="5924401328803615165">"налашт. сигнал у будильн."</string>
+    <string name="permdesc_setAlarm" msgid="5966966598149875082">"Дозволяє програмі налаштовувати сигнал у встановленій програмі будильника. У деяких програмах будильника ця функція може не застосовуватися."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Змін. дозволи геогр. місцезн. перегладача"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Дозволяє програмі змін. дозволи географ. місцезн. переглядача. Шкідливі програми можуть використ. це, щоб дозволяти надсилати інф-ю про місцезн. випадковим веб-сайтам."</string>
     <string name="save_password_message" msgid="767344687139195790">"Хочете, щоб переглядач запам\'ятав цей пароль?"</string>
@@ -830,15 +784,12 @@
     <string name="cut" msgid="3092569408438626261">"Виріз."</string>
     <string name="copy" msgid="2681946229533511987">"Копіюв."</string>
     <string name="paste" msgid="5629880836805036433">"Вставити"</string>
-    <!-- no translation found for pasteDisabled (7259254654641456570) -->
-    <skip />
+    <string name="pasteDisabled" msgid="7259254654641456570">"Немає що вставити"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Копіюв. URL"</string>
-    <!-- no translation found for selectTextMode (6738556348861347240) -->
-    <skip />
-    <!-- no translation found for textSelectionCABTitle (5236850394370820357) -->
-    <skip />
+    <string name="selectTextMode" msgid="6738556348861347240">"Вибрати текст..."</string>
+    <string name="textSelectionCABTitle" msgid="5236850394370820357">"Вибір тексту"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Метод введення"</string>
-    <!-- outdated translation 1672989176958581452 -->     <string name="editTextMenuTitle" msgid="4909135564941815494">"Редаг. текст"</string>
+    <string name="editTextMenuTitle" msgid="4909135564941815494">"Дії з текстом"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Недост. місця"</string>
     <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"Пам\'яті пристрою стає недостатньо."</string>
     <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"Пам\'яті телефону стає недостатньо."</string>
@@ -847,8 +798,7 @@
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Скасувати"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Увага"</string>
-    <!-- no translation found for loading (1760724998928255250) -->
-    <skip />
+    <string name="loading" msgid="1760724998928255250">"Завант-ня..."</string>
     <string name="capital_on" msgid="1544682755514494298">"УВІМК."</string>
     <string name="capital_off" msgid="6815870386972805832">"ВИМК."</string>
     <string name="whichApplication" msgid="4533185947064773386">"Завершити дію за доп."</string>
@@ -867,32 +817,19 @@
     <string name="force_close" msgid="3653416315450806396">"Примус. закр."</string>
     <string name="report" msgid="4060218260984795706">"Повідом."</string>
     <string name="wait" msgid="7147118217226317732">"Чекати"</string>
-    <!-- no translation found for launch_warning_title (8323761616052121936) -->
-    <skip />
-    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
-    <skip />
-    <!-- no translation found for launch_warning_original (188102023021668683) -->
-    <skip />
-    <!-- no translation found for smv_application (295583804361236288) -->
-    <skip />
-    <!-- no translation found for smv_process (5120397012047462446) -->
-    <skip />
-    <!-- no translation found for heavy_weight_notification (9087063985776626166) -->
-    <skip />
-    <!-- no translation found for heavy_weight_notification_detail (2423977499339403402) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (1135403633766694316) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4592075610079319667) -->
-    <skip />
-    <!-- no translation found for old_app_action (493129172238566282) -->
-    <skip />
-    <!-- no translation found for old_app_description (942967900237208466) -->
-    <skip />
-    <!-- no translation found for new_app_action (5472756926945440706) -->
-    <skip />
-    <!-- no translation found for new_app_description (6830398339826789493) -->
-    <skip />
+    <string name="launch_warning_title" msgid="8323761616052121936">"Програму переадресовано"</string>
+    <string name="launch_warning_replace" msgid="6202498949970281412">"Зараз працює <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="launch_warning_original" msgid="188102023021668683">"Спочатку було запущено <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="smv_application" msgid="295583804361236288">"Програма <xliff:g id="APPLICATION">%1$s</xliff:g> (процес <xliff:g id="PROCESS">%2$s</xliff:g>) порушила свою самозастосовну політику StrictMode."</string>
+    <string name="smv_process" msgid="5120397012047462446">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> порушив свою самозастосовну політику StrictMode."</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"Працює <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Виберіть, щоб перейти до програми"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Переключ. між прогр.?"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Уже працює інша програма, яку потрібно зупинити перед тим, як запускати нову програму."</string>
+    <string name="old_app_action" msgid="493129172238566282">"Поверн. до <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="old_app_description" msgid="942967900237208466">"Не запускайте нову програму."</string>
+    <string name="new_app_action" msgid="5472756926945440706">"Запуст. <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="6830398339826789493">"Зупинити попередню програму без збереження."</string>
     <string name="sendText" msgid="5132506121645618310">"Виберіть дію для тексту"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Гучність дзвінка"</string>
     <string name="volume_music" msgid="5421651157138628171">"Гучність медіа"</string>
@@ -931,17 +868,17 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Показ. всі"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB великої ємності"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Підкл. через USB"</string>
-    <!-- outdated translation 4796759646167247178 -->     <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Ваш телефон було підключено до комп\'ютера за допомогою USB. Натисніть кнопку нижче, якщо хочете скопіювати файли з комп\'ютера на карту SD вашого Android."</string>
-    <!-- outdated translation 4796759646167247178 -->     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Ваш телефон було підключено до комп\'ютера за допомогою USB. Натисніть кнопку нижче, якщо хочете скопіювати файли з комп\'ютера на карту SD вашого Android."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Ви підключилися до комп\'ютера за допомогою USB. Торкніться кнопки нижче, якщо хочете скопіювати файли з комп\'ютера на носій USB вашого пристрою Android або навпаки."</string>
+    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Ви підключилися до комп\'ютера за допомогою USB. Торкніться кнопки нижче, якщо хочете скопіювати файли з комп\'ютера на карту SD вашого пристрою Android або навпаки."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Увімкнути носій USB"</string>
-    <!-- outdated translation 2534784751603345363 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Виникла проблема з використанням карти SD для носія USB."</string>
-    <!-- outdated translation 2534784751603345363 -->     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Виникла проблема з використанням карти SD для носія USB."</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Виникла проблема з використанням носія USB замість носія USB великої ємності."</string>
+    <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Виникла проблема з викор. карти SD замість носія USB вел. ємн."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"Підкл. через USB"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Виберіть, щоб скопіюв. файли на/з вашого комп."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Вимкнути носій USB"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Виберіть, щоб вимкнути носій USB."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"Носій USB зайнято"</string>
-    <!-- outdated translation 3613713396426604104 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Перед вимкненням носія USB переконайтеся, що ви відключили (\"вийняли\") карту SD свого Android із комп\'ютера."</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Перед вимкненням носія USB переконайтеся, що ви відключили від комп\'ютера (\"вийняли\") носій USB вашого пристрою Android."</string>
     <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Перед вимкненням носія USB переконайтеся, що ви відключили (\"вийняли\") карту SD свого Android із комп\'ютера."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Вимкнути носій USB"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Під час вимкнення носія USB виникла проблема. Перевірте, чи ви відключили USB-хост, після чого спробуйте знову."</string>
@@ -949,9 +886,9 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Якщо ввімкнути носій USB, деякі програми, які викор., припинять свою роботу та можуть бути недоступними до вимкнення носія USB."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Помилка операції з USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <!-- outdated translation 8663247929551095854 -->     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Формат. карти SD"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Форматув. носій USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Формат. карти SD"</string>
-    <!-- outdated translation 3621369962433523619 -->     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Ви дійсно хочете форматувати карту SD? Усі дані на вашій карті буде втрачено."</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Форматувати носій USB, видаляючи всі збережені файли? Дію не можна скасувати!"</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Ви дійсно хочете форматувати карту SD? Усі дані на вашій карті буде втрачено."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Форматув."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Налагодження USB підключ."</string>
@@ -960,28 +897,28 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"кандидати"</u></string>
-    <!-- outdated translation 5457603418970994050 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Пригот-ня карти SD"</string>
+    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Підготовка носія USB"</string>
     <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Пригот-ня карти SD"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Перевір. наявн. помил."</string>
-    <!-- outdated translation 780477838241212997 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Порожня карта SD"</string>
+    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Порожній носій USB"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Порожня карта SD"</string>
-    <!-- outdated translation 3817704088027829380 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"Карта SD порожня чи має непідтрим. файл. сист."</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"Носій USB порожній або має непідтримувану файлову систему."</string>
     <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"Карта SD порожня чи має непідтрим. файл. сист."</string>
-    <!-- outdated translation 6410723906019100189 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Пошкодж. карта SD"</string>
+    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Пошкоджений носій USB"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Пошкодж. карта SD"</string>
-    <!-- outdated translation 6902531775948238989 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Карту SD пошкоджено. Її треба ще раз відформат."</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Носій USB пошкоджено. Його треба ще раз відформатувати."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"Карту SD пошкоджено. Її треба ще раз відформат."</string>
-    <!-- outdated translation 6872152882604407837 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Карту SD несподівано вилучено"</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Носій USB несподівано вилучено"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Карту SD несподівано вилучено"</string>
-    <!-- outdated translation 7260183293747448241 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Відключ. карту SD перед її вилуч., щоб не втрат. дані."</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Відключити носій USB перед його вилученням, щоб не втратити дані."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Відключ. карту SD перед її вилуч., щоб не втрат. дані."</string>
-    <!-- outdated translation 6729801130790616200 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Карту SD можна вилучити"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Носій USB можна вилучити"</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"Карту SD можна вилучити"</string>
-    <!-- outdated translation 568841278138377604 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Можна безпечно вилучити карту SD."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Можна безпечно вилучити носій USB."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Можна безпечно вилучити карту SD."</string>
-    <!-- outdated translation 8902518030404381318 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Вилучена карта SD"</string>
+    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Вилучений носій USB"</string>
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Вилучена карта SD"</string>
-    <!-- outdated translation 3870120652983659641 -->     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Карту SD вилучено. Вставте нову."</string>
+    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Носій USB вилучено. Вставте новий носій."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"Карту SD вилучено. Вставте нову."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Не знайдено відповідних дій"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"оновл. статистику викор. компонентів"</string>
@@ -995,8 +932,7 @@
     <string name="ime_action_send" msgid="2316166556349314424">"Надісл."</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Далі"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Готово"</string>
-    <!-- no translation found for ime_action_previous (1443550039250105948) -->
-    <skip />
+    <string name="ime_action_previous" msgid="1443550039250105948">"Назад"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Запустити"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Набр. номер"\n", викор. <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Створ. контакт"\n", викор. <xliff:g id="NUMBER">%s</xliff:g>"</string>
@@ -1019,64 +955,43 @@
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"Спільн. ключ на осн. L2TP/IPSec VPN"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"L2TP/IPSec VPN на осн. сертифіката"</string>
     <string name="upload_file" msgid="2897957172366730416">"Виберіть файл"</string>
-    <!-- no translation found for no_file_chosen (6363648562170759465) -->
-    <skip />
+    <string name="no_file_chosen" msgid="6363648562170759465">"Не вибрано файл"</string>
     <string name="reset" msgid="2448168080964209908">"Віднов."</string>
     <string name="submit" msgid="1602335572089911941">"Надіслати"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Режим авто ввімкн."</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Вибер. для вих. з реж.авто."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Прив\'язка чи точка дост. активна"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Натисн., щоб налашт."</string>
-    <!-- no translation found for back_button_label (2300470004503343439) -->
-    <skip />
-    <!-- no translation found for next_button_label (1080555104677992408) -->
-    <skip />
-    <!-- no translation found for skip_button_label (1275362299471631819) -->
-    <skip />
+    <string name="back_button_label" msgid="2300470004503343439">"Назад"</string>
+    <string name="next_button_label" msgid="1080555104677992408">"Далі"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"Пропустити"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Часте викор. моб. даних"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Натисн., щоб дізнатися про викор. моб. даних"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Перевищено ліміт моб. даних"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Натисн., щоб дізнатися про викор. моб. даних"</string>
-    <!-- no translation found for no_matches (8129421908915840737) -->
-    <skip />
-    <!-- no translation found for find_on_page (1946799233822820384) -->
-    <skip />
-    <!-- no translation found for matches_found:one (8167147081136579439) -->
-    <!-- no translation found for matches_found:other (4641872797067609177) -->
-    <!-- no translation found for action_mode_done (7217581640461922289) -->
-    <skip />
-    <!-- no translation found for progress_unmounting (535863554318797377) -->
-    <skip />
-    <!-- no translation found for progress_unmounting (5556813978958789471) -->
-    <skip />
-    <!-- no translation found for progress_erasing (4183664626203056915) -->
-    <skip />
-    <!-- no translation found for progress_erasing (2115214724367534095) -->
-    <skip />
-    <!-- no translation found for format_error (4320339096529911637) -->
-    <skip />
-    <!-- no translation found for format_error (1343380371925238343) -->
-    <skip />
-    <!-- no translation found for media_bad_removal (7960864061016603281) -->
-    <skip />
-    <!-- no translation found for media_checking (418188720009569693) -->
-    <skip />
-    <!-- no translation found for media_checking (7334762503904827481) -->
-    <skip />
-    <!-- no translation found for media_removed (7001526905057952097) -->
-    <skip />
-    <!-- no translation found for media_shared (5830814349250834225) -->
-    <skip />
-    <!-- no translation found for media_shared (5706130568133540435) -->
-    <skip />
-    <!-- no translation found for media_unknown_state (729192782197290385) -->
-    <skip />
-    <!-- no translation found for share (1778686618230011964) -->
-    <skip />
-    <!-- no translation found for find (4808270900322985960) -->
-    <skip />
-    <!-- no translation found for websearch (4337157977400211589) -->
-    <skip />
+    <string name="no_matches" msgid="8129421908915840737">"Немає збігів"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"Знайти на сторінці"</string>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 збіг"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> з <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
+    <string name="action_mode_done" msgid="7217581640461922289">"Готово"</string>
+    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Відключення носія USB..."</string>
+    <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Відключення карти SD..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Очищення носія USB..."</string>
+    <string name="progress_erasing" product="default" msgid="2115214724367534095">"Очищення карти SD..."</string>
+    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"Помилка очищення носія USB."</string>
+    <string name="format_error" product="default" msgid="1343380371925238343">"Помилка очищення карти SD."</string>
+    <string name="media_bad_removal" msgid="7960864061016603281">"Карту SD вилучено раніше ніж її було відключено."</string>
+    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Носій USB наразі перевіряється."</string>
+    <string name="media_checking" product="default" msgid="7334762503904827481">"Карта SD наразі перевіряється."</string>
+    <string name="media_removed" msgid="7001526905057952097">"Карту SD вилучено."</string>
+    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Наразі комп\'ютер використовує носій USB."</string>
+    <string name="media_shared" product="default" msgid="5706130568133540435">"Наразі комп\'ютер використовує карту SD."</string>
+    <string name="media_unknown_state" msgid="729192782197290385">"Зовнішні носії в невідомому стані."</string>
+    <string name="share" msgid="1778686618230011964">"Надіслати"</string>
+    <string name="find" msgid="4808270900322985960">"Знайти"</string>
+    <string name="websearch" msgid="4337157977400211589">"Веб-пошук"</string>
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />
     <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
@@ -1086,5 +1001,15 @@
     <!-- no translation found for gpsVerifYes (2346566072867213563) -->
     <skip />
     <!-- no translation found for gpsVerifNo (1146564937346454865) -->
+    <skip />
+    <!-- no translation found for sync_too_many_deletes (5296321850662746890) -->
+    <skip />
+    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
+    <skip />
+    <!-- no translation found for sync_really_delete (8933566316059338692) -->
+    <skip />
+    <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
+    <skip />
+    <!-- no translation found for sync_do_nothing (8717589462945226869) -->
     <skip />
 </resources>

@@ -32,8 +32,7 @@
     <string name="invalid_charger" msgid="4549105996740522523">"不支持 USB 充电功能。"\n"只能使用随附的充电器充电。"</string>
     <string name="battery_low_why" msgid="7279169609518386372">"电量使用情况"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"设置"</string>
-    <!-- no translation found for status_bar_settings_wifi_button (1733928151698311923) -->
-    <skip />
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"飞行模式"</string>
     <string name="status_bar_settings_rotation_lock" msgid="8361452930058000609">"锁定屏幕浏览模式"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"静音"</string>

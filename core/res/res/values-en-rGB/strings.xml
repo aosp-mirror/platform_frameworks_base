@@ -138,8 +138,7 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"Shutting down…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Your tablet will shut down."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Your phone will shut down."</string>
-    <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
-    <skip />
+    <string name="shutdown_confirm_question" msgid="6656441286856415014">"Would you like to shut down?"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Recent"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"No recent applications."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tablet options"</string>
@@ -176,7 +175,7 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Development tools"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Features only needed for application developers."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Storage"</string>
-    <!-- outdated translation 9203302214915355774 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Access the SD card."</string>
+    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Access the USB storage."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Access the SD card."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"disable or modify status bar"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Allows application to disable the status bar or add and remove system icons."</string>
@@ -241,7 +240,7 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"display unauthorised windows"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Allows the creation of windows that are intended to be used by the internal system user interface. Not for use by normal applications."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"display system-level alerts"</string>
-    <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"Allows an application to show system-alert windows. Malicious applications can take over the entire screen."</string>
+    <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"Allows an application to show system alert windows. Malicious applications can take over the entire screen."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"modify global animation speed"</string>
     <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"Allows an application to change the global animation speed (faster or slower animations) at any time."</string>
     <string name="permlab_manageAppTokens" msgid="17124341698093865">"manage application tokens"</string>
@@ -274,18 +273,18 @@
     <string name="permlab_installPackages" msgid="335800214119051089">"directly install applications"</string>
     <string name="permdesc_installPackages" msgid="526669220850066132">"Allows an application to install new or updated Android packages. Malicious applications can use this to add new applications with arbitrarily powerful permissions."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"delete all application cache data"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Allows an application to free tablet storage by deleting files in application cache directory. Access is very restricted, usually to system processes."</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Allows an application to free tablet storage by deleting files in application cache directory. Access is very restricted, usually to system process."</string>
     <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"Allows an application to free phone storage by deleting files in application cache directory. Access is usually very restricted to system process."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Move application resources"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Allows an application to move application resources from internal to external media and vice versa."</string>
-    <!-- outdated translation 4811921703882532070 -->     <string name="permlab_readLogs" msgid="6615778543198967614">"read system log files"</string>
+    <string name="permlab_readLogs" msgid="6615778543198967614">"read sensitive log data"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Allows an application to read from the system\'s various log files. This allows it to discover general information about what you are doing with the tablet, potentially including personal or private information."</string>
-    <!-- outdated translation 4077356893924755294 -->     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Allows an application to read from the system\'s various log files. This allows it to discover general information about what you are doing with the tablet, potentially including personal or private information."</string>
+    <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Allows an application to read from the system\'s various log files. This allows it to discover general information about what you are doing with the phone, potentially including personal or private information."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"read/write to resources owned by diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Allows an application to read and write to any resource owned by the diag group; for example, files in /dev. This could potentially affect system stability and security. This should ONLY be used for hardware-specific diagnostics by the manufacturer or operator."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"enable or disable application components"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Allows an application to change whether a component of another application is enabled or not. Malicious applications can use this to disable important tablet capabilities. Care must be used with this permission, as it is possible to get application components into an unusable, inconsistent or unstable state."</string>
-    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Allows an application to change whether a component of another application is enabled or not. Malicious applications can use this to disable important tablet capabilities. Care must be used with this permission, as it is possible to get application components into an unusable, inconsistent or unstable state."</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Allows an application to change whether a component of another application is enabled or not. Malicious applications can use this to disable important phone capabilities. Care must be used with this permission, as it is possible to get application components into an unusable, inconsistent or unstable state."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"set preferred applications"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Allows an application to modify your preferred applications. This can allow malicious applications to silently change the applications that are run, spoofing your existing applications to collect private data from you."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"modify global system settings"</string>
@@ -318,7 +317,7 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"permission to install a location provider"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Create mock location sources for testing. Malicious applications can use this to override the location and/or status returned by real-location sources such as GPS or Network providers, or monitor and report your location to an external source."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"fine (GPS) location"</string>
-    <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Access fine location sources, such as the Global Positioning System on the tablet, where available. Malicious applications can use this to determine where you are. This may consume additional battery power."</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Access fine location sources such as the Global Positioning System on the tablet, where available. Malicious applications can use this to determine where you are and may consume additional battery power."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Access fine location sources, such as the Global Positioning System on the phone, where available. Malicious applications can use this to determine where you are and may consume additional battery power."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"coarse (network-based) location"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Access coarse location sources, such as the mobile network database, to determine an approximate tablet location, where available. Malicious applications can use this to determine approximately where you are."</string>
@@ -345,16 +344,16 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Allows the application to mount and unmount file systems for removable storage."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"format external storage"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Allows the application to format removable storage."</string>
-    <!-- outdated translation 1070364079249834666 -->     <string name="permlab_asec_access" msgid="3411338632002193846">"get information on secure storage"</string>
-    <!-- outdated translation 7691616292170590244 -->     <string name="permdesc_asec_access" msgid="8820326551687285439">"Allows the application to get information on secure storage."</string>
-    <!-- outdated translation 7312078032326928899 -->     <string name="permlab_asec_create" msgid="6414757234789336327">"create secure storage"</string>
-    <!-- outdated translation 7041802322759014035 -->     <string name="permdesc_asec_create" msgid="2621346764995731250">"Allows the application to create secure storage."</string>
-    <!-- outdated translation 7787322878955261006 -->     <string name="permlab_asec_destroy" msgid="526928328301618022">"destroy secure storage"</string>
-    <!-- outdated translation 5740754114967893169 -->     <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Allows the application to destroy secure storage."</string>
-    <!-- outdated translation 7517449694667828592 -->     <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"mount/unmount secure storage"</string>
-    <!-- outdated translation 5438078121718738625 -->     <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Allows the application to mount/unmount secure storage."</string>
-    <!-- outdated translation 5685344390439934495 -->     <string name="permlab_asec_rename" msgid="7496633954080472417">"rename secure storage"</string>
-    <!-- outdated translation 1387881770708872470 -->     <string name="permdesc_asec_rename" msgid="2152829985238876790">"Allows the application to rename secure storage."</string>
+    <string name="permlab_asec_access" msgid="3411338632002193846">"get information on internal storage"</string>
+    <string name="permdesc_asec_access" msgid="8820326551687285439">"Allows the application to get information on internal storage."</string>
+    <string name="permlab_asec_create" msgid="6414757234789336327">"create internal storage"</string>
+    <string name="permdesc_asec_create" msgid="2621346764995731250">"Allows the application to create internal storage."</string>
+    <string name="permlab_asec_destroy" msgid="526928328301618022">"destroy internal storage"</string>
+    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Allows the application to destroy internal storage."</string>
+    <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"mount/unmount internal storage"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Allows the application to mount/unmount internal storage."</string>
+    <string name="permlab_asec_rename" msgid="7496633954080472417">"rename internal storage"</string>
+    <string name="permdesc_asec_rename" msgid="2152829985238876790">"Allows the application to rename internal storage."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"control vibrator"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Allows the application to control the vibrator."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"control flashlight"</string>
@@ -384,7 +383,7 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"prevent phone from sleeping"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"Allows an application to prevent the tablet from going to sleep."</string>
     <string name="permdesc_wakeLock" product="default" msgid="7584036471227467099">"Allows an application to prevent the phone from going to sleep."</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"Turn tablet on or off"</string>
+    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"turn tablet on or off"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"turn phone on or off"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"Allows the application to turn the tablet on or off."</string>
     <string name="permdesc_devicePower" product="default" msgid="4577331933252444818">"Allows the application to turn the phone on or off."</string>
@@ -438,10 +437,8 @@
     <string name="permlab_bluetooth" msgid="8361038707857018732">"create Bluetooth connections"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"Allows an application to view configuration of the local Bluetooth tablet and to make and accept connections with paired devices."</string>
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Allows an application to view configuration of the local Bluetooth phone and to make and accept connections with paired devices."</string>
-    <!-- no translation found for permlab_nfc (4423351274757876953) -->
-    <skip />
-    <!-- no translation found for permdesc_nfc (9171401851954407226) -->
-    <skip />
+    <string name="permlab_nfc" msgid="4423351274757876953">"control Near-Field Communication"</string>
+    <string name="permdesc_nfc" msgid="9171401851954407226">"Allows an application to communicate with Near-Field Communication (NFC) tags, cards and readers."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"disable key lock"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Allows an application to disable the key lock and any associated password security. A legitimate example of this is the phone disabling the key lock when receiving an incoming phone call, then re-enabling the key lock when the call is finished."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"read sync settings"</string>
@@ -458,40 +455,32 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Allows an application to read any private words, names and phrases that the user may have stored in the user dictionary."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"write to user-defined dictionary"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Allows an application to write new words into the user dictionary."</string>
-    <!-- outdated translation 8079403759001777291 -->     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"modify/delete SD card contents"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"modify/delete USB storage contents"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modify/delete SD card contents"</string>
-    <!-- outdated translation 6643963204976471878 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Allows an application to write to the SD card."</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Allows an application to write to the USB storage."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Allows an application to write to the SD card."</string>
-    <!-- no translation found for permlab_mediaStorageWrite (6859839199706879015) -->
-    <skip />
-    <!-- no translation found for permdesc_mediaStorageWrite (8232008512478316233) -->
-    <skip />
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modify/delete internal media storage contents"</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Allows an application to modify the contents of the internal media storage."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"access the cache file system"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Allows an application to read and write the cache file system."</string>
-    <!-- no translation found for permlab_use_sip (5986952362795870502) -->
-    <skip />
-    <!-- no translation found for permdesc_use_sip (6320376185606661843) -->
-    <skip />
-    <!-- outdated translation 4307861496302850201 -->     <string name="policylab_limitPassword" msgid="4497420728857585791">"Limit password"</string>
-    <!-- outdated translation 1719877245692318299 -->     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Restrict the types of passwords that you are allowed to use."</string>
-    <!-- outdated translation 7374780712664285321 -->     <string name="policylab_watchLogin" msgid="914130646942199503">"Watch login attempts"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"Monitor the number of incorrect passwords entered when unlocking the screen and lock the tablet or erase all the tablet\'s data if too many incorrect passwords are entered."</string>
-    <!-- outdated translation 933601759466308092 -->     <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"Monitor the number of incorrect passwords entered when unlocking the screen and lock the tablet or erase all the tablet\'s data if too many incorrect passwords are entered."</string>
-    <!-- outdated translation 9084772090797485420 -->     <string name="policylab_resetPassword" msgid="2620077191242688955">"Reset Password"</string>
-    <!-- outdated translation 3332167600331799991 -->     <string name="policydesc_resetPassword" msgid="5391240616981297361">"Force your password to a new value, requiring the administrator to give it to you before you can log in."</string>
-    <!-- outdated translation 5760466025247634488 -->     <string name="policylab_forceLock" msgid="2274085384704248431">"Force lock"</string>
-    <!-- outdated translation 2819868664946089740 -->     <string name="policydesc_forceLock" msgid="5696964126226028442">"Control when device locks, requiring you to re-enter its password."</string>
+    <string name="permlab_use_sip" msgid="5986952362795870502">"make/receive Internet calls"</string>
+    <string name="permdesc_use_sip" msgid="6320376185606661843">"Allows an application to use the SIP service to make/receive Internet calls."</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Set password rules"</string>
+    <string name="policydesc_limitPassword" msgid="9083400080861728056">"Control the length and the characters allowed in screen-unlock passwords"</string>
+    <string name="policylab_watchLogin" msgid="914130646942199503">"Monitor screen-unlock attempts"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"Monitor the number of incorrect passwords entered when unlocking the screen and lock the tablet or erase all the tablet\'s data if too many incorrect passwords are entered"</string>
+    <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"Monitor the number of incorrect passwords entered when unlocking the screen and lock the phone or erase all the phone\'s data if too many incorrect passwords are entered"</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"Change the screen-unlock password"</string>
+    <string name="policydesc_resetPassword" msgid="5391240616981297361">"Change the screen-unlock password"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Lock the screen"</string>
+    <string name="policydesc_forceLock" msgid="5696964126226028442">"Control how and when the screen locks"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Erase all data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"Erase the tablet\'s data without warning by performing a factory data reset"</string>
-    <!-- outdated translation 314455232799486222 -->     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Erase the tablet\'s data without warning by performing a factory data reset"</string>
-    <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
-    <skip />
-    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
-    <skip />
-    <!-- no translation found for policylab_expirePassword (2314569545488269564) -->
-    <skip />
-    <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
-    <skip />
+    <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Erase the phone\'s data without warning by performing a factory data reset"</string>
+    <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Set the device global proxy"</string>
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Set the device\'s global proxy to be used while policy is enabled. Only the first device admin sets the effective global proxy."</string>
+    <string name="policylab_expirePassword" msgid="2314569545488269564">"Set password expiry"</string>
+    <string name="policydesc_expirePassword" msgid="7276906351852798814">"Control how long before lock-screen password needs to be changed"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Home"</item>
     <item msgid="869923650527136615">"Mobile"</item>
@@ -556,11 +545,10 @@
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Work Pager"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistant"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <!-- no translation found for eventTypeCustom (7837586198458073404) -->
-    <skip />
+    <string name="eventTypeCustom" msgid="7837586198458073404">"Customised"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Birthday"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Anniversary"</string>
-    <!-- outdated translation 5834288791948564594 -->     <string name="eventTypeOther" msgid="7388178939010143077">"Event"</string>
+    <string name="eventTypeOther" msgid="7388178939010143077">"Other"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Custom"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Home"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Work"</string>
@@ -587,44 +575,25 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Work"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Other"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Custom"</string>
-    <!-- no translation found for relationTypeCustom (3542403679827297300) -->
-    <skip />
-    <!-- no translation found for relationTypeAssistant (6274334825195379076) -->
-    <skip />
-    <!-- no translation found for relationTypeBrother (8757913506784067713) -->
-    <skip />
-    <!-- no translation found for relationTypeChild (1890746277276881626) -->
-    <skip />
-    <!-- no translation found for relationTypeDomesticPartner (6904807112121122133) -->
-    <skip />
-    <!-- no translation found for relationTypeFather (5228034687082050725) -->
-    <skip />
-    <!-- no translation found for relationTypeFriend (7313106762483391262) -->
-    <skip />
-    <!-- no translation found for relationTypeManager (6365677861610137895) -->
-    <skip />
-    <!-- no translation found for relationTypeMother (4578571352962758304) -->
-    <skip />
-    <!-- no translation found for relationTypeParent (4755635567562925226) -->
-    <skip />
-    <!-- no translation found for relationTypePartner (7266490285120262781) -->
-    <skip />
-    <!-- no translation found for relationTypeReferredBy (101573059844135524) -->
-    <skip />
-    <!-- no translation found for relationTypeRelative (1799819930085610271) -->
-    <skip />
-    <!-- no translation found for relationTypeSister (1735983554479076481) -->
-    <skip />
-    <!-- no translation found for relationTypeSpouse (394136939428698117) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
-    <skip />
+    <string name="relationTypeCustom" msgid="3542403679827297300">"Customised"</string>
+    <string name="relationTypeAssistant" msgid="6274334825195379076">"Assistant"</string>
+    <string name="relationTypeBrother" msgid="8757913506784067713">"Brother"</string>
+    <string name="relationTypeChild" msgid="1890746277276881626">"Child"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Domestic Partner"</string>
+    <string name="relationTypeFather" msgid="5228034687082050725">"Father"</string>
+    <string name="relationTypeFriend" msgid="7313106762483391262">"Friend"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"Manager"</string>
+    <string name="relationTypeMother" msgid="4578571352962758304">"Mother"</string>
+    <string name="relationTypeParent" msgid="4755635567562925226">"Parent"</string>
+    <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Referred by"</string>
+    <string name="relationTypeRelative" msgid="1799819930085610271">"Relative"</string>
+    <string name="relationTypeSister" msgid="1735983554479076481">"Sister"</string>
+    <string name="relationTypeSpouse" msgid="394136939428698117">"Spouse"</string>
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Customised"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Home"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"Work"</string>
+    <string name="sipAddressTypeOther" msgid="4408436162950119849">"Other"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Enter PIN code"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Enter password to unlock"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Enter PIN to unlock"</string>
@@ -689,23 +658,17 @@
     <string name="double_tap_toast" msgid="1068216937244567247">"Tip: double-tap to zoom in and out."</string>
     <string name="autofill_this_form" msgid="1272247532604569872">"Auto-Fill"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Set up Auto-Fill"</string>
-    <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
-    <skip />
-    <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
-    <skip />
-    <!-- no translation found for autofill_address_summary_separator (7483307893170324129) -->
-    <skip />
-    <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
-    <skip />
+    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
+    <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
+    <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
+    <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"read Browser\'s history and bookmarks"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Allows the application to read all the URLs that the browser has visited and all of the browser\'s bookmarks."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"write Browser\'s history and bookmarks"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"Allows an application to modify the Browser\'s history or bookmarks stored on your tablet. Malicious applications can use this to erase or modify your Browser\'s data."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Allows an application to modify the browser\'s history or bookmarks stored on your phone. Malicious applications can use this to erase or modify your browser\'s data."</string>
-    <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
-    <skip />
-    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
-    <skip />
+    <string name="permlab_setAlarm" msgid="5924401328803615165">"set alarm in alarm clock"</string>
+    <string name="permdesc_setAlarm" msgid="5966966598149875082">"Allows the application to set an alarm in an installed alarm clock application. Some alarm clock applications may not implement this feature."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modify Browser geo-location permissions"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Allows an application to modify the browser\'s geo-location permissions. Malicious applications can use this to allow the sending of location information to arbitrary websites."</string>
     <string name="save_password_message" msgid="767344687139195790">"Do you want the browser to remember this password?"</string>
@@ -821,15 +784,12 @@
     <string name="cut" msgid="3092569408438626261">"Cut"</string>
     <string name="copy" msgid="2681946229533511987">"Copy"</string>
     <string name="paste" msgid="5629880836805036433">"Paste"</string>
-    <!-- no translation found for pasteDisabled (7259254654641456570) -->
-    <skip />
+    <string name="pasteDisabled" msgid="7259254654641456570">"Nothing to paste"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copy URL"</string>
-    <!-- no translation found for selectTextMode (6738556348861347240) -->
-    <skip />
-    <!-- no translation found for textSelectionCABTitle (5236850394370820357) -->
-    <skip />
+    <string name="selectTextMode" msgid="6738556348861347240">"Select text..."</string>
+    <string name="textSelectionCABTitle" msgid="5236850394370820357">"Text selection"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Input method"</string>
-    <!-- outdated translation 1672989176958581452 -->     <string name="editTextMenuTitle" msgid="4909135564941815494">"Edit text"</string>
+    <string name="editTextMenuTitle" msgid="4909135564941815494">"Text actions"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Low on space"</string>
     <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"Tablet storage space is getting low."</string>
     <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"Phone storage space is getting low."</string>
@@ -857,12 +817,9 @@
     <string name="force_close" msgid="3653416315450806396">"Force close"</string>
     <string name="report" msgid="4060218260984795706">"Report"</string>
     <string name="wait" msgid="7147118217226317732">"Wait"</string>
-    <!-- no translation found for launch_warning_title (8323761616052121936) -->
-    <skip />
-    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
-    <skip />
-    <!-- no translation found for launch_warning_original (188102023021668683) -->
-    <skip />
+    <string name="launch_warning_title" msgid="8323761616052121936">"Application redirected"</string>
+    <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> is now running."</string>
+    <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> was originally launched."</string>
     <string name="smv_application" msgid="295583804361236288">"The application <xliff:g id="APPLICATION">%1$s</xliff:g> (process <xliff:g id="PROCESS">%2$s</xliff:g>) has violated its self-enforced StrictMode policy."</string>
     <string name="smv_process" msgid="5120397012047462446">"The process <xliff:g id="PROCESS">%1$s</xliff:g> has violated its self-enforced StrictMode policy."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> running"</string>
@@ -911,17 +868,17 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Show all"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB Mass Storage"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB connected"</string>
-    <!-- outdated translation 4796759646167247178 -->     <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"You have connected your phone to your computer via USB. Select the button below if you want to copy files between your computer and your Android\'s SD card."</string>
-    <!-- outdated translation 4796759646167247178 -->     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"You have connected your phone to your computer via USB. Select the button below if you want to copy files between your computer and your Android\'s SD card."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"You have connected to your computer via USB. Touch the button below if you want to copy files between your computer and your Android‘s USB storage."</string>
+    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"You have connected to your computer via USB. Touch the button below if you want to copy files between your computer and your Android‘s SD card."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Turn off USB storage"</string>
-    <!-- outdated translation 2534784751603345363 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"There is a problem using your SD card for USB storage."</string>
-    <!-- outdated translation 2534784751603345363 -->     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"There is a problem using your SD card for USB storage."</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"There is a problem with using your USB storage for USB mass storage."</string>
+    <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"There is a problem with using your SD card for USB mass storage."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB connected"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Select to copy files to/from your computer."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Turn off USB storage"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Select to turn off USB storage."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB storage in use"</string>
-    <!-- outdated translation 3613713396426604104 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Before turning off USB storage, make sure that you have unmounted (“ejected”) your Android‘s SD card from your computer."</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Before turning off USB storage, make sure that you have unmounted (“ejected”) your Android‘s USB storage from your computer."</string>
     <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Before turning off USB storage, make sure that you have unmounted (“ejected”) your Android‘s SD card from your computer."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Turn off USB storage"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"We\'ve encountered a problem turning off USB storage. Check to ensure that you have unmounted the USB host, then try again."</string>
@@ -929,9 +886,9 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"If you turn on USB storage, some applications that you are using will stop and may be unavailable until you turn off USB storage."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB operation failed"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <!-- outdated translation 8663247929551095854 -->     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Format SD card"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Format USB storage"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Format SD card"</string>
-    <!-- outdated translation 3621369962433523619 -->     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Are you sure that you want to format the SD card? All data on your card will be lost."</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Format USB storage, erasing all files stored there? Action cannot be reversed!"</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Are you sure that you want to format the SD card? All data on your card will be lost."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB debugging connected"</string>
@@ -940,28 +897,28 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidates"</u></string>
-    <!-- outdated translation 5457603418970994050 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Preparing SD card"</string>
+    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Preparing USB storage"</string>
     <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Preparing SD card"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Checking for errors."</string>
-    <!-- outdated translation 780477838241212997 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Blank SD card"</string>
+    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Blank USB storage"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Blank SD card"</string>
-    <!-- outdated translation 1312266820092958014 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"The SD card is blank or using an unsupported file system."</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"USB storage blank or has unsupported file system."</string>
     <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SD card blank or has unsupported file system."</string>
-    <!-- outdated translation 6410723906019100189 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Damaged SD card"</string>
+    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Damaged USB storage"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Damaged SD card"</string>
-    <!-- outdated translation 2679412884290061775 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"The SD card is damaged. You may have to reformat your card."</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"USB storage damaged. You may have to reformat it."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"SD card damaged. You may have to reformat it."</string>
-    <!-- outdated translation 6872152882604407837 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"SD card removed unexpectedly"</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB storage removed unexpectedly"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD card removed unexpectedly"</string>
-    <!-- outdated translation 7260183293747448241 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Unmount SD card before removing to avoid data loss."</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Unmount USB storage before removing to avoid data loss."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Unmount SD card before removing to avoid data loss."</string>
-    <!-- outdated translation 6729801130790616200 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"SD card safe to remove"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"USB storage safe to remove"</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD card safe to remove"</string>
-    <!-- outdated translation 568841278138377604 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"You can safely remove SD card."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"You can safely remove USB storage."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"You can safely remove SD card."</string>
-    <!-- outdated translation 8902518030404381318 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Removed SD card"</string>
+    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Removed USB storage"</string>
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Removed SD card"</string>
-    <!-- outdated translation 3870120652983659641 -->     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"SD card removed. Insert a new one."</string>
+    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB storage removed. Insert new media."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD card removed. Insert a new one."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"No matching activities found"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"update component usage statistics"</string>
@@ -975,8 +932,7 @@
     <string name="ime_action_send" msgid="2316166556349314424">"Send"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Next"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Done"</string>
-    <!-- no translation found for ime_action_previous (1443550039250105948) -->
-    <skip />
+    <string name="ime_action_previous" msgid="1443550039250105948">"Prev"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Execute"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Dial number"\n", using <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Create contact"\n", using <xliff:g id="NUMBER">%s</xliff:g>"</string>
@@ -1008,52 +964,34 @@
     <string name="tethered_notification_message" msgid="3067108323903048927">"Touch to configure"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Back"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Next"</string>
-    <!-- no translation found for skip_button_label (1275362299471631819) -->
-    <skip />
+    <string name="skip_button_label" msgid="1275362299471631819">"Skip"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"High mobile data use"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Touch to learn more about mobile data usage"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Mobile data limit exceeded"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Touch to learn more about mobile data usage"</string>
-    <!-- no translation found for no_matches (8129421908915840737) -->
-    <skip />
-    <!-- no translation found for find_on_page (1946799233822820384) -->
-    <skip />
-    <!-- no translation found for matches_found:one (8167147081136579439) -->
-    <!-- no translation found for matches_found:other (4641872797067609177) -->
-    <!-- no translation found for action_mode_done (7217581640461922289) -->
-    <skip />
-    <!-- no translation found for progress_unmounting (535863554318797377) -->
-    <skip />
-    <!-- no translation found for progress_unmounting (5556813978958789471) -->
-    <skip />
-    <!-- no translation found for progress_erasing (4183664626203056915) -->
-    <skip />
-    <!-- no translation found for progress_erasing (2115214724367534095) -->
-    <skip />
-    <!-- no translation found for format_error (4320339096529911637) -->
-    <skip />
-    <!-- no translation found for format_error (1343380371925238343) -->
-    <skip />
-    <!-- no translation found for media_bad_removal (7960864061016603281) -->
-    <skip />
-    <!-- no translation found for media_checking (418188720009569693) -->
-    <skip />
-    <!-- no translation found for media_checking (7334762503904827481) -->
-    <skip />
-    <!-- no translation found for media_removed (7001526905057952097) -->
-    <skip />
-    <!-- no translation found for media_shared (5830814349250834225) -->
-    <skip />
-    <!-- no translation found for media_shared (5706130568133540435) -->
-    <skip />
-    <!-- no translation found for media_unknown_state (729192782197290385) -->
-    <skip />
-    <!-- no translation found for share (1778686618230011964) -->
-    <skip />
-    <!-- no translation found for find (4808270900322985960) -->
-    <skip />
-    <!-- no translation found for websearch (4337157977400211589) -->
-    <skip />
+    <string name="no_matches" msgid="8129421908915840737">"No matches"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"Find on page"</string>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 Match"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> of <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
+    <string name="action_mode_done" msgid="7217581640461922289">"Done"</string>
+    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Unmounting USB storage..."</string>
+    <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Unmounting SD card..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Erasing USB storage..."</string>
+    <string name="progress_erasing" product="default" msgid="2115214724367534095">"Erasing SD card..."</string>
+    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"Failed to erase USB storage."</string>
+    <string name="format_error" product="default" msgid="1343380371925238343">"Failed to erase SD card."</string>
+    <string name="media_bad_removal" msgid="7960864061016603281">"SD card was removed before being unmounted."</string>
+    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB storage is currently being checked."</string>
+    <string name="media_checking" product="default" msgid="7334762503904827481">"SD card is currently being checked."</string>
+    <string name="media_removed" msgid="7001526905057952097">"SD card has been removed."</string>
+    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB storage is currently in use by a computer."</string>
+    <string name="media_shared" product="default" msgid="5706130568133540435">"SD card is currently in use by a computer."</string>
+    <string name="media_unknown_state" msgid="729192782197290385">"External media in unknown state."</string>
+    <string name="share" msgid="1778686618230011964">"Share"</string>
+    <string name="find" msgid="4808270900322985960">"Find"</string>
+    <string name="websearch" msgid="4337157977400211589">"Web Search"</string>
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />
     <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
@@ -1063,5 +1001,15 @@
     <!-- no translation found for gpsVerifYes (2346566072867213563) -->
     <skip />
     <!-- no translation found for gpsVerifNo (1146564937346454865) -->
+    <skip />
+    <!-- no translation found for sync_too_many_deletes (5296321850662746890) -->
+    <skip />
+    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
+    <skip />
+    <!-- no translation found for sync_really_delete (8933566316059338692) -->
+    <skip />
+    <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
+    <skip />
+    <!-- no translation found for sync_do_nothing (8717589462945226869) -->
     <skip />
 </resources>

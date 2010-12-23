@@ -19,8 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for status_bar_clear_all_button (4722520806446512408) -->
-    <skip />
+    <string name="status_bar_clear_all_button" msgid="4722520806446512408">"Hapus semua"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="4684094636492991496">"Tidak ada sambungan internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="1456658018593445677">"Wi-Fi tersambung"</string>
 </resources>
