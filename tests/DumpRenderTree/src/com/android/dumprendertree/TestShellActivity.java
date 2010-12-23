@@ -88,8 +88,9 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             } else if (msg.what == MSG_WEBKIT_DATA) {
                 TestShellActivity.this.dump(mTimedOut, (String)msg.obj);
                 return;
+            } else if (msg.what == MSG_DUMP_TIMEOUT) {
+                throw new RuntimeException("WebView dump timeout, is it pegged?");
             }
-
             super.handleMessage(msg);
         }
     }
@@ -106,15 +107,22 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             case DUMP_AS_TEXT:
                 callback.arg1 = mDumpTopFrameAsText ? 1 : 0;
                 callback.arg2 = mDumpChildFramesAsText ? 1 : 0;
+                setDumpTimeout(DUMP_TIMEOUT_MS);
                 mWebView.documentAsText(callback);
                 break;
             case EXT_REPR:
                 mWebView.externalRepresentation(callback);
+                setDumpTimeout(DUMP_TIMEOUT_MS);
                 break;
             default:
                 finished();
                 break;
         }
+    }
+
+    private void setDumpTimeout(long timeout) {
+        Message msg = mHandler.obtainMessage(MSG_DUMP_TIMEOUT);
+        mHandler.sendMessageDelayed(msg, timeout);
     }
 
     public void clearCache() {
@@ -933,9 +941,11 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     private boolean mDumpWebKitData = false;
 
     static final String TIMEOUT_STR = "**Test timeout";
+    static final long DUMP_TIMEOUT_MS = 20000; //20s timeout for dumping webview content
 
     static final int MSG_TIMEOUT = 0;
     static final int MSG_WEBKIT_DATA = 1;
+    static final int MSG_DUMP_TIMEOUT = 2;
 
     static final String LOGTAG="TestShell";
 
