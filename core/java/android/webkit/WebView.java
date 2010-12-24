@@ -1002,10 +1002,20 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    private static void setupProxyListener(Context context) {
+    /*
+     * A variable to track if there is a receiver added for PROXY_CHANGE_ACTION
+     */
+    private static boolean sProxyReceiverAdded;
+
+    private static synchronized void setupProxyListener(Context context) {
+        if (sProxyReceiverAdded) {
+            return;
+        }
         IntentFilter filter = new IntentFilter();
         filter.addAction(Proxy.PROXY_CHANGE_ACTION);
-        Intent currentProxy = context.getApplicationContext().registerReceiver(new ProxyReceiver(), filter);
+        Intent currentProxy = context.getApplicationContext().registerReceiver(
+                new ProxyReceiver(), filter);
+        sProxyReceiverAdded = true;
         if (currentProxy != null) {
             handleProxyBroadcast(currentProxy);
         }
