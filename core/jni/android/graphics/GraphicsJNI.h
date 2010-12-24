@@ -4,6 +4,7 @@
 #include "SkPoint.h"
 #include "SkRect.h"
 #include "SkBitmap.h"
+#include "../images/SkBitmapRegionDecoder.h"
 #include "../images/SkImageDecoder.h"
 #include <jni.h>
 
@@ -54,6 +55,8 @@ public:
                                 jbyteArray ninePatch, int density = -1);
     
     static jobject createRegion(JNIEnv* env, SkRegion* region);
+
+    static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
 
     /** Set a pixelref for the bitmap (needs setConfig to already be called)
         Returns true on success. If it returns false, then it failed, and the

@@ -27,6 +27,7 @@ jfieldID gOptions_ditherFieldID;
 jfieldID gOptions_purgeableFieldID;
 jfieldID gOptions_shareableFieldID;
 jfieldID gOptions_nativeAllocFieldID;
+jfieldID gOptions_preferQualityOverSpeedFieldID;
 jfieldID gOptions_widthFieldID;
 jfieldID gOptions_heightFieldID;
 jfieldID gOptions_mimeFieldID;
@@ -180,6 +181,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     bool isPurgeable = forcePurgeable ||
                         (allowPurgeable && optionsPurgeable(env, options));
     bool reportSizeToVM = optionsReportSizeToVM(env, options);
+    bool preferQualityOverSpeed = false;
     
     if (NULL != options) {
         sampleSize = env->GetIntField(options, gOptions_sampleSizeFieldID);
@@ -194,6 +196,8 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         jobject jconfig = env->GetObjectField(options, gOptions_configFieldID);
         prefConfig = GraphicsJNI::getNativeBitmapConfig(env, jconfig);
         doDither = env->GetBooleanField(options, gOptions_ditherFieldID);
+        preferQualityOverSpeed = env->GetBooleanField(options,
+                gOptions_preferQualityOverSpeedFieldID);
     }
 
     SkImageDecoder* decoder = SkImageDecoder::Factory(stream);
@@ -203,6 +207,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     
     decoder->setSampleSize(sampleSize);
     decoder->setDitherImage(doDither);
+    decoder->setPreferQualityOverSpeed(preferQualityOverSpeed);
 
     NinePatchPeeker     peeker(decoder);
     JavaPixelAllocator  javaAllocator(env, reportSizeToVM);
@@ -551,6 +556,8 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     gOptions_purgeableFieldID = getFieldIDCheck(env, gOptions_class, "inPurgeable", "Z");
     gOptions_shareableFieldID = getFieldIDCheck(env, gOptions_class, "inInputShareable", "Z");
     gOptions_nativeAllocFieldID = getFieldIDCheck(env, gOptions_class, "inNativeAlloc", "Z");
+    gOptions_preferQualityOverSpeedFieldID = getFieldIDCheck(env, gOptions_class,
+            "inPreferQualityOverSpeed", "Z");
     gOptions_widthFieldID = getFieldIDCheck(env, gOptions_class, "outWidth", "I");
     gOptions_heightFieldID = getFieldIDCheck(env, gOptions_class, "outHeight", "I");
     gOptions_mimeFieldID = getFieldIDCheck(env, gOptions_class, "outMimeType", "Ljava/lang/String;");
