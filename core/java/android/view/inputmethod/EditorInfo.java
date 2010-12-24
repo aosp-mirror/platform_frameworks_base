@@ -275,7 +275,9 @@ public class EditorInfo implements InputType, Parcelable {
      * that was developed against the given target API version.  This can
      * impact the following input types:
      * {@link InputType#TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS},
-     * {@link InputType#TYPE_TEXT_VARIATION_WEB_PASSWORD}.
+     * {@link InputType#TYPE_TEXT_VARIATION_WEB_PASSWORD},
+     * {@link InputType#TYPE_NUMBER_VARIATION_NORMAL},
+     * {@link InputType#TYPE_NUMBER_VARIATION_PASSWORD}.
      *
      * <p>This is called by the framework for input method implementations;
      * you should not generally need to call it yourself.
@@ -288,11 +290,16 @@ public class EditorInfo implements InputType, Parcelable {
             switch (inputType&(TYPE_MASK_CLASS|TYPE_MASK_VARIATION)) {
                 case TYPE_CLASS_TEXT|TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS:
                     inputType = TYPE_CLASS_TEXT|TYPE_TEXT_VARIATION_EMAIL_ADDRESS
-                            | (inputType&(~TYPE_MASK_FLAGS));
+                            | (inputType&TYPE_MASK_FLAGS);
                     break;
                 case TYPE_CLASS_TEXT|TYPE_TEXT_VARIATION_WEB_PASSWORD:
                     inputType = TYPE_CLASS_TEXT|TYPE_TEXT_VARIATION_PASSWORD
-                            | (inputType&(~TYPE_MASK_FLAGS));
+                            | (inputType&TYPE_MASK_FLAGS);
+                    break;
+                case TYPE_CLASS_NUMBER|TYPE_NUMBER_VARIATION_NORMAL:
+                case TYPE_CLASS_NUMBER|TYPE_NUMBER_VARIATION_PASSWORD:
+                    inputType = TYPE_CLASS_NUMBER
+                            | (inputType&TYPE_MASK_FLAGS);
                     break;
             }
         }

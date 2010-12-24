@@ -850,7 +850,8 @@
              {@link android.text.InputType#TYPE_TEXT_VARIATION_WEB_PASSWORD}. -->
         <flag name="textWebPassword" value="0x000000e1" />
         <!-- A numeric only field.  Corresponds to
-             {@link android.text.InputType#TYPE_CLASS_NUMBER}. -->
+             {@link android.text.InputType#TYPE_CLASS_NUMBER} |
+             {@link android.text.InputType#TYPE_NUMBER_VARIATION_NORMAL}. -->
         <flag name="number" value="0x00000002" />
         <!-- Can be combined with <var>number</var> and its other options to
              allow a signed number.  Corresponds to
@@ -862,6 +863,10 @@
              {@link android.text.InputType#TYPE_CLASS_NUMBER} |
              {@link android.text.InputType#TYPE_NUMBER_FLAG_DECIMAL}. -->
         <flag name="numberDecimal" value="0x00002002" />
+        <!-- A numeric password field.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_NUMBER} |
+             {@link android.text.InputType#TYPE_NUMBER_VARIATION_PASSWORD}. -->
+        <flag name="numberPassword" value="0x00000012" />
         <!-- For entering a phone number.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_PHONE}. -->
         <flag name="phone" value="0x00000003" />
