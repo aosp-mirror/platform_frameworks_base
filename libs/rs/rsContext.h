@@ -137,6 +137,7 @@ public:
     void resume();
     void setSurface(uint32_t w, uint32_t h, ANativeWindow *sur);
     void setPriority(int32_t p);
+    void destroyWorkerThreadResources();
 
     void assignName(ObjectBase *obj, const char *name, uint32_t len);
     void removeName(ObjectBase *obj);

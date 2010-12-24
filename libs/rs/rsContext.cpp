@@ -509,20 +509,6 @@ void * Context::threadProc(void *vrsc) {
      }
 
      LOGV("%p, RS Thread exiting", rsc);
-     if (rsc->mIsGraphicsContext) {
-         rsc->mRaster.clear();
-         rsc->mFragment.clear();
-         rsc->mVertex.clear();
-         rsc->mFragmentStore.clear();
-         rsc->mFont.clear();
-         rsc->mRootScript.clear();
-         rsc->mStateRaster.deinit(rsc);
-         rsc->mStateVertex.deinit(rsc);
-         rsc->mStateFragment.deinit(rsc);
-         rsc->mStateFragmentStore.deinit(rsc);
-         rsc->mStateFont.deinit(rsc);
-     }
-     ObjectBase::zeroAllUserRef(rsc);
 
      if (rsc->mIsGraphicsContext) {
          pthread_mutex_lock(&gInitMutex);
@@ -533,6 +519,25 @@ void * Context::threadProc(void *vrsc) {
 
      LOGV("%p, RS Thread exited", rsc);
      return NULL;
+}
+
+void Context::destroyWorkerThreadResources() {
+    LOGV("destroyWorkerThreadResources 1");
+    if (mIsGraphicsContext) {
+         mRaster.clear();
+         mFragment.clear();
+         mVertex.clear();
+         mFragmentStore.clear();
+         mFont.clear();
+         mRootScript.clear();
+         mStateRaster.deinit(this);
+         mStateVertex.deinit(this);
+         mStateFragment.deinit(this);
+         mStateFragmentStore.deinit(this);
+         mStateFont.deinit(this);
+    }
+    ObjectBase::zeroAllUserRef(this);
+    LOGV("destroyWorkerThreadResources 2");
 }
 
 void * Context::helperThreadProc(void *vrsc) {
@@ -725,6 +730,7 @@ Context::~Context() {
         mDev = NULL;
     }
     pthread_mutex_unlock(&gInitMutex);
+    LOGV("Context::~Context done");
 }
 
 void Context::setSurface(uint32_t w, uint32_t h, ANativeWindow *sur) {
@@ -1019,13 +1025,22 @@ void rsi_ContextDump(Context *rsc, int32_t bits) {
     ObjectBase::dumpAll(rsc);
 }
 
-void rsi_ContextDestroy(Context *rsc) {
+void rsi_ContextDestroyWorker(Context *rsc) {
+    LOGE("rsi_ContextDestroyWorker 1");
+    rsc->destroyWorkerThreadResources();;
+    LOGE("rsi_ContextDestroyWorker 2");
+}
+
+}
+}
+
+void rsContextDestroy(RsContext vcon) {
+    LOGV("rsContextDestroy %p", vcon);
+    Context *rsc = static_cast<Context *>(vcon);
+    rsContextDestroyWorker(rsc);
     delete rsc;
+    LOGV("rsContextDestroy 2 %p", vcon);
 }
-
-}
-}
-
 
 RsContext rsContextCreate(RsDevice vdev, uint32_t version) {
     LOGV("rsContextCreate %p", vdev);
