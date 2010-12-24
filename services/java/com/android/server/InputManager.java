@@ -32,6 +32,7 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.Surface;
+import android.view.WindowManager;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -474,6 +475,14 @@ public class InputManager {
                 result = 60;
             }
             return result;
+        }
+
+        @SuppressWarnings("unused")
+        public int getPointerLayer() {
+            return mWindowManagerService.mPolicy.windowTypeToLayerLw(
+                    WindowManager.LayoutParams.TYPE_DRAG)
+                    * WindowManagerService.TYPE_LAYER_MULTIPLIER
+                    + WindowManagerService.TYPE_LAYER_OFFSET;
         }
     }
 }

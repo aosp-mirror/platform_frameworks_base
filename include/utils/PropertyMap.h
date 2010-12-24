@@ -71,6 +71,12 @@ public:
     bool tryGetProperty(const String8& key, int32_t& outValue) const;
     bool tryGetProperty(const String8& key, float& outValue) const;
 
+    /* Adds all values from the specified property map. */
+    void addAll(const PropertyMap* map);
+
+    /* Gets the underlying property map. */
+    inline const KeyedVector<String8, String8>& getProperties() const { return mProperties; }
+
     /* Loads a property map from a file. */
     static status_t load(const String8& filename, PropertyMap** outMap);
 

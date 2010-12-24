@@ -20,6 +20,7 @@
 #include <ui/EventHub.h>
 #include <ui/Input.h>
 #include <ui/InputDispatcher.h>
+#include <ui/PointerController.h>
 #include <utils/KeyedVector.h>
 #include <utils/threads.h>
 #include <utils/Timers.h>
@@ -77,6 +78,9 @@ public:
 
     /* Gets the excluded device names for the platform. */
     virtual void getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames) = 0;
+
+    /* Gets a pointer controller associated with the specified cursor device (ie. a mouse). */
+    virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId) = 0;
 };
 
 
@@ -421,10 +425,10 @@ private:
 };
 
 
-class TrackballInputMapper : public InputMapper {
+class CursorInputMapper : public InputMapper {
 public:
-    TrackballInputMapper(InputDevice* device);
-    virtual ~TrackballInputMapper();
+    CursorInputMapper(InputDevice* device);
+    virtual ~CursorInputMapper();
 
     virtual uint32_t getSources();
     virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
@@ -443,6 +447,12 @@ private:
 
     // Immutable configuration parameters.
     struct Parameters {
+        enum Mode {
+            MODE_POINTER,
+            MODE_NAVIGATION,
+        };
+
+        Mode mode;
         int32_t associatedDisplayId;
         bool orientationAware;
     } mParameters;
@@ -465,10 +475,12 @@ private:
         }
     } mAccumulator;
 
+    int32_t mSources;
     float mXScale;
     float mYScale;
     float mXPrecision;
     float mYPrecision;
+    sp<PointerControllerInterface> mPointerController;
 
     struct LockedState {
         bool down;
@@ -571,6 +583,9 @@ protected:
             idBits.clear();
         }
     };
+
+    // Input sources supported by the device.
+    int32_t mSources;
 
     // Immutable configuration parameters.
     struct Parameters {

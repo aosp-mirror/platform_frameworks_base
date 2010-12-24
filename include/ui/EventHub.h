@@ -109,8 +109,8 @@ enum {
     /* The input device is a touchscreen (either single-touch or multi-touch). */
     INPUT_DEVICE_CLASS_TOUCHSCREEN   = 0x00000004,
 
-    /* The input device is a trackball. */
-    INPUT_DEVICE_CLASS_TRACKBALL     = 0x00000008,
+    /* The input device is a cursor device such as a trackball or mouse. */
+    INPUT_DEVICE_CLASS_CURSOR        = 0x00000008,
 
     /* The input device is a multi-touch touchscreen. */
     INPUT_DEVICE_CLASS_TOUCHSCREEN_MT= 0x00000010,

@@ -381,6 +381,11 @@ public interface WindowManager extends ViewManager {
          */
         public static final int TYPE_STATUS_BAR_SUB_PANEL = FIRST_SYSTEM_WINDOW+17;
 
+        /**
+         * Window type: (mouse) pointer
+         * @hide
+         */
+        public static final int TYPE_POINTER = FIRST_SYSTEM_WINDOW+18;
 
         /**
          * End of types of system windows.

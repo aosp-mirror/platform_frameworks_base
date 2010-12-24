@@ -1443,11 +1443,11 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
 #if DEBUG_DISPATCH_CYCLE
     LOGD("channel '%s' ~ prepareDispatchCycle - flags=%d, "
             "xOffset=%f, yOffset=%f, "
-            "windowType=%d, pointerIds=0x%x, "
+            "pointerIds=0x%x, "
             "resumeWithAppendedMotionSample=%s",
             connection->getInputChannelName(), inputTarget->flags,
             inputTarget->xOffset, inputTarget->yOffset,
-            inputTarget->windowType, inputTarget->pointerIds.value,
+            inputTarget->pointerIds.value,
             toString(resumeWithAppendedMotionSample));
 #endif
 
@@ -1826,8 +1826,8 @@ void InputDispatcher::startNextDispatchCycleLocked(nsecs_t currentTime,
 void InputDispatcher::abortBrokenDispatchCycleLocked(nsecs_t currentTime,
         const sp<Connection>& connection) {
 #if DEBUG_DISPATCH_CYCLE
-    LOGD("channel '%s' ~ abortBrokenDispatchCycle - broken=%s",
-            connection->getInputChannelName(), toString(broken));
+    LOGD("channel '%s' ~ abortBrokenDispatchCycle",
+            connection->getInputChannelName());
 #endif
 
     // Clear the outbound queue.

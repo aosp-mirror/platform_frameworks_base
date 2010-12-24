@@ -755,14 +755,14 @@ int EventHub::openDevice(const char *devicePath) {
         }
     }
     
-    // See if this is a trackball (or mouse).
+    // See if this is a cursor device such as a trackball or mouse.
     if (test_bit(BTN_MOUSE, key_bitmask)) {
         uint8_t rel_bitmask[sizeof_bit_array(REL_MAX + 1)];
         memset(rel_bitmask, 0, sizeof(rel_bitmask));
         LOGV("Getting relative controllers...");
         if (ioctl(fd, EVIOCGBIT(EV_REL, sizeof(rel_bitmask)), rel_bitmask) >= 0) {
             if (test_bit(REL_X, rel_bitmask) && test_bit(REL_Y, rel_bitmask)) {
-                device->classes |= INPUT_DEVICE_CLASS_TRACKBALL;
+                device->classes |= INPUT_DEVICE_CLASS_CURSOR;
             }
         }
     }

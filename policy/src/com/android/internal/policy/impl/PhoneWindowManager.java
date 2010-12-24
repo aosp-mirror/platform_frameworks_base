@@ -112,6 +112,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
@@ -176,6 +177,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // things in here CAN NOT take focus, but are shown on top of everything else.
     static final int SYSTEM_OVERLAY_LAYER = 18;
     static final int SECURE_SYSTEM_OVERLAY_LAYER = 19;
+    // the (mouse) pointer layer
+    static final int POINTER_LAYER = 20;
 
     static final int APPLICATION_MEDIA_SUBLAYER = -2;
     static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
@@ -950,6 +953,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return WALLPAPER_LAYER;
         case TYPE_DRAG:
             return DRAG_LAYER;
+        case TYPE_POINTER:
+            return POINTER_LAYER;
         }
         Log.e(TAG, "Unknown window type: " + type);
         return APPLICATION_LAYER;
