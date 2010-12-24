@@ -48,6 +48,9 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
     /* Maximum retries on a password failure notification */
     private static final int MAX_RETRIES_ON_PASSWORD_FAILURE = 2;
 
+    /* Tracks if networks have been disabled during a connection */
+    private boolean mNetworksDisabledDuringConnect = false;
+
     private Context mContext;
 
     private HierarchicalState mUninitializedState = new UninitializedState();
@@ -77,6 +80,16 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
 
         //start the state machine
         start();
+    }
+
+    private void handleNetworkConnectionFailure(int netId) {
+        /* If other networks disabled during connection, enable them */
+        if (mNetworksDisabledDuringConnect) {
+            WifiConfigStore.enableAllNetworks();
+            mNetworksDisabledDuringConnect = false;
+        }
+        /* Disable failed network */
+        WifiConfigStore.disableNetwork(netId);
     }
 
     private void transitionOnSupplicantStateChange(StateChangeResult stateChangeResult) {
@@ -156,6 +169,9 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
                 case WifiStateMachine.CMD_RESET_SUPPLICANT_STATE:
                     transitionTo(mUninitializedState);
                     break;
+                case WifiStateMachine.CMD_CONNECT_NETWORK:
+                    mNetworksDisabledDuringConnect = true;
+                    break;
                 default:
                     Log.e(TAG, "Ignoring " + message);
                     break;
@@ -211,7 +227,7 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
              if (mPasswordFailuresCount >= MAX_RETRIES_ON_PASSWORD_FAILURE) {
                  Log.d(TAG, "Failed to authenticate, disabling network " +
                          stateChangeResult.networkId);
-                 WifiConfigStore.disableNetwork(stateChangeResult.networkId);
+                 handleNetworkConnectionFailure(stateChangeResult.networkId);
                  mPasswordFailuresCount = 0;
              }
          }
@@ -256,7 +272,7 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
                         if (mLoopDetectCount > MAX_SUPPLICANT_LOOP_ITERATIONS) {
                             Log.d(TAG, "Supplicant loop detected, disabling network " +
                                     stateChangeResult.networkId);
-                            WifiConfigStore.disableNetwork(stateChangeResult.networkId);
+                            handleNetworkConnectionFailure(stateChangeResult.networkId);
                         }
                         mLoopDetectIndex = state.ordinal();
                         sendSupplicantStateChangedBroadcast(state,
@@ -279,7 +295,11 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
              if (DBG) Log.d(TAG, getName() + "\n");
              /* Reset password failure count */
              mPasswordFailuresCount = 0;
-         }
+             if (mNetworksDisabledDuringConnect) {
+                 WifiConfigStore.enableAllNetworks();
+                 mNetworksDisabledDuringConnect = false;
+             }
+        }
         @Override
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");

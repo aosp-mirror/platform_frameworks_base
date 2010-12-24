@@ -164,10 +164,12 @@ class WifiConfigStore {
      * of configured networks indicates all networks as being enabled
      */
     static void enableAllNetworks() {
+        boolean networkEnabledStateChanged = false;
         synchronized (sConfiguredNetworks) {
             for(WifiConfiguration config : sConfiguredNetworks.values()) {
                 if(config != null && config.status == Status.DISABLED) {
                     if(WifiNative.enableNetworkCommand(config.networkId, false)) {
+                        networkEnabledStateChanged = true;
                         config.status = Status.ENABLED;
                     } else {
                         Log.e(TAG, "Enable network failed on " + config.networkId);
@@ -176,8 +178,10 @@ class WifiConfigStore {
             }
         }
 
-        WifiNative.saveConfigCommand();
-        sendConfiguredNetworksChangedBroadcast();
+        if (networkEnabledStateChanged) {
+            WifiNative.saveConfigCommand();
+            sendConfiguredNetworksChangedBroadcast();
+        }
     }
 
     /**
