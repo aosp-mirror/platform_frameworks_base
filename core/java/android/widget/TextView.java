@@ -783,6 +783,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 == (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD);
         final boolean webPasswordInputType = variation
                 == (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD);
+        final boolean numberPasswordInputType = variation
+                == (EditorInfo.TYPE_CLASS_NUMBER | EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD);
 
         if (inputMethod != null) {
             Class<?> c;
@@ -900,6 +902,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mInputType = (mInputType & ~(EditorInfo.TYPE_MASK_VARIATION))
                         | EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD;
             }
+        } else if ((mInputType & EditorInfo.TYPE_MASK_CLASS) == EditorInfo.TYPE_CLASS_NUMBER) {
+            if (numberPasswordInputType) {
+                mInputType = (mInputType & ~(EditorInfo.TYPE_MASK_VARIATION))
+                        | EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD;
+            }
         }
 
         if (selectallonfocus) {
@@ -946,7 +953,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         setRawTextSize(textSize);
 
-        if (password || passwordInputType || webPasswordInputType) {
+        if (password || passwordInputType || webPasswordInputType || numberPasswordInputType) {
             setTransformationMethod(PasswordTransformationMethod.getInstance());
             typefaceIndex = MONOSPACE;
         } else if ((mInputType & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_MASK_VARIATION))
@@ -3096,7 +3103,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return variation
                 == (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD)
                 || variation
-                == (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD);
+                == (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD)
+                || variation
+                == (EditorInfo.TYPE_CLASS_NUMBER | EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD);
     }
 
     private boolean isVisiblePasswordInputType(int inputType) {
@@ -7637,9 +7646,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int variation = mInputType & InputType.TYPE_MASK_VARIATION;
 
         // Text selection is not permitted in password fields
-        if (variation == InputType.TYPE_TEXT_VARIATION_PASSWORD ||
-                variation == InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD ||
-                variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
+        if (isPasswordInputType(mInputType) || isVisiblePasswordInputType(mInputType)) {
             return -1;
         }
 

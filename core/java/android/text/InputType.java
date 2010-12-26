@@ -257,7 +257,10 @@ public interface InputType {
     /**
      * Class for numeric text.  This class supports the following flag:
      * {@link #TYPE_NUMBER_FLAG_SIGNED} and
-     * {@link #TYPE_NUMBER_FLAG_DECIMAL}.
+     * {@link #TYPE_NUMBER_FLAG_DECIMAL}.  It also supports the following
+     * variations: {@link #TYPE_NUMBER_VARIATION_NORMAL} and
+     * {@link #TYPE_NUMBER_VARIATION_PASSWORD}.  If you do not recognize
+     * the variation, normal should be assumed.
      */
     public static final int TYPE_CLASS_NUMBER = 0x00000002;
     
@@ -273,6 +276,29 @@ public interface InputType {
      */
     public static final int TYPE_NUMBER_FLAG_DECIMAL = 0x00002000;
     
+    // ----------------------------------------------------------------------
+
+    /**
+     * Default variation of {@link #TYPE_CLASS_NUMBER}: plain normal
+     * numeric text.  This was added in
+     * {@link android.os.Build.VERSION_CODES#HONEYCOMB}.  An IME must target
+     * this API version or later to see this input type; if it doesn't, a request
+     * for this type will be dropped when passed through
+     * {@link android.view.inputmethod.EditorInfo#makeCompatible(int)
+     * EditorInfo.makeCompatible(int)}.
+     */
+    public static final int TYPE_NUMBER_VARIATION_NORMAL = 0x00000000;
+
+    /**
+     * Variation of {@link #TYPE_CLASS_NUMBER}: entering a numeric password.
+     * This was added in {@link android.os.Build.VERSION_CODES#HONEYCOMB}.  An
+     * IME must target this API version or later to see this input type; if it
+     * doesn't, a request for this type will be dropped when passed
+     * through {@link android.view.inputmethod.EditorInfo#makeCompatible(int)
+     * EditorInfo.makeCompatible(int)}.
+     */
+    public static final int TYPE_NUMBER_VARIATION_PASSWORD = 0x00000010;
+
     // ----------------------------------------------------------------------
     // ----------------------------------------------------------------------
     // ----------------------------------------------------------------------
