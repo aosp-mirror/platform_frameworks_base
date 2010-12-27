@@ -37,11 +37,13 @@ using namespace android::renderscript;
 
 
 ScriptC::ScriptC(Context *rsc) : Script(rsc) {
+    LOGD(">>>> ScriptC ctor called, obj=%p", this);
     mBccScript = NULL;
     memset(&mProgram, 0, sizeof(mProgram));
 }
 
 ScriptC::~ScriptC() {
+    LOGD(">>>> ~ScriptC() mBccScript = %p", mBccScript);
     if (mBccScript) {
         bccDeleteScript(mBccScript);
     }

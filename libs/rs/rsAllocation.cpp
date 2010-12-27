@@ -135,7 +135,6 @@ void Allocation::allocScriptMemory() {
 }
 
 void Allocation::freeScriptMemory() {
-    rsAssert(!(mUsageFlags & RS_ALLOCATION_USAGE_SCRIPT));
     if (mPtr) {
         free(mPtr);
         mPtr = NULL;

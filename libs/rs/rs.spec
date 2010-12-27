@@ -47,7 +47,7 @@ ContextSetPriority {
 	param int32_t priority
 	}
 
-ContextDestroy {
+ContextDestroyWorker {
 }
 
 AssignName {
