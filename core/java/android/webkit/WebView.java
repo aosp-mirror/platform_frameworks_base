@@ -4485,6 +4485,11 @@ public class WebView extends AbsoluteLayout
                     + ", " + event + ", unicode=" + event.getUnicodeChar());
         }
 
+        // don't implement accelerator keys here; defer to host application
+        if (event.isCtrlPressed()) {
+            return false;
+        }
+
         if (mNativeClass == 0) {
             return false;
         }
