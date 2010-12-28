@@ -1409,6 +1409,22 @@
   <public type="attr" name="fastScrollOverlayPosition" />
   <public type="attr" name="customTokens" />
   <public type="attr" name="nextFocusForward" />
+  <public type="attr" name="firstDayOfWeek" />
+  <public type="attr" name="showWeekNumber" />
+  <public type="attr" name="minDate" />
+  <public type="attr" name="maxDate" />
+  <public type="attr" name="shownWeekCount" />
+  <public type="attr" name="selectedWeekBackgroundColor" />
+  <public type="attr" name="focusedMonthDateColor" />
+  <public type="attr" name="unfocusedMonthDateColor" />
+  <public type="attr" name="weekNumberColor" />
+  <public type="attr" name="weekSeparatorLineColor" />
+  <public type="attr" name="selectedDateVerticalBar" />
+  <public type="attr" name="weekDayTextAppearance" />
+  <public type="attr" name="dateTextAppearance" />
+  <public type="attr" name="solidColor" />
+  <public type="attr" name="spinnersShown" />
+  <public type="attr" name="calendarViewShown" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
@@ -1578,5 +1594,18 @@
   <public type="style" name="Holo.Light.ButtonBar.AlertDialog" />
   <public type="style" name="Holo.SegmentedButton" />
   <public type="style" name="Holo.Light.SegmentedButton" />
+  <public type="style" name="Widget.ImageButton.NumberPickerUpButton" />
+  <public type="style" name="Widget.EditText.NumberPickerInputText" />
+  <public type="style" name="Widget.ImageButton.NumberPickerDownButton" />
+  <public type="style" name="Widget.Holo.ImageButton.NumberPickerUpButton" />
+  <public type="style" name="Widget.Holo.EditText.NumberPickerInputText" />
+  <public type="style" name="Widget.Holo.ImageButton.NumberPickerDownButton" />
+  <public type="style" name="Widget.Holo.Light.ImageButton.NumberPickerUpButton" />
+  <public type="style" name="Widget.Holo.Light.EditText.NumberPickerInputText" />
+  <public type="style" name="Widget.Holo.Light.ImageButton.NumberPickerDownButton" />
+  <public type="style" name="Widget.CalendarView" />
+  <public type="style" name="Widget.Holo.CalendarView" />
+  <public type="style" name="Widget.Holo.Light.CalendarView" />
   <public type="string" name="selectTextMode" />
+
 </resources>

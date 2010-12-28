@@ -30,8 +30,8 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Paint.Align;
 import android.graphics.Rect;
+import android.graphics.Paint.Align;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
@@ -41,11 +41,11 @@ import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.LayoutInflater.Filter;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.LayoutInflater.Filter;
 import android.view.animation.OvershootInterpolator;
 import android.view.inputmethod.InputMethodManager;
 
@@ -62,9 +62,16 @@ import android.view.inputmethod.InputMethodManager;
  * <p>
  * For an example of using this widget, see {@link android.widget.TimePicker}.
  * </p>
+ *
+ * @attr ref android.R.styleable#NumberPicker_solidColor
  */
 @Widget
 public class NumberPicker extends LinearLayout {
+
+    /**
+     * The default update interval during long press.
+     */
+    private static final long DEFAULT_LONG_PRESS_UPDATE_INTERVAL = 300;
 
     /**
      * The index of the middle selector item.
@@ -115,6 +122,8 @@ public class NumberPicker extends LinearLayout {
      * strings like "01". Keeping a static formatter etc. is the most efficient
      * way to do this; it avoids creating temporary objects on every call to
      * format().
+     *
+     * @hide
      */
     public static final NumberPicker.Formatter TWO_DIGIT_FORMATTER = new NumberPicker.Formatter() {
         final StringBuilder mBuilder = new StringBuilder();
@@ -123,7 +132,7 @@ public class NumberPicker extends LinearLayout {
 
         final Object[] mArgs = new Object[1];
 
-        public String toString(int value) {
+        public String format(int value) {
             mArgs[0] = value;
             mBuilder.delete(0, mBuilder.length());
             mFmt.format("%02d", mArgs);
@@ -159,22 +168,22 @@ public class NumberPicker extends LinearLayout {
     /**
      * Lower value of the range of numbers allowed for the NumberPicker
      */
-    private int mStart;
+    private int mMinValue;
 
     /**
      * Upper value of the range of numbers allowed for the NumberPicker
      */
-    private int mEnd;
+    private int mMaxValue;
 
     /**
      * Current value of this NumberPicker
      */
-    private int mCurrent;
+    private int mValue;
 
     /**
      * Listener to be notified upon current value change.
      */
-    private OnChangeListener mOnChangeListener;
+    private OnValueChangedListener mOnValueChangedListener;
 
     /**
      * Listener to be notified upon scroll state change.
@@ -189,7 +198,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * The speed for updating the value form long press.
      */
-    private long mLongPressUpdateInterval = 300;
+    private long mLongPressUpdateInterval = DEFAULT_LONG_PRESS_UPDATE_INTERVAL;
 
     /**
      * Cache for the string representation of selector indices.
@@ -308,7 +317,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * Flag whether the selector should wrap around.
      */
-    private boolean mWrapSelector;
+    private boolean mWrapSelectorWheel;
 
     /**
      * The back ground color used to optimize scroller fading.
@@ -326,9 +335,10 @@ public class NumberPicker extends LinearLayout {
     private int mScrollState = OnScrollListener.SCROLL_STATE_IDLE;
 
     /**
-     * The callback interface used to indicate the number value has changed.
+     * Interface to listen for changes of the current value.
      */
-    public interface OnChangeListener {
+    public interface OnValueChangedListener {
+
         /**
          * Called upon a change of the current value.
          *
@@ -336,11 +346,11 @@ public class NumberPicker extends LinearLayout {
          * @param oldVal The previous value.
          * @param newVal The new value.
          */
-        void onChange(NumberPicker picker, int oldVal, int newVal);
+        void onValueChange(NumberPicker picker, int oldVal, int newVal);
     }
 
     /**
-     * Interface for listening to the picker scroll state.
+     * Interface to listen for the picker scroll state.
      */
     public interface OnScrollListener {
 
@@ -360,27 +370,29 @@ public class NumberPicker extends LinearLayout {
         public static int SCROLL_STATE_FLING = 2;
 
         /**
-         * Callback method to be invoked while the number picker is being scrolled.
+         * Callback invoked while the number picker scroll state has changed.
          *
-         * @param view The view whose scroll state is being reported
-         * @param scrollState The current scroll state. One of {@link #SCROLL_STATE_IDLE},
-         * {@link #SCROLL_STATE_TOUCH_SCROLL} or {@link #SCROLL_STATE_IDLE}.
+         * @param view The view whose scroll state is being reported.
+         * @param scrollState The current scroll state. One of
+         *            {@link #SCROLL_STATE_IDLE},
+         *            {@link #SCROLL_STATE_TOUCH_SCROLL} or
+         *            {@link #SCROLL_STATE_IDLE}.
          */
         public void onScrollStateChange(NumberPicker view, int scrollState);
     }
 
     /**
-     * Interface used to format the number into a string for presentation.
+     * Interface used to format current value into a string for presentation.
      */
     public interface Formatter {
 
         /**
-         * Formats a string representation of the current index.
+         * Formats a string representation of the current value.
          *
          * @param value The currently selected value.
          * @return A formatted string representation.
          */
-        public String toString(int value);
+        public String format(int value);
     }
 
     /**
@@ -436,9 +448,9 @@ public class NumberPicker extends LinearLayout {
             public void onClick(View v) {
                 mInputText.clearFocus();
                 if (v.getId() == R.id.increment) {
-                    changeCurrent(mCurrent + 1);
+                    changeCurrent(mValue + 1);
                 } else {
-                    changeCurrent(mCurrent - 1);
+                    changeCurrent(mValue - 1);
                 }
             }
         };
@@ -702,12 +714,6 @@ public class NumberPicker extends LinearLayout {
         }
     }
 
-    /**
-     * Set the enabled state of this view. The interpretation of the enabled
-     * state varies by subclass.
-     *
-     * @param enabled True if this view is enabled, false otherwise.
-     */
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
@@ -716,9 +722,6 @@ public class NumberPicker extends LinearLayout {
         mInputText.setEnabled(enabled);
     }
 
-    /**
-     * Scrolls the selector with the given <code>vertical offset</code>.
-     */
     @Override
     public void scrollBy(int x, int y) {
         int[] selectorIndices = getSelectorIndices();
@@ -734,11 +737,11 @@ public class NumberPicker extends LinearLayout {
             mSelectorElementHeight = mTextSize + selectorTextGapHeight;
         }
 
-        if (!mWrapSelector && y > 0 && selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] <= mStart) {
+        if (!mWrapSelectorWheel && y > 0 && selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] <= mMinValue) {
             mCurrentScrollOffset = mInitialScrollOffset;
             return;
         }
-        if (!mWrapSelector && y < 0 && selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] >= mEnd) {
+        if (!mWrapSelectorWheel && y < 0 && selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] >= mMaxValue) {
             mCurrentScrollOffset = mInitialScrollOffset;
             return;
         }
@@ -747,7 +750,7 @@ public class NumberPicker extends LinearLayout {
             mCurrentScrollOffset -= mSelectorElementHeight;
             decrementSelectorIndices(selectorIndices);
             changeCurrent(selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX]);
-            if (selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] <= mStart) {
+            if (selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] <= mMinValue) {
                 mCurrentScrollOffset = mInitialScrollOffset;
             }
         }
@@ -755,7 +758,7 @@ public class NumberPicker extends LinearLayout {
             mCurrentScrollOffset += mSelectorElementHeight;
             incrementScrollSelectorIndices(selectorIndices);
             changeCurrent(selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX]);
-            if (selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] >= mEnd) {
+            if (selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] >= mMaxValue) {
                 mCurrentScrollOffset = mInitialScrollOffset;
             }
         }
@@ -769,16 +772,16 @@ public class NumberPicker extends LinearLayout {
     /**
      * Sets the listener to be notified on change of the current value.
      *
-     * @param onChangeListener The listener.
+     * @param onValueChangedListener The listener.
      */
-    public void setOnChangeListener(OnChangeListener onChangeListener) {
-        mOnChangeListener = onChangeListener;
+    public void setOnValueChangedListener(OnValueChangedListener onValueChangedListener) {
+        mOnValueChangedListener = onValueChangedListener;
     }
 
     /**
      * Set listener to be notified for scroll state changes.
      *
-     * @param onScrollListener the callback, should not be null.
+     * @param onScrollListener The listener.
      */
     public void setOnScrollListener(OnScrollListener onScrollListener) {
         mOnScrollListener = onScrollListener;
@@ -787,165 +790,216 @@ public class NumberPicker extends LinearLayout {
     /**
      * Set the formatter to be used for formatting the current value.
      * <p>
-     * Note: If you have provided alternative values for the selected positons
-     *       this formatter is never invoked.
+     * Note: If you have provided alternative values for the values this
+     * formatter is never invoked.
      * </p>
      *
-     * @param formatter the formatter object. If formatter is null,
-     *            String.valueOf() will be used.
+     * @param formatter The formatter object. If formatter is <code>null</code>,
+     *            {@link String#valueOf(int)} will be used.
      *
-     * @see #setRange(int, int, String[])
+     * @see #setDisplayedValues(String[])
      */
     public void setFormatter(Formatter formatter) {
-        mFormatter = formatter;
-        resetSelectorIndices();
-    }
-
-    /**
-     * Set the range of numbers allowed for the number picker. The current value
-     * will be automatically set to the start.
-     *
-     * @param start the start of the range (inclusive)
-     * @param end the end of the range (inclusive)
-     */
-    public void setRange(int start, int end) {
-        setRange(start, end, null);
-    }
-
-    /**
-     * Set the range of numbers allowed for the number picker. The current value
-     * will be automatically set to the start. Also provide a mapping for values
-     * used to display to the user instead of the numbers in the range.
-     *
-     * @param start The start of the range (inclusive).
-     * @param end The end of the range (inclusive).
-     * @param displayedValues The values displayed to the user.
-     */
-    public void setRange(int start, int end, String[] displayedValues) {
-        boolean wrapSelector = (end - start) >= mSelectorIndices.length;
-        setRange(start, end, displayedValues, wrapSelector);
-    }
-
-    /**
-     * Set the range of numbers allowed for the number picker. The current value
-     * will be automatically set to the start. Also provide a mapping for values
-     * used to display to the user.
-     * <p>
-     * Note: The <code>wrapSelectorWheel</code> argument is ignored if the range
-     * (difference between <code>start</code> and <code>end</code>) us less than
-     * five since this is the number of values shown by the selector wheel.
-     * </p>
-     *
-     * @param start the start of the range (inclusive)
-     * @param end the end of the range (inclusive)
-     * @param displayedValues the values displayed to the user.
-     * @param wrapSelectorWheel Whether to wrap the selector wheel.
-     *
-     * @see #setWrapSelectorWheel(boolean)
-     */
-    public void setRange(int start, int end, String[] displayedValues, boolean wrapSelectorWheel) {
-        if (start == mStart && end == mEnd) {
+        if (formatter == mFormatter) {
             return;
         }
-
-        if (start < 0 || end < 0) {
-            throw new IllegalArgumentException("start and end must be > 0");
-        }
-        
-        mDisplayedValues = displayedValues;
-        mStart = start;
-        mEnd = end;
-        mCurrent = start;
-
-        setWrapSelectorWheel(wrapSelectorWheel);
-        updateInputTextView();
-
-        if (displayedValues != null) {
-            // Allow text entry rather than strictly numeric entry.
-            mInputText.setRawInputType(InputType.TYPE_CLASS_TEXT
-                    | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        } else {
-            mInputText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
-        }
-
-        resetSelectorIndices();
+        mFormatter = formatter;
+        resetSelectorWheelIndices();
     }
 
     /**
      * Set the current value for the number picker.
+     * <p>
+     * If the argument is less than the {@link NumberPicker#getMinValue()} and
+     * {@link NumberPicker#getWrapSelectorWheel()} is <code>false</code> the
+     * current value is set to the {@link NumberPicker#getMinValue()} value.
+     * </p>
+     * <p>
+     * If the argument is less than the {@link NumberPicker#getMinValue()} and
+     * {@link NumberPicker#getWrapSelectorWheel()} is <code>true</code> the
+     * current value is set to the {@link NumberPicker#getMaxValue()} value.
+     * </p>
+     * <p>
+     * If the argument is less than the {@link NumberPicker#getMaxValue()} and
+     * {@link NumberPicker#getWrapSelectorWheel()} is <code>false</code> the
+     * current value is set to the {@link NumberPicker#getMaxValue()} value.
+     * </p>
+     * <p>
+     * If the argument is less than the {@link NumberPicker#getMaxValue()} and
+     * {@link NumberPicker#getWrapSelectorWheel()} is <code>true</code> the
+     * current value is set to the {@link NumberPicker#getMinValue()} value.
+     * </p>
      *
-     * @param current the current value the start of the range (inclusive)
-     *
-     * @throws IllegalArgumentException when current is not within the range of
-     *             of the number picker.
+     * @param value The current value.
+     * @see #setWrapSelectorWheel(boolean)
+     * @see #setMinValue(int)
+     * @see #setMaxValue(int)
      */
-    public void setCurrent(int current) {
-        if (mCurrent == current) {
+    public void setValue(int value) {
+        if (mValue == value) {
             return;
         }
-        if (current < mStart || current > mEnd) {
-            throw new IllegalArgumentException("current should be >= start and <= end");
+        if (value < mMinValue) {
+            value = mWrapSelectorWheel ? mMaxValue : mMinValue;
         }
-        mCurrent = current;
+        if (value > mMaxValue) {
+            value = mWrapSelectorWheel ? mMinValue : mMaxValue;
+        }
+        mValue = value;
         updateInputTextView();
         updateIncrementAndDecrementButtonsVisibilityState();
     }
 
     /**
-     * Sets whether the selector wheel shown during flinging/scrolling should wrap
-     * around the beginning and end values. By default if the range is more than
-     * five (the number of items shown on the selector wheel) the selector wheel
-     * wrapping is enabled.
+     * Gets whether the selector wheel wraps when reaching the min/max value.
+     *
+     * @return True if the selector wheel wraps.
+     *
+     * @see #getMinValue()
+     * @see #getMaxValue()
+     */
+    public boolean getWrapSelectorWheel() {
+        return mWrapSelectorWheel;
+    }
+
+    /**
+     * Sets whether the selector wheel shown during flinging/scrolling should
+     * wrap around the {@link NumberPicker#getMinValue()} and
+     * {@link NumberPicker#getMaxValue()} values.
+     * <p>
+     * By default if the range (max - min) is more than five (the number of
+     * items shown on the selector wheel) the selector wheel wrapping is
+     * enabled.
+     * </p>
      *
      * @param wrapSelector Whether to wrap.
      */
     public void setWrapSelectorWheel(boolean wrapSelector) {
-        if (wrapSelector && (mEnd - mStart) < mSelectorIndices.length) {
+        if (wrapSelector && (mMaxValue - mMinValue) < mSelectorIndices.length) {
             throw new IllegalStateException("Range less than selector items count.");
         }
-        if (wrapSelector != mWrapSelector) {
+        if (wrapSelector != mWrapSelectorWheel) {
             // force the selector indices array to be reinitialized
             mSelectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] = Integer.MAX_VALUE;
-            mWrapSelector = wrapSelector;
+            mWrapSelectorWheel = wrapSelector;
         }
     }
 
     /**
      * Sets the speed at which the numbers be incremented and decremented when
      * the up and down buttons are long pressed respectively.
+     * <p>
+     * The default value is 300 ms.
+     * </p>
      *
      * @param intervalMillis The speed (in milliseconds) at which the numbers
-     *            will be incremented and decremented (default 300ms).
+     *            will be incremented and decremented.
      */
     public void setOnLongPressUpdateInterval(long intervalMillis) {
         mLongPressUpdateInterval = intervalMillis;
     }
 
     /**
-     * Returns the current value of the NumberPicker.
+     * Returns the value of the picker.
      *
-     * @return the current value.
+     * @return The value.
      */
-    public int getCurrent() {
-        return mCurrent;
+    public int getValue() {
+        return mValue;
     }
 
     /**
-     * Returns the range lower value of the NumberPicker.
+     * Returns the min value of the picker.
      *
-     * @return The lower number of the range.
+     * @return The min value
      */
-    public int getRangeStart() {
-        return mStart;
+    public int getMinValue() {
+        return mMinValue;
     }
 
     /**
-     * Returns the range end value of the NumberPicker.
+     * Sets the min value of the picker.
      *
-     * @return The upper number of the range.
+     * @param minValue The min value.
      */
-    public int getRangeEnd() {
-        return mEnd;
+    public void setMinValue(int minValue) {
+        if (mMinValue == minValue) {
+            return;
+        }
+        if (minValue < 0) {
+            throw new IllegalArgumentException("minValue must be >= 0");
+        }
+        mMinValue = minValue;
+        if (mMinValue > mValue) {
+            mValue = mMinValue;
+        }
+        boolean wrapSelectorWheel = mMaxValue - mMinValue > mSelectorIndices.length;
+        setWrapSelectorWheel(wrapSelectorWheel);
+        resetSelectorWheelIndices();
+        updateInputTextView();
+        updateIncrementAndDecrementButtonsVisibilityState();
+    }
+
+    /**
+     * Returns the max value of the picker.
+     *
+     * @return The max value.
+     */
+    public int getMaxValue() {
+        return mMaxValue;
+    }
+
+    /**
+     * Sets the max value of the picker.
+     *
+     * @param maxValue The max value.
+     */
+    public void setMaxValue(int maxValue) {
+        if (mMaxValue == maxValue) {
+            return;
+        }
+        if (maxValue < 0) {
+            throw new IllegalArgumentException("maxValue must be >= 0");
+        }
+        mMaxValue = maxValue;
+        if (mMaxValue < mValue) {
+            mValue = mMaxValue;
+        }
+        boolean wrapSelectorWheel = mMaxValue - mMinValue > mSelectorIndices.length;
+        setWrapSelectorWheel(wrapSelectorWheel);
+        resetSelectorWheelIndices();
+        updateInputTextView();
+        updateIncrementAndDecrementButtonsVisibilityState();
+    }
+
+    /**
+     * Gets the values to be displayed instead of string values.
+     *
+     * @return The displayed values.
+     */
+    public String[] getDisplayedValues() {
+        return mDisplayedValues;
+    }
+
+    /**
+     * Sets the values to be displayed.
+     *
+     * @param displayedValues The displayed values.
+     */
+    public void setDisplayedValues(String[] displayedValues) {
+        if (mDisplayedValues == displayedValues) {
+            return;
+        }
+        mDisplayedValues = displayedValues;
+        if (mDisplayedValues != null) {
+            // Allow text entry rather than strictly numeric entry.
+            mInputText.setRawInputType(InputType.TYPE_CLASS_TEXT
+                    | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        } else {
+            mInputText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
+        }
+        updateInputTextView();
+        resetSelectorWheelIndices();
     }
 
     @Override
@@ -1018,7 +1072,7 @@ public class NumberPicker extends LinearLayout {
      * Resets the selector indices and clear the cached
      * string representation of these indices.
      */
-    private void resetSelectorIndices() {
+    private void resetSelectorWheelIndices() {
         mSelectorIndexToStringCache.clear();
         int[] selectorIdices = getSelectorIndices();
         for (int i = 0; i < selectorIdices.length; i++) {
@@ -1035,15 +1089,15 @@ public class NumberPicker extends LinearLayout {
      * @param current the new value of the NumberPicker
      */
     private void changeCurrent(int current) {
-        if (mCurrent == current) {
+        if (mValue == current) {
             return;
         }
         // Wrap around the values if we go past the start or end
-        if (mWrapSelector) {
+        if (mWrapSelectorWheel) {
             current = getWrappedSelectorIndex(current);
         }
-        int previous = mCurrent;
-        setCurrent(current);
+        int previous = mValue;
+        setValue(current);
         notifyChange(previous, current);
     }
 
@@ -1108,7 +1162,7 @@ public class NumberPicker extends LinearLayout {
         mPreviousScrollerY = 0;
         Scroller flingScroller = mFlingScroller;
 
-        if (mWrapSelector) {
+        if (mWrapSelectorWheel) {
             if (velocityY > 0) {
                 flingScroller.fling(0, 0, 0, velocityY, 0, 0, 0, Integer.MAX_VALUE);
             } else {
@@ -1116,10 +1170,10 @@ public class NumberPicker extends LinearLayout {
             }
         } else {
             if (velocityY > 0) {
-                int maxY = mTextSize * (mCurrent - mStart);
+                int maxY = mTextSize * (mValue - mMinValue);
                 flingScroller.fling(0, 0, 0, velocityY, 0, 0, 0, maxY);
             } else {
-                int startY = mTextSize * (mEnd - mCurrent);
+                int startY = mTextSize * (mMaxValue - mValue);
                 int maxY = startY;
                 flingScroller.fling(0, startY, 0, velocityY, 0, 0, 0, maxY);
             }
@@ -1153,12 +1207,12 @@ public class NumberPicker extends LinearLayout {
      * Updates the visibility state of the increment and decrement buttons.
      */
     private void updateIncrementAndDecrementButtonsVisibilityState() {
-        if (mWrapSelector || mCurrent < mEnd) {
+        if (mWrapSelectorWheel || mValue < mMaxValue) {
             mIncrementButton.setVisibility(VISIBLE);
         } else {
             mIncrementButton.setVisibility(INVISIBLE);
         }
-        if (mWrapSelector || mCurrent > mStart) {
+        if (mWrapSelectorWheel || mValue > mMinValue) {
             mDecrementButton.setVisibility(VISIBLE);
         } else {
             mDecrementButton.setVisibility(INVISIBLE);
@@ -1170,11 +1224,11 @@ public class NumberPicker extends LinearLayout {
      *         the middle one.
      */
     private int[] getSelectorIndices() {
-        int current = getCurrent();
+        int current = getValue();
         if (mSelectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] != current) {
             for (int i = 0; i < mSelectorIndices.length; i++) {
                 int selectorIndex = current + (i - SELECTOR_MIDDLE_ITEM_INDEX);
-                if (mWrapSelector) {
+                if (mWrapSelectorWheel) {
                     selectorIndex = getWrappedSelectorIndex(selectorIndex);
                 }
                 mSelectorIndices[i] = selectorIndex;
@@ -1188,10 +1242,10 @@ public class NumberPicker extends LinearLayout {
      * @return The wrapped index <code>selectorIndex</code> value.
      */
     private int getWrappedSelectorIndex(int selectorIndex) {
-        if (selectorIndex > mEnd) {
-            return mStart + (selectorIndex - mEnd) % (mEnd - mStart) - 1;
-        } else if (selectorIndex < mStart) {
-            return mEnd - (mStart - selectorIndex) % (mEnd - mStart) + 1;
+        if (selectorIndex > mMaxValue) {
+            return mMinValue + (selectorIndex - mMaxValue) % (mMaxValue - mMinValue) - 1;
+        } else if (selectorIndex < mMinValue) {
+            return mMaxValue - (mMinValue - selectorIndex) % (mMaxValue - mMinValue) + 1;
         }
         return selectorIndex;
     }
@@ -1205,8 +1259,8 @@ public class NumberPicker extends LinearLayout {
             selectorIndices[i] = selectorIndices[i + 1];
         }
         int nextScrollSelectorIndex = selectorIndices[selectorIndices.length - 2] + 1;
-        if (mWrapSelector && nextScrollSelectorIndex > mEnd) {
-            nextScrollSelectorIndex = mStart;
+        if (mWrapSelectorWheel && nextScrollSelectorIndex > mMaxValue) {
+            nextScrollSelectorIndex = mMinValue;
         }
         selectorIndices[selectorIndices.length - 1] = nextScrollSelectorIndex;
         ensureCachedScrollSelectorValue(nextScrollSelectorIndex);
@@ -1221,8 +1275,8 @@ public class NumberPicker extends LinearLayout {
             selectorIndices[i] = selectorIndices[i - 1];
         }
         int nextScrollSelectorIndex = selectorIndices[1] - 1;
-        if (mWrapSelector && nextScrollSelectorIndex < mStart) {
-            nextScrollSelectorIndex = mEnd;
+        if (mWrapSelectorWheel && nextScrollSelectorIndex < mMinValue) {
+            nextScrollSelectorIndex = mMaxValue;
         }
         selectorIndices[0] = nextScrollSelectorIndex;
         ensureCachedScrollSelectorValue(nextScrollSelectorIndex);
@@ -1239,11 +1293,11 @@ public class NumberPicker extends LinearLayout {
         if (scrollSelectorValue != null) {
             return;
         }
-        if (selectorIndex < mStart || selectorIndex > mEnd) {
+        if (selectorIndex < mMinValue || selectorIndex > mMaxValue) {
             scrollSelectorValue = "";
         } else {
             if (mDisplayedValues != null) {
-                int displayedValueIndex = selectorIndex - mStart;
+                int displayedValueIndex = selectorIndex - mMinValue;
                 scrollSelectorValue = mDisplayedValues[displayedValueIndex];
             } else {
                 scrollSelectorValue = formatNumber(selectorIndex);
@@ -1253,7 +1307,7 @@ public class NumberPicker extends LinearLayout {
     }
 
     private String formatNumber(int value) {
-        return (mFormatter != null) ? mFormatter.toString(value) : String.valueOf(value);
+        return (mFormatter != null) ? mFormatter.format(value) : String.valueOf(value);
     }
 
     private void validateInputTextView(View v) {
@@ -1281,9 +1335,9 @@ public class NumberPicker extends LinearLayout {
          * number.
          */
         if (mDisplayedValues == null) {
-            mInputText.setText(formatNumber(mCurrent));
+            mInputText.setText(formatNumber(mValue));
         } else {
-            mInputText.setText(mDisplayedValues[mCurrent - mStart]);
+            mInputText.setText(mDisplayedValues[mValue - mMinValue]);
         }
         mInputText.setSelection(mInputText.getText().length());
     }
@@ -1293,8 +1347,8 @@ public class NumberPicker extends LinearLayout {
      * NumberPicker.
      */
     private void notifyChange(int previous, int current) {
-        if (mOnChangeListener != null) {
-            mOnChangeListener.onChange(this, previous, mCurrent);
+        if (mOnValueChangedListener != null) {
+            mOnValueChangedListener.onValueChange(this, previous, mValue);
         }
     }
 
@@ -1342,7 +1396,7 @@ public class NumberPicker extends LinearLayout {
                 // Don't force the user to type in jan when ja will do
                 value = value.toLowerCase();
                 if (mDisplayedValues[i].toLowerCase().startsWith(value)) {
-                    return mStart + i;
+                    return mMinValue + i;
                 }
             }
 
@@ -1357,7 +1411,7 @@ public class NumberPicker extends LinearLayout {
                 // Ignore as if it's not a number we don't care
             }
         }
-        return mStart;
+        return mMinValue;
     }
 
     /**
@@ -1429,7 +1483,7 @@ public class NumberPicker extends LinearLayout {
                  * allowed. We have to allow less than min as the user might
                  * want to delete some numbers and then type a new number.
                  */
-                if (val > mEnd) {
+                if (val > mMaxValue) {
                     return "";
                 } else {
                     return filtered;
@@ -1493,7 +1547,7 @@ public class NumberPicker extends LinearLayout {
         }
 
         public void run() {
-            changeCurrent(mCurrent + mUpdateStep);
+            changeCurrent(mValue + mUpdateStep);
             postDelayed(this, mLongPressUpdateInterval);
         }
     }
