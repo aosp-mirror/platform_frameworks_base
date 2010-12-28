@@ -16,7 +16,7 @@
 
 package android.content;
 
-import com.google.android.collect.Lists;
+import android.os.SystemClock;
 import com.google.android.collect.Maps;
 
 import android.util.Pair;
@@ -130,33 +130,13 @@ public class SyncQueue {
     public Pair<SyncOperation, Long> nextOperation() {
         SyncOperation best = null;
         long bestRunTime = 0;
-        boolean bestSyncableIsUnknownAndNotARetry = false;
+        boolean bestIsInitial = false;
         for (SyncOperation op : mOperationsMap.values()) {
-            long opRunTime = op.earliestRunTime;
-            if (!op.extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, false)) {
-                Pair<Long, Long> backoff = mSyncStorageEngine.getBackoff(op.account, op.authority);
-                long delayUntil = mSyncStorageEngine.getDelayUntilTime(op.account, op.authority);
-                opRunTime = Math.max(
-                        Math.max(opRunTime, delayUntil),
-                        backoff != null ? backoff.first : 0);
-            }
-            // we know a sync is a retry if the intialization flag is set, since that will only
-            // be set by the sync dispatching code, thus if it is set it must have already been
-            // dispatched
-            final boolean syncableIsUnknownAndNotARetry =
-                    !op.extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false)
-                    && mSyncStorageEngine.getIsSyncable(op.account, op.authority) < 0;
-            // if the unsyncable state differs, make the current the best if it is unsyncable
-            // else, if the expedited state differs, make the current the best if it is expedited
-            // else, make the current the best if it is earlier than the best
-            if (best == null
-                    || ((bestSyncableIsUnknownAndNotARetry == syncableIsUnknownAndNotARetry)
-                        ? (best.expedited == op.expedited
-                           ? opRunTime < bestRunTime
-                           : op.expedited)
-                        : syncableIsUnknownAndNotARetry)) {
+            final long opRunTime = getOpTime(op);
+            final boolean opIsInitial = getIsInitial(op);
+            if (isOpBetter(best, bestRunTime, bestIsInitial, op, opRunTime, opIsInitial)) {
                 best = op;
-                bestSyncableIsUnknownAndNotARetry = syncableIsUnknownAndNotARetry;
+                bestIsInitial = opIsInitial;
                 bestRunTime = opRunTime;
             }
         }
@@ -164,6 +144,91 @@ public class SyncQueue {
             return null;
         }
         return Pair.create(best, bestRunTime);
+    }
+
+    // VisibleForTesting
+    long getOpTime(SyncOperation op) {
+        long opRunTime = op.earliestRunTime;
+        if (!op.extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, false)) {
+            Pair<Long, Long> backoff = mSyncStorageEngine.getBackoff(op.account, op.authority);
+            long delayUntil = mSyncStorageEngine.getDelayUntilTime(op.account, op.authority);
+            opRunTime = Math.max(
+                    Math.max(opRunTime, delayUntil),
+                    backoff != null ? backoff.first : 0);
+        }
+        return opRunTime;
+    }
+
+    // VisibleForTesting
+    boolean getIsInitial(SyncOperation op) {
+        // Initial op is defined as an op with an unknown syncable that is not a retry.
+        // We know a sync is a retry if the intialization flag is set, since that will only
+        // be set by the sync dispatching code, thus if it is set it must have already been
+        // dispatched
+        return !op.extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false)
+        && mSyncStorageEngine.getIsSyncable(op.account, op.authority) < 0;
+    }
+
+    // return true if op is a better candidate than best. Rules:
+    // if the "Initial" state differs, make the current the best if it is "Initial".
+    // else, if the expedited state differs, pick the expedited unless it is backed off and the
+    // non-expedited isn't
+    // VisibleForTesting
+    boolean isOpBetter(
+            SyncOperation best, long bestRunTime, boolean bestIsInitial,
+            SyncOperation op, long opRunTime, boolean opIsInitial) {
+        boolean setBest = false;
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG,  "nextOperation: Processing op: " + op);
+        }
+        if (best == null) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG,  "   First op selected");
+            }
+            setBest = true;
+        } else if (bestIsInitial == opIsInitial) {
+            if (best.expedited == op.expedited) {
+                if (opRunTime < bestRunTime) {
+                    //  if both have same level, earlier time wins
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG,  "   Same expedite level - new op selected");
+                    }
+                    setBest = true;
+                }
+            } else {
+                final long now = SystemClock.elapsedRealtime();
+                if (op.expedited) {
+                    if (opRunTime <= now || bestRunTime > now) {
+                        // if op is expedited, it wins unless op can't run yet and best can
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG,  "   New op is expedited and can run - new op selected");
+                        }
+                        setBest = true;
+                    } else {
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG,  "   New op is expedited but can't run and best can");
+                        }
+                    }
+                } else {
+                    if (bestRunTime > now && opRunTime <= now) {
+                        // if best is expedited but can't run yet and op can run, op wins
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG,
+                                    "   New op is not expedited but can run - new op selected");
+                        }
+                        setBest = true;
+                    }
+                }
+            }
+        } else {
+            if (opIsInitial) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG,  "   New op is init - new op selected");
+                }
+                setBest = true;
+            }
+        }
+        return setBest;
     }
 
     /**
