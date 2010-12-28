@@ -32,7 +32,6 @@ import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
-import android.text.format.Time;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -44,11 +43,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView.OnScrollListener;
 
-import java.security.InvalidParameterException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -397,6 +394,16 @@ public class CalendarView extends FrameLayout {
         invalidate();
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        mListView.setEnabled(enabled);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return mListView.isEnabled();
+    }
+
     /**
      * Gets the minimal date supported by this {@link CalendarView} in milliseconds
      * since January 1, 1970 00:00:00 in {@link TimeZone#getDefault()} time
@@ -571,8 +578,8 @@ public class CalendarView extends FrameLayout {
      *        minimal or after the maximal date.
      *
      * @see #setDate(long, boolean, boolean)
-     * @see #setMinDate(Calendar)
-     * @see #setMaxDate(Calendar)
+     * @see #setMinDate(long)
+     * @see #setMaxDate(long)
      */
     public void setDate(long date) {
         setDate(date, false, false);
@@ -589,8 +596,8 @@ public class CalendarView extends FrameLayout {
      * @throws IllegalArgumentException of the provided date is before the
      *        minimal or after the maximal date.
      *
-     * @see #setMinDate(Calendar)
-     * @see #setMaxDate(Calendar)
+     * @see #setMinDate(long)
+     * @see #setMaxDate(long)
      */
     public void setDate(long date, boolean animate, boolean center) {
         mTempDate.setTimeInMillis(date);
@@ -995,61 +1002,26 @@ public class CalendarView extends FrameLayout {
             return position;
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            WeekView v;
-            HashMap<String, Object> drawingParams = null;
+            WeekView weekView = null;
             if (convertView != null) {
-                v = (WeekView) convertView;
-                // We store the drawing parameters in the view so it can be
-                // recycled
-                drawingParams = (HashMap<String, Object>) v.getTag();
+                weekView = (WeekView) convertView;
             } else {
-                v = getNewView();
-                // Set up the new view
+                weekView = new WeekView(mContext);
                 android.widget.AbsListView.LayoutParams params =
-                    new android.widget.AbsListView.LayoutParams(
-                        LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-                v.setLayoutParams(params);
-                v.setClickable(true);
-                v.setOnTouchListener(this);
-
-                drawingParams = new HashMap<String, Object>();
+                    new android.widget.AbsListView.LayoutParams(LayoutParams.WRAP_CONTENT,
+                            LayoutParams.WRAP_CONTENT);
+                weekView.setLayoutParams(params);
+                weekView.setClickable(true);
+                weekView.setOnTouchListener(this);
             }
 
-            // pass in all the view parameters
-            putDrawingParementer(drawingParams, WeekView.VIEW_PARAMS_WEEK, position);
-            putDrawingParementer(drawingParams, WeekView.VIEW_PARAMS_FOCUS_MONTH, mFocusedMonth);
-            putDrawingParementer(drawingParams, WeekView.VIEW_PARAMS_SELECTED_DAY,
-                    (mSelectedWeek == position) ? mSelectedDate.get(Calendar.DAY_OF_WEEK) : -1);
-            v.setWeekParams(drawingParams);
+            int selectedWeekDay = (mSelectedWeek == position) ? mSelectedDate.get(
+                    Calendar.DAY_OF_WEEK) : -1;
+            weekView.init(position, selectedWeekDay, mFocusedMonth);
 
-            return v;
-        }
-
-        /**
-         * Puts the given <code>value</code> for the drawing
-         * <code>parameter</code> in the <code>drawingParams</code>.
-         */
-        private void putDrawingParementer(HashMap<String, Object> drawingParams, String parameter,
-                int value) {
-            int[] valueArray = (int[]) drawingParams.get(parameter);
-            if (valueArray == null) {
-                valueArray = new int[1];
-                drawingParams.put(parameter, valueArray);
-            }
-            valueArray[0] = value;
-        }
-
-        /**
-         * Creates a new WeekView and returns it.
-         * view creation.
-         *
-         * @return A new WeekView
-         */
-        private WeekView getNewView() {
-            return new WeekView(mContext);
+            return weekView;
         }
 
         /**
@@ -1067,7 +1039,7 @@ public class CalendarView extends FrameLayout {
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            if (mGestureDetector.onTouchEvent(event)) {
+            if (mListView.isEnabled() && mGestureDetector.onTouchEvent(event)) {
                 WeekView weekView = (WeekView) v;
                 weekView.getDayFromLocation(event.getX(), mTempDate);
                 // it is possible that the touched day is outside the valid range
@@ -1113,24 +1085,6 @@ public class CalendarView extends FrameLayout {
      */
     private class WeekView extends View {
 
-        /**
-         * This specifies the position (or weeks since the epoch) of this week.
-         */
-        public static final String VIEW_PARAMS_WEEK = "week";
-
-        /**
-         * This sets one of the days in this view as selected
-         * {@link Time#SUNDAY} through {@link Time#SATURDAY}.
-         */
-        public static final String VIEW_PARAMS_SELECTED_DAY = "selected_day";
-
-        /**
-         * Which month is currently in focus, as defined by {@link Time#month}
-         * [0-11].
-         */
-        public static final String VIEW_PARAMS_FOCUS_MONTH = "focus_month";
-
-
         private final Rect mTempRect = new Rect();
 
         private final Paint mDrawPaint = new Paint();
@@ -1166,7 +1120,7 @@ public class CalendarView extends FrameLayout {
         private boolean mHasSelectedDay = false;
 
         // Which day is selected [0-6] or -1 if no day is selected
-        private int mSelectedDate = -1;
+        private int mSelectedDay = -1;
 
         // The number of days + a spot for week number if it is displayed
         private int mNumCells;
@@ -1188,28 +1142,21 @@ public class CalendarView extends FrameLayout {
         }
 
         /**
-         * Sets all the parameters for displaying this week. The only required
-         * parameter is the week number. Other parameters have a default value
-         * and will only update if a new value is included, except for focus
-         * month, which will always default to no focus month if no value is
-         * passed in. See {@link #VIEW_PARAMS_HEIGHT} for more info on
-         * parameters.
+         * Initializes this week view.
          *
-         * @param params A map of the new parameters, see
-         *            {@link #VIEW_PARAMS_HEIGHT}
+         * @param weekNumber The number of the week this view represents. The
+         *            week number is a zero based index of the weeks since
+         *            {@link CalendarView#getMinDate()}.
+         * @param selectedWeekDay The selected day of the week from 0 to 6, -1 if no
+         *            selected day.
+         * @param focusedMonth The month that is currently in focus i.e.
+         *            highlighted.
          */
-        public void setWeekParams(HashMap<String, Object> params) {
-            if (!params.containsKey(VIEW_PARAMS_WEEK)) {
-                throw new InvalidParameterException(
-                        "You must specify the week number for this view");
-            }
-            setTag(params);
-            if (params.containsKey(VIEW_PARAMS_SELECTED_DAY)) {
-                mSelectedDate = ((int[]) params.get(VIEW_PARAMS_SELECTED_DAY))[0];
-            }
-            mHasSelectedDay = mSelectedDate != -1;
+        public void init(int weekNumber, int selectedWeekDay, int focusedMonth) {
+            mSelectedDay = selectedWeekDay;
+            mHasSelectedDay = mSelectedDay != -1;
             mNumCells = mShowWeekNumber ? mDaysPerWeek + 1 : mDaysPerWeek;
-            mWeek = ((int[]) params.get(VIEW_PARAMS_WEEK))[0];
+            mWeek = weekNumber;
             mTempDate.setTimeInMillis(mMinDate.getTimeInMillis());
             mTempDate.add(Calendar.WEEK_OF_YEAR, mWeek);
             mTempDate.setFirstDayOfWeek(mFirstDayOfWeek);
@@ -1230,14 +1177,10 @@ public class CalendarView extends FrameLayout {
             mTempDate.add(Calendar.DAY_OF_MONTH, diff);
 
             mFirstDay = (Calendar) mTempDate.clone();
-
             mMonthOfFirstWeekDay = mTempDate.get(Calendar.MONTH);
 
-            int focusMonth = params.containsKey(VIEW_PARAMS_FOCUS_MONTH) ? ((int[]) params
-                    .get(VIEW_PARAMS_FOCUS_MONTH))[0] : -1;
-
             for (; i < mNumCells; i++) {
-                mFocusDay[i] = (mTempDate.get(Calendar.MONTH) == focusMonth);
+                mFocusDay[i] = (mTempDate.get(Calendar.MONTH) == focusedMonth);
                 // do not draw dates outside the valid range to avoid user confusion
                 if (mTempDate.before(mMinDate) || mTempDate.after(mMaxDate)) {
                     mDayNumbers[i] = "";
@@ -1426,7 +1369,7 @@ public class CalendarView extends FrameLayout {
          */
         private void updateSelectionPositions() {
             if (mHasSelectedDay) {
-                int selectedPosition = mSelectedDate - mFirstDayOfWeek;
+                int selectedPosition = mSelectedDay - mFirstDayOfWeek;
                 if (selectedPosition < 0) {
                     selectedPosition += 7;
                 }

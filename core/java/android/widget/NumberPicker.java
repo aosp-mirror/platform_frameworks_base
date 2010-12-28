@@ -563,6 +563,9 @@ public class NumberPicker extends LinearLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (!isEnabled()) {
+            return false;
+        }
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mLastMotionEventY = mLastDownEventY = event.getY();
@@ -606,6 +609,9 @@ public class NumberPicker extends LinearLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if (!isEnabled()) {
+            return false;
+        }
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
         }
