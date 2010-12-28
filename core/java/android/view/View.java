@@ -5445,7 +5445,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
             // Figure out if we need to update the pivot point
             if ((mPrivateFlags & PIVOT_EXPLICITLY_SET) == 0) {
-                if ((mRight - mLeft) != mPrevWidth && (mBottom - mTop) != mPrevHeight) {
+                if ((mRight - mLeft) != mPrevWidth || (mBottom - mTop) != mPrevHeight) {
                     mPrevWidth = mRight - mLeft;
                     mPrevHeight = mBottom - mTop;
                     mPivotX = (float) mPrevWidth / 2f;
@@ -5827,6 +5827,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             onSizeChanged(width, mBottom - mTop, width, oldHeight);
 
             if (!mMatrixIsIdentity) {
+                if ((mPrivateFlags & PIVOT_EXPLICITLY_SET) == 0) {
+                    // A change in dimension means an auto-centered pivot point changes, too
+                    mMatrixDirty = true;
+                }
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate();
             }
@@ -5880,6 +5884,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             onSizeChanged(width, mBottom - mTop, width, oldHeight);
 
             if (!mMatrixIsIdentity) {
+                if ((mPrivateFlags & PIVOT_EXPLICITLY_SET) == 0) {
+                    // A change in dimension means an auto-centered pivot point changes, too
+                    mMatrixDirty = true;
+                }
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate();
             }
@@ -5936,6 +5944,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             onSizeChanged(mRight - mLeft, height, oldWidth, height);
 
             if (!mMatrixIsIdentity) {
+                if ((mPrivateFlags & PIVOT_EXPLICITLY_SET) == 0) {
+                    // A change in dimension means an auto-centered pivot point changes, too
+                    mMatrixDirty = true;
+                }
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate();
             }
@@ -5989,6 +6001,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             onSizeChanged(mRight - mLeft, height, oldWidth, height);
 
             if (!mMatrixIsIdentity) {
+                if ((mPrivateFlags & PIVOT_EXPLICITLY_SET) == 0) {
+                    // A change in dimension means an auto-centered pivot point changes, too
+                    mMatrixDirty = true;
+                }
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate();
             }
@@ -8691,6 +8707,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             int newHeight = bottom - top;
 
             if (newWidth != oldWidth || newHeight != oldHeight) {
+                if ((mPrivateFlags & PIVOT_EXPLICITLY_SET) == 0) {
+                    // A change in dimension means an auto-centered pivot point changes, too
+                    mMatrixDirty = true;
+                }
                 onSizeChanged(newWidth, newHeight, oldWidth, oldHeight);
             }
 
@@ -8698,7 +8718,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 // If we are visible, force the DRAWN bit to on so that
                 // this invalidate will go through (at least to our parent).
                 // This is because someone may have invalidated this view
-                // before this call to setFrame came in, therby clearing
+                // before this call to setFrame came in, thereby clearing
                 // the DRAWN bit.
                 mPrivateFlags |= DRAWN;
                 invalidate();
