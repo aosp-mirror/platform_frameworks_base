@@ -60,6 +60,15 @@ import libcore.icu.LocaleData;
  * @attr ref android.R.styleable#CalendarView_firstDayOfWeek
  * @attr ref android.R.styleable#CalendarView_minDate
  * @attr ref android.R.styleable#CalendarView_maxDate
+ * @attr ref android.R.styleable#CalendarView_shownWeekCount
+ * @attr ref android.R.styleable#CalendarView_selectedWeekBackgroundColor
+ * @attr ref android.R.styleable#CalendarView_focusedMonthDateColor
+ * @attr ref android.R.styleable#CalendarView_unfocusedMonthDateColor
+ * @attr ref android.R.styleable#CalendarView_weekNumberColor
+ * @attr ref android.R.styleable#CalendarView_weekSeparatorLineColor
+ * @attr ref android.R.styleable#CalendarView_selectedDateVerticalBar
+ * @attr ref android.R.styleable#CalendarView_weekDayTextAppearance
+ * @attr ref android.R.styleable#CalendarView_dateTextAppearance
  */
 @Widget
 public class CalendarView extends FrameLayout {
