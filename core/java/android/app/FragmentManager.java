@@ -972,9 +972,17 @@ final class FragmentManagerImpl extends FragmentManager {
                         transitionStyle);
                 if (anim != null) {
                     anim.setTarget(fragment.mView);
+                    // Delay the actual hide operation until the animation finishes, otherwise
+                    // the fragment will just immediately disappear
+                    final Fragment finalFragment = fragment;
+                    anim.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            finalFragment.mView.setVisibility(View.GONE);
+                        }
+                    });
                     anim.start();
                 }
-                fragment.mView.setVisibility(View.GONE);
             }
             if (fragment.mAdded && fragment.mHasMenu) {
                 mNeedMenuInvalidate = true;
