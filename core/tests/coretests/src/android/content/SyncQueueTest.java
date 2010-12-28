@@ -24,6 +24,8 @@ import android.accounts.Account;
 import android.os.Bundle;
 import android.os.SystemClock;
 
+import java.io.File;
+
 public class SyncQueueTest extends AndroidTestCase {
     private static final Account ACCOUNT1 = new Account("test.account1", "test.type1");
     private static final Account ACCOUNT2 = new Account("test.account2", "test.type2");
@@ -138,6 +140,38 @@ public class SyncQueueTest extends AndroidTestCase {
         mSyncQueue.remove(op3);
     }
 
+    public void testExpeditedVsBackoff() throws Exception {
+
+        final SyncOperation op1 = new SyncOperation(
+                ACCOUNT1, SyncStorageEngine.SOURCE_USER, AUTHORITY1, newTestBundle("1"), 0);
+        final SyncOperation op2 = new SyncOperation(
+                ACCOUNT1, SyncStorageEngine.SOURCE_USER, AUTHORITY1, newTestBundle("2"), 0);
+
+        // op1 is expedited but backed off
+        mSettings.setBackoff(ACCOUNT1,  AUTHORITY1, SystemClock.elapsedRealtime() + 1000000, 5);
+        op1.expedited = true;
+
+        // op2 is not expidaited but ignores back off so it should run
+        op2.extras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, true);
+
+        // First test top level method
+        mSyncQueue.remove(ACCOUNT1, AUTHORITY1);
+        mSyncQueue.add(op1);
+        mSyncQueue.add(op2);
+        assertEquals(op2, mSyncQueue.nextReadyToRun(SystemClock.elapsedRealtime()).first);
+
+        // Since the queue is implemented as a hash, we cannot control the order the op's get
+        // fed into the algorithm so test the inner method in both cases
+        final long opTime1 = mSyncQueue.getOpTime(op1);
+        final boolean isInitial1 = mSyncQueue.getIsInitial(op1);
+        final long opTime2 = mSyncQueue.getOpTime(op2);
+        final boolean opIsInitial2 = mSyncQueue.getIsInitial(op2);
+
+        assertTrue(mSyncQueue.isOpBetter(op1, opTime1, isInitial1, op2, opTime2, opIsInitial2));
+        assertFalse(mSyncQueue.isOpBetter(op2, opTime2, opIsInitial2, op1, opTime1, isInitial1));
+    }
+
+
     Bundle newTestBundle(String val) {
         Bundle bundle = new Bundle();
         bundle.putString("test", val);
@@ -148,7 +182,12 @@ public class SyncQueueTest extends AndroidTestCase {
         ContentResolver mResolver;
 
         public TestContext(ContentResolver resolver, Context realContext) {
-            super(new RenamingDelegatingContext(new MockContext(), realContext, "test."));
+                        super(new RenamingDelegatingContext(new MockContext() {
+                @Override
+                public File getFilesDir() {
+                    return new File("/data");
+                }
+            }, realContext, "test."));
             mResolver = resolver;
         }
 
