@@ -75,6 +75,8 @@ public class TimePicker extends FrameLayout {
 
     private final String[] mAmPmStrings;
 
+    private boolean mIsEnabled;
+
     // callbacks
     private OnTimeChangedListener mOnTimeChangedListener;
 
@@ -188,10 +190,19 @@ public class TimePicker extends FrameLayout {
 
     @Override
     public void setEnabled(boolean enabled) {
+        if (mIsEnabled == enabled) {
+            return;
+        }
         super.setEnabled(enabled);
         mMinuteSpinner.setEnabled(enabled);
         mHourSpinner.setEnabled(enabled);
         mAmPmSpinner.setEnabled(enabled);
+        mIsEnabled = enabled;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return mIsEnabled;
     }
 
     /**

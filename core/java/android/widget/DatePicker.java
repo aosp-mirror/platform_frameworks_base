@@ -103,6 +103,8 @@ public class DatePicker extends FrameLayout {
 
     private final Calendar mCurrentDate = Calendar.getInstance();
 
+    private boolean mIsEnabled;
+
     /**
      * The callback used to indicate the user changes\d the date.
      */
@@ -295,11 +297,20 @@ public class DatePicker extends FrameLayout {
 
     @Override
     public void setEnabled(boolean enabled) {
+        if (mIsEnabled == enabled) {
+            return;
+        }
         super.setEnabled(enabled);
         mDaySpinner.setEnabled(enabled);
         mMonthSpinner.setEnabled(enabled);
         mYearSpinner.setEnabled(enabled);
         mCalendarView.setEnabled(enabled);
+        mIsEnabled = enabled;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return mIsEnabled;
     }
 
     /**
