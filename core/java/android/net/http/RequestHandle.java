@@ -308,7 +308,7 @@ public class RequestHandle {
         String A2 = mMethod  + ":" + mUrl;
 
         // because we do not preemptively send authorization headers, nc is always 1
-        String nc = "000001";
+        String nc = "00000001";
         String cnonce = computeCnonce();
         String digest = computeDigest(A1, A2, nonce, QOP, nc, cnonce);
 
