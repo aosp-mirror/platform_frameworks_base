@@ -982,6 +982,8 @@ final class FragmentManagerImpl extends FragmentManager {
                         }
                     });
                     anim.start();
+                } else {
+                    fragment.mView.setVisibility(View.GONE);
                 }
             }
             if (fragment.mAdded && fragment.mHasMenu) {
