@@ -82,6 +82,11 @@ public class LocalePicker extends ListFragment {
      * {@link LocaleInfo#label}.
      */
     public static ArrayAdapter<LocaleInfo> constructAdapter(Context context) {
+        return constructAdapter(context, R.layout.locale_picker_item, R.id.locale);
+    }
+
+    public static ArrayAdapter<LocaleInfo> constructAdapter(Context context,
+            int layoutId, int fieldId) {
         final Resources resources = context.getResources();
         final String[] locales = context.getAssets().getLocales();
         final String[] specialLocaleCodes = resources.getStringArray(R.array.special_locale_codes);
@@ -149,8 +154,6 @@ public class LocalePicker extends ListFragment {
             localeInfos[i] = preprocess[i];
         }
         Arrays.sort(localeInfos);
-        final int layoutId = R.layout.locale_picker_item;
-        final int fieldId = R.id.locale;
         return new ArrayAdapter<LocaleInfo>(context, layoutId, fieldId, localeInfos);
     }
 
