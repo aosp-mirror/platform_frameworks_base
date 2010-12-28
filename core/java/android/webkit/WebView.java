@@ -4471,10 +4471,17 @@ public class WebView extends AbsoluteLayout
         return false;
     }
 
+    private boolean isEnterActionKey(int keyCode) {
+        return keyCode == KeyEvent.KEYCODE_DPAD_CENTER
+                || keyCode == KeyEvent.KEYCODE_ENTER
+                || keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER;
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "keyDown at " + System.currentTimeMillis()
+                    + "keyCode=" + keyCode
                     + ", " + event + ", unicode=" + event.getUnicodeChar());
         }
 
@@ -4543,7 +4550,7 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
-        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+        if (isEnterActionKey(keyCode)) {
             switchOutDrawHistory();
             if (event.getRepeatCount() == 0) {
                 if (mSelectingText) {
@@ -4672,7 +4679,7 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
-        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+        if (isEnterActionKey(keyCode)) {
             // remove the long press message first
             mPrivateHandler.removeMessages(LONG_PRESS_CENTER);
             mGotCenterDown = false;
@@ -5464,8 +5471,10 @@ public class WebView extends AbsoluteLayout
                     } else {
                         // TODO: allow scrollable overflow div to autoscroll
                     }
-                    nativeExtendSelection(contentX, contentY);
-                    invalidate();
+                    if (deltaX != 0 || deltaY != 0) {
+                        nativeExtendSelection(contentX, contentY);
+                        invalidate();
+                    }
                     break;
                 }
 

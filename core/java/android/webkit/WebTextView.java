@@ -238,7 +238,8 @@ import junit.framework.Assert;
             }
         }
 
-        if ((mSingle && KeyEvent.KEYCODE_ENTER == keyCode)) {
+        if (mSingle && (KeyEvent.KEYCODE_ENTER == keyCode
+                    || KeyEvent.KEYCODE_NUMPAD_ENTER == keyCode)) {
             if (isPopupShowing()) {
                 return super.dispatchKeyEvent(event);
             }
@@ -296,7 +297,8 @@ import junit.framework.Assert;
             // so do not pass down to javascript, and instead
             // return true.  If it is an arrow key or a delete key, we can go
             // ahead and pass it down.
-            if (KeyEvent.KEYCODE_ENTER == keyCode) {
+            if (KeyEvent.KEYCODE_ENTER == keyCode
+                        || KeyEvent.KEYCODE_NUMPAD_ENTER == keyCode) {
                 // For multi-line text boxes, newlines will
                 // trigger onTextChanged for key down (which will send both
                 // key up and key down) but not key up.
