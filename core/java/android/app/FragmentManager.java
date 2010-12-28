@@ -827,8 +827,9 @@ final class FragmentManagerImpl extends FragmentManager {
                                 // animation right now -- it is not needed,
                                 // and we can't wait any more on destroying
                                 // the fragment.
+                                Animator anim = f.mAnimatingAway;
                                 f.mAnimatingAway = null;
-                                f.mAnimatingAway.cancel();
+                                anim.cancel();
                             }
                         }
                         if (f.mAnimatingAway != null) {
