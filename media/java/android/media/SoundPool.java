@@ -141,17 +141,6 @@ public class SoundPool
             throw new RuntimeException("Native setup failed");
         }
         mLock = new Object();
-
-        // setup message handler
-        Looper looper;
-        if ((looper = Looper.myLooper()) != null) {
-            mEventHandler = new EventHandler(this, looper);
-        } else if ((looper = Looper.getMainLooper()) != null) {
-            mEventHandler = new EventHandler(this, looper);
-        } else {
-            mEventHandler = null;
-        }
-
     }
 
     /**
@@ -427,6 +416,19 @@ public class SoundPool
     public void setOnLoadCompleteListener(OnLoadCompleteListener listener)
     {
         synchronized(mLock) {
+            if (listener != null) {
+                // setup message handler
+                Looper looper;
+                if ((looper = Looper.myLooper()) != null) {
+                    mEventHandler = new EventHandler(this, looper);
+                } else if ((looper = Looper.getMainLooper()) != null) {
+                    mEventHandler = new EventHandler(this, looper);
+                } else {
+                    mEventHandler = null;
+                }
+            } else {
+                mEventHandler = null;
+            }
             mOnLoadCompleteListener = listener;
         }
     }

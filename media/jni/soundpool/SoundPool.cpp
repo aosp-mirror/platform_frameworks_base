@@ -81,10 +81,10 @@ SoundPool::~SoundPool()
     quit();
 
     Mutex::Autolock lock(&mLock);
+
     mChannels.clear();
     if (mChannelPool)
         delete [] mChannelPool;
-
     // clean up samples
     LOGV("clear samples");
     mSamples.clear();
@@ -96,8 +96,19 @@ SoundPool::~SoundPool()
 void SoundPool::addToRestartList(SoundChannel* channel)
 {
     Mutex::Autolock lock(&mRestartLock);
-    mRestart.push_back(channel);
-    mCondition.signal();
+    if (!mQuit) {
+        mRestart.push_back(channel);
+        mCondition.signal();
+    }
+}
+
+void SoundPool::addToStopList(SoundChannel* channel)
+{
+    Mutex::Autolock lock(&mRestartLock);
+    if (!mQuit) {
+        mStop.push_back(channel);
+        mCondition.signal();
+    }
 }
 
 int SoundPool::beginThread(void* arg)
@@ -114,17 +125,38 @@ int SoundPool::run()
         LOGV("awake");
         if (mQuit) break;
 
+        while (!mStop.empty()) {
+            SoundChannel* channel;
+            LOGV("Getting channel from stop list");
+            List<SoundChannel* >::iterator iter = mStop.begin();
+            channel = *iter;
+            mStop.erase(iter);
+            mRestartLock.unlock();
+            if (channel != 0) {
+                Mutex::Autolock lock(&mLock);
+                channel->stop();
+            }
+            mRestartLock.lock();
+            if (mQuit) break;
+        }
+
         while (!mRestart.empty()) {
             SoundChannel* channel;
             LOGV("Getting channel from list");
             List<SoundChannel*>::iterator iter = mRestart.begin();
             channel = *iter;
             mRestart.erase(iter);
-            if (channel) channel->nextEvent();
+            mRestartLock.unlock();
+            if (channel != 0) {
+                Mutex::Autolock lock(&mLock);
+                channel->nextEvent();
+            }
+            mRestartLock.lock();
             if (mQuit) break;
         }
     }
 
+    mStop.clear();
     mRestart.clear();
     mCondition.signal();
     mRestartLock.unlock();
@@ -208,43 +240,43 @@ bool SoundPool::unload(int sampleID)
 int SoundPool::play(int sampleID, float leftVolume, float rightVolume,
         int priority, int loop, float rate)
 {
-    LOGV("sampleID=%d, leftVolume=%f, rightVolume=%f, priority=%d, loop=%d, rate=%f",
+    LOGV("play sampleID=%d, leftVolume=%f, rightVolume=%f, priority=%d, loop=%d, rate=%f",
             sampleID, leftVolume, rightVolume, priority, loop, rate);
     sp<Sample> sample;
     SoundChannel* channel;
     int channelID;
 
-    // scope for lock
-    {
-        Mutex::Autolock lock(&mLock);
+    Mutex::Autolock lock(&mLock);
 
-        // is sample ready?
-        sample = findSample(sampleID);
-        if ((sample == 0) || (sample->state() != Sample::READY)) {
-            LOGW("  sample %d not READY", sampleID);
-            return 0;
-        }
-
-        dump();
-
-        // allocate a channel
-        channel = allocateChannel(priority);
-
-        // no channel allocated - return 0
-        if (!channel) {
-            LOGV("No channel allocated");
-            return 0;
-        }
-
-        channelID = ++mNextChannelID;
+    if (mQuit) {
+        return 0;
+    }
+    // is sample ready?
+    sample = findSample(sampleID);
+    if ((sample == 0) || (sample->state() != Sample::READY)) {
+        LOGW("  sample %d not READY", sampleID);
+        return 0;
     }
 
-    LOGV("channel state = %d", channel->state());
+    dump();
+
+    // allocate a channel
+    channel = allocateChannel_l(priority);
+
+    // no channel allocated - return 0
+    if (!channel) {
+        LOGV("No channel allocated");
+        return 0;
+    }
+
+    channelID = ++mNextChannelID;
+
+    LOGV("play channel %p state = %d", channel, channel->state());
     channel->play(sample, channelID, leftVolume, rightVolume, priority, loop, rate);
     return channelID;
 }
 
-SoundChannel* SoundPool::allocateChannel(int priority)
+SoundChannel* SoundPool::allocateChannel_l(int priority)
 {
     List<SoundChannel*>::iterator iter;
     SoundChannel* channel = NULL;
@@ -273,7 +305,7 @@ SoundChannel* SoundPool::allocateChannel(int priority)
 }
 
 // move a channel from its current position to the front of the list
-void SoundPool::moveToFront(SoundChannel* channel)
+void SoundPool::moveToFront_l(SoundChannel* channel)
 {
     for (List<SoundChannel*>::iterator iter = mChannels.begin(); iter != mChannels.end(); ++iter) {
         if (*iter == channel) {
@@ -378,10 +410,9 @@ void SoundPool::setRate(int channelID, float rate)
 }
 
 // call with lock held
-void SoundPool::done(SoundChannel* channel)
+void SoundPool::done_l(SoundChannel* channel)
 {
-    LOGV("done(%d)", channel->channelID());
-
+    LOGV("done_l(%d)", channel->channelID());
     // if "stolen", play next event
     if (channel->nextChannelID() != 0) {
         LOGV("add to restart list");
@@ -391,7 +422,7 @@ void SoundPool::done(SoundChannel* channel)
     // return to idle state
     else {
         LOGV("move to front");
-        moveToFront(channel);
+        moveToFront_l(channel);
     }
 }
 
@@ -511,81 +542,88 @@ void SoundChannel::init(SoundPool* soundPool)
     mSoundPool = soundPool;
 }
 
+// call with sound pool lock held
 void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftVolume,
         float rightVolume, int priority, int loop, float rate)
 {
     AudioTrack* oldTrack;
+    AudioTrack* newTrack;
+    status_t status;
 
-    LOGV("play %p: sampleID=%d, channelID=%d, leftVolume=%f, rightVolume=%f, priority=%d, loop=%d, rate=%f",
-            this, sample->sampleID(), nextChannelID, leftVolume, rightVolume, priority, loop, rate);
+    { // scope for the lock
+        Mutex::Autolock lock(&mLock);
 
-    // if not idle, this voice is being stolen
-    if (mState != IDLE) {
-        LOGV("channel %d stolen - event queued for channel %d", channelID(), nextChannelID);
-        mNextEvent.set(sample, nextChannelID, leftVolume, rightVolume, priority, loop, rate);
-        stop();
-        return;
-    }
+        LOGV("SoundChannel::play %p: sampleID=%d, channelID=%d, leftVolume=%f, rightVolume=%f,"
+                " priority=%d, loop=%d, rate=%f",
+                this, sample->sampleID(), nextChannelID, leftVolume, rightVolume,
+                priority, loop, rate);
 
-    // initialize track
-    int afFrameCount;
-    int afSampleRate;
-    int streamType = mSoundPool->streamType();
-    if (AudioSystem::getOutputFrameCount(&afFrameCount, streamType) != NO_ERROR) {
-        afFrameCount = kDefaultFrameCount;
-    }
-    if (AudioSystem::getOutputSamplingRate(&afSampleRate, streamType) != NO_ERROR) {
-        afSampleRate = kDefaultSampleRate;
-    }
-    int numChannels = sample->numChannels();
-    uint32_t sampleRate = uint32_t(float(sample->sampleRate()) * rate + 0.5);
-    uint32_t totalFrames = (kDefaultBufferCount * afFrameCount * sampleRate) / afSampleRate;
-    uint32_t bufferFrames = (totalFrames + (kDefaultBufferCount - 1)) / kDefaultBufferCount;
-    uint32_t frameCount = 0;
+        // if not idle, this voice is being stolen
+        if (mState != IDLE) {
+            LOGV("channel %d stolen - event queued for channel %d", channelID(), nextChannelID);
+            mNextEvent.set(sample, nextChannelID, leftVolume, rightVolume, priority, loop, rate);
+            stop_l();
+            return;
+        }
 
-    if (loop) {
-        frameCount = sample->size()/numChannels/((sample->format() == AudioSystem::PCM_16_BIT) ? sizeof(int16_t) : sizeof(uint8_t));
-    }
+        // initialize track
+        int afFrameCount;
+        int afSampleRate;
+        int streamType = mSoundPool->streamType();
+        if (AudioSystem::getOutputFrameCount(&afFrameCount, streamType) != NO_ERROR) {
+            afFrameCount = kDefaultFrameCount;
+        }
+        if (AudioSystem::getOutputSamplingRate(&afSampleRate, streamType) != NO_ERROR) {
+            afSampleRate = kDefaultSampleRate;
+        }
+        int numChannels = sample->numChannels();
+        uint32_t sampleRate = uint32_t(float(sample->sampleRate()) * rate + 0.5);
+        uint32_t totalFrames = (kDefaultBufferCount * afFrameCount * sampleRate) / afSampleRate;
+        uint32_t bufferFrames = (totalFrames + (kDefaultBufferCount - 1)) / kDefaultBufferCount;
+        uint32_t frameCount = 0;
+
+        if (loop) {
+            frameCount = sample->size()/numChannels/
+                ((sample->format() == AudioSystem::PCM_16_BIT) ? sizeof(int16_t) : sizeof(uint8_t));
+        }
 
 #ifndef USE_SHARED_MEM_BUFFER
-    // Ensure minimum audio buffer size in case of short looped sample
-    if(frameCount < totalFrames) {
-        frameCount = totalFrames;
-    }
+        // Ensure minimum audio buffer size in case of short looped sample
+        if(frameCount < totalFrames) {
+            frameCount = totalFrames;
+        }
 #endif
 
-    AudioTrack* newTrack;
+        // mToggle toggles each time a track is started on a given channel.
+        // The toggle is concatenated with the SoundChannel address and passed to AudioTrack
+        // as callback user data. This enables the detection of callbacks received from the old
+        // audio track while the new one is being started and avoids processing them with
+        // wrong audio audio buffer size  (mAudioBufferSize)
+        unsigned long toggle = mToggle ^ 1;
+        void *userData = (void *)((unsigned long)this | toggle);
+        uint32_t channels = (numChannels == 2) ?
+                AudioSystem::CHANNEL_OUT_STEREO : AudioSystem::CHANNEL_OUT_MONO;
 
-    // mToggle toggles each time a track is started on a given channel.
-    // The toggle is concatenated with the SoundChannel address and passed to AudioTrack
-    // as callback user data. This enables the detection of callbacks received from the old
-    // audio track while the new one is being started and avoids processing them with 
-    // wrong audio audio buffer size  (mAudioBufferSize)
-    unsigned long toggle = mToggle ^ 1;
-    void *userData = (void *)((unsigned long)this | toggle);
-    uint32_t channels = (numChannels == 2) ? AudioSystem::CHANNEL_OUT_STEREO : AudioSystem::CHANNEL_OUT_MONO;
-
+        // do not create a new audio track if current track is compatible with sample parameters
 #ifdef USE_SHARED_MEM_BUFFER
-    newTrack = new AudioTrack(streamType, sampleRate, sample->format(),
-            channels, sample->getIMemory(), 0, callback, userData);
+        newTrack = new AudioTrack(streamType, sampleRate, sample->format(),
+                channels, sample->getIMemory(), 0, callback, userData);
 #else
-    newTrack = new AudioTrack(streamType, sampleRate, sample->format(),
-            channels, frameCount, 0, callback, userData, bufferFrames);
+        newTrack = new AudioTrack(streamType, sampleRate, sample->format(),
+                channels, frameCount, 0, callback, userData, bufferFrames);
 #endif
-    if (newTrack->initCheck() != NO_ERROR) {
-        LOGE("Error creating AudioTrack");
-        delete newTrack;
-        return;
-    }
-    LOGV("setVolume %p", newTrack);
-    newTrack->setVolume(leftVolume, rightVolume);
-    newTrack->setLoop(0, frameCount, loop);
+        oldTrack = mAudioTrack;
+        status = newTrack->initCheck();
+        if (status != NO_ERROR) {
+            LOGE("Error creating AudioTrack");
+            goto exit;
+        }
+        LOGV("setVolume %p", newTrack);
+        newTrack->setVolume(leftVolume, rightVolume);
+        newTrack->setLoop(0, frameCount, loop);
 
-    {
-        Mutex::Autolock lock(&mLock);
         // From now on, AudioTrack callbacks recevieved with previous toggle value will be ignored.
         mToggle = toggle;
-        oldTrack = mAudioTrack;
         mAudioTrack = newTrack;
         mPos = 0;
         mSample = sample;
@@ -602,8 +640,13 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
         mAudioBufferSize = newTrack->frameCount()*newTrack->frameSize();
     }
 
+exit:
     LOGV("delete oldTrack %p", oldTrack);
     delete oldTrack;
+    if (status != NO_ERROR) {
+        delete newTrack;
+        mAudioTrack = NULL;
+    }
 }
 
 void SoundChannel::nextEvent()
@@ -639,28 +682,43 @@ void SoundChannel::nextEvent()
 
 void SoundChannel::callback(int event, void* user, void *info)
 {
-    unsigned long toggle = (unsigned long)user & 1;
     SoundChannel* channel = static_cast<SoundChannel*>((void *)((unsigned long)user & ~1));
     
-    if (channel->mToggle != toggle) {
-        LOGV("callback with wrong toggle");
-        return;
-    }
-    channel->process(event, info);
+    channel->process(event, info, (unsigned long)user & 1);
 }
 
-void SoundChannel::process(int event, void *info)
+void SoundChannel::process(int event, void *info, unsigned long toggle)
 {
     //LOGV("process(%d)", mChannelID);
+
+    Mutex::Autolock lock(&mLock);
+
+    AudioTrack::Buffer* b = NULL;
+    if (event == AudioTrack::EVENT_MORE_DATA) {
+       b = static_cast<AudioTrack::Buffer *>(info);
+    }
+
+    if (mToggle != toggle) {
+        LOGV("process wrong toggle %p channel %d", this, mChannelID);
+        if (b != NULL) {
+            b->size = 0;
+        }
+        return;
+    }
+
     sp<Sample> sample = mSample;
 
 //    LOGV("SoundChannel::process event %d", event);
 
     if (event == AudioTrack::EVENT_MORE_DATA) {
-       AudioTrack::Buffer* b = static_cast<AudioTrack::Buffer *>(info);
 
         // check for stop state
         if (b->size == 0) return;
+
+        if (mState == IDLE) {
+            b->size = 0;
+            return;
+        }
 
         if (sample != 0) {
             // fill buffer
@@ -674,14 +732,14 @@ void SoundChannel::process(int event, void *info)
                     count = b->size;
                 }
                 memcpy(q, p, count);
-                LOGV("fill: q=%p, p=%p, mPos=%u, b->size=%u, count=%d", q, p, mPos, b->size, count);
+//              LOGV("fill: q=%p, p=%p, mPos=%u, b->size=%u, count=%d", q, p, mPos, b->size, count);
             } else if (mPos < mAudioBufferSize) {
                 count = mAudioBufferSize - mPos;
                 if (count > b->size) {
                     count = b->size;
                 }
                 memset(q, 0, count);
-                LOGV("fill extra: q=%p, mPos=%u, b->size=%u, count=%d", q, mPos, b->size, count);
+//              LOGV("fill extra: q=%p, mPos=%u, b->size=%u, count=%d", q, mPos, b->size, count);
             }
 
             mPos += count;
@@ -689,16 +747,16 @@ void SoundChannel::process(int event, void *info)
             //LOGV("buffer=%p, [0]=%d", b->i16, b->i16[0]);
         }
     } else if (event == AudioTrack::EVENT_UNDERRUN) {
-        LOGV("stopping track");
-        stop();
+        LOGV("process %p channel %d EVENT_UNDERRUN", this, mChannelID);
+        mSoundPool->addToStopList(this);
     } else if (event == AudioTrack::EVENT_LOOP_END) {
-        LOGV("End loop: %d", *(int *)info);
+        LOGV("End loop %p channel %d count %d", this, mChannelID, *(int *)info);
     }
 }
 
 
 // call with lock held
-void SoundChannel::stop_l()
+bool SoundChannel::doStop_l()
 {
     if (mState != IDLE) {
         setVolume_l(0, 0);
@@ -707,16 +765,31 @@ void SoundChannel::stop_l()
         mSample.clear();
         mState = IDLE;
         mPriority = IDLE_PRIORITY;
+        return true;
+    }
+    return false;
+}
+
+// call with lock held and sound pool lock held
+void SoundChannel::stop_l()
+{
+    if (doStop_l()) {
+        mSoundPool->done_l(this);
     }
 }
 
+// call with sound pool lock held
 void SoundChannel::stop()
 {
+    bool stopped;
     {
         Mutex::Autolock lock(&mLock);
-        stop_l();
+        stopped = doStop_l();
     }
-    mSoundPool->done(this);
+
+    if (stopped) {
+        mSoundPool->done_l(this);
+    }
 }
 
 //FIXME: Pause is a little broken right now
@@ -791,21 +864,24 @@ void SoundChannel::setLoop(int loop)
 {
     Mutex::Autolock lock(&mLock);
     if (mAudioTrack != 0 && mSample.get() != 0) {
-        mAudioTrack->setLoop(0, mSample->size()/mNumChannels/((mSample->format() == AudioSystem::PCM_16_BIT) ? sizeof(int16_t) : sizeof(uint8_t)), loop);
+        uint32_t loopEnd = mSample->size()/mNumChannels/
+            ((mSample->format() == AudioSystem::PCM_16_BIT) ? sizeof(int16_t) : sizeof(uint8_t));
+        mAudioTrack->setLoop(0, loopEnd, loop);
         mLoop = loop;
     }
 }
 
 SoundChannel::~SoundChannel()
 {
-    LOGV("SoundChannel destructor");
-    if (mAudioTrack) {
-        LOGV("stop track");
-        mAudioTrack->stop();
-        delete mAudioTrack;
+    LOGV("SoundChannel destructor %p", this);
+    {
+        Mutex::Autolock lock(&mLock);
+        clearNextEvent();
+        doStop_l();
     }
-    clearNextEvent();
-    mSample.clear();
+    // do not call AudioTrack destructor with mLock held as it will wait for the AudioTrack
+    // callback thread to exit which may need to execute process() and acquire the mLock.
+    delete mAudioTrack;
 }
 
 void SoundChannel::dump()
@@ -817,7 +893,7 @@ void SoundChannel::dump()
 void SoundEvent::set(const sp<Sample>& sample, int channelID, float leftVolume,
             float rightVolume, int priority, int loop, float rate)
 {
-    mSample =sample;
+    mSample = sample;
     mChannelID = channelID;
     mLeftVolume = leftVolume;
     mRightVolume = rightVolume;
