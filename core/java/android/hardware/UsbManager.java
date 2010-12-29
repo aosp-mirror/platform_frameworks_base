@@ -105,6 +105,14 @@ public class UsbManager {
      */
     public static final String USB_FUNCTION_DISABLED = "disabled";
 
+    public static final int getDeviceId(String name) {
+        return native_get_device_id(name);
+    }
+
+    public static final String getDeviceName(int id) {
+        return native_get_device_name(id);
+    }
+
     private static File getFunctionEnableFile(String function) {
         return new File("/sys/class/usb_composite/" + function + "/enable");
     }
@@ -130,4 +138,7 @@ public class UsbManager {
             return false;
         }
     }
+
+    private static native int native_get_device_id(String name);
+    private static native String native_get_device_name(int id);
 }
