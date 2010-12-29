@@ -2,61 +2,20 @@ page.title=layoutopt
 @jd:body
 
 <p><code>layoutopt</code> is a command-line tool that helps you optimize the
-layouts and layout hierarchies of your applications. You can run it against your
-layout files or resource directories to quickly check for inefficiencies or
-other types of problems that could be affecting the performance of your
-application. </p>
+layouts and layout hierarchies of your applications.<p>
 
-<p>To run the tool, open a terminal and launch <code>layoutopt
-&lt;resources&gt;</code> from your SDK <code>tools/</code> directory. In the
-command, supply a list of uncompiled resource xml files or directories that you
-want to analyze. </p>
-
-<p>When run, the tool loads the specified XML files and analyzes their layout
-structures and hierarchies according to a set of predefined rules. If it detects
-issues, it outputs information about the issues, giving filename, line numbers,
-description of issue, and for some types of issues a suggested resolution. </p>
-
-<p>Here's an example of the output:</p>
-
-<pre>$ layoutopt samples/
-samples/compound.xml
-   7:23 The root-level &lt;FrameLayout/&gt; can be replaced with &lt;merge/&gt;
-   11:21 This LinearLayout layout or its FrameLayout parent is useless
-samples/simple.xml
-   7:7 The root-level &lt;FrameLayout/&gt; can be replaced with &lt;merge/&gt;
-samples/too_deep.xml
-   -1:-1 This layout has too many nested layouts: 13 levels, it should have &lt= 10!
-   20:81 This LinearLayout layout or its LinearLayout parent is useless
-   24:79 This LinearLayout layout or its LinearLayout parent is useless
-   28:77 This LinearLayout layout or its LinearLayout parent is useless
-   32:75 This LinearLayout layout or its LinearLayout parent is useless
-   36:73 This LinearLayout layout or its LinearLayout parent is useless
-   40:71 This LinearLayout layout or its LinearLayout parent is useless
-   44:69 This LinearLayout layout or its LinearLayout parent is useless
-   48:67 This LinearLayout layout or its LinearLayout parent is useless
-   52:65 This LinearLayout layout or its LinearLayout parent is useless
-   56:63 This LinearLayout layout or its LinearLayout parent is useless
-samples/too_many.xml
-   7:413 The root-level &lt;FrameLayout/&gt; can be replaced with &lt;merge/&gt;
-   -1:-1 This layout has too many views: 81 views, it should have &lt= 80!
-samples/useless.xml
-   7:19 The root-level &lt;FrameLayout/&gt; can be replaced with &lt;merge/&gt;
-   11:17 This LinearLayout layout or its FrameLayout parent is useless</pre>
-
-<p>The <code>layoutopt</code> tool is available in SDK Tools, Revision 3 or
-later. If you do not have SDK Tools r3 or later installed in your SDK, you can
-download it from the Android SDK repository site using the Android SDK and AVD
-Manager. For information, see <a
-href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.</p>
+<p>This document is a reference to the available command line options. For more information and sample
+output of the tool, see <a href="{@docRoot}guide/developing/debugging/debugging-ui.html#layoutopt.html">
+Optimizing layouts with layoutopt</a>.</p>
 
 <h3>Usage</h3>
 
 <p>To run <code>layoutopt</code> against a given list of layout resources:</p>
 
-<pre>layoutopt &lt;list of xml files or directories></pre>
+<pre>layoutopt &lt;file_or_directory&gt; ...</pre>
 
 <p>For example:</p>
 
 <pre>$ layoutopt res/layout-land</pre>
 <pre>$ layoutopt res/layout/main.xml res/layout-land/main.xml</pre>
+
