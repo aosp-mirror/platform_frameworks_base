@@ -315,32 +315,125 @@
     <ul>
   <!--<li><a href="">Developing for Android</a></li>
       signing, upgrading, selecting a package name, select device profile, touch, trackball, dpad available, etc. -->
-      <li><a href="<?cs var:toroot ?>guide/developing/eclipse-adt.html">
-            <span class="en">In Eclipse, with ADT</span>
-            <span class="de" style="display:none">In Eclipse, mit ADT</span>
-            <span class="es" style="display:none">En Eclipse, con ADT</span>
-            <span class="fr" style="display:none">Sous Eclipse, à l'aide du plugin ADT</span>
-            <span class="it" style="display:none">In Eclipse, con ADT</span>
-            <span class="ja" style="display:none">Eclipse 内で ADT を使用</span>
-            <span class="zh-CN" style="display:none">利用 ADT 在 Eclipse 中开发</span>
-            <span class="zh-TW" style="display:none">在加裝 ADT 工具的 Eclipse 環境中</span>
+      <li>
+        <a href="<?cs var:toroot ?>guide/developing/overview.html">
+        <span class="en">Overview</span></a>
+      </li>
+
+      <li class="toggle-list">
+        <div>
+          <a href="<?cs var:toroot ?>guide/developing/devices/index.html">
+            <span class="en">Creating and Managing Virtual Devices</span>
+          </a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>guide/developing/devices/managing-avds.html">
+              <span class="en">With AVD Manager</span>
+         	 </a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>guide/developing/devices/managing-avds-cmdline.html">
+              <span class="en">On the Command Line</span>
+         	 </a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>guide/developing/devices/emulator.html">
+        	     <span class="en">Using the Android Emulator</span>
+         	 </a>
+          </li>
+        </ul>
+      </li>
+
+     <li>
+        <a href="<?cs var:toroot ?>guide/developing/device.html">
+          <span class="en">Connecting Hardware Devices</span>
+        </a>
+      </li>
+      
+      <li class="toggle-list">
+        <div>
+          <a href="<?cs var:toroot ?>guide/developing/projects/index.html">
+            <span class="en">Creating and Managing Projects</span>
+          </a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>guide/developing/projects/projects-eclipse.html">
+              <span class="en">In Eclipse</span>
+            </a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>guide/developing/projects/projects-cmdline.html">
+        	    <span class="en">On the Command Line</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="toggle-list">
+        <div>
+          <a href="<?cs var:toroot ?>guide/developing/building/index.html">
+            <span class="en">Building and Running</span>
+          </a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>guide/developing/building/building-eclipse.html">
+          <span class="en">In Eclipse</span>
           </a></li>
-      <li><a href="<?cs var:toroot ?>guide/developing/other-ide.html">
-            <span class="en">In Other IDEs</span>
-            <span class="de" style="display:none">In anderen IDEs</span>
-            <span class="es" style="display:none">En otros entornos</span>
-            <span class="fr" style="display:none">Sous d'autres environnements</span>
-            <span class="it" style="display:none">In altri IDE</span>
-            <span class="ja" style="display:none">その他の統合開発環境</span>
-            <span class="zh-CN" style="display:none">在其他 IDE 中开发</span>
-            <span class="zh-TW" style="display:none">在其他開發環境中</span>
-          </a></li>
-      <li><a href="<?cs var:toroot ?>guide/developing/device.html">
-            <span class="en">On a Device</span>
-          </a></li>
-      <li><a href="<?cs var:toroot ?>guide/developing/debug-tasks.html">
-            <span class="en">Debugging Tasks</span>
-          </a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/building/building-cmdline.html"><span class="en">With Ant</span></a></li>
+        </ul>
+      </li>
+
+      <li class="toggle-list">
+        <div>
+          <a href="<?cs var:toroot ?>guide/developing/debugging/index.html">
+            <span class="en">Debugging</span>
+          </a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-projects.html">
+         	    <span class="en">In Eclipse</span>
+            </a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-projects-cmdline.html">
+         	    <span class="en">In Other IDEs</span>
+            </a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>guide/developing/debugging/ddms.html">
+              <span class="en">Dalvik Debug Monitor Server</span>
+            </a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-log.html">
+         	    <span class="en">Reading and Writing Log Messages</span>
+            </a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-ui.html">
+         	    <span class="en">Debugging and Profiling UIs</span>
+          	</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-tracing.html">
+         	    <span class="en">Profiling with Traceview and dmtracedump</span>
+          	</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-devtools.html">
+         	    <span class="en">Debugging with the Dev Tools App</span>
+          	</a>
+          </li>
+
+          <li>
+            <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-tips.html"><span class="en">Debugging Tips</span></a>
+          </li>
+        </ul>
+      </li>
+
       <li class="toggle-list">
            <div>
                 <a href="<?cs var:toroot ?>guide/developing/testing/index.html">
@@ -361,60 +454,57 @@
               </li>
            </ul>
          </li>
-      <li class="toggle-list">
+
+         <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/developing/tools/index.html">
             <span class="en">Tools</span>
           </a></div>
         <ul>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/aapt.html">aapt</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html">adb</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#android">android</a></li>
-      <!--<li><a href="<?cs var:toroot ?>guide/developing/tools/adt.html">ADT Plugin</a></li>-->
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/aidl.html">aidl</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/avd.html">AVDs</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/bmgr.html">bmgr</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/ddms.html">ddms</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#dx">dx</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/draw9patch.html">Draw 9-Patch</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/emulator.html">Emulator</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/hierarchy-viewer.html">Hierarchy Viewer</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/layoutopt.html">layoutopt</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#mksdcard">mksdcard</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/monkey.html">Monkey</a></li>
-              <li class="toggle-list">
-                 <div>
-                     <a href="<?cs var:toroot?>guide/developing/tools/monkeyrunner_concepts.html">
-                     <span class="en">monkeyrunner</span>
-                  </a>
-                      <span class="new">new!</span>
-                  </div>
-                  <ul>
-                      <li>
-                          <a href="<?cs var:toroot?>guide/developing/tools/MonkeyDevice.html">
-                                <span class="en">MonkeyDevice</span>
-                        </a>
-                        <span class="new">new!</span>
-                    </li>
-                    <li>
-                        <a href="<?cs var:toroot?>guide/developing/tools/MonkeyImage.html">
-                            <span class="en">MonkeyImage</span>
-                        </a>
-                        <span class="new">new!</span>
-                    </li>
-                    <li>
-                        <a href="<?cs var:toroot?>guide/developing/tools/MonkeyRunner.html">
-                            <span class="en">MonkeyRunner</span>
-                        </a>
-                        <span class="new">new!</span>
-                    </li>
-                  </ul>
-              </li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/proguard.html">Proguard</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html#sqlite">sqlite3</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/traceview.html" >Traceview</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/zipalign.html" >zipalign</a></li>
-          </ul>
-        </li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html">adb</a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/android.html">android</a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/aidl.html">aidl</a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/bmgr.html">bmgr</a>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/dmtracedump.html">dmtracedump</a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/draw9patch.html" >Draw 9-Patch</a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/emulator.html">Emulator</a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/hprof-conv.html">hprof-conv</a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/layoutopt.html">layoutopt</a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/logcat.html">logcat</a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/mksdcard.html">mksdcard</a></li>
+          <li><a href="/guide/developing/tools/monkey.html">Monkey</a></li> 
+              <li class="toggle-list"> 
+                 <div> 
+                     <a href="/guide/developing/tools/monkeyrunner_concepts.html"> 
+                     <span class="en">monkeyrunner</span> 
+                  </a> 
+                      <span class="new">new!</span> 
+                  </div> 
+                  <ul> 
+                      <li> 
+                          <a href="/guide/developing/tools/MonkeyDevice.html"> 
+                                <span class="en">MonkeyDevice</span> 
+                        </a> 
+                        <span class="new">new!</span> 
+                    </li> 
+                    <li> 
+                        <a href="/guide/developing/tools/MonkeyImage.html"> 
+                            <span class="en">MonkeyImage</span> 
+                        </a> 
+                        <span class="new">new!</span> 
+                    </li> 
+                    <li> 
+                        <a href="/guide/developing/tools/MonkeyRunner.html"> 
+                            <span class="en">MonkeyRunner</span> 
+                        </a> 
+                        <span class="new">new!</span> 
+                    </li> 
+                  </ul> 
+              </li> 
+              <li><a href="/guide/developing/tools/proguard.html">ProGuard</a> <span class="new">new!</span></li> 
+              <li><a href="/guide/developing/tools/adb.html#sqlite">sqlite3</a></li> 
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/zipalign.html">zipalign</a></li>
+        </ul>
+      </li>
     </ul>
   </li>
 
