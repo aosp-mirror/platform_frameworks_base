@@ -43,7 +43,9 @@ LOCAL_MODULE:= libmtp
 
 LOCAL_CFLAGS := -DMTP_DEVICE -DMTP_HOST
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_SHARED_LIBRARIES := libutils libcutils libusbhost libbinder
+
+include $(BUILD_SHARED_LIBRARY)
 
 endif
 

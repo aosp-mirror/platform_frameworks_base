@@ -9,10 +9,10 @@ LOCAL_SRC_FILES:= \
     android_media_ResampleInputStream.cpp \
     android_media_MediaProfiles.cpp \
     android_media_AmrInputStream.cpp \
-	android_media_MtpDatabase.cpp \
-	android_media_MtpServer.cpp \
-	android_media_PtpClient.cpp \
-	android_media_PtpCursor.cpp \
+    android_media_MtpDatabase.cpp \
+    android_media_MtpServer.cpp \
+    android_media_PtpClient.cpp \
+    android_media_PtpCursor.cpp \
 
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \
@@ -26,11 +26,9 @@ LOCAL_SHARED_LIBRARIES := \
     libsurfaceflinger_client \
     libstagefright \
     libcamera_client \
-	libsqlite
-
-ifneq ($(TARGET_SIMULATOR),true)
-LOCAL_STATIC_LIBRARIES := libmtp libusbhost
-endif
+    libsqlite \
+    libmtp \
+    libusbhost
 
 LOCAL_C_INCLUDES += \
     external/tremor/Tremor \
