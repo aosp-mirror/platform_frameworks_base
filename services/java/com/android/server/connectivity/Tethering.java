@@ -1138,8 +1138,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 int result = Phone.APN_REQUEST_FAILED;
                 try {
                     result = service.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
-                            (mDunRequired ? Phone.FEATURE_ENABLE_DUN : Phone.FEATURE_ENABLE_HIPRI),
-                            new Binder());
+                            (mDunRequired ? Phone.FEATURE_ENABLE_DUN_ALWAYS :
+                            Phone.FEATURE_ENABLE_HIPRI), new Binder());
                 } catch (Exception e) {
                 }
                 switch (result) {

@@ -697,7 +697,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 usedNetworkType = ConnectivityManager.TYPE_MOBILE_MMS;
             } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
                 usedNetworkType = ConnectivityManager.TYPE_MOBILE_SUPL;
-            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN)) {
+            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN) ||
+                    TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN_ALWAYS)) {
                 usedNetworkType = ConnectivityManager.TYPE_MOBILE_DUN;
             } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_HIPRI)) {
                 usedNetworkType = ConnectivityManager.TYPE_MOBILE_HIPRI;
@@ -712,7 +713,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
                 if (ni.isAvailable() == false) {
                     if (DBG) log("special network not available");
-                    return Phone.APN_TYPE_NOT_AVAILABLE;
+                    if (!TextUtils.equals(feature,Phone.FEATURE_ENABLE_DUN_ALWAYS)) {
+                        return Phone.APN_TYPE_NOT_AVAILABLE;
+                    } else {
+                        // else make the attempt anyway - probably giving REQUEST_STARTED below
+                    }
                 }
 
                 synchronized(this) {
