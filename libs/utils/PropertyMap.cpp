@@ -109,6 +109,12 @@ bool PropertyMap::tryGetProperty(const String8& key, float& outValue) const {
     return true;
 }
 
+void PropertyMap::addAll(const PropertyMap* map) {
+    for (size_t i = 0; i < map->mProperties.size(); i++) {
+        mProperties.add(map->mProperties.keyAt(i), map->mProperties.valueAt(i));
+    }
+}
+
 status_t PropertyMap::load(const String8& filename, PropertyMap** outMap) {
     *outMap = NULL;
 

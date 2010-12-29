@@ -30,6 +30,56 @@ static inline float avg(float x, float y) {
 }
 
 
+// --- FakePointerController ---
+
+class FakePointerController : public PointerControllerInterface {
+    bool mHaveBounds;
+    float mMinX, mMinY, mMaxX, mMaxY;
+
+protected:
+    virtual ~FakePointerController() { }
+
+public:
+    FakePointerController() {
+    }
+
+    void setBounds(float minX, float minY, float maxX, float maxY) {
+        mHaveBounds = true;
+        mMinX = minX;
+        mMinY = minY;
+        mMaxX = maxX;
+        mMaxY = maxY;
+    }
+
+private:
+    virtual bool getBounds(float* outMinX, float* outMinY, float* outMaxX, float* outMaxY) const {
+        *outMinX = mMinX;
+        *outMaxX = mMinX;
+        *outMinY = mMinY;
+        *outMaxY = mMaxY;
+        return mHaveBounds;
+    }
+
+    virtual void move(float deltaX, float deltaY) {
+    }
+
+    virtual void setButtonState(uint32_t buttonState) {
+    }
+
+    virtual uint32_t getButtonState() const {
+        return 0;
+    }
+
+    virtual void setPosition(float x, float y) {
+    }
+
+    virtual void getPosition(float* outX, float* outY) const {
+        *outX = 0;
+        *outY = 0;
+    }
+};
+
+
 // --- FakeInputReaderPolicy ---
 
 class FakeInputReaderPolicy : public InputReaderPolicyInterface {
@@ -43,6 +93,7 @@ class FakeInputReaderPolicy : public InputReaderPolicyInterface {
     bool mFilterTouchEvents;
     bool mFilterJumpyTouchEvents;
     Vector<String8> mExcludedDeviceNames;
+    KeyedVector<int32_t, sp<FakePointerController> > mPointerControllers;
 
 protected:
     virtual ~FakeInputReaderPolicy() { }
@@ -78,6 +129,10 @@ public:
         mExcludedDeviceNames.push(deviceName);
     }
 
+    void setPointerController(int32_t deviceId, const sp<FakePointerController>& controller) {
+        mPointerControllers.add(deviceId, controller);
+    }
+
 private:
     virtual bool getDisplayInfo(int32_t displayId,
             int32_t* width, int32_t* height, int32_t* orientation) {
@@ -108,6 +163,10 @@ private:
 
     virtual void getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames) {
         outExcludedDeviceNames.appendVector(mExcludedDeviceNames);
+    }
+
+    virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId) {
+        return mPointerControllers.valueFor(deviceId);
     }
 };
 
@@ -379,6 +438,11 @@ public:
     void addConfigurationProperty(int32_t deviceId, const String8& key, const String8& value) {
         Device* device = getDevice(deviceId);
         device->configuration.addProperty(key, value);
+    }
+
+    void addConfigurationMap(int32_t deviceId, const PropertyMap* configuration) {
+        Device* device = getDevice(deviceId);
+        device->configuration.addAll(configuration);
     }
 
     void addAxis(int32_t deviceId, int axis,
@@ -851,8 +915,12 @@ protected:
         mFakeEventHub.clear();
     }
 
-    void addDevice(int32_t deviceId, const String8& name, uint32_t classes) {
+    void addDevice(int32_t deviceId, const String8& name, uint32_t classes,
+            const PropertyMap* configuration) {
         mFakeEventHub->addDevice(deviceId, name, classes);
+        if (configuration) {
+            mFakeEventHub->addConfigurationMap(deviceId, configuration);
+        }
         mFakeEventHub->finishDeviceScan();
         mReader->loopOnce();
         mReader->loopOnce();
@@ -860,12 +928,13 @@ protected:
     }
 
     FakeInputMapper* addDeviceWithFakeInputMapper(int32_t deviceId,
-            const String8& name, uint32_t classes, uint32_t sources) {
+            const String8& name, uint32_t classes, uint32_t sources,
+            const PropertyMap* configuration) {
         InputDevice* device = new InputDevice(mReader.get(), deviceId, name);
         FakeInputMapper* mapper = new FakeInputMapper(device, sources);
         device->addMapper(mapper);
         mReader->setNextDevice(device);
-        addDevice(deviceId, name, classes);
+        addDevice(deviceId, name, classes, configuration);
         return mapper;
     }
 };
@@ -881,7 +950,7 @@ TEST_F(InputReaderTest, GetInputConfiguration_WhenNoDevices_ReturnsDefaults) {
 
 TEST_F(InputReaderTest, GetInputConfiguration_WhenAlphabeticKeyboardPresent_ReturnsQwertyKeyboard) {
     ASSERT_NO_FATAL_FAILURE(addDevice(0, String8("keyboard"),
-            INPUT_DEVICE_CLASS_KEYBOARD | INPUT_DEVICE_CLASS_ALPHAKEY));
+            INPUT_DEVICE_CLASS_KEYBOARD | INPUT_DEVICE_CLASS_ALPHAKEY, NULL));
 
     InputConfiguration config;
     mReader->getInputConfiguration(&config);
@@ -893,7 +962,7 @@ TEST_F(InputReaderTest, GetInputConfiguration_WhenAlphabeticKeyboardPresent_Retu
 
 TEST_F(InputReaderTest, GetInputConfiguration_WhenTouchScreenPresent_ReturnsFingerTouchScreen) {
     ASSERT_NO_FATAL_FAILURE(addDevice(0, String8("touchscreen"),
-            INPUT_DEVICE_CLASS_TOUCHSCREEN));
+            INPUT_DEVICE_CLASS_TOUCHSCREEN, NULL));
 
     InputConfiguration config;
     mReader->getInputConfiguration(&config);
@@ -903,9 +972,25 @@ TEST_F(InputReaderTest, GetInputConfiguration_WhenTouchScreenPresent_ReturnsFing
     ASSERT_EQ(InputConfiguration::TOUCHSCREEN_FINGER, config.touchScreen);
 }
 
+TEST_F(InputReaderTest, GetInputConfiguration_WhenMousePresent_ReturnsNoNavigation) {
+    PropertyMap configuration;
+    configuration.addProperty(String8("cursor.mode"), String8("pointer"));
+    ASSERT_NO_FATAL_FAILURE(addDevice(0, String8("mouse"),
+            INPUT_DEVICE_CLASS_CURSOR, &configuration));
+
+    InputConfiguration config;
+    mReader->getInputConfiguration(&config);
+
+    ASSERT_EQ(InputConfiguration::KEYBOARD_NOKEYS, config.keyboard);
+    ASSERT_EQ(InputConfiguration::NAVIGATION_NONAV, config.navigation);
+    ASSERT_EQ(InputConfiguration::TOUCHSCREEN_NOTOUCH, config.touchScreen);
+}
+
 TEST_F(InputReaderTest, GetInputConfiguration_WhenTrackballPresent_ReturnsTrackballNavigation) {
+    PropertyMap configuration;
+    configuration.addProperty(String8("cursor.mode"), String8("navigation"));
     ASSERT_NO_FATAL_FAILURE(addDevice(0, String8("trackball"),
-            INPUT_DEVICE_CLASS_TRACKBALL));
+            INPUT_DEVICE_CLASS_CURSOR, &configuration));
 
     InputConfiguration config;
     mReader->getInputConfiguration(&config);
@@ -917,7 +1002,7 @@ TEST_F(InputReaderTest, GetInputConfiguration_WhenTrackballPresent_ReturnsTrackb
 
 TEST_F(InputReaderTest, GetInputConfiguration_WhenDPadPresent_ReturnsDPadNavigation) {
     ASSERT_NO_FATAL_FAILURE(addDevice(0, String8("dpad"),
-            INPUT_DEVICE_CLASS_DPAD));
+            INPUT_DEVICE_CLASS_DPAD, NULL));
 
     InputConfiguration config;
     mReader->getInputConfiguration(&config);
@@ -929,7 +1014,7 @@ TEST_F(InputReaderTest, GetInputConfiguration_WhenDPadPresent_ReturnsDPadNavigat
 
 TEST_F(InputReaderTest, GetInputDeviceInfo_WhenDeviceIdIsValid) {
     ASSERT_NO_FATAL_FAILURE(addDevice(1, String8("keyboard"),
-            INPUT_DEVICE_CLASS_KEYBOARD));
+            INPUT_DEVICE_CLASS_KEYBOARD, NULL));
 
     InputDeviceInfo info;
     status_t result = mReader->getInputDeviceInfo(1, &info);
@@ -950,7 +1035,7 @@ TEST_F(InputReaderTest, GetInputDeviceInfo_WhenDeviceIdIsInvalid) {
 }
 
 TEST_F(InputReaderTest, GetInputDeviceInfo_WhenDeviceIdIsIgnored) {
-    addDevice(1, String8("ignored"), 0); // no classes so device will be ignored
+    addDevice(1, String8("ignored"), 0, NULL); // no classes so device will be ignored
 
     InputDeviceInfo info;
     status_t result = mReader->getInputDeviceInfo(1, &info);
@@ -960,9 +1045,9 @@ TEST_F(InputReaderTest, GetInputDeviceInfo_WhenDeviceIdIsIgnored) {
 
 TEST_F(InputReaderTest, GetInputDeviceIds) {
     ASSERT_NO_FATAL_FAILURE(addDevice(1, String8("keyboard"),
-            INPUT_DEVICE_CLASS_KEYBOARD | INPUT_DEVICE_CLASS_ALPHAKEY));
-    ASSERT_NO_FATAL_FAILURE(addDevice(2, String8("trackball"),
-            INPUT_DEVICE_CLASS_TRACKBALL));
+            INPUT_DEVICE_CLASS_KEYBOARD | INPUT_DEVICE_CLASS_ALPHAKEY, NULL));
+    ASSERT_NO_FATAL_FAILURE(addDevice(2, String8("mouse"),
+            INPUT_DEVICE_CLASS_CURSOR, NULL));
 
     Vector<int32_t> ids;
     mReader->getInputDeviceIds(ids);
@@ -975,7 +1060,7 @@ TEST_F(InputReaderTest, GetInputDeviceIds) {
 TEST_F(InputReaderTest, GetKeyCodeState_ForwardsRequestsToMappers) {
     FakeInputMapper* mapper = NULL;
     ASSERT_NO_FATAL_FAILURE(mapper = addDeviceWithFakeInputMapper(1, String8("fake"),
-            INPUT_DEVICE_CLASS_KEYBOARD, AINPUT_SOURCE_KEYBOARD));
+            INPUT_DEVICE_CLASS_KEYBOARD, AINPUT_SOURCE_KEYBOARD, NULL));
     mapper->setKeyCodeState(AKEYCODE_A, AKEY_STATE_DOWN);
 
     ASSERT_EQ(AKEY_STATE_UNKNOWN, mReader->getKeyCodeState(0,
@@ -1002,7 +1087,7 @@ TEST_F(InputReaderTest, GetKeyCodeState_ForwardsRequestsToMappers) {
 TEST_F(InputReaderTest, GetScanCodeState_ForwardsRequestsToMappers) {
     FakeInputMapper* mapper = NULL;
     ASSERT_NO_FATAL_FAILURE(mapper = addDeviceWithFakeInputMapper(1, String8("fake"),
-            INPUT_DEVICE_CLASS_KEYBOARD, AINPUT_SOURCE_KEYBOARD));
+            INPUT_DEVICE_CLASS_KEYBOARD, AINPUT_SOURCE_KEYBOARD, NULL));
     mapper->setScanCodeState(KEY_A, AKEY_STATE_DOWN);
 
     ASSERT_EQ(AKEY_STATE_UNKNOWN, mReader->getScanCodeState(0,
@@ -1029,7 +1114,7 @@ TEST_F(InputReaderTest, GetScanCodeState_ForwardsRequestsToMappers) {
 TEST_F(InputReaderTest, GetSwitchState_ForwardsRequestsToMappers) {
     FakeInputMapper* mapper = NULL;
     ASSERT_NO_FATAL_FAILURE(mapper = addDeviceWithFakeInputMapper(1, String8("fake"),
-            INPUT_DEVICE_CLASS_KEYBOARD, AINPUT_SOURCE_KEYBOARD));
+            INPUT_DEVICE_CLASS_KEYBOARD, AINPUT_SOURCE_KEYBOARD, NULL));
     mapper->setSwitchState(SW_LID, AKEY_STATE_DOWN);
 
     ASSERT_EQ(AKEY_STATE_UNKNOWN, mReader->getSwitchState(0,
@@ -1056,7 +1141,7 @@ TEST_F(InputReaderTest, GetSwitchState_ForwardsRequestsToMappers) {
 TEST_F(InputReaderTest, MarkSupportedKeyCodes_ForwardsRequestsToMappers) {
     FakeInputMapper* mapper = NULL;
     ASSERT_NO_FATAL_FAILURE(mapper = addDeviceWithFakeInputMapper(1, String8("fake"),
-            INPUT_DEVICE_CLASS_KEYBOARD, AINPUT_SOURCE_KEYBOARD));
+            INPUT_DEVICE_CLASS_KEYBOARD, AINPUT_SOURCE_KEYBOARD, NULL));
     mapper->addSupportedKeyCode(AKEYCODE_A);
     mapper->addSupportedKeyCode(AKEYCODE_B);
 
@@ -1089,7 +1174,7 @@ TEST_F(InputReaderTest, MarkSupportedKeyCodes_ForwardsRequestsToMappers) {
 }
 
 TEST_F(InputReaderTest, LoopOnce_WhenDeviceScanFinished_SendsConfigurationChanged) {
-    addDevice(1, String8("ignored"), INPUT_DEVICE_CLASS_KEYBOARD);
+    addDevice(1, String8("ignored"), INPUT_DEVICE_CLASS_KEYBOARD, NULL);
 
     FakeInputDispatcher::NotifyConfigurationChangedArgs args;
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyConfigurationChangedWasCalled(&args));
@@ -1099,7 +1184,7 @@ TEST_F(InputReaderTest, LoopOnce_WhenDeviceScanFinished_SendsConfigurationChange
 TEST_F(InputReaderTest, LoopOnce_ForwardsRawEventsToMappers) {
     FakeInputMapper* mapper = NULL;
     ASSERT_NO_FATAL_FAILURE(mapper = addDeviceWithFakeInputMapper(1, String8("fake"),
-            INPUT_DEVICE_CLASS_KEYBOARD, AINPUT_SOURCE_KEYBOARD));
+            INPUT_DEVICE_CLASS_KEYBOARD, AINPUT_SOURCE_KEYBOARD, NULL));
 
     mFakeEventHub->enqueueEvent(0, 1, EV_KEY, KEY_A, AKEYCODE_A, 1, POLICY_FLAG_WAKE);
     mReader->loopOnce();
@@ -1792,19 +1877,28 @@ TEST_F(KeyboardInputMapperTest, Process_LockedKeysShouldToggleMetaStateAndLeds) 
 }
 
 
-// --- TrackballInputMapperTest ---
+// --- CursorInputMapperTest ---
 
-class TrackballInputMapperTest : public InputMapperTest {
+class CursorInputMapperTest : public InputMapperTest {
 protected:
     static const int32_t TRACKBALL_MOVEMENT_THRESHOLD;
 
-    void testMotionRotation(TrackballInputMapper* mapper,
+    sp<FakePointerController> mFakePointerController;
+
+    virtual void SetUp() {
+        InputMapperTest::SetUp();
+
+        mFakePointerController = new FakePointerController();
+        mFakePolicy->setPointerController(DEVICE_ID, mFakePointerController);
+    }
+
+    void testMotionRotation(CursorInputMapper* mapper,
             int32_t originalX, int32_t originalY, int32_t rotatedX, int32_t rotatedY);
 };
 
-const int32_t TrackballInputMapperTest::TRACKBALL_MOVEMENT_THRESHOLD = 6;
+const int32_t CursorInputMapperTest::TRACKBALL_MOVEMENT_THRESHOLD = 6;
 
-void TrackballInputMapperTest::testMotionRotation(TrackballInputMapper* mapper,
+void CursorInputMapperTest::testMotionRotation(CursorInputMapper* mapper,
         int32_t originalX, int32_t originalY, int32_t rotatedX, int32_t rotatedY) {
     FakeInputDispatcher::NotifyMotionArgs args;
 
@@ -1819,15 +1913,53 @@ void TrackballInputMapperTest::testMotionRotation(TrackballInputMapper* mapper,
             0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
 }
 
-TEST_F(TrackballInputMapperTest, GetSources) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
+TEST_F(CursorInputMapperTest, WhenModeIsPointer_GetSources_ReturnsMouse) {
+    CursorInputMapper* mapper = new CursorInputMapper(mDevice);
+    addConfigurationProperty("cursor.mode", "pointer");
+    addMapperAndConfigure(mapper);
+
+    ASSERT_EQ(AINPUT_SOURCE_MOUSE, mapper->getSources());
+}
+
+TEST_F(CursorInputMapperTest, WhenModeIsNavigation_GetSources_ReturnsTrackball) {
+    CursorInputMapper* mapper = new CursorInputMapper(mDevice);
+    addConfigurationProperty("cursor.mode", "navigation");
     addMapperAndConfigure(mapper);
 
     ASSERT_EQ(AINPUT_SOURCE_TRACKBALL, mapper->getSources());
 }
 
-TEST_F(TrackballInputMapperTest, PopulateDeviceInfo) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
+TEST_F(CursorInputMapperTest, WhenModeIsPointer_PopulateDeviceInfo_ReturnsRangeFromPointerController) {
+    CursorInputMapper* mapper = new CursorInputMapper(mDevice);
+    addConfigurationProperty("cursor.mode", "pointer");
+    addMapperAndConfigure(mapper);
+
+    InputDeviceInfo info;
+    mapper->populateDeviceInfo(&info);
+
+    // Initially there may not be a valid motion range.
+    ASSERT_EQ(NULL, info.getMotionRange(AINPUT_MOTION_RANGE_X));
+    ASSERT_EQ(NULL, info.getMotionRange(AINPUT_MOTION_RANGE_Y));
+    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info, AINPUT_MOTION_RANGE_PRESSURE,
+            0.0f, 1.0f, 0.0f, 1.0f));
+
+    // When the bounds are set, then there should be a valid motion range.
+    mFakePointerController->setBounds(1, 2, 800, 480);
+
+    InputDeviceInfo info2;
+    mapper->populateDeviceInfo(&info2);
+
+    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info2, AINPUT_MOTION_RANGE_X,
+            1, 800, 0.0f, 1.0f));
+    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info2, AINPUT_MOTION_RANGE_Y,
+            2, 480, 0.0f, 1.0f));
+    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info2, AINPUT_MOTION_RANGE_PRESSURE,
+            0.0f, 1.0f, 0.0f, 1.0f));
+}
+
+TEST_F(CursorInputMapperTest, WhenModeIsNavigation_PopulateDeviceInfo_ReturnsScaledRange) {
+    CursorInputMapper* mapper = new CursorInputMapper(mDevice);
+    addConfigurationProperty("cursor.mode", "navigation");
     addMapperAndConfigure(mapper);
 
     InputDeviceInfo info;
@@ -1839,8 +1971,9 @@ TEST_F(TrackballInputMapperTest, PopulateDeviceInfo) {
             -1.0f, 1.0f, 0.0f, 1.0f / TRACKBALL_MOVEMENT_THRESHOLD));
 }
 
-TEST_F(TrackballInputMapperTest, Process_ShouldSetAllFieldsAndIncludeGlobalMetaState) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
+TEST_F(CursorInputMapperTest, Process_ShouldSetAllFieldsAndIncludeGlobalMetaState) {
+    CursorInputMapper* mapper = new CursorInputMapper(mDevice);
+    addConfigurationProperty("cursor.mode", "navigation");
     addMapperAndConfigure(mapper);
 
     mFakeContext->setGlobalMetaState(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON);
@@ -1887,8 +2020,9 @@ TEST_F(TrackballInputMapperTest, Process_ShouldSetAllFieldsAndIncludeGlobalMetaS
     ASSERT_EQ(ARBITRARY_TIME, args.downTime);
 }
 
-TEST_F(TrackballInputMapperTest, Process_ShouldHandleIndependentXYUpdates) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
+TEST_F(CursorInputMapperTest, Process_ShouldHandleIndependentXYUpdates) {
+    CursorInputMapper* mapper = new CursorInputMapper(mDevice);
+    addConfigurationProperty("cursor.mode", "navigation");
     addMapperAndConfigure(mapper);
 
     FakeInputDispatcher::NotifyMotionArgs args;
@@ -1911,8 +2045,9 @@ TEST_F(TrackballInputMapperTest, Process_ShouldHandleIndependentXYUpdates) {
             0.0f, -2.0f / TRACKBALL_MOVEMENT_THRESHOLD, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
 }
 
-TEST_F(TrackballInputMapperTest, Process_ShouldHandleIndependentButtonUpdates) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
+TEST_F(CursorInputMapperTest, Process_ShouldHandleIndependentButtonUpdates) {
+    CursorInputMapper* mapper = new CursorInputMapper(mDevice);
+    addConfigurationProperty("cursor.mode", "navigation");
     addMapperAndConfigure(mapper);
 
     FakeInputDispatcher::NotifyMotionArgs args;
@@ -1932,8 +2067,9 @@ TEST_F(TrackballInputMapperTest, Process_ShouldHandleIndependentButtonUpdates) {
             0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
 }
 
-TEST_F(TrackballInputMapperTest, Process_ShouldHandleCombinedXYAndButtonUpdates) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
+TEST_F(CursorInputMapperTest, Process_ShouldHandleCombinedXYAndButtonUpdates) {
+    CursorInputMapper* mapper = new CursorInputMapper(mDevice);
+    addConfigurationProperty("cursor.mode", "navigation");
     addMapperAndConfigure(mapper);
 
     FakeInputDispatcher::NotifyMotionArgs args;
@@ -1967,8 +2103,9 @@ TEST_F(TrackballInputMapperTest, Process_ShouldHandleCombinedXYAndButtonUpdates)
             0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
 }
 
-TEST_F(TrackballInputMapperTest, Reset_WhenButtonIsNotDown_ShouldNotSynthesizeButtonUp) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
+TEST_F(CursorInputMapperTest, Reset_WhenButtonIsNotDown_ShouldNotSynthesizeButtonUp) {
+    CursorInputMapper* mapper = new CursorInputMapper(mDevice);
+    addConfigurationProperty("cursor.mode", "navigation");
     addMapperAndConfigure(mapper);
 
     FakeInputDispatcher::NotifyMotionArgs args;
@@ -1987,8 +2124,9 @@ TEST_F(TrackballInputMapperTest, Reset_WhenButtonIsNotDown_ShouldNotSynthesizeBu
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasNotCalled());
 }
 
-TEST_F(TrackballInputMapperTest, Reset_WhenButtonIsDown_ShouldSynthesizeButtonUp) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
+TEST_F(CursorInputMapperTest, Reset_WhenButtonIsDown_ShouldSynthesizeButtonUp) {
+    CursorInputMapper* mapper = new CursorInputMapper(mDevice);
+    addConfigurationProperty("cursor.mode", "navigation");
     addMapperAndConfigure(mapper);
 
     FakeInputDispatcher::NotifyMotionArgs args;
@@ -2006,8 +2144,9 @@ TEST_F(TrackballInputMapperTest, Reset_WhenButtonIsDown_ShouldSynthesizeButtonUp
             0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
 }
 
-TEST_F(TrackballInputMapperTest, Process_WhenNotOrientationAware_ShouldNotRotateMotions) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
+TEST_F(CursorInputMapperTest, Process_WhenNotOrientationAware_ShouldNotRotateMotions) {
+    CursorInputMapper* mapper = new CursorInputMapper(mDevice);
+    addConfigurationProperty("cursor.mode", "navigation");
     addMapperAndConfigure(mapper);
 
     mFakePolicy->setDisplayInfo(DISPLAY_ID,
@@ -2023,9 +2162,10 @@ TEST_F(TrackballInputMapperTest, Process_WhenNotOrientationAware_ShouldNotRotate
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper, -1,  1, -1,  1));
 }
 
-TEST_F(TrackballInputMapperTest, Process_WhenOrientationAware_ShouldRotateMotions) {
-    TrackballInputMapper* mapper = new TrackballInputMapper(mDevice);
-    addConfigurationProperty("trackball.orientationAware", "1");
+TEST_F(CursorInputMapperTest, Process_WhenOrientationAware_ShouldRotateMotions) {
+    CursorInputMapper* mapper = new CursorInputMapper(mDevice);
+    addConfigurationProperty("cursor.mode", "navigation");
+    addConfigurationProperty("cursor.orientationAware", "1");
     addMapperAndConfigure(mapper);
 
     mFakePolicy->setDisplayInfo(DISPLAY_ID,

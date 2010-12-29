@@ -239,9 +239,9 @@ InputDevice* InputReader::createDevice(int32_t deviceId, const String8& name, ui
         device->addMapper(new KeyboardInputMapper(device, keyboardSources, keyboardType));
     }
 
-    // Trackball-like devices.
-    if (classes & INPUT_DEVICE_CLASS_TRACKBALL) {
-        device->addMapper(new TrackballInputMapper(device));
+    // Cursor-like devices.
+    if (classes & INPUT_DEVICE_CLASS_CURSOR) {
+        device->addMapper(new CursorInputMapper(device));
     }
 
     // Touchscreen-like devices.
@@ -914,7 +914,7 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
     if (policyFlags & POLICY_FLAG_FUNCTION) {
         newMetaState |= AMETA_FUNCTION_ON;
     }
-    getDispatcher()->notifyKey(when, getDeviceId(), AINPUT_SOURCE_KEYBOARD, policyFlags,
+    getDispatcher()->notifyKey(when, getDeviceId(), mSources, policyFlags,
             down ? AKEY_EVENT_ACTION_DOWN : AKEY_EVENT_ACTION_UP,
             AKEY_EVENT_FLAG_FROM_SYSTEM, keyCode, scanCode, newMetaState, downTime);
 }
@@ -983,36 +983,40 @@ void KeyboardInputMapper::updateLedStateForModifierLocked(LockedState::LedState&
 }
 
 
-// --- TrackballInputMapper ---
+// --- CursorInputMapper ---
 
-TrackballInputMapper::TrackballInputMapper(InputDevice* device) :
+CursorInputMapper::CursorInputMapper(InputDevice* device) :
         InputMapper(device) {
-    mXPrecision = TRACKBALL_MOVEMENT_THRESHOLD;
-    mYPrecision = TRACKBALL_MOVEMENT_THRESHOLD;
-    mXScale = 1.0f / TRACKBALL_MOVEMENT_THRESHOLD;
-    mYScale = 1.0f / TRACKBALL_MOVEMENT_THRESHOLD;
-
     initializeLocked();
 }
 
-TrackballInputMapper::~TrackballInputMapper() {
+CursorInputMapper::~CursorInputMapper() {
 }
 
-uint32_t TrackballInputMapper::getSources() {
-    return AINPUT_SOURCE_TRACKBALL;
+uint32_t CursorInputMapper::getSources() {
+    return mSources;
 }
 
-void TrackballInputMapper::populateDeviceInfo(InputDeviceInfo* info) {
+void CursorInputMapper::populateDeviceInfo(InputDeviceInfo* info) {
     InputMapper::populateDeviceInfo(info);
 
-    info->addMotionRange(AINPUT_MOTION_RANGE_X, -1.0f, 1.0f, 0.0f, mXScale);
-    info->addMotionRange(AINPUT_MOTION_RANGE_Y, -1.0f, 1.0f, 0.0f, mYScale);
+    if (mParameters.mode == Parameters::MODE_POINTER) {
+        float minX, minY, maxX, maxY;
+        if (mPointerController->getBounds(&minX, &minY, &maxX, &maxY)) {
+            info->addMotionRange(AINPUT_MOTION_RANGE_X, minX, maxX, 0.0f, 0.0f);
+            info->addMotionRange(AINPUT_MOTION_RANGE_Y, minY, maxY, 0.0f, 0.0f);
+        }
+    } else {
+        info->addMotionRange(AINPUT_MOTION_RANGE_X, -1.0f, 1.0f, 0.0f, mXScale);
+        info->addMotionRange(AINPUT_MOTION_RANGE_Y, -1.0f, 1.0f, 0.0f, mYScale);
+    }
+    info->addMotionRange(AINPUT_MOTION_RANGE_PRESSURE, 0.0f, 1.0f, 0.0f, 0.0f);
 }
 
-void TrackballInputMapper::dump(String8& dump) {
+void CursorInputMapper::dump(String8& dump) {
     { // acquire lock
         AutoMutex _l(mLock);
-        dump.append(INDENT2 "Trackball Input Mapper:\n");
+        dump.append(INDENT2 "Cursor Input Mapper:\n");
         dumpParameters(dump);
         dump.appendFormat(INDENT3 "XPrecision: %0.3f\n", mXPrecision);
         dump.appendFormat(INDENT3 "YPrecision: %0.3f\n", mYPrecision);
@@ -1021,37 +1025,79 @@ void TrackballInputMapper::dump(String8& dump) {
     } // release lock
 }
 
-void TrackballInputMapper::configure() {
+void CursorInputMapper::configure() {
     InputMapper::configure();
 
     // Configure basic parameters.
     configureParameters();
+
+    // Configure device mode.
+    switch (mParameters.mode) {
+    case Parameters::MODE_POINTER:
+        mSources = AINPUT_SOURCE_MOUSE;
+        mXPrecision = 1.0f;
+        mYPrecision = 1.0f;
+        mXScale = 1.0f;
+        mYScale = 1.0f;
+        mPointerController = getPolicy()->obtainPointerController(getDeviceId());
+        break;
+    case Parameters::MODE_NAVIGATION:
+        mSources = AINPUT_SOURCE_TRACKBALL;
+        mXPrecision = TRACKBALL_MOVEMENT_THRESHOLD;
+        mYPrecision = TRACKBALL_MOVEMENT_THRESHOLD;
+        mXScale = 1.0f / TRACKBALL_MOVEMENT_THRESHOLD;
+        mYScale = 1.0f / TRACKBALL_MOVEMENT_THRESHOLD;
+        break;
+    }
 }
 
-void TrackballInputMapper::configureParameters() {
+void CursorInputMapper::configureParameters() {
+    mParameters.mode = Parameters::MODE_POINTER;
+    String8 cursorModeString;
+    if (getDevice()->getConfiguration().tryGetProperty(String8("cursor.mode"), cursorModeString)) {
+        if (cursorModeString == "navigation") {
+            mParameters.mode = Parameters::MODE_NAVIGATION;
+        } else if (cursorModeString != "pointer" && cursorModeString != "default") {
+            LOGW("Invalid value for cursor.mode: '%s'", cursorModeString.string());
+        }
+    }
+
     mParameters.orientationAware = false;
-    getDevice()->getConfiguration().tryGetProperty(String8("trackball.orientationAware"),
+    getDevice()->getConfiguration().tryGetProperty(String8("cursor.orientationAware"),
             mParameters.orientationAware);
 
-    mParameters.associatedDisplayId = mParameters.orientationAware ? 0 : -1;
+    mParameters.associatedDisplayId = mParameters.mode == Parameters::MODE_POINTER
+            || mParameters.orientationAware ? 0 : -1;
 }
 
-void TrackballInputMapper::dumpParameters(String8& dump) {
+void CursorInputMapper::dumpParameters(String8& dump) {
     dump.append(INDENT3 "Parameters:\n");
     dump.appendFormat(INDENT4 "AssociatedDisplayId: %d\n",
             mParameters.associatedDisplayId);
+
+    switch (mParameters.mode) {
+    case Parameters::MODE_POINTER:
+        dump.append(INDENT4 "Mode: pointer\n");
+        break;
+    case Parameters::MODE_NAVIGATION:
+        dump.append(INDENT4 "Mode: navigation\n");
+        break;
+    default:
+        assert(false);
+    }
+
     dump.appendFormat(INDENT4 "OrientationAware: %s\n",
             toString(mParameters.orientationAware));
 }
 
-void TrackballInputMapper::initializeLocked() {
+void CursorInputMapper::initializeLocked() {
     mAccumulator.clear();
 
     mLocked.down = false;
     mLocked.downTime = 0;
 }
 
-void TrackballInputMapper::reset() {
+void CursorInputMapper::reset() {
     for (;;) {
         { // acquire lock
             AutoMutex _l(mLock);
@@ -1062,7 +1108,7 @@ void TrackballInputMapper::reset() {
             }
         } // release lock
 
-        // Synthesize trackball button up event on reset.
+        // Synthesize button up event on reset.
         nsecs_t when = systemTime(SYSTEM_TIME_MONOTONIC);
         mAccumulator.fields = Accumulator::FIELD_BTN_MOUSE;
         mAccumulator.btnMouse = false;
@@ -1072,7 +1118,7 @@ void TrackballInputMapper::reset() {
     InputMapper::reset();
 }
 
-void TrackballInputMapper::process(const RawEvent* rawEvent) {
+void CursorInputMapper::process(const RawEvent* rawEvent) {
     switch (rawEvent->type) {
     case EV_KEY:
         switch (rawEvent->scanCode) {
@@ -1109,7 +1155,7 @@ void TrackballInputMapper::process(const RawEvent* rawEvent) {
     }
 }
 
-void TrackballInputMapper::sync(nsecs_t when) {
+void CursorInputMapper::sync(nsecs_t when) {
     uint32_t fields = mAccumulator.fields;
     if (fields == 0) {
         return; // no new state changes, so nothing to do
@@ -1133,8 +1179,8 @@ void TrackballInputMapper::sync(nsecs_t when) {
         }
 
         downTime = mLocked.downTime;
-        float x = fields & Accumulator::FIELD_REL_X ? mAccumulator.relX * mXScale : 0.0f;
-        float y = fields & Accumulator::FIELD_REL_Y ? mAccumulator.relY * mYScale : 0.0f;
+        float deltaX = fields & Accumulator::FIELD_REL_X ? mAccumulator.relX * mXScale : 0.0f;
+        float deltaY = fields & Accumulator::FIELD_REL_Y ? mAccumulator.relY * mYScale : 0.0f;
 
         if (downChanged) {
             motionEventAction = mLocked.down ? AMOTION_EVENT_ACTION_DOWN : AMOTION_EVENT_ACTION_UP;
@@ -1142,18 +1188,8 @@ void TrackballInputMapper::sync(nsecs_t when) {
             motionEventAction = AMOTION_EVENT_ACTION_MOVE;
         }
 
-        pointerCoords.x = x;
-        pointerCoords.y = y;
-        pointerCoords.pressure = mLocked.down ? 1.0f : 0.0f;
-        pointerCoords.size = 0;
-        pointerCoords.touchMajor = 0;
-        pointerCoords.touchMinor = 0;
-        pointerCoords.toolMajor = 0;
-        pointerCoords.toolMinor = 0;
-        pointerCoords.orientation = 0;
-
         if (mParameters.orientationAware && mParameters.associatedDisplayId >= 0
-                && (x != 0.0f || y != 0.0f)) {
+                && (deltaX != 0.0f || deltaY != 0.0f)) {
             // Rotate motion based on display orientation if needed.
             // Note: getDisplayInfo is non-reentrant so we can continue holding the lock.
             int32_t orientation;
@@ -1165,35 +1201,54 @@ void TrackballInputMapper::sync(nsecs_t when) {
             float temp;
             switch (orientation) {
             case InputReaderPolicyInterface::ROTATION_90:
-                temp = pointerCoords.x;
-                pointerCoords.x = pointerCoords.y;
-                pointerCoords.y = - temp;
+                temp = deltaX;
+                deltaX = deltaY;
+                deltaY = -temp;
                 break;
 
             case InputReaderPolicyInterface::ROTATION_180:
-                pointerCoords.x = - pointerCoords.x;
-                pointerCoords.y = - pointerCoords.y;
+                deltaX = -deltaX;
+                deltaY = -deltaY;
                 break;
 
             case InputReaderPolicyInterface::ROTATION_270:
-                temp = pointerCoords.x;
-                pointerCoords.x = - pointerCoords.y;
-                pointerCoords.y = temp;
+                temp = deltaX;
+                deltaX = -deltaY;
+                deltaY = temp;
                 break;
             }
         }
+
+        if (mPointerController != NULL) {
+            mPointerController->move(deltaX, deltaY);
+            if (downChanged) {
+                mPointerController->setButtonState(mLocked.down ? POINTER_BUTTON_1 : 0);
+            }
+            mPointerController->getPosition(&pointerCoords.x, &pointerCoords.y);
+        } else {
+            pointerCoords.x = deltaX;
+            pointerCoords.y = deltaY;
+        }
+
+        pointerCoords.pressure = mLocked.down ? 1.0f : 0.0f;
+        pointerCoords.size = 0;
+        pointerCoords.touchMajor = 0;
+        pointerCoords.touchMinor = 0;
+        pointerCoords.toolMajor = 0;
+        pointerCoords.toolMinor = 0;
+        pointerCoords.orientation = 0;
     } // release lock
 
     int32_t metaState = mContext->getGlobalMetaState();
     int32_t pointerId = 0;
-    getDispatcher()->notifyMotion(when, getDeviceId(), AINPUT_SOURCE_TRACKBALL, 0,
+    getDispatcher()->notifyMotion(when, getDeviceId(), mSources, 0,
             motionEventAction, 0, metaState, AMOTION_EVENT_EDGE_FLAG_NONE,
             1, &pointerId, &pointerCoords, mXPrecision, mYPrecision, downTime);
 
     mAccumulator.clear();
 }
 
-int32_t TrackballInputMapper::getScanCodeState(uint32_t sourceMask, int32_t scanCode) {
+int32_t CursorInputMapper::getScanCodeState(uint32_t sourceMask, int32_t scanCode) {
     if (scanCode >= BTN_MOUSE && scanCode < BTN_JOYSTICK) {
         return getEventHub()->getScanCodeState(getDeviceId(), scanCode);
     } else {
@@ -1217,15 +1272,7 @@ TouchInputMapper::~TouchInputMapper() {
 }
 
 uint32_t TouchInputMapper::getSources() {
-    switch (mParameters.deviceType) {
-    case Parameters::DEVICE_TYPE_TOUCH_SCREEN:
-        return AINPUT_SOURCE_TOUCHSCREEN;
-    case Parameters::DEVICE_TYPE_TOUCH_PAD:
-        return AINPUT_SOURCE_TOUCHPAD;
-    default:
-        assert(false);
-        return AINPUT_SOURCE_UNKNOWN;
-    }
+    return mSources;
 }
 
 void TouchInputMapper::populateDeviceInfo(InputDeviceInfo* info) {
@@ -1325,6 +1372,18 @@ void TouchInputMapper::configure() {
 
     // Configure basic parameters.
     configureParameters();
+
+    // Configure sources.
+    switch (mParameters.deviceType) {
+    case Parameters::DEVICE_TYPE_TOUCH_SCREEN:
+        mSources = AINPUT_SOURCE_TOUCHSCREEN;
+        break;
+    case Parameters::DEVICE_TYPE_TOUCH_PAD:
+        mSources = AINPUT_SOURCE_TOUCHPAD;
+        break;
+    default:
+        assert(false);
+    }
 
     // Configure absolute axis information.
     configureRawAxes();
@@ -2560,7 +2619,7 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
         yPrecision = mLocked.orientedYPrecision;
     } // release lock
 
-    getDispatcher()->notifyMotion(when, getDeviceId(), getSources(), policyFlags,
+    getDispatcher()->notifyMotion(when, getDeviceId(), mSources, policyFlags,
             motionEventAction, 0, getContext()->getGlobalMetaState(), motionEventEdgeFlags,
             pointerCount, pointerIds, pointerCoords,
             xPrecision, yPrecision, mDownTime);
