@@ -20,11 +20,12 @@
         >
     <ImageView
             android:id="@android:id/left_icon"
-            android:src="@drawable/nav_divider"
+            android:src="?attr/dividerVertical"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginTop="8dip"
-            android:layout_marginBottom="8dip"
+            android:scaleType="fitXY"
+            android:layout_marginTop="12dip"
+            android:layout_marginBottom="12dip"
         />
 
     <TextView
