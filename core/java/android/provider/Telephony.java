@@ -1712,6 +1712,21 @@ public final class Telephony {
 
         public static final String TYPE = "type";
 
+        /**
+         * The protocol to be used to connect to this APN.
+         *
+         * One of the PDP_type values in TS 27.007 section 10.1.1.
+         * For example, "IP", "IPV6", "IPV4V6", or "PPP".
+         */
+        public static final String PROTOCOL = "protocol";
+
+        /**
+          * The protocol to be used to connect to this APN when roaming.
+          *
+          * The syntax is the same as protocol.
+          */
+        public static final String ROAMING_PROTOCOL = "roaming_protocol";
+
         public static final String CURRENT = "current";
     }
 

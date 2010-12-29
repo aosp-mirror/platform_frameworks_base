@@ -432,7 +432,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         } else {
             types = mDefaultApnTypes;
         }
-        mActiveApn = new ApnSetting(0, "", "", "", "", "", "", "", "", "", "", 0, types);
+        mActiveApn = new ApnSetting(0, "", "", "", "", "", "", "", "", "", "",
+                                    0, types, "IP", "IP");
 
         Message msg = obtainMessage();
         msg.what = EVENT_DATA_SETUP_COMPLETE;
