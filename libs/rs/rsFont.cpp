@@ -606,7 +606,7 @@ void FontState::issueDrawCommand() {
     mRSC->setProgramStore(mFontProgramStore.get());
 
     if (mConstantsDirty) {
-        mFontShaderFConstant->data(mRSC, &mConstants, sizeof(mConstants));
+        mFontShaderFConstant->data(mRSC, 0, 0, 1, &mConstants, sizeof(mConstants));
         mConstantsDirty = false;
     }
 

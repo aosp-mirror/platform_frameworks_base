@@ -228,44 +228,38 @@ public class RenderScript {
         rsnAllocationCopyFromBitmap(mContext, alloc, bmp);
     }
 
-    native void rsnAllocationUploadToTexture(int con, int alloc, boolean genMips, int baseMioLevel);
-    synchronized void nAllocationUploadToTexture(int alloc, boolean genMips, int baseMioLevel) {
-        rsnAllocationUploadToTexture(mContext, alloc, genMips, baseMioLevel);
+
+    native void rsnAllocationData1D(int con, int id, int off, int mip, int count, int[] d, int sizeBytes);
+    synchronized void nAllocationData1D(int id, int off, int mip, int count, int[] d, int sizeBytes) {
+        rsnAllocationData1D(mContext, id, off, mip, count, d, sizeBytes);
     }
-    native void rsnAllocationUploadToBufferObject(int con, int alloc);
-    synchronized void nAllocationUploadToBufferObject(int alloc) {
-        rsnAllocationUploadToBufferObject(mContext, alloc);
+    native void rsnAllocationData1D(int con, int id, int off, int mip, int count, short[] d, int sizeBytes);
+    synchronized void nAllocationData1D(int id, int off, int mip, int count, short[] d, int sizeBytes) {
+        rsnAllocationData1D(mContext, id, off, mip, count, d, sizeBytes);
+    }
+    native void rsnAllocationData1D(int con, int id, int off, int mip, int count, byte[] d, int sizeBytes);
+    synchronized void nAllocationData1D(int id, int off, int mip, int count, byte[] d, int sizeBytes) {
+        rsnAllocationData1D(mContext, id, off, mip, count, d, sizeBytes);
+    }
+    native void rsnAllocationData1D(int con, int id, int off, int mip, int count, float[] d, int sizeBytes);
+    synchronized void nAllocationData1D(int id, int off, int mip, int count, float[] d, int sizeBytes) {
+        rsnAllocationData1D(mContext, id, off, mip, count, d, sizeBytes);
     }
 
-    native void rsnAllocationSubData1D(int con, int id, int off, int count, int[] d, int sizeBytes);
-    synchronized void nAllocationSubData1D(int id, int off, int count, int[] d, int sizeBytes) {
-        rsnAllocationSubData1D(mContext, id, off, count, d, sizeBytes);
-    }
-    native void rsnAllocationSubData1D(int con, int id, int off, int count, short[] d, int sizeBytes);
-    synchronized void nAllocationSubData1D(int id, int off, int count, short[] d, int sizeBytes) {
-        rsnAllocationSubData1D(mContext, id, off, count, d, sizeBytes);
-    }
-    native void rsnAllocationSubData1D(int con, int id, int off, int count, byte[] d, int sizeBytes);
-    synchronized void nAllocationSubData1D(int id, int off, int count, byte[] d, int sizeBytes) {
-        rsnAllocationSubData1D(mContext, id, off, count, d, sizeBytes);
-    }
-    native void rsnAllocationSubElementData1D(int con, int id, int xoff, int compIdx, byte[] d, int sizeBytes);
-    synchronized void nAllocationSubElementData1D(int id, int xoff, int compIdx, byte[] d, int sizeBytes) {
-        rsnAllocationSubElementData1D(mContext, id, xoff, compIdx, d, sizeBytes);
-    }
-    native void rsnAllocationSubData1D(int con, int id, int off, int count, float[] d, int sizeBytes);
-    synchronized void nAllocationSubData1D(int id, int off, int count, float[] d, int sizeBytes) {
-        rsnAllocationSubData1D(mContext, id, off, count, d, sizeBytes);
+    native void rsnAllocationElementData1D(int con, int id, int xoff, int mip, int compIdx, byte[] d, int sizeBytes);
+    synchronized void nAllocationElementData1D(int id, int xoff, int mip, int compIdx, byte[] d, int sizeBytes) {
+        rsnAllocationElementData1D(mContext, id, xoff, mip, compIdx, d, sizeBytes);
     }
 
-    native void rsnAllocationSubData2D(int con, int id, int xoff, int yoff, int w, int h, int[] d, int sizeBytes);
-    synchronized void nAllocationSubData2D(int id, int xoff, int yoff, int w, int h, int[] d, int sizeBytes) {
-        rsnAllocationSubData2D(mContext, id, xoff, yoff, w, h, d, sizeBytes);
+    native void rsnAllocationData2D(int con, int id, int xoff, int yoff, int mip, int face, int w, int h, int[] d, int sizeBytes);
+    synchronized void nAllocationData2D(int id, int xoff, int yoff, int mip, int face, int w, int h, int[] d, int sizeBytes) {
+        rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes);
     }
-    native void rsnAllocationSubData2D(int con, int id, int xoff, int yoff, int w, int h, float[] d, int sizeBytes);
-    synchronized void nAllocationSubData2D(int id, int xoff, int yoff, int w, int h, float[] d, int sizeBytes) {
-        rsnAllocationSubData2D(mContext, id, xoff, yoff, w, h, d, sizeBytes);
+    native void rsnAllocationData2D(int con, int id, int xoff, int yoff, int mip, int face, int w, int h, float[] d, int sizeBytes);
+    synchronized void nAllocationData2D(int id, int xoff, int yoff, int mip, int face, int w, int h, float[] d, int sizeBytes) {
+        rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes);
     }
+
     native void rsnAllocationRead(int con, int id, int[] d);
     synchronized void nAllocationRead(int id, int[] d) {
         rsnAllocationRead(mContext, id, d);
@@ -310,63 +304,6 @@ public class RenderScript {
         return rsnFontCreateFromFile(mContext, fileName, size, dpi);
     }
 
-    native void rsnAdapter1DBindAllocation(int con, int ad, int alloc);
-    synchronized void nAdapter1DBindAllocation(int ad, int alloc) {
-        rsnAdapter1DBindAllocation(mContext, ad, alloc);
-    }
-    native void rsnAdapter1DSetConstraint(int con, int ad, int dim, int value);
-    synchronized void nAdapter1DSetConstraint(int ad, int dim, int value) {
-        rsnAdapter1DSetConstraint(mContext, ad, dim, value);
-    }
-    native void rsnAdapter1DData(int con, int ad, int[] d);
-    synchronized void nAdapter1DData(int ad, int[] d) {
-        rsnAdapter1DData(mContext, ad, d);
-    }
-    native void rsnAdapter1DData(int con, int ad, float[] d);
-    synchronized void nAdapter1DData(int ad, float[] d) {
-        rsnAdapter1DData(mContext, ad, d);
-    }
-    native void rsnAdapter1DSubData(int con, int ad, int off, int count, int[] d);
-    synchronized void nAdapter1DSubData(int ad, int off, int count, int[] d) {
-        rsnAdapter1DSubData(mContext, ad, off, count, d);
-    }
-    native void rsnAdapter1DSubData(int con, int ad, int off, int count, float[] d);
-    synchronized void nAdapter1DSubData(int ad, int off, int count, float[] d) {
-        rsnAdapter1DSubData(mContext, ad, off, count, d);
-    }
-    native int  rsnAdapter1DCreate(int con);
-    synchronized int nAdapter1DCreate() {
-        return rsnAdapter1DCreate(mContext);
-    }
-
-    native void rsnAdapter2DBindAllocation(int con, int ad, int alloc);
-    synchronized void nAdapter2DBindAllocation(int ad, int alloc) {
-        rsnAdapter2DBindAllocation(mContext, ad, alloc);
-    }
-    native void rsnAdapter2DSetConstraint(int con, int ad, int dim, int value);
-    synchronized void nAdapter2DSetConstraint(int ad, int dim, int value) {
-        rsnAdapter2DSetConstraint(mContext, ad, dim, value);
-    }
-    native void rsnAdapter2DData(int con, int ad, int[] d);
-    synchronized void nAdapter2DData(int ad, int[] d) {
-        rsnAdapter2DData(mContext, ad, d);
-    }
-    native void rsnAdapter2DData(int con, int ad, float[] d);
-    synchronized void nAdapter2DData(int ad, float[] d) {
-        rsnAdapter2DData(mContext, ad, d);
-    }
-    native void rsnAdapter2DSubData(int con, int ad, int xoff, int yoff, int w, int h, int[] d);
-    synchronized void nAdapter2DSubData(int ad, int xoff, int yoff, int w, int h, int[] d) {
-        rsnAdapter2DSubData(mContext, ad, xoff, yoff, w, h, d);
-    }
-    native void rsnAdapter2DSubData(int con, int ad, int xoff, int yoff, int w, int h, float[] d);
-    synchronized void nAdapter2DSubData(int ad, int xoff, int yoff, int w, int h, float[] d) {
-        rsnAdapter2DSubData(mContext, ad, xoff, yoff, w, h, d);
-    }
-    native int  rsnAdapter2DCreate(int con);
-    synchronized int nAdapter2DCreate() {
-        return rsnAdapter2DCreate(mContext);
-    }
 
     native void rsnScriptBindAllocation(int con, int script, int alloc, int slot);
     synchronized void nScriptBindAllocation(int script, int alloc, int slot) {

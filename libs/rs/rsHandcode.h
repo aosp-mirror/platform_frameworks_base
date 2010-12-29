@@ -49,64 +49,49 @@ static inline void rsHCAPI_ScriptSetVarV (RsContext rsc, RsScript va, uint32_t s
     }
 }
 
-static inline void rsHCAPI_AllocationData (RsContext rsc, RsAllocation va, const void * data, uint32_t sizeBytes) {
+static inline void rsHCAPI_Allocation1DData (RsContext rsc, RsAllocation va, uint32_t xoff, uint32_t lod,
+                                             uint32_t count, const void * data, uint32_t sizeBytes) {
     ThreadIO *io = &((Context *)rsc)->mIO;
-    uint32_t size = sizeof(RS_CMD_AllocationData);
+    uint32_t size = sizeof(RS_CMD_Allocation1DData);
     if (sizeBytes < DATA_SYNC_SIZE) {
         size += (sizeBytes + 3) & ~3;
     }
-    RS_CMD_AllocationData *cmd = static_cast<RS_CMD_AllocationData *>(io->mToCore.reserve(size));
-    cmd->va = va;
-    cmd->bytes = sizeBytes;
-    cmd->data = data;
-    if (sizeBytes < DATA_SYNC_SIZE) {
-        cmd->data = (void *)(cmd+1);
-        memcpy(cmd+1, data, sizeBytes);
-        io->mToCore.commit(RS_CMD_ID_AllocationData, size);
-    } else {
-        io->mToCore.commitSync(RS_CMD_ID_AllocationData, size);
-    }
-}
-
-static inline void rsHCAPI_Allocation1DSubData (RsContext rsc, RsAllocation va, uint32_t xoff, uint32_t count, const void * data, uint32_t sizeBytes) {
-    ThreadIO *io = &((Context *)rsc)->mIO;
-    uint32_t size = sizeof(RS_CMD_Allocation1DSubData);
-    if (sizeBytes < DATA_SYNC_SIZE) {
-        size += (sizeBytes + 3) & ~3;
-    }
-    RS_CMD_Allocation1DSubData *cmd = static_cast<RS_CMD_Allocation1DSubData *>(io->mToCore.reserve(size));
+    RS_CMD_Allocation1DData *cmd = static_cast<RS_CMD_Allocation1DData *>(io->mToCore.reserve(size));
     cmd->va = va;
     cmd->xoff = xoff;
+    cmd->lod = lod;
     cmd->count = count;
     cmd->data = data;
     cmd->bytes = sizeBytes;
     if (sizeBytes < DATA_SYNC_SIZE) {
         cmd->data = (void *)(cmd+1);
         memcpy(cmd+1, data, sizeBytes);
-        io->mToCore.commit(RS_CMD_ID_Allocation1DSubData, size);
+        io->mToCore.commit(RS_CMD_ID_Allocation1DData, size);
     } else {
-        io->mToCore.commitSync(RS_CMD_ID_Allocation1DSubData, size);
+        io->mToCore.commitSync(RS_CMD_ID_Allocation1DData, size);
     }
 }
 
-static inline void rsHCAPI_Allocation1DSubElementData (RsContext rsc, RsAllocation va, uint32_t x, const void * data, uint32_t comp_offset, uint32_t sizeBytes) {
+static inline void rsHCAPI_Allocation1DElementData (RsContext rsc, RsAllocation va, uint32_t x, uint32_t lod,
+                                                    const void * data, uint32_t comp_offset, uint32_t sizeBytes) {
     ThreadIO *io = &((Context *)rsc)->mIO;
-    uint32_t size = sizeof(RS_CMD_Allocation1DSubElementData);
+    uint32_t size = sizeof(RS_CMD_Allocation1DElementData);
     if (sizeBytes < DATA_SYNC_SIZE) {
         size += (sizeBytes + 3) & ~3;
     }
-    RS_CMD_Allocation1DSubElementData *cmd = static_cast<RS_CMD_Allocation1DSubElementData *>(io->mToCore.reserve(size));
+    RS_CMD_Allocation1DElementData *cmd = static_cast<RS_CMD_Allocation1DElementData *>(io->mToCore.reserve(size));
     cmd->va = va;
     cmd->x = x;
+    cmd->lod = lod;
     cmd->data = data;
     cmd->comp_offset = comp_offset;
     cmd->bytes = sizeBytes;
     if (sizeBytes < DATA_SYNC_SIZE) {
         cmd->data = (void *)(cmd+1);
         memcpy(cmd+1, data, sizeBytes);
-        io->mToCore.commit(RS_CMD_ID_Allocation1DSubElementData, size);
+        io->mToCore.commit(RS_CMD_ID_Allocation1DElementData, size);
     } else {
-        io->mToCore.commitSync(RS_CMD_ID_Allocation1DSubElementData, size);
+        io->mToCore.commitSync(RS_CMD_ID_Allocation1DElementData, size);
     }
 }
 
