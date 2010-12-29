@@ -63,7 +63,7 @@ public class Matrix3f {
     }
 
     public void load(Matrix3f src) {
-        System.arraycopy(mMat, 0, src.getArray(), 0, 9);
+        System.arraycopy(src.getArray(), 0, mMat, 0, mMat.length);
     }
 
     public void loadRotate(float rot, float x, float y, float z) {
