@@ -71,7 +71,7 @@ public class Matrix4f {
     }
 
     public void load(Matrix4f src) {
-        System.arraycopy(mMat, 0, src.getArray(), 0, 16);
+        System.arraycopy(src.getArray(), 0, mMat, 0, mMat.length);
     }
 
     public void loadRotate(float rot, float x, float y, float z) {
