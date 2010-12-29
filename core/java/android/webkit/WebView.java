@@ -3846,6 +3846,13 @@ public class WebView extends AbsoluteLayout
     public boolean selectText() {
         int x = viewToContentX((int) mLastTouchX + mScrollX);
         int y = viewToContentY((int) mLastTouchY + mScrollY);
+        return selectText(x, y);
+    }
+
+    /**
+     * Select the word at the indicated content coordinates.
+     */
+    boolean selectText(int x, int y) {
         if (!setUpSelect()) {
             return false;
         }
@@ -4808,12 +4815,16 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Select all of the text in this WebView.
+     *
+     * @hide pending API council approval.
      */
-    void selectAll() {
+    public void selectAll() {
         if (0 == mNativeClass) return; // client isn't initialized
         if (inFullScreenMode()) return;
-        if (!mSelectingText && !setUpSelect()) {
-            return;
+        if (!mSelectingText) {
+            // retrieve a point somewhere within the text
+            Point select = nativeSelectableText();
+            if (!selectText(select.x, select.y)) return;
         }
         nativeSelectAll();
         mDrawSelectionPointer = false;
@@ -4842,8 +4853,10 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Copy the selection to the clipboard
+     *
+     * @hide pending API council approval.
      */
-    boolean copySelection() {
+    public boolean copySelection() {
         boolean copiedSomething = false;
         String selection = getSelection();
         if (selection != "") {
@@ -8049,6 +8062,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeRecordButtons(boolean focused,
             boolean pressed, boolean invalidate);
     private native void     nativeResetSelection();
+    private native Point    nativeSelectableText();
     private native void     nativeSelectAll();
     private native void     nativeSelectBestAt(Rect rect);
     private native int      nativeSelectionX();
