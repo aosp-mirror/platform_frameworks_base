@@ -587,15 +587,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     intalledService.name);
             Service service = componentNameToServiceMap.get(componentName);
 
-            if (isEnabled && enabledServices.contains(componentName)) {
-                if (service == null) {
+            if (isEnabled) {
+                if (enabledServices.contains(componentName) && service == null) {
                     new Service(componentName).bind();
+                } else if (!enabledServices.contains(componentName) && service != null) {
+                    // clean up done in Service#onServiceDisconnected
+                    service.unbind();
                 }
             } else {
                 if (service != null) {
+                    // clean up done in Service#onServiceDisconnected
                     service.unbind();
-                    componentNameToServiceMap.remove(componentName);
-                    services.remove(service);
                 }
             }
         }
