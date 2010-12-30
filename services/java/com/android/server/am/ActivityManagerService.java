@@ -6561,7 +6561,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     + " has crashed too many times: killing!");
             EventLog.writeEvent(EventLogTags.AM_PROCESS_CRASHED_TOO_MUCH,
                     app.info.processName, app.info.uid);
-            killServicesLocked(app, false);
             for (int i=mMainStack.mHistory.size()-1; i>=0; i--) {
                 ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
                 if (r.app == app) {
@@ -6571,6 +6570,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             if (!app.persistent) {
+                // Don't let services in this process be restarted and potentially
+                // annoy the user repeatedly.  Unless it is persistent, since those
+                // processes run critical code.
+                killServicesLocked(app, false);
                 // We don't want to start this process again until the user
                 // explicitly does so...  but for persistent process, we really
                 // need to keep it running.  If a persistent process is actually
@@ -6594,7 +6597,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 int index = mMainStack.indexOfTokenLocked(r);
                 r.stack.finishActivityLocked(r, index,
                         Activity.RESULT_CANCELED, null, "crashed");
-                // Also terminate an activities below it that aren't yet
+                // Also terminate any activities below it that aren't yet
                 // stopped, to avoid a situation where one will get
                 // re-start our crashing activity once it gets resumed again.
                 index--;
@@ -8476,7 +8479,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
 
-                if (sr.crashCount >= 2) {
+                if (sr.crashCount >= 2 && (sr.serviceInfo.applicationInfo.flags
+                        &ApplicationInfo.FLAG_PERSISTENT) == 0) {
                     Slog.w(TAG, "Service crashed " + sr.crashCount
                             + " times, stopping: " + sr);
                     EventLog.writeEvent(EventLogTags.AM_SERVICE_CRASHED_TOO_MUCH,
@@ -9138,6 +9142,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         long minDuration = SERVICE_RESTART_DURATION;
         long resetTime = SERVICE_RESET_RUN_DURATION;
         
+        if ((r.serviceInfo.applicationInfo.flags
+                &ApplicationInfo.FLAG_PERSISTENT) != 0) {
+            minDuration /= 4;
+        }
+        
         // Any delivered but not yet finished starts should be put back
         // on the pending list.
         final int N = r.deliveredStarts.size();
@@ -9177,9 +9186,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                 r.restartCount = 1;
                 r.restartDelay = minDuration;
             } else {
-                r.restartDelay *= SERVICE_RESTART_DURATION_FACTOR;
-                if (r.restartDelay < minDuration) {
-                    r.restartDelay = minDuration;
+                if ((r.serviceInfo.applicationInfo.flags
+                        &ApplicationInfo.FLAG_PERSISTENT) != 0) {
+                    // Services in peristent processes will restart much more
+                    // quickly, since they are pretty important.  (Think SystemUI).
+                    r.restartDelay += minDuration/2;
+                } else {
+                    r.restartDelay *= SERVICE_RESTART_DURATION_FACTOR;
+                    if (r.restartDelay < minDuration) {
+                        r.restartDelay = minDuration;
+                    }
                 }
             }
         }
