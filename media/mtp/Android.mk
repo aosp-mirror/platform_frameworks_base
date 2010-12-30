@@ -21,7 +21,6 @@ ifneq ($(TARGET_SIMULATOR),true)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=                                       \
-                  MtpClient.cpp                         \
                   MtpDataPacket.cpp                     \
                   MtpDebug.cpp                          \
                   MtpDevice.cpp                         \
@@ -53,7 +52,6 @@ ifeq ($(HOST_OS),linux)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=                                       \
-                  MtpClient.cpp                         \
                   MtpDataPacket.cpp                     \
                   MtpDebug.cpp                          \
                   MtpDevice.cpp                         \
