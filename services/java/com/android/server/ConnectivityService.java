@@ -59,6 +59,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -112,6 +113,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private boolean mTestMode;
     private static ConnectivityService sServiceInstance;
+
+    private AtomicBoolean mBackgroundDataEnabled = new AtomicBoolean(true);
 
     private static final int ENABLED  = 1;
     private static final int DISABLED = 0;
@@ -260,6 +263,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         HandlerThread handlerThread = new HandlerThread("ConnectivityServiceThread");
         handlerThread.start();
         mHandler = new MyHandler(handlerThread.getLooper());
+
+        mBackgroundDataEnabled.set(Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.BACKGROUND_DATA, 1) == 1);
 
         // setup our unique device name
         if (TextUtils.isEmpty(SystemProperties.get("net.hostname"))) {
@@ -954,8 +960,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * @see ConnectivityManager#getBackgroundDataSetting()
      */
     public boolean getBackgroundDataSetting() {
-        return Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.BACKGROUND_DATA, 1) == 1;
+        return mBackgroundDataEnabled.get();
     }
 
     /**
@@ -965,6 +970,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_BACKGROUND_DATA_SETTING,
                 "ConnectivityService");
+
+        mBackgroundDataEnabled.set(allowBackgroundDataUsage);
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_SET_BACKGROUND_DATA,
                 (allowBackgroundDataUsage ? ENABLED : DISABLED), 0));
