@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.media;
+package android.mtp;
 
 import android.content.IContentProvider;
 import android.database.Cursor;

@@ -774,11 +774,11 @@ extern int register_android_media_MediaRecorder(JNIEnv *env);
 extern int register_android_media_MediaScanner(JNIEnv *env);
 extern int register_android_media_ResampleInputStream(JNIEnv *env);
 extern int register_android_media_MediaProfiles(JNIEnv *env);
-extern int register_android_media_PtpClient(JNIEnv *env);
-extern int register_android_media_PtpCursor(JNIEnv *env);
-extern int register_android_media_MtpDatabase(JNIEnv *env);
-extern int register_android_media_MtpServer(JNIEnv *env);
 extern int register_android_media_AmrInputStream(JNIEnv *env);
+extern int register_android_mtp_MtpDatabase(JNIEnv *env);
+extern int register_android_mtp_MtpServer(JNIEnv *env);
+extern int register_android_mtp_PtpClient(JNIEnv *env);
+extern int register_android_mtp_PtpCursor(JNIEnv *env);
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
@@ -826,22 +826,22 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
         goto bail;
     }
 
-    if (register_android_media_PtpClient(env) < 0) {
+    if (register_android_mtp_PtpClient(env) < 0) {
         LOGE("ERROR: PtpClient native registration failed");
         goto bail;
     }
 
-    if (register_android_media_PtpCursor(env) < 0) {
+    if (register_android_mtp_PtpCursor(env) < 0) {
         LOGE("ERROR: PtpCursor native registration failed");
         goto bail;
     }
 
-    if (register_android_media_MtpDatabase(env) < 0) {
+    if (register_android_mtp_MtpDatabase(env) < 0) {
         LOGE("ERROR: MtpDatabase native registration failed");
         goto bail;
     }
 
-    if (register_android_media_MtpServer(env) < 0) {
+    if (register_android_mtp_MtpServer(env) < 0) {
         LOGE("ERROR: MtpServer native registration failed");
         goto bail;
     }

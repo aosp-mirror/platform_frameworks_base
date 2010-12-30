@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.media;
+package android.mtp;
 
 import android.content.Context;
 import android.content.ContentValues;
@@ -22,6 +22,7 @@ import android.content.IContentProvider;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.media.MediaScanner;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.RemoteException;

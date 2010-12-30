@@ -37,7 +37,7 @@ using namespace android;
 
 static jfieldID field_context;
 
-// From android_media_PtpClient.cpp
+// From android_mtp_PtpClient.cpp
 MtpClient * get_client_from_object(JNIEnv * env, jobject javaClient);
 
 // ----------------------------------------------------------------------------
@@ -48,11 +48,11 @@ static bool ExceptionCheck(void* env)
 }
 
 static void
-android_media_PtpCursor_setup(JNIEnv *env, jobject thiz, jobject javaClient,
+android_mtp_PtpCursor_setup(JNIEnv *env, jobject thiz, jobject javaClient,
         jint queryType, jint deviceID, jlong storageID, jlong objectID, jintArray javaColumns)
 {
 #ifdef HAVE_ANDROID_OS
-    LOGD("android_media_PtpCursor_setup queryType: %d deviceID: %d storageID: %lld objectID: %lld\n",
+    LOGD("android_mtp_PtpCursor_setup queryType: %d deviceID: %d storageID: %lld objectID: %lld\n",
                 queryType, deviceID, storageID, objectID);
 
     int* columns = NULL;
@@ -73,7 +73,7 @@ android_media_PtpCursor_setup(JNIEnv *env, jobject thiz, jobject javaClient,
 }
 
 static void
-android_media_PtpCursor_finalize(JNIEnv *env, jobject thiz)
+android_mtp_PtpCursor_finalize(JNIEnv *env, jobject thiz)
 {
 #ifdef HAVE_ANDROID_OS
     LOGD("finalize\n");
@@ -83,7 +83,7 @@ android_media_PtpCursor_finalize(JNIEnv *env, jobject thiz)
 }
 
 static jint
-android_media_PtpCursor_fill_window(JNIEnv *env, jobject thiz, jobject javaWindow, jint startPos)
+android_mtp_PtpCursor_fill_window(JNIEnv *env, jobject thiz, jobject javaWindow, jint startPos)
 {
 #ifdef HAVE_ANDROID_OS
     CursorWindow* window = get_window_from_object(env, javaWindow);
@@ -104,25 +104,25 @@ android_media_PtpCursor_fill_window(JNIEnv *env, jobject thiz, jobject javaWindo
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"native_setup",            "(Landroid/media/PtpClient;IIJJ[I)V",
-                                        (void *)android_media_PtpCursor_setup},
-    {"native_finalize",         "()V",  (void *)android_media_PtpCursor_finalize},
+    {"native_setup",            "(Landroid/mtp/PtpClient;IIJJ[I)V",
+                                        (void *)android_mtp_PtpCursor_setup},
+    {"native_finalize",         "()V",  (void *)android_mtp_PtpCursor_finalize},
     {"native_fill_window",      "(Landroid/database/CursorWindow;I)I",
-                                        (void *)android_media_PtpCursor_fill_window},
+                                        (void *)android_mtp_PtpCursor_fill_window},
 
 };
 
-static const char* const kClassPathName = "android/media/PtpCursor";
+static const char* const kClassPathName = "android/mtp/PtpCursor";
 
-int register_android_media_PtpCursor(JNIEnv *env)
+int register_android_mtp_PtpCursor(JNIEnv *env)
 {
     jclass clazz;
 
-    LOGD("register_android_media_PtpCursor\n");
+    LOGD("register_android_mtp_PtpCursor\n");
 
-    clazz = env->FindClass("android/media/PtpCursor");
+    clazz = env->FindClass("android/mtp/PtpCursor");
     if (clazz == NULL) {
-        LOGE("Can't find android/media/PtpCursor");
+        LOGE("Can't find android/mtp/PtpCursor");
         return -1;
     }
     field_context = env->GetFieldID(clazz, "mNativeContext", "I");
@@ -132,5 +132,5 @@ int register_android_media_PtpCursor(JNIEnv *env)
     }
 
     return AndroidRuntime::registerNativeMethods(env,
-                "android/media/PtpCursor", gMethods, NELEM(gMethods));
+                "android/mtp/PtpCursor", gMethods, NELEM(gMethods));
 }

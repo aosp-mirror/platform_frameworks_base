@@ -43,7 +43,7 @@ using namespace android;
 static jfieldID field_context;
 static Mutex    sMutex;
 
-// in android_media_MtpDatabase.cpp
+// in android_mtp_MtpDatabase.cpp
 extern MtpDatabase* getMtpDatabase(JNIEnv *env, jobject database);
 
 // ----------------------------------------------------------------------------
@@ -142,7 +142,7 @@ public:
 #endif // HAVE_ANDROID_OS
 
 static void
-android_media_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase,
+android_mtp_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase,
         jstring storagePath, jlong reserveSpace)
 {
 #ifdef HAVE_ANDROID_OS
@@ -160,14 +160,14 @@ android_media_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase,
 }
 
 static void
-android_media_MtpServer_finalize(JNIEnv *env, jobject thiz)
+android_mtp_MtpServer_finalize(JNIEnv *env, jobject thiz)
 {
     LOGD("finalize\n");
 }
 
 
 static void
-android_media_MtpServer_start(JNIEnv *env, jobject thiz)
+android_mtp_MtpServer_start(JNIEnv *env, jobject thiz)
 {
 #ifdef HAVE_ANDROID_OS
     LOGD("start\n");
@@ -177,7 +177,7 @@ android_media_MtpServer_start(JNIEnv *env, jobject thiz)
 }
 
 static void
-android_media_MtpServer_stop(JNIEnv *env, jobject thiz)
+android_mtp_MtpServer_stop(JNIEnv *env, jobject thiz)
 {
 #ifdef HAVE_ANDROID_OS
     LOGD("stop\n");
@@ -185,7 +185,7 @@ android_media_MtpServer_stop(JNIEnv *env, jobject thiz)
 }
 
 static void
-android_media_MtpServer_send_object_added(JNIEnv *env, jobject thiz, jint handle)
+android_mtp_MtpServer_send_object_added(JNIEnv *env, jobject thiz, jint handle)
 {
 #ifdef HAVE_ANDROID_OS
     MtpThread *thread = (MtpThread *)env->GetIntField(thiz, field_context);
@@ -195,7 +195,7 @@ android_media_MtpServer_send_object_added(JNIEnv *env, jobject thiz, jint handle
 }
 
 static void
-android_media_MtpServer_send_object_removed(JNIEnv *env, jobject thiz, jint handle)
+android_mtp_MtpServer_send_object_removed(JNIEnv *env, jobject thiz, jint handle)
 {
 #ifdef HAVE_ANDROID_OS
     MtpThread *thread = (MtpThread *)env->GetIntField(thiz, field_context);
@@ -205,7 +205,7 @@ android_media_MtpServer_send_object_removed(JNIEnv *env, jobject thiz, jint hand
 }
 
 static void
-android_media_MtpServer_set_ptp_mode(JNIEnv *env, jobject thiz, jboolean usePtp)
+android_mtp_MtpServer_set_ptp_mode(JNIEnv *env, jobject thiz, jboolean usePtp)
 {
 #ifdef HAVE_ANDROID_OS
     LOGD("set_ptp_mode\n");
@@ -218,27 +218,27 @@ android_media_MtpServer_set_ptp_mode(JNIEnv *env, jobject thiz, jboolean usePtp)
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"native_setup",                "(Landroid/media/MtpDatabase;Ljava/lang/String;J)V",
-                                            (void *)android_media_MtpServer_setup},
-    {"native_finalize",             "()V",  (void *)android_media_MtpServer_finalize},
-    {"native_start",                "()V",  (void *)android_media_MtpServer_start},
-    {"native_stop",                 "()V",  (void *)android_media_MtpServer_stop},
-    {"native_send_object_added",    "(I)V", (void *)android_media_MtpServer_send_object_added},
-    {"native_send_object_removed",  "(I)V", (void *)android_media_MtpServer_send_object_removed},
-    {"native_set_ptp_mode",         "(Z)V", (void *)android_media_MtpServer_set_ptp_mode},
+    {"native_setup",                "(Landroid/mtp/MtpDatabase;Ljava/lang/String;J)V",
+                                            (void *)android_mtp_MtpServer_setup},
+    {"native_finalize",             "()V",  (void *)android_mtp_MtpServer_finalize},
+    {"native_start",                "()V",  (void *)android_mtp_MtpServer_start},
+    {"native_stop",                 "()V",  (void *)android_mtp_MtpServer_stop},
+    {"native_send_object_added",    "(I)V", (void *)android_mtp_MtpServer_send_object_added},
+    {"native_send_object_removed",  "(I)V", (void *)android_mtp_MtpServer_send_object_removed},
+    {"native_set_ptp_mode",         "(Z)V", (void *)android_mtp_MtpServer_set_ptp_mode},
 };
 
-static const char* const kClassPathName = "android/media/MtpServer";
+static const char* const kClassPathName = "android/mtp/MtpServer";
 
-int register_android_media_MtpServer(JNIEnv *env)
+int register_android_mtp_MtpServer(JNIEnv *env)
 {
     jclass clazz;
 
-    LOGD("register_android_media_MtpServer\n");
+    LOGD("register_android_mtp_MtpServer\n");
 
-    clazz = env->FindClass("android/media/MtpServer");
+    clazz = env->FindClass("android/mtp/MtpServer");
     if (clazz == NULL) {
-        LOGE("Can't find android/media/MtpServer");
+        LOGE("Can't find android/mtp/MtpServer");
         return -1;
     }
     field_context = env->GetFieldID(clazz, "mNativeContext", "I");
@@ -248,5 +248,5 @@ int register_android_media_MtpServer(JNIEnv *env)
     }
 
     return AndroidRuntime::registerNativeMethods(env,
-                "android/media/MtpServer", gMethods, NELEM(gMethods));
+                "android/mtp/MtpServer", gMethods, NELEM(gMethods));
 }

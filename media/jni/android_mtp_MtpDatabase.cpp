@@ -1029,7 +1029,7 @@ void MyMtpDatabase::sessionEnded() {
 // ----------------------------------------------------------------------------
 
 static void
-android_media_MtpDatabase_setup(JNIEnv *env, jobject thiz)
+android_mtp_MtpDatabase_setup(JNIEnv *env, jobject thiz)
 {
 #ifdef HAVE_ANDROID_OS
     LOGD("setup\n");
@@ -1040,7 +1040,7 @@ android_media_MtpDatabase_setup(JNIEnv *env, jobject thiz)
 }
 
 static void
-android_media_MtpDatabase_finalize(JNIEnv *env, jobject thiz)
+android_mtp_MtpDatabase_finalize(JNIEnv *env, jobject thiz)
 {
 #ifdef HAVE_ANDROID_OS
     LOGD("finalize\n");
@@ -1053,7 +1053,7 @@ android_media_MtpDatabase_finalize(JNIEnv *env, jobject thiz)
 }
 
 static jstring
-android_media_MtpPropertyGroup_format_date_time(JNIEnv *env, jobject thiz, jlong seconds)
+android_mtp_MtpPropertyGroup_format_date_time(JNIEnv *env, jobject thiz, jlong seconds)
 {
 #ifdef HAVE_ANDROID_OS
     char    date[20];
@@ -1067,26 +1067,26 @@ android_media_MtpPropertyGroup_format_date_time(JNIEnv *env, jobject thiz, jlong
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMtpDatabaseMethods[] = {
-    {"native_setup",            "()V",  (void *)android_media_MtpDatabase_setup},
-    {"native_finalize",         "()V",  (void *)android_media_MtpDatabase_finalize},
+    {"native_setup",            "()V",  (void *)android_mtp_MtpDatabase_setup},
+    {"native_finalize",         "()V",  (void *)android_mtp_MtpDatabase_finalize},
 };
 
 static JNINativeMethod gMtpPropertyGroupMethods[] = {
     {"format_date_time",        "(J)Ljava/lang/String;",
-                                        (void *)android_media_MtpPropertyGroup_format_date_time},
+                                        (void *)android_mtp_MtpPropertyGroup_format_date_time},
 };
 
-static const char* const kClassPathName = "android/media/MtpDatabase";
+static const char* const kClassPathName = "android/mtp/MtpDatabase";
 
-int register_android_media_MtpDatabase(JNIEnv *env)
+int register_android_mtp_MtpDatabase(JNIEnv *env)
 {
     jclass clazz;
 
-    LOGD("register_android_media_MtpDatabase\n");
+    LOGD("register_android_mtp_MtpDatabase\n");
 
-    clazz = env->FindClass("android/media/MtpDatabase");
+    clazz = env->FindClass("android/mtp/MtpDatabase");
     if (clazz == NULL) {
-        LOGE("Can't find android/media/MtpDatabase");
+        LOGE("Can't find android/mtp/MtpDatabase");
         return -1;
     }
     method_beginSendObject = env->GetMethodID(clazz, "beginSendObject", "(Ljava/lang/String;IIIJJ)I");
@@ -1145,7 +1145,7 @@ int register_android_media_MtpDatabase(JNIEnv *env)
         return -1;
     }
     method_getObjectPropertyList = env->GetMethodID(clazz, "getObjectPropertyList",
-            "(JIJII)Landroid/media/MtpPropertyList;");
+            "(JIJII)Landroid/mtp/MtpPropertyList;");
     if (method_getObjectPropertyList == NULL) {
         LOGE("Can't find getObjectPropertyList");
         return -1;
@@ -1193,9 +1193,9 @@ int register_android_media_MtpDatabase(JNIEnv *env)
     }
 
     // now set up fields for MtpPropertyList class
-    clazz = env->FindClass("android/media/MtpPropertyList");
+    clazz = env->FindClass("android/mtp/MtpPropertyList");
     if (clazz == NULL) {
-        LOGE("Can't find android/media/MtpPropertyList");
+        LOGE("Can't find android/mtp/MtpPropertyList");
         return -1;
     }
     field_mCount = env->GetFieldID(clazz, "mCount", "I");
@@ -1235,9 +1235,9 @@ int register_android_media_MtpDatabase(JNIEnv *env)
     }
 
     if (AndroidRuntime::registerNativeMethods(env,
-                "android/media/MtpDatabase", gMtpDatabaseMethods, NELEM(gMtpDatabaseMethods)))
+                "android/mtp/MtpDatabase", gMtpDatabaseMethods, NELEM(gMtpDatabaseMethods)))
         return -1;
 
     return AndroidRuntime::registerNativeMethods(env,
-                "android/media/MtpPropertyGroup", gMtpPropertyGroupMethods, NELEM(gMtpPropertyGroupMethods));
+                "android/mtp/MtpPropertyGroup", gMtpPropertyGroupMethods, NELEM(gMtpPropertyGroupMethods));
 }

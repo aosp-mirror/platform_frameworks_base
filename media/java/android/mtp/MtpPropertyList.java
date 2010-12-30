@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.media;
+package android.mtp;
 
 /**
  * Encapsulates the ObjectPropList dataset used by the GetObjectPropList command.

@@ -28,6 +28,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.drm.DrmManagerClient;
 import android.graphics.BitmapFactory;
+import android.mtp.MtpConstants;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Process;

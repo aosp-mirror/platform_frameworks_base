@@ -23,6 +23,7 @@ import android.provider.MediaStore.Video;
 import android.media.DecoderCapabilities;
 import android.media.DecoderCapabilities.VideoDecoder;
 import android.media.DecoderCapabilities.AudioDecoder;
+import android.mtp.MtpConstants;
 
 import java.util.HashMap;
 import java.util.Iterator;
