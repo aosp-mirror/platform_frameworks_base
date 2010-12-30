@@ -1,4 +1,4 @@
-page.title=Testing Overview
+page.title=Testing
 @jd:body
 <p>
     Android includes powerful tools for setting up and running test applications.
