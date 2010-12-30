@@ -19,10 +19,18 @@ package com.android.server;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.IUsbManager;
+import android.hardware.UsbConstants;
+import android.hardware.UsbDevice;
+import android.hardware.UsbEndpoint;
+import android.hardware.UsbInterface;
 import android.hardware.UsbManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcelable;
+import android.os.ParcelFileDescriptor;
 import android.os.UEventObserver;
 import android.provider.Settings;
 import android.util.Log;
@@ -32,11 +40,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * <p>UsbService monitors for changes to USB state.
  */
-class UsbService {
+class UsbService extends IUsbManager.Stub {
     private static final String TAG = UsbService.class.getSimpleName();
     private static final boolean LOG = false;
 
@@ -68,9 +77,11 @@ class UsbService {
     private int mLastConnected = -1;
     private int mLastConfiguration = -1;
 
-    // lists of enabled and disabled USB functions
+    // lists of enabled and disabled USB functions (for USB device mode)
     private final ArrayList<String> mEnabledFunctions = new ArrayList<String>();
     private final ArrayList<String> mDisabledFunctions = new ArrayList<String>();
+
+    private final HashMap<String,UsbDevice> mDevices = new HashMap<String,UsbDevice>();
 
     private boolean mSystemReady;
 
@@ -186,8 +197,106 @@ class UsbService {
         }
     }
 
+    // called from JNI in monitorUsbHostBus()
+    private void usbDeviceAdded(String deviceName, int vendorID, int productID,
+            int deviceClass, int deviceSubclass, int deviceProtocol,
+            /* array of quintuples containing id, class, subclass, protocol
+               and number of endpoints for each interface */
+            int[] interfaceValues,
+           /* array of quadruples containing address, attributes, max packet size
+              and interval for each endpoint */
+            int[] endpointValues) {
+
+        // ignore hubs
+        if (deviceClass == UsbConstants.USB_CLASS_HUB) {
+            return;
+        }
+
+        synchronized (mDevices) {
+            if (mDevices.get(deviceName) != null) {
+                Log.w(TAG, "device already on mDevices list: " + deviceName);
+                return;
+            }
+
+            int numInterfaces = interfaceValues.length / 5;
+            Parcelable[] interfaces = new UsbInterface[numInterfaces];
+            try {
+                // repackage interfaceValues as an array of UsbInterface
+                int intf, endp, ival = 0, eval = 0;
+                boolean hasGoodInterface = false;
+                for (intf = 0; intf < numInterfaces; intf++) {
+                    int interfaceId = interfaceValues[ival++];
+                    int interfaceClass = interfaceValues[ival++];
+                    int interfaceSubclass = interfaceValues[ival++];
+                    int interfaceProtocol = interfaceValues[ival++];
+                    int numEndpoints = interfaceValues[ival++];
+
+                    Parcelable[] endpoints = new UsbEndpoint[numEndpoints];
+                    for (endp = 0; endp < numEndpoints; endp++) {
+                        int address = endpointValues[eval++];
+                        int attributes = endpointValues[eval++];
+                        int maxPacketSize = endpointValues[eval++];
+                        int interval = endpointValues[eval++];
+                        endpoints[endp] = new UsbEndpoint(address, attributes,
+                                maxPacketSize, interval);
+                    }
+
+                    if (interfaceClass != UsbConstants.USB_CLASS_HUB) {
+                        hasGoodInterface = true;
+                    }
+                    interfaces[intf] = new UsbInterface(interfaceId, interfaceClass,
+                            interfaceSubclass, interfaceProtocol, endpoints);
+                }
+
+                if (!hasGoodInterface) {
+                    return;
+                }
+            } catch (Exception e) {
+                // beware of index out of bound exceptions, which might happen if
+                // a device does not set bNumEndpoints correctly
+                Log.e(TAG, "error parsing USB descriptors", e);
+                return;
+            }
+
+            UsbDevice device = new UsbDevice(deviceName, vendorID, productID,
+                    deviceClass, deviceSubclass, deviceProtocol, interfaces);
+            mDevices.put(deviceName, device);
+
+            Intent intent = new Intent(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+            intent.putExtra(UsbManager.EXTRA_DEVICE_NAME, deviceName);
+            intent.putExtra(UsbManager.EXTRA_VENDOR_ID, vendorID);
+            intent.putExtra(UsbManager.EXTRA_PRODUCT_ID, productID);
+            intent.putExtra(UsbManager.EXTRA_DEVICE_CLASS, deviceClass);
+            intent.putExtra(UsbManager.EXTRA_DEVICE_SUBCLASS, deviceSubclass);
+            intent.putExtra(UsbManager.EXTRA_DEVICE_PROTOCOL, deviceProtocol);
+            intent.putExtra(UsbManager.EXTRA_DEVICE, device);
+            Log.d(TAG, "usbDeviceAdded, sending " + intent);
+            mContext.sendBroadcast(intent);
+        }
+    }
+
+    // called from JNI in monitorUsbHostBus()
+    private void usbDeviceRemoved(String deviceName) {
+        synchronized (mDevices) {
+            UsbDevice device = mDevices.remove(deviceName);
+            if (device != null) {
+                Intent intent = new Intent(UsbManager.ACTION_USB_DEVICE_DETACHED);
+                intent.putExtra(UsbManager.EXTRA_DEVICE_NAME, deviceName);
+                Log.d(TAG, "usbDeviceRemoved, sending " + intent);
+                mContext.sendBroadcast(intent);
+            }
+        }
+    }
+
     private void initHostSupport() {
-        // temporarily disabled
+        // Create a thread to call into native code to wait for USB host events.
+        // This thread will call us back on usbDeviceAdded and usbDeviceRemoved.
+        Runnable runnable = new Runnable() {
+            public void run() {
+                monitorUsbHostBus();
+            }
+        };
+        new Thread(null, runnable, "UsbService host thread").start();
     }
 
     void systemReady() {
@@ -206,6 +315,21 @@ class UsbService {
     private final void update(boolean delayed) {
         mHandler.removeMessages(MSG_UPDATE);
         mHandler.sendEmptyMessageDelayed(MSG_UPDATE, delayed ? UPDATE_DELAY : 0);
+    }
+
+    /* Returns a list of all currently attached USB devices */
+    public void getDeviceList(Bundle devices) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.ACCESS_USB, null);
+        synchronized (mDevices) {
+            for (String name : mDevices.keySet()) {
+                devices.putParcelable(name, mDevices.get(name));
+            }
+        }
+    }
+
+    public ParcelFileDescriptor openDevice(String deviceName) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.ACCESS_USB, null);
+        return nativeOpenDevice(deviceName);
     }
 
     private final Handler mHandler = new Handler() {
@@ -249,4 +373,7 @@ class UsbService {
             }
         }
     };
+
+    private native void monitorUsbHostBus();
+    private native ParcelFileDescriptor nativeOpenDevice(String deviceName);
 }

@@ -405,6 +405,7 @@ class ServerThread extends Thread {
                 Slog.i(TAG, "USB Observer");
                 // Listen for USB changes
                 usb = new UsbService(context);
+                ServiceManager.addService(Context.USB_SERVICE, usb);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting UsbService", e);
             }
