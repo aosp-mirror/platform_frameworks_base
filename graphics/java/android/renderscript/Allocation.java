@@ -40,8 +40,6 @@ public class Allocation extends BaseObj {
     public static final int USAGE_GRAPHICS_VERTEX = 0x0004;
     public static final int USAGE_GRAPHICS_CONSTANTS = 0x0008;
 
-    private static final int USAGE_ALL = 0x000F;
-
 
     public enum CubemapLayout {
         VERTICAL_FACE_LIST (0),
@@ -54,6 +52,7 @@ public class Allocation extends BaseObj {
             mID = id;
         }
     }
+
 
     public enum MipmapControl {
         MIPMAP_NONE(0),
@@ -68,7 +67,10 @@ public class Allocation extends BaseObj {
 
     Allocation(int id, RenderScript rs, Type t, int usage) {
         super(id, rs);
-        if (usage > USAGE_ALL) {
+        if ((usage & ~(USAGE_SCRIPT |
+                       USAGE_GRAPHICS_TEXTURE |
+                       USAGE_GRAPHICS_VERTEX |
+                       USAGE_GRAPHICS_CONSTANTS)) != 0) {
             throw new RSIllegalArgumentException("Unknown usage specified.");
         }
         mType = t;
@@ -160,7 +162,7 @@ public class Allocation extends BaseObj {
                                                " not divisible by element size " + eSize + ".");
         }
         data1DChecks(xoff, count, data.length, data.length);
-        mRS.nAllocationSubData1D(getID(), xoff, count, data, data.length);
+        mRS.nAllocationData1D(getID(), xoff, 0, count, data, data.length);
     }
 
 
@@ -180,7 +182,7 @@ public class Allocation extends BaseObj {
                                                " does not match component size " + eSize + ".");
         }
 
-        mRS.nAllocationSubElementData1D(getID(), xoff, component_number, data, data.length);
+        mRS.nAllocationElementData1D(getID(), xoff, 0, component_number, data, data.length);
     }
 
     private void data1DChecks(int off, int count, int len, int dataSize) {
@@ -203,33 +205,33 @@ public class Allocation extends BaseObj {
     public void subData1D(int off, int count, int[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 4, dataSize);
-        mRS.nAllocationSubData1D(getID(), off, count, d, dataSize);
+        mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
     }
     public void subData1D(int off, int count, short[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 2, dataSize);
-        mRS.nAllocationSubData1D(getID(), off, count, d, dataSize);
+        mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
     }
     public void subData1D(int off, int count, byte[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length, dataSize);
-        mRS.nAllocationSubData1D(getID(), off, count, d, dataSize);
+        mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
     }
     public void subData1D(int off, int count, float[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 4, dataSize);
-        mRS.nAllocationSubData1D(getID(), off, count, d, dataSize);
+        mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
     }
 
 
     public void subData2D(int xoff, int yoff, int w, int h, int[] d) {
         mRS.validate();
-        mRS.nAllocationSubData2D(getID(), xoff, yoff, w, h, d, d.length * 4);
+        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, d, d.length * 4);
     }
 
     public void subData2D(int xoff, int yoff, int w, int h, float[] d) {
         mRS.validate();
-        mRS.nAllocationSubData2D(getID(), xoff, yoff, w, h, d, d.length * 4);
+        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, d, d.length * 4);
     }
 
     public void readData(int[] d) {
@@ -266,98 +268,11 @@ public class Allocation extends BaseObj {
     }
     */
 
-    /*
-    public class Adapter1D extends BaseObj {
-        Adapter1D(int id, RenderScript rs) {
-            super(id, rs);
-        }
-
-        public void setConstraint(Dimension dim, int value) {
-            mRS.validate();
-            mRS.nAdapter1DSetConstraint(getID(), dim.mID, value);
-        }
-
-        public void data(int[] d) {
-            mRS.validate();
-            mRS.nAdapter1DData(getID(), d);
-        }
-
-        public void data(float[] d) {
-            mRS.validate();
-            mRS.nAdapter1DData(getID(), d);
-        }
-
-        public void subData(int off, int count, int[] d) {
-            mRS.validate();
-            mRS.nAdapter1DSubData(getID(), off, count, d);
-        }
-
-        public void subData(int off, int count, float[] d) {
-            mRS.validate();
-            mRS.nAdapter1DSubData(getID(), off, count, d);
-        }
-    }
-
-    public Adapter1D createAdapter1D() {
-        mRS.validate();
-        int id = mRS.nAdapter1DCreate();
-        if(id == 0) {
-            throw new RSRuntimeException("Adapter creation failed.");
-        }
-        mRS.nAdapter1DBindAllocation(id, getID());
-        return new Adapter1D(id, mRS);
-    }
-    */
-
-
-    public class Adapter2D extends BaseObj {
-        Adapter2D(int id, RenderScript rs) {
-            super(id, rs);
-        }
-
-        public void setConstraint(Dimension dim, int value) {
-            mRS.validate();
-            mRS.nAdapter2DSetConstraint(getID(), dim.mID, value);
-        }
-
-        public void data(int[] d) {
-            mRS.validate();
-            mRS.nAdapter2DData(getID(), d);
-        }
-
-        public void data(float[] d) {
-            mRS.validate();
-            mRS.nAdapter2DData(getID(), d);
-        }
-
-        public void subData(int xoff, int yoff, int w, int h, int[] d) {
-            mRS.validate();
-            mRS.nAdapter2DSubData(getID(), xoff, yoff, w, h, d);
-        }
-
-        public void subData(int xoff, int yoff, int w, int h, float[] d) {
-            mRS.validate();
-            mRS.nAdapter2DSubData(getID(), xoff, yoff, w, h, d);
-        }
-    }
-
-    public Adapter2D createAdapter2D() {
-        mRS.validate();
-        int id = mRS.nAdapter2DCreate();
-        if(id == 0) {
-            throw new RSRuntimeException("allocation failed.");
-        }
-        mRS.nAdapter2DBindAllocation(id, getID());
-        if(id == 0) {
-            throw new RSRuntimeException("Adapter creation failed.");
-        }
-        return new Adapter2D(id, mRS);
-    }
 
 
     // creation
 
-    private static BitmapFactory.Options mBitmapOptions = new BitmapFactory.Options();
+    static BitmapFactory.Options mBitmapOptions = new BitmapFactory.Options();
     static {
         mBitmapOptions.inScaled = false;
     }
@@ -400,7 +315,7 @@ public class Allocation extends BaseObj {
         return createSized(rs, e, count, USAGE_SCRIPT);
     }
 
-    static private Element elementFromBitmap(RenderScript rs, Bitmap b) {
+    static Element elementFromBitmap(RenderScript rs, Bitmap b) {
         final Bitmap.Config bc = b.getConfig();
         if (bc == Bitmap.Config.ALPHA_8) {
             return Element.A_8(rs);
@@ -417,7 +332,7 @@ public class Allocation extends BaseObj {
         throw new RSInvalidStateException("Bad bitmap type: " + bc);
     }
 
-    static private Type typeFromBitmap(RenderScript rs, Bitmap b,
+    static Type typeFromBitmap(RenderScript rs, Bitmap b,
                                        MipmapControl mip) {
         Element e = elementFromBitmap(rs, b);
         Type.Builder tb = new Type.Builder(rs, e);

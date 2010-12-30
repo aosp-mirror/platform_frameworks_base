@@ -89,28 +89,11 @@ AllocationCopyToBitmap {
 	param size_t dataLen
 	}
 
-AllocationUploadToTexture {
-	param RsAllocation alloc
-	param bool genMipMaps
-	param uint32_t baseMipLevel
-	}
 
-AllocationUploadToBufferObject {
-	param RsAllocation alloc
-	}
-
-
-AllocationData {
-	param RsAllocation va
-	param const void * data
-	param uint32_t bytes
-	handcodeApi
-	togglePlay
-	}
-
-Allocation1DSubData {
+Allocation1DData {
 	param RsAllocation va
 	param uint32_t xoff
+	param uint32_t lod
 	param uint32_t count
 	param const void *data
 	param uint32_t bytes
@@ -118,9 +101,10 @@ Allocation1DSubData {
 	togglePlay
 	}
 
-Allocation1DSubElementData {
+Allocation1DElementData {
 	param RsAllocation va
 	param uint32_t x
+	param uint32_t lod
 	param const void *data
 	param uint32_t comp_offset
 	param uint32_t bytes
@@ -128,20 +112,24 @@ Allocation1DSubElementData {
 	togglePlay
 	}
 
-Allocation2DSubData {
+Allocation2DData {
 	param RsAllocation va
 	param uint32_t xoff
 	param uint32_t yoff
+	param uint32_t lod
+	param RsAllocationCubemapFace face
 	param uint32_t w
 	param uint32_t h
 	param const void *data
 	param uint32_t bytes
 	}
 
-Allocation2DSubElementData {
+Allocation2DElementData {
 	param RsAllocation va
 	param uint32_t x
 	param uint32_t y
+	param uint32_t lod
+	param RsAllocationCubemapFace face
 	param const void *data
 	param uint32_t element_offset
 	param uint32_t bytes
@@ -157,61 +145,6 @@ AllocationSyncAll {
 	param RsAllocationUsageType src
 }
 
-Adapter1DCreate {
-	ret RsAdapter1D
-	}
-
-Adapter1DBindAllocation {
-	param RsAdapter1D adapt
-	param RsAllocation alloc
-	}
-
-Adapter1DSetConstraint {
-	param RsAdapter1D adapter
-	param RsDimension dim
-	param uint32_t value
-	}
-
-Adapter1DData {
-	param RsAdapter1D adapter
-	param const void * data
-	}
-
-Adapter1DSubData {
-	param RsAdapter1D adapter
-	param uint32_t xoff
-	param uint32_t count
-	param const void *data
-	}
-
-Adapter2DCreate {
-	ret RsAdapter2D
-	}
-
-Adapter2DBindAllocation {
-	param RsAdapter2D adapt
-	param RsAllocation alloc
-	}
-
-Adapter2DSetConstraint {
-	param RsAdapter2D adapter
-	param RsDimension dim
-	param uint32_t value
-	}
-
-Adapter2DData {
-	param RsAdapter2D adapter
-	param const void *data
-	}
-
-Adapter2DSubData {
-	param RsAdapter2D adapter
-	param uint32_t xoff
-	param uint32_t yoff
-	param uint32_t w
-	param uint32_t h
-	param const void *data
-	}
 
 AllocationResize1D {
 	param RsAllocation va

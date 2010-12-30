@@ -61,16 +61,15 @@ public:
     void resize1D(Context *rsc, uint32_t dimX);
     void resize2D(Context *rsc, uint32_t dimX, uint32_t dimY);
 
-    void data(Context *rsc, const void *data, uint32_t sizeBytes);
-    void subData(Context *rsc, uint32_t xoff, uint32_t count, const void *data, uint32_t sizeBytes);
-    void subData(Context *rsc, uint32_t xoff, uint32_t yoff,
+    void data(Context *rsc, uint32_t xoff, uint32_t lod, uint32_t count, const void *data, uint32_t sizeBytes);
+    void data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t lod, RsAllocationCubemapFace face,
                  uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes);
-    void subData(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t zoff,
+    void data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t zoff, uint32_t lod, RsAllocationCubemapFace face,
                  uint32_t w, uint32_t h, uint32_t d, const void *data, uint32_t sizeBytes);
 
-    void subElementData(Context *rsc, uint32_t x,
+    void elementData(Context *rsc, uint32_t x,
                         const void *data, uint32_t elementOff, uint32_t sizeBytes);
-    void subElementData(Context *rsc, uint32_t x, uint32_t y,
+    void elementData(Context *rsc, uint32_t x, uint32_t y,
                         const void *data, uint32_t elementOff, uint32_t sizeBytes);
 
     void read(void *data);

@@ -307,29 +307,12 @@ void Allocation::uploadCheck(Context *rsc) {
     }
 }
 
-
-void Allocation::data(Context *rsc, const void *data, uint32_t sizeBytes) {
-    uint32_t size = mType->getSizeBytes();
-    if (size != sizeBytes) {
-        LOGE("Allocation::data called with mismatched size expected %i, got %i", size, sizeBytes);
-        return;
-    }
-
-    if (mType->getElement()->getHasReferences()) {
-        incRefs(data, sizeBytes / mType->getElement()->getSizeBytes());
-        decRefs(mPtr, sizeBytes / mType->getElement()->getSizeBytes());
-    }
-
-    memcpy(mPtr, data, size);
-    sendDirty();
-    mUploadDefered = true;
-}
-
 void Allocation::read(void *data) {
     memcpy(data, mPtr, mType->getSizeBytes());
 }
 
-void Allocation::subData(Context *rsc, uint32_t xoff, uint32_t count, const void *data, uint32_t sizeBytes) {
+void Allocation::data(Context *rsc, uint32_t xoff, uint32_t lod,
+                         uint32_t count, const void *data, uint32_t sizeBytes) {
     uint32_t eSize = mType->getElementSizeBytes();
     uint8_t * ptr = static_cast<uint8_t *>(mPtr);
     ptr += eSize * xoff;
@@ -351,7 +334,7 @@ void Allocation::subData(Context *rsc, uint32_t xoff, uint32_t count, const void
     mUploadDefered = true;
 }
 
-void Allocation::subData(Context *rsc, uint32_t xoff, uint32_t yoff,
+void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t lod, RsAllocationCubemapFace face,
              uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes) {
     uint32_t eSize = mType->getElementSizeBytes();
     uint32_t lineSize = eSize * w;
@@ -379,11 +362,11 @@ void Allocation::subData(Context *rsc, uint32_t xoff, uint32_t yoff,
     mUploadDefered = true;
 }
 
-void Allocation::subData(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t zoff,
+void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t zoff, uint32_t lod, RsAllocationCubemapFace face,
              uint32_t w, uint32_t h, uint32_t d, const void *data, uint32_t sizeBytes) {
 }
 
-void Allocation::subElementData(Context *rsc, uint32_t x, const void *data,
+void Allocation::elementData(Context *rsc, uint32_t x, const void *data,
                                 uint32_t cIdx, uint32_t sizeBytes) {
     uint32_t eSize = mType->getElementSizeBytes();
     uint8_t * ptr = static_cast<uint8_t *>(mPtr);
@@ -420,7 +403,7 @@ void Allocation::subElementData(Context *rsc, uint32_t x, const void *data,
     mUploadDefered = true;
 }
 
-void Allocation::subElementData(Context *rsc, uint32_t x, uint32_t y,
+void Allocation::elementData(Context *rsc, uint32_t x, uint32_t y,
                                 const void *data, uint32_t cIdx, uint32_t sizeBytes) {
     uint32_t eSize = mType->getElementSizeBytes();
     uint8_t * ptr = static_cast<uint8_t *>(mPtr);
@@ -539,8 +522,10 @@ Allocation *Allocation::createFromStream(Context *rsc, IStream *stream) {
     Allocation *alloc = new Allocation(rsc, type, RS_ALLOCATION_USAGE_SCRIPT);
     alloc->setName(name.string(), name.size());
 
+    uint32_t count = dataSize / type->getElementSizeBytes();
+
     // Read in all of our allocation data
-    alloc->data(rsc, stream->getPtr() + stream->getPos(), dataSize);
+    alloc->data(rsc, 0, 0, count, stream->getPtr() + stream->getPos(), dataSize);
     stream->reset(stream->getPos() + dataSize);
 
     return alloc;
@@ -741,29 +726,28 @@ void rsi_AllocationCopyToBitmap(Context *rsc, RsAllocation va, void *data, size_
     memcpy(data, texAlloc->getPtr(), s);
 }
 
-void rsi_AllocationData(Context *rsc, RsAllocation va, const void *data, uint32_t sizeBytes) {
+void rsi_Allocation1DData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t lod,
+                          uint32_t count, const void *data, uint32_t sizeBytes) {
     Allocation *a = static_cast<Allocation *>(va);
-    a->data(rsc, data, sizeBytes);
+    a->data(rsc, xoff, lod, count, data, sizeBytes);
 }
 
-void rsi_Allocation1DSubData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t count, const void *data, uint32_t sizeBytes) {
+void rsi_Allocation2DElementData(Context *rsc, RsAllocation va, uint32_t x, uint32_t y, uint32_t lod, RsAllocationCubemapFace face,
+                                 const void *data, uint32_t eoff, uint32_t sizeBytes) {
     Allocation *a = static_cast<Allocation *>(va);
-    a->subData(rsc, xoff, count, data, sizeBytes);
+    a->elementData(rsc, x, y, data, eoff, sizeBytes);
 }
 
-void rsi_Allocation2DSubElementData(Context *rsc, RsAllocation va, uint32_t x, uint32_t y, const void *data, uint32_t eoff, uint32_t sizeBytes) {
+void rsi_Allocation1DElementData(Context *rsc, RsAllocation va, uint32_t x, uint32_t lod,
+                                 const void *data, uint32_t eoff, uint32_t sizeBytes) {
     Allocation *a = static_cast<Allocation *>(va);
-    a->subElementData(rsc, x, y, data, eoff, sizeBytes);
+    a->elementData(rsc, x, data, eoff, sizeBytes);
 }
 
-void rsi_Allocation1DSubElementData(Context *rsc, RsAllocation va, uint32_t x, const void *data, uint32_t eoff, uint32_t sizeBytes) {
+void rsi_Allocation2DData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t yoff, uint32_t lod, RsAllocationCubemapFace face,
+                          uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes) {
     Allocation *a = static_cast<Allocation *>(va);
-    a->subElementData(rsc, x, data, eoff, sizeBytes);
-}
-
-void rsi_Allocation2DSubData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes) {
-    Allocation *a = static_cast<Allocation *>(va);
-    a->subData(rsc, xoff, yoff, w, h, data, sizeBytes);
+    a->data(rsc, xoff, yoff, lod, face, w, h, data, sizeBytes);
 }
 
 void rsi_AllocationRead(Context *rsc, RsAllocation va, void *data) {
