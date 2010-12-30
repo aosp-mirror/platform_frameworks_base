@@ -322,9 +322,9 @@
 
       <li class="toggle-list">
         <div>
-          <a href="<?cs var:toroot ?>guide/developing/devices/index.html">
-            <span class="en">Creating and Managing Virtual Devices</span>
-          </a>
+           <a href="<?cs var:toroot ?>guide/developing/devices/index.html">
+        	     <span class="en">Creating and Managing Virtual Devices</span>
+         	 </a>
         </div>
         <ul>
           <li>
@@ -338,14 +338,13 @@
          	 </a>
           </li>
           <li>
-            <a href="<?cs var:toroot ?>guide/developing/devices/emulator.html">
+           <a href="<?cs var:toroot ?>guide/developing/devices/emulator.html">
         	     <span class="en">Using the Android Emulator</span>
          	 </a>
           </li>
         </ul>
       </li>
-
-     <li>
+      <li>
         <a href="<?cs var:toroot ?>guide/developing/device.html">
           <span class="en">Connecting Hardware Devices</span>
         </a>
@@ -374,14 +373,14 @@
       <li class="toggle-list">
         <div>
           <a href="<?cs var:toroot ?>guide/developing/building/index.html">
-            <span class="en">Building and Running</span>
+            <span class="en">Building and Running Apps</span>
           </a>
         </div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/developing/building/building-eclipse.html">
           <span class="en">In Eclipse</span>
           </a></li>
-          <li><a href="<?cs var:toroot ?>guide/developing/building/building-cmdline.html"><span class="en">With Ant</span></a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/building/building-cmdline.html"><span class="en">In Other IDEs</span></a></li>
         </ul>
       </li>
 
@@ -404,7 +403,7 @@
           </li>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/debugging/ddms.html">
-              <span class="en">Dalvik Debug Monitor Server</span>
+              <span class="en">Using DDMS</span>
             </a>
           </li>
           <li>
@@ -424,7 +423,7 @@
           </li>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-devtools.html">
-         	    <span class="en">Debugging with the Dev Tools App</span>
+         	    <span class="en">Using the Dev Tools App</span>
           	</a>
           </li>
 
