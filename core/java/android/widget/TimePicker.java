@@ -52,6 +52,8 @@ import java.util.Calendar;
 @Widget
 public class TimePicker extends FrameLayout {
 
+    private static final boolean DEFAULT_ENABLED_STATE = true;
+
     /**
      * A no-op callback used in the constructor to avoid null checks
      * later in the code.
@@ -75,7 +77,7 @@ public class TimePicker extends FrameLayout {
 
     private final String[] mAmPmStrings;
 
-    private boolean mIsEnabled;
+    private boolean mIsEnabled = DEFAULT_ENABLED_STATE;
 
     // callbacks
     private OnTimeChangedListener mOnTimeChangedListener;
@@ -195,6 +197,7 @@ public class TimePicker extends FrameLayout {
         }
         super.setEnabled(enabled);
         mMinuteSpinner.setEnabled(enabled);
+        mDivider.setEnabled(enabled);
         mHourSpinner.setEnabled(enabled);
         mAmPmSpinner.setEnabled(enabled);
         mIsEnabled = enabled;

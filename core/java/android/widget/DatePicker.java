@@ -75,6 +75,8 @@ public class DatePicker extends FrameLayout {
 
     private static final boolean DEFAULT_SPINNERS_SHOWN = true;
 
+    private static final boolean DEFAULT_ENABLED_STATE = true;
+
     private final NumberPicker mDaySpinner;
 
     private final LinearLayout mSpinners;
@@ -103,7 +105,7 @@ public class DatePicker extends FrameLayout {
 
     private final Calendar mCurrentDate = Calendar.getInstance();
 
-    private boolean mIsEnabled;
+    private boolean mIsEnabled = DEFAULT_ENABLED_STATE;
 
     /**
      * The callback used to indicate the user changes\d the date.
