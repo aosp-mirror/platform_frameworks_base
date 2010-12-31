@@ -93,8 +93,8 @@ public class CdmaDataConnection extends DataConnection {
                 Integer.toString(RILConstants.SETUP_DATA_TECH_CDMA),
                 Integer.toString(dataProfile),
                 null, null, null,
-                RILConstants.SETUP_DATA_PROTOCOL_IP,
-                Integer.toString(RILConstants.SETUP_DATA_AUTH_PAP_CHAP), msg);
+                Integer.toString(RILConstants.SETUP_DATA_AUTH_PAP_CHAP),
+                RILConstants.SETUP_DATA_PROTOCOL_IP, msg);
     }
 
     @Override

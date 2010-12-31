@@ -114,8 +114,8 @@ public class GsmDataConnection extends DataConnection {
                 Integer.toString(RILConstants.SETUP_DATA_TECH_GSM),
                 Integer.toString(RILConstants.DATA_PROFILE_DEFAULT),
                 apn.apn, apn.user, apn.password,
-                RILConstants.SETUP_DATA_PROTOCOL_IP,
-                Integer.toString(authType), msg);
+                Integer.toString(authType),
+                RILConstants.SETUP_DATA_PROTOCOL_IP, msg);
     }
 
     @Override
