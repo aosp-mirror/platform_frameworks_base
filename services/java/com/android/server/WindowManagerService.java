@@ -435,7 +435,6 @@ public class WindowManagerService extends IWindowManager.Stub
     // This just indicates the window the input method is on top of, not
     // necessarily the window its input is going to.
     WindowState mInputMethodTarget = null;
-    WindowState mUpcomingInputMethodTarget = null;
     boolean mInputMethodTargetWaitingAnim;
     int mInputMethodAnimLayerAdjustment;
 
@@ -1337,7 +1336,20 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        mUpcomingInputMethodTarget = w;
+        // Now, a special case -- if the last target's window is in the
+        // process of exiting, and is above the new target, keep on the
+        // last target to avoid flicker.  Consider for example a Dialog with
+        // the IME shown: when the Dialog is dismissed, we want to keep
+        // the IME above it until it is completely gone so it doesn't drop
+        // behind the dialog or its full-screen scrim.
+        if (mInputMethodTarget != null && w != null
+                && mInputMethodTarget.isDisplayedLw()
+                && mInputMethodTarget.mExiting) {
+            if (mInputMethodTarget.mAnimLayer > w.mAnimLayer) {
+                w = mInputMethodTarget;
+                i = localmWindows.indexOf(w);
+            }
+        }
 
         if (DEBUG_INPUT_METHOD) Slog.v(TAG, "Desired input method target="
                 + w + " willMove=" + willMove);
@@ -1626,7 +1638,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 imPos = tmpRemoveWindowLocked(imPos, imWin);
                 if (DEBUG_INPUT_METHOD) {
-                    Slog.v(TAG, "List after moving with new pos " + imPos + ":");
+                    Slog.v(TAG, "List after removing with new pos " + imPos + ":");
                     logWindowList("  ");
                 }
                 imWin.mTargetAppToken = mInputMethodTarget.mAppToken;

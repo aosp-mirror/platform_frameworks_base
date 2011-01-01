@@ -84,7 +84,7 @@ public class PopupWindow {
     private View mPopupView;
     private boolean mFocusable;
     private int mInputMethodMode = INPUT_METHOD_FROM_FOCUSABLE;
-    private int mSoftInputMode;
+    private int mSoftInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED;
     private boolean mTouchable = true;
     private boolean mOutsideTouchable = false;
     private boolean mClippingEnabled = true;
