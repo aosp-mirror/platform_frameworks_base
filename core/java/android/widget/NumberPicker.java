@@ -743,11 +743,13 @@ public class NumberPicker extends LinearLayout {
             mSelectorElementHeight = mTextSize + selectorTextGapHeight;
         }
 
-        if (!mWrapSelectorWheel && y > 0 && selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] <= mMinValue) {
+        if (!mWrapSelectorWheel && y > 0
+                && selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] <= mMinValue) {
             mCurrentScrollOffset = mInitialScrollOffset;
             return;
         }
-        if (!mWrapSelectorWheel && y < 0 && selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] >= mMaxValue) {
+        if (!mWrapSelectorWheel && y < 0
+                && selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] >= mMaxValue) {
             mCurrentScrollOffset = mInitialScrollOffset;
             return;
         }
@@ -1534,7 +1536,16 @@ public class NumberPicker extends LinearLayout {
     class AdjustScrollerCommand implements Runnable {
         public void run() {
             mPreviousScrollerY = 0;
+            if (mInitialScrollOffset == mCurrentScrollOffset) {
+                showInputControls();
+                updateInputTextView();
+                return;
+            }
+            // adjust to the closest value
             int deltaY = mInitialScrollOffset - mCurrentScrollOffset;
+            if (Math.abs(deltaY) > mSelectorElementHeight / 2) {
+                deltaY += (deltaY > 0) ? -mSelectorElementHeight : mSelectorElementHeight;
+            }
             float delayCoef = (float) Math.abs(deltaY) / (float) mTextSize;
             int duration = (int) (delayCoef * SELECTOR_ADJUSTMENT_DURATION_MILLIS);
             mAdjustScroller.startScroll(0, 0, 0, deltaY, duration);
