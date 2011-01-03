@@ -376,23 +376,26 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                 case EVENT_WAKE_LOCK_TIMEOUT:
                     // Haven't heard back from the last request.  Assume we're
                     // not getting a response and  release the wake lock.
-                    // TODO should we clean up mRequestList and mRequestPending
                     synchronized (mWakeLock) {
                         if (mWakeLock.isHeld()) {
-                            if (RILJ_LOGD) {
-                                synchronized (mRequestsList) {
-                                    int count = mRequestsList.size();
-                                    Log.d(LOG_TAG, "WAKE_LOCK_TIMEOUT " +
-                                        " mReqPending=" + mRequestMessagesPending +
-                                        " mRequestList=" + count);
-
-                                    for (int i = 0; i < count; i++) {
-                                        rr = mRequestsList.get(i);
-                                        Log.d(LOG_TAG, i + ": [" + rr.mSerial + "] " +
-                                            requestToString(rr.mRequest));
-
-                                    }
-                                }
+                            // The timer of WAKE_LOCK_TIMEOUT is reset with each
+                            // new send request. So when WAKE_LOCK_TIMEOUT occurs
+                            // all requests in mRequestList already waited at
+                            // least DEFAULT_WAKE_LOCK_TIMEOUT but no response.
+                            // Therefore all should be treated as lost requests.
+                            // Those lost requests return GENERIC_FAILURE and
+                            // request list is cleared.
+                            //
+                            // Note: mRequestMessagesPending shows how many
+                            //       requests are waiting to be sent (and before
+                            //       to be added in request list) since star the
+                            //       timer. It should be
+                            //       zero here since all request should already
+                            //       be put in request list while TIMEOUT occurs.
+                            clearRequestsList(GENERIC_FAILURE, true);
+                            if (mRequestMessagesPending != 0) {
+                                Log.e(LOG_TAG, "ERROR: mReqPending is NOT 0 at TIMEOUT, "
+                                    + "mReqPending = " + mRequestMessagesPending);
                             }
                             mWakeLock.release();
                         }
@@ -564,15 +567,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                 RILRequest.resetSerial();
 
                 // Clear request list on close
-                synchronized (mRequestsList) {
-                    for (int i = 0, sz = mRequestsList.size() ; i < sz ; i++) {
-                        RILRequest rr = mRequestsList.get(i);
-                        rr.onError(RADIO_NOT_AVAILABLE, null);
-                        rr.release();
-                    }
-
-                    mRequestsList.clear();
-                }
+                clearRequestsList(RADIO_NOT_AVAILABLE, false);
             }} catch (Throwable tr) {
                 Log.e(LOG_TAG,"Uncaught exception", tr);
             }
@@ -2075,6 +2070,34 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         }
 
         releaseWakeLockIfDone();
+    }
+
+    /**
+     * Release each request in mReqeustsList then clear the list
+     * @param error is the RIL_Errno sent back
+     * @param loggable true means to print all requests in mRequestslist
+     */
+    private void clearRequestsList(int error, boolean loggable) {
+        RILRequest rr;
+        synchronized (mRequestsList) {
+            int count = mRequestsList.size();
+            if (RILJ_LOGD && loggable) {
+                Log.d(LOG_TAG, "WAKE_LOCK_TIMEOUT " +
+                        " mReqPending=" + mRequestMessagesPending +
+                        " mRequestList=" + count);
+            }
+
+            for (int i = 0; i < count ; i++) {
+                rr = mRequestsList.get(i);
+                if (RILJ_LOGD && loggable) {
+                    Log.d(LOG_TAG, i + ": [" + rr.mSerial + "] " +
+                            requestToString(rr.mRequest));
+                }
+                rr.onError(error, null);
+                rr.release();
+            }
+            mRequestsList.clear();
+        }
     }
 
     private RILRequest findAndRemoveRequestFromList(int serial) {
