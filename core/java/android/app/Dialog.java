@@ -25,7 +25,6 @@ import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -101,6 +100,7 @@ public class Dialog implements DialogInterface, Window.Callback,
 
     private boolean mCreated = false;
     private boolean mShowing = false;
+    private boolean mCanceled = false;
 
     private final Thread mUiThread;
     private final Handler mHandler = new Handler();
@@ -244,6 +244,8 @@ public class Dialog implements DialogInterface, Window.Callback,
             return;
         }
 
+        mCanceled = false;
+        
         if (!mCreated) {
             dispatchOnCreate(null);
         }
@@ -997,7 +999,8 @@ public class Dialog implements DialogInterface, Window.Callback,
      * also call your {@link DialogInterface.OnCancelListener} (if registered).
      */
     public void cancel() {
-        if (mCancelMessage != null) {
+        if (!mCanceled && mCancelMessage != null) {
+            mCanceled = true;
             // Obtain a new message so this dialog can be re-used
             Message.obtain(mCancelMessage).sendToTarget();
         }
