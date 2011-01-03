@@ -204,7 +204,7 @@ public final class RingtonePickerActivity extends AlertActivity implements
      */
     private int addStaticItem(ListView listView, int textResId) {
         TextView textView = (TextView) getLayoutInflater().inflate(
-                com.android.internal.R.layout.select_dialog_singlechoice, listView, false);
+                com.android.internal.R.layout.select_dialog_singlechoice_holo, listView, false);
         textView.setText(textResId);
         listView.addHeaderView(textView);
         mStaticItemCount++;
