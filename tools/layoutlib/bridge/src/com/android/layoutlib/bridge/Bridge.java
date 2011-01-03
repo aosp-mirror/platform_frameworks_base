@@ -180,12 +180,9 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
         return mCapabilities;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.android.layoutlib.api.ILayoutLibBridge#init(java.io.File, java.util.Map)
-     */
     @Override
-    public boolean init(File fontLocation, Map<String, Map<String, Integer>> enumValueMap) {
+    public boolean init(File fontLocation, Map<String, Map<String, Integer>> enumValueMap,
+            LayoutLog log) {
         sEnumValueMap = enumValueMap;
 
         // don't use EnumSet.allOf(), because the bridge doesn't come with its specific version
@@ -242,11 +239,6 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
         // now parse com.android.internal.R (and only this one as android.R is a subset of
         // the internal version), and put the content in the maps.
         try {
-            // WARNING: this only works because the class is already loaded, and therefore
-            // the objects returned by Field.get() are the same as the ones used by
-            // the code accessing the R class.
-            // int[] does not implement equals/hashCode, and if the parsing used a different class
-            // loader for the R class, this would NOT work.
             Class<?> r = com.android.internal.R.class;
 
             for (Class<?> inner : r.getDeclaredClasses()) {
@@ -262,7 +254,9 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
                     if (Modifier.isStatic(modifiers)) {
                         Class<?> type = f.getType();
                         if (type.isArray() && type.getComponentType() == int.class) {
-                            // if the object is an int[] we put it in sRArrayMap
+                            // if the object is an int[] we put it in sRArrayMap using an IntArray
+                            // wrapper that properly implements equals and hashcode for the array
+                            // objects, as required by the map contract.
                             sRArrayMap.put(new IntArray((int[]) f.get(null)), f.getName());
                         } else if (type == int.class) {
                             Integer value = (Integer) f.get(null);
@@ -274,12 +268,12 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
                     }
                 }
             }
-        } catch (IllegalArgumentException e) {
-            // FIXME: log/return the error (there's no logger object at this point!)
-            e.printStackTrace();
-            return false;
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+        } catch (Throwable throwable) {
+            if (log != null) {
+                log.error(null,
+                        "Failed to load com.android.internal.R from the layout library jar",
+                        throwable);
+            }
             return false;
         }
 
