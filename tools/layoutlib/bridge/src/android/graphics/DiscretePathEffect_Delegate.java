@@ -30,10 +30,10 @@ import java.awt.Stroke;
  * native data into its own objects and mapping them to int that are sent back and forth between
  * it and the original DiscretePathEffect class.
  *
- * Because this extends {@link Shader_Delegate}, there's no need to use a {@link DelegateManager},
- * as all the Shader classes will be added to the manager owned by {@link Shader_Delegate}.
+ * Because this extends {@link PathEffect_Delegate}, there's no need to use a {@link DelegateManager},
+ * as all the Shader classes will be added to the manager owned by {@link PathEffect_Delegate}.
  *
- * @see Shader_Delegate
+ * @see PathEffect_Delegate
  *
  */
 public class DiscretePathEffect_Delegate extends PathEffect_Delegate {
