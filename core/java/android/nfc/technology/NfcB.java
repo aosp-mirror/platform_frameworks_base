@@ -44,6 +44,7 @@ public final class NfcB extends BasicTagTechnology {
     public NfcB(NfcAdapter adapter, Tag tag, Bundle extras)
             throws RemoteException {
         super(adapter, tag, TagTechnology.NFC_B);
+        mAtqb = extras.getByteArray(EXTRA_ATQB);
     }
 
     /**

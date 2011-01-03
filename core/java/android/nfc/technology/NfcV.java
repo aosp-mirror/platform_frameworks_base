@@ -36,8 +36,27 @@ import android.os.RemoteException;
  * permission.
  */
 public final class NfcV extends BasicTagTechnology {
+    /** @hide */
+    public static final String EXTRA_RESP_FLAGS = "respflags";
+
+    /** @hide */
+    public static final String EXTRA_DSFID = "dsfid";
+
+    private byte mRespFlags;
+    private byte mDsfId;
+
     public NfcV(NfcAdapter adapter, Tag tag, Bundle extras)
             throws RemoteException {
         super(adapter, tag, TagTechnology.NFC_V);
+        mRespFlags = extras.getByte(EXTRA_RESP_FLAGS);
+        mDsfId = extras.getByte(EXTRA_DSFID);
+    }
+
+    public byte getResponseFlags() {
+        return mRespFlags;
+    }
+
+    public byte getDsfId() {
+        return mDsfId;
     }
 }
