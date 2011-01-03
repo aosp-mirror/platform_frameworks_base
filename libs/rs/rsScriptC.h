@@ -22,7 +22,7 @@
 #include "RenderScriptEnv.h"
 
 namespace bcc {
-class BCCscript;
+class Script;
 }
 
 // ---------------------------------------------------------------------------
@@ -48,7 +48,7 @@ public:
 
     Program_t mProgram;
 
-    bcc::BCCscript* mBccScript;
+    bcc::Script* mBccScript;
 
     const Allocation *ptrToAllocation(const void *) const;
 
