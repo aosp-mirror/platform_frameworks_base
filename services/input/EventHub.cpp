@@ -1,5 +1,19 @@
-//
-// Copyright 2005 The Android Open Source Project
+/*
+ * Copyright (C) 2005 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 //
 // Handle events, like key input and vsync.
 //
@@ -15,7 +29,8 @@
 
 //#define LOG_NDEBUG 0
 
-#include <ui/EventHub.h>
+#include "EventHub.h"
+
 #include <hardware_legacy/power.h>
 
 #include <cutils/properties.h>
@@ -57,18 +72,6 @@
 
 /* this macro computes the number of bytes needed to represent a bit array of the specified size */
 #define sizeof_bit_array(bits)  ((bits + 7) / 8)
-
-#ifndef ABS_MT_TOUCH_MAJOR
-#define ABS_MT_TOUCH_MAJOR      0x30    /* Major axis of touching ellipse */
-#endif
-
-#ifndef ABS_MT_POSITION_X
-#define ABS_MT_POSITION_X       0x35    /* Center X ellipse position */
-#endif
-
-#ifndef ABS_MT_POSITION_Y
-#define ABS_MT_POSITION_Y       0x36    /* Center Y ellipse position */
-#endif
 
 // Fd at index 0 is always reserved for inotify
 #define FIRST_ACTUAL_DEVICE_INDEX 1

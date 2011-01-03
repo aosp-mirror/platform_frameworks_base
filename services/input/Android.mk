@@ -14,55 +14,30 @@
 
 LOCAL_PATH:= $(call my-dir)
 
-# libui is partially built for the host (used by build time keymap validation tool)
-# These files are common to host and target builds.
-commonSources:= \
-	Input.cpp \
-	Keyboard.cpp \
-	KeyLayoutMap.cpp \
-	KeyCharacterMap.cpp \
-	VirtualKeyMap.cpp
-
-# For the host
-# =====================================================
-
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES:= $(commonSources)
-
-LOCAL_MODULE:= libui
-
-include $(BUILD_HOST_STATIC_LIBRARY)
-
-
-# For the device
-# =====================================================
-
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-	$(commonSources) \
-	EGLUtils.cpp \
-	EventRecurrence.cpp \
-	FramebufferNativeWindow.cpp \
-	GraphicBuffer.cpp \
-	GraphicBufferAllocator.cpp \
-	GraphicBufferMapper.cpp \
-	GraphicLog.cpp \
-	InputTransport.cpp \
-	PixelFormat.cpp \
-	Rect.cpp \
-	Region.cpp
+    EventHub.cpp \
+    InputDispatcher.cpp \
+    InputManager.cpp \
+    InputReader.cpp \
+    PointerController.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libcutils \
-	libutils \
-	libEGL \
-	libpixelflinger \
-	libhardware \
-	libhardware_legacy
+    libcutils \
+    libutils \
+    libhardware \
+    libhardware_legacy \
+    libsurfaceflinger_client \
+    libskia \
+    libui
 
-LOCAL_MODULE:= libui
+LOCAL_C_INCLUDES := \
+    external/skia/include/core
+
+LOCAL_MODULE:= libinput
+
+LOCAL_MODULE_TAGS := optional
 
 ifeq ($(TARGET_SIMULATOR),true)
     LOCAL_LDLIBS += -lpthread

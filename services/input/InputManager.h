@@ -21,8 +21,12 @@
  * Native input manager.
  */
 
-#include <ui/EventHub.h>
+#include "EventHub.h"
+#include "InputReader.h"
+#include "InputDispatcher.h"
+
 #include <ui/Input.h>
+#include <ui/InputTransport.h>
 #include <utils/Errors.h>
 #include <utils/Vector.h>
 #include <utils/Timers.h>
@@ -30,16 +34,6 @@
 #include <utils/String8.h>
 
 namespace android {
-
-class InputChannel;
-
-class InputReaderInterface;
-class InputReaderPolicyInterface;
-class InputReaderThread;
-
-class InputDispatcherInterface;
-class InputDispatcherPolicyInterface;
-class InputDispatcherThread;
 
 /*
  * The input manager is the core of the system event processing.

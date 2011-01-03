@@ -2,7 +2,8 @@
 // Copyright 2010 The Android Open Source Project
 //
 
-#include <ui/InputReader.h>
+#include "../InputReader.h"
+
 #include <utils/List.h>
 #include <gtest/gtest.h>
 #include <math.h>
@@ -40,7 +41,8 @@ protected:
     virtual ~FakePointerController() { }
 
 public:
-    FakePointerController() {
+    FakePointerController() :
+        mHaveBounds(false), mMinX(0), mMinY(0), mMaxX(0), mMaxY(0) {
     }
 
     void setBounds(float minX, float minY, float maxX, float maxY) {
@@ -54,8 +56,8 @@ public:
 private:
     virtual bool getBounds(float* outMinX, float* outMinY, float* outMaxX, float* outMaxY) const {
         *outMinX = mMinX;
-        *outMaxX = mMinX;
         *outMinY = mMinY;
+        *outMaxX = mMaxX;
         *outMaxY = mMaxY;
         return mHaveBounds;
     }
@@ -973,6 +975,9 @@ TEST_F(InputReaderTest, GetInputConfiguration_WhenTouchScreenPresent_ReturnsFing
 }
 
 TEST_F(InputReaderTest, GetInputConfiguration_WhenMousePresent_ReturnsNoNavigation) {
+    sp<FakePointerController> controller = new FakePointerController();
+    mFakePolicy->setPointerController(0, controller);
+
     PropertyMap configuration;
     configuration.addProperty(String8("cursor.mode"), String8("pointer"));
     ASSERT_NO_FATAL_FAILURE(addDevice(0, String8("mouse"),
@@ -1044,6 +1049,9 @@ TEST_F(InputReaderTest, GetInputDeviceInfo_WhenDeviceIdIsIgnored) {
 }
 
 TEST_F(InputReaderTest, GetInputDeviceIds) {
+    sp<FakePointerController> controller = new FakePointerController();
+    mFakePolicy->setPointerController(2, controller);
+
     ASSERT_NO_FATAL_FAILURE(addDevice(1, String8("keyboard"),
             INPUT_DEVICE_CLASS_KEYBOARD | INPUT_DEVICE_CLASS_ALPHAKEY, NULL));
     ASSERT_NO_FATAL_FAILURE(addDevice(2, String8("mouse"),
@@ -1675,7 +1683,7 @@ TEST_F(KeyboardInputMapperTest, Process_WhenNotOrientationAware_ShouldNotRotateD
 
     mFakePolicy->setDisplayInfo(DISPLAY_ID,
             DISPLAY_WIDTH, DISPLAY_HEIGHT,
-            InputReaderPolicyInterface::ROTATION_90);
+            DISPLAY_ORIENTATION_90);
     ASSERT_NO_FATAL_FAILURE(testDPadKeyRotation(mapper,
             KEY_UP, AKEYCODE_DPAD_UP, AKEYCODE_DPAD_UP));
     ASSERT_NO_FATAL_FAILURE(testDPadKeyRotation(mapper,
@@ -1694,7 +1702,7 @@ TEST_F(KeyboardInputMapperTest, Process_WhenOrientationAware_ShouldRotateDPad) {
 
     mFakePolicy->setDisplayInfo(DISPLAY_ID,
             DISPLAY_WIDTH, DISPLAY_HEIGHT,
-            InputReaderPolicyInterface::ROTATION_0);
+            DISPLAY_ORIENTATION_0);
     ASSERT_NO_FATAL_FAILURE(testDPadKeyRotation(mapper,
             KEY_UP, AKEYCODE_DPAD_UP, AKEYCODE_DPAD_UP));
     ASSERT_NO_FATAL_FAILURE(testDPadKeyRotation(mapper,
@@ -1706,7 +1714,7 @@ TEST_F(KeyboardInputMapperTest, Process_WhenOrientationAware_ShouldRotateDPad) {
 
     mFakePolicy->setDisplayInfo(DISPLAY_ID,
             DISPLAY_WIDTH, DISPLAY_HEIGHT,
-            InputReaderPolicyInterface::ROTATION_90);
+            DISPLAY_ORIENTATION_90);
     ASSERT_NO_FATAL_FAILURE(testDPadKeyRotation(mapper,
             KEY_UP, AKEYCODE_DPAD_UP, AKEYCODE_DPAD_LEFT));
     ASSERT_NO_FATAL_FAILURE(testDPadKeyRotation(mapper,
@@ -1718,7 +1726,7 @@ TEST_F(KeyboardInputMapperTest, Process_WhenOrientationAware_ShouldRotateDPad) {
 
     mFakePolicy->setDisplayInfo(DISPLAY_ID,
             DISPLAY_WIDTH, DISPLAY_HEIGHT,
-            InputReaderPolicyInterface::ROTATION_180);
+            DISPLAY_ORIENTATION_180);
     ASSERT_NO_FATAL_FAILURE(testDPadKeyRotation(mapper,
             KEY_UP, AKEYCODE_DPAD_UP, AKEYCODE_DPAD_DOWN));
     ASSERT_NO_FATAL_FAILURE(testDPadKeyRotation(mapper,
@@ -1730,7 +1738,7 @@ TEST_F(KeyboardInputMapperTest, Process_WhenOrientationAware_ShouldRotateDPad) {
 
     mFakePolicy->setDisplayInfo(DISPLAY_ID,
             DISPLAY_WIDTH, DISPLAY_HEIGHT,
-            InputReaderPolicyInterface::ROTATION_270);
+            DISPLAY_ORIENTATION_270);
     ASSERT_NO_FATAL_FAILURE(testDPadKeyRotation(mapper,
             KEY_UP, AKEYCODE_DPAD_UP, AKEYCODE_DPAD_RIGHT));
     ASSERT_NO_FATAL_FAILURE(testDPadKeyRotation(mapper,
@@ -1746,7 +1754,7 @@ TEST_F(KeyboardInputMapperTest, Process_WhenOrientationAware_ShouldRotateDPad) {
 
     mFakePolicy->setDisplayInfo(DISPLAY_ID,
             DISPLAY_WIDTH, DISPLAY_HEIGHT,
-            InputReaderPolicyInterface::ROTATION_270);
+            DISPLAY_ORIENTATION_270);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, KEY_UP, AKEYCODE_DPAD_UP, 1, 0);
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&args));
     ASSERT_EQ(AKEY_EVENT_ACTION_DOWN, args.action);
@@ -1755,7 +1763,7 @@ TEST_F(KeyboardInputMapperTest, Process_WhenOrientationAware_ShouldRotateDPad) {
 
     mFakePolicy->setDisplayInfo(DISPLAY_ID,
             DISPLAY_WIDTH, DISPLAY_HEIGHT,
-            InputReaderPolicyInterface::ROTATION_180);
+            DISPLAY_ORIENTATION_180);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, KEY_UP, AKEYCODE_DPAD_UP, 0, 0);
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&args));
     ASSERT_EQ(AKEY_EVENT_ACTION_UP, args.action);
@@ -1941,7 +1949,7 @@ TEST_F(CursorInputMapperTest, WhenModeIsPointer_PopulateDeviceInfo_ReturnsRangeF
     ASSERT_EQ(NULL, info.getMotionRange(AINPUT_MOTION_RANGE_X));
     ASSERT_EQ(NULL, info.getMotionRange(AINPUT_MOTION_RANGE_Y));
     ASSERT_NO_FATAL_FAILURE(assertMotionRange(info, AINPUT_MOTION_RANGE_PRESSURE,
-            0.0f, 1.0f, 0.0f, 1.0f));
+            0.0f, 1.0f, 0.0f, 0.0f));
 
     // When the bounds are set, then there should be a valid motion range.
     mFakePointerController->setBounds(1, 2, 800, 480);
@@ -1950,11 +1958,11 @@ TEST_F(CursorInputMapperTest, WhenModeIsPointer_PopulateDeviceInfo_ReturnsRangeF
     mapper->populateDeviceInfo(&info2);
 
     ASSERT_NO_FATAL_FAILURE(assertMotionRange(info2, AINPUT_MOTION_RANGE_X,
-            1, 800, 0.0f, 1.0f));
+            1, 800, 0.0f, 0.0f));
     ASSERT_NO_FATAL_FAILURE(assertMotionRange(info2, AINPUT_MOTION_RANGE_Y,
-            2, 480, 0.0f, 1.0f));
+            2, 480, 0.0f, 0.0f));
     ASSERT_NO_FATAL_FAILURE(assertMotionRange(info2, AINPUT_MOTION_RANGE_PRESSURE,
-            0.0f, 1.0f, 0.0f, 1.0f));
+            0.0f, 1.0f, 0.0f, 0.0f));
 }
 
 TEST_F(CursorInputMapperTest, WhenModeIsNavigation_PopulateDeviceInfo_ReturnsScaledRange) {
@@ -1969,6 +1977,8 @@ TEST_F(CursorInputMapperTest, WhenModeIsNavigation_PopulateDeviceInfo_ReturnsSca
             -1.0f, 1.0f, 0.0f, 1.0f / TRACKBALL_MOVEMENT_THRESHOLD));
     ASSERT_NO_FATAL_FAILURE(assertMotionRange(info, AINPUT_MOTION_RANGE_Y,
             -1.0f, 1.0f, 0.0f, 1.0f / TRACKBALL_MOVEMENT_THRESHOLD));
+    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info, AINPUT_MOTION_RANGE_PRESSURE,
+            0.0f, 1.0f, 0.0f, 0.0f));
 }
 
 TEST_F(CursorInputMapperTest, Process_ShouldSetAllFieldsAndIncludeGlobalMetaState) {
@@ -2151,7 +2161,7 @@ TEST_F(CursorInputMapperTest, Process_WhenNotOrientationAware_ShouldNotRotateMot
 
     mFakePolicy->setDisplayInfo(DISPLAY_ID,
             DISPLAY_WIDTH, DISPLAY_HEIGHT,
-            InputReaderPolicyInterface::ROTATION_90);
+            DISPLAY_ORIENTATION_90);
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  0,  1,  0,  1));
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  1,  1,  1,  1));
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  1,  0,  1,  0));
@@ -2169,8 +2179,7 @@ TEST_F(CursorInputMapperTest, Process_WhenOrientationAware_ShouldRotateMotions) 
     addMapperAndConfigure(mapper);
 
     mFakePolicy->setDisplayInfo(DISPLAY_ID,
-            DISPLAY_WIDTH, DISPLAY_HEIGHT,
-            InputReaderPolicyInterface::ROTATION_0);
+            DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_ORIENTATION_0);
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  0,  1,  0,  1));
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  1,  1,  1,  1));
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  1,  0,  1,  0));
@@ -2181,8 +2190,7 @@ TEST_F(CursorInputMapperTest, Process_WhenOrientationAware_ShouldRotateMotions) 
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper, -1,  1, -1,  1));
 
     mFakePolicy->setDisplayInfo(DISPLAY_ID,
-            DISPLAY_WIDTH, DISPLAY_HEIGHT,
-            InputReaderPolicyInterface::ROTATION_90);
+            DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_ORIENTATION_90);
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  0,  1,  1,  0));
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  1,  1,  1, -1));
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  1,  0,  0, -1));
@@ -2193,8 +2201,7 @@ TEST_F(CursorInputMapperTest, Process_WhenOrientationAware_ShouldRotateMotions) 
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper, -1,  1,  1,  1));
 
     mFakePolicy->setDisplayInfo(DISPLAY_ID,
-            DISPLAY_WIDTH, DISPLAY_HEIGHT,
-            InputReaderPolicyInterface::ROTATION_180);
+            DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_ORIENTATION_180);
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  0,  1,  0, -1));
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  1,  1, -1, -1));
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  1,  0, -1,  0));
@@ -2205,8 +2212,7 @@ TEST_F(CursorInputMapperTest, Process_WhenOrientationAware_ShouldRotateMotions) 
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper, -1,  1,  1, -1));
 
     mFakePolicy->setDisplayInfo(DISPLAY_ID,
-            DISPLAY_WIDTH, DISPLAY_HEIGHT,
-            InputReaderPolicyInterface::ROTATION_270);
+            DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_ORIENTATION_270);
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  0,  1, -1,  0));
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  1,  1, -1,  1));
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper,  1,  0,  0,  1));
@@ -2386,7 +2392,7 @@ TEST_F(SingleTouchInputMapperTest, GetSources_WhenDeviceTypeIsTouchScreen_Return
 
 TEST_F(SingleTouchInputMapperTest, GetKeyCodeState) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
+    prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -2413,7 +2419,7 @@ TEST_F(SingleTouchInputMapperTest, GetKeyCodeState) {
 
 TEST_F(SingleTouchInputMapperTest, GetScanCodeState) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
+    prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -2440,7 +2446,7 @@ TEST_F(SingleTouchInputMapperTest, GetScanCodeState) {
 
 TEST_F(SingleTouchInputMapperTest, MarkSupportedKeyCodes) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
+    prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -2456,7 +2462,7 @@ TEST_F(SingleTouchInputMapperTest, Reset_WhenVirtualKeysAreDown_SendsUp) {
     // Note: Ideally we should send cancels but the implementation is more straightforward
     // with up and this will only happen if a device is forcibly removed.
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
+    prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -2489,7 +2495,7 @@ TEST_F(SingleTouchInputMapperTest, Reset_WhenVirtualKeysAreDown_SendsUp) {
 
 TEST_F(SingleTouchInputMapperTest, Reset_WhenNothingIsPressed_NothingMuchHappens) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
+    prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -2515,7 +2521,7 @@ TEST_F(SingleTouchInputMapperTest, Reset_WhenNothingIsPressed_NothingMuchHappens
 
 TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndReleasedNormally_SendsKeyDownAndKeyUp) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
+    prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -2564,7 +2570,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndReleasedNor
 
 TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfBounds_SendsKeyDownAndKeyCancel) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
+    prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -2678,7 +2684,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfB
 
 TEST_F(SingleTouchInputMapperTest, Process_WhenTouchStartsOutsideDisplayAndMovesIn_SendsDownAsTouchEntersDisplay) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
+    prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -2746,7 +2752,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenTouchStartsOutsideDisplayAndMoves
 
 TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
+    prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -2836,7 +2842,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenNotOrientationAware_DoesNotRotate
     FakeInputDispatcher::NotifyMotionArgs args;
 
     // Rotation 90.
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_90);
+    prepareDisplay(DISPLAY_ORIENTATION_90);
     processDown(mapper, toRawX(50), toRawY(75));
     processSync(mapper);
 
@@ -2857,7 +2863,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) 
     FakeInputDispatcher::NotifyMotionArgs args;
 
     // Rotation 0.
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
+    prepareDisplay(DISPLAY_ORIENTATION_0);
     processDown(mapper, toRawX(50), toRawY(75));
     processSync(mapper);
 
@@ -2870,7 +2876,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) 
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled());
 
     // Rotation 90.
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_90);
+    prepareDisplay(DISPLAY_ORIENTATION_90);
     processDown(mapper, toRawX(50), toRawY(75));
     processSync(mapper);
 
@@ -2883,7 +2889,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) 
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled());
 
     // Rotation 180.
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_180);
+    prepareDisplay(DISPLAY_ORIENTATION_180);
     processDown(mapper, toRawX(50), toRawY(75));
     processSync(mapper);
 
@@ -2896,7 +2902,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) 
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled());
 
     // Rotation 270.
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_270);
+    prepareDisplay(DISPLAY_ORIENTATION_270);
     processDown(mapper, toRawX(50), toRawY(75));
     processSync(mapper);
 
@@ -2911,7 +2917,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) 
 
 TEST_F(SingleTouchInputMapperTest, Process_AllAxes_DefaultCalibration) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
+    prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION | PRESSURE | TOOL);
     addMapperAndConfigure(mapper);
 
@@ -3043,7 +3049,7 @@ void MultiTouchInputMapperTest::processSync(MultiTouchInputMapper* mapper) {
 
 TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackingIds) {
     MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
+    prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -3294,7 +3300,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
 
 TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingIds) {
     MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
+    prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION | ID);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -3454,7 +3460,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
 
 TEST_F(MultiTouchInputMapperTest, Process_AllAxes_WithDefaultCalibration) {
     MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
+    prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION | TOUCH | TOOL | PRESSURE | ORIENTATION | ID | MINOR);
     addMapperAndConfigure(mapper);
 
@@ -3499,7 +3505,7 @@ TEST_F(MultiTouchInputMapperTest, Process_AllAxes_WithDefaultCalibration) {
 
 TEST_F(MultiTouchInputMapperTest, Process_TouchAndToolAxes_GeometricCalibration) {
     MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
+    prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION | TOUCH | TOOL | MINOR);
     addConfigurationProperty("touch.touchSize.calibration", "geometric");
     addConfigurationProperty("touch.toolSize.calibration", "geometric");
@@ -3540,7 +3546,7 @@ TEST_F(MultiTouchInputMapperTest, Process_TouchAndToolAxes_GeometricCalibration)
 
 TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_SummedLinearCalibration) {
     MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
+    prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION | TOUCH | TOOL);
     addConfigurationProperty("touch.touchSize.calibration", "pressure");
     addConfigurationProperty("touch.toolSize.calibration", "linear");
@@ -3596,7 +3602,7 @@ TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_SummedLinear
 
 TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_AreaCalibration) {
     MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
-    prepareDisplay(InputReaderPolicyInterface::ROTATION_0);
+    prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION | TOUCH | TOOL);
     addConfigurationProperty("touch.touchSize.calibration", "pressure");
     addConfigurationProperty("touch.toolSize.calibration", "area");

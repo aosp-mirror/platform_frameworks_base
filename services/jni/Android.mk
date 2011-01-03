@@ -14,7 +14,10 @@ LOCAL_SRC_FILES:= \
     onload.cpp
 
 LOCAL_C_INCLUDES += \
-    $(JNI_H_INCLUDE)
+    $(JNI_H_INCLUDE) \
+    frameworks/base/services \
+    frameworks/base/core/jni \
+    external/skia/include/core
 
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \
@@ -25,6 +28,8 @@ LOCAL_SHARED_LIBRARIES := \
     libsystem_server \
     libutils \
     libui \
+    libinput \
+    libskia \
     libsurfaceflinger_client \
     libusbhost
 
@@ -43,4 +48,3 @@ endif
 LOCAL_MODULE:= libandroid_servers
 
 include $(BUILD_SHARED_LIBRARY)
-    

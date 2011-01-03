@@ -6,29 +6,30 @@ ifneq ($(TARGET_SIMULATOR),true)
 
 # Build the unit tests.
 test_src_files := \
-    InputChannel_test.cpp \
-    InputPublisherAndConsumer_test.cpp
+    InputReader_test.cpp \
+    InputDispatcher_test.cpp
 
 shared_libraries := \
-	libcutils \
-	libutils \
-	libEGL \
-	libbinder \
-	libpixelflinger \
-	libhardware \
-	libhardware_legacy \
-	libui \
-	libstlport
+    libcutils \
+    libutils \
+    libhardware \
+    libhardware_legacy \
+    libui \
+    libsurfaceflinger_client \
+    libskia \
+    libstlport \
+    libinput
 
 static_libraries := \
-	libgtest \
-	libgtest_main
+    libgtest \
+    libgtest_main
 
 c_includes := \
     bionic \
     bionic/libstdc++/include \
     external/gtest/include \
-    external/stlport/stlport
+    external/stlport/stlport \
+    external/skia/include/core
 
 module_tags := eng tests
 

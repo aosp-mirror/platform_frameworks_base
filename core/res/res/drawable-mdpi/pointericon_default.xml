@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pointer-icon xmlns:android="http://schemas.android.com/apk/res/android"
+    android:bitmap="@drawable/pointericon_default_bitmap"
+    android:hotSpotX="2"
+    android:hotSpotY="2" />

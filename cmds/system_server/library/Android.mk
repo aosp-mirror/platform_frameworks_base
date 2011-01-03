@@ -21,6 +21,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libaudioflinger \
     libcameraservice \
     libmediaplayerservice \
+    libinput \
 	libutils \
 	libbinder \
 	libcutils

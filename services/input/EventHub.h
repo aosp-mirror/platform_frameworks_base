@@ -133,7 +133,7 @@ enum {
  * environment.  In addition, the event hub generates fake input events to indicate
  * when devices are added or removed.
  *
- * The event hub provies a stream of input events (via the getEvent function).
+ * The event hub provides a stream of input events (via the getEvent function).
  * It also supports querying the current actual state of input devices such as identifying
  * which keys are currently down.  Finally, the event hub keeps track of the capabilities of
  * individual input devices, such as their class and the set of key codes that they support.

@@ -37,6 +37,15 @@ struct DisplayInfo {
     float               ydpi;
 };
 
+/* Display orientations as defined in Surface.java and ISurfaceComposer.h. */
+enum {
+    DISPLAY_ORIENTATION_0 = 0,
+    DISPLAY_ORIENTATION_90 = 1,
+    DISPLAY_ORIENTATION_180 = 2,
+    DISPLAY_ORIENTATION_270 = 3
+};
+
+
 }; // namespace android
 
 #endif // ANDROID_COMPOSER_DISPLAY_INFO_H

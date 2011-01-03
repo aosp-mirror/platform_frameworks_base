@@ -19,10 +19,17 @@ package com.android.server;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.os.SystemProperties;
 import android.util.Slog;
@@ -358,7 +365,49 @@ public class InputManager {
             pw.println(dumpStr);
         }
     }
-    
+
+    private static final class PointerIcon {
+        public Bitmap bitmap;
+        public float hotSpotX;
+        public float hotSpotY;
+
+        public static PointerIcon load(Resources resources, int resourceId) {
+            PointerIcon icon = new PointerIcon();
+
+            XmlResourceParser parser = resources.getXml(resourceId);
+            final int bitmapRes;
+            try {
+                XmlUtils.beginDocument(parser, "pointer-icon");
+
+                TypedArray a = resources.obtainAttributes(
+                        parser, com.android.internal.R.styleable.PointerIcon);
+                bitmapRes = a.getResourceId(com.android.internal.R.styleable.PointerIcon_bitmap, 0);
+                icon.hotSpotX = a.getFloat(com.android.internal.R.styleable.PointerIcon_hotSpotX, 0);
+                icon.hotSpotY = a.getFloat(com.android.internal.R.styleable.PointerIcon_hotSpotY, 0);
+                a.recycle();
+            } catch (Exception ex) {
+                Slog.e(TAG, "Exception parsing pointer icon resource.", ex);
+                return null;
+            } finally {
+                parser.close();
+            }
+
+            if (bitmapRes == 0) {
+                Slog.e(TAG, "<pointer-icon> is missing bitmap attribute");
+                return null;
+            }
+
+            Drawable drawable = resources.getDrawable(bitmapRes);
+            if (!(drawable instanceof BitmapDrawable)) {
+                Slog.e(TAG, "<pointer-icon> bitmap attribute must refer to a bitmap drawable");
+                return null;
+            }
+
+            icon.bitmap = ((BitmapDrawable)drawable).getBitmap();
+            return icon;
+        }
+    }
+
     /*
      * Callbacks from native.
      */
@@ -480,9 +529,15 @@ public class InputManager {
         @SuppressWarnings("unused")
         public int getPointerLayer() {
             return mWindowManagerService.mPolicy.windowTypeToLayerLw(
-                    WindowManager.LayoutParams.TYPE_DRAG)
+                    WindowManager.LayoutParams.TYPE_POINTER)
                     * WindowManagerService.TYPE_LAYER_MULTIPLIER
                     + WindowManagerService.TYPE_LAYER_OFFSET;
+        }
+
+        @SuppressWarnings("unused")
+        public PointerIcon getPointerIcon() {
+            return PointerIcon.load(mContext.getResources(),
+                    com.android.internal.R.drawable.pointericon_default);
         }
     }
 }

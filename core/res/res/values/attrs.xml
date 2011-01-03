@@ -4708,4 +4708,13 @@
         <!-- Minimum space between the switch and caption text -->
         <attr name="switchPadding" format="dimension" />
     </declare-styleable>
+
+    <declare-styleable name="PointerIcon">
+        <!-- Drawable to use as the icon bitmap. -->
+        <attr name="bitmap" format="reference" />
+        <!-- X coordinate of the icon hot spot. -->
+        <attr name="hotSpotX" format="float" />
+        <!-- Y coordinate of the icon hot spot. -->
+        <attr name="hotSpotY" format="float" />
+    </declare-styleable>
 </resources>

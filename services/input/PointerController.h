@@ -17,7 +17,15 @@
 #ifndef _UI_POINTER_CONTROLLER_H
 #define _UI_POINTER_CONTROLLER_H
 
+#include <ui/DisplayInfo.h>
 #include <utils/RefBase.h>
+#include <utils/String8.h>
+
+#include <surfaceflinger/Surface.h>
+#include <surfaceflinger/SurfaceComposerClient.h>
+#include <surfaceflinger/ISurfaceComposer.h>
+
+#include <SkBitmap.h>
 
 namespace android {
 
@@ -56,6 +64,64 @@ public:
 
     /* Gets the absolute location of the pointer. */
     virtual void getPosition(float* outX, float* outY) const = 0;
+};
+
+
+/*
+ * Tracks pointer movements and draws the pointer sprite to a surface.
+ *
+ * Handles pointer acceleration and animation.
+ */
+class PointerController : public PointerControllerInterface {
+protected:
+    virtual ~PointerController();
+
+public:
+    PointerController(int32_t pointerLayer);
+
+    virtual bool getBounds(float* outMinX, float* outMinY,
+            float* outMaxX, float* outMaxY) const;
+    virtual void move(float deltaX, float deltaY);
+    virtual void setButtonState(uint32_t buttonState);
+    virtual uint32_t getButtonState() const;
+    virtual void setPosition(float x, float y);
+    virtual void getPosition(float* outX, float* outY) const;
+
+    void setDisplaySize(int32_t width, int32_t height);
+    void setDisplayOrientation(int32_t orientation);
+    void setPointerIcon(const SkBitmap* bitmap, float hotSpotX, float hotSpotY);
+
+private:
+    mutable Mutex mLock;
+
+    int32_t mPointerLayer;
+    sp<SurfaceComposerClient> mSurfaceComposerClient;
+    sp<SurfaceControl> mSurfaceControl;
+
+    struct Locked {
+        int32_t displayWidth;
+        int32_t displayHeight;
+        int32_t displayOrientation;
+
+        float pointerX;
+        float pointerY;
+        uint32_t buttonState;
+
+        SkBitmap* iconBitmap;
+        float iconHotSpotX;
+        float iconHotSpotY;
+
+        bool wantVisible;
+        bool visible;
+        bool drawn;
+    } mLocked;
+
+    bool getBoundsLocked(float* outMinX, float* outMinY, float* outMaxX, float* outMaxY) const;
+    void setPositionLocked(float x, float y);
+    void updateLocked();
+    bool createSurfaceIfNeededLocked();
+    bool drawPointerIfNeededLocked();
+    bool resizeSurfaceLocked(int32_t width, int32_t height);
 };
 
 } // namespace android

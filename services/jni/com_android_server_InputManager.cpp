@@ -24,27 +24,23 @@
 // Log debug messages about InputDispatcherPolicy
 #define DEBUG_INPUT_DISPATCHER_POLICY 0
 
-// Log debug messages about PointerController
-#define DEBUG_POINTER_CONTROLLER 1
-
 
 #include "JNIHelp.h"
 #include "jni.h"
 #include <limits.h>
 #include <android_runtime/AndroidRuntime.h>
-#include <ui/InputReader.h>
-#include <ui/InputDispatcher.h>
-#include <ui/InputManager.h>
-#include <ui/InputTransport.h>
+
 #include <utils/Log.h>
 #include <utils/threads.h>
-#include <surfaceflinger/Surface.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
-#include <surfaceflinger/ISurfaceComposer.h>
 
-#include "../../core/jni/android_view_KeyEvent.h"
-#include "../../core/jni/android_view_MotionEvent.h"
-#include "../../core/jni/android_view_InputChannel.h"
+#include <input/InputManager.h>
+#include <input/PointerController.h>
+
+#include <android_view_KeyEvent.h>
+#include <android_view_MotionEvent.h>
+#include <android_view_InputChannel.h>
+#include <android/graphics/GraphicsJNI.h>
+
 #include "com_android_server_PowerManagerService.h"
 
 namespace android {
@@ -67,6 +63,7 @@ static struct {
     jmethodID getExcludedDeviceNames;
     jmethodID getMaxEventsPerSecond;
     jmethodID getPointerLayer;
+    jmethodID getPointerIcon;
 } gCallbacksClassInfo;
 
 static struct {
@@ -136,57 +133,13 @@ static struct {
     jfieldID navigation;
 } gConfigurationClassInfo;
 
-// ----------------------------------------------------------------------------
+static struct {
+    jclass clazz;
 
-static inline nsecs_t now() {
-    return systemTime(SYSTEM_TIME_MONOTONIC);
-}
-
-// ----------------------------------------------------------------------------
-
-class PointerController : public PointerControllerInterface {
-protected:
-    virtual ~PointerController();
-
-public:
-    PointerController(int32_t pointerLayer);
-
-    virtual bool getBounds(float* outMinX, float* outMinY,
-            float* outMaxX, float* outMaxY) const;
-    virtual void move(float deltaX, float deltaY);
-    virtual void setButtonState(uint32_t buttonState);
-    virtual uint32_t getButtonState() const;
-    virtual void setPosition(float x, float y);
-    virtual void getPosition(float* outX, float* outY) const;
-
-    void setDisplaySize(int32_t width, int32_t height);
-    void setDisplayOrientation(int32_t orientation);
-
-private:
-    mutable Mutex mLock;
-
-    int32_t mPointerLayer;
-    sp<SurfaceComposerClient> mSurfaceComposerClient;
-    sp<SurfaceControl> mSurfaceControl;
-
-    struct Locked {
-        int32_t displayWidth;
-        int32_t displayHeight;
-        int32_t displayOrientation;
-
-        float pointerX;
-        float pointerY;
-        uint32_t buttonState;
-
-        bool wantVisible;
-        bool visible;
-        bool drawn;
-    } mLocked;
-
-    bool getBoundsLocked(float* outMinX, float* outMinY, float* outMaxX, float* outMaxY) const;
-    void setPositionLocked(float x, float y);
-    void updateLocked();
-};
+    jfieldID bitmap;
+    jfieldID hotSpotX;
+    jfieldID hotSpotY;
+} gPointerIconClassInfo;
 
 // ----------------------------------------------------------------------------
 
@@ -538,13 +491,30 @@ sp<PointerControllerInterface> NativeInputManager::obtainPointerController(int32
     if (controller == NULL) {
         JNIEnv* env = jniEnv();
         jint layer = env->CallIntMethod(mCallbacksObj, gCallbacksClassInfo.getPointerLayer);
-        checkAndClearExceptionFromCallback(env, "getPointerLayer");
+        if (checkAndClearExceptionFromCallback(env, "getPointerLayer")) {
+            layer = -1;
+        }
 
         controller = new PointerController(layer);
         mLocked.pointerController = controller;
 
         controller->setDisplaySize(mLocked.displayWidth, mLocked.displayHeight);
         controller->setDisplayOrientation(mLocked.displayOrientation);
+
+        jobject iconObj = env->CallObjectMethod(mCallbacksObj, gCallbacksClassInfo.getPointerIcon);
+        if (!checkAndClearExceptionFromCallback(env, "getPointerIcon") && iconObj) {
+            jfloat iconHotSpotX = env->GetFloatField(iconObj, gPointerIconClassInfo.hotSpotX);
+            jfloat iconHotSpotY = env->GetFloatField(iconObj, gPointerIconClassInfo.hotSpotY);
+            jobject iconBitmapObj = env->GetObjectField(iconObj, gPointerIconClassInfo.bitmap);
+            if (iconBitmapObj) {
+                SkBitmap* iconBitmap = GraphicsJNI::getNativeBitmap(env, iconBitmapObj);
+                if (iconBitmap) {
+                    controller->setPointerIcon(iconBitmap, iconHotSpotX, iconHotSpotY);
+                }
+                env->DeleteLocalRef(iconBitmapObj);
+            }
+            env->DeleteLocalRef(iconObj);
+        }
     }
     return controller;
 }
@@ -982,293 +952,6 @@ bool NativeInputManager::checkInjectEventsPermissionNonReentrant(
             gCallbacksClassInfo.checkInjectEventsPermission, injectorPid, injectorUid);
     checkAndClearExceptionFromCallback(env, "checkInjectEventsPermission");
     return result;
-}
-
-// --- PointerController ---
-
-PointerController::PointerController(int32_t pointerLayer) :
-    mPointerLayer(pointerLayer) {
-    AutoMutex _l(mLock);
-
-    mLocked.displayWidth = -1;
-    mLocked.displayHeight = -1;
-    mLocked.displayOrientation = InputReaderPolicyInterface::ROTATION_0;
-
-    mLocked.pointerX = 0;
-    mLocked.pointerY = 0;
-    mLocked.buttonState = 0;
-
-    mLocked.wantVisible = false;
-    mLocked.visible = false;
-    mLocked.drawn = false;
-}
-
-PointerController::~PointerController() {
-    mSurfaceControl.clear();
-    mSurfaceComposerClient.clear();
-}
-
-bool PointerController::getBounds(float* outMinX, float* outMinY,
-        float* outMaxX, float* outMaxY) const {
-    AutoMutex _l(mLock);
-
-    return getBoundsLocked(outMinX, outMinY, outMaxX, outMaxY);
-}
-
-bool PointerController::getBoundsLocked(float* outMinX, float* outMinY,
-        float* outMaxX, float* outMaxY) const {
-    if (mLocked.displayWidth <= 0 || mLocked.displayHeight <= 0) {
-        return false;
-    }
-
-    *outMinX = 0;
-    *outMinY = 0;
-    switch (mLocked.displayOrientation) {
-    case InputReaderPolicyInterface::ROTATION_90:
-    case InputReaderPolicyInterface::ROTATION_270:
-        *outMaxX = mLocked.displayHeight;
-        *outMaxY = mLocked.displayWidth;
-        break;
-    default:
-        *outMaxX = mLocked.displayWidth;
-        *outMaxY = mLocked.displayHeight;
-        break;
-    }
-    return true;
-}
-
-void PointerController::move(float deltaX, float deltaY) {
-#if DEBUG_POINTER_CONTROLLER
-    LOGD("Move pointer by deltaX=%0.3f, deltaY=%0.3f", deltaX, deltaY);
-#endif
-    if (deltaX == 0.0f && deltaY == 0.0f) {
-        return;
-    }
-
-    AutoMutex _l(mLock);
-
-    setPositionLocked(mLocked.pointerX + deltaX, mLocked.pointerY + deltaY);
-}
-
-void PointerController::setButtonState(uint32_t buttonState) {
-    AutoMutex _l(mLock);
-
-    if (mLocked.buttonState != buttonState) {
-        mLocked.buttonState = buttonState;
-        mLocked.wantVisible = true;
-        updateLocked();
-    }
-}
-
-uint32_t PointerController::getButtonState() const {
-    AutoMutex _l(mLock);
-
-    return mLocked.buttonState;
-}
-
-void PointerController::setPosition(float x, float y) {
-    AutoMutex _l(mLock);
-
-    setPositionLocked(x, y);
-}
-
-void PointerController::setPositionLocked(float x, float y) {
-    float minX, minY, maxX, maxY;
-    if (getBoundsLocked(&minX, &minY, &maxX, &maxY)) {
-        if (x <= minX) {
-            mLocked.pointerX = minX;
-        } else if (x >= maxX) {
-            mLocked.pointerX = maxX;
-        } else {
-            mLocked.pointerX = x;
-        }
-        if (y <= minY) {
-            mLocked.pointerY = minY;
-        } else if (y >= maxY) {
-            mLocked.pointerY = maxY;
-        } else {
-            mLocked.pointerY = y;
-        }
-        mLocked.wantVisible = true;
-        updateLocked();
-    }
-}
-
-void PointerController::getPosition(float* outX, float* outY) const {
-    AutoMutex _l(mLock);
-
-    *outX = mLocked.pointerX;
-    *outY = mLocked.pointerY;
-}
-
-void PointerController::updateLocked() {
-#if DEBUG_POINTER_CONTROLLER
-    LOGD("Pointer at (%f, %f).", mLocked.pointerX, mLocked.pointerY);
-#endif
-
-    if (!mLocked.wantVisible && !mLocked.visible) {
-        return;
-    }
-
-    if (mSurfaceComposerClient == NULL) {
-        mSurfaceComposerClient = new SurfaceComposerClient();
-    }
-
-    if (mSurfaceControl == NULL) {
-        mSurfaceControl = mSurfaceComposerClient->createSurface(getpid(),
-                String8("Pointer"), 0, 16, 16, PIXEL_FORMAT_RGBA_8888);
-        if (mSurfaceControl == NULL) {
-            LOGE("Error creating pointer surface.");
-            return;
-        }
-    }
-
-    status_t status = mSurfaceComposerClient->openTransaction();
-    if (status) {
-        LOGE("Error opening surface transaction to update pointer surface.");
-        return;
-    }
-
-    if (mLocked.wantVisible) {
-        if (!mLocked.drawn) {
-            mLocked.drawn = true;
-
-            sp<Surface> surface = mSurfaceControl->getSurface();
-            Surface::SurfaceInfo surfaceInfo;
-            status = surface->lock(&surfaceInfo);
-            if (status) {
-                LOGE("Error %d locking pointer surface before drawing.", status);
-                goto CloseTransaction;
-            }
-
-            // TODO: Load pointers from assets and allow them to be set.
-            char* bitmap = (char*)surfaceInfo.bits;
-            ssize_t bpr = surfaceInfo.s * 4;
-            for (int y = 0; y < surfaceInfo.h; y++) {
-                for (int x = 0; x < surfaceInfo.w; x++) {
-                    bitmap[y * bpr + x * 4] = 128;
-                    bitmap[y * bpr + x * 4 + 1] = 255;
-                    bitmap[y * bpr + x * 4 + 2] = 128;
-                    bitmap[y * bpr + x * 4 + 3] = 255;
-                }
-            }
-
-            status = surface->unlockAndPost();
-            if (status) {
-                LOGE("Error %d unlocking pointer surface after drawing.", status);
-                goto CloseTransaction;
-            }
-        }
-
-        status = mSurfaceControl->setPosition(mLocked.pointerX, mLocked.pointerY);
-        if (status) {
-            LOGE("Error %d moving pointer surface.", status);
-            goto CloseTransaction;
-        }
-
-        if (!mLocked.visible) {
-            mLocked.visible = true;
-
-            mSurfaceControl->setLayer(mPointerLayer);
-
-            LOGD("XXX Show");
-            status = mSurfaceControl->show(mPointerLayer);
-            if (status) {
-                LOGE("Error %d showing pointer surface.", status);
-                goto CloseTransaction;
-            }
-        }
-    } else {
-        if (mLocked.visible) {
-            mLocked.visible = false;
-
-            if (mSurfaceControl != NULL) {
-                status = mSurfaceControl->hide();
-                if (status) {
-                    LOGE("Error %d hiding pointer surface.", status);
-                    goto CloseTransaction;
-                }
-            }
-        }
-    }
-
-CloseTransaction:
-    status = mSurfaceComposerClient->closeTransaction();
-    if (status) {
-        LOGE("Error closing surface transaction to update pointer surface.");
-    }
-}
-
-void PointerController::setDisplaySize(int32_t width, int32_t height) {
-    AutoMutex _l(mLock);
-
-    if (mLocked.displayWidth != width || mLocked.displayHeight != height) {
-        mLocked.displayWidth = width;
-        mLocked.displayHeight = height;
-
-        float minX, minY, maxX, maxY;
-        if (getBoundsLocked(&minX, &minY, &maxX, &maxY)) {
-            mLocked.pointerX = (minX + maxX) * 0.5f;
-            mLocked.pointerY = (minY + maxY) * 0.5f;
-        } else {
-            mLocked.pointerX = 0;
-            mLocked.pointerY = 0;
-        }
-
-        updateLocked();
-    }
-}
-
-void PointerController::setDisplayOrientation(int32_t orientation) {
-    AutoMutex _l(mLock);
-
-    if (mLocked.displayOrientation != orientation) {
-        float absoluteX, absoluteY;
-
-        // Map from oriented display coordinates to absolute display coordinates.
-        switch (mLocked.displayOrientation) {
-        case InputReaderPolicyInterface::ROTATION_90:
-            absoluteX = mLocked.displayWidth - mLocked.pointerY;
-            absoluteY = mLocked.pointerX;
-            break;
-        case InputReaderPolicyInterface::ROTATION_180:
-            absoluteX = mLocked.displayWidth - mLocked.pointerX;
-            absoluteY = mLocked.displayHeight - mLocked.pointerY;
-            break;
-        case InputReaderPolicyInterface::ROTATION_270:
-            absoluteX = mLocked.pointerY;
-            absoluteY = mLocked.displayHeight - mLocked.pointerX;
-            break;
-        default:
-            absoluteX = mLocked.pointerX;
-            absoluteY = mLocked.pointerY;
-            break;
-        }
-
-        // Map from absolute display coordinates to oriented display coordinates.
-        switch (orientation) {
-        case InputReaderPolicyInterface::ROTATION_90:
-            mLocked.pointerX = absoluteY;
-            mLocked.pointerY = mLocked.displayWidth - absoluteX;
-            break;
-        case InputReaderPolicyInterface::ROTATION_180:
-            mLocked.pointerX = mLocked.displayWidth - absoluteX;
-            mLocked.pointerY = mLocked.displayHeight - absoluteY;
-            break;
-        case InputReaderPolicyInterface::ROTATION_270:
-            mLocked.pointerX = mLocked.displayHeight - absoluteY;
-            mLocked.pointerY = absoluteX;
-            break;
-        default:
-            mLocked.pointerX = absoluteX;
-            mLocked.pointerY = absoluteY;
-            break;
-        }
-
-        mLocked.displayOrientation = orientation;
-
-        updateLocked();
-    }
 }
 
 
@@ -1715,6 +1398,9 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gCallbacksClassInfo.getPointerLayer, gCallbacksClassInfo.clazz,
             "getPointerLayer", "()I");
 
+    GET_METHOD_ID(gCallbacksClassInfo.getPointerIcon, gCallbacksClassInfo.clazz,
+            "getPointerIcon", "()Lcom/android/server/InputManager$PointerIcon;");
+
     // InputWindow
 
     FIND_CLASS(gInputWindowClassInfo.clazz, "com/android/server/InputWindow");
@@ -1853,6 +1539,19 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_FIELD_ID(gConfigurationClassInfo.navigation, gConfigurationClassInfo.clazz,
             "navigation", "I");
+
+    // PointerIcon
+
+    FIND_CLASS(gPointerIconClassInfo.clazz, "com/android/server/InputManager$PointerIcon");
+
+    GET_FIELD_ID(gPointerIconClassInfo.bitmap, gPointerIconClassInfo.clazz,
+            "bitmap", "Landroid/graphics/Bitmap;");
+
+    GET_FIELD_ID(gPointerIconClassInfo.hotSpotX, gPointerIconClassInfo.clazz,
+            "hotSpotX", "F");
+
+    GET_FIELD_ID(gPointerIconClassInfo.hotSpotY, gPointerIconClassInfo.clazz,
+            "hotSpotY", "F");
 
     return 0;
 }

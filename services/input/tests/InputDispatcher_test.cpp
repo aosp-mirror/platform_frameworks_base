@@ -2,7 +2,8 @@
 // Copyright 2010 The Android Open Source Project
 //
 
-#include <ui/InputDispatcher.h>
+#include "../InputDispatcher.h"
+
 #include <gtest/gtest.h>
 #include <linux/input.h>
 

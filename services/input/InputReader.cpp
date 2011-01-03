@@ -1,8 +1,19 @@
-//
-// Copyright 2010 The Android Open Source Project
-//
-// The input reader.
-//
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #define LOG_TAG "InputReader"
 
 //#define LOG_NDEBUG 0
@@ -22,8 +33,9 @@
 // Log debug messages about pointer assignment calculations.
 #define DEBUG_POINTER_ASSIGNMENT 0
 
+#include "InputReader.h"
+
 #include <cutils/log.h>
-#include <ui/InputReader.h>
 #include <ui/Keyboard.h>
 #include <ui/VirtualKeyMap.h>
 
@@ -84,7 +96,7 @@ static const int keyCodeRotationMapSize =
         sizeof(keyCodeRotationMap) / sizeof(keyCodeRotationMap[0]);
 
 int32_t rotateKeyCode(int32_t keyCode, int32_t orientation) {
-    if (orientation != InputReaderPolicyInterface::ROTATION_0) {
+    if (orientation != DISPLAY_ORIENTATION_0) {
         for (int i = 0; i < keyCodeRotationMapSize; i++) {
             if (keyCode == keyCodeRotationMap[i][0]) {
                 return keyCodeRotationMap[i][orientation];
@@ -860,7 +872,7 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
                 int32_t orientation;
                 if (!getPolicy()->getDisplayInfo(mParameters.associatedDisplayId,
                         NULL, NULL, & orientation)) {
-                    orientation = InputReaderPolicyInterface::ROTATION_0;
+                    orientation = DISPLAY_ORIENTATION_0;
                 }
 
                 keyCode = rotateKeyCode(keyCode, orientation);
@@ -1195,23 +1207,23 @@ void CursorInputMapper::sync(nsecs_t when) {
             int32_t orientation;
             if (! getPolicy()->getDisplayInfo(mParameters.associatedDisplayId,
                     NULL, NULL, & orientation)) {
-                orientation = InputReaderPolicyInterface::ROTATION_0;
+                orientation = DISPLAY_ORIENTATION_0;
             }
 
             float temp;
             switch (orientation) {
-            case InputReaderPolicyInterface::ROTATION_90:
+            case DISPLAY_ORIENTATION_90:
                 temp = deltaX;
                 deltaX = deltaY;
                 deltaY = -temp;
                 break;
 
-            case InputReaderPolicyInterface::ROTATION_180:
+            case DISPLAY_ORIENTATION_180:
                 deltaX = -deltaX;
                 deltaY = -deltaY;
                 break;
 
-            case InputReaderPolicyInterface::ROTATION_270:
+            case DISPLAY_ORIENTATION_270:
                 temp = deltaX;
                 deltaX = -deltaY;
                 deltaY = temp;
@@ -1485,7 +1497,7 @@ void TouchInputMapper::dumpRawAxes(String8& dump) {
 
 bool TouchInputMapper::configureSurfaceLocked() {
     // Update orientation and dimensions if needed.
-    int32_t orientation = InputReaderPolicyInterface::ROTATION_0;
+    int32_t orientation = DISPLAY_ORIENTATION_0;
     int32_t width = mRawAxes.x.getRange();
     int32_t height = mRawAxes.y.getRange();
 
@@ -1677,8 +1689,8 @@ bool TouchInputMapper::configureSurfaceLocked() {
         // Compute oriented surface dimensions, precision, and scales.
         float orientedXScale, orientedYScale;
         switch (mLocked.surfaceOrientation) {
-        case InputReaderPolicyInterface::ROTATION_90:
-        case InputReaderPolicyInterface::ROTATION_270:
+        case DISPLAY_ORIENTATION_90:
+        case DISPLAY_ORIENTATION_270:
             mLocked.orientedSurfaceWidth = mLocked.surfaceHeight;
             mLocked.orientedSurfaceHeight = mLocked.surfaceWidth;
             mLocked.orientedXPrecision = mLocked.yPrecision;
@@ -2553,7 +2565,7 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
 
             // Adjust coords for orientation.
             switch (mLocked.surfaceOrientation) {
-            case InputReaderPolicyInterface::ROTATION_90: {
+            case DISPLAY_ORIENTATION_90: {
                 float xTemp = x;
                 x = y;
                 y = mLocked.surfaceWidth - xTemp;
@@ -2563,13 +2575,13 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
                 }
                 break;
             }
-            case InputReaderPolicyInterface::ROTATION_180: {
+            case DISPLAY_ORIENTATION_180: {
                 x = mLocked.surfaceWidth - x;
                 y = mLocked.surfaceHeight - y;
                 orientation = - orientation;
                 break;
             }
-            case InputReaderPolicyInterface::ROTATION_270: {
+            case DISPLAY_ORIENTATION_270: {
                 float xTemp = x;
                 x = mLocked.surfaceHeight - y;
                 y = xTemp;

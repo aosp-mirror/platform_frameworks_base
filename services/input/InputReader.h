@@ -17,10 +17,12 @@
 #ifndef _UI_INPUT_READER_H
 #define _UI_INPUT_READER_H
 
-#include <ui/EventHub.h>
+#include "EventHub.h"
+#include "InputDispatcher.h"
+#include "PointerController.h"
+
 #include <ui/Input.h>
-#include <ui/InputDispatcher.h>
-#include <ui/PointerController.h>
+#include <ui/DisplayInfo.h>
 #include <utils/KeyedVector.h>
 #include <utils/threads.h>
 #include <utils/Timers.h>
