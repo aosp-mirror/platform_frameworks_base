@@ -205,6 +205,15 @@ public final class MifareClassic extends BasicTagTechnology {
         return getBlockCount(sector) * 16;
     }
 
+    public int getTotalBlockCount() {
+        int totalBlocks = 0;
+        for (int sec = 0; sec < getSectorCount(); sec++) {
+            totalBlocks += getSectorSize(sec);
+        }
+
+        return totalBlocks;
+    }
+
     public int getBlockCount(int sector) {
         if (sector >= getSectorCount()) {
             throw new IllegalArgumentException("this card only has " + getSectorCount() +
@@ -343,9 +352,27 @@ public final class MifareClassic extends BasicTagTechnology {
         checkConnected();
 
         byte addr = (byte) block;
-        byte[] incr_cmd = { (byte) 0xC0, (byte) block };
+        byte[] decr_cmd = { (byte) 0xC0, (byte) block };
 
-        transceive(incr_cmd);
+        transceive(decr_cmd);
+    }
+
+    public void transfer(int block) throws IOException {
+        checkConnected();
+
+        byte addr = (byte) block;
+        byte[] trans_cmd = { (byte) 0xB0, (byte) block };
+
+        transceive(trans_cmd);
+    }
+
+    public void restore(int block) throws IOException {
+        checkConnected();
+
+        byte addr = (byte) block;
+        byte[] rest_cmd = { (byte) 0xC2, (byte) block };
+
+        transceive(rest_cmd);
     }
 
     /**
