@@ -34,6 +34,8 @@ public class Shader {
      */
     public int native_shader;
 
+    private Matrix mLocalMatrix;
+
     public enum TileMode {
         /**
          * replicate the edge color if the shader draws outside of its
@@ -62,7 +64,11 @@ public class Shader {
      * @return true if the shader has a non-identity local matrix
      */
     public boolean getLocalMatrix(Matrix localM) {
-        return nativeGetLocalMatrix(native_instance, localM.native_instance);
+        if (mLocalMatrix != null) {
+            localM.set(mLocalMatrix);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -71,6 +77,7 @@ public class Shader {
      * @param localM The shader's new local matrix, or null to specify identity
      */
     public void setLocalMatrix(Matrix localM) {
+        mLocalMatrix = localM;
         nativeSetLocalMatrix(native_instance, native_shader,
                 localM == null ? 0 : localM.native_instance);
     }
@@ -84,8 +91,6 @@ public class Shader {
     }
 
     private static native void nativeDestructor(int native_shader, int native_skiaShader);
-    private static native boolean nativeGetLocalMatrix(int native_shader,
-            int matrix_instance); 
     private static native void nativeSetLocalMatrix(int native_shader,
             int native_skiaShader, int matrix_instance);
 }

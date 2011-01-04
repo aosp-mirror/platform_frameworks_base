@@ -64,11 +64,6 @@ static void Shader_destructor(JNIEnv* env, jobject o, SkShader* shader, SkiaShad
 #endif
 }
 
-static bool Shader_getLocalMatrix(JNIEnv* env, jobject, const SkShader* shader, SkMatrix* matrix)
-{
-    return shader ? shader->getLocalMatrix(matrix) : false;
-}
- 
 static void Shader_setLocalMatrix(JNIEnv* env, jobject o, SkShader* shader, SkiaShader* skiaShader,
         const SkMatrix* matrix)
 {
@@ -471,7 +466,6 @@ static JNINativeMethod gColorMethods[] = {
 
 static JNINativeMethod gShaderMethods[] = {
     { "nativeDestructor",        "(II)V",    (void*)Shader_destructor        },
-    { "nativeGetLocalMatrix",    "(II)Z",    (void*)Shader_getLocalMatrix    },
     { "nativeSetLocalMatrix",    "(III)V",   (void*)Shader_setLocalMatrix    }
 };
 
