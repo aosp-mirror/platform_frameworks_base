@@ -260,7 +260,7 @@ VideoFrame *StagefrightMetadataRetriever::getFrameAtTime(
 
     LOGV("getFrameAtTime: %lld us option: %d", timeUs, option);
     if (0 == (mMode & METADATA_MODE_FRAME_CAPTURE_ONLY)) {
-        LOGV("captureFrame disabled by mode (0x%08x)", mMode);
+        LOGV("getFrameAtTime disabled by mode (0x%08x)", mMode);
 
         return NULL;
     }

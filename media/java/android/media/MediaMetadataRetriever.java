@@ -262,14 +262,6 @@ public class MediaMetadataRetriever
         return getFrameAtTime(-1, OPTION_CLOSEST_SYNC);
     }
 
-    /**
-     * FIXME
-     * To be removed and replaced by getFrameAt().
-     */
-    public Bitmap captureFrame() {
-        return _getFrameAtTime(-1, OPTION_CLOSEST_SYNC);
-    }
-
     private native Bitmap _getFrameAtTime(long timeUs, int option);
 
     
