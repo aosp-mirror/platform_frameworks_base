@@ -2577,10 +2577,7 @@ final class WebViewCore {
                 .sendToTarget();
     }
 
-    // called by JNI.  PluginWidget functions for creating an embedded View for
-    // the surface drawing model.
-    private ViewManager.ChildView addSurface(View pluginView, int x, int y,
-                                             int width, int height) {
+    private ViewManager.ChildView createSurface(View pluginView) {
         if (mWebView == null) {
             return null;
         }
@@ -2598,6 +2595,14 @@ final class WebViewCore {
 
         ViewManager.ChildView view = mWebView.mViewManager.createView();
         view.mView = pluginView;
+        return view;
+    }
+    
+    // called by JNI.  PluginWidget functions for creating an embedded View for
+    // the surface drawing model.
+    private ViewManager.ChildView addSurface(View pluginView, int x, int y,
+                                             int width, int height) {
+        ViewManager.ChildView view = createSurface(pluginView);
         view.attachView(x, y, width, height);
         return view;
     }
