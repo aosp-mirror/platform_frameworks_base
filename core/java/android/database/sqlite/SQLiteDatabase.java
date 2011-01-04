@@ -991,13 +991,21 @@ public class SQLiteDatabase extends SQLiteClosable {
             }
             return db;
         } catch (SQLiteDatabaseCorruptException e) {
-            db.mErrorHandler.onCorruption(db);
-            return SQLiteDatabase.openDatabase(path, factory, flags, errorHandler);
+            return handleCorruptedDatabase(db, path, factory, flags, errorHandler);
+        } catch (SQLiteCantOpenDatabaseException e) {
+            Log.e(TAG, "database file can't be opened. possibly due to database corruption.");
+            return handleCorruptedDatabase(db, path, factory, flags, errorHandler);
         } catch (SQLiteException e) {
             Log.e(TAG, "Failed to open the database. closing it.", e);
             db.close();
             throw e;
         }
+    }
+
+    private static SQLiteDatabase handleCorruptedDatabase(SQLiteDatabase db, String path,
+            CursorFactory factory, int flags, DatabaseErrorHandler errorHandler) {
+        db.mErrorHandler.onCorruption(db);
+        return SQLiteDatabase.openDatabase(path, factory, flags, errorHandler);
     }
 
     /**
