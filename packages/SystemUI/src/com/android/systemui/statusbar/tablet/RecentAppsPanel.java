@@ -257,20 +257,23 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
 
     private Bitmap compositeBitmap(Bitmap background, Bitmap thumbnail) {
         Bitmap outBitmap = background.copy(background.getConfig(), true);
-        Canvas canvas = new Canvas(outBitmap);
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setFilterBitmap(true);
-        paint.setAlpha(255);
-        final int srcWidth = thumbnail.getWidth();
-        final int height = thumbnail.getHeight();
-        final int srcHeight = srcWidth > height ? height : (height - height * srcWidth / height);
-        canvas.drawBitmap(thumbnail,
-                new Rect(0, 0, srcWidth-1, srcHeight-1),
-                new RectF(GLOW_PADDING,
-                        GLOW_PADDING - 4.0f,
-                        outBitmap.getWidth() - GLOW_PADDING + 2.0f,
-                        outBitmap.getHeight() - GLOW_PADDING + 3.0f), paint);
+        if (thumbnail != null) {
+            Canvas canvas = new Canvas(outBitmap);
+            Paint paint = new Paint();
+            paint.setAntiAlias(true);
+            paint.setFilterBitmap(true);
+            paint.setAlpha(255);
+            final int srcWidth = thumbnail.getWidth();
+            final int height = thumbnail.getHeight();
+            final int srcHeight = srcWidth > height ? height
+                    : (height - height * srcWidth / height);
+            canvas.drawBitmap(thumbnail,
+                    new Rect(0, 0, srcWidth-1, srcHeight-1),
+                    new RectF(GLOW_PADDING,
+                            GLOW_PADDING - 4.0f,
+                            outBitmap.getWidth() - GLOW_PADDING + 2.0f,
+                            outBitmap.getHeight() - GLOW_PADDING + 3.0f), paint);
+        }
         return outBitmap;
     }
 
