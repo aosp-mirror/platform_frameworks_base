@@ -2951,19 +2951,33 @@ public class WebView extends AbsoluteLayout
      * @param text If non-null, will be the initial text to search for.
      *             Otherwise, the last String searched for in this WebView will
      *             be used to start.
+     * @param showIme If true, show the IME, assuming the user will begin typing.
+     *             If false and text is non-null, perform a find all.
+     * @return boolean True if the find dialog is shown, false otherwise.
      */
-    public void showFindDialog(String text) {
+    public boolean showFindDialog(String text, boolean showIme) {
         mFindCallback = new FindActionModeCallback(mContext);
+        if (startActionMode(mFindCallback) == null) {
+            // Could not start the action mode, so end Find on page
+            mFindCallback = null;
+            return false;
+        }
         setFindIsUp(true);
         mFindCallback.setWebView(this);
-        View titleBar = mTitleBar;
-        startActionMode(mFindCallback);
+        if (showIme) {
+            mFindCallback.showSoftInput();
+        } else if (text != null) {
+            mFindCallback.setText(text);
+            mFindCallback.findAll();
+            return true;
+        }
         if (text == null) {
             text = mLastFind;
         }
         if (text != null) {
             mFindCallback.setText(text);
         }
+        return true;
     }
 
     /**

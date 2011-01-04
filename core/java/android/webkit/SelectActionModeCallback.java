@@ -78,7 +78,7 @@ class SelectActionModeCallback implements ActionMode.Callback {
             case com.android.internal.R.id.find:
                 String sel= mWebView.getSelection();
                 mode.finish();
-                mWebView.showFindDialog(sel);
+                mWebView.showFindDialog(sel, false);
                 break;
             case com.android.internal.R.id.websearch:
                 mode.finish();
