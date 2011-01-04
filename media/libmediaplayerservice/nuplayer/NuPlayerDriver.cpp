@@ -22,12 +22,14 @@
 
 #include "NuPlayer.h"
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/ALooper.h>
 
 namespace android {
 
 NuPlayerDriver::NuPlayerDriver()
-    : mLooper(new ALooper),
+    : mResetInProgress(false),
+      mLooper(new ALooper),
       mPlayer(false) {
     mLooper->setName("NuPlayerDriver Looper");
 
@@ -121,6 +123,15 @@ status_t NuPlayerDriver::getDuration(int *msec) {
 }
 
 status_t NuPlayerDriver::reset() {
+    Mutex::Autolock autoLock(mLock);
+    mResetInProgress = true;
+
+    mPlayer->resetAsync();
+
+    while (mResetInProgress) {
+        mCondition.wait(mLock);
+    }
+
     return OK;
 }
 
@@ -143,6 +154,18 @@ void NuPlayerDriver::setAudioSink(const sp<AudioSink> &audioSink) {
 status_t NuPlayerDriver::getMetadata(
         const media::Metadata::Filter& ids, Parcel *records) {
     return INVALID_OPERATION;
+}
+
+void NuPlayerDriver::sendEvent(int msg, int ext1, int ext2) {
+    if (msg != MEDIA_RESET_COMPLETE) {
+        MediaPlayerInterface::sendEvent(msg, ext1, ext2);
+        return;
+    }
+
+    Mutex::Autolock autoLock(mLock);
+    CHECK(mResetInProgress);
+    mResetInProgress = false;
+    mCondition.broadcast();
 }
 
 }  // namespace android
