@@ -7639,6 +7639,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 type == Character.LOWERCASE_LETTER ||
                 type == Character.TITLECASE_LETTER ||
                 type == Character.MODIFIER_LETTER ||
+                type == Character.OTHER_LETTER || // Should handle asian characters
                 type == Character.DECIMAL_DIGIT_NUMBER);
     }
 
@@ -7647,15 +7648,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @param offset An offset in the text.
      * @return The offsets for the start and end of the word located at <code>offset</code>.
-     * The two ints offsets are packed in a long, with the starting offset shifted by 32 bits.
-     * Returns a negative value if no valid word was found.
+     * The two ints offsets are packed in a long using {@link #packRangeInLong(int, int)}.
+     * Returns -1 if no valid word was found.
      */
     private long getWordLimitsAt(int offset) {
         int klass = mInputType & InputType.TYPE_MASK_CLASS;
         int variation = mInputType & InputType.TYPE_MASK_VARIATION;
 
         // Text selection is not permitted in password fields
-        if (isPasswordInputType(mInputType) || isVisiblePasswordInputType(mInputType)) {
+        if (hasPasswordTransformationMethod()) {
             return -1;
         }
 
@@ -7739,17 +7740,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (hasPasswordTransformationMethod()) {
-            // selectCurrentWord is not available on a password field and would return an
-            // arbitrary 10-charater selection around pressed position. Select all instead.
+            // Always select all on a password field.
             // Cut/copy menu entries are not available for passwords, but being able to select all
             // is however useful to delete or paste to replace the entire content.
             selectAll();
             return;
         }
 
-        long lastTouchOffset = getLastTouchOffsets();
-        final int minOffset = extractRangeStartFromLong(lastTouchOffset);
-        final int maxOffset = extractRangeEndFromLong(lastTouchOffset);
+        long lastTouchOffsets = getLastTouchOffsets();
+        final int minOffset = extractRangeStartFromLong(lastTouchOffsets);
+        final int maxOffset = extractRangeEndFromLong(lastTouchOffsets);
 
         int selectionStart, selectionEnd;
 
