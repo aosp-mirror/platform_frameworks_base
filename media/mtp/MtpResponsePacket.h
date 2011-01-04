@@ -34,8 +34,8 @@ public:
 #endif
 
 #ifdef MTP_HOST
-    // read our buffer from the given endpoint
-    int                 read(struct usb_endpoint *ep);
+    // read our buffer with the given request
+    int                 read(struct usb_request *request);
 #endif
 
     inline MtpResponseCode      getResponseCode() const { return getContainerCode(); }

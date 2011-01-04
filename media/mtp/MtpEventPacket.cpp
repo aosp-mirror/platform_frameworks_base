@@ -27,6 +27,8 @@
 
 #include "MtpEventPacket.h"
 
+#include <usbhost/usbhost.h>
+
 namespace android {
 
 MtpEventPacket::MtpEventPacket()
@@ -52,9 +54,10 @@ int MtpEventPacket::write(int fd) {
 #endif
 
 #ifdef MTP_HOST
-    // read our buffer from the given endpoint
-int MtpEventPacket::read(struct usb_endpoint *ep) {
-    int ret = transfer(ep, mBuffer, mBufferSize);
+int MtpEventPacket::read(struct usb_request *request) {
+    request->buffer = mBuffer;
+    request->buffer_length = mBufferSize;
+    int ret = transfer(request);
      if (ret >= 0)
         mPacketSize = ret;
     else

@@ -391,15 +391,19 @@ int MtpDataPacket::writeDataHeader(int fd, uint32_t length) {
 #endif // MTP_DEVICE
 
 #ifdef MTP_HOST
-int MtpDataPacket::read(struct usb_endpoint *ep) {
+int MtpDataPacket::read(struct usb_request *request) {
     // first read the header
-    int length = transfer(ep, mBuffer, mBufferSize);
+    request->buffer = mBuffer;
+    request->buffer_length = mBufferSize;
+    int length = transfer(request);
     if (length >= MTP_CONTAINER_HEADER_SIZE) {
         // look at the length field to see if the data spans multiple packets
         uint32_t totalLength = MtpPacket::getUInt32(MTP_CONTAINER_LENGTH_OFFSET);
         while (totalLength > length) {
             allocate(length + mAllocationIncrement);
-            int ret = transfer(ep, mBuffer + length, mAllocationIncrement);
+            request->buffer = mBuffer + length;
+            request->buffer_length = mAllocationIncrement;
+            int ret = transfer(request);
             if (ret >= 0)
                 length += ret;
             else {
@@ -413,10 +417,12 @@ int MtpDataPacket::read(struct usb_endpoint *ep) {
     return length;
 }
 
-int MtpDataPacket::readData(struct usb_endpoint *ep, void* buffer, int length) {
+int MtpDataPacket::readData(struct usb_request *request, void* buffer, int length) {
     int read = 0;
     while (read < length) {
-        int ret = transfer(ep, (char *)buffer + read, length - read);
+        request->buffer = (char *)buffer + read;
+        request->buffer_length = length - read;
+        int ret = transfer(request);
         if (ret < 0) {
             return ret;
         }
@@ -426,8 +432,8 @@ int MtpDataPacket::readData(struct usb_endpoint *ep, void* buffer, int length) {
 }
 
 // Queue a read request.  Call readDataWait to wait for result
-int MtpDataPacket::readDataAsync(struct usb_endpoint *ep, void* buffer, int length) {
-    if (usb_endpoint_queue(ep, buffer, length)) {
+int MtpDataPacket::readDataAsync(struct usb_request *req) {
+    if (usb_request_queue(req)) {
         LOGE("usb_endpoint_queue failed, errno: %d", errno);
         return -1;
     }
@@ -435,39 +441,49 @@ int MtpDataPacket::readDataAsync(struct usb_endpoint *ep, void* buffer, int leng
 }
 
 // Wait for result of readDataAsync
-int MtpDataPacket::readDataWait(struct usb_endpoint *ep) {
-    int ep_num;
-    return usb_endpoint_wait(usb_endpoint_get_device(ep), &ep_num);
+int MtpDataPacket::readDataWait(struct usb_device *device) {
+    struct usb_request *req = usb_request_wait(device);
+    return (req ? req->actual_length : -1);
 }
 
-int MtpDataPacket::readDataHeader(struct usb_endpoint *ep) {
-    int length = transfer(ep, mBuffer, usb_endpoint_max_packet(ep));
+int MtpDataPacket::readDataHeader(struct usb_request *request) {
+    request->buffer = mBuffer;
+    request->buffer_length = request->max_packet_size;
+    int length = transfer(request);
     if (length >= 0)
         mPacketSize = length;
     return length;
 }
 
-int MtpDataPacket::writeDataHeader(struct usb_endpoint *ep, uint32_t length) {
+int MtpDataPacket::writeDataHeader(struct usb_request *request, uint32_t length) {
     MtpPacket::putUInt32(MTP_CONTAINER_LENGTH_OFFSET, length);
     MtpPacket::putUInt16(MTP_CONTAINER_TYPE_OFFSET, MTP_CONTAINER_TYPE_DATA);
-    int ret = transfer(ep, mBuffer, MTP_CONTAINER_HEADER_SIZE);
+    request->buffer = mBuffer;
+    request->buffer_length = MTP_CONTAINER_HEADER_SIZE;
+    int ret = transfer(request);
     return (ret < 0 ? ret : 0);
 }
 
-int MtpDataPacket::write(struct usb_endpoint *ep) {
+int MtpDataPacket::write(struct usb_request *request) {
     MtpPacket::putUInt32(MTP_CONTAINER_LENGTH_OFFSET, mPacketSize);
     MtpPacket::putUInt16(MTP_CONTAINER_TYPE_OFFSET, MTP_CONTAINER_TYPE_DATA);
 
     // send header separately from data
-    int ret = transfer(ep, mBuffer, MTP_CONTAINER_HEADER_SIZE);
-    if (ret == MTP_CONTAINER_HEADER_SIZE)
-        ret = transfer(ep, mBuffer + MTP_CONTAINER_HEADER_SIZE,
-                        mPacketSize - MTP_CONTAINER_HEADER_SIZE);
+    request->buffer = mBuffer;
+    request->buffer_length = MTP_CONTAINER_HEADER_SIZE;
+    int ret = transfer(request);
+    if (ret == MTP_CONTAINER_HEADER_SIZE) {
+        request->buffer = mBuffer + MTP_CONTAINER_HEADER_SIZE;
+        request->buffer_length = mPacketSize - MTP_CONTAINER_HEADER_SIZE;
+        ret = transfer(request);
+    }
     return (ret < 0 ? ret : 0);
 }
 
-int MtpDataPacket::write(struct usb_endpoint *ep, void* buffer, uint32_t length) {
-    int ret = transfer(ep, buffer, length);
+int MtpDataPacket::write(struct usb_request *request, void* buffer, uint32_t length) {
+    request->buffer = buffer;
+    request->buffer_length = length;
+    int ret = transfer(request);
     return (ret < 0 ? ret : 0);
 }
 
