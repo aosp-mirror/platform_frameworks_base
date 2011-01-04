@@ -54,9 +54,20 @@ public final class Ndef extends BasicTagTechnology {
     /** @hide */
     public static final String EXTRA_NDEF_CARDSTATE = "ndefcardstate";
 
+    /** @hide */
+    public static final String EXTRA_NDEF_TYPE = "ndeftype";
+
+    public static final int UNKNOWN_TAG = 0;
+    public static final int TYPE1_TAG = 1;
+    public static final int TYPE2_TAG = 2;
+    public static final int TYPE3_TAG = 3;
+    public static final int TYPE4_TAG = 4;
+    public static final int MIFARE_CLASSIC_TAG = 5;
+
     private final int mMaxNdefSize;
     private final int mCardState;
     private final NdefMessage mNdefMsg;
+    private final int mNdefType;
 
     /**
      * Internal constructor, to be used by NfcAdapter
@@ -68,6 +79,7 @@ public final class Ndef extends BasicTagTechnology {
             mMaxNdefSize = extras.getInt(EXTRA_NDEF_MAXLENGTH);
             mCardState = extras.getInt(EXTRA_NDEF_CARDSTATE);
             mNdefMsg = extras.getParcelable(EXTRA_NDEF_MSG);
+            mNdefType = extras.getInt(EXTRA_NDEF_TYPE);
         } else {
             throw new NullPointerException("NDEF tech extras are null.");
         }
@@ -89,6 +101,13 @@ public final class Ndef extends BasicTagTechnology {
      */
     public NdefMessage[] getExtraNdefMessage() throws IOException, FormatException {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Get NDEF card type
+     */
+    public int getType() {
+        return mNdefType;
     }
 
     /**
