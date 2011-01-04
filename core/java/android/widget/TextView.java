@@ -7854,7 +7854,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         MenuHandler handler = new MenuHandler();
 
-        if (mText instanceof Spanned) {
+        if (mText instanceof Spanned && hasSelectionController()) {
             long lastTouchOffset = getLastTouchOffsets();
             final int selStart = extractRangeStartFromLong(lastTouchOffset);
             final int selEnd = extractRangeEndFromLong(lastTouchOffset);
