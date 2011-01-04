@@ -690,7 +690,7 @@ final class FragmentManagerImpl extends FragmentManager {
                             ViewGroup container = null;
                             if (f.mContainerId != 0) {
                                 container = (ViewGroup)mActivity.findViewById(f.mContainerId);
-                                if (container == null) {
+                                if (container == null && !f.mRestored) {
                                     throw new IllegalArgumentException("No view found for id 0x"
                                             + Integer.toHexString(f.mContainerId)
                                             + " for fragment " + f);
