@@ -132,6 +132,7 @@ public interface Phone {
     static final String FEATURE_ENABLE_SUPL = "enableSUPL";
     static final String FEATURE_ENABLE_DUN = "enableDUN";
     static final String FEATURE_ENABLE_HIPRI = "enableHIPRI";
+    static final String FEATURE_ENABLE_DUN_ALWAYS = "enableDUNAlways";
 
     /**
      * Return codes for <code>enableApnType()</code>
