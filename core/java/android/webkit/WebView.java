@@ -3270,6 +3270,9 @@ public class WebView extends AbsoluteLayout
      * @param url The URL loaded by this {@link WebView}.
      */
     private void injectAccessibilityForUrl(String url) {
+        if (mWebViewCore == null) {
+            return;
+        }
         AccessibilityManager accessibilityManager = AccessibilityManager.getInstance(mContext);
 
         if (!accessibilityManager.isEnabled()) {
@@ -3318,8 +3321,10 @@ public class WebView extends AbsoluteLayout
      * @param present True to ensure an insance, false to ensure no instance.
      */
     private void ensureAccessibilityScriptInjectorInstance(boolean present) {
-        if (present && mAccessibilityInjector == null) {
-            mAccessibilityInjector = new AccessibilityInjector(this);
+        if (present) {
+            if (mAccessibilityInjector == null) {
+                mAccessibilityInjector = new AccessibilityInjector(this);
+            }
         } else {
             mAccessibilityInjector = null;
         }
@@ -4513,9 +4518,17 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
+        // if an accessibility script is injected we delegate to it the key handling.
+        // this script is a screen reader which is a fully fledged solution for blind
+        // users to navigate in and interact with web pages.
+        if (accessibilityScriptInjected()) {
+            mWebViewCore.sendMessage(EventHub.KEY_DOWN, event);
+            return true;
+        }
+
         if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            if (!pageShouldHandleShiftAndArrows() && !nativeCursorWantsKeyEvents()
+            if (!nativePageShouldHandleShiftAndArrows() && !nativeCursorWantsKeyEvents()
                     && !mSelectingText) {
                 setUpSelect();
             }
@@ -4534,7 +4547,7 @@ public class WebView extends AbsoluteLayout
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
             switchOutDrawHistory();
-            if (pageShouldHandleShiftAndArrows()) {
+            if (nativePageShouldHandleShiftAndArrows()) {
                 letPageHandleNavKey(keyCode, event.getEventTime(), true, event.getMetaState());
                 return true;
             }
@@ -4665,9 +4678,17 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
+        // if an accessibility script is injected we delegate to it the key handling.
+        // this script is a screen reader which is a fully fledged solution for blind
+        // users to navigate in and interact with web pages.
+        if (accessibilityScriptInjected()) {
+            mWebViewCore.sendMessage(EventHub.KEY_UP, event);
+            return true;
+        }
+
         if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            if (!pageShouldHandleShiftAndArrows() && copySelection()) {
+            if (!nativePageShouldHandleShiftAndArrows() && copySelection()) {
                 selectionDone();
                 return true;
             }
@@ -4675,7 +4696,7 @@ public class WebView extends AbsoluteLayout
 
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
-            if (pageShouldHandleShiftAndArrows()) {
+            if (nativePageShouldHandleShiftAndArrows()) {
                 letPageHandleNavKey(keyCode, event.getEventTime(), false, event.getMetaState());
                 return true;
             }
@@ -6003,7 +6024,7 @@ public class WebView extends AbsoluteLayout
             return false; // let common code in onKeyUp at it
         }
         if ((mMapTrackballToArrowKeys && (ev.getMetaState() & KeyEvent.META_SHIFT_ON) == 0) ||
-                (mAccessibilityInjector != null || mAccessibilityScriptInjected)) {
+                AccessibilityManager.getInstance(mContext).isEnabled()) {
             if (DebugFlags.WEB_VIEW) Log.v(LOGTAG, "onTrackballEvent gmail quit");
             return false;
         }
@@ -7859,13 +7880,13 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * @return If the page should receive Shift and arrows.
+     * @return Whether accessibility script has been injected.
      */
-    private boolean pageShouldHandleShiftAndArrows() {
+    private boolean accessibilityScriptInjected() {
         // TODO: Maybe the injected script should announce its presence in
         // the page meta-tag so the nativePageShouldHandleShiftAndArrows
         // will check that as one of the conditions it looks for
-        return (nativePageShouldHandleShiftAndArrows() || mAccessibilityScriptInjected);
+        return mAccessibilityScriptInjected;
     }
 
     /**

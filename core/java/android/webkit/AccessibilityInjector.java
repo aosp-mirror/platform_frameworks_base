@@ -139,9 +139,8 @@ class AccessibilityInjector {
                     break;
                 case ACTION_TRAVERSE_CURRENT_AXIS:
                     int direction = binding.getFirstArgument(i);
-                    // on second null selection string in same direction => WebView handle the event
+                    // on second null selection string in same direction - WebView handles the event
                     if (direction == mLastDirection && mIsLastSelectionStringNull) {
-                        mLastDirection = direction;
                         mIsLastSelectionStringNull = false;
                         return false;
                     }
@@ -259,7 +258,13 @@ class AccessibilityInjector {
      * Called when the <code>selectionString</code> has changed.
      */
     public void onSelectionStringChange(String selectionString) {
+        if (DEBUG) {
+            Log.d(LOG_TAG, "Selection string: " + selectionString);
+        }
         mIsLastSelectionStringNull = (selectionString == null);
+        if (mScheduledEventStack.isEmpty()) {
+            return;
+        }
         AccessibilityEvent event = mScheduledEventStack.pop();
         if (event != null) {
             event.getText().add(selectionString);
@@ -312,25 +317,22 @@ class AccessibilityInjector {
         while (semiColonSplitter.hasNext()) {
             String bindingString = semiColonSplitter.next();
             if (TextUtils.isEmpty(bindingString)) {
-                Log.e(LOG_TAG, "Malformed Web content key binding: "
+                Log.e(LOG_TAG, "Disregarding malformed Web content key binding: "
                         + webContentKeyBindingsString);
                 continue;
             }
             String[] keyValueArray = bindingString.split("=");
             if (keyValueArray.length != 2) {
-                Log.e(LOG_TAG, "Disregarding malformed Web content key binding: " +
-                        bindingString);
+                Log.e(LOG_TAG, "Disregarding malformed Web content key binding: " + bindingString);
                 continue;
             }
             try {
-                SimpleStringSplitter colonSplitter = new SimpleStringSplitter(':');//remove
                 int key = Integer.decode(keyValueArray[0].trim());
                 String[] actionStrings = keyValueArray[1].split(":");
                 int[] actions = new int[actionStrings.length];
                 for (int i = 0, count = actions.length; i < count; i++) {
                     actions[i] = Integer.decode(actionStrings[i].trim());
                 }
-
                 bindings.add(new AccessibilityWebContentKeyBinding(key, actions));
             } catch (NumberFormatException nfe) {
                 Log.e(LOG_TAG, "Disregarding malformed key binding: " + bindingString);
