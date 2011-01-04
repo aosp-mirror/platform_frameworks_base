@@ -22,6 +22,7 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -156,6 +157,13 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     
     @Override
     protected LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
+        if (p instanceof LayoutParams) {
+            LayoutParams result = new LayoutParams((LayoutParams) p);
+            if (result.gravity <= Gravity.NO_GRAVITY) {
+                result.gravity = Gravity.CENTER_VERTICAL;
+            }
+            return result;
+        }
         return generateDefaultLayoutParams();
     }
 
@@ -186,13 +194,25 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                 addView(makeDividerView(), makeDividerLayoutParams());
             }
             final MenuItemImpl itemData = itemsToShow.get(i);
-            final View actionView = itemData.getActionView();
+            View actionView = itemData.getActionView();
+
+            if (actionView == null) {
+                // Check for a layout ID instead
+                final int layoutId = itemData.getActionViewId();
+                if (layoutId != 0) {
+                    LayoutInflater inflater = LayoutInflater.from(getContext());
+                    actionView = inflater.inflate(layoutId, this, false);
+                    itemData.setActionView(0);
+                    itemData.setActionView(actionView);
+                }
+            }
+
             if (actionView != null) {
                 final ViewParent parent = actionView.getParent();
                 if (parent instanceof ViewGroup) {
                     ((ViewGroup) parent).removeView(actionView);
                 }
-                addView(actionView, makeActionViewLayoutParams());
+                addView(actionView, makeActionViewLayoutParams(actionView));
             } else {
                 needsDivider = addItemView(i == 0 || !needsDivider,
                         (ActionMenuItemView) itemData.getItemView(
@@ -274,8 +294,8 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         return params;
     }
 
-    private LayoutParams makeActionViewLayoutParams() {
-        LayoutParams params = generateDefaultLayoutParams();
+    private LayoutParams makeActionViewLayoutParams(View view) {
+        LayoutParams params = generateLayoutParams(view.getLayoutParams());
         params.leftMargin = (int) mButtonPaddingLeft;
         params.rightMargin = (int) mButtonPaddingRight;
         return params;

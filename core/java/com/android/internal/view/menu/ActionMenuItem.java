@@ -231,4 +231,9 @@ public class ActionMenuItem implements MenuItem {
     public View getActionView() {
         return null;
     }
+
+    @Override
+    public MenuItem setActionView(int resId) {
+        throw new UnsupportedOperationException();
+    }
 }

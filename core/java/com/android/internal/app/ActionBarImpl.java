@@ -238,6 +238,36 @@ public class ActionBarImpl extends ActionBar {
     }
 
     @Override
+    public void setCustomView(int resId) {
+        setCustomView(LayoutInflater.from(mContext).inflate(resId, mActionView, false));
+    }
+
+    @Override
+    public void setDisplayUseLogoEnabled(boolean useLogo) {
+        setDisplayOptions(useLogo ? DISPLAY_USE_LOGO : 0, DISPLAY_USE_LOGO);
+    }
+
+    @Override
+    public void setDisplayShowHomeEnabled(boolean showHome) {
+        setDisplayOptions(showHome ? DISPLAY_SHOW_HOME : 0, DISPLAY_SHOW_HOME);
+    }
+
+    @Override
+    public void setDisplayHomeAsUpEnabled(boolean showHomeAsUp) {
+        setDisplayOptions(showHomeAsUp ? DISPLAY_HOME_AS_UP : 0, DISPLAY_HOME_AS_UP);
+    }
+
+    @Override
+    public void setDisplayShowTitleEnabled(boolean showTitle) {
+        setDisplayOptions(showTitle ? DISPLAY_SHOW_TITLE : 0, DISPLAY_SHOW_TITLE);
+    }
+
+    @Override
+    public void setDisplayShowCustomEnabled(boolean showCustom) {
+        setDisplayOptions(showCustom ? DISPLAY_SHOW_CUSTOM : 0, DISPLAY_SHOW_CUSTOM);
+    }
+
+    @Override
     public void setTitle(int resId) {
         setTitle(mContext.getString(resId));
     }

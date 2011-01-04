@@ -379,15 +379,15 @@ public class MenuInflater {
 
             if (itemActionViewClassName != null) {
                 try {
-                    final Class<?> clazz = Class.forName(itemActionViewClassName);
+                    final Class<?> clazz = Class.forName(itemActionViewClassName, true,
+                            mContext.getClassLoader());
                     Constructor<?> c = clazz.getConstructor(ACTION_VIEW_CONSTRUCTOR_SIGNATURE);
                     item.setActionView((View) c.newInstance(mContext));
                 } catch (Exception e) {
                     throw new InflateException(e);
                 }
             } else if (itemActionViewLayout > 0) {
-                final LayoutInflater inflater = LayoutInflater.from(mContext);
-                item.setActionView(inflater.inflate(itemActionViewLayout, null));
+                item.setActionView(itemActionViewLayout);
             }
         }
         

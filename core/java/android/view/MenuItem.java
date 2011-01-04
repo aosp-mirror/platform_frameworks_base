@@ -433,6 +433,18 @@ public interface MenuItem {
     public MenuItem setActionView(View view);
 
     /**
+     * Set an action view for this menu item. An action view will be displayed in place
+     * of an automatically generated menu item element in the UI when this item is shown
+     * as an action within a parent.
+     *
+     * @param resId Layout resource to use for presenting this item to the user.
+     * @return This Item so additional setters can be called.
+     *
+     * @see #setShowAsAction(int)
+     */
+    public MenuItem setActionView(int resId);
+
+    /**
      * Returns the currently set action view for this menu item.
      *
      * @return This item's action view

@@ -154,6 +154,25 @@ public abstract class ActionBar {
     public abstract void setCustomView(View view, LayoutParams layoutParams);
 
     /**
+     * Set the action bar into custom navigation mode, supplying a view
+     * for custom navigation.
+     *
+     * <p>Custom navigation views appear between the application icon and
+     * any action buttons and may use any space available there. Common
+     * use cases for custom navigation views might include an auto-suggesting
+     * address bar for a browser or other navigation mechanisms that do not
+     * translate well to provided navigation modes.</p>
+     *
+     * <p>The display option {@link #DISPLAY_SHOW_CUSTOM} must be set for
+     * the custom view to be displayed.</p>
+     *
+     * @param resId Resource ID of a layout to inflate into the ActionBar.
+     *
+     * @see #setDisplayOptions(int, int)
+     */
+    public abstract void setCustomView(int resId);
+
+    /**
      * @param view
      * @deprecated Use {@link #setCustomView(View)} and {@link #setDisplayOptions(int)} instead.
      */
@@ -319,7 +338,72 @@ public abstract class ActionBar {
      * @param mask A bit mask declaring which display options should be changed.
      */
     public abstract void setDisplayOptions(int options, int mask);
-    
+
+    /**
+     * Set whether to display the activity logo rather than the activity icon.
+     * A logo is often a wider, more detailed image.
+     *
+     * <p>To set several display options at once, see the setDisplayOptions methods.
+     *
+     * @param useLogo true to use the activity logo, false to use the activity icon.
+     *
+     * @see #setDisplayOptions(int)
+     * @see #setDisplayOptions(int, int)
+     */
+    public abstract void setDisplayUseLogoEnabled(boolean useLogo);
+
+    /**
+     * Set whether to include the application home affordance in the action bar.
+     * Home is presented as either an activity icon or logo.
+     *
+     * <p>To set several display options at once, see the setDisplayOptions methods.
+     *
+     * @param showHome true to show home, false otherwise.
+     *
+     * @see #setDisplayOptions(int)
+     * @see #setDisplayOptions(int, int)
+     */
+    public abstract void setDisplayShowHomeEnabled(boolean showHome);
+
+    /**
+     * Set whether home should be displayed as an "up" affordance.
+     * Set this to true if selecting "home" returns up by a single level in your UI
+     * rather than back to the top level or front page.
+     *
+     * <p>To set several display options at once, see the setDisplayOptions methods.
+     *
+     * @param showHomeAsUp true to show the user that selecting home will return one
+     *                     level up rather than to the top level of the app.
+     *
+     * @see #setDisplayOptions(int)
+     * @see #setDisplayOptions(int, int)
+     */
+    public abstract void setDisplayHomeAsUpEnabled(boolean showHomeAsUp);
+
+    /**
+     * Set whether an activity title/subtitle should be displayed.
+     *
+     * <p>To set several display options at once, see the setDisplayOptions methods.
+     *
+     * @param showTitle true to display a title/subtitle if present.
+     *
+     * @see #setDisplayOptions(int)
+     * @see #setDisplayOptions(int, int)
+     */
+    public abstract void setDisplayShowTitleEnabled(boolean showTitle);
+
+    /**
+     * Set whether a custom view should be displayed, if set.
+     *
+     * <p>To set several display options at once, see the setDisplayOptions methods.
+     *
+     * @param showCustom true if the currently set custom view should be displayed, false otherwise.
+     *
+     * @see #setDisplayOptions(int)
+     * @see #setDisplayOptions(int, int)
+     */
+    public abstract void setDisplayShowCustomEnabled(boolean showCustom);
+
     /**
      * Set the ActionBar's background.
      * 
