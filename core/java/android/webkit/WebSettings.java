@@ -1587,10 +1587,11 @@ public class WebSettings {
     }
 
     /**
-     * Returns whether to use fixed viewport.
+     * Returns whether to use fixed viewport.  Fixed viewport should operate only
+     * when wide viewport is on.
      */
     /* package */ boolean getUseFixedViewport() {
-        return mUseFixedViewport;
+        return getUseWideViewPort() && mUseFixedViewport;
     }
 
     /**
