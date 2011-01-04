@@ -135,6 +135,9 @@ public class ActionBarView extends ViewGroup {
     public ActionBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        // Background is always provided by the container.
+        setBackgroundResource(0);
+
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ActionBar);
 
         ApplicationInfo appInfo = context.getApplicationInfo();
