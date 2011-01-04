@@ -357,11 +357,15 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
 }
 
 void AwesomePlayer::reset() {
+    LOGI("reset");
+
     Mutex::Autolock autoLock(mLock);
     reset_l();
 }
 
 void AwesomePlayer::reset_l() {
+    LOGI("reset_l");
+
     if (mDecryptHandle != NULL) {
             mDrmManagerClient->setPlaybackStatus(mDecryptHandle,
                     Playback::STOP, 0);
@@ -382,6 +386,10 @@ void AwesomePlayer::reset_l() {
             // enough data to start playback, we can safely interrupt that.
             finishAsyncPrepare_l();
         }
+    }
+
+    if (mFlags & PREPARING) {
+        LOGI("waiting until preparation is completes.");
     }
 
     while (mFlags & PREPARING) {
@@ -406,6 +414,8 @@ void AwesomePlayer::reset_l() {
         mAudioSource->stop();
     }
     mAudioSource.clear();
+
+    LOGI("audio source cleared");
 
     mTimeSource = NULL;
 
@@ -447,6 +457,8 @@ void AwesomePlayer::reset_l() {
         IPCThreadState::self()->flushCommands();
     }
 
+    LOGI("video source cleared");
+
     mDurationUs = -1;
     mFlags = 0;
     mExtractorFlags = 0;
@@ -463,6 +475,8 @@ void AwesomePlayer::reset_l() {
     mFileSource.clear();
 
     mBitrate = -1;
+
+    LOGI("reset_l completed");
 }
 
 void AwesomePlayer::notifyListener_l(int msg, int ext1, int ext2) {
