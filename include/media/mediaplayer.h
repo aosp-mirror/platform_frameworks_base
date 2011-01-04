@@ -36,6 +36,7 @@ enum media_event_type {
     MEDIA_BUFFERING_UPDATE  = 3,
     MEDIA_SEEK_COMPLETE     = 4,
     MEDIA_SET_VIDEO_SIZE    = 5,
+    MEDIA_RESET_COMPLETE    = 6,  // not visible on java side
     MEDIA_ERROR             = 100,
     MEDIA_INFO              = 200,
 };

@@ -40,6 +40,10 @@ struct NuPlayer : public AHandler {
     void setAudioSink(const sp<MediaPlayerBase::AudioSink> &sink);
     void start();
 
+    // Will notify the listener that reset() has completed
+    // with code MEDIA_RESET_COMPLETE.
+    void resetAsync();
+
 protected:
     virtual ~NuPlayer();
 
@@ -63,6 +67,7 @@ private:
         kWhatVideoNotify,
         kWhatAudioNotify,
         kWhatRendererNotify,
+        kWhatReset,
     };
 
     wp<MediaPlayerBase> mListener;
@@ -73,17 +78,17 @@ private:
     sp<Decoder> mAudioDecoder;
     sp<Renderer> mRenderer;
 
-    bool mEOS;
     bool mAudioEOS;
     bool mVideoEOS;
 
     bool mScanSourcesPending;
+    int32_t mScanSourcesGeneration;
 
     enum FlushStatus {
         NONE,
         AWAITING_DISCONTINUITY,
         FLUSHING_DECODER,
-        FLUSHING_DECODER_FORMATCHANGE,
+        FLUSHING_DECODER_SHUTDOWN,
         SHUTTING_DOWN_DECODER,
         FLUSHED,
         SHUT_DOWN,
@@ -91,6 +96,8 @@ private:
 
     FlushStatus mFlushingAudio;
     FlushStatus mFlushingVideo;
+    bool mResetInProgress;
+    bool mResetPostponed;
 
     status_t instantiateDecoder(bool audio, sp<Decoder> *decoder);
 
@@ -101,7 +108,12 @@ private:
 
     void finishFlushIfPossible();
 
-    static bool IsFlushingState(FlushStatus state, bool *formatChange = NULL);
+    void flushDecoder(bool audio, bool needShutdown);
+
+    static bool IsFlushingState(FlushStatus state, bool *needShutdown = NULL);
+
+    void finishReset();
+    void postScanSources();
 
     DISALLOW_EVIL_CONSTRUCTORS(NuPlayer);
 };

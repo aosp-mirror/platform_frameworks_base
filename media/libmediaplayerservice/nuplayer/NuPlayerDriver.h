@@ -54,10 +54,16 @@ struct NuPlayerDriver : public MediaPlayerInterface {
     virtual status_t getMetadata(
             const media::Metadata::Filter& ids, Parcel *records);
 
+    virtual void sendEvent(int msg, int ext1 = 0, int ext2 = 0);
+
 protected:
     virtual ~NuPlayerDriver();
 
 private:
+    Mutex mLock;
+    Condition mCondition;
+    bool mResetInProgress;
+
     sp<ALooper> mLooper;
     sp<NuPlayer> mPlayer;
     bool mPlaying;
