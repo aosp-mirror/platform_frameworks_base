@@ -38,6 +38,7 @@ import android.view.View;
 import android.webkit.DeviceMotionService;
 import android.webkit.DeviceMotionAndOrientationManager;
 import android.webkit.DeviceOrientationService;
+import android.webkit.JniUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1201,15 +1202,19 @@ final class WebViewCore {
                             Process.setThreadPriority(mTid,
                                     Process.THREAD_PRIORITY_BACKGROUND);
                             pauseTimers();
-                            WebViewWorker.getHandler().sendEmptyMessage(
-                                    WebViewWorker.MSG_PAUSE_CACHE_TRANSACTION);
+                            if (!JniUtil.useChromiumHttpStack()) {
+                                WebViewWorker.getHandler().sendEmptyMessage(
+                                        WebViewWorker.MSG_PAUSE_CACHE_TRANSACTION);
+                            }
                             break;
 
                         case RESUME_TIMERS:
                             Process.setThreadPriority(mTid, mSavedPriority);
                             resumeTimers();
-                            WebViewWorker.getHandler().sendEmptyMessage(
-                                    WebViewWorker.MSG_RESUME_CACHE_TRANSACTION);
+                            if (!JniUtil.useChromiumHttpStack()) {
+                                WebViewWorker.getHandler().sendEmptyMessage(
+                                        WebViewWorker.MSG_RESUME_CACHE_TRANSACTION);
+                            }
                             break;
 
                         case ON_PAUSE:
@@ -1733,7 +1738,7 @@ final class WebViewCore {
 
     private void clearCache(boolean includeDiskFiles) {
         mBrowserFrame.clearCache();
-        if (includeDiskFiles) {
+        if (includeDiskFiles && !JniUtil.useChromiumHttpStack()) {
             CacheManager.removeAllCacheFiles();
         }
     }
@@ -2150,12 +2155,14 @@ final class WebViewCore {
     // called by JNI
     private void sendNotifyProgressFinished() {
         sendUpdateTextEntry();
-        // as CacheManager can behave based on database transaction, we need to
-        // call tick() to trigger endTransaction
-        WebViewWorker.getHandler().removeMessages(
-                WebViewWorker.MSG_CACHE_TRANSACTION_TICKER);
-        WebViewWorker.getHandler().sendEmptyMessage(
-                WebViewWorker.MSG_CACHE_TRANSACTION_TICKER);
+        if (!JniUtil.useChromiumHttpStack()) {
+            // as CacheManager can behave based on database transaction, we need to
+            // call tick() to trigger endTransaction
+            WebViewWorker.getHandler().removeMessages(
+                    WebViewWorker.MSG_CACHE_TRANSACTION_TICKER);
+            WebViewWorker.getHandler().sendEmptyMessage(
+                    WebViewWorker.MSG_CACHE_TRANSACTION_TICKER);
+        }
         contentDraw();
     }
 

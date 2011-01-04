@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.net.http.Headers;
 import android.text.TextUtils;
+import android.webkit.JniUtil;
 
 /**
  * This class is a concrete implementation of StreamLoader that uses a
@@ -36,6 +37,9 @@ class CacheLoader extends StreamLoader {
      */
     CacheLoader(LoadListener loadListener, CacheManager.CacheResult result) {
         super(loadListener);
+
+        assert !JniUtil.useChromiumHttpStack();
+
         mCacheResult = result;
     }
 

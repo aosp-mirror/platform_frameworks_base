@@ -33,6 +33,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 import android.webkit.CookieManager.Cookie;
 import android.webkit.CacheManager.CacheResult;
+import android.webkit.JniUtil;
 
 public class WebViewDatabase {
     private static final String DATABASE_FILE = "webview.db";
@@ -202,6 +203,17 @@ public class WebViewDatabase {
             return;
         }
 
+        initDatabase(context);
+        if (!JniUtil.useChromiumHttpStack()) {
+            initCacheDatabase(context);
+        }
+
+        // Thread done, notify.
+        mInitialized = true;
+        notify();
+    }
+
+    private void initDatabase(Context context) {
         try {
             mDatabase = context.openOrCreateDatabase(DATABASE_FILE, 0, null);
         } catch (SQLiteException e) {
@@ -234,6 +246,10 @@ public class WebViewDatabase {
         // improves performance as database's ReentrantLock is
         // expansive
         mDatabase.setLockingEnabled(false);
+    }
+
+    private void initCacheDatabase(Context context) {
+        assert !JniUtil.useChromiumHttpStack();
 
         try {
             mCacheDatabase = context.openOrCreateDatabase(
@@ -306,10 +322,6 @@ public class WebViewDatabase {
                 .getColumnIndex(CACHE_CONTENTDISPOSITION_COL);
         mCacheCrossDomainColIndex = mCacheInserter
                 .getColumnIndex(CACHE_CROSSDOMAIN_COL);
-
-        // Thread done, notify.
-        mInitialized = true;
-        notify();
     }
 
     private static void upgradeDatabase() {
@@ -668,6 +680,8 @@ public class WebViewDatabase {
      * @return CacheResult The CacheManager.CacheResult
      */
     CacheResult getCache(String url) {
+        assert !JniUtil.useChromiumHttpStack();
+
         if (url == null || !checkInitialized()) {
             return null;
         }
@@ -708,6 +722,8 @@ public class WebViewDatabase {
      * @param url The url
      */
     void removeCache(String url) {
+        assert !JniUtil.useChromiumHttpStack();
+
         if (url == null || !checkInitialized()) {
             return;
         }
@@ -722,6 +738,8 @@ public class WebViewDatabase {
      * @param c The CacheManager.CacheResult
      */
     void addCache(String url, CacheResult c) {
+        assert !JniUtil.useChromiumHttpStack();
+
         if (url == null || !checkInitialized()) {
             return;
         }

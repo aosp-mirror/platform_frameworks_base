@@ -22,6 +22,7 @@ import android.net.http.RequestHandle;
 import android.os.Build;
 import android.util.Log;
 import android.webkit.CacheManager.CacheResult;
+import android.webkit.JniUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +57,8 @@ class FrameLoader {
     
     FrameLoader(LoadListener listener, WebSettings settings,
             String method, WebResourceResponse interceptResponse) {
+        assert !JniUtil.useChromiumHttpStack();
+
         mListener = listener;
         mHeaders = null;
         mMethod = method;
@@ -148,9 +151,10 @@ class FrameLoader {
 
     }
 
-    /* package */
-    static boolean handleLocalFile(String url, LoadListener loadListener,
+    private static boolean handleLocalFile(String url, LoadListener loadListener,
             WebSettings settings) {
+        assert !JniUtil.useChromiumHttpStack();
+
         // Attempt to decode the percent-encoded url before passing to the
         // local loaders.
         try {

@@ -35,6 +35,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.webkit.CacheManager.CacheResult;
+import android.webkit.JniUtil;
 
 import com.android.internal.R;
 
@@ -156,6 +157,8 @@ class LoadListener extends Handler implements EventHandler {
             int nativeLoader, boolean synchronous, boolean isMainPageLoader,
             boolean isMainResource, boolean userGesture, long postIdentifier,
             String username, String password) {
+        assert !JniUtil.useChromiumHttpStack();
+
         if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "LoadListener constructor url=" + url);
         }
@@ -991,6 +994,7 @@ class LoadListener extends Handler implements EventHandler {
      * URL.
      */
     static boolean willLoadFromCache(String url, long identifier) {
+        assert !JniUtil.useChromiumHttpStack();
         boolean inCache =
                 CacheManager.getCacheFile(url, identifier, null) != null;
         if (DebugFlags.LOAD_LISTENER) {

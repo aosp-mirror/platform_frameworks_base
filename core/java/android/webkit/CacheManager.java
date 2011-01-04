@@ -190,6 +190,11 @@ public final class CacheManager {
      * @param context The application context.
      */
     static void init(Context context) {
+        if (JniUtil.useChromiumHttpStack()) {
+            // TODO: Need to init mBaseDir.
+            return;
+        }
+
         mDataBase = WebViewDatabase.getInstance(context.getApplicationContext());
         mBaseDir = new File(context.getCacheDir(), "webviewCache");
         if (createCacheDirectory() && mClearCacheOnInit) {
@@ -204,6 +209,8 @@ public final class CacheManager {
      * @return true if the cache directory didn't exist and was created.
      */
     static private boolean createCacheDirectory() {
+        assert !JniUtil.useChromiumHttpStack();
+
         if (!mBaseDir.exists()) {
             if(!mBaseDir.mkdirs()) {
                 Log.w(LOGTAG, "Unable to create webviewCache directory");
@@ -245,6 +252,8 @@ public final class CacheManager {
      * @param disabled Whether the cache should be disabled
      */
     static void setCacheDisabled(boolean disabled) {
+        assert !JniUtil.useChromiumHttpStack();
+
         if (disabled == mDisabled) {
             return;
         }
@@ -269,6 +278,8 @@ public final class CacheManager {
     // only called from WebViewWorkerThread
     // make sure to call enableTransaction/disableTransaction in pair
     static boolean enableTransaction() {
+        assert !JniUtil.useChromiumHttpStack();
+
         if (++mRefCount == 1) {
             mDataBase.startCacheTransaction();
             return true;
@@ -279,6 +290,8 @@ public final class CacheManager {
     // only called from WebViewWorkerThread
     // make sure to call enableTransaction/disableTransaction in pair
     static boolean disableTransaction() {
+        assert !JniUtil.useChromiumHttpStack();
+
         if (--mRefCount == 0) {
             mDataBase.endCacheTransaction();
             return true;
@@ -289,12 +302,16 @@ public final class CacheManager {
     // only called from WebViewWorkerThread
     // make sure to call startTransaction/endTransaction in pair
     static boolean startTransaction() {
+        assert !JniUtil.useChromiumHttpStack();
+
         return mDataBase.startCacheTransaction();
     }
 
     // only called from WebViewWorkerThread
     // make sure to call startTransaction/endTransaction in pair
     static boolean endTransaction() {
+        assert !JniUtil.useChromiumHttpStack();
+
         boolean ret = mDataBase.endCacheTransaction();
         if (++mTrimCacheCount >= TRIM_CACHE_INTERVAL) {
             mTrimCacheCount = 0;
@@ -347,8 +364,12 @@ public final class CacheManager {
             return null;
         }
 
-        String databaseKey = getDatabaseKey(url, postIdentifier);
+        if (JniUtil.useChromiumHttpStack()) {
+            // TODO: Implement this.
+            return null;
+        }
 
+        String databaseKey = getDatabaseKey(url, postIdentifier);
         CacheResult result = mDataBase.getCache(databaseKey);
         if (result == null) {
             return null;
@@ -415,6 +436,11 @@ public final class CacheManager {
     @Deprecated
     public static CacheResult createCacheFile(String url, int statusCode,
             Headers headers, String mimeType, boolean forceCache) {
+        if (JniUtil.useChromiumHttpStack()) {
+            // TODO: Implement this.
+            return null;
+        }
+
         return createCacheFile(url, statusCode, headers, mimeType, 0,
                 forceCache);
     }
@@ -422,6 +448,8 @@ public final class CacheManager {
     static CacheResult createCacheFile(String url, int statusCode,
             Headers headers, String mimeType, long postIdentifier,
             boolean forceCache) {
+        assert !JniUtil.useChromiumHttpStack();
+
         if (!forceCache && mDisabled) {
             return null;
         }
@@ -493,6 +521,11 @@ public final class CacheManager {
             return;
         }
 
+        if (JniUtil.useChromiumHttpStack()) {
+            // TODO: Implement this.
+            return;
+        }
+
         if (!cacheRet.outFile.exists()) {
             // the file in the cache directory can be removed by the system
             return;
@@ -520,6 +553,8 @@ public final class CacheManager {
     }
 
     static boolean cleanupCacheFile(CacheResult cacheRet) {
+        assert !JniUtil.useChromiumHttpStack();
+
         try {
             cacheRet.outStream.close();
         } catch (IOException e) {
@@ -534,6 +569,8 @@ public final class CacheManager {
      * @return Whether the removal succeeded.
      */
     static boolean removeAllCacheFiles() {
+        assert !JniUtil.useChromiumHttpStack();
+
         // Note, this is called before init() when the database is
         // created or upgraded.
         if (mBaseDir == null) {
@@ -570,6 +607,8 @@ public final class CacheManager {
     }
 
     static void trimCacheIfNeeded() {
+        assert !JniUtil.useChromiumHttpStack();
+
         if (mDataBase.getCacheTotalSize() > CACHE_THRESHOLD) {
             List<String> pathList = mDataBase.trimCache(CACHE_TRIM_AMOUNT);
             int size = pathList.size();
@@ -603,6 +642,8 @@ public final class CacheManager {
     }
 
     static void clearCache() {
+        assert !JniUtil.useChromiumHttpStack();
+
         // delete database
         mDataBase.clearCache();
     }
@@ -617,12 +658,16 @@ public final class CacheManager {
     }
 
     private static String getDatabaseKey(String url, long postIdentifier) {
+        assert !JniUtil.useChromiumHttpStack();
+
         if (postIdentifier == 0) return url;
         return postIdentifier + url;
     }
 
     @SuppressWarnings("deprecation")
     private static void setupFiles(String url, CacheResult cacheRet) {
+        assert !JniUtil.useChromiumHttpStack();
+
         if (true) {
             // Note: SHA1 is much stronger hash. But the cost of setupFiles() is
             // 3.2% cpu time for a fresh load of nytimes.com. While a simple
@@ -689,6 +734,8 @@ public final class CacheManager {
     }
 
     private static void appendAsHex(int i, StringBuffer ret) {
+        assert !JniUtil.useChromiumHttpStack();
+
         String hex = Integer.toHexString(i);
         switch (hex.length()) {
             case 1:
@@ -718,6 +765,8 @@ public final class CacheManager {
 
     private static CacheResult parseHeaders(int statusCode, Headers headers,
             String mimeType) {
+        assert !JniUtil.useChromiumHttpStack();
+
         // if the contentLength is already larger than CACHE_MAX_SIZE, skip it
         if (headers.getContentLength() > CACHE_MAX_SIZE) return null;
 
