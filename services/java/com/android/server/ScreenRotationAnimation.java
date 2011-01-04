@@ -40,6 +40,7 @@ class ScreenRotationAnimation {
     final Context mContext;
     final Display mDisplay;
     Surface mSurface;
+    Surface mBlackSurface;
     int mWidth, mHeight;
 
     int mSnapshotRotation;
@@ -84,42 +85,55 @@ class ScreenRotationAnimation {
         mOriginalHeight = mDisplayMetrics.heightPixels;
 
         Surface.openTransaction();
-        if (mSurface != null) {
-            mSurface.destroy();
-            mSurface = null;
-        }
+        
         try {
             mSurface = new Surface(session, 0, "FreezeSurface",
                     -1, mWidth, mHeight, PixelFormat.OPAQUE, 0);
+            mSurface.setLayer(WindowManagerService.TYPE_LAYER_MULTIPLIER * 200);
         } catch (Surface.OutOfResourcesException e) {
             Slog.w(TAG, "Unable to allocate freeze surface", e);
         }
-        mSurface.setLayer(WindowManagerService.TYPE_LAYER_MULTIPLIER * 200);
+        
+        if (false) {
+            try {
+                int size = mOriginalWidth > mOriginalHeight ? mOriginalWidth : mOriginalHeight;
+                mBlackSurface = new Surface(session, 0, "BlackSurface",
+                        -1, size, size, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM);
+                mBlackSurface.setAlpha(1.0f);
+                mBlackSurface.setLayer(0);
+            } catch (Surface.OutOfResourcesException e) {
+                Slog.w(TAG, "Unable to allocate black surface", e);
+            }
+        }
+        
         setRotation(display.getRotation());
 
-        Rect dirty = new Rect(0, 0, mWidth, mHeight);
-        Canvas c = null;
-        try {
-            c = mSurface.lockCanvas(dirty);
-        } catch (IllegalArgumentException e) {
-            Slog.w(TAG, "Unable to lock surface", e);
-            return;
-        } catch (Surface.OutOfResourcesException e) {
-            Slog.w(TAG, "Unable to lock surface", e);
-            return;
+        if (mSurface != null) {
+            Rect dirty = new Rect(0, 0, mWidth, mHeight);
+            Canvas c = null;
+            try {
+                c = mSurface.lockCanvas(dirty);
+            } catch (IllegalArgumentException e) {
+                Slog.w(TAG, "Unable to lock surface", e);
+                return;
+            } catch (Surface.OutOfResourcesException e) {
+                Slog.w(TAG, "Unable to lock surface", e);
+                return;
+            }
+            if (c == null) {
+                Slog.w(TAG, "Null surface");
+                return;
+            }
+    
+            if (screenshot != null) {
+                c.drawBitmap(screenshot, 0, 0, new Paint(0));
+            } else {
+                c.drawColor(Color.GREEN);
+            }
+    
+            mSurface.unlockCanvasAndPost(c);
         }
-        if (c == null) {
-            Slog.w(TAG, "Null surface");
-            return;
-        }
-
-        if (screenshot != null) {
-            c.drawBitmap(screenshot, 0, 0, new Paint(0));
-        } else {
-            c.drawColor(Color.GREEN);
-        }
-
-        mSurface.unlockCanvasAndPost(c);
+        
         Surface.closeTransaction();
 
         if (screenshot != null) {
@@ -134,21 +148,23 @@ class ScreenRotationAnimation {
     }
 
     void setSnapshotTransform(Matrix matrix, float alpha) {
-        matrix.getValues(mTmpFloats);
-        mSurface.setPosition((int)mTmpFloats[Matrix.MTRANS_X],
-                (int)mTmpFloats[Matrix.MTRANS_Y]);
-        mSurface.setMatrix(
-                mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
-                mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
-        mSurface.setAlpha(alpha);
-        if (DEBUG) {
-            float[] srcPnts = new float[] { 0, 0, mWidth, mHeight };
-            float[] dstPnts = new float[4];
-            matrix.mapPoints(dstPnts, srcPnts);
-            Slog.i(TAG, "Original  : (" + srcPnts[0] + "," + srcPnts[1]
-                    + ")-(" + srcPnts[2] + "," + srcPnts[3] + ")");
-            Slog.i(TAG, "Transformed: (" + dstPnts[0] + "," + dstPnts[1]
-                    + ")-(" + dstPnts[2] + "," + dstPnts[3] + ")");
+        if (mSurface != null) {
+            matrix.getValues(mTmpFloats);
+            mSurface.setPosition((int)mTmpFloats[Matrix.MTRANS_X],
+                    (int)mTmpFloats[Matrix.MTRANS_Y]);
+            mSurface.setMatrix(
+                    mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
+                    mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
+            mSurface.setAlpha(alpha);
+            if (DEBUG) {
+                float[] srcPnts = new float[] { 0, 0, mWidth, mHeight };
+                float[] dstPnts = new float[4];
+                matrix.mapPoints(dstPnts, srcPnts);
+                Slog.i(TAG, "Original  : (" + srcPnts[0] + "," + srcPnts[1]
+                        + ")-(" + srcPnts[2] + "," + srcPnts[3] + ")");
+                Slog.i(TAG, "Transformed: (" + dstPnts[0] + "," + dstPnts[1]
+                        + ")-(" + dstPnts[2] + "," + dstPnts[3] + ")");
+            }
         }
     }
 
@@ -254,6 +270,10 @@ class ScreenRotationAnimation {
             mSurface.destroy();
             mSurface = null;
         }
+        if (mBlackSurface != null) {
+            mBlackSurface.destroy();
+            mBlackSurface = null;
+        }
         if (mExitAnimation != null) {
             mExitAnimation.cancel();
             mExitAnimation = null;
@@ -293,6 +313,10 @@ class ScreenRotationAnimation {
                     mSurface.destroy();
                     mSurface = null;
                 }
+                if (mBlackSurface != null) {
+                    mBlackSurface.destroy();
+                    mBlackSurface = null;
+                }
             }
         }
 
@@ -307,10 +331,8 @@ class ScreenRotationAnimation {
             }
         }
 
-        if (mSurface != null) {
-            mSnapshotFinalMatrix.setConcat(mExitTransformation.getMatrix(), mSnapshotInitialMatrix);
-            setSnapshotTransform(mSnapshotFinalMatrix, mExitTransformation.getAlpha());
-        }
+        mSnapshotFinalMatrix.setConcat(mExitTransformation.getMatrix(), mSnapshotInitialMatrix);
+        setSnapshotTransform(mSnapshotFinalMatrix, mExitTransformation.getAlpha());
 
         return moreEnter || moreExit;
     }

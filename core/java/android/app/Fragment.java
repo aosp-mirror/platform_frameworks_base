@@ -98,6 +98,7 @@ final class FragmentState implements Parcelable {
         }
         mInstance.setIndex(mIndex);
         mInstance.mFromLayout = mFromLayout;
+        mInstance.mRestored = true;
         mInstance.mFragmentId = mFragmentId;
         mInstance.mContainerId = mContainerId;
         mInstance.mTag = mTag;
@@ -363,6 +364,9 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     // Set to true when the view has actually been inflated in its layout.
     boolean mInLayout;
 
+    // True if this fragment has been restored from previously saved state.
+    boolean mRestored;
+    
     // Number of active back stack entries this fragment is in.
     int mBackStackNesting;
     
