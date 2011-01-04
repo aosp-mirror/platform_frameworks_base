@@ -42,6 +42,8 @@ public class MediaMetadataRetriever
     @SuppressWarnings("unused")
     private int mNativeContext;
  
+    private static final int EMBEDDED_PICTURE_TYPE_ANY = 0xFFFF;
+
     public MediaMetadataRetriever() {
         native_setup();
     }
@@ -272,7 +274,11 @@ public class MediaMetadataRetriever
      * 
      * @return null if no such graphic is found.
      */
-    public native byte[] extractAlbumArt();
+    public byte[] getEmbeddedPicture() {
+        return getEmbeddedPicture(EMBEDDED_PICTURE_TYPE_ANY);
+    }
+
+    private native byte[] getEmbeddedPicture(int pictureType);
 
     /**
      * Call it when one is done with the object. This method releases the memory

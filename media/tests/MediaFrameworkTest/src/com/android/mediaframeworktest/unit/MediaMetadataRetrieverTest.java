@@ -31,8 +31,8 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
    
     // Test album art extraction.
     @MediumTest
-    public static void testAlbumArt() throws Exception {
-        Log.v(TAG, "testAlbumArt starts.");
+    public static void testGetEmbeddedPicture() throws Exception {
+        Log.v(TAG, "testGetEmbeddedPicture starts.");
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         boolean supportWMA = MediaProfileReader.getWMAEnable();
         boolean hasFailed = false;
@@ -48,13 +48,13 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
                     continue;
                 }
                 retriever.setDataSource(MediaNames.ALBUMART_TEST_FILES[i]);
-                byte[] albumArt = retriever.extractAlbumArt();
+                byte[] albumArt = retriever.getEmbeddedPicture();
 
                 // TODO:
                 // A better test would be to compare the retrieved album art with the
                 // known result.
                 if (albumArt == null) {  // Do we have expect in JUnit?
-                    Log.e(TAG, "Fails to extract album art for " + MediaNames.ALBUMART_TEST_FILES[i]);
+                    Log.e(TAG, "Fails to get embedded picture for " + MediaNames.ALBUMART_TEST_FILES[i]);
                     hasFailed = true;
                 }
             } catch(Exception e) {
@@ -64,7 +64,7 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
             Thread.yield();  // Don't be evil
         }
         retriever.release();
-        Log.v(TAG, "testAlbumArt completes.");
+        Log.v(TAG, "testGetEmbeddedPicture completes.");
         assertTrue(!hasFailed);
     }
 
