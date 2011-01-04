@@ -37,6 +37,7 @@ import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -580,5 +581,36 @@ public class DatabaseCursorTest extends AndroidTestCase implements PerformanceTe
         // Test that setting query args on a deactivated cursor also works.
         c.deactivate();
         c.requery();
+    }
+    /**
+     * sometimes CursorWindow creation fails due to non-availability of memory create
+     * another CursorWindow object. One of the scenarios of its occurrence is when
+     * there are too many CursorWindow objects already opened by the process.
+     * This test is for that scenario.
+     */
+    @LargeTest
+    public void testCursorWindowFailureWhenTooManyCursorWindowsLeftOpen() {
+        mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, data TEXT);");
+        mDatabase.execSQL("INSERT INTO test values(1, 'test');");
+        int N = 1024;
+        ArrayList<Cursor> cursorList = new ArrayList<Cursor>();
+        // open many cursors until a failure occurs
+        for (int i = 0; i < N; i++) {
+            try {
+                Cursor cursor = mDatabase.rawQuery("select * from test", null);
+                cursor.getCount();
+                cursorList.add(cursor);
+            } catch (CursorWindowAllocationException e) {
+                // got the exception we wanted
+                break;
+            } catch (Exception e) {
+                fail("unexpected exception: " + e.getMessage());
+                e.printStackTrace();
+                break;
+            }
+        }
+        for (Cursor c : cursorList) {
+            c.close();
+        }
     }
 }

@@ -18,14 +18,20 @@ package android.database;
 
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteClosable;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
+import android.util.Log;
+import android.util.SparseIntArray;
 
 /**
  * A buffer containing multiple cursor rows.
  */
 public class CursorWindow extends SQLiteClosable implements Parcelable {
+    private static final String STATS_TAG = "CursorWindowStats";
+
     /** The cursor window size. resource xml file specifies the value in kB.
      * convert it to bytes here by multiplying with 1024.
      */
@@ -33,8 +39,9 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         Resources.getSystem().getInteger(
                 com.android.internal.R.integer.config_cursorWindowSize) * 1024;
 
-    /** The pointer to the native window class */
-    @SuppressWarnings("unused")
+    /** The pointer to the native window class. set by the native methods in
+     * android_database_CursorWindow.cpp
+     */
     private int nWindow;
 
     private int mStartPos;
@@ -46,7 +53,18 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      */
     public CursorWindow(boolean localWindow) {
         mStartPos = 0;
-        native_init(sCursorWindowSize, localWindow);
+        int rslt = native_init(sCursorWindowSize, localWindow);
+        printDebugMsgIfError(rslt);
+        recordNewWindow(Binder.getCallingPid(), nWindow);
+    }
+
+    private void printDebugMsgIfError(int rslt) {
+        if (rslt > 0) {
+            // cursor window allocation failed. either low memory or too many cursors being open.
+            // print info to help in debugging this.
+            throw new CursorWindowAllocationException("Cursor Window allocation of " +
+                    sCursorWindowSize/1024 + " kb failed. " + printStats());
+        }
     }
 
     /**
@@ -574,21 +592,78 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     private CursorWindow(Parcel source) {
         IBinder nativeBinder = source.readStrongBinder();
         mStartPos = source.readInt();
-
-        native_init(nativeBinder);
+        int rslt = native_init(nativeBinder);
+        printDebugMsgIfError(rslt);
     }
 
     /** Get the binder for the native side of the window */
     private native IBinder native_getBinder();
 
     /** Does the native side initialization for an empty window */
-    private native void native_init(int cursorWindowSize, boolean localOnly);
+    private native int native_init(int cursorWindowSize, boolean localOnly);
 
     /** Does the native side initialization with an existing binder from another process */
-    private native void native_init(IBinder nativeBinder);
+    private native int native_init(IBinder nativeBinder);
 
     @Override
     protected void onAllReferencesReleased() {
-        close_native();        
+        int windowId = nWindow;
+        recordClosingOfWindow(Binder.getCallingPid(), nWindow);
+        close_native();
+    }
+
+    private static final SparseIntArray sWindowToPidMap = new SparseIntArray();
+
+    private void recordNewWindow(int pid, int window) {
+        synchronized (sWindowToPidMap) {
+            sWindowToPidMap.put(window, pid);
+            if (Log.isLoggable(STATS_TAG, Log.VERBOSE)) {
+                Log.i(STATS_TAG, "Created a new Cursor. " + printStats());
+            }
+        }
+    }
+
+    private void recordClosingOfWindow(int pid, int window) {
+        synchronized (sWindowToPidMap) {
+            if (sWindowToPidMap.size() == 0) {
+                // this means we are not in the ContentProvider.
+                return;
+            }
+            sWindowToPidMap.delete(window);
+        }
+    }
+    private String printStats() {
+        StringBuilder buff = new StringBuilder();
+        int myPid = Process.myPid();
+        int total = 0;
+        SparseIntArray pidCounts = new SparseIntArray();
+        synchronized (sWindowToPidMap) {
+            int size = sWindowToPidMap.size();
+            if (size == 0) {
+                // this means we are not in the ContentProvider.
+                return "";
+            }
+            for (int indx = 0; indx < size; indx++) {
+                int pid = sWindowToPidMap.valueAt(indx);
+                int value = pidCounts.get(pid);
+                pidCounts.put(pid, ++value);
+            }
+        }
+        int numPids = pidCounts.size();
+        for (int i = 0; i < numPids;i++) {
+            buff.append(" (# cursors opened by ");
+            int pid = pidCounts.keyAt(i);
+            if (pid == myPid) {
+                buff.append("this proc=");
+            } else {
+                buff.append("pid " + pid + "=");
+            }
+            int num = pidCounts.get(pid);
+            buff.append(num + ")");
+            total += num;
+        }
+        // limit the returned string size to 1000
+        String s = (buff.length() > 980) ? buff.substring(0, 980) : buff.toString();
+        return "# Open Cursors=" + total + s;
     }
 }

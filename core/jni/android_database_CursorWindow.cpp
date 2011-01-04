@@ -50,7 +50,7 @@ CursorWindow * get_window_from_object(JNIEnv * env, jobject javaWindow)
     return GET_WINDOW(env, javaWindow);
 }
 
-static void native_init_empty(JNIEnv * env, jobject object, jint cursorWindowSize,
+static jint native_init_empty(JNIEnv * env, jobject object, jint cursorWindowSize,
         jboolean localOnly)
 {
     uint8_t * data;
@@ -59,44 +59,38 @@ static void native_init_empty(JNIEnv * env, jobject object, jint cursorWindowSiz
 
     window = new CursorWindow(cursorWindowSize);
     if (!window) {
-        jniThrowException(env, "java/lang/RuntimeException", "No memory for native window object");
-        return;
+        return 1;
     }
-
     if (!window->initBuffer(localOnly)) {
-        jniThrowException(env, "java/lang/RuntimeException",
-                "Memory couldn't be allocated for 1MB CursorWindow object.");
         delete window;
-        return;
+        return 1;
     }
 
-LOG_WINDOW("native_init_empty: window = %p", window);
+    LOG_WINDOW("native_init_empty: window = %p", window);
     SET_WINDOW(env, object, window);
+    return 0;
 }
 
-static void native_init_memory(JNIEnv * env, jobject object, jobject memObj)
+static jint native_init_memory(JNIEnv * env, jobject object, jobject memObj)
 {
     sp<IMemory> memory = interface_cast<IMemory>(ibinderForJavaObject(env, memObj));
     if (memory == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", "Couldn't get native binder");
-        return;
+        return 1;
     }
 
     CursorWindow * window = new CursorWindow();
     if (!window) {
-        jniThrowException(env, "java/lang/RuntimeException",
-                "CursorWindow of size 1MB couldn't be created. No memory?");
-        return;
+        return 1;
     }
     if (!window->setMemory(memory)) {
-        jniThrowException(env, "java/lang/RuntimeException",
-                "Memory couldn't be initialized for 1MB CursorWindow object.");
         delete window;
-        return;
+        return 1;
     }
 
-LOG_WINDOW("native_init_memory: numRows = %d, numColumns = %d, window = %p", window->getNumRows(), window->getNumColumns(), window);
+    LOG_WINDOW("native_init_memory: numRows = %d, numColumns = %d, window = %p", window->getNumRows(), window->getNumColumns(), window);
     SET_WINDOW(env, object, window);
+    return 0;
 }
 
 static jobject native_getBinder(JNIEnv * env, jobject object)
@@ -615,8 +609,8 @@ static jint getType_native(JNIEnv* env, jobject object, jint row, jint column)
 static JNINativeMethod sMethods[] =
 {
      /* name, signature, funcPtr */
-    {"native_init", "(IZ)V", (void *)native_init_empty},
-    {"native_init", "(Landroid/os/IBinder;)V", (void *)native_init_memory},
+    {"native_init", "(IZ)I", (void *)native_init_empty},
+    {"native_init", "(Landroid/os/IBinder;)I", (void *)native_init_memory},
     {"native_getBinder", "()Landroid/os/IBinder;", (void *)native_getBinder},
     {"native_clear", "()V", (void *)native_clear},
     {"close_native", "()V", (void *)native_close},
