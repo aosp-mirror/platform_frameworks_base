@@ -80,8 +80,9 @@ sp<Camera> Camera::create(const sp<ICamera>& camera)
         c->mStatus = NO_ERROR;
         c->mCamera = camera;
         camera->asBinder()->linkToDeath(c);
+        return c;
     }
-    return c;
+    return 0;
 }
 
 void Camera::init()
