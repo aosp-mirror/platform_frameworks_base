@@ -57,12 +57,14 @@ public final class Ndef extends BasicTagTechnology {
     /** @hide */
     public static final String EXTRA_NDEF_TYPE = "ndeftype";
 
-    public static final int UNKNOWN_TAG = 0;
-    public static final int TYPE1_TAG = 1;
-    public static final int TYPE2_TAG = 2;
-    public static final int TYPE3_TAG = 3;
-    public static final int TYPE4_TAG = 4;
-    public static final int MIFARE_CLASSIC_TAG = 5;
+    //TODO: consider removing OTHER entirely - and not allowing Ndef to
+    // enumerate for tag types outside of (NFC Forum 1-4, MifareClassic)
+    public static final int OTHER = -1;
+    public static final int NFC_FORUM_TYPE_1 = 1;
+    public static final int NFC_FORUM_TYPE_2 = 2;
+    public static final int NFC_FORUM_TYPE_3 = 3;
+    public static final int NFC_FORUM_TYPE_4 = 4;
+    public static final int MIFARE_CLASSIC = 105;
 
     private final int mMaxNdefSize;
     private final int mCardState;
@@ -104,7 +106,18 @@ public final class Ndef extends BasicTagTechnology {
     }
 
     /**
-     * Get NDEF card type
+     * Get NDEF tag type.
+     * <p>Returns one of {@link #NFC_FORUM_TYPE_1}, {@link #NFC_FORUM_TYPE_2},
+     * {@link #NFC_FORUM_TYPE_3}, {@link #NFC_FORUM_TYPE_4},
+     * {@link #MIFARE_CLASSIC} or {@link #OTHER}.
+     * <p>Platforms of this API revision will always return one of the above
+     * values. Platforms at future API revisions may return other values, which
+     * can be treated as {@link #OTHER} by applications targeting this API.
+     * <p>Android devices with NFC support must always correctly enumerate
+     * NFC Forum tag types, and may optionally enumerate
+     * {@link #MIFARE_CLASSIC} since it requires proprietary technology.
+     * Devices that cannot enumerate {@link #MIFARE_CLASSIC} will use
+     * {@link #OTHER} instead.
      */
     public int getType() {
         return mNdefType;
