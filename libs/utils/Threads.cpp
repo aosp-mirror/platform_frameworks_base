@@ -774,6 +774,9 @@ int Thread::_threadLoop(void* user)
             self->mExitPending = true;
             self->mLock.lock();
             self->mRunning = false;
+            // clear thread ID so that requestExitAndWait() does not exit if
+            // called by a new thread using the same thread ID as this one.
+            self->mThread = thread_id_t(-1);
             self->mThreadExitedCondition.broadcast();
             self->mLock.unlock();
             break;
