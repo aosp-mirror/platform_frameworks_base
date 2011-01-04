@@ -38,20 +38,22 @@ public abstract class SQLiteClosable {
     }
 
     public void releaseReference() {
+        boolean refCountIsZero = false;
         synchronized(this) {
-            mReferenceCount--;
-            if (mReferenceCount == 0) {
-                onAllReferencesReleased();
-            }
+            refCountIsZero = --mReferenceCount == 0;
+        }
+        if (refCountIsZero) {
+            onAllReferencesReleased();
         }
     }
 
     public void releaseReferenceFromContainer() {
+        boolean refCountIsZero = false;
         synchronized(this) {
-            mReferenceCount--;
-            if (mReferenceCount == 0) {
-                onAllReferencesReleasedFromContainer();
-            }
+            refCountIsZero = --mReferenceCount == 0;
+        }
+        if (refCountIsZero) {
+            onAllReferencesReleasedFromContainer();
         }
     }
 
