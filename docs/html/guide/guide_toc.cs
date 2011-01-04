@@ -426,10 +426,6 @@
          	    <span class="en">Using the Dev Tools App</span>
           	</a>
           </li>
-
-          <li>
-            <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-tips.html"><span class="en">Debugging Tips</span></a>
-          </li>
         </ul>
       </li>
 
