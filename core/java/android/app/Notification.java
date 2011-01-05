@@ -752,7 +752,7 @@ public class Notification implements Parcelable
         }
 
         public Builder setAutoCancel(boolean autoCancel) {
-            setFlag(FLAG_ONLY_ALERT_ONCE, autoCancel);
+            setFlag(FLAG_AUTO_CANCEL, autoCancel);
             return this;
         }
 
