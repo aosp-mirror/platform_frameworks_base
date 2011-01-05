@@ -9127,7 +9127,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          *
          * @param v The view that was clicked and held.
          *
-         * return True if the callback consumed the long click, false otherwise
+         * @return true if the callback consumed the long click, false otherwise.
          */
         boolean onLongClick(View v);
     }

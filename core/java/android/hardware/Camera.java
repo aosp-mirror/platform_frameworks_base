@@ -183,10 +183,10 @@ public class Camera {
          * the right of the screen, the value should be 270.
          *
          * @see #setDisplayOrientation(int)
-         * @see #setRotation(int)
-         * @see #setPreviewSize(int, int)
-         * @see #setPictureSize(int, int)
-         * @see #setJpegThumbnailSize(int, int)
+         * @see Parameters#setRotation(int)
+         * @see Parameters#setPreviewSize(int, int)
+         * @see Parameters#setPictureSize(int, int)
+         * @see Parameters#setJpegThumbnailSize(int, int)
          */
         public int orientation;
     };
@@ -609,9 +609,10 @@ public class Camera {
     public interface AutoFocusCallback
     {
         /**
-         * Called when the camera auto focus completes.  If the camera does not
-         * support auto-focus and autoFocus is called, onAutoFocus will be
-         * called immediately with success.
+         * Called when the camera auto focus completes.  If the camera
+         * does not support auto-focus and autoFocus is called,
+         * onAutoFocus will be called immediately with a fake value of
+         * <code>success</code> set to <code>true</code>.
          *
          * @param success true if focus was successful, false if otherwise
          * @param camera  the Camera service object
@@ -785,12 +786,12 @@ public class Camera {
      * is, the image is reflected along the central vertical axis of the camera
      * sensor. So the users can see themselves as looking into a mirror.
      *
-     * This does not affect the order of byte array passed in {@link
+     * <p>This does not affect the order of byte array passed in {@link
      * PreviewCallback#onPreviewFrame}, JPEG pictures, or recorded videos. This
      * method is not allowed to be called during preview.
      *
-     * If you want to make the camera image show in the same orientation as
-     * the display, you can use the following code.<p>
+     * <p>If you want to make the camera image show in the same orientation as
+     * the display, you can use the following code.
      * <pre>
      * public static void setCameraDisplayOrientation(Activity activity,
      *         int cameraId, android.hardware.Camera camera) {
@@ -1767,26 +1768,27 @@ public class Camera {
          * the orientation in the EXIF header will be missing or 1 (row #0 is
          * top and column #0 is left side).
          *
-         * If applications want to rotate the picture to match the orientation
+         * <p>If applications want to rotate the picture to match the orientation
          * of what users see, apps should use {@link
          * android.view.OrientationEventListener} and {@link CameraInfo}.
          * The value from OrientationEventListener is relative to the natural
          * orientation of the device. CameraInfo.orientation is the angle
-         * between camera orientation and natural device orientation. The sum or
+         * between camera orientation and natural device orientation. The sum
          * of the two is the rotation angle for back-facing camera. The
          * difference of the two is the rotation angle for front-facing camera.
          * Note that the JPEG pictures of front-facing cameras are not mirrored
          * as in preview display.
          *
-         * For example, suppose the natural orientation of the device is
+         * <p>For example, suppose the natural orientation of the device is
          * portrait. The device is rotated 270 degrees clockwise, so the device
          * orientation is 270. Suppose a back-facing camera sensor is mounted in
          * landscape and the top side of the camera sensor is aligned with the
          * right edge of the display in natural orientation. So the camera
          * orientation is 90. The rotation should be set to 0 (270 + 90).
          *
-         * The reference code is as follows.
+         * <p>The reference code is as follows.
          *
+	 * <pre>
          * public void public void onOrientationChanged(int orientation) {
          *     if (orientation == ORIENTATION_UNKNOWN) return;
          *     android.hardware.Camera.CameraInfo info =
@@ -1801,6 +1803,7 @@ public class Camera {
          *     }
          *     mParameters.setRotation(rotation);
          * }
+	 * </pre>
          *
          * @param rotation The rotation angle in degrees relative to the
          *                 orientation of the camera. Rotation can only be 0,
