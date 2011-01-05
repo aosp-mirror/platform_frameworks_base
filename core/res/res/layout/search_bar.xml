@@ -25,7 +25,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:focusable="true"
-    android:background="?attr/actionModeBackground"
+    android:background="@drawable/cab_background_opaque_holo_light"
     android:descendantFocusability="afterDescendants">
 
     <RelativeLayout
