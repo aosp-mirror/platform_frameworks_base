@@ -50,6 +50,8 @@ struct ATSParser : public RefBase {
     };
     sp<MediaSource> getSource(SourceType type);
 
+    bool PTSTimeDeltaEstablished();
+
 protected:
     virtual ~ATSParser();
 

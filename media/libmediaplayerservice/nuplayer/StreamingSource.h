@@ -29,13 +29,13 @@ struct ATSParser;
 struct NuPlayer::StreamingSource : public NuPlayer::Source {
     StreamingSource(const sp<IStreamSource> &source);
 
-    void start();
+    virtual void start();
 
     // Returns true iff more data was available, false on EOS.
-    bool feedMoreTSData();
+    virtual bool feedMoreTSData();
 
-    sp<MetaData> getFormat(bool audio);
-    status_t dequeueAccessUnit(bool audio, sp<ABuffer> *accessUnit);
+    virtual sp<MetaData> getFormat(bool audio);
+    virtual status_t dequeueAccessUnit(bool audio, sp<ABuffer> *accessUnit);
 
 protected:
     virtual ~StreamingSource();

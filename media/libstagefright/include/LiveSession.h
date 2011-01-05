@@ -49,7 +49,7 @@ protected:
 
 private:
     enum {
-        kMaxNumQueuedFragments = 2,
+        kMaxNumQueuedFragments = 3,
         kMaxNumRetries         = 5,
     };
 

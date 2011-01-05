@@ -37,6 +37,18 @@ struct NuPlayer::Source : public RefBase {
     virtual status_t dequeueAccessUnit(
             bool audio, sp<ABuffer> *accessUnit) = 0;
 
+    virtual status_t getDuration(int64_t *durationUs) {
+        return INVALID_OPERATION;
+    }
+
+    virtual status_t seekTo(int64_t seekTimeUs) {
+        return INVALID_OPERATION;
+    }
+
+    virtual bool isSeekable() {
+        return false;
+    }
+
 protected:
     virtual ~Source() {}
 

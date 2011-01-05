@@ -56,6 +56,10 @@ struct ATSParser::Program : public RefBase {
 
     int64_t convertPTSToTimestamp(uint64_t PTS);
 
+    bool PTSTimeDeltaEstablished() const {
+        return mFirstPTSValid;
+    }
+
 private:
     ATSParser *mParser;
     unsigned mProgramMapPID;
@@ -732,6 +736,14 @@ sp<MediaSource> ATSParser::getSource(SourceType type) {
     }
 
     return NULL;
+}
+
+bool ATSParser::PTSTimeDeltaEstablished() {
+    if (mPrograms.isEmpty()) {
+        return false;
+    }
+
+    return mPrograms.editItemAt(0)->PTSTimeDeltaEstablished();
 }
 
 }  // namespace android

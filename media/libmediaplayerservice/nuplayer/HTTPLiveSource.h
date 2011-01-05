@@ -29,13 +29,17 @@ struct LiveSession;
 struct NuPlayer::HTTPLiveSource : public NuPlayer::Source {
     HTTPLiveSource(const char *url);
 
-    void start();
+    virtual void start();
 
     // Returns true iff more data was available, false on EOS.
-    bool feedMoreTSData();
+    virtual bool feedMoreTSData();
 
-    sp<MetaData> getFormat(bool audio);
-    status_t dequeueAccessUnit(bool audio, sp<ABuffer> *accessUnit);
+    virtual sp<MetaData> getFormat(bool audio);
+    virtual status_t dequeueAccessUnit(bool audio, sp<ABuffer> *accessUnit);
+
+    virtual status_t getDuration(int64_t *durationUs);
+    virtual status_t seekTo(int64_t seekTimeUs);
+    virtual bool isSeekable();
 
 protected:
     virtual ~HTTPLiveSource();

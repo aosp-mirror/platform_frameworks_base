@@ -22,6 +22,7 @@
 
 #include "HTTPLiveSource.h"
 #include "NuPlayerDecoder.h"
+#include "NuPlayerDriver.h"
 #include "NuPlayerRenderer.h"
 #include "NuPlayerSource.h"
 #include "StreamingSource.h"
@@ -55,8 +56,8 @@ NuPlayer::NuPlayer()
 NuPlayer::~NuPlayer() {
 }
 
-void NuPlayer::setListener(const wp<MediaPlayerBase> &listener) {
-    mListener = listener;
+void NuPlayer::setDriver(const wp<NuPlayerDriver> &driver) {
+    mDriver = driver;
 }
 
 void NuPlayer::setDataSource(const sp<IStreamSource> &source) {
@@ -90,8 +91,22 @@ void NuPlayer::start() {
     (new AMessage(kWhatStart, id()))->post();
 }
 
+void NuPlayer::pause() {
+    // XXX to be implemented
+}
+
+void NuPlayer::resume() {
+    // XXX to be implemented
+}
+
 void NuPlayer::resetAsync() {
     (new AMessage(kWhatReset, id()))->post();
+}
+
+void NuPlayer::seekToAsync(int64_t seekTimeUs) {
+    sp<AMessage> msg = new AMessage(kWhatSeek, id());
+    msg->setInt64("seekTimeUs", seekTimeUs);
+    msg->post();
 }
 
 // static
@@ -153,6 +168,8 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
 
         case kWhatStart:
         {
+            LOGV("kWhatStart");
+
             mAudioEOS = false;
             mVideoEOS = false;
 
@@ -178,6 +195,9 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
             }
 
             mScanSourcesPending = false;
+
+            LOGV("scanning sources haveAudio=%d, haveVideo=%d",
+                 mAudioDecoder != NULL, mVideoDecoder != NULL);
 
             instantiateDecoder(false, &mVideoDecoder);
 
@@ -312,6 +332,16 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                         && (mVideoEOS || mVideoDecoder == NULL)) {
                     notifyListener(MEDIA_PLAYBACK_COMPLETE, 0, 0);
                 }
+            } else if (what == Renderer::kWhatPosition) {
+                int64_t positionUs;
+                CHECK(msg->findInt64("positionUs", &positionUs));
+
+                if (mDriver != NULL) {
+                    sp<NuPlayerDriver> driver = mDriver.promote();
+                    if (driver != NULL) {
+                        driver->notifyPosition(positionUs);
+                    }
+                }
             } else {
                 CHECK_EQ(what, (int32_t)Renderer::kWhatFlushComplete);
 
@@ -356,6 +386,26 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
             }
 
             mResetInProgress = true;
+            break;
+        }
+
+        case kWhatSeek:
+        {
+            int64_t seekTimeUs;
+            CHECK(msg->findInt64("seekTimeUs", &seekTimeUs));
+
+            LOGI("kWhatSeek seekTimeUs=%lld us (%.2f secs)",
+                 seekTimeUs, seekTimeUs / 1E6);
+
+            mSource->seekTo(seekTimeUs);
+
+            if (mDriver != NULL) {
+                sp<NuPlayerDriver> driver = mDriver.promote();
+                if (driver != NULL) {
+                    driver->notifySeekComplete();
+                }
+            }
+
             break;
         }
 
@@ -415,7 +465,12 @@ void NuPlayer::finishReset() {
     mRenderer.clear();
     mSource.clear();
 
-    notifyListener(MEDIA_RESET_COMPLETE, 0, 0);
+    if (mDriver != NULL) {
+        sp<NuPlayerDriver> driver = mDriver.promote();
+        if (driver != NULL) {
+            driver->notifyResetComplete();
+        }
+    }
 }
 
 void NuPlayer::postScanSources() {
@@ -449,6 +504,14 @@ status_t NuPlayer::instantiateDecoder(bool audio, sp<Decoder> *decoder) {
     looper()->registerHandler(*decoder);
 
     (*decoder)->configure(meta);
+
+    int64_t durationUs;
+    if (mDriver != NULL && mSource->getDuration(&durationUs) == OK) {
+        sp<NuPlayerDriver> driver = mDriver.promote();
+        if (driver != NULL) {
+            driver->notifyDuration(durationUs);
+        }
+    }
 
     return OK;
 }
@@ -488,7 +551,7 @@ status_t NuPlayer::feedDecoderInputData(bool audio, const sp<AMessage> &msg) {
         return OK;
     }
 
-    LOGV("returned a valid buffer of %s data", audio ? "audio" : "video");
+    // LOGV("returned a valid buffer of %s data", audio ? "audio" : "video");
 
 #if 0
     int64_t mediaTimeUs;
@@ -505,7 +568,7 @@ status_t NuPlayer::feedDecoderInputData(bool audio, const sp<AMessage> &msg) {
 }
 
 void NuPlayer::renderBuffer(bool audio, const sp<AMessage> &msg) {
-    LOGV("renderBuffer %s", audio ? "audio" : "video");
+    // LOGV("renderBuffer %s", audio ? "audio" : "video");
 
     sp<AMessage> reply;
     CHECK(msg->findMessage("reply", &reply));
@@ -519,22 +582,23 @@ void NuPlayer::renderBuffer(bool audio, const sp<AMessage> &msg) {
 }
 
 void NuPlayer::notifyListener(int msg, int ext1, int ext2) {
-    if (mListener == NULL) {
+    if (mDriver == NULL) {
         return;
     }
 
-    sp<MediaPlayerBase> listener = mListener.promote();
+    sp<NuPlayerDriver> driver = mDriver.promote();
 
-    if (listener == NULL) {
+    if (driver == NULL) {
         return;
     }
 
-    listener->sendEvent(msg, ext1, ext2);
+    driver->sendEvent(msg, ext1, ext2);
 }
 
 void NuPlayer::flushDecoder(bool audio, bool needShutdown) {
     // Make sure we don't continue to scan sources until we finish flushing.
     ++mScanSourcesGeneration;
+    mScanSourcesPending = false;
 
     (audio ? mAudioDecoder : mVideoDecoder)->signalFlush();
     mRenderer->flush(audio);

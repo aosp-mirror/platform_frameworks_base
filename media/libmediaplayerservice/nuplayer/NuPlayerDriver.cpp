@@ -29,8 +29,11 @@ namespace android {
 
 NuPlayerDriver::NuPlayerDriver()
     : mResetInProgress(false),
+      mDurationUs(-1),
+      mPositionUs(-1),
       mLooper(new ALooper),
-      mPlayer(false) {
+      mState(UNINITIALIZED),
+      mStartupSeekTimeUs(-1) {
     mLooper->setName("NuPlayerDriver Looper");
 
     mLooper->start(
@@ -41,7 +44,7 @@ NuPlayerDriver::NuPlayerDriver()
     mPlayer = new NuPlayer;
     mLooper->registerHandler(mPlayer);
 
-    mPlayer->setListener(this);
+    mPlayer->setDriver(this);
 }
 
 NuPlayerDriver::~NuPlayerDriver() {
@@ -54,7 +57,11 @@ status_t NuPlayerDriver::initCheck() {
 
 status_t NuPlayerDriver::setDataSource(
         const char *url, const KeyedVector<String8, String8> *headers) {
+    CHECK_EQ((int)mState, (int)UNINITIALIZED);
+
     mPlayer->setDataSource(url, headers);
+
+    mState = STOPPED;
 
     return OK;
 }
@@ -64,7 +71,11 @@ status_t NuPlayerDriver::setDataSource(int fd, int64_t offset, int64_t length) {
 }
 
 status_t NuPlayerDriver::setDataSource(const sp<IStreamSource> &source) {
+    CHECK_EQ((int)mState, (int)UNINITIALIZED);
+
     mPlayer->setDataSource(source);
+
+    mState = STOPPED;
 
     return OK;
 }
@@ -86,38 +97,110 @@ status_t NuPlayerDriver::prepareAsync() {
 }
 
 status_t NuPlayerDriver::start() {
-    mPlayer->start();
-    mPlaying = true;
+    switch (mState) {
+        case UNINITIALIZED:
+            return INVALID_OPERATION;
+        case STOPPED:
+        {
+            mPlayer->start();
+
+            if (mStartupSeekTimeUs >= 0) {
+                mPlayer->seekToAsync(mStartupSeekTimeUs);
+                mStartupSeekTimeUs = -1;
+            }
+            break;
+        }
+        case PLAYING:
+            return OK;
+        default:
+        {
+            CHECK_EQ((int)mState, (int)PAUSED);
+
+            mPlayer->resume();
+            break;
+        }
+    }
+
+    mState = PLAYING;
 
     return OK;
 }
 
 status_t NuPlayerDriver::stop() {
-    mPlaying = false;
-    return OK;
+    return pause();
 }
 
 status_t NuPlayerDriver::pause() {
-    mPlaying = false;
+    switch (mState) {
+        case UNINITIALIZED:
+            return INVALID_OPERATION;
+        case STOPPED:
+            return OK;
+        case PLAYING:
+            mPlayer->pause();
+            break;
+        default:
+        {
+            CHECK_EQ((int)mState, (int)PAUSED);
+            return OK;
+        }
+    }
+
+    mState = PAUSED;
+
     return OK;
 }
 
 bool NuPlayerDriver::isPlaying() {
-    return mPlaying;
+    return mState == PLAYING;
 }
 
 status_t NuPlayerDriver::seekTo(int msec) {
-    return INVALID_OPERATION;
+    int64_t seekTimeUs = msec * 1000ll;
+
+    switch (mState) {
+        case UNINITIALIZED:
+            return INVALID_OPERATION;
+        case STOPPED:
+        {
+            mStartupSeekTimeUs = seekTimeUs;
+            break;
+        }
+        case PLAYING:
+        case PAUSED:
+        {
+            mPlayer->seekToAsync(seekTimeUs);
+            break;
+        }
+
+        default:
+            TRESPASS();
+            break;
+    }
+
+    return OK;
 }
 
 status_t NuPlayerDriver::getCurrentPosition(int *msec) {
-    *msec = 0;
+    Mutex::Autolock autoLock(mLock);
+
+    if (mPositionUs < 0) {
+        *msec = 0;
+    } else {
+        *msec = (mPositionUs + 500ll) / 1000;
+    }
 
     return OK;
 }
 
 status_t NuPlayerDriver::getDuration(int *msec) {
-    *msec = 0;
+    Mutex::Autolock autoLock(mLock);
+
+    if (mDurationUs < 0) {
+        *msec = 0;
+    } else {
+        *msec = (mDurationUs + 500ll) / 1000;
+    }
 
     return OK;
 }
@@ -131,6 +214,11 @@ status_t NuPlayerDriver::reset() {
     while (mResetInProgress) {
         mCondition.wait(mLock);
     }
+
+    mDurationUs = -1;
+    mPositionUs = -1;
+    mState = UNINITIALIZED;
+    mStartupSeekTimeUs = -1;
 
     return OK;
 }
@@ -156,16 +244,25 @@ status_t NuPlayerDriver::getMetadata(
     return INVALID_OPERATION;
 }
 
-void NuPlayerDriver::sendEvent(int msg, int ext1, int ext2) {
-    if (msg != MEDIA_RESET_COMPLETE) {
-        MediaPlayerInterface::sendEvent(msg, ext1, ext2);
-        return;
-    }
-
+void NuPlayerDriver::notifyResetComplete() {
     Mutex::Autolock autoLock(mLock);
     CHECK(mResetInProgress);
     mResetInProgress = false;
     mCondition.broadcast();
+}
+
+void NuPlayerDriver::notifyDuration(int64_t durationUs) {
+    Mutex::Autolock autoLock(mLock);
+    mDurationUs = durationUs;
+}
+
+void NuPlayerDriver::notifyPosition(int64_t positionUs) {
+    Mutex::Autolock autoLock(mLock);
+    mPositionUs = positionUs;
+}
+
+void NuPlayerDriver::notifySeekComplete() {
+    sendEvent(MEDIA_SEEK_COMPLETE);
 }
 
 }  // namespace android

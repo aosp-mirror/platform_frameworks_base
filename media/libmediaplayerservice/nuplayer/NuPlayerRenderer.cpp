@@ -249,6 +249,8 @@ void NuPlayer::Renderer::onDrainAudioQueue() {
         numBytesAvailableToWrite -= copy;
         mNumFramesWritten += copy / mAudioSink->frameSize();
     }
+
+    notifyPosition();
 }
 
 void NuPlayer::Renderer::postDrainVideoQueue() {
@@ -322,6 +324,8 @@ void NuPlayer::Renderer::onDrainVideoQueue() {
     entry->mNotifyConsumed->post();
     mVideoQueue.erase(mVideoQueue.begin());
     entry = NULL;
+
+    notifyPosition();
 }
 
 void NuPlayer::Renderer::notifyEOS(bool audio) {
@@ -508,6 +512,20 @@ bool NuPlayer::Renderer::dropBufferWhileFlushing(
 void NuPlayer::Renderer::onAudioSinkChanged() {
     CHECK(!mDrainAudioQueuePending);
     mNumFramesWritten = 0;
+}
+
+void NuPlayer::Renderer::notifyPosition() {
+    if (mAnchorTimeRealUs < 0 || mAnchorTimeMediaUs < 0) {
+        return;
+    }
+
+    int64_t nowUs = ALooper::GetNowUs();
+    int64_t positionUs = (nowUs - mAnchorTimeRealUs) + mAnchorTimeMediaUs;
+
+    sp<AMessage> notify = mNotify->dup();
+    notify->setInt32("what", kWhatPosition);
+    notify->setInt64("positionUs", positionUs);
+    notify->post();
 }
 
 }  // namespace android

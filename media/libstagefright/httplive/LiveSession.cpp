@@ -395,10 +395,17 @@ void LiveSession::onDownloadNext() {
             int64_t index = seekTimeSecs / targetDuration;
 
             if (index >= 0 && index < mPlaylist->size()) {
-                mSeqNumber = firstSeqNumberInPlaylist + index;
-                mDataSource->reset();
+                int32_t newSeqNumber = firstSeqNumberInPlaylist + index;
 
-                explicitDiscontinuity = true;
+                if (newSeqNumber != mSeqNumber) {
+                    LOGI("seeking to seq no %d", newSeqNumber);
+
+                    mSeqNumber = newSeqNumber;
+
+                    mDataSource->reset();
+
+                    explicitDiscontinuity = true;
+                }
             }
         }
 
@@ -463,6 +470,8 @@ void LiveSession::onDownloadNext() {
         return;
     }
 
+    CHECK(buffer != NULL);
+
     CHECK_EQ((status_t)OK,
              decryptBuffer(mSeqNumber - firstSeqNumberInPlaylist, buffer));
 
@@ -481,6 +490,9 @@ void LiveSession::onDownloadNext() {
 
     if (explicitDiscontinuity || bandwidthChanged) {
         // Signal discontinuity.
+
+        LOGI("queueing discontinuity (explicit=%d, bandwidthChanged=%d)",
+             explicitDiscontinuity, bandwidthChanged);
 
         sp<ABuffer> tmp = new ABuffer(188);
         memset(tmp->data(), 0, tmp->size());
