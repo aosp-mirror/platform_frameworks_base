@@ -316,7 +316,7 @@
   <!--<li><a href="">Developing for Android</a></li>
       signing, upgrading, selecting a package name, select device profile, touch, trackball, dpad available, etc. -->
       <li>
-        <a href="<?cs var:toroot ?>guide/developing/overview.html">
+        <a href="<?cs var:toroot ?>guide/developing/index.html">
         <span class="en">Overview</span></a>
       </li>
 
@@ -359,7 +359,7 @@
         <ul>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/projects/projects-eclipse.html">
-              <span class="en">In Eclipse</span>
+              <span class="en">In Eclipse with ADT</span>
             </a>
           </li>
           <li>
@@ -378,9 +378,9 @@
         </div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/developing/building/building-eclipse.html">
-          <span class="en">In Eclipse</span>
+          <span class="en">In Eclipse with ADT</span>
           </a></li>
-          <li><a href="<?cs var:toroot ?>guide/developing/building/building-cmdline.html"><span class="en">In Other IDEs</span></a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/building/building-cmdline.html"><span class="en">On the Command Line</span></a></li>
         </ul>
       </li>
 
@@ -393,7 +393,7 @@
         <ul>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-projects.html">
-         	    <span class="en">In Eclipse</span>
+         	    <span class="en">In Eclipse with ADT</span>
             </a>
           </li>
           <li>
@@ -438,13 +438,13 @@
            <ul>
               <li>
                 <a href="<?cs var:toroot ?>guide/developing/testing/testing_eclipse.html">
-                  <span class="en">Testing in Eclipse, with ADT</span>
+                  <span class="en">In Eclipse with ADT</span>
                 </a>
               </li>
 
               <li>
                 <a href="<?cs var:toroot ?>guide/developing/testing/testing_otheride.html">
-                  <span class="en">Testing in Other IDEs</span>
+                  <span class="en">In Other IDEs</span>
                 </a>
               </li>
            </ul>

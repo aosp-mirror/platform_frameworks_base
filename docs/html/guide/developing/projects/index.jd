@@ -8,7 +8,11 @@ page.title=Creating and Managing Projects
       <ol>
         <li><a href="#ApplicationProjects">Android Projects</a></li>
 
-        <li><a href="#LibraryProjects">Library Projects</a></li>
+        <li><a href="#LibraryProjects">Library Projects</a>
+          <ol>
+            <li><a href="#libraryMigrating">Migrating library projects to ADT 0.9.8 or higher</a></li>
+          </ol>
+        </li>
 
         <li><a href="#TestProjects">Test Projects</a></li>
       </ol>
@@ -417,6 +421,81 @@ page.title=Creating and Managing Projects
   project by a relative link. What is important is that the main
   project can reference the library project through a relative link.</p></li>
   </ul>
+  
+  
+  
+  <h3 id="libraryMigrating">Migrating library projects to ADT 0.9.8 or higher</h3> 
+ 
+<p>This section provides information about how to migrate a library project
+created with ADT 0.9.7 to ADT 0.9.8 or higher. The migration is needed only if
+you are developing in Eclipse with ADT and assumes that you have also upgraded
+to SDK Tools r7 (or higher). </p> 
+ 
+<p>The way that ADT handles library projects has changed between
+ADT 0.9.7 and ADT 0.9.8. Specifically, in ADT 0.9.7, the <code>src/</code> 
+source folder of the library was linked into the dependent application project
+as a folder that had the same name as the library project. This worked because
+of two restrictions on the library projects:</p> 
+ 
+<ul> 
+<li>The library was only able to contain a single source folder (excluding the
+special <code>gen/</code> source folder), and</li> 
+<li>The source folder was required to have the name <code>src/</code> and be
+stored at the root of the project.</li> 
+</ul> 
+ 
+<p>In ADT 0.9.8, both of those restrictions were removed. A library project can
+have as many source folders as needed and each can have any name. Additionally,
+a library project can store source folders in any location of the project. For
+example, you could store sources in a <code>src/java/</code> directory. In order
+to support this, the name of the linked source folders in the main project are
+now called &lt;library-name&gt;_&lt;folder-name&gt; For
+example: <code>MyLibrary_src/</code> or <code>MyLibrary_src_java/</code>.</p> 
+ 
+<p>Additionally, the linking process now flags those folders in order for ADT to
+recognize that it created them. This will allow ADT to automatically migrate the
+project to new versions of ADT, should they contain changes to the handling of
+library projects. ADT 0.9.7 did not flag the linked source folders, so ADT 0.9.8
+cannot be sure whether the old linked folders can be removed safely. After
+upgrading ADT to 0.9.8, you will need to remove the old linked folders manually
+in a simple two-step process, as described below.</p> 
+ 
+<p>Before you begin, make sure to create a backup copy of your application or
+save the latest version to your code version control system. This ensures that
+you will be able to easily revert the migration changes in case there is a
+problem in your environment.</p> 
+ 
+<p>When you first upgrade to ADT 0.9.8, your main project will look as shown
+in figure 1, with two linked folders (in this example, <code>MyLibrary</code> and
+<code>MyLibrary_src</code> &mdash; both of which link to
+<code>MyLibrary/src</code>. Eclipse shows an error on one of them because they
+are duplicate links to a single class.</p> 
+ 
+<img src="/images/developing/lib-migration-0.png" alt=""> 
+<p class="img-caption"><strong>Figure 1.</strong> Library project migration error</p>
+<p>To fix the error, remove the linked folder that <em>does not</em> contain the
+<code>_src</code> suffix. </p> 
+ 
+<ol> 
+<li>Right click the folder that you want to remove (in this case, the
+<code>MyLibrary</code> folder) and choose <strong>Build Path</strong> &gt;
+<strong>Remove from Build Path</strong>, as shown in figure 2.</li> 
+ 
+<img src="/images/developing/lib-migration-1.png" style="height:600px"
+alt=""> 
+<p class="img-caption"><strong>Figure 2.</strong> Remove from Build Path menu item</p>
+ 
+<li>Next, when asked about unlinking the folder from the project, select
+<strong>Yes</strong>, as shown in figure 3.</li> 
+ 
+<img src="/images/developing/lib-migration-2.png" alt=""> 
+
+<p class="img-caption"><strong>Figure 3.</strong> Unlink folder confirmation window</p>
+</ol> 
+ 
+<p>This should resolve the error and migrate your library project to the new
+ADT environment. </p> 
+ 
   
 
   <h2 id="TestProjects">Test Projects</h2>

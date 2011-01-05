@@ -5,7 +5,8 @@ parent.link=index.html
 
 
 <p>Here are some tips and tricks for common Android errors. Don't forget to use the
-    ddms logcat capability to get a deeper view when errors occur. See <a href="{@docRoot}guide/developing/debug-tasks.html">Debugging</a> for more debugging tips. </p>
+    ddms logcat capability to get a deeper view when errors occur. 
+    See the <a href="{@docRoot}guide/developing/debugging/index.html">Debugging</a> documentation for more information.</p>
 <ul>
     <li><a href="#installeclipsecomponents">ADT Installation Error: "requires plug-in org.eclipse.wst.sse.ui".</a></li>
     <li><a href="#nodevice">ADB reports &quot;no device&quot; when an emulator is running</a></li>
@@ -282,9 +283,10 @@ missing import packages, then save each file.</li>
 
 <p>If you get an error message such as "Could not load /sdcard/gestures. 
 Make sure you have a mounted SD card," be sure that your target AVD has an 
-SD card. To create an AVD that has an SD card, use the
-<a href="{@docRoot}guide/developing/tools/avd.html#options"><code>-c</code> 
-option</a> in the <code>android create avd</code> command.</p> 
+SD card. To create an AVD that has an SD card, specify one when creating
+an AVD with the AVD manager. See 
+<a href="{@docRoot}guide/developing/devices/managing-avds.html#createavd">
+Creating and Managing AVDs with AVD Manager</a> for more information.</p>
 
 <h2 id="signingcalendar">I can't compile my app because the build tools generated an expired debug certificate</h2>
 

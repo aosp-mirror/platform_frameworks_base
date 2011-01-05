@@ -23,32 +23,33 @@ page.title=Overview
       before continuing.</p>
     </li>
 
-    <li>
-      <a href="{@docRoot}guide/developing/devices/avds-devices.html">Set up Android Virtual Devices
-      or hardware devices</a>.
+    <li>Set up Android Virtual Devices or hardware devices</a>.
 
       <p>You need to create Android Virtual Devices (AVD) or connect hardware devices on which
       you will install your applications.</p>
+      
+      <p>See <a href="{@docRoot}guide/developing/devices/index.html">Creating and Managing Virtual Devices</a>
+      and <a href="{@docRoot}guide/developing/device.html">Connecting Hardware Devices</a> for more information.
     </li>
 
     <li>
-      <a href="{@docRoot}guide/developing/projects/projects.html">Create an Android project</a>.
+      <a href="{@docRoot}guide/developing/projects/index.html">Create an Android project</a>.
 
       <p>An Android project contains all source code and resource files for your application. It is
       built into an <code>.apk</code> package that you can install on Android devices.</p>
     </li>
 
     <li>
-      <a href="{@docRoot}guide/developing/building/building.html">Build and run your
+      <a href="{@docRoot}guide/developing/building/index.html">Build and run your
       application</a>.
 
       <p>If you are using Eclipse, builds are generated each time you save changes and you can install
       your application on a device by clicking <strong>Run</strong>. If you're using another IDE, you can build your
-      project using Ant and install it on a device using ADB.</p>
+      project using Ant and install it on a device using <code>adb</code>.</p>
     </li>
 
     <li>
-      <a href="{@docRoot}guide/developing/debugging/debugging.html">Debug your application with the
+      <a href="{@docRoot}guide/developing/debugging/index.html">Debug your application with the
       SDK debugging and logging tools</a>.
 
       <p>Debugging your application involves using a JDWP-compliant debugger along with the
@@ -110,6 +111,6 @@ page.title=Overview
   Eclipse, such as the <code>adb</code> shell commands. You might also need to call Keytool and Jarsigner to
   sign your applications, but you can set up Eclipse to do this automatically as well.</p>
   
-  <p>For more information on these tools, see the <a href="@{docRoot}guide/developing/tools/index.html">
-  Tools</a> section of the documentation.</p>
+  <p>For more information on the tools provided with the Android SDK, see the
+  <a href="{@docRoot}guide/developing/tools/index.html">Tools</a> section of the documentation.</p>
 
