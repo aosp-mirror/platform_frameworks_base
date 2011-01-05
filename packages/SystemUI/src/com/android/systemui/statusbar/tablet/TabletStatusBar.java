@@ -537,7 +537,7 @@ public class TabletStatusBar extends StatusBar {
             } catch (PendingIntent.CanceledException e) {
             }
         } else {
-            tick(key, notification);
+            tick(key, notification, true);
         }
 
         setAreThereNotifications();
@@ -628,7 +628,7 @@ public class TabletStatusBar extends StatusBar {
         if (false && immersive) {
             // TODO: immersive mode
         } else {
-            tick(key, notification);
+            tick(key, notification, false);
         }
 
         setAreThereNotifications();
@@ -707,9 +707,14 @@ public class TabletStatusBar extends StatusBar {
         return n.tickerView != null || !TextUtils.isEmpty(n.tickerText);
     }
 
-    private void tick(IBinder key, StatusBarNotification n) {
+    private void tick(IBinder key, StatusBarNotification n, boolean firstTime) {
         // Don't show the ticker when the windowshade is open.
         if (mNotificationPanel.isShowing()) {
+            return;
+        }
+        // If they asked for FLAG_ONLY_ALERT_ONCE, then only show this notification
+        // if it's a new notification.
+        if (!firstTime && (n.notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0) {
             return;
         }
         // Show the ticker if one is requested. Also don't do this
