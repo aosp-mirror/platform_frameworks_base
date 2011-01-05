@@ -25,30 +25,39 @@
     android:layout_alignParentRight="true"
     android:orientation="horizontal"
     >
-    <com.android.systemui.statusbar.tablet.InputMethodButton
-        android:id="@+id/imeSwitchButton"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="8dip"
-        android:src="@drawable/ic_sysbar_ime_default"
-        android:visibility="gone"
-        />
-    <com.android.systemui.statusbar.tablet.NotificationIconArea
-        android:id="@+id/notificationIcons"
+
+    <LinearLayout
+        android:id="@+id/notificationAndImeArea"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:orientation="horizontal"
         >
-        <view
-            class="com.android.systemui.statusbar.tablet.NotificationIconArea$IconLayout"
-            android:id="@+id/icons"
+
+        <com.android.systemui.statusbar.tablet.InputMethodButton
+            android:id="@+id/imeSwitchButton"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
-            android:paddingTop="5dp"
-            android:layout_marginLeft="8dp"
+            android:layout_marginLeft="8dip"
+            android:src="@drawable/ic_sysbar_ime_default"
+            android:visibility="gone"
             />
-    </com.android.systemui.statusbar.tablet.NotificationIconArea>
+        <com.android.systemui.statusbar.tablet.NotificationIconArea
+            android:id="@+id/notificationIcons"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            >
+            <view
+                class="com.android.systemui.statusbar.tablet.NotificationIconArea$IconLayout"
+                android:id="@+id/icons"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:paddingTop="5dp"
+                android:layout_marginLeft="8dp"
+                />
+        </com.android.systemui.statusbar.tablet.NotificationIconArea>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/notificationTrigger"

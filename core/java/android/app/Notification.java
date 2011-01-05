@@ -752,7 +752,7 @@ public class Notification implements Parcelable
         }
 
         public Builder setAutoCancel(boolean autoCancel) {
-            setFlag(FLAG_ONLY_ALERT_ONCE, autoCancel);
+            setFlag(FLAG_AUTO_CANCEL, autoCancel);
             return this;
         }
 
@@ -783,8 +783,13 @@ public class Notification implements Parcelable
             if (mContentInfo != null) {
                 contentView.setTextViewText(R.id.info, mContentInfo);
             } else if (mNumber > 0) {
-                NumberFormat f = NumberFormat.getIntegerInstance();
-                contentView.setTextViewText(R.id.info, f.format(mNumber));
+                if (mNumber > 100) {
+                    contentView.setTextViewText(R.id.info, mContext.getString(
+                                R.string.status_bar_notification_info_overflow));
+                } else {
+                    NumberFormat f = NumberFormat.getIntegerInstance();
+                    contentView.setTextViewText(R.id.info, f.format(mNumber));
+                }
                 contentView.setFloat(R.id.info, "setTextSize",
                         mContext.getResources().getDimensionPixelSize(
                             R.dimen.status_bar_content_number_size));

@@ -81,11 +81,10 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
 
         mContentParent = (ViewGroup)findViewById(R.id.content_parent);
         mTitleArea = findViewById(R.id.title_area);
+        mTitleArea.setOnClickListener(this);
 
         mSettingsButton = (ImageView)findViewById(R.id.settings_button);
-        mSettingsButton.setOnClickListener(this);
         mNotificationButton = (ImageView)findViewById(R.id.notification_button);
-        mNotificationButton.setOnClickListener(this);
 
         mNotificationScroller = findViewById(R.id.notification_scroller);
         mNotificationGlow = findViewById(R.id.notification_glow);
@@ -178,10 +177,12 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
     }
 
     public void onClick(View v) {
-        if (v == mSettingsButton) {
-            switchToSettingsMode();
-        } else if (v == mNotificationButton) {
-            switchToNotificationMode();
+        if (v == mTitleArea) {
+            if (mSettingsView == null) {
+                switchToSettingsMode();
+            } else {
+                switchToNotificationMode();
+            }
         }
     }
 

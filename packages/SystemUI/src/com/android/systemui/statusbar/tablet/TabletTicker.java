@@ -53,7 +53,7 @@ public class TabletTicker
 
     private static final String TAG = "StatusBar.TabletTicker";
 
-    private static final boolean CLICKABLE_TICKER = true;
+    private static final boolean CLICKABLE_TICKER = false;
 
     // 3 is enough to let us see most cases, but not get so far behind that it's too annoying.
     private static final int QUEUE_LENGTH = 3;
@@ -209,12 +209,16 @@ public class TabletTicker
         final FrameLayout view = new FrameLayout(mContext);
         final int width = res.getDimensionPixelSize(R.dimen.notification_ticker_width);
         final int height = res.getDimensionPixelSize(R.dimen.notification_large_icon_height);
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(width, height,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+        int windowFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+        if (CLICKABLE_TICKER) {
+            windowFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        } else {
+            windowFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        }
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(width, height,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL, windowFlags,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
 //        lp.windowAnimations = com.android.internal.R.style.Animation_Toast;
