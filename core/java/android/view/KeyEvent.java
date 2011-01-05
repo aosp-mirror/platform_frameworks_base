@@ -990,20 +990,32 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public static final int META_SCROLL_LOCK_ON = 0x400000;
 
-    /** {@hide} */
+    /**
+     * This mask is a combination of {@link #META_SHIFT_ON}, {@link #META_SHIFT_LEFT_ON}
+     * and {@link #META_SHIFT_RIGHT_ON}.
+     */
     public static final int META_SHIFT_MASK = META_SHIFT_ON
             | META_SHIFT_LEFT_ON | META_SHIFT_RIGHT_ON;
 
-    /** {@hide} */
+    /**
+     * This mask is a combination of {@link #META_ALT_ON}, {@link #META_ALT_LEFT_ON}
+     * and {@link #META_ALT_RIGHT_ON}.
+     */
     public static final int META_ALT_MASK = META_ALT_ON
             | META_ALT_LEFT_ON | META_ALT_RIGHT_ON;
 
-    /** {@hide} */
+    /**
+     * This mask is a combination of {@link #META_CTRL_ON}, {@link #META_CTRL_LEFT_ON}
+     * and {@link #META_CTRL_RIGHT_ON}.
+     */
     public static final int META_CTRL_MASK = META_CTRL_ON
             | META_CTRL_LEFT_ON | META_CTRL_RIGHT_ON;
 
-    /** {@hide} */
-    public static final int META_META_MASK = META_ALT_ON
+    /**
+     * This mask is a combination of {@link #META_META_ON}, {@link #META_META_LEFT_ON}
+     * and {@link #META_META_RIGHT_ON}.
+     */
+    public static final int META_META_MASK = META_META_ON
             | META_META_LEFT_ON | META_META_RIGHT_ON;
 
     /**
