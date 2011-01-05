@@ -19,6 +19,7 @@ package android.view;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Resources;
+import android.os.Build;
 
 /**
  * A ContextWrapper that allows you to modify the theme from what is in the 
@@ -56,7 +57,10 @@ public class ContextThemeWrapper extends ContextWrapper {
         }
 
         if (mThemeResource == 0) {
-            mThemeResource = com.android.internal.R.style.Theme;
+            mThemeResource = (getApplicationInfo().targetSdkVersion
+                    >= Build.VERSION_CODES.HONEYCOMB)
+                            ? com.android.internal.R.style.Theme_Holo
+                            : com.android.internal.R.style.Theme;
         }
         initializeTheme();
 
