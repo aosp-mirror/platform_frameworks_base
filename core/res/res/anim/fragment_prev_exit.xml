@@ -19,7 +19,7 @@
 <set xmlns:android="http://schemas.android.com/apk/res/android"
 	android:zAdjustment="normal">
     <objectAnimator
-        android:interpolator="@anim/decelerate_cubic_interpolator"
+        android:interpolator="@interpolator/decelerate_cubic"
         android:valueFrom="1"
         android:valueTo="0"
         android:valueType="floatType"

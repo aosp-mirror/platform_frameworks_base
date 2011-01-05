@@ -23,12 +23,12 @@
             android:fromYScale=".9" android:toYScale="1.0"
             android:pivotX="50%p" android:pivotY="50%p"
             android:fillEnabled="true" android:fillBefore="true"
-            android:interpolator="@anim/decelerate_quint_interpolator"
+            android:interpolator="@interpolator/decelerate_quint"
             android:startOffset="160"
             android:duration="300" />
     <alpha android:fromAlpha="0" android:toAlpha="1.0"
             android:fillEnabled="true" android:fillBefore="true"
-            android:interpolator="@anim/decelerate_quint_interpolator"
+            android:interpolator="@interpolator/decelerate_quint"
             android:startOffset="160"
             android:duration="300"/>
 </set>

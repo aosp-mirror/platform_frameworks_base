@@ -148,7 +148,8 @@ private:
 
 bool isValidResourceType(const String8& type)
 {
-    return type == "anim" || type == "drawable" || type == "layout"
+    return type == "anim" || type == "animator" || type == "interpolator"
+        || type == "drawable" || type == "layout"
         || type == "values" || type == "xml" || type == "raw"
         || type == "color" || type == "menu" || type == "mipmap";
 }
@@ -798,6 +799,8 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
     sp<ResourceTypeSet> drawables;
     sp<ResourceTypeSet> layouts;
     sp<ResourceTypeSet> anims;
+    sp<ResourceTypeSet> animators;
+    sp<ResourceTypeSet> interpolators;
     sp<ResourceTypeSet> xmls;
     sp<ResourceTypeSet> raws;
     sp<ResourceTypeSet> colors;
@@ -807,6 +810,8 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
     ASSIGN_IT(drawable);
     ASSIGN_IT(layout);
     ASSIGN_IT(anim);
+    ASSIGN_IT(animator);
+    ASSIGN_IT(interpolator);
     ASSIGN_IT(xml);
     ASSIGN_IT(raw);
     ASSIGN_IT(color);
@@ -827,6 +832,8 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
     if (!applyFileOverlay(bundle, assets, &drawables, "drawable") ||
             !applyFileOverlay(bundle, assets, &layouts, "layout") ||
             !applyFileOverlay(bundle, assets, &anims, "anim") ||
+            !applyFileOverlay(bundle, assets, &animators, "animator") ||
+            !applyFileOverlay(bundle, assets, &interpolators, "interpolator") ||
             !applyFileOverlay(bundle, assets, &xmls, "xml") ||
             !applyFileOverlay(bundle, assets, &raws, "raw") ||
             !applyFileOverlay(bundle, assets, &colors, "color") ||
@@ -874,6 +881,20 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
 
     if (anims != NULL) {
         err = makeFileResources(bundle, assets, &table, anims, "anim");
+        if (err != NO_ERROR) {
+            hasErrors = true;
+        }
+    }
+
+    if (animators != NULL) {
+        err = makeFileResources(bundle, assets, &table, animators, "animator");
+        if (err != NO_ERROR) {
+            hasErrors = true;
+        }
+    }
+
+    if (interpolators != NULL) {
+        err = makeFileResources(bundle, assets, &table, interpolators, "interpolator");
         if (err != NO_ERROR) {
             hasErrors = true;
         }
@@ -973,6 +994,36 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
 
     if (anims != NULL) {
         ResourceDirIterator it(anims, String8("anim"));
+        while ((err=it.next()) == NO_ERROR) {
+            err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
+            if (err != NO_ERROR) {
+                hasErrors = true;
+            }
+        }
+
+        if (err < NO_ERROR) {
+            hasErrors = true;
+        }
+        err = NO_ERROR;
+    }
+
+    if (animators != NULL) {
+        ResourceDirIterator it(animators, String8("animator"));
+        while ((err=it.next()) == NO_ERROR) {
+            err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
+            if (err != NO_ERROR) {
+                hasErrors = true;
+            }
+        }
+
+        if (err < NO_ERROR) {
+            hasErrors = true;
+        }
+        err = NO_ERROR;
+    }
+
+    if (interpolators != NULL) {
+        ResourceDirIterator it(interpolators, String8("interpolator"));
         while ((err=it.next()) == NO_ERROR) {
             err = compileXmlFile(assets, it.getFile(), &table, xmlFlags);
             if (err != NO_ERROR) {

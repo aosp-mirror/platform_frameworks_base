@@ -18,7 +18,7 @@
 */
 -->
 
-<set xmlns:android="http://schemas.android.com/apk/res/android" android:interpolator="@anim/decelerate_interpolator">
+<set xmlns:android="http://schemas.android.com/apk/res/android" android:interpolator="@interpolator/decelerate_quad">
 	<translate android:fromYDelta="-25%" android:toYDelta="0"
             android:duration="@android:integer/config_shortAnimTime"/>
 	<alpha android:fromAlpha="0.0" android:toAlpha="1.0"

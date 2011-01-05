@@ -1421,6 +1421,41 @@
   <public type="attr" name="editTextBackground" />
   <public type="attr" name="horizontalScrollViewStyle" />
 
+  <!-- A simple fade-in animation. -->
+  <public type="animator" name="fade_in" id="0x010b0000" />
+  <!-- A simple fade-out animation. -->
+  <public type="animator" name="fade_out" />
+
+  <!-- Acceleration curve matching a quadtratic ease out function. -->
+  <public type="interpolator" name="accelerate_quad" id="0x010c0000" />
+  <!-- Acceleration curve matching a quadtratic ease in function. -->
+  <public type="interpolator" name="decelerate_quad" />
+  <!-- Acceleration curve matching a cubic ease out function. -->
+  <public type="interpolator" name="accelerate_cubic" />
+  <!-- Acceleration curve matching a cubic ease in function. -->
+  <public type="interpolator" name="decelerate_cubic" />
+  <!-- Acceleration curve matching a quint ease out function. -->
+  <public type="interpolator" name="accelerate_quint" />
+  <!-- Acceleration curve matching a quint ease in function. -->
+  <public type="interpolator" name="decelerate_quint" />
+  <!-- Acceleration curve matching an ease in + ease out function -->
+  <public type="interpolator" name="accelerate_decelerate" />
+  <!-- An interpolator where the change starts backward then flings forward. -->
+  <public type="interpolator" name="anticipate" />
+  <!-- An interpolator where the change flings forward and overshoots the last
+       value then comes back. -->
+  <public type="interpolator" name="overshoot" />
+  <!-- An interpolator where the change starts backward then flings forward and
+       overshoots the target value and finally goes back to the final value. -->
+  <public type="interpolator" name="anticipate_overshoot" />
+  <!-- An interpolator where the change bounces at the end. -->
+  <public type="interpolator" name="bounce" />
+  <!-- An interpolator where the rate of change is constant. -->
+  <public type="interpolator" name="linear" />
+  <!-- Repeats the animation for one cycle. The rate of change follows a
+       sinusoidal pattern. -->
+  <public type="interpolator" name="cycle" />
+
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
 

@@ -23,9 +23,9 @@
     <scale android:fromXScale="1.0" android:toXScale="0.975"
             android:fromYScale="1.0" android:toYScale="0.975"
             android:pivotX="50%p" android:pivotY="50%p"
-            android:interpolator="@anim/linear_interpolator"
+            android:interpolator="@interpolator/linear"
             android:duration="@android:integer/config_activityDefaultDur" />
     <alpha android:fromAlpha="1.0" android:toAlpha="0.75"
-            android:interpolator="@anim/decelerate_cubic_interpolator"
+            android:interpolator="@interpolator/decelerate_cubic"
             android:duration="@android:integer/config_activityDefaultDur"/>
 </set>
