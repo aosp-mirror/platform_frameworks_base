@@ -80,6 +80,10 @@ class GLES20Canvas extends HardwareCanvas {
     protected GLES20Canvas(boolean record, boolean translucent) {
         mOpaque = !translucent;
 
+        setupRenderer(record);
+    }
+
+    protected void setupRenderer(boolean record) {
         if (record) {
             mRenderer = nCreateDisplayListRenderer();
         } else {
@@ -89,7 +93,11 @@ class GLES20Canvas extends HardwareCanvas {
         if (mRenderer == 0) {
             throw new IllegalStateException("Could not create GLES20Canvas renderer");
         } else {
-            mFinalizer = new CanvasFinalizer(mRenderer);
+            if (mFinalizer == null) {
+                mFinalizer = new CanvasFinalizer(mRenderer);
+            } else {
+                mFinalizer.replaceNativeObject(mRenderer);
+            }
         }
     }
 
@@ -99,15 +107,22 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nDestroyRenderer(int renderer);
 
     private static class CanvasFinalizer {
-        final int mRenderer;
+        int mRenderer;
 
         CanvasFinalizer(int renderer) {
             mRenderer = renderer;
         }
 
+        void replaceNativeObject(int newRenderer) {
+            if (mRenderer != 0) {
+                nDestroyRenderer(mRenderer);
+            }
+            mRenderer = newRenderer;
+        }
+
         @Override
         protected void finalize() throws Throwable {
-            nDestroyRenderer(mRenderer);
+            replaceNativeObject(0);
         }
     }
 

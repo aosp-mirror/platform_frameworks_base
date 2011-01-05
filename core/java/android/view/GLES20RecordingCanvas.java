@@ -51,6 +51,11 @@ class GLES20RecordingCanvas extends GLES20Canvas {
         }
     }
 
+    void reset() {
+        mBitmaps.clear();
+        setupRenderer(true);
+    }
+
     @Override
     public void drawArc(RectF oval, float startAngle, float sweepAngle, boolean useCenter,
             Paint paint) {

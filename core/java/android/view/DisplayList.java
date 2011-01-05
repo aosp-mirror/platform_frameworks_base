@@ -46,4 +46,19 @@ abstract class DisplayList {
      * @see android.view.HardwareCanvas#drawDisplayList(DisplayList) 
      */
     abstract boolean isReady();
+
+    /**
+     * Invalidates the display list, indicating that it should be repopulated
+     * with new drawing commands prior to being used again. Calling this method
+     * causes calls to {@link #isValid()} to return <code>false</code>.
+     */
+    abstract void invalidate();
+
+    /**
+     * Returns whether the display list is currently usable. If this returns false,
+     * the display list should be re-recorded prior to replaying it.
+     *
+     * @return boolean true if the display list is able to be replayed, false otherwise.
+     */
+    abstract boolean isValid();
 }

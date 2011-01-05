@@ -73,19 +73,19 @@ public class LayoutTransition {
 
     /**
      * A flag indicating the animation that runs on those items that are changing
-     * due to a new item disappearing from the container.
+     * due to an item disappearing from the container.
      */
     public static final int CHANGE_DISAPPEARING = 1;
 
     /**
-     * A flag indicating the animation that runs on those items that are changing
-     * due to a new item appearing in the container.
+     * A flag indicating the animation that runs on those items that are appearing
+     * in the container.
      */
     public static final int APPEARING = 2;
 
     /**
-     * A flag indicating the animation that runs on those items that are changing
-     * due to a new item appearing in the container.
+     * A flag indicating the animation that runs on those items that are disappearing
+     * from the container.
      */
     public static final int DISAPPEARING = 3;
 

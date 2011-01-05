@@ -7783,9 +7783,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         if ((mViewFlags & DRAWING_CACHE_ENABLED) == DRAWING_CACHE_ENABLED &&
-                ((mPrivateFlags & DRAWING_CACHE_VALID) == 0 || mDisplayList == null)) {
+                ((mPrivateFlags & DRAWING_CACHE_VALID) == 0 ||
+                        mDisplayList == null || !mDisplayList.isValid())) {
 
-            mDisplayList = mAttachInfo.mHardwareRenderer.createDisplayList();
+            if (mDisplayList == null) {
+                mDisplayList = mAttachInfo.mHardwareRenderer.createDisplayList();
+            }
 
             final HardwareCanvas canvas = mDisplayList.start();
             try {
@@ -7886,7 +7889,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mUnscaledDrawingCache = null;
         }
         if (mDisplayList != null) {
-            mDisplayList = null;
+            mDisplayList.invalidate();
         }
     }
 

@@ -24,6 +24,7 @@ class GLES20DisplayList extends DisplayList {
 
     private boolean mStarted = false;
     private boolean mRecorded = false;
+    private boolean mValid = false;
 
     int mNativeDisplayList;
 
@@ -38,11 +39,28 @@ class GLES20DisplayList extends DisplayList {
             throw new IllegalStateException("Recording has already started");
         }
 
-        mCanvas = new GLES20RecordingCanvas(true);
+        if (mCanvas != null) {
+            ((GLES20RecordingCanvas) mCanvas).reset();
+        } else {
+            mCanvas = new GLES20RecordingCanvas(true);
+        }
         mStarted = true;
         mRecorded = false;
+        mValid = true;
 
         return mCanvas;
+    }
+
+    @Override
+    void invalidate() {
+        mStarted = false;
+        mRecorded = false;
+        mValid = false;
+    }
+
+    @Override
+    boolean isValid() {
+        return mValid;
     }
 
     @Override
@@ -52,7 +70,11 @@ class GLES20DisplayList extends DisplayList {
             mRecorded = true;
 
             mNativeDisplayList = mCanvas.getDisplayList();
-            mFinalizer = new DisplayListFinalizer(mNativeDisplayList);
+            if (mFinalizer == null) {
+                mFinalizer = new DisplayListFinalizer(mNativeDisplayList);
+            } else {
+                mFinalizer.replaceNativeObject(mNativeDisplayList);
+            }
         }
     }
 
@@ -68,9 +90,16 @@ class GLES20DisplayList extends DisplayList {
             mNativeDisplayList = nativeDisplayList;
         }
 
+        void replaceNativeObject(int newNativeDisplayList) {
+            if (mNativeDisplayList != 0) {
+                GLES20Canvas.destroyDisplayList(mNativeDisplayList);
+            }
+            mNativeDisplayList = newNativeDisplayList;
+        }
+
         @Override
         protected void finalize() throws Throwable {
-            GLES20Canvas.destroyDisplayList(mNativeDisplayList);
+            replaceNativeObject(0);
         }
     }
 }
