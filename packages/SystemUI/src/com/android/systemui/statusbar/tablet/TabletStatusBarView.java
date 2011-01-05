@@ -60,6 +60,7 @@ public class TabletStatusBarView extends FrameLayout {
                 }
             }
         }
+        Slog.d(TabletStatusBar.TAG, "TabletStatusBarView not intercepting event");
         return super.onInterceptTouchEvent(ev);
     }
 

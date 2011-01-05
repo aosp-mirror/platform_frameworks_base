@@ -119,6 +119,7 @@ public class TabletStatusBar extends StatusBar {
     View mMenuButton;
     View mRecentButton;
 
+    ViewGroup mNotificationAndImeArea;
     InputMethodButton mInputMethodSwitchButton;
 
     NotificationPanel mNotificationPanel;
@@ -344,6 +345,7 @@ public class TabletStatusBar extends StatusBar {
         mRecentButton.setOnClickListener(mOnClickListener);
 
         // The bar contents buttons
+        mNotificationAndImeArea = (ViewGroup)sb.findViewById(R.id.notificationAndImeArea);
         mInputMethodSwitchButton = (InputMethodButton) sb.findViewById(R.id.imeSwitchButton);
 
         // for redirecting errant bar taps to the IME
@@ -718,15 +720,14 @@ public class TabletStatusBar extends StatusBar {
             if (0 == (mDisabled & (StatusBarManager.DISABLE_NOTIFICATION_ICONS
                             | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
                 mTicker.add(key, n);
-
-                mNotificationArea.setVisibility(View.GONE);
+                mNotificationAndImeArea.setVisibility(View.GONE);
             }
         }
     }
 
     // called by TabletTicker when it's done with all queued ticks
     public void doneTicking() {
-        mNotificationArea.setVisibility(View.VISIBLE);
+        mNotificationAndImeArea.setVisibility(View.VISIBLE);
     }
 
     public void animateExpand() {
