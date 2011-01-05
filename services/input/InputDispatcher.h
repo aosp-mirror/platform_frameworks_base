@@ -957,6 +957,7 @@ private:
     struct TouchState {
         bool down;
         bool split;
+        int32_t deviceId; // id of the device that is currently down, others are rejected
         Vector<TouchedWindow> windows;
 
         TouchState();
