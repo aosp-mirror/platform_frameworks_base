@@ -17,7 +17,7 @@
 package android.text;
 
 /**
- * @deprecated Old text-only interace to the clipboard.  See
+ * @deprecated Old text-only interface to the clipboard.  See
  * {@link android.content.ClipboardManager} for the modern API.
  */
 @Deprecated

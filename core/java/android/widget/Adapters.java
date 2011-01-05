@@ -39,6 +39,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
+ * @hide -- not sure if we really want this in the framework.
+ *
  * <p>This class can be used to load {@link android.widget.Adapter adapters} defined in
  * XML resources. XML-defined adapters can be used to easily create adapters in your
  * own application or to pass adapters to other processes.</p>
@@ -239,18 +241,18 @@ import java.util.HashMap;
  * @see android.widget.Adapter
  * @see android.content.ContentProvider
  * 
- * @attr ref android.R.styleable#CursorAdapter_layout 
- * @attr ref android.R.styleable#CursorAdapter_selection 
- * @attr ref android.R.styleable#CursorAdapter_sortOrder 
- * @attr ref android.R.styleable#CursorAdapter_uri 
- * @attr ref android.R.styleable#CursorAdapter_BindItem_as 
- * @attr ref android.R.styleable#CursorAdapter_BindItem_from 
- * @attr ref android.R.styleable#CursorAdapter_BindItem_to
- * @attr ref android.R.styleable#CursorAdapter_MapItem_fromValue 
- * @attr ref android.R.styleable#CursorAdapter_MapItem_toValue 
- * @attr ref android.R.styleable#CursorAdapter_SelectItem_column 
- * @attr ref android.R.styleable#CursorAdapter_TransformItem_withClass 
- * @attr ref android.R.styleable#CursorAdapter_TransformItem_withExpression 
+ * attr ref android.R.styleable#CursorAdapter_layout
+ * attr ref android.R.styleable#CursorAdapter_selection
+ * attr ref android.R.styleable#CursorAdapter_sortOrder
+ * attr ref android.R.styleable#CursorAdapter_uri
+ * attr ref android.R.styleable#CursorAdapter_BindItem_as
+ * attr ref android.R.styleable#CursorAdapter_BindItem_from
+ * attr ref android.R.styleable#CursorAdapter_BindItem_to
+ * attr ref android.R.styleable#CursorAdapter_MapItem_fromValue
+ * attr ref android.R.styleable#CursorAdapter_MapItem_toValue
+ * attr ref android.R.styleable#CursorAdapter_SelectItem_column
+ * attr ref android.R.styleable#CursorAdapter_TransformItem_withClass
+ * attr ref android.R.styleable#CursorAdapter_TransformItem_withExpression
  */
 @SuppressWarnings({"JavadocReference"})
 public class Adapters {
@@ -614,12 +616,12 @@ public class Adapters {
                throws IOException, XmlPullParserException {
 
             Resources resources = mResources;
-            TypedArray a = resources.obtainAttributes(mAttrs, android.R.styleable.CursorAdapter);
+            TypedArray a = resources.obtainAttributes(mAttrs, com.android.internal.R.styleable.CursorAdapter);
 
-            String uri = a.getString(android.R.styleable.CursorAdapter_uri);
-            String selection = a.getString(android.R.styleable.CursorAdapter_selection);
-            String sortOrder = a.getString(android.R.styleable.CursorAdapter_sortOrder);
-            int layout = a.getResourceId(android.R.styleable.CursorAdapter_layout, 0);
+            String uri = a.getString(com.android.internal.R.styleable.CursorAdapter_uri);
+            String selection = a.getString(com.android.internal.R.styleable.CursorAdapter_selection);
+            String sortOrder = a.getString(com.android.internal.R.styleable.CursorAdapter_sortOrder);
+            int layout = a.getResourceId(com.android.internal.R.styleable.CursorAdapter_layout, 0);
             if (layout == 0) {
                 throw new IllegalArgumentException("The layout specified in " +
                         resources.getResourceEntryName(mId) + " does not exist");
@@ -670,9 +672,9 @@ public class Adapters {
 
         private void parseSelectTag() {
             TypedArray a = mResources.obtainAttributes(mAttrs,
-                    android.R.styleable.CursorAdapter_SelectItem);
+                    com.android.internal.R.styleable.CursorAdapter_SelectItem);
 
-            String fromName = a.getString(android.R.styleable.CursorAdapter_SelectItem_column);
+            String fromName = a.getString(com.android.internal.R.styleable.CursorAdapter_SelectItem_column);
             if (fromName == null) {
                 throw new IllegalArgumentException("A select item in " +
                         mResources.getResourceEntryName(mId) +
@@ -688,21 +690,21 @@ public class Adapters {
         private void parseBindTag() throws IOException, XmlPullParserException {
             Resources resources = mResources;
             TypedArray a = resources.obtainAttributes(mAttrs,
-                    android.R.styleable.CursorAdapter_BindItem);
+                    com.android.internal.R.styleable.CursorAdapter_BindItem);
 
-            String fromName = a.getString(android.R.styleable.CursorAdapter_BindItem_from);
+            String fromName = a.getString(com.android.internal.R.styleable.CursorAdapter_BindItem_from);
             if (fromName == null) {
                 throw new IllegalArgumentException("A bind item in " +
                         resources.getResourceEntryName(mId) + " does not have a 'from' attribute");
             }
 
-            int toName = a.getResourceId(android.R.styleable.CursorAdapter_BindItem_to, 0);
+            int toName = a.getResourceId(com.android.internal.R.styleable.CursorAdapter_BindItem_to, 0);
             if (toName == 0) {
                 throw new IllegalArgumentException("A bind item in " +
                         resources.getResourceEntryName(mId) + " does not have a 'to' attribute");
             }
 
-            String asType = a.getString(android.R.styleable.CursorAdapter_BindItem_as);
+            String asType = a.getString(com.android.internal.R.styleable.CursorAdapter_BindItem_as);
             if (asType == null) {
                 throw new IllegalArgumentException("A bind item in " +
                         resources.getResourceEntryName(mId) + " does not have an 'as' attribute");
@@ -796,9 +798,9 @@ public class Adapters {
             Resources resources = mResources;
 
             TypedArray a = resources.obtainAttributes(mAttrs,
-                    android.R.styleable.CursorAdapter_MapItem);
+                    com.android.internal.R.styleable.CursorAdapter_MapItem);
 
-            String from = a.getString(android.R.styleable.CursorAdapter_MapItem_fromValue);
+            String from = a.getString(com.android.internal.R.styleable.CursorAdapter_MapItem_fromValue);
             if (from == null) {
                 throw new IllegalArgumentException("A map item in " +
                         resources.getResourceEntryName(mId) +
@@ -806,7 +808,7 @@ public class Adapters {
             }
 
             if (!drawable) {
-                String to = a.getString(android.R.styleable.CursorAdapter_MapItem_toValue);
+                String to = a.getString(com.android.internal.R.styleable.CursorAdapter_MapItem_toValue);
                 if (to == null) {
                     throw new IllegalArgumentException("A map item in " +
                             resources.getResourceEntryName(mId) +
@@ -814,7 +816,7 @@ public class Adapters {
                 }
                 transformation.addStringMapping(from, to);
             } else {
-                int to = a.getResourceId(android.R.styleable.CursorAdapter_MapItem_toValue, 0);
+                int to = a.getResourceId(com.android.internal.R.styleable.CursorAdapter_MapItem_toValue, 0);
                 if (to == 0) {
                     throw new IllegalArgumentException("A map item in " +
                             resources.getResourceEntryName(mId) +
@@ -830,12 +832,12 @@ public class Adapters {
             Resources resources = mResources;
             CursorTransformation transformation = null;
             TypedArray a = resources.obtainAttributes(mAttrs,
-                    android.R.styleable.CursorAdapter_TransformItem);
+                    com.android.internal.R.styleable.CursorAdapter_TransformItem);
 
-            String className = a.getString(android.R.styleable.CursorAdapter_TransformItem_withClass);
+            String className = a.getString(com.android.internal.R.styleable.CursorAdapter_TransformItem_withClass);
             if (className == null) {
                 String expression = a.getString(
-                        android.R.styleable.CursorAdapter_TransformItem_withExpression);
+                        com.android.internal.R.styleable.CursorAdapter_TransformItem_withExpression);
                 transformation = createExpressionTransformation(expression);
             } else if (!mContext.isRestricted()) {
                 try {

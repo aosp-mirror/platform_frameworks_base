@@ -98,9 +98,9 @@
         <!-- Text color for urls in search suggestions, used by things like global search and the browser. @hide -->
         <attr name="textColorSearchUrl" format="reference|color" />
 
-        <!-- Color of highlighted text, when used in a light theme. @hide -->
+        <!-- Color of highlighted text, when used in a light theme. -->
         <attr name="textColorHighlightInverse" format="reference|color" />
-        <!-- Color of link text (URLs), when used in a light theme. @hide -->
+        <!-- Color of link text (URLs), when used in a light theme. -->
         <attr name="textColorLinkInverse" format="reference|color" />
 
         <!-- Color of list item text in alert dialogs. -->
@@ -371,6 +371,17 @@
         <attr name="alertDialogButtonGroupStyle" format="reference" />
         <attr name="alertDialogCenterButtons" format="boolean" />
 
+        <!-- ============== -->
+        <!-- Image elements -->
+        <!-- ============== -->
+        <eat-comment />
+
+        <!-- Background that can be used behind parts of a UI that provide
+             details on data the user is selecting.  For example, this is
+             the background element of PreferenceActivity's embedded
+             preference fragment. -->
+        <attr name="detailsElementBackground" format="reference" />
+
         <!-- ============ -->
         <!-- Panel styles -->
         <!-- ============ -->
@@ -598,8 +609,6 @@
         <attr name="ringtonePreferenceStyle" format="reference" />
         <!-- The preference layout that has the child/tabbed effect. -->
         <attr name="preferenceLayoutChild" format="reference" />
-        <!-- Preference panel background -->
-        <attr name="preferencePanelBackground" format="reference" />
         <!-- Preference panel style -->
         <attr name="preferencePanelStyle" format="reference" />
 
@@ -2022,7 +2031,8 @@
              will use only the number of items in the adapter and the number of items visible
              on screen to determine the scrollbar's properties. -->
         <attr name="smoothScrollbar" format="boolean" />
-        <!-- A reference to an XML description of the adapter to attach to the list. -->
+        <!-- A reference to an XML description of the adapter to attach to the list.
+             XXX Should remove? -->
         <attr name="adapter" format="reference" />
         <!-- Defines the choice behavior for the view. By default, lists do not have
              any choice behavior. By setting the choiceMode to singleChoice, the list
@@ -4555,7 +4565,8 @@
     <!-- =============================== -->
     <eat-comment />
 
-    <!-- Adapter used to bind cursors. -->
+    <!-- Adapter used to bind cursors.
+         @hide XXX should remove? -->
     <declare-styleable name="CursorAdapter">
         <!-- URI to get the cursor from. Optional. -->
         <attr name="uri" format="string" />
@@ -4567,7 +4578,8 @@
         <attr name="layout" />
     </declare-styleable>
 
-    <!-- Attributes used in bind items for XML cursor adapters. -->
+    <!-- Attributes used in bind items for XML cursor adapters.
+         @hide XXX should remove? -->
     <declare-styleable name="CursorAdapter_BindItem">
         <!-- The name of the column to bind from. Mandatory. -->
         <attr name="from" format="string" />
@@ -4589,13 +4601,15 @@
         <attr name="as" format="string" />
     </declare-styleable>
 
-    <!-- Attributes used in select items for XML cursor adapters. -->
+    <!-- Attributes used in select items for XML cursor adapters.
+         @hide XXX should remove? -->
     <declare-styleable name="CursorAdapter_SelectItem">
         <!-- The name of the column to select. Mandatory. -->
         <attr name="column" format="string" />
     </declare-styleable>
 
-    <!-- Attributes used to map values to new values in XML cursor adapters' bind items. -->
+    <!-- Attributes used to map values to new values in XML cursor adapters' bind items.
+         @hide XXX should remove? -->
     <declare-styleable name="CursorAdapter_MapItem">
         <!-- The original value from the column. Mandatory. -->
         <attr name="fromValue" format="string" />
@@ -4603,7 +4617,8 @@
         <attr name="toValue" format="string" />
     </declare-styleable>
 
-    <!-- Attributes used to map values to new values in XML cursor adapters' bind items. -->
+    <!-- Attributes used to map values to new values in XML cursor adapters' bind items.
+         @hide XXX should remove? -->
     <declare-styleable name="CursorAdapter_TransformItem">
         <!-- The transformation expression. Mandatory if "withClass" is not specified. -->
         <attr name="withExpression" format="string" />

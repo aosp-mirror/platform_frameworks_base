@@ -1231,7 +1231,7 @@
   <public type="attr" name="expandableListViewWhiteStyle" id="0x010102b6" />
 
 <!-- ===============================================================
-     Resources proposed for Froyo.
+     Resources added in version 8 of the platform (Froyo / 2.2)
      =============================================================== -->
   <eat-comment />
   <public type="attr" name="installLocation" id="0x010102b7" />
@@ -1247,7 +1247,7 @@
   <public type="anim" name="cycle_interpolator" id="0x010a000c" />
 
 <!-- ===============================================================
-     Resources introduced in Gingerbread.
+     Resources added in version 9 of the platform (Gingerbread / 2.3)
      =============================================================== -->
   <eat-comment />
   <public type="attr" name="logo" id="0x010102be" />
@@ -1282,18 +1282,6 @@
      Resources proposed for Honeycomb.
      =============================================================== -->
   <eat-comment />
-  <public type="attr" name="adapter" />
-  <public type="attr" name="selection" />
-  <public type="attr" name="sortOrder" />
-  <public type="attr" name="uri" />
-  <public type="attr" name="from" />
-  <public type="attr" name="to" />
-  <public type="attr" name="as" />
-  <public type="attr" name="fromValue" />
-  <public type="attr" name="toValue" />
-  <public type="attr" name="column" />
-  <public type="attr" name="withExpression" />
-  <public type="attr" name="withClass" />
   <public type="attr" name="allContactsName" />
   <public type="attr" name="windowActionBar" />
   <public type="attr" name="actionBarStyle" />
@@ -1426,6 +1414,12 @@
   <public type="attr" name="spinnersShown" />
   <public type="attr" name="calendarViewShown" />
   <public type="attr" name="state_multiline" />
+  <public type="attr" name="detailsElementBackground" />
+  <public type="attr" name="textColorHighlightInverse" />
+  <public type="attr" name="textColorLinkInverse" />
+  <public type="attr" name="editTextColor" />
+  <public type="attr" name="editTextBackground" />
+  <public type="attr" name="horizontalScrollViewStyle" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
