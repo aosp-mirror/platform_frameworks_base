@@ -106,7 +106,7 @@ enum {
 
 // camera fatal errors
 enum {
-    CAMERA_ERROR_UKNOWN  = 1,
+    CAMERA_ERROR_UNKNOWN  = 1,
     CAMERA_ERROR_SERVER_DIED = 100
 };
 
