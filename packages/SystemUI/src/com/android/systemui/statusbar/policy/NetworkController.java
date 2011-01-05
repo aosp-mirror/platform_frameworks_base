@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +25,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
@@ -61,6 +64,7 @@ public class NetworkController extends BroadcastReceiver {
     boolean mDataConnected;
     IccCard.State mSimState = IccCard.State.READY;
     int mPhoneState = TelephonyManager.CALL_STATE_IDLE;
+    int mDataNetType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
     int mDataState = TelephonyManager.DATA_DISCONNECTED;
     int mDataActivity = TelephonyManager.DATA_ACTIVITY_NONE;
     ServiceState mServiceState;
@@ -235,7 +239,8 @@ public class NetworkController extends BroadcastReceiver {
                         + " type=" + networkType);
             }
             mDataState = state;
-            updateDataNetType(networkType);
+            mDataNetType = networkType;
+            updateDataNetType();
             updateDataIcon();
             refreshViews();
         }
@@ -406,8 +411,12 @@ public class NetworkController extends BroadcastReceiver {
         }
     }
 
-    private final void updateDataNetType(int net) {
-        switch (net) {
+    private final void updateDataNetType() {
+        switch (mDataNetType) {
+            case TelephonyManager.NETWORK_TYPE_UNKNOWN:
+                mDataIconList = TelephonyIcons.DATA_G[mInetCondition];
+                mDataTypeIconId = 0;
+                break;
             case TelephonyManager.NETWORK_TYPE_EDGE:
                 mDataIconList = TelephonyIcons.DATA_E[mInetCondition];
                 mDataTypeIconId = R.drawable.stat_sys_signal_edge;
@@ -446,7 +455,7 @@ public class NetworkController extends BroadcastReceiver {
             default:
                 mDataIconList = TelephonyIcons.DATA_G[mInetCondition];
                 mDataTypeIconId = R.drawable.stat_sys_signal_gprs;
-            break;
+                break;
         }
         if ((isCdma() && isCdmaEri()) || mPhone.isNetworkRoaming()) {
             mDataTypeIconId = R.drawable.stat_sys_signal_roam;
@@ -632,7 +641,7 @@ public class NetworkController extends BroadcastReceiver {
         switch (info.getType()) {
             case ConnectivityManager.TYPE_MOBILE:
                 mInetCondition = inetCondition;
-                updateDataNetType(info.getSubtype());
+                updateDataNetType();
                 updateDataIcon();
                 updateTelephonySignalStrength(); // apply any change in connectionStatus
                 break;
@@ -748,4 +757,98 @@ public class NetworkController extends BroadcastReceiver {
             }
         }
     }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("  - telephony ------");
+        pw.print("  mHspaDataDistinguishable=");
+        pw.println(mHspaDataDistinguishable);
+        pw.print("  mDataConnected=");
+        pw.println(mDataConnected);
+        pw.print("  mSimState=");
+        pw.println(mSimState);
+        pw.print("  mPhoneState=");
+        pw.println(mPhoneState);
+        pw.print("  mDataState=");
+        pw.println(mDataState);
+        pw.print("  mDataActivity=");
+        pw.println(mDataActivity);
+        pw.print("  mServiceState=");
+        pw.println(mServiceState.toString());
+        pw.print("  mNetworkName=");
+        pw.println(mNetworkName);
+        pw.print("  mNetworkNameDefault=");
+        pw.println(mNetworkNameDefault);
+        pw.print("  mNetworkNameSeparator=");
+        pw.println(mNetworkNameSeparator);
+        pw.print("  mPhoneSignalIconId=0x");
+        pw.print(Integer.toHexString(mPhoneSignalIconId));
+        pw.print("/");
+        pw.println(getResourceName(mPhoneSignalIconId));
+        pw.print("  mDataDirectionIconId=");
+        pw.print(Integer.toHexString(mDataDirectionIconId));
+        pw.print("/");
+        pw.println(getResourceName(mDataDirectionIconId));
+        pw.print("  mDataSignalIconId=");
+        pw.print(Integer.toHexString(mDataSignalIconId));
+        pw.print("/");
+        pw.println(getResourceName(mDataSignalIconId));
+        pw.print("  mDataTypeIconId=");
+        pw.print(Integer.toHexString(mDataTypeIconId));
+        pw.print("/");
+        pw.println(getResourceName(mDataTypeIconId));
+
+        pw.println("  - wifi ------");
+        pw.print("  mWifiEnabled=");
+        pw.println(mWifiEnabled);
+        pw.print("  mWifiConnected=");
+        pw.println(mWifiConnected);
+        pw.print("  mWifiLevel=");
+        pw.println(mWifiLevel);
+        pw.print("  mWifiSsid=");
+        pw.println(mWifiSsid);
+        pw.print("  mWifiIconId=");
+        pw.println(mWifiIconId);
+
+        pw.println("  - connectivity ------");
+        pw.print("  mInetCondition=");
+        pw.println(mInetCondition);
+
+        pw.println("  - icons ------");
+        pw.print("  mLastPhoneSignalIconId=0x");
+        pw.print(Integer.toHexString(mLastPhoneSignalIconId));
+        pw.print("/");
+        pw.println(getResourceName(mLastPhoneSignalIconId));
+        pw.print("  mLastDataDirectionIconId=0x");
+        pw.print(Integer.toHexString(mLastDataDirectionIconId));
+        pw.print("/");
+        pw.println(getResourceName(mLastDataDirectionIconId));
+        pw.print("  mLastWifiIconId=0x");
+        pw.print(Integer.toHexString(mLastWifiIconId));
+        pw.print("/");
+        pw.println(getResourceName(mLastWifiIconId));
+        pw.print("  mLastCombinedSignalIconId=0x");
+        pw.print(Integer.toHexString(mLastCombinedSignalIconId));
+        pw.print("/");
+        pw.println(getResourceName(mLastCombinedSignalIconId));
+        pw.print("  mLastDataTypeIconId=0x");
+        pw.print(Integer.toHexString(mLastDataTypeIconId));
+        pw.print("/");
+        pw.println(getResourceName(mLastCombinedSignalIconId));
+        pw.print("  mLastLabel=");
+        pw.print(mLastLabel);
+    }
+
+    private String getResourceName(int resId) {
+        if (resId == 0) {
+            final Resources res = mContext.getResources();
+            try {
+                return res.getResourceName(resId);
+            } catch (android.content.res.Resources.NotFoundException ex) {
+                return "(unknown)";
+            }
+        } else {
+            return "(null)";
+        }
+    }
+
 }
