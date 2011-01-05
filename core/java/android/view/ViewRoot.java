@@ -345,8 +345,6 @@ public final class ViewRoot extends Handler implements ViewParent,
                 mWindowAttributes.copyFrom(attrs);
                 attrs = mWindowAttributes;
                 
-                enableHardwareAcceleration(attrs);
-
                 if (view instanceof RootViewSurfaceTaker) {
                     mSurfaceHolderCallback =
                             ((RootViewSurfaceTaker)view).willYouTakeTheSurface();
@@ -355,6 +353,12 @@ public final class ViewRoot extends Handler implements ViewParent,
                         mSurfaceHolder.setFormat(PixelFormat.UNKNOWN);
                     }
                 }
+
+                // If the application owns the surface, don't enable hardware acceleration
+                if (mSurfaceHolder == null) {
+                    enableHardwareAcceleration(attrs);
+                }
+
                 Resources resources = mView.getContext().getResources();
                 CompatibilityInfo compatibilityInfo = resources.getCompatibilityInfo();
                 mTranslator = compatibilityInfo.getTranslator();
