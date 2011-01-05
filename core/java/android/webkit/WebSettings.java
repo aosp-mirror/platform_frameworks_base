@@ -215,6 +215,7 @@ public class WebSettings {
     private boolean         mBuiltInZoomControls = false;
     private boolean         mDisplayZoomControls = true;
     private boolean         mAllowFileAccess = true;
+    private boolean         mAllowContentAccess = true;
     private boolean         mLoadWithOverviewMode = false;
     private boolean         mEnableSmoothTransition = false;
 
@@ -587,7 +588,9 @@ public class WebSettings {
 
     /**
      * Enable or disable file access within WebView. File access is enabled by
-     * default.
+     * default.  Note that this enables or disables file system access only.
+     * Assets and resources are still accessible using file:///android_asset and
+     * file:///android_res.
      */
     public void setAllowFileAccess(boolean allow) {
         mAllowFileAccess = allow;
@@ -598,6 +601,22 @@ public class WebSettings {
      */
     public boolean getAllowFileAccess() {
         return mAllowFileAccess;
+    }
+
+    /**
+     * Enable or disable content url access within WebView.  Content url access
+     * allows WebView to load content from a content provider installed in the
+     * system.  The default is enabled.
+     */
+    public void setAllowContentAccess(boolean allow) {
+        mAllowContentAccess = allow;
+    }
+
+    /**
+     * Returns true if this WebView supports content url access.
+     */
+    public boolean getAllowContentAccess() {
+        return mAllowContentAccess;
     }
 
     /**
