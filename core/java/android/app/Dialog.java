@@ -571,7 +571,21 @@ public class Dialog implements DialogInterface, Window.Callback,
             cancel();
         }
     }
-    
+
+    /**
+     * Called when an key shortcut event is not handled by any of the views in the Dialog.
+     * Override this method to implement global key shortcuts for the Dialog.
+     * Key shortcuts can also be implemented by setting the
+     * {@link MenuItem#setShortcut(char, char) shortcut} property of menu items.
+     *
+     * @param keyCode The value in event.getKeyCode().
+     * @param event Description of the key event.
+     * @return True if the key shortcut was handled.
+     */
+    public boolean onKeyShortcut(int keyCode, KeyEvent event) {
+        return false;
+    }
+
     /**
      * Called when a touch screen event was not handled by any of the views
      * under it. This is most useful to process touch events that happen outside
@@ -656,6 +670,22 @@ public class Dialog implements DialogInterface, Window.Callback,
         }
         return event.dispatch(this, mDecor != null
                 ? mDecor.getKeyDispatcherState() : null, this);
+    }
+
+    /**
+     * Called to process a key shortcut event.
+     * You can override this to intercept all key shortcut events before they are
+     * dispatched to the window.  Be sure to call this implementation for key shortcut
+     * events that should be handled normally.
+     *
+     * @param event The key shortcut event.
+     * @return True if this event was consumed.
+     */
+    public boolean dispatchKeyShortcutEvent(KeyEvent event) {
+        if (mWindow.superDispatchKeyShortcutEvent(event)) {
+            return true;
+        }
+        return onKeyShortcut(event.getKeyCode(), event);
     }
 
     /**

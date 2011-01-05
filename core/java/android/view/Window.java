@@ -150,6 +150,17 @@ public abstract class Window {
         public boolean dispatchKeyEvent(KeyEvent event);
 
         /**
+         * Called to process a key shortcut event.
+         * At the very least your implementation must call
+         * {@link android.view.Window#superDispatchKeyShortcutEvent} to do the
+         * standard key shortcut processing.
+         *
+         * @param event The key shortcut event.
+         * @return True if this event was consumed.
+         */
+        public boolean dispatchKeyShortcutEvent(KeyEvent event);
+
+        /**
          * Called to process touch screen events.  At the very least your
          * implementation must call
          * {@link android.view.Window#superDispatchTouchEvent} to do the
@@ -1026,6 +1037,14 @@ public abstract class Window {
      *
      */
     public abstract boolean superDispatchKeyEvent(KeyEvent event);
+
+    /**
+     * Used by custom windows, such as Dialog, to pass the key shortcut press event
+     * further down the view hierarchy. Application developers should
+     * not need to implement or call this.
+     *
+     */
+    public abstract boolean superDispatchKeyShortcutEvent(KeyEvent event);
 
     /**
      * Used by custom windows, such as Dialog, to pass the touch screen event

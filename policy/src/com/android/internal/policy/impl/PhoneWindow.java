@@ -1237,6 +1237,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
+    public boolean superDispatchKeyShortcutEvent(KeyEvent event) {
+        return mDecor.superDispatchKeyShortcutEvent(event);
+    }
+
+    @Override
     public boolean superDispatchTouchEvent(MotionEvent event) {
         return mDecor.superDispatchTouchEvent(event);
     }
@@ -1643,6 +1648,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         @Override
+        public boolean dispatchKeyShortcutEvent(KeyEvent ev) {
+            final Callback cb = getCallback();
+            return cb != null && mFeatureId < 0 ? cb.dispatchKeyShortcutEvent(ev) : super
+                    .dispatchKeyShortcutEvent(ev);
+        }
+
+        @Override
         public boolean dispatchTouchEvent(MotionEvent ev) {
             final Callback cb = getCallback();
             return cb != null && mFeatureId < 0 ? cb.dispatchTouchEvent(ev) : super
@@ -1658,6 +1670,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         public boolean superDispatchKeyEvent(KeyEvent event) {
             return super.dispatchKeyEvent(event);
+        }
+
+        public boolean superDispatchKeyShortcutEvent(KeyEvent event) {
+            return super.dispatchKeyShortcutEvent(event);
         }
 
         public boolean superDispatchTouchEvent(MotionEvent event) {

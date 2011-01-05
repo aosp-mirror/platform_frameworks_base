@@ -4768,7 +4768,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Called when an unhandled key shortcut event occurs.
+     * Called on the focused view when a key shortcut event is not handled.
+     * Override this method to implement local key shortcuts for the View.
+     * Key shortcuts can also be implemented by setting the
+     * {@link MenuItem#setShortcut(char, char) shortcut} property of menu items.
      *
      * @param keyCode The value in event.getKeyCode().
      * @param event Description of the key event.
