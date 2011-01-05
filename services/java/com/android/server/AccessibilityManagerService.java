@@ -532,11 +532,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         for (int i = 0, count = services.size(); i < count; i++) {
             Service service = services.get(i);
-
             service.unbind();
-            mComponentNameToServiceMap.remove(service.mComponentName);
         }
-        services.clear();
     }
 
     /**
@@ -588,15 +585,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             Service service = componentNameToServiceMap.get(componentName);
 
             if (isEnabled) {
-                if (enabledServices.contains(componentName) && service == null) {
-                    new Service(componentName).bind();
-                } else if (!enabledServices.contains(componentName) && service != null) {
-                    // clean up done in Service#onServiceDisconnected
-                    service.unbind();
+                if (enabledServices.contains(componentName)) {
+                    if (service == null) {
+                        service = new Service(componentName);
+                    }
+                    service.bind();
+                } else if (!enabledServices.contains(componentName)) {
+                    if (service != null) {
+                        service.unbind();
+                    }
                 }
             } else {
                 if (service != null) {
-                    // clean up done in Service#onServiceDisconnected
                     service.unbind();
                 }
             }
@@ -679,6 +679,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         public void unbind() {
             if (mService != null) {
                 mContext.unbindService(this);
+                mComponentNameToServiceMap.remove(mComponentName);
+                mServices.remove(this);
             }
         }
 
