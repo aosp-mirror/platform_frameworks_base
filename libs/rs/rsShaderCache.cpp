@@ -32,10 +32,7 @@ ShaderCache::ShaderCache() {
 }
 
 ShaderCache::~ShaderCache() {
-    for (uint32_t ct=0; ct < mEntries.size(); ct++) {
-        glDeleteProgram(mEntries[ct]->program);
-        free(mEntries[ct]);
-    }
+    cleanupAll();
 }
 
 void ShaderCache::updateUniformArrayData(Context *rsc, Program *prog, uint32_t linkedID,
@@ -251,5 +248,10 @@ void ShaderCache::cleanupFragment(uint32_t id) {
 }
 
 void ShaderCache::cleanupAll() {
+    for (uint32_t ct=0; ct < mEntries.size(); ct++) {
+        glDeleteProgram(mEntries[ct]->program);
+        free(mEntries[ct]);
+    }
+    mEntries.clear();
 }
 

@@ -535,6 +535,7 @@ void Context::destroyWorkerThreadResources() {
          mStateFragment.deinit(this);
          mStateFragmentStore.deinit(this);
          mStateFont.deinit(this);
+         mShaderCache.cleanupAll();
     }
     ObjectBase::zeroAllUserRef(this);
     LOGV("destroyWorkerThreadResources 2");
