@@ -214,7 +214,6 @@ public class Type extends BaseObj {
          * Add a dimension to the Type.
          *
          *
-         * @param d
          * @param value
          */
         public Builder setX(int value) {
