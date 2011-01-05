@@ -5853,6 +5853,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * True if this view has changed since the last time being drawn.
+     *
+     * @return The dirty state of this view.
+     */
+    public boolean isDirty() {
+        return (mPrivateFlags & DIRTY_MASK) != 0;
+    }
+
+    /**
      * Sets the bottom position of this view relative to its parent. This method is meant to be
      * called by the layout system and should not generally be called otherwise, because the
      * property may be changed at any time by the layout.
