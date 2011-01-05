@@ -135,6 +135,8 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
     }
 
     public void showSoftInput() {
+        mInput.startGettingWindowFocus(mEditText.getRootView());
+        mInput.focusIn(mEditText);
         mInput.showSoftInput(mEditText, 0);
     }
 
