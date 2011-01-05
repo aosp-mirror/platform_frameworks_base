@@ -65,6 +65,6 @@ when.</p>
 
 <p>The Android Eclipse plugin not only offers excellent debugging support for
 your application development, but also superb profiling support. You can also
-try using <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview</a> to profile your application. If your application is running too slow, this can help you 
+try using <a href="{@docRoot}guide/developing/debugging/debugging-tracing.html">Traceview</a> to profile your application. If your application is running too slow, this can help you 
 find the bottlenecks and fix them.</p>
 

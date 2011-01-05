@@ -40,7 +40,7 @@ Dev Phone, see the <a href="http://market.android.com/publish">Android Market</a
 
 <p class="note"><strong>Note:</strong> When developing on a device, keep in mind that you should
 still use the <a
-href="{@docRoot}guide/developing/tools/emulator.html">Android emulator</a> to test your application
+href="{@docRoot}guide/developing/devices/emulator.html">Android emulator</a> to test your application
 on configurations that are not equivalent to those of your real device. Although the emulator
 does not allow you to test every device feature (such as the accelerometer), it does
 allow you to verify that your application functions properly on different versions of the Android
