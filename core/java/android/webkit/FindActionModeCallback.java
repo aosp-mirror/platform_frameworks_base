@@ -134,6 +134,10 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         }
     }
 
+    public void showSoftInput() {
+        mInput.showSoftInput(mEditText, 0);
+    }
+
     /*
      * Update the string which tells the user how many matches were found, and
      * which match is currently highlighted.
@@ -165,7 +169,6 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         mMatchesFound = false;
         mMatches.setText("0");
         mEditText.requestFocus();
-        mInput.showSoftInput(mEditText, 0);
         return true;
     }
 
