@@ -1177,10 +1177,12 @@ import junit.framework.Assert;
             mWebView.requestLabel(mWebView.nativeFocusCandidateFramePointer(),
                     mNodePointer);
             maxLength = mWebView.nativeFocusCandidateMaxLength();
-            if (type != PASSWORD) {
+            boolean autoComplete = mWebView.nativeFocusCandidateIsAutoComplete();
+            if (type != PASSWORD && (mAutoFillable || autoComplete)) {
                 String name = mWebView.nativeFocusCandidateName();
                 if (name != null && name.length() > 0) {
-                    mWebView.requestFormData(name, mNodePointer, mAutoFillable);
+                    mWebView.requestFormData(name, mNodePointer, mAutoFillable,
+                            autoComplete);
                 }
             }
         }

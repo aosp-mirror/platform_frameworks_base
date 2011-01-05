@@ -4345,13 +4345,16 @@ public class WebView extends AbsoluteLayout
      *          retrieved.
      * @param autoFillable true if WebKit has determined this field is part of
      *          a form that can be auto filled.
+     * @param autoComplete true if the attribute "autocomplete" is set to true
+     *          on the textfield.
      */
-    /* package */ void requestFormData(String name, int nodePointer, boolean autoFillable) {
+    /* package */ void requestFormData(String name, int nodePointer,
+            boolean autoFillable, boolean autoComplete) {
         if (mWebViewCore.getSettings().getSaveFormData()) {
             Message update = mPrivateHandler.obtainMessage(REQUEST_FORM_DATA);
             update.arg1 = nodePointer;
             RequestFormData updater = new RequestFormData(name, getUrl(),
-                    update, autoFillable);
+                    update, autoFillable, autoComplete);
             Thread t = new Thread(updater);
             t.start();
         }
@@ -4378,16 +4381,19 @@ public class WebView extends AbsoluteLayout
         private String mUrl;
         private Message mUpdateMessage;
         private boolean mAutoFillable;
+        private boolean mAutoComplete;
 
-        public RequestFormData(String name, String url, Message msg, boolean autoFillable) {
+        public RequestFormData(String name, String url, Message msg,
+                boolean autoFillable, boolean autoComplete) {
             mName = name;
             mUrl = url;
             mUpdateMessage = msg;
             mAutoFillable = autoFillable;
+            mAutoComplete = autoComplete;
         }
 
         public void run() {
-            ArrayList<String> pastEntries = new ArrayList();
+            ArrayList<String> pastEntries = new ArrayList<String>();
 
             if (mAutoFillable) {
                 // Note that code inside the adapter click handler in WebTextView depends
@@ -4409,7 +4415,9 @@ public class WebView extends AbsoluteLayout
                 }
             }
 
-            pastEntries.addAll(mDatabase.getFormData(mUrl, mName));
+            if (mAutoComplete) {
+                pastEntries.addAll(mDatabase.getFormData(mUrl, mName));
+            }
 
             if (pastEntries.size() > 0) {
                 AutoCompleteAdapter adapter = new
@@ -8024,6 +8032,7 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeFocusCandidateIsRtlText();
     private native boolean  nativeFocusCandidateIsTextInput();
     /* package */ native int      nativeFocusCandidateMaxLength();
+    /* package */ native boolean  nativeFocusCandidateIsAutoComplete();
     /* package */ native String   nativeFocusCandidateName();
     private native Rect     nativeFocusCandidateNodeBounds();
     /**
