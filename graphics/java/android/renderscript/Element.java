@@ -20,8 +20,6 @@ import java.lang.reflect.Field;
 import android.util.Log;
 
 /**
- * @hide
- *
  * Element is the basic data type of RenderScript.  An element can be of 2
  * forms.  Basic elements contain a single component of data.  This can be of
  * any of the legal RS types.  Examples of basic element types.

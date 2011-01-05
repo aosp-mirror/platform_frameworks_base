@@ -18,7 +18,8 @@ package android.renderscript;
 
 
 /**
- * @hide
+ * Utility class for packing arguments and structures from java objects to rs
+ * objects.
  *
  **/
 public class FieldPacker {

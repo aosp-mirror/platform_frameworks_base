@@ -21,7 +21,7 @@ import android.util.Log;
 
 
 /**
- * @hide
+ * Class for exposing the rs int4 type back to java applications.
  *
  **/
 public class Int4 {

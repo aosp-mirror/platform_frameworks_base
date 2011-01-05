@@ -21,7 +21,7 @@ import android.util.Log;
 
 
 /**
- * @hide
+ * Class for exposing the rs float2 type back to java applications.
  *
  **/
 public class Float2 {

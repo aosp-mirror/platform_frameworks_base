@@ -27,7 +27,6 @@ import android.util.Log;
 
 
 /**
- * @hide
  *
  **/
 public class Program extends BaseObj {

@@ -21,7 +21,7 @@ import android.util.Log;
 
 
 /**
- * @hide
+ * Class for exposing the rs int2 type back to java applications.
  *
  **/
 public class Int2 {

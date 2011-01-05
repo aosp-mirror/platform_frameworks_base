@@ -21,7 +21,7 @@ import android.util.Log;
 
 
 /**
- * @hide
+ * Class for exposing the rs short3 type back to java applications.
  *
  **/
 public class Short3 {

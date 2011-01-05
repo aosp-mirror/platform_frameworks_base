@@ -22,7 +22,6 @@ import android.util.Log;
 
 
 /**
- * @hide
  *
  **/
 public class ProgramFragment extends Program {

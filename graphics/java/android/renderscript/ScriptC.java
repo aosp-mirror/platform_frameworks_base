@@ -30,7 +30,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
 /**
- * @hide
+ *
  **/
 public class ScriptC extends Script {
     private static final String TAG = "ScriptC";
