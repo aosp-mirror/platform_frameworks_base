@@ -421,8 +421,8 @@ lat/long coordinates, with a GPX file for route playback, or a KML file for mult
     <li>Use a KML file describing individual place marks for sequenced playback to the device.</li>
 </ul>
 
-<p>For more information on using DDMS to spoof location data, see the
-<a href="{@docRoot}guide/developing/tools/ddms.html#emulator-control">Using DDMS guide</a>.
+<p>For more information on using DDMS to spoof location data, see
+<a href="{@docRoot}guide/developing/debugging/ddms.html">Using DDMS</a>.
 
 
 <h3 id="MockGeo">Using the "geo" command in the emulator console</h3>
@@ -451,4 +451,4 @@ lat/long coordinates, with a GPX file for route playback, or a KML file for mult
 </ol>
 
 <p>For information about how to connect to the emulator console, see
-<a href="{@docRoot}guide/developing/tools/emulator.html#console">Using the Emulator Console</a>.</p>
+<a href="{@docRoot}guide/developing/devices/emulator.html#console">Using the Emulator Console</a>.</p>
