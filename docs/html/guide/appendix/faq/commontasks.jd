@@ -655,7 +655,7 @@ and the {@link android.os.Handler} documentation.</p>
         and <code>STRIKE</code> (strikethrough).
         So, for example, in res/values/strings.xml you could declare this:<br />
         <code>&lt;resource&gt;<br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&lt;string&gt;id=&quot;@+id/styled_welcome_message&quot;&gt;We
+        &nbsp;&nbsp;&nbsp;&nbsp;&lt;string&nbsp;id=&quot;@+id/styled_welcome_message&quot;&gt;We
         are &lt;b&gt;&lt;i&gt;so&lt;/i&gt;&lt;/b&gt; glad to see you.&lt;/string&gt;<br />
         &lt;/resources&gt;</code></li>
     <li>To style text on the fly, or to add highlighting or more complex styling,

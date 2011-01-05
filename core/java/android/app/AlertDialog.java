@@ -438,7 +438,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
         }
         
         /**
-         * Sets whether the dialog is cancelable or not default is true.
+         * Sets whether the dialog is cancelable or not.  Default is true.
          *
          * @return This Builder object to allow for chaining of calls to set methods
          */

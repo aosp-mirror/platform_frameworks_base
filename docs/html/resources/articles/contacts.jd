@@ -107,7 +107,7 @@ disable aggregation altogether, as described in the sections below.</p>
 <p>When a raw contact is added or modified, the system looks for matching
 (overlapping) raw contacts with which to aggregate it. It may not find any
 matching raw contacts, in which case it will create an aggregate contact that
-contains just the original raw contact. If it finds a single match,it creates a
+contains just the original raw contact. If it finds a single match, it creates a
 new contact that contains the two raw contacts. And it may even find multiple
 similar raw contacts, in which case it chooses the closest match. </p>
 

@@ -202,7 +202,7 @@ public abstract class Drawable {
 
     /**
      * Return a mask of the configuration parameters for which this drawable
-     * mau change, requiring that it be re-created.  The default implementation
+     * may change, requiring that it be re-created.  The default implementation
      * returns whatever was provided through
      * {@link #setChangingConfigurations(int)} or 0 by default.  Subclasses
      * may extend this to or in the changing configurations of any other
