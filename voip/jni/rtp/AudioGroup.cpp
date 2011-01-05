@@ -63,6 +63,14 @@ int gRandom = -1;
 // real jitter buffer. For a stream at 8000Hz it takes 8192 bytes. These numbers
 // are chosen by experiments and each of them can be adjusted as needed.
 
+// Originally a stream does not send packets when it is receive-only or there is
+// nothing to mix. However, this causes some problems with certain firewalls and
+// proxies. A firewall might remove a port mapping when there is no outgoing
+// packet for a preiod of time, and a proxy might wait for incoming packets from
+// both sides before start forwarding. To solve these problems, we send out a
+// silence packet on the stream for every second. It should be good enough to
+// keep the stream alive with relatively low resources.
+
 // Other notes:
 // + We use elapsedRealtime() to get the time. Since we use 32bit variables
 //   instead of 64bit ones, comparison must be done by subtraction.
@@ -110,7 +118,7 @@ private:
     int mSampleRate;
     int mSampleCount;
     int mInterval;
-    int mLogThrottle;
+    int mKeepAlive;
 
     int16_t *mBuffer;
     int mBufferMask;
@@ -262,12 +270,8 @@ void AudioStream::encode(int tick, AudioStream *chain)
     ++mSequence;
     mTimestamp += mSampleCount;
 
-    if (mMode == RECEIVE_ONLY) {
-        return;
-    }
-
     // If there is an ongoing DTMF event, send it now.
-    if (mDtmfEvent != -1) {
+    if (mMode != RECEIVE_ONLY && mDtmfEvent != -1) {
         int duration = mTimestamp - mDtmfStart;
         // Make sure duration is reasonable.
         if (duration >= 0 && duration < mSampleRate * 100) {
@@ -289,43 +293,55 @@ void AudioStream::encode(int tick, AudioStream *chain)
         mDtmfEvent = -1;
     }
 
-    // It is time to mix streams.
-    bool mixed = false;
     int32_t buffer[mSampleCount + 3];
-    memset(buffer, 0, sizeof(buffer));
-    while (chain) {
-        if (chain != this &&
-            chain->mix(buffer, tick - mInterval, tick, mSampleRate)) {
-            mixed = true;
+    int16_t samples[mSampleCount];
+    if (mMode == RECEIVE_ONLY) {
+        if ((mTick ^ mKeepAlive) >> 10 == 0) {
+            return;
         }
-        chain = chain->mNext;
-    }
-    if (!mixed) {
-        if ((mTick ^ mLogThrottle) >> 10) {
-            mLogThrottle = mTick;
+        mKeepAlive = mTick;
+        memset(samples, 0, sizeof(samples));
+    } else {
+        // Mix all other streams.
+        bool mixed = false;
+        memset(buffer, 0, sizeof(buffer));
+        while (chain) {
+            if (chain != this &&
+                chain->mix(buffer, tick - mInterval, tick, mSampleRate)) {
+                mixed = true;
+            }
+            chain = chain->mNext;
+        }
+
+        if (mixed) {
+            // Saturate into 16 bits.
+            for (int i = 0; i < mSampleCount; ++i) {
+                int32_t sample = buffer[i];
+                if (sample < -32768) {
+                    sample = -32768;
+                }
+                if (sample > 32767) {
+                    sample = 32767;
+                }
+                samples[i] = sample;
+            }
+        } else {
+            if ((mTick ^ mKeepAlive) >> 10 == 0) {
+                return;
+            }
+            mKeepAlive = mTick;
+            memset(samples, 0, sizeof(samples));
             LOGV("stream[%d] no data", mSocket);
         }
-        return;
     }
 
-    // Cook the packet and send it out.
-    int16_t samples[mSampleCount];
-    for (int i = 0; i < mSampleCount; ++i) {
-        int32_t sample = buffer[i];
-        if (sample < -32768) {
-            sample = -32768;
-        }
-        if (sample > 32767) {
-            sample = 32767;
-        }
-        samples[i] = sample;
-    }
     if (!mCodec) {
         // Special case for device stream.
         send(mSocket, samples, sizeof(samples), MSG_DONTWAIT);
         return;
     }
 
+    // Cook the packet and send it out.
     buffer[0] = htonl(mCodecMagic | mSequence);
     buffer[1] = htonl(mTimestamp);
     buffer[2] = mSsrc;
@@ -883,7 +899,7 @@ void add(JNIEnv *env, jobject thiz, jint mode,
     int codecType = -1;
     char codecName[16];
     int sampleRate = -1;
-    sscanf(codecSpec, "%d %[^/]%*c%d", &codecType, codecName, &sampleRate);
+    sscanf(codecSpec, "%d %15[^/]%*c%d", &codecType, codecName, &sampleRate);
     codec = newAudioCodec(codecName);
     int sampleCount = (codec ? codec->set(sampleRate, codecSpec) : -1);
     env->ReleaseStringUTFChars(jCodecSpec, codecSpec);
