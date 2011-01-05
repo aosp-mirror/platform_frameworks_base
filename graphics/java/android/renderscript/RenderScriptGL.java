@@ -150,19 +150,6 @@ public class RenderScriptGL extends RenderScript {
     };
 
     SurfaceConfig mSurfaceConfig;
-/*
-    // Keep?
-    public void configureSurface(SurfaceHolder sh) {
-        if (mSurfaceConfig.mAlphaMin > 1) {
-            sh.setFormat(PixelFormat.RGBA_8888);
-        } else {
-            sh.setFormat(PixelFormat.RGBX_8888);
-        }
-    }
-
-    public void checkSurface(SurfaceHolder sh) {
-    }
-*/
 
     /**
      * Construct a new RenderScriptGL context.
