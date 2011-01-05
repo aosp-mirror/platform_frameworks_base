@@ -1060,14 +1060,26 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
     // Update the touch state as needed based on the properties of the touch event.
     int32_t injectionResult = INPUT_EVENT_INJECTION_PENDING;
     InjectionPermission injectionPermission = INJECTION_PERMISSION_UNKNOWN;
+    bool isSplit, wrongDevice;
     if (maskedAction == AMOTION_EVENT_ACTION_DOWN) {
         mTempTouchState.reset();
         mTempTouchState.down = true;
+        mTempTouchState.deviceId = entry->deviceId;
+        isSplit = false;
+        wrongDevice = false;
     } else {
         mTempTouchState.copyFrom(mTouchState);
+        isSplit = mTempTouchState.split;
+        wrongDevice = mTempTouchState.down && mTempTouchState.deviceId != entry->deviceId;
+        if (wrongDevice) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+            LOGD("Dropping event because a pointer for a different device is already down.");
+#endif
+            injectionResult = INPUT_EVENT_INJECTION_FAILED;
+            goto Failed;
+        }
     }
 
-    bool isSplit = mTempTouchState.split && mTempTouchState.down;
     if (maskedAction == AMOTION_EVENT_ACTION_DOWN
             || (isSplit && maskedAction == AMOTION_EVENT_ACTION_POINTER_DOWN)) {
         /* Case 1: New splittable pointer going down. */
@@ -1279,39 +1291,41 @@ Failed:
 
     // Update final pieces of touch state if the injector had permission.
     if (injectionPermission == INJECTION_PERMISSION_GRANTED) {
-        if (maskedAction == AMOTION_EVENT_ACTION_UP
-                || maskedAction == AMOTION_EVENT_ACTION_CANCEL) {
-            // All pointers up or canceled.
-            mTempTouchState.reset();
-        } else if (maskedAction == AMOTION_EVENT_ACTION_DOWN) {
-            // First pointer went down.
-            if (mTouchState.down) {
+        if (!wrongDevice) {
+            if (maskedAction == AMOTION_EVENT_ACTION_UP
+                    || maskedAction == AMOTION_EVENT_ACTION_CANCEL) {
+                // All pointers up or canceled.
+                mTempTouchState.reset();
+            } else if (maskedAction == AMOTION_EVENT_ACTION_DOWN) {
+                // First pointer went down.
+                if (mTouchState.down) {
 #if DEBUG_FOCUS
-                LOGD("Pointer down received while already down.");
+                    LOGD("Pointer down received while already down.");
 #endif
-            }
-        } else if (maskedAction == AMOTION_EVENT_ACTION_POINTER_UP) {
-            // One pointer went up.
-            if (isSplit) {
-                int32_t pointerIndex = getMotionEventActionPointerIndex(action);
-                uint32_t pointerId = entry->pointerIds[pointerIndex];
+                }
+            } else if (maskedAction == AMOTION_EVENT_ACTION_POINTER_UP) {
+                // One pointer went up.
+                if (isSplit) {
+                    int32_t pointerIndex = getMotionEventActionPointerIndex(action);
+                    uint32_t pointerId = entry->pointerIds[pointerIndex];
 
-                for (size_t i = 0; i < mTempTouchState.windows.size(); ) {
-                    TouchedWindow& touchedWindow = mTempTouchState.windows.editItemAt(i);
-                    if (touchedWindow.targetFlags & InputTarget::FLAG_SPLIT) {
-                        touchedWindow.pointerIds.clearBit(pointerId);
-                        if (touchedWindow.pointerIds.isEmpty()) {
-                            mTempTouchState.windows.removeAt(i);
-                            continue;
+                    for (size_t i = 0; i < mTempTouchState.windows.size(); ) {
+                        TouchedWindow& touchedWindow = mTempTouchState.windows.editItemAt(i);
+                        if (touchedWindow.targetFlags & InputTarget::FLAG_SPLIT) {
+                            touchedWindow.pointerIds.clearBit(pointerId);
+                            if (touchedWindow.pointerIds.isEmpty()) {
+                                mTempTouchState.windows.removeAt(i);
+                                continue;
+                            }
                         }
+                        i += 1;
                     }
-                    i += 1;
                 }
             }
-        }
 
-        // Save changes to touch state.
-        mTouchState.copyFrom(mTempTouchState);
+            // Save changes to touch state.
+            mTouchState.copyFrom(mTempTouchState);
+        }
     } else {
 #if DEBUG_FOCUS
         LOGD("Not updating touch focus because injection was denied.");
@@ -2768,6 +2782,7 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
 
     dump.appendFormat(INDENT "TouchDown: %s\n", toString(mTouchState.down));
     dump.appendFormat(INDENT "TouchSplit: %s\n", toString(mTouchState.split));
+    dump.appendFormat(INDENT "TouchDeviceId: %d\n", mTouchState.deviceId);
     if (!mTouchState.windows.isEmpty()) {
         dump.append(INDENT "TouchedWindows:\n");
         for (size_t i = 0; i < mTouchState.windows.size(); i++) {
@@ -3642,7 +3657,7 @@ InputDispatcher::CommandEntry::~CommandEntry() {
 // --- InputDispatcher::TouchState ---
 
 InputDispatcher::TouchState::TouchState() :
-    down(false), split(false) {
+    down(false), split(false), deviceId(-1) {
 }
 
 InputDispatcher::TouchState::~TouchState() {
@@ -3651,12 +3666,14 @@ InputDispatcher::TouchState::~TouchState() {
 void InputDispatcher::TouchState::reset() {
     down = false;
     split = false;
+    deviceId = -1;
     windows.clear();
 }
 
 void InputDispatcher::TouchState::copyFrom(const TouchState& other) {
     down = other.down;
     split = other.split;
+    deviceId = other.deviceId;
     windows.clear();
     windows.appendVector(other.windows);
 }
