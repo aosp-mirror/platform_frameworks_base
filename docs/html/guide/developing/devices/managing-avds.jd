@@ -6,7 +6,11 @@ page.title=Creating and Managing AVDs with AVD Manager
       <h2>In this document</h2>
 
       <ol>
-        <li><a href="#AVDEclipse">Creating an AVD</a></li>
+        <li><a href="#createavd">Creating an AVD</a>
+          <ol>
+            <li><a href="#hardwareopts">Hardware options</a></li>
+          </ol>
+        </li>        
       </ol>
     </div>
   </div>
@@ -25,7 +29,7 @@ page.title=Creating and Managing AVDs with AVD Manager
   of each AVD. </p>
 
   
-  <h2>Creating an AVD</h2>
+  <h2 id="createavd">Creating an AVD</h2>
 
   <p>You can create as many AVDs as you would like to test on. It is recommended that you test your
   applications on all API levels higher than the target API level for your application.</p>

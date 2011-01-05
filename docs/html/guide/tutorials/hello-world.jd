@@ -23,9 +23,11 @@ It's particularly easy if you're using Eclipse as your IDE, because we've provid
 great plugin that handles your project creation and management to greatly speed-up your
 development cycles.</p>
 
-<p>If you're not using Eclipse, that's okay. Familiarize yourself with 
-<a href="{@docRoot}guide/developing/other-ide.html">Developing in Other IDEs</a>.
-You can then return to this tutorial and ignore anything about Eclipse.</p>
+<p>If you are not using Eclipse, the tools provided by the Android SDK are accessible
+on the command line, so you can choose your IDE or text editor.
+For more information about developing with the Android SDK tools, see
+the <a href="{@docRoot}guide/developing/index.html">Overview</a>
+section for developing on Android.</p>
 
 <p>Before you start, you should already have the very latest SDK installed, and if you're using
 Eclipse, you should have installed the ADT plugin as well. If you have not installed these, see 
@@ -562,5 +564,6 @@ android create project \
   <p>This creates the required folders and files for the project at the location 
   defined by the <em>path</em>.</p>
   
-  <p>For more information on how to use the SDK tools to create and build projects, please read 
-<a href="{@docRoot}guide/developing/other-ide.html">Developing in Other IDEs</a>.</p>
+  <p>For more information on how to use the SDK tools to create and build projects on the command line, read
+<a href="{@docRoot}guide/developing/projects/index.html">Creating and Managing Projects on the Command Line</a> and
+<a href="{@docRoot}guide/developing/building/building-cmdline.html">Building and Running Apps on the Command Line</a>.</p>

@@ -148,8 +148,9 @@ last step in setting up your Android SDK.</p>
 
 <p>If you prefer to work in a different IDE, you do not need to
 install Eclipse or ADT, instead, you can directly use the SDK tools to build and
-debug your application. The developer guide has more information about <a
-href="{@docRoot}guide/developing/other-ide.html">Developing in Other IDEs</a>.</p>
+debug your application. The <a href="{@docRoot}guide/developing/index.html">Overview</a>
+section of the developer guide outlines the major steps that you need to complete 
+when developing in Eclipse or other IDEs.</p>
 
 
 
@@ -547,9 +548,9 @@ first step in getting started with Android development. </p>
   <li>Get an overview of the <a
   href="{@docRoot}guide/developing/tools/index.html">development
   tools</a> that are available to you</li>
-  <li>Read how to develop <a
-  href="{@docRoot}guide/developing/eclipse-adt.html">in Eclipse/ADT</a> or
-  <a href="{@docRoot}guide/developing/other-ide.html">in other IDEs</a>
+  <li>Read the <a
+  href="{@docRoot}guide/developing/index.html">Overview</a> 
+  for how to develop an Android application.
   </li>
   <li>Read <a href="{@docRoot}guide/developing/device.html">Developing on a Device</a> to set up an
 Android-powered device to run and test your application.</li>
