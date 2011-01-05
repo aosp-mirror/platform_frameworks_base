@@ -38,7 +38,7 @@ page.title=Supporting Multiple Screens
     <li><a
 href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">
 Providing Alternative Resources</a></li>
-    <li><a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a></li>
+    <li><a href="{@docRoot}guide/developing/devices/index.html">Creating and Managing Virtual Devices</a></li>
   </ol>
 
 </div>
@@ -1205,7 +1205,7 @@ includes several emulator skins to get you started. You can use the Android AVD
 Manager or the <code>android</code> tool to create AVDs that use the various
 emulator skins and you can also set up custom AVDs to test densities other than
 the defaults. For general information about working with AVDs, see
-<a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual
+<a href="{@docRoot}guide/developing/devices/index.html">Creating and Managing Virtual
 Devices</a>.</p>
 
 <p>The Android SDK provides a set of default emulator skins that you can use for

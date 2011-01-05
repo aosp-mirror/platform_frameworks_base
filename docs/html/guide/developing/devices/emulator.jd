@@ -33,7 +33,6 @@ page.title=Using the Android Emulator
 </div>
 </div>
 
-
 <img src="/images/emulator-wvga800l.png" alt="Image of the Android Emulator"
 width="367" height="349" style="margin-left:2em;float:right;"/>
 <p>The Android SDK includes a virtual mobile device emulator
@@ -119,9 +118,10 @@ user data, SD card, and so on. When you launch the emulator with an AVD configur
 it automatically loads the user data and SD card data from the AVD directory. By default,
 the emulator stores the user data, SD card data, and cache in the AVD directory.</p>
 
-<p>To create and manage AVDs you use the android tool, a command-line utility
-included in the SDK. For complete information about how to set up AVDs, see <a
-href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>.</p>
+<p>To create and manage AVDs you use the AVD Manager UI or the <code>android</code> tool
+that is included in the SDK. 
+For complete information about how to set up AVDs, see <a
+href="{@docRoot}guide/developing/devices/index.html">Creating and Managing Virtual Devices</a>.</p>
 
 <a name="starting"></a>
 
@@ -352,8 +352,8 @@ Here's the command-line usage for launching the emulator with options: </p>
   <td><strong>Required</strong>. Specifies the AVD to load for this emulator
       instance.</td>
   <td>You must create an AVD configuration before launching the emulator. For
-      information, see <a href="{@docRoot}guide/developing/tools/avd.html">Android
-      Virtual Devices</a>.</td>
+      information, see <a href="{@docRoot}guide/developing/devices/managing-avds.html">Creating and Managing
+      Virtual Devices with AVD Manager</a>.</td>
 <tr>
   <td rowspan="7">Disk Images</td>
   <td><code>-cache&nbsp;&lt;filepath&gt;</code></td>
@@ -708,7 +708,8 @@ option. Using this option may yield unexpected and in some cases misleading
 results, since the density with which to render the skin may not be defined.
 AVDs let you associate each skin with a default density and override the default
 as needed. For more information, see <a
-href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>.
+href="{@docRoot}guide/developing/devices/managing-avds.html">Creating and Managing Virtual Devices
+with AVD Manager</a>.
 </td>
 </tr>
 <tr>
@@ -716,15 +717,6 @@ href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>.
   <td>This emulator option is deprecated. </td>
   <td>See comments for <code>-skin</code>, above.</td></tr>
 </table>
-
-
-
-
-
-
-
-
-
 
 
 <a name="diskimages"></a>
@@ -892,7 +884,7 @@ emulated SD card and load it in the emulator, see <a href="#sdcard">SD Card Emul
 
 <p>You can also use the android tool to automatically create an SD Card image
 for you, when creating an AVD. For more information, see <a 
-href="{@docRoot}guide/developing/tools/avd.html#options">Command-line options for AVDs</a>.
+href="{@docRoot}guide/developing/devices/managing-avds.html">Creating and Managing Virtual Devices with AVD Manager</a>.
 
 <a name="temporaryimages"></a>
 <h3>Temporary Images</h3>
@@ -1643,7 +1635,7 @@ kilobits/sec):</p>
 <h2>Using Emulator Skins</h2>
 
 <p>The Android SDK includes several Emulator skins that you can use to control the resolution and density of the emulated device's screen. To select a specific skin for running the emulator, create an AVD that uses that skin. Please do not use deprecated emulator options such as <code>-skin</code> to control the skin used by an emulator instance. For more information about AVDs, see <a
-href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>.  </p>
+href="{@docRoot}guide/developing/devices/index.html">Creating and Managing Virtual Devices</a>.</p>
 
 
 <a name="multipleinstances"></a>
@@ -1662,9 +1654,9 @@ instance-specific storage area. </p>
 
 <p>If you don't have access to Eclipse or the ADT Plugin, you can install 
 your application on the emulator <a href="{@docRoot}guide/developing/tools/adb.html#move">using 
-the adb utility</a>. Before installing the application, you need to package it 
-in a .apk file using the <a href="{@docRoot}guide/developing/tools/aapt.html">Android Asset Packaging Tool</a>. 
-Once the application is installed, you can start the emulator from the command 
+the adb utility</a>. Before installing the application, you need to build and package it 
+into an <code>.apk</code> as described in <a href="{@docRoot}guide/developing/building/index.html">Building and
+Running Apps</a>. Once the application is installed, you can start the emulator from the command 
 line, as described in this document, using any startup options necessary. 
 When the emulator is running, you can also connect to the emulator instance's 
 console to issue commands as needed.</p>
@@ -1707,7 +1699,7 @@ creating an AVD, you simply specify the <code>-c</code> option, like this: </p>
 
 <p>You can also use the <code>-c</code> option to specify a path to an SD card
 image to use in the new AVD. For more information, see <a
-href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>.
+href="{@docRoot}guide/developing/devices/managing-avds-cmdline.html">Creating and Managing Virtual Devices on the Command Line</a>.
 </p>
 
 <h3 id="creatingm">Creating an SD card image using mksdcard</h3>
@@ -1722,7 +1714,7 @@ the tools/ directory of the SDK and create a disk image like this: </p>
 
 <pre>mksdcard 1024M sdcard1.iso</pre>
 
-<p>For more information, see <a href="{@docRoot}guide/developing/tools/othertools.html">Other Tools</a>. </p>
+<p>For more information, see <a href="{@docRoot}guide/developing/tools/mksdcard.html"><code>mksdcard</code></a>.</p>
 
 <a name="copying"></a>
 <h3>Copying Files to a Disk Image</h3>

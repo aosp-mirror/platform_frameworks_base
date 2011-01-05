@@ -9,9 +9,10 @@ page.title=Debugging and Profiling User Interfaces
         <li>
           <a href="#hierarchyViewer">Debugging and Optimizing User Interfaces with Hierarchy
           Viewer</a>
-          <ul>
+          <ol>
             <li><a href="#layoutview">Layout View</a></li>
-        
+            <li><a href="#pixelperfect">Pixel Perfect View</a></li>
+          </ol>       
         </li>
 
         <li><a href="#layoutopt">Optimizing Layouts with <code>layoutopt</code></a></li>
@@ -94,7 +95,7 @@ page.title=Debugging and Profiling User Interfaces
   automatically refresh. You must reload the Layout View by clicking <strong>Load View
   Hierarchy</strong>.</p>
 
-  <h3>Pixel Perfect View</h3>
+  <h3 id="pixelperfect">Pixel Perfect View</h3>
 
   <p>The Pixel Perfect View provides a magnified look at the current device window. It helps you
   design your UI better by giving you a closer look at your UI's image quality, alignment, and other
@@ -190,7 +191,7 @@ samples/useless.xml
 
 <p>
 For more information on running the tool, see the
-<a href="${@docRoot}guide/developing/tools/layoutopt.html">layoutopt</a> reference.</p>
+<a href="${@docRoot}guide/developing/debugging/debugging-ui.html#layoutopt">layoutopt</a> reference.</p>
   
     
 
