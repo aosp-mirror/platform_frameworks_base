@@ -1104,7 +1104,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
             }
 
-            if (hwInitialized || (windowShouldResize &&
+            if (hwInitialized || ((windowShouldResize || params != null) &&
                     mAttachInfo.mHardwareRenderer != null &&
                     mAttachInfo.mHardwareRenderer.isEnabled())) {
                 mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight);
