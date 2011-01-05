@@ -44,6 +44,7 @@ struct NuPlayer::Renderer : public AHandler {
     enum {
         kWhatEOS,
         kWhatFlushComplete,
+        kWhatPosition,
     };
 
 protected:
@@ -103,6 +104,7 @@ private:
 
     void notifyEOS(bool audio);
     void notifyFlushComplete(bool audio);
+    void notifyPosition();
 
     void flushQueue(List<QueueEntry> *queue);
     bool dropBufferWhileFlushing(bool audio, const sp<AMessage> &msg);

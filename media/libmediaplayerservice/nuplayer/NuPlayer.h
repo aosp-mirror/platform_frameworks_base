@@ -25,11 +25,12 @@ namespace android {
 
 struct ACodec;
 struct MetaData;
+struct NuPlayerDriver;
 
 struct NuPlayer : public AHandler {
     NuPlayer();
 
-    void setListener(const wp<MediaPlayerBase> &listener);
+    void setDriver(const wp<NuPlayerDriver> &driver);
 
     void setDataSource(const sp<IStreamSource> &source);
 
@@ -40,9 +41,14 @@ struct NuPlayer : public AHandler {
     void setAudioSink(const sp<MediaPlayerBase::AudioSink> &sink);
     void start();
 
-    // Will notify the listener that reset() has completed
-    // with code MEDIA_RESET_COMPLETE.
+    void pause();
+    void resume();
+
+    // Will notify the driver through "notifyResetComplete" once finished.
     void resetAsync();
+
+    // Will notify the driver through "notifySeekComplete" once finished.
+    void seekToAsync(int64_t seekTimeUs);
 
 protected:
     virtual ~NuPlayer();
@@ -68,9 +74,10 @@ private:
         kWhatAudioNotify,
         kWhatRendererNotify,
         kWhatReset,
+        kWhatSeek,
     };
 
-    wp<MediaPlayerBase> mListener;
+    wp<NuPlayerDriver> mDriver;
     sp<Source> mSource;
     sp<Surface> mSurface;
     sp<MediaPlayerBase::AudioSink> mAudioSink;

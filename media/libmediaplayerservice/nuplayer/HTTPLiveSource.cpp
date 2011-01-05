@@ -128,5 +128,25 @@ status_t NuPlayer::HTTPLiveSource::dequeueAccessUnit(
     return source->dequeueAccessUnit(accessUnit);
 }
 
+status_t NuPlayer::HTTPLiveSource::getDuration(int64_t *durationUs) {
+    return mLiveSession->getDuration(durationUs);
+}
+
+status_t NuPlayer::HTTPLiveSource::seekTo(int64_t seekTimeUs) {
+    // We need to make sure we're not seeking until we have seen the very first
+    // PTS timestamp in the whole stream (from the beginning of the stream).
+    while (!mTSParser->PTSTimeDeltaEstablished() && feedMoreTSData()) {
+        usleep(100000);
+    }
+
+    mLiveSession->seekTo(seekTimeUs);
+
+    return OK;
+}
+
+bool NuPlayer::HTTPLiveSource::isSeekable() {
+    return mLiveSession->isSeekable();
+}
+
 }  // namespace android
 
