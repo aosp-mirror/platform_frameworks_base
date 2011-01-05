@@ -1602,9 +1602,13 @@ public class SQLiteDatabase extends SQLiteClosable {
      * Convenience method for inserting a row into the database.
      *
      * @param table the table to insert the row into
-     * @param nullColumnHack SQL doesn't allow inserting a completely empty row,
-     *            so if initialValues is empty this column will explicitly be
-     *            assigned a NULL value
+     * @param nullColumnHack optional; may be <code>null</code>.
+     *            SQL doesn't allow inserting a completely empty row without
+     *            naming at least one column name.  If your provided <code>values</code> is
+     *            empty, no column names are known and an empty row can't be inserted.
+     *            If not set to null, the <code>nullColumnHack</code> parameter
+     *            provides the name of nullable column name to explicitly insert a NULL into
+     *            in the case where your <code>values</code> is empty.
      * @param values this map contains the initial column values for the
      *            row. The keys should be the column names and the values the
      *            column values
@@ -1623,9 +1627,13 @@ public class SQLiteDatabase extends SQLiteClosable {
      * Convenience method for inserting a row into the database.
      *
      * @param table the table to insert the row into
-     * @param nullColumnHack SQL doesn't allow inserting a completely empty row,
-     *            so if initialValues is empty this column will explicitly be
-     *            assigned a NULL value
+     * @param nullColumnHack optional; may be <code>null</code>.
+     *            SQL doesn't allow inserting a completely empty row without
+     *            naming at least one column name.  If your provided <code>values</code> is
+     *            empty, no column names are known and an empty row can't be inserted.
+     *            If not set to null, the <code>nullColumnHack</code> parameter
+     *            provides the name of nullable column name to explicitly insert a NULL into
+     *            in the case where your <code>values</code> is empty.
      * @param values this map contains the initial column values for the
      *            row. The keys should be the column names and the values the
      *            column values
@@ -1641,11 +1649,15 @@ public class SQLiteDatabase extends SQLiteClosable {
      * Convenience method for replacing a row in the database.
      *
      * @param table the table in which to replace the row
-     * @param nullColumnHack SQL doesn't allow inserting a completely empty row,
-     *            so if initialValues is empty this row will explicitly be
-     *            assigned a NULL value
+     * @param nullColumnHack optional; may be <code>null</code>.
+     *            SQL doesn't allow inserting a completely empty row without
+     *            naming at least one column name.  If your provided <code>initialValues</code> is
+     *            empty, no column names are known and an empty row can't be inserted.
+     *            If not set to null, the <code>nullColumnHack</code> parameter
+     *            provides the name of nullable column name to explicitly insert a NULL into
+     *            in the case where your <code>initialValues</code> is empty.
      * @param initialValues this map contains the initial column values for
-     *   the row. The key
+     *   the row.
      * @return the row ID of the newly inserted row, or -1 if an error occurred
      */
     public long replace(String table, String nullColumnHack, ContentValues initialValues) {
@@ -1662,9 +1674,13 @@ public class SQLiteDatabase extends SQLiteClosable {
      * Convenience method for replacing a row in the database.
      *
      * @param table the table in which to replace the row
-     * @param nullColumnHack SQL doesn't allow inserting a completely empty row,
-     *            so if initialValues is empty this row will explicitly be
-     *            assigned a NULL value
+     * @param nullColumnHack optional; may be <code>null</code>.
+     *            SQL doesn't allow inserting a completely empty row without
+     *            naming at least one column name.  If your provided <code>initialValues</code> is
+     *            empty, no column names are known and an empty row can't be inserted.
+     *            If not set to null, the <code>nullColumnHack</code> parameter
+     *            provides the name of nullable column name to explicitly insert a NULL into
+     *            in the case where your <code>initialValues</code> is empty.
      * @param initialValues this map contains the initial column values for
      *   the row. The key
      * @throws SQLException
@@ -1680,9 +1696,13 @@ public class SQLiteDatabase extends SQLiteClosable {
      * General method for inserting a row into the database.
      *
      * @param table the table to insert the row into
-     * @param nullColumnHack SQL doesn't allow inserting a completely empty row,
-     *            so if initialValues is empty this column will explicitly be
-     *            assigned a NULL value
+     * @param nullColumnHack optional; may be <code>null</code>.
+     *            SQL doesn't allow inserting a completely empty row without
+     *            naming at least one column name.  If your provided <code>initialValues</code> is
+     *            empty, no column names are known and an empty row can't be inserted.
+     *            If not set to null, the <code>nullColumnHack</code> parameter
+     *            provides the name of nullable column name to explicitly insert a NULL into
+     *            in the case where your <code>initialValues</code> is empty.
      * @param initialValues this map contains the initial column values for the
      *            row. The keys should be the column names and the values the
      *            column values
@@ -1841,7 +1861,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      *
      * @param sql the SQL statement to be executed. Multiple statements separated by semicolons are
      * not supported.
-     * @throws SQLException If the SQL string is invalid for some reason
+     * @throws SQLException if the SQL string is invalid
      */
     public void execSQL(String sql) throws SQLException {
         int stmtType = DatabaseUtils.getSqlStatementType(sql);
@@ -1905,7 +1925,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @param sql the SQL statement to be executed. Multiple statements separated by semicolons are
      * not supported.
      * @param bindArgs only byte[], String, Long and Double are supported in bindArgs.
-     * @throws SQLException If the SQL string is invalid for some reason
+     * @throws SQLException if the SQL string is invalid
      */
     public void execSQL(String sql, Object[] bindArgs) throws SQLException {
         if (bindArgs == null) {
