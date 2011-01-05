@@ -326,8 +326,8 @@ public class ScrollView extends FrameLayout {
             if (child.getMeasuredHeight() < height) {
                 final FrameLayout.LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
-                int childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec, mPaddingLeft
-                        + mPaddingRight, lp.width);
+                int childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
+                        mPaddingLeft + mPaddingRight, lp.width);
                 height -= mPaddingTop;
                 height -= mPaddingBottom;
                 int childHeightMeasureSpec =
@@ -1327,7 +1327,7 @@ public class ScrollView extends FrameLayout {
         mIsLayoutDirty = false;
         // Give a child focus if it needs it
         if (mChildToScrollTo != null && isViewDescendantOf(mChildToScrollTo, this)) {
-                scrollToChild(mChildToScrollTo);
+            scrollToChild(mChildToScrollTo);
         }
         mChildToScrollTo = null;
 

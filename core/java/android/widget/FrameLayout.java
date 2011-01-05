@@ -29,6 +29,8 @@ import android.view.ViewGroup;
 import android.view.Gravity;
 import android.widget.RemoteViews.RemoteView;
 
+import java.util.ArrayList;
+
 
 /**
  * FrameLayout is designed to block out an area on the screen to display
@@ -46,6 +48,8 @@ import android.widget.RemoteViews.RemoteView;
  */
 @RemoteView
 public class FrameLayout extends ViewGroup {
+    private static final int DEFAULT_CHILD_GRAVITY = Gravity.TOP | Gravity.LEFT;
+
     @ViewDebug.ExportedProperty(category = "measurement")
     boolean mMeasureAllChildren = false;
 
@@ -76,8 +80,8 @@ public class FrameLayout extends ViewGroup {
 
     boolean mForegroundBoundsChanged = false;
     
-    private static final int DEFAULT_CHILD_GRAVITY = Gravity.TOP | Gravity.LEFT;
-
+    private final ArrayList<View> mMatchParentChildren = new ArrayList<View>(1);
+    
     public FrameLayout(Context context) {
         super(context);
     }
@@ -246,13 +250,17 @@ public class FrameLayout extends ViewGroup {
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int count = getChildCount();
+        int count = getChildCount();
+
+        final boolean measureMatchParentChildren =
+                MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.EXACTLY ||
+                MeasureSpec.getMode(heightMeasureSpec) != MeasureSpec.EXACTLY;
+        mMatchParentChildren.clear();
 
         int maxHeight = 0;
         int maxWidth = 0;
         int childState = 0;
 
-        // Find rightmost and bottommost child
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (mMeasureAllChildren || child.getVisibility() != GONE) {
@@ -260,6 +268,13 @@ public class FrameLayout extends ViewGroup {
                 maxWidth = Math.max(maxWidth, child.getMeasuredWidth());
                 maxHeight = Math.max(maxHeight, child.getMeasuredHeight());
                 childState = combineMeasuredStates(childState, child.getMeasuredState());
+                if (measureMatchParentChildren) {
+                    final ViewGroup.LayoutParams lp = child.getLayoutParams();
+                    if (lp.width == LayoutParams.MATCH_PARENT ||
+                            lp.height == LayoutParams.MATCH_PARENT) {
+                        mMatchParentChildren.add(child);
+                    }
+                }
             }
         }
 
@@ -280,7 +295,40 @@ public class FrameLayout extends ViewGroup {
 
         setMeasuredDimension(resolveSizeAndState(maxWidth, widthMeasureSpec, childState),
                 resolveSizeAndState(maxHeight, heightMeasureSpec,
-                        childState<<MEASURED_HEIGHT_STATE_SHIFT));
+                        childState << MEASURED_HEIGHT_STATE_SHIFT));
+
+        if (mMatchParentChildren.size() > 0) {
+            count = mMatchParentChildren.size();
+            for (int i = 0; i < count; i++) {
+                final View child = mMatchParentChildren.get(i);
+
+                final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
+                int childWidthMeasureSpec;
+                int childHeightMeasureSpec;
+
+                if (lp.width == LayoutParams.MATCH_PARENT) {
+                    childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(getMeasuredWidth() -
+                            mPaddingLeft - mPaddingRight - lp.leftMargin - lp.rightMargin,
+                            MeasureSpec.EXACTLY);
+                } else {
+                    childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
+                            mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin,
+                            lp.width);
+                }
+                
+                if (lp.height == LayoutParams.MATCH_PARENT) {
+                    childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(getMeasuredHeight() -
+                            mPaddingTop - mPaddingBottom - lp.topMargin - lp.bottomMargin,
+                            MeasureSpec.EXACTLY);
+                } else {
+                    childHeightMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
+                            mPaddingTop + mPaddingBottom + lp.topMargin + lp.bottomMargin,
+                            lp.height);
+                }
+
+                child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+            }
+        }
     }
  
     /**
@@ -306,8 +354,8 @@ public class FrameLayout extends ViewGroup {
                 final int width = child.getMeasuredWidth();
                 final int height = child.getMeasuredHeight();
 
-                int childLeft = parentLeft;
-                int childTop = parentTop;
+                int childLeft;
+                int childTop;
 
                 int gravity = lp.gravity;
                 if (gravity == -1) {
