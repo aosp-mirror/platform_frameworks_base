@@ -65,7 +65,7 @@
                 android:layout_marginRight="@dimen/preference_screen_side_margin"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
-                android:background="?attr/preferencePanelBackground"
+                android:background="?attr/detailsElementBackground"
                 android:orientation="vertical"
                 android:visibility="gone" >
 

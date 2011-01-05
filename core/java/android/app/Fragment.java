@@ -225,12 +225,11 @@ final class FragmentState implements Parcelable {
  * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
  *      main}
  *
- * <p>The titles fragment, showing a list of titles, is very simple, relying
+ * <p>The titles fragment, showing a list of titles, is fairly simple, relying
  * on {@link ListFragment} for most of its work.  Note the implementation of
- * clicking an item, which can either update
- * the content of the details fragment or start a new activity show the
- * details depending on whether the current activity's layout can show the
- * details.</p>
+ * clicking an item: depending on the current activity's layout, it can either
+ * create and display a new fragment to show the details in-place (more about
+ * this later), or start a new activity show the details.</p>
  *
  * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
  *      titles}
@@ -243,7 +242,7 @@ final class FragmentState implements Parcelable {
  *      details}
  *
  * <p>In this case when the user clicks on a title, there is no details
- * fragment in the current activity, so the title title fragment's click code will
+ * container in the current activity, so the title title fragment's click code will
  * launch a new activity to display the details fragment:</p>
  *
  * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
@@ -255,22 +254,25 @@ final class FragmentState implements Parcelable {
  *
  * {@sample development/samples/ApiDemos/res/layout-land/fragment_layout.xml layout}
  *
- * <p>Note how the prior code will adjust to this alternative UI flow: the
- * titles fragment will now show its text inside of its activity, and the
- * details activity will finish of it finds itself running in a configuration
- * where the details can be shown inline.
+ * <p>Note how the prior code will adjust to this alternative UI flow: the titles
+ * fragment will now embed the details fragment inside of this activity, and the
+ * details activity will finish itself if it is running in a configuration
+ * where the details can be shown in-place.
  *
  * <p>When a configuration change causes the activity hosting these fragments
  * to restart, its new instance may use a different layout that doesn't
  * include the same fragments as the previous layout.  In this case all of
  * the previous fragments will still be instantiated and running in the new
- * instance; however, any that are no longer associated with a &lt;fragment&gt;
- * tag in the view hierarchy will not have their content view created and will
- * return false from {@link #isInLayout}.
+ * instance.  However, any that are no longer associated with a &lt;fragment&gt;
+ * tag in the view hierarchy will not have their content view created
+ * and will return false from {@link #isInLayout}.  (The code here also shows
+ * how you can determine if a fragment placed in a container is no longer
+ * running in a layout with that container and avoid creating its view hierarchy
+ * in that case.)
  * 
  * <p>The attributes of the &lt;fragment&gt; tag are used to control the
- * LayoutParams provider when attaching the fragment's view to the parent
- * container.  They can alse be parsed by the fragment in {@link #onInflate}
+ * LayoutParams provided when attaching the fragment's view to the parent
+ * container.  They can also be parsed by the fragment in {@link #onInflate}
  * as parameters.
  * 
  * <p>The fragment being instantiated must have some kind of unique identifier
