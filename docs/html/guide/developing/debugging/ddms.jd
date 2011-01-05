@@ -280,5 +280,5 @@ page.title=Using DDMS
   </ul>
   
   For more information about providing mock location data, see 
-  <a href="guide/topics/location/obtaining-user-location.html#MockData">Obtaining User Location</a>.
+  <a href="{@docRoot}guide/topics/location/obtaining-user-location.html#MockData">Obtaining User Location</a>.
   

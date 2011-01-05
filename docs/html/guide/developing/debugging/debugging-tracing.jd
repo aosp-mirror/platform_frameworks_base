@@ -204,9 +204,9 @@ clock=global
   <h2 id="creatingtracefiles">Creating Trace Files</h2>
 
   <p>To use Traceview, you need to generate log files containing the trace information you want to
-  analyze.<p>
+  analyze.</p>
   
-  <p>There are two ways to generate trace logs:<p>
+  <p>There are two ways to generate trace logs:</p>
   <ul>
     <li>Include the {@link android.os.Debug} class in your code and call its
   methods to start and stop logging of trace information to disk. This method is very precise because
@@ -293,7 +293,7 @@ traceview /tmp/calc
   <p class="note"><strong>Note:</strong> If you are trying to view the trace logs of an application 
   that is built with ProGuard enabled (release mode build), some method and member names might be obfuscated.
   You can use the Proguard <code>mapping.txt</code> file to figure out the original unobfuscated names. For more information
-  on this file, see the <a href="{@docRoot}/guide/developing/tools/proguard.html>Proguard</a> documentation.</p>
+  on this file, see the <a href="{@docRoot}guide/developing/tools/proguard.html">Proguard</a> documentation.</p>
 
       <h2 id="dmtracedump">Using dmtracdedump</h2>
 
@@ -308,7 +308,7 @@ traceview /tmp/calc
       "{@docRoot}images/tracedump.png"
           width="485"
           height="401" />
-       <p class="image-caption><strong>Figure 3.</strong> Screenshot of dmtracedump</p>
+       <p class="image-caption"><strong>Figure 3.</strong> Screenshot of dmtracedump</p>
 
       <p>For each node, dmtracedump shows <code>&lt;ref&gt;
       <em>callname</em> (&lt;inc-ms&gt;, &lt;exc-ms&gt;,&lt;numcalls&gt;)</code>, where</p>
@@ -378,8 +378,6 @@ dmtracedump [-ho] [-s sortable] [-d trace-base-name] [-g outfile] &lt;trace-base
           is 20%.</td>
         </tr>
       </table>
-    </dd>
-  </dl>
   
   
     
