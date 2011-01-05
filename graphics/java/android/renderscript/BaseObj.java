@@ -19,8 +19,6 @@ package android.renderscript;
 import android.util.Log;
 
 /**
- * @hide
- *
  * BaseObj is the base class for interfacing with native renderscript objects.
  * It primarly contains code for tracking the native object ID and forcably
  * disconecting the object from the native allocation for early cleanup.

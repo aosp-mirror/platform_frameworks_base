@@ -21,7 +21,7 @@ import android.util.Log;
 
 
 /**
- * @hide
+ * Class for exposing the rs_matrix3x3 type back to java applications.
  *
  **/
 public class Matrix3f {

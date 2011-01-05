@@ -21,7 +21,7 @@ import android.util.Log;
 
 
 /**
- * @hide
+ * Class for exposing the rs_matrix2x2 type back to java applications.
  *
  **/
 public class Matrix2f {

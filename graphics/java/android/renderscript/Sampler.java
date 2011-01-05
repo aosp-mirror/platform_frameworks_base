@@ -29,8 +29,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 /**
- * @hide
- *
  * Sampler object which defines how data is extracted from textures.  Samplers
  * are attached to Program objects (currently only fragment) when those objects
  * need to access texture data.

@@ -23,7 +23,6 @@ import android.util.Log;
 
 
 /**
- * @hide
  *
  **/
 public class ProgramVertex extends Program {

@@ -21,8 +21,6 @@ import java.lang.reflect.Field;
 import android.util.Log;
 
 /**
- * @hide
- *
  * Type is an allocation template.  It consists of an Element and one or more
  * dimensions.  It describes only the layout of memory but does not allocate and
  * storage for the data thus described.

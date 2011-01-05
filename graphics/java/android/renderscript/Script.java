@@ -17,7 +17,7 @@
 package android.renderscript;
 
 /**
- * @hide
+ *
  **/
 public class Script extends BaseObj {
     public static final int MAX_SLOT = 16;

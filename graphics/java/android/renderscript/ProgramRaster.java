@@ -22,7 +22,6 @@ import android.util.Log;
 
 
 /**
- * @hide
  *
  **/
 public class ProgramRaster extends BaseObj {

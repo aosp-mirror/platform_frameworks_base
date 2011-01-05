@@ -21,7 +21,7 @@ import android.util.Log;
 
 
 /**
- * @hide
+ * Class for exposing the rs byte4 type back to java applications.
  *
  **/
 public class Byte4 {

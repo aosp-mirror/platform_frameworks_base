@@ -27,7 +27,19 @@ import android.util.Log;
 import android.util.TypedValue;
 
 /**
- * @hide
+ * Memory allocation class for renderscript.  An allocation combines a Type with
+ * memory to provide storage for user data and objects.
+ *
+ * Allocations may exist in one or more memory spaces.  Currently those are
+ * Script: accessable by RS scripts.
+ * Graphics Texture: accessable as a graphics texture.
+ * Graphics Vertex: accessable as graphical vertex data.
+ * Graphics Constants: Accessable as constants in user shaders
+ *
+ * By default java side updates are always applied to the script accessable
+ * memory.  If this is not present they are then applied to the various HW
+ * memory types.  A syncAll call is necessary after the script data is update to
+ * keep the other memory spaces in sync.
  *
  **/
 public class Allocation extends BaseObj {

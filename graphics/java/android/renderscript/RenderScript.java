@@ -27,8 +27,6 @@ import android.view.Surface;
 
 
 /**
- * @hide
- *
  * RenderScript base master class.  An instance of this class creates native
  * worker threads for processing commands from this object.  This base class
  * does not provide any extended capabilities beyond simple data processing.
