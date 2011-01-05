@@ -738,7 +738,8 @@ class BrowserFrame extends Handler {
             }
 
         // content://
-        } else if (url.startsWith(ANDROID_CONTENT)) {
+        } else if (mSettings.getAllowContentAccess() &&
+                   url.startsWith(ANDROID_CONTENT)) {
             try {
                 // Strip off mimetype, for compatibility with ContentLoader.java
                 // If we don't do this, we can fail to load Gmail attachments,
