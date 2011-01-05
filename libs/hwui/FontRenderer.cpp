@@ -38,8 +38,8 @@ namespace uirenderer {
 // Font
 ///////////////////////////////////////////////////////////////////////////////
 
-Font::Font(FontRenderer* state, uint32_t fontId, float fontSize) :
-    mState(state), mFontId(fontId), mFontSize(fontSize) {
+Font::Font(FontRenderer* state, uint32_t fontId, float fontSize, int flags) :
+    mState(state), mFontId(fontId), mFontSize(fontSize), mFlags(flags) {
 }
 
 
@@ -275,17 +275,17 @@ Font::CachedGlyphInfo* Font::cacheGlyph(SkPaint* paint, int32_t glyph) {
     return newGlyph;
 }
 
-Font* Font::create(FontRenderer* state, uint32_t fontId, float fontSize) {
+Font* Font::create(FontRenderer* state, uint32_t fontId, float fontSize, int flags) {
     Vector<Font*> &activeFonts = state->mActiveFonts;
 
     for (uint32_t i = 0; i < activeFonts.size(); i++) {
         Font* font = activeFonts[i];
-        if (font->mFontId == fontId && font->mFontSize == fontSize) {
+        if (font->mFontId == fontId && font->mFontSize == fontSize && font->mFlags == flags) {
             return font;
         }
     }
 
-    Font* newFont = new Font(state, fontId, fontSize);
+    Font* newFont = new Font(state, fontId, fontSize, flags);
     activeFonts.push(newFont);
     return newFont;
 }
@@ -634,7 +634,11 @@ void FontRenderer::precacheLatin(SkPaint* paint) {
 
 void FontRenderer::setFont(SkPaint* paint, uint32_t fontId, float fontSize) {
     uint32_t currentNumFonts = mActiveFonts.size();
-    mCurrentFont = Font::create(this, fontId, fontSize);
+    int flags = 0;
+    if (paint->isFakeBoldText()) {
+        flags |= Font::kFakeBold;
+    }
+    mCurrentFont = Font::create(this, fontId, fontSize, flags);
 
     const float maxPrecacheFontSize = 40.0f;
     bool isNewFont = currentNumFonts != mActiveFonts.size();
@@ -720,7 +724,7 @@ void FontRenderer::computeGaussianWeights(float* weights, int32_t radius) {
     // The larger the radius gets, the more our gaussian blur
     // will resemble a box blur since with large sigma
     // the gaussian curve begins to lose its shape
-    float sigma = 0.3f * (float)radius + 0.6f;
+    float sigma = 0.3f * (float) radius + 0.6f;
 
     // Now compute the coefficints
     // We will store some redundant values to save some math during
@@ -730,7 +734,7 @@ void FontRenderer::computeGaussianWeights(float* weights, int32_t radius) {
     float coeff2 = - 1.0f / (2.0f * sigma * sigma);
 
     float normalizeFactor = 0.0f;
-    for(int32_t r = -radius; r <= radius; r ++) {
+    for (int32_t r = -radius; r <= radius; r ++) {
         float floatR = (float) r;
         weights[r + radius] = coeff1 * pow(e, floatR * floatR * coeff2);
         normalizeFactor += weights[r + radius];
@@ -738,7 +742,7 @@ void FontRenderer::computeGaussianWeights(float* weights, int32_t radius) {
 
     //Now we need to normalize the weights because all our coefficients need to add up to one
     normalizeFactor = 1.0f / normalizeFactor;
-    for(int32_t r = -radius; r <= radius; r ++) {
+    for (int32_t r = -radius; r <= radius; r ++) {
         weights[r + radius] *= normalizeFactor;
     }
 }
@@ -748,35 +752,35 @@ void FontRenderer::horizontalBlur(float* weights, int32_t radius,
     float blurredPixel = 0.0f;
     float currentPixel = 0.0f;
 
-    for(int32_t y = 0; y < height; y ++) {
+    for (int32_t y = 0; y < height; y ++) {
 
         const uint8_t* input = source + y * width;
         uint8_t* output = dest + y * width;
 
-        for(int32_t x = 0; x < width; x ++) {
+        for (int32_t x = 0; x < width; x ++) {
             blurredPixel = 0.0f;
             const float* gPtr = weights;
             // Optimization for non-border pixels
-            if ((x > radius) && (x < (width - radius))) {
+            if (x > radius && x < (width - radius)) {
                 const uint8_t *i = input + (x - radius);
-                for(int r = -radius; r <= radius; r ++) {
+                for (int r = -radius; r <= radius; r ++) {
                     currentPixel = (float) (*i);
                     blurredPixel += currentPixel * gPtr[0];
                     gPtr++;
                     i++;
                 }
             } else {
-                for(int32_t r = -radius; r <= radius; r ++) {
+                for (int32_t r = -radius; r <= radius; r ++) {
                     // Stepping left and right away from the pixel
                     int validW = x + r;
-                    if(validW < 0) {
+                    if (validW < 0) {
                         validW = 0;
                     }
-                    if(validW > width - 1) {
+                    if (validW > width - 1) {
                         validW = width - 1;
                     }
 
-                    currentPixel = (float)(input[validW]);
+                    currentPixel = (float) input[validW];
                     blurredPixel += currentPixel * gPtr[0];
                     gPtr++;
                 }
@@ -792,41 +796,41 @@ void FontRenderer::verticalBlur(float* weights, int32_t radius,
     float blurredPixel = 0.0f;
     float currentPixel = 0.0f;
 
-    for(int32_t y = 0; y < height; y ++) {
+    for (int32_t y = 0; y < height; y ++) {
 
         uint8_t* output = dest + y * width;
 
-        for(int32_t x = 0; x < width; x ++) {
+        for (int32_t x = 0; x < width; x ++) {
             blurredPixel = 0.0f;
             const float* gPtr = weights;
             const uint8_t* input = source + x;
             // Optimization for non-border pixels
-            if ((y > radius) && (y < (height - radius))) {
+            if (y > radius && y < (height - radius)) {
                 const uint8_t *i = input + ((y - radius) * width);
-                for(int32_t r = -radius; r <= radius; r ++) {
+                for (int32_t r = -radius; r <= radius; r ++) {
                     currentPixel = (float)(*i);
                     blurredPixel += currentPixel * gPtr[0];
                     gPtr++;
                     i += width;
                 }
             } else {
-                for(int32_t r = -radius; r <= radius; r ++) {
+                for (int32_t r = -radius; r <= radius; r ++) {
                     int validH = y + r;
                     // Clamp to zero and width
-                    if(validH < 0) {
+                    if (validH < 0) {
                         validH = 0;
                     }
-                    if(validH > height - 1) {
+                    if (validH > height - 1) {
                         validH = height - 1;
                     }
 
                     const uint8_t *i = input + validH * width;
-                    currentPixel = (float)(*i);
+                    currentPixel = (float) (*i);
                     blurredPixel += currentPixel * gPtr[0];
                     gPtr++;
                 }
             }
-            *output = (uint8_t)blurredPixel;
+            *output = (uint8_t) blurredPixel;
             output ++;
         }
     }

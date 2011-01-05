@@ -41,6 +41,10 @@ class FontRenderer;
  */
 class Font {
 public:
+    enum Style {
+        kFakeBold
+    };
+
     ~Font();
 
     /**
@@ -53,7 +57,7 @@ public:
     /**
      * Creates a new font associated with the specified font state.
      */
-    static Font* create(FontRenderer* state, uint32_t fontId, float fontSize);
+    static Font* create(FontRenderer* state, uint32_t fontId, float fontSize, int flags);
 
 protected:
     friend class FontRenderer;
@@ -99,7 +103,7 @@ protected:
         SkFixed mRsbDelta;
     };
 
-    Font(FontRenderer* state, uint32_t fontId, float fontSize);
+    Font(FontRenderer* state, uint32_t fontId, float fontSize, int flags);
 
     DefaultKeyedVector<int32_t, CachedGlyphInfo*> mCachedGlyphs;
 
@@ -117,6 +121,7 @@ protected:
     FontRenderer* mState;
     uint32_t mFontId;
     float mFontSize;
+    int mFlags;
 };
 
 class FontRenderer {
