@@ -734,8 +734,7 @@ public final class CacheManager {
         CacheResult ret = new CacheResult();
         ret.httpStatusCode = statusCode;
 
-        String location = headers.getLocation();
-        if (location != null) ret.location = location;
+        ret.location = headers.getLocation();
 
         ret.expires = -1;
         ret.expiresString = headers.getExpires();
@@ -754,15 +753,9 @@ public final class CacheManager {
             }
         }
 
-        String contentDisposition = headers.getContentDisposition();
-        if (contentDisposition != null) {
-            ret.contentdisposition = contentDisposition;
-        }
+        ret.contentdisposition = headers.getContentDisposition();
 
-        String crossDomain = headers.getXPermittedCrossDomainPolicies();
-        if (crossDomain != null) {
-            ret.crossDomain = crossDomain;
-        }
+        ret.crossDomain = headers.getXPermittedCrossDomainPolicies();
 
         // lastModified and etag may be set back to http header. So they can't
         // be empty string.
@@ -772,7 +765,9 @@ public final class CacheManager {
         }
 
         String etag = headers.getEtag();
-        if (etag != null && etag.length() > 0) ret.etag = etag;
+        if (etag != null && etag.length() > 0) {
+            ret.etag = etag;
+        }
 
         String cacheControl = headers.getCacheControl();
         if (cacheControl != null) {
