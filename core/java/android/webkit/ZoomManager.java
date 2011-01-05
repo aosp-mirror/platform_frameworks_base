@@ -800,28 +800,12 @@ class ZoomManager {
      */
     public void onNewPicture(WebViewCore.DrawData drawData) {
         final int viewWidth = mWebView.getViewWidth();
+        final boolean zoomOverviewWidthChanged = setupZoomOverviewWidth(drawData, viewWidth);
         WebSettings settings = mWebView.getSettings();
-        if (settings.getUseWideViewPort()) {
-            if (!settings.getUseFixedViewport()) {
-                // limit mZoomOverviewWidth upper bound to
-                // sMaxViewportWidth so that if the page doesn't behave
-                // well, the WebView won't go insane. limit the lower
-                // bound to match the default scale for mobile sites.
-                setZoomOverviewWidth(Math.min(WebView.sMaxViewportWidth,
-                    Math.max((int) (viewWidth * mInvDefaultScale),
-                            Math.max(drawData.mMinPrefWidth, drawData.mViewSize.x))));
-            } else if (drawData.mContentSize.x > 0) {
-                // The webkitDraw for layers will not populate contentSize, and it'll be
-                // ignored for zoom overview width update.
-                final int contentWidth = Math.max(drawData.mContentSize.x, drawData.mMinPrefWidth);
-                final int newZoomOverviewWidth = Math.min(WebView.sMaxViewportWidth, contentWidth);
-                if (newZoomOverviewWidth != mZoomOverviewWidth) {
-                    setZoomOverviewWidth(newZoomOverviewWidth);
-                    if (settings.isNarrowColumnLayout() && (mInitialZoomOverview || mInZoomOverview)) {
-                        mTextWrapScale = getReadingLevelScale();
-                    }
-                }
-            }
+        if (zoomOverviewWidthChanged && settings.isNarrowColumnLayout() &&
+            settings.getUseFixedViewport() &&
+            (mInitialZoomOverview || mInZoomOverview)) {
+            mTextWrapScale = getReadingLevelScale();
         }
 
         final float zoomOverviewScale = getZoomOverviewScale();
@@ -835,6 +819,41 @@ class ZoomManager {
             setZoomScale(zoomOverviewScale, !willScaleTriggerZoom(mTextWrapScale) &&
                 !mWebView.getSettings().getUseFixedViewport());
         }
+    }
+
+    /**
+     * Set up correct zoom overview width based on different settings.
+     *
+     * @param drawData webviewcore draw data
+     * @param viewWidth current view width
+     */
+    private boolean setupZoomOverviewWidth(WebViewCore.DrawData drawData, final int viewWidth) {
+        WebSettings settings = mWebView.getSettings();
+        int newZoomOverviewWidth = mZoomOverviewWidth;
+        if (settings.getUseWideViewPort()) {
+            if (!settings.getUseFixedViewport()) {
+                // limit mZoomOverviewWidth upper bound to
+                // sMaxViewportWidth so that if the page doesn't behave
+                // well, the WebView won't go insane. limit the lower
+                // bound to match the default scale for mobile sites.
+                newZoomOverviewWidth = Math.min(WebView.sMaxViewportWidth,
+                    Math.max((int) (viewWidth * mInvDefaultScale),
+                          Math.max(drawData.mMinPrefWidth, drawData.mViewSize.x)));
+            } else if (drawData.mContentSize.x > 0) {
+                // The webkitDraw for layers will not populate contentSize, and it'll be
+                // ignored for zoom overview width update.
+                final int contentWidth = Math.max(drawData.mContentSize.x, drawData.mMinPrefWidth);
+                newZoomOverviewWidth = Math.min(WebView.sMaxViewportWidth, contentWidth);
+            }
+        } else {
+            // If not use wide viewport, use view width as the zoom overview width.
+            newZoomOverviewWidth = viewWidth;
+        }
+        if (newZoomOverviewWidth != mZoomOverviewWidth) {
+            setZoomOverviewWidth(newZoomOverviewWidth);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -853,15 +872,12 @@ class ZoomManager {
         WebViewCore.ViewState viewState = drawData.mViewState;
         final Point viewSize = drawData.mViewSize;
         updateZoomRange(viewState, viewSize.x, drawData.mMinPrefWidth);
-        if (mWebView.getSettings().getUseWideViewPort() &&
-            mWebView.getSettings().getUseFixedViewport()) {
-            final int contentWidth = Math.max(drawData.mContentSize.x, drawData.mMinPrefWidth);
-            setZoomOverviewWidth(Math.min(WebView.sMaxViewportWidth, contentWidth));
-        }
+        setupZoomOverviewWidth(drawData, mWebView.getViewWidth());
 
         if (!mWebView.drawHistory()) {
             float scale;
             final float overviewScale = getZoomOverviewScale();
+            WebSettings settings = mWebView.getSettings();
 
             if (mInitialScale > 0) {
                 scale = mInitialScale;
@@ -870,12 +886,12 @@ class ZoomManager {
                 scale = viewState.mViewScale;
             } else {
                 scale = overviewScale;
-                WebSettings settings = mWebView.getSettings();
                 if (!settings.getUseWideViewPort()
                     || !settings.getLoadWithOverviewMode()) {
                     scale = Math.max(viewState.mTextWrapScale, scale);
                 }
-                if (settings.isNarrowColumnLayout() && settings.getUseFixedViewport()) {
+                if (settings.isNarrowColumnLayout() &&
+                    settings.getUseFixedViewport()) {
                     // When first layout, reflow using the reading level scale to avoid
                     // reflow when double tapped.
                     mTextWrapScale = getReadingLevelScale();
@@ -883,8 +899,11 @@ class ZoomManager {
             }
             boolean reflowText = false;
             if (!viewState.mIsRestored) {
-                scale = Math.max(scale, overviewScale);
-                mTextWrapScale = Math.max(mTextWrapScale, overviewScale);
+                if (settings.getUseFixedViewport()) {
+                    // Override the scale only in case of fixed viewport.
+                    scale = Math.max(scale, overviewScale);
+                    mTextWrapScale = Math.max(mTextWrapScale, overviewScale);
+                }
                 reflowText = exceedsMinScaleIncrement(mTextWrapScale, scale);
             }
             mInitialZoomOverview = !exceedsMinScaleIncrement(scale, overviewScale);
