@@ -289,21 +289,26 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
     return jBitmap;
 }
 
-static jbyteArray android_media_MediaMetadataRetriever_extractAlbumArt(JNIEnv *env, jobject thiz)
+static jbyteArray android_media_MediaMetadataRetriever_getEmbeddedPicture(
+        JNIEnv *env, jobject thiz, jint pictureType)
 {
-    LOGV("extractAlbumArt");
+    LOGV("getEmbeddedPicture: %d", pictureType);
     MediaMetadataRetriever* retriever = getRetriever(env, thiz);
     if (retriever == 0) {
         jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
         return NULL;
     }
     MediaAlbumArt* mediaAlbumArt = NULL;
+
+    // FIXME:
+    // Use pictureType to retrieve the intended embedded picture and also change
+    // the method name to getEmbeddedPicture().
     sp<IMemory> albumArtMemory = retriever->extractAlbumArt();
     if (albumArtMemory != 0) {  // cast the shared structure to a MediaAlbumArt object
         mediaAlbumArt = static_cast<MediaAlbumArt *>(albumArtMemory->pointer());
     }
     if (mediaAlbumArt == NULL) {
-        LOGE("extractAlbumArt: Call to extractAlbumArt failed.");
+        LOGE("getEmbeddedPicture: Call to getEmbeddedPicture failed.");
         return NULL;
     }
 
@@ -311,7 +316,7 @@ static jbyteArray android_media_MediaMetadataRetriever_extractAlbumArt(JNIEnv *e
     char* data = (char*) mediaAlbumArt + sizeof(MediaAlbumArt);
     jbyteArray array = env->NewByteArray(len);
     if (!array) {  // OutOfMemoryError exception has already been thrown.
-        LOGE("extractAlbumArt: OutOfMemoryError is thrown.");
+        LOGE("getEmbeddedPicture: OutOfMemoryError is thrown.");
     } else {
         jbyte* bytes = env->GetByteArrayElements(array, NULL);
         if (bytes != NULL) {
@@ -445,7 +450,7 @@ static JNINativeMethod nativeMethods[] = {
         {"setMode",         "(I)V", (void *)android_media_MediaMetadataRetriever_setMode},
         {"_getFrameAtTime", "(JI)Landroid/graphics/Bitmap;", (void *)android_media_MediaMetadataRetriever_getFrameAtTime},
         {"extractMetadata", "(I)Ljava/lang/String;", (void *)android_media_MediaMetadataRetriever_extractMetadata},
-        {"extractAlbumArt", "()[B", (void *)android_media_MediaMetadataRetriever_extractAlbumArt},
+        {"getEmbeddedPicture", "(I)[B", (void *)android_media_MediaMetadataRetriever_getEmbeddedPicture},
         {"release",         "()V", (void *)android_media_MediaMetadataRetriever_release},
         {"native_finalize", "()V", (void *)android_media_MediaMetadataRetriever_native_finalize},
         {"native_setup",    "()V", (void *)android_media_MediaMetadataRetriever_native_setup},
