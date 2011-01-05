@@ -76,7 +76,7 @@ CameraSourceTimeLapse::CameraSourceTimeLapse(
     mVideoWidth = videoSize.width;
     mVideoHeight = videoSize.height;
 
-    if (trySettingPreviewSize(videoSize.width, videoSize.height)) {
+    if (trySettingVideoSize(videoSize.width, videoSize.height)) {
         mUseStillCameraForTimeLapse = false;
     } else {
         // TODO: Add a check to see that mTimeBetweenTimeLapseFrameCaptureUs is greater
@@ -115,29 +115,39 @@ void CameraSourceTimeLapse::startQuickReadReturns() {
     }
 }
 
-bool CameraSourceTimeLapse::trySettingPreviewSize(int32_t width, int32_t height) {
-    LOGV("trySettingPreviewSize: %dx%d", width, height);
+bool CameraSourceTimeLapse::trySettingVideoSize(int32_t width, int32_t height) {
+    LOGV("trySettingVideoSize: %dx%d", width, height);
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
     String8 s = mCamera->getParameters();
 
     CameraParameters params(s);
     Vector<Size> supportedSizes;
-    params.getSupportedPreviewSizes(supportedSizes);
+    params.getSupportedVideoSizes(supportedSizes);
+    bool videoOutputSupported = false;
+    if (supportedSizes.size() == 0) {
+        params.getSupportedPreviewSizes(supportedSizes);
+    } else {
+        videoOutputSupported = true;
+    }
 
-    bool previewSizeSupported = false;
+    bool videoSizeSupported = false;
     for (uint32_t i = 0; i < supportedSizes.size(); ++i) {
         int32_t pictureWidth = supportedSizes[i].width;
         int32_t pictureHeight = supportedSizes[i].height;
 
         if ((pictureWidth == width) && (pictureHeight == height)) {
-            previewSizeSupported = true;
+            videoSizeSupported = true;
         }
     }
 
     bool isSuccessful = false;
-    if (previewSizeSupported) {
-        LOGV("Video size (%d, %d) is a supported preview size", width, height);
-        params.setPreviewSize(width, height);
+    if (videoSizeSupported) {
+        LOGV("Video size (%d, %d) is supported", width, height);
+        if (videoOutputSupported) {
+            params.setVideoSize(width, height);
+        } else {
+            params.setPreviewSize(width, height);
+        }
         if (mCamera->setParameters(params.flatten()) == OK) {
             isSuccessful = true;
         } else {

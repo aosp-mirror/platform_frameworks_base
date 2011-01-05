@@ -182,10 +182,10 @@ private:
     // buffer.
     void fillLastReadBufferCopy(MediaBuffer& sourceBuffer);
 
-    // If the passed in size (width x height) is a supported preview size,
-    // the function sets the camera's preview size to it and returns true.
+    // If the passed in size (width x height) is a supported video/preview size,
+    // the function sets the camera's video/preview size to it and returns true.
     // Otherwise returns false.
-    bool trySettingPreviewSize(int32_t width, int32_t height);
+    bool trySettingVideoSize(int32_t width, int32_t height);
 
     // The still camera may not support the demanded video width and height.
     // We look for the supported picture sizes from the still camera and
