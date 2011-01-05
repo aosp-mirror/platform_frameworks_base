@@ -217,7 +217,7 @@ class BrowserFrame extends Handler {
 
         if (sConfigCallback == null) {
             sConfigCallback = new ConfigCallback(
-                    (WindowManager) context.getSystemService(
+                    (WindowManager) appContext.getSystemService(
                             Context.WINDOW_SERVICE));
             ViewRoot.addConfigCallback(sConfigCallback);
         }
