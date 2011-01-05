@@ -239,7 +239,7 @@ public final class BluetoothDevice implements Parcelable {
     public static final String EXTRA_PAIRING_VARIANT =
             "android.bluetooth.device.extra.PAIRING_VARIANT";
     /** @hide */
-    public static final String EXTRA_PASSKEY = "android.bluetooth.device.extra.PASSKEY";
+    public static final String EXTRA_PAIRING_KEY = "android.bluetooth.device.extra.PAIRING_KEY";
 
     /**
      * Broadcast Action: This intent is used to broadcast the {@link UUID}
@@ -276,58 +276,113 @@ public final class BluetoothDevice implements Parcelable {
     public static final String ACTION_PAIRING_CANCEL =
             "android.bluetooth.device.action.PAIRING_CANCEL";
 
-    /** A bond attempt succeeded
-     * @hide */
+    /**
+     * A bond attempt succeeded
+     * @hide
+     */
     public static final int BOND_SUCCESS = 0;
-    /** A bond attempt failed because pins did not match, or remote device did
+
+    /**
+     * A bond attempt failed because pins did not match, or remote device did
      * not respond to pin request in time
-     * @hide */
+     * @hide
+     */
     public static final int UNBOND_REASON_AUTH_FAILED = 1;
-    /** A bond attempt failed because the other side explicitly rejected
+
+    /**
+     * A bond attempt failed because the other side explicitly rejected
      * bonding
-     * @hide */
+     * @hide
+     */
     public static final int UNBOND_REASON_AUTH_REJECTED = 2;
-    /** A bond attempt failed because we canceled the bonding process
-     * @hide */
+
+    /**
+     * A bond attempt failed because we canceled the bonding process
+     * @hide
+     */
     public static final int UNBOND_REASON_AUTH_CANCELED = 3;
-    /** A bond attempt failed because we could not contact the remote device
-     * @hide */
+
+    /**
+     * A bond attempt failed because we could not contact the remote device
+     * @hide
+     */
     public static final int UNBOND_REASON_REMOTE_DEVICE_DOWN = 4;
-    /** A bond attempt failed because a discovery is in progress
-     * @hide */
+
+    /**
+     * A bond attempt failed because a discovery is in progress
+     * @hide
+     */
     public static final int UNBOND_REASON_DISCOVERY_IN_PROGRESS = 5;
-    /** A bond attempt failed because of authentication timeout
-     * @hide */
+
+    /**
+     * A bond attempt failed because of authentication timeout
+     * @hide
+     */
     public static final int UNBOND_REASON_AUTH_TIMEOUT = 6;
-    /** A bond attempt failed because of repeated attempts
-     * @hide */
+
+    /**
+     * A bond attempt failed because of repeated attempts
+     * @hide
+     */
     public static final int UNBOND_REASON_REPEATED_ATTEMPTS = 7;
-    /** A bond attempt failed because we received an Authentication Cancel
-     *  by remote end
-     * @hide */
+
+    /**
+     * A bond attempt failed because we received an Authentication Cancel
+     * by remote end
+     * @hide
+     */
     public static final int UNBOND_REASON_REMOTE_AUTH_CANCELED = 8;
-    /** An existing bond was explicitly revoked
-     * @hide */
+
+    /**
+     * An existing bond was explicitly revoked
+     * @hide
+     */
     public static final int UNBOND_REASON_REMOVED = 9;
 
-    /** The user will be prompted to enter a pin
-     * @hide */
+    /**
+     * The user will be prompted to enter a pin
+     * @hide
+     */
     public static final int PAIRING_VARIANT_PIN = 0;
-    /** The user will be prompted to enter a passkey
-     * @hide */
+
+    /**
+     * The user will be prompted to enter a passkey
+     * @hide
+     */
     public static final int PAIRING_VARIANT_PASSKEY = 1;
-    /** The user will be prompted to confirm the passkey displayed on the screen
-     * @hide */
+
+    /**
+     * The user will be prompted to confirm the passkey displayed on the screen
+     * @hide
+     */
     public static final int PAIRING_VARIANT_PASSKEY_CONFIRMATION = 2;
-    /** The user will be prompted to accept or deny the incoming pairing request
-     * @hide */
+
+    /**
+     * The user will be prompted to accept or deny the incoming pairing request
+     * @hide
+     */
     public static final int PAIRING_VARIANT_CONSENT = 3;
-    /** The user will be prompted to enter the passkey displayed on remote device
-     * @hide */
+
+    /**
+     * The user will be prompted to enter the passkey displayed on remote device
+     * This is used for Bluetooth 2.1 pairing.
+     * @hide
+     */
     public static final int PAIRING_VARIANT_DISPLAY_PASSKEY = 4;
-    /** The user will be prompted to accept or deny the OOB pairing request
-     * @hide */
-    public static final int PAIRING_VARIANT_OOB_CONSENT = 5;
+
+    /**
+     * The user will be prompted to enter the PIN displayed on remote device.
+     * This is used for Bluetooth 2.0 pairing.
+     * @hide
+     */
+    public static final int PAIRING_VARIANT_DISPLAY_PIN = 5;
+
+    /**
+     * The user will be prompted to accept or deny the OOB pairing request
+     * @hide
+     */
+    public static final int PAIRING_VARIANT_OOB_CONSENT = 6;
+
     /**
      * Used as an extra field in {@link #ACTION_UUID} intents,
      * Contains the {@link android.os.ParcelUuid}s of the remote device which
