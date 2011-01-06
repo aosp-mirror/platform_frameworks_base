@@ -4540,18 +4540,22 @@ public class WebView extends AbsoluteLayout
         // Bubble up the key event if
         // 1. it is a system key; or
         // 2. the host application wants to handle it;
-        // 3. the accessibility injector is present and wants to handle it;
         if (event.isSystem()
-                || mCallbackProxy.uiOverrideKeyEvent(event)
-                || (mAccessibilityInjector != null && mAccessibilityInjector.onKeyEvent(event))) {
+                || mCallbackProxy.uiOverrideKeyEvent(event)) {
             return false;
         }
 
-        // if an accessibility script is injected we delegate to it the key handling.
-        // this script is a screen reader which is a fully fledged solution for blind
-        // users to navigate in and interact with web pages.
+        // accessibility support
         if (accessibilityScriptInjected()) {
+            // if an accessibility script is injected we delegate to it the key handling.
+            // this script is a screen reader which is a fully fledged solution for blind
+            // users to navigate in and interact with web pages.
             mWebViewCore.sendMessage(EventHub.KEY_DOWN, event);
+            return true;
+        } else if (mAccessibilityInjector != null && mAccessibilityInjector.onKeyEvent(event)) {
+            // if an accessibility injector is present (no JavaScript enabled or the site opts
+            // out injecting our JavaScript screen reader) we let it decide whether to act on
+            // and consume the event.
             return true;
         }
 
@@ -4702,18 +4706,22 @@ public class WebView extends AbsoluteLayout
         // Bubble up the key event if
         // 1. it is a system key; or
         // 2. the host application wants to handle it;
-        // 3. the accessibility injector is present and wants to handle it;
         if (event.isSystem()
-                || mCallbackProxy.uiOverrideKeyEvent(event)
-                || (mAccessibilityInjector != null && mAccessibilityInjector.onKeyEvent(event))) {
+                || mCallbackProxy.uiOverrideKeyEvent(event)) {
             return false;
         }
 
-        // if an accessibility script is injected we delegate to it the key handling.
-        // this script is a screen reader which is a fully fledged solution for blind
-        // users to navigate in and interact with web pages.
+        // accessibility support
         if (accessibilityScriptInjected()) {
+            // if an accessibility script is injected we delegate to it the key handling.
+            // this script is a screen reader which is a fully fledged solution for blind
+            // users to navigate in and interact with web pages.
             mWebViewCore.sendMessage(EventHub.KEY_UP, event);
+            return true;
+        } else if (mAccessibilityInjector != null && mAccessibilityInjector.onKeyEvent(event)) {
+            // if an accessibility injector is present (no JavaScript enabled or the site opts
+            // out injecting our JavaScript screen reader) we let it decide whether to act on
+            // and consume the event.
             return true;
         }
 
@@ -7789,6 +7797,24 @@ public class WebView extends AbsoluteLayout
         }
         mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE_IF_LATEST,
                 cursorData());
+    }
+
+    /*
+     * Called from JNI when the cursor has moved. This method
+     * sends a message to the WebCore requesting the given
+     * nodePtr in the given framePrt to be selected which will
+     * result in firing an accessibility event announing its
+     * content.
+     *
+     * Note: Accessibility support.
+     */
+    @SuppressWarnings("unused")
+    // called from JNI
+    private void sendMoveSelection(int framePtr, int nodePtr) {
+        if (AccessibilityManager.getInstance(mContext).isEnabled()
+                && mAccessibilityInjector != null) {
+            mWebViewCore.sendMessage(EventHub.MOVE_SELECTION, framePtr, nodePtr);
+        }
     }
 
     // called by JNI

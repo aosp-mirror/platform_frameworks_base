@@ -71,6 +71,7 @@ class AccessibilityInjector {
     private static final int ACTION_TRAVERSE_CURRENT_AXIS = 1;
     private static final int ACTION_TRAVERSE_GIVEN_AXIS = 2;
     private static final int ACTION_PERFORM_AXIS_TRANSITION = 3;
+    private static final int ACTION_TRAVERSE_DEFAULT_WEB_VIEW_BEHAVIOR_AXIS = 4;
 
     // the default WebView behavior abstracted as a navigation axis
     private static final int NAVIGATION_AXIS_DEFAULT_WEB_VIEW_BEHAVIOR = 7;
@@ -153,7 +154,6 @@ class AccessibilityInjector {
                     direction = binding.getFirstArgument(i);
                     // on second null selection string in same direction => WebView handle the event
                     if (direction == mLastDirection && mIsLastSelectionStringNull) {
-                        mLastDirection = direction;
                         mIsLastSelectionStringNull = false;
                         return false;
                     }
@@ -169,6 +169,22 @@ class AccessibilityInjector {
                     sendEvent = (binding.getThirdArgument(i) == 1);
                     prefromAxisTransition(fromAxis, toAxis, sendEvent, contentDescription);
                     mLastDownEventHandled = true;
+                    break;
+                case ACTION_TRAVERSE_DEFAULT_WEB_VIEW_BEHAVIOR_AXIS:
+                    // This is a special case since we treat the default WebView navigation
+                    // behavior as one of the possible navigation axis the user can use.
+                    // If we are not on the default WebView navigation axis this is NOP.
+                    if (mCurrentAxis == NAVIGATION_AXIS_DEFAULT_WEB_VIEW_BEHAVIOR) {
+                        // While WebVew handles navigation we do not get null selection
+                        // strings so do not check for that here as the cases above.
+                        mLastDirection = binding.getFirstArgument(i);
+                        sendEvent = (binding.getSecondArgument(i) == 1);
+                        traverseGivenAxis(mLastDirection, NAVIGATION_AXIS_DEFAULT_WEB_VIEW_BEHAVIOR,
+                            sendEvent, contentDescription);
+                        mLastDownEventHandled = false;
+                    } else {
+                        mLastDownEventHandled = true;
+                    }
                     break;
                 default:
                     Log.w(LOG_TAG, "Unknown action code: " + actionCode);
@@ -236,21 +252,26 @@ class AccessibilityInjector {
      */
     private boolean traverseGivenAxis(int direction, int axis, boolean sendEvent,
             String contentDescription) {
-        // if the axis is the default let WebView handle the event
+        WebViewCore webViewCore = mWebView.getWebViewCore();
+        if (webViewCore == null) {
+            return false;
+        }
+
+        AccessibilityEvent event = null;
+        if (sendEvent) {
+            event = getPartialyPopulatedAccessibilityEvent();
+            // the text will be set upon receiving the selection string
+            event.setContentDescription(contentDescription);
+        }
+        mScheduledEventStack.push(event);
+
+        // if the axis is the default let WebView handle the event which will
+        // result in cursor ring movement and selection of its content
         if (axis == NAVIGATION_AXIS_DEFAULT_WEB_VIEW_BEHAVIOR) {
             return false;
         }
-        WebViewCore webViewCore = mWebView.getWebViewCore();
-        if (webViewCore != null) {
-            AccessibilityEvent event = null;
-            if (sendEvent) {
-                event = getPartialyPopulatedAccessibilityEvent();
-                // the text will be set upon receiving the selection string
-                event.setContentDescription(contentDescription);
-            }
-            mScheduledEventStack.push(event);
-            webViewCore.sendMessage(EventHub.MODIFY_SELECTION, direction, axis);
-        }
+
+        webViewCore.sendMessage(EventHub.MODIFY_SELECTION, direction, axis);
         return true;
     }
 
