@@ -17,12 +17,14 @@
 package android.database;
 
 import android.content.res.Resources;
+import android.database.sqlite.DatabaseObjectNotClosedException;
 import android.database.sqlite.SQLiteClosable;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
+import android.os.StrictMode;
 import android.util.Log;
 import android.util.SparseIntArray;
 
@@ -45,6 +47,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     private int nWindow;
 
     private int mStartPos;
+    private final Throwable mStackTrace;
 
     /**
      * Creates a new empty window.
@@ -56,6 +59,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         int rslt = native_init(sCursorWindowSize, localWindow);
         printDebugMsgIfError(rslt);
         recordNewWindow(Binder.getCallingPid(), nWindow);
+        mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
     }
 
     private void printDebugMsgIfError(int rslt) {
@@ -561,7 +565,16 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
 
     @Override
     protected void finalize() {
-        // Just in case someone forgot to call close...
+        if (nWindow == 0) {
+            return;
+        }
+        if (StrictMode.vmSqliteObjectLeaksEnabled()) {
+            StrictMode.onSqliteObjectLeaked(
+                    "Releasing cursor in a finalizer. Please ensure " +
+                    "that you explicitly call close() on your cursor: ",
+                    mStackTrace);
+        }
+        recordClosingOfWindow(nWindow);
         close_native();
     }
     
@@ -593,6 +606,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         IBinder nativeBinder = source.readStrongBinder();
         mStartPos = source.readInt();
         int rslt = native_init(nativeBinder);
+        mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
         printDebugMsgIfError(rslt);
     }
 
@@ -607,8 +621,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
 
     @Override
     protected void onAllReferencesReleased() {
-        int windowId = nWindow;
-        recordClosingOfWindow(Binder.getCallingPid(), nWindow);
+        recordClosingOfWindow(nWindow);
         close_native();
     }
 
@@ -623,7 +636,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         }
     }
 
-    private void recordClosingOfWindow(int pid, int window) {
+    private void recordClosingOfWindow(int window) {
         synchronized (sWindowToPidMap) {
             if (sWindowToPidMap.size() == 0) {
                 // this means we are not in the ContentProvider.
