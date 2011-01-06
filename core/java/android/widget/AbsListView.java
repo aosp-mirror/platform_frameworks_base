@@ -4218,7 +4218,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return incrementalDeltaY != 0;
         }
 
-        if (firstPosition + childCount == mItemCount && lastBottom <= end &&
+        if (firstPosition + childCount == mItemCount &&
+                lastBottom <= getHeight() - listPadding.bottom &&
                 incrementalDeltaY <= 0) {
             // Don't need to move views up if the bottom of the last position
             // is already visible
