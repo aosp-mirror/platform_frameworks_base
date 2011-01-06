@@ -1,0 +1,907 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="byteShort" msgid="8340973892742019101">"B"</string>
+    <string name="kilobyteShort" msgid="5973789783504771878">"KB"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
+    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
+    <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
+    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="untitled" msgid="6071602020171759109">"&lt;bez nosaukuma&gt;"</string>
+    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
+    <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Nav tālruņa numura)"</string>
+    <string name="unknownName" msgid="2277556546742746522">"(Nezināms)"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Balss pasts"</string>
+    <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
+    <string name="mmiError" msgid="5154499457739052907">"Savienojuma problēma vai nederīgs MMI kods."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"Darbība ir atļauta tikai fiksēto numuru sastādīšanai."</string>
+    <string name="serviceEnabled" msgid="8147278346414714315">"Pakalpojums tika iespējots."</string>
+    <string name="serviceEnabledFor" msgid="6856228140453471041">"Pakalpojums tika iespējots šādai pakalpojumu klasei:"</string>
+    <string name="serviceDisabled" msgid="1937553226592516411">"Pakalpojums ir atspējots."</string>
+    <string name="serviceRegistered" msgid="6275019082598102493">"Reģistrācija bija veiksmīga."</string>
+    <string name="serviceErased" msgid="1288584695297200972">"Dzēšana bija veiksmīga."</string>
+    <string name="passwordIncorrect" msgid="7612208839450128715">"Nepareiza parole."</string>
+    <string name="mmiComplete" msgid="8232527495411698359">"MMI ir pabeigts."</string>
+    <string name="badPin" msgid="5085454289896032547">"Ierakstītais iepriekšējais PIN nav pareizs."</string>
+    <string name="badPuk" msgid="5702522162746042460">"Ierakstītais PUK kods nav pareizs."</string>
+    <string name="mismatchPin" msgid="3695902225843339274">"Ievadītie PIN neatbilst."</string>
+    <string name="invalidPin" msgid="3850018445187475377">"Ierakstiet PIN, kas sastāv no 4 līdz 8 cipariem."</string>
+    <string name="needPuk" msgid="919668385956251611">"SIM karte ir bloķēta ar PUK kodu. Ierakstiet PUK kodu, lai to atbloķētu."</string>
+    <string name="needPuk2" msgid="4526033371987193070">"Ierakstiet PUK2 kodu, lai atbloķētu SIM karti."</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"Ienākošā zvana zvanītāja ID"</string>
+    <string name="ClirMmi" msgid="7784673673446833091">"Izejošā zvana zvanītāja ID"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"Zvanu pāradresācija"</string>
+    <string name="CwMmi" msgid="9129678056795016867">"Zvana gaidīšana"</string>
+    <string name="BaMmi" msgid="455193067926770581">"Zvanu aizliegšana"</string>
+    <string name="PwdMmi" msgid="7043715687905254199">"Paroles maiņa"</string>
+    <string name="PinMmi" msgid="3113117780361190304">"PIN maiņa"</string>
+    <string name="CnipMmi" msgid="3110534680557857162">"Tiek rādīts numurs, uz kuru tiek zvanīts"</string>
+    <string name="CnirMmi" msgid="3062102121430548731">"Zvanīšana uz numuru ir ierobežota."</string>
+    <string name="ThreeWCMmi" msgid="9051047170321190368">"Trīsvirzienu zvanīšana"</string>
+    <string name="RuacMmi" msgid="7827887459138308886">"Nevēlamu traucējošu zvanu noraidīšana"</string>
+    <string name="CndMmi" msgid="3116446237081575808">"Zvanīšanas numuru piegāde"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"Netraucēt"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Zvanītāja ID noklusējuma vērtība ir Ierobežots. Nākamais zvans: ierobežots."</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Zvanītāja ID noklusējumi ir iestatīti uz Ierobežots. Nākamais zvans: nav ierobežots"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Zvanītāja ID noklusējumi ir iestatīti uz Nav ierobežots. Nākamais zvans: ierobežots"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Zvanītāja ID noklusējumi ir iestatīti uz Nav ierobežots. Nākamais zvans: nav ierobežots"</string>
+    <string name="serviceNotProvisioned" msgid="8614830180508686666">"Pakalpojums netiek nodrošināts."</string>
+    <string name="CLIRPermanent" msgid="5460892159398802465">"Zvanītāja ID iestatījumu nevar mainīt."</string>
+    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Ierobežotā piekļuve ir mainīta"</string>
+    <string name="RestrictedOnData" msgid="8653794784690065540">"Datu pakalpojums ir bloķēts."</string>
+    <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Ārkārtas pakalpojums ir bloķēts."</string>
+    <string name="RestrictedOnNormal" msgid="4953867011389750673">"Balss pakalpojums ir bloķēts."</string>
+    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"Visi balss pakalpojumi ir bloķēti."</string>
+    <string name="RestrictedOnSms" msgid="8314352327461638897">"Īsziņu pakalpojums ir bloķēts."</string>
+    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"Balss/datu pakalpojumi ir bloķēti."</string>
+    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Balss/īsziņu pakalpojumi ir bloķēti."</string>
+    <string name="RestrictedOnAll" msgid="2714924667937117304">"Visi balss/datu/īsziņu pakalpojumi ir bloķēti."</string>
+    <string name="serviceClassVoice" msgid="1258393812335258019">"Voice"</string>
+    <string name="serviceClassData" msgid="872456782077937893">"Dati"</string>
+    <string name="serviceClassFAX" msgid="5566624998840486475">"FAKSS"</string>
+    <string name="serviceClassSMS" msgid="2015460373701527489">"Īsziņa"</string>
+    <string name="serviceClassDataAsync" msgid="4523454783498551468">"Asinhroni dati"</string>
+    <string name="serviceClassDataSync" msgid="7530000519646054776">"Sinhronizācija"</string>
+    <string name="serviceClassPacket" msgid="6991006557993423453">"Pakete"</string>
+    <string name="serviceClassPAD" msgid="3235259085648271037">"PAD"</string>
+    <string name="roamingText0" msgid="7170335472198694945">"Viesabonēšanas indikators ir ieslēgts."</string>
+    <string name="roamingText1" msgid="5314861519752538922">"Viesabonēšanas indikators ir izslēgts."</string>
+    <string name="roamingText2" msgid="8969929049081268115">"Viesabonēšanas indikators mirgo"</string>
+    <string name="roamingText3" msgid="5148255027043943317">"Ārpus apkaimes"</string>
+    <string name="roamingText4" msgid="8808456682550796530">"Ārpus ēkas"</string>
+    <string name="roamingText5" msgid="7604063252850354350">"Viesabonēšana — vēlamā sistēma"</string>
+    <string name="roamingText6" msgid="2059440825782871513">"Viesabonēšana — pieejamā sistēma"</string>
+    <string name="roamingText7" msgid="7112078724097233605">"Viesabonēšana — apvienības partneris"</string>
+    <string name="roamingText8" msgid="5989569778604089291">"Viesabonēšana — ekskluzīvs partneris"</string>
+    <string name="roamingText9" msgid="7969296811355152491">"Viesabonēšana — pakalpojuma pilnīga funkcionalitāte"</string>
+    <string name="roamingText10" msgid="3992906999815316417">"Viesabonēšana — pakalpojuma daļēja funkcionalitāte"</string>
+    <string name="roamingText11" msgid="4154476854426920970">"Viesabonēšanas reklāmkarogs ir ieslēgts."</string>
+    <string name="roamingText12" msgid="1189071119992726320">"Viesabonēšanas reklāmkarogs ir izslēgts."</string>
+    <string name="roamingTextSearching" msgid="8360141885972279963">"Pakalpojuma meklēšana"</string>
+    <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: nav pāradresēts"</string>
+    <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
+    <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> pēc <xliff:g id="TIME_DELAY">{2}</xliff:g> sekundes(-ēm)"</string>
+    <string name="cfTemplateRegistered" msgid="5073237827620166285">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: nav pāradresēts"</string>
+    <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: nav pāradresēts"</string>
+    <string name="fcComplete" msgid="3118848230966886575">"Funkcijas kods ir pabeigts."</string>
+    <string name="fcError" msgid="3327560126588500777">"Savienojuma problēma vai nederīgs funkcijas kods."</string>
+    <string name="httpErrorOk" msgid="1191919378083472204">"Labi"</string>
+    <string name="httpError" msgid="2567300624552921790">"Tīmekļa lapā ir kļūda."</string>
+    <string name="httpErrorLookup" msgid="4517085806977851374">"Vietrādi URL nevar atrast."</string>
+    <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Vietnes autentifikācijas shēma netiek atbalstīta."</string>
+    <string name="httpErrorAuth" msgid="7293960746955020542">"Autentifikācija nebija veiksmīga."</string>
+    <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Autentifikācija, izmantojot starpniekserveri, nebija veiksmīga."</string>
+    <string name="httpErrorConnect" msgid="7623096283505770433">"Savienojuma izveide ar serveri nebija veiksmīga."</string>
+    <string name="httpErrorIO" msgid="5047872902739125260">"Serverim neizdevās izveidot savienojumu. Vēlāk mēģiniet vēlreiz."</string>
+    <string name="httpErrorTimeout" msgid="4743403703762883954">"Savienojumam ar serveri radās noildze."</string>
+    <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Lapā ir pārāk daudz servera novirzīšanu."</string>
+    <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"Protokols netiek atbalstīts."</string>
+    <string name="httpErrorFailedSslHandshake" msgid="3088290300440289771">"Drošu savienojumu nevarēja izveidot."</string>
+    <string name="httpErrorBadUrl" msgid="6088183159988619736">"Lapu nevar atvērt, jo URL nav derīgs."</string>
+    <string name="httpErrorFile" msgid="8250549644091165175">"Failam nevarēja piekļūt."</string>
+    <string name="httpErrorFileNotFound" msgid="5588380756326017105">"Pieprasītais fails netika atrasts."</string>
+    <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Tiek apstrādāts pārāk liels pieprasījumu skaits. Vēlāk mēģiniet vēlreiz."</string>
+    <string name="notification_title" msgid="1259940370369187045">"Konta <xliff:g id="ACCOUNT">%1$s</xliff:g> pierakstīšanās kļūda"</string>
+    <string name="contentServiceSync" msgid="8353523060269335667">"Sinhronizācija"</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sinhronizācija"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Pārāk daudz <xliff:g id="CONTENT_TYPE">%s</xliff:g> dzēsto vienumu."</string>
+    <string name="low_memory" msgid="6632412458436461203">"tālruņa krātuve ir pilna! Dzēsiet dažus failus, lai atbrīvotu vietu."</string>
+    <string name="me" msgid="6545696007631404292">"Man"</string>
+    <string name="power_dialog" msgid="1319919075463988638">"Tālruņa opcijas"</string>
+    <string name="silent_mode" msgid="7167703389802618663">"Klusuma režīms"</string>
+    <string name="turn_on_radio" msgid="3912793092339962371">"Ieslēgt bezvadu tīklu"</string>
+    <string name="turn_off_radio" msgid="8198784949987062346">"Izslēgt bezvadu tīklu"</string>
+    <string name="screen_lock" msgid="799094655496098153">"Bloķēt ekrānu"</string>
+    <string name="power_off" msgid="4266614107412865048">"Strāvas padeve ir izslēgta."</string>
+    <string name="shutdown_progress" msgid="2281079257329981203">"Notiek izslēgšana..."</string>
+    <string name="shutdown_confirm" msgid="649792175242821353">"Tālrunis tiks izslēgts."</string>
+    <string name="recent_tasks_title" msgid="3691764623638127888">"Nesens"</string>
+    <string name="no_recent_tasks" msgid="279702952298056674">"Nav nesen izmantotu lietojumprogrammu."</string>
+    <string name="global_actions" msgid="2406416831541615258">"Tālruņa opcijas"</string>
+    <string name="global_action_lock" msgid="2844945191792119712">"Ekrāna bloķētājs"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"Strāvas padeve ir izslēgta."</string>
+    <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Klusuma režīms"</string>
+    <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Skaņa ir IZSLĒGTA."</string>
+    <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Skaņa ir IESLĒGTA."</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Lidojuma režīms"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Lidojuma režīms ir IESLĒGTS."</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Lidojuma režīms ir IZSLĒGTS."</string>
+    <string name="safeMode" msgid="2788228061547930246">"Drošais režīms"</string>
+    <string name="android_system_label" msgid="6577375335728551336">"Android sistēma"</string>
+    <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Maksas pakalpojumi"</string>
+    <string name="permgroupdesc_costMoney" msgid="8193824940620517189">"Ļauj lietojumprogrammām veikt darbības, par kurām, iespējams, būs jāmaksā."</string>
+    <string name="permgrouplab_messages" msgid="7521249148445456662">"Jūsu ziņojumi"</string>
+    <string name="permgroupdesc_messages" msgid="7045736972019211994">"Lasiet un rakstiet īsziņas, e-pasta un citus ziņojumus."</string>
+    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Personas informācija"</string>
+    <string name="permgroupdesc_personalInfo" msgid="5488050357388806068">"Tiešā piekļuve tālrunī saglabātajām kontaktpersonām un kalendāram."</string>
+    <string name="permgrouplab_location" msgid="635149742436692049">"Jūsu atrašanās vieta"</string>
+    <string name="permgroupdesc_location" msgid="2430258821648348660">"Pārraugiet savu fizisko atrašanās vietu"</string>
+    <string name="permgrouplab_network" msgid="5808983377727109831">"Tīkla sakari"</string>
+    <string name="permgroupdesc_network" msgid="5035763698958415998">"Ļauj lietojumprogrammām piekļūt dažādām tīkla funkcijām."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Jūsu konti"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Piekļūstiet pieejamajiem kontiem."</string>
+    <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Aparatūras vadīklas"</string>
+    <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Tieša piekļuve aparatūrai klausulē."</string>
+    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Tālruņa zvani"</string>
+    <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"Pārraugiet, ierakstiet un apstrādājiet tālruņa zvanus."</string>
+    <string name="permgrouplab_systemTools" msgid="4652191644082714048">"Sistēmas rīki"</string>
+    <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Sistēmas apakšējā līmeņa piekļuve un vadība."</string>
+    <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Izstrādes rīki"</string>
+    <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Tikai lietojumprogrammu izstrādātājiem vajadzīgas funkcijas."</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Krātuve"</string>
+    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Piekļūst USB krātuvei."</string>
+    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Piekļūstiet SD kartei."</string>
+    <string name="permlab_statusBar" msgid="7417192629601890791">"atspējot vai pārveidot statusa joslu"</string>
+    <string name="permdesc_statusBar" msgid="1365473595331989732">"Ļauj lietojumprogrammai atspējot statusa joslu vai pievienot un noņemt sistēmas ikonas."</string>
+    <string name="permlab_statusBarService" msgid="7247281911387931485">"statusa josla"</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Ļauj lietojumprogrammai būt par statusa joslu."</string>
+    <string name="permlab_expandStatusBar" msgid="1148198785937489264">"izvērst/sakļaut statusa joslu"</string>
+    <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Ļauj lietojumprogrammai izvērst vai sakļaut statusa joslu."</string>
+    <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"pārtvert izejošos zvanus"</string>
+    <string name="permdesc_processOutgoingCalls" msgid="2228988201852654461">"Ļauj lietojumprogrammai apstrādāt izejošos zvanus un mainīt sastādāmo numuru. Ļaunprātīgas lietojumprogrammas var pārraudzīt, novirzīt vai novērst izejošos zvanus."</string>
+    <string name="permlab_receiveSms" msgid="2697628268086208535">"saņemt īsziņu"</string>
+    <string name="permdesc_receiveSms" msgid="6298292335965966117">"Ļauj lietojumprogrammai saņemt un apstrādāt īsziņas. Ļaunprātīgas lietojumprogrammas var pārraudzīt jūsu ziņojumus vai dzēst tos, neparādot tos jums."</string>
+    <string name="permlab_receiveMms" msgid="8894700916188083287">"saņemt multiziņu"</string>
+    <string name="permdesc_receiveMms" msgid="4563346832000174373">"Ļauj lietojumprogrammai saņemt un apstrādāt multiziņas. Ļaunprātīgas lietojumprogrammas var pārraudzīt jūsu ziņojumus vai dzēst tos, neparādot tos jums."</string>
+    <string name="permlab_sendSms" msgid="5600830612147671529">"sūtīt īsziņas"</string>
+    <string name="permdesc_sendSms" msgid="1946540351763502120">"Ļauj lietojumprogrammai sūtīt īsziņas. Ļaunprātīgas lietojumprogrammas var radīt jums izmaksas, bez apstiprinājuma sūtot īsziņas."</string>
+    <string name="permlab_readSms" msgid="4085333708122372256">"lasīt īsziņu vai multiziņu"</string>
+    <string name="permdesc_readSms" msgid="3002170087197294591">"Ļauj lietojumprogrammai lasīt īsziņas, kas ir saglabātas jūsu tālrunī vai SIM kartē. Ļaunprātīgas lietojumprogrammas var lasīt konfidenciālos ziņojumus."</string>
+    <string name="permlab_writeSms" msgid="6881122575154940744">"rediģēt īsziņu vai multiziņu"</string>
+    <string name="permdesc_writeSms" msgid="6299398896177548095">"Ļauj lietojumprogrammai rakstīt īsziņās, kas ir saglabātas tālrunī vai SIM kartē. Ļaunprātīgas lietojumprogrammas var dzēst jūsu ziņojumus."</string>
+    <string name="permlab_receiveWapPush" msgid="8258226427716551388">"saņemt WAP"</string>
+    <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Ļauj lietojumprogrammai saņemt un apstrādāt WAP ziņojumus. Ļaunprātīgas lietojumprogrammas var pārraudzīt jūsu ziņojumus vai dzēst tos, neparādot tos jums."</string>
+    <string name="permlab_getTasks" msgid="5005277531132573353">"izgūt aktīvas lietojumprogrammas"</string>
+    <string name="permdesc_getTasks" msgid="7048711358713443341">"Ļauj lietojumprogrammai izgūt informāciju par pašlaik un nesen darbinātajiem uzdevumiem. Var atļaut lietojumprogrammām atklāt privātu informāciju par citām lietojumprogrammām."</string>
+    <string name="permlab_reorderTasks" msgid="5669588525059921549">"pārkārtot aktīvās lietojumprogrammas"</string>
+    <string name="permdesc_reorderTasks" msgid="126252774270522835">"Ļauj lietojumprogrammai pārvietot uzdevumus priekšplānā vai fonā. Ļaunprātīgas lietojumprogrammas var tikt parādītas priekšplānā bez jūsu vadības."</string>
+    <string name="permlab_setDebugApp" msgid="4339730312925176742">"iespējot lietojumprogrammas atkļūdošanu"</string>
+    <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Ļauj lietojumprogrammai ieslēgt citas lietojumprogrammas atkļūdošanu. Ļaunprātīgas lietojumprogrammas var to izmantot, lai pārtrauktu citu lietojumprogrammu darbību."</string>
+    <string name="permlab_changeConfiguration" msgid="8214475779521218295">"mainīt lietotāja saskarnes iestatījumus"</string>
+    <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Ļauj lietojumprogrammai mainīt pašreizējo konfigurāciju, piemēram, lokalizāciju vai vispārīgo fonta lielumu."</string>
+    <string name="permlab_enableCarMode" msgid="5684504058192921098">"iespējot automobiļa režīmu"</string>
+    <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Ļauj lietojumprogrammai iespējot automobiļa režīmu."</string>
+    <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"pārtraukt fonā notiekošos procesus"</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Ļauj lietojumprogrammai pārtraukt citu lietojumprogrammu fonā notiekošos procesus; arī tad, ja atmiņas līmenis nav zems."</string>
+    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"apturēt citu lietojumprogrammu darbību"</string>
+    <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Ļauj lietojumprogrammai apturēt citas lietojumprogrammas."</string>
+    <string name="permlab_forceBack" msgid="1804196839880393631">"aizvērt lietojumprogrammu"</string>
+    <string name="permdesc_forceBack" msgid="6534109744159919013">"Ļauj lietojumprogrammai aizvērt jebkuru priekšplānā esošu darbību un atgriezties atpakaļ. Parastajās lietojumprogrammās nekad nav nepieciešams."</string>
+    <string name="permlab_dump" msgid="1681799862438954752">"izgūt sistēmas iekšējo stāvokli"</string>
+    <string name="permdesc_dump" msgid="2198776174276275220">"Ļauj lietojumprogrammai izgūt sistēmas iekšējo stāvokli. Ļaunprātīgas lietojumprogrammas var izgūt plašu privātās un drošās informācijas spektru, kas tai parasti nav nepieciešama."</string>
+    <string name="permlab_shutdown" msgid="7185747824038909016">"daļēja izslēgšana"</string>
+    <string name="permdesc_shutdown" msgid="7046500838746291775">"Liek darbību pārvaldniekam pāriet izslēgšanas stāvoklī. Neveic pilnīgu izslēgšanu."</string>
+    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"novērst lietojumprogrammu pārslēgšanu"</string>
+    <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Neļauj lietotājam pārslēgties uz citu lietojumprogrammu."</string>
+    <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"pārraudzīt un kontrolēt visu lietojumprogrammu palaišanu"</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="3228701938345388092">"Ļauj lietojumprogrammai pārraudzīt un kontrolēt, kā sistēma uzsāk darbības. Ļaunprātīgas lietojumprogrammas var pilnībā pārkāpt sistēmas drošības politiku. Šī atļauja ir nepieciešama tikai izstrādei (nekad parastai tālruņa lietošanai)."</string>
+    <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"sūtīt apraidi par pakotnes noņemšanu"</string>
+    <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"Ļauj lietojumprogrammai raidīt paziņojumu, ka lietojumprogrammas pakotne ir noņemta. Ļaunprātīgas lietojumprogrammas var to izmantot, lai pārtrauktu jebkuras citas aktīvas lietojumprogrammas darbību."</string>
+    <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"sūtīt īsziņā saņemtu apraidi"</string>
+    <string name="permdesc_broadcastSmsReceived" msgid="9122419277306740155">"Ļauj lietojumprogrammai raidīt paziņojumu, ka īsziņa ir saņemta. Ļaunprātīgas lietojumprogrammas var to izmantot, lai viltotu ienākošās īsziņas."</string>
+    <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"sūtīt WAP-PUSH-saņemto apraidi"</string>
+    <string name="permdesc_broadcastWapPush" msgid="3955303669461378091">"Ļauj lietojumprogrammai apraidīt paziņojumu, ka WAP PUSH ziņojums ir saņemts. Ļaunprātīgas lietojumprogrammas var to izmantot, lai viltotu multiziņas saņemšanu vai nemanāmi aizstātu jebkuras tīmekļa lapas saturu ar ļaunprātīgiem variantiem."</string>
+    <string name="permlab_setProcessLimit" msgid="2451873664363662666">"ierobežot aktīvo procesu skaitu"</string>
+    <string name="permdesc_setProcessLimit" msgid="7824786028557379539">"Ļauj lietojumprogrammai kontrolēt darbināmo procesu maksimālo skaitu. Parastajām lietojumprogrammām nekad nav nepieciešama."</string>
+    <string name="permlab_setAlwaysFinish" msgid="5342837862439543783">"aizvērt visas fonā izmantotās lietojumprogrammas"</string>
+    <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"Ļauj lietojumprogrammai kontrolēt, vai darbības vienmēr tiek pabeigtas, tiklīdz tās tiek pārvietotas fonā. Nekad nav nepieciešams parastajām lietojumprogrammām."</string>
+    <string name="permlab_batteryStats" msgid="7863923071360031652">"pārveidot akumulatora statistiku"</string>
+    <string name="permdesc_batteryStats" msgid="5847319823772230560">"Ļauj pārveidot apkopoto akumulatora jaudas statistiku. Nav paredzēts izmantošanai parastajās lietojumprogrammās."</string>
+    <string name="permlab_backup" msgid="470013022865453920">"kontrolēt sistēmas dublējumu un atjaunošanu"</string>
+    <string name="permdesc_backup" msgid="4837493065154256525">"Ļauj lietojumprogrammai kontrolēt sistēmas dublēšanas un atjaunošanas mehānismu. Nav paredzēts izmantošanai parastajās lietojumprogrammās."</string>
+    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"attēlot neautorizētus logus"</string>
+    <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Ļauj izveidot logus, kas ir paredzēti izmantošanai iekšējās sistēmas lietotāja saskarnē. Nav paredzēts izmantošanai parastajās lietojumprogrammās."</string>
+    <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"rādīt sistēmas līmeņa brīdinājumus"</string>
+    <string name="permdesc_systemAlertWindow" msgid="5109622689323490558">"Ļauj lietojumprogrammai rādīt sistēmas brīdinājumu logus. Ļaunprātīgas lietojumprogrammas var pārņemt visu tālruņa ekrānu."</string>
+    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"pārveidot globālo animācijas ātrumu"</string>
+    <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"Ļauj lietojumprogrammai jebkurā brīdī mainīt globālo animācijas ātrumu (ātrākas vai lēnākas animācijas)."</string>
+    <string name="permlab_manageAppTokens" msgid="17124341698093865">"pārvaldīt lietojumprogrammas pilnvaras"</string>
+    <string name="permdesc_manageAppTokens" msgid="977127907524195988">"Ļauj lietojumprogrammām izveidot un pārvaldīt savas pilnvaras, apejot parasto Z secību. Nav nepieciešams parastajām lietojumprogrammām."</string>
+    <string name="permlab_injectEvents" msgid="1378746584023586600">"nospiest taustiņus un vadības pogas"</string>
+    <string name="permdesc_injectEvents" msgid="3946098050410874715">"Ļauj lietojumprogrammai piegādāt savus ievades notikumus (taustiņu spiedienus u.c.) citām lietojumprogrammām. Ļaunprātīgas lietojumprogrammas var to izmantot, lai pārņemtu tālruni."</string>
+    <string name="permlab_readInputState" msgid="469428900041249234">"reģistrēt rakstīto un veiktās darbības"</string>
+    <string name="permdesc_readInputState" msgid="5132879321450325445">"Ļauj lietojumprogrammām sekot līdzi nospiestajiem taustiņiem, mijiedarbojoties ar citu lietojumprogrammu (piemēram, ievadot paroli). Parastajām lietojumprogrammām nekad nav nepieciešama."</string>
+    <string name="permlab_bindInputMethod" msgid="3360064620230515776">"saistīt ar ievades metodi"</string>
+    <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Ļauj īpašniekam saistīt ar ievades metodes augšējā līmeņa saskarni. Parastajām lietojumprogrammām nekad nav nepieciešama."</string>
+    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"saistīt ar tapeti"</string>
+    <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Ļauj īpašniekam saistīties ar tapetes augšējā līmeņa saskarni. Parastajās lietojumprogrammās nekad nav nepieciešama."</string>
+    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"mijiedarboties ar ierīces administratoru"</string>
+    <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Ļauj īpašniekam sūtīt nolūkus ierīces administratoram. Nekad nav nepieciešams parastajām lietojumprogrammām."</string>
+    <string name="permlab_setOrientation" msgid="3365947717163866844">"mainīt ekrāna orientāciju"</string>
+    <string name="permdesc_setOrientation" msgid="6335814461615851863">"Ļauj lietojumprogrammai jebkurā brīdī mainīt ekrāna pagriešanas iestatījumu. Parastajām lietojumprogrammām nekad nav nepieciešama."</string>
+    <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"sūtīt Linux signālus uz lietojumprogrammām"</string>
+    <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Ļauj lietojumprogrammai pieprasīt, lai piegādātais signāls tiktu sūtīts uz visiem pastāvīgajiem procesiem."</string>
+    <string name="permlab_persistentActivity" msgid="8659652042401085862">"likt lietojumprogrammai vienmēr darboties"</string>
+    <string name="permdesc_persistentActivity" msgid="5037199778265006008">"Ļauj lietojumprogrammai padarīt atsevišķas tās daļas neatgriezeniskas, lai sistēma nevar to izmantot citām lietojumprogrammām."</string>
+    <string name="permlab_deletePackages" msgid="3343439331576348805">"dzēst lietojumprogrammas"</string>
+    <string name="permdesc_deletePackages" msgid="3634943677518723314">"Ļauj lietojumprogrammai dzēst Android pakotnes. Ļaunprātīgas lietojumprogrammas var to izmantot, lai dzēstu svarīgas lietojumprogrammas."</string>
+    <string name="permlab_clearAppUserData" msgid="2192134353540277878">"dzēst citu lietojumprogrammu datus"</string>
+    <string name="permdesc_clearAppUserData" msgid="7546345080434325456">"Ļauj lietojumprogrammai notīrīt lietotāja datus."</string>
+    <string name="permlab_deleteCacheFiles" msgid="1518556602634276725">"dzēst citu lietojumprogrammu kešatmiņas"</string>
+    <string name="permdesc_deleteCacheFiles" msgid="2283074077168165971">"Ļauj lietojumprogrammai dzēst kešatmiņas failus."</string>
+    <string name="permlab_getPackageSize" msgid="4799785352306641460">"noteikt lietojumprogrammas krātuvē pieejamo vietu"</string>
+    <string name="permdesc_getPackageSize" msgid="5557253039670753437">"Ļauj lietojumprogrammai izgūt tās kodu, datus un kešatmiņas lielumu."</string>
+    <string name="permlab_installPackages" msgid="335800214119051089">"tieši instalēt lietojumprogrammas"</string>
+    <string name="permdesc_installPackages" msgid="526669220850066132">"Ļauj lietojumprogrammai instalēt jaunas vai atjauninātas Android pakotnes. Ļaunprātīgas lietojumprogrammas var to izmantot, lai pievienotu jaunas lietojumprogrammas ar nejauši jaudīgām atļaujām."</string>
+    <string name="permlab_clearAppCache" msgid="4747698311163766540">"dzēst visus lietojumprogrammas kešatmiņas datus"</string>
+    <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Ļauj lietojumprogrammai atbrīvot vietu tālruņa krātuvē, dzēšot failus lietojumprogrammas kešatmiņas katalogā. Piekļuve parasti ir pieejama tikai sistēmas procesam."</string>
+    <string name="permlab_movePackage" msgid="728454979946503926">"Pārvietot lietojumprogrammas resursus"</string>
+    <string name="permdesc_movePackage" msgid="6323049291923925277">"Ļauj lietojumprogrammai pārvietot lietojumprogrammas resursus no iekšējā datu nesēja uz ārējo un otrādi."</string>
+    <string name="permlab_readLogs" msgid="6615778543198967614">"lasīt sensitīvus žurnāla datus"</string>
+    <string name="permdesc_readLogs" msgid="8896449437464867766">"Ļauj lietojumprogrammai lasīt no sistēmas dažādiem žurnālfailiem. Šādi lietojumprogramma var atrast vispārīgu informāciju par jūsu darbībām tālrunī, tostarp, iespējams, arī personisku vai privātu informāciju."</string>
+    <string name="permlab_diagnostic" msgid="8076743953908000342">"lasīt grupas “diag” resursus un rakstīt tajos"</string>
+    <string name="permdesc_diagnostic" msgid="3121238373951637049">"Ļauj lietojumprogrammai lasīt jebkuru resursu, kas pieder grupai “diag”, un rakstīt tajos; piemēram, failus direktorijā /dev. Tas var ietekmēt sistēmas stabilitāti un drošību. Tas ir jāizmanto TIKAI aparatūrai specifiskas diagnostikas veikšanai, ko izpilda ražotājs vai operators."</string>
+    <string name="permlab_changeComponentState" msgid="79425198834329406">"iespējot vai atspējot lietojumprogrammas komponentus"</string>
+    <string name="permdesc_changeComponentState" msgid="4569107043246700630">"Ļauj lietojumprogrammai mainīt, vai citas lietojumprogrammas komponents ir iespējots vai ne. Ļaunprātīgas lietojumprogrammas var to izmantot, lai atspējotu svarīgas tālruņa iespējas. Atļauja ir jāizmanto uzmanīgi, jo pastāv iespēja, ka lietojumprogrammas komponenti būs neizmantojamā, nekonsekventā vai nestabilā stāvoklī."</string>
+    <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"iestatīt vēlamās lietojumprogrammas"</string>
+    <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Ļauj lietojumprogrammai pārveidot vēlamās lietojumprogrammas. Šādi ļaunprātīgajām lietojumprogrammā var tikt atļauts nemanāmi mainīt darbinātās lietojumprogrammas, izmānot datus no esošajām lietojumprogrammām, lai apkopotu jūsu privātos datus."</string>
+    <string name="permlab_writeSettings" msgid="1365523497395143704">"pārveidot globālos sistēmas iestatījumus"</string>
+    <string name="permdesc_writeSettings" msgid="838789419871034696">"Ļauj lietojumprogrammai pārveidot sistēmas iestatījumu datus. Ļaunprātīgas lietojumprogrammas var bojāt sistēmas konfigurāciju."</string>
+    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"pārveidot drošos sistēmas iestatījumus"</string>
+    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Ļauj lietojumprogrammai pārveidot sistēmas drošo iestatījumu datus. Nav paredzēts izmantošanai parastajās lietojumprogrammās."</string>
+    <string name="permlab_writeGservices" msgid="2149426664226152185">"pārveidot Google pakalpojumu karti"</string>
+    <string name="permdesc_writeGservices" msgid="6602362746516676175">"Ļauj lietojumprogrammai pārveidot Google pakalpojumu karti. Nav paredzēts izmantošanai parastajās lietojumprogrammās."</string>
+    <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"automātiski sākt pēc palaišanas"</string>
+    <string name="permdesc_receiveBootCompleted" msgid="698336728415008796">"Ļauj startēt lietojumprogrammu, sevi tiklīdz sistēma ir pabeigusi palaišanu. Šādi tālruņa startēšana var būt ilgāka un lietojumprogrammai var tikt atļauts palēnināt vispārējo tālruņa darbību, vienmēr darbojoties."</string>
+    <string name="permlab_broadcastSticky" msgid="7919126372606881614">"sūtīt piesaistošu apraidi"</string>
+    <string name="permdesc_broadcastSticky" msgid="1920045289234052219">"Ļauj lietojumprogrammai sūtīt piesaistošās apraides, kas saglabājas pēc apraides pabeigšanas. Ļaunprātīgas lietojumprogrammas var palēnināt tālruņa darbību vai padarīt to nestabilu, tādējādi liekot izmantot pārāk daudz atmiņas."</string>
+    <string name="permlab_readContacts" msgid="6219652189510218240">"lasīt kontaktpersonu datus"</string>
+    <string name="permdesc_readContacts" msgid="3371591512896545975">"Ļauj lietojumprogrammai lasīt visus jūsu tālrunī saglabāto kontaktpersonu (adrešu) datus. Ļaunprātīgas lietojumprogrammas var to izmantot, lai sūtītu jūsu datus citām personām."</string>
+    <string name="permlab_writeContacts" msgid="644616215860933284">"rakstīt kontaktpersonu datus"</string>
+    <string name="permdesc_writeContacts" msgid="3924383579108183601">"Ļauj lietojumprogrammai pārveidot tālrunī saglabātos kontaktpersonu (adrešu) datus. Ļaunprātīgas lietojumprogrammas var to izmantot, lai dzēstu vai pārveidotu jūsu kontaktpersonu datus."</string>
+    <string name="permlab_readCalendar" msgid="6898987798303840534">"lasīt kalendāra pasākumus"</string>
+    <string name="permdesc_readCalendar" msgid="5533029139652095734">"Ļauj lietojumprogrammai lasīt visus tālrunī saglabātos kalendāra pasākumus. Ļaunprātīgas lietojumprogrammas var to izmantot, lai sūtītu kalendāra pasākumus citām personām."</string>
+    <string name="permlab_writeCalendar" msgid="3894879352594904361">"pievienot vai pārveidot kalendāra pasākumus un sūtīt e-pasta ziņojumus viesiem"</string>
+    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Ļauj lietojumprogrammai pievienot vai mainīt pasākumus jūsu kalendārā, kas var sūtīt e-pasta ziņojumus viesiem. Ļaunprātīgas lietojumprogrammas var to izmantot, lai dzēstu vai pārveidotu jūsu kalendāra pasākumus vai sūtītu e-pasta ziņojumus viesiem."</string>
+    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"imitēt atrašanās vietu avotus pārbaudes nolūkos"</string>
+    <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Pārbaudīšanai izveidojiet imitētus atrašanās vietu avotus. Ļaunprātīgas lietojumprogrammas var to izmantot, lai ignorētu atrašanās vietu un/vai statusu, ko atgriež reālie atrašanās vietu avoti, piemēram, GPS vai tīkla pakalpojumu sniedzēji."</string>
+    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"piekļūt atrašanās vietas nodrošinātāja papildu komandām"</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Piekļūstiet atrašanās vietas nodrošinātāja papildu komandām. Ļaunprātīgas lietojumprogrammas var to izmantot, lai traucētu GPS vai citu atrašanās vietu avotu darbību."</string>
+    <string name="permlab_installLocationProvider" msgid="6578101199825193873">"atļauja instalēt atrašanās vietas sniedzēju"</string>
+    <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Izveidojiet imitētas atrašanās vietas avotus pārbaudīšanai. Ļaunprātīgas lietojumprogrammas var to izmantot, lai ignorētu atrašanās vietu un/vai statusu, ko atgriež reālās atrašanās vietas avoti, piemēram, GPS vai tīkla nodrošinātāji, vai pārraudzītu un ziņotu par jūsu atrašanās vietu ārējam avotam."</string>
+    <string name="permlab_accessFineLocation" msgid="8116127007541369477">"noteikt precīzu (GPS) atrašanās vietu"</string>
+    <string name="permdesc_accessFineLocation" msgid="7411213317434337331">"Piekļūstiet precīziem atrašanās vietas avotiem, piemēram, globālās pozicionēšanas sistēmai tālrunī (ja pieejams). Ļaunprātīgas lietojumprogrammas var to izmantot, lai noteiktu, kur jūs atrodaties, un var patērēt papildu akumulatora jaudu."</string>
+    <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"noteikt aptuvenu (uz tīklu balstītu) atrašanās vietu"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="8235655958070862293">"Piekļūstiet tādiem zemas kvalitātes atrašanās vietas avotiem kā mobilā tīkla datu bāzei, lai noteiktu aptuvenu tālruņa atrašanās vietu (ja pieejams). Ļaunprātīgas lietojumprogrammas var to izmantot, lai noteiktu jūsu aptuveno atrašanās vietu."</string>
+    <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"piekļūt SurfaceFlinger"</string>
+    <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Ļauj lietojumprogrammai izmantot SurfaceFlinger zemā līmeņa funkcijas."</string>
+    <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"lasīt kadru buferi"</string>
+    <string name="permdesc_readFrameBuffer" msgid="7530020370469942528">"Ļauj lietojumprogrammai lasīt kadru bufera saturu."</string>
+    <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"mainīt audio iestatījumus"</string>
+    <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Ļauj lietojumprogrammai pārveidot globālos audio iestatījumus, piemēram, skaļumu un maršrutēšanu."</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"ierakstīt audio"</string>
+    <string name="permdesc_recordAudio" msgid="6493228261176552356">"Ļauj lietojumprogrammai piekļūt audio ieraksta ceļam."</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"uzņemt attēlus un videoklipus"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"Ļauj lietojumprogrammai uzņemt attēlus un videoklipus ar kameru. Šādi lietojumprogramma jebkurā laikā var apkopot ar kameru redzamos attēlus."</string>
+    <string name="permlab_brick" msgid="8337817093326370537">"neatgriezeniski atspējot tālruni"</string>
+    <string name="permdesc_brick" msgid="5569526552607599221">"Ļauj lietojumprogrammai neatgriezeniski atspējot visu tālruni. Tas ir ļoti bīstami."</string>
+    <string name="permlab_reboot" msgid="2898560872462638242">"atsāknēt tālruni"</string>
+    <string name="permdesc_reboot" msgid="7914933292815491782">"Ļauj lietojumprogrammai atsāknēt tālruni."</string>
+    <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"uzlikt un noņemt failu sistēmas"</string>
+    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Ļauj lietojumprogrammai noņemt vai uzlikt noņemamu krātuvju failu sistēmas."</string>
+    <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"formatēt ārējo krātuvi"</string>
+    <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Ļauj lietojumprogrammai formatēt noņemamo krātuvi."</string>
+    <string name="permlab_asec_access" msgid="3411338632002193846">"iegūt informāciju par iekšējo krātuvi"</string>
+    <string name="permdesc_asec_access" msgid="8820326551687285439">"Ļauj lietojumprogrammai iegūt informāciju par iekšējo krātuvi."</string>
+    <string name="permlab_asec_create" msgid="6414757234789336327">"izveidot iekšēju krātuvi"</string>
+    <string name="permdesc_asec_create" msgid="2621346764995731250">"Ļauj lietojumprogrammai izveidot iekšējo krātuvi."</string>
+    <string name="permlab_asec_destroy" msgid="526928328301618022">"likvidēt iekšējo krātuvi"</string>
+    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Ļauj lietojumprogrammai iznīcināt iekšējo krātuvi."</string>
+    <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"uzstādīt/atvienot iekšējo krātuvi"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Ļauj lietojumprogrammai uzstādīt/atvienot iekšējo krātuvi."</string>
+    <string name="permlab_asec_rename" msgid="7496633954080472417">"pārdēvēt iekšējo krātuvi"</string>
+    <string name="permdesc_asec_rename" msgid="2152829985238876790">"Ļauj lietojumprogrammai pārdēvēt iekšējo krātuvi."</string>
+    <string name="permlab_vibrate" msgid="7768356019980849603">"kontrolēt vibrozvanu"</string>
+    <string name="permdesc_vibrate" msgid="2886677177257789187">"Ļauj lietojumprogrammai kontrolēt vibrozvanu."</string>
+    <string name="permlab_flashlight" msgid="2155920810121984215">"kontrolēt uzliesmojumu"</string>
+    <string name="permdesc_flashlight" msgid="6433045942283802309">"Ļauj lietojumprogrammai kontrolēt uzliesmojumu."</string>
+    <string name="permlab_accessUsb" msgid="7362327818655760496">"piekļuve USB ierīcēm"</string>
+    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Ļauj lietojumprogrammai piekļūt USB ierīcēm."</string>
+    <string name="permlab_hardware_test" msgid="4148290860400659146">"pārbaudīt aparatūru"</string>
+    <string name="permdesc_hardware_test" msgid="3668894686500081699">"Ļauj lietojumprogrammai kontrolēt dažādas perifērijas ierīces aparatūras pārbaudīšanas nolūkos."</string>
+    <string name="permlab_callPhone" msgid="3925836347681847954">"tieši zvanīt uz tālruņa numuriem"</string>
+    <string name="permdesc_callPhone" msgid="3369867353692722456">"Ļauj lietojumprogrammai zvanīt uz tālruņa numuriem bez jūsu iejaukšanās. Ļaunprātīgas lietojumprogrammas var radīt neparedzētu zvanu parādīšanos jūsu tālruņa rēķinā. Ņemiet vērā, ka lietojumprogramma nevar zvanīt uz ārkārtas numuriem."</string>
+    <string name="permlab_callPrivileged" msgid="4198349211108497879">"tieši zvanīt uz jebkuriem tālruņa numuriem"</string>
+    <string name="permdesc_callPrivileged" msgid="244405067160028452">"Ļauj lietojumprogrammai zvanīt uz jebkuru tālruņa numuru, tostarp ārkārtas numuriem, bez jūsu iejaukšanās. Ļaunprātīgas lietojumprogrammas var veikt nevajadzīgus un pretlikumīgus zvanus uz ārkārtas pakalpojumiem."</string>
+    <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"tiešā veidā sākt CDMA tālruņa iestatīšanu"</string>
+    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Ļauj lietojumprogrammai sākt CDMA nodrošināšanu. Ļaunprātīgas lietojumprogrammas var nevajadzīgi sākt CDMA nodrošināšanu."</string>
+    <string name="permlab_locationUpdates" msgid="7785408253364335740">"kontrolēt atrašanās vietas atjauninājumu paziņojumus"</string>
+    <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Ļauj iespējot/atspējot atrašanās vietas atjaunināšanas paziņojumus no radio. Nav paredzēts izmantošanai parastajās lietojumprogrammās."</string>
+    <string name="permlab_checkinProperties" msgid="7855259461268734914">"piekļūt reģistrēšanās rekvizītiem"</string>
+    <string name="permdesc_checkinProperties" msgid="7150307006141883832">"Sniedz lasīšanas/rakstīšanas piekļuvi rekvizītiem, kas tika augšupielādēti, izmantojot reģistrēšanās pakalpojumu. Nav paredzēts izmantošanai parastajās lietojumprogrammās."</string>
+    <string name="permlab_bindGadget" msgid="776905339015863471">"izvēlēties logrīkus"</string>
+    <string name="permdesc_bindGadget" msgid="2098697834497452046">"Ļauj lietojumprogrammai norādīt sistēmai, kurus logrīkus var izmantot katra lietojumprogramma. Izmantojot šo atļauju, lietojumprogrammas var piešķirt citām lietojumprogrammām piekļuvi personīgiem datiem. Nav paredzēts izmantošanai parastajās lietojumprogrammās."</string>
+    <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"pārveidot tālruņa stāvokli"</string>
+    <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Ļauj lietojumprogrammai kontrolēt ierīces tālruņa funkcijas. Lietojumprogramma ar šo atļauju var pārslēgt tīklus, ieslēgt un izslēgt tālruņa radio un veikt līdzīgas darbības, neinformējot par to jūs."</string>
+    <string name="permlab_readPhoneState" msgid="2326172951448691631">"lasīt tālruņa stāvokli un identitāti"</string>
+    <string name="permdesc_readPhoneState" msgid="188877305147626781">"Ļauj lietojumprogrammai piekļūt ierīces tālruņa funkcijām. Lietojumprogramma ar šo atļauju var noteikt tālruņa numuru un šī tālruņa sērijas numuru, to, vai zvans ir aktīvs, numuru, ar kuru zvans ir savienots u.tml."</string>
+    <string name="permlab_wakeLock" msgid="573480187941496130">"novērst tālruņa pāriešanu miega režīmā"</string>
+    <string name="permdesc_wakeLock" msgid="7584036471227467099">"Ļauj lietojumprogrammai novērst tālruņa pāriešanu miega režīmā."</string>
+    <string name="permlab_devicePower" msgid="4928622470980943206">"ieslēgt vai izslēgt tālruni"</string>
+    <string name="permdesc_devicePower" msgid="4577331933252444818">"Ļauj lietojumprogrammai ieslēgt vai izslēgt tālruni."</string>
+    <string name="permlab_factoryTest" msgid="3715225492696416187">"darbināt rūpnīcas pārbaudes režīmā"</string>
+    <string name="permdesc_factoryTest" msgid="8136644990319244802">"Darbiniet kā zema līmeņa ražotāja pārbaudi, atļaujot pilnīgu piekļuvi tālruņa aparatūrai. Pieejams tikai tad, ja tālrunis darbojas ražotāja pārbaudes režīmā."</string>
+    <string name="permlab_setWallpaper" msgid="6627192333373465143">"iestatīt tapeti"</string>
+    <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Ļauj lietojumprogrammai iestatīt sistēmas tapeti."</string>
+    <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"iestatīt tapetes izmēra norādes"</string>
+    <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Ļauj lietojumprogrammai iestatīt sistēmas tapetes lieluma norādes."</string>
+    <string name="permlab_masterClear" msgid="2315750423139697397">"atiestatīt sistēmu uz rūpnīcas noklusējuma iestatījumiem"</string>
+    <string name="permdesc_masterClear" msgid="5033465107545174514">"Ļauj lietojumprogrammai pilnībā atiestatīt sistēmu uz rūpnīcas iestatījumiem, dzēšot visus datus, konfigurāciju un instalētās lietojumprogrammas."</string>
+    <string name="permlab_setTime" msgid="2021614829591775646">"iestatīt laiku"</string>
+    <string name="permdesc_setTime" msgid="667294309287080045">"Ļauj lietojumprogrammai mainīt tālruņa pulksteņa laiku."</string>
+    <string name="permlab_setTimeZone" msgid="2945079801013077340">"iestatīt laika joslu"</string>
+    <string name="permdesc_setTimeZone" msgid="1902540227418179364">"Ļauj lietojumprogrammai mainīt tālruņa laika joslu."</string>
+    <string name="permlab_accountManagerService" msgid="4829262349691386986">"darboties kā AccountManagerService"</string>
+    <string name="permdesc_accountManagerService" msgid="6056903274106394752">"Ļauj lietojumprogrammai veikt zvanus uz AccountAuthenticators"</string>
+    <string name="permlab_getAccounts" msgid="4549918644233460103">"atklāt zināmus kontus"</string>
+    <string name="permdesc_getAccounts" msgid="6839262446413155394">"Ļauj lietojumprogrammai iegūt tālrunim zināmo kontu sarakstu."</string>
+    <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"darboties kā konta autentificētājam"</string>
+    <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"Ļauj lietojumprogrammai izmantot AccountManager konta autentificētāja iespējas, tostarp kontu izveidi un to paroļu iegūšanu un iestatīšanu."</string>
+    <string name="permlab_manageAccounts" msgid="4440380488312204365">"pārvaldīt kontu sarakstu"</string>
+    <string name="permdesc_manageAccounts" msgid="8804114016661104517">"Ļauj lietojumprogrammai veikt tādas darbības kā kontu pievienošana un noņemšana un to paroļu dzēšana."</string>
+    <string name="permlab_useCredentials" msgid="6401886092818819856">"izmantot konta autentifikācijas akreditācijas datus"</string>
+    <string name="permdesc_useCredentials" msgid="7416570544619546974">"Ļauj lietojumprogrammai pieprasīt autentifikācijas pilnvaras."</string>
+    <string name="permlab_accessNetworkState" msgid="6865575199464405769">"skatīt tīkla stāvokli"</string>
+    <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Ļauj lietojumprogrammai skatīt visu tīklu stāvokli."</string>
+    <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"pilnīga interneta piekļuve"</string>
+    <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Ļauj lietojumprogrammai izveidot tīkla ligzdas."</string>
+    <string name="permlab_writeApnSettings" msgid="7823599210086622545">"rakstīt piekļuves punkta nosaukuma iestatījumus"</string>
+    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Ļauj lietojumprogrammai pārveidot APN iestatījumus, piemēram, jebkura APN starpniekserveri un portu."</string>
+    <string name="permlab_changeNetworkState" msgid="958884291454327309">"mainīt tīkla savienojamību"</string>
+    <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Ļauj lietojumprogrammai mainīt tīkla savienojamības stāvokli."</string>
+    <string name="permlab_changeTetherState" msgid="2702121155761140799">"Mainīt piesaistes savienojamību"</string>
+    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Ļauj lietojumprogrammai mainīt piesaistes tīkla savienojamības stāvokli."</string>
+    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"mainīt fona datu lietojuma iestatījumu"</string>
+    <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Ļauj lietojumprogrammai mainīt fona datu lietojuma iestatījumu."</string>
+    <string name="permlab_accessWifiState" msgid="8100926650211034400">"skatīt Wi-Fi stāvokli"</string>
+    <string name="permdesc_accessWifiState" msgid="485796529139236346">"Ļauj lietojumprogrammai skatīt informāciju par Wi-Fi stāvokli."</string>
+    <string name="permlab_changeWifiState" msgid="7280632711057112137">"mainīt Wi-Fi stāvokli"</string>
+    <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Ļauj lietojumprogrammai izveidot savienojumu ar Wi-Fi piekļuves punktiem un atvienot to, kā arī veikt izmaiņas konfigurētajos Wi-Fi tīklos."</string>
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"atļaut Wi-Fi multiraides uztveršanu"</string>
+    <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Ļauj lietojumprogrammai saņemt paketes, kas nav tieši adresētas ierīcei. Tas var būt noderīgi, atklājot pakalpojumus, kas tiek piedāvāti tuvākajā apkārtnē. Tas izmanto vairāk jaudas nekā režīmā, kas nav multiraides režīms."</string>
+    <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"Bluetooth administrēšana"</string>
+    <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Ļauj lietojumprogrammai konfigurēt vietējo Bluetooth tālruni un atklāt attālās ierīces, un izveidot pāri ar tām."</string>
+    <string name="permlab_bluetooth" msgid="8361038707857018732">"izveidot Bluetooth savienojumus"</string>
+    <string name="permdesc_bluetooth" msgid="762515380679392945">"Ļauj lietojumprogrammai skatīt vietējā Bluetooth tālruņa konfigurāciju, kā arī veidot un pieņemt savienojumus ar pārī savienotām ierīcēm."</string>
+    <string name="permlab_nfc" msgid="4423351274757876953">"kontrolē tuvlauka saziņu"</string>
+    <string name="permdesc_nfc" msgid="9171401851954407226">"Ļauj lietojumprogrammai sazināties ar tuvlauka saziņas (Near Field Communication — NFC) atzīmēm, kartēm un lasītājiem."</string>
+    <string name="permlab_disableKeyguard" msgid="4977406164311535092">"atspējot atslēgas slēgu"</string>
+    <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Ļauj lietojumprogrammai atspējot atslēgas slēgu un jebkādu saistīto paroles drošību. Atbilstošs tā piemērs: tālrunis atspējo atslēgas slēgu, saņemot ienākošu tālruņa zvanu, pēc tam atkārtoti iespējo atslēgas slēgu, kad saruna ir pabeigta."</string>
+    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lasīt sinhronizācijas iestatījumus"</string>
+    <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"Ļauj lietojumprogrammai lasīt sinhronizācijas iestatījumus, piemēram, to, vai kontaktpersonu sinhronizācija ir iespējota."</string>
+    <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"rakstīt sinhronizācijas iestatījumus"</string>
+    <string name="permdesc_writeSyncSettings" msgid="2498201614431360044">"Ļauj lietojumprogrammai pārveidot sinhronizācijas iestatījumus, piemēram, vai kontaktpersonu sinhronizācija ir iespējota."</string>
+    <string name="permlab_readSyncStats" msgid="7396577451360202448">"lasīt sinhronizācijas statistiku"</string>
+    <string name="permdesc_readSyncStats" msgid="7511448343374465000">"Ļauj lietojumprogrammai lasīt sinhronizēto statistiku, piem., notikušās sinhronizācijas vēsturi."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lasīt abonētās plūsmas"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="3622200625634207660">"Ļauj lietojumprogrammai iegūt detalizētu informāciju par pašreiz sinhronizētajām plūsmām."</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"rakstīt abonētās plūsmas"</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="8121607099326533878">"Ļauj lietojumprogrammai pārveidot pašreizējās sinhronizētās plūsmas. Šādi ļaunprātīgai lietojumprogrammai var tikt atļauts mainīt sinhronizētās plūsmas."</string>
+    <string name="permlab_readDictionary" msgid="432535716804748781">"lasīt lietotāja definēto vārdnīcu"</string>
+    <string name="permdesc_readDictionary" msgid="1082972603576360690">"Ļauj lietojumprogrammai lasīt jebkādus privātos vārdus, nosaukumus un frāzes, ko lietotājs, iespējams, ir saglabājis lietotāja vārdnīcā."</string>
+    <string name="permlab_writeDictionary" msgid="6703109511836343341">"rakstīt lietotāja definētajā vārdnīcā"</string>
+    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Ļauj lietojumprogrammai rakstīt jaunus vārdus lietotāja vārdnīcā."</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"pārveidot/dzēst USB kr. sat."</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"pārveidot/dzēst SD kartes saturu"</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Ļauj lietoj. rakstīt USB kr."</string>
+    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Ļauj lietojumprogrammai rakstīt SD kartē."</string>
+    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"piekļūt kešatmiņas failu sistēmai"</string>
+    <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Ļauj lietojumprogrammai lasīt kešatmiņas failu sistēmu un rakstīt tajā."</string>
+    <string name="permlab_use_sip" msgid="5986952362795870502">"veikt/saņemt interneta zvanus"</string>
+    <string name="permdesc_use_sip" msgid="6320376185606661843">"Ļauj lietojumprogrammai izmantot SIP pakalpojumu, vai veiktu/saņemtu interneta zvanus."</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Paroles kārtulu iestatīšana"</string>
+    <string name="policydesc_limitPassword" msgid="9083400080861728056">"Kontrolē ekrāna atbloķēšanas parolē atļautās rakstzīmes un garumu"</string>
+    <string name="policylab_watchLogin" msgid="914130646942199503">"Ekrāna atbloķēšanas mēģinājumu pārraudzīšana"</string>
+    <string name="policydesc_watchLogin" msgid="7227578260165172673">"Pārrauga nepareizi ievadīto paroļu skaitu, atbloķējot ekrānu, un bloķē tālruni vai dzēš visus tālruņa datus, ja tiek ievadīts pārāk daudz nepareizu paroļu"</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"Ekrāna atbloķēšanas paroles maiņa"</string>
+    <string name="policydesc_resetPassword" msgid="5391240616981297361">"Ekrāna atbloķēšanas paroles maiņa"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Ekrāna bloķēšana"</string>
+    <string name="policydesc_forceLock" msgid="5696964126226028442">"Kontrolē, kā un kur ekrāns tiek bloķēts"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Dzēst visus datus"</string>
+    <string name="policydesc_wipeData" msgid="7669895333814222586">"Dzēš tālruņa datus bez brīdinājuma, veicot rūpnīcas datu atiestatīšanu"</string>
+  <string-array name="phoneTypes">
+    <item msgid="8901098336658710359">"Mājas"</item>
+    <item msgid="869923650527136615">"Mobilais"</item>
+    <item msgid="7897544654242874543">"Darbā"</item>
+    <item msgid="1103601433382158155">"Faksa numurs darbā"</item>
+    <item msgid="1735177144948329370">"Faksa numurs mājās"</item>
+    <item msgid="603878674477207394">"Peidžers"</item>
+    <item msgid="1650824275177931637">"Cits"</item>
+    <item msgid="9192514806975898961">"Pielāgots"</item>
+  </string-array>
+  <string-array name="emailAddressTypes">
+    <item msgid="8073994352956129127">"Privāta"</item>
+    <item msgid="7084237356602625604">"Darbā"</item>
+    <item msgid="1112044410659011023">"Cits"</item>
+    <item msgid="2374913952870110618">"Pielāgots"</item>
+  </string-array>
+  <string-array name="postalAddressTypes">
+    <item msgid="6880257626740047286">"Mājas"</item>
+    <item msgid="5629153956045109251">"Darbā"</item>
+    <item msgid="4966604264500343469">"Cits"</item>
+    <item msgid="4932682847595299369">"Pielāgots"</item>
+  </string-array>
+  <string-array name="imAddressTypes">
+    <item msgid="1738585194601476694">"Mājas"</item>
+    <item msgid="1359644565647383708">"Darbā"</item>
+    <item msgid="7868549401053615677">"Cits"</item>
+    <item msgid="3145118944639869809">"Pielāgots"</item>
+  </string-array>
+  <string-array name="organizationTypes">
+    <item msgid="7546335612189115615">"Darbā"</item>
+    <item msgid="4378074129049520373">"Cits"</item>
+    <item msgid="3455047468583965104">"Pielāgots"</item>
+  </string-array>
+  <string-array name="imProtocols">
+    <item msgid="8595261363518459565">"AIM"</item>
+    <item msgid="7390473628275490700">"Windows Live"</item>
+    <item msgid="7882877134931458217">"Yahoo"</item>
+    <item msgid="5035376313200585242">"Skype"</item>
+    <item msgid="7532363178459444943">"QQ"</item>
+    <item msgid="3713441034299660749">"Google Talk"</item>
+    <item msgid="2506857312718630823">"ICQ"</item>
+    <item msgid="1648797903785279353">"Jabber"</item>
+  </string-array>
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"Pielāgots"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Mājas"</string>
+    <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobilais"</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"Darbā"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Faksa numurs darbā"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Faksa numurs mājās"</string>
+    <string name="phoneTypePager" msgid="7582359955394921732">"Peidžers"</string>
+    <string name="phoneTypeOther" msgid="1544425847868765990">"Cits"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Atzvanīšana"</string>
+    <string name="phoneTypeCar" msgid="8738360689616716982">"Automobiļa"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Uzņēmuma galvenais tālruņa numurs"</string>
+    <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
+    <string name="phoneTypeMain" msgid="6766137010628326916">"Galvenais"</string>
+    <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Cits faksa numurs"</string>
+    <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
+    <string name="phoneTypeTelex" msgid="3367879952476250512">"Telekss"</string>
+    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"Teletaips/surdotālrunis"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Mobilā tālruņa numurs darbā"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Peidžera numurs darbā"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"Palīgs"</string>
+    <string name="phoneTypeMms" msgid="7254492275502768992">"Multiziņa"</string>
+    <string name="eventTypeBirthday" msgid="2813379844211390740">"Dzimšanas diena"</string>
+    <string name="eventTypeAnniversary" msgid="3876779744518284000">"Jubileja"</string>
+    <string name="eventTypeOther" msgid="5834288791948564594">"Pasākums"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Pielāgots"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Mājas"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"Darbā"</string>
+    <string name="emailTypeOther" msgid="2923008695272639549">"Cits"</string>
+    <string name="emailTypeMobile" msgid="119919005321166205">"Mobilais"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Pielāgots"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Mājas"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"Darbā"</string>
+    <string name="postalTypeOther" msgid="2726111966623584341">"Cits"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"Pielāgots"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Mājas"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"Darbā"</string>
+    <string name="imTypeOther" msgid="5377007495735915478">"Cits"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Pielāgots"</string>
+    <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
+    <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
+    <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
+    <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
+    <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
+    <string name="imProtocolGoogleTalk" msgid="3808393979157698766">"Google Talk"</string>
+    <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
+    <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
+    <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
+    <string name="orgTypeWork" msgid="29268870505363872">"Darbā"</string>
+    <string name="orgTypeOther" msgid="3951781131570124082">"Cits"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Pielāgots"</string>
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Pielāgotas"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Mājās"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"Darbs"</string>
+    <string name="sipAddressTypeOther" msgid="4408436162950119849">"Cits"</string>
+    <string name="contact_status_update_attribution" msgid="5112589886094402795">"izmantojot <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
+    <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g>, izmantojot <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Ievadiet PIN kodu"</string>
+    <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Lai atbloķētu, ievadiet paroli."</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"PIN kods nav pareizs."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"Lai atbloķētu, nospiediet Izvēlne, pēc tam 0."</string>
+    <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Ārkārtas numurs"</string>
+    <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(Nav pakalpojuma)"</string>
+    <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Ekrāns ir bloķēts."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Nospiediet Izvēlne, lai atbloķētu, vai veiciet ārkārtas zvanu."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Lai atbloķētu, nospiediet vienumu Izvēlne."</string>
+    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Zīmējiet kombināciju, lai atbloķētu."</string>
+    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Ārkārtas zvans"</string>
+    <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Atpakaļ pie zvana"</string>
+    <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Pareizi!"</string>
+    <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Neizdevās. Mēģiniet vēlreiz."</string>
+    <string name="lockscreen_plugged_in" msgid="613343852842944435">"Notiek uzlāde (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="lockscreen_charged" msgid="4938930459620989972">"Uzlādēts."</string>
+    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="lockscreen_low_battery" msgid="1482873981919249740">"Pievienojiet uzlādes ierīci."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Nav SIM kartes."</string>
+    <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"Tālrunī nav SIM kartes."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Lūdzu, ievietojiet SIM karti."</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Tikai ārkārtas zvani"</string>
+    <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Tīkls ir bloķēts."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM karte ir bloķēta ar PUK kodu."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"Lūdzu, skatiet lietotāja rokasgrāmatu vai sazinieties ar klientu apkalpošanas dienestu."</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM karte ir bloķēta."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Notiek SIM kartes atbloķēšana..."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Atbloķēšanas kombinācija tika nepareizi uzzīmēta <xliff:g id="NUMBER_0">%d</xliff:g> reizes. "\n\n"Lūdzu, mēģiniet vēlreiz pēc <xliff:g id="NUMBER_1">%d</xliff:g> sekundes(-ēm)."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Atbloķēšanas kombinācija tika nepareizi uzzīmēta <xliff:g id="NUMBER_0">%d</xliff:g> reizi(-es). Pēc vēl <xliff:g id="NUMBER_1">%d</xliff:g> neveiksmīgiem mēģinājumiem tālrunis būs jāatbloķē, izmantojot Google pierakstīšanos."\n\n" Lūdzu, mēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%d</xliff:g> sekundes(-ēm)."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Mēģiniet vēlreiz pēc <xliff:g id="NUMBER">%d</xliff:g> sekundes(-ēm)."</string>
+    <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Vai aizmirsāt kombināciju?"</string>
+    <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Konta atbloķēšana"</string>
+    <string name="lockscreen_glogin_too_many_attempts" msgid="2446246026221678244">"Veikts pārāk daudz kombinācijas mēģinājumu!"</string>
+    <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"Lai atbloķētu, pierakstieties Google kontā."</string>
+    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Lietotājvārds (e-pasts)"</string>
+    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Parole"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Pierakstīties"</string>
+    <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Lietotājvārds vai parole nav derīga."</string>
+    <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Notiek pārbaude..."</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Atbloķēt"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Skaņa ir ieslēgta"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Skaņa ir izslēgta."</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <string name="factorytest_failed" msgid="5410270329114212041">"Rūpnīcas pārbaude neizdevās"</string>
+    <string name="factorytest_not_system" msgid="4435201656767276723">"Darbība FACTORY_TEST tiek atbalstīta tikai pakotnēm, kas ir instalētas šeit: /system/app."</string>
+    <string name="factorytest_no_action" msgid="872991874799998561">"Netika atrasts neviena pakotne, kas nodrošina darbību FACTORY_TEST."</string>
+    <string name="factorytest_reboot" msgid="6320168203050791643">"Atsāknēt"</string>
+    <string name="js_dialog_title" msgid="8143918455087008109">"Lapā “<xliff:g id="TITLE">%s</xliff:g>” ir teikts:"</string>
+    <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
+    <string name="js_dialog_before_unload" msgid="1901675448179653089">"Vai doties prom no šīs lapas?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Atlasiet Labi, lai turpinātu, vai Atcelt, lai paliktu pašreizējā lapā."</string>
+    <string name="save_password_label" msgid="6860261758665825069">"Apstiprināt"</string>
+    <string name="double_tap_toast" msgid="1068216937244567247">"Padoms: divreiz pieskarieties, lai tuvinātu un tālinātu."</string>
+    <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"lasīt pārlūkprogrammas vēsturi un grāmatzīmes"</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Ļauj lietojumprogrammai lasīt visus URL, kas ir apmeklēti pārlūkprogrammā, un visas pārlūkprogrammas grāmatzīmes."</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"rakstīt pārlūkprogrammas vēsturi un grāmatzīmes"</string>
+    <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Ļauj lietojumprogrammai pārveidot tālrunī saglabāto pārlūkprogrammas vēsturi un grāmatzīmes. Ļaunprātīgas lietojumprogrammas var to izmantot, lai dzēstu vai pārveidotu pārlūkprogrammas datus."</string>
+    <string name="permlab_setAlarm" msgid="5924401328803615165">"iestatīt trauksmi modinātājpulkstenī"</string>
+    <string name="permdesc_setAlarm" msgid="5966966598149875082">"Ļauj lietojumprogrammai iestatīt trauksmi instalētajā modinātājpulksteņa lietojumprogrammā. Dažās modinātājpulksteņu lietojumprogrammās šī funkcija var nebūt īstenojama."</string>
+    <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Pārveidot pārlūkprogrammas ģeogrāfiskās atrašanās vietas atļaujas"</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Ļauj lietojumprogrammai pārveidot pārlūkprogrammas ģeogrāfiskās atrašanās vietas atļaujas. Ļaunprātīgas lietojumprogrammas var to izmantot, lai atļautu atrašanās vietas informācijas sūtīšanu uz citām vietnēm."</string>
+    <string name="save_password_message" msgid="767344687139195790">"Vai vēlaties, lai pārlūkprogrammā tiktu saglabāta šī parole?"</string>
+    <string name="save_password_notnow" msgid="6389675316706699758">"Ne tagad"</string>
+    <string name="save_password_remember" msgid="6491879678996749466">"Atcerēties"</string>
+    <string name="save_password_never" msgid="8274330296785855105">"Nekad"</string>
+    <string name="open_permission_deny" msgid="5661861460947222274">"Jums nav atļaujas atvērt šo lapu."</string>
+    <string name="text_copied" msgid="4985729524670131385">"Teksts ir kopēts uz starpliktuvi."</string>
+    <string name="more_item_label" msgid="4650918923083320495">"Vairāk"</string>
+    <string name="prepend_shortcut_label" msgid="2572214461676015642">"Izvēlne+"</string>
+    <string name="menu_space_shortcut_label" msgid="2410328639272162537">"atstarpe"</string>
+    <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"ievade"</string>
+    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"dzēst"</string>
+    <string name="search_go" msgid="8298016669822141719">"Meklēt"</string>
+    <string name="oneMonthDurationPast" msgid="7396384508953779925">"Pirms 1 mēneša"</string>
+    <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Vairāk nekā pirms 1 mēneša"</string>
+  <plurals name="num_seconds_ago">
+    <item quantity="one" msgid="4869870056547896011">"Pirms 1 sekundes"</item>
+    <item quantity="other" msgid="3903706804349556379">"Pirms <xliff:g id="COUNT">%d</xliff:g> sekundes(-ēm)"</item>
+  </plurals>
+  <plurals name="num_minutes_ago">
+    <item quantity="one" msgid="3306787433088810191">"Pirms 1 minūtes"</item>
+    <item quantity="other" msgid="2176942008915455116">"Pirms <xliff:g id="COUNT">%d</xliff:g> minūtes(-ēm)"</item>
+  </plurals>
+  <plurals name="num_hours_ago">
+    <item quantity="one" msgid="9150797944610821849">"Pirms 1 stundas"</item>
+    <item quantity="other" msgid="2467273239587587569">"Pirms <xliff:g id="COUNT">%d</xliff:g> stundas(-ām)"</item>
+  </plurals>
+  <plurals name="last_num_days">
+    <item quantity="other" msgid="3069992808164318268">"Pēdējās <xliff:g id="COUNT">%d</xliff:g> dienās"</item>
+  </plurals>
+    <string name="last_month" msgid="3959346739979055432">"Iepriekšējā mēnesī"</string>
+    <string name="older" msgid="5211975022815554840">"Vecāks"</string>
+  <plurals name="num_days_ago">
+    <item quantity="one" msgid="861358534398115820">"vakar"</item>
+    <item quantity="other" msgid="2479586466153314633">"Pirms <xliff:g id="COUNT">%d</xliff:g> dienas(-ām)"</item>
+  </plurals>
+  <plurals name="in_num_seconds">
+    <item quantity="one" msgid="2729745560954905102">"pēc 1 sekundes"</item>
+    <item quantity="other" msgid="1241926116443974687">"pēc <xliff:g id="COUNT">%d</xliff:g> sekundes(-ēm)"</item>
+  </plurals>
+  <plurals name="in_num_minutes">
+    <item quantity="one" msgid="8793095251325200395">"pēc 1 minūtes"</item>
+    <item quantity="other" msgid="3330713936399448749">"pēc <xliff:g id="COUNT">%d</xliff:g> minūtes(-ēm)"</item>
+  </plurals>
+  <plurals name="in_num_hours">
+    <item quantity="one" msgid="7164353342477769999">"pēc 1 stundas"</item>
+    <item quantity="other" msgid="547290677353727389">"pēc <xliff:g id="COUNT">%d</xliff:g> stundas(-ām)"</item>
+  </plurals>
+  <plurals name="in_num_days">
+    <item quantity="one" msgid="5413088743009839518">"rītdien"</item>
+    <item quantity="other" msgid="5109449375100953247">"pēc <xliff:g id="COUNT">%d</xliff:g> dienas(-ām)"</item>
+  </plurals>
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one" msgid="1849036840200069118">"Pirms 1 sekundes"</item>
+    <item quantity="other" msgid="3699169366650930415">"Pirms <xliff:g id="COUNT">%d</xliff:g> s"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one" msgid="6361490147113871545">"Pirms 1 min"</item>
+    <item quantity="other" msgid="851164968597150710">"Pirms <xliff:g id="COUNT">%d</xliff:g> min"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one" msgid="4796212039724722116">"Pirms 1 stundas"</item>
+    <item quantity="other" msgid="6889970745748538901">"Pirms <xliff:g id="COUNT">%d</xliff:g> stundas(-ām)"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one" msgid="8463161711492680309">"vakar"</item>
+    <item quantity="other" msgid="3453342639616481191">"Pirms <xliff:g id="COUNT">%d</xliff:g> dienas(-ām)"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one" msgid="5842225370795066299">"pēc 1 s"</item>
+    <item quantity="other" msgid="5495880108825805108">"pēc <xliff:g id="COUNT">%d</xliff:g> s"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one" msgid="562786149928284878">"pēc 1 min"</item>
+    <item quantity="other" msgid="4216113292706568726">"pēc <xliff:g id="COUNT">%d</xliff:g> minūtes(-ēm)"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one" msgid="3274708118124045246">"pēc 1 stundas"</item>
+    <item quantity="other" msgid="3705373766798013406">"pēc <xliff:g id="COUNT">%d</xliff:g> stundas(-ām)"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one" msgid="2178576254385739855">"rītdien"</item>
+    <item quantity="other" msgid="2973062968038355991">"pēc <xliff:g id="COUNT">%d</xliff:g> dienas(-ām)"</item>
+  </plurals>
+    <string name="preposition_for_date" msgid="9093949757757445117">"šādā datumā: <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="5506831244263083793">"plkst. <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_year" msgid="5040395640711867177">"šādā gadā: <xliff:g id="YEAR">%s</xliff:g>"</string>
+    <string name="day" msgid="8144195776058119424">"diena"</string>
+    <string name="days" msgid="4774547661021344602">"dienas"</string>
+    <string name="hour" msgid="2126771916426189481">"stunda"</string>
+    <string name="hours" msgid="894424005266852993">"stundas"</string>
+    <string name="minute" msgid="9148878657703769868">"min"</string>
+    <string name="minutes" msgid="5646001005827034509">"min"</string>
+    <string name="second" msgid="3184235808021478">"s"</string>
+    <string name="seconds" msgid="3161515347216589235">"s"</string>
+    <string name="week" msgid="5617961537173061583">"nedēļa"</string>
+    <string name="weeks" msgid="6509623834583944518">"nedēļas"</string>
+    <string name="year" msgid="4001118221013892076">"gads"</string>
+    <string name="years" msgid="6881577717993213522">"gadi"</string>
+    <string name="VideoView_error_title" msgid="3359437293118172396">"Nevar atskaņot video"</string>
+    <string name="VideoView_error_text_invalid_progressive_playback" msgid="897920883624437033">"Šis video diemžēl nav derīgs straumēšanai uz šo ierīci."</string>
+    <string name="VideoView_error_text_unknown" msgid="710301040038083944">"Diemžēl šo video nevar atskaņot."</string>
+    <string name="VideoView_error_button" msgid="2822238215100679592">"Labi"</string>
+    <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="noon" msgid="7245353528818587908">"pusdienlaiks"</string>
+    <string name="Noon" msgid="3342127745230013127">"Pusdienlaiks"</string>
+    <string name="midnight" msgid="7166259508850457595">"pusnakts"</string>
+    <string name="Midnight" msgid="5630806906897892201">"Pusnakts"</string>
+    <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
+    <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
+    <string name="selectAll" msgid="6876518925844129331">"Atlasīt visu"</string>
+    <string name="selectText" msgid="4862359311088898878">"Atlasīt vārdu"</string>
+    <string name="cut" msgid="3092569408438626261">"Izgriezt"</string>
+    <string name="copy" msgid="2681946229533511987">"Kopēt"</string>
+    <string name="paste" msgid="5629880836805036433">"Ielīmēt"</string>
+    <string name="copyUrl" msgid="2538211579596067402">"Kopēt URL"</string>
+    <string name="inputMethod" msgid="1653630062304567879">"Ievades metode"</string>
+    <string name="addToDictionary" msgid="8793624991686948709">"Vārdnīcai pievienot “<xliff:g id="WORD">%s</xliff:g>”"</string>
+    <string name="editTextMenuTitle" msgid="1672989176958581452">"Rediģēt tekstu"</string>
+    <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Maz brīvas vietas"</string>
+    <string name="low_internal_storage_view_text" msgid="635106544616378836">"Tālruņa krātuvē kļūst maz vietas."</string>
+    <string name="ok" msgid="5970060430562524910">"Labi"</string>
+    <string name="cancel" msgid="6442560571259935130">"Atcelt"</string>
+    <string name="yes" msgid="5362982303337969312">"Labi"</string>
+    <string name="no" msgid="5141531044935541497">"Atcelt"</string>
+    <string name="dialog_alert_title" msgid="2049658708609043103">"Uzmanību!"</string>
+    <string name="capital_on" msgid="1544682755514494298">"IESLĒGT"</string>
+    <string name="capital_off" msgid="6815870386972805832">"IZSLĒGT"</string>
+    <string name="whichApplication" msgid="4533185947064773386">"Pabeigt darbību, izmantojot"</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"Pēc noklusējuma izmantot šai darbībai."</string>
+    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Notīriet noklusējumu šeit: Sākuma iestatījumi &gt; Lietojumprogrammas &gt; Lietojumprogrammu pārvaldība."</string>
+    <string name="chooseActivity" msgid="1009246475582238425">"Atlasiet darbību"</string>
+    <string name="noApplications" msgid="1691104391758345586">"Šo darbību nevar veikt neviena lietojumprogramma."</string>
+    <string name="aerr_title" msgid="653922989522758100">"Atvainojiet!"</string>
+    <string name="aerr_application" msgid="4683614104336409186">"Lietojumprogrammas <xliff:g id="APPLICATION">%1$s</xliff:g> (process <xliff:g id="PROCESS">%2$s</xliff:g>) darbība neparedzēti tika apturēta. Lūdzu, mēģiniet vēlreiz."</string>
+    <string name="aerr_process" msgid="1551785535966089511">"Process <xliff:g id="PROCESS">%1$s</xliff:g> ir neparedzēti apturēts. Lūdzu, mēģiniet vēlreiz."</string>
+    <string name="anr_title" msgid="3100070910664756057">"Atvainojiet!"</string>
+    <string name="anr_activity_application" msgid="3538242413112507636">"Darbība <xliff:g id="ACTIVITY">%1$s</xliff:g> (lietojumprogrammā <xliff:g id="APPLICATION">%2$s</xliff:g>) neatbild."</string>
+    <string name="anr_activity_process" msgid="5420826626009561014">"Darbība <xliff:g id="ACTIVITY">%1$s</xliff:g> (procesā <xliff:g id="PROCESS">%2$s</xliff:g>) neatbild."</string>
+    <string name="anr_application_process" msgid="4185842666452210193">"Lietojumprogramma <xliff:g id="APPLICATION">%1$s</xliff:g> (procesā <xliff:g id="PROCESS">%2$s</xliff:g>) neatbild."</string>
+    <string name="anr_process" msgid="1246866008169975783">"Process <xliff:g id="PROCESS">%1$s</xliff:g> neatbild."</string>
+    <string name="force_close" msgid="3653416315450806396">"aizvērt"</string>
+    <string name="report" msgid="4060218260984795706">"Pārskats"</string>
+    <string name="wait" msgid="7147118217226317732">"Gaidīt"</string>
+    <string name="launch_warning_title" msgid="8323761616052121936">"Lietojumpr. ir novirzīta"</string>
+    <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> tagad darbojas."</string>
+    <string name="launch_warning_original" msgid="188102023021668683">"Sākotnēji tika palaista lietojumprogramma <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="smv_application" msgid="295583804361236288">"Lietojumprogramma <xliff:g id="APPLICATION">%1$s</xliff:g> (process <xliff:g id="PROCESS">%2$s</xliff:g>) ir pārkāpusi savu pašieviesto StrictMode politiku."</string>
+    <string name="smv_process" msgid="5120397012047462446">"Process <xliff:g id="PROCESS">%1$s</xliff:g> ir pārkāpis savu pašieviesto StrictMode politiku."</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> darbojas"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Atlasiet, lai pārietu uz lietojumprogrammu"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Vai pārslēgt lietojumprogrammas?"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Jau darbojas cita lietojumprogramma. Tās darbība ir jāaptur, lai varētu startēt citu lietojumprogrammu."</string>
+    <string name="old_app_action" msgid="493129172238566282">"Atgriezties: <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="old_app_description" msgid="942967900237208466">"Nestartējiet jauno lietojumprogrammu."</string>
+    <string name="new_app_action" msgid="5472756926945440706">"Startēt: <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="6830398339826789493">"Aptur veco lietojumprogrammu, nesaglabājot."</string>
+    <string name="sendText" msgid="5132506121645618310">"Atlasiet darbību tekstam"</string>
+    <string name="volume_ringtone" msgid="6885421406845734650">"Zvanītāja skaļums"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Multivides skaļums"</string>
+    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Atskaņošana, izmantojot Bluetooth"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"Klusais zvana signāls ir atlasīts."</string>
+    <string name="volume_call" msgid="3941680041282788711">"Zvana skaļums"</string>
+    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Bluetooth sarunas skaļums"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Signāla skaļums"</string>
+    <string name="volume_notification" msgid="2422265656744276715">"Paziņojumu skaļums"</string>
+    <string name="volume_unknown" msgid="1400219669770445902">"Skaļums"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"Noklusējuma zvana signāls"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Noklusējuma zvana signāls (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_silent" msgid="4440324407807468713">"Klusums"</string>
+    <string name="ringtone_picker_title" msgid="3515143939175119094">"Zvana signāli"</string>
+    <string name="ringtone_unknown" msgid="5477919988701784788">"Nezināms zvana signāls"</string>
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"Wi-Fi tīkls ir pieejams."</item>
+    <item quantity="other" msgid="4192424489168397386">"Wi-Fi tīkli ir pieejami"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"Ir pieejams atvērts Wi-Fi tīkls"</item>
+    <item quantity="other" msgid="7915895323644292768">"Ir pieejami atvērti Wi-Fi tīkli."</item>
+  </plurals>
+    <string name="select_character" msgid="3365550120617701745">"Ievietojiet rakstzīmi"</string>
+    <string name="sms_control_default_app_name" msgid="7630529934366549163">"Nezināma lietojumprogramma"</string>
+    <string name="sms_control_title" msgid="7296612781128917719">"Īsziņu sūtīšana"</string>
+    <string name="sms_control_message" msgid="1289331457999236205">"Tiek sūtīts liels īsziņu skaits. Atlasiet Labi, lai turpinātu, vai Atcelt, lai apturētu sūtīšanu."</string>
+    <string name="sms_control_yes" msgid="2532062172402615953">"Labi"</string>
+    <string name="sms_control_no" msgid="1715320703137199869">"Atcelt"</string>
+    <string name="date_time_set" msgid="5777075614321087758">"Iestatīt"</string>
+    <string name="default_permission_group" msgid="2690160991405646128">"Noklusējums"</string>
+    <string name="no_permissions" msgid="7283357728219338112">"Atļaujas nav nepieciešamas."</string>
+    <string name="perms_hide" msgid="7283915391320676226"><b>"Slēpt"</b></string>
+    <string name="perms_show_all" msgid="2671791163933091180"><b>"Rādīt visu"</b></string>
+    <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB lielapjoma krātuve"</string>
+    <string name="usb_storage_title" msgid="5901459041398751495">"USB ir pievienots."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="115779324551502062">"Tālrunim ir izveidots savienojums ar datoru, izmantojot USB. Atlasiet tālāk esošo pogu, ja vēlaties kopēt failus no datora Android USB krātuvē vai otrādi."</string>
+    <string name="usb_storage_message" product="default" msgid="4796759646167247178">"Tālrunis ir pievienots datoram, izmantojot USB. Atlasiet tālāk norādīto pogu, ja vēlaties kopēt failus no datora uz Android SD karti vai otrādi."</string>
+    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Ieslēgt USB krātuvi"</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Radās problēma, izmantojot USB krātuvi lielapjoma uzglabāšanai USB."</string>
+    <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Radās problēma, izmantojot SD karti lielapjoma uzglabāšanai USB."</string>
+    <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB ir pievienots."</string>
+    <string name="usb_storage_notification_message" msgid="7380082404288219341">"Atlasiet, lai kopētu failus datorā/no datora."</string>
+    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB krātuves izslēgšana"</string>
+    <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Atlasiet, lai izslēgtu USB krātuvi."</string>
+    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB krātuve tiek izmantota"</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Pirms USB krātuves izslēgšanas atvienojiet Android USB krātuvi no datora (tai jābūt “izstumtai”)."</string>
+    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Pirms USB krātuves izslēgšanas pārliecinieties, ka datorā ir noņemta (“izstumta”) Android SD karte."</string>
+    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Izslēgt USB krātuvi"</string>
+    <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Izslēdzot USB krātuvi, radās problēma. Pārliecinieties, ka USB saimniekdators ir noņemts, pēc tam mēģiniet vēlreiz."</string>
+    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Ieslēgt USB krātuvi"</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Ja ieslēgsiet USB krātuvi, dažu joprojām lietoto lietojumprogrammu darbība tiks apturēta un tās, iespējams, nebūs pieejamas līdz brīdim, kad USB krātuve tiks izslēgta."</string>
+    <string name="dlg_error_title" msgid="8048999973837339174">"USB darbība neizdevās."</string>
+    <string name="dlg_ok" msgid="7376953167039865701">"Labi"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"USB kr. formatēšana"</string>
+    <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"SD kartes formatēšana"</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Vai formatēt USB krātuvi, dzēšot visus tajā saglabātos failus? Šo darbību nevar atcelt."</string>
+    <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Vai tiešām vēlaties formatēt SD karti? Visi kartē esošie dati tiks zaudēti."</string>
+    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatēt"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB atkļūdošana ir pievienota."</string>
+    <string name="adb_active_notification_message" msgid="8470296818270110396">"Atlasiet, lai atspējotu USB atkļūdošanu."</string>
+    <string name="select_input_method" msgid="6865512749462072765">"Atlasiet ievades metodi"</string>
+    <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AĀBCČDEĒFGĢHIĪJKĶLĻMNŅOPRSŠTUŪVZŽ"</string>
+    <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789AĀBCČDEĒFGĢHIĪJKĶLĻMNŅOPRSŠTUŪVZŽ"</string>
+    <string name="candidates_style" msgid="4333913089637062257"><u>"kandidāti"</u></string>
+    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Notiek USB kr. sagatavošana"</string>
+    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"SD kartes sagatavošana"</string>
+    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Notiek kļūdu meklēšana."</string>
+    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Tukša USB krātuve"</string>
+    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Tukša SD karte"</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"USB krātuve ir tukša vai arī tajā ir neatbalstīta failu sistēma."</string>
+    <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SD karte ir tukša vai arī tajā ir neatbalstīta failu sistēma."</string>
+    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Bojāta USB krātuve"</string>
+    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Bojāta SD karte"</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"USB krātuve ir bojāta. Iespējams, tā būs atkārtoti jāformatē."</string>
+    <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"SD karte ir bojāta. Iespējams, tā būs atkārtoti jāformatē."</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB kr. tika negaidīti noņemta"</string>
+    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD karte tika negaidīti izņemta."</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Pirms noņemšanas atvienojiet USB krātuvi, lai nezaudētu datus."</string>
+    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Demontēt SD karti pirms tās izņemšanas, lai netiktu zaudēti dati."</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"USB krātuvi var droši noņemt"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD karti var droši noņemt."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Varat droši noņemt USB krātuvi."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Varat droši noņemt SD karti."</string>
+    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Noņemta USB krātuve"</string>
+    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Izņemta SD karte"</string>
+    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB krātuve ir noņemta. Ievietojiet jaunu datu nesēju."</string>
+    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD karte ir izņemta. Ievietojiet citu karti."</string>
+    <string name="activity_list_empty" msgid="4168820609403385789">"Nav atrasta neviena atbilstoša darbība"</string>
+    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"atjaunināt komponenta lietojuma statistiku"</string>
+    <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Ļauj pārveidot apkopoto komponentu lietojuma statistiku. Nav paredzēts izmantošanai parastajās lietojumprogrammās."</string>
+    <string name="permlab_copyProtectedData" msgid="1660908117394854464">"Ļauj izsaukt noklusējuma konteinera pakalpojumu, lai kopētu saturu. Nav paredzēts izmantošanai parastajās lietojumprogrammās."</string>
+    <string name="permdesc_copyProtectedData" msgid="537780957633976401">"Ļauj izsaukt noklusējuma konteinera pakalpojumu, lai kopētu saturu. Nav paredzēts izmantošanai parastajās lietojumprogrammās."</string>
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Pieskarieties divreiz, lai kontrolētu tālummaiņu."</string>
+    <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Paplašinot logrīku, radās kļūda"</string>
+    <string name="ime_action_go" msgid="8320845651737369027">"Doties uz"</string>
+    <string name="ime_action_search" msgid="658110271822807811">"Meklēt"</string>
+    <string name="ime_action_send" msgid="2316166556349314424">"Sūtīt"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"Tālāk"</string>
+    <string name="ime_action_done" msgid="8971516117910934605">"Gatavs"</string>
+    <string name="ime_action_default" msgid="2840921885558045721">"Izpildīt"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Sastādiet numuru,"\n"izmantojot <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Izveidot kontaktpersonu,"\n"izmantojot šo numuru: <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"atzīmēts"</string>
+    <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"nav atzīmēts"</string>
+    <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Viena vai vairākas no tālāk minētajām lietojumprogrammām pieprasīja atļauju piekļūt jūsu kontam tagad un nākotnē."</string>
+    <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Vai vēlaties atļaut šo pieprasījumu?"</string>
+    <string name="grant_permissions_header_text" msgid="2722567482180797717">"Piekļuves pieprasījums"</string>
+    <string name="allow" msgid="7225948811296386551">"Atļaut"</string>
+    <string name="deny" msgid="2081879885755434506">"Noraidīt"</string>
+    <string name="permission_request_notification_title" msgid="5390555465778213840">"Atļauja ir pieprasīta."</string>
+    <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"Pieprasīta atļauja"\n"kontam <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="input_method_binding_label" msgid="1283557179944992649">"Ievades metode"</string>
+    <string name="sync_binding_label" msgid="3687969138375092423">"Sinhronizācija"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Pieejamība"</string>
+    <string name="wallpaper_binding_label" msgid="1240087844304687662">"Fona tapete"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"Tapetes maiņa"</string>
+    <string name="pptp_vpn_description" msgid="2688045385181439401">"Tunelēšanas divpunktu protokols"</string>
+    <string name="l2tp_vpn_description" msgid="3750692169378923304">"2. slāņa tunelēšanas protokols"</string>
+    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"Uz iepriekš koplietotas atslēgas balstīts L2TP/IPSec VPN"</string>
+    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Uz sertifikātu balstīts L2TP/IPSec VPN"</string>
+    <string name="upload_file" msgid="2897957172366730416">"Izvēlēties failu"</string>
+    <string name="reset" msgid="2448168080964209908">"Atiestatīt"</string>
+    <string name="submit" msgid="1602335572089911941">"Iesniegt"</string>
+    <string name="description_star" msgid="2654319874908576133">"izlases vienums"</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Automobiļa režīms ir iespējots."</string>
+    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Atlasiet, lai izietu no automobiļa režīma."</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Piesaiste vai tīklājs ir aktīvs."</string>
+    <string name="tethered_notification_message" msgid="3067108323903048927">"Pieskarieties, lai konfigurētu"</string>
+    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Augsts mobilo datu lietojums"</string>
+    <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Pieskarieties, lai uzzinātu vairāk par mobilo datu izmantošanu."</string>
+    <string name="throttled_notification_title" msgid="6269541897729781332">"Ir pārsniegts mobilo datu ierobežojums."</string>
+    <string name="throttled_notification_message" msgid="4712369856601275146">"Pieskarieties, lai uzzinātu vairāk par mobilo datu izmantošanu."</string>
+    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Notiek USB krātuves atvienošana..."</string>
+    <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Notiek SD kartes atvienošana..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Notiek USB krātuves dzēšana..."</string>
+    <string name="progress_erasing" product="default" msgid="2115214724367534095">"Notiek SD kartes dzēšana..."</string>
+    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"Neizdevās dzēst USB krātuvi."</string>
+    <string name="format_error" product="default" msgid="1343380371925238343">"Neizdevās dzēst SD karti."</string>
+    <string name="media_bad_removal" msgid="7960864061016603281">"SD karte pirms atvienošanas tika noņemta."</string>
+    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB atmiņa pašlaik tiek pārbaudīta."</string>
+    <string name="media_checking" product="default" msgid="7334762503904827481">"SD karte pašlaik tiek pārbaudīta."</string>
+    <string name="media_removed" msgid="7001526905057952097">"SD karte ir noņemta."</string>
+    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB krātuve pašlaik tiek izmantota datorā."</string>
+    <string name="media_shared" product="default" msgid="5706130568133540435">"SD karte pašlaik tiek izmantota datorā."</string>
+    <string name="media_unknown_state" msgid="729192782197290385">"Ārējais datu nesējs ir nezināmā stāvoklī."</string>
+</resources>

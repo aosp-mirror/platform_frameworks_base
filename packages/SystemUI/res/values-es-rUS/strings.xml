@@ -26,6 +26,6 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificaciones"</string>
     <string name="battery_low_title" msgid="7923774589611311406">"Conecta el cargador"</string>
     <string name="battery_low_subtitle" msgid="7388781709819722764">"Hay poca batería:"</string>
-    <string name="battery_low_percent_format" msgid="696154104579022959">"Restan <xliff:g id="NUMBER">%d%%</xliff:g> o menos."</string>
+    <string name="battery_low_percent_format" msgid="696154104579022959">"<xliff:g id="NUMBER">%d%%</xliff:g> o menos disponible."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Uso de la batería"</string>
 </resources>
