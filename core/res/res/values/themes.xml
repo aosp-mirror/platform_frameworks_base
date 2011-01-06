@@ -547,6 +547,7 @@
         <item name="windowBackground">@android:color/transparent</item>
         <item name="windowTitleStyle">@android:style/DialogWindowTitle</item>
         <item name="windowContentOverlay">@null</item>
+        <item name="itemTextAppearance">@android:style/TextAppearance.Large.Inverse</item>
     </style>
     
     <!-- Default dark theme for panel windows.  This removes all extraneous
