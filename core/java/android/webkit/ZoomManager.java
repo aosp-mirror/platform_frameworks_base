@@ -260,8 +260,9 @@ class ZoomManager {
     public final float getReadingLevelScale() {
         // The reading scale is at least 0.5f apart from the overview scale.
         final float MIN_SCALE_DIFF = 0.5f;
-        return Math.max(getZoomOverviewScale() + MIN_SCALE_DIFF,
-            DEFAULT_READING_LEVEL_SCALE);
+        return computeScaleWithLimits(
+                   Math.max(getZoomOverviewScale() + MIN_SCALE_DIFF,
+                            DEFAULT_READING_LEVEL_SCALE));
     }
 
     public final float getInvDefaultScale() {
