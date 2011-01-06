@@ -18,7 +18,7 @@
     package="com.android.test.hwui">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-sdk android:minSdkVersion="Froyo" />
+    <uses-sdk android:minSdkVersion="Honeycomb" />
     
     <application
         android:label="HwUi"
