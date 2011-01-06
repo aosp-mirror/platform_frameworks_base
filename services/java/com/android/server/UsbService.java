@@ -24,7 +24,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.UEventObserver;
-import android.provider.Ptp;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
@@ -182,33 +181,8 @@ class UsbService {
         }
     }
 
-    private native void monitorUsbHostBus();
-
-    // called from JNI in monitorUsbHostBus()
-    private void usbCameraAdded(int deviceID) {
-        Intent intent = new Intent(UsbManager.ACTION_USB_CAMERA_ATTACHED,
-                                Ptp.Device.getContentUri(deviceID));
-        Log.d(TAG, "usbCameraAdded, sending " + intent);
-        mContext.sendBroadcast(intent);
-    }
-
-    // called from JNI in monitorUsbHostBus()
-    private void usbCameraRemoved(int deviceID) {
-        Intent intent = new Intent(UsbManager.ACTION_USB_CAMERA_DETACHED,
-                                Ptp.Device.getContentUri(deviceID));
-        Log.d(TAG, "usbCameraRemoved, sending " + intent);
-        mContext.sendBroadcast(intent);
-    }
-
     private void initHostSupport() {
-        // Create a thread to call into native code to wait for USB host events.
-        // This thread will call us back on usbCameraAdded and usbCameraRemoved.
-        Runnable runnable = new Runnable() {
-            public void run() {
-                monitorUsbHostBus();
-            }
-        };
-        new Thread(null, runnable, "UsbService host thread").start();
+        // temporarily disabled
     }
 
     void systemReady() {
