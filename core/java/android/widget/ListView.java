@@ -3093,7 +3093,14 @@ public class ListView extends AbsListView {
             }
             final Paint paint = mDividerPaint;
 
-            final int listBottom = mBottom - mTop - mListPadding.bottom + mScrollY;
+            int effectivePaddingTop = 0;
+            int effectivePaddingBottom = 0;
+            if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
+                effectivePaddingTop = mListPadding.top;
+                effectivePaddingBottom = mListPadding.bottom;
+            }
+
+            final int listBottom = mBottom - mTop - effectivePaddingBottom + mScrollY;
             if (!mStackFromBottom) {
                 int bottom = 0;
                 
@@ -3144,7 +3151,7 @@ public class ListView extends AbsListView {
                 }
             } else {
                 int top;
-                int listTop = mListPadding.top;
+                int listTop = effectivePaddingTop;
 
                 final int scrollY = mScrollY;
 
