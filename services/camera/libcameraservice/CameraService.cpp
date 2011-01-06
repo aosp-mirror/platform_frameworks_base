@@ -27,6 +27,7 @@
 #include <binder/MemoryHeapBase.h>
 #include <cutils/atomic.h>
 #include <cutils/properties.h>
+#include <gui/SurfaceTextureClient.h>
 #include <hardware/hardware.h>
 #include <media/AudioSystem.h>
 #include <media/mediaplayer.h>
@@ -306,6 +307,8 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
     mCameraFacing = cameraFacing;
     mClientPid = clientPid;
     mMsgEnabled = 0;
+    mSurface = 0;
+    mPreviewWindow = 0;
     mHardware->setCallbacks(notifyCallback,
                             dataCallback,
                             dataCallbackTimestamp,
@@ -470,22 +473,58 @@ status_t CameraService::Client::setPreviewDisplay(const sp<Surface>& surface) {
 
     // return if no change in surface.
     // asBinder() is safe on NULL (returns NULL)
-    if (getISurface(surface)->asBinder() == mSurface->asBinder()) {
+    if (getISurface(surface)->asBinder() == mSurface) {
         return result;
     }
 
     if (mSurface != 0) {
         LOG1("clearing old preview surface %p", mSurface.get());
     }
-    if (surface != 0) {
-        mSurface = getISurface(surface);
-    } else {
-        mSurface = 0;
-    }
+    mSurface = getISurface(surface)->asBinder();
     mPreviewWindow = surface;
+
     // If preview has been already started, register preview
     // buffers now.
     if (mHardware->previewEnabled()) {
+        if (mPreviewWindow != 0) {
+            native_window_set_buffers_transform(mPreviewWindow.get(),
+                                                mOrientation);
+            result = mHardware->setPreviewWindow(mPreviewWindow);
+        }
+    }
+
+    return result;
+}
+
+// set the SurfaceTexture that the preview will use
+status_t CameraService::Client::setPreviewTexture(
+        const sp<ISurfaceTexture>& surfaceTexture) {
+    LOG1("setPreviewTexture(%p) (pid %d)", surfaceTexture.get(),
+            getCallingPid());
+    Mutex::Autolock lock(mLock);
+    status_t result = checkPidAndHardware();
+    if (result != NO_ERROR) return result;
+
+    // return if no change in surface.
+    // asBinder() is safe on NULL (returns NULL)
+    if (surfaceTexture->asBinder() == mSurface) {
+        return result;
+    }
+
+    if (mSurface != 0) {
+        LOG1("clearing old preview surface %p", mSurface.get());
+    }
+    mSurface = surfaceTexture->asBinder();
+    if (surfaceTexture != 0) {
+        mPreviewWindow = new SurfaceTextureClient(surfaceTexture);
+    } else {
+        mPreviewWindow = 0;
+    }
+
+    // If preview has been already started, set overlay or register preview
+    // buffers now.
+    if (mHardware->previewEnabled()) {
+        // XXX: What if the new preview window is 0?
         if (mPreviewWindow != 0) {
             native_window_set_buffers_transform(mPreviewWindow.get(),
                                                 mOrientation);
@@ -959,23 +998,6 @@ void CameraService::Client::handleShutter(image_rect_type *size) {
         if (!lockIfMessageWanted(CAMERA_MSG_SHUTTER)) return;
     }
     disableMsgType(CAMERA_MSG_SHUTTER);
-
-    // It takes some time before yuvPicture callback to be called.
-    // Register the buffer for raw image here to reduce latency.
-    if (mSurface != 0) {
-        int w, h;
-        CameraParameters params(mHardware->getParameters());
-        if (size == NULL) {
-            params.getPictureSize(&w, &h);
-        } else {
-            w = size->width;
-            h = size->height;
-            w &= ~1;
-            h &= ~1;
-            LOG1("Snapshot image width=%d, height=%d", w, h);
-        }
-        IPCThreadState::self()->flushCommands();
-    }
 
     mLock.unlock();
 }
