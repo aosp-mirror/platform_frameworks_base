@@ -351,7 +351,6 @@ void ATSParser::Stream::signalDiscontinuity(DiscontinuityType type) {
             mQueue.clear(!isASeek);
 
             if (mSource != NULL) {
-                mSource->clear();
                 mSource->queueDiscontinuity(type);
             }
             break;

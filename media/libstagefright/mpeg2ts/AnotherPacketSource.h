@@ -49,8 +49,6 @@ struct AnotherPacketSource : public MediaSource {
     void queueDiscontinuity(ATSParser::DiscontinuityType type);
     void signalEOS(status_t result);
 
-    void clear();
-
     status_t dequeueAccessUnit(sp<ABuffer> *buffer);
 
 protected:

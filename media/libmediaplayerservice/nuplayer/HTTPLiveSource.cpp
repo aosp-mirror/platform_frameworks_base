@@ -79,7 +79,7 @@ bool NuPlayer::HTTPLiveSource::feedMoreTSData() {
     sp<LiveDataSource> source =
         static_cast<LiveDataSource *>(mLiveSession->getDataSource().get());
 
-    for (int32_t i = 0; i < 10; ++i) {
+    for (int32_t i = 0; i < 50; ++i) {
         char buffer[188];
         ssize_t n = source->readAtNonBlocking(mOffset, buffer, sizeof(buffer));
 
