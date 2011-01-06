@@ -496,7 +496,7 @@
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Hauptnummer"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Weitere Faxnummer"</string>
-    <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
+    <string name="phoneTypeRadio" msgid="4093738079908667513">"Funktelefon"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telex"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY/TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Handy (geschäftl.)"</string>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0 
+ *
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and 
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="4489004083283879149">"Barra d\'estat"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Esborra"</string>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Cap notificació"</string>
+    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Continu"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificacions"</string>
+    <string name="battery_low_title" msgid="7923774589611311406">"Connecteu el carregador"</string>
+    <string name="battery_low_subtitle" msgid="7388781709819722764">"Comença a quedar poca bateria:"</string>
+    <string name="battery_low_percent_format" msgid="696154104579022959">"En queda un <xliff:g id="NUMBER">%d%%</xliff:g> o menys."</string>
+    <string name="battery_low_why" msgid="7279169609518386372">"Ús de la bateria"</string>
+</resources>

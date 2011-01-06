@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="4589592829302498102">"VPT paslaugos"</string>
+    <string name="vpn_notification_title_connected" msgid="8598654486956133580">"<xliff:g id="PROFILENAME">%s</xliff:g> VPT prijungtas"</string>
+    <string name="vpn_notification_title_disconnected" msgid="6216572264382192027">"<xliff:g id="PROFILENAME">%s</xliff:g> VPT atjungtas"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="1952209867082269429">"Palieskite, kad būtų iš naujo sujungta su VPT."</string>
+</resources>
