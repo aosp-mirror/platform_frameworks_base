@@ -158,8 +158,8 @@ void LiveSession::onConnect(const sp<AMessage> &msg) {
         mBandwidthItems.sort(SortByBandwidth);
 
         char value[PROPERTY_VALUE_MAX];
-        if (!property_get("media.httplive.enable-nuplayer", value, NULL)
-                || (strcasecmp(value, "true") && strcmp(value, "1"))) {
+        if (property_get("media.httplive.disable-nuplayer", value, NULL)
+                && (!strcasecmp(value, "true") || !strcmp(value, "1"))) {
             // The "legacy" player cannot deal with audio format changes,
             // some streams use different audio encoding parameters for
             // their lowest bandwidth stream.
