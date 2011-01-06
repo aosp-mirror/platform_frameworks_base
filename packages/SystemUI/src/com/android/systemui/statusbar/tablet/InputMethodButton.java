@@ -184,6 +184,9 @@ public class InputMethodButton extends ImageView {
     }
 
     private void refreshStatusIcon() {
+        if (mIcon == null) {
+            return;
+        }
         if (!needsToShowIMEButton()) {
             setVisibility(View.INVISIBLE);
             return;
@@ -202,12 +205,10 @@ public class InputMethodButton extends ImageView {
                 icon = getShortcutInputMethodAndSubtypeDrawable();
                 break;
         }
-        if (mIcon != null) {
-            if (icon == null) {
-                mIcon.setImageResource(R.drawable.ic_sysbar_ime_default);
-            } else {
-                mIcon.setImageDrawable(icon);
-            }
+        if (icon == null) {
+            mIcon.setImageResource(R.drawable.ic_sysbar_ime_default);
+        } else {
+            mIcon.setImageDrawable(icon);
         }
     }
 
