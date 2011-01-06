@@ -62,11 +62,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.app.backup.IBackupManager;
-import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothHeadset;
-import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.Context;
@@ -120,6 +116,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private int mReconnectCount = 0;
     private boolean mIsScanMode = false;
 
+    private boolean mBluetoothConnectionActive = false;
+
     /**
      * Interval in milliseconds between polling for RSSI
      * and linkspeed information
@@ -137,16 +135,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private static final int SUPPLICANT_RESTART_TRIES = 5;
 
     private int mSupplicantRestartCount = 0;
-
-    /**
-     * Instance of the bluetooth headset helper. This needs to be created
-     * early because there is a delay before it actually 'connects', as
-     * noted by its javadoc. If we check before it is connected, it will be
-     * in an error state and we will not disable coexistence.
-     */
-    private BluetoothHeadset mBluetoothHeadset;
-
-    private BluetoothA2dp mBluetoothA2dp;
 
     private LinkProperties mLinkProperties;
 
@@ -186,10 +174,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     static final int CMD_UNLOAD_DRIVER_SUCCESS            = 5;
     /* Indicates driver unload failed */
     static final int CMD_UNLOAD_DRIVER_FAILURE            = 6;
-    /* Set bluetooth headset proxy */
-    static final int CMD_SET_BLUETOOTH_HEADSET_PROXY      = 7;
-    /* Set bluetooth A2dp proxy */
-    static final int CMD_SET_BLUETOOTH_A2DP_PROXY         = 8;
 
     /* Start the supplicant */
     static final int CMD_START_SUPPLICANT                 = 11;
@@ -209,6 +193,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /* Stop the soft access point */
     static final int CMD_STOP_AP                          = 22;
 
+    static final int CMD_BLUETOOTH_ADAPTER_STATE_CHANGE   = 23;
 
     /* Supplicant events */
     /* Connection to supplicant established */
@@ -277,17 +262,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * - DTIM wake up settings
      */
     static final int CMD_SET_HIGH_PERF_MODE               = 77;
-    /* Set bluetooth co-existence
-     * BLUETOOTH_COEXISTENCE_MODE_ENABLED
-     * BLUETOOTH_COEXISTENCE_MODE_DISABLED
-     * BLUETOOTH_COEXISTENCE_MODE_SENSE
-     */
-    static final int CMD_SET_BLUETOOTH_COEXISTENCE        = 78;
-    /* Enable/disable bluetooth scan mode
-     * true(1)
-     * false(0)
-     */
-    static final int CMD_SET_BLUETOOTH_SCAN_MODE          = 79;
     /* Set the country code */
     static final int CMD_SET_COUNTRY_CODE                 = 80;
     /* Request connectivity manager wake lock before driver stop */
@@ -476,15 +450,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         mInterfaceName = SystemProperties.get("wifi.interface", "tiwlan0");
         mSupplicantStateTracker = new SupplicantStateTracker(context, this, getHandler());
         mWpsStateMachine = new WpsStateMachine(context, this, getHandler());
-
         mLinkProperties = new LinkProperties();
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter != null) {
-            adapter.getProfileProxy(mContext, mBluetoothProfileServiceListener,
-                                    BluetoothProfile.A2DP);
-            adapter.getProfileProxy(mContext, mBluetoothProfileServiceListener,
-                                    BluetoothProfile.HEADSET);
-        }
 
         mNetworkInfo.setIsAvailable(false);
         mLinkProperties.clear();
@@ -914,26 +880,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     /**
-     * Set bluetooth coex mode:
-     *
-     * @param mode
-     *  BLUETOOTH_COEXISTENCE_MODE_ENABLED
-     *  BLUETOOTH_COEXISTENCE_MODE_DISABLED
-     *  BLUETOOTH_COEXISTENCE_MODE_SENSE
+     * Send a message indicating bluetooth adapter connection state changed
      */
-    public void setBluetoothCoexistenceMode(int mode) {
-        sendMessage(obtainMessage(CMD_SET_BLUETOOTH_COEXISTENCE, mode, 0));
-    }
-
-    /**
-     * Enable or disable Bluetooth coexistence scan mode. When this mode is on,
-     * some of the low-level scan parameters used by the driver are changed to
-     * reduce interference with A2DP streaming.
-     *
-     * @param isBluetoothPlaying whether to enable or disable this mode
-     */
-    public void setBluetoothScanMode(boolean isBluetoothPlaying) {
-        sendMessage(obtainMessage(CMD_SET_BLUETOOTH_SCAN_MODE, isBluetoothPlaying ? 1 : 0, 0));
+    public void sendBluetoothAdapterStateChange(int state) {
+        sendMessage(obtainMessage(CMD_BLUETOOTH_ADAPTER_STATE_CHANGE, state, 0));
     }
 
     /**
@@ -1312,54 +1262,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                                       DEFAULT_MAX_DHCP_RETRIES);
     }
 
-    /**
-     * Whether to disable coexistence mode while obtaining IP address. We
-     * disable coexistence if the headset indicates that there are no
-     * connected devices. If we have not got an indication of the service
-     * connection yet, we go ahead with disabling coexistence mode.
-     *
-     * @return Whether to disable coexistence mode.
-     */
-    private boolean shouldDisableCoexistenceMode() {
-        if (mBluetoothHeadset == null) return true;
-        List<BluetoothDevice> devices = mBluetoothHeadset.getConnectedDevices();
-        return (devices.size() != 0 ? false : true);
-    }
-
-    private void checkIsBluetoothPlaying() {
-        boolean isBluetoothPlaying = false;
-        if (mBluetoothA2dp != null) {
-            List<BluetoothDevice> connected = mBluetoothA2dp.getConnectedDevices();
-
-            for (BluetoothDevice device : connected) {
-                if (mBluetoothA2dp.isA2dpPlaying(device)) {
-                    isBluetoothPlaying = true;
-                    break;
-                }
-            }
-        }
-        setBluetoothScanMode(isBluetoothPlaying);
-    }
-
-    private BluetoothProfile.ServiceListener mBluetoothProfileServiceListener =
-        new BluetoothProfile.ServiceListener() {
-        public void onServiceConnected(int profile, BluetoothProfile proxy) {
-                if (profile == BluetoothProfile.HEADSET) {
-                    sendMessage(CMD_SET_BLUETOOTH_HEADSET_PROXY, proxy);
-                } else if (profile == BluetoothProfile.A2DP) {
-                    sendMessage(CMD_SET_BLUETOOTH_A2DP_PROXY, proxy);
-                }
-        }
-
-        public void onServiceDisconnected(int profile) {
-                if (profile == BluetoothProfile.HEADSET) {
-                    sendMessage(CMD_SET_BLUETOOTH_HEADSET_PROXY, null);
-                } else if (profile == BluetoothProfile.A2DP) {
-                    sendMessage(CMD_SET_BLUETOOTH_A2DP_PROXY, null);
-                }
-        }
-    };
-
     private void sendScanResultsAvailableBroadcast() {
         Intent intent = new Intent(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
@@ -1562,11 +1464,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch (message.what) {
-                case CMD_SET_BLUETOOTH_HEADSET_PROXY:
-                    mBluetoothHeadset = (BluetoothHeadset) message.obj;
-                    break;
-                case CMD_SET_BLUETOOTH_A2DP_PROXY:
-                    mBluetoothA2dp = (BluetoothA2dp) message.obj;
+                case CMD_BLUETOOTH_ADAPTER_STATE_CHANGE:
+                    mBluetoothConnectionActive = (message.arg1 !=
+                            BluetoothAdapter.STATE_DISCONNECTED);
                     break;
                     /* Synchronous call returns */
                 case CMD_PING_SUPPLICANT:
@@ -1610,8 +1510,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_SCAN_TYPE:
                 case CMD_SET_HIGH_PERF_MODE:
-                case CMD_SET_BLUETOOTH_COEXISTENCE:
-                case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_REQUEST_CM_WAKELOCK:
@@ -1722,8 +1620,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_SCAN_TYPE:
                 case CMD_SET_HIGH_PERF_MODE:
-                case CMD_SET_BLUETOOTH_COEXISTENCE:
-                case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
@@ -1850,8 +1746,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_SCAN_TYPE:
                 case CMD_SET_HIGH_PERF_MODE:
-                case CMD_SET_BLUETOOTH_COEXISTENCE:
-                case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
@@ -1930,8 +1824,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     //TODO: initialize and fix multicast filtering
                     //mWM.initializeMulticastFiltering();
 
-                    checkIsBluetoothPlaying();
-
                     sendSupplicantConnectionChangedBroadcast(true);
                     transitionTo(mDriverStartedState);
                     break;
@@ -1960,8 +1852,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_SCAN_TYPE:
                 case CMD_SET_HIGH_PERF_MODE:
-                case CMD_SET_BLUETOOTH_COEXISTENCE:
-                case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
@@ -2116,8 +2006,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_SCAN_TYPE:
                 case CMD_SET_HIGH_PERF_MODE:
-                case CMD_SET_BLUETOOTH_COEXISTENCE:
-                case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
@@ -2154,8 +2042,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case PASSWORD_MAY_BE_INCORRECT_EVENT:
                 case CMD_SET_SCAN_TYPE:
                 case CMD_SET_HIGH_PERF_MODE:
-                case CMD_SET_BLUETOOTH_COEXISTENCE:
-                case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
@@ -2183,6 +2069,12 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             mIsRunning = true;
             updateBatteryWorkSource(null);
 
+            /**
+             * Enable bluetooth coexistence scan mode when bluetooth connection is active.
+             * When this mode is on, some of the low-level scan parameters used by the
+             * driver are changed to reduce interference with bluetooth
+             */
+            WifiNative.setBluetoothCoexistenceScanModeCommand(mBluetoothConnectionActive);
             /* set country code */
             setCountryCode();
             /* set frequency band of operation */
@@ -2219,12 +2111,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_HIGH_PERF_MODE:
                     setHighPerfModeEnabledNative(message.arg1 == 1);
                     break;
-                case CMD_SET_BLUETOOTH_COEXISTENCE:
-                    WifiNative.setBluetoothCoexistenceModeCommand(message.arg1);
-                    break;
-                case CMD_SET_BLUETOOTH_SCAN_MODE:
-                    WifiNative.setBluetoothCoexistenceScanModeCommand(message.arg1 == 1);
-                    break;
                 case CMD_SET_COUNTRY_CODE:
                     String country = (String) message.obj;
                     Log.d(TAG, "set country code " + country);
@@ -2242,6 +2128,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     } else {
                         Log.e(TAG, "Failed to set frequency band " + band);
                     }
+                    break;
+                case CMD_BLUETOOTH_ADAPTER_STATE_CHANGE:
+                    mBluetoothConnectionActive = (message.arg1 !=
+                            BluetoothAdapter.STATE_DISCONNECTED);
+                    WifiNative.setBluetoothCoexistenceScanModeCommand(mBluetoothConnectionActive);
                     break;
                 case CMD_STOP_DRIVER:
                     mWakeLock.acquire();
@@ -2290,8 +2181,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_STOP_DRIVER:
                 case CMD_SET_SCAN_TYPE:
                 case CMD_SET_HIGH_PERF_MODE:
-                case CMD_SET_BLUETOOTH_COEXISTENCE:
-                case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
@@ -2490,7 +2379,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 mModifiedBluetoothCoexistenceMode = false;
                 mPowerMode = POWER_MODE_AUTO;
 
-                if (shouldDisableCoexistenceMode()) {
+                if (!mBluetoothConnectionActive) {
                     /*
                      * There are problems setting the Wi-Fi driver's power
                      * mode to active when bluetooth coexistence mode is
