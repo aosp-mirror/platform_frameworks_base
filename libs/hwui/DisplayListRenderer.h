@@ -110,6 +110,8 @@ public:
         SetupShadow
     };
 
+    void initFromDisplayListRenderer(const DisplayListRenderer& recorder);
+
     void replay(OpenGLRenderer& renderer);
 
 private:
@@ -216,6 +218,8 @@ public:
     DisplayListRenderer();
     ~DisplayListRenderer();
 
+    DisplayList* getDisplayList();
+
     void setViewport(int width, int height);
     void prepare(bool opaque);
 
@@ -265,10 +269,6 @@ public:
     void setupShadow(float radius, float dx, float dy, int color);
 
     void reset();
-
-    DisplayList* getDisplayList() const {
-        return new DisplayList(*this);
-    }
 
     const SkWriter32& writeStream() const {
         return mWriter;
@@ -421,6 +421,8 @@ private:
 
     SkRefCntRecorder mRCRecorder;
     SkRefCntRecorder mTFRecorder;
+
+    DisplayList *mDisplayList;
 
     friend class DisplayList;
 

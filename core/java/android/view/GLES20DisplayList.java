@@ -70,11 +70,7 @@ class GLES20DisplayList extends DisplayList {
             mRecorded = true;
 
             mNativeDisplayList = mCanvas.getDisplayList();
-            if (mFinalizer == null) {
-                mFinalizer = new DisplayListFinalizer(mNativeDisplayList);
-            } else {
-                mFinalizer.replaceNativeObject(mNativeDisplayList);
-            }
+            mFinalizer = DisplayListFinalizer.getFinalizer(mFinalizer, mNativeDisplayList);
         }
     }
 
@@ -86,12 +82,23 @@ class GLES20DisplayList extends DisplayList {
     private static class DisplayListFinalizer {
         int mNativeDisplayList;
 
-        DisplayListFinalizer(int nativeDisplayList) {
+        // Factory method returns new instance if old one is null, or old instance
+        // otherwise, destroying native display list along the way as necessary
+        static DisplayListFinalizer getFinalizer(DisplayListFinalizer oldFinalizer,
+                int nativeDisplayList) {
+            if (oldFinalizer == null) {
+                return new DisplayListFinalizer(nativeDisplayList);
+            }
+            oldFinalizer.replaceNativeObject(nativeDisplayList);
+            return oldFinalizer;
+        }
+
+        private DisplayListFinalizer(int nativeDisplayList) {
             mNativeDisplayList = nativeDisplayList;
         }
 
-        void replaceNativeObject(int newNativeDisplayList) {
-            if (mNativeDisplayList != 0) {
+        private void replaceNativeObject(int newNativeDisplayList) {
+            if (mNativeDisplayList != 0 && mNativeDisplayList != newNativeDisplayList) {
                 GLES20Canvas.destroyDisplayList(mNativeDisplayList);
             }
             mNativeDisplayList = newNativeDisplayList;
