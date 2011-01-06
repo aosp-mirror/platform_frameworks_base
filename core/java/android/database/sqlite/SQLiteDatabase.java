@@ -958,13 +958,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             sBlockSize = new StatFs("/data").getBlockSize();
         }
         sqliteDatabase.setPageSize(sBlockSize);
-        //STOPSHIP - uncomment the following line
-        //sqliteDatabase.setJournalMode(path, "TRUNCATE");
-        // STOPSHIP remove the following lines
-        if (!path.equalsIgnoreCase(MEMORY_DB_PATH)) {
-            sqliteDatabase.enableWriteAheadLogging();
-        }
-        // END STOPSHIP
+        sqliteDatabase.setJournalMode(path, "TRUNCATE");
 
         // add this database to the list of databases opened in this process
         synchronized(mActiveDatabases) {
