@@ -1372,6 +1372,8 @@ public class TabletStatusBar extends StatusBar {
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.print("mDisabled=0x");
         pw.println(Integer.toHexString(mDisabled));
+        pw.println("mNetworkController:");
+        mNetworkController.dump(fd, pw, args);
     }
 }
 
