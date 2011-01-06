@@ -1055,7 +1055,10 @@ public final class SipService extends ISipService.Stub {
                 // we want to skip the interim ones) but deliver bad news
                 // immediately
                 if (connected) {
-                    if (mTask != null) mTask.cancel();
+                    if (mTask != null) {
+                        mTask.cancel();
+                        mMyWakeLock.release(mTask);
+                    }
                     mTask = new MyTimerTask(type, connected);
                     mTimer.schedule(mTask, 2 * 1000L);
                     // hold wakup lock so that we can finish changes before the
@@ -1096,6 +1099,7 @@ public final class SipService extends ISipService.Stub {
                     if (mTask != this) {
                         Log.w(TAG, "  unexpected task: " + mNetworkType
                                 + (mConnected ? " CONNECTED" : "DISCONNECTED"));
+                        mMyWakeLock.release(this);
                         return;
                     }
                     mTask = null;
