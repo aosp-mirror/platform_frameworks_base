@@ -69,39 +69,64 @@ public class Region_Delegate {
      *
      * If the Op is not one that combines two shapes, then this return null
      *
-     * @param shape1 the firt shape to combine
+     * @param shape1 the firt shape to combine which can be null if there's no original clip.
      * @param shape2 the 2nd shape to combine
      * @param regionOp the operande for the combine
      * @return a new area or null.
      */
     public static Area combineShapes(Shape shape1, Shape shape2, int regionOp) {
         if (regionOp == Region.Op.DIFFERENCE.nativeInt) {
+            // if shape1 is null (empty), then the result is null.
+            if (shape1 == null) {
+                return null;
+            }
+
             // result is always a new area.
             Area result = new Area(shape1);
             result.subtract(shape2 instanceof Area ? (Area) shape2 : new Area(shape2));
             return result;
 
         } else if (regionOp == Region.Op.INTERSECT.nativeInt) {
+            // if shape1 is null, then the result is simply shape2.
+            if (shape1 == null) {
+                return new Area(shape2);
+            }
+
             // result is always a new area.
             Area result = new Area(shape1);
             result.intersect(shape2 instanceof Area ? (Area) shape2 : new Area(shape2));
             return result;
 
         } else if (regionOp == Region.Op.UNION.nativeInt) {
+            // if shape1 is null, then the result is simply shape2.
+            if (shape1 == null) {
+                return new Area(shape2);
+            }
+
             // result is always a new area.
             Area result = new Area(shape1);
             result.add(shape2 instanceof Area ? (Area) shape2 : new Area(shape2));
             return result;
 
         } else if (regionOp == Region.Op.XOR.nativeInt) {
+            // if shape1 is null, then the result is simply shape2
+            if (shape1 == null) {
+                return new Area(shape2);
+            }
+
             // result is always a new area.
             Area result = new Area(shape1);
             result.exclusiveOr(shape2 instanceof Area ? (Area) shape2 : new Area(shape2));
+            return result;
 
         } else if (regionOp == Region.Op.REVERSE_DIFFERENCE.nativeInt) {
             // result is always a new area.
             Area result = new Area(shape2);
-            result.subtract(shape1 instanceof Area ? (Area) shape1 : new Area(shape1));
+
+            if (shape1 != null) {
+                result.subtract(shape1 instanceof Area ? (Area) shape1 : new Area(shape1));
+            }
+
             return result;
         }
 
