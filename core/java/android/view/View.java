@@ -58,7 +58,6 @@ import android.util.PoolableManager;
 import android.util.Pools;
 import android.util.SparseArray;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
@@ -546,6 +545,10 @@ import java.util.WeakHashMap;
  * subtree rooted by that node. When an animation is started, the framework will
  * take care of redrawing the appropriate views until the animation completes.
  * </p>
+ * <p>
+ * Starting with Android 3.0, the preferred way of animating views is to use the
+ * {@link android.animation} package APIs.
+ * </p>
  *
  * <a name="Security"></a>
  * <h3>Security</h3>
@@ -569,6 +572,7 @@ import java.util.WeakHashMap;
  * See also {@link MotionEvent#FLAG_WINDOW_IS_OBSCURED}.
  * </p>
  *
+ * @attr ref android.R.styleable#View_alpha
  * @attr ref android.R.styleable#View_background
  * @attr ref android.R.styleable#View_clickable
  * @attr ref android.R.styleable#View_contentDescription
@@ -584,6 +588,7 @@ import java.util.WeakHashMap;
  * @attr ref android.R.styleable#View_focusableInTouchMode
  * @attr ref android.R.styleable#View_hapticFeedbackEnabled
  * @attr ref android.R.styleable#View_keepScreenOn
+ * @attr ref android.R.styleable#View_layerType
  * @attr ref android.R.styleable#View_longClickable
  * @attr ref android.R.styleable#View_minHeight
  * @attr ref android.R.styleable#View_minWidth
@@ -2152,6 +2157,69 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public static final int SCROLLBAR_POSITION_RIGHT = 2;
 
     /**
+     * Indicates that the view does not have a layer.
+     * 
+     * @see #getLayerType() 
+     * @see #setLayerType(int, android.graphics.Paint) 
+     * @see #LAYER_TYPE_SOFTWARE
+     * @see #LAYER_TYPE_HARDWARE 
+     */
+    public static final int LAYER_TYPE_NONE = 0;
+
+    /**
+     * <p>Indicates that the view has a software layer. A software layer is backed
+     * by a bitmap and causes the view to be rendered using Android's software
+     * rendering pipeline, even if hardware acceleration is enabled.</p>
+     * 
+     * <p>Software layers have various usages:</p>
+     * <p>When the application is not using hardware acceleration, a software layer
+     * is useful to apply a specific color filter and/or blending mode and/or
+     * translucency to a view and all its children.</p>
+     * <p>When the application is using hardware acceleration, a software layer
+     * is useful to render drawing primitives not supported by the hardware
+     * accelerated pipeline. It can also be used to cache a complex view tree
+     * into a texture and reduce the complexity of drawing operations. For instance,
+     * when animating a complex view tree with a translation, a software layer can
+     * be used to render the view tree only once.</p>
+     * <p>Software layers should be avoided when the affected view tree updates
+     * often. Every update will require to re-render the software layer, which can
+     * potentially be slow (particularly when hardware acceleration is turned on
+     * since the layer will have to be uploaded into a hardware texture after every
+     * update.)</p>
+     * 
+     * @see #getLayerType() 
+     * @see #setLayerType(int, android.graphics.Paint) 
+     * @see #LAYER_TYPE_NONE
+     * @see #LAYER_TYPE_HARDWARE 
+     */
+    public static final int LAYER_TYPE_SOFTWARE = 1;
+
+    /**
+     * <p>Indicates that the view has a hardware layer. A hardware layer is backed
+     * by a hardware specific texture (generally Frame Buffer Objects or FBO on
+     * OpenGL hardware) and causes the view to be rendered using Android's hardware
+     * rendering pipeline, but only if hardware acceleration is turned on for the
+     * view hierarchy. When hardware acceleration is turned off, hardware layers
+     * behave exactly as {@link #LAYER_TYPE_SOFTWARE software layers}.</p>
+     * 
+     * <p>A hardware layer is useful to apply a specific color filter and/or
+     * blending mode and/or translucency to a view and all its children.</p>
+     * <p>A hardware layer can also be used to increase the rendering quality when
+     * rotation transformations are applied on a view. It can also be used to
+     * prevent potential clipping issues when applying 3D transforms on a view.</p>
+     * 
+     * @see #getLayerType() 
+     * @see #setLayerType(int, android.graphics.Paint)
+     * @see #LAYER_TYPE_NONE
+     * @see #LAYER_TYPE_SOFTWARE
+     */
+    public static final int LAYER_TYPE_HARDWARE = 2;
+    
+    @ViewDebug.ExportedProperty(category = "drawing")
+    int mLayerType = LAYER_TYPE_NONE;
+    Paint mLayerPaint;
+
+    /**
      * Simple constructor to use when creating a view from code.
      *
      * @param context The Context the view is running in, through which it can
@@ -2488,6 +2556,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     break;
                 case R.styleable.View_verticalScrollbarPosition:
                     mVerticalScrollbarPosition = a.getInt(attr, SCROLLBAR_POSITION_DEFAULT);
+                    break;
+                case R.styleable.View_layerType:
+                    setLayerType(a.getInt(attr, LAYER_TYPE_NONE), null);
                     break;
             }
         }
@@ -5763,11 +5834,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Sets the opacity of the view. This is a value from 0 to 1, where 0 means the view is
-     * completely transparent and 1 means the view is completely opaque.
+     * <p>Sets the opacity of the view. This is a value from 0 to 1, where 0 means the view is
+     * completely transparent and 1 means the view is completely opaque.</p>
+     * 
+     * <p>If this view overrides {@link #onSetAlpha(int)} to return true, then this view is
+     * responsible for applying the opacity itself. Otherwise, calling this method is
+     * equivalent to calling {@link #setLayerType(int, android.graphics.Paint)} and
+     * setting a hardware layer.</p> 
      *
      * @param alpha The opacity of the view.
      *
+     * @see #setLayerType(int, android.graphics.Paint) 
+     * 
      * @attr ref android.R.styleable#View_alpha
      */
     public void setAlpha(float alpha) {
@@ -7747,18 +7825,107 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * <p>Specifies the type of layer backing this view. The layer can be
+     * {@link #LAYER_TYPE_NONE disabled}, {@link #LAYER_TYPE_SOFTWARE software} or
+     * {@link #LAYER_TYPE_HARDWARE hardware}.</p>
+     * 
+     * <p>A layer is associated with an optional {@link android.graphics.Paint}
+     * instance that controls how the layer is composed on screen. The following
+     * properties of the paint are taken into account when composing the layer:</p>
+     * <ul>
+     * <li>{@link android.graphics.Paint#getAlpha() Translucency (alpha)}</li>
+     * <li>{@link android.graphics.Paint#getXfermode() Blending mode}</li>
+     * <li>{@link android.graphics.Paint#getColorFilter() Color filter}</li>
+     * </ul>
+     * 
+     * <p>If this view has an alpha value set to < 1.0 by calling
+     * {@link #setAlpha(float)}, the alpha value of the layer's paint is replaced by
+     * this view's alpha value. Calling {@link #setAlpha(float)} is therefore
+     * equivalent to setting a hardware layer on this view and providing a paint with
+     * the desired alpha value.<p>
+     * 
+     * <p>Refer to the documentation of {@link #LAYER_TYPE_NONE disabled},
+     * {@link #LAYER_TYPE_SOFTWARE software} and {@link #LAYER_TYPE_HARDWARE hardware}
+     * for more information on when and how to use layers.</p>
+     * 
+     * @param layerType The ype of layer to use with this view, must be one of
+     *        {@link #LAYER_TYPE_NONE}, {@link #LAYER_TYPE_SOFTWARE} or
+     *        {@link #LAYER_TYPE_HARDWARE}
+     * @param paint The paint used to compose the layer. This argument is optional
+     *        and can be null. It is ignored when the layer type is
+     *        {@link #LAYER_TYPE_NONE}
+     * 
+     * @see #getLayerType() 
+     * @see #LAYER_TYPE_NONE
+     * @see #LAYER_TYPE_SOFTWARE
+     * @see #LAYER_TYPE_HARDWARE
+     * @see #setAlpha(float) 
+     * 
+     * @attr ref android.R.styleable#View_layerType
+     */
+    public void setLayerType(int layerType, Paint paint) {
+        if (layerType < LAYER_TYPE_NONE || layerType > LAYER_TYPE_HARDWARE) {
+            throw new IllegalArgumentException("Layer type can only be one of: LAYER_TYPE_NONE, " 
+                    + "LAYER_TYPE_SOFTWARE or LAYER_TYPE_HARDWARE");
+        }
+
+        // Destroy any previous software drawing cache if needed
+        if (mLayerType == LAYER_TYPE_SOFTWARE && layerType != LAYER_TYPE_SOFTWARE) {
+            if (mDrawingCache != null) {
+                mDrawingCache.recycle();
+                mDrawingCache = null;
+            }
+
+            if (mUnscaledDrawingCache != null) {
+                mUnscaledDrawingCache.recycle();
+                mUnscaledDrawingCache = null;
+            }
+        }
+
+        mLayerType = layerType;
+        mLayerPaint = mLayerType == LAYER_TYPE_NONE ? null : paint;
+
+        invalidate();
+    }
+
+    /**
+     * Indicates what type of layer is currently associated with this view. By default
+     * a view does not have a layer, and the layer type is {@link #LAYER_TYPE_NONE}.
+     * Refer to the documentation of {@link #setLayerType(int, android.graphics.Paint)}
+     * for more information on the different types of layers.
+     * 
+     * @return {@link #LAYER_TYPE_NONE}, {@link #LAYER_TYPE_SOFTWARE} or
+     *         {@link #LAYER_TYPE_HARDWARE}
+     * 
+     * @see #setLayerType(int, android.graphics.Paint) 
+     * @see #LAYER_TYPE_NONE
+     * @see #LAYER_TYPE_SOFTWARE
+     * @see #LAYER_TYPE_HARDWARE
+     */
+    public int getLayerType() {
+        return mLayerType;
+    }
+
+    /**
      * <p>Enables or disables the drawing cache. When the drawing cache is enabled, the next call
      * to {@link #getDrawingCache()} or {@link #buildDrawingCache()} will draw the view in a
      * bitmap. Calling {@link #draw(android.graphics.Canvas)} will not draw from the cache when
      * the cache is enabled. To benefit from the cache, you must request the drawing cache by
      * calling {@link #getDrawingCache()} and draw it on screen if the returned bitmap is not
      * null.</p>
+     * 
+     * <p>Enabling the drawing cache is similar to
+     * {@link #setLayerType(int, android.graphics.Paint) setting a layer} when hardware
+     * acceleration is turned off. When hardware acceleration is turned on enabling the
+     * drawing cache has either no effect or the cache used at drawing time is not a bitmap.
+     * This API can however be used to manually generate a bitmap copy of this view.</p>
      *
      * @param enabled true to enable the drawing cache, false otherwise
      *
      * @see #isDrawingCacheEnabled()
      * @see #getDrawingCache()
      * @see #buildDrawingCache()
+     * @see #setLayerType(int, android.graphics.Paint) 
      */
     public void setDrawingCacheEnabled(boolean enabled) {
         setFlags(enabled ? DRAWING_CACHE_ENABLED : 0, DRAWING_CACHE_ENABLED);
@@ -8077,7 +8244,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             canvas.translate(-mScrollX, -mScrollY);
 
             mPrivateFlags |= DRAWN;
-            if (mAttachInfo == null || !mAttachInfo.mHardwareAccelerated) {
+            if (mAttachInfo == null || !mAttachInfo.mHardwareAccelerated ||
+                    mLayerType != LAYER_TYPE_NONE) {
                 mPrivateFlags |= DRAWING_CACHE_VALID;
             }
 

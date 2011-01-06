@@ -26,6 +26,7 @@
 #include <SkXfermode.h>
 
 #include "Rect.h"
+#include "SkiaColorFilter.h"
 
 namespace android {
 namespace uirenderer {
@@ -93,6 +94,11 @@ struct Layer {
      * have been drawn.
      */
     Region region;
+
+    /**
+     * Color filter used to draw this layer. Optional.
+     */
+    SkiaColorFilter* colorFilter;
 }; // struct Layer
 
 }; // namespace uirenderer
