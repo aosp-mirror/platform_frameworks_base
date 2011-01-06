@@ -1506,7 +1506,7 @@ void OMXCodec::setComponentRole() {
 OMXCodec::~OMXCodec() {
     mSource.clear();
 
-    CHECK(mState == LOADED || mState == ERROR);
+    CHECK(mState == LOADED || mState == ERROR || mState == LOADED_TO_IDLE);
 
     status_t err = mOMX->freeNode(mNode);
     CHECK_EQ(err, (status_t)OK);
