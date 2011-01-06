@@ -484,7 +484,7 @@ private:
         ON_HOLD = 0,
         MUTED = 1,
         NORMAL = 2,
-        EC_ENABLED = 3,
+        ECHO_SUPPRESSION = 3,
         LAST_MODE = 3,
     };
 
@@ -618,6 +618,10 @@ bool AudioGroup::setMode(int mode)
 {
     if (mode < 0 || mode > LAST_MODE) {
         return false;
+    }
+    if (mode == ECHO_SUPPRESSION && AudioSystem::getParameters(
+        0, String8("ec_supported")) == "ec_supported=yes") {
+        mode = NORMAL;
     }
     if (mMode == mode) {
         return true;
@@ -775,8 +779,8 @@ bool AudioGroup::DeviceThread::threadLoop()
     AudioTrack track;
     AudioRecord record;
     if (track.set(AudioSystem::VOICE_CALL, sampleRate, AudioSystem::PCM_16_BIT,
-        AudioSystem::CHANNEL_OUT_MONO, output) != NO_ERROR ||
-        record.set(AUDIO_SOURCE_MIC, sampleRate, AudioSystem::PCM_16_BIT,
+        AudioSystem::CHANNEL_OUT_MONO, output) != NO_ERROR || record.set(
+        AUDIO_SOURCE_VOICE_COMMUNICATION, sampleRate, AudioSystem::PCM_16_BIT,
         AudioSystem::CHANNEL_IN_MONO, input) != NO_ERROR) {
         LOGE("cannot initialize audio device");
         return false;
