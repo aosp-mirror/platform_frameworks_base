@@ -108,11 +108,4 @@
     <!-- Recent apps label. Shown as title on recent apps panel -->
     <string name="recent_tasks_app_label">Apps</string>
 
-    <!-- Rotation lock toast text: shown when rotation lock is turned off (and the screen will
-         auto-rotate based on the accelerometer).  [CHAR LIMIT=NONE]-->
-    <string name="toast_rotation_free">Screen will rotate automatically.</string>
-    
-    <!-- Rotation lock toast text: shown when rotation lock is turned on and the orientation is
-         undefined.  [CHAR LIMIT=NONE] -->
-    <string name="toast_rotation_locked">Screen rotation is now locked.</string>
 </resources>
