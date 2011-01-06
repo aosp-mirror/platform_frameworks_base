@@ -1176,6 +1176,17 @@ status_t MPEG4Extractor::parseMetaData(off_t offset, size_t size) {
             metadataKey = kKeyGenre;
             break;
         }
+        case FOURCC('c', 'p', 'i', 'l'):
+        {
+            if (size == 9 && flags == 21) {
+                char tmp[16];
+                sprintf(tmp, "%d",
+                        (int)buffer[size - 1]);
+
+                mFileMetaData->setCString(kKeyCompilation, tmp);
+            }
+            break;
+        }
         case FOURCC('t', 'r', 'k', 'n'):
         {
             if (size == 16 && flags == 0) {
