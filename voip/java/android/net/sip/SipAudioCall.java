@@ -999,16 +999,6 @@ public class SipAudioCall {
 
         if (isWifiOn()) grabWifiHighPerfLock();
 
-        if (!mHold) {
-            /* The recorder volume will be very low if the device is in
-             * IN_CALL mode. Therefore, we have to set the mode to NORMAL
-             * in order to have the normal microphone level.
-             */
-            ((AudioManager) mContext.getSystemService
-                    (Context.AUDIO_SERVICE))
-                    .setMode(AudioManager.MODE_NORMAL);
-        }
-
         // AudioGroup logic:
         AudioGroup audioGroup = getAudioGroup();
         if (mHold) {
