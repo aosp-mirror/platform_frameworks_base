@@ -152,17 +152,6 @@ static void android_media_MediaMetadataRetriever_setDataSourceFD(JNIEnv *env, jo
     process_media_retriever_call(env, retriever->setDataSource(fd, offset, length), "java/lang/RuntimeException", "setDataSource failed");
 }
 
-static void android_media_MediaMetadataRetriever_setMode(JNIEnv *env, jobject thiz, jint mode)
-{
-    LOGV("setMode");
-    MediaMetadataRetriever* retriever = getRetriever(env, thiz);
-    if (retriever == 0) {
-        jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
-        return;
-    }
-    process_media_retriever_call(env, retriever->setMode(mode), "java/lang/RuntimeException", "setMode failed");
-}
-
 static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, jobject thiz, jlong timeUs, jint option)
 {
     LOGV("getFrameAtTime: %lld us option: %d", timeUs, option);
@@ -447,7 +436,6 @@ static void android_media_MediaMetadataRetriever_native_setup(JNIEnv *env, jobje
 static JNINativeMethod nativeMethods[] = {
         {"setDataSource",   "(Ljava/lang/String;)V", (void *)android_media_MediaMetadataRetriever_setDataSource},
         {"setDataSource",   "(Ljava/io/FileDescriptor;JJ)V", (void *)android_media_MediaMetadataRetriever_setDataSourceFD},
-        {"setMode",         "(I)V", (void *)android_media_MediaMetadataRetriever_setMode},
         {"_getFrameAtTime", "(JI)Landroid/graphics/Bitmap;", (void *)android_media_MediaMetadataRetriever_getFrameAtTime},
         {"extractMetadata", "(I)Ljava/lang/String;", (void *)android_media_MediaMetadataRetriever_extractMetadata},
         {"getEmbeddedPicture", "(I)[B", (void *)android_media_MediaMetadataRetriever_getEmbeddedPicture},

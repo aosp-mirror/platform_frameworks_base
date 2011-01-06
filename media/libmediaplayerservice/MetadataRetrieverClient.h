@@ -43,7 +43,6 @@ public:
     virtual void                    disconnect();
     virtual status_t                setDataSource(const char *url);
     virtual status_t                setDataSource(int fd, int64_t offset, int64_t length);
-    virtual status_t                setMode(int mode);
     virtual sp<IMemory>             getFrameAtTime(int64_t timeUs, int option);
     virtual sp<IMemory>             extractAlbumArt();
     virtual const char*             extractMetadata(int keyCode);
@@ -59,7 +58,6 @@ private:
     mutable Mutex                          mLock;
     sp<MediaMetadataRetrieverBase>         mRetriever;
     pid_t                                  mPid;
-    int                                    mMode;
 
     // Keep the shared memory copy of album art and capture frame (for thumbnail)
     sp<IMemory>                            mAlbumArt;
