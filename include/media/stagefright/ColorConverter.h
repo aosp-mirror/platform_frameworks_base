@@ -21,6 +21,7 @@
 #include <sys/types.h>
 
 #include <stdint.h>
+#include <utils/Errors.h>
 
 #include <OMX_Video.h>
 
@@ -32,7 +33,7 @@ struct ColorConverter {
 
     bool isValid() const;
 
-    void convert(
+    status_t convert(
             const void *srcBits,
             size_t srcWidth, size_t srcHeight,
             size_t srcCropLeft, size_t srcCropTop,
@@ -63,16 +64,16 @@ private:
 
     uint8_t *initClip();
 
-    void convertCbYCrY(
+    status_t convertCbYCrY(
             const BitmapParams &src, const BitmapParams &dst);
 
-    void convertYUV420Planar(
+    status_t convertYUV420Planar(
             const BitmapParams &src, const BitmapParams &dst);
 
-    void convertQCOMYUV420SemiPlanar(
+    status_t convertQCOMYUV420SemiPlanar(
             const BitmapParams &src, const BitmapParams &dst);
 
-    void convertYUV420SemiPlanar(
+    status_t convertYUV420SemiPlanar(
             const BitmapParams &src, const BitmapParams &dst);
 
     ColorConverter(const ColorConverter &);

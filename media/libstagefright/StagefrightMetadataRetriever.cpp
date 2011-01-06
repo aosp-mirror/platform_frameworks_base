@@ -238,7 +238,7 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
             (OMX_COLOR_FORMATTYPE)srcFormat, OMX_COLOR_Format16bitRGB565);
     CHECK(converter.isValid());
 
-    converter.convert(
+    err = converter.convert(
             (const uint8_t *)buffer->data() + buffer->range_offset(),
             width, height,
             crop_left, crop_top, crop_right, crop_bottom,
@@ -251,6 +251,13 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
     buffer = NULL;
 
     decoder->stop();
+
+    if (err != OK) {
+        LOGE("Colorconverter failed to convert frame.");
+
+        delete frame;
+        frame = NULL;
+    }
 
     return frame;
 }
