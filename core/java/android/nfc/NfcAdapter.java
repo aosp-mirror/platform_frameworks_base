@@ -702,4 +702,28 @@ public final class NfcAdapter {
             return null;
         }
     }
+
+    /**
+     * To change the Secure Element Card Emulation state (ON/OFF)
+     * @hide
+     */
+    public void changeNfcSecureElementCardEmulationState(boolean state)
+    {
+        int seId = 11259375;
+        if(state){
+            /* Enable card emulation */
+            try {
+                sService.selectSecureElement(seId);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Enable card emulation failed", e);
+            }
+        }else{
+            /* Disable card emulation */
+            try {
+                sService.deselectSecureElement();
+            } catch (RemoteException e) {
+                Log.e(TAG, " card emulation failed", e);
+            }
+        }
+    }
 }
