@@ -16,6 +16,7 @@
 
 #include <media/stagefright/ColorConverter.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/MediaErrors.h>
 
 namespace android {
 
@@ -72,7 +73,7 @@ size_t ColorConverter::BitmapParams::cropHeight() const {
     return mCropBottom - mCropTop + 1;
 }
 
-void ColorConverter::convert(
+status_t ColorConverter::convert(
         const void *srcBits,
         size_t srcWidth, size_t srcHeight,
         size_t srcCropLeft, size_t srcCropTop,
@@ -81,7 +82,9 @@ void ColorConverter::convert(
         size_t dstWidth, size_t dstHeight,
         size_t dstCropLeft, size_t dstCropTop,
         size_t dstCropRight, size_t dstCropBottom) {
-    CHECK_EQ(mDstFormat, OMX_COLOR_Format16bitRGB565);
+    if (mDstFormat != OMX_COLOR_Format16bitRGB565) {
+        return ERROR_UNSUPPORTED;
+    }
 
     BitmapParams src(
             const_cast<void *>(srcBits),
@@ -93,21 +96,23 @@ void ColorConverter::convert(
             dstWidth, dstHeight,
             dstCropLeft, dstCropTop, dstCropRight, dstCropBottom);
 
+    status_t err;
+
     switch (mSrcFormat) {
         case OMX_COLOR_FormatYUV420Planar:
-            convertYUV420Planar(src, dst);
+            err = convertYUV420Planar(src, dst);
             break;
 
         case OMX_COLOR_FormatCbYCrY:
-            convertCbYCrY(src, dst);
+            err = convertCbYCrY(src, dst);
             break;
 
         case OMX_QCOM_COLOR_FormatYVU420SemiPlanar:
-            convertQCOMYUV420SemiPlanar(src, dst);
+            err = convertQCOMYUV420SemiPlanar(src, dst);
             break;
 
         case OMX_COLOR_FormatYUV420SemiPlanar:
-            convertYUV420SemiPlanar(src, dst);
+            err = convertYUV420SemiPlanar(src, dst);
             break;
 
         default:
@@ -116,17 +121,21 @@ void ColorConverter::convert(
             break;
         }
     }
+
+    return err;
 }
 
-void ColorConverter::convertCbYCrY(
+status_t ColorConverter::convertCbYCrY(
         const BitmapParams &src, const BitmapParams &dst) {
     // XXX Untested
 
     uint8_t *kAdjustedClip = initClip();
 
-    CHECK((src.mCropLeft & 1) == 0);
-    CHECK_EQ(src.cropWidth(), dst.cropWidth());
-    CHECK_EQ(src.cropHeight(), dst.cropHeight());
+    if (!((src.mCropLeft & 1) == 0
+        && src.cropWidth() == dst.cropWidth()
+        && src.cropHeight() == dst.cropHeight())) {
+        return ERROR_UNSUPPORTED;
+    }
 
     uint32_t *dst_ptr = (uint32_t *)dst.mBits
         + (dst.mCropTop * dst.mWidth + dst.mCropLeft) / 2;
@@ -172,16 +181,20 @@ void ColorConverter::convertCbYCrY(
         src_ptr += src.mWidth * 2;
         dst_ptr += dst.mWidth / 2;
     }
+
+    return OK;
 }
 
-void ColorConverter::convertYUV420Planar(
+status_t ColorConverter::convertYUV420Planar(
         const BitmapParams &src, const BitmapParams &dst) {
-    uint8_t *kAdjustedClip = initClip();
+    if (!((dst.mWidth & 3) == 0
+            && (src.mCropLeft & 1) == 0
+            && src.cropWidth() == dst.cropWidth()
+            && src.cropHeight() == dst.cropHeight())) {
+        return ERROR_UNSUPPORTED;
+    }
 
-    CHECK((dst.mWidth & 3) == 0);
-    CHECK((src.mCropLeft & 1) == 0);
-    CHECK_EQ(src.cropWidth(), dst.cropWidth());
-    CHECK_EQ(src.cropHeight(), dst.cropHeight());
+    uint8_t *kAdjustedClip = initClip();
 
     uint32_t *dst_ptr = (uint32_t *)dst.mBits
         + (dst.mCropTop * dst.mWidth + dst.mCropLeft) / 2;
@@ -259,16 +272,20 @@ void ColorConverter::convertYUV420Planar(
 
         dst_ptr += dst.mWidth / 2;
     }
+
+    return OK;
 }
 
-void ColorConverter::convertQCOMYUV420SemiPlanar(
+status_t ColorConverter::convertQCOMYUV420SemiPlanar(
         const BitmapParams &src, const BitmapParams &dst) {
     uint8_t *kAdjustedClip = initClip();
 
-    CHECK((dst.mWidth & 3) == 0);
-    CHECK((src.mCropLeft & 1) == 0);
-    CHECK_EQ(src.cropWidth(), dst.cropWidth());
-    CHECK_EQ(src.cropHeight(), dst.cropHeight());
+    if (!((dst.mWidth & 3) == 0
+            && (src.mCropLeft & 1) == 0
+            && src.cropWidth() == dst.cropWidth()
+            && src.cropHeight() == dst.cropHeight())) {
+        return ERROR_UNSUPPORTED;
+    }
 
     uint32_t *dst_ptr = (uint32_t *)dst.mBits
         + (dst.mCropTop * dst.mWidth + dst.mCropLeft) / 2;
@@ -324,18 +341,22 @@ void ColorConverter::convertQCOMYUV420SemiPlanar(
 
         dst_ptr += dst.mWidth / 2;
     }
+
+    return OK;
 }
 
-void ColorConverter::convertYUV420SemiPlanar(
+status_t ColorConverter::convertYUV420SemiPlanar(
         const BitmapParams &src, const BitmapParams &dst) {
     // XXX Untested
 
     uint8_t *kAdjustedClip = initClip();
 
-    CHECK((dst.mWidth & 3) == 0);
-    CHECK((src.mCropLeft & 1) == 0);
-    CHECK_EQ(src.cropWidth(), dst.cropWidth());
-    CHECK_EQ(src.cropHeight(), dst.cropHeight());
+    if (!((dst.mWidth & 3) == 0
+            && (src.mCropLeft & 1) == 0
+            && src.cropWidth() == dst.cropWidth()
+            && src.cropHeight() == dst.cropHeight())) {
+        return ERROR_UNSUPPORTED;
+    }
 
     uint32_t *dst_ptr = (uint32_t *)dst.mBits
         + (dst.mCropTop * dst.mWidth + dst.mCropLeft) / 2;
@@ -391,6 +412,8 @@ void ColorConverter::convertYUV420SemiPlanar(
 
         dst_ptr += dst.mWidth / 2;
     }
+
+    return OK;
 }
 
 uint8_t *ColorConverter::initClip() {
