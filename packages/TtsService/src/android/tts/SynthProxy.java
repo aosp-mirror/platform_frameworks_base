@@ -78,12 +78,13 @@ public class SynthProxy {
     /**
      * Synthesize speech and speak it directly using AudioTrack.
      */
-    public int speak(String text, int streamType) {
+    public int speak(String text, int streamType, float volume, float pan) {
+        Log.i(TAG, "speak() on stream "+ streamType);
         if ((streamType > -1) && (streamType < AudioSystem.getNumStreamTypes())) {
-            return native_speak(mJniData, text, streamType);
+            return native_speak(mJniData, text, streamType, volume, pan);
         } else {
             Log.e("SynthProxy", "Trying to speak with invalid stream type " + streamType);
-            return native_speak(mJniData, text, AudioManager.STREAM_MUSIC);
+            return native_speak(mJniData, text, AudioManager.STREAM_MUSIC, volume, pan);
         }
     }
 
@@ -93,6 +94,7 @@ public class SynthProxy {
      * "/sdcard/???.wav" is recommended.
      */
     public int synthesizeToFile(String text, String filename) {
+        Log.i(TAG, "synthesizeToFile() to file "+ filename);
         return native_synthesizeToFile(mJniData, text, filename);
     }
 
@@ -192,7 +194,8 @@ public class SynthProxy {
 
     private native final int native_stopSync(int jniData);
 
-    private native final int native_speak(int jniData, String text, int streamType);
+    private native final int native_speak(int jniData, String text, int streamType, float volume,
+            float pan);
 
     private native final int native_synthesizeToFile(int jniData, String text, String filename);
 

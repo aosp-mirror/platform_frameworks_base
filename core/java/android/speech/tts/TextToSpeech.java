@@ -151,6 +151,23 @@ public class TextToSpeech {
         /**
          * {@hide}
          */
+        public static final float DEFAULT_VOLUME = 1.0f;
+        /**
+         * {@hide}
+         */
+        protected static final String DEFAULT_VOLUME_STRING = "1.0";
+        /**
+         * {@hide}
+         */
+        public static final float DEFAULT_PAN = 0.0f;
+        /**
+         * {@hide}
+         */
+        protected static final String DEFAULT_PAN_STRING = "0.0";
+
+        /**
+         * {@hide}
+         */
         public static final int USE_DEFAULTS = 0; // false
         /**
          * {@hide}
@@ -331,6 +348,24 @@ public class TextToSpeech {
          * @see TextToSpeech#synthesizeToFile(String, HashMap, String)
          */
         public static final String KEY_PARAM_UTTERANCE_ID = "utteranceId";
+        /**
+         * {@hide}
+         * Parameter key to specify the speech volume relative to the current stream type
+         * volume used when speaking text. Volume is specified as a float ranging from 0 to 1
+         * where 0 is silence, and 1 is the maximum volume.
+         * @see TextToSpeech#speak(String, int, HashMap)
+         * @see TextToSpeech#playEarcon(String, int, HashMap)
+         */
+        public static final String KEY_PARAM_VOLUME = "volume";
+        /**
+         * {@hide}
+         * Parameter key to specify how the speech is panned from left to right when speaking text.
+         * Pan is specified as a float ranging from -1 to +1 where -1 maps to a hard-left pan,
+         * 0 to center, and +1 to hard-right.
+         * @see TextToSpeech#speak(String, int, HashMap)
+         * @see TextToSpeech#playEarcon(String, int, HashMap)
+         */
+        public static final String KEY_PARAM_PAN = "pan";
 
         // key positions in the array of cached parameters
         /**
@@ -371,7 +406,18 @@ public class TextToSpeech {
         /**
          * {@hide}
          */
-        protected static final int NB_CACHED_PARAMS = 8;
+        protected static final int PARAM_POSITION_VOLUME = 16;
+
+        /**
+         * {@hide}
+         */
+        protected static final int PARAM_POSITION_PAN = 18;
+
+
+        /**
+         * {@hide}
+         */
+        protected static final int NB_CACHED_PARAMS = 20;
     }
 
     /**
@@ -416,6 +462,8 @@ public class TextToSpeech {
         mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID] = Engine.KEY_PARAM_UTTERANCE_ID;
         mCachedParams[Engine.PARAM_POSITION_ENGINE] = Engine.KEY_PARAM_ENGINE;
         mCachedParams[Engine.PARAM_POSITION_PITCH] = Engine.KEY_PARAM_PITCH;
+        mCachedParams[Engine.PARAM_POSITION_VOLUME] = Engine.KEY_PARAM_VOLUME;
+        mCachedParams[Engine.PARAM_POSITION_PAN] = Engine.KEY_PARAM_PAN;
 
         // Leave all defaults that are shown in Settings uninitialized/at the default
         // so that the values set in Settings will take effect if the application does
@@ -429,6 +477,8 @@ public class TextToSpeech {
         mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID + 1] = "";
         mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = "";
         mCachedParams[Engine.PARAM_POSITION_PITCH + 1] = "100";
+        mCachedParams[Engine.PARAM_POSITION_VOLUME + 1] = Engine.DEFAULT_VOLUME_STRING;
+        mCachedParams[Engine.PARAM_POSITION_PAN + 1] = Engine.DEFAULT_PAN_STRING;
 
         initTts();
     }
@@ -717,24 +767,18 @@ public class TextToSpeech {
     {
         synchronized (mStartLock) {
             int result = ERROR;
-            Log.i("TTS received: ", text);
+            Log.i("TTS", "speak() queueMode=" + queueMode);
             if (!mStarted) {
                 return result;
             }
             try {
                 if ((params != null) && (!params.isEmpty())) {
-                    String extra = params.get(Engine.KEY_PARAM_STREAM);
-                    if (extra != null) {
-                        mCachedParams[Engine.PARAM_POSITION_STREAM + 1] = extra;
-                    }
-                    extra = params.get(Engine.KEY_PARAM_UTTERANCE_ID);
-                    if (extra != null) {
-                        mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID + 1] = extra;
-                    }
-                    extra = params.get(Engine.KEY_PARAM_ENGINE);
-                    if (extra != null) {
-                        mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = extra;
-                    }
+                    setCachedParam(params, Engine.KEY_PARAM_STREAM, Engine.PARAM_POSITION_STREAM);
+                    setCachedParam(params, Engine.KEY_PARAM_UTTERANCE_ID,
+                            Engine.PARAM_POSITION_UTTERANCE_ID);
+                    setCachedParam(params, Engine.KEY_PARAM_ENGINE, Engine.PARAM_POSITION_ENGINE);
+                    setCachedParam(params, Engine.KEY_PARAM_VOLUME, Engine.PARAM_POSITION_VOLUME);
+                    setCachedParam(params, Engine.KEY_PARAM_PAN, Engine.PARAM_POSITION_PAN);
                 }
                 result = mITts.speak(mPackageName, text, queueMode, mCachedParams);
             } catch (RemoteException e) {
@@ -791,10 +835,9 @@ public class TextToSpeech {
                     if (extra != null) {
                         mCachedParams[Engine.PARAM_POSITION_STREAM + 1] = extra;
                     }
-                    extra = params.get(Engine.KEY_PARAM_UTTERANCE_ID);
-                    if (extra != null) {
-                        mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID + 1] = extra;
-                    }
+                    setCachedParam(params, Engine.KEY_PARAM_STREAM, Engine.PARAM_POSITION_STREAM);
+                    setCachedParam(params, Engine.KEY_PARAM_UTTERANCE_ID,
+                            Engine.PARAM_POSITION_UTTERANCE_ID);
                 }
                 result = mITts.playEarcon(mPackageName, earcon, queueMode, null);
             } catch (RemoteException e) {
@@ -845,10 +888,8 @@ public class TextToSpeech {
             }
             try {
                 if ((params != null) && (!params.isEmpty())) {
-                    String extra = params.get(Engine.KEY_PARAM_UTTERANCE_ID);
-                    if (extra != null) {
-                        mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID + 1] = extra;
-                    }
+                    setCachedParam(params, Engine.KEY_PARAM_UTTERANCE_ID,
+                            Engine.PARAM_POSITION_UTTERANCE_ID);
                 }
                 result = mITts.playSilence(mPackageName, durationInMs, queueMode, mCachedParams);
             } catch (RemoteException e) {
@@ -870,6 +911,7 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             } finally {
+                resetCachedParams();
                 return result;
             }
         }
@@ -1224,6 +1266,7 @@ public class TextToSpeech {
      */
     public int synthesizeToFile(String text, HashMap<String,String> params,
             String filename) {
+        Log.i("TTS", "synthesizeToFile()");
         synchronized (mStartLock) {
             int result = ERROR;
             if (!mStarted) {
@@ -1232,14 +1275,9 @@ public class TextToSpeech {
             try {
                 if ((params != null) && (!params.isEmpty())) {
                     // no need to read the stream type here
-                    String extra = params.get(Engine.KEY_PARAM_UTTERANCE_ID);
-                    if (extra != null) {
-                        mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID + 1] = extra;
-                    }
-                    extra = params.get(Engine.KEY_PARAM_ENGINE);
-                    if (extra != null) {
-                        mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = extra;
-                    }
+                    setCachedParam(params, Engine.KEY_PARAM_UTTERANCE_ID,
+                            Engine.PARAM_POSITION_UTTERANCE_ID);
+                    setCachedParam(params, Engine.KEY_PARAM_ENGINE, Engine.PARAM_POSITION_ENGINE);
                 }
                 result = mITts.synthesizeToFile(mPackageName, text, mCachedParams, filename) ?
                         SUCCESS : ERROR;
@@ -1277,6 +1315,19 @@ public class TextToSpeech {
         mCachedParams[Engine.PARAM_POSITION_STREAM + 1] =
                 String.valueOf(Engine.DEFAULT_STREAM);
         mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID+ 1] = "";
+        mCachedParams[Engine.PARAM_POSITION_VOLUME + 1] = Engine.DEFAULT_VOLUME_STRING;
+        mCachedParams[Engine.PARAM_POSITION_PAN + 1] = Engine.DEFAULT_PAN_STRING;
+    }
+
+    /**
+     * Convenience method to save a parameter in the cached parameter array, at the given index,
+     * for a property saved in the given hashmap.
+     */
+    private void setCachedParam(HashMap<String,String> params, String key, int keyIndex) {
+        String extra = params.get(key);
+        if (extra != null) {
+            mCachedParams[keyIndex+1] = extra;
+        }
     }
 
     /**

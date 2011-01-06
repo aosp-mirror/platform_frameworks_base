@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define LOG_TAG "SynthProxy"
+#define LOG_TAG "SynthProxyJNI"
 
 #include <utils/Log.h>
 #include <nativehelper/jni.h>
@@ -33,8 +33,8 @@
 #define DEFAULT_TTS_FORMAT      AudioSystem::PCM_16_BIT
 #define DEFAULT_TTS_NB_CHANNELS 1
 #define DEFAULT_TTS_BUFFERSIZE  2048
-// TODO use the TTS stream type when available
 #define DEFAULT_TTS_STREAM_TYPE AudioSystem::MUSIC
+#define DEFAULT_VOLUME          1.0f
 
 // EQ + BOOST parameters
 #define FILTER_LOWSHELF_ATTENUATION -18.0f // in dB
@@ -154,7 +154,7 @@ static Mutex engineMutex;
 class SynthProxyJniStorage {
     public :
         jobject                   tts_ref;
-        android_tts_engine_t*       mEngine;
+        android_tts_engine_t*     mEngine;
         void*                     mEngineLibHandle;
         AudioTrack*               mAudioOut;
         int8_t                    mPlayState;
@@ -165,6 +165,7 @@ class SynthProxyJniStorage {
         int                       mNbChannels;
         int8_t *                  mBuffer;
         size_t                    mBufferSize;
+        float                     mVolume[2];
 
         SynthProxyJniStorage() {
             tts_ref = NULL;
@@ -179,6 +180,8 @@ class SynthProxyJniStorage {
             mBufferSize = DEFAULT_TTS_BUFFERSIZE;
             mBuffer = new int8_t[mBufferSize];
             memset(mBuffer, 0, mBufferSize);
+            mVolume[AudioTrack::LEFT] = DEFAULT_VOLUME;
+            mVolume[AudioTrack::RIGHT] = DEFAULT_VOLUME;
         }
 
         ~SynthProxyJniStorage() {
@@ -189,7 +192,7 @@ class SynthProxyJniStorage {
                 mEngine = NULL;
             }
             if (mEngineLibHandle) {
-                //LOGE("~SynthProxyJniStorage(): before close library");
+                //LOGV("~SynthProxyJniStorage(): before close library");
                 int res = dlclose(mEngineLibHandle);
                 LOGE_IF( res != 0, "~SynthProxyJniStorage(): dlclose returned %d", res);
             }
@@ -241,7 +244,7 @@ class SynthProxyJniStorage {
               mAudioOut = NULL;
             } else {
               //LOGI("AudioTrack OK");
-              mAudioOut->setVolume(1.0f, 1.0f);
+              mAudioOut->setVolume(mVolume[AudioTrack::LEFT], mVolume[AudioTrack::RIGHT]);
               LOGV("AudioTrack ready");
             }
             mPlayLock.unlock();
@@ -277,7 +280,7 @@ extern "C" android_tts_callback_status_t
 __ttsSynthDoneCB(void ** pUserdata, uint32_t rate,
                android_tts_audio_format_t format, int channel,
                int8_t **pWav, size_t *pBufferSize,
-               android_tts_synth_status_t status) 
+               android_tts_synth_status_t status)
 {
     //LOGV("ttsSynthDoneCallback: %d bytes", bufferSize);
     AudioSystem::audio_format  encoding;
@@ -618,7 +621,7 @@ android_tts_SynthProxy_setSpeechRate(JNIEnv *env, jobject thiz, jint jniData,
     Mutex::Autolock l(engineMutex);
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
-    LOGI("setting speech rate to %d", speechRate);
+    //LOGI("setting speech rate to %d", speechRate);
     android_tts_engine_t *engine = pSynthData->mEngine;
 
     if (engine) {
@@ -647,7 +650,7 @@ android_tts_SynthProxy_setPitch(JNIEnv *env, jobject thiz, jint jniData,
     sprintf(buffer, "%d", pitch);
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
-    LOGI("setting pitch to %d", pitch);
+    //LOGI("setting pitch to %d", pitch);
     android_tts_engine_t *engine = pSynthData->mEngine;
 
     if (engine) {
@@ -783,7 +786,7 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
 
 static int
 android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
-        jstring textJavaString, jint javaStreamType)
+        jstring textJavaString, jint javaStreamType, jfloat volume, jfloat pan)
 {
     int result = ANDROID_TTS_FAILURE;
 
@@ -798,9 +801,34 @@ android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
 
-    pSynthData->mPlayLock.lock();
-    pSynthData->mPlayState = SYNTHPLAYSTATE_IS_PLAYING;
-    pSynthData->mPlayLock.unlock();
+    {//scope for lock on mPlayLock
+        Mutex::Autolock _l(pSynthData->mPlayLock);
+
+        pSynthData->mPlayState = SYNTHPLAYSTATE_IS_PLAYING;
+
+        // clip volume and pan
+        float vol = (volume > 1.0f) ? 1.0f : (volume < 0.0f) ? 0.0f : volume;
+        float panning = (pan > 1.0f) ? 1.0f : (pan < -1.0f) ? -1.0f : pan;
+        // compute playback volume based on volume and pan, using balance rule, in order to avoid
+        // lowering volume when panning in center
+        pSynthData->mVolume[AudioTrack::LEFT] = vol;
+        pSynthData->mVolume[AudioTrack::RIGHT] = vol;
+        if (panning > 0.0f) {
+            pSynthData->mVolume[AudioTrack::LEFT] *= (1.0f - panning);
+        } else if (panning < 0.0f) {
+            pSynthData->mVolume[AudioTrack::RIGHT] *= (1.0f + panning);
+        }
+
+        // apply the volume if there is an output
+        if (NULL != pSynthData->mAudioOut) {
+            pSynthData->mAudioOut->setVolume(pSynthData->mVolume[AudioTrack::LEFT],
+                    pSynthData->mVolume[AudioTrack::RIGHT]);
+        }
+
+        //LOGV("android_tts_SynthProxy_speak() vol=%.3f pan=%.3f, mVolume=[%.1f %.1f]",
+        //        volume, pan,
+        //        pSynthData->mVolume[AudioTrack::LEFT], pSynthData->mVolume[AudioTrack::RIGHT]);
+    }
 
     afterSynthData_t* pForAfter = new (afterSynthData_t);
     pForAfter->jniStorage = jniData;
@@ -935,7 +963,7 @@ static JNINativeMethod gMethods[] = {
         (void*)android_tts_SynthProxy_stopSync
     },
     {   "native_speak",
-        "(ILjava/lang/String;I)I",
+        "(ILjava/lang/String;IFF)I",
         (void*)android_tts_SynthProxy_speak
     },
     {   "native_synthesizeToFile",
