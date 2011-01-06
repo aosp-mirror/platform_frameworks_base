@@ -85,7 +85,7 @@ public class AudioService extends IAudioService.Stub {
 
     private Context mContext;
     private ContentResolver mContentResolver;
-
+    private boolean mVoiceCapable;
 
     /** The UI */
     private VolumePanel mVolumePanel;
@@ -283,6 +283,8 @@ public class AudioService extends IAudioService.Stub {
     public AudioService(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
+        mVoiceCapable = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_voice_capable);
 
        // Intialized volume
         MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = SystemProperties.getInt(
@@ -1323,8 +1325,15 @@ public class AudioService extends IAudioService.Stub {
             // Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC...");
             return AudioSystem.STREAM_MUSIC;
         } else if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
-            // Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING...");
-            return AudioSystem.STREAM_RING;
+            if (mVoiceCapable) {
+                // Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING..."
+                //        + " b/c USE_DEFAULT_STREAM_TYPE...");
+                return AudioSystem.STREAM_RING;
+            } else {
+                // Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC "
+                //        + " b/c USE_DEFAULT_STREAM_TYPE...");
+                return AudioSystem.STREAM_MUSIC;
+            }
         } else {
             // Log.v(TAG, "getActiveStreamType: Returning suggested type " + suggestedStreamType);
             return suggestedStreamType;
