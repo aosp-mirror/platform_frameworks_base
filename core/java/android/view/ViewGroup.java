@@ -129,6 +129,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private int[] mTmpPointerIds;
     private MotionEvent.PointerCoords[] mTmpPointerCoords;
 
+    // For debugging only.  You can see these in hierarchyviewer.
+    @ViewDebug.ExportedProperty(category = "events")
+    private long mLastTouchDownTime;
+    @ViewDebug.ExportedProperty(category = "events")
+    private int mLastTouchDownIndex = -1;
+    @ViewDebug.ExportedProperty(category = "events")
+    private float mLastTouchDownX;
+    @ViewDebug.ExportedProperty(category = "events")
+    private float mLastTouchDownY;
+
     /**
      * Internal flags.
      *
@@ -1157,6 +1167,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         resetCancelNextUpFlag(child);
                         if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) {
                             // Child wants to receive touch within its bounds.
+                            mLastTouchDownTime = ev.getDownTime();
+                            mLastTouchDownIndex = i;
+                            mLastTouchDownX = ev.getX();
+                            mLastTouchDownY = ev.getY();
                             newTouchTarget = addTouchTarget(child, idBitsToAssign);
                             alreadyDispatchedToNewTouchTarget = true;
                             break;
@@ -2805,6 +2819,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
             children[index] = child;
             mChildrenCount++;
+            if (mLastTouchDownIndex >= index) {
+                mLastTouchDownIndex++;
+            }
         } else {
             throw new IndexOutOfBoundsException("index=" + index + " count=" + count);
         }
@@ -2824,6 +2841,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             children[--mChildrenCount] = null;
         } else {
             throw new IndexOutOfBoundsException();
+        }
+        if (mLastTouchDownIndex == index) {
+            mLastTouchDownTime = 0;
+            mLastTouchDownIndex = -1;
+        } else if (mLastTouchDownIndex > index) {
+            mLastTouchDownIndex--;
         }
     }
 
