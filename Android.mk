@@ -311,18 +311,9 @@ fwbase_dirs_to_document := \
 # as "final" in the official SDK APIs.
 fwbase_dirs_to_document += core/config/sdk
 
+# include definition of libcore_to_document
 # These are relative to libcore
-# Intentionally not included from libcore:
-#     icu openssl suncompat support
-libcore_to_document := \
-	dalvik/src/main/java/dalvik \
-	json/src/main/java \
-	junit/src/main/java \
-	luni/src/main/java/java \
-	luni/src/main/java/javax \
-	luni/src/main/java/org/xml/sax \
-	luni/src/main/java/org/w3c \
-	xml/src/main/java/org/xmlpull/v1 \
+include $(LOCAL_PATH)/../../libcore/Docs.mk
 
 non_base_dirs := \
 	../../external/apache-http/src/org/apache/http
