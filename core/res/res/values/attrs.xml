@@ -2822,6 +2822,8 @@
              spinnerMode="dropdown". This layout must contain a TextView with the id
              @android:id/text1 to be populated with the prompt text. -->
         <attr name="popupPromptView" format="reference" />
+        <!-- Gravity setting for positioning the currently selected item. -->
+        <attr name="gravity" />
     </declare-styleable>
     <declare-styleable name="DatePicker">
         <!-- The first year (inclusive), for example "1940". -->
