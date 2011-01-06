@@ -385,6 +385,7 @@ void LiveSession::onDownloadNext() {
     }
 
     bool explicitDiscontinuity = false;
+    bool bandwidthChanged = false;
 
     if (mSeekTimeUs >= 0) {
         int32_t targetDuration;
@@ -404,7 +405,14 @@ void LiveSession::onDownloadNext() {
 
                     mDataSource->reset();
 
+                    // reseting the data source will have had the
+                    // side effect of discarding any previously queued
+                    // bandwidth change discontinuity.
+                    // Therefore we'll need to treat these explicit
+                    // discontinuities as involving a bandwidth change
+                    // even if they aren't directly.
                     explicitDiscontinuity = true;
+                    bandwidthChanged = true;
                 }
             }
         }
@@ -484,9 +492,15 @@ void LiveSession::onDownloadNext() {
         return;
     }
 
-    bool bandwidthChanged =
-        mPrevBandwidthIndex >= 0
-            && (size_t)mPrevBandwidthIndex != bandwidthIndex;
+    if ((size_t)mPrevBandwidthIndex != bandwidthIndex) {
+        bandwidthChanged = true;
+    }
+
+    if (mPrevBandwidthIndex < 0) {
+        // Don't signal a bandwidth change at the very beginning of
+        // playback.
+        bandwidthChanged = false;
+    }
 
     if (explicitDiscontinuity || bandwidthChanged) {
         // Signal discontinuity.

@@ -394,7 +394,7 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
             int64_t seekTimeUs;
             CHECK(msg->findInt64("seekTimeUs", &seekTimeUs));
 
-            LOGI("kWhatSeek seekTimeUs=%lld us (%.2f secs)",
+            LOGV("kWhatSeek seekTimeUs=%lld us (%.2f secs)",
                  seekTimeUs, seekTimeUs / 1E6);
 
             mSource->seekTo(seekTimeUs);
@@ -428,17 +428,11 @@ void NuPlayer::finishFlushIfPossible() {
 
     mRenderer->signalTimeDiscontinuity();
 
-    bool scanSourcesAgain = false;
-
-    if (mFlushingAudio == SHUT_DOWN) {
-        scanSourcesAgain = true;
-    } else if (mAudioDecoder != NULL) {
+    if (mAudioDecoder != NULL) {
         mAudioDecoder->signalResume();
     }
 
-    if (mFlushingVideo == SHUT_DOWN) {
-        scanSourcesAgain = true;
-    } else if (mVideoDecoder != NULL) {
+    if (mVideoDecoder != NULL) {
         mVideoDecoder->signalResume();
     }
 
@@ -453,7 +447,7 @@ void NuPlayer::finishFlushIfPossible() {
     } else if (mResetPostponed) {
         (new AMessage(kWhatReset, id()))->post();
         mResetPostponed = false;
-    } else if (scanSourcesAgain) {
+    } else if (mAudioDecoder == NULL || mVideoDecoder == NULL) {
         postScanSources();
     }
 }

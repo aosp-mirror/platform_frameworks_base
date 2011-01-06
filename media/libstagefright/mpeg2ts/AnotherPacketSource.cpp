@@ -142,14 +142,21 @@ void AnotherPacketSource::queueDiscontinuity(
 
     Mutex::Autolock autoLock(mLock);
 
+#if 0
+    if (type == ATSParser::DISCONTINUITY_SEEK
+            || type == ATSParser::DISCONTINUITY_FORMATCHANGE) {
+        // XXX Fix this: This will also clear any pending discontinuities,
+        // If there's a pending DISCONTINUITY_FORMATCHANGE and the new
+        // discontinuity is "just" a DISCONTINUITY_SEEK, this will effectively
+        // downgrade the type of discontinuity received by the client.
+
+        mBuffers.clear();
+        mEOSResult = OK;
+    }
+#endif
+
     mBuffers.push_back(buffer);
     mCondition.signal();
-}
-
-void AnotherPacketSource::clear() {
-    Mutex::Autolock autoLock(mLock);
-    mBuffers.clear();
-    mEOSResult = OK;
 }
 
 void AnotherPacketSource::signalEOS(status_t result) {
