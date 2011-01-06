@@ -85,7 +85,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     protected void setupRenderer(boolean record) {
         if (record) {
-            mRenderer = nCreateDisplayListRenderer();
+            mRenderer = nGetDisplayListRenderer(mRenderer);
         } else {
             mRenderer = nCreateRenderer();
         }
@@ -93,28 +93,33 @@ class GLES20Canvas extends HardwareCanvas {
         if (mRenderer == 0) {
             throw new IllegalStateException("Could not create GLES20Canvas renderer");
         } else {
-            if (mFinalizer == null) {
-                mFinalizer = new CanvasFinalizer(mRenderer);
-            } else {
-                mFinalizer.replaceNativeObject(mRenderer);
-            }
+            mFinalizer = CanvasFinalizer.getFinalizer(mFinalizer, mRenderer);
         }
     }
 
-    private native int nCreateRenderer();    
-    private native int nCreateDisplayListRenderer();    
-
+    private native int nCreateRenderer();
+    private static native int nGetDisplayListRenderer(int renderer);
     private static native void nDestroyRenderer(int renderer);
 
     private static class CanvasFinalizer {
         int mRenderer;
 
-        CanvasFinalizer(int renderer) {
+        // Factory method returns new instance if old one is null, or old instance
+        // otherwise, destroying native renderer along the way as necessary
+        static CanvasFinalizer getFinalizer(CanvasFinalizer oldFinalizer, int renderer) {
+            if (oldFinalizer == null) {
+                return new CanvasFinalizer(renderer);
+            }
+            oldFinalizer.replaceNativeObject(renderer);
+            return oldFinalizer;
+        }
+
+        private CanvasFinalizer(int renderer) {
             mRenderer = renderer;
         }
 
-        void replaceNativeObject(int newRenderer) {
-            if (mRenderer != 0) {
+        private void replaceNativeObject(int newRenderer) {
+            if (mRenderer != 0 && newRenderer != mRenderer) {
                 nDestroyRenderer(mRenderer);
             }
             mRenderer = newRenderer;
@@ -199,10 +204,10 @@ class GLES20Canvas extends HardwareCanvas {
     ///////////////////////////////////////////////////////////////////////////
 
     int getDisplayList() {
-        return nCreateDisplayList(mRenderer);
+        return nGetDisplayList(mRenderer);
     }
 
-    private native int nCreateDisplayList(int renderer);
+    private native int nGetDisplayList(int renderer);
     
     static void destroyDisplayList(int displayList) {
         nDestroyDisplayList(displayList);
