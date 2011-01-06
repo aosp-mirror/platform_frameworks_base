@@ -440,7 +440,8 @@ public class ListPopupWindow {
     public void setContentWidth(int width) {
         Drawable popupBackground = mPopup.getBackground();
         if (popupBackground != null) {
-            mDropDownWidth = popupBackground.getIntrinsicWidth() + width;
+            popupBackground.getPadding(mTempRect);
+            mDropDownWidth = mTempRect.left + mTempRect.right + width;
         }
     }
 

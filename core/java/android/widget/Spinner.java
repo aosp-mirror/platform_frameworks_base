@@ -25,7 +25,8 @@ import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.view.LayoutInflater;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -64,6 +65,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     
     private SpinnerPopup mPopup;
     private DropDownAdapter mTempAdapter;
+
+    private int mGravity;
 
     /**
      * Construct a new spinner with the given context's theme.
@@ -152,10 +155,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         }
 
         case MODE_DROPDOWN: {
-            final int hintResource = a.getResourceId(
-                    com.android.internal.R.styleable.Spinner_popupPromptView, 0);
-
-            DropdownPopup popup = new DropdownPopup(context, attrs, defStyle, hintResource);
+            DropdownPopup popup = new DropdownPopup(context, attrs, defStyle);
 
             popup.setWidth(a.getLayoutDimension(
                     com.android.internal.R.styleable.Spinner_dropDownWidth,
@@ -172,6 +172,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         }
         }
         
+        mGravity = a.getInt(com.android.internal.R.styleable.Spinner_gravity, Gravity.CENTER);
+
         mPopup.setPromptText(a.getString(com.android.internal.R.styleable.Spinner_prompt));
 
         a.recycle();
@@ -183,7 +185,25 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             mTempAdapter = null;
         }
     }
-    
+
+    /**
+     * Describes how the selected item view is positioned. Currently only the horizontal component
+     * is used. The default is determined by the current theme.
+     *
+     * @param gravity See {@link android.view.Gravity}
+     *
+     * @attr ref android.R.styleable#Spinner_gravity
+     */
+    public void setGravity(int gravity) {
+        if (mGravity != gravity) {
+            if ((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) == 0) {
+                gravity |= Gravity.LEFT;
+            }
+            mGravity = gravity;
+            requestLayout();
+        }
+    }
+
     @Override
     public void setAdapter(SpinnerAdapter adapter) {
         super.setAdapter(adapter);
@@ -234,6 +254,18 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         throw new RuntimeException("setOnItemClickListener cannot be used with a spinner.");
     }
 
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        if (mPopup != null && MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.AT_MOST) {
+            final int measuredWidth = getMeasuredWidth();
+            setMeasuredDimension(Math.min(Math.max(measuredWidth, mPopup.measureContentWidth()),
+                    MeasureSpec.getSize(widthMeasureSpec)),
+                    getMeasuredHeight());
+            Log.d(TAG, "onMeasure - old measured width " + measuredWidth + " new " + getMeasuredWidth());
+        }
+    }
+
     /**
      * @see android.view.View#onLayout(boolean,int,int,int,int)
      *
@@ -278,11 +310,19 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         // Clear out old views
         removeAllViewsInLayout();
 
-        // Make selected view and center it
+        // Make selected view and position it
         mFirstPosition = mSelectedPosition;
         View sel = makeAndAddView(mSelectedPosition);
         int width = sel.getMeasuredWidth();
-        int selectedOffset = childrenLeft + (childrenWidth / 2) - (width / 2);
+        int selectedOffset = childrenLeft;
+        switch (mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
+            case Gravity.CENTER_HORIZONTAL:
+                selectedOffset = childrenLeft + (childrenWidth / 2) - (width / 2);
+                break;
+            case Gravity.RIGHT:
+                selectedOffset = childrenLeft + childrenWidth - width;
+                break;
+        }
         sel.offsetLeftAndRight(selectedOffset);
 
         // Flush any cached views that did not get reused above
@@ -541,6 +581,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
          */
         public void setPromptText(CharSequence hintText);
         public CharSequence getHintText();
+
+        public int measureContentWidth();
     }
     
     private class DialogPopup implements SpinnerPopup, DialogInterface.OnClickListener {
@@ -582,19 +624,19 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             setSelection(which);
             dismiss();
         }
+
+        public int measureContentWidth() {
+            // Doesn't matter for dialog mode
+            return 0;
+        }
     }
     
     private class DropdownPopup extends ListPopupWindow implements SpinnerPopup {
         private CharSequence mHintText;
-        private TextView mHintView;
-        private int mHintResource;
         private int mPopupMaxWidth;
         
-        public DropdownPopup(Context context, AttributeSet attrs,
-                int defStyleRes, int hintResource) {
+        public DropdownPopup(Context context, AttributeSet attrs, int defStyleRes) {
             super(context, attrs, 0, defStyleRes);
-            
-            mHintResource = hintResource;
             
             final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
             mPopupMaxWidth = metrics.widthPixels / 2;
@@ -615,30 +657,21 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         }
         
         public void setPromptText(CharSequence hintText) {
+            // Hint text is ignored for dropdowns, but maintain it here.
             mHintText = hintText;
-            if (mHintView != null) {
-                mHintView.setText(hintText);
-            }
         }
 
         @Override
         public void show() {
-            if (mHintView == null) {
-                final TextView textView = (TextView) LayoutInflater.from(getContext()).inflate(
-                        mHintResource, null).findViewById(com.android.internal.R.id.text1);
-                textView.setText(mHintText);
-                setPromptView(textView);
-                mHintView = textView;
-            }
-            setContentWidth(Math.min(
-                    Math.max(measureContentWidth(getAdapter()), Spinner.this.getWidth()),
-                    mPopupMaxWidth));
+            setWidth(Spinner.this.getWidth());
             super.show();
             getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             setSelection(Spinner.this.getSelectedItemPosition());
         }
 
-        private int measureContentWidth(SpinnerAdapter adapter) {
+        @Override
+        public int measureContentWidth() {
+            final SpinnerAdapter adapter = getAdapter();
             int width = 0;
             View itemView = null;
             int itemType = 0;
