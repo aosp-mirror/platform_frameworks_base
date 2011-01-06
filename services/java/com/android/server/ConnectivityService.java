@@ -2173,7 +2173,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (proxy == null) proxy = new ProxyProperties("", 0, "");
         log("sending Proxy Broadcast for " + proxy);
         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
-        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |
+            Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.putExtra(Proxy.EXTRA_PROXY_INFO, proxy);
         mContext.sendStickyBroadcast(intent);
     }
