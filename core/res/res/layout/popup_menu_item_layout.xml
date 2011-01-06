@@ -16,7 +16,9 @@
 
 <com.android.internal.view.menu.ListMenuItemView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight">
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:paddingLeft="16dip"
+    android:paddingRight="16dip">
     
     <!-- Icon will be inserted here. -->
     
