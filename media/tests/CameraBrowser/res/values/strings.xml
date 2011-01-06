@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2010 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+    <string name="app_label">Camera Browser</string>
+
+    <!-- for object info -->
+    <string name="name_label">Name: </string>
+    <string name="size_label">Size: </string>
+    <string name="format_label">Format: </string>
+    <string name="thumb_width_label">Thumb Width: </string>
+    <string name="thumb_height_label">Thumb Height: </string>
+    <string name="thumb_size_label">Thumb Size: </string>
+    <string name="width_label">Width: </string>
+    <string name="height_label">Height: </string>
+    <string name="depth_label">Depth: </string>
+    <string name="sequence_label">Sequence: </string>
+    <string name="created_label">Created: </string>
+    <string name="modified_label">Modified: </string>
+    <string name="keywords_label">Keywords: </string>
+
+    <!-- button labels -->
+    <string name="import_label">Import</string>
+    <string name="delete_label">Delete</string>
+
+    <!-- toasts -->
+    <string name="object_saved_message">Object saved</string>
+    <string name="save_failed_message">Could not save object</string>
+    <string name="object_deleted_message">Object deleted</string>
+    <string name="delete_failed_message">Could not delete object</string>
+    <string name="start_activity_failed_message">Import succeeded, but could not display object</string>
+
+</resources>
