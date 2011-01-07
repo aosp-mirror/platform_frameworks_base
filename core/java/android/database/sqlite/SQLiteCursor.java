@@ -407,15 +407,29 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                 mWindow.clear();
             }
             mPos = -1;
-            SQLiteDatabase db = mQuery.mDatabase.getDatabaseHandle(mQuery.mSql);
+            SQLiteDatabase db = null;
+            try {
+                db = mQuery.mDatabase.getDatabaseHandle(mQuery.mSql);
+            } catch (IllegalStateException e) {
+                // for backwards compatibility, just return false
+                return false;
+            }
             if (!db.equals(mQuery.mDatabase)) {
                 // since we need to use a different database connection handle,
                 // re-compile the query
-                db.lock();
+                try {
+                    db.lock();
+                } catch (IllegalStateException e) {
+                    // for backwards compatibility, just return false
+                    return false;
+                }
                 try {
                     // close the old mQuery object and open a new one
                     mQuery.close();
                     mQuery = new SQLiteQuery(db, mQuery);
+                } catch (IllegalStateException e) {
+                    // for backwards compatibility, just return false
+                    return false;
                 } finally {
                     db.unlock();
                 }
@@ -427,6 +441,9 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             queryThreadLock();
             try {
                 mQuery.requery();
+            } catch (IllegalStateException e) {
+                // for backwards compatibility, just return false
+                return false;
             } finally {
                 queryThreadUnlock();
             }
@@ -437,7 +454,12 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             Log.v(TAG, "--- Requery()ed cursor " + this + ": " + mQuery);
         }
 
-        boolean result = super.requery();
+        boolean result = false;
+        try {
+            result = super.requery();
+        } catch (IllegalStateException e) {
+            // for backwards compatibility, just return false
+        }
         if (Config.LOGV) {
             long timeEnd = System.currentTimeMillis();
             Log.v(TAG, "requery (" + (timeEnd - timeStart) + " ms): " + mDriver.toString());
