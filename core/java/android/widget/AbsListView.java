@@ -738,16 +738,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         boolean smoothScrollbar = a.getBoolean(R.styleable.AbsListView_smoothScrollbar, true);
         setSmoothScrollbarEnabled(smoothScrollbar);
 
-        final int adapterId = a.getResourceId(R.styleable.AbsListView_adapter, 0);
-        if (adapterId != 0) {
-            final Context c = context;
-            post(new Runnable() {
-                public void run() {
-                    setAdapter(Adapters.loadAdapter(c, adapterId));
-                }
-            });
-        }
-
         setChoiceMode(a.getInt(R.styleable.AbsListView_choiceMode, CHOICE_MODE_NONE));
         setFastScrollAlwaysVisible(
                 a.getBoolean(R.styleable.AbsListView_fastScrollAlwaysVisible, false));
