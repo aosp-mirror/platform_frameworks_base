@@ -102,6 +102,7 @@ Layer* LayerCache::get(const uint32_t width, const uint32_t height) {
         layer->blend = true;
         layer->empty = true;
         layer->fbo = 0;
+        layer->colorFilter = NULL;
 
         glGenTextures(1, &layer->texture);
         glBindTexture(GL_TEXTURE_2D, layer->texture);

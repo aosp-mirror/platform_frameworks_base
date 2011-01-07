@@ -127,7 +127,11 @@ class GLES20Canvas extends HardwareCanvas {
 
         @Override
         protected void finalize() throws Throwable {
-            replaceNativeObject(0);
+            try {
+                replaceNativeObject(0);
+            } finally {
+                super.finalize();
+            }
         }
     }
 
@@ -395,8 +399,11 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public int saveLayer(float left, float top, float right, float bottom, Paint paint,
             int saveFlags) {
-        int nativePaint = paint == null ? 0 : paint.mNativePaint;
-        return nSaveLayer(mRenderer, left, top, right, bottom, nativePaint, saveFlags);
+        boolean hasColorFilter = paint != null && setupColorFilter(paint);
+        final int nativePaint = paint == null ? 0 : paint.mNativePaint;
+        int count = nSaveLayer(mRenderer, left, top, right, bottom, nativePaint, saveFlags);
+        if (hasColorFilter) nResetModifiers(mRenderer);
+        return count;
     }
 
     private native int nSaveLayer(int renderer, float left, float top, float right, float bottom,
