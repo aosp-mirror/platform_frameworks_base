@@ -4564,14 +4564,6 @@ public class WebView extends AbsoluteLayout
             return true;
         }
 
-        if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
-                || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            if (!nativePageShouldHandleShiftAndArrows() && !nativeCursorWantsKeyEvents()
-                    && !mSelectingText) {
-                setUpSelect();
-            }
-        }
-
         if (keyCode == KeyEvent.KEYCODE_PAGE_UP) {
             if (event.hasNoModifiers()) {
                 pageUp(false);
@@ -4660,12 +4652,6 @@ public class WebView extends AbsoluteLayout
             }
             // Bubble up the key event as WebView doesn't handle it
             if (!wantsKeyEvents) return false;
-        }
-
-        if (keyCode != KeyEvent.KEYCODE_SHIFT_LEFT
-                && keyCode != KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            // turn off copy select if a shift-key combo is pressed
-            selectionDone();
         }
 
         if (getSettings().getNavDump()) {
@@ -4764,14 +4750,6 @@ public class WebView extends AbsoluteLayout
             // out injecting our JavaScript screen reader) we let it decide whether to act on
             // and consume the event.
             return true;
-        }
-
-        if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
-                || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            if (!nativePageShouldHandleShiftAndArrows() && copySelection()) {
-                selectionDone();
-                return true;
-            }
         }
 
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
@@ -5234,7 +5212,8 @@ public class WebView extends AbsoluteLayout
         // Textfields, plugins, and contentEditable nodes need to receive the
         // shift up key even if another key was released while the shift key
         // was held down.
-        if (!inEditingMode() && (mNativeClass == 0
+        boolean inEditingMode = inEditingMode();
+        if (!inEditingMode && (mNativeClass == 0
                 || !nativePageShouldHandleShiftAndArrows())) {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 mGotKeyDown = true;
@@ -5251,7 +5230,13 @@ public class WebView extends AbsoluteLayout
         }
 
         if (dispatch) {
-            return super.dispatchKeyEvent(event);
+            if (inEditingMode) {
+                // Ensure that the WebTextView gets the event, even if it does
+                // not currently have a bounds.
+                return mWebTextView.dispatchKeyEvent(event);
+            } else {
+                return super.dispatchKeyEvent(event);
+            }
         } else {
             // We didn't dispatch, so let something else handle the key
             return false;
