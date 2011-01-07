@@ -85,6 +85,17 @@ public interface WindowManagerPolicy {
 
     public final static boolean WATCH_POINTER = false;
 
+    /**
+     * Sticky broadcast of the current HDMI plugged state.
+     */
+    public final static String ACTION_HDMI_PLUGGED = "android.intent.action.HDMI_PLUGGED";
+
+    /**
+     * Extra in {@link #ACTION_HDMI_PLUGGED} indicating the state: true if
+     * plugged in to HDMI, false if not.
+     */
+    public final static String EXTRA_HDMI_PLUGGED_STATE = "state";
+
     // flags for interceptKeyTq
     /**
      * Pass this event to the user / app.  To be returned from {@link #interceptKeyTq}.
