@@ -229,7 +229,7 @@ status_t LiveSession::fetchFile(const char *url, sp<ABuffer> *out) {
                 bufferRemaining);
 
         if (n < 0) {
-            return err;
+            return n;
         }
 
         if (n == 0) {
