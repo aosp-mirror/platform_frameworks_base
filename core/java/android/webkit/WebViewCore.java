@@ -627,12 +627,26 @@ final class WebViewCore {
     /**
      * Modifies the current selection.
      *
+     * Note: Accessibility support.
+     *
      * @param direction The direction in which to alter the selection.
      * @param granularity The granularity of the selection modification.
      *
      * @return The selection string.
      */
     private native String nativeModifySelection(int direction, int granularity);
+
+    /**
+     * Moves the selection to given node i.e. selects that node.
+     *
+     * Note: Accessibility support.
+     *
+     * @param framePtr Pointer to the frame containing the node to be selected.
+     * @param nodePtr Pointer to the node to be selected.
+     *
+     * @return The selection string.
+     */
+    private native String nativeMoveSelection(int framePtr, int nodePtr);
 
     // EventHub for processing messages
     private final EventHub mEventHub;
@@ -993,6 +1007,9 @@ final class WebViewCore {
         static final int AUTOFILL_FORM = 192;
 
         static final int PROXY_CHANGED = 193;
+
+        // accessibility support
+        static final int MOVE_SELECTION = 194;
 
         // private message ids
         private static final int DESTROY =     200;
@@ -1401,9 +1418,16 @@ final class WebViewCore {
                             break;
 
                         case MODIFY_SELECTION:
-                            String selectionString = nativeModifySelection(msg.arg1, msg.arg2);
+                            String modifiedSelectionString = nativeModifySelection(msg.arg1,
+                                    msg.arg2);
                             mWebView.mPrivateHandler.obtainMessage(WebView.SELECTION_STRING_CHANGED,
-                                    selectionString).sendToTarget();
+                                    modifiedSelectionString).sendToTarget();
+                            break;
+
+                        case MOVE_SELECTION:
+                            String movedSelectionString = nativeMoveSelection(msg.arg1, msg.arg2);
+                            mWebView.mPrivateHandler.obtainMessage(WebView.SELECTION_STRING_CHANGED,
+                                    movedSelectionString).sendToTarget();
                             break;
 
                         case LISTBOX_CHOICES:
