@@ -777,8 +777,6 @@ extern int register_android_media_MediaProfiles(JNIEnv *env);
 extern int register_android_media_AmrInputStream(JNIEnv *env);
 extern int register_android_mtp_MtpDatabase(JNIEnv *env);
 extern int register_android_mtp_MtpServer(JNIEnv *env);
-extern int register_android_mtp_PtpClient(JNIEnv *env);
-extern int register_android_mtp_PtpCursor(JNIEnv *env);
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
@@ -823,16 +821,6 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     if (register_android_media_MediaProfiles(env) < 0) {
         LOGE("ERROR: MediaProfiles native registration failed");
-        goto bail;
-    }
-
-    if (register_android_mtp_PtpClient(env) < 0) {
-        LOGE("ERROR: PtpClient native registration failed");
-        goto bail;
-    }
-
-    if (register_android_mtp_PtpCursor(env) < 0) {
-        LOGE("ERROR: PtpCursor native registration failed");
         goto bail;
     }
 

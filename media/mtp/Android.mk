@@ -37,7 +37,6 @@ LOCAL_SRC_FILES:=                                       \
                   MtpStringBuffer.cpp                   \
                   MtpStorage.cpp                        \
                   MtpUtils.cpp                          \
-                  PtpCursor.cpp                         \
 
 LOCAL_MODULE:= libmtp
 
@@ -69,7 +68,6 @@ LOCAL_SRC_FILES:=                                       \
                   MtpStringBuffer.cpp                   \
                   MtpStorage.cpp                        \
                   MtpUtils.cpp                          \
-                  PtpCursor.cpp                         \
 
 LOCAL_MODULE:= libmtp
 
