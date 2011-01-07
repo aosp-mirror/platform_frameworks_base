@@ -197,6 +197,12 @@
                <span class="en">List of Samples</span>
              </a></div>
         <ul>
+          <li><a href="<?cs var:toroot ?>resources/samples/AccelerometerPlay/index.html">
+                <span class="en">Accelerometer Play</span>
+              </a> <span class="new">new!</span></li>
+          <li><a href="<?cs var:toroot ?>resources/samples/AccessibilityService/index.html">
+                <span class="en">Accessibility Service</span>
+              </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>resources/samples/ApiDemos/index.html">
                 <span class="en">API Demos</span>
               </a></li>

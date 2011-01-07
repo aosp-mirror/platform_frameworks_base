@@ -40,18 +40,18 @@ page.title=Android 2.3 Platform Highlights
 
 <div class="video">
 <object width="278" height="180">
-<param name="movie" value="http://www.youtube.com/v/yAZYSVr2Bhc&hl=en&fs=1&"></param>
+<param name="movie" value="http://www.youtube.com/v/Jx3pdWBlZ34?hl=en&fs=1"></param>
 <param name="allowFullScreen" value="true"></param><param name="allowscriptaccess"
 value="always"></param>
-<embed src="http://www.youtube.com/v/yAZYSVr2Bhc&hl=en&fs=1&" type="application/x-shockwave-flash"
+<embed src="http://www.youtube.com/v/Jx3pdWBlZ34?hl=en&fs=1" type="application/x-shockwave-flash"
 allowscriptaccess="always" allowfullscreen="true" width="278" height="180"></embed>
 </object>
 </div>
 
 <p>The Android 2.3 platform introduces many new and exciting features for
-users and developers. This document provides a glimpse at some of the new user features
+users and developers. This document provides a glimpse at some of the new features
 and technologies in Android 2.3. For detailed information about the new developer APIs, see the <a
-href="android-2.3.html#api">Android 2.3 version notes</a>.</p>
+href="android-2.3.html">Android 2.3 version notes</a>.</p>
 
 <ul>
   <li><a href="#UserFeatures">New User Features</a></li>
@@ -251,7 +251,8 @@ application could use readings from a gyroscope and accelerometer on the device
 to recognize complex user gestures and motions, such as tilt, spin, thrust, and
 slice.  </p>
 
-<p style="margin-top:1.25em;margin-bottom:.75em;"><strong>Low-latency native
+
+<p style="margin-top:1.25em;margin-bottom:.75em;"><strong>Open API for native
 audio</strong></p>
 
 <p>The platform provides a software implementation of <a
@@ -405,7 +406,7 @@ open container format</li>
 <ul>
 <li>Dalvik VM:
 <ul>
-<li>Concurrent Garbage Collector (target sub-3ms pauses)</li>
+<li>Concurrent garbage collector (target sub-3ms pauses)</li>
 <li>Adds further JIT (code-generation) optimizations</li>
 <li>Improved code verification</li>
 <li>StrictMode debugging, for identifying performance and memory issues</li>
@@ -438,5 +439,5 @@ open container format</li>
 </ul>
 
 <p>For more information about the new developer APIs, see the <a
-href="android-2.3.html#api">Android 2.3 version notes</a> and the <a
+href="android-2.3.html">Android 2.3 version notes</a> and the <a
 href="{@docRoot}sdk/api_diff/9/changes.html">API Differences Report</a>.</p>
