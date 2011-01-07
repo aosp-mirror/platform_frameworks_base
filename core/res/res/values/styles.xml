@@ -1033,6 +1033,7 @@
         <item name="android:background">?android:attr/selectableItemBackground</item>
         <item name="android:paddingLeft">16dip</item>
         <item name="android:paddingRight">16dip</item>
+        <item name="android:minWidth">64dip</item>
     </style>
 
     <style name="Widget.ActionButton.Overflow">

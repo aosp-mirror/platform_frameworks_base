@@ -41,4 +41,6 @@
     <!-- The standard size (both width and height) of an application icon that
          will be displayed in the app launcher and elsewhere. -->
     <dimen name="app_icon_size">64dip</dimen>
+    <!-- Minimum width of the search view text entry area. -->
+    <dimen name="search_view_text_min_width">192dip</dimen>
 </resources>
