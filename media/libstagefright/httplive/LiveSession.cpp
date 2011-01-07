@@ -340,6 +340,7 @@ size_t LiveSession::getBandwidthIndex() {
 void LiveSession::onDownloadNext() {
     size_t bandwidthIndex = getBandwidthIndex();
 
+rinse_repeat:
     int64_t nowUs = ALooper::GetNowUs();
 
     if (mLastPlaylistFetchTimeUs < 0
@@ -437,6 +438,18 @@ void LiveSession::onDownloadNext() {
 
     if (mSeqNumber < firstSeqNumberInPlaylist
             || mSeqNumber > lastSeqNumberInPlaylist) {
+        if (mSeqNumber < firstSeqNumberInPlaylist
+                && mPrevBandwidthIndex != (ssize_t)bandwidthIndex) {
+            // Go back to the previous bandwidth.
+
+            LOGI("new bandwidth does not have the sequence number "
+                 "we're looking for, switching back to previous bandwidth");
+
+            mLastPlaylistFetchTimeUs = -1;
+            bandwidthIndex = mPrevBandwidthIndex;
+            goto rinse_repeat;
+        }
+
         if (!mPlaylist->isComplete()
                 && mSeqNumber > lastSeqNumberInPlaylist
                 && mNumRetries < kMaxNumRetries) {
