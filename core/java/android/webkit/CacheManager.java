@@ -565,13 +565,6 @@ public final class CacheManager {
         return true;
     }
 
-    /**
-     * Return true if the cache is empty.
-     */
-    static boolean cacheEmpty() {
-        return mDataBase.hasCache();
-    }
-
     static void trimCacheIfNeeded() {
         if (mDataBase.getCacheTotalSize() > CACHE_THRESHOLD) {
             List<String> pathList = mDataBase.trimCache(CACHE_TRIM_AMOUNT);
