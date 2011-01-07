@@ -170,6 +170,29 @@ public class GcSnapshot {
                 mBitmap.change();
             }
         }
+
+        /**
+         * Sets the clip for the graphics2D object associated with the layer.
+         * This should be used over the normal Graphics2D setClip method.
+         *
+         * @param clipShape the shape to use a the clip shape.
+         */
+        void setClip(Shape clipShape) {
+            // because setClip is only guaranteed to work with rectangle shape,
+            // first reset the clip to max and then intersect the current (empty)
+            // clip with the shap.
+            mGraphics.setClip(null);
+            mGraphics.clip(clipShape);
+        }
+
+        /**
+         * Clips the layer with the given shape. This performs an intersect between the current
+         * clip shape and the given shape.
+         * @param shape the new clip shape.
+         */
+        public void clip(Shape shape) {
+            mGraphics.clip(shape);
+        }
     }
 
     /**
@@ -287,11 +310,12 @@ public class GcSnapshot {
             AffineTransform currentMtx = baseLayer.getGraphics().getTransform();
             layerGraphics.setTransform(currentMtx);
 
-            Shape currentClip = baseLayer.getGraphics().getClip();
-            layerGraphics.setClip(currentClip);
-
             // create a new layer for this new layer and add it to the list at the end.
             mLayers.add(mLocalLayer = new Layer(layerGraphics, layerImage, flags));
+
+            // set the clip on it.
+            Shape currentClip = baseLayer.getGraphics().getClip();
+            mLocalLayer.setClip(currentClip);
 
             // if the drawing is not clipped to the local layer only, we save the current content
             // of all other layers. We are only interested in the part that will actually
@@ -369,15 +393,24 @@ public class GcSnapshot {
      */
     public void setBitmap(Bitmap_Delegate bitmap) {
         assert mLayers.size() == 0;
+
+        // create a new Layer for the bitmap. This will be the base layer.
         Graphics2D graphics2D = bitmap.getImage().createGraphics();
-        mLayers.add(new Layer(graphics2D, bitmap));
+        Layer baseLayer = new Layer(graphics2D, bitmap);
+
+        // add it to the list.
+        mLayers.add(baseLayer);
+
+        // if transform and clip where modified before, get the information and give it to the
+        // layer.
+
         if (mTransform != null) {
             graphics2D.setTransform(mTransform);
             mTransform = null;
         }
 
         if (mClip != null) {
-            graphics2D.setClip(mClip);
+            baseLayer.setClip(mClip);
             mClip = null;
         }
     }
@@ -447,7 +480,20 @@ public class GcSnapshot {
     }
 
     public boolean clip(Shape shape, int regionOp) {
+        // Simple case of intersect with existing layers.
+        // Because Graphics2D#setClip works a bit peculiarly, we optimize
+        // the case of clipping by intersection, as it's supported natively.
+        if (regionOp == Region.Op.INTERSECT.nativeInt && mLayers.size() > 0) {
+            for (Layer layer : mLayers) {
+                layer.clip(shape);
+            }
+
+            Shape currentClip = getClip();
+            return currentClip != null && currentClip.getBounds().isEmpty() == false;
+        }
+
         Area area = null;
+
         if (regionOp == Region.Op.REPLACE.nativeInt) {
             area = new Area(shape);
         } else {
@@ -459,11 +505,12 @@ public class GcSnapshot {
         if (mLayers.size() > 0) {
             if (area != null) {
                 for (Layer layer : mLayers) {
-                    layer.getGraphics().setClip(area);
+                    layer.setClip(area);
                 }
             }
 
-            return getClip().getBounds().isEmpty() == false;
+            Shape currentClip = getClip();
+            return currentClip != null && currentClip.getBounds().isEmpty() == false;
         } else {
             if (area != null) {
                 mClip = area;
@@ -479,14 +526,14 @@ public class GcSnapshot {
         return clip(new Rectangle2D.Float(left, top, right - left, bottom - top), regionOp);
     }
 
+    /**
+     * Returns the current clip, or null if none have been setup.
+     */
     public Shape getClip() {
         if (mLayers.size() > 0) {
             // they all have the same clip
             return mLayers.get(0).getGraphics().getClip();
         } else {
-            if (mClip == null) {
-                mClip = new Area();
-            }
             return mClip;
         }
     }
@@ -603,7 +650,7 @@ public class GcSnapshot {
             if ((mFlags & Canvas.CLIP_SAVE_FLAG) == 0) {
                 Shape clip = getClip();
                 for (Layer layer : mPrevious.mLayers) {
-                    layer.getGraphics().setClip(clip);
+                    layer.setClip(clip);
                 }
             }
         }
