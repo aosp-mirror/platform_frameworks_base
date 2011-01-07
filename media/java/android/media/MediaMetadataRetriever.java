@@ -258,5 +258,6 @@ public class MediaMetadataRetriever
     public static final int METADATA_KEY_MIMETYPE        = 22;
     public static final int METADATA_KEY_DISCNUMBER      = 23;
     public static final int METADATA_KEY_ALBUMARTIST     = 24;
+    public static final int METADATA_KEY_COMPILATION     = 25;
     // Add more here...
 }
