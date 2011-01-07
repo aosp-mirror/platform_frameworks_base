@@ -147,23 +147,23 @@ public class ShirtPocket extends ImageView {
                 final ClipData clip = mClipping;
                 if (clip != null) {
                     final Bitmap icon = clip.getIcon();
-                    DragThumbnailBuilder thumb;
+                    DragShadowBuilder shadow;
                     if (icon != null) {
-                        thumb = new DragThumbnailBuilder(v) {
-                            public void onProvideThumbnailMetrics(Point thumbnailSize, Point thumbnailTouchPoint) {
-                                thumbnailSize.set(icon.getWidth(), icon.getHeight());
-                                thumbnailTouchPoint.set(thumbnailSize.x / 2, thumbnailSize.y / 2);
+                        shadow = new DragShadowBuilder(v) {
+                            public void onProvideShadowMetrics(Point shadowSize, Point shadowTouchPoint) {
+                                shadowSize.set(icon.getWidth(), icon.getHeight());
+                                shadowTouchPoint.set(shadowSize.x / 2, shadowSize.y / 2);
                             }
-                            public void onDrawThumbnail(Canvas canvas) {
+                            public void onDrawShadow(Canvas canvas) {
                                 canvas.drawBitmap(icon, 0, 0, new Paint());
                             }
                         };
                     } else {
                         // uhhh, what now?
-                        thumb = new DragThumbnailBuilder(mWindow.findViewById(R.id.preview));
+                        shadow = new DragShadowBuilder(mWindow.findViewById(R.id.preview));
                     }
 
-                    v.startDrag(clip, thumb, false, null);
+                    v.startDrag(clip, shadow, false, null);
 
                     // TODO: only discard the clipping if it was accepted
                     stash(null);

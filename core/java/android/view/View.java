@@ -10482,17 +10482,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * !!! TODO: real docs
      *
-     * The base class implementation makes the thumbnail the same size and appearance
+     * The base class implementation makes the shadow the same size and appearance
      * as the view itself, and positions it with its center at the touch point.
      */
-    public static class DragThumbnailBuilder {
+    public static class DragShadowBuilder {
         private final WeakReference<View> mView;
 
         /**
-         * Construct a thumbnail builder object for use with the given view.
+         * Construct a shadow builder object for use with the given view.
          * @param view
          */
-        public DragThumbnailBuilder(View view) {
+        public DragShadowBuilder(View view) {
             mView = new WeakReference<View>(view);
         }
 
@@ -10501,56 +10501,57 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         /**
-         * Provide the draggable-thumbnail metrics for the operation: the dimensions of
-         * the thumbnail image itself, and the point within that thumbnail that should
+         * Provide the draggable-shadow metrics for the operation: the dimensions of
+         * the shadow image itself, and the point within that shadow that should
          * be centered under the touch location while dragging.
          * <p>
-         * The default implementation sets the dimensions of the thumbnail to be the
-         * same as the dimensions of the View itself and centers the thumbnail under
+         * The default implementation sets the dimensions of the shadow to be the
+         * same as the dimensions of the View itself and centers the shadow under
          * the touch point.
          *
-         * @param thumbnailSize The application should set the {@code x} member of this
-         *        parameter to the desired thumbnail width, and the {@code y} member to
+         * @param shadowSize The application should set the {@code x} member of this
+         *        parameter to the desired shadow width, and the {@code y} member to
          *        the desired height.
-         * @param thumbnailTouchPoint The application should set this point to be the
-         *        location within the thumbnail that should track directly underneath
+         * @param shadowTouchPoint The application should set this point to be the
+         *        location within the shadow that should track directly underneath
          *        the touch point on the screen during a drag.
          */
-        public void onProvideThumbnailMetrics(Point thumbnailSize, Point thumbnailTouchPoint) {
+        public void onProvideShadowMetrics(Point shadowSize, Point shadowTouchPoint) {
             final View view = mView.get();
             if (view != null) {
-                thumbnailSize.set(view.getWidth(), view.getHeight());
-                thumbnailTouchPoint.set(thumbnailSize.x / 2, thumbnailSize.y / 2);
+                shadowSize.set(view.getWidth(), view.getHeight());
+                shadowTouchPoint.set(shadowSize.x / 2, shadowSize.y / 2);
             } else {
                 Log.e(View.VIEW_LOG_TAG, "Asked for drag thumb metrics but no view");
             }
         }
 
         /**
-         * Draw the thumbnail image for the upcoming drag.  The thumbnail canvas was
-         * created with the dimensions supplied by the onProvideThumbnailMetrics()
-         * callback.
+         * Draw the shadow image for the upcoming drag.  The shadow canvas was
+         * created with the dimensions supplied by the
+         * {@link #onProvideShadowMetrics(Point, Point)} callback.
          *
          * @param canvas
          */
-        public void onDrawThumbnail(Canvas canvas) {
+        public void onDrawShadow(Canvas canvas) {
             final View view = mView.get();
             if (view != null) {
                 view.draw(canvas);
             } else {
-                Log.e(View.VIEW_LOG_TAG, "Asked to draw drag thumb but no view");
+                Log.e(View.VIEW_LOG_TAG, "Asked to draw drag shadow but no view");
             }
         }
     }
 
     /**
-     * Drag and drop.  App calls startDrag(), then callbacks to the thumbnail builder's
-     * onProvideThumbnailMetrics() and onDrawThumbnail() methods happen, then the drag
+     * Drag and drop.  App calls startDrag(), then callbacks to the shadow builder's
+     * {@link DragShadowBuilder#onProvideShadowMetrics(Point, Point)} and
+     * {@link DragShadowBuilder#onDrawShadow(Canvas)} methods happen, then the drag
      * operation is handed over to the OS.
      * !!! TODO: real docs
      *
      * @param data !!! TODO
-     * @param thumbBuilder !!! TODO
+     * @param shadowBuilder !!! TODO
      * @param myWindowOnly When {@code true}, indicates that the drag operation should be
      *     restricted to the calling application. In this case only the calling application
      *     will see any DragEvents related to this drag operation.
@@ -10563,37 +10564,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return {@code true} if the drag operation was initiated successfully; {@code false} if
      *     an error prevented the drag from taking place.
      */
-    public final boolean startDrag(ClipData data, DragThumbnailBuilder thumbBuilder,
+    public final boolean startDrag(ClipData data, DragShadowBuilder shadowBuilder,
             boolean myWindowOnly, Object myLocalState) {
         if (ViewDebug.DEBUG_DRAG) {
             Log.d(VIEW_LOG_TAG, "startDrag: data=" + data + " local=" + myWindowOnly);
         }
         boolean okay = false;
 
-        Point thumbSize = new Point();
-        Point thumbTouchPoint = new Point();
-        thumbBuilder.onProvideThumbnailMetrics(thumbSize, thumbTouchPoint);
+        Point shadowSize = new Point();
+        Point shadowTouchPoint = new Point();
+        shadowBuilder.onProvideShadowMetrics(shadowSize, shadowTouchPoint);
 
-        if ((thumbSize.x < 0) || (thumbSize.y < 0) ||
-                (thumbTouchPoint.x < 0) || (thumbTouchPoint.y < 0)) {
-            throw new IllegalStateException("Drag thumb dimensions must not be negative");
+        if ((shadowSize.x < 0) || (shadowSize.y < 0) ||
+                (shadowTouchPoint.x < 0) || (shadowTouchPoint.y < 0)) {
+            throw new IllegalStateException("Drag shadow dimensions must not be negative");
         }
 
         if (ViewDebug.DEBUG_DRAG) {
-            Log.d(VIEW_LOG_TAG, "drag thumb: width=" + thumbSize.x + " height=" + thumbSize.y
-                    + " thumbX=" + thumbTouchPoint.x + " thumbY=" + thumbTouchPoint.y);
+            Log.d(VIEW_LOG_TAG, "drag shadow: width=" + shadowSize.x + " height=" + shadowSize.y
+                    + " shadowX=" + shadowTouchPoint.x + " shadowY=" + shadowTouchPoint.y);
         }
         Surface surface = new Surface();
         try {
             IBinder token = mAttachInfo.mSession.prepareDrag(mAttachInfo.mWindow,
-                    myWindowOnly, thumbSize.x, thumbSize.y, surface);
+                    myWindowOnly, shadowSize.x, shadowSize.y, surface);
             if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "prepareDrag returned token=" + token
                     + " surface=" + surface);
             if (token != null) {
                 Canvas canvas = surface.lockCanvas(null);
                 try {
                     canvas.drawColor(0, PorterDuff.Mode.CLEAR);
-                    thumbBuilder.onDrawThumbnail(canvas);
+                    shadowBuilder.onDrawShadow(canvas);
                 } finally {
                     surface.unlockCanvasAndPost(canvas);
                 }
@@ -10603,12 +10604,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 // Cache the local state object for delivery with DragEvents
                 root.setLocalDragState(myLocalState);
 
-                // repurpose 'thumbSize' for the last touch point
-                root.getLastTouchPoint(thumbSize);
+                // repurpose 'shadowSize' for the last touch point
+                root.getLastTouchPoint(shadowSize);
 
                 okay = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, token,
-                        thumbSize.x, thumbSize.y,
-                        thumbTouchPoint.x, thumbTouchPoint.y, data);
+                        shadowSize.x, shadowSize.y,
+                        shadowTouchPoint.x, shadowTouchPoint.y, data);
                 if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "performDrag returned " + okay);
             }
         } catch (Exception e) {
