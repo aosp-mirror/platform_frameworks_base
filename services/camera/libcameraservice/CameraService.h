@@ -94,6 +94,7 @@ private:
         virtual status_t        lock();
         virtual status_t        unlock();
         virtual status_t        setPreviewDisplay(const sp<Surface>& surface);
+        virtual status_t        setPreviewTexture(const sp<ISurfaceTexture>& surfaceTexture);
         virtual void            setPreviewCallbackFlag(int flag);
         virtual status_t        startPreview();
         virtual void            stopPreview();
@@ -180,7 +181,8 @@ private:
 
         // Ensures atomicity among the public methods
         mutable Mutex                   mLock;
-        sp<ISurface>                    mSurface;
+        // This is a binder of Surface or SurfaceTexture.
+        sp<IBinder>                     mSurface;
         sp<ANativeWindow>               mPreviewWindow;
 
         // If the user want us to return a copy of the preview frame (instead

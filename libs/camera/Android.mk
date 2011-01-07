@@ -14,7 +14,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libbinder \
 	libhardware \
 	libsurfaceflinger_client \
-	libui
+	libui \
+	libgui
 
 LOCAL_MODULE:= libcamera_client
 

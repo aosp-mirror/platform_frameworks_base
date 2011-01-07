@@ -24,6 +24,7 @@
 #include <binder/IMemory.h>
 #include <utils/String8.h>
 #include <camera/Camera.h>
+#include <gui/ISurfaceTexture.h>
 
 namespace android {
 
@@ -47,6 +48,10 @@ public:
 
     // pass the buffered Surface to the camera service
     virtual status_t        setPreviewDisplay(const sp<Surface>& surface) = 0;
+
+    // pass the buffered ISurfaceTexture to the camera service
+    virtual status_t        setPreviewTexture(
+            const sp<ISurfaceTexture>& surfaceTexture) = 0;
 
     // set the preview callback flag to affect how the received frames from
     // preview are handled.

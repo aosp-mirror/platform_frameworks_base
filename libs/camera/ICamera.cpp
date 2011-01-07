@@ -28,6 +28,7 @@ namespace android {
 enum {
     DISCONNECT = IBinder::FIRST_CALL_TRANSACTION,
     SET_PREVIEW_DISPLAY,
+    SET_PREVIEW_TEXTURE,
     SET_PREVIEW_CALLBACK_FLAG,
     START_PREVIEW,
     STOP_PREVIEW,
@@ -75,6 +76,18 @@ public:
         data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
         Surface::writeToParcel(surface, &data);
         remote()->transact(SET_PREVIEW_DISPLAY, data, &reply);
+        return reply.readInt32();
+    }
+
+    // pass the buffered SurfaceTexture to the camera service
+    status_t setPreviewTexture(const sp<ISurfaceTexture>& surfaceTexture)
+    {
+        LOGV("setPreviewTexture");
+        Parcel data, reply;
+        data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
+        sp<IBinder> b(surfaceTexture->asBinder());
+        data.writeStrongBinder(b);
+        remote()->transact(SET_PREVIEW_TEXTURE, data, &reply);
         return reply.readInt32();
     }
 
@@ -294,6 +307,13 @@ status_t BnCamera::onTransact(
             CHECK_INTERFACE(ICamera, data, reply);
             sp<Surface> surface = Surface::readFromParcel(data);
             reply->writeInt32(setPreviewDisplay(surface));
+            return NO_ERROR;
+        } break;
+        case SET_PREVIEW_TEXTURE: {
+            LOGV("SET_PREVIEW_TEXTURE");
+            CHECK_INTERFACE(ICamera, data, reply);
+            sp<ISurfaceTexture> st = interface_cast<ISurfaceTexture>(data.readStrongBinder());
+            reply->writeInt32(setPreviewTexture(st));
             return NO_ERROR;
         } break;
         case SET_PREVIEW_CALLBACK_FLAG: {
