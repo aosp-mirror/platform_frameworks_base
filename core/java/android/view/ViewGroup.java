@@ -3392,7 +3392,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         child.getAnimation() == null;
                 // Mark the child as dirty, using the appropriate flag
                 // Make sure we do not set both flags at the same time
-                final int opaqueFlag = isOpaque ? DIRTY_OPAQUE : DIRTY;
+                int opaqueFlag = isOpaque ? DIRTY_OPAQUE : DIRTY;
 
                 final int[] location = attachInfo.mInvalidateChildLocation;
                 location[CHILD_LEFT_INDEX] = child.mLeft;
@@ -3423,8 +3423,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
                     // If the parent is dirty opaque or not dirty, mark it dirty with the opaque
                     // flag coming from the child that initiated the invalidate
-                    if (view != null && (view.mPrivateFlags & DIRTY_MASK) != DIRTY) {
-                        view.mPrivateFlags = (view.mPrivateFlags & ~DIRTY_MASK) | opaqueFlag;
+                    if (view != null) {
+                        if ((view.mViewFlags & FADING_EDGE_MASK) != 0 &&
+                                view.getSolidColor() == 0 && !view.isOpaque()) {
+                            opaqueFlag = DIRTY;
+                        }
+                        if ((view.mPrivateFlags & DIRTY_MASK) != DIRTY) {
+                            view.mPrivateFlags = (view.mPrivateFlags & ~DIRTY_MASK) | opaqueFlag;
+                        }
                     }
 
                     parent = parent.invalidateChildInParent(location, dirty);
