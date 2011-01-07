@@ -17,32 +17,33 @@
 package android.text.format;
 
 import android.content.Context;
+import android.net.NetworkUtils;
 
 /**
  * Utility class to aid in formatting common values that are not covered
- * by the standard java.util.Formatter.
+ * by {@link java.util.Formatter}
  */
 public final class Formatter {
 
     /**
      * Formats a content size to be in the form of bytes, kilobytes, megabytes, etc
-     * 
+     *
      * @param context Context to use to load the localized units
-     * @param number size value to be formated
-     * @return formated string with the number
+     * @param number size value to be formatted
+     * @return formatted string with the number
      */
     public static String formatFileSize(Context context, long number) {
         return formatFileSize(context, number, false);
     }
-    
+
     /**
      * Like {@link #formatFileSize}, but trying to generate shorter numbers
-     * (showing fewer digits of precisin).
+     * (showing fewer digits of precision).
      */
     public static String formatShortFileSize(Context context, long number) {
         return formatFileSize(context, number, true);
     }
-    
+
     private static String formatFileSize(Context context, long number, boolean shorter) {
         if (context == null) {
             return "";
@@ -92,21 +93,21 @@ public final class Formatter {
             getString(com.android.internal.R.string.fileSizeSuffix,
                       value, context.getString(suffix));
     }
-    
+
     /**
      * Returns a string in the canonical IP format ###.###.###.### from a packed integer containing
      * the IP address.  The IP address is expected to be in little-endian format (LSB first). That
      * is, 0x01020304 will return "4.3.2.1".
-     * 
-     * @param addr the IP address as a packed integer with LSB first.
+     *
+     * @param ipv4Address the IP address as a packed integer with LSB first.
      * @return string with canonical IP address format.
+     *
+     * @deprecated this method doesn't support IPv6 addresses. Prefer {@link
+     *     java.net.InetAddress#getHostAddress()}, which supports both IPv4 and
+     *     IPv6 addresses.
      */
-    public static String formatIpAddress(int addr) {
-        StringBuffer buf = new StringBuffer();
-        buf.append(addr  & 0xff).append('.').
-            append((addr >>>= 8) & 0xff).append('.').
-            append((addr >>>= 8) & 0xff).append('.').
-            append((addr >>>= 8) & 0xff);
-        return buf.toString();
+    @Deprecated
+    public static String formatIpAddress(int ipv4Address) {
+        return NetworkUtils.intToInetAddress(ipv4Address).getHostAddress();
     }
 }

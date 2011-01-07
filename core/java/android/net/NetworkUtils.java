@@ -125,24 +125,19 @@ public class NetworkUtils {
 
     /**
      * Convert a IPv4 address from an integer to an InetAddress.
-     * @param hostAddr is an Int corresponding to the IPv4 address in network byte order
-     * @return the IP address as an {@code InetAddress}, returns null if
-     * unable to convert or if the int is an invalid address.
+     * @param hostAddress an int corresponding to the IPv4 address in network byte order
      */
     public static InetAddress intToInetAddress(int hostAddress) {
-        InetAddress inetAddress;
         byte[] addressBytes = { (byte)(0xff & hostAddress),
                                 (byte)(0xff & (hostAddress >> 8)),
                                 (byte)(0xff & (hostAddress >> 16)),
                                 (byte)(0xff & (hostAddress >> 24)) };
 
         try {
-           inetAddress = InetAddress.getByAddress(addressBytes);
-        } catch(UnknownHostException e) {
-           return null;
+           return InetAddress.getByAddress(addressBytes);
+        } catch (UnknownHostException e) {
+           throw new AssertionError();
         }
-
-        return inetAddress;
     }
 
     /**
