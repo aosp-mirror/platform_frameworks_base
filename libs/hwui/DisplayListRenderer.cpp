@@ -82,6 +82,43 @@ void PathHeap::flatten(SkFlattenableWriteBuffer& buffer) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 DisplayList::DisplayList(const DisplayListRenderer& recorder) {
+    initFromDisplayListRenderer(recorder);
+}
+
+DisplayList::~DisplayList() {
+    sk_free((void*) mReader.base());
+
+    Caches& caches = Caches::getInstance();
+
+    for (size_t i = 0; i < mBitmapResources.size(); i++) {
+        caches.resourceCache.decrementRefcount(mBitmapResources.itemAt(i));
+    }
+    mBitmapResources.clear();
+
+    for (size_t i = 0; i < mShaderResources.size(); i++) {
+        caches.resourceCache.decrementRefcount(mShaderResources.itemAt(i));
+    }
+    mShaderResources.clear();
+
+    for (size_t i = 0; i < mPaints.size(); i++) {
+        delete mPaints.itemAt(i);
+    }
+    mPaints.clear();
+
+    for (size_t i = 0; i < mMatrices.size(); i++) {
+        delete mMatrices.itemAt(i);
+    }
+    mMatrices.clear();
+
+    if (mPathHeap) {
+        for (int i = 0; i < mPathHeap->count(); i++) {
+            caches.pathCache.removeDeferred(&(*mPathHeap)[i]);
+        }
+        mPathHeap->safeUnref();
+    }
+}
+
+void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorder) {
     const SkWriter32& writer = recorder.writeStream();
     init();
 
@@ -129,39 +166,6 @@ DisplayList::DisplayList(const DisplayListRenderer& recorder) {
     mPathHeap = recorder.mPathHeap;
     if (mPathHeap) {
         mPathHeap->safeRef();
-    }
-}
-
-DisplayList::~DisplayList() {
-    sk_free((void*) mReader.base());
-
-    Caches& caches = Caches::getInstance();
-
-    for (size_t i = 0; i < mBitmapResources.size(); i++) {
-        caches.resourceCache.decrementRefcount(mBitmapResources.itemAt(i));
-    }
-    mBitmapResources.clear();
-
-    for (size_t i = 0; i < mShaderResources.size(); i++) {
-        caches.resourceCache.decrementRefcount(mShaderResources.itemAt(i));
-    }
-    mShaderResources.clear();
-
-    for (size_t i = 0; i < mPaints.size(); i++) {
-        delete mPaints.itemAt(i);
-    }
-    mPaints.clear();
-
-    for (size_t i = 0; i < mMatrices.size(); i++) {
-        delete mMatrices.itemAt(i);
-    }
-    mMatrices.clear();
-
-    if (mPathHeap) {
-        for (int i = 0; i < mPathHeap->count(); i++) {
-            caches.pathCache.removeDeferred(&(*mPathHeap)[i]);
-        }
-        mPathHeap->safeUnref();
     }
 }
 
@@ -327,6 +331,7 @@ void DisplayList::replay(OpenGLRenderer& renderer) {
 DisplayListRenderer::DisplayListRenderer():
         mHeap(HEAP_BLOCK_SIZE), mWriter(MIN_WRITER_SIZE) {
     mPathHeap = NULL;
+    mDisplayList = NULL;
 }
 
 DisplayListRenderer::~DisplayListRenderer() {
@@ -366,6 +371,15 @@ void DisplayListRenderer::reset() {
 ///////////////////////////////////////////////////////////////////////////////
 // Operations
 ///////////////////////////////////////////////////////////////////////////////
+
+DisplayList* DisplayListRenderer::getDisplayList() {
+    if (mDisplayList == NULL) {
+        mDisplayList = new DisplayList(*this);
+    } else {
+        mDisplayList->initFromDisplayListRenderer(*this);
+    }
+    return mDisplayList;
+}
 
 void DisplayListRenderer::setViewport(int width, int height) {
     mOrthoMatrix.loadOrtho(0, width, height, 0, -1, 1);
