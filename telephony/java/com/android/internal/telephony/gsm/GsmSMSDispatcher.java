@@ -110,7 +110,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
             return Intents.RESULT_SMS_HANDLED;
         }
 
-        if (!mSmsCapable) {
+        if (mSmsReceiveDisabled) {
             // Device doesn't support SMS service,
             Log.d(TAG, "Received short message on device which doesn't support "
                     + "SMS service. Ignored.");

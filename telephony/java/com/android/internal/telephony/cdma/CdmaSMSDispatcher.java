@@ -107,10 +107,10 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             return Activity.RESULT_OK;
         }
 
-        if (!mSmsCapable) {
-            // Device doesn't support SMS service,
+        if (mSmsReceiveDisabled) {
+            // Device doesn't support receiving SMS,
             Log.d(TAG, "Received short message on device which doesn't support "
-                    + "SMS service. Ignored.");
+                    + "receiving SMS. Ignored.");
             return Intents.RESULT_SMS_HANDLED;
         }
 
