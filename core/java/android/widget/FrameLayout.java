@@ -297,15 +297,15 @@ public class FrameLayout extends ViewGroup {
                 resolveSizeAndState(maxHeight, heightMeasureSpec,
                         childState << MEASURED_HEIGHT_STATE_SHIFT));
 
-        if (mMatchParentChildren.size() > 0) {
-            count = mMatchParentChildren.size();
+        count = mMatchParentChildren.size();
+        if (count > 1) {
             for (int i = 0; i < count; i++) {
                 final View child = mMatchParentChildren.get(i);
 
                 final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
                 int childWidthMeasureSpec;
                 int childHeightMeasureSpec;
-
+                
                 if (lp.width == LayoutParams.MATCH_PARENT) {
                     childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(getMeasuredWidth() -
                             mPaddingLeft - mPaddingRight - lp.leftMargin - lp.rightMargin,
