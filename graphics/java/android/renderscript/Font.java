@@ -129,41 +129,62 @@ public class Font extends BaseObj {
     /**
      * Takes a specific file name as an argument
      */
-    static public Font createFromFile(RenderScript rs, Resources res, String path, float pointSize)
-        throws IllegalArgumentException {
-
+    static public Font createFromFile(RenderScript rs, Resources res, String path, float pointSize) {
         rs.validate();
-        try {
-            int dpi = res.getDisplayMetrics().densityDpi;
-            int fontId = rs.nFontCreateFromFile(path, pointSize, dpi);
+        int dpi = res.getDisplayMetrics().densityDpi;
+        int fontId = rs.nFontCreateFromFile(path, pointSize, dpi);
 
-            if(fontId == 0) {
-                throw new IllegalStateException("Failed loading a font");
-            }
-            Font rsFont = new Font(fontId, rs);
-
-            return rsFont;
-
-        } catch (Exception e) {
-            // Ignore
+        if(fontId == 0) {
+            throw new RSRuntimeException("Unable to create font from file " + path);
         }
+        Font rsFont = new Font(fontId, rs);
 
-        return null;
+        return rsFont;
     }
 
-    static public Font createFromFile(RenderScript rs, Resources res, File path, float pointSize)
-        throws IllegalArgumentException {
+    static public Font createFromFile(RenderScript rs, Resources res, File path, float pointSize) {
         return createFromFile(rs, res, path.getAbsolutePath(), pointSize);
     }
 
-    static public Font createFromAsset(RenderScript rs, Resources res, AssetManager mgr, String path, float pointSize)
-        throws IllegalArgumentException {
-        return null;
+    static public Font createFromAsset(RenderScript rs, Resources res, String path, float pointSize) {
+        rs.validate();
+        AssetManager mgr = res.getAssets();
+        int dpi = res.getDisplayMetrics().densityDpi;
+
+        int fontId = rs.nFontCreateFromAsset(mgr, path, pointSize, dpi);
+        if(fontId == 0) {
+            throw new RSRuntimeException("Unable to create font from asset " + path);
+        }
+        Font rsFont = new Font(fontId, rs);
+        return rsFont;
     }
 
-    static public Font createFromResource(RenderScript rs, Resources res, int id, float pointSize)
-        throws IllegalArgumentException {
-        return null;
+    static public Font createFromResource(RenderScript rs, Resources res, int id, float pointSize) {
+        String name = "R." + Integer.toString(id);
+
+        rs.validate();
+        InputStream is = null;
+        try {
+            is = res.openRawResource(id);
+        } catch (Exception e) {
+            throw new RSRuntimeException("Unable to open resource " + id);
+        }
+
+        int dpi = res.getDisplayMetrics().densityDpi;
+
+        int fontId = 0;
+        if (is instanceof AssetManager.AssetInputStream) {
+            int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
+            fontId = rs.nFontCreateFromAssetStream(name, pointSize, dpi, asset);
+        } else {
+            throw new RSRuntimeException("Unsupported asset stream created");
+        }
+
+        if(fontId == 0) {
+            throw new RSRuntimeException("Unable to create font from resource " + id);
+        }
+        Font rsFont = new Font(fontId, rs);
+        return rsFont;
     }
 
     /**
@@ -175,8 +196,7 @@ public class Font extends BaseObj {
      * "monospace" "courier" "courier new" "monaco"
      * Returns default font if no match could be found
      */
-    static public Font create(RenderScript rs, Resources res, String familyName, Style fontStyle, float pointSize)
-    throws IllegalArgumentException {
+    static public Font create(RenderScript rs, Resources res, String familyName, Style fontStyle, float pointSize) {
         String fileName = getFontFileName(familyName, fontStyle);
         String fontPath = Environment.getRootDirectory().getAbsolutePath();
         fontPath += "/fonts/" + fileName;

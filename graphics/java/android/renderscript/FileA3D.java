@@ -167,47 +167,57 @@ public class FileA3D extends BaseObj {
         return mFileEntries[index];
     }
 
-    // API cleanup stand-ins
-    // TODO: implement ermaining loading mechanisms
-    static public FileA3D createFromAsset(RenderScript rs, AssetManager mgr, String path)
-        throws IllegalArgumentException {
-        return null;
+    static public FileA3D createFromAsset(RenderScript rs, AssetManager mgr, String path) {
+        rs.validate();
+        int fileId = rs.nFileA3DCreateFromAsset(mgr, path);
+
+        if(fileId == 0) {
+            throw new RSRuntimeException("Unable to create a3d file from asset " + path);
+        }
+        FileA3D fa3d = new FileA3D(fileId, rs, null);
+        fa3d.initEntries();
+        return fa3d;
     }
 
-    static public FileA3D createFromFile(RenderScript rs, String path)
-        throws IllegalArgumentException {
-        return null;
+    static public FileA3D createFromFile(RenderScript rs, String path) {
+        int fileId = rs.nFileA3DCreateFromFile(path);
+
+        if(fileId == 0) {
+            throw new RSRuntimeException("Unable to create a3d file from " + path);
+        }
+        FileA3D fa3d = new FileA3D(fileId, rs, null);
+        fa3d.initEntries();
+        return fa3d;
     }
 
-    static public FileA3D createFromFile(RenderScript rs, File path)
-        throws IllegalArgumentException {
+    static public FileA3D createFromFile(RenderScript rs, File path) {
         return createFromFile(rs, path.getAbsolutePath());
     }
 
-    static public FileA3D createFromResource(RenderScript rs, Resources res, int id)
-        throws IllegalArgumentException {
+    static public FileA3D createFromResource(RenderScript rs, Resources res, int id) {
 
         rs.validate();
         InputStream is = null;
         try {
-            final TypedValue value = new TypedValue();
-            is = res.openRawResource(id, value);
-
-            int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
-
-            int fileId = rs.nFileA3DCreateFromAssetStream(asset);
-
-            if(fileId == 0) {
-                throw new IllegalStateException("Load failed.");
-            }
-            FileA3D fa3d = new FileA3D(fileId, rs, is);
-            fa3d.initEntries();
-            return fa3d;
-
+            is = res.openRawResource(id);
         } catch (Exception e) {
-            // Ignore
+            throw new RSRuntimeException("Unable to open resource " + id);
         }
 
-        return null;
+        int fileId = 0;
+        if (is instanceof AssetManager.AssetInputStream) {
+            int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
+            fileId = rs.nFileA3DCreateFromAssetStream(asset);
+        } else {
+            throw new RSRuntimeException("Unsupported asset stream");
+        }
+
+        if(fileId == 0) {
+            throw new RSRuntimeException("Unable to create a3d file from resource " + id);
+        }
+        FileA3D fa3d = new FileA3D(fileId, rs, is);
+        fa3d.initEntries();
+        return fa3d;
+
     }
 }

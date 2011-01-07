@@ -40,13 +40,19 @@ Font::Font(Context *rsc) : ObjectBase(rsc), mCachedGlyphs(NULL) {
     mFace = NULL;
 }
 
-bool Font::init(const char *name, float fontSize, uint32_t dpi) {
+bool Font::init(const char *name, float fontSize, uint32_t dpi, const void *data, uint32_t dataLen) {
     if (mInitialized) {
         LOGE("Reinitialization of fonts not supported");
         return false;
     }
 
-    FT_Error error = FT_New_Face(mRSC->mStateFont.getLib(), name, 0, &mFace);
+    FT_Error error = 0;
+    if (data != NULL && dataLen > 0) {
+        error = FT_New_Memory_Face(mRSC->mStateFont.getLib(), (const FT_Byte*)data, dataLen, 0, &mFace);
+    } else {
+        error = FT_New_Face(mRSC->mStateFont.getLib(), name, 0, &mFace);
+    }
+
     if (error) {
         LOGE("Unable to initialize font %s", name);
         return false;
@@ -127,7 +133,8 @@ void Font::measureCachedGlyph(CachedGlyphInfo *glyph, int32_t x, int32_t y, Rect
     int32_t width = (int32_t) glyph->mBitmapWidth;
     int32_t height = (int32_t) glyph->mBitmapHeight;
 
-    if (bounds->bottom > nPenY) {
+    // 0, 0 is top left, so bottom is a positive number
+    if (bounds->bottom < nPenY) {
         bounds->bottom = nPenY;
     }
     if (bounds->left > nPenX) {
@@ -136,8 +143,8 @@ void Font::measureCachedGlyph(CachedGlyphInfo *glyph, int32_t x, int32_t y, Rect
     if (bounds->right < nPenX + width) {
         bounds->right = nPenX + width;
     }
-    if (bounds->top < nPenY + height) {
-        bounds->top = nPenY + height;
+    if (bounds->top > nPenY - height) {
+        bounds->top = nPenY - height;
     }
 }
 
@@ -155,7 +162,7 @@ void Font::renderUTF(const char *text, uint32_t len, int32_t x, int32_t y,
             return;
         }
         // Reset min and max of the bounding box to something large
-        bounds->set(1e6, -1e6, -1e6, 1e6);
+        bounds->set(1e6, -1e6, 1e6, -1e6);
     }
 
     int32_t penX = x, penY = y;
@@ -273,7 +280,8 @@ Font::CachedGlyphInfo *Font::cacheGlyph(uint32_t glyph) {
     return newGlyph;
 }
 
-Font * Font::create(Context *rsc, const char *name, float fontSize, uint32_t dpi) {
+Font * Font::create(Context *rsc, const char *name, float fontSize, uint32_t dpi,
+                    const void *data, uint32_t dataLen) {
     rsc->mStateFont.checkInit();
     Vector<Font*> &activeFonts = rsc->mStateFont.mActiveFonts;
 
@@ -285,7 +293,7 @@ Font * Font::create(Context *rsc, const char *name, float fontSize, uint32_t dpi
     }
 
     Font *newFont = new Font(rsc);
-    bool isInitialized = newFont->init(name, fontSize, dpi);
+    bool isInitialized = newFont->init(name, fontSize, dpi, data, dataLen);
     if (isInitialized) {
         activeFonts.push(newFont);
         rsc->mStateFont.precacheLatin(newFont);
@@ -743,6 +751,8 @@ void FontState::renderText(const char *text, uint32_t len, int32_t x, int32_t y,
 
 void FontState::measureText(const char *text, uint32_t len, Font::Rect *bounds) {
     renderText(text, len, 0, 0, 0, -1, Font::MEASURE, bounds);
+    bounds->bottom = - bounds->bottom;
+    bounds->top = - bounds->top;
 }
 
 void FontState::setFontColor(float r, float g, float b, float a) {
@@ -805,6 +815,14 @@ namespace renderscript {
 
 RsFont rsi_FontCreateFromFile(Context *rsc, char const *name, float fontSize, uint32_t dpi) {
     Font *newFont = Font::create(rsc, name, fontSize, dpi);
+    if (newFont) {
+        newFont->incUserRef();
+    }
+    return newFont;
+}
+
+RsFont rsi_FontCreateFromMemory(Context *rsc, char const *name, float fontSize, uint32_t dpi, const void *data, uint32_t dataLen) {
+    Font *newFont = Font::create(rsc, name, fontSize, dpi, data, dataLen);
     if (newFont) {
         newFont->incUserRef();
     }
