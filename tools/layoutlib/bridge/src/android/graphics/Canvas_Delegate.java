@@ -499,13 +499,14 @@ public final class Canvas_Delegate {
         }
 
         Rectangle rect = canvasDelegate.getSnapshot().getClip().getBounds();
-        if (rect != null) {
+        if (rect != null && rect.isEmpty() == false) {
             bounds.left = rect.x;
             bounds.top = rect.y;
             bounds.right = rect.x + rect.width;
             bounds.bottom = rect.y + rect.height;
             return true;
         }
+
         return false;
     }
 
