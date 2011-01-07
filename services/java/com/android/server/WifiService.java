@@ -20,10 +20,7 @@ import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -91,7 +88,6 @@ public class WifiService extends IWifiManager.Stub {
 
     private AlarmManager mAlarmManager;
     private PendingIntent mIdleIntent;
-    private BluetoothA2dp mBluetoothA2dp;
     private static final int IDLE_REQUEST = 0;
     private boolean mScreenOff;
     private boolean mDeviceIdle;
@@ -943,10 +939,10 @@ public class WifiService extends IWifiManager.Stub {
                     mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
                 }
                 mPluggedType = pluggedType;
-            } else if (action.equals(BluetoothA2dp.ACTION_PLAYING_STATE_CHANGED)) {
-                int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
-                                               BluetoothA2dp.STATE_NOT_PLAYING);
-                mWifiStateMachine.setBluetoothScanMode(state == BluetoothA2dp.STATE_PLAYING);
+            } else if (action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
+                int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
+                        BluetoothAdapter.STATE_DISCONNECTED);
+                mWifiStateMachine.sendBluetoothAdapterStateChange(state);
             }
         }
 
@@ -1048,7 +1044,7 @@ public class WifiService extends IWifiManager.Stub {
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
         intentFilter.addAction(ACTION_DEVICE_IDLE);
-        intentFilter.addAction(BluetoothA2dp.ACTION_PLAYING_STATE_CHANGED);
+        intentFilter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         mContext.registerReceiver(mReceiver, intentFilter);
     }
 
