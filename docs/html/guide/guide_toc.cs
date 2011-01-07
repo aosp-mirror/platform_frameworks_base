@@ -462,6 +462,7 @@
           <li><a href="<?cs var:toroot ?>guide/developing/tools/dmtracedump.html">dmtracedump</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/draw9patch.html" >Draw 9-Patch</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/emulator.html">Emulator</a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/hierarchy-viewer.html">Hierarchy Viewer</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/hprof-conv.html">hprof-conv</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/layoutopt.html">layoutopt</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/logcat.html">logcat</a></li>
@@ -496,7 +497,8 @@
                   </ul> 
               </li> 
               <li><a href="/guide/developing/tools/proguard.html">ProGuard</a> <span class="new">new!</span></li> 
-              <li><a href="/guide/developing/tools/adb.html#sqlite">sqlite3</a></li> 
+              <li><a href="/guide/developing/tools/adb.html#sqlite">sqlite3</a></li>               
+              <li><a href="/guide/developing/tools/traceview.html">Traceview</a></li> 
           <li><a href="<?cs var:toroot ?>guide/developing/tools/zipalign.html">zipalign</a></li>
         </ul>
       </li>
