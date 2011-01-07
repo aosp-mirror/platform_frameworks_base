@@ -548,15 +548,26 @@ class BluetoothEventLoop {
            }
         }
 
-        if (btDeviceClass == BluetoothClass.Device.PERIPHERAL_KEYBOARD ||
-            btDeviceClass == BluetoothClass.Device.PERIPHERAL_KEYBOARD_POINTING) {
-            // Its a keyboard. Follow the HID spec recommendation of creating the
-            // passkey and displaying it to the user.
-            // Generate a variable PIN. This is not truly random but good enough.
-            int pin = (int) Math.floor(Math.random() * 10000);
-            sendDisplayPinIntent(address, pin);
-            return;
+        // STOPSHIP: Hack for MOT keyboards
+        boolean motKeyboard = false;
+        String name = mBluetoothService.getRemoteName(address);
+        if (name == null && address.startsWith("00:0F:F6") ||
+            (name != null && name.startsWith("Motorola"))) {
+                motKeyboard = true;
         }
+
+        if (!motKeyboard) {
+            if (btDeviceClass == BluetoothClass.Device.PERIPHERAL_KEYBOARD ||
+                btDeviceClass == BluetoothClass.Device.PERIPHERAL_KEYBOARD_POINTING) {
+                // Its a keyboard. Follow the HID spec recommendation of creating the
+                // passkey and displaying it to the user.
+                // Generate a variable PIN. This is not truly random but good enough.
+                int pin = (int) Math.floor(Math.random() * 10000);
+                sendDisplayPinIntent(address, pin);
+                return;
+            }
+        }
+
         // Acquire wakelock during PIN code request to bring up LCD display
         mWakeLock.acquire();
         Intent intent = new Intent(BluetoothDevice.ACTION_PAIRING_REQUEST);
