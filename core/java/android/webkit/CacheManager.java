@@ -183,8 +183,10 @@ public final class CacheManager {
     }
 
     /**
-     * initialize the CacheManager. WebView should handle this for each process.
-     * 
+     * Initialize the CacheManager.
+     *
+     * Note that this is called automatically when a {@link android.webkit.WebView} is created.
+     *
      * @param context The application context.
      */
     static void init(Context context) {
@@ -195,10 +197,10 @@ public final class CacheManager {
             mClearCacheOnInit = false;
         }
     }
-    
+
     /**
      * Create the cache directory if it does not already exist.
-     * 
+     *
      * @return true if the cache directory didn't exist and was created.
      */
     static private boolean createCacheDirectory() {
@@ -211,7 +213,7 @@ public final class CacheManager {
                     mBaseDir.toString(),
                     FileUtils.S_IRWXU | FileUtils.S_IRWXG,
                     -1, -1);
-            // If we did create the directory, we need to flush 
+            // If we did create the directory, we need to flush
             // the cache database. The directory could be recreated
             // because the system flushed all the data/cache directories
             // to free up disk space.
@@ -224,8 +226,9 @@ public final class CacheManager {
     }
 
     /**
-     * get the base directory of the cache. With localPath of the CacheResult,
-     * it identifies the cache file.
+     * Get the base directory of the cache. Together with the local path of the CacheResult,
+     * obtained from {@link android.webkit.CacheManager.CacheResult#getLocalPath}, this
+     * identifies the cache file.
      *
      * @return File The base directory of the cache.
      *
@@ -237,9 +240,9 @@ public final class CacheManager {
     }
 
     /**
-     * set the flag to control whether cache is enabled or disabled
-     * 
-     * @param disabled true to disable the cache
+     * Sets whether the cache is disabled.
+     *
+     * @param disabled Whether the cache should be disabled
      */
     static void setCacheDisabled(boolean disabled) {
         if (disabled == mDisabled) {
@@ -252,9 +255,9 @@ public final class CacheManager {
     }
 
     /**
-     * get the state of the current cache, enabled or disabled
+     * Whether the cache is disabled.
      *
-     * @return return if it is disabled
+     * @return return Whether the cache is disabled
      *
      * @deprecated Access to the HTTP cache will be removed in a future release.
      */
@@ -321,12 +324,14 @@ public final class CacheManager {
     }
 
     /**
-     * Given a url, returns the CacheResult if exists. Otherwise returns null.
-     * If headers are provided and a cache needs validation,
-     * HEADER_KEY_IFNONEMATCH or HEADER_KEY_IFMODIFIEDSINCE will be set in the
-     * cached headers.
-     * 
-     * @return the CacheResult for a given url.
+     * Given a URL, returns the corresponding CacheResult if it exists, or null otherwise.
+     *
+     * The output stream of the CacheEntry object is initialized and opened and should be closed by
+     * the caller when access to the undelying file is no longer required.
+     * If a non-zero value is provided for the headers map, and the cache entry needs validation,
+     * HEADER_KEY_IFNONEMATCH or HEADER_KEY_IFMODIFIEDSINCE will be set in headers.
+     *
+     * @return The CacheResult for the given URL
      *
      * @deprecated Access to the HTTP cache will be removed in a future release.
      */
@@ -345,40 +350,39 @@ public final class CacheManager {
         String databaseKey = getDatabaseKey(url, postIdentifier);
 
         CacheResult result = mDataBase.getCache(databaseKey);
-        if (result != null) {
-            if (result.contentLength == 0) {
-                if (!checkCacheRedirect(result.httpStatusCode)) {
-                    // this should not happen. If it does, remove it.
-                    mDataBase.removeCache(databaseKey);
-                    return null;
-                }
-            } else {
-                File src = new File(mBaseDir, result.localPath);
-                try {
-                    // open here so that even the file is deleted, the content
-                    // is still readable by the caller until close() is called
-                    result.inStream = new FileInputStream(src);
-                } catch (FileNotFoundException e) {
-                    // the files in the cache directory can be removed by the
-                    // system. If it is gone, clean up the database
-                    mDataBase.removeCache(databaseKey);
-                    return null;
-                }
-            }
-        } else {
+        if (result == null) {
             return null;
         }
+        if (result.contentLength == 0) {
+            if (!isCachableRedirect(result.httpStatusCode)) {
+                // This should not happen. If it does, remove it.
+                mDataBase.removeCache(databaseKey);
+                return null;
+            }
+        } else {
+            File src = new File(mBaseDir, result.localPath);
+            try {
+                // Open the file here so that even if it is deleted, the content
+                // is still readable by the caller until close() is called.
+                result.inStream = new FileInputStream(src);
+            } catch (FileNotFoundException e) {
+                // The files in the cache directory can be removed by the
+                // system. If it is gone, clean up the database.
+                mDataBase.removeCache(databaseKey);
+                return null;
+            }
+        }
 
-        // null headers request coming from CACHE_MODE_CACHE_ONLY
-        // which implies that it needs cache even it is expired.
-        // negative expires means time in the far future.
+        // A null value for headers is used by CACHE_MODE_CACHE_ONLY to imply
+        // that we should provide the cache result even if it is expired.
+        // Note that a negative expires value means a time in the far future.
         if (headers != null && result.expires >= 0
                 && result.expires <= System.currentTimeMillis()) {
             if (result.lastModified == null && result.etag == null) {
                 return null;
             }
-            // return HEADER_KEY_IFNONEMATCH or HEADER_KEY_IFMODIFIEDSINCE
-            // for requesting validation
+            // Return HEADER_KEY_IFNONEMATCH or HEADER_KEY_IFMODIFIEDSINCE
+            // for requesting validation.
             if (result.etag != null) {
                 headers.put(HEADER_KEY_IFNONEMATCH, result.etag);
             }
@@ -433,7 +437,7 @@ public final class CacheManager {
 
         // like the other browsers, do not cache redirects containing a cookie
         // header.
-        if (checkCacheRedirect(statusCode) && !headers.getSetCookie().isEmpty()) {
+        if (isCachableRedirect(statusCode) && !headers.getSetCookie().isEmpty()) {
             // remove the saved cache if there is any
             mDataBase.removeCache(databaseKey);
             return null;
@@ -494,7 +498,7 @@ public final class CacheManager {
             return;
         }
 
-        boolean redirect = checkCacheRedirect(cacheRet.httpStatusCode);
+        boolean redirect = isCachableRedirect(cacheRet.httpStatusCode);
         if (redirect) {
             // location is in database, no need to keep the file
             cacheRet.contentLength = 0;
@@ -525,9 +529,9 @@ public final class CacheManager {
     }
 
     /**
-     * remove all cache files
-     * 
-     * @return true if it succeeds
+     * Remove all cache files.
+     *
+     * @return Whether the removal succeeded.
      */
     static boolean removeAllCacheFiles() {
         // Note, this is called before init() when the database is
@@ -603,7 +607,7 @@ public final class CacheManager {
         mDataBase.clearCache();
     }
 
-    private static boolean checkCacheRedirect(int statusCode) {
+    private static boolean isCachableRedirect(int statusCode) {
         if (statusCode == 301 || statusCode == 302 || statusCode == 307) {
             // as 303 can't be cached, we do not return true
             return true;
