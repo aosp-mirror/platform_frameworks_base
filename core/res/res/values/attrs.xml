@@ -1784,6 +1784,22 @@
             <!-- Place the scroll bar on the right. -->
             <enum name="right" value="2" />
         </attr>
+        
+        <!-- Specifies the type of layer backing this view. The default value is none.
+             Refer to {@link android.view.View#setLayerType(int, android.graphics.Paint)
+             for more information.-->
+        <attr name="layerType">
+            <!-- Don't use a layer. -->
+            <enum name="none" value="0" />
+            <!-- Use a software layer. Refer to
+                 {@link android.view.View#setLayerType(int, android.graphics.Paint) for
+                 more information. -->
+            <enum name="software" value="1" />
+            <!-- Use a hardware layer. Refer to
+                 {@link android.view.View#setLayerType(int, android.graphics.Paint) for
+                 more information. -->
+            <enum name="hardware" value="2" />
+        </attr>
     </declare-styleable>
 
     <!-- Attributes that can be used with a {@link android.view.ViewGroup} or any

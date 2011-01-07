@@ -406,6 +406,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     layer->layer.set(bounds);
     layer->texCoords.set(0.0f, bounds.getHeight() / float(layer->height),
             bounds.getWidth() / float(layer->width), 0.0f);
+    layer->colorFilter = mColorFilter;
 
     // Save the layer in the snapshot
     snapshot->flags |= Snapshot::kFlagIsLayer;
@@ -459,7 +460,6 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, sp<Snapshot> sna
     snapshot->flags |= Snapshot::kFlagIsFboLayer;
     snapshot->fbo = layer->fbo;
     snapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
-    //snapshot->resetClip(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
     snapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
     snapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
     snapshot->height = bounds.getHeight();
@@ -544,7 +544,13 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     // drawing only the dirty region
     if (fboLayer) {
         dirtyLayer(rect.left, rect.top, rect.right, rect.bottom, *previous->transform);
+        if (layer->colorFilter) {
+            setupColorFilter(layer->colorFilter);
+        }
         composeLayerRegion(layer, rect);
+        if (layer->colorFilter) {
+            resetColorFilter();
+        }
     } else {
         dirtyLayer(rect.left, rect.top, rect.right, rect.bottom);
         composeLayerRect(layer, rect, true);

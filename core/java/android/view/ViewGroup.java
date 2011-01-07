@@ -2175,11 +2175,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         boolean concatMatrix = false;
 
         boolean scalingRequired = false;
-        boolean caching = false;
+        boolean caching;
+        final int layerType = child.getLayerType();
+        
         if ((flags & FLAG_CHILDREN_DRAWN_WITH_CACHE) == FLAG_CHILDREN_DRAWN_WITH_CACHE ||
                 (flags & FLAG_ALWAYS_DRAWN_WITH_CACHE) == FLAG_ALWAYS_DRAWN_WITH_CACHE) {
             caching = true;
             if (mAttachInfo != null) scalingRequired = mAttachInfo.mScalingRequired;
+        } else {
+            caching = layerType != LAYER_TYPE_NONE;
         }
 
         if (a != null) {
@@ -2270,9 +2274,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         Bitmap cache = null;
         if (caching) {
             if (!canvas.isHardwareAccelerated()) {
+                if (layerType != LAYER_TYPE_NONE) {
+                    child.buildDrawingCache(true);
+                }
                 cache = child.getDrawingCache(true);
             } else {
-                displayList = child.getDisplayList();
+                if (layerType == LAYER_TYPE_SOFTWARE) {
+                    child.buildDrawingCache(true);
+                    cache = child.getDrawingCache(true);
+                } else {
+                    displayList = child.getDisplayList();
+                }
             }
         }
 
@@ -2290,6 +2302,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 canvas.scale(scale, scale);
             }
         }
+        
+        boolean layerSaved = false;
 
         if (transformToApply != null || alpha < 1.0f || !child.hasIdentityMatrix()) {
             if (transformToApply != null || !childHasIdentityMatrix) {
@@ -2331,12 +2345,24 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     final int multipliedAlpha = (int) (255 * alpha);
                     if (!child.onSetAlpha(multipliedAlpha)) {
                         int layerFlags = Canvas.HAS_ALPHA_LAYER_SAVE_FLAG;
-                        if ((flags & FLAG_CLIP_CHILDREN) == FLAG_CLIP_CHILDREN) {
+                        if ((flags & FLAG_CLIP_CHILDREN) == FLAG_CLIP_CHILDREN ||
+                                layerType != LAYER_TYPE_NONE) {
                             layerFlags |= Canvas.CLIP_TO_LAYER_SAVE_FLAG;
                         }
-                        canvas.saveLayerAlpha(sx, sy, sx + cr - cl, sy + cb - ct, multipliedAlpha,
-                                layerFlags);
+                        if (layerType != LAYER_TYPE_NONE && child.mLayerPaint != null) {
+                            child.mLayerPaint.setAlpha(multipliedAlpha);
+                            canvas.saveLayer(sx, sy, sx + cr - cl, sy + cb - ct,
+                                    child.mLayerPaint, layerFlags);
+                        } else {
+                            canvas.saveLayerAlpha(sx, sy, sx + cr - cl, sy + cb - ct,
+                                    multipliedAlpha, layerFlags);
+                        }
+                        layerSaved = true;
                     } else {
+                        // Alpha is handled by the child directly, clobber the layer's alpha
+                        if (layerType != LAYER_TYPE_NONE && child.mLayerPaint != null) {
+                            child.mLayerPaint.setAlpha(255);
+                        }
                         child.mPrivateFlags |= ALPHA_SET;
                     }
                 }
@@ -2359,6 +2385,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         if (hasNoCache) {
+            if (!layerSaved && layerType == LAYER_TYPE_HARDWARE) {
+                canvas.saveLayer(sx, sy, sx + cr - cl, sy + cb - ct, child.mLayerPaint,
+                        Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
+            }
             if (!hasDisplayList) {
                 // Fast path for layouts with no backgrounds
                 if ((child.mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
@@ -2376,13 +2406,22 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         } else if (cache != null) {
             child.mPrivateFlags &= ~DIRTY_MASK;
-            final Paint cachePaint = mCachePaint;
-            if (alpha < 1.0f) {
-                cachePaint.setAlpha((int) (alpha * 255));
-                mGroupFlags |= FLAG_ALPHA_LOWER_THAN_ONE;
-            } else if  ((flags & FLAG_ALPHA_LOWER_THAN_ONE) == FLAG_ALPHA_LOWER_THAN_ONE) {
-                cachePaint.setAlpha(255);
-                mGroupFlags &= ~FLAG_ALPHA_LOWER_THAN_ONE;
+            Paint cachePaint;
+
+            if (layerType == LAYER_TYPE_NONE || child.mLayerPaint == null) {
+                cachePaint = mCachePaint;
+                if (alpha < 1.0f) {
+                    cachePaint.setAlpha((int) (alpha * 255));
+                    mGroupFlags |= FLAG_ALPHA_LOWER_THAN_ONE;
+                } else if  ((flags & FLAG_ALPHA_LOWER_THAN_ONE) == FLAG_ALPHA_LOWER_THAN_ONE) {
+                    cachePaint.setAlpha(255);
+                    mGroupFlags &= ~FLAG_ALPHA_LOWER_THAN_ONE;
+                }
+            } else {
+                cachePaint = child.mLayerPaint;
+                if (alpha < 1.0f) {
+                    cachePaint.setAlpha((int) (alpha * 255));
+                }
             }
             canvas.drawBitmap(cache, 0.0f, 0.0f, cachePaint);
         }
