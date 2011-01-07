@@ -37,12 +37,12 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocalPowerManager;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UEventObserver;
 import android.os.Vibrator;
 import android.provider.Settings;
 
@@ -120,6 +120,7 @@ import android.view.animation.AnimationUtils;
 import android.media.IAudioService;
 import android.media.AudioManager;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -236,6 +237,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     boolean mSystemReady;
     boolean mLidOpen;
+    boolean mHdmiPlugged;
     int mUiMode = Configuration.UI_MODE_TYPE_NORMAL;
     int mDockMode = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     int mLidOpenRotation;
@@ -350,6 +352,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     PowerManager.WakeLock mBroadcastWakeLock;
 
     final KeyCharacterMap.FallbackAction mFallbackAction = new KeyCharacterMap.FallbackAction();
+
+    private UEventObserver mHDMIObserver = new UEventObserver() {
+        @Override
+        public void onUEvent(UEventObserver.UEvent event) {
+            setHdmiPlugged("1".equals(event.get("SWITCH_STATE")));
+        }
+    };
 
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
@@ -697,6 +706,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.array.config_safeModeDisabledVibePattern);
         mSafeModeEnabledVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_safeModeEnabledVibePattern);
+
+        // watch for HDMI plug messages if the hdmi switch exists
+        if (new File("/sys/devices/virtual/switch/hdmi/state").exists()) {
+            mHDMIObserver.startObserving("DEVPATH=/devices/virtual/switch/hdmi");
+        }
 
         // Note: the Configuration is not stable here, so we cannot load mStatusBarCanHide from
         // config_statusBarCanHide because the latter depends on the screen size
@@ -1963,7 +1977,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean awakeNow = mKeyguardMediator.doLidChangeTq(mLidOpen);
         updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
         if (awakeNow) {
-            // If the lid opening and we don't have to keep the
+            // If the lid is opening and we don't have to keep the
             // keyguard up, then we can turn on the screen
             // immediately.
             mKeyguardMediator.pokeWakelock();
@@ -1984,6 +1998,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
                         LocalPowerManager.OTHER_EVENT);
             }
+        }
+    }
+
+    void setHdmiPlugged(boolean plugged) {
+        if (mHdmiPlugged != plugged) {
+            mHdmiPlugged = plugged;
+            updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
+            Intent intent = new Intent(ACTION_HDMI_PLUGGED);
+            intent.putExtra(EXTRA_HDMI_PLUGGED_STATE, plugged);
+            mContext.sendStickyBroadcast(intent);
         }
     }
 
@@ -2418,7 +2442,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // case for nosensor meaning ignore sensor and consider only lid
             // or orientation sensor disabled
             //or case.unspecified
-            if (mLidOpen) {
+            if (mHdmiPlugged) {
+                return Surface.ROTATION_0;
+            } else if (mLidOpen) {
                 return mLidOpenRotation;
             } else if (mDockMode == Intent.EXTRA_DOCK_STATE_CAR && mCarDockRotation >= 0) {
                 return mCarDockRotation;
@@ -2586,7 +2612,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     void updateRotation(int animFlags) {
         mPowerManager.setKeyboardVisibility(mLidOpen);
         int rotation = Surface.ROTATION_0;
-        if (mLidOpen) {
+        if (mHdmiPlugged) {
+            rotation = Surface.ROTATION_0;
+        } else if (mLidOpen) {
             rotation = mLidOpenRotation;
         } else if (mDockMode == Intent.EXTRA_DOCK_STATE_CAR && mCarDockRotation >= 0) {
             rotation = mCarDockRotation;
