@@ -47,9 +47,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     private boolean mReserveOverflow;
     private OverflowMenuButton mOverflowButton;
     private MenuPopupHelper mOverflowPopup;
-    
-    private float mButtonPaddingLeft;
-    private float mButtonPaddingRight;
+
     private float mDividerPadding;
     
     private Drawable mDivider;
@@ -94,14 +92,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                 Configuration.SCREENLAYOUT_SIZE_XLARGE;
         
         TypedArray a = context.obtainStyledAttributes(com.android.internal.R.styleable.Theme);
-        final int buttonStyle = a.getResourceId(
-                com.android.internal.R.styleable.Theme_actionButtonStyle, 0);
         mDivider = a.getDrawable(com.android.internal.R.styleable.Theme_dividerVertical);
-        a.recycle();
-        
-        a = context.obtainStyledAttributes(buttonStyle, com.android.internal.R.styleable.View);
-        mButtonPaddingLeft = a.getDimension(com.android.internal.R.styleable.View_paddingLeft, 0);
-        mButtonPaddingRight = a.getDimension(com.android.internal.R.styleable.View_paddingRight, 0);
         a.recycle();
         
         mDividerPadding = DIVIDER_PADDING * res.getDisplayMetrics().density;
@@ -295,10 +286,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     }
 
     private LayoutParams makeActionViewLayoutParams(View view) {
-        LayoutParams params = generateLayoutParams(view.getLayoutParams());
-        params.leftMargin = (int) mButtonPaddingLeft;
-        params.rightMargin = (int) mButtonPaddingRight;
-        return params;
+        return generateLayoutParams(view.getLayoutParams());
     }
 
     private class OverflowMenuButton extends ImageButton {

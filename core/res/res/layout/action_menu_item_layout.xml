@@ -29,7 +29,11 @@
                  android:layout_height="wrap_content"
                  android:layout_gravity="center"
                  android:visibility="gone"
-                 style="?attr/actionButtonStyle" />
+                 android:paddingLeft="4dip"
+                 android:paddingRight="4dip"
+                 android:minHeight="56dip"
+                 android:scaleType="center"
+                 android:background="@null" />
     <Button android:id="@+id/textButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
