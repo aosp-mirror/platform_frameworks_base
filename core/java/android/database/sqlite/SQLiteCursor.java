@@ -412,6 +412,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                 db = mQuery.mDatabase.getDatabaseHandle(mQuery.mSql);
             } catch (IllegalStateException e) {
                 // for backwards compatibility, just return false
+                Log.w(TAG, "requery() failed " + e.getMessage(), e);
                 return false;
             }
             if (!db.equals(mQuery.mDatabase)) {
@@ -421,6 +422,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                     db.lock();
                 } catch (IllegalStateException e) {
                     // for backwards compatibility, just return false
+                    Log.w(TAG, "requery() failed " + e.getMessage(), e);
                     return false;
                 }
                 try {
@@ -429,6 +431,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                     mQuery = new SQLiteQuery(db, mQuery);
                 } catch (IllegalStateException e) {
                     // for backwards compatibility, just return false
+                    Log.w(TAG, "requery() failed " + e.getMessage(), e);
                     return false;
                 } finally {
                     db.unlock();
@@ -443,6 +446,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                 mQuery.requery();
             } catch (IllegalStateException e) {
                 // for backwards compatibility, just return false
+                Log.w(TAG, "requery() failed " + e.getMessage(), e);
                 return false;
             } finally {
                 queryThreadUnlock();
@@ -459,6 +463,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             result = super.requery();
         } catch (IllegalStateException e) {
             // for backwards compatibility, just return false
+            Log.w(TAG, "requery() failed " + e.getMessage(), e);
         }
         if (Config.LOGV) {
             long timeEnd = System.currentTimeMillis();
