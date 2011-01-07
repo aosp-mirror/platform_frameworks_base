@@ -127,6 +127,15 @@
         android:layout_marginLeft="12dip"
         android:gravity="left"
         >
+        <!-- TODO: Redo layout when we release on phones -->
+        <TextView
+            android:id="@+id/alarm_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="18sp"
+            android:drawablePadding="4dip"
+            />
         <TextView
             android:id="@+id/status1"
             android:layout_width="wrap_content"

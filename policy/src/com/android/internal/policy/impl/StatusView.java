@@ -19,6 +19,11 @@ import android.view.View;
 import android.widget.TextView;
 
 class StatusView {
+    private static final int LOCK_ICON = R.drawable.ic_lock_idle_lock;
+    private static final int ALARM_ICON = R.drawable.ic_lock_idle_alarm;
+    private static final int CHARGING_ICON = R.drawable.ic_lock_idle_charging;
+    private static final int BATTERY_LOW_ICON = R.drawable.ic_lock_idle_low_battery;
+
     private String mDateFormatString;
 
     private TextView mCarrier;
@@ -33,19 +38,17 @@ class StatusView {
     // last known battery level
     private int mBatteryLevel = 100;
 
-    private String mNextAlarm = null;
-
     private String mInstructions = null;
     private TextView mStatus1;
-    private TextView mStatus2;
     private TextView mPropertyOf;
 
-    private boolean mHasStatus2;
     private boolean mHasCarrier;
     private boolean mHasDate;
-    private boolean mHasProperty;
 
     private View mView;
+
+    private TextView mAlarmStatus;
+    private LockPatternUtils mLockPatternUtils;
 
     private View findViewById(int id) {
         return mView.findViewById(id);
@@ -69,7 +72,7 @@ class StatusView {
         mShowingBatteryInfo = showBatteryInfo;
         mPluggedIn = pluggedIn;
         mBatteryLevel = batteryLevel;
-        updateStatusLines();
+        updateStatusLines(true);
     }
 
     void onTimeChanged() {
@@ -91,14 +94,14 @@ class StatusView {
         mDate = (TextView) findViewById(R.id.date);
         mHasDate = (mDate != null);
         mDateFormatString = getContext().getString(R.string.full_wday_month_day_no_year);
+        mLockPatternUtils = lockPatternUtils;
 
         refreshTimeAndDateDisplay();
 
         mStatus1 = (TextView) findViewById(R.id.status1);
-        mStatus2 = (TextView) findViewById(R.id.status2);
-        mHasStatus2 = (mStatus2 != null);
+        mAlarmStatus = (TextView) findViewById(R.id.alarm_status);
+        mAlarmStatus.setCompoundDrawablesWithIntrinsicBounds(ALARM_ICON, 0, 0, 0);
         mPropertyOf = (TextView) findViewById(R.id.propertyOf);
-        mHasProperty = (mPropertyOf != null);
 
         resetStatusInfo(updateMonitor, lockPatternUtils);
 
@@ -107,7 +110,6 @@ class StatusView {
             mCarrier.setSelected(true);
             mCarrier.setTextColor(0xffffffff);
         }
-
     }
 
     void resetStatusInfo(KeyguardUpdateMonitor updateMonitor, LockPatternUtils lockPatternUtils) {
@@ -115,19 +117,18 @@ class StatusView {
         mShowingBatteryInfo = updateMonitor.shouldShowBatteryInfo();
         mPluggedIn = updateMonitor.isDevicePluggedIn();
         mBatteryLevel = updateMonitor.getBatteryLevel();
-        mNextAlarm = lockPatternUtils.getNextAlarm();
-        updateStatusLines();
+        updateStatusLines(true);
     }
 
     void setInstructionText(int stringId) {
         mStatus1.setText(stringId);
-        mStatus1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_lock_idle_lock, 0, 0, 0);
+        mStatus1.setCompoundDrawablesWithIntrinsicBounds(LOCK_ICON, 0, 0, 0);
         mStatus1.setVisibility(View.VISIBLE);
     }
 
     void setInstructionText(String string) {
         mStatus1.setText(string);
-        mStatus1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_lock_idle_lock, 0, 0, 0);
+        mStatus1.setCompoundDrawablesWithIntrinsicBounds(LOCK_ICON, 0, 0, 0);
         mStatus1.setVisibility(View.VISIBLE);
     }
 
@@ -138,9 +139,22 @@ class StatusView {
         mCarrier.setText(string);
     }
 
-    /** Originated from PatternUnlockScreen **/
-    void updateStatusLines() {
-        if (mHasProperty) {
+    /**
+     * Update the status lines based on these rules:
+     * AlarmStatus: Alarm state always gets it's own line.
+     * Status1 is shared between help, battery status and generic unlock instructions,
+     * prioritized in that order.
+     * @param showStatusLines status lines are shown if true
+     */
+    void updateStatusLines(boolean showStatusLines) {
+        if (!showStatusLines) {
+            mStatus1.setVisibility(showStatusLines ? View.VISIBLE : View.GONE);
+            mAlarmStatus.setVisibility(showStatusLines ? View.VISIBLE : View.GONE);
+            return;
+        }
+
+        // Update owner info
+        if (mPropertyOf != null) {
             ContentResolver res = getContext().getContentResolver();
             String info = Settings.Secure.getString(res, Settings.Secure.LOCK_SCREEN_OWNER_INFO);
             boolean enabled = Settings.Secure.getInt(res,
@@ -151,104 +165,44 @@ class StatusView {
                     View.VISIBLE : View.INVISIBLE);
         }
 
-        if (!mHasStatus2) return;
+        // Update Alarm status
+        String nextAlarm = mLockPatternUtils.getNextAlarm();
+        if (!TextUtils.isEmpty(nextAlarm)) {
+            mAlarmStatus.setText(nextAlarm);
+            mAlarmStatus.setVisibility(View.VISIBLE);
+        } else {
+            mAlarmStatus.setVisibility(View.GONE);
+        }
 
+        // Update Status1
         if (mInstructions != null) {
-            // instructions only
+            // Instructions only
+            final int resId = TextUtils.isEmpty(mInstructions) ? 0 : LOCK_ICON;
             mStatus1.setText(mInstructions);
-            if (TextUtils.isEmpty(mInstructions)) {
-                mStatus1.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-            } else {
-                mStatus1.setCompoundDrawablesWithIntrinsicBounds(
-                        R.drawable.ic_lock_idle_lock, 0, 0, 0);
-            }
-
+            mStatus1.setCompoundDrawablesWithIntrinsicBounds(resId, 0, 0, 0);
             mStatus1.setVisibility(View.VISIBLE);
-            mStatus2.setVisibility(View.INVISIBLE);
-        } else if (mShowingBatteryInfo && mNextAlarm == null) {
-            // battery only
+        } else if (mShowingBatteryInfo) {
+            // Battery status
             if (mPluggedIn) {
-              if (mBatteryLevel >= 100) {
-                mStatus1.setText(getContext().getString(R.string.lockscreen_charged));
-              } else {
-                  mStatus1.setText(getContext().getString(R.string.lockscreen_plugged_in,
-                          mBatteryLevel));
-              }
+                // Charging or charged
+                if (mBatteryLevel >= 100) {
+                    mStatus1.setText(getContext().getString(R.string.lockscreen_charged));
+                } else {
+                    mStatus1.setText(getContext().getString(R.string.lockscreen_plugged_in,
+                            mBatteryLevel));
+                }
+                mStatus1.setCompoundDrawablesWithIntrinsicBounds(CHARGING_ICON, 0, 0, 0);
             } else {
+                // Battery is low
                 mStatus1.setText(getContext().getString(R.string.lockscreen_low_battery));
+                mStatus1.setCompoundDrawablesWithIntrinsicBounds(BATTERY_LOW_ICON, 0, 0, 0);
             }
-            mStatus1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_lock_idle_charging, 0,
-                    0, 0);
-
             mStatus1.setVisibility(View.VISIBLE);
-            mStatus2.setVisibility(View.INVISIBLE);
-
-        } else if (mNextAlarm != null && !mShowingBatteryInfo) {
-            // alarm only
-            mStatus1.setText(mNextAlarm);
-            mStatus1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_lock_idle_alarm, 0,
-                    0, 0);
-
-            mStatus1.setVisibility(View.VISIBLE);
-            mStatus2.setVisibility(View.INVISIBLE);
-        } else if (mNextAlarm != null && mShowingBatteryInfo) {
-            // both battery and next alarm
-            mStatus1.setText(mNextAlarm);
-            mStatus2.setText(getContext().getString(
-                    R.string.lockscreen_battery_short,
-                    Math.min(100, mBatteryLevel)));
-            mStatus1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_lock_idle_alarm, 0,
-                    0, 0);
-            if (mPluggedIn) {
-                mStatus2.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_lock_idle_charging,
-                        0, 0, 0);
-            } else {
-                mStatus2.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-            }
-
-            mStatus1.setVisibility(View.VISIBLE);
-            mStatus2.setVisibility(View.VISIBLE);
         } else {
             // nothing specific to show; show general instructions
             mStatus1.setText(R.string.lockscreen_pattern_instructions);
-            mStatus1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_lock_idle_lock, 0,
-                    0, 0);
-
+            mStatus1.setCompoundDrawablesWithIntrinsicBounds(LOCK_ICON, 0,0, 0);
             mStatus1.setVisibility(View.VISIBLE);
-            mStatus2.setVisibility(View.INVISIBLE);
-        }
-    }
-
-    /** Originated from LockScreen **/
-    // TODO Merge with function above
-    void updateStatusLines(boolean showStatusLines, String charging, Drawable chargingIcon,
-            Drawable alarmIcon) {
-        if (!showStatusLines || (charging == null && mNextAlarm == null)) {
-            mStatus1.setVisibility(View.INVISIBLE);
-            mStatus2.setVisibility(View.INVISIBLE);
-        } else if (charging != null && mNextAlarm == null) {
-            // charging only
-            mStatus1.setVisibility(View.VISIBLE);
-            mStatus2.setVisibility(View.INVISIBLE);
-
-            mStatus1.setText(charging);
-            mStatus1.setCompoundDrawablesWithIntrinsicBounds(chargingIcon, null, null, null);
-        } else if (mNextAlarm != null && charging == null) {
-            // next alarm only
-            mStatus1.setVisibility(View.VISIBLE);
-            mStatus2.setVisibility(View.INVISIBLE);
-
-            mStatus1.setText(mNextAlarm);
-            mStatus1.setCompoundDrawablesWithIntrinsicBounds(alarmIcon, null, null, null);
-        } else if (charging != null && mNextAlarm != null) {
-            // both charging and next alarm
-            mStatus1.setVisibility(View.VISIBLE);
-            mStatus2.setVisibility(View.VISIBLE);
-
-            mStatus1.setText(charging);
-            mStatus1.setCompoundDrawablesWithIntrinsicBounds(chargingIcon, null, null, null);
-            mStatus2.setText(mNextAlarm);
-            mStatus2.setCompoundDrawablesWithIntrinsicBounds(alarmIcon, null, null, null);
         }
     }
 
