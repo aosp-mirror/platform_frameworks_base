@@ -39,24 +39,6 @@ public class UsbManager {
     public static final String ACTION_USB_STATE =
             "android.hardware.action.USB_STATE";
 
-   /**
-     * Broadcast Action:  A broadcast for USB camera attached event.
-     *
-     * This intent is sent when a USB device supporting PTP is attached to the host USB bus.
-     * The intent's data contains a Uri for the device in the MTP provider.
-     */
-    public static final String ACTION_USB_CAMERA_ATTACHED =
-            "android.hardware.action.USB_CAMERA_ATTACHED";
-
-   /**
-     * Broadcast Action:  A broadcast for USB camera detached event.
-     *
-     * This intent is sent when a USB device supporting PTP is detached from the host USB bus.
-     * The intent's data contains a Uri for the device in the MTP provider.
-     */
-    public static final String ACTION_USB_CAMERA_DETACHED =
-            "android.hardware.action.USB_CAMERA_DETACHED";
-
     /**
      * Boolean extra indicating whether USB is connected or disconnected.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast.
@@ -105,14 +87,6 @@ public class UsbManager {
      */
     public static final String USB_FUNCTION_DISABLED = "disabled";
 
-    public static final int getDeviceId(String name) {
-        return native_get_device_id(name);
-    }
-
-    public static final String getDeviceName(int id) {
-        return native_get_device_name(id);
-    }
-
     private static File getFunctionEnableFile(String function) {
         return new File("/sys/class/usb_composite/" + function + "/enable");
     }
@@ -138,7 +112,4 @@ public class UsbManager {
             return false;
         }
     }
-
-    private static native int native_get_device_id(String name);
-    private static native String native_get_device_name(int id);
 }
