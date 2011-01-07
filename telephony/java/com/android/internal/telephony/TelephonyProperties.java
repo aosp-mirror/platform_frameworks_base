@@ -147,4 +147,16 @@ public interface TelephonyProperties
      * when there is a radio technology change.
      */
     static final String PROPERTY_RESET_ON_RADIO_TECH_CHANGE = "persist.radio.reset_on_switch";
+
+    /**
+     * Set to false to disable SMS receiving, default is
+     * the value of config_sms_capable
+     */
+    static final String PROPERTY_SMS_RECEIVE = "telephony.sms.receive";
+
+    /**
+     * Set to false to disable SMS sending, default is
+     * the value of config_sms_capable
+     */
+    static final String PROPERTY_SMS_SEND = "telephony.sms.send";
 }

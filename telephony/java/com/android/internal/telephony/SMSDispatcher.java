@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.StatFs;
+import android.os.SystemProperties;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
 import android.provider.Settings;
@@ -156,8 +157,10 @@ public abstract class SMSDispatcher extends Handler {
     protected boolean mStorageAvailable = true;
     protected boolean mReportMemoryStatusPending = false;
 
-    /* Flag indicating whether the current device allows sms service */
+    /* Flags indicating whether the current device allows sms service */
     protected boolean mSmsCapable = true;
+    protected boolean mSmsReceiveDisabled;
+    protected boolean mSmsSendDisabled;
 
     protected static int getNextConcatenatedRef() {
         sConcatenatedRef += 1;
@@ -255,6 +258,13 @@ public abstract class SMSDispatcher extends Handler {
 
         mSmsCapable = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_sms_capable);
+        mSmsReceiveDisabled = !SystemProperties.getBoolean(
+                                TelephonyProperties.PROPERTY_SMS_RECEIVE, mSmsCapable);
+        mSmsSendDisabled = !SystemProperties.getBoolean(
+                                TelephonyProperties.PROPERTY_SMS_SEND, mSmsCapable);
+        Log.d(TAG, "SMSDispatcher: ctor mSmsCapable=" + mSmsCapable
+                + " mSmsReceiveDisabled=" + mSmsReceiveDisabled
+                + " mSmsSendDisabled=" + mSmsSendDisabled);
     }
 
     public void dispose() {
@@ -783,13 +793,13 @@ public abstract class SMSDispatcher extends Handler {
      */
     protected void sendRawPdu(byte[] smsc, byte[] pdu, PendingIntent sentIntent,
             PendingIntent deliveryIntent) {
-        if (!mSmsCapable) {
+        if (mSmsSendDisabled) {
             if (sentIntent != null) {
                 try {
                     sentIntent.send(RESULT_ERROR_NO_SERVICE);
                 } catch (CanceledException ex) {}
             }
-            Log.d(TAG, "Device does not support sms service.");
+            Log.d(TAG, "Device does not support sending sms.");
             return;
         }
 
