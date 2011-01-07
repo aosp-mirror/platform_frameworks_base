@@ -100,70 +100,24 @@ static float SC_frac(float v) {
 // Time routines
 //////////////////////////////////////////////////////////////////////////////
 
-static int32_t SC_second() {
+static time_t SC_time(time_t *timer) {
     GET_TLS();
-
-    time_t rawtime;
-    time(&rawtime);
-
-    struct tm *timeinfo;
-    timeinfo = localtime(&rawtime);
-    return timeinfo->tm_sec;
+    return time(timer);
 }
 
-static int32_t SC_minute() {
+static tm* SC_localtime(tm *local, time_t *timer) {
     GET_TLS();
+    if (!local) {
+      return NULL;
+    }
 
-    time_t rawtime;
-    time(&rawtime);
-
-    struct tm *timeinfo;
-    timeinfo = localtime(&rawtime);
-    return timeinfo->tm_min;
-}
-
-static int32_t SC_hour() {
-    GET_TLS();
-
-    time_t rawtime;
-    time(&rawtime);
-
-    struct tm *timeinfo;
-    timeinfo = localtime(&rawtime);
-    return timeinfo->tm_hour;
-}
-
-static int32_t SC_day() {
-    GET_TLS();
-
-    time_t rawtime;
-    time(&rawtime);
-
-    struct tm *timeinfo;
-    timeinfo = localtime(&rawtime);
-    return timeinfo->tm_mday;
-}
-
-static int32_t SC_month() {
-    GET_TLS();
-
-    time_t rawtime;
-    time(&rawtime);
-
-    struct tm *timeinfo;
-    timeinfo = localtime(&rawtime);
-    return timeinfo->tm_mon;
-}
-
-static int32_t SC_year() {
-    GET_TLS();
-
-    time_t rawtime;
-    time(&rawtime);
-
-    struct tm *timeinfo;
-    timeinfo = localtime(&rawtime);
-    return timeinfo->tm_year;
+    // The native localtime function is not thread-safe, so we
+    // have to apply locking for proper behavior in RenderScript.
+    pthread_mutex_lock(&rsc->gLibMutex);
+    tm *tmp = localtime(timer);
+    memcpy(local, tmp, sizeof(*tmp));
+    pthread_mutex_unlock(&rsc->gLibMutex);
+    return local;
 }
 
 static int64_t SC_uptimeMillis() {
@@ -498,12 +452,8 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z6rsFracf", (void *)&SC_frac, true },
 
     // time
-    { "_Z8rsSecondv", (void *)&SC_second, true },
-    { "_Z8rsMinutev", (void *)&SC_minute, true },
-    { "_Z6rsHourv", (void *)&SC_hour, true },
-    { "_Z5rsDayv", (void *)&SC_day, true },
-    { "_Z7rsMonthv", (void *)&SC_month, true },
-    { "_Z6rsYearv", (void *)&SC_year, true },
+    { "_Z6rsTimePi", (void *)&SC_time, true },
+    { "_Z11rsLocaltimeP5rs_tmPKi", (void *)&SC_localtime, true },
     { "_Z14rsUptimeMillisv", (void*)&SC_uptimeMillis, true },
     { "_Z13rsUptimeNanosv", (void*)&SC_uptimeNanos, true },
     { "_Z7rsGetDtv", (void*)&SC_getDt, false },

@@ -44,6 +44,7 @@ pthread_key_t Context::gThreadTLSKey = 0;
 uint32_t Context::gThreadTLSKeyCount = 0;
 uint32_t Context::gGLContextCount = 0;
 pthread_mutex_t Context::gInitMutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t Context::gLibMutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void checkEglError(const char* op, EGLBoolean returnVal = EGL_TRUE) {
     if (returnVal != EGL_TRUE) {
