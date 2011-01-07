@@ -191,7 +191,14 @@ public final class CacheManager {
      */
     static void init(Context context) {
         if (JniUtil.useChromiumHttpStack()) {
-            // TODO: Need to init mBaseDir.
+            // This isn't actually where the real cache lives, but where we put files for the
+            // purpose of getCacheFile().
+            mBaseDir = new File(context.getCacheDir(), "webviewCacheChromiumStaging");
+            if (!mBaseDir.exists()) {
+                mBaseDir.mkdirs();
+            } else {
+                // TODO: Should we clear out old files?
+            }
             return;
         }
 
@@ -343,8 +350,8 @@ public final class CacheManager {
     /**
      * Given a URL, returns the corresponding CacheResult if it exists, or null otherwise.
      *
-     * The output stream of the CacheEntry object is initialized and opened and should be closed by
-     * the caller when access to the undelying file is no longer required.
+     * The input stream of the CacheEntry object is initialized and opened and should be closed by
+     * the caller when access to the underlying file is no longer required.
      * If a non-zero value is provided for the headers map, and the cache entry needs validation,
      * HEADER_KEY_IFNONEMATCH or HEADER_KEY_IFMODIFIEDSINCE will be set in headers.
      *
@@ -365,8 +372,24 @@ public final class CacheManager {
         }
 
         if (JniUtil.useChromiumHttpStack()) {
-            // TODO: Implement this.
-            return null;
+            CacheResult result = nativeGetCacheResult(url);
+            if (result == null) {
+                return null;
+            }
+            // A temporary local file will have been created native side and localPath set
+            // appropriately.
+            File src = new File(mBaseDir, result.localPath);
+            try {
+                // Open the file here so that even if it is deleted, the content
+                // is still readable by the caller until close() is called.
+                result.inStream = new FileInputStream(src);
+            } catch (FileNotFoundException e) {
+                Log.v(LOGTAG, "getCacheFile(): Failed to open file: " + e);
+                // TODO: The files in the cache directory can be removed by the
+                // system. If it is gone, what should we do?
+                return null;
+            }
+            return result;
         }
 
         String databaseKey = getDatabaseKey(url, postIdentifier);
@@ -437,7 +460,7 @@ public final class CacheManager {
     public static CacheResult createCacheFile(String url, int statusCode,
             Headers headers, String mimeType, boolean forceCache) {
         if (JniUtil.useChromiumHttpStack()) {
-            // TODO: Implement this.
+            // This method is public but hidden. We break functionality.
             return null;
         }
 
@@ -522,8 +545,16 @@ public final class CacheManager {
         }
 
         if (JniUtil.useChromiumHttpStack()) {
-            // TODO: Implement this.
-            return;
+            // This method is exposed in the public API but the API provides no way to obtain a
+            // new CacheResult object with a non-null output stream ...
+            // - CacheResult objects returned by getCacheFile() have a null output stream.
+            // - new CacheResult objects have a null output stream and no setter is provided.
+            // Since for the Android HTTP stack this method throws a null pointer exception in this
+            // case, this method is effectively useless from the point of view of the public API.
+
+            // We should already have thrown an exception above, to maintain 'backward
+            // compatibility' with the Android HTTP stack.
+            assert false;
         }
 
         if (!cacheRet.outFile.exists()) {
@@ -917,4 +948,6 @@ public final class CacheManager {
 
         return ret;
     }
+
+    private static native CacheResult nativeGetCacheResult(String url);
 }
