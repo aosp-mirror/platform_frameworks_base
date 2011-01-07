@@ -251,14 +251,11 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
 
         void startAnimation(boolean visible) {
             if (DEBUG) Slog.d(TAG, "startAnimation(visible=" + visible + ")");
-            if (mBgAnim != null && mVisible != visible) {
-                mBgAnim.reverse();
-                mPositionAnim.reverse();
-            } else {
-                createAnimation(visible);
-                mBgAnim.start();
-                mPositionAnim.start();
-            }
+
+            createAnimation(visible);
+            mBgAnim.start();
+            mPositionAnim.start();
+
             mVisible = visible;
         }
 
