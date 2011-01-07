@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.view.ViewDebug;
 import com.android.internal.R;
 
 import android.content.Context;
@@ -110,6 +111,7 @@ public class ScrollView extends FrameLayout {
      * When set to true, the scroll view measure its child to make it fill the currently
      * visible area.
      */
+    @ViewDebug.ExportedProperty(category = "layout")
     private boolean mFillViewport;
 
     /**
