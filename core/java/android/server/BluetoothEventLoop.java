@@ -493,7 +493,7 @@ class BluetoothEventLoop {
         mWakeLock.acquire();
         Intent intent = new Intent(BluetoothDevice.ACTION_PAIRING_REQUEST);
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
-        intent.putExtra(BluetoothDevice.EXTRA_PASSKEY, passkey);
+        intent.putExtra(BluetoothDevice.EXTRA_PAIRING_KEY, passkey);
         intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,
                 BluetoothDevice.PAIRING_VARIANT_PASSKEY_CONFIRMATION);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
@@ -523,6 +523,9 @@ class BluetoothEventLoop {
 
         String pendingOutgoingAddress =
                 mBluetoothService.getPendingOutgoingBonding();
+        BluetoothClass btClass = new BluetoothClass(mBluetoothService.getRemoteClass(address));
+        int btDeviceClass = btClass.getDeviceClass();
+
         if (address.equals(pendingOutgoingAddress)) {
             // we initiated the bonding
 
@@ -533,10 +536,8 @@ class BluetoothEventLoop {
                 return;
             }
 
-            BluetoothClass btClass = new BluetoothClass(mBluetoothService.getRemoteClass(address));
-
             // try 0000 once if the device looks dumb
-            switch (btClass.getDeviceClass()) {
+            switch (btDeviceClass) {
             case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
             case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
             case BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES:
@@ -545,6 +546,16 @@ class BluetoothEventLoop {
             case BluetoothClass.Device.AUDIO_VIDEO_HIFI_AUDIO:
                 if (mBluetoothService.attemptAutoPair(address)) return;
            }
+        }
+
+        if (btDeviceClass == BluetoothClass.Device.PERIPHERAL_KEYBOARD ||
+            btDeviceClass == BluetoothClass.Device.PERIPHERAL_KEYBOARD_POINTING) {
+            // Its a keyboard. Follow the HID spec recommendation of creating the
+            // passkey and displaying it to the user.
+            // Generate a variable PIN. This is not truly random but good enough.
+            int pin = (int) Math.floor(Math.random() * 10000);
+            sendDisplayPinIntent(address, pin);
+            return;
         }
         // Acquire wakelock during PIN code request to bring up LCD display
         mWakeLock.acquire();
@@ -565,9 +576,22 @@ class BluetoothEventLoop {
         mWakeLock.acquire();
         Intent intent = new Intent(BluetoothDevice.ACTION_PAIRING_REQUEST);
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
-        intent.putExtra(BluetoothDevice.EXTRA_PASSKEY, passkey);
+        intent.putExtra(BluetoothDevice.EXTRA_PAIRING_KEY, passkey);
         intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,
                         BluetoothDevice.PAIRING_VARIANT_DISPLAY_PASSKEY);
+        mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
+        //Release wakelock to allow the LCD to go off after the PIN popup notifcation.
+        mWakeLock.release();
+    }
+
+    private void sendDisplayPinIntent(String address, int pin) {
+        // Acquire wakelock during PIN code request to bring up LCD display
+        mWakeLock.acquire();
+        Intent intent = new Intent(BluetoothDevice.ACTION_PAIRING_REQUEST);
+        intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
+        intent.putExtra(BluetoothDevice.EXTRA_PAIRING_KEY, pin);
+        intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,
+                        BluetoothDevice.PAIRING_VARIANT_DISPLAY_PIN);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
         //Release wakelock to allow the LCD to go off after the PIN popup notifcation.
         mWakeLock.release();

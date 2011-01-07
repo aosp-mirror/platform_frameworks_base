@@ -226,6 +226,24 @@ public final class BluetoothClass implements Parcelable {
         public static final int HEALTH_PULSE_OXIMETER               = 0x0914;
         public static final int HEALTH_PULSE_RATE                   = 0x0918;
         public static final int HEALTH_DATA_DISPLAY                 = 0x091C;
+
+        // Devices in PERIPHERAL major class
+        /**
+         * @hide
+         */
+        public static final int PERIPHERAL_NON_KEYBOARD_NON_POINTING = 0x0500;
+        /**
+         * @hide
+         */
+        public static final int PERIPHERAL_KEYBOARD                  = 0x0540;
+        /**
+         * @hide
+         */
+        public static final int PERIPHERAL_POINTING                  = 0x0580;
+        /**
+         * @hide
+         */
+        public static final int PERIPHERAL_KEYBOARD_POINTING         = 0x05C0;
     }
 
     /**
