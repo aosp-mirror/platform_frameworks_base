@@ -605,7 +605,11 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         // mOperatorAlphaLong contains the ERI text
         String plmn = ss.getOperatorAlphaLong();
         if (!TextUtils.equals(plmn, curPlmn)) {
-            boolean showPlmn = !TextUtils.isEmpty(plmn);
+            // Allow A blank plmn, "" to set showPlmn to true. Previously, we
+            // would set showPlmn to true only if plmn was not empty, i.e. was not
+            // null and not blank. But this would cause us to incorrectly display
+            // "No Service". Now showPlmn is set to true for any non null string.
+            boolean showPlmn = plmn != null;
             Log.d(LOG_TAG,
                     String.format("updateSpnDisplay: changed sending intent" +
                             " showPlmn='%b' plmn='%s'", showPlmn, plmn));
