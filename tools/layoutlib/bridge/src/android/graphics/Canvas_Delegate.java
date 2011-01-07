@@ -418,7 +418,7 @@ public final class Canvas_Delegate {
             assert false;
             Bridge.getLog().fidelityWarning(null,
                     "android.graphics.Canvas#setMatrix(android.graphics.Matrix) only " +
-                    "supports affine transformations in the Layout Preview.", null);
+                    "supports affine transformations.", null);
         }
     }
 

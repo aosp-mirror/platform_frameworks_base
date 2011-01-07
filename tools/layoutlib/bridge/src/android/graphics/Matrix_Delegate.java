@@ -17,6 +17,7 @@
 package android.graphics;
 
 
+import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
 import android.graphics.Matrix.ScaleToFit;
@@ -599,7 +600,10 @@ public final class Matrix_Delegate {
     /*package*/ static boolean native_setPolyToPoly(int native_object, float[] src, int srcIndex,
             float[] dst, int dstIndex, int pointCount) {
         // FIXME
-        throw new UnsupportedOperationException("Native delegate needed: Matrix_Delegate.native_setPolyToPoly");
+        Bridge.getLog().fidelityWarning(null,
+                "Matrix.setPolyToPoly is not supported.",
+                null);
+        return false;
     }
 
     /*package*/ static boolean native_invert(int native_object, int inverse) {
@@ -639,9 +643,7 @@ public final class Matrix_Delegate {
         if (isPts) {
             d.mapPoints(dst, dstIndex, src, srcIndex, ptCount);
         } else {
-            // src is vectors
-            // FIXME
-            throw new UnsupportedOperationException("Native delegate needed: Matrix_Delegate.native_mapPoints");
+            d.mapVectors(dst, dstIndex, src, srcIndex, ptCount);
         }
     }
 
@@ -655,8 +657,18 @@ public final class Matrix_Delegate {
     }
 
     /*package*/ static float native_mapRadius(int native_object, float radius) {
-        // FIXME
-        throw new UnsupportedOperationException("Native delegate needed: Matrix_Delegate.native_mapRadius");
+        Matrix_Delegate d = sManager.getDelegate(native_object);
+        if (d == null) {
+            return 0.f;
+        }
+
+        float[] src = new float[] { radius, 0.f, 0.f, radius };
+        d.mapVectors(src, 0, src, 0, 2);
+
+        float l1 = getPointLength(src, 0);
+        float l2 = getPointLength(src, 2);
+
+        return (float) Math.sqrt(l1 * l2);
     }
 
     /*package*/ static void native_getValues(int native_object, float[] values) {
@@ -842,15 +854,15 @@ public final class Matrix_Delegate {
 
      private void mapPoints(float[] dst, int dstIndex, float[] src, int srcIndex,
                            int pointCount) {
-         //checkPointArrays(src, srcIndex, dst, dstIndex, pointCount);
+         final int count = pointCount * 2;
 
          float[] tmpDest = dst;
          boolean inPlace = dst == src;
          if (inPlace) {
-             tmpDest = new float[dstIndex + pointCount * 2];
+             tmpDest = new float[dstIndex + count];
          }
 
-         for (int i = 0 ; i < pointCount * 2 ; i += 2) {
+         for (int i = 0 ; i < count ; i += 2) {
              // just in case we are doing in place, we better put this in temp vars
              float x = mValues[0] * src[i + srcIndex] +
                        mValues[1] * src[i + srcIndex + 1] +
@@ -864,7 +876,7 @@ public final class Matrix_Delegate {
          }
 
          if (inPlace) {
-             System.arraycopy(tmpDest, dstIndex, dst, dstIndex, pointCount * 2);
+             System.arraycopy(tmpDest, dstIndex, dst, dstIndex, count);
          }
      }
 
@@ -877,6 +889,37 @@ public final class Matrix_Delegate {
 
      private void mapPoints(float[] pts) {
          mapPoints(pts, 0, pts, 0, pts.length >> 1);
+     }
+
+     private void mapVectors(float[] dst, int dstIndex, float[] src, int srcIndex, int ptCount) {
+         if (hasPerspective()) {
+             // transform the (0,0) point
+             float[] origin = new float[] { 0.f, 0.f};
+             mapPoints(origin);
+
+             // translate the vector data as points
+             mapPoints(dst, dstIndex, src, srcIndex, ptCount);
+
+             // then substract the transformed origin.
+             final int count = ptCount * 2;
+             for (int i = 0 ; i < count ; i += 2) {
+                 dst[dstIndex + i] = dst[dstIndex + i] - origin[0];
+                 dst[dstIndex + i + 1] = dst[dstIndex + i + 1] - origin[1];
+             }
+         } else {
+             // make a copy of the matrix
+             Matrix_Delegate copy = new Matrix_Delegate(mValues);
+
+             // remove the translation
+             setTranslate(copy.mValues, 0, 0);
+
+             // map the content as points.
+             copy.mapPoints(dst, dstIndex, src, srcIndex, ptCount);
+         }
+     }
+
+     private static float getPointLength(float[] src, int index) {
+         return (float) Math.sqrt(src[index] * src[index] + src[index + 1] * src[index + 1]);
      }
 
     /**
