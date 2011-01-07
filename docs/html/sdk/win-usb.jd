@@ -82,7 +82,21 @@ padding: .25em 1em;
 
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
+width="9px" />
+USB Driver for Windows, Revision 4</a> <em>(December 2010)</em>
+  <div class="toggleme">
+
+<dl>
+<dt><p>Adds support for the Nexus S.</p></dt>
+</dl>
+ </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
+width="9px" />
 USB Driver for Windows, Revision 3</a> <em>(January 2010)</em>
   <div class="toggleme">
 
@@ -126,10 +140,11 @@ for the T-Mobile G1 and myTouch 3G (and similar devices).</p></dt>
 Android-powered
 devices:</p>
   <ul>
-    <li>T-Mobile G1* / ADP1</li>
-    <li>T-Mobile myTouch 3G* / Google Ion</li>
+    <li>ADP1 / T-Mobile G1*</li>
+    <li>ADP2 / Google Ion / T-Mobile myTouch 3G*</li>
     <li>Verizon Droid*</li>
     <li>Nexus One</li>
+    <li>Nexus S</li>
   </ul>
   <p>* <em>Or similar hardware on other carriers</em></p>
   <p>Any additional devices will require Windows drivers provided by

@@ -256,7 +256,7 @@
       </li>
       <li><a href="<?cs var:toroot?>guide/topics/admin/device-admin.html">
             <span class="en">Device Administration</span>
-         </a> <span class="new">new!</span>
+         </a>
       </li>
       <li class="toggle-list">
            <div>
@@ -403,7 +403,7 @@
                     </li>
                   </ul>
               </li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/proguard.html">Proguard</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/proguard.html">ProGuard</a> <span class="new">new!</span></li>
               <li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html#sqlite">sqlite3</a></li>
               <li><a href="<?cs var:toroot ?>guide/developing/tools/traceview.html" >Traceview</a></li>
               <li><a href="<?cs var:toroot ?>guide/developing/tools/zipalign.html" >zipalign</a></li>
@@ -445,7 +445,7 @@
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/publishing/licensing.html">
             <span class="en">Licensing Your Applications</span>
-          </a> <span class="new">new!</span></li>
+          </a></li>
       <li><a href="<?cs var:toroot ?>guide/publishing/preparing.html">
             <span class="en">Preparing to Publish</span>
             <span class="de" style="display:none">Vorbereitung auf die Veröffentlichung</span>
