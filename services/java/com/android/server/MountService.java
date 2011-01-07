@@ -1653,6 +1653,29 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         return 0;
     }
 
+    public int encryptStorage(String password) {
+        if (password == null) {
+            throw new IllegalArgumentException("password cannot be null");
+        }
+
+        // TODO: Enforce a permission
+
+        waitForReady();
+
+        if (DEBUG_EVENTS) {
+            Slog.i(TAG, "decrypting storage...");
+        }
+
+        try {
+            mConnector.doCommand(String.format("cryptfs enablecrypto wipe %s", password));
+        } catch (NativeDaemonConnectorException e) {
+            // Encryption failed
+            return e.getCode();
+        }
+
+        return 0;
+    }
+
     private void addObbStateLocked(ObbState obbState) throws RemoteException {
         final IBinder binder = obbState.getBinder();
         List<ObbState> obbStates = mObbMounts.get(binder);
