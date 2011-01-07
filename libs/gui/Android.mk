@@ -4,17 +4,25 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES:= \
 	ISensorEventConnection.cpp \
 	ISensorServer.cpp \
+	ISurfaceTexture.cpp \
 	Sensor.cpp \
 	SensorChannel.cpp \
 	SensorEventQueue.cpp \
-	SensorManager.cpp
+	SensorManager.cpp \
+	SurfaceTexture.cpp \
+	SurfaceTextureClient.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libutils \
 	libbinder \
 	libhardware \
-	libhardware_legacy
+	libhardware_legacy \
+	libui \
+	libEGL \
+	libGLESv2 \
+	libsurfaceflinger_client
+
 
 LOCAL_MODULE:= libgui
 
