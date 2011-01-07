@@ -1149,7 +1149,11 @@ public class TabletStatusBar extends StatusBar {
                     }
                 });
         } else {
-            vetoButton.setVisibility(View.INVISIBLE);
+            if ((sbn.notification.flags & Notification.FLAG_ONGOING_EVENT) == 0) {
+                vetoButton.setVisibility(View.INVISIBLE);
+            } else {
+                vetoButton.setVisibility(View.GONE);
+            }
         }
 
         // the large icon
