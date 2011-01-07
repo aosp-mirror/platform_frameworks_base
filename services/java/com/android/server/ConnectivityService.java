@@ -1132,11 +1132,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    // returns null if no failover available
+    // returns null if no failover available, otherwise returns the highest
+    // priority network we're trying
     private NetworkStateTracker tryFailover(int prevNetType) {
         /*
-         * If this is a default network, check if other defaults are available
-         * or active
+         * If this is a default network, check if other defaults are available.
+         * Try to reconnect on all available and let them hash it out when
+         * more than one connects.
          */
         NetworkStateTracker newNet = null;
         if (mNetAttributes[prevNetType].isDefault()) {
@@ -1149,54 +1151,30 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             for (int checkType=0; checkType <= ConnectivityManager.MAX_NETWORK_TYPE; checkType++) {
                 if (checkType == prevNetType) continue;
                 if (mNetAttributes[checkType] == null) continue;
-                if (mNetAttributes[checkType].isDefault()) {
-                    /* TODO - if we have multiple nets we could use
-                     * we may want to put more thought into which we choose
-                     */
-                    if (checkType == mNetworkPreference) {
-                        newType = checkType;
-                        break;
-                    }
-                    if (mNetAttributes[checkType].mPriority > newPriority) {
-                        newType = checkType;
-                        newPriority = mNetAttributes[newType].mPriority;
-                    }
-                }
-            }
+                if (!mNetAttributes[checkType].isDefault()) continue;
+                if (!mNetTrackers[checkType].isAvailable()) continue;
 
-            if (newType != -1) {
-                newNet = mNetTrackers[newType];
-                /**
-                 * See if the other network is available to fail over to.
-                 * If is not available, we enable it anyway, so that it
-                 * will be able to connect when it does become available,
-                 * but we report a total loss of connectivity rather than
-                 * report that we are attempting to fail over.
-                 */
-                if (newNet.isAvailable()) {
-                    NetworkInfo switchTo = newNet.getNetworkInfo();
-                    switchTo.setFailover(true);
-                    if (!switchTo.isConnectedOrConnecting() ||
-                            newNet.isTeardownRequested()) {
-                        newNet.reconnect();
-                    }
-                    if (DBG) {
-                        if (switchTo.isConnected()) {
-                            log("Switching to already connected " + switchTo.getTypeName());
-                        } else {
-                            log("Attempting to switch to " + switchTo.getTypeName());
-                        }
-                    }
-                } else {
-                    newNet.reconnect();
-                    newNet = null; // not officially avail..  try anyway, but
-                                   // report no failover
+                NetworkStateTracker tracker = mNetTrackers[checkType];
+                NetworkInfo info = tracker.getNetworkInfo();
+                if (!info.isConnectedOrConnecting() ||
+                        tracker.isTeardownRequested()) {
+                    info.setFailover(true);
+                    tracker.reconnect();
                 }
-            } else {
-                loge("Network failover failing.");
+                if (DBG) log("Attempting to switch to " + info.getTypeName());
+
+                // figure out if this is the highest priority network
+                // so we send an appropriate return value
+                if (checkType == mNetworkPreference) {
+                    newType = checkType;
+                }
+                if (mNetAttributes[checkType].mPriority > newPriority &&
+                        newType != mNetworkPreference) {
+                    newType = checkType;
+                    newPriority = mNetAttributes[newType].mPriority;
+                }
             }
         }
-
         return newNet;
     }
 
