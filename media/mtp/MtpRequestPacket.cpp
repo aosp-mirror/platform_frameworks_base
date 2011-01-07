@@ -22,6 +22,8 @@
 
 #include "MtpRequestPacket.h"
 
+#include <usbhost/usbhost.h>
+
 namespace android {
 
 MtpRequestPacket::MtpRequestPacket()
@@ -45,11 +47,13 @@ int MtpRequestPacket::read(int fd) {
 
 #ifdef MTP_HOST
     // write our buffer to the given endpoint (host mode)
-int MtpRequestPacket::write(struct usb_endpoint *ep)
+int MtpRequestPacket::write(struct usb_request *request)
 {
     putUInt32(MTP_CONTAINER_LENGTH_OFFSET, mPacketSize);
     putUInt16(MTP_CONTAINER_TYPE_OFFSET, MTP_CONTAINER_TYPE_COMMAND);
-    return transfer(ep, mBuffer, mPacketSize);
+    request->buffer = mBuffer;
+    request->buffer_length = mPacketSize;
+    return transfer(request);
 }
 #endif
 

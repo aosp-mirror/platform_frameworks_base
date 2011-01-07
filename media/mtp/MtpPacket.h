@@ -19,7 +19,7 @@
 
 #include "MtpTypes.h"
 
-struct usb_endpoint;
+struct usb_request;
 
 namespace android {
 
@@ -57,7 +57,7 @@ public:
     void                setParameter(int index, uint32_t value);
 
 #ifdef MTP_HOST
-    int                 transfer(struct usb_endpoint *ep, void* buffer, int length);
+    int                 transfer(struct usb_request* request);
 #endif
 
 protected:

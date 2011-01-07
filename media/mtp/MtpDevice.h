@@ -25,6 +25,8 @@
 #include <utils/threads.h>
 
 struct usb_device;
+struct usb_request;
+struct usb_endpoint_descriptor;
 
 namespace android {
 
@@ -36,9 +38,10 @@ class MtpDevice {
 private:
     struct usb_device*      mDevice;
     int                     mInterface;
-    struct usb_endpoint*    mEndpointIn;
-    struct usb_endpoint*    mEndpointOut;
-    struct usb_endpoint*    mEndpointIntr;
+    struct usb_request*     mRequestIn1;
+    struct usb_request*     mRequestIn2;
+    struct usb_request*     mRequestOut;
+    struct usb_request*     mRequestIntr;
     MtpDeviceInfo*          mDeviceInfo;
     MtpPropertyList         mDeviceProperties;
 
@@ -61,8 +64,9 @@ private:
 
 public:
                             MtpDevice(struct usb_device* device, int interface,
-                                    struct usb_endpoint *ep_in, struct usb_endpoint *ep_out,
-                                    struct usb_endpoint *ep_intr);
+                                    const struct usb_endpoint_descriptor *ep_in,
+                                    const struct usb_endpoint_descriptor *ep_out,
+                                    const struct usb_endpoint_descriptor *ep_intr);
     virtual                 ~MtpDevice();
 
     inline int              getID() const { return mID; }

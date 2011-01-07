@@ -20,6 +20,9 @@
 #include "MtpPacket.h"
 #include "mtp.h"
 
+struct usb_device;
+struct usb_request;
+
 namespace android {
 
 class MtpStringBuffer;
@@ -100,15 +103,15 @@ public:
 #endif
 
 #ifdef MTP_HOST
-    int                 read(struct usb_endpoint *ep);
-    int                 readData(struct usb_endpoint *ep, void* buffer, int length);
-    int                 readDataAsync(struct usb_endpoint *ep, void* buffer, int length);
-    int                 readDataWait(struct usb_endpoint *ep);
-    int                 readDataHeader(struct usb_endpoint *ep);
+    int                 read(struct usb_request *request);
+    int                 readData(struct usb_request *request, void* buffer, int length);
+    int                 readDataAsync(struct usb_request *req);
+    int                 readDataWait(struct usb_device *device);
+    int                 readDataHeader(struct usb_request *ep);
 
-    int                 writeDataHeader(struct usb_endpoint *ep, uint32_t length);
-    int                 write(struct usb_endpoint *ep);
-    int                 write(struct usb_endpoint *ep, void* buffer, uint32_t length);
+    int                 writeDataHeader(struct usb_request *ep, uint32_t length);
+    int                 write(struct usb_request *ep);
+    int                 write(struct usb_request *ep, void* buffer, uint32_t length);
 #endif
 
     inline bool         hasData() const { return mPacketSize > MTP_CONTAINER_HEADER_SIZE; }

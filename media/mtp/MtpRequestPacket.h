@@ -20,6 +20,8 @@
 #include "MtpPacket.h"
 #include "mtp.h"
 
+struct usb_request;
+
 namespace android {
 
 class MtpRequestPacket : public MtpPacket {
@@ -35,7 +37,7 @@ public:
 
 #ifdef MTP_HOST
     // write our buffer to the given endpoint
-    int                 write(struct usb_endpoint *ep);
+    int                 write(struct usb_request *request);
 #endif
 
     inline MtpOperationCode    getOperationCode() const { return getContainerCode(); }

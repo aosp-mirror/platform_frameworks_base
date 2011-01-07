@@ -29,12 +29,8 @@
 #include <errno.h>
 
 #include <usbhost/usbhost.h>
-#include <linux/version.h>
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 20)
-#include <linux/usb/ch9.h>
-#else
-#include <linux/usb_ch9.h>
-#endif
+
+struct usb_device;
 
 namespace android {
 
@@ -194,20 +190,13 @@ bool MtpClient::usbDeviceAdded(const char *devname) {
                 return mDone;
             }
 
-            struct usb_endpoint *ep_in = usb_endpoint_open(device, ep_in_desc);
-            struct usb_endpoint *ep_out = usb_endpoint_open(device, ep_out_desc);
-            struct usb_endpoint *ep_intr = usb_endpoint_open(device, ep_intr_desc);
-
             if (usb_device_claim_interface(device, interface->bInterfaceNumber)) {
                 LOGE("usb_device_claim_interface failed errno: %d\n", errno);
-                usb_endpoint_close(ep_in);
-                usb_endpoint_close(ep_out);
-                usb_endpoint_close(ep_intr);
                 return mDone;
             }
 
             MtpDevice* mtpDevice = new MtpDevice(device, interface->bInterfaceNumber,
-                        ep_in, ep_out, ep_intr);
+                        ep_in_desc, ep_out_desc, ep_intr_desc);
             mDeviceList.add(mtpDevice);
             mtpDevice->initialize();
             deviceAdded(mtpDevice);

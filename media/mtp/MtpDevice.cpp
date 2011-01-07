@@ -39,25 +39,35 @@
 namespace android {
 
 MtpDevice::MtpDevice(struct usb_device* device, int interface,
-            struct usb_endpoint *ep_in, struct usb_endpoint *ep_out,
-            struct usb_endpoint *ep_intr)
+            const struct usb_endpoint_descriptor *ep_in,
+            const struct usb_endpoint_descriptor *ep_out,
+            const struct usb_endpoint_descriptor *ep_intr)
     :   mDevice(device),
         mInterface(interface),
-        mEndpointIn(ep_in),
-        mEndpointOut(ep_out),
-        mEndpointIntr(ep_intr),
+        mRequestIn1(NULL),
+        mRequestIn2(NULL),
+        mRequestOut(NULL),
+        mRequestIntr(NULL),
         mDeviceInfo(NULL),
         mID(usb_device_get_unique_id(device)),
         mSessionID(0),
         mTransactionID(0),
         mReceivedResponse(false)
 {
+    mRequestIn1 = usb_request_new(device, ep_in);
+    mRequestIn2 = usb_request_new(device, ep_in);
+    mRequestOut = usb_request_new(device, ep_out);
+    mRequestIntr = usb_request_new(device, ep_intr);
 }
 
 MtpDevice::~MtpDevice() {
     close();
     for (int i = 0; i < mDeviceProperties.size(); i++)
         delete mDeviceProperties[i];
+    usb_request_free(mRequestIn1);
+    usb_request_free(mRequestIn2);
+    usb_request_free(mRequestOut);
+    usb_request_free(mRequestIntr);
 }
 
 void MtpDevice::initialize() {
@@ -325,7 +335,7 @@ bool MtpDevice::sendObject(MtpObjectInfo* info, int srcFD) {
         while (remaining > 0) {
             int count = read(srcFD, buffer, sizeof(buffer));
             if (count > 0) {
-                int written = mData.write(mEndpointOut, buffer, count);
+                int written = mData.write(mRequestOut, buffer, count);
                 // FIXME check error
                 remaining -= count;
             } else {
@@ -441,7 +451,7 @@ bool MtpDevice::readObject(MtpObjectHandle handle, const char* destPath, int gro
     mRequest.reset();
     mRequest.setParameter(1, handle);
     if (sendRequest(MTP_OPERATION_GET_OBJECT)
-            && mData.readDataHeader(mEndpointIn)) {
+            && mData.readDataHeader(mRequestIn1)) {
         uint32_t length = mData.getContainerLength();
         if (length < MTP_CONTAINER_HEADER_SIZE)
             goto fail;
@@ -461,20 +471,22 @@ bool MtpDevice::readObject(MtpObjectHandle handle, const char* destPath, int gro
 
         // USB reads greater than 16K don't work
         char buffer1[16384], buffer2[16384];
-        char* readBuffer = buffer1;
-        char* writeBuffer = NULL;
+        mRequestIn1->buffer = buffer1;
+        mRequestIn2->buffer = buffer2;
+        struct usb_request* req = mRequestIn1;
+        void* writeBuffer = NULL;
         int writeLength = 0;
 
         while (remaining > 0 || writeBuffer) {
             if (remaining > 0) {
                 // queue up a read request
-                int readSize = (remaining > sizeof(buffer1) ? sizeof(buffer1) : remaining);
-                if (mData.readDataAsync(mEndpointIn, readBuffer, readSize)) {
+                req->buffer_length = (remaining > sizeof(buffer1) ? sizeof(buffer1) : remaining);
+                if (mData.readDataAsync(req)) {
                     LOGE("readDataAsync failed");
                     goto fail;
                 }
             } else {
-                readBuffer = NULL;
+                req = NULL;
             }
 
             if (writeBuffer) {
@@ -482,23 +494,23 @@ bool MtpDevice::readObject(MtpObjectHandle handle, const char* destPath, int gro
                 if (write(fd, writeBuffer, writeLength) != writeLength) {
                     LOGE("write failed");
                     // wait for pending read before failing
-                    if (readBuffer)
-                        mData.readDataWait(mEndpointIn);
+                    if (req)
+                        mData.readDataWait(mDevice);
                     goto fail;
                 }
                 writeBuffer = NULL;
             }
 
             // wait for read to complete
-            if (readBuffer) {
-                int read = mData.readDataWait(mEndpointIn);
+            if (req) {
+                int read = mData.readDataWait(mDevice);
                 if (read < 0)
                     goto fail;
 
-                writeBuffer = readBuffer;
+                writeBuffer = req->buffer;
                 writeLength = read;
                 remaining -= read;
-                readBuffer = (readBuffer == buffer1 ? buffer2 : buffer1);
+                req = (req == mRequestIn1 ? mRequestIn2 : mRequestIn1);
             }
         }
 
@@ -518,7 +530,7 @@ bool MtpDevice::sendRequest(MtpOperationCode operation) {
     mRequest.setOperationCode(operation);
     if (mTransactionID > 0)
         mRequest.setTransactionID(mTransactionID++);
-    int ret = mRequest.write(mEndpointOut);
+    int ret = mRequest.write(mRequestOut);
     mRequest.dump();
     return (ret > 0);
 }
@@ -527,14 +539,14 @@ bool MtpDevice::sendData() {
     LOGV("sendData\n");
     mData.setOperationCode(mRequest.getOperationCode());
     mData.setTransactionID(mRequest.getTransactionID());
-    int ret = mData.write(mEndpointOut);
+    int ret = mData.write(mRequestOut);
     mData.dump();
     return (ret > 0);
 }
 
 bool MtpDevice::readData() {
     mData.reset();
-    int ret = mData.read(mEndpointIn);
+    int ret = mData.read(mRequestIn1);
     LOGV("readData returned %d\n", ret);
     if (ret >= MTP_CONTAINER_HEADER_SIZE) {
         if (mData.getContainerType() == MTP_CONTAINER_TYPE_RESPONSE) {
@@ -557,7 +569,7 @@ bool MtpDevice::readData() {
 bool MtpDevice::writeDataHeader(MtpOperationCode operation, int dataLength) {
     mData.setOperationCode(operation);
     mData.setTransactionID(mRequest.getTransactionID());
-    return (!mData.writeDataHeader(mEndpointOut, dataLength));
+    return (!mData.writeDataHeader(mRequestOut, dataLength));
 }
 
 MtpResponseCode MtpDevice::readResponse() {
@@ -566,7 +578,7 @@ MtpResponseCode MtpDevice::readResponse() {
         mReceivedResponse = false;
         return mResponse.getResponseCode();
     }
-    int ret = mResponse.read(mEndpointIn);
+    int ret = mResponse.read(mRequestIn1);
     if (ret >= MTP_CONTAINER_HEADER_SIZE) {
         mResponse.dump();
         return mResponse.getResponseCode();
