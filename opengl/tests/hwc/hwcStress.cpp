@@ -92,8 +92,6 @@
 #include <unistd.h>
 #include <vector>
 
-#include <arpa/inet.h> // For ntohl() and htonl()
-
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -112,6 +110,9 @@
 #include <testUtil.h>
 
 #include <hardware/hwcomposer.h>
+
+#include <glTestLib.h>
+#include <hwc/hwcTestLib.h>
 
 using namespace std;
 using namespace android;
@@ -167,55 +168,7 @@ bool eFlag, sFlag, pFlag;
         memset((addr), 0, (size)); \
     } while (0)
 
-// Represent RGB color as fraction of color components.
-// Each of the color components are expected in the range [0.0, 1.0]
-class RGBColor {
-  public:
-    RGBColor(): _r(0.0), _g(0.0), _b(0.0) {};
-    RGBColor(float f): _r(f), _g(f), _b(f) {}; // Gray
-    RGBColor(float r, float g, float b): _r(r), _g(g), _b(b) {};
-    float r(void) const { return _r; }
-    float g(void) const { return _g; }
-    float b(void) const { return _b; }
-
-  private:
-    float _r;
-    float _g;
-    float _b;
-};
-
-// Represent YUV color as fraction of color components.
-// Each of the color components are expected in the range [0.0, 1.0]
-class YUVColor {
-  public:
-    YUVColor(): _y(0.0), _u(0.0), _v(0.0) {};
-    YUVColor(float f): _y(f), _u(0.0), _v(0.0) {}; // Gray
-    YUVColor(float y, float u, float v): _y(y), _u(u), _v(v) {};
-    float y(void) const { return _y; }
-    float u(void) const { return _u; }
-    float v(void) const { return _v; }
-
-  private:
-    float _y;
-    float _u;
-    float _v;
-};
-
 // File scope constants
-static const struct graphicFormat {
-    unsigned int format;
-    const char *desc;
-    unsigned int wMod, hMod; // Width/height mod this value must equal zero
-} graphicFormat[] = {
-    {HAL_PIXEL_FORMAT_RGBA_8888, "RGBA8888", 1, 1},
-    {HAL_PIXEL_FORMAT_RGBX_8888, "RGBX8888", 1, 1},
-    {HAL_PIXEL_FORMAT_RGB_888, "RGB888", 1, 1},
-    {HAL_PIXEL_FORMAT_RGB_565, "RGB565", 1, 1},
-    {HAL_PIXEL_FORMAT_BGRA_8888, "BGRA8888", 1, 1},
-    {HAL_PIXEL_FORMAT_RGBA_5551, "RGBA5551", 1, 1},
-    {HAL_PIXEL_FORMAT_RGBA_4444, "RGBA4444", 1, 1},
-    {HAL_PIXEL_FORMAT_YV12, "YV12", 2, 2},
-};
 const unsigned int blendingOps[] = {
     HWC_BLENDING_NONE,
     HWC_BLENDING_PREMULT,
@@ -240,30 +193,15 @@ const vector<unsigned int> vecTransformFlags(transformFlags,
 // File scope globals
 static const int texUsage = GraphicBuffer::USAGE_HW_TEXTURE |
         GraphicBuffer::USAGE_SW_WRITE_RARELY;
-static hw_module_t const *hwcModule;
 static hwc_composer_device_t *hwcDevice;
-static vector <vector <sp<GraphicBuffer> > > frames;
 static EGLDisplay dpy;
-static EGLContext context;
 static EGLSurface surface;
 static EGLint width, height;
+static vector <vector <sp<GraphicBuffer> > > frames;
 
 // File scope prototypes
-static void execCmd(const char *cmd);
-static void checkEglError(const char* op, EGLBoolean returnVal = EGL_TRUE);
-static void checkGlError(const char* op);
-static void printEGLConfiguration(EGLDisplay dpy, EGLConfig config);
-static void printGLString(const char *name, GLenum s);
-static hwc_layer_list_t *createLayerList(size_t numLayers);
-static void freeLayerList(hwc_layer_list_t *list);
-static void fillColor(GraphicBuffer *gBuf, RGBColor color, float trans);
-static void fillColor(GraphicBuffer *gBuf, YUVColor color, float trans);
 void init(void);
 void initFrames(unsigned int seed);
-void displayList(hwc_layer_list_t *list);
-void displayListPrepareModifiable(hwc_layer_list_t *list);
-void displayListHandles(hwc_layer_list_t *list);
-const char *graphicFormat2str(unsigned int format);
 template <class T> vector<T> vectorRandSelect(const vector<T>& vec, size_t num);
 template <class T> T vectorOr(const vector<T>& vec);
 
@@ -441,8 +379,8 @@ main(int argc, char *argv[])
         testPrintE("Command too long for: %s", CMD_STOP_FRAMEWORK);
         exit(14);
     }
-    execCmd(cmd);
-    testDelay(1.0); // TODO - needs means to query whether asyncronous stop
+    testExecCmd(cmd);
+    testDelay(1.0); // TODO - need means to query whether asyncronous stop
                     // framework operation has completed.  For now, just wait
                     // a long time.
 
@@ -473,9 +411,9 @@ main(int argc, char *argv[])
         srand48(pass);
 
         hwc_layer_list_t *list;
-        list = createLayerList(testRandMod(frames.size()) + 1);
+        list = hwcTestCreateLayerList(testRandMod(frames.size()) + 1);
         if (list == NULL) {
-            testPrintE("createLayerList failed");
+            testPrintE("hwcTestCreateLayerList failed");
             exit(20);
         }
 
@@ -540,11 +478,11 @@ main(int argc, char *argv[])
         }
 
         // Perform prepare operation
-        if (verbose) { testPrintI("Prepare:"); displayList(list); }
+        if (verbose) { testPrintI("Prepare:"); hwcTestDisplayList(list); }
         hwcDevice->prepare(hwcDevice, list);
         if (verbose) {
             testPrintI("Post Prepare:");
-            displayListPrepareModifiable(list);
+            hwcTestDisplayListPrepareModifiable(list);
         }
 
         // Turn off the geometry changed flag
@@ -553,7 +491,7 @@ main(int argc, char *argv[])
         // Perform the set operation(s)
         if (verbose) {testPrintI("Set:"); }
         for (unsigned int n1 = 0; n1 < numSet; n1++) {
-            if (verbose) {displayListHandles(list); }
+            if (verbose) { hwcTestDisplayListHandles(list); }
             hwcDevice->set(hwcDevice, dpy, surface, list);
 
             // Prandomly select a new set of handles
@@ -567,8 +505,7 @@ main(int argc, char *argv[])
             testDelay(perSetDelay);
         }
 
-
-        freeLayerList(list);
+        hwcTestFreeLayerList(list);
         testPrintI("==== Completed pass: %u", pass);
     }
 
@@ -580,448 +517,24 @@ main(int argc, char *argv[])
         testPrintE("Command too long for: %s", CMD_START_FRAMEWORK);
         exit(21);
     }
-    execCmd(cmd);
+    testExecCmd(cmd);
 
     testPrintI("Successfully completed %u passes", pass - startPass);
 
     return 0;
 }
 
-/*
- * Execute Command
- *
- * Executes the command pointed to by cmd.  Output from the
- * executed command is captured and sent to LogCat Info.  Once
- * the command has finished execution, it's exit status is captured
- * and checked for an exit status of zero.  Any other exit status
- * causes diagnostic information to be printed and an immediate
- * testcase failure.
- */
-static void execCmd(const char *cmd)
-{
-    FILE *fp;
-    int rv;
-    int status;
-    char str[MAXSTR];
-
-    // Display command to be executed
-    testPrintI("cmd: %s", cmd);
-
-    // Execute the command
-    fflush(stdout);
-    if ((fp = popen(cmd, "r")) == NULL) {
-        testPrintE("execCmd popen failed, errno: %i", errno);
-        exit(30);
-    }
-
-    // Obtain and display each line of output from the executed command
-    while (fgets(str, sizeof(str), fp) != NULL) {
-        if ((strlen(str) > 1) && (str[strlen(str) - 1] == '\n')) {
-            str[strlen(str) - 1] = '\0';
-        }
-        testPrintI(" out: %s", str);
-    }
-
-    // Obtain and check return status of executed command.
-    // Fail on non-zero exit status
-    status = pclose(fp);
-    if (!(WIFEXITED(status) && (WEXITSTATUS(status) == 0))) {
-        testPrintE("Unexpected command failure");
-        testPrintE("  status: %#x", status);
-        if (WIFEXITED(status)) {
-            testPrintE("WEXITSTATUS: %i", WEXITSTATUS(status));
-        }
-        if (WIFSIGNALED(status)) {
-            testPrintE("WTERMSIG: %i", WTERMSIG(status));
-        }
-        exit(31);
-    }
-}
-
-static void checkEglError(const char* op, EGLBoolean returnVal) {
-    if (returnVal != EGL_TRUE) {
-        testPrintE("%s() returned %d", op, returnVal);
-    }
-
-    for (EGLint error = eglGetError(); error != EGL_SUCCESS; error
-            = eglGetError()) {
-        testPrintE("after %s() eglError %s (0x%x)",
-                   op, EGLUtils::strerror(error), error);
-    }
-}
-
-static void checkGlError(const char* op) {
-    for (GLint error = glGetError(); error; error
-            = glGetError()) {
-        testPrintE("after %s() glError (0x%x)", op, error);
-    }
-}
-
-static void printEGLConfiguration(EGLDisplay dpy, EGLConfig config) {
-
-#define X(VAL) {VAL, #VAL}
-    struct {EGLint attribute; const char* name;} names[] = {
-    X(EGL_BUFFER_SIZE),
-    X(EGL_ALPHA_SIZE),
-    X(EGL_BLUE_SIZE),
-    X(EGL_GREEN_SIZE),
-    X(EGL_RED_SIZE),
-    X(EGL_DEPTH_SIZE),
-    X(EGL_STENCIL_SIZE),
-    X(EGL_CONFIG_CAVEAT),
-    X(EGL_CONFIG_ID),
-    X(EGL_LEVEL),
-    X(EGL_MAX_PBUFFER_HEIGHT),
-    X(EGL_MAX_PBUFFER_PIXELS),
-    X(EGL_MAX_PBUFFER_WIDTH),
-    X(EGL_NATIVE_RENDERABLE),
-    X(EGL_NATIVE_VISUAL_ID),
-    X(EGL_NATIVE_VISUAL_TYPE),
-    X(EGL_SAMPLES),
-    X(EGL_SAMPLE_BUFFERS),
-    X(EGL_SURFACE_TYPE),
-    X(EGL_TRANSPARENT_TYPE),
-    X(EGL_TRANSPARENT_RED_VALUE),
-    X(EGL_TRANSPARENT_GREEN_VALUE),
-    X(EGL_TRANSPARENT_BLUE_VALUE),
-    X(EGL_BIND_TO_TEXTURE_RGB),
-    X(EGL_BIND_TO_TEXTURE_RGBA),
-    X(EGL_MIN_SWAP_INTERVAL),
-    X(EGL_MAX_SWAP_INTERVAL),
-    X(EGL_LUMINANCE_SIZE),
-    X(EGL_ALPHA_MASK_SIZE),
-    X(EGL_COLOR_BUFFER_TYPE),
-    X(EGL_RENDERABLE_TYPE),
-    X(EGL_CONFORMANT),
-   };
-#undef X
-
-    for (size_t j = 0; j < sizeof(names) / sizeof(names[0]); j++) {
-        EGLint value = -1;
-        EGLint returnVal = eglGetConfigAttrib(dpy, config, names[j].attribute, &value);
-        EGLint error = eglGetError();
-        if (returnVal && error == EGL_SUCCESS) {
-            testPrintI(" %s: %d (%#x)", names[j].name, value, value);
-        }
-    }
-    testPrintI("");
-}
-
-static void printGLString(const char *name, GLenum s)
-{
-    const char *v = (const char *) glGetString(s);
-
-    if (v == NULL) {
-        testPrintI("GL %s unknown", name);
-    } else {
-        testPrintI("GL %s = %s", name, v);
-    }
-}
-
-/*
- * createLayerList
- * dynamically creates layer list with numLayers worth
- * of hwLayers entries.
- */
-static hwc_layer_list_t *createLayerList(size_t numLayers)
-{
-    hwc_layer_list_t *list;
-
-    size_t size = sizeof(hwc_layer_list) + numLayers * sizeof(hwc_layer_t);
-    if ((list = (hwc_layer_list_t *) calloc(1, size)) == NULL) {
-        return NULL;
-    }
-    list->flags = HWC_GEOMETRY_CHANGED;
-    list->numHwLayers = numLayers;
-
-    return list;
-}
-
-/*
- * freeLayerList
- * Frees memory previous allocated via createLayerList().
- */
-static void freeLayerList(hwc_layer_list_t *list)
-{
-    free(list);
-}
-
-static void fillColor(GraphicBuffer *gBuf, RGBColor color, float trans)
-{
-    unsigned char* buf = NULL;
-    status_t err;
-    uint32_t pixel;
-
-    // RGB 2 YUV conversion ratios
-    const struct rgb2yuvRatios {
-        int format;
-        float weightRed;
-        float weightBlu;
-        float weightGrn;
-    } rgb2yuvRatios[] = {
-        { HAL_PIXEL_FORMAT_YV12, 0.299, 0.114, 0.587 },
-    };
-
-    const struct rgbAttrib {
-        int format;
-        bool   hostByteOrder;
-        size_t bytes;
-        size_t rOffset;
-        size_t rSize;
-        size_t gOffset;
-        size_t gSize;
-        size_t bOffset;
-        size_t bSize;
-        size_t aOffset;
-        size_t aSize;
-    } rgbAttributes[] = {
-        {HAL_PIXEL_FORMAT_RGBA_8888, false, 4,  0, 8,  8, 8, 16, 8, 24, 8},
-        {HAL_PIXEL_FORMAT_RGBX_8888, false, 4,  0, 8,  8, 8, 16, 8,  0, 0},
-        {HAL_PIXEL_FORMAT_RGB_888,   false, 3,  0, 8,  8, 8, 16, 8,  0, 0},
-        {HAL_PIXEL_FORMAT_RGB_565,   true,  2,  0, 5,  5, 6, 11, 5,  0, 0},
-        {HAL_PIXEL_FORMAT_BGRA_8888, false, 4, 16, 8,  8, 8,  0, 8, 24, 8},
-        {HAL_PIXEL_FORMAT_RGBA_5551, true , 2,  0, 5,  5, 5, 10, 5, 15, 1},
-        {HAL_PIXEL_FORMAT_RGBA_4444, false, 2, 12, 4,  0, 4,  4, 4,  8, 4},
-    };
-
-    // If YUV format, convert color and pass work to YUV color fill
-    for (unsigned int n1 = 0; n1 < NUMA(rgb2yuvRatios); n1++) {
-        if (gBuf->getPixelFormat() == rgb2yuvRatios[n1].format) {
-            float wr = rgb2yuvRatios[n1].weightRed;
-            float wb = rgb2yuvRatios[n1].weightBlu;
-            float wg = rgb2yuvRatios[n1].weightGrn;
-            float y = wr * color.r() + wb * color.b() + wg * color.g();
-            float u = 0.5 * ((color.b() - y) / (1 - wb)) + 0.5;
-            float v = 0.5 * ((color.r() - y) / (1 - wr)) + 0.5;
-            YUVColor yuvColor(y, u, v);
-            fillColor(gBuf, yuvColor, trans);
-            return;
-        }
-    }
-
-    const struct rgbAttrib *attrib;
-    for (attrib = rgbAttributes; attrib < rgbAttributes + NUMA(rgbAttributes);
-         attrib++) {
-        if (attrib->format == gBuf->getPixelFormat()) { break; }
-    }
-    if (attrib >= rgbAttributes + NUMA(rgbAttributes)) {
-        testPrintE("fillColor rgb unsupported format of: %u",
-        gBuf->getPixelFormat());
-        exit(50);
-    }
-
-    pixel = htonl((uint32_t) (((1 << attrib->rSize) - 1) * color.r())
-         << ((sizeof(pixel) * BITSPERBYTE)
-             - (attrib->rOffset + attrib->rSize)));
-    pixel |= htonl((uint32_t) (((1 << attrib->gSize) - 1) * color.g())
-         << ((sizeof(pixel) * BITSPERBYTE)
-             - (attrib->gOffset + attrib->gSize)));
-    pixel |= htonl((uint32_t) (((1 << attrib->bSize) - 1) * color.b())
-         << ((sizeof(pixel) * BITSPERBYTE)
-             - (attrib->bOffset + attrib->bSize)));
-    if (attrib->aSize) {
-        pixel |= htonl((uint32_t) (((1 << attrib->aSize) - 1) * trans)
-             << ((sizeof(pixel) * BITSPERBYTE)
-                 - (attrib->aOffset + attrib->aSize)));
-    }
-    if (attrib->hostByteOrder) {
-        pixel = ntohl(pixel);
-        pixel >>= sizeof(pixel) * BITSPERBYTE - attrib->bytes * BITSPERBYTE;
-    }
-
-    err = gBuf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&buf));
-    if (err != 0) {
-        testPrintE("fillColor rgb lock failed: %d", err);
-        exit(51);
-    }
-
-    for (unsigned int row = 0; row < gBuf->getHeight(); row++) {
-        for (unsigned int col = 0; col < gBuf->getWidth(); col++) {
-          memmove(buf, &pixel, attrib->bytes);
-          buf += attrib->bytes;
-        }
-        for (unsigned int pad = 0;
-             pad < (gBuf->getStride() - gBuf->getWidth()) * attrib->bytes;
-             pad++) {
-            *buf++ = testRandMod(256);
-        }
-    }
-
-    err = gBuf->unlock();
-    if (err != 0) {
-        testPrintE("fillColor rgb unlock failed: %d", err);
-        exit(52);
-    }
-}
-
-static void fillColor(GraphicBuffer *gBuf, YUVColor color, float trans)
-{
-    unsigned char* buf = NULL;
-    status_t err;
-    unsigned int width = gBuf->getWidth();
-    unsigned int height = gBuf->getHeight();
-
-    const struct yuvAttrib {
-        int format;
-        bool   planar;
-        unsigned int uSubSampX;
-        unsigned int uSubSampY;
-        unsigned int vSubSampX;
-        unsigned int vSubSampY;
-    } yuvAttributes[] = {
-        { HAL_PIXEL_FORMAT_YV12, true, 2, 2, 2, 2},
-    };
-
-    const struct yuvAttrib *attrib;
-    for (attrib = yuvAttributes; attrib < yuvAttributes + NUMA(yuvAttributes);
-         attrib++) {
-        if (attrib->format == gBuf->getPixelFormat()) { break; }
-    }
-    if (attrib >= yuvAttributes + NUMA(yuvAttributes)) {
-        testPrintE("fillColor yuv unsupported format of: %u",
-        gBuf->getPixelFormat());
-        exit(60);
-    }
-
-    assert(attrib->planar == true); // So far, only know how to handle planar
-
-    err = gBuf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&buf));
-    if (err != 0) {
-        testPrintE("fillColor lock failed: %d", err);
-        exit(61);
-    }
-
-    // Fill in Y component
-    for (unsigned int row = 0; row < height; row++) {
-        for (unsigned int col = 0; col < width; col++) {
-            *buf++ = 255 * color.y();
-        }
-        for (unsigned int pad = 0; pad < gBuf->getStride() - gBuf->getWidth();
-             pad++) {
-             *buf++ = testRandMod(256);
-        }
-    }
-
-    // Fill in U component
-    for (unsigned int row = 0; row < height; row += attrib->uSubSampY) {
-        for (unsigned int col = 0; col < width; col += attrib->uSubSampX) {
-            *buf++ = 255 * color.u();
-        }
-        for (unsigned int pad = 0; pad < gBuf->getStride() - gBuf->getWidth();
-             pad += attrib->uSubSampX) {
-            *buf++ = testRandMod(256);
-        }
-    }
-
-    // Fill in V component
-    for (unsigned int row = 0; row < height; row += attrib->vSubSampY) {
-        for (unsigned int col = 0; col < width; col += attrib->vSubSampX) {
-            *buf++ = 255 * color.v();
-        }
-        for (unsigned int pad = 0; pad < gBuf->getStride() - gBuf->getWidth();
-             pad += attrib->vSubSampX) {
-            *buf++ = testRandMod(256);
-        }
-    }
-
-    err = gBuf->unlock();
-    if (err != 0) {
-        testPrintE("fillColor unlock failed: %d", err);
-        exit(62);
-    }
-}
-
 void init(void)
 {
-    int rv;
+    srand48(0); // Defensively set pseudo random number generator.
+                // Should not need to set this, because a stress test
+                // sets the seed on each pass.  Defensively set it here
+                // so that future code that uses pseudo random numbers
+                // before the first pass will be deterministic.
 
-    EGLBoolean returnValue;
-    EGLConfig myConfig = {0};
-    EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
-    EGLint sConfigAttribs[] = {
-        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-        EGL_NONE };
-    EGLint majorVersion, minorVersion;
+    hwcTestInitDisplay(verbose, &dpy, &surface, &width, &height);
 
-    checkEglError("<init>");
-    dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    checkEglError("eglGetDisplay");
-    if (dpy == EGL_NO_DISPLAY) {
-        testPrintE("eglGetDisplay returned EGL_NO_DISPLAY");
-        exit(70);
-    }
-
-    returnValue = eglInitialize(dpy, &majorVersion, &minorVersion);
-    checkEglError("eglInitialize", returnValue);
-    testPrintI("EGL version %d.%d", majorVersion, minorVersion);
-    if (returnValue != EGL_TRUE) {
-        testPrintE("eglInitialize failed");
-        exit(71);
-    }
-
-    EGLNativeWindowType window = android_createDisplaySurface();
-    if (window == NULL) {
-        testPrintE("android_createDisplaySurface failed");
-        exit(72);
-    }
-    returnValue = EGLUtils::selectConfigForNativeWindow(dpy,
-        sConfigAttribs, window, &myConfig);
-    if (returnValue) {
-        testPrintE("EGLUtils::selectConfigForNativeWindow() returned %d",
-            returnValue);
-        exit(73);
-    }
-    checkEglError("EGLUtils::selectConfigForNativeWindow");
-
-    testPrintI("Chose this configuration:");
-    printEGLConfiguration(dpy, myConfig);
-
-    surface = eglCreateWindowSurface(dpy, myConfig, window, NULL);
-    checkEglError("eglCreateWindowSurface");
-    if (surface == EGL_NO_SURFACE) {
-        testPrintE("gelCreateWindowSurface failed.");
-        exit(74);
-    }
-
-    context = eglCreateContext(dpy, myConfig, EGL_NO_CONTEXT, contextAttribs);
-    checkEglError("eglCreateContext");
-    if (context == EGL_NO_CONTEXT) {
-        testPrintE("eglCreateContext failed");
-        exit(75);
-    }
-    returnValue = eglMakeCurrent(dpy, surface, surface, context);
-    checkEglError("eglMakeCurrent", returnValue);
-    if (returnValue != EGL_TRUE) {
-        testPrintE("eglMakeCurrent failed");
-        exit(76);
-    }
-    eglQuerySurface(dpy, surface, EGL_WIDTH, &width);
-    checkEglError("eglQuerySurface");
-    eglQuerySurface(dpy, surface, EGL_HEIGHT, &height);
-    checkEglError("eglQuerySurface");
-
-    testPrintI("Window dimensions: %d x %d", width, height);
-
-    printGLString("Version", GL_VERSION);
-    printGLString("Vendor", GL_VENDOR);
-    printGLString("Renderer", GL_RENDERER);
-    printGLString("Extensions", GL_EXTENSIONS);
-
-    if ((rv = hw_get_module(HWC_HARDWARE_MODULE_ID, &hwcModule)) != 0) {
-        testPrintE("hw_get_module failed, rv: %i", rv);
-        errno = -rv;
-        perror(NULL);
-        exit(77);
-    }
-    if ((rv = hwc_open(hwcModule, &hwcDevice)) != 0) {
-        testPrintE("hwc_open failed, rv: %i", rv);
-        errno = -rv;
-        perror(NULL);
-        exit(78);
-    }
-
-    testPrintI("");
+    hwcTestOpenHwc(&hwcDevice);
 }
 
 /*
@@ -1051,8 +564,9 @@ void initFrames(unsigned int seed)
     for (unsigned int row = 0; row < rows; row++) {
         // All frames within a row have to have the same format and
         // dimensions.  Width and height need to be >= 1.
-        unsigned int formatIdx = testRandMod(NUMA(graphicFormat));
-        const struct graphicFormat *formatPtr = &graphicFormat[formatIdx];
+        unsigned int formatIdx = testRandMod(NUMA(hwcTestGraphicFormat));
+        const struct hwcTestGraphicFormat *formatPtr
+            = &hwcTestGraphicFormat[formatIdx];
         int format = formatPtr->format;
 
         // Pick width and height, which must be >= 1 and the size
@@ -1069,162 +583,31 @@ void initFrames(unsigned int seed)
         }
         if (verbose) {
             testPrintI("  frame %u width: %u height: %u format: %u %s",
-                       row, w, h, format, graphicFormat2str(format));
+                       row, w, h, format, hwcTestGraphicFormat2str(format));
         }
 
         size_t cols = testRandMod((maxCols + 1) - minCols) + minCols;
         frames[row].resize(cols);
         for (unsigned int col = 0; col < cols; col++) {
-            RGBColor color(testRandFract(), testRandFract(), testRandFract());
-            float transp = testRandFract();
+            ColorFract color(testRandFract(), testRandFract(), testRandFract());
+            float alpha = testRandFract();
 
             frames[row][col] = new GraphicBuffer(w, h, format, texUsage);
             if ((rv = frames[row][col]->initCheck()) != NO_ERROR) {
                 testPrintE("GraphicBuffer initCheck failed, rv: %i", rv);
                 testPrintE("  frame %u width: %u height: %u format: %u %s",
-                           row, w, h, format, graphicFormat2str(format));
+                           row, w, h, format, hwcTestGraphicFormat2str(format));
                 exit(80);
             }
 
-            fillColor(frames[row][col].get(), color, transp);
+            hwcTestFillColor(frames[row][col].get(), color, alpha);
             if (verbose) {
-                testPrintI("    buf: %p handle: %p color: <%f, %f, %f> "
-                           "transp: %f",
+                testPrintI("    buf: %p handle: %p color: %s alpha: %f",
                            frames[row][col].get(), frames[row][col]->handle,
-                           color.r(), color.g(), color.b(), transp);
+                           string(color).c_str(), alpha);
             }
         }
     }
-}
-
-void displayList(hwc_layer_list_t *list)
-{
-    testPrintI("  flags: %#x%s", list->flags,
-               (list->flags & HWC_GEOMETRY_CHANGED) ? " GEOMETRY_CHANGED" : "");
-    testPrintI("  numHwLayers: %u", list->numHwLayers);
-
-    for (unsigned int layer = 0; layer < list->numHwLayers; layer++) {
-        testPrintI("    layer %u compositionType: %#x%s%s", layer,
-                   list->hwLayers[layer].compositionType,
-                   (list->hwLayers[layer].compositionType == HWC_FRAMEBUFFER)
-                       ? " FRAMEBUFFER" : "",
-                   (list->hwLayers[layer].compositionType == HWC_OVERLAY)
-                       ? " OVERLAY" : "");
-
-        testPrintI("      hints: %#x",
-                   list->hwLayers[layer].hints,
-                   (list->hwLayers[layer].hints & HWC_HINT_TRIPLE_BUFFER)
-                       ? " TRIPLE_BUFFER" : "",
-                   (list->hwLayers[layer].hints & HWC_HINT_CLEAR_FB)
-                       ? " CLEAR_FB" : "");
-
-        testPrintI("      flags: %#x%s",
-                   list->hwLayers[layer].flags,
-                   (list->hwLayers[layer].flags & HWC_SKIP_LAYER)
-                       ? " SKIP_LAYER" : "");
-
-        testPrintI("      handle: %p",
-                   list->hwLayers[layer].handle);
-
-        // Intentionally skipped display of ROT_180 & ROT_270,
-        // which are formed from combinations of the other flags.
-        testPrintI("      transform: %#x%s%s%s",
-                   list->hwLayers[layer].transform,
-                   (list->hwLayers[layer].transform & HWC_TRANSFORM_FLIP_H)
-                       ? " FLIP_H" : "",
-                   (list->hwLayers[layer].transform & HWC_TRANSFORM_FLIP_V)
-                       ? " FLIP_V" : "",
-                   (list->hwLayers[layer].transform & HWC_TRANSFORM_ROT_90)
-                       ? " ROT_90" : "");
-
-        testPrintI("      blending: %#x",
-                   list->hwLayers[layer].blending,
-                   (list->hwLayers[layer].blending == HWC_BLENDING_NONE)
-                       ? " NONE" : "",
-                   (list->hwLayers[layer].blending == HWC_BLENDING_PREMULT)
-                       ? " PREMULT" : "",
-                   (list->hwLayers[layer].blending == HWC_BLENDING_COVERAGE)
-                       ? " COVERAGE" : "");
-
-        testPrintI("      sourceCrop: [%i, %i, %i, %i]",
-                   list->hwLayers[layer].sourceCrop.left,
-                   list->hwLayers[layer].sourceCrop.top,
-                   list->hwLayers[layer].sourceCrop.right,
-                   list->hwLayers[layer].sourceCrop.bottom);
-
-        testPrintI("      displayFrame: [%i, %i, %i, %i]",
-                   list->hwLayers[layer].displayFrame.left,
-                   list->hwLayers[layer].displayFrame.top,
-                   list->hwLayers[layer].displayFrame.right,
-                   list->hwLayers[layer].displayFrame.bottom);
-        testPrintI("      scaleFactor: [%f %f]",
-                   (float) (list->hwLayers[layer].displayFrame.right
-                            - list->hwLayers[layer].displayFrame.left)
-                       / (float) (list->hwLayers[layer].sourceCrop.right
-                            - list->hwLayers[layer].sourceCrop.left),
-                   (float) (list->hwLayers[layer].displayFrame.bottom
-                            - list->hwLayers[layer].displayFrame.top)
-                       / (float) (list->hwLayers[layer].sourceCrop.bottom
-                            - list->hwLayers[layer].sourceCrop.top));
-    }
-}
-
-/*
- * Display List Prepare Modifiable
- *
- * Displays the portions of a list that are meant to be modified by
- * a prepare call.
- */
-void displayListPrepareModifiable(hwc_layer_list_t *list)
-{
-    for (unsigned int layer = 0; layer < list->numHwLayers; layer++) {
-        testPrintI("    layer %u compositionType: %#x%s%s", layer,
-                   list->hwLayers[layer].compositionType,
-                   (list->hwLayers[layer].compositionType == HWC_FRAMEBUFFER)
-                       ? " FRAMEBUFFER" : "",
-                   (list->hwLayers[layer].compositionType == HWC_OVERLAY)
-                       ? " OVERLAY" : "");
-        testPrintI("      hints: %#x%s%s",
-                   list->hwLayers[layer].hints,
-                   (list->hwLayers[layer].hints & HWC_HINT_TRIPLE_BUFFER)
-                       ? " TRIPLE_BUFFER" : "",
-                   (list->hwLayers[layer].hints & HWC_HINT_CLEAR_FB)
-                       ? " CLEAR_FB" : "");
-    }
-}
-
-/*
- * Display List Handles
- *
- * Displays the handles of all the graphic buffers in the list.
- */
-void displayListHandles(hwc_layer_list_t *list)
-{
-    const unsigned int maxLayersPerLine = 6;
-
-    ostringstream str("  layers:");
-    for (unsigned int layer = 0; layer < list->numHwLayers; layer++) {
-        str << ' ' << list->hwLayers[layer].handle;
-        if (((layer % maxLayersPerLine) == (maxLayersPerLine - 1))
-            && (layer != list->numHwLayers - 1)) {
-            testPrintI("%s", str.str().c_str());
-            str.str("    ");
-        }
-    }
-    testPrintI("%s", str.str().c_str());
-}
-
-const char *graphicFormat2str(unsigned int format)
-{
-    const static char *unknown = "unknown";
-
-    for (unsigned int n1 = 0; n1 < NUMA(graphicFormat); n1++) {
-        if (format == graphicFormat[n1].format) {
-            return graphicFormat[n1].desc;
-        }
-    }
-
-    return unknown;
 }
 
 /*
