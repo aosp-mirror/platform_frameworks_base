@@ -111,6 +111,7 @@ extern int register_android_graphics_PathMeasure(JNIEnv* env);
 extern int register_android_graphics_Picture(JNIEnv*);
 extern int register_android_graphics_PorterDuff(JNIEnv* env);
 extern int register_android_graphics_Rasterizer(JNIEnv* env);
+extern int register_android_graphics_SurfaceTexture(JNIEnv* env);
 extern int register_android_graphics_Xfermode(JNIEnv* env);
 extern int register_android_graphics_PixelFormat(JNIEnv* env);
 extern int register_com_android_internal_graphics_NativeUtils(JNIEnv *env);
@@ -1235,6 +1236,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_graphics_Rasterizer),
     REG_JNI(register_android_graphics_Region),
     REG_JNI(register_android_graphics_Shader),
+    REG_JNI(register_android_graphics_SurfaceTexture),
     REG_JNI(register_android_graphics_Typeface),
     REG_JNI(register_android_graphics_Xfermode),
     REG_JNI(register_android_graphics_YuvImage),
