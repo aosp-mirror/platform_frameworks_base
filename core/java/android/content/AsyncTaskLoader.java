@@ -17,6 +17,9 @@
 package android.content;
 
 import android.os.AsyncTask;
+import android.util.Log;
+
+import java.util.concurrent.ExecutionException;
 
 /**
  * Abstract Loader that provides an {@link AsyncTask} to do the work.
@@ -24,6 +27,9 @@ import android.os.AsyncTask;
  * @param <D> the data type to be loaded.
  */
 public abstract class AsyncTaskLoader<D> extends Loader<D> {
+
+    private static final String TAG = "AsyncTaskLoader";
+
     final class LoadTask extends AsyncTask<Void, Void, D> {
 
         private D result;
@@ -47,7 +53,7 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
         }
     }
 
-    LoadTask mTask;
+    volatile LoadTask mTask;
 
     public AsyncTaskLoader(Context context) {
         super(context);
@@ -105,4 +111,25 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
      * @return the result of the load
      */
     public abstract D loadInBackground();
+
+    /**
+     * Locks the current thread until the loader completes the current load
+     * operation. Returns immediately if there is no load operation running.
+     * Should not be called from the UI thread.
+     * <p>
+     * Used for testing.
+     */
+    public void waitForLoader() {
+        LoadTask task = mTask;
+        if (task != null) {
+            try {
+                task.get();
+            } catch (InterruptedException e) {
+                Log.w(TAG, e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException("An error occured while executing waitForLoader()",
+                        e.getCause());
+            }
+        }
+    }
 }
