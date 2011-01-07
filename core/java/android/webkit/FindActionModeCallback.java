@@ -143,6 +143,7 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
     /*
      * Update the string which tells the user how many matches were found, and
      * which match is currently highlighted.
+     * Not to be called when mNumberOfMatches is 0.
      */
     private void updateMatchesString() {
         String template = mResources.getQuantityString(
@@ -194,6 +195,11 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         mInput.hideSoftInputFromWindow(mWebView.getWindowToken(), 0);
         if (!mMatchesFound) {
             findAll();
+            return true;
+        }
+        if (0 == mNumberOfMatches) {
+            // There are no matches, so moving to the next match will not do
+            // anything.
             return true;
         }
         switch(item.getItemId()) {
