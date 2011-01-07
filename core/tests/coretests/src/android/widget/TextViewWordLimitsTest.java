@@ -231,12 +231,22 @@ public class TextViewWordLimitsTest extends AndroidTestCase {
         final String SURROGATE_SYMBOL   = "\uD83D\uDE01\uD83D\uDE02\uD83D\uDE03"; // Three smileys
 
         // Letter Other is included even when coded as surrogate pairs
-        verifyWordLimits(SURROGATE_LETTER, 1, -1, -1);
-        verifyWordLimits(SURROGATE_LETTER, 2, -1, -1);
+        verifyWordLimits(SURROGATE_LETTER, 0, 0, 6);
+        verifyWordLimits(SURROGATE_LETTER, 1, 0, 6);
+        verifyWordLimits(SURROGATE_LETTER, 2, 0, 6);
+        verifyWordLimits(SURROGATE_LETTER, 3, 0, 6);
+        verifyWordLimits(SURROGATE_LETTER, 4, 0, 6);
+        verifyWordLimits(SURROGATE_LETTER, 5, 0, 6);
+        verifyWordLimits(SURROGATE_LETTER, 6, 0, 6);
 
         // Not included classes are ignored even when coded as surrogate pairs
+        verifyWordLimits(SURROGATE_SYMBOL, 0, -1, -1);
         verifyWordLimits(SURROGATE_SYMBOL, 1, -1, -1);
         verifyWordLimits(SURROGATE_SYMBOL, 2, -1, -1);
+        verifyWordLimits(SURROGATE_SYMBOL, 3, -1, -1);
+        verifyWordLimits(SURROGATE_SYMBOL, 4, -1, -1);
+        verifyWordLimits(SURROGATE_SYMBOL, 5, -1, -1);
+        verifyWordLimits(SURROGATE_SYMBOL, 6, -1, -1);
     }
 
     /**

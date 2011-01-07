@@ -7645,9 +7645,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 hasPrimaryClip());
     }
 
-    private boolean isWordCharacter(int position) {
-        final char c = mTransformed.charAt(position);
-        final int type = Character.getType(c);
+    private boolean isWordCharacter(int c, int type) {
         return (c == '\'' || c == '"' ||
                 type == Character.UPPERCASE_LETTER ||
                 type == Character.LOWERCASE_LETTER ||
@@ -7696,35 +7694,32 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int start = end;
 
         for (; start > 0; start--) {
-            if (start == end) {
+            final char c = mTransformed.charAt(start - 1);
+            final int type = Character.getType(c);
+            if (start == end && type == Character.OTHER_PUNCTUATION) { 
                 // Cases where the text ends with a '.' and we select from the end of the line
                 // (right after the dot), or when we select from the space character in "aaa, bbb".
-                final char c = mTransformed.charAt(start - 1);
-                final int type = Character.getType(c);
-                if (type == Character.OTHER_PUNCTUATION) continue;
+                continue;
+            }              
+            if (type == Character.SURROGATE) { // Two Character codepoint
+                end = start - 1; // Recheck as a pair when scanning forward
+                continue;
             }
-            if (!isWordCharacter(start - 1)) break;
+            if (!isWordCharacter(c, type)) break;
             if ((end - start) > MAX_LENGTH) return -1;
         }
 
         for (; end < len; end++) {
-            if (!isWordCharacter(end)) break;
+            final int c = Character.codePointAt(mTransformed, end);
+            final int type = Character.getType(c);
+            if (!isWordCharacter(c, type)) break;
             if ((end - start) > MAX_LENGTH) return -1;
-        }
-
-        if (start == end) {
-            return -1;
-        }
-
-        boolean hasLetter = false;
-        for (int i = start; i < end; i++) {
-            if (Character.isLetter(mTransformed.charAt(i))) {
-                hasLetter = true;
-                break;
+            if (c > 0xFFFF) { // Two Character codepoint
+                end++;
             }
         }
 
-        if (!hasLetter) {
+        if (start == end) {
             return -1;
         }
 
