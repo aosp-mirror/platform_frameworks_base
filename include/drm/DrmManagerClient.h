@@ -49,6 +49,9 @@ public:
     class OnInfoListener: virtual public RefBase {
 
     public:
+        virtual ~OnInfoListener() {}
+
+    public:
         virtual void onInfo(const DrmInfoEvent& event) = 0;
     };
 
