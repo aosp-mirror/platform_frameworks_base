@@ -4599,6 +4599,8 @@ public class WebView extends AbsoluteLayout
 
         if (isEnterActionKey(keyCode)) {
             switchOutDrawHistory();
+            boolean wantsKeyEvents = nativeCursorNodePointer() == 0
+                || nativeCursorWantsKeyEvents();
             if (event.getRepeatCount() == 0) {
                 if (mSelectingText) {
                     return true; // discard press if copy in progress
@@ -4609,10 +4611,10 @@ public class WebView extends AbsoluteLayout
                 // Already checked mNativeClass, so we do not need to check it
                 // again.
                 nativeRecordButtons(hasFocus() && hasWindowFocus(), true, true);
-                return true;
+                if (!wantsKeyEvents) return true;
             }
             // Bubble up the key event as WebView doesn't handle it
-            return false;
+            if (!wantsKeyEvents) return false;
         }
 
         if (keyCode != KeyEvent.KEYCODE_SHIFT_LEFT
@@ -4771,11 +4773,14 @@ public class WebView extends AbsoluteLayout
             }
             clearTextEntry();
             nativeShowCursorTimed();
-            if (!mCallbackProxy.uiOverrideUrlLoading(nativeCursorText())) {
+            if (mCallbackProxy.uiOverrideUrlLoading(nativeCursorText())) {
+                return true;
+            }
+            if (nativeCursorNodePointer() != 0 && !nativeCursorWantsKeyEvents()) {
                 mWebViewCore.sendMessage(EventHub.CLICK, data.mFrame,
                         nativeCursorNodePointer());
+                return true;
             }
-            return true;
         }
 
         // TODO: should we pass all the keys to DOM or check the meta tag
