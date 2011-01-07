@@ -196,7 +196,7 @@ public final class Downloads {
          * @return a boolean whether the download is successful.
          */
         public boolean isSuccessful() {
-            return android.provider.Downloads.Impl.isStatusCompleted(statusCode);
+            return android.provider.Downloads.Impl.isStatusSuccess(statusCode);
         }
     }
 
