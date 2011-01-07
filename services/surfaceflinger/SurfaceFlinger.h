@@ -322,6 +322,8 @@ private:
             status_t electronBeamOnAnimationImplLocked();
             status_t renderScreenToTextureLocked(DisplayID dpy,
                     GLuint* textureName, GLfloat* uOut, GLfloat* vOut);
+            sp<GraphicBuffer> createGraphicBuffer(uint32_t w, uint32_t h,
+                    PixelFormat format, uint32_t usage) const;
 
             friend class FreezeLock;
             sp<FreezeLock> getFreezeLock() const;

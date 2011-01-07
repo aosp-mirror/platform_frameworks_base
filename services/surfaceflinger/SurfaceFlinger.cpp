@@ -2267,6 +2267,25 @@ sp<Layer> SurfaceFlinger::getLayer(const sp<ISurface>& sur) const
 
 // ---------------------------------------------------------------------------
 
+sp<GraphicBuffer> SurfaceFlinger::createGraphicBuffer(uint32_t w, uint32_t h,
+        PixelFormat format, uint32_t usage) const {
+    // XXX: HACK HACK HACK!!!  This should NOT be static, but it is to fix a
+    // race between SurfaceFlinger unref'ing the buffer and the client ref'ing
+    // it.
+    static sp<GraphicBuffer> graphicBuffer(new GraphicBuffer(w, h, format, usage));
+    status_t err = graphicBuffer->initCheck();
+    if (err != 0) {
+        LOGE("createGraphicBuffer: init check failed: %d", err);
+        return 0;
+    } else if (graphicBuffer->handle == 0) {
+        LOGE("createGraphicBuffer: unable to create GraphicBuffer");
+        return 0;
+    }
+    return graphicBuffer;
+}
+
+// ---------------------------------------------------------------------------
+
 Client::Client(const sp<SurfaceFlinger>& flinger)
     : mFlinger(flinger), mNameGenerator(1)
 {
