@@ -29,15 +29,18 @@
     android:id="@+id/root"
     android:background="#70000000">
 
-    <!-- left side: status and emergency call button -->
-    <LinearLayout
+    <!-- top: status -->
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
-        android:orientation="vertical"
-        android:gravity="center_vertical">
-        <include layout="@layout/keyguard_screen_status_port" />
-    </LinearLayout>
+        android:orientation="vertical">
+        <include layout="@layout/keyguard_screen_status_port"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="134dip"
+            android:layout_marginLeft="266dip"/>
+    </RelativeLayout>
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -75,6 +78,7 @@
             android:text="@string/emergency_calls_only"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@color/white"
+            android:visibility="gone"
            />
 
         <!-- emergency call button shown when sim is PUKd and tab_selector is
@@ -86,7 +90,7 @@
             android:drawableLeft="@drawable/ic_emergency"
             android:layout_centerInParent="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="80dip"
+            android:layout_marginBottom="90dip"
             style="@style/Widget.Button.Transparent"
             android:drawablePadding="8dip"
             android:visibility="gone"

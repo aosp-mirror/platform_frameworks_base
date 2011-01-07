@@ -396,7 +396,7 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 mLockPatternView
                         .setDisplayMode(LockPatternView.DisplayMode.Correct);
                 mStatusView.setInstructions("");
-                mStatusView.updateStatusLines();
+                mStatusView.updateStatusLines(true);
                 mCallback.keyguardDone(true);
                 mCallback.reportSuccessfulUnlockAttempt();
             } else {
@@ -416,7 +416,7 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                     // TODO mUnlockIcon.setVisibility(View.VISIBLE);
                     mStatusView.setInstructions(
                             getContext().getString(R.string.lockscreen_pattern_wrong));
-                    mStatusView.updateStatusLines();
+                    mStatusView.updateStatusLines(true);
                     mLockPatternView.postDelayed(
                             mCancelPatternRunnable,
                             PATTERN_CLEAR_TIMEOUT_MS);
@@ -437,7 +437,7 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 mStatusView.setInstructions(getContext().getString(
                         R.string.lockscreen_too_many_failed_attempts_countdown,
                         secondsRemaining));
-                mStatusView.updateStatusLines();
+                mStatusView.updateStatusLines(true);
             }
 
             @Override
@@ -445,7 +445,7 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 mLockPatternView.setEnabled(true);
                 mStatusView.setInstructions(getContext().getString(
                         R.string.lockscreen_pattern_instructions));
-                mStatusView.updateStatusLines();
+                mStatusView.updateStatusLines(true);
                 // TODO mUnlockIcon.setVisibility(View.VISIBLE);
                 mFailedPatternAttemptsSinceLastTimeout = 0;
                 if (mEnableFallback) {
