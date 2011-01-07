@@ -321,7 +321,7 @@ public class FrameLayout extends ViewGroup {
                             mPaddingTop - mPaddingBottom - lp.topMargin - lp.bottomMargin,
                             MeasureSpec.EXACTLY);
                 } else {
-                    childHeightMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
+                    childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec,
                             mPaddingTop + mPaddingBottom + lp.topMargin + lp.bottomMargin,
                             lp.height);
                 }
