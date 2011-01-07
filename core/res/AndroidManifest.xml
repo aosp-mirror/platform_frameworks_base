@@ -464,11 +464,10 @@
         android:label="@string/permlab_flashlight"
         android:description="@string/permdesc_flashlight" />
 
-    <!-- Allows an application to access USB devices
-         @hide -->
+    <!-- Allows an application to access USB devices -->
     <permission android:name="android.permission.ACCESS_USB"
         android:permissionGroup="android.permission-group.HARDWARE_CONTROLS"
-        android:protectionLevel="signatureOrSystem"
+        android:protectionLevel="normal"
         android:label="@string/permlab_accessUsb"
         android:description="@string/permdesc_accessUsb" />
 
