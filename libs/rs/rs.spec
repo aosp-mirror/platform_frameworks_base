@@ -346,16 +346,19 @@ ProgramVertexCreate {
 	ret RsProgramVertex
 	}
 
-FileOpen {
-	ret RsFile
-	param const char *name
-	param size_t len
-	}
-
 FontCreateFromFile {
 	param const char *name
 	param float fontSize
 	param uint32_t dpi
+	ret RsFont
+	}
+
+FontCreateFromMemory {
+	param const char *name
+	param float fontSize
+	param uint32_t dpi
+    param const void *data
+    param uint32_t dataLen
 	ret RsFont
 	}
 

@@ -32,12 +32,14 @@
 #include <images/SkImageDecoder.h>
 
 #include <utils/Asset.h>
+#include <utils/AssetManager.h>
 #include <utils/ResourceTypes.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
+#include "android_runtime/android_util_AssetManager.h"
 
 #include <RenderScript.h>
 #include <RenderScriptEnv.h>
@@ -46,6 +48,27 @@
 #define LOG_API(...)
 
 using namespace android;
+
+class AutoJavaStringToUTF8 {
+public:
+    AutoJavaStringToUTF8(JNIEnv* env, jstring str) : fEnv(env), fJStr(str)
+    {
+        fCStr = env->GetStringUTFChars(str, NULL);
+        fLength = env->GetStringUTFLength(str);
+    }
+    ~AutoJavaStringToUTF8()
+    {
+        fEnv->ReleaseStringUTFChars(fJStr, fCStr);
+    }
+    const char* c_str() const { return fCStr; }
+    jsize length() const { return fLength; }
+
+private:
+    JNIEnv*     fEnv;
+    jstring     fJStr;
+    const char* fCStr;
+    jsize       fLength;
+};
 
 // ---------------------------------------------------------------------------
 
@@ -572,7 +595,34 @@ nFileA3DCreateFromAssetStream(JNIEnv *_env, jobject _this, RsContext con, jint n
 
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
 
-    jint id = (jint)rsaFileA3DCreateFromAssetStream(con, asset->getBuffer(false), asset->getLength());
+    jint id = (jint)rsaFileA3DCreateFromMemory(con, asset->getBuffer(false), asset->getLength());
+    return id;
+}
+
+static int
+nFileA3DCreateFromAsset(JNIEnv *_env, jobject _this, RsContext con, jobject _assetMgr, jstring _path)
+{
+    AssetManager* mgr = assetManagerForJavaObject(_env, _assetMgr);
+    if (mgr == NULL) {
+        return 0;
+    }
+
+    AutoJavaStringToUTF8 str(_env, _path);
+    Asset* asset = mgr->open(str.c_str(), Asset::ACCESS_BUFFER);
+    if (asset == NULL) {
+        return 0;
+    }
+
+    jint id = (jint)rsaFileA3DCreateFromAsset(con, asset);
+    return id;
+}
+
+static int
+nFileA3DCreateFromFile(JNIEnv *_env, jobject _this, RsContext con, jstring fileName)
+{
+    AutoJavaStringToUTF8 fileNameUTF(_env, fileName);
+    jint id = (jint)rsaFileA3DCreateFromFile(con, fileNameUTF.c_str());
+
     return id;
 }
 
@@ -611,11 +661,45 @@ nFileA3DGetEntryByIndex(JNIEnv *_env, jobject _this, RsContext con, jint fileA3D
 // -----------------------------------
 
 static int
-nFontCreateFromFile(JNIEnv *_env, jobject _this, RsContext con, jstring fileName, jfloat fontSize, jint dpi)
+nFontCreateFromFile(JNIEnv *_env, jobject _this, RsContext con,
+                    jstring fileName, jfloat fontSize, jint dpi)
 {
-    const char* fileNameUTF = _env->GetStringUTFChars(fileName, NULL);
+    AutoJavaStringToUTF8 fileNameUTF(_env, fileName);
+    jint id = (jint)rsFontCreateFromFile(con, fileNameUTF.c_str(), fontSize, dpi);
 
-    jint id = (jint)rsFontCreateFromFile(con, fileNameUTF, fontSize, dpi);
+    return id;
+}
+
+static int
+nFontCreateFromAssetStream(JNIEnv *_env, jobject _this, RsContext con,
+                           jstring name, jfloat fontSize, jint dpi, jint native_asset)
+{
+    Asset* asset = reinterpret_cast<Asset*>(native_asset);
+    AutoJavaStringToUTF8 nameUTF(_env, name);
+
+    jint id = (jint)rsFontCreateFromMemory(con, nameUTF.c_str(), fontSize, dpi,
+                                           asset->getBuffer(false), asset->getLength());
+    return id;
+}
+
+static int
+nFontCreateFromAsset(JNIEnv *_env, jobject _this, RsContext con, jobject _assetMgr, jstring _path,
+                     jfloat fontSize, jint dpi)
+{
+    AssetManager* mgr = assetManagerForJavaObject(_env, _assetMgr);
+    if (mgr == NULL) {
+        return 0;
+    }
+
+    AutoJavaStringToUTF8 str(_env, _path);
+    Asset* asset = mgr->open(str.c_str(), Asset::ACCESS_BUFFER);
+    if (asset == NULL) {
+        return 0;
+    }
+
+    jint id = (jint)rsFontCreateFromMemory(con, str.c_str(), fontSize, dpi,
+                                           asset->getBuffer(false), asset->getLength());
+    delete asset;
     return id;
 }
 
@@ -764,13 +848,10 @@ static jint
 nScriptCCreate(JNIEnv *_env, jobject _this, RsContext con, jstring packageName, jstring resName, jstring cacheDir)
 {
     LOG_API("nScriptCCreate, con(%p)", con);
-    const char* packageNameUTF = _env->GetStringUTFChars(packageName, NULL);
-    const char* resNameUTF = _env->GetStringUTFChars(resName, NULL);
-    const char* cacheDirUTF = _env->GetStringUTFChars(cacheDir, NULL);
-    jint i = (jint)rsScriptCCreate(con, packageNameUTF, resNameUTF, cacheDirUTF);
-    _env->ReleaseStringUTFChars(packageName, packageNameUTF);
-    _env->ReleaseStringUTFChars(resName, resNameUTF);
-    _env->ReleaseStringUTFChars(cacheDir, cacheDirUTF);
+    AutoJavaStringToUTF8 packageNameUTF(_env, packageName);
+    AutoJavaStringToUTF8 resNameUTF(_env, resName);
+    AutoJavaStringToUTF8 cacheDirUTF(_env, cacheDir);
+    jint i = (jint)rsScriptCCreate(con, packageNameUTF.c_str(), resNameUTF.c_str(), cacheDirUTF.c_str());
     return i;
 }
 
@@ -853,15 +934,13 @@ nProgramBindSampler(JNIEnv *_env, jobject _this, RsContext con, jint vpf, jint s
 static jint
 nProgramFragmentCreate(JNIEnv *_env, jobject _this, RsContext con, jstring shader, jintArray params)
 {
-    const char* shaderUTF = _env->GetStringUTFChars(shader, NULL);
-    jint shaderLen = _env->GetStringUTFLength(shader);
+    AutoJavaStringToUTF8 shaderUTF(_env, shader);
     jint *paramPtr = _env->GetIntArrayElements(params, NULL);
     jint paramLen = _env->GetArrayLength(params);
 
     LOG_API("nProgramFragmentCreate, con(%p), shaderLen(%i), paramLen(%i)", con, shaderLen, paramLen);
 
-    jint ret = (jint)rsProgramFragmentCreate(con, shaderUTF, shaderLen, (uint32_t *)paramPtr, paramLen);
-    _env->ReleaseStringUTFChars(shader, shaderUTF);
+    jint ret = (jint)rsProgramFragmentCreate(con, shaderUTF.c_str(), shaderUTF.length(), (uint32_t *)paramPtr, paramLen);
     _env->ReleaseIntArrayElements(params, paramPtr, JNI_ABORT);
     return ret;
 }
@@ -872,15 +951,13 @@ nProgramFragmentCreate(JNIEnv *_env, jobject _this, RsContext con, jstring shade
 static jint
 nProgramVertexCreate(JNIEnv *_env, jobject _this, RsContext con, jstring shader, jintArray params)
 {
-    const char* shaderUTF = _env->GetStringUTFChars(shader, NULL);
-    jint shaderLen = _env->GetStringUTFLength(shader);
+    AutoJavaStringToUTF8 shaderUTF(_env, shader);
     jint *paramPtr = _env->GetIntArrayElements(params, NULL);
     jint paramLen = _env->GetArrayLength(params);
 
     LOG_API("nProgramVertexCreate, con(%p), shaderLen(%i), paramLen(%i)", con, shaderLen, paramLen);
 
-    jint ret = (jint)rsProgramVertexCreate(con, shaderUTF, shaderLen, (uint32_t *)paramPtr, paramLen);
-    _env->ReleaseStringUTFChars(shader, shaderUTF);
+    jint ret = (jint)rsProgramVertexCreate(con, shaderUTF.c_str(), shaderUTF.length(), (uint32_t *)paramPtr, paramLen);
     _env->ReleaseIntArrayElements(params, paramPtr, JNI_ABORT);
     return ret;
 }
@@ -1095,12 +1172,16 @@ static JNINativeMethod methods[] = {
 {"rsnGetName",                       "(II)Ljava/lang/String;",                (void*)nGetName },
 {"rsnObjDestroy",                    "(II)V",                                 (void*)nObjDestroy },
 
+{"rsnFileA3DCreateFromFile",         "(ILjava/lang/String;)I",                (void*)nFileA3DCreateFromFile },
 {"rsnFileA3DCreateFromAssetStream",  "(II)I",                                 (void*)nFileA3DCreateFromAssetStream },
+{"rsnFileA3DCreateFromAsset",        "(ILandroid/content/res/AssetManager;Ljava/lang/String;)I",            (void*)nFileA3DCreateFromAsset },
 {"rsnFileA3DGetNumIndexEntries",     "(II)I",                                 (void*)nFileA3DGetNumIndexEntries },
 {"rsnFileA3DGetIndexEntries",        "(III[I[Ljava/lang/String;)V",           (void*)nFileA3DGetIndexEntries },
 {"rsnFileA3DGetEntryByIndex",        "(III)I",                                (void*)nFileA3DGetEntryByIndex },
 
 {"rsnFontCreateFromFile",            "(ILjava/lang/String;FI)I",              (void*)nFontCreateFromFile },
+{"rsnFontCreateFromAssetStream",     "(ILjava/lang/String;FII)I",             (void*)nFontCreateFromAssetStream },
+{"rsnFontCreateFromAsset",        "(ILandroid/content/res/AssetManager;Ljava/lang/String;FI)I",            (void*)nFontCreateFromAsset },
 
 {"rsnElementCreate",                 "(IIIZI)I",                              (void*)nElementCreate },
 {"rsnElementCreate2",                "(I[I[Ljava/lang/String;[I)I",           (void*)nElementCreate2 },
