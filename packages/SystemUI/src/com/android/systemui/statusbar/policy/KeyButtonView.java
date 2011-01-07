@@ -78,6 +78,8 @@ public class KeyButtonView extends ImageView {
 
         mWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
+
+        setClickable(true);
     }
 
     public boolean onTouchEvent(MotionEvent ev) {
