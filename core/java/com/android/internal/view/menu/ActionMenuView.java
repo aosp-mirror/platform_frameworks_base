@@ -187,17 +187,6 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             final MenuItemImpl itemData = itemsToShow.get(i);
             View actionView = itemData.getActionView();
 
-            if (actionView == null) {
-                // Check for a layout ID instead
-                final int layoutId = itemData.getActionViewId();
-                if (layoutId != 0) {
-                    LayoutInflater inflater = LayoutInflater.from(getContext());
-                    actionView = inflater.inflate(layoutId, this, false);
-                    itemData.setActionView(0);
-                    itemData.setActionView(actionView);
-                }
-            }
-
             if (actionView != null) {
                 final ViewParent parent = actionView.getParent();
                 if (parent instanceof ViewGroup) {
