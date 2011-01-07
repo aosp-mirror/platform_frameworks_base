@@ -39,7 +39,7 @@ import java.util.Queue;
  * <p/>
  * Classes should implement {@link #preAnimation()} and {@link #postAnimation()}.
  * <p/>
- * If {@link #preAnimation()} does not start an animation something then the thread doesn't do
+ * If {@link #preAnimation()} does not start an animation somehow then the thread doesn't do
  * anything.
  *
  */
@@ -59,7 +59,7 @@ public abstract class AnimationThread extends Thread {
 
     private final RenderSessionImpl mSession;
 
-    Queue<MessageBundle> mQueue = new LinkedList<MessageBundle>();
+    private Queue<MessageBundle> mQueue = new LinkedList<MessageBundle>();
     private final IAnimationListener mListener;
 
     public AnimationThread(RenderSessionImpl scene, String threadName,
@@ -148,6 +148,10 @@ public abstract class AnimationThread extends Thread {
             } while (mListener.isCanceled() == false && mQueue.size() > 0);
 
             mListener.done(Status.SUCCESS.createResult());
+
+        } catch (Throwable throwable) {
+            Bridge.getLog().error(null, "Error playing animation", throwable);
+
         } finally {
             postAnimation();
             Handler_Delegate.setCallback(null);
