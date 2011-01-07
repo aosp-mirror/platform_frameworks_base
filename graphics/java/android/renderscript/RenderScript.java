@@ -19,6 +19,7 @@ package android.renderscript;
 import java.lang.reflect.Field;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Config;
@@ -284,6 +285,14 @@ public class RenderScript {
     synchronized int nFileA3DCreateFromAssetStream(int assetStream) {
         return rsnFileA3DCreateFromAssetStream(mContext, assetStream);
     }
+    native int  rsnFileA3DCreateFromFile(int con, String path);
+    synchronized int nFileA3DCreateFromFile(String path) {
+        return rsnFileA3DCreateFromFile(mContext, path);
+    }
+    native int  rsnFileA3DCreateFromAsset(int con, AssetManager mgr, String path);
+    synchronized int nFileA3DCreateFromAsset(AssetManager mgr, String path) {
+        return rsnFileA3DCreateFromAsset(mContext, mgr, path);
+    }
     native int  rsnFileA3DGetNumIndexEntries(int con, int fileA3D);
     synchronized int nFileA3DGetNumIndexEntries(int fileA3D) {
         return rsnFileA3DGetNumIndexEntries(mContext, fileA3D);
@@ -300,6 +309,14 @@ public class RenderScript {
     native int  rsnFontCreateFromFile(int con, String fileName, float size, int dpi);
     synchronized int nFontCreateFromFile(String fileName, float size, int dpi) {
         return rsnFontCreateFromFile(mContext, fileName, size, dpi);
+    }
+    native int  rsnFontCreateFromAssetStream(int con, String name, float size, int dpi, int assetStream);
+    synchronized int nFontCreateFromAssetStream(String name, float size, int dpi, int assetStream) {
+        return rsnFontCreateFromAssetStream(mContext, name, size, dpi, assetStream);
+    }
+    native int  rsnFontCreateFromAsset(int con, AssetManager mgr, String path, float size, int dpi);
+    synchronized int nFontCreateFromAsset(AssetManager mgr, String path, float size, int dpi) {
+        return rsnFontCreateFromAsset(mContext, mgr, path, size, dpi);
     }
 
 

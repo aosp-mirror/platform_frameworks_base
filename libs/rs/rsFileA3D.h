@@ -21,6 +21,7 @@
 #include "rsMesh.h"
 
 #include <utils/String8.h>
+#include <utils/Asset.h>
 #include "rsStream.h"
 #include <stdio.h>
 
@@ -59,6 +60,7 @@ public:
     };
 
     bool load(FILE *f);
+    bool load(Asset *asset);
     bool load(const void *data, size_t length);
 
     size_t getNumIndexEntries() const;
@@ -83,6 +85,7 @@ protected:
     const uint8_t * mData;
     void * mAlloc;
     uint64_t mDataSize;
+    Asset *mAsset;
 
     OStream *mWriteStream;
     Vector<A3DIndexEntry*> mWriteIndex;

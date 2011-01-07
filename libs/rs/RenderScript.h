@@ -334,7 +334,9 @@ typedef struct {
 // A3D loading and object update code.
 // Should only be called at object creation, not thread safe
 RsObjectBase rsaFileA3DGetEntryByIndex(RsContext, uint32_t idx, RsFile);
-RsFile rsaFileA3DCreateFromAssetStream(RsContext, const void *data, uint32_t len);
+RsFile rsaFileA3DCreateFromMemory(RsContext, const void *data, uint32_t len);
+RsFile rsaFileA3DCreateFromAsset(RsContext, void *asset);
+RsFile rsaFileA3DCreateFromFile(RsContext, const char *path);
 void rsaFileA3DGetNumIndexEntries(RsContext, int32_t *numEntries, RsFile);
 void rsaFileA3DGetIndexEntries(RsContext, RsFileIndexEntry *fileEntries,uint32_t numEntries, RsFile);
 void rsaGetName(RsContext, void * obj, const char **name);

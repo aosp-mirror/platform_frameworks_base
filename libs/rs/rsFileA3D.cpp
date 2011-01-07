@@ -35,6 +35,7 @@ FileA3D::FileA3D(Context *rsc) : ObjectBase(rsc) {
     mData = NULL;
     mWriteStream = NULL;
     mReadStream = NULL;
+    mAsset = NULL;
 
     mMajorVersion = 0;
     mMinorVersion = 1;
@@ -56,6 +57,9 @@ FileA3D::~FileA3D() {
     }
     if (mAlloc) {
         free(mAlloc);
+    }
+    if (mAsset) {
+        delete mAsset;
     }
 }
 
@@ -81,6 +85,11 @@ void FileA3D::parseHeader(IStream *headerStream) {
         entry->mRsObj = NULL;
         mIndex.push(entry);
     }
+}
+
+bool FileA3D::load(Asset *asset) {
+    mAsset = asset;
+    return load(asset->getBuffer(false), asset->getLength());
 }
 
 bool FileA3D::load(const void *data, size_t length) {
@@ -357,26 +366,6 @@ void FileA3D::appendToFile(ObjectBase *obj) {
     mWriteStream->align(4);
 }
 
-namespace android {
-namespace renderscript {
-
-RsFile rsi_FileOpen(Context *rsc, char const *path, unsigned int len) {
-    FileA3D *fa3d = new FileA3D(rsc);
-
-    FILE *f = fopen("/sdcard/test.a3d", "rb");
-    if (f) {
-        fa3d->load(f);
-        fclose(f);
-        fa3d->incUserRef();
-        return fa3d;
-    }
-    delete fa3d;
-    return NULL;
-}
-
-}
-}
-
 RsObjectBase rsaFileA3DGetEntryByIndex(RsContext con, uint32_t index, RsFile file) {
     FileA3D *fa3d = static_cast<FileA3D *>(file);
     if (!fa3d) {
@@ -422,7 +411,7 @@ void rsaFileA3DGetIndexEntries(RsContext con, RsFileIndexEntry *fileEntries, uin
     }
 }
 
-RsFile rsaFileA3DCreateFromAssetStream(RsContext con, const void *data, uint32_t len) {
+RsFile rsaFileA3DCreateFromMemory(RsContext con, const void *data, uint32_t len) {
     if (data == NULL) {
         LOGE("File load failed. Asset stream is NULL");
         return NULL;
@@ -433,5 +422,37 @@ RsFile rsaFileA3DCreateFromAssetStream(RsContext con, const void *data, uint32_t
     fa3d->incUserRef();
 
     fa3d->load(data, len);
+    return fa3d;
+}
+
+RsFile rsaFileA3DCreateFromAsset(RsContext con, void *_asset) {
+    Context *rsc = static_cast<Context *>(con);
+    Asset *asset = static_cast<Asset *>(_asset);
+    FileA3D *fa3d = new FileA3D(rsc);
+    fa3d->incUserRef();
+
+    fa3d->load(asset);
+    return fa3d;
+}
+
+RsFile rsaFileA3DCreateFromFile(RsContext con, const char *path) {
+    if (path == NULL) {
+        LOGE("File load failed. Path is NULL");
+        return NULL;
+    }
+
+    Context *rsc = static_cast<Context *>(con);
+    FileA3D *fa3d = NULL;
+
+    FILE *f = fopen(path, "rb");
+    if (f) {
+        fa3d = new FileA3D(rsc);
+        fa3d->incUserRef();
+        fa3d->load(f);
+        fclose(f);
+    } else {
+        LOGE("Could not open file %s", path);
+    }
+
     return fa3d;
 }
