@@ -488,8 +488,10 @@ class BrowserFrame extends Handler {
                         }
                     }
                 }
-                WebViewWorker.getHandler().sendEmptyMessage(
-                        WebViewWorker.MSG_TRIM_CACHE);
+                if (!JniUtil.useChromiumHttpStack()) {
+                    WebViewWorker.getHandler().sendEmptyMessage(
+                            WebViewWorker.MSG_TRIM_CACHE);
+                }
                 break;
             }
 
