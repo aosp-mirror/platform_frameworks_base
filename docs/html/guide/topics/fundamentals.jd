@@ -52,10 +52,9 @@ page.title=Application Fundamentals
 <p>
 Android applications are written in the Java programming language. 
 The compiled Java code &mdash; along with any data and resource 
-files required by the application &mdash; is bundled by the 
-<a href="{@docRoot}guide/developing/tools/aapt.html"><code>aapt</code> 
-tool</a> into an <i>Android package</i>, an archive file 
-marked by an {@code .apk} suffix.  This file is the vehicle 
+files required by the application &mdash; is bundled into an 
+<i>Android package</i>, an archive file 
+marked by an {@code .apk} suffix. This file is the vehicle 
 for distributing the application and installing it on mobile devices; 
 it's the file users download to their devices.  All the code in a 
 single {@code .apk} file is considered to be one <i>application</i>.
@@ -425,7 +424,7 @@ elements for broadcast receivers, and
 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
 elements for content providers.  Activities, services, and content providers 
 that are not declared in the manifest are not visible to the system and are 
-consequently never run.  However, broadcast receivers can either be 
+consequently never run. However, broadcast receivers can either be 
 declared in the manifest, or they can be created dynamically in code 
 (as {@link android.content.BroadcastReceiver} objects) 
 and registered with the system by calling 

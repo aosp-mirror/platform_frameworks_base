@@ -18,7 +18,7 @@ messages</li>
 
 <h2>See also</h2>
 <ol>
-  <li><a href="{@docRoot}guide/developing/debug-tasks.html">Debugging Tasks</a></li>
+  <li><a href="{@docRoot}guide/developing/debugging/index.html">Debugging</a></li>
 </ol>
 
 </div>
@@ -46,8 +46,8 @@ those written using JavaScript {@code console} APIs.</p>
 <strong>Device > Run logcat</strong>. When using the <a href="{@docRoot}sdk/eclipse-adt.html">ADT
 plugin for Eclipse</a>, you can also view logcat messages by opening the Logcat view, available from
 <strong>Window > Show View > Other > Android > Logcat</strong>.</p>
-  <p>See <a href="{@docRoot}guide/developing/debug-tasks.html">Debugging
-Tasks</a> for more information about logcat.</p>
+  <p>See <a href="{@docRoot}guide/developing/debugging/debugging-log.html">Debugging</a>
+  for more information about <codelogcat</code>.</p>
 </div>
 </div>
 

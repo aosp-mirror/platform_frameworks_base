@@ -91,8 +91,7 @@ page.title=Glossary
     with the SDK. It provides screen capture, log dump, and process
     examination capabilities. If you are developing in Eclipse using the ADT
     Plugin, DDMS is integrated into your development environment. See <a
-    href="{@docRoot}guide/developing/tools/ddms.html">Dalvik Debug Monitor
-    Server</a> to learn more about the program.</dd>
+    href="{@docRoot}guide/developing/debugging/ddms.html">Using DDMS</a> to learn more about the program.</dd>
 
     <dt id="dialog">Dialog</dt> <dd> A floating window that that acts as a lightweight
     form. A dialog can have button controls only and is intended to perform a

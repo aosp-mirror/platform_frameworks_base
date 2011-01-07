@@ -1,4 +1,4 @@
-page.title=Building and Running Applications
+page.title=Building and Running Apps
 @jd:body
 
 <div id="qv-wrapper">
@@ -54,6 +54,7 @@ page.title=Building and Running Applications
   <p>The general process for a typical build is outlined below:</p>
 
   <ul>
+  
     <li>The Android Asset Packaging Tool (aapt) takes your application resource files, such as the
     <code>AndroidManifest.xml</code> file and the XML files for your Activities, and compiles them. An <code>R.java</code> is
     also produced so you can reference your resources from your Java code.</li>
