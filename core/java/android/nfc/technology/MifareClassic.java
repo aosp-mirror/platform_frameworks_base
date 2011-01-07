@@ -263,7 +263,7 @@ public final class MifareClassic extends BasicTagTechnology {
         System.arraycopy(key, 0, cmd, 6, 6);
 
         try {
-            if ((transceive(cmd) != null)) {
+            if ((transceive(cmd, false) != null)) {
                 return true;
             }
         } catch (IOException e) {
@@ -308,7 +308,7 @@ public final class MifareClassic extends BasicTagTechnology {
         byte addr = (byte) block;
         byte[] blockread_cmd = { 0x30, addr };
 
-        return transceive(blockread_cmd);
+        return transceive(blockread_cmd, false);
     }
 
     /**
@@ -324,7 +324,7 @@ public final class MifareClassic extends BasicTagTechnology {
         blockwrite_cmd[1] = addr;
         System.arraycopy(data, 0, blockwrite_cmd, 2, data.length);
 
-        transceive(blockwrite_cmd);
+        transceive(blockwrite_cmd, false);
     }
 
     /**
@@ -345,7 +345,7 @@ public final class MifareClassic extends BasicTagTechnology {
         byte addr = (byte) block;
         byte[] incr_cmd = { (byte) 0xC1, (byte) block };
 
-        transceive(incr_cmd);
+        transceive(incr_cmd, false);
     }
 
     public void decrement(int block) throws IOException {
@@ -354,7 +354,7 @@ public final class MifareClassic extends BasicTagTechnology {
         byte addr = (byte) block;
         byte[] decr_cmd = { (byte) 0xC0, (byte) block };
 
-        transceive(decr_cmd);
+        transceive(decr_cmd, false);
     }
 
     public void transfer(int block) throws IOException {
@@ -363,7 +363,7 @@ public final class MifareClassic extends BasicTagTechnology {
         byte addr = (byte) block;
         byte[] trans_cmd = { (byte) 0xB0, (byte) block };
 
-        transceive(trans_cmd);
+        transceive(trans_cmd, false);
     }
 
     public void restore(int block) throws IOException {
@@ -372,33 +372,6 @@ public final class MifareClassic extends BasicTagTechnology {
         byte addr = (byte) block;
         byte[] rest_cmd = { (byte) 0xC2, (byte) block };
 
-        transceive(rest_cmd);
-    }
-
-    /**
-     * Send data to a tag and receive the response.
-     * <p>
-     * This method will block until the response is received. It can be canceled
-     * with {@link #close}.
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     *
-     * @param data bytes to send
-     * @return bytes received in response
-     * @throws IOException if the target is lost or connection closed
-     */
-    @Override
-    public byte[] transceive(byte[] data) throws IOException {
-        checkConnected();
-
-        try {
-            byte[] response = mTagService.transceive(mTag.getServiceHandle(), data, false);
-            if (response == null) {
-                throw new IOException("transceive failed");
-            }
-            return response;
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            throw new IOException("NFC service died");
-        }
+        transceive(rest_cmd, false);
     }
 }
