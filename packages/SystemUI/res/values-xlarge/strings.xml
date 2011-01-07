@@ -18,7 +18,7 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- The text for the button in the notification window-shade that clears
-         all of the currently visible notifications. -->
+         all of the currently visible notifications. [CHAR LIMIT=10]-->
     <string name="status_bar_clear_all_button">Clear all</string>
 
     <!-- System panel ("Quick Settings") -->
