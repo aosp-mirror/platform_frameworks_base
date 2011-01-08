@@ -150,7 +150,10 @@ public abstract class AnimationThread extends Thread {
             mListener.done(Status.SUCCESS.createResult());
 
         } catch (Throwable throwable) {
-            Bridge.getLog().error(null, "Error playing animation", throwable);
+            // can't use Bridge.getLog() as the exception might be thrown outside
+            // of an acquire/release block.
+            mSession.getLog().error(null, "Error playing animation", throwable);
+            mListener.done(Status.ERROR_UNKNOWN.createResult("Error playing animation", throwable));
 
         } finally {
             postAnimation();
