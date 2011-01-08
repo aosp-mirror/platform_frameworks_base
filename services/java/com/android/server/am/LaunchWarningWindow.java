@@ -4,6 +4,7 @@ import com.android.internal.R;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.util.TypedValue;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -20,8 +21,11 @@ public class LaunchWarningWindow extends Dialog {
         
         setContentView(R.layout.launch_warning);
         setTitle(context.getText(R.string.launch_warning_title));
-        getWindow().setFeatureDrawableResource(Window.FEATURE_LEFT_ICON,
-                R.drawable.ic_dialog_alert);
+
+        TypedValue out = new TypedValue();
+        getContext().getTheme().resolveAttribute(android.R.attr.alertDialogIcon, out, true);
+        getWindow().setFeatureDrawableResource(Window.FEATURE_LEFT_ICON, out.resourceId);
+
         ImageView icon = (ImageView)findViewById(R.id.replace_app_icon);
         icon.setImageDrawable(next.info.applicationInfo.loadIcon(context.getPackageManager()));
         TextView text = (TextView)findViewById(R.id.replace_message);

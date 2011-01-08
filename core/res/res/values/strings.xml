@@ -2152,7 +2152,8 @@
     <!-- Preference framework strings. -->
     <string name="no">Cancel</string>
     <!-- This is the generic "attention" string to be used in attention dialogs.  Typically
-         combined with setIcon(android.R.drawable.ic_dialog_alert) -->
+         combined with setIconAttribute(android.R.attr.alertDialogIcon)
+         (or setIcon(android.R.drawable.ic_dialog_alert) on legacy versions of the platform) -->
     <string name="dialog_alert_title">Attention</string>
 
     <!-- Text shown by list fragment when waiting for data to display. -->
