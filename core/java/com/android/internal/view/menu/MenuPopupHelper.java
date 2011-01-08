@@ -69,6 +69,12 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     }
 
     public void show() {
+        if (!tryShow()) {
+            throw new IllegalStateException("MenuPopupHelper cannot be used without an anchor");
+        }
+    }
+
+    public boolean tryShow() {
         mPopup = new ListPopupWindow(mContext, null, com.android.internal.R.attr.popupMenuStyle);
         mPopup.setOnItemClickListener(this);
         mPopup.setOnDismissListener(this);
@@ -92,13 +98,14 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
             mTreeObserver.addOnGlobalLayoutListener(this);
             mPopup.setAnchorView(anchor);
         } else {
-            throw new IllegalStateException("MenuPopupHelper cannot be used without an anchor");
+            return false;
         }
 
         mPopup.setContentWidth(Math.min(measureContentWidth(adapter), mPopupMaxWidth));
         mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
         mPopup.show();
         mPopup.getListView().setOnKeyListener(this);
+        return true;
     }
 
     public void dismiss() {
