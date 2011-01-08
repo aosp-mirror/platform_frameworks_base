@@ -21,7 +21,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
-import static android.view.WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY;
 import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 
 import com.android.internal.view.BaseSurfaceHolder;
@@ -57,7 +56,6 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.Gravity;
-import android.view.HardwareRenderer;
 import android.view.InputQueue;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -428,6 +426,21 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // Already open, return
         if (st.isOpen) {
             return;
+        }
+
+        // Don't open an options panel for honeycomb apps on xlarge devices.
+        // (The app should be using an action bar for menu items.)
+        if (st.featureId == FEATURE_OPTIONS_PANEL) {
+            Context context = getContext();
+            Configuration config = context.getResources().getConfiguration();
+            boolean isXLarge = (config.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) ==
+                    Configuration.SCREENLAYOUT_SIZE_XLARGE;
+            boolean isHoneycombApp = context.getApplicationInfo().targetSdkVersion >=
+                    android.os.Build.VERSION_CODES.HONEYCOMB;
+
+            if (isXLarge && isHoneycombApp) {
+                return;
+            }
         }
 
         Callback cb = getCallback();
