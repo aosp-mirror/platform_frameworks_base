@@ -3049,7 +3049,11 @@ public class PackageParser {
         if (!sCompatibilityModeEnabled) {
             ai.disableCompatibilityMode();
         }
-        ai.enabled = p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+        if (p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+            ai.enabled = true;
+        } else if (p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
+            ai.enabled = false;
+        }
         return ai;
     }
 
