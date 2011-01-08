@@ -237,8 +237,7 @@ public final class Path_Delegate {
         pathDelegate.quadTo(x1, y1, x2, y2);
     }
 
-    /*package*/ static void native_rQuadTo(int nPath, float dx1, float dy1,
-                                              float dx2, float dy2) {
+    /*package*/ static void native_rQuadTo(int nPath, float dx1, float dy1, float dx2, float dy2) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
             return;
@@ -248,7 +247,7 @@ public final class Path_Delegate {
     }
 
     /*package*/ static void native_cubicTo(int nPath, float x1, float y1,
-                float x2, float y2, float x3, float y3) {
+            float x2, float y2, float x3, float y3) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
             return;
@@ -258,7 +257,7 @@ public final class Path_Delegate {
     }
 
     /*package*/ static void native_rCubicTo(int nPath, float x1, float y1,
-                float x2, float y2, float x3, float y3) {
+            float x2, float y2, float x3, float y3) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
             return;
@@ -295,8 +294,8 @@ public final class Path_Delegate {
         pathDelegate.addRect(rect.left, rect.top, rect.right, rect.bottom, dir);
     }
 
-    /*package*/ static void native_addRect(int nPath, float left, float top,
-                                            float right, float bottom, int dir) {
+    /*package*/ static void native_addRect(int nPath,
+            float left, float top, float right, float bottom, int dir) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
             return;
@@ -310,39 +309,35 @@ public final class Path_Delegate {
         throw new UnsupportedOperationException();
     }
 
-    /*package*/ static void native_addCircle(int nPath, float x, float y,
-                                                float radius, int dir) {
+    /*package*/ static void native_addCircle(int nPath, float x, float y, float radius, int dir) {
         // FIXME
         throw new UnsupportedOperationException();
     }
 
     /*package*/ static void native_addArc(int nPath, RectF oval,
-                                            float startAngle, float sweepAngle) {
+            float startAngle, float sweepAngle) {
         // FIXME
         throw new UnsupportedOperationException();
     }
 
     /*package*/ static void native_addRoundRect(int nPath, RectF rect,
-                                                   float rx, float ry, int dir) {
+            float rx, float ry, int dir) {
         // FIXME
         throw new UnsupportedOperationException();
     }
 
-    /*package*/ static void native_addRoundRect(int nPath, RectF r,
-                                                   float[] radii, int dir) {
+    /*package*/ static void native_addRoundRect(int nPath, RectF r, float[] radii, int dir) {
         // FIXME
         throw new UnsupportedOperationException();
     }
 
-    /*package*/ static void native_addPath(int nPath, int src, float dx,
-                                              float dy) {
+    /*package*/ static void native_addPath(int nPath, int src, float dx, float dy) {
         // FIXME
         throw new UnsupportedOperationException();
     }
 
     /*package*/ static void native_addPath(int nPath, int src) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        native_addPath(nPath, src, 0, 0);
     }
 
     /*package*/ static void native_addPath(int nPath, int src, int matrix) {
@@ -350,8 +345,7 @@ public final class Path_Delegate {
         throw new UnsupportedOperationException();
     }
 
-    /*package*/ static void native_offset(int nPath, float dx, float dy,
-                                             int dst_path) {
+    /*package*/ static void native_offset(int nPath, float dx, float dy, int dst_path) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
             return;
