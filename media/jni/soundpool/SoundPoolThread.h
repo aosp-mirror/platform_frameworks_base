@@ -31,10 +31,8 @@ public:
     SoundPoolMsg() : mMessageType(INVALID), mData(0) {}
     SoundPoolMsg(MessageType MessageType, int data) :
         mMessageType(MessageType), mData(data) {}
-    uint8_t         mMessageType;
-    uint8_t         mData;
-    uint8_t         mData2;
-    uint8_t         mData3;
+    uint16_t         mMessageType;
+    uint16_t         mData;
 };
 
 /*
