@@ -33,6 +33,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.webkit.DeviceMotionService;
@@ -830,6 +831,7 @@ final class WebViewCore {
         Point[] mPoints;
         int mMetaState;
         boolean mReprocess;
+        MotionEvent mMotionEvent;
     }
 
     static class GeolocationPermissionsData {

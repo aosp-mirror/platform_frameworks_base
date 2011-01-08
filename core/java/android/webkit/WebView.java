@@ -56,6 +56,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.text.Selection;
@@ -5329,17 +5330,10 @@ public class WebView extends AbsoluteLayout
                 + " numPointers=" + ev.getPointerCount());
         }
 
-        int action = ev.getAction();
-        float x = ev.getX();
-        float y = ev.getY();
-        long eventTime = ev.getEventTime();
-
-        // mDeferMultitouch is a hack for layout tests, where it is used to
-        // force passing multi-touch events to webkit.
-        // FIXME: always pass multi-touch events to webkit and remove everything
-        // related to mDeferMultitouch.
-        if (ev.getPointerCount() > 1 &&
-                (mDeferMultitouch || mZoomManager.isZoomScaleFixed())) {
+        // Always pass multi-touch event to WebKit first.
+        // If WebKit doesn't consume it and set preventDefault to true,
+        // WebView's private handler will handle it.
+        if (ev.getPointerCount() > 1) {
             if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "passing " + ev.getPointerCount() + " points to webkit");
             }
@@ -5347,59 +5341,15 @@ public class WebView extends AbsoluteLayout
             return true;
         }
 
-        final ScaleGestureDetector detector =
-                mZoomManager.getMultiTouchGestureDetector();
+        return handleTouchEventCommon(ev);
+    }
 
-        if (mZoomManager.supportsMultiTouchZoom() && ev.getPointerCount() > 1) {
-            if (!detector.isInProgress() &&
-                    ev.getActionMasked() != MotionEvent.ACTION_POINTER_DOWN) {
-                // Insert a fake pointer down event in order to start
-                // the zoom scale detector.
-                MotionEvent temp = MotionEvent.obtain(ev);
-                // Clear the original event and set it to
-                // ACTION_POINTER_DOWN.
-                try {
-                    temp.setAction(temp.getAction() &
-                            ~MotionEvent.ACTION_MASK |
-                            MotionEvent.ACTION_POINTER_DOWN);
-                    detector.onTouchEvent(temp);
-                } finally {
-                    temp.recycle();
-                }
-            }
+    private boolean handleTouchEventCommon(MotionEvent ev) {
+        int action = ev.getAction();
+        float x = ev.getX();
+        float y = ev.getY();
+        long eventTime = ev.getEventTime();
 
-            detector.onTouchEvent(ev);
-
-            if (detector.isInProgress()) {
-                mLastTouchTime = eventTime;
-                cancelLongPress();
-                mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
-                if (!mZoomManager.supportsPanDuringZoom()) {
-                    return true;
-                }
-                mTouchMode = TOUCH_DRAG_MODE;
-                if (mVelocityTracker == null) {
-                    mVelocityTracker = VelocityTracker.obtain();
-                }
-            }
-
-            x = detector.getFocusX();
-            y = detector.getFocusY();
-            action = ev.getAction() & MotionEvent.ACTION_MASK;
-            if (action == MotionEvent.ACTION_POINTER_DOWN) {
-                cancelTouch();
-                action = MotionEvent.ACTION_DOWN;
-            } else if (action == MotionEvent.ACTION_POINTER_UP) {
-                // set mLastTouchX/Y to the remaining point
-                mLastTouchX = x;
-                mLastTouchY = y;
-            } else if (action == MotionEvent.ACTION_MOVE) {
-                // negative x or y indicate it is on the edge, skip it.
-                if (x < 0 || y < 0) {
-                    return true;
-                }
-            }
-        }
 
         // Due to the touch screen edge effect, a touch closer to the edge
         // always snapped to the edge. As getViewWidth() can be different from
@@ -5610,22 +5560,6 @@ public class WebView extends AbsoluteLayout
                         // ACTION_UP
                         mLastTouchTime = eventTime;
                         break;
-                    }
-
-                    // Only lock dragging to one axis if we don't have a scale in progress.
-                    // Scaling implies free-roaming movement. Note this is only ever a question
-                    // if mZoomManager.supportsPanDuringZoom() is true.
-                    if (detector != null && !detector.isInProgress()) {
-                        // if it starts nearly horizontal or vertical, enforce it
-                        int ax = Math.abs(deltaX);
-                        int ay = Math.abs(deltaY);
-                        if (ax > MAX_SLOPE_FOR_DIAG * ay) {
-                            mSnapScrollMode = SNAP_X;
-                            mSnapPositive = deltaX > 0;
-                        } else if (ay > MAX_SLOPE_FOR_DIAG * ax) {
-                            mSnapScrollMode = SNAP_Y;
-                            mSnapPositive = deltaY > 0;
-                        }
                     }
 
                     mTouchMode = TOUCH_DRAG_MODE;
@@ -5884,11 +5818,80 @@ public class WebView extends AbsoluteLayout
             ted.mPoints[c] = new Point(x, y);
         }
         ted.mMetaState = ev.getMetaState();
-        ted.mReprocess = mDeferTouchProcess;
+        ted.mReprocess = true;
+        ted.mMotionEvent = MotionEvent.obtain(ev);
         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
         cancelLongPress();
         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
         mPreventDefault = PREVENT_DEFAULT_IGNORE;
+    }
+
+    private boolean handleMultiTouchInWebView(MotionEvent ev) {
+        if (DebugFlags.WEB_VIEW) {
+            Log.v(LOGTAG, "multi-touch: " + ev + " at " + ev.getEventTime()
+                + " mTouchMode=" + mTouchMode
+                + " numPointers=" + ev.getPointerCount()
+                + " scrolloffset=(" + mScrollX + "," + mScrollY + ")");
+        }
+
+        final ScaleGestureDetector detector =
+            mZoomManager.getMultiTouchGestureDetector();
+        int action = ev.getAction();
+        float x = ev.getX();
+        float y = ev.getY();
+        long eventTime = ev.getEventTime();
+
+        if (!detector.isInProgress() &&
+            ev.getActionMasked() != MotionEvent.ACTION_POINTER_DOWN) {
+            // Insert a fake pointer down event in order to start
+            // the zoom scale detector.
+            MotionEvent temp = MotionEvent.obtain(ev);
+            // Clear the original event and set it to
+            // ACTION_POINTER_DOWN.
+            try {
+                temp.setAction(temp.getAction() &
+                ~MotionEvent.ACTION_MASK |
+                MotionEvent.ACTION_POINTER_DOWN);
+                detector.onTouchEvent(temp);
+            } finally {
+                temp.recycle();
+            }
+        }
+
+        detector.onTouchEvent(ev);
+
+        if (detector.isInProgress()) {
+            if (DebugFlags.WEB_VIEW) {
+                Log.v(LOGTAG, "detector is in progress");
+            }
+            mLastTouchTime = eventTime;
+            cancelLongPress();
+            mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
+            if (!mZoomManager.supportsPanDuringZoom()) {
+                return false;
+            }
+            mTouchMode = TOUCH_DRAG_MODE;
+            if (mVelocityTracker == null) {
+                mVelocityTracker = VelocityTracker.obtain();
+            }
+        }
+
+        action = ev.getAction() & MotionEvent.ACTION_MASK;
+        if (action == MotionEvent.ACTION_POINTER_DOWN) {
+            cancelTouch();
+            action = MotionEvent.ACTION_DOWN;
+        } else if (action == MotionEvent.ACTION_POINTER_UP) {
+            // set mLastTouchX/Y to the remaining point
+            mLastTouchX = x;
+            mLastTouchY = y;
+        } else if (action == MotionEvent.ACTION_MOVE) {
+            // negative x or y indicate it is on the edge, skip it.
+            if (x < 0 || y < 0) {
+                return false;
+            }
+        }
+
+        return handleTouchEventCommon(ev);
     }
 
     private void cancelWebCoreTouchEvent(int x, int y, boolean removeEvents) {
@@ -7263,6 +7266,13 @@ public class WebView extends AbsoluteLayout
                         // prevent default is not called in WebCore, so the
                         // message needs to be reprocessed in UI
                         TouchEventData ted = (TouchEventData) msg.obj;
+
+                        if (ted.mPoints.length > 1) {  // for multi-touch.
+                            handleMultiTouchInWebView(ted.mMotionEvent);
+                            break;
+                        }
+
+                        // Following is for single touch.
                         switch (ted.mAction) {
                             case MotionEvent.ACTION_DOWN:
                                 mLastDeferTouchX = contentToViewX(ted.mPoints[0].x)
