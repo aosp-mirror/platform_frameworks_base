@@ -3007,10 +3007,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         @Override
         public void run() {
-            show();
-            Callback cb = getCallback();
-            if (cb != null) {
-                cb.onMenuOpened(FEATURE_ACTION_BAR, mSubMenu);
+            if (tryShow()) {
+                Callback cb = getCallback();
+                if (cb != null) {
+                    cb.onMenuOpened(FEATURE_ACTION_BAR, mSubMenu);
+                }
             }
         }
     }

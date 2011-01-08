@@ -66,9 +66,10 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         }
 
         public void run() {
-            mOverflowPopup = mPopup;
-            mPopup.show();
-            mPostedOpenRunnable = null;
+            if (mPopup.tryShow()) {
+                mOverflowPopup = mPopup;
+                mPostedOpenRunnable = null;
+            }
         }
     }
 
