@@ -216,6 +216,7 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
         removeAllViews();
         mCustomView = null;
         mMenuView = null;
+        mAnimateInOnLayout = false;
     }
 
     public boolean showOverflowMenu() {
