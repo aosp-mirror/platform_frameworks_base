@@ -479,9 +479,9 @@ public class Switch extends CompoundButton {
     }
 
     private void animateThumbToCheckedState(boolean newCheckedState) {
-        float targetPos = newCheckedState ? 0 : getThumbScrollRange();
         // TODO animate!
-        mThumbPosition = targetPos;
+        //float targetPos = newCheckedState ? 0 : getThumbScrollRange();
+        //mThumbPosition = targetPos;
         setChecked(newCheckedState);
     }
 
@@ -493,11 +493,14 @@ public class Switch extends CompoundButton {
     public void setChecked(boolean checked) {
         super.setChecked(checked);
         mThumbPosition = checked ? 0 : getThumbScrollRange();
+        invalidate();
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
+
+        mThumbPosition = isChecked() ? 0 : getThumbScrollRange();
 
         int switchRight = getWidth() - getPaddingRight();
         int switchLeft = switchRight - mSwitchWidth;
