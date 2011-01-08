@@ -4087,7 +4087,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 // we have gone through a significant charge (from a very low
                 // level to a now very high level).
                 if (oldStatus == BatteryManager.BATTERY_STATUS_FULL
-                        || level >= 95
+                        || level >= 90
                         || (mDischargeCurrentLevel < 20 && level >= 80)) {
                     doWrite = true;
                     resetAllStatsLocked();
