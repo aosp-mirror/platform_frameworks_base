@@ -186,7 +186,7 @@ public class PowerUI extends SystemUI {
                 b.setCancelable(true);
                 b.setTitle(R.string.battery_low_title);
                 b.setView(v);
-                b.setIcon(android.R.drawable.ic_dialog_alert);
+                b.setIconAttribute(android.R.attr.alertDialogIcon);
                 b.setPositiveButton(android.R.string.ok, null);
 
             final Intent intent = new Intent(Intent.ACTION_POWER_USAGE_SUMMARY);
@@ -249,7 +249,7 @@ if (false) { // getRingtone ANRs
         AlertDialog.Builder b = new AlertDialog.Builder(mContext);
             b.setCancelable(true);
             b.setMessage(R.string.invalid_charger);
-            b.setIcon(android.R.drawable.ic_dialog_alert);
+            b.setIconAttribute(android.R.attr.alertDialogIcon);
             b.setPositiveButton(android.R.string.ok, null);
 
         AlertDialog d = b.create();

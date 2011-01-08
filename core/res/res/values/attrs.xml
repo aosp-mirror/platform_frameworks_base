@@ -636,6 +636,8 @@
         <attr name="dialogTheme" format="reference" />
         <!-- Theme to use for alert dialogs spawned from this theme. -->
         <attr name="alertDialogTheme" format="reference" />
+        <!-- Icon drawable to use for alerts -->
+        <attr name="alertDialogIcon" format="reference" />
 
         <!-- Drawable to use for generic vertical dividers. -->
         <attr name="dividerVertical" format="reference" />
