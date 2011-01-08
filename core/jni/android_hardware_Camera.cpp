@@ -25,6 +25,7 @@
 
 #include <utils/Vector.h>
 
+#include <gui/SurfaceTexture.h>
 #include <surfaceflinger/Surface.h>
 #include <camera/Camera.h>
 #include <binder/IMemory.h>
@@ -34,6 +35,7 @@ using namespace android;
 struct fields_t {
     jfieldID    context;
     jfieldID    surface;
+    jfieldID    surfaceTexture;
     jfieldID    facing;
     jfieldID    orientation;
     jmethodID   post_event;
@@ -393,6 +395,24 @@ static void android_hardware_Camera_setPreviewDisplay(JNIEnv *env, jobject thiz,
     }
 }
 
+static void android_hardware_Camera_setPreviewTexture(JNIEnv *env,
+        jobject thiz, jobject jSurfaceTexture)
+{
+    LOGV("setPreviewTexture");
+    sp<Camera> camera = get_native_camera(env, thiz, NULL);
+    if (camera == 0) return;
+
+    sp<SurfaceTexture> surfaceTexture = NULL;
+    if (jSurfaceTexture != NULL) {
+        surfaceTexture = reinterpret_cast<SurfaceTexture*>(env->GetIntField(
+                jSurfaceTexture, fields.surfaceTexture));
+    }
+    if (camera->setPreviewTexture(surfaceTexture) != NO_ERROR) {
+        jniThrowException(env, "java/io/IOException",
+                "setPreviewTexture failed");
+    }
+}
+
 static void android_hardware_Camera_startPreview(JNIEnv *env, jobject thiz)
 {
     LOGV("startPreview");
@@ -603,6 +623,9 @@ static JNINativeMethod camMethods[] = {
   { "setPreviewDisplay",
     "(Landroid/view/Surface;)V",
     (void *)android_hardware_Camera_setPreviewDisplay },
+  { "setPreviewTexture",
+    "(Landroid/graphics/SurfaceTexture;)V",
+    (void *)android_hardware_Camera_setPreviewTexture },
   { "startPreview",
     "()V",
     (void *)android_hardware_Camera_startPreview },
@@ -688,6 +711,8 @@ int register_android_hardware_Camera(JNIEnv *env)
     field fields_to_find[] = {
         { "android/hardware/Camera", "mNativeContext",   "I", &fields.context },
         { "android/view/Surface",    ANDROID_VIEW_SURFACE_JNI_ID, "I", &fields.surface },
+        { "android/graphics/SurfaceTexture",
+          ANDROID_GRAPHICS_SURFACETEXTURE_JNI_ID, "I", &fields.surfaceTexture },
         { "android/hardware/Camera$CameraInfo", "facing",   "I", &fields.facing },
         { "android/hardware/Camera$CameraInfo", "orientation",   "I", &fields.orientation },
     };
@@ -708,4 +733,3 @@ int register_android_hardware_Camera(JNIEnv *env)
     return AndroidRuntime::registerNativeMethods(env, "android/hardware/Camera",
                                               camMethods, NELEM(camMethods));
 }
-
