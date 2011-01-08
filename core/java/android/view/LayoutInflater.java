@@ -38,7 +38,7 @@ import java.util.HashMap;
  * for the device you are running on.  For example:
  *
  * <pre>LayoutInflater inflater = (LayoutInflater)context.getSystemService
- *      Context.LAYOUT_INFLATER_SERVICE);</pre>
+ *      (Context.LAYOUT_INFLATER_SERVICE);</pre>
  * 
  * <p>
  * To create a new LayoutInflater with an additional {@link Factory} for your
