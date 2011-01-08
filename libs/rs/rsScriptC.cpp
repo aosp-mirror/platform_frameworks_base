@@ -437,7 +437,7 @@ void ScriptCState::runCompiler(Context *rsc,
         }
 #endif
 
-        if (bccCompileBC(s->mBccScript) != 0) {
+        if (bccPrepareExecutable(s->mBccScript) != 0) {
             LOGE("bcc: FAILS to prepare executable");
             // Handle Fatal Error
         }
