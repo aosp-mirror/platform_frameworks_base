@@ -28,6 +28,7 @@ import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
 import com.android.ide.common.rendering.api.IAnimationListener;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
 import com.android.ide.common.rendering.api.IProjectCallback;
+import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.Params;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.ResourceDensity;
@@ -654,14 +655,20 @@ public class RenderSessionImpl {
                     previousParent.setLayoutTransition(removeTransition);
 
                     // no fade-out
-                    removeTransition.setAnimator(LayoutTransition.DISAPPEARING, null);
+                    // FIXME: set a non-null do-nothing Animator.
+                    // setting a null animator doesn't work because the child gets its parent
+                    // set to null too late.
+                    //removeTransition.setAnimator(LayoutTransition.DISAPPEARING, null);
 
                     // now for the new parent, if different
                     if (previousParent != newParentView) {
                         LayoutTransition addTransition = new LayoutTransition();
 
                         // no fade-in
-                        addTransition.setAnimator(LayoutTransition.APPEARING, null);
+                        // FIXME: set a non-null do-nothing Animator.
+                        // setting a null animator doesn't work because the child gets its parent
+                        // set to null too late.
+                        //addTransition.setAnimator(LayoutTransition.APPEARING, null);
 
                         newParentView.setLayoutTransition(addTransition);
                     }
@@ -824,6 +831,18 @@ public class RenderSessionImpl {
             // looks like this is a view class that doesn't support children manipulation!
             return ERROR_VIEWGROUP_NO_CHILDREN.createResult();
         }
+    }
+
+    /**
+     * Returns the log associated with the session.
+     * @return the log or null if there are none.
+     */
+    public LayoutLog getLog() {
+        if (mParams != null) {
+            return mParams.getLog();
+        }
+
+        return null;
     }
 
     /**
