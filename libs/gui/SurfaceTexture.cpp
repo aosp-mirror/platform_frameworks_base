@@ -36,6 +36,11 @@ namespace android {
 SurfaceTexture::SurfaceTexture(GLuint tex) :
     mBufferCount(MIN_BUFFER_SLOTS), mCurrentTexture(INVALID_BUFFER_SLOT),
     mLastQueued(INVALID_BUFFER_SLOT), mTexName(tex) {
+    for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
+        mSlots[i].mEglImage = EGL_NO_IMAGE_KHR;
+        mSlots[i].mEglDisplay = EGL_NO_DISPLAY;
+        mSlots[i].mOwnedByClient = false;
+    }
 }
 
 SurfaceTexture::~SurfaceTexture() {
