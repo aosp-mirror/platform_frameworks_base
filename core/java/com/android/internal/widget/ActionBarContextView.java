@@ -159,7 +159,7 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
     }
 
     public void initForMode(final ActionMode mode) {
-        if (mAnimationMode == ANIMATE_OUT) {
+        if (mAnimationMode != ANIMATE_IDLE || mAnimateInOnLayout) {
             killMode();
         }
 
