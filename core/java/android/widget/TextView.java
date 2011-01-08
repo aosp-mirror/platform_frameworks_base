@@ -8036,32 +8036,32 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return packRangeInLong(min, max);
     }
 
-    private DragThumbnailBuilder getTextThumbnailBuilder(CharSequence text) {
-        TextView thumbnail = (TextView) inflate(mContext,
+    private DragShadowBuilder getTextThumbnailBuilder(CharSequence text) {
+        TextView shadowView = (TextView) inflate(mContext,
                 com.android.internal.R.layout.text_drag_thumbnail, null);
 
-        if (thumbnail == null) {
+        if (shadowView == null) {
             throw new IllegalArgumentException("Unable to inflate text drag thumbnail");
         }
 
-        if (text.length() > DRAG_THUMBNAIL_MAX_TEXT_LENGTH) {
-            text = text.subSequence(0, DRAG_THUMBNAIL_MAX_TEXT_LENGTH);
+        if (text.length() > DRAG_SHADOW_MAX_TEXT_LENGTH) {
+            text = text.subSequence(0, DRAG_SHADOW_MAX_TEXT_LENGTH);
         }
-        thumbnail.setText(text);
-        thumbnail.setTextColor(getTextColors());
+        shadowView.setText(text);
+        shadowView.setTextColor(getTextColors());
 
-        thumbnail.setTextAppearance(mContext, R.styleable.Theme_textAppearanceLarge);
-        thumbnail.setGravity(Gravity.CENTER);
+        shadowView.setTextAppearance(mContext, R.styleable.Theme_textAppearanceLarge);
+        shadowView.setGravity(Gravity.CENTER);
 
-        thumbnail.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+        shadowView.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
 
         final int size = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-        thumbnail.measure(size, size);
+        shadowView.measure(size, size);
 
-        thumbnail.layout(0, 0, thumbnail.getMeasuredWidth(), thumbnail.getMeasuredHeight());
-        thumbnail.invalidate();
-        return new DragThumbnailBuilder(thumbnail);
+        shadowView.layout(0, 0, shadowView.getMeasuredWidth(), shadowView.getMeasuredHeight());
+        shadowView.invalidate();
+        return new DragShadowBuilder(shadowView);
     }
 
     private static class DragLocalState {
@@ -9503,7 +9503,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static final InputFilter[] NO_FILTERS = new InputFilter[0];
     private InputFilter[] mFilters = NO_FILTERS;
     private static final Spanned EMPTY_SPANNED = new SpannedString("");
-    private static int DRAG_THUMBNAIL_MAX_TEXT_LENGTH = 20;
+    private static int DRAG_SHADOW_MAX_TEXT_LENGTH = 20;
     // System wide time for last cut or copy action.
     private static long sLastCutOrCopyTime;
     // Used to highlight a word when it is corrected by the IME
