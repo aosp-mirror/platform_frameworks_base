@@ -410,40 +410,38 @@ extern unsigned rs_runtime_lib_bc_size;
 
 void ScriptCState::runCompiler(Context *rsc,
                                ScriptC *s,
-                               long modWhen,
-                               long crc32,
                                const char *resName,
                                const char *cacheDir) {
     {
         s->mBccScript = bccCreateScript();
+
         s->mEnviroment.mIsThreadable = true;
+
         bccRegisterSymbolCallback(s->mBccScript, symbolLookup, s);
-        // bccReadBC() reads in the BitCode, if no cache file corresponding to
-        // the resName is found. Otherwise, bccReadBC() returns a negative value
-        // and the "else" branch will be taken.
+
         if (bccReadBC(s->mBccScript,
                       s->mEnviroment.mScriptText,
                       s->mEnviroment.mScriptTextLength,
-                      modWhen,
-                      crc32,
-                      resName,
-                      cacheDir) >= 0) {
-          //bccLinkBC(s->mBccScript, rs_runtime_lib_bc, rs_runtime_lib_bc_size);
-          bccCompileBC(s->mBccScript);
-        } else {
-          // bccReadBC returns a neagative value: Didn't read any script,
-          // So, use cached binary instead
-          if (bccLoadBinary(s->mBccScript)) {  // LoadBinary fails ==> Recompile
-            bccReadBC(s->mBccScript,
-                      s->mEnviroment.mScriptText,
-                      s->mEnviroment.mScriptTextLength,
-                      modWhen,
-                      crc32,
-                      resName,
-                      cacheDir);
-            bccCompileBC(s->mBccScript);
-          }
+                      /*deprecated*/ 0, /*deprecated*/ 0,
+                      resName, cacheDir) != 0) {
+            LOGE("bcc: FAILS to read bitcode");
+            // Handle Fatal Error
         }
+
+#if 0
+        if (bccLinkBC(s->mBccScript,
+                      rs_runtime_lib_bc,
+                      rs_runtime_lib_bc_size) != 0) {
+            LOGE("bcc: FAILS to link bitcode");
+            // Handle Fatal Error
+        }
+#endif
+
+        if (bccCompileBC(s->mBccScript) != 0) {
+            LOGE("bcc: FAILS to prepare executable");
+            // Handle Fatal Error
+        }
+
         bccGetScriptLabel(s->mBccScript, "root", (BCCvoid**) &s->mProgram.mRoot);
         bccGetScriptLabel(s->mBccScript, "init", (BCCvoid**) &s->mProgram.mInit);
     }
@@ -535,7 +533,8 @@ void ScriptCState::runCompiler(Context *rsc,
 
 
     } else {
-        // Deal with an error.
+        LOGE("bcc: FAILS to prepare executable");
+        // Handle Fatal Error
     }
 }
 
@@ -559,7 +558,7 @@ void rsi_ScriptCSetText(Context *rsc, const char *text, uint32_t len) {
 
 
 RsScript rsi_ScriptCCreate(Context *rsc,
-                           const char *packageName,
+                           const char *packageName /* deprecated */,
                            const char *resName,
                            const char *cacheDir)
 {
@@ -569,34 +568,7 @@ RsScript rsi_ScriptCCreate(Context *rsc,
     ss->mScript.clear();
     s->incUserRef();
 
-    // Open the apk and return the ZipArchive:
-    //  int dexZipOpenArchive(const char* fileName, ZipArchive* pArchive)
-    ZipArchive archive;
-    long modWhen;
-    long crc32;
-    if (!dexZipOpenArchive(packageName, &archive)) {  // Success
-      ZipEntry entry = dexZipFindEntry(&archive, resName);
-
-      int method;
-      size_t uncompLen;
-      size_t compLen;
-      off_t offset;
-      if (!dexZipGetEntryInfo(&archive,
-                              entry,
-                              &method,
-                              &uncompLen,
-                              &compLen,
-                              &offset,
-                              &modWhen,
-                              &crc32)) {
-      } else {
-        LOGI("Coudn't get entry info for the bitcode in an apk");
-      }
-    } else {
-      LOGI("Couldn't open the archive and read the bitcode");
-    }
-
-    ss->runCompiler(rsc, s.get(), modWhen, crc32, resName, cacheDir);
+    ss->runCompiler(rsc, s.get(), resName, cacheDir);
     ss->clear(rsc);
     return s.get();
 }
