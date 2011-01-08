@@ -126,7 +126,7 @@ public class Allocation extends BaseObj {
         for (int ct=0; ct < d.length; ct++) {
             i[ct] = d[ct].getID();
         }
-        subData1D(0, mType.getCount(), i);
+        copy1DRangeFrom(0, mType.getCount(), i);
     }
 
     private void validateBitmap(Bitmap b) {
@@ -139,32 +139,35 @@ public class Allocation extends BaseObj {
 
     public void copyFrom(int[] d) {
         mRS.validate();
-        subData1D(0, mType.getCount(), d);
+        copy1DRangeFrom(0, mType.getCount(), d);
     }
     public void copyFrom(short[] d) {
         mRS.validate();
-        subData1D(0, mType.getCount(), d);
+        copy1DRangeFrom(0, mType.getCount(), d);
     }
     public void copyFrom(byte[] d) {
         mRS.validate();
-        subData1D(0, mType.getCount(), d);
+        copy1DRangeFrom(0, mType.getCount(), d);
     }
     public void copyFrom(float[] d) {
         mRS.validate();
-        subData1D(0, mType.getCount(), d);
+        copy1DRangeFrom(0, mType.getCount(), d);
     }
     public void copyFrom(Bitmap b) {
         validateBitmap(b);
         mRS.nAllocationCopyFromBitmap(getID(), b);
     }
 
-    public void copyTo(Bitmap b) {
-        validateBitmap(b);
-        mRS.nAllocationCopyToBitmap(getID(), b);
-    }
-
-
-    public void subData(int xoff, FieldPacker fp) {
+    /**
+     * @hide
+     *
+     * This is only intended to be used by auto-generate code reflected from the
+     * renderscript script files.
+     *
+     * @param xoff
+     * @param fp
+     */
+    public void setOneElement(int xoff, FieldPacker fp) {
         int eSize = mType.mElement.getSizeBytes();
         final byte[] data = fp.getData();
 
@@ -178,7 +181,17 @@ public class Allocation extends BaseObj {
     }
 
 
-    public void subElementData(int xoff, int component_number, FieldPacker fp) {
+    /**
+     * @hide
+     *
+     * This is only intended to be used by auto-generate code reflected from the
+     * renderscript script files.
+     *
+     * @param xoff
+     * @param component_number
+     * @param fp
+     */
+    public void setOneComponent(int xoff, int component_number, FieldPacker fp) {
         if (component_number >= mType.mElement.mElements.length) {
             throw new RSIllegalArgumentException("Component_number " + component_number + " out of range.");
         }
@@ -214,44 +227,75 @@ public class Allocation extends BaseObj {
         }
     }
 
-    public void subData1D(int off, int count, int[] d) {
+    public void copy1DRangeFrom(int off, int count, int[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 4, dataSize);
         mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
     }
-    public void subData1D(int off, int count, short[] d) {
+    public void copy1DRangeFrom(int off, int count, short[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 2, dataSize);
         mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
     }
-    public void subData1D(int off, int count, byte[] d) {
+    public void copy1DRangeFrom(int off, int count, byte[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length, dataSize);
         mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
     }
-    public void subData1D(int off, int count, float[] d) {
+    public void copy1DRangeFrom(int off, int count, float[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 4, dataSize);
         mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
     }
 
 
-    public void subData2D(int xoff, int yoff, int w, int h, int[] d) {
+    public void copy2DRangeFrom(int xoff, int yoff, int w, int h, byte[] d) {
+        mRS.validate();
+        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, d, d.length);
+    }
+
+    public void copy2DRangeFrom(int xoff, int yoff, int w, int h, short[] d) {
+        mRS.validate();
+        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, d, d.length * 2);
+    }
+
+    public void copy2DRangeFrom(int xoff, int yoff, int w, int h, int[] d) {
         mRS.validate();
         mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, d, d.length * 4);
     }
 
-    public void subData2D(int xoff, int yoff, int w, int h, float[] d) {
+    public void copy2DRangeFrom(int xoff, int yoff, int w, int h, float[] d) {
         mRS.validate();
         mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, d, d.length * 4);
     }
 
-    public void readData(int[] d) {
+    public void copy2DRangeFrom(int xoff, int yoff, Bitmap b) {
+        mRS.validate();
+        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, b);
+    }
+
+
+    public void copyTo(Bitmap b) {
+        validateBitmap(b);
+        mRS.nAllocationCopyToBitmap(getID(), b);
+    }
+
+    public void copyTo(byte[] d) {
         mRS.validate();
         mRS.nAllocationRead(getID(), d);
     }
 
-    public void readData(float[] d) {
+    public void copyTo(short[] d) {
+        mRS.validate();
+        mRS.nAllocationRead(getID(), d);
+    }
+
+    public void copyTo(int[] d) {
+        mRS.validate();
+        mRS.nAllocationRead(getID(), d);
+    }
+
+    public void copyTo(float[] d) {
         mRS.validate();
         mRS.nAllocationRead(getID(), d);
     }

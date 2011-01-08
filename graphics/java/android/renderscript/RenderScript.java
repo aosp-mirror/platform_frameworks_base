@@ -60,7 +60,8 @@ public class RenderScript {
             _nInit();
             sInitialized = true;
         } catch (UnsatisfiedLinkError e) {
-            Log.d(LOG_TAG, "RenderScript JNI library not found!");
+            Log.e(LOG_TAG, "Error loading RS jni library: " + e);
+            throw new RSRuntimeException("Error loading RS jni library: " + e);
         }
     }
 
@@ -250,6 +251,14 @@ public class RenderScript {
         rsnAllocationElementData1D(mContext, id, xoff, mip, compIdx, d, sizeBytes);
     }
 
+    native void rsnAllocationData2D(int con, int id, int xoff, int yoff, int mip, int face, int w, int h, byte[] d, int sizeBytes);
+    synchronized void nAllocationData2D(int id, int xoff, int yoff, int mip, int face, int w, int h, byte[] d, int sizeBytes) {
+        rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes);
+    }
+    native void rsnAllocationData2D(int con, int id, int xoff, int yoff, int mip, int face, int w, int h, short[] d, int sizeBytes);
+    synchronized void nAllocationData2D(int id, int xoff, int yoff, int mip, int face, int w, int h, short[] d, int sizeBytes) {
+        rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes);
+    }
     native void rsnAllocationData2D(int con, int id, int xoff, int yoff, int mip, int face, int w, int h, int[] d, int sizeBytes);
     synchronized void nAllocationData2D(int id, int xoff, int yoff, int mip, int face, int w, int h, int[] d, int sizeBytes) {
         rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes);
@@ -258,7 +267,19 @@ public class RenderScript {
     synchronized void nAllocationData2D(int id, int xoff, int yoff, int mip, int face, int w, int h, float[] d, int sizeBytes) {
         rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes);
     }
+    native void rsnAllocationData2D(int con, int id, int xoff, int yoff, int mip, int face, Bitmap b);
+    synchronized void nAllocationData2D(int id, int xoff, int yoff, int mip, int face, Bitmap b) {
+        rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, b);
+    }
 
+    native void rsnAllocationRead(int con, int id, byte[] d);
+    synchronized void nAllocationRead(int id, byte[] d) {
+        rsnAllocationRead(mContext, id, d);
+    }
+    native void rsnAllocationRead(int con, int id, short[] d);
+    synchronized void nAllocationRead(int id, short[] d) {
+        rsnAllocationRead(mContext, id, d);
+    }
     native void rsnAllocationRead(int con, int id, int[] d);
     synchronized void nAllocationRead(int id, int[] d) {
         rsnAllocationRead(mContext, id, d);
