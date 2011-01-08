@@ -672,6 +672,10 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         @Override
         public int measureContentWidth() {
             final SpinnerAdapter adapter = getAdapter();
+            if (adapter == null) {
+                return 0;
+            }
+
             int width = 0;
             View itemView = null;
             int itemType = 0;
