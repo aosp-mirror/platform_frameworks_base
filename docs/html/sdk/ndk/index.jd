@@ -1,16 +1,16 @@
 ndk=true
 
-ndk.win_download=android-ndk-r4b-windows.zip
-ndk.win_bytes=45792835
-ndk.win_checksum=e397145e155a639be53ee4b6db8ad511
+ndk.win_download=android-ndk-r5-windows.zip
+ndk.win_bytes=62217450
+ndk.win_checksum=59cbb02d91d74e9c5c7278d94c989e80
 
-ndk.mac_download=android-ndk-r4b-darwin-x86.zip
-ndk.mac_bytes=50586041
-ndk.mac_checksum=41dbd54335fb828ee408eab17103a1b0
+ndk.mac_download=android-ndk-r5-darwin-x86.tar.bz2
+ndk.mac_bytes=50210863
+ndk.mac_checksum=9dee8e4cb529a5619e9b8d1707478c32
 
-ndk.linux_download=android-ndk-r4b-linux-x86.zip
-ndk.linux_bytes=49464776
-ndk.linux_checksum=2deabcb125c219b34140975b710f00ec
+ndk.linux_download=android-ndk-r5-linux-x86.tar.bz2
+ndk.linux_bytes=44362746
+ndk.linux_checksum=49d5c35ec02bafc074842542c58b7eb3
 
 page.title=Android NDK
 @jd:body
@@ -64,7 +64,7 @@ padding: .25em 1em;
          onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-opened.png"
          class="toggle-img"
          height="9px"
-         width="9px" /> Android NDK, Revision 5</a> <em>(November 2010)</em>
+         width="9px" /> Android NDK, Revision 5</a> <em>(December 2010)</em>
 
     <div class="toggleme">
       <p>This release of the NDK includes many new APIs, most of which are introduced to

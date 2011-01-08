@@ -225,7 +225,7 @@ gyroscope sensor. To do so, add <code>&lt;uses-feature
 android:name="android.hardware.sensor.gyroscope"
 android:required="true"&gt;</code> to the application manifest.</p>
 
-<p>For API details, see {@link android.hardware.Sensor}</p>
+<p>For API details, see {@link android.hardware.Sensor}.</p>
 
 
 <h3 id="cameras">Multiple cameras support</h3>
@@ -242,9 +242,9 @@ positional characteristics (orientation, front-facing or back-facing).</li>
 android.hardware.Camera#getCameraInfo(int,CameraInfo) getCameraInfo()} methods in the {@link
 android.hardware.Camera} class let applications query for the cameras available
 and open the camera that they need.</li>
-<li>New {@link android.media.CamcorderProfile get(int,int) method lets
-applications retrieve a CamcorderProfile for a specific camera. </li>
-<li>New {@link android media.CameraProfile#getJpegEncodingQualityParameter(int, int)
+<li>New {@link android.media.CamcorderProfile#get get()} method lets
+applications retrieve a {@link android.media.CamcorderProfile} for a specific camera. </li>
+<li>New {@link android.media.CameraProfile#getJpegEncodingQualityParameter(int, int)
 getJpegEncodingQualityParameter()} lets applications obtain the still-image
 capture quality level for a specific camera.</li>
 </ul>
@@ -389,19 +389,19 @@ security of Views that provide access to sensitive functionality. For example,
 touch filtering is appropriate to ensure the security of user actions such as
 granting a permission request, making a purchase, or clicking on an
 advertisement. For details, see the <a
-href="{@docRoot}reference/android/view/View.html#security">View class
+href="{@docRoot}reference/android/view/View.html#Security">View class
 documentation</a>.</li>
 <li>New <code>filterTouchesWhenObscured</code> attribute for view elements,
 which declares whether to filter touches when the view's window is obscured by
 another visible window. When set to <code>"true"</code>, the view will not
 receive touches whenever a toast, dialog or other window appears above the
 view's window. Refer to <a
-href="{@docRoot}reference/android/view/View.html#security">View security
+href="{@docRoot}reference/android/view/View.html#Security">View security
 documentation</a> for details.</li>
 </ul>
 
 <p class="note">To look at sample code for touch filtering, see
-<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/SecureView.html">SurfaceView.java</a>
+<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/SecureView.html">SecureView.java</a>
 in the ApiDemos sample application.</p>
 </li>
 
