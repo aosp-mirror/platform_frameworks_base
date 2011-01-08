@@ -88,6 +88,12 @@ public class CalendarUtils {
             @Override
             protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
                 synchronized (mTZCallbacks) {
+                    if (cursor == null) {
+                        mTZQueryInProgress = false;
+                        mFirstTZRequest = true;
+                        return;
+                    }
+
                     boolean writePrefs = false;
                     // Check the values in the db
                     int keyColumn = cursor.getColumnIndexOrThrow(CalendarCache.KEY);
