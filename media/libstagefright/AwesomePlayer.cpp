@@ -52,6 +52,7 @@
 #include "include/LiveSession.h"
 
 #define USE_SURFACE_ALLOC 1
+#define FRAME_DROP_FREQ 7
 
 namespace android {
 
@@ -1255,7 +1256,7 @@ void AwesomePlayer::onVideoEvent() {
 
     if (mFlags & FIRST_FRAME) {
         mFlags &= ~FIRST_FRAME;
-
+        mSinceLastDropped = 0;
         mTimeSourceDeltaUs = ts->getRealTimeUs() - timeUs;
     }
 
@@ -1283,12 +1284,16 @@ void AwesomePlayer::onVideoEvent() {
     if (latenessUs > 40000) {
         // We're more than 40ms late.
         LOGV("we're late by %lld us (%.2f secs)", latenessUs, latenessUs / 1E6);
+        if ( mSinceLastDropped > FRAME_DROP_FREQ)
+        {
+            LOGV("we're late by %lld us (%.2f secs) dropping one after %d frames", latenessUs, latenessUs / 1E6, mSinceLastDropped);
+            mSinceLastDropped = 0;
+            mVideoBuffer->release();
+            mVideoBuffer = NULL;
 
-        mVideoBuffer->release();
-        mVideoBuffer = NULL;
-
-        postVideoEvent_l();
-        return;
+            postVideoEvent_l();
+            return;
+        }
     }
 
     if (latenessUs < -10000) {
@@ -1305,6 +1310,7 @@ void AwesomePlayer::onVideoEvent() {
     }
 
     if (mVideoRenderer != NULL) {
+        mSinceLastDropped++;
         mVideoRenderer->render(mVideoBuffer);
     }
 
