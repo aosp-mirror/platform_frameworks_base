@@ -262,7 +262,7 @@
       </li>
       <li><a href="<?cs var:toroot?>guide/topics/admin/device-admin.html">
             <span class="en">Device Administration</span>
-         </a> <span class="new">new!</span>
+         </a>
       </li>
       <li class="toggle-list">
            <div>
@@ -274,27 +274,22 @@
               <li>
                 <a href="<?cs var:toroot?>guide/topics/testing/testing_android.html">
                 <span class="en">Testing Fundamentals</span></a>
-                <span class="new">new!</span>
               </li>
               <li>
                 <a href="<?cs var:toroot?>guide/topics/testing/activity_testing.html">
                 <span class="en">Activity Testing</span></a>
-                <span class="new">new!</span>
               </li>
               <li>
                 <a href="<?cs var:toroot?>guide/topics/testing/contentprovider_testing.html">
                 <span class="en">Content Provider Testing</span></a>
-                <span class="new">new!</span>
               </li>
               <li>
                 <a href="<?cs var:toroot?>guide/topics/testing/service_testing.html">
                 <span class="en">Service Testing</span></a>
-                <span class="new">new!</span>
               </li>
               <li>
                 <a href="<?cs var:toroot ?>guide/topics/testing/what_to_test.html">
                 <span class="en">What To Test</span></a>
-                <span class="new">new!</span>
               </li>
 
            </ul>
@@ -467,38 +462,26 @@
           <li><a href="<?cs var:toroot ?>guide/developing/tools/layoutopt.html">layoutopt</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/logcat.html">logcat</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/mksdcard.html">mksdcard</a></li>
-          <li><a href="/guide/developing/tools/monkey.html">Monkey</a></li> 
-              <li class="toggle-list"> 
-                 <div> 
-                     <a href="/guide/developing/tools/monkeyrunner_concepts.html"> 
-                     <span class="en">monkeyrunner</span> 
-                  </a> 
-                      <span class="new">new!</span> 
-                  </div> 
-                  <ul> 
-                      <li> 
-                          <a href="/guide/developing/tools/MonkeyDevice.html"> 
-                                <span class="en">MonkeyDevice</span> 
-                        </a> 
-                        <span class="new">new!</span> 
-                    </li> 
-                    <li> 
-                        <a href="/guide/developing/tools/MonkeyImage.html"> 
-                            <span class="en">MonkeyImage</span> 
-                        </a> 
-                        <span class="new">new!</span> 
-                    </li> 
-                    <li> 
-                        <a href="/guide/developing/tools/MonkeyRunner.html"> 
-                            <span class="en">MonkeyRunner</span> 
-                        </a> 
-                        <span class="new">new!</span> 
-                    </li> 
-                  </ul> 
-              </li> 
-              <li><a href="/guide/developing/tools/proguard.html">ProGuard</a> <span class="new">new!</span></li> 
-              <li><a href="/guide/developing/tools/adb.html#sqlite">sqlite3</a></li>               
-              <li><a href="/guide/developing/tools/traceview.html">Traceview</a></li> 
+          <li><a href="/guide/developing/tools/monkey.html">Monkey</a></li>
+          <li class="toggle-list">
+            <div><a href="/guide/developing/tools/monkeyrunner_concepts.html">
+              <span class="en">monkeyrunner</span>
+            </a></div>
+            <ul>
+              <li><a href="/guide/developing/tools/MonkeyDevice.html">
+                <span class="en">MonkeyDevice</span>
+                </a></li>
+              <li><a href="/guide/developing/tools/MonkeyImage.html">
+                <span class="en">MonkeyImage</span>
+                </a></li>
+              <li><a href="/guide/developing/tools/MonkeyRunner.html">
+                <span class="en">MonkeyRunner</span>
+                </a></li>
+            </ul>
+          </li>
+          <li><a href="/guide/developing/tools/proguard.html">ProGuard</a></li>
+          <li><a href="/guide/developing/tools/adb.html#sqlite">sqlite3</a></li>
+          <li><a href="/guide/developing/tools/traceview.html">Traceview</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/zipalign.html">zipalign</a></li>
         </ul>
       </li>
@@ -538,7 +521,7 @@
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/publishing/licensing.html">
             <span class="en">Licensing Your Applications</span>
-          </a> <span class="new">new!</span></li>
+          </a></li>
       <li><a href="<?cs var:toroot ?>guide/publishing/preparing.html">
             <span class="en">Preparing to Publish</span>
             <span class="de" style="display:none">Vorbereitung auf die Veröffentlichung</span>
@@ -633,19 +616,19 @@
     <ul>
       <li><a href="<?cs var:toroot ?>guide/webapps/index.html">
             <span class="en">Web Apps Overview</span>
-          </a> <span class="new">new!</span><!-- 11/1/10 --></li>
+          </a></li>
       <li><a href="<?cs var:toroot ?>guide/webapps/targeting.html">
             <span class="en">Targeting Screens from Web Apps</span>
-          </a> <span class="new">new!</span><!-- 11/1/10 --></li>
+          </a></li>
       <li><a href="<?cs var:toroot ?>guide/webapps/webview.html">
             <span class="en">Building Web Apps in WebView</span>
-          </a> <span class="new">new!</span><!-- 11/1/10 --></li>
+          </a></li>
       <li><a href="<?cs var:toroot ?>guide/webapps/debugging.html">
             <span class="en">Debugging Web Apps</span>
-          </a> <span class="new">new!</span><!-- 11/1/10 --></li>
+          </a></li>
       <li><a href="<?cs var:toroot ?>guide/webapps/best-practices.html">
             <span class="en">Best Practices for Web Apps</span>
-          </a> <span class="new">new!</span><!-- 11/1/10 --></li>
+          </a></li>
     </ul>
   </li>
 

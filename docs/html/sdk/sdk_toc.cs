@@ -98,7 +98,7 @@ Started</a></li>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r8</a> <span class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>sdk/win-usb.html">USB Driver for
-      Windows, r3</a>
+      Windows, r4</a> <span class="new">new!</span>
       </li>
     </ul>
   </li>

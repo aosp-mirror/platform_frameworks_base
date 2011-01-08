@@ -18,6 +18,13 @@ href="{@docRoot}resources/samples/get.html">Getting the Samples</a>.</p>
 -->
 <dl>
 
+ <dt><a href="AccelerometerPlay/index.html">Accelerometer Play</a></dt>
+  <dd>An example that demonstrates how to use accelerometer readings
+  in an application.</dd>
+  
+ <dt><a href="AccessibilityService/index.html">Accessibility Service</a></dt>
+  <dd>An example that demonstrates the use of accessibility APIs.</dd>
+
  <dt><a href="ApiDemos/index.html">API Demos</a></dt>
   <dd>A variety of small applications that demonstrate an extensive collection of
   framework topics.</dd>
