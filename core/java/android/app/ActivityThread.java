@@ -185,6 +185,9 @@ public final class ActivityThread {
     final HashMap<IBinder, ProviderClientRecord> mLocalProviders
         = new HashMap<IBinder, ProviderClientRecord>();
 
+    final HashMap<Activity, ArrayList<OnActivityPausedListener>> mOnPauseListeners
+        = new HashMap<Activity, ArrayList<OnActivityPausedListener>>();
+
     final GcIdler mGcIdler = new GcIdler();
     boolean mGcIdlerScheduled = false;
 
@@ -1424,6 +1427,18 @@ public final class ActivityThread {
         }
     }
 
+    public void registerOnActivityPausedListener(Activity activity,
+            OnActivityPausedListener listener) {
+        synchronized (mOnPauseListeners) {
+            ArrayList<OnActivityPausedListener> list = mOnPauseListeners.get(activity);
+            if (list == null) {
+                list = new ArrayList<OnActivityPausedListener>();
+                mOnPauseListeners.put(activity, list);
+            }
+            list.add(listener);
+        }
+    }
+
     public final ActivityInfo resolveActivityInfo(Intent intent) {
         ActivityInfo aInfo = intent.resolveActivityInfo(
                 mInitialApplication.getPackageManager(), PackageManager.GET_SHARED_LIBRARY_FILES);
@@ -2333,6 +2348,17 @@ public final class ActivityThread {
             }
         }
         r.paused = true;
+
+        // Notify any outstanding on paused listeners
+        ArrayList<OnActivityPausedListener> listeners;
+        synchronized (mOnPauseListeners) {
+            listeners = mOnPauseListeners.remove(r.activity);
+        }
+        int size = (listeners != null ? listeners.size() : 0);
+        for (int i = 0; i < size; i++) {
+            listeners.get(i).onPaused(r.activity);
+        }
+
         return state;
     }
 

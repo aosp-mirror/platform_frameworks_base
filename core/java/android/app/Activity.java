@@ -632,7 +632,7 @@ public class Activity extends ContextThemeWrapper
     /*package*/ HashMap<String,Object> mLastNonConfigurationChildInstances;
     Activity mParent;
     boolean mCalled;
-    private boolean mResumed;
+    /*package*/ boolean mResumed;
     private boolean mStopped;
     boolean mFinished;
     boolean mStartedActivity;
@@ -3827,9 +3827,8 @@ public class Activity extends ContextThemeWrapper
         
         mLastNonConfigurationInstance = null;
         
-        // First call onResume() -before- setting mResumed, so we don't
-        // send out any status bar / menu notifications the client makes.
         mCalled = false;
+        // mResumed is set by the instrumentation
         mInstrumentation.callActivityOnResume(this);
         if (!mCalled) {
             throw new SuperNotCalledException(
@@ -3838,7 +3837,6 @@ public class Activity extends ContextThemeWrapper
         }
 
         // Now really resume, and install the current status bar and menu.
-        mResumed = true;
         mCalled = false;
         onPostResume();
         if (!mCalled) {
@@ -3857,6 +3855,7 @@ public class Activity extends ContextThemeWrapper
                     "Activity " + mComponent.toShortString() +
                     " did not call through to super.onPause()");
         }
+        mResumed = false;
     }
     
     final void performUserLeaving() {
@@ -3891,10 +3890,12 @@ public class Activity extends ContextThemeWrapper
     
             mStopped = true;
         }
-        mResumed = false;
     }
 
-    final boolean isResumed() {
+    /**
+     * @hide
+     */
+    public final boolean isResumed() {
         return mResumed;
     }
 
