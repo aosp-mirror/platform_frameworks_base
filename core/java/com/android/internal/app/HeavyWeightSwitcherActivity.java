@@ -28,6 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
@@ -84,8 +85,10 @@ public class HeavyWeightSwitcherActivity extends Activity {
         button = findViewById((R.id.cancel));
         button.setOnClickListener(mCancelListener);
         
+        TypedValue out = new TypedValue();
+        getTheme().resolveAttribute(android.R.attr.alertDialogIcon, out, true);
         getWindow().setFeatureDrawableResource(Window.FEATURE_LEFT_ICON, 
-                android.R.drawable.ic_dialog_alert);
+                out.resourceId);
     }
 
     void setText(int id, CharSequence text) {

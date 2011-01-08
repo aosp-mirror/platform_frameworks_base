@@ -1421,6 +1421,7 @@
   <public type="attr" name="editTextBackground" />
   <public type="attr" name="horizontalScrollViewStyle" />
   <public type="attr" name="layerType" />
+  <public type="attr" name="alertDialogIcon" />
 
   <!-- A simple fade-in animation. -->
   <public type="animator" name="fade_in" id="0x010b0000" />

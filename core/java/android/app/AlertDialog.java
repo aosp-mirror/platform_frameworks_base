@@ -270,6 +270,17 @@ public class AlertDialog extends Dialog implements DialogInterface {
         mAlert.setIcon(icon);
     }
 
+    /**
+     * Set an icon as supplied by a theme attribute. e.g. android.R.attr.alertDialogIcon
+     *
+     * @param attrId ID of a theme attribute that points to a drawable resource.
+     */
+    public void setIconAttribute(int attrId) {
+        TypedValue out = new TypedValue();
+        mContext.getTheme().resolveAttribute(attrId, out, true);
+        mAlert.setIcon(out.resourceId);
+    }
+
     public void setInverseBackgroundForced(boolean forceInverseBackground) {
         mAlert.setInverseBackgroundForced(forceInverseBackground);
     }
@@ -399,7 +410,19 @@ public class AlertDialog extends Dialog implements DialogInterface {
             P.mIcon = icon;
             return this;
         }
-        
+
+        /**
+         * Set an icon as supplied by a theme attribute. e.g. android.R.attr.alertDialogIcon
+         *
+         * @param attrId ID of a theme attribute that points to a drawable resource.
+         */
+        public Builder setIconAttribute(int attrId) {
+            TypedValue out = new TypedValue();
+            P.mContext.getTheme().resolveAttribute(attrId, out, true);
+            P.mIconId = out.resourceId;
+            return this;
+        }
+
         /**
          * Set a listener to be invoked when the positive button of the dialog is pressed.
          * @param textId The resource id of the text to display in the positive button
