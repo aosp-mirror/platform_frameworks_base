@@ -491,8 +491,8 @@
         <attr name="spinnerItemStyle" format="reference" />
         <!-- Default MapView style. -->
         <attr name="mapViewStyle" format="reference" />
-        <!-- Default quickcontact badge style. -->
-        <attr name="quickContactBadgeStyle" format="reference" />
+        <!-- Drawable used as an overlay on top of quickcontact photos. -->
+        <attr name="quickContactBadgeOverlay" format="reference" />
         <!-- Default quickcontact badge style with small quickcontact window. -->
         <attr name="quickContactBadgeStyleWindowSmall" format="reference" />
         <!-- Default quickcontact badge style with medium quickcontact window. -->
