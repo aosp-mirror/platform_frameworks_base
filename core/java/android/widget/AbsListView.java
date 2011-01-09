@@ -2424,7 +2424,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private class PerformClick extends WindowRunnnable implements Runnable {
-        View mChild;
         int mClickMotionPosition;
 
         public void run() {
@@ -2437,7 +2436,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (adapter != null && mItemCount > 0 &&
                     motionPosition != INVALID_POSITION &&
                     motionPosition < adapter.getCount() && sameWindow()) {
-                performItemClick(mChild, motionPosition, adapter.getItemId(motionPosition));
+                performItemClick(getChildAt(motionPosition - mFirstPosition), motionPosition,
+                        adapter.getItemId(motionPosition));
             }
         }
     }
@@ -3010,7 +3010,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     }
 
                     final AbsListView.PerformClick performClick = mPerformClick;
-                    performClick.mChild = child;
                     performClick.mClickMotionPosition = motionPosition;
                     performClick.rememberWindowAttachCount();
 
@@ -3046,7 +3045,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     child.setPressed(false);
                                     setPressed(false);
                                     if (!mDataChanged) {
-                                        post(performClick);
+                                        performClick.run();
                                     }
                                 }
                             };
@@ -3058,7 +3057,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         }
                         return true;
                     } else if (!mDataChanged && mAdapter.isEnabled(motionPosition)) {
-                        post(performClick);
+                        performClick.run();
                     }
                 }
                 mTouchMode = TOUCH_MODE_REST;
