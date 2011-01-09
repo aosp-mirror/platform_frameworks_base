@@ -485,6 +485,11 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public int getThemeResId() {
+        return mThemeResource;
+    }
+
+    @Override
     public Resources.Theme getTheme() {
         if (mTheme == null) {
             if (mThemeResource == 0) {

@@ -3244,13 +3244,23 @@ public final class Settings {
 
         /**
          * Minimum percentage of free storage on the device that is used to determine if
-         * the device is running low on storage.
-         * Say this value is set to 10, the device is considered running low on storage
+         * the device is running low on storage.  The default is 10.
+         * <p>Say this value is set to 10, the device is considered running low on storage
          * if 90% or more of the device storage is filled up.
          * @hide
          */
         public static final String SYS_STORAGE_THRESHOLD_PERCENTAGE =
                 "sys_storage_threshold_percentage";
+
+        /**
+         * Maximum byte size of the low storage threshold.  This is to ensure
+         * that {@link #SYS_STORAGE_THRESHOLD_PERCENTAGE} does not result in
+         * an overly large threshold for large storage devices.  Currently this
+         * must be less than 2GB.  This default is 500MB.
+         * @hide
+         */
+        public static final String SYS_STORAGE_THRESHOLD_MAX_BYTES =
+                "sys_storage_threshold_max_bytes";
 
         /**
          * Minimum bytes of free storage on the device before the data

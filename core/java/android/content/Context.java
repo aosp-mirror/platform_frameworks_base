@@ -227,6 +227,12 @@ public abstract class Context {
      */
     public abstract void setTheme(int resid);
 
+    /** @hide Needed for some internal implementation...  not public because
+     * you can't assume this actually means anything. */
+    public int getThemeResId() {
+        return 0;
+    }
+
     /**
      * Return the Theme object associated with this Context.
      */

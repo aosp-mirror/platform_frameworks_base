@@ -211,7 +211,7 @@ public class DialogFragment extends Fragment
      */
     @Deprecated
     public void show(Activity activity, String tag) {
-        FragmentTransaction ft = activity.openFragmentTransaction();
+        FragmentTransaction ft = activity.getFragmentManager().openTransaction();
         ft.add(this, tag);
         ft.commit();
     }
