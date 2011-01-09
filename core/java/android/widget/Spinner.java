@@ -25,7 +25,6 @@ import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -262,7 +261,6 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             setMeasuredDimension(Math.min(Math.max(measuredWidth, mPopup.measureContentWidth()),
                     MeasureSpec.getSize(widthMeasureSpec)),
                     getMeasuredHeight());
-            Log.d(TAG, "onMeasure - old measured width " + measuredWidth + " new " + getMeasuredWidth());
         }
     }
 
