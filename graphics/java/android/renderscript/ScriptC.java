@@ -35,10 +35,28 @@ import java.lang.reflect.Modifier;
 public class ScriptC extends Script {
     private static final String TAG = "ScriptC";
 
+    /**
+     * @hide
+     *
+     * Only intended for use by the generated derived classes.
+     *
+     * @param id
+     * @param rs
+     */
     protected ScriptC(int id, RenderScript rs) {
         super(id, rs);
     }
 
+    /**
+     * @hide
+     *
+     * Only intended for use by the generated derived classes.
+     *
+     *
+     * @param rs
+     * @param resources
+     * @param resourceID
+     */
     protected ScriptC(RenderScript rs, Resources resources, int resourceID) {
         super(0, rs);
         int id = internalCreate(rs, resources, resourceID);
