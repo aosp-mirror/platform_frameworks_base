@@ -131,26 +131,12 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     /**
-     * Notify our observers of an interface status change
+     * Notify our observers of an interface link status change
      */
-    private void notifyInterfaceStatusChanged(String iface, boolean up) {
+    private void notifyInterfaceLinkStatusChanged(String iface, boolean link) {
         for (INetworkManagementEventObserver obs : mObservers) {
             try {
-                obs.interfaceStatusChanged(iface, up);
-            } catch (Exception ex) {
-                Slog.w(TAG, "Observer notifier failed", ex);
-            }
-        }
-    }
-
-    /**
-     * Notify our observers of an interface link status change.
-     * (typically, an Ethernet cable has been plugged-in or unplugged).
-     */
-    private void notifyInterfaceLinkStateChanged(String iface, boolean up) {
-        for (INetworkManagementEventObserver obs : mObservers) {
-            try {
-                obs.interfaceLinkStateChanged(iface, up);
+                obs.interfaceLinkStatusChanged(iface, link);
             } catch (Exception ex) {
                 Slog.w(TAG, "Observer notifier failed", ex);
             }
@@ -211,7 +197,6 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                  * Format: "NNN Iface added <name>"
                  *         "NNN Iface removed <name>"
                  *         "NNN Iface changed <name> <up/down>"
-                 *         "NNN Iface linkstatus <name> <up/down>"
                  */
                 if (cooked.length < 4 || !cooked[1].equals("Iface")) {
                     throw new IllegalStateException(
@@ -224,10 +209,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                     notifyInterfaceRemoved(cooked[3]);
                     return true;
                 } else if (cooked[2].equals("changed") && cooked.length == 5) {
-                    notifyInterfaceStatusChanged(cooked[3], cooked[4].equals("up"));
-                    return true;
-                } else if (cooked[2].equals("linkstatus") && cooked.length == 5) {
-                    notifyInterfaceLinkStateChanged(cooked[3], cooked[4].equals("up"));
+                    notifyInterfaceLinkStatusChanged(cooked[3], cooked[4].equals("up"));
                     return true;
                 }
                 throw new IllegalStateException(
