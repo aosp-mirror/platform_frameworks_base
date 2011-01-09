@@ -1324,6 +1324,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         ActivityThread at = ActivityThread.systemMain();
         mSystemThread = at;
         Context context = at.getSystemContext();
+        context.setTheme(android.R.style.Theme_Holo);
         m.mContext = context;
         m.mFactoryTest = factoryTest;
         m.mMainStack = new ActivityStack(m, context, true);

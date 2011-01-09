@@ -34,6 +34,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocalPowerManager;
@@ -1017,22 +1018,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         
         try {
             Context context = mContext;
-            boolean setTheme = false;
             //Log.i(TAG, "addStartingWindow " + packageName + ": nonLocalizedLabel="
             //        + nonLocalizedLabel + " theme=" + Integer.toHexString(theme));
-            if (theme != 0 || labelRes != 0) {
+            if (theme != context.getThemeResId() || labelRes != 0) {
                 try {
                     context = context.createPackageContext(packageName, 0);
-                    if (theme != 0) {
-                        context.setTheme(theme);
-                        setTheme = true;
-                    }
+                    context.setTheme(theme);
                 } catch (PackageManager.NameNotFoundException e) {
                     // Ignore
                 }
-            }
-            if (!setTheme) {
-                context.setTheme(com.android.internal.R.style.Theme);
             }
             
             Window win = PolicyManager.makeNewWindow(context);

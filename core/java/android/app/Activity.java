@@ -73,13 +73,11 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
-import android.widget.FrameLayout;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * An activity is a single, focused thing that the user can do.  Almost all
@@ -1579,16 +1577,6 @@ public class Activity extends ContextThemeWrapper
         return mFragments;
     }
 
-    /**
-     * Start a series of edit operations on the Fragments associated with
-     * this activity.
-     * @deprecated use {@link #getFragmentManager}.
-     */
-    @Deprecated
-    public FragmentTransaction openFragmentTransaction() {
-        return mFragments.openTransaction();
-    }
-    
     void invalidateFragmentIndex(int index) {
         //Log.v(TAG, "invalidateFragmentIndex: index=" + index);
         if (mAllLoaderManagers != null) {
@@ -1767,30 +1755,6 @@ public class Activity extends ContextThemeWrapper
         }
         
         mActionBar = new ActionBarImpl(this);
-    }
-    
-    /**
-     * Finds a fragment that was identified by the given id either when inflated
-     * from XML or as the container ID when added in a transaction.  This only
-     * returns fragments that are currently added to the activity's content.
-     * @return The fragment if found or null otherwise.
-     * @deprecated use {@link #getFragmentManager}.
-     */
-    @Deprecated
-    public Fragment findFragmentById(int id) {
-        return mFragments.findFragmentById(id);
-    }
-    
-    /**
-     * Finds a fragment that was identified by the given tag either when inflated
-     * from XML or as supplied when added in a transaction.  This only
-     * returns fragments that are currently added to the activity's content.
-     * @return The fragment if found or null otherwise.
-     * @deprecated use {@link #getFragmentManager}.
-     */
-    @Deprecated
-    public Fragment findFragmentByTag(String tag) {
-        return mFragments.findFragmentByTag(tag);
     }
     
     /**

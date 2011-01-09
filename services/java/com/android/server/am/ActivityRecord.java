@@ -26,6 +26,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Process;
@@ -69,6 +70,7 @@ class ActivityRecord extends IApplicationToken.Stub {
     int labelRes;           // the label information from the package mgr.
     int icon;               // resource identifier of activity's icon.
     int theme;              // resource identifier of activity's theme.
+    int realTheme;          // actual theme resource we will use, never 0.
     int windowFlags;        // custom window flags for preview window.
     TaskRecord task;        // the task this is in.
     long launchTime;        // when we starting launching this activity
@@ -246,6 +248,13 @@ class ActivityRecord extends IApplicationToken.Stub {
             }
             icon = aInfo.getIconResource();
             theme = aInfo.getThemeResource();
+            realTheme = theme;
+            if (realTheme == 0) {
+                realTheme = aInfo.applicationInfo.targetSdkVersion
+                        < Build.VERSION_CODES.HONEYCOMB
+                        ? android.R.style.Theme
+                        : android.R.style.Theme_Holo;
+            }
             if ((aInfo.flags&ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
                 windowFlags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
             }
@@ -266,8 +275,7 @@ class ActivityRecord extends IApplicationToken.Stub {
             launchMode = aInfo.launchMode;
             
             AttributeCache.Entry ent = AttributeCache.instance().get(packageName,
-                    theme != 0 ? theme : android.R.style.Theme,
-                    com.android.internal.R.styleable.Window);
+                    realTheme, com.android.internal.R.styleable.Window);
             fullscreen = ent != null && !ent.array.getBoolean(
                     com.android.internal.R.styleable.Window_windowIsFloating, false)
                     && !ent.array.getBoolean(

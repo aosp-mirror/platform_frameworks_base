@@ -106,6 +106,12 @@ public class ContextWrapper extends Context {
         mBase.setTheme(resid);
     }
 
+    /** @hide */
+    @Override
+    public int getThemeResId() {
+        return mBase.getThemeResId();
+    }
+
     @Override
     public Resources.Theme getTheme() {
         return mBase.getTheme();

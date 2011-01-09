@@ -277,13 +277,13 @@ fragments to your activity layout. You simply need to specify a {@link android.v
 which to place the fragment.</p>
   <p>To make any fragment transactions in your activity (such as add, remove, or replace a
 fragment), you must use APIs from {@link android.app.FragmentTransaction}. You can get an instance
-of {@link android.app.FragmentTransaction} from your {@link android.app.Activity} using {@link
-android.app.Activity#openFragmentTransaction()}. You can then add a fragment using the {@link
+of {@link android.app.FragmentTransaction} from your {@link android.app.FragmentManager} using {@link
+android.app.FragmentManager#openTransaction()}. You can then add a fragment using the {@link
 android.app.FragmentTransaction#add add()} method, specifying the fragment to add and the view in
 which to insert it. For example:</p>
 <pre>
 MyFragment fragment = new MyFragment();
-openFragmentTransaction().add(R.id.fragment_container, fragment).commit();
+getFragmentManager().openTransaction().add(R.id.fragment_container, fragment).commit();
 </pre>
   <p>The first argument passed to {@link android.app.FragmentTransaction#add add()}
 is the {@link android.view.ViewGroup} in which the fragment should be placed, specified by
@@ -372,8 +372,8 @@ android.app.Fragment#onStop onStop()} and others that coincide with the fragment
 operations on a fragment as the user interacts with the activity, alowing for more rich user
 experiences without changing activities. In order to perform these operations, you must use {@link
 android.app.FragmentTransaction} to perform fragment "transactions." You can acquire {@link
-android.app.FragmentTransaction} from your activity with {@link
-android.app.Activity#openFragmentTransaction}.</p>
+android.app.FragmentTransaction} from your FragmentManager with {@link
+android.app.FragmentManager#openTransaction}.</p>
 
 <p>Common transactions you can perform with fragments include:</p>
 
@@ -397,7 +397,7 @@ in the back stack:</p>
 <pre>
 // Create new fragment
 Fragment newFragment = new MyFragment();
-FragmentTransaction ft = openFragmentTransaction();
+FragmentTransaction ft = getFragmentManager().openTransaction();
 // Replace and add to back stack
 ft.replace(R.id.myfragment, newFragment);
 ft.addToBackStack(null);
@@ -519,7 +519,7 @@ View listView = {@link android.app.Fragment#getActivity()}.{@link android.app.Ac
 
 <p>Likewise, your activity can call public methods in the fragment when you have a reference to the
 {@link android.app.Fragment}. You can acquire a reference to the fragment with {@link
-android.app.Activity#findFragmentById findFragmentById()} and cast it to your implementation of
+android.app.FragmentManager#findFragmentById findFragmentById()} and cast it to your implementation of
 {@link android.app.Fragment}. For example:</p>
 
 <pre>

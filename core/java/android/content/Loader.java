@@ -28,6 +28,13 @@ import java.io.PrintWriter;
  * they should monitor the source of their data and deliver new results when the contents
  * change.
  *
+ * <p><b>Note on threading:</b> Clients of loaders should as a rule perform
+ * any calls on to a Loader from the main thread of their process (that is,
+ * the thread the Activity callbacks and other things occur on).  Subclasses
+ * of Loader (such as {@link AsyncTaskLoader}) will often perform their work
+ * in a separate thread, but when delivering their results this too should
+ * be done on the main thread.</p>
+ *
  * <p>Subclasses generally must implement at least {@link #onStartLoading()},
  * {@link #onStopLoading()}, {@link #onForceLoad()}, and {@link #onReset()}.
  *
@@ -80,7 +87,7 @@ public class Loader<D> {
     /**
      * Sends the result of the load to the registered listener. Should only be called by subclasses.
      *
-     * Must be called from the UI thread.
+     * Must be called from the process's main thread.
      *
      * @param data the result of the load
      */
@@ -105,10 +112,11 @@ public class Loader<D> {
     }
 
     /**
-     * Registers a class that will receive callbacks when a load is complete. The callbacks will
-     * be called on the UI thread so it's safe to pass the results to widgets.
+     * Registers a class that will receive callbacks when a load is complete.
+     * The callback will be called on the process's main thread so it's safe to
+     * pass the results to widgets.
      *
-     * Must be called from the UI thread
+     * <p>Must be called from the process's main thread.
      */
     public void registerListener(int id, OnLoadCompleteListener<D> listener) {
         if (mListener != null) {
@@ -119,7 +127,9 @@ public class Loader<D> {
     }
 
     /**
-     * Must be called from the UI thread
+     * Remove a listener that was previously added with {@link #registerListener}.
+     *
+     * Must be called from the process's main thread.
      */
     public void unregisterListener(OnLoadCompleteListener<D> listener) {
         if (mListener == null) {
@@ -150,17 +160,19 @@ public class Loader<D> {
     }
 
     /**
-     * Starts an asynchronous load of the contacts list data. When the result is ready the callbacks
-     * will be called on the UI thread. If a previous load has been completed and is still valid
-     * the result may be passed to the callbacks immediately. The loader will monitor the source of
-     * the data set and may deliver future callbacks if the source changes. Calling
-     * {@link #stopLoading} will stop the delivery of callbacks.
+     * Starts an asynchronous load of the Loader's data. When the result
+     * is ready the callbacks will be called on the process's main thread.
+     * If a previous load has been completed and is still valid
+     * the result may be passed to the callbacks immediately.
+     * The loader will monitor the source of
+     * the data set and may deliver future callbacks if the source changes.
+     * Calling {@link #stopLoading} will stop the delivery of callbacks.
      *
      * <p>This updates the Loader's internal state so that
      * {@link #isStarted()} and {@link #isReset()} will return the correct
      * values, and then calls the implementation's {@link #onStartLoading()}.
      *
-     * <p>Must be called from the UI thread.
+     * <p>Must be called from the process's main thread.
      */
     public final void startLoading() {
         mStarted = true;
@@ -182,14 +194,15 @@ public class Loader<D> {
      * implementation's {@link #onForceLoad()}.  You generally should only call this
      * when the loader is started -- that is, {@link #isStarted()} returns true.
      *
-     * <p>Must be called from the UI thread.
+     * <p>Must be called from the process's main thread.
      */
-    public final void forceLoad() {
+    public void forceLoad() {
         onForceLoad();
     }
 
     /**
      * Subclasses must implement this to take care of requests to {@link #forceLoad()}.
+     * This will always be called from the process's main thread.
      */
     protected void onForceLoad() {
     }
@@ -206,9 +219,9 @@ public class Loader<D> {
      * {@link #isStarted()} will return the correct
      * value, and then calls the implementation's {@link #onStopLoading()}.
      *
-     * <p>Must be called from the UI thread.
+     * <p>Must be called from the process's main thread.
      */
-    public final void stopLoading() {
+    public void stopLoading() {
         mStarted = false;
         onStopLoading();
     }
@@ -217,6 +230,7 @@ public class Loader<D> {
      * Subclasses must implement this to take care of stopping their loader,
      * as per {@link #stopLoading()}.  This is not called by clients directly,
      * but as a result of a call to {@link #stopLoading()}.
+     * This will always be called from the process's main thread.
      */
     protected void onStopLoading() {
     }
@@ -231,9 +245,9 @@ public class Loader<D> {
      * {@link #isStarted()} and {@link #isReset()} will return the correct
      * values, and then calls the implementation's {@link #onReset()}.
      *
-     * <p>Must be called from the UI thread.
+     * <p>Must be called from the process's main thread.
      */
-    public final void reset() {
+    public void reset() {
         onReset();
         mReset = true;
         mStarted = false;
@@ -244,6 +258,7 @@ public class Loader<D> {
      * Subclasses must implement this to take care of resetting their loader,
      * as per {@link #reset()}.  This is not called by clients directly,
      * but as a result of a call to {@link #reset()}.
+     * This will always be called from the process's main thread.
      */
     protected void onReset() {
     }
@@ -265,7 +280,7 @@ public class Loader<D> {
      * if so, it simply calls {@link #forceLoad()}; otherwise, it sets a flag
      * so that {@link #takeContentChanged()} returns true.
      *
-     * <p>Must be called from the UI thread.
+     * <p>Must be called from the process's main thread.
      */
     public void onContentChanged() {
         if (mStarted) {
