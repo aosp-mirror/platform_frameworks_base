@@ -19,12 +19,11 @@ package android.content;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.util.Log;
 import android.util.TimeUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Abstract Loader that provides an {@link AsyncTask} to do the work.
@@ -33,12 +32,15 @@ import java.util.concurrent.ExecutionException;
  */
 public abstract class AsyncTaskLoader<D> extends Loader<D> {
 
+
     private static final String TAG = "AsyncTaskLoader";
 
     final class LoadTask extends AsyncTask<Void, Void, D> implements Runnable {
 
         D result;
         boolean waiting;
+
+        private CountDownLatch done = new CountDownLatch(1);
 
         /* Runs on a worker thread */
         @Override
@@ -50,12 +52,20 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
         /* Runs on the UI thread */
         @Override
         protected void onPostExecute(D data) {
-            AsyncTaskLoader.this.dispatchOnLoadComplete(this, data);
+            try {
+                AsyncTaskLoader.this.dispatchOnLoadComplete(this, data);
+            } finally {
+                done.countDown();
+            }
         }
 
         @Override
         protected void onCancelled() {
-            AsyncTaskLoader.this.dispatchOnCancelled(this, result);
+            try {
+                AsyncTaskLoader.this.dispatchOnCancelled(this, result);
+            } finally {
+                done.countDown();
+            }
         }
 
         @Override
@@ -209,7 +219,8 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
     /**
      * Locks the current thread until the loader completes the current load
      * operation. Returns immediately if there is no load operation running.
-     * Should not be called from the UI thread.
+     * Should not be called from the UI thread: calling it from the UI
+     * thread would cause a deadlock.
      * <p>
      * Use for testing only.  <b>Never</b> call this from a UI thread.
      */
@@ -217,12 +228,9 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
         LoadTask task = mTask;
         if (task != null) {
             try {
-                task.get();
+                task.done.await();
             } catch (InterruptedException e) {
-                Log.w(TAG, e);
-            } catch (ExecutionException e) {
-                throw new RuntimeException("An error occured while executing waitForLoader()",
-                        e.getCause());
+                // Ignore
             }
         }
     }
