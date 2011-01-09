@@ -265,11 +265,13 @@ public class FrameLayout extends ViewGroup {
             final View child = getChildAt(i);
             if (mMeasureAllChildren || child.getVisibility() != GONE) {
                 measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
-                maxWidth = Math.max(maxWidth, child.getMeasuredWidth());
-                maxHeight = Math.max(maxHeight, child.getMeasuredHeight());
+                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                maxWidth = Math.max(maxWidth,
+                        child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin);
+                maxHeight = Math.max(maxHeight,
+                        child.getMeasuredHeight() + lp.topMargin + lp.bottomMargin);
                 childState = combineMeasuredStates(childState, child.getMeasuredState());
                 if (measureMatchParentChildren) {
-                    final ViewGroup.LayoutParams lp = child.getLayoutParams();
                     if (lp.width == LayoutParams.MATCH_PARENT ||
                             lp.height == LayoutParams.MATCH_PARENT) {
                         mMatchParentChildren.add(child);
