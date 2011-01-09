@@ -654,24 +654,24 @@ public class RenderSessionImpl {
                     LayoutTransition removeTransition = new LayoutTransition();
                     previousParent.setLayoutTransition(removeTransition);
 
-                    // no fade-out
-                    // FIXME: set a non-null do-nothing Animator.
-                    // setting a null animator doesn't work because the child gets its parent
-                    // set to null too late.
-                    //removeTransition.setAnimator(LayoutTransition.DISAPPEARING, null);
+                    // no fade-out. Because we can't rely on layout transition listeners when
+                    // there is no Animator at all, instead we keep the animator but set its
+                    // duration to 0.
+                    // Note: Cannot user Animation.setDuration() directly. Have to set it
+                    // on the LayoutTransition.
+                    removeTransition.setDuration(LayoutTransition.DISAPPEARING, 0);
 
-                    // now for the new parent, if different
                     if (previousParent != newParentView) {
-                        LayoutTransition addTransition = new LayoutTransition();
-
-                        // no fade-in
-                        // FIXME: set a non-null do-nothing Animator.
-                        // setting a null animator doesn't work because the child gets its parent
-                        // set to null too late.
-                        //addTransition.setAnimator(LayoutTransition.APPEARING, null);
-
-                        newParentView.setLayoutTransition(addTransition);
+                        // different parent, set a Layout transition on the new parent.
+                        newParentView.setLayoutTransition(new LayoutTransition());
                     }
+
+                    // no fade-in. Because we can't rely on layout transition listeners when
+                    // there is no Animator at all, instead we keep the animator but set its
+                    // duration to 0.
+                    // Note: Cannot user Animation.setDuration() directly. Have to set it
+                    // on the LayoutTransition.
+                    newParentView.getLayoutTransition().setDuration(LayoutTransition.APPEARING, 0);
 
                     return moveView(previousParent, newParentView, childView, index, params);
                 }
@@ -720,9 +720,20 @@ public class RenderSessionImpl {
             // check if there is a transition on the previousParent.
             LayoutTransition transition = previousParent.getLayoutTransition();
             if (transition != null) {
-                // in this case there is an animation. This means we have to listener for the
-                // disappearing animation to be done before we can add the view to the new parent.
-                // TODO: check that if the disappearing animation is null, the removal is done during the removeView call which would simplify the code.
+                // in this case there is an animation. This means we have to wait for the child's
+                // parent reference to be null'ed out so that we can add it to the new parent.
+                // It is technically removed right before the DISAPPEARING animation is done (if
+                // the animation of this type is not null, otherwise it's after which is impossible
+                // to handle).
+                // Because there is no move animation, if the new parent is the same as the old
+                // parent, we need to wait until the CHANGE_DISAPPEARING animation is done before
+                // adding the child or the child will appear in its new location before the
+                // other children have made room for it.
+                // If the parents are different, then we can add the child to its new parent right
+                // after the DISAPPEARING animation is done.
+
+                final int waitForType = newParent == previousParent ?
+                        LayoutTransition.CHANGE_DISAPPEARING : LayoutTransition.DISAPPEARING;
 
                 // add a listener to the transition to be notified of the actual removal.
                 transition.addTransitionListener(new TransitionListener() {
@@ -734,7 +745,7 @@ public class RenderSessionImpl {
 
                     public void endTransition(LayoutTransition transition, ViewGroup container,
                             View view, int transitionType) {
-                        if (transitionType == LayoutTransition.DISAPPEARING) {
+                        if (transitionType == waitForType) {
                             // add it to the parentView in the correct location
                             if (params != null) {
                                 newParent.addView(view, index, params);
