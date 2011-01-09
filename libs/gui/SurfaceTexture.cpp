@@ -15,6 +15,7 @@
  */
 
 #define LOG_TAG "SurfaceTexture"
+//#define LOG_NDEBUG 0
 
 #define GL_GLEXT_PROTOTYPES
 #define EGL_EGLEXT_PROTOTYPES
@@ -36,6 +37,7 @@ namespace android {
 SurfaceTexture::SurfaceTexture(GLuint tex) :
     mBufferCount(MIN_BUFFER_SLOTS), mCurrentTexture(INVALID_BUFFER_SLOT),
     mLastQueued(INVALID_BUFFER_SLOT), mTexName(tex) {
+    LOGV("SurfaceTexture::SurfaceTexture");
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
         mSlots[i].mEglImage = EGL_NO_IMAGE_KHR;
         mSlots[i].mEglDisplay = EGL_NO_DISPLAY;
@@ -44,10 +46,12 @@ SurfaceTexture::SurfaceTexture(GLuint tex) :
 }
 
 SurfaceTexture::~SurfaceTexture() {
+    LOGV("SurfaceTexture::~SurfaceTexture");
     freeAllBuffers();
 }
 
 status_t SurfaceTexture::setBufferCount(int bufferCount) {
+    LOGV("SurfaceTexture::setBufferCount");
     Mutex::Autolock lock(mMutex);
     freeAllBuffers();
     mBufferCount = bufferCount;
@@ -56,6 +60,7 @@ status_t SurfaceTexture::setBufferCount(int bufferCount) {
 
 sp<GraphicBuffer> SurfaceTexture::requestBuffer(int buf,
         uint32_t w, uint32_t h, uint32_t format, uint32_t usage) {
+    LOGV("SurfaceTexture::requestBuffer");
     Mutex::Autolock lock(mMutex);
     if (buf < 0 || mBufferCount <= buf) {
         LOGE("requestBuffer: slot index out of range [0, %d]: %d",
@@ -80,6 +85,7 @@ sp<GraphicBuffer> SurfaceTexture::requestBuffer(int buf,
 }
 
 status_t SurfaceTexture::dequeueBuffer(int *buf) {
+    LOGV("SurfaceTexture::dequeueBuffer");
     Mutex::Autolock lock(mMutex);
     int found = INVALID_BUFFER_SLOT;
     for (int i = 0; i < mBufferCount; i++) {
@@ -97,6 +103,7 @@ status_t SurfaceTexture::dequeueBuffer(int *buf) {
 }
 
 status_t SurfaceTexture::queueBuffer(int buf) {
+    LOGV("SurfaceTexture::queueBuffer");
     Mutex::Autolock lock(mMutex);
     if (buf < 0 || mBufferCount <= buf) {
         LOGE("queueBuffer: slot index out of range [0, %d]: %d",
@@ -116,6 +123,7 @@ status_t SurfaceTexture::queueBuffer(int buf) {
 }
 
 void SurfaceTexture::cancelBuffer(int buf) {
+    LOGV("SurfaceTexture::cancelBuffer");
     Mutex::Autolock lock(mMutex);
     if (buf < 0 || mBufferCount <= buf) {
         LOGE("cancelBuffer: slot index out of range [0, %d]: %d", mBufferCount,
@@ -129,18 +137,21 @@ void SurfaceTexture::cancelBuffer(int buf) {
 }
 
 status_t SurfaceTexture::setCrop(const Rect& reg) {
+    LOGV("SurfaceTexture::setCrop");
     Mutex::Autolock lock(mMutex);
     // XXX: How should we handle crops?
     return OK;
 }
 
 status_t SurfaceTexture::setTransform(uint32_t transform) {
+    LOGV("SurfaceTexture::setTransform");
     Mutex::Autolock lock(mMutex);
     // XXX: How should we handle transforms?
     return OK;
 }
 
 status_t SurfaceTexture::updateTexImage() {
+    LOGV("SurfaceTexture::updateTexImage");
     Mutex::Autolock lock(mMutex);
 
     // We always bind the texture even if we don't update its contents.
