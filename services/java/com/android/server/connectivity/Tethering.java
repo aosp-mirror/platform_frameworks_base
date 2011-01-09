@@ -202,11 +202,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         mDnsServers[1] = DNS_DEFAULT_SERVER2;
     }
 
-    public void interfaceLinkStateChanged(String iface, boolean up) {
-    }
-
-    public void interfaceStatusChanged(String iface, boolean up) {
-        if (DEBUG) Log.d(TAG, "interfaceStatusChanged " + iface + ", " + up);
+    public void interfaceLinkStatusChanged(String iface, boolean link) {
+        if (DEBUG) Log.d(TAG, "interfaceLinkStatusChanged " + iface + ", " + link);
         boolean found = false;
         boolean usb = false;
         if (isWifi(iface)) {
@@ -221,7 +218,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
         synchronized (mIfaces) {
             TetherInterfaceSM sm = mIfaces.get(iface);
-            if (up) {
+            if (link) {
                 if (sm == null) {
                     sm = new TetherInterfaceSM(iface, mLooper, usb);
                     mIfaces.put(iface, sm);

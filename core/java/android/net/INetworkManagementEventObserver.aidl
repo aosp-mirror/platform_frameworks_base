@@ -23,21 +23,12 @@ package android.net;
  */
 interface INetworkManagementEventObserver {
     /**
-     * Interface configuration status has changed.
+     * Interface link status has changed.
      *
      * @param iface The interface.
-     * @param up True if the interface has been enabled.
+     * @param link True if link is up.
      */
-    void interfaceStatusChanged(String iface, boolean up);
-
-    /**
-     * Interface physical-layer link status has changed.  For Ethernet,
-     * this method is invoked when the cable is plugged in or unplugged.
-     *
-     * @param iface The interface.
-     * @param up  True if the physical link-layer connection signal is valid.
-     */
-     void interfaceLinkStateChanged(String iface, boolean up);
+    void interfaceLinkStatusChanged(String iface, boolean link);
 
     /**
      * An interface has been added to the system
