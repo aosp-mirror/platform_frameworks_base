@@ -20,6 +20,7 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.layoutlib.bridge.impl.GcSnapshot;
 
+import android.graphics.Bitmap.Config;
 import android.graphics.Paint_Delegate.FontInfo;
 import android.text.TextUtils;
 
@@ -98,8 +99,13 @@ public final class Canvas_Delegate {
     // ---- native methods ----
 
     /*package*/ static boolean isOpaque(Canvas thisCanvas) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(thisCanvas.mNativeCanvas);
+        if (canvasDelegate == null) {
+            return false;
+        }
+
+        return canvasDelegate.mBitmap.getConfig() == Config.RGB_565;
     }
 
     /*package*/ static int getWidth(Canvas thisCanvas) {
@@ -511,8 +517,19 @@ public final class Canvas_Delegate {
     }
 
     /*package*/ static void native_getCTM(int canvas, int matrix) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(canvas);
+        if (canvasDelegate == null) {
+            return;
+        }
+
+        Matrix_Delegate matrixDelegate = Matrix_Delegate.getDelegate(matrix);
+        if (matrixDelegate == null) {
+            return;
+        }
+
+        AffineTransform transform = canvasDelegate.getSnapshot().getTransform();
+        matrixDelegate.set(Matrix_Delegate.makeValues(transform));
     }
 
     /*package*/ static boolean native_quickReject(int nativeCanvas,

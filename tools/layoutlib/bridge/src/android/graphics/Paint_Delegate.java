@@ -375,7 +375,7 @@ public class Paint_Delegate {
     /*package*/ static void nSetShadowLayer(Paint thisPaint, float radius, float dx, float dy,
             int color) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(null, "Paint.setShadowLayer is not supported.", null);
     }
 
     /*package*/ static float getTextSize(Paint thisPaint) {
