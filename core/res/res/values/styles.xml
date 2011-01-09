@@ -1511,6 +1511,7 @@
 
     <style name="Widget.Holo.ProgressBar.Horizontal" parent="Widget.ProgressBar.Horizontal">
         <item name="android:progressDrawable">@android:drawable/progress_horizontal_holo_dark</item>
+        <item name="android:indeterminateDrawable">@android:drawable/progress_indeterminate_horizontal_holo</item>
         <item name="android:minHeight">24dip</item>
         <item name="android:maxHeight">24dip</item>
     </style>
@@ -1541,7 +1542,7 @@
         <item name="android:indeterminateDrawable">@android:drawable/scrubber_progress_horizontal_holo_dark</item>
         <item name="android:minHeight">13dip</item>
         <item name="android:maxHeight">13dip</item>
-        <item name="android:thumb">@android:drawable/scrubber_control_holo</item>
+        <item name="android:thumb">@android:drawable/scrubber_control_selector_holo</item>
         <item name="android:thumbOffset">16dip</item>
         <item name="android:focusable">true</item>
     </style>
