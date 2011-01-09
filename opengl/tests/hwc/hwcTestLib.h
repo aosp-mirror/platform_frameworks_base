@@ -98,6 +98,7 @@ class HwcTestDim {
     void setHeight(uint32_t h) { _h = h; }
 
     operator std::string();
+    operator hwc_rect() const;
 
   private:
     uint32_t _w;
@@ -109,6 +110,7 @@ void hwcTestInitDisplay(bool verbose, EGLDisplay *dpy, EGLSurface *surface,
     EGLint *width, EGLint *height);
 void hwcTestOpenHwc(hwc_composer_device_t **hwcDevicePtr);
 const struct hwcTestGraphicFormat *hwcTestGraphicFormatLookup(const char *desc);
+const struct hwcTestGraphicFormat *hwcTestGraphicFormatLookup(uint32_t id);
 const char *hwcTestGraphicFormat2str(uint32_t format);
 std::string hwcTestRect2str(const struct hwc_rect& rect);
 
