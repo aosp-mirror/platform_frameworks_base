@@ -21,7 +21,7 @@
  *   hwcRects [options] (graphicFormat displayFrame [attributes],)...
  *     options:
  *       -D #.## - End of test delay
- *       -v Verbose");
+ *       -v - Verbose
  *
  *      graphic formats:
  *        RGBA8888 (reference frame default)
@@ -108,7 +108,7 @@
 #include <ui/GraphicBuffer.h>
 #include <ui/EGLUtils.h>
 
-#define LOG_TAG "hwcColorEquivTest"
+#define LOG_TAG "hwcRectsTest"
 #include <utils/Log.h>
 #include <testUtil.h>
 
@@ -209,6 +209,8 @@ main(int argc, char *argv[])
     bool    error;
     string  str;
     char cmd[MAXCMD];
+
+    testSetLogCatTag(LOG_TAG);
 
     // Parse command line arguments
     while ((opt = getopt(argc, argv, "D:v?h")) != -1) {
