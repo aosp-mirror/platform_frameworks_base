@@ -84,6 +84,14 @@ public final class Matrix_Delegate {
     }
 
     /**
+     * Sets the content of the matrix with the content of another matrix represented as an array
+     * of values.
+     */
+    public void set(float[] values) {
+        System.arraycopy(values, 0, mValues, 0, MATRIX_SIZE);
+    }
+
+    /**
      * Resets the matrix to be the identity matrix.
      */
     public void reset() {
@@ -105,7 +113,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static Matrix_Delegate make(AffineTransform matrix) {
+    public static float[] makeValues(AffineTransform matrix) {
         float[] values = new float[MATRIX_SIZE];
         values[0] = (float) matrix.getScaleX();
         values[1] = (float) matrix.getShearX();
@@ -117,7 +125,11 @@ public final class Matrix_Delegate {
         values[7] = 0.f;
         values[8] = 1.f;
 
-        return new Matrix_Delegate(values);
+        return values;
+    }
+
+    public static Matrix_Delegate make(AffineTransform matrix) {
+        return new Matrix_Delegate(makeValues(matrix));
     }
 
     public boolean mapRect(RectF dst, RectF src) {
