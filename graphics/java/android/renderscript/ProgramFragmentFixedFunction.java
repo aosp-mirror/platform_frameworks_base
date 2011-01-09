@@ -22,6 +22,13 @@ import android.util.Log;
 
 
 /**
+ * ProgramFragmentFixedFunction is a helper class that provides
+ * a way to make a simple fragment shader without writing any
+ * GLSL code.
+ *
+ * This class allows for display of constant color, interpolated
+ * color from vertex shader, or combinations of the above
+ * blended with results of up to two texture lookups.
  *
  **/
 public class ProgramFragmentFixedFunction extends ProgramFragment {
@@ -34,6 +41,12 @@ public class ProgramFragmentFixedFunction extends ProgramFragment {
             super(rs);
         }
 
+        /**
+         * Creates ProgramFragmentFixedFunction from the current state
+         * of the builder
+         *
+         * @return  ProgramFragmentFixedFunction
+         */
         public ProgramFragmentFixedFunction create() {
             mRS.validate();
             int[] tmp = new int[(mInputCount + mOutputCount + mConstantCount + mTextureCount) * 2];
@@ -71,6 +84,11 @@ public class ProgramFragmentFixedFunction extends ProgramFragment {
         String mShader;
         RenderScript mRS;
 
+        /**
+         * EnvMode describes how textures are combined with the existing
+         * color in the fixed function fragment shader
+         *
+         **/
         public enum EnvMode {
             REPLACE (1),
             MODULATE (2),
@@ -82,6 +100,11 @@ public class ProgramFragmentFixedFunction extends ProgramFragment {
             }
         }
 
+        /**
+         * Format describes the pixel format of textures in the fixed
+         * function fragment shader and how they are sampled
+         *
+         **/
         public enum Format {
             ALPHA (1),
             LUMINANCE_ALPHA (2),
@@ -168,12 +191,30 @@ public class ProgramFragmentFixedFunction extends ProgramFragment {
             mShader += "}\n";
         }
 
+        /**
+         * Creates a builder for fixed function fragment program
+         *
+         * @param rs
+         */
         public Builder(RenderScript rs) {
             mRS = rs;
             mSlots = new Slot[MAX_TEXTURE];
             mPointSpriteEnable = false;
         }
 
+        /**
+         * Adds a texture to be fetched as part of the fixed function
+         * fragment program
+         *
+         * @param env specifies how the texture is combined with the
+         *            current color
+         * @param fmt specifies the format of the texture and how its
+         *            components will be used to combine with the
+         *            current color
+         * @param slot index of the texture to apply the operations on
+         *
+         * @return this
+         */
         public Builder setTexture(EnvMode env, Format fmt, int slot)
             throws IllegalArgumentException {
             if((slot < 0) || (slot >= MAX_TEXTURE)) {
@@ -183,16 +224,34 @@ public class ProgramFragmentFixedFunction extends ProgramFragment {
             return this;
         }
 
+        /**
+         * Specifies whether the texture coordinate passed from the
+         * vertex program is replaced with an openGL internal point
+         * sprite texture coordinate
+         *
+         **/
         public Builder setPointSpriteTexCoordinateReplacement(boolean enable) {
             mPointSpriteEnable = enable;
             return this;
         }
 
+        /**
+         * Specifies whether the varying color passed from the vertex
+         * program or the constant color set on the fragment program is
+         * used in the final color calculation in the fixed function
+         * fragment shader
+         *
+         **/
         public Builder setVaryingColor(boolean enable) {
             mVaryingColorEnable = enable;
             return this;
         }
 
+        /**
+        * Creates the fixed function fragment program from the current
+        * state of the builder.
+        *
+        */
         public ProgramFragmentFixedFunction create() {
             InternalBuilder sb = new InternalBuilder(mRS);
             mNumTextures = 0;

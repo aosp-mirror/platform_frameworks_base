@@ -23,6 +23,9 @@ import android.util.Log;
 
 
 /**
+ * ProgramVertexFixedFunction is a helper class that provides a
+ * simple way to create a fixed function emulation vertex shader
+ * without writing any GLSL code.
  *
  **/
 public class ProgramVertexFixedFunction extends ProgramVertex {
@@ -31,6 +34,12 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         super(id, rs);
     }
 
+    /**
+     * Binds the constant buffer containing fixed function emulation
+     * matrices
+     *
+     * @param va allocation containing fixed function matrices
+     */
     public void bindConstants(Constants va) {
         mRS.validate();
         bindConstants(va.getAllocation(), 0);
@@ -53,6 +62,12 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
             return this;
         }
 
+        /**
+         * Creates ProgramVertexFixedFunction from the current state of
+         * the builder
+         *
+         * @return  ProgramVertexFixedFunction
+         */
         public ProgramVertexFixedFunction create() {
             mRS.validate();
             int[] tmp = new int[(mInputCount + mOutputCount + mConstantCount + mTextureCount) * 2];
@@ -87,10 +102,20 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         String mShader;
         RenderScript mRS;
 
+        /**
+         * Creates a builder for fixed function vertex program
+         *
+         * @param rs
+         */
         public Builder(RenderScript rs) {
             mRS = rs;
         }
 
+        /**
+         * Specifies whether texture matrix calculations are to be added
+         * to the shader
+         *
+         */
         public Builder setTextureMatrixEnable(boolean enable) {
             mTextureMatrixEnable = enable;
             return this;
@@ -126,6 +151,12 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
             mShader += "}\n";
         }
 
+        /**
+         * Creates ProgramVertexFixedFunction from the current state of
+         * the builder
+         *
+         * @return Fixed function emulation ProgramVertex
+         */
         public ProgramVertexFixedFunction create() {
             buildShaderString();
 
@@ -144,6 +175,11 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         }
     }
 
+    /**
+     * Helper class to store modelview, projection and texture
+     * matrices for ProgramVertexFixedFunction
+     *
+     */
     public static class Constants {
         static final int MODELVIEW_OFFSET = 0;
         static final int PROJECTION_OFFSET = 16;
@@ -159,6 +195,11 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         }
         private FieldPacker mIOBuffer;
 
+        /**
+        * Creates buffer to store fixed function emulation matrices
+        *
+        * @param rs
+        **/
         public Constants(RenderScript rs) {
             Type constInputType = ProgramVertexFixedFunction.Builder.getConstantInputType(rs);
             mAlloc = Allocation.createTyped(rs, constInputType);
@@ -173,6 +214,11 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
             setTexture(new Matrix4f());
         }
 
+        /**
+        * Forces deallocation of memory backing the contant matrices.
+        * Normally, this is unnecessary and will be garbage collected
+        *
+        */
         public void destroy() {
             mAlloc.destroy();
             mAlloc = null;
@@ -186,16 +232,34 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
             mAlloc.copyFrom(mIOBuffer.getData());
         }
 
+        /**
+        * Sets the modelview matrix in the fixed function matrix buffer
+        *
+        * @param m modelview matrix
+        */
         public void setModelview(Matrix4f m) {
             mModel.load(m);
             addToBuffer(MODELVIEW_OFFSET*4, m);
         }
 
+        /**
+        * Sets the projection matrix in the fixed function matrix buffer
+        *
+        * @param m projection matrix
+        */
         public void setProjection(Matrix4f m) {
             mProjection.load(m);
             addToBuffer(PROJECTION_OFFSET*4, m);
         }
 
+        /**
+        * Sets the texture matrix in the fixed function matrix buffer.
+        * Texture matrix must be enabled in the
+        * ProgramVertexFixedFunction builder for the shader to utilize
+        * it.
+        *
+        * @param m modelview matrix
+        */
         public void setTexture(Matrix4f m) {
             mTexture.load(m);
             addToBuffer(TEXTURE_OFFSET*4, m);
