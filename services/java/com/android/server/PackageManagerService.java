@@ -3663,17 +3663,6 @@ class PackageManagerService extends IPackageManager.Stub {
                 mAppDirs.remove(pkg.mPath);
             }
 
-            PackageSetting ps = (PackageSetting)pkg.mExtras;
-            if (ps != null && ps.sharedUser != null) {
-                // XXX don't do this until the data is removed.
-                if (false) {
-                    ps.sharedUser.packages.remove(ps);
-                    if (ps.sharedUser.packages.size() == 0) {
-                        // Remove.
-                    }
-                }
-            }
-
             int N = pkg.providers.size();
             StringBuilder r = null;
             int i;
@@ -5695,12 +5684,26 @@ class PackageManagerService extends IPackageManager.Stub {
                 return;
             }
         }
+
+        killApplication(packageName, oldPkg.applicationInfo.uid);
+
         res.removedInfo.uid = oldPkg.applicationInfo.uid;
         res.removedInfo.removedPackage = packageName;
         // Remove existing system package
         removePackageLI(oldPkg, true);
         synchronized (mPackages) {
-            mSettings.disableSystemPackageLP(packageName);
+            if (!mSettings.disableSystemPackageLP(packageName) && deletedPackage != null) {
+                // We didn't need to disable the .apk as a current system package,
+                // which means we are replacing another update that is already
+                // installed.  We need to make sure to delete the older one's .apk.
+                res.removedInfo.args = createInstallArgs(isExternal(pkg)
+                        ? PackageManager.INSTALL_EXTERNAL : PackageManager.INSTALL_INTERNAL,
+                        deletedPackage.applicationInfo.sourceDir,
+                        deletedPackage.applicationInfo.publicSourceDir,
+                        deletedPackage.applicationInfo.nativeLibraryDir);
+            } else {
+                res.removedInfo.args = null;
+            }
         }
         
         // Successfully disabled the old package. Now proceed with re-installation
@@ -5738,17 +5741,6 @@ class PackageManagerService extends IPackageManager.Stub {
                             oldPkgSetting.installerPackageName);
                 }
                 mSettings.writeLP();
-            }
-        } else {
-            // If this is an update to an existing update, setup 
-            // to remove the existing update.
-            synchronized (mPackages) {
-                PackageSetting ps = mSettings.getDisabledSystemPkg(packageName);
-                if (ps != null && ps.codePathString != null &&
-                        !ps.codePathString.equals(oldPkgSetting.codePathString)) {
-                    res.removedInfo.args = createInstallArgs(0, oldPkgSetting.codePathString,
-                            oldPkgSetting.resourcePathString, oldPkgSetting.nativeLibraryPathString);
-                }
             }
         }
     }
@@ -6252,24 +6244,21 @@ class PackageManagerService extends IPackageManager.Stub {
             ps = mSettings.getDisabledSystemPkg(p.packageName);
         }
         if (ps == null) {
-            Slog.w(TAG, "Attempt to delete system package "+ p.packageName);
+            Slog.w(TAG, "Attempt to delete unknown system package "+ p.packageName);
             return false;
         } else {
             Log.i(TAG, "Deleting system pkg from data partition");
         }
         // Delete the updated package
         outInfo.isRemovedPackageSystemUpdate = true;
-        final boolean deleteCodeAndResources;
         if (ps.versionCode < p.mVersionCode) {
-            // Delete code and resources for downgrades
-            deleteCodeAndResources = true;
+            // Delete data for downgrades
             flags &= ~PackageManager.DONT_DELETE_DATA;
         } else {
             // Preserve data by setting flag
-            deleteCodeAndResources = false;
             flags |= PackageManager.DONT_DELETE_DATA;
         }
-        boolean ret = deleteInstalledPackageLI(p, deleteCodeAndResources, flags, outInfo,
+        boolean ret = deleteInstalledPackageLI(p, true, flags, outInfo,
                 writeSettings);
         if (!ret) {
             return false;
@@ -7850,6 +7839,12 @@ class PackageManagerService extends IPackageManager.Stub {
                     pkgFlags);
         }
 
+        PackageSetting(PackageSetting orig) {
+            super(orig.name, orig.realName, orig.codePath, orig.resourcePath,
+                    orig.nativeLibraryPathString, orig.versionCode, orig.pkgFlags);
+            copyFrom(orig);
+        }
+
         @Override
         public String toString() {
             return "PackageSetting{"
@@ -8062,21 +8057,29 @@ class PackageManagerService extends IPackageManager.Stub {
             return s;
         }
 
-        int disableSystemPackageLP(String name) {
+        boolean disableSystemPackageLP(String name) {
             PackageSetting p = mPackages.get(name);
             if(p == null) {
                 Log.w(TAG, "Package:"+name+" is not an installed package");
-                return -1;
+                return false;
             }
             PackageSetting dp = mDisabledSysPackages.get(name);
             // always make sure the system package code and resource paths dont change
-            if(dp == null) {
+            if (dp == null) {
                 if((p.pkg != null) && (p.pkg.applicationInfo != null)) {
                     p.pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
                 }
                 mDisabledSysPackages.put(name, p);
+
+                // a little trick...  when we install the new package, we don't
+                // want to modify the existing PackageSetting for the built-in
+                // version.  so at this point we need a new PackageSetting that
+                // is okay to much with.
+                PackageSetting newp = new PackageSetting(p);
+                replacePackageLP(name, newp);
+                return true;
             }
-            return removePackageLP(name);
+            return false;
         }
 
         PackageSetting enableSystemPackageLP(String name) {
@@ -8410,6 +8413,19 @@ class PackageManagerService extends IPackageManager.Stub {
             return -1;
         }
 
+        private void replacePackageLP(String name, PackageSetting newp) {
+            PackageSetting p = mPackages.get(name);
+            if (p != null) {
+                if (p.sharedUser != null) {
+                    p.sharedUser.packages.remove(p);
+                    p.sharedUser.packages.add(newp);
+                } else {
+                    replaceUserIdLP(p.userId, newp);
+                }
+            }
+            mPackages.put(name, newp);
+        }
+
         private boolean addUserIdLP(int uid, Object obj, Object name) {
             if (uid >= FIRST_APPLICATION_UID + MAX_APPLICATION_UIDS) {
                 return false;
@@ -8469,6 +8485,16 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (index < N) mUserIds.set(index, null);
             } else {
                 mOtherUserIds.remove(uid);
+            }
+        }
+
+        private void replaceUserIdLP(int uid, Object obj) {
+            if (uid >= FIRST_APPLICATION_UID) {
+                int N = mUserIds.size();
+                final int index = uid - FIRST_APPLICATION_UID;
+                if (index < N) mUserIds.set(index, obj);
+            } else {
+                mOtherUserIds.put(uid, obj);
             }
         }
 
