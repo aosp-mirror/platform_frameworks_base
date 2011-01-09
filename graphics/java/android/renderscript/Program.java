@@ -28,6 +28,9 @@ import android.util.Log;
 
 /**
  *
+ * Program is a base class for all the objects that modify
+ * various stages of the graphics pipeline
+ *
  **/
 public class Program extends BaseObj {
     public static final int MAX_INPUT = 8;
@@ -35,6 +38,12 @@ public class Program extends BaseObj {
     public static final int MAX_CONSTANT = 8;
     public static final int MAX_TEXTURE = 8;
 
+    /**
+     *
+     * TextureType specifies what textures are attached to Program
+     * objects
+     *
+     **/
     public enum TextureType {
         TEXTURE_2D (0),
         TEXTURE_CUBE (1);
@@ -68,6 +77,14 @@ public class Program extends BaseObj {
         super(id, rs);
     }
 
+    /**
+     * Binds a constant buffer to be used as uniform inputs to the
+     * program
+     *
+     * @param a allocation containing uniform data
+     * @param slot index within the program's list of constant
+     *             buffer allocations
+     */
     public void bindConstants(Allocation a, int slot) {
         if (slot < 0 || slot >= mConstants.length) {
             throw new IllegalArgumentException("Slot ID out of range.");
@@ -80,6 +97,13 @@ public class Program extends BaseObj {
         mRS.nProgramBindConstants(getID(), slot, id);
     }
 
+    /**
+     * Binds a texture to be used in the program
+     *
+     * @param va allocation containing texture data
+     * @param slot index within the program's list of textures
+     *
+     */
     public void bindTexture(Allocation va, int slot)
         throws IllegalArgumentException {
         mRS.validate();
@@ -95,6 +119,15 @@ public class Program extends BaseObj {
         mRS.nProgramBindTexture(getID(), slot, id);
     }
 
+    /**
+     * Binds an object that describes how a texture at the
+     * corresponding location is sampled
+     *
+     * @param vs sampler for a corresponding texture
+     * @param slot index within the program's list of textures to
+     *             use the sampler on
+     *
+     */
     public void bindSampler(Sampler vs, int slot)
         throws IllegalArgumentException {
         mRS.validate();
@@ -133,11 +166,25 @@ public class Program extends BaseObj {
             mTextureTypes = new TextureType[MAX_TEXTURE];
         }
 
+        /**
+         * Sets the GLSL shader code to be used in the program
+         *
+         * @param s GLSL shader string
+         * @return  self
+         */
         public BaseProgramBuilder setShader(String s) {
             mShader = s;
             return this;
         }
 
+        /**
+         * Sets the GLSL shader code to be used in the program
+         *
+         * @param resources application resources
+         * @param resourceID id of the file containing GLSL shader code
+         *
+         * @return  self
+         */
         public BaseProgramBuilder setShader(Resources resources, int resourceID) {
             byte[] str;
             int strLength;
@@ -176,14 +223,29 @@ public class Program extends BaseObj {
             return this;
         }
 
+        /**
+         * Queries the index of the last added constant buffer type
+         *
+         */
         public int getCurrentConstantIndex() {
             return mConstantCount - 1;
         }
 
+        /**
+         * Queries the index of the last added texture type
+         *
+         */
         public int getCurrentTextureIndex() {
             return mTextureCount - 1;
         }
 
+        /**
+         * Adds constant (uniform) inputs to the program
+         *
+         * @param t Type that describes the layout of the Allocation
+         *          object to be used as constant inputs to the Program
+         * @return  self
+         */
         public BaseProgramBuilder addConstant(Type t) throws IllegalStateException {
             // Should check for consistant and non-conflicting names...
             if(mConstantCount >= MAX_CONSTANT) {
@@ -197,6 +259,13 @@ public class Program extends BaseObj {
             return this;
         }
 
+        /**
+         * Adds a texture input to the Program
+         *
+         * @param texType describes that the texture to append it (2D,
+         *                Cubemap, etc.)
+         * @return  self
+         */
         public BaseProgramBuilder addTexture(TextureType texType) throws IllegalArgumentException {
             if(mTextureCount >= MAX_TEXTURE) {
                 throw new IllegalArgumentException("Max texture count exceeded.");
