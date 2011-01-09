@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.layoutlib.bridge.impl.FontLoader;
 
@@ -84,7 +85,6 @@ public final class Typeface_Delegate {
         return delegate.mFonts;
     }
 
-
     // ---- native methods ----
 
     /*package*/ static synchronized int nativeCreate(String familyName, int style) {
@@ -125,13 +125,13 @@ public final class Typeface_Delegate {
     }
 
     /*package*/ static synchronized int nativeCreateFromAsset(AssetManager mgr, String path) {
-        // FIXME
-        throw new UnsupportedOperationException("Native delegate needed: Typeface_Delegate.nativeCreateFromAsset");
+        Bridge.getLog().fidelityWarning(null, "Typeface.createFromAsset() is not supported.", null);
+        return 0;
     }
 
     /*package*/ static synchronized int nativeCreateFromFile(String path) {
-        // FIXME
-        throw new UnsupportedOperationException("Native delegate needed: Typeface_Delegate.nativeCreateFromFile");
+        Bridge.getLog().fidelityWarning(null, "Typeface.createFromFile() is not supported.", null);
+        return 0;
     }
 
     /*package*/ static void nativeUnref(int native_instance) {

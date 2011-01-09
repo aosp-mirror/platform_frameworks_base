@@ -344,6 +344,7 @@ public class RenderSessionImpl {
             info.mHasWindowFocus = true;
             info.mWindowVisibility = View.VISIBLE;
             info.mInTouchMode = false; // this is so that we can display selections.
+            info.mHardwareAccelerated = false;
             mViewRoot.dispatchAttachedToWindow(info, 0);
 
             // get the background drawable
