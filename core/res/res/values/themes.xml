@@ -366,6 +366,8 @@
         <item name="searchViewGoIcon">@android:drawable/ic_go_search_api_holo_light</item>
         <item name="searchViewVoiceIcon">@android:drawable/ic_voice_search_api_holo_light</item>
         <item name="searchViewEditQuery">@android:drawable/ic_commit_search_api_holo_light</item>
+
+        <item name="detailsElementBackground">@android:drawable/panel_bg_holo_light</item>
     </style>
 
     <!-- Variant of the light theme with no title bar -->
