@@ -311,7 +311,6 @@ public class DatabaseUtils {
 
     /**
      * Concatenates two SQL WHERE clauses, handling empty or null values.
-     * @hide
      */
     public static String concatenateWhere(String a, String b) {
         if (TextUtils.isEmpty(a)) {

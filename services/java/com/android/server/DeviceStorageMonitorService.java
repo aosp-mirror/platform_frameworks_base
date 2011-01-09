@@ -16,7 +16,6 @@
 
 package com.android.server;
 
-import com.android.server.am.ActivityManagerService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -38,7 +37,6 @@ import android.provider.Settings;
 import android.util.Config;
 import android.util.EventLog;
 import android.util.Slog;
-import android.provider.Settings;
 
 /**
  * This class implements a service to monitor the amount of disk
@@ -66,6 +64,7 @@ class DeviceStorageMonitorService extends Binder {
     private static final int MONITOR_INTERVAL = 1; //in minutes
     private static final int LOW_MEMORY_NOTIFICATION_ID = 1;
     private static final int DEFAULT_THRESHOLD_PERCENTAGE = 10;
+    private static final int DEFAULT_THRESHOLD_MAX_BYTES = 500*1024*1024; // 500MB
     private static final int DEFAULT_FREE_STORAGE_LOG_INTERVAL_IN_MINUTES = 12*60; //in minutes
     private static final long DEFAULT_DISK_FREE_CHANGE_REPORTING_THRESHOLD = 2 * 1024 * 1024; // 2MB
     private static final long DEFAULT_CHECK_INTERVAL = MONITOR_INTERVAL*60*1000;
@@ -271,13 +270,18 @@ class DeviceStorageMonitorService extends Binder {
      * any way
      */
     private long getMemThreshold() {
-        int value = Settings.Secure.getInt(
+        long value = Settings.Secure.getInt(
                               mContentResolver,
                               Settings.Secure.SYS_STORAGE_THRESHOLD_PERCENTAGE,
                               DEFAULT_THRESHOLD_PERCENTAGE);
         if(localLOGV) Slog.v(TAG, "Threshold Percentage="+value);
+        value *= mTotalMemory;
+        long maxValue = Settings.Secure.getInt(
+                mContentResolver,
+                Settings.Secure.SYS_STORAGE_THRESHOLD_MAX_BYTES,
+                DEFAULT_THRESHOLD_MAX_BYTES);
         //evaluate threshold value
-        return mTotalMemory*value;
+        return value < maxValue ? value : maxValue;
     }
 
     /*

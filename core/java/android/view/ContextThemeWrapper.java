@@ -51,6 +51,12 @@ public class ContextThemeWrapper extends ContextWrapper {
         initializeTheme();
     }
     
+    /** @hide */
+    @Override
+    public int getThemeResId() {
+        return mThemeResource;
+    }
+
     @Override public Resources.Theme getTheme() {
         if (mTheme != null) {
             return mTheme;

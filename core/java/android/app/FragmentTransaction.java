@@ -24,8 +24,8 @@ public abstract class FragmentTransaction {
      * @param fragment The fragment to be added.  This fragment must not already
      * be added to the activity.
      * @param tag Optional tag name for the fragment, to later retrieve the
-     * fragment with {@link Activity#findFragmentByTag(String)
-     * Activity.findFragmentByTag(String)}.
+     * fragment with {@link FragmentManager#findFragmentByTag(String)
+     * FragmentManager.findFragmentByTag(String)}.
      * 
      * @return Returns the same FragmentTransaction instance.
      */
@@ -47,8 +47,8 @@ public abstract class FragmentTransaction {
      * to be replaced.
      * @param fragment The new fragment to place in the container.
      * @param tag Optional tag name for the fragment, to later retrieve the
-     * fragment with {@link Activity#findFragmentByTag(String)
-     * Activity.findFragmentByTag(String)}.
+     * fragment with {@link FragmentManager#findFragmentByTag(String)
+     * FragmentManager.findFragmentByTag(String)}.
      * 
      * @return Returns the same FragmentTransaction instance.
      */
