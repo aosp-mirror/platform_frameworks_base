@@ -26,81 +26,92 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-        >
+    android:background="#70000000">
 
-    <!-- left side: status and emergency call button -->
-    <LinearLayout
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_width="0dip"
-            android:orientation="vertical"
-            android:gravity="center_vertical"
-                >
-        
-        <include layout="@layout/keyguard_screen_status_land" />
+    <!-- left side: status  -->
+    <RelativeLayout
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_width="0dip">
 
-        <!-- footer -->
-        <FrameLayout
-            android:layout_width="match_parent"
+        <include layout="@layout/keyguard_screen_status_land"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="140dip"
-            >
+            android:layout_marginLeft="102dip"
+            android:layout_marginTop="320dip"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"/>
 
-            <!-- option 1: a single emergency call button -->
-            <RelativeLayout android:id="@+id/footerNormal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                >
-                <Button android:id="@+id/emergencyCallAlone"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/lockscreen_emergency_call"
-                    style="@style/Widget.Button.Transparent"
-                    android:drawableLeft="@drawable/ic_emergency"
-                    android:drawablePadding="8dip"
-                    android:visibility="gone"
-                    />
-            </RelativeLayout>
-
-            <!-- option 2: an emergency call button, and a 'forgot pattern?' button -->
-            <LinearLayout android:id="@+id/footerForgotPattern"
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                >
-                <Button android:id="@+id/forgotPattern"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.Button.Transparent"
-                    />
-                <Button android:id="@+id/emergencyCallTogether"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/lockscreen_emergency_call"
-                    style="@style/Widget.Button.Transparent"
-                    android:drawableLeft="@drawable/ic_emergency"
-                    android:drawablePadding="8dip"
-                    android:visibility="gone"
-                    />
-            </LinearLayout>
-        </FrameLayout>
-    </LinearLayout>
+    </RelativeLayout>
 
     <!-- right side: lock pattern -->
-    <LinearLayout
+    <RelativeLayout
         android:layout_weight="1"
         android:layout_width="0dip"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        >
+        android:layout_height="match_parent">
+
         <com.android.internal.widget.LockPatternView android:id="@+id/lockPattern"
             android:layout_width="354dip"
             android:layout_height="354dip"
-            android:layout_marginTop="90dip"
-            android:layout_marginRight="90dip"
-          />
-    </LinearLayout>
+            android:layout_marginLeft="143dip"
+            android:layout_marginTop="201dip"
+            android:layout_gravity="center_vertical"
+        />
+
+        <!-- footer -->
+
+        <!-- option 1: a single emergency call button -->
+        <RelativeLayout android:id="@+id/footerNormal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/lockPattern"
+            android:layout_alignLeft="@id/lockPattern"
+            android:layout_alignRight="@id/lockPattern"
+            android:layout_marginTop="28dip"
+            android:layout_marginLeft="28dip"
+            android:layout_marginRight="28dip"
+            >
+            <Button android:id="@+id/emergencyCallAlone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lockscreen_emergency_call"
+                style="@style/Widget.Button.Transparent"
+                android:drawableLeft="@drawable/ic_emergency"
+                android:drawablePadding="8dip"
+                android:visibility="gone"
+                />
+        </RelativeLayout>
+
+        <!-- option 2: an emergency call button, and a 'forgot pattern?' button -->
+        <LinearLayout android:id="@+id/footerForgotPattern"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/footerNormal"
+            android:layout_alignLeft="@id/lockPattern"
+            android:layout_alignRight="@id/lockPattern"
+            android:layout_marginTop="28dip"
+            android:layout_marginLeft="28dip"
+            android:layout_marginRight="28dip">
+
+            <Button android:id="@+id/forgotPattern"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.Button.Transparent"
+            />
+
+            <Button android:id="@+id/emergencyCallTogether"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/lockscreen_emergency_call"
+                style="@style/Widget.Button.Transparent"
+                android:drawableLeft="@drawable/ic_emergency"
+                android:drawablePadding="8dip"
+                android:visibility="gone"
+            />
+
+        </LinearLayout>
+
+    </RelativeLayout>
 
 </com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient>

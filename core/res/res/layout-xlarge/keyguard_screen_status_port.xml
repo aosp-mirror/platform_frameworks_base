@@ -44,8 +44,6 @@
     <com.android.internal.widget.DigitalClock android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
         android:layout_marginTop="8dip"
         android:layout_marginBottom="8dip"
         android_layout_marginLeft="-10dip">
@@ -57,7 +55,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:ellipsize="none"
-            android:textSize="120sp"
+            android:textSize="98sp"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/lockscreen_clock_background"
             android:layout_marginBottom="6dip"
@@ -68,7 +66,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:ellipsize="none"
-            android:textSize="120sp"
+            android:textSize="98sp"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/lockscreen_clock_foreground"
             android:layout_marginBottom="6dip"
@@ -91,15 +89,29 @@
 
     </com.android.internal.widget.DigitalClock>
 
-    <TextView
-        android:id="@+id/date"
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/time"
-        android:layout_marginTop="10dip"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="22sp"
-        />
+        android:layout_marginTop="10dip">
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="17sp"/>
+
+        <TextView
+            android:id="@+id/alarm_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dip"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="17sp"/>
+
+    </LinearLayout>
 
     <!-- used for status such as the next alarm, and charging status.  -->
     <TextView
@@ -108,9 +120,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="22sp"
+        android:textSize="17sp"
         android:layout_marginTop="10dip"
         android:drawablePadding="4dip"
+        android:visibility="gone"
         />
 
     <TextView
@@ -118,7 +131,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dip"
-        android:textSize="22sp"
+        android:textSize="17sp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         />
 
@@ -129,8 +142,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dip"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="22sp"
+        android:textSize="17sp"
         android:singleLine="false"
         android:visibility="invisible"
+        android:textColor="@color/lockscreen_owner_info"
         />
 </LinearLayout>
