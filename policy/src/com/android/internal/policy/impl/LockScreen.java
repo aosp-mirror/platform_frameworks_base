@@ -80,11 +80,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
     // last known battery level
     private int mBatteryLevel = 100;
 
-    private String mNextAlarm = null;
-    private Drawable mAlarmIcon = null;
-    private String mCharging = null;
-    private Drawable mChargingIcon = null;
-
     private boolean mSilentMode;
     private AudioManager mAudioManager;
     private String mDateFormatString;
@@ -356,9 +351,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
         mStatus = getCurrentStatus(updateMonitor.getSimState());
         updateLayout(mStatus);
 
-        refreshBatteryStringAndIcon();
-        refreshAlarmDisplay();
-
         mTimeFormat = DateFormat.getTimeFormat(getContext());
         mDateFormatString = getContext().getString(R.string.full_wday_month_day_no_year);
         refreshTimeAndDateDisplay();
@@ -417,14 +409,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
     private Runnable mPendingR1;
     private Runnable mPendingR2;
 
-    private void refreshAlarmDisplay() {
-        mNextAlarm = mLockPatternUtils.getNextAlarm();
-        if (mNextAlarm != null) {
-            mAlarmIcon = getContext().getResources().getDrawable(R.drawable.ic_lock_idle_alarm);
-        }
-        updateStatusLines();
-    }
-
     /** {@inheritDoc} */
     public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn,
             int batteryLevel) {
@@ -433,30 +417,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
         mPluggedIn = pluggedIn;
         mBatteryLevel = batteryLevel;
 
-        refreshBatteryStringAndIcon();
         updateStatusLines();
-    }
-
-    private void refreshBatteryStringAndIcon() {
-        if (!mShowingBatteryInfo) {
-            mCharging = null;
-            return;
-        }
-
-        if (mChargingIcon == null) {
-            mChargingIcon =
-                    getContext().getResources().getDrawable(R.drawable.ic_lock_idle_charging);
-        }
-
-        if (mPluggedIn) {
-            if (mBatteryLevel >= 100) {
-                mCharging = getContext().getString(R.string.lockscreen_charged);
-            } else {
-                mCharging = getContext().getString(R.string.lockscreen_plugged_in, mBatteryLevel);
-            }
-        } else {
-            mCharging = getContext().getString(R.string.lockscreen_low_battery);
-        }
     }
 
     /** {@inheritDoc} */
@@ -469,7 +430,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
     }
 
     private void updateStatusLines() {
-        mStatusView.updateStatusLines(mStatus.showStatusLines(), mCharging, mChargingIcon, mAlarmIcon);
+        mStatusView.updateStatusLines(mStatus.showStatusLines());
     }
 
     /** {@inheritDoc} */
