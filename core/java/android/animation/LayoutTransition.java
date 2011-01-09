@@ -600,6 +600,18 @@ public class LayoutTransition {
                 // Remove the animation from the cache when it ends
                 anim.addListener(new AnimatorListenerAdapter() {
                     private boolean canceled = false;
+
+                    @Override
+                    public void onAnimationStart(Animator animator) {
+                        if (mListeners != null) {
+                            for (TransitionListener listener : mListeners) {
+                                listener.startTransition(LayoutTransition.this, parent, child,
+                                        changeReason == APPEARING ?
+                                                CHANGE_APPEARING : CHANGE_DISAPPEARING);
+                            }
+                        }
+                    }
+
                     @Override
                     public void onAnimationCancel(Animator animator) {
                         // we remove canceled animations immediately, not here
@@ -607,10 +619,18 @@ public class LayoutTransition {
                         child.removeOnLayoutChangeListener(listener);
                         layoutChangeListenerMap.remove(child);
                     }
+
                     @Override
                     public void onAnimationEnd(Animator animator) {
                         if (!canceled) {
                             currentChangingAnimations.remove(child);
+                        }
+                        if (mListeners != null) {
+                            for (TransitionListener listener : mListeners) {
+                                listener.endTransition(LayoutTransition.this, parent, child,
+                                        changeReason == APPEARING ?
+                                                CHANGE_APPEARING : CHANGE_DISAPPEARING);
+                            }
                         }
                     }
                 });
