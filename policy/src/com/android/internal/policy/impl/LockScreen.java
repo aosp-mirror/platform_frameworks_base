@@ -23,6 +23,7 @@ import com.android.internal.widget.SlidingTab;
 import com.android.internal.widget.WaveView;
 import com.android.internal.widget.WaveView.OnTriggerListener;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -250,9 +251,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
     private boolean shouldEnableMenuKey() {
         final Resources res = getResources();
         final boolean configDisabled = res.getBoolean(R.bool.config_disableMenuKeyInLockScreen);
-        final boolean isMonkey = SystemProperties.getBoolean("ro.monkey", false);
+        final boolean isTestHarness = ActivityManager.isRunningInTestHarness();
         final boolean fileOverride = (new File(ENABLE_MENU_KEY_FILE)).exists();
-        return !configDisabled || isMonkey || fileOverride;
+        return !configDisabled || isTestHarness || fileOverride;
     }
 
     /**
