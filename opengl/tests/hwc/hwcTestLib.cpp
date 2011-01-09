@@ -174,6 +174,19 @@ HwcTestDim::operator string()
     return out.str();
 }
 
+// Dimension class to hwc_rect conversion
+HwcTestDim::operator hwc_rect() const
+{
+    hwc_rect rect;
+
+    rect.left = rect.top = 0;
+
+    rect.right = this->_w;
+    rect.bottom = this->_h;
+
+    return rect;
+}
+
 // Hardware Composer rectangle to string conversion
 string hwcTestRect2str(const struct hwc_rect& rect)
 {
@@ -348,6 +361,21 @@ const struct hwcTestGraphicFormat *hwcTestGraphicFormatLookup(const char *desc)
 
     return NULL;
 }
+
+// Look up and return pointer to structure with the characteristics
+// of the graphic format specified by the id parameter.  Search failure
+// indicated by the return of NULL.
+const struct hwcTestGraphicFormat *hwcTestGraphicFormatLookup(uint32_t id)
+{
+    for (unsigned int n1 = 0; n1 < NUMA(hwcTestGraphicFormat); n1++) {
+        if (id == hwcTestGraphicFormat[n1].format) {
+            return &hwcTestGraphicFormat[n1];
+        }
+    }
+
+    return NULL;
+}
+
 
 // Given the integer ID of a graphic format, return a pointer to
 // a string that describes the format.
