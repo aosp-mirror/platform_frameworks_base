@@ -32,6 +32,7 @@ import com.android.tools.layoutlib.create.MethodAdapter;
 import com.android.tools.layoutlib.create.OverrideMethod;
 
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.graphics.Typeface_Delegate;
 import android.os.Looper;
 
@@ -283,6 +284,10 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
     @Override
     public boolean dispose() {
         BridgeAssetManager.clearSystem();
+
+        // dispose of the default typeface.
+        Typeface.sDefaults = null;
+
         return true;
     }
 
