@@ -2927,24 +2927,23 @@ class PackageManagerService extends IPackageManager.Stub {
                     System.arraycopy(mTmpSharedLibraries, 0,
                             pkg.usesLibraryFiles, 0, num);
                 }
+            }
 
-                if (pkg.reqFeatures != null) {
-                    N = pkg.reqFeatures.size();
-                    for (int i=0; i<N; i++) {
-                        FeatureInfo fi = pkg.reqFeatures.get(i);
-                        if ((fi.flags&FeatureInfo.FLAG_REQUIRED) == 0) {
-                            // Don't care.
-                            continue;
-                        }
+            if (pkg.reqFeatures != null) {
+                int N = pkg.reqFeatures.size();
+                for (int i = 0; i < N; i++) {
+                    FeatureInfo fi = pkg.reqFeatures.get(i);
+                    if ((fi.flags & FeatureInfo.FLAG_REQUIRED) == 0) {
+                        // Don't care.
+                        continue;
+                    }
 
-                        if (fi.name != null) {
-                            if (mAvailableFeatures.get(fi.name) == null) {
-                                Slog.e(TAG, "Package " + pkg.packageName
-                                        + " requires unavailable feature "
-                                        + fi.name + "; failing!");
-                                mLastScanError = PackageManager.INSTALL_FAILED_MISSING_FEATURE;
-                                return null;
-                            }
+                    if (fi.name != null) {
+                        if (mAvailableFeatures.get(fi.name) == null) {
+                            Slog.e(TAG, "Package " + pkg.packageName
+                                    + " requires unavailable feature " + fi.name + "; failing!");
+                            mLastScanError = PackageManager.INSTALL_FAILED_MISSING_FEATURE;
+                            return null;
                         }
                     }
                 }

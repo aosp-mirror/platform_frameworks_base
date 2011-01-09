@@ -23,6 +23,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -215,7 +216,7 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    public void invokeInstallPackageFail(Uri packageURI, int flags, int result) {
+    public void invokeInstallPackageFail(Uri packageURI, int flags, int expectedResult) {
         PackageInstallObserver observer = new PackageInstallObserver();
         try {
             // Wait on observer
@@ -233,7 +234,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 if(!observer.isDone()) {
                     fail("Timed out waiting for packageInstalled callback");
                 }
-                assertEquals(observer.returnCode, result);
+                assertEquals(expectedResult, observer.returnCode);
             }
         } finally {
         }
@@ -2837,6 +2838,13 @@ public class PackageManagerTests extends AndroidTestCase {
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
         installFromRawResource("install.apk", rapk2, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+    }
+
+    @LargeTest
+    public void testUsesFeatureMissingFeature() {
+        int retCode = PackageManager.INSTALL_FAILED_MISSING_FEATURE;
+        installFromRawResource("install.apk", R.raw.install_uses_feature, 0, true, true, retCode,
+                PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
     /*---------- Recommended install location tests ----*/
     /*
