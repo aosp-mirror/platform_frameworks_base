@@ -22,6 +22,9 @@ import android.util.Log;
 
 
 /**
+ * ProgramFragment, also know as a fragment shader, describes a
+ * stage in the graphics pipeline responsible for manipulating
+ * pixel data in a user-defined way.
  *
  **/
 public class ProgramFragment extends Program {
@@ -30,10 +33,20 @@ public class ProgramFragment extends Program {
     }
 
     public static class Builder extends BaseProgramBuilder {
+        /**
+         * Create a builder object.
+         *
+         * @param rs
+         */
         public Builder(RenderScript rs) {
             super(rs);
         }
 
+        /**
+         * Creates ProgramFragment from the current state of the builder
+         *
+         * @return  ProgramFragment
+         */
         public ProgramFragment create() {
             mRS.validate();
             int[] tmp = new int[(mInputCount + mOutputCount + mConstantCount + mTextureCount) * 2];
