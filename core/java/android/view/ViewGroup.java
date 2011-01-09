@@ -130,12 +130,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private MotionEvent.PointerCoords[] mTmpPointerCoords;
 
     // For debugging only.  You can see these in hierarchyviewer.
+    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     @ViewDebug.ExportedProperty(category = "events")
     private long mLastTouchDownTime;
     @ViewDebug.ExportedProperty(category = "events")
     private int mLastTouchDownIndex = -1;
+    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     @ViewDebug.ExportedProperty(category = "events")
     private float mLastTouchDownX;
+    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     @ViewDebug.ExportedProperty(category = "events")
     private float mLastTouchDownY;
 
