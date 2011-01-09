@@ -20,32 +20,25 @@ package android.renderscript;
  *
  **/
 public class Script extends BaseObj {
-    public static final int MAX_SLOT = 16;
-
-    boolean mIsRoot;
-    Type[] mTypes;
-    boolean[] mWritable;
-    Invokable[] mInvokables;
-
-    public static class Invokable {
-        RenderScript mRS;
-        Script mScript;
-        int mSlot;
-        String mName;
-
-        Invokable() {
-            mSlot = -1;
-        }
-
-        public void execute() {
-            mRS.nScriptInvoke(mScript.getID(), mSlot);
-        }
-    }
-
+    /**
+     * @hide
+     *
+     * Only intended for use by generated reflected code.
+     *
+     * @param slot
+     */
     protected void invoke(int slot) {
         mRS.nScriptInvoke(getID(), slot);
     }
 
+    /**
+     * @hide
+     *
+     * Only intended for use by generated reflected code.
+     *
+     * @param slot
+     * @param v
+     */
     protected void invoke(int slot, FieldPacker v) {
         if (v != null) {
             mRS.nScriptInvokeV(getID(), slot, v.getData());
@@ -59,6 +52,15 @@ public class Script extends BaseObj {
         super(id, rs);
     }
 
+
+    /**
+     * @hide
+     *
+     * Only intended for use by generated reflected code.
+     *
+     * @param va
+     * @param slot
+     */
     public void bindAllocation(Allocation va, int slot) {
         mRS.validate();
         if (va != null) {
@@ -68,30 +70,86 @@ public class Script extends BaseObj {
         }
     }
 
+    /**
+     * @hide
+     *
+     * Only intended for use by generated reflected code.
+     *
+     * @param index
+     * @param v
+     */
     public void setVar(int index, float v) {
         mRS.nScriptSetVarF(getID(), index, v);
     }
 
+    /**
+     * @hide
+     *
+     * Only intended for use by generated reflected code.
+     *
+     * @param index
+     * @param v
+     */
     public void setVar(int index, double v) {
         mRS.nScriptSetVarD(getID(), index, v);
     }
 
+    /**
+     * @hide
+     *
+     * Only intended for use by generated reflected code.
+     *
+     * @param index
+     * @param v
+     */
     public void setVar(int index, int v) {
         mRS.nScriptSetVarI(getID(), index, v);
     }
 
+    /**
+     * @hide
+     *
+     * Only intended for use by generated reflected code.
+     *
+     * @param index
+     * @param v
+     */
     public void setVar(int index, long v) {
         mRS.nScriptSetVarJ(getID(), index, v);
     }
 
+    /**
+     * @hide
+     *
+     * Only intended for use by generated reflected code.
+     *
+     * @param index
+     * @param v
+     */
     public void setVar(int index, boolean v) {
         mRS.nScriptSetVarI(getID(), index, v ? 1 : 0);
     }
 
+    /**
+     * @hide
+     *
+     * Only intended for use by generated reflected code.
+     *
+     * @param index
+     * @param o
+     */
     public void setVar(int index, BaseObj o) {
         mRS.nScriptSetVarObj(getID(), index, (o == null) ? 0 : o.getID());
     }
 
+    /**
+     * @hide
+     *
+     * Only intended for use by generated reflected code.
+     *
+     * @param index
+     * @param v
+     */
     public void setVar(int index, FieldPacker v) {
         mRS.nScriptSetVarV(getID(), index, v.getData());
     }
