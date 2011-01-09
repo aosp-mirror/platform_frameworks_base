@@ -176,6 +176,8 @@ main(int argc, char *argv[])
 
     assert(refFormat != NULL);
 
+    testSetLogCatTag(LOG_TAG);
+
     // Parse command line arguments
     while ((opt = getopt(argc, argv, "vs:e:r:D:?h")) != -1) {
         switch (opt) {
