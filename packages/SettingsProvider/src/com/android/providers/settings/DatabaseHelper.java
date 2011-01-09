@@ -61,7 +61,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 62;
+    private static final int DATABASE_VERSION = 63;
 
     private Context mContext;
 
@@ -441,18 +441,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 39) {
-            db.beginTransaction();
-            try {
-                String value =
-                        mContext.getResources().getBoolean(
-                        R.bool.def_screen_brightness_automatic_mode) ? "1" : "0";
-                db.execSQL("INSERT OR IGNORE INTO system(name,value) values('" +
-                        Settings.System.SCREEN_BRIGHTNESS_MODE + "','" + value + "');");
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-            }
-
+            upgradeAutoBrightness(db);
             upgradeVersion = 40;
         }
 
@@ -802,6 +791,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 62;
         }
 
+        // Change the default for screen auto-brightness mode
+        if (upgradeVersion == 62) {
+            upgradeAutoBrightness(db);
+            upgradeVersion = 63;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -921,6 +916,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.endTransaction();
             if (stmt != null)
                 stmt.close();
+        }
+    }
+
+    private void upgradeAutoBrightness(SQLiteDatabase db) {
+        db.beginTransaction();
+        try {
+            String value =
+                    mContext.getResources().getBoolean(
+                    R.bool.def_screen_brightness_automatic_mode) ? "1" : "0";
+            db.execSQL("INSERT OR REPLACE INTO system(name,value) values('" +
+                    Settings.System.SCREEN_BRIGHTNESS_MODE + "','" + value + "');");
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
         }
     }
 
