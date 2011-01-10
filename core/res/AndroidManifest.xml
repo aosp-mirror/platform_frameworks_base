@@ -85,8 +85,6 @@
     <protected-broadcast android:name="android.hardware.action.USB_CONNECTED" />
     <protected-broadcast android:name="android.hardware.action.USB_DISCONNECTED" />
     <protected-broadcast android:name="android.hardware.action.USB_STATE" />
-    <protected-broadcast android:name="android.hardware.action.USB_CAMERA_ATTACHED" />
-    <protected-broadcast android:name="android.hardware.action.USB_CAMERA_DETACHED" />
 
     <protected-broadcast android:name="android.nfc.action.LLCP_LINK_STATE_CHANGED" />
     <protected-broadcast android:name="android.nfc.action.TRANSACTION_DETECTED" />
