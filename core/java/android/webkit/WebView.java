@@ -4573,12 +4573,32 @@ public class WebView extends AbsoluteLayout
         }
 
         if (keyCode == KeyEvent.KEYCODE_PAGE_UP) {
-            pageUp(false);
-            return true;
+            if (event.hasNoModifiers()) {
+                pageUp(false);
+                return true;
+            } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
+                pageUp(true);
+                return true;
+            }
         }
 
         if (keyCode == KeyEvent.KEYCODE_PAGE_DOWN) {
-            pageDown(false);
+            if (event.hasNoModifiers()) {
+                pageDown(false);
+                return true;
+            } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
+                pageDown(true);
+                return true;
+            }
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_MOVE_HOME && event.hasNoModifiers()) {
+            pageUp(true);
+            return true;
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_MOVE_END && event.hasNoModifiers()) {
+            pageDown(true);
             return true;
         }
 
@@ -4588,6 +4608,22 @@ public class WebView extends AbsoluteLayout
             if (nativePageShouldHandleShiftAndArrows()) {
                 letPageHandleNavKey(keyCode, event.getEventTime(), true, event.getMetaState());
                 return true;
+            }
+            if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
+                switch (keyCode) {
+                    case KeyEvent.KEYCODE_DPAD_UP:
+                        pageUp(true);
+                        return true;
+                    case KeyEvent.KEYCODE_DPAD_DOWN:
+                        pageDown(true);
+                        return true;
+                    case KeyEvent.KEYCODE_DPAD_LEFT:
+                        nativeClearCursor(); // start next trackball movement from page edge
+                        return pinScrollTo(0, mScrollY, true, 0);
+                    case KeyEvent.KEYCODE_DPAD_RIGHT:
+                        nativeClearCursor(); // start next trackball movement from page edge
+                        return pinScrollTo(mContentWidth, mScrollY, true, 0);
+                }
             }
             if (mSelectingText) {
                 int xRate = keyCode == KeyEvent.KEYCODE_DPAD_LEFT
@@ -7947,6 +7983,9 @@ public class WebView extends AbsoluteLayout
         Rect contentCursorRingBounds = nativeGetCursorRingBounds();
         if (contentCursorRingBounds.isEmpty()) return keyHandled;
         Rect viewCursorRingBounds = contentToViewRect(contentCursorRingBounds);
+        // set last touch so that context menu related functions will work
+        mLastTouchX = (viewCursorRingBounds.left + viewCursorRingBounds.right) / 2;
+        mLastTouchY = (viewCursorRingBounds.top + viewCursorRingBounds.bottom) / 2;
         Rect visRect = new Rect();
         calcOurVisibleRect(visRect);
         Rect outset = new Rect(visRect);
