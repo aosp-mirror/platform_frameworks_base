@@ -129,7 +129,7 @@ public class DigitalClock extends RelativeLayout {
         mTimeDisplayBackground.setTypeface(Typeface.createFromFile(SYSTEM_FONT_TIME_BACKGROUND));
         mTimeDisplayForeground = (TextView) findViewById(R.id.timeDisplayForeground);
         mTimeDisplayForeground.setTypeface(Typeface.createFromFile(SYSTEM_FONT_TIME_FOREGROUND));
-        mAmPm = new AmPm(this, Typeface.createFromFile(SYSTEM_FONT_TIME_BACKGROUND));
+        mAmPm = new AmPm(this, null);
         mCalendar = Calendar.getInstance();
 
         setDateFormat();
