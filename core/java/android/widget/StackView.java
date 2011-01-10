@@ -784,6 +784,18 @@ public class StackView extends AdapterViewAnimator {
 
             int stackDirection = (mStackMode == ITEMS_SLIDE_UP) ? 1 : -1;
 
+            // We need to prevent any clipping issues which may arise by setting a layer type.
+            // This doesn't come for free however, so we only want to enable it when required.
+            if (Float.compare(0f, mYProgress) != 0 && Float.compare(1.0f, mYProgress) != 0) {
+                if (mView.getLayerType() == LAYER_TYPE_NONE) {
+                    mView.setLayerType(LAYER_TYPE_HARDWARE, null);
+                }
+            } else {
+                if (mView.getLayerType() != LAYER_TYPE_NONE) {
+                    mView.setLayerType(LAYER_TYPE_NONE, null);
+                }
+            }
+
             switch (mMode) {
                 case NORMAL_MODE:
                     viewLp.setVerticalOffset(Math.round(-r * stackDirection * mSlideAmount));
