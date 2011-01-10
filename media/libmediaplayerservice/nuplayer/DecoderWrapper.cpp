@@ -309,6 +309,18 @@ void DecoderWrapper::WrapperReader::sendFormatChange() {
 
         realNotify->setInt32("width", width);
         realNotify->setInt32("height", height);
+
+        int32_t cropLeft, cropTop, cropRight, cropBottom;
+        if (!meta->findRect(
+                    kKeyCropRect,
+                    &cropLeft, &cropTop, &cropRight, &cropBottom)) {
+            cropLeft = 0;
+            cropTop = 0;
+            cropRight = width - 1;
+            cropBottom = height - 1;
+        }
+
+        realNotify->setRect("crop", cropLeft, cropTop, cropRight, cropBottom);
     }
 
     notify->post();

@@ -271,22 +271,43 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
 
                 finishFlushIfPossible();
             } else if (what == ACodec::kWhatOutputFormatChanged) {
-                CHECK(audio);
+                if (audio) {
+                    int32_t numChannels;
+                    CHECK(codecRequest->findInt32("channel-count", &numChannels));
 
-                int32_t numChannels;
-                CHECK(codecRequest->findInt32("channel-count", &numChannels));
+                    int32_t sampleRate;
+                    CHECK(codecRequest->findInt32("sample-rate", &sampleRate));
 
-                int32_t sampleRate;
-                CHECK(codecRequest->findInt32("sample-rate", &sampleRate));
+                    LOGV("Audio output format changed to %d Hz, %d channels",
+                         sampleRate, numChannels);
 
-                LOGV("Audio output format changed to %d Hz, %d channels",
-                     sampleRate, numChannels);
+                    mAudioSink->close();
+                    CHECK_EQ(mAudioSink->open(sampleRate, numChannels), (status_t)OK);
+                    mAudioSink->start();
 
-                mAudioSink->close();
-                CHECK_EQ(mAudioSink->open(sampleRate, numChannels), (status_t)OK);
-                mAudioSink->start();
+                    mRenderer->signalAudioSinkChanged();
+                } else {
+                    // video
 
-                mRenderer->signalAudioSinkChanged();
+                    int32_t width, height;
+                    CHECK(codecRequest->findInt32("width", &width));
+                    CHECK(codecRequest->findInt32("height", &height));
+
+                    int32_t cropLeft, cropTop, cropRight, cropBottom;
+                    CHECK(codecRequest->findRect(
+                                "crop",
+                                &cropLeft, &cropTop, &cropRight, &cropBottom));
+
+                    LOGV("Video output format changed to %d x %d "
+                         "(crop: %d, %d, %d, %d)",
+                         width, height,
+                         cropLeft, cropTop, cropRight, cropBottom);
+
+                    notifyListener(
+                            MEDIA_SET_VIDEO_SIZE,
+                            cropRight - cropLeft + 1,
+                            cropBottom - cropTop + 1);
+                }
             } else if (what == ACodec::kWhatShutdownCompleted) {
                 LOGV("%s shutdown completed", audio ? "audio" : "video");
                 if (audio) {

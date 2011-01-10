@@ -171,6 +171,18 @@ void AMessage::setMessage(const char *name, const sp<AMessage> &obj) {
     item->u.refValue = obj.get();
 }
 
+void AMessage::setRect(
+        const char *name,
+        int32_t left, int32_t top, int32_t right, int32_t bottom) {
+    Item *item = allocateItem(name);
+    item->mType = kTypeRect;
+
+    item->u.rectValue.mLeft = left;
+    item->u.rectValue.mTop = top;
+    item->u.rectValue.mRight = right;
+    item->u.rectValue.mBottom = bottom;
+}
+
 bool AMessage::findString(const char *name, AString *value) const {
     const Item *item = findItem(name, kTypeString);
     if (item) {
@@ -196,6 +208,22 @@ bool AMessage::findMessage(const char *name, sp<AMessage> *obj) const {
         return true;
     }
     return false;
+}
+
+bool AMessage::findRect(
+        const char *name,
+        int32_t *left, int32_t *top, int32_t *right, int32_t *bottom) const {
+    const Item *item = findItem(name, kTypeRect);
+    if (item == NULL) {
+        return false;
+    }
+
+    *left = item->u.rectValue.mLeft;
+    *top = item->u.rectValue.mTop;
+    *right = item->u.rectValue.mRight;
+    *bottom = item->u.rectValue.mBottom;
+
+    return true;
 }
 
 void AMessage::post(int64_t delayUs) {
