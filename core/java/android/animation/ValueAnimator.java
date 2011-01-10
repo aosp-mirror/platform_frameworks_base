@@ -862,7 +862,7 @@ public class ValueAnimator extends Animator {
      * of <code>startValue</code> and <code>endValue</code> in the constructor. But if these values
      * are not one of these primitive types, or if different evaluation is desired (such as is
      * necessary with int values that represent colors), a custom evaluator needs to be assigned.
-     * For example, when running an animation on color values, the {@link RGBEvaluator}
+     * For example, when running an animation on color values, the {@link ArgbEvaluator}
      * should be used to get correct RGB color interpolation.
      *
      * <p>If this ValueAnimator has only one set of values being animated between, this evaluator
