@@ -45,14 +45,10 @@ namespace android {
 static jint com_android_internal_os_ZygoteInit_setreuid(
     JNIEnv* env, jobject clazz, jint ruid, jint euid)
 {
-    int err;
-
-    errno = 0;
-    err = setreuid(ruid, euid);
-
-    //LOGI("setreuid(%d,%d) err %d errno %d", ruid, euid, err, errno);
-
-    return errno;
+    if (setreuid(ruid, euid) < 0) {
+        return errno;
+    }
+    return 0;
 }
 
 /*
@@ -62,14 +58,10 @@ static jint com_android_internal_os_ZygoteInit_setreuid(
 static jint com_android_internal_os_ZygoteInit_setregid(
     JNIEnv* env, jobject clazz, jint rgid, jint egid)
 {
-    int err;
-
-    errno = 0;
-    err = setregid(rgid, egid);
-
-    //LOGI("setregid(%d,%d) err %d errno %d", rgid, egid, err, errno);
-
-    return errno;
+    if (setregid(rgid, egid) < 0) {
+        return errno;
+    }
+    return 0;
 }
 
 /*
@@ -79,13 +71,10 @@ static jint com_android_internal_os_ZygoteInit_setregid(
 static jint com_android_internal_os_ZygoteInit_setpgid(
     JNIEnv* env, jobject clazz, jint pid, jint pgid)
 {
-    int err;
-
-    errno = 0;
-
-    err = setpgid(pid, pgid);
-
-    return errno;
+    if (setpgid(pid, pgid) < 0) {
+        return errno;
+    }
+    return 0;
 }
 
 /*
