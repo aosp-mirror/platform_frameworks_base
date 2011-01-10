@@ -719,7 +719,7 @@ void hwcTestFillColorHBlend(GraphicBuffer *gBuf, uint32_t colorFormat,
             pixel = testRand();
         }
 
-        for (unsigned int y = 0; y <= height; y++) {
+        for (unsigned int y = 0; y < height; y++) {
             hwcTestSetPixel(gBuf, buf, x, y, pixel);
         }
     }
