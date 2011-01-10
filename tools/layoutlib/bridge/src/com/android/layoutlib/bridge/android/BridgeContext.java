@@ -92,7 +92,7 @@ public final class BridgeContext extends Activity {
 
     // cache for TypedArray generated from IStyleResourceValue object
     private Map<int[], Map<Integer, TypedArray>> mTypedArrayCache;
-    private BridgeInflater mInflater;
+    private BridgeInflater mBridgeInflater;
 
     private final IProjectCallback mProjectCallback;
     private BridgeContentResolver mContentResolver;
@@ -160,7 +160,7 @@ public final class BridgeContext extends Activity {
     }
 
     public void setBridgeInflater(BridgeInflater inflater) {
-        mInflater = inflater;
+        mBridgeInflater = inflater;
     }
 
     public void addViewKey(View view, Object viewKey) {
@@ -221,7 +221,7 @@ public final class BridgeContext extends Activity {
 
     @Override
     public LayoutInflater getLayoutInflater() {
-        return mInflater;
+        return mBridgeInflater;
     }
 
     // ------------ Context methods
@@ -244,7 +244,7 @@ public final class BridgeContext extends Activity {
     @Override
     public Object getSystemService(String service) {
         if (LAYOUT_INFLATER_SERVICE.equals(service)) {
-            return mInflater;
+            return mBridgeInflater;
         }
 
         // AutoCompleteTextView and MultiAutoCompleteTextView want a window
@@ -591,7 +591,7 @@ public final class BridgeContext extends Activity {
 
             boolean frameworkOnly = false;
 
-            // eleminate the prefix from the string
+            // eliminate the prefix from the string
             if (reference.startsWith(BridgeConstants.PREFIX_ANDROID_THEME_REF)) {
                 frameworkOnly = true;
                 reference = reference.substring(BridgeConstants.PREFIX_ANDROID_THEME_REF.length());
@@ -677,7 +677,7 @@ public final class BridgeContext extends Activity {
      * project resources
      */
     private ResourceValue findResValue(String resType, String resName, boolean frameworkOnly) {
-        // map of IResouceValue for the given type
+        // map of ResouceValue for the given type
         Map<String, ResourceValue> typeMap;
 
         // if allowed, search in the project resources first.
@@ -701,6 +701,13 @@ public final class BridgeContext extends Activity {
         }
 
         // didn't find the resource anywhere.
+        // This is normal if the resource is an ID that is generated automatically.
+        // For other resources, we output a warning
+        if ("+id".equals(resType) == false && "+android:id".equals(resType) == false) { //$NON-NLS-1$ //$NON-NLS-2$
+            Bridge.getLog().warning("resources", //$NON-NLS-1$
+                    "Couldn't resolve resource @" +
+                    (frameworkOnly ? "android:" : "") + resType + "/" + resName);
+        }
         return null;
     }
 
@@ -1302,5 +1309,16 @@ public final class BridgeContext extends Activity {
     @Override
     public Context getApplicationContext() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void startActivities(Intent[] arg0) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public boolean isRestricted() {
+        return false;
     }
 }
