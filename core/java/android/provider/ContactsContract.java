@@ -3430,12 +3430,6 @@ public final class ContactsContract {
      * <th colspan='4'>PhoneLookup</th>
      * </tr>
      * <tr>
-     * <td>long</td>
-     * <td>{@link #_ID}</td>
-     * <td>read-only</td>
-     * <td>Data row ID.</td>
-     * </tr>
-     * <tr>
      * <td>String</td>
      * <td>{@link #NUMBER}</td>
      * <td>read-only</td>
@@ -3460,6 +3454,12 @@ public final class ContactsContract {
      * <table class="jd-sumtable">
      * <tr>
      * <th colspan='4'>Join with {@link Contacts}</th>
+     * </tr>
+     * <tr>
+     * <td>long</td>
+     * <td>{@link #_ID}</td>
+     * <td>read-only</td>
+     * <td>Contact ID.</td>
      * </tr>
      * <tr>
      * <td>String</td>
