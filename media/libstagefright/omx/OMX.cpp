@@ -89,6 +89,9 @@ OMX::CallbackDispatcher::~CallbackDispatcher() {
         mQueueChanged.signal();
     }
 
+    // Don't call join on myself
+    CHECK(mThread != pthread_self());
+
     void *dummy;
     pthread_join(mThread, &dummy);
 }
@@ -249,9 +252,12 @@ status_t OMX::freeNode(node_id node) {
 
     status_t err = instance->freeNode(mMaster);
 
-    index = mDispatchers.indexOfKey(node);
-    CHECK(index >= 0);
-    mDispatchers.removeItemsAt(index);
+    {
+        Mutex::Autolock autoLock(mLock);
+        index = mDispatchers.indexOfKey(node);
+        CHECK(index >= 0);
+        mDispatchers.removeItemsAt(index);
+    }
 
     return err;
 }

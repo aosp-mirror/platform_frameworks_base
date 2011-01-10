@@ -234,7 +234,9 @@ struct OMXCodecObserver : public BnOMXObserver {
         sp<OMXCodec> codec = mTarget.promote();
 
         if (codec.get() != NULL) {
+            Mutex::Autolock autoLock(codec->mLock);
             codec->on_message(msg);
+            codec.clear();
         }
     }
 
@@ -1672,8 +1674,6 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
 }
 
 void OMXCodec::on_message(const omx_message &msg) {
-    Mutex::Autolock autoLock(mLock);
-
     switch (msg.type) {
         case omx_message::EVENT:
         {
