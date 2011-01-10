@@ -16,11 +16,10 @@
 
 package android.util;
 
-import java.util.Arrays;
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Arrays;
+import junit.framework.TestCase;
 
 public final class JsonReaderTest extends TestCase {
 
@@ -677,7 +676,7 @@ public final class JsonReaderTest extends TestCase {
         try {
             reader.nextString();
             fail();
-        } catch (IOException expected) {
+        } catch (MalformedJsonException expected) {
         }
     }
 
@@ -810,5 +809,51 @@ public final class JsonReaderTest extends TestCase {
         reader.nextNull();
         reader.nextNull();
         reader.endArray();
+    }
+
+    public void testStrictMultipleTopLevelValues() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[] []"));
+        reader.beginArray();
+        reader.endArray();
+        try {
+            reader.peek();
+            fail();
+        } catch (IOException expected) {
+        }
+    }
+
+    public void testLenientMultipleTopLevelValues() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[] true {}"));
+        reader.setLenient(true);
+        reader.beginArray();
+        reader.endArray();
+        assertEquals(true, reader.nextBoolean());
+        reader.beginObject();
+        reader.endObject();
+        assertEquals(JsonToken.END_DOCUMENT, reader.peek());
+    }
+
+    public void testStrictTopLevelValueType() {
+        JsonReader reader = new JsonReader(new StringReader("true"));
+        try {
+            reader.nextBoolean();
+            fail();
+        } catch (IOException expected) {
+        }
+    }
+
+    public void testLenientTopLevelValueType() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("true"));
+        reader.setLenient(true);
+        assertEquals(true, reader.nextBoolean());
+    }
+
+    public void testStrictNonExecutePrefix() {
+        JsonReader reader = new JsonReader(new StringReader(")]}'\n []"));
+        try {
+            reader.beginArray();
+            fail();
+        } catch (IOException expected) {
+        }
     }
 }

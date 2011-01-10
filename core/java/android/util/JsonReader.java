@@ -16,6 +16,7 @@
 
 package android.util;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Closeable;
@@ -249,6 +250,13 @@ public final class JsonReader implements Closeable {
     }
 
     /**
+     * Returns true if this parser is liberal in what it accepts.
+     */
+    public boolean isLenient() {
+        return lenient;
+    }
+
+    /**
      * Consumes the next token from the JSON stream and asserts that it is the
      * beginning of a new array.
      */
@@ -311,7 +319,7 @@ public final class JsonReader implements Closeable {
             case EMPTY_DOCUMENT:
                 replaceTop(JsonScope.NONEMPTY_DOCUMENT);
                 JsonToken firstToken = nextValue();
-                if (token != JsonToken.BEGIN_ARRAY && token != JsonToken.BEGIN_OBJECT) {
+                if (!lenient && token != JsonToken.BEGIN_ARRAY && token != JsonToken.BEGIN_OBJECT) {
                     throw new IOException(
                             "Expected JSON document to start with '[' or '{' but was " + token);
                 }
@@ -327,7 +335,15 @@ public final class JsonReader implements Closeable {
             case NONEMPTY_OBJECT:
                 return nextInObject(false);
             case NONEMPTY_DOCUMENT:
-                return token = JsonToken.END_DOCUMENT;
+                try {
+                    JsonToken token = nextValue();
+                    if (lenient) {
+                        return token;
+                    }
+                    throw syntaxError("Expected EOF");
+                } catch (EOFException e) {
+                    return token = JsonToken.END_DOCUMENT; // TODO: avoid throwing here?
+                }
             case CLOSED:
                 throw new IllegalStateException("JsonReader is closed");
             default:
@@ -758,7 +774,7 @@ public final class JsonReader implements Closeable {
             }
         }
 
-        throw syntaxError("End of input");
+        throw new EOFException("End of input");
     }
 
     private void checkLenient() throws IOException {
@@ -1030,8 +1046,6 @@ public final class JsonReader implements Closeable {
      * form -12.34e+56. Fractional and exponential parts are optional. Leading
      * zeroes are not allowed in the value or exponential part, but are allowed
      * in the fraction.
-     *
-     * <p>This has a side effect of setting isInteger.
      */
     private JsonToken decodeNumber(char[] chars, int offset, int length) {
         int i = offset;
@@ -1085,8 +1099,8 @@ public final class JsonReader implements Closeable {
      * Throws a new IO exception with the given message and a context snippet
      * with this reader's content.
      */
-    public IOException syntaxError(String message) throws IOException {
-        throw new JsonSyntaxException(message + " near " + getSnippet());
+    private IOException syntaxError(String message) throws IOException {
+        throw new MalformedJsonException(message + " near " + getSnippet());
     }
 
     private CharSequence getSnippet() {
@@ -1096,11 +1110,5 @@ public final class JsonReader implements Closeable {
         int afterPos = Math.min(limit - pos, 20);
         snippet.append(buffer, pos, afterPos);
         return snippet;
-    }
-
-    private static class JsonSyntaxException extends IOException {
-        private JsonSyntaxException(String s) {
-            super(s);
-        }
     }
 }
