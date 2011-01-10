@@ -18,7 +18,6 @@ package android.widget;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -407,7 +406,10 @@ class FastScroller {
         // Are there enough pages to require fast scroll? Recompute only if total count changes
         if (mItemCount != totalItemCount && visibleItemCount > 0) {
             mItemCount = totalItemCount;
-            mLongList = mAlwaysShow || mItemCount / visibleItemCount >= MIN_PAGES;
+            mLongList = mItemCount / visibleItemCount >= MIN_PAGES;
+        }
+        if (mAlwaysShow) {
+            mLongList = true;
         }
         if (!mLongList) {
             if (mState != STATE_NONE) {
@@ -416,8 +418,8 @@ class FastScroller {
             return;
         }
         if (totalItemCount - visibleItemCount > 0 && mState != STATE_DRAGGING ) {
-            mThumbY = ((mList.getHeight() - mThumbH) * firstVisibleItem) 
-                    / (totalItemCount - visibleItemCount);
+            mThumbY = getThumbPositionForListPosition(firstVisibleItem, visibleItemCount,
+                    totalItemCount);
             if (mChangedBounds) {
                 resetThumbPos();
                 mChangedBounds = false;
@@ -577,6 +579,49 @@ class FastScroller {
         } else {
             mDrawOverlay = false;
         }
+    }
+
+    private int getThumbPositionForListPosition(int firstVisibleItem, int visibleItemCount,
+            int totalItemCount) {
+        if (mSectionIndexer == null) {
+            getSectionsFromIndexer();
+        }
+        if (mSectionIndexer == null) {
+            return ((mList.getHeight() - mThumbH) * firstVisibleItem)
+                    / (totalItemCount - visibleItemCount);
+        }
+
+        firstVisibleItem -= mListOffset;
+        if (firstVisibleItem < 0) {
+            return 0;
+        }
+        totalItemCount -= mListOffset;
+
+        final int trackHeight = mList.getHeight() - mThumbH;
+
+        final int section = mSectionIndexer.getSectionForPosition(firstVisibleItem);
+        final int sectionPos = mSectionIndexer.getPositionForSection(section);
+        final int nextSectionPos = mSectionIndexer.getPositionForSection(section + 1);
+        final int sectionCount = mSectionIndexer.getSections().length;
+        final int positionsInSection = nextSectionPos - sectionPos;
+
+        final View child = mList.getChildAt(0);
+        final float incrementalPos = firstVisibleItem +
+                (float) (mList.getPaddingTop() - child.getTop()) / child.getHeight();
+        final float posWithinSection = (incrementalPos - sectionPos) / positionsInSection;
+        int result = (int) ((section + posWithinSection) / sectionCount * trackHeight);
+
+        // Fake out the scrollbar for the last item. Since the section indexer won't
+        // ever actually move the list in this end space, make scrolling across the last item
+        // account for whatever space is remaining.
+        if (firstVisibleItem > 0 && firstVisibleItem + visibleItemCount == totalItemCount) {
+            final View lastChild = mList.getChildAt(visibleItemCount - 1);
+            final float lastItemVisible = (float) (mList.getHeight() - mList.getPaddingBottom()
+                    - lastChild.getTop()) / lastChild.getHeight();
+            result += (trackHeight - result) * lastItemVisible;
+        }
+
+        return result;
     }
 
     private void cancelFling() {
