@@ -66,6 +66,7 @@ public class RSTestCore {
 
         unitTests.add(new UT_primitives(this, mRes, mCtx));
         unitTests.add(new UT_rsdebug(this, mRes, mCtx));
+        unitTests.add(new UT_rstime(this, mRes, mCtx));
         unitTests.add(new UT_rstypes(this, mRes, mCtx));
         unitTests.add(new UT_fp_mad(this, mRes, mCtx));
         /*
