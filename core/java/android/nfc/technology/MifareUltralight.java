@@ -26,13 +26,13 @@ import android.os.RemoteException;
 /**
  * Concrete class for TagTechnology.MIFARE_ULTRALIGHT
  *
- * Mifare classic has n sectors, with varying sizes, although
- * they are at least the same pattern for any one mifare classic
+ * MIFARE Ultralight has n sectors, with varying sizes, although
+ * they are at least the same pattern for any one MIFARE Ultralight
  * product. Each sector has two keys. Authentication with the correct
  * key is needed before access to any sector.
  *
  * Each sector has k blocks.
- * Block size is constant across the whole mifare classic family.
+ * Block size is constant across the whole MIFARE Ultralight family.
  */
 public final class MifareUltralight extends BasicTagTechnology {
     public static final int TYPE_ULTRALIGHT = 1;
