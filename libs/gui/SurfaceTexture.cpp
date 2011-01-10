@@ -34,6 +34,46 @@
 
 namespace android {
 
+// Transform matrices
+static float mtxIdentity[16] = {
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1,
+};
+static float mtxFlipH[16] = {
+    -1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    1, 0, 0, 1,
+};
+static float mtxFlipV[16] = {
+    1, 0, 0, 0,
+    0, -1, 0, 0,
+    0, 0, 1, 0,
+    0, 1, 0, 1,
+};
+static float mtxRot90[16] = {
+    0, 1, 0, 0,
+    -1, 0, 0, 0,
+    0, 0, 1, 0,
+    1, 0, 0, 1,
+};
+static float mtxRot180[16] = {
+    -1, 0, 0, 0,
+    0, -1, 0, 0,
+    0, 0, 1, 0,
+    1, 1, 0, 1,
+};
+static float mtxRot270[16] = {
+    0, -1, 0, 0,
+    1, 0, 0, 0,
+    0, 0, 1, 0,
+    0, 1, 0, 1,
+};
+
+static void mtxMul(float out[16], const float a[16], const float b[16]);
+
 SurfaceTexture::SurfaceTexture(GLuint tex) :
     mBufferCount(MIN_BUFFER_SLOTS), mCurrentTexture(INVALID_BUFFER_SLOT),
     mLastQueued(INVALID_BUFFER_SLOT), mTexName(tex) {
@@ -121,6 +161,8 @@ status_t SurfaceTexture::queueBuffer(int buf) {
     }
     mSlots[buf].mOwnedByClient = false;
     mLastQueued = buf;
+    mLastQueuedCrop = mNextCrop;
+    mLastQueuedTransform = mNextTransform;
     return OK;
 }
 
@@ -138,17 +180,17 @@ void SurfaceTexture::cancelBuffer(int buf) {
     mSlots[buf].mOwnedByClient = false;
 }
 
-status_t SurfaceTexture::setCrop(const Rect& reg) {
+status_t SurfaceTexture::setCrop(const Rect& crop) {
     LOGV("SurfaceTexture::setCrop");
     Mutex::Autolock lock(mMutex);
-    // XXX: How should we handle crops?
+    mNextCrop = crop;
     return OK;
 }
 
 status_t SurfaceTexture::setTransform(uint32_t transform) {
     LOGV("SurfaceTexture::setTransform");
     Mutex::Autolock lock(mMutex);
-    // XXX: How should we handle transforms?
+    mNextTransform = transform;
     return OK;
 }
 
@@ -162,8 +204,12 @@ status_t SurfaceTexture::updateTexImage() {
     // Initially both mCurrentTexture and mLastQueued are INVALID_BUFFER_SLOT,
     // so this check will fail until a buffer gets queued.
     if (mCurrentTexture != mLastQueued) {
-        // XXX: Figure out the right target.
+        // Update the SurfaceTexture state.
         mCurrentTexture = mLastQueued;
+        mCurrentCrop = mLastQueuedCrop;
+        mCurrentTransform = mLastQueuedTransform;
+
+        // Update the GL texture object.
         EGLImageKHR image = mSlots[mCurrentTexture].mEglImage;
         if (image == EGL_NO_IMAGE_KHR) {
             EGLDisplay dpy = eglGetCurrentDisplay();
@@ -181,6 +227,49 @@ status_t SurfaceTexture::updateTexImage() {
         }
     }
     return OK;
+}
+
+void SurfaceTexture::getTransformMatrix(float mtx[16]) {
+    LOGV("SurfaceTexture::updateTexImage");
+    Mutex::Autolock lock(mMutex);
+
+    float* xform = mtxIdentity;
+    switch (mCurrentTransform) {
+        case 0:
+            xform = mtxIdentity;
+            break;
+        case NATIVE_WINDOW_TRANSFORM_FLIP_H:
+            xform = mtxFlipH;
+            break;
+        case NATIVE_WINDOW_TRANSFORM_FLIP_V:
+            xform = mtxFlipV;
+            break;
+        case NATIVE_WINDOW_TRANSFORM_ROT_90:
+            xform = mtxRot90;
+            break;
+        case NATIVE_WINDOW_TRANSFORM_ROT_180:
+            xform = mtxRot180;
+            break;
+        case NATIVE_WINDOW_TRANSFORM_ROT_270:
+            xform = mtxRot270;
+            break;
+        default:
+            LOGE("getTransformMatrix: unknown transform: %d", mCurrentTransform);
+    }
+
+    sp<GraphicBuffer>& buf(mSlots[mCurrentTexture].mGraphicBuffer);
+    float tx = float(mCurrentCrop.left) / float(buf->getWidth());
+    float ty = float(mCurrentCrop.bottom) / float(buf->getHeight());
+    float sx = float(mCurrentCrop.width()) / float(buf->getWidth());
+    float sy = float(mCurrentCrop.height()) / float(buf->getHeight());
+    float crop[16] = {
+        sx, 0, 0, sx*tx,
+        0, sy, 0, sy*ty,
+        0, 0, 1, 0,
+        0, 0, 0, 1,
+    };
+
+    mtxMul(mtx, crop, xform);
 }
 
 void SurfaceTexture::freeAllBuffers() {
@@ -212,6 +301,28 @@ EGLImageKHR SurfaceTexture::createImage(EGLDisplay dpy,
                 "eglCreateImageKHR");
     }
     return image;
+}
+
+static void mtxMul(float out[16], const float a[16], const float b[16]) {
+    out[0] = a[0]*b[0] + a[4]*b[1] + a[8]*b[2] + a[12]*b[3];
+    out[1] = a[1]*b[0] + a[5]*b[1] + a[9]*b[2] + a[13]*b[3];
+    out[2] = a[2]*b[0] + a[6]*b[1] + a[10]*b[2] + a[14]*b[3];
+    out[3] = a[3]*b[0] + a[7]*b[1] + a[11]*b[2] + a[15]*b[3];
+
+    out[4] = a[0]*b[4] + a[4]*b[5] + a[8]*b[6] + a[12]*b[7];
+    out[5] = a[1]*b[4] + a[5]*b[5] + a[9]*b[6] + a[13]*b[7];
+    out[6] = a[2]*b[4] + a[6]*b[5] + a[10]*b[6] + a[14]*b[7];
+    out[7] = a[3]*b[4] + a[7]*b[5] + a[11]*b[6] + a[15]*b[7];
+
+    out[8] = a[0]*b[8] + a[4]*b[9] + a[8]*b[10] + a[12]*b[11];
+    out[9] = a[1]*b[8] + a[5]*b[9] + a[9]*b[10] + a[13]*b[11];
+    out[10] = a[2]*b[8] + a[6]*b[9] + a[10]*b[10] + a[14]*b[11];
+    out[11] = a[3]*b[8] + a[7]*b[9] + a[11]*b[10] + a[15]*b[11];
+
+    out[12] = a[0]*b[12] + a[4]*b[13] + a[8]*b[14] + a[12]*b[15];
+    out[13] = a[1]*b[12] + a[5]*b[13] + a[9]*b[14] + a[13]*b[15];
+    out[14] = a[2]*b[12] + a[6]*b[13] + a[10]*b[14] + a[14]*b[15];
+    out[15] = a[3]*b[12] + a[7]*b[13] + a[11]*b[14] + a[15]*b[15];
 }
 
 }; // namespace android

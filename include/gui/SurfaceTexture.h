@@ -70,6 +70,26 @@ public:
     // target texture belongs is bound to the calling thread.
     status_t updateTexImage();
 
+    // getTransformMatrix retrieves the 4x4 texture coordinate transform matrix
+    // associated with the texture image set by the most recent call to
+    // updateTexImage.
+    //
+    // This transform matrix maps 2D homogeneous texture coordinates of the form
+    // (s, t, 0, 1) with s and t in the inclusive range [0, 1] to the texture
+    // coordinate that should be used to sample that location from the texture.
+    // Sampling the texture outside of the range of this transform is undefined.
+    //
+    // This transform is necessary to compensate for transforms that the stream
+    // content producer may implicitly apply to the content. By forcing users of
+    // a SurfaceTexture to apply this transform we avoid performing an extra
+    // copy of the data that would be needed to hide the transform from the
+    // user.
+    //
+    // The matrix is stored in column-major order so that it may be passed
+    // directly to OpenGL ES via the glLoadMatrixf or glUniformMatrix4fv
+    // functions.
+    void getTransformMatrix(float mtx[16]);
+
 private:
 
     // freeAllBuffers frees the resources (both GraphicBuffer and EGLImage) for
@@ -120,10 +140,36 @@ private:
     // reset mCurrentTexture to INVALID_BUFFER_SLOT.
     int mCurrentTexture;
 
+    // mCurrentCrop is the crop rectangle that applies to the current texture.
+    // It gets set to mLastQueuedCrop each time updateTexImage is called.
+    Rect mCurrentCrop;
+
+    // mCurrentTransform is the transform identifier for the current texture. It
+    // gets set to mLastQueuedTransform each time updateTexImage is called.
+    uint32_t mCurrentTransform;
+
     // mLastQueued is the buffer slot index of the most recently enqueued buffer.
     // At construction time it is initialized to INVALID_BUFFER_SLOT, and is
     // updated each time queueBuffer is called.
     int mLastQueued;
+
+    // mLastQueuedCrop is the crop rectangle for the buffer that was most
+    // recently queued. This gets set to mNextCrop each time queueBuffer gets
+    // called.
+    Rect mLastQueuedCrop;
+
+    // mLastQueuedTransform is the transform identifier for the buffer that was
+    // most recently queued. This gets set to mNextTransform each time
+    // queueBuffer gets called.
+    uint32_t mLastQueuedTransform;
+
+    // mNextCrop is the crop rectangle that will be used for the next buffer
+    // that gets queued. It is set by calling setCrop.
+    Rect mNextCrop;
+
+    // mNextTransform is the transform identifier that will be used for the next
+    // buffer that gets queued. It is set by calling setTransform.
+    uint32_t mNextTransform;
 
     // mTexName is the name of the OpenGL texture to which streamed images will
     // be bound when updateTexImage is called. It is set at construction time 
