@@ -28,7 +28,7 @@ import android.os.Handler_Delegate;
 import android.os.Message;
 import android.os.Handler_Delegate.IHandlerCallback;
 
-import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Queue;
 
 /**
@@ -45,7 +45,7 @@ import java.util.Queue;
  */
 public abstract class AnimationThread extends Thread {
 
-    private static class MessageBundle {
+    private static class MessageBundle implements Comparable<MessageBundle> {
         final Handler mTarget;
         final Message mMessage;
         final long mUptimeMillis;
@@ -55,11 +55,18 @@ public abstract class AnimationThread extends Thread {
             mMessage = message;
             mUptimeMillis = uptimeMillis;
         }
+
+        public int compareTo(MessageBundle bundle) {
+            if (mUptimeMillis < bundle.mUptimeMillis) {
+                return -1;
+            }
+            return 1;
+        }
     }
 
     private final RenderSessionImpl mSession;
 
-    private Queue<MessageBundle> mQueue = new LinkedList<MessageBundle>();
+    private Queue<MessageBundle> mQueue = new PriorityQueue<MessageBundle>();
     private final IAnimationListener mListener;
 
     public AnimationThread(RenderSessionImpl scene, String threadName,
