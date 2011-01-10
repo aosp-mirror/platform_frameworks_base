@@ -22,7 +22,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.renderscript.*;
-import android.renderscript.Allocation.CubemapLayout;
 import android.renderscript.Allocation.MipmapControl;
 import android.renderscript.Program.TextureType;
 import android.renderscript.ProgramStore.DepthFunc;
@@ -318,8 +317,7 @@ public class RsBenchRS {
         mTexTransparent = loadTextureARGB(R.drawable.leaf);
         mTexChecker = loadTextureRGB(R.drawable.checker);
         Bitmap b = BitmapFactory.decodeResource(mRes, R.drawable.cubemap_test);
-        mTexCube = Allocation.createCubemapFromBitmap(mRS, b,
-                                                      Allocation.CubemapLayout.VERTICAL_FACE_LIST);
+        mTexCube = Allocation.createCubemapFromBitmap(mRS, b);
 
         mScript.set_gTexTorus(mTexTorus);
         mScript.set_gTexOpaque(mTexOpaque);

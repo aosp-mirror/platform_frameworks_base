@@ -53,19 +53,6 @@ public class Allocation extends BaseObj {
     public static final int USAGE_GRAPHICS_CONSTANTS = 0x0008;
 
 
-    public enum CubemapLayout {
-        VERTICAL_FACE_LIST (0),
-        HORIZONTAL_FACE_LIST (1),
-        VERTICAL_CROSS (2),
-        HORIZONTAL_CROSS (3);
-
-        int mID;
-        CubemapLayout(int id) {
-            mID = id;
-        }
-    }
-
-
     public enum MipmapControl {
         MIPMAP_NONE(0),
         MIPMAP_FULL(1),
@@ -416,33 +403,41 @@ public class Allocation extends BaseObj {
                                 USAGE_GRAPHICS_TEXTURE);
     }
 
+    /**
+    * Creates a cubemap allocation from a bitmap containing the
+    * horizontal list of cube faces. Each individual face must be
+    * the same size and power of 2
+    *
+    * @param rs
+    * @param b bitmap with cubemap faces layed out in the following
+    *          format: right, left, top, bottom, front, back
+    * @param mips specifies desired mipmap behaviour for the cubemap
+    * @param usage bitfield specifying how the cubemap is utilized
+    *
+    **/
     static public Allocation createCubemapFromBitmap(RenderScript rs, Bitmap b,
                                                      MipmapControl mips,
-                                                     CubemapLayout layout,
                                                      int usage) {
         rs.validate();
 
         int height = b.getHeight();
         int width = b.getWidth();
 
-        if (layout != CubemapLayout.VERTICAL_FACE_LIST) {
-            throw new RSIllegalArgumentException("Only vertical face list supported");
-        }
-        if (height % 6 != 0) {
+        if (width % 6 != 0) {
             throw new RSIllegalArgumentException("Cubemap height must be multiple of 6");
         }
-        if (height / 6 != width) {
+        if (width / 6 != height) {
             throw new RSIllegalArgumentException("Only square cobe map faces supported");
         }
-        boolean isPow2 = (width & (width - 1)) == 0;
+        boolean isPow2 = (height & (height - 1)) == 0;
         if (!isPow2) {
             throw new RSIllegalArgumentException("Only power of 2 cube faces supported");
         }
 
         Element e = elementFromBitmap(rs, b);
         Type.Builder tb = new Type.Builder(rs, e);
-        tb.setX(width);
-        tb.setY(width);
+        tb.setX(height);
+        tb.setY(height);
         tb.setFaces(true);
         tb.setMipmaps(mips == MipmapControl.MIPMAP_FULL);
         Type t = tb.create();
@@ -454,10 +449,9 @@ public class Allocation extends BaseObj {
         return new Allocation(id, rs, t, usage);
     }
 
-    static public Allocation createCubemapFromBitmap(RenderScript rs, Bitmap b,
-                                                     CubemapLayout layout) {
+    static public Allocation createCubemapFromBitmap(RenderScript rs, Bitmap b) {
         return createCubemapFromBitmap(rs, b, MipmapControl.MIPMAP_NONE,
-                                       layout, USAGE_GRAPHICS_TEXTURE);
+                                       USAGE_GRAPHICS_TEXTURE);
     }
 
     static public Allocation createFromBitmapResource(RenderScript rs,
