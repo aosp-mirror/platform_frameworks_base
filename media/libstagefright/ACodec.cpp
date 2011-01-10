@@ -299,7 +299,8 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 ACodec::ACodec()
-    : mNode(NULL) {
+    : mNode(NULL),
+      mSentFormat(false) {
     mUninitializedState = new UninitializedState(this);
     mLoadedToIdleState = new LoadedToIdleState(this);
     mIdleToExecutingState = new IdleToExecutingState(this);
@@ -980,6 +981,103 @@ void ACodec::processDeferredMessages() {
     }
 }
 
+void ACodec::sendFormatChange() {
+    sp<AMessage> notify = mNotify->dup();
+    notify->setInt32("what", kWhatOutputFormatChanged);
+
+    OMX_PARAM_PORTDEFINITIONTYPE def;
+    InitOMXParams(&def);
+    def.nPortIndex = kPortIndexOutput;
+
+    CHECK_EQ(mOMX->getParameter(
+                mNode, OMX_IndexParamPortDefinition, &def, sizeof(def)),
+             (status_t)OK);
+
+    CHECK_EQ((int)def.eDir, (int)OMX_DirOutput);
+
+    switch (def.eDomain) {
+        case OMX_PortDomainVideo:
+        {
+            OMX_VIDEO_PORTDEFINITIONTYPE *videoDef = &def.format.video;
+
+            notify->setString("mime", MEDIA_MIMETYPE_VIDEO_RAW);
+            notify->setInt32("width", videoDef->nFrameWidth);
+            notify->setInt32("height", videoDef->nFrameHeight);
+
+            OMX_CONFIG_RECTTYPE rect;
+            InitOMXParams(&rect);
+            rect.nPortIndex = kPortIndexOutput;
+
+            if (mOMX->getConfig(
+                        mNode, OMX_IndexConfigCommonOutputCrop,
+                        &rect, sizeof(rect)) != OK) {
+                rect.nLeft = 0;
+                rect.nTop = 0;
+                rect.nWidth = videoDef->nFrameWidth;
+                rect.nHeight = videoDef->nFrameHeight;
+            }
+
+            CHECK_GE(rect.nLeft, 0);
+            CHECK_GE(rect.nTop, 0);
+            CHECK_GE(rect.nWidth, 0u);
+            CHECK_GE(rect.nHeight, 0u);
+            CHECK_LE(rect.nLeft + rect.nWidth - 1, videoDef->nFrameWidth);
+            CHECK_LE(rect.nTop + rect.nHeight - 1, videoDef->nFrameHeight);
+
+            notify->setRect(
+                    "crop",
+                    rect.nLeft,
+                    rect.nTop,
+                    rect.nLeft + rect.nWidth - 1,
+                    rect.nTop + rect.nHeight - 1);
+
+            if (mNativeWindow != NULL) {
+                android_native_rect_t crop;
+                crop.left = rect.nLeft;
+                crop.top = rect.nTop;
+                crop.right = rect.nLeft + rect.nWidth - 1;
+                crop.bottom = rect.nTop + rect.nHeight - 1;
+
+                CHECK_EQ(0, native_window_set_crop(
+                            mNativeWindow.get(), &crop));
+            }
+            break;
+        }
+
+        case OMX_PortDomainAudio:
+        {
+            OMX_AUDIO_PORTDEFINITIONTYPE *audioDef = &def.format.audio;
+            CHECK_EQ((int)audioDef->eEncoding, (int)OMX_AUDIO_CodingPCM);
+
+            OMX_AUDIO_PARAM_PCMMODETYPE params;
+            InitOMXParams(&params);
+            params.nPortIndex = kPortIndexOutput;
+
+            CHECK_EQ(mOMX->getParameter(
+                        mNode, OMX_IndexParamAudioPcm,
+                        &params, sizeof(params)),
+                     (status_t)OK);
+
+            CHECK(params.nChannels == 1 || params.bInterleaved);
+            CHECK_EQ(params.nBitPerSample, 16u);
+            CHECK_EQ((int)params.eNumData, (int)OMX_NumericalDataSigned);
+            CHECK_EQ((int)params.ePCMMode, (int)OMX_AUDIO_PCMModeLinear);
+
+            notify->setString("mime", MEDIA_MIMETYPE_AUDIO_RAW);
+            notify->setInt32("channel-count", params.nChannels);
+            notify->setInt32("sample-rate", params.nSamplingRate);
+            break;
+        }
+
+        default:
+            TRESPASS();
+    }
+
+    notify->post();
+
+    mSentFormat = true;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 ACodec::BaseState::BaseState(ACodec *codec, const sp<AState> &parentState)
@@ -1305,6 +1403,10 @@ bool ACodec::BaseState::onOMXFillBufferDone(
                     info->mStatus = BufferInfo::OWNED_BY_COMPONENT;
                 }
             } else {
+                if (!mCodec->mSentFormat) {
+                    mCodec->sendFormatChange();
+                }
+
                 if (mCodec->mNativeWindow == NULL) {
                     info->mData->setRange(rangeOffset, rangeLength);
                 }
@@ -1717,7 +1819,7 @@ bool ACodec::ExecutingState::onOMXEvent(
         {
             CHECK_EQ(data1, (OMX_U32)kPortIndexOutput);
 
-            if (data2 == OMX_IndexParamPortDefinition) {
+            if (data2 == 0 || data2 == OMX_IndexParamPortDefinition) {
                 CHECK_EQ(mCodec->mOMX->sendCommand(
                             mCodec->mNode,
                             OMX_CommandPortDisable, kPortIndexOutput),
@@ -1729,6 +1831,8 @@ bool ACodec::ExecutingState::onOMXEvent(
                 }
 
                 mCodec->changeState(mCodec->mOutputPortSettingsChangedState);
+            } else if (data2 == OMX_IndexConfigCommonOutputCrop) {
+                mCodec->mSentFormat = false;
             } else {
                 LOGV("[%s] OMX_EventPortSettingsChanged 0x%08lx",
                      mCodec->mComponentName.c_str(), data2);
@@ -1816,6 +1920,8 @@ bool ACodec::OutputPortSettingsChangedState::onOMXEvent(
             } else if (data1 == (OMX_U32)OMX_CommandPortEnable) {
                 CHECK_EQ(data2, (OMX_U32)kPortIndexOutput);
 
+                mCodec->mSentFormat = false;
+
                 LOGV("[%s] Output port now reenabled.",
                         mCodec->mComponentName.c_str());
 
@@ -1869,6 +1975,8 @@ bool ACodec::ExecutingToIdleState::onMessageReceived(const sp<AMessage> &msg) {
 
 void ACodec::ExecutingToIdleState::stateEntered() {
     LOGV("[%s] Now Executing->Idle", mCodec->mComponentName.c_str());
+
+    mCodec->mSentFormat = false;
 }
 
 bool ACodec::ExecutingToIdleState::onOMXEvent(
