@@ -1149,4 +1149,11 @@ public class ActivityManager {
         }
         return false;
     }
+
+    /**
+     * Returns "true" if device is running in a test harness.
+     */
+    public static boolean isRunningInTestHarness() {
+        return SystemProperties.getBoolean("ro.test_harness", false);
+    }
 }
