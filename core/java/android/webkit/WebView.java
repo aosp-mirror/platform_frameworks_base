@@ -823,6 +823,11 @@ public class WebView extends AbsoluteLayout
     private static final long SELECT_SCROLL_INTERVAL = 1000 / 60; // 60 / second
     private int mAutoScrollX = 0;
     private int mAutoScrollY = 0;
+    private int mMinAutoScrollX = 0;
+    private int mMaxAutoScrollX = 0;
+    private int mMinAutoScrollY = 0;
+    private int mMaxAutoScrollY = 0;
+    private Rect mScrollingLayerBounds = new Rect();
     private boolean mSentAutoScrollMessage = false;
 
     // Used to notify listeners of a new picture.
@@ -4837,6 +4842,31 @@ public class WebView extends AbsoluteLayout
             selectionDone();
             return false;
         }
+        mMinAutoScrollX = 0;
+        mMaxAutoScrollX = getViewWidth();
+        mMinAutoScrollY = 0;
+        mMaxAutoScrollY = getViewHeightWithTitle();
+        mScrollingLayer = nativeScrollableLayer(viewToContentX(mSelectX),
+                viewToContentY(mSelectY), mScrollingLayerRect,
+                mScrollingLayerBounds);
+        if (mScrollingLayer != 0) {
+            if (mScrollingLayerRect.left != mScrollingLayerRect.right) {
+                mMinAutoScrollX = Math.max(mMinAutoScrollX,
+                        contentToViewX(mScrollingLayerBounds.left));
+                mMaxAutoScrollX = Math.min(mMaxAutoScrollX,
+                        contentToViewX(mScrollingLayerBounds.right));
+            }
+            if (mScrollingLayerRect.top != mScrollingLayerRect.bottom) {
+                mMinAutoScrollY = Math.max(mMinAutoScrollY,
+                        contentToViewY(mScrollingLayerBounds.top));
+                mMaxAutoScrollY = Math.min(mMaxAutoScrollY,
+                        contentToViewY(mScrollingLayerBounds.bottom));
+            }
+        }
+        mMinAutoScrollX += SELECT_SCROLL;
+        mMaxAutoScrollX -= SELECT_SCROLL;
+        mMinAutoScrollY += SELECT_SCROLL;
+        mMaxAutoScrollY -= SELECT_SCROLL;
         return true;
     }
 
@@ -5252,7 +5282,7 @@ public class WebView extends AbsoluteLayout
         int contentX = viewToContentX((int) x + mScrollX);
         int contentY = viewToContentY((int) y + mScrollY);
         mScrollingLayer = nativeScrollableLayer(contentX, contentY,
-                mScrollingLayerRect);
+                mScrollingLayerRect, mScrollingLayerBounds);
         if (mScrollingLayer != 0) {
             mTouchMode = TOUCH_DRAG_LAYER_MODE;
         }
@@ -5529,21 +5559,15 @@ public class WebView extends AbsoluteLayout
                     if (parent != null) {
                         parent.requestDisallowInterceptTouchEvent(true);
                     }
-                    int layer = nativeScrollableLayer(contentX, contentY, mScrollingLayerRect);
-                    if (layer == 0) {
-                        mAutoScrollX = x <= SELECT_SCROLL ? -SELECT_SCROLL
-                            : x >= getViewWidth() - SELECT_SCROLL
-                            ? SELECT_SCROLL : 0;
-                        mAutoScrollY = y <= SELECT_SCROLL ? -SELECT_SCROLL
-                            : y >= getViewHeightWithTitle() - SELECT_SCROLL
-                            ? SELECT_SCROLL : 0;
-                        if (!mSentAutoScrollMessage) {
-                            mSentAutoScrollMessage = true;
-                            mPrivateHandler.sendEmptyMessageDelayed(
-                                    SCROLL_SELECT_TEXT, SELECT_SCROLL_INTERVAL);
-                        }
-                    } else {
-                        // TODO: allow scrollable overflow div to autoscroll
+                    mAutoScrollX = x <= mMinAutoScrollX ? -SELECT_SCROLL
+                            : x >= mMaxAutoScrollX ? SELECT_SCROLL : 0;
+                    mAutoScrollY = y <= mMinAutoScrollY ? -SELECT_SCROLL
+                            : y >= mMaxAutoScrollY ? SELECT_SCROLL : 0;
+                    if ((mAutoScrollX != 0 || mAutoScrollY != 0)
+                            && !mSentAutoScrollMessage) {
+                        mSentAutoScrollMessage = true;
+                        mPrivateHandler.sendEmptyMessageDelayed(
+                                SCROLL_SELECT_TEXT, SELECT_SCROLL_INTERVAL);
                     }
                     if (deltaX != 0 || deltaY != 0) {
                         nativeExtendSelection(contentX, contentY);
@@ -5691,6 +5715,9 @@ public class WebView extends AbsoluteLayout
                     mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                 }
                 mLastTouchUpTime = eventTime;
+                if (mSentAutoScrollMessage) {
+                    mAutoScrollX = mAutoScrollY = 0;
+                }
                 switch (mTouchMode) {
                     case TOUCH_DOUBLE_TAP_MODE: // double tap
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
@@ -6938,7 +6965,16 @@ public class WebView extends AbsoluteLayout
                         mSentAutoScrollMessage = false;
                         break;
                     }
-                    pinScrollBy(mAutoScrollX, mAutoScrollY, true, 0);
+                    if (mScrollingLayer == 0) {
+                        pinScrollBy(mAutoScrollX, mAutoScrollY, true, 0);
+                    } else {
+                        mScrollingLayerRect.left += mAutoScrollX;
+                        mScrollingLayerRect.top += mAutoScrollY;
+                        nativeScrollLayer(mScrollingLayer,
+                                mScrollingLayerRect.left,
+                                mScrollingLayerRect.top);
+                        invalidate();
+                    }
                     sendEmptyMessageDelayed(
                             SCROLL_SELECT_TEXT, SELECT_SCROLL_INTERVAL);
                     break;
@@ -8146,6 +8182,7 @@ public class WebView extends AbsoluteLayout
     native int nativeGetBlockLeftEdge(int x, int y, float scale);
 
     // Returns a pointer to the scrollable LayerAndroid at the given point.
-    private native int      nativeScrollableLayer(int x, int y, Rect scrollRect);
+    private native int      nativeScrollableLayer(int x, int y, Rect scrollRect,
+            Rect scrollBounds);
     private native boolean  nativeScrollLayer(int layer, int dx, int dy);
 }
