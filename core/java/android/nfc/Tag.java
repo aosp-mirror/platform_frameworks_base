@@ -45,7 +45,7 @@ import java.util.Arrays;
  * in {@link NfcAdapter#ACTION_TAG_DISCOVERED} intents. A {@link Tag} object is immutable
  * and represents the state of the tag at the time of discovery. It can be
  * directly queried for its UID and Type, or used to create a {@link TagTechnology}
- * (with {@link Tag#getTechnology}).
+ * (with {@link NfcAdapter#getTechnology}).
  * <p>
  * A {@link Tag} can  be used to create a {@link TagTechnology} only while the tag is in
  * range. If it is removed and then returned to range, then the most recent
@@ -84,7 +84,7 @@ public class Tag implements Parcelable {
     /**
      * Construct a mock Tag.
      * <p>This is an application constructed tag, so NfcAdapter methods on this
-     * Tag such as {@link #getTechnology} may fail with
+     * Tag such as {@link NfcAdapter#getTechnology} may fail with
      * {@link IllegalArgumentException} since it does not represent a physical Tag.
      * <p>This constructor might be useful for mock testing.
      * @param id The tag identifier, can be null
@@ -127,10 +127,7 @@ public class Tag implements Parcelable {
         return Arrays.copyOf(mTechList, mTechList.length);
     }
 
-    /**
-     * Returns the technology, or null if not present
-     */
-    public TagTechnology getTechnology(NfcAdapter adapter, int tech) {
+    /*package*/ TagTechnology getTechnology(NfcAdapter adapter, int tech) {
         int pos = -1;
         for (int idx = 0; idx < mTechList.length; idx++) {
           if (mTechList[idx] == tech) {

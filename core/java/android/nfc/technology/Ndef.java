@@ -31,7 +31,7 @@ import java.io.IOException;
  * to interact with NDEF data. MiFare Classic cards that present NDEF data may also be used
  * via this class. To determine the exact technology being used call {@link #getTechnologyId()}
  *
- * <p>You can acquire this kind of connection with {@link Tag#getTechnology}.
+ * <p>You can acquire this kind of connection with {@link NfcAdapter#getTechnology}.
  *
  * <p class="note"><strong>Note:</strong>
  * Use of this class requires the {@link android.Manifest.permission#NFC}
