@@ -16,10 +16,11 @@
 
 package android.util;
 
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import junit.framework.TestCase;
 
 public final class JsonWriterTest extends TestCase {
 
@@ -119,7 +120,7 @@ public final class JsonWriterTest extends TestCase {
         JsonWriter jsonWriter = new JsonWriter(stringWriter);
         jsonWriter.beginObject();
         jsonWriter.name("a");
-        jsonWriter.value(null);
+        jsonWriter.value((String) null);
         jsonWriter.endObject();
         assertEquals("{\"a\":null}", stringWriter.toString());
     }
@@ -140,6 +141,27 @@ public final class JsonWriterTest extends TestCase {
         }
         try {
             jsonWriter.value(Double.POSITIVE_INFINITY);
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    public void testNonFiniteBoxedDoubles() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        try {
+            jsonWriter.value(new Double(Double.NaN));
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+        try {
+            jsonWriter.value(new Double(Double.NEGATIVE_INFINITY));
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+        try {
+            jsonWriter.value(new Double(Double.POSITIVE_INFINITY));
             fail();
         } catch (IllegalArgumentException expected) {
         }
@@ -187,6 +209,22 @@ public final class JsonWriterTest extends TestCase {
                 + "-1,"
                 + "-9223372036854775808,"
                 + "9223372036854775807]", stringWriter.toString());
+    }
+
+    public void testNumbers() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(new BigInteger("0"));
+        jsonWriter.value(new BigInteger("9223372036854775808"));
+        jsonWriter.value(new BigInteger("-9223372036854775809"));
+        jsonWriter.value(new BigDecimal("3.141592653589793238462643383"));
+        jsonWriter.endArray();
+        jsonWriter.close();
+        assertEquals("[0,"
+                + "9223372036854775808,"
+                + "-9223372036854775809,"
+                + "3.141592653589793238462643383]", stringWriter.toString());
     }
 
     public void testBooleans() throws IOException {

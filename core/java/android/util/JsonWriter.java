@@ -138,6 +138,8 @@ public final class JsonWriter implements Closeable {
      */
     private String separator = ":";
 
+    private boolean lenient;
+
     /**
      * Creates a new instance that writes a JSON-encoded stream to {@code out}.
      * For best performance, ensure {@link Writer} is buffered; wrapping in
@@ -166,6 +168,29 @@ public final class JsonWriter implements Closeable {
             this.indent = indent;
             this.separator = ": ";
         }
+    }
+
+    /**
+     * Configure this writer to relax its syntax rules. By default, this writer
+     * only emits well-formed JSON as specified by <a
+     * href="http://www.ietf.org/rfc/rfc4627.txt">RFC 4627</a>. Setting the writer
+     * to lenient permits the following:
+     * <ul>
+     *   <li>Top-level values of any type. With strict writing, the top-level
+     *       value must be an object or an array.
+     *   <li>Numbers may be {@link Double#isNaN() NaNs} or {@link
+     *       Double#isInfinite() infinities}.
+     * </ul>
+     */
+    public void setLenient(boolean lenient) {
+        this.lenient = lenient;
+    }
+
+    /**
+     * Returns true if this writer has relaxed syntax rules.
+     */
+    public boolean isLenient() {
+        return lenient;
     }
 
     /**
@@ -306,11 +331,11 @@ public final class JsonWriter implements Closeable {
      * Encodes {@code value}.
      *
      * @param value a finite value. May not be {@link Double#isNaN() NaNs} or
-     *     {@link Double#isInfinite() infinities}.
+     *     {@link Double#isInfinite() infinities} unless this writer is lenient.
      * @return this writer.
      */
     public JsonWriter value(double value) throws IOException {
-        if (Double.isNaN(value) || Double.isInfinite(value)) {
+        if (!lenient && (Double.isNaN(value) || Double.isInfinite(value))) {
             throw new IllegalArgumentException("Numeric values must be finite, but was " + value);
         }
         beforeValue(false);
@@ -326,6 +351,28 @@ public final class JsonWriter implements Closeable {
     public JsonWriter value(long value) throws IOException {
         beforeValue(false);
         out.write(Long.toString(value));
+        return this;
+    }
+
+    /**
+     * Encodes {@code value}.
+     *
+     * @param value a finite value. May not be {@link Double#isNaN() NaNs} or
+     *     {@link Double#isInfinite() infinities} unless this writer is lenient.
+     * @return this writer.
+     */
+    public JsonWriter value(Number value) throws IOException {
+        if (value == null) {
+            return nullValue();
+        }
+
+        String string = value.toString();
+        if (!lenient &&
+                (string.equals("-Infinity") || string.equals("Infinity") || string.equals("NaN"))) {
+            throw new IllegalArgumentException("Numeric values must be finite, but was " + value);
+        }
+        beforeValue(false);
+        out.append(string);
         return this;
     }
 
@@ -364,7 +411,6 @@ public final class JsonWriter implements Closeable {
             switch (c) {
                 case '"':
                 case '\\':
-                case '/':
                     out.write('\\');
                     out.write(c);
                     break;
@@ -439,7 +485,7 @@ public final class JsonWriter implements Closeable {
     private void beforeValue(boolean root) throws IOException {
         switch (peek()) {
             case EMPTY_DOCUMENT: // first in document
-                if (!root) {
+                if (!lenient && !root) {
                     throw new IllegalStateException(
                             "JSON must start with an array or an object.");
                 }
