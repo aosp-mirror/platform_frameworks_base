@@ -113,8 +113,11 @@ private:
     int mBufferCount;
 
     // mCurrentTexture is the buffer slot index of the buffer that is currently
-    // bound to the OpenGL texture. A value of INVALID_BUFFER_SLOT, indicating
-    // that no buffer is currently bound to the texture.
+    // bound to the OpenGL texture. It is initialized to INVALID_BUFFER_SLOT,
+    // indicating that no buffer slot is currently bound to the texture. Note,
+    // however, that a value of INVALID_BUFFER_SLOT does not necessarily mean
+    // that no buffer is bound to the texture. A call to setBufferCount will
+    // reset mCurrentTexture to INVALID_BUFFER_SLOT.
     int mCurrentTexture;
 
     // mLastQueued is the buffer slot index of the most recently enqueued buffer.
