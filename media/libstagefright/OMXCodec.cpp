@@ -235,7 +235,9 @@ struct OMXCodecObserver : public BnOMXObserver {
         sp<OMXCodec> codec = mTarget.promote();
 
         if (codec.get() != NULL) {
+            Mutex::Autolock autoLock(codec->mLock);
             codec->on_message(msg);
+            codec.clear();
         }
     }
 
@@ -1845,8 +1847,6 @@ OMXCodec::BufferInfo* OMXCodec::dequeueBufferFromNativeWindow() {
 }
 
 void OMXCodec::on_message(const omx_message &msg) {
-    Mutex::Autolock autoLock(mLock);
-
     switch (msg.type) {
         case omx_message::EVENT:
         {
