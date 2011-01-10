@@ -2961,12 +2961,12 @@ public class WebView extends AbsoluteLayout
      * @return boolean True if the find dialog is shown, false otherwise.
      */
     public boolean showFindDialog(String text, boolean showIme) {
-        mFindCallback = new FindActionModeCallback(mContext);
-        if (startActionMode(mFindCallback) == null) {
+        FindActionModeCallback callback = new FindActionModeCallback(mContext);
+        if (startActionMode(callback) == null) {
             // Could not start the action mode, so end Find on page
-            mFindCallback = null;
             return false;
         }
+        mFindCallback = callback;
         setFindIsUp(true);
         mFindCallback.setWebView(this);
         if (showIme) {
