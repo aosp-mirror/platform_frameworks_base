@@ -630,7 +630,7 @@ public class RenderSessionImpl {
      * @see LayoutScene#moveChild(Object, Object, int, Map, IAnimationListener)
      */
     public Result moveChild(final ViewGroup newParentView, final View childView, final int index,
-            Map<String, String> layoutParamsMap, IAnimationListener listener) {
+            Map<String, String> layoutParamsMap, final IAnimationListener listener) {
         checkLock();
 
         invalidateRenderingSize();
@@ -647,42 +647,73 @@ public class RenderSessionImpl {
 
         if (listener != null) {
             final LayoutParams params = layoutParams;
-            new AnimationThread(this, "moveChild", listener) {
 
-                @Override
-                public Result preAnimation() {
-                    // set up the transition for the previous parent.
-                    LayoutTransition removeTransition = new LayoutTransition();
-                    previousParent.setLayoutTransition(removeTransition);
+            // there is no support for animating views across layouts, so in case the new and old
+            // parent views are different we fake the animation through a no animation thread.
+            if (previousParent != newParentView) {
+                new Thread("not animated moveChild") {
+                    @Override
+                    public void run() {
+                        Result result = moveView(previousParent, newParentView, childView, index,
+                                params);
+                        if (result.isSuccess() == false) {
+                            listener.done(result);
+                        }
 
-                    // no fade-out. Because we can't rely on layout transition listeners when
-                    // there is no Animator at all, instead we keep the animator but set its
-                    // duration to 0.
-                    // Note: Cannot user Animation.setDuration() directly. Have to set it
-                    // on the LayoutTransition.
-                    removeTransition.setDuration(LayoutTransition.DISAPPEARING, 0);
+                        // ready to do the work, acquire the scene.
+                        result = acquire(250);
+                        if (result.isSuccess() == false) {
+                            listener.done(result);
+                            return;
+                        }
 
-                    if (previousParent != newParentView) {
-                        // different parent, set a Layout transition on the new parent.
-                        newParentView.setLayoutTransition(new LayoutTransition());
+                        try {
+                            result = render();
+                            if (result.isSuccess()) {
+                                listener.onNewFrame(RenderSessionImpl.this.getSession());
+                            }
+                        } finally {
+                            release();
+                        }
+
+                        listener.done(result);
+                    }
+                }.start();
+            } else {
+                new AnimationThread(this, "moveChild", listener) {
+
+                    @Override
+                    public Result preAnimation() {
+                        // set up the transition for the parent.
+                        LayoutTransition transition = new LayoutTransition();
+                        previousParent.setLayoutTransition(transition);
+
+                        // tweak the animation durations and start delays (to match the duration of
+                        // animation playing just before).
+                        // Note: Cannot user Animation.setDuration() directly. Have to set it
+                        // on the LayoutTransition.
+                        transition.setDuration(LayoutTransition.DISAPPEARING, 100);
+                        // CHANGE_DISAPPEARING plays after DISAPPEARING
+                        transition.setStartDelay(LayoutTransition.CHANGE_DISAPPEARING, 100);
+
+                        transition.setDuration(LayoutTransition.CHANGE_DISAPPEARING, 100);
+
+                        transition.setDuration(LayoutTransition.CHANGE_APPEARING, 100);
+                        // CHANGE_APPEARING plays after CHANGE_APPEARING
+                        transition.setStartDelay(LayoutTransition.APPEARING, 100);
+
+                        transition.setDuration(LayoutTransition.APPEARING, 100);
+
+                        return moveView(previousParent, newParentView, childView, index, params);
                     }
 
-                    // no fade-in. Because we can't rely on layout transition listeners when
-                    // there is no Animator at all, instead we keep the animator but set its
-                    // duration to 0.
-                    // Note: Cannot user Animation.setDuration() directly. Have to set it
-                    // on the LayoutTransition.
-                    newParentView.getLayoutTransition().setDuration(LayoutTransition.APPEARING, 0);
-
-                    return moveView(previousParent, newParentView, childView, index, params);
-                }
-
-                @Override
-                public void postAnimation() {
-                    previousParent.setLayoutTransition(null);
-                    newParentView.setLayoutTransition(null);
-                }
-            }.start();
+                    @Override
+                    public void postAnimation() {
+                        previousParent.setLayoutTransition(null);
+                        newParentView.setLayoutTransition(null);
+                    }
+                }.start();
+            }
 
             // always return success since the real status will come through the listener.
             return SUCCESS.createResult(layoutParams);
@@ -707,7 +738,7 @@ public class RenderSessionImpl {
      *
      * @param previousParent the previous parent, still owning the child at the time of the call.
      * @param newParent the new parent
-     * @param view the view to move
+     * @param movedView the view to move
      * @param index the new location in the new parent
      * @param params an option (can be null) {@link LayoutParams} instance.
      *
@@ -715,12 +746,12 @@ public class RenderSessionImpl {
      *     {@link Status#ERROR_VIEWGROUP_NO_CHILDREN} if the given parent doesn't support
      *     adding views.
      */
-    private Result moveView(ViewGroup previousParent, final ViewGroup newParent, View view,
-            final int index, final LayoutParams params) {
+    private Result moveView(ViewGroup previousParent, final ViewGroup newParent,
+            final View movedView, final int index, final LayoutParams params) {
         try {
             // check if there is a transition on the previousParent.
-            LayoutTransition transition = previousParent.getLayoutTransition();
-            if (transition != null) {
+            LayoutTransition previousTransition = previousParent.getLayoutTransition();
+            if (previousTransition != null) {
                 // in this case there is an animation. This means we have to wait for the child's
                 // parent reference to be null'ed out so that we can add it to the new parent.
                 // It is technically removed right before the DISAPPEARING animation is done (if
@@ -730,48 +761,50 @@ public class RenderSessionImpl {
                 // parent, we need to wait until the CHANGE_DISAPPEARING animation is done before
                 // adding the child or the child will appear in its new location before the
                 // other children have made room for it.
-                // If the parents are different, then we can add the child to its new parent right
-                // after the DISAPPEARING animation is done.
-
-                final int waitForType = newParent == previousParent ?
-                        LayoutTransition.CHANGE_DISAPPEARING : LayoutTransition.DISAPPEARING;
 
                 // add a listener to the transition to be notified of the actual removal.
-                transition.addTransitionListener(new TransitionListener() {
+                previousTransition.addTransitionListener(new TransitionListener() {
+                    private int mChangeDisappearingCount = 0;
 
                     public void startTransition(LayoutTransition transition, ViewGroup container,
                             View view, int transitionType) {
-                        // don't care.
+                        if (transitionType == LayoutTransition.CHANGE_DISAPPEARING) {
+                            mChangeDisappearingCount++;
+                        }
                     }
 
                     public void endTransition(LayoutTransition transition, ViewGroup container,
                             View view, int transitionType) {
-                        if (transitionType == waitForType) {
+                        if (transitionType == LayoutTransition.CHANGE_DISAPPEARING) {
+                            mChangeDisappearingCount--;
+                        }
+
+                        if (transitionType == LayoutTransition.CHANGE_DISAPPEARING &&
+                                mChangeDisappearingCount == 0) {
                             // add it to the parentView in the correct location
                             if (params != null) {
-                                newParent.addView(view, index, params);
+                                newParent.addView(movedView, index, params);
                             } else {
-                                newParent.addView(view, index);
+                                newParent.addView(movedView, index);
                             }
-
                         }
                     }
                 });
 
                 // remove the view from the current parent.
-                previousParent.removeView(view);
+                previousParent.removeView(movedView);
 
                 // and return since adding the view to the new parent is done in the listener.
                 return SUCCESS.createResult();
             } else {
                 // standard code with no animation. pretty simple.
-                previousParent.removeView(view);
+                previousParent.removeView(movedView);
 
                 // add it to the parentView in the correct location
                 if (params != null) {
-                    newParent.addView(view, index, params);
+                    newParent.addView(movedView, index, params);
                 } else {
-                    newParent.addView(view, index);
+                    newParent.addView(movedView, index);
                 }
 
                 return SUCCESS.createResult();
