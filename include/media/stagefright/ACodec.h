@@ -101,6 +101,8 @@ private:
 
     List<sp<AMessage> > mDeferredQueue;
 
+    bool mSentFormat;
+
     status_t allocateBuffersOnPort(OMX_U32 portIndex);
     status_t freeBuffersOnPort(OMX_U32 portIndex);
     status_t freeBuffer(OMX_U32 portIndex, size_t i);
@@ -144,6 +146,8 @@ private:
 
     void deferMessage(const sp<AMessage> &msg);
     void processDeferredMessages();
+
+    void sendFormatChange();
 
     DISALLOW_EVIL_CONSTRUCTORS(ACodec);
 };

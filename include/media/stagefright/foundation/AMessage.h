@@ -52,6 +52,10 @@ struct AMessage : public RefBase {
     void setObject(const char *name, const sp<RefBase> &obj);
     void setMessage(const char *name, const sp<AMessage> &obj);
 
+    void setRect(
+            const char *name,
+            int32_t left, int32_t top, int32_t right, int32_t bottom);
+
     bool findInt32(const char *name, int32_t *value) const;
     bool findInt64(const char *name, int64_t *value) const;
     bool findSize(const char *name, size_t *value) const;
@@ -61,6 +65,10 @@ struct AMessage : public RefBase {
     bool findString(const char *name, AString *value) const;
     bool findObject(const char *name, sp<RefBase> *obj) const;
     bool findMessage(const char *name, sp<AMessage> *obj) const;
+
+    bool findRect(
+            const char *name,
+            int32_t *left, int32_t *top, int32_t *right, int32_t *bottom) const;
 
     void post(int64_t delayUs = 0);
 
@@ -85,10 +93,15 @@ private:
         kTypeString,
         kTypeObject,
         kTypeMessage,
+        kTypeRect,
     };
 
     uint32_t mWhat;
     ALooper::handler_id mTarget;
+
+    struct Rect {
+        int32_t mLeft, mTop, mRight, mBottom;
+    };
 
     struct Item {
         union {
@@ -100,6 +113,7 @@ private:
             void *ptrValue;
             RefBase *refValue;
             AString *stringValue;
+            Rect rectValue;
         } u;
         const char *mName;
         Type mType;
