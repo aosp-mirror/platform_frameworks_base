@@ -223,6 +223,7 @@ public class WebViewDatabase {
                         null);
             }
         }
+        mDatabase.enableWriteAheadLogging();
 
         // mDatabase should not be null,
         // the only case is RequestAPI test has problem to create db
@@ -233,7 +234,7 @@ public class WebViewDatabase {
         }
 
         if (mDatabase.getVersion() != DATABASE_VERSION) {
-            mDatabase.beginTransaction();
+            mDatabase.beginTransactionNonExclusive();
             try {
                 upgradeDatabase();
                 mDatabase.setTransactionSuccessful();
@@ -261,6 +262,7 @@ public class WebViewDatabase {
                         CACHE_DATABASE_FILE, 0, null);
             }
         }
+        mCacheDatabase.enableWriteAheadLogging();
 
         // mCacheDatabase should not be null,
         // the only case is RequestAPI test has problem to create db
@@ -271,7 +273,7 @@ public class WebViewDatabase {
         }
 
         if (mCacheDatabase.getVersion() != CACHE_DATABASE_VERSION) {
-            mCacheDatabase.beginTransaction();
+            mCacheDatabase.beginTransactionNonExclusive();
             try {
                 upgradeCacheDatabase();
                 bootstrapCacheDatabase();
@@ -648,7 +650,7 @@ public class WebViewDatabase {
                         + "WebViewWorkerThread instead of from "
                         + Thread.currentThread().getName());
             }
-            mCacheDatabase.beginTransaction();
+            mCacheDatabase.beginTransactionNonExclusive();
             return true;
         }
         return false;
