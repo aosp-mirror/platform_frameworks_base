@@ -26,6 +26,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -115,11 +116,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <h2>Cancelling a task</h2>
  * <p>A task can be cancelled at any time by invoking {@link #cancel(boolean)}. Invoking
  * this method will cause subsequent calls to {@link #isCancelled()} to return true.
- * After invoking this method, {@link #onCancelled()}, instead of {@link #onPostExecute(Object)}
- * will be invoked after {@link #doInBackground(Object[])} returns. To ensure that
- * a task is cancelled as quickly as possible, you should always check the return
- * value of {@link #isCancelled()} periodically from {@link #doInBackground(Object[])},
- * if possible (inside a loop for instance.)</p>
+ * After invoking this method, {@link #onCancelled(Object)}, instead of
+ * {@link #onPostExecute(Object)} will be invoked after {@link #doInBackground(Object[])}
+ * returns. To ensure that a task is cancelled as quickly as possible, you should always
+ * check the return value of {@link #isCancelled()} periodically from
+ * {@link #doInBackground(Object[])}, if possible (inside a loop for instance.)</p>
  *
  * <h2>Threading rules</h2>
  * <p>There are a few threading rules that must be followed for this class to
@@ -173,6 +174,8 @@ public abstract class AsyncTask<Params, Progress, Result> {
     private final FutureTask<Result> mFuture;
 
     private volatile Status mStatus = Status.PENDING;
+    
+    private final AtomicBoolean mTaskInvoked = new AtomicBoolean();
 
     /**
      * Indicates the current status of the task. Each status will be set only once
@@ -204,15 +207,10 @@ public abstract class AsyncTask<Params, Progress, Result> {
     public AsyncTask() {
         mWorker = new WorkerRunnable<Params, Result>() {
             public Result call() throws Exception {
+                mTaskInvoked.set(true);
+
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-
-                Result result = doInBackground(mParams);
-
-                Message message = sHandler.obtainMessage(MESSAGE_POST_RESULT,
-                        new AsyncTaskResult<Result>(AsyncTask.this, result));
-                message.sendToTarget();
-
-                return result;
+                return postResult(doInBackground(mParams));
             }
         };
 
@@ -220,20 +218,36 @@ public abstract class AsyncTask<Params, Progress, Result> {
             @Override
             protected void done() {
                 try {
-                    get();
+                    final Result result = get();
+
+                    postResultIfNotInvoked(result);
                 } catch (InterruptedException e) {
                     android.util.Log.w(LOG_TAG, e);
                 } catch (ExecutionException e) {
                     throw new RuntimeException("An error occured while executing doInBackground()",
                             e.getCause());
                 } catch (CancellationException e) {
-                    // Taken care of in the WorkerRunnable
+                    postResultIfNotInvoked(null);
                 } catch (Throwable t) {
                     throw new RuntimeException("An error occured while executing "
                             + "doInBackground()", t);
                 }
             }
         };
+    }
+
+    private void postResultIfNotInvoked(Result result) {
+        final boolean wasTaskInvoked = mTaskInvoked.get();
+        if (!wasTaskInvoked) {
+            postResult(result);
+        }
+    }
+
+    private Result postResult(Result result) {
+        Message message = sHandler.obtainMessage(MESSAGE_POST_RESULT,
+                new AsyncTaskResult<Result>(this, result));
+        message.sendToTarget();
+        return result;
     }
 
     /**
@@ -282,7 +296,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      *
      * @see #onPreExecute
      * @see #doInBackground
-     * @see #onCancelled() 
+     * @see #onCancelled(Object) 
      */
     @SuppressWarnings({"UnusedDeclaration"})
     protected void onPostExecute(Result result) {
@@ -302,9 +316,33 @@ public abstract class AsyncTask<Params, Progress, Result> {
     }
 
     /**
-     * Runs on the UI thread after {@link #cancel(boolean)} is invoked and
-     * {@link #doInBackground(Object[])} has finished.
+     * <p>Runs on the UI thread after {@link #cancel(boolean)} is invoked and
+     * {@link #doInBackground(Object[])} has finished.</p>
+     * 
+     * <p>The default implementation simply invokes {@link #onCancelled()} and
+     * ignores the result. If you write your own implementation, do not call
+     * <code>super.onCancelled(result)</code>.</p>
      *
+     * @param result The result, if any, computed in
+     *               {@link #doInBackground(Object[])}, can be null
+     * 
+     * @see #cancel(boolean)
+     * @see #isCancelled()
+     */
+    @SuppressWarnings({"UnusedParameters"})
+    protected void onCancelled(Result result) {
+        onCancelled();
+    }    
+    
+    /**
+     * <p>Applications should preferably override {@link #onCancelled(Object)}.
+     * This method is invoked by the default implementation of
+     * {@link #onCancelled(Object)}.</p>
+     * 
+     * <p>Runs on the UI thread after {@link #cancel(boolean)} is invoked and
+     * {@link #doInBackground(Object[])} has finished.</p>
+     *
+     * @see #onCancelled(Object) 
      * @see #cancel(boolean)
      * @see #isCancelled()
      */
@@ -335,7 +373,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * whether the thread executing this task should be interrupted in
      * an attempt to stop the task.</p>
      * 
-     * <p>Calling this method will result in {@link #onCancelled()} being
+     * <p>Calling this method will result in {@link #onCancelled(Object)} being
      * invoked on the UI thread after {@link #doInBackground(Object[])}
      * returns. Calling this method guarantees that {@link #onPostExecute(Object)}
      * is never invoked. After invoking this method, you should check the
@@ -352,7 +390,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      *         <tt>true</tt> otherwise
      *
      * @see #isCancelled()
-     * @see #onCancelled()
+     * @see #onCancelled(Object)
      */
     public final boolean cancel(boolean mayInterruptIfRunning) {
         return mFuture.cancel(mayInterruptIfRunning);
@@ -452,7 +490,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
 
     private void finish(Result result) {
         if (isCancelled()) {
-            onCancelled();
+            onCancelled(result);
         } else {
             onPostExecute(result);
         }
