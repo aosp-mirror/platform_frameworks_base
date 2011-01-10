@@ -118,32 +118,6 @@ extern float __attribute__((overloadable))
 extern float __attribute__((overloadable))
     rsFrac(float);
 
-// time
-extern int32_t __attribute__((overloadable))
-    rsSecond(void);
-extern int32_t __attribute__((overloadable))
-    rsMinute(void);
-extern int32_t __attribute__((overloadable))
-    rsHour(void);
-extern int32_t __attribute__((overloadable))
-    rsDay(void);
-extern int32_t __attribute__((overloadable))
-    rsMonth(void);
-extern int32_t __attribute__((overloadable))
-    rsYear(void);
-
-// Return the current system clock in milliseconds
-extern int64_t __attribute__((overloadable))
-    rsUptimeMillis(void);
-
-// Return the current system clock in nanoseconds
-extern int64_t __attribute__((overloadable))
-    rsUptimeNanos(void);
-
-// Return the time in seconds since function was last called in this script.
-extern float __attribute__((overloadable))
-    rsGetDt(void);
-
 // Send a message back to the client.  Will not block and returns true
 // if the message was sendable and false if the fifo was full.
 // A message ID is required.  Data payload is optional.
