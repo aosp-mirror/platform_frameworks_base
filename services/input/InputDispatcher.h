@@ -33,6 +33,9 @@
 #include <unistd.h>
 #include <limits.h>
 
+#include "InputWindow.h"
+#include "InputApplication.h"
+
 
 namespace android {
 
@@ -116,137 +119,6 @@ struct InputTarget {
 
 
 /*
- * An input window describes the bounds of a window that can receive input.
- */
-struct InputWindow {
-    // Window flags from WindowManager.LayoutParams
-    enum {
-        FLAG_ALLOW_LOCK_WHILE_SCREEN_ON     = 0x00000001,
-        FLAG_DIM_BEHIND        = 0x00000002,
-        FLAG_BLUR_BEHIND        = 0x00000004,
-        FLAG_NOT_FOCUSABLE      = 0x00000008,
-        FLAG_NOT_TOUCHABLE      = 0x00000010,
-        FLAG_NOT_TOUCH_MODAL    = 0x00000020,
-        FLAG_TOUCHABLE_WHEN_WAKING = 0x00000040,
-        FLAG_KEEP_SCREEN_ON     = 0x00000080,
-        FLAG_LAYOUT_IN_SCREEN   = 0x00000100,
-        FLAG_LAYOUT_NO_LIMITS   = 0x00000200,
-        FLAG_FULLSCREEN      = 0x00000400,
-        FLAG_FORCE_NOT_FULLSCREEN   = 0x00000800,
-        FLAG_DITHER             = 0x00001000,
-        FLAG_SECURE             = 0x00002000,
-        FLAG_SCALED             = 0x00004000,
-        FLAG_IGNORE_CHEEK_PRESSES    = 0x00008000,
-        FLAG_LAYOUT_INSET_DECOR = 0x00010000,
-        FLAG_ALT_FOCUSABLE_IM = 0x00020000,
-        FLAG_WATCH_OUTSIDE_TOUCH = 0x00040000,
-        FLAG_SHOW_WHEN_LOCKED = 0x00080000,
-        FLAG_SHOW_WALLPAPER = 0x00100000,
-        FLAG_TURN_SCREEN_ON = 0x00200000,
-        FLAG_DISMISS_KEYGUARD = 0x00400000,
-        FLAG_SPLIT_TOUCH = 0x00800000,
-        FLAG_KEEP_SURFACE_WHILE_ANIMATING = 0x10000000,
-        FLAG_COMPATIBLE_WINDOW = 0x20000000,
-        FLAG_SYSTEM_ERROR = 0x40000000,
-    };
-
-    // Window types from WindowManager.LayoutParams
-    enum {
-        FIRST_APPLICATION_WINDOW = 1,
-        TYPE_BASE_APPLICATION   = 1,
-        TYPE_APPLICATION        = 2,
-        TYPE_APPLICATION_STARTING = 3,
-        LAST_APPLICATION_WINDOW = 99,
-        FIRST_SUB_WINDOW        = 1000,
-        TYPE_APPLICATION_PANEL  = FIRST_SUB_WINDOW,
-        TYPE_APPLICATION_MEDIA  = FIRST_SUB_WINDOW+1,
-        TYPE_APPLICATION_SUB_PANEL = FIRST_SUB_WINDOW+2,
-        TYPE_APPLICATION_ATTACHED_DIALOG = FIRST_SUB_WINDOW+3,
-        TYPE_APPLICATION_MEDIA_OVERLAY  = FIRST_SUB_WINDOW+4,
-        LAST_SUB_WINDOW         = 1999,
-        FIRST_SYSTEM_WINDOW     = 2000,
-        TYPE_STATUS_BAR         = FIRST_SYSTEM_WINDOW,
-        TYPE_SEARCH_BAR         = FIRST_SYSTEM_WINDOW+1,
-        TYPE_PHONE              = FIRST_SYSTEM_WINDOW+2,
-        TYPE_SYSTEM_ALERT       = FIRST_SYSTEM_WINDOW+3,
-        TYPE_KEYGUARD           = FIRST_SYSTEM_WINDOW+4,
-        TYPE_TOAST              = FIRST_SYSTEM_WINDOW+5,
-        TYPE_SYSTEM_OVERLAY     = FIRST_SYSTEM_WINDOW+6,
-        TYPE_PRIORITY_PHONE     = FIRST_SYSTEM_WINDOW+7,
-        TYPE_SYSTEM_DIALOG      = FIRST_SYSTEM_WINDOW+8,
-        TYPE_KEYGUARD_DIALOG    = FIRST_SYSTEM_WINDOW+9,
-        TYPE_SYSTEM_ERROR       = FIRST_SYSTEM_WINDOW+10,
-        TYPE_INPUT_METHOD       = FIRST_SYSTEM_WINDOW+11,
-        TYPE_INPUT_METHOD_DIALOG= FIRST_SYSTEM_WINDOW+12,
-        TYPE_WALLPAPER          = FIRST_SYSTEM_WINDOW+13,
-        TYPE_STATUS_BAR_SUB_PANEL  = FIRST_SYSTEM_WINDOW+14,
-        TYPE_SECURE_SYSTEM_OVERLAY = FIRST_SYSTEM_WINDOW+15,
-        TYPE_DRAG               = FIRST_SYSTEM_WINDOW+16,
-        TYPE_STATUS_BAR_PANEL   = FIRST_SYSTEM_WINDOW+17,
-        LAST_SYSTEM_WINDOW      = 2999,
-    };
-
-    sp<InputChannel> inputChannel;
-    String8 name;
-    int32_t layoutParamsFlags;
-    int32_t layoutParamsType;
-    nsecs_t dispatchingTimeout;
-    int32_t frameLeft;
-    int32_t frameTop;
-    int32_t frameRight;
-    int32_t frameBottom;
-    int32_t visibleFrameLeft;
-    int32_t visibleFrameTop;
-    int32_t visibleFrameRight;
-    int32_t visibleFrameBottom;
-    int32_t touchableAreaLeft;
-    int32_t touchableAreaTop;
-    int32_t touchableAreaRight;
-    int32_t touchableAreaBottom;
-    bool visible;
-    bool canReceiveKeys;
-    bool hasFocus;
-    bool hasWallpaper;
-    bool paused;
-    int32_t layer;
-    int32_t ownerPid;
-    int32_t ownerUid;
-
-    bool touchableAreaContainsPoint(int32_t x, int32_t y) const;
-    bool frameContainsPoint(int32_t x, int32_t y) const;
-
-    /* Returns true if the window is of a trusted type that is allowed to silently
-     * overlay other windows for the purpose of implementing the secure views feature.
-     * Trusted overlays, such as IME windows, can partly obscure other windows without causing
-     * motion events to be delivered to them with AMOTION_EVENT_FLAG_WINDOW_IS_OBSCURED.
-     */
-    bool isTrustedOverlay() const;
-
-    bool supportsSplitTouch() const;
-};
-
-
-/*
- * A private handle type used by the input manager to track the window.
- */
-class InputApplicationHandle : public RefBase {
-protected:
-    InputApplicationHandle() { }
-    virtual ~InputApplicationHandle() { }
-};
-
-
-/*
- * An input application describes properties of an application that can receive input.
- */
-struct InputApplication {
-    String8 name;
-    nsecs_t dispatchingTimeout;
-    sp<InputApplicationHandle> handle;
-};
-
-
-/*
  * Input dispatcher policy interface.
  *
  * The input reader policy is used by the input reader to interact with the Window Manager
@@ -267,10 +139,10 @@ public:
     /* Notifies the system that an application is not responding.
      * Returns a new timeout to continue waiting, or 0 to abort dispatch. */
     virtual nsecs_t notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle,
-            const sp<InputChannel>& inputChannel) = 0;
+            const sp<InputWindowHandle>& inputWindowHandle) = 0;
 
     /* Notifies the system that an input channel is unrecoverably broken. */
-    virtual void notifyInputChannelBroken(const sp<InputChannel>& inputChannel) = 0;
+    virtual void notifyInputChannelBroken(const sp<InputWindowHandle>& inputWindowHandle) = 0;
 
     /* Gets the key repeat initial timeout or -1 if automatic key repeating is disabled. */
     virtual nsecs_t getKeyRepeatTimeout() = 0;
@@ -303,12 +175,12 @@ public:
     virtual void interceptGenericBeforeQueueing(nsecs_t when, uint32_t& policyFlags) = 0;
 
     /* Allows the policy a chance to intercept a key before dispatching. */
-    virtual bool interceptKeyBeforeDispatching(const sp<InputChannel>& inputChannel,
+    virtual bool interceptKeyBeforeDispatching(const sp<InputWindowHandle>& inputWindowHandle,
             const KeyEvent* keyEvent, uint32_t policyFlags) = 0;
 
     /* Allows the policy a chance to perform default processing for an unhandled key.
      * Returns an alternate keycode to redispatch as a fallback, or 0 to give up. */
-    virtual bool dispatchUnhandledKey(const sp<InputChannel>& inputChannel,
+    virtual bool dispatchUnhandledKey(const sp<InputWindowHandle>& inputWindowHandle,
             const KeyEvent* keyEvent, uint32_t policyFlags, KeyEvent* outFallbackKeyEvent) = 0;
 
     /* Notifies the policy about switch events.
@@ -407,7 +279,8 @@ public:
      *
      * These methods may be called on any thread (usually by the input manager).
      */
-    virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel, bool monitor) = 0;
+    virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel,
+            const sp<InputWindowHandle>& inputWindowHandle, bool monitor) = 0;
     virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel) = 0;
 };
 
@@ -461,7 +334,8 @@ public:
     virtual bool transferTouchFocus(const sp<InputChannel>& fromChannel,
             const sp<InputChannel>& toChannel);
 
-    virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel, bool monitor);
+    virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel,
+            const sp<InputWindowHandle>& inputWindowHandle, bool monitor);
     virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel);
 
 private:
@@ -615,6 +489,7 @@ private:
         KeyEntry* keyEntry;
         sp<InputChannel> inputChannel;
         sp<InputApplicationHandle> inputApplicationHandle;
+        sp<InputWindowHandle> inputWindowHandle;
         int32_t userActivityEventType;
         bool handled;
     };
@@ -815,7 +690,8 @@ private:
         };
 
         Status status;
-        sp<InputChannel> inputChannel;
+        sp<InputChannel> inputChannel; // never null
+        sp<InputWindowHandle> inputWindowHandle; // may be null
         InputPublisher inputPublisher;
         InputState inputState;
         Queue<DispatchEntry> outboundQueue;
@@ -823,7 +699,8 @@ private:
         nsecs_t lastEventTime; // the time when the event was originally captured
         nsecs_t lastDispatchTime; // the time when the last event was dispatched
 
-        explicit Connection(const sp<InputChannel>& inputChannel);
+        explicit Connection(const sp<InputChannel>& inputChannel,
+                const sp<InputWindowHandle>& inputWindowHandle);
 
         inline const char* getInputChannelName() const { return inputChannel->getName().string(); }
 
@@ -851,6 +728,8 @@ private:
         DROP_REASON_POLICY = 1,
         DROP_REASON_APP_SWITCH = 2,
         DROP_REASON_DISABLED = 3,
+        DROP_REASON_BLOCKED = 4,
+        DROP_REASON_STALE = 5,
     };
 
     sp<InputDispatcherPolicyInterface> mPolicy;
@@ -883,6 +762,15 @@ private:
     bool isAppSwitchKeyEventLocked(KeyEntry* keyEntry);
     bool isAppSwitchPendingLocked();
     void resetPendingAppSwitchLocked(bool handled);
+
+    // Stale event latency optimization.
+    static bool isStaleEventLocked(nsecs_t currentTime, EventEntry* entry);
+
+    // Blocked event latency optimization.  Drops old events when the user intends
+    // to transfer focus to a new application.
+    EventEntry* mNextUnblockedEvent;
+
+    const InputWindow* findTouchedWindowAtLocked(int32_t x, int32_t y);
 
     // All registered connections mapped by receive pipe file descriptor.
     KeyedVector<int, sp<Connection> > mConnectionsByReceiveFd;
@@ -1006,6 +894,7 @@ private:
     nsecs_t mInputTargetWaitStartTime;
     nsecs_t mInputTargetWaitTimeoutTime;
     bool mInputTargetWaitTimeoutExpired;
+    sp<InputApplicationHandle> mInputTargetWaitApplication;
 
     // Finding targets for input events.
     void resetTargetsLocked();

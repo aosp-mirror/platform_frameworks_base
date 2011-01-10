@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.server;
+#ifndef _ANDROID_SERVER_INPUT_WINDOW_H
+#define _ANDROID_SERVER_INPUT_WINDOW_H
 
-/**
- * Describes input-related application properties for use by the input dispatcher.
- * @hide
- */
-public final class InputApplication {
-    // Application handle.
-    public InputApplicationHandle inputApplicationHandle;
+#include <input/InputWindow.h>
 
-    // Application name.
-    public String name;
+#include "JNIHelp.h"
+#include "jni.h"
 
-    // Dispatching timeout.
-    public long dispatchingTimeoutNanos;
+namespace android {
 
-    public void recycle() {
-        inputApplicationHandle = null;
-    }
-}
+extern void android_server_InputWindow_toNative(
+        JNIEnv* env, jobject inputWindowObj, InputWindow* outInputWindow);
+
+} // namespace android
+
+#endif // _ANDROID_SERVER_INPUT_WINDOW_H
