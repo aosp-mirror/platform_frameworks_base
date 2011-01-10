@@ -636,8 +636,33 @@ public interface WindowManager extends ViewManager {
         public static final int FLAG_SPLIT_TOUCH = 0x00800000;
         
         /**
-         * Indicates whether this window should be hardware accelerated.
-         * Requesting hardware acceleration does not guarantee it will happen.
+         * <p>Indicates whether this window should be hardware accelerated.
+         * Requesting hardware acceleration does not guarantee it will happen.</p>
+         * 
+         * <p>This flag can be controlled programmatically <em>only</em> to enable
+         * hardware acceleration. To enable hardware acceleration for a given
+         * window programmatically, do the following:</p>
+         * 
+         * <pre>
+         * Window w = activity.getWindow(); // in Activity's onCreate() for instance
+         * w.setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+         *         WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+         * </pre>
+         * 
+         * <p>It is important to remember that this flag <strong>must</strong>
+         * be set before setting the content view of your activity or dialog.</p>
+         * 
+         * <p>This flag cannot be used to disable hardware acceleration after it
+         * was enabled in your manifest using
+         * {@link android.R.attr#hardwareAccelerated}. If you need to selectively
+         * and programmatically disable hardware acceleration (for automated testing
+         * for instance), make sure it is turned off in your manifest and enable it
+         * on your activity or dialog when you need it instead, using the method
+         * described above.</p>
+         * 
+         * <p>This flag is automatically set by the system if the
+         * {@link android.R.attr#hardwareAccelerated android:hardwareAccelerated}
+         * XML attribute is set to true on an activity or on the application.</p>
          */
         public static final int FLAG_HARDWARE_ACCELERATED = 0x01000000;
 
