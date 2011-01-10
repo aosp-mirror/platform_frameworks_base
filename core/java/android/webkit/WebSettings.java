@@ -657,10 +657,11 @@ public class WebSettings {
     }
 
     /**
-     *  Return whether the WebView is saving form data.
+     *  Return whether the WebView is saving form data and displaying prior
+     *  entries/autofill++.  Always false in private browsing mode.
      */
     public boolean getSaveFormData() {
-        return mSaveFormData;
+        return mSaveFormData && !mPrivateBrowsingEnabled;
     }
 
     /**
