@@ -8028,7 +8028,6 @@ public class WebView extends AbsoluteLayout
     private native int      nativeCursorFramePointer();
     private native Rect     nativeCursorNodeBounds();
     private native int nativeCursorNodePointer();
-    /* package */ native boolean nativeCursorMatchesFocus();
     private native boolean  nativeCursorIntersects(Rect visibleRect);
     private native boolean  nativeCursorIsAnchor();
     private native boolean  nativeCursorIsTextInput();
