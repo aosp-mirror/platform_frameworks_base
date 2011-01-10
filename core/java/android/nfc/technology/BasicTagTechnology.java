@@ -30,19 +30,14 @@ import android.util.Log;
  * A base class for tag technologies that are built on top of transceive().
  */
 /* package */ abstract class BasicTagTechnology implements TagTechnology {
+    private static final String TAG = "NFC";
 
     /*package*/ final Tag mTag;
     /*package*/ boolean mIsConnected;
     /*package*/ int mSelectedTechnology;
     private final NfcAdapter mAdapter;
-
-    // Following fields are final after construction, except for
-    // during attemptDeadServiceRecovery() when NFC crashes.
-    // Not locked - we accept a best effort attempt when NFC crashes.
-    /*package*/ INfcAdapter mService;
-    /*package*/ INfcTag mTagService;
-
-    private static final String TAG = "NFC";
+    /*package*/ final INfcAdapter mService;
+    /*package*/ final INfcTag mTagService;
 
     /**
      * @hide
@@ -64,11 +59,7 @@ import android.util.Log;
 
         mAdapter = adapter;
         mService = mAdapter.getService();
-        try {
-          mTagService = mService.getNfcTagInterface();
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-        }
+        mTagService = mAdapter.getTagService();
         mTag = tag;
         mSelectedTechnology = tech;
     }
@@ -78,19 +69,6 @@ import android.util.Log;
      */
     public BasicTagTechnology(NfcAdapter adapter, Tag tag) throws RemoteException {
         this(adapter, tag, tag.getTechnologyList()[0]);
-    }
-
-    /** NFC service dead - attempt best effort recovery */
-    /*package*/ void attemptDeadServiceRecovery(Exception e) {
-        mAdapter.attemptDeadServiceRecovery(e);
-        /* assigning to mService is not thread-safe, but this is best-effort code
-         * and on a well-behaved system should never happen */
-        mService = mAdapter.getService();
-        try {
-            mTagService = mService.getNfcTagInterface();
-        } catch (RemoteException e2) {
-            Log.e(TAG, "second RemoteException trying to recover from dead NFC service", e2);
-        }
     }
 
     /**
@@ -135,7 +113,7 @@ import android.util.Log;
         try {
             return mTagService.isPresent(mTag.getServiceHandle());
         } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
+            Log.e(TAG, "NFC service dead", e);
             return false;
         }
     }
@@ -163,7 +141,7 @@ import android.util.Log;
                 throw new IOException();
             }
         } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
+            Log.e(TAG, "NFC service dead", e);
             throw new IOException("NFC service died");
         }
     }
@@ -183,21 +161,21 @@ import android.util.Log;
     public void reconnect() throws IOException {
         if (!mIsConnected) {
             throw new IllegalStateException("Technology not connected yet");
-        } else {
-            try {
-                int errorCode = mTagService.reconnect(mTag.getServiceHandle());
+        }
 
-                if (errorCode != ErrorCodes.SUCCESS) {
-                    mIsConnected = false;
-                    mTag.setTechnologyDisconnected();
-                    throw new IOException();
-                }
-            } catch (RemoteException e) {
+        try {
+            int errorCode = mTagService.reconnect(mTag.getServiceHandle());
+
+            if (errorCode != ErrorCodes.SUCCESS) {
                 mIsConnected = false;
                 mTag.setTechnologyDisconnected();
-                attemptDeadServiceRecovery(e);
-                throw new IOException("NFC service died");
+                throw new IOException();
             }
+        } catch (RemoteException e) {
+            mIsConnected = false;
+            mTag.setTechnologyDisconnected();
+            Log.e(TAG, "NFC service dead", e);
+            throw new IOException("NFC service died");
         }
     }
 
@@ -219,7 +197,7 @@ import android.util.Log;
              */
             mTagService.reconnect(mTag.getServiceHandle());
         } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
+            Log.e(TAG, "NFC service dead", e);
         } finally {
             mIsConnected = false;
             mTag.setTechnologyDisconnected();
@@ -237,7 +215,7 @@ import android.util.Log;
             }
             return response;
         } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
+            Log.e(TAG, "NFC service dead", e);
             throw new IOException("NFC service died");
         }
     }

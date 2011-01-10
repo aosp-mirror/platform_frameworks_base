@@ -23,6 +23,7 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.util.Log;
 
 import java.io.IOException;
 
@@ -38,6 +39,8 @@ import java.io.IOException;
  * permission.
  */
 public final class Ndef extends BasicTagTechnology {
+    private static final String TAG = "NFC";
+
     /** @hide */
     public static final int NDEF_MODE_READ_ONLY = 1;
     /** @hide */
@@ -168,7 +171,7 @@ public final class Ndef extends BasicTagTechnology {
                 return null;
             }
         } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
+            Log.e(TAG, "NFC service dead", e);
             return null;
         }
     }
@@ -200,7 +203,7 @@ public final class Ndef extends BasicTagTechnology {
                 throw new IOException("Tag is not ndef");
             }
         } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
+            Log.e(TAG, "NFC service dead", e);
         }
     }
 
@@ -241,7 +244,7 @@ public final class Ndef extends BasicTagTechnology {
                     throw new IOException();
             }
         } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
+            Log.e(TAG, "NFC service dead", e);
             return false;
         }
     }
