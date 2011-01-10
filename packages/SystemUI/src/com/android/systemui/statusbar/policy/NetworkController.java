@@ -77,13 +77,18 @@ public class NetworkController extends BroadcastReceiver {
     int mDataDirectionIconId;
     int mDataSignalIconId;
     int mDataTypeIconId;
- 
+
     // wifi
     final WifiManager mWifiManager;
     boolean mWifiEnabled, mWifiConnected;
     int mWifiLevel;
     String mWifiSsid;
     int mWifiIconId;
+
+    // bluetooth
+    private boolean mBluetoothTethered = false;
+    private int mBluetoothTetherIconId =
+        com.android.internal.R.drawable.stat_sys_tether_bluetooth;
 
     // data connectivity (regardless of state, can we access the internet?)
     // state of inet connection - 0 not connected, 100 connected
@@ -104,7 +109,7 @@ public class NetworkController extends BroadcastReceiver {
     int mLastCombinedSignalIconId = -1;
     int mLastDataTypeIconId = -1;
     String mLastLabel = "";
-    
+
     // yuck -- stop doing this here and put it in the framework
     IBatteryStats mBatteryStats;
 
@@ -235,7 +240,7 @@ public class NetworkController extends BroadcastReceiver {
         @Override
         public void onDataConnectionStateChanged(int state, int networkType) {
             if (DEBUG) {
-                Slog.d(TAG, "onDataConnectionStateChanged: state=" + state 
+                Slog.d(TAG, "onDataConnectionStateChanged: state=" + state
                         + " type=" + networkType);
             }
             mDataState = state;
@@ -649,13 +654,22 @@ public class NetworkController extends BroadcastReceiver {
                 mInetCondition = inetCondition;
                 updateWifiIcons();
                 break;
+            case ConnectivityManager.TYPE_BLUETOOTH:
+                mInetCondition = inetCondition;
+                if (info != null) {
+                    mBluetoothTethered = info.isConnected() ? true: false;
+                } else {
+                    mBluetoothTethered = false;
+                }
+                break;
         }
     }
 
 
     // ===== Update the views =======================================================
 
-    // figure out what to show: first wifi, then 3G, then nothing
+    // figure out what to show- there should be one connected network or nothing
+    // General order of preference is: wifi, 3G than bluetooth. This might vary by product.
     void refreshViews() {
         Context context = mContext;
 
@@ -672,12 +686,16 @@ public class NetworkController extends BroadcastReceiver {
             }
             combinedSignalIconId = mWifiIconId;
             dataTypeIconId = 0;
+        } else if (mDataConnected) {
+            label = mNetworkName;
+            combinedSignalIconId = mDataSignalIconId;
+            dataTypeIconId = mDataTypeIconId;
+        } else if (mBluetoothTethered) {
+            label = mContext.getString(R.string.bluetooth_tethered);
+            combinedSignalIconId = mBluetoothTetherIconId;
+            dataTypeIconId = 0;
         } else {
-            if (mDataConnected) {
-                label = mNetworkName;
-            } else {
-                label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
-            }
+            label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
             combinedSignalIconId = mDataSignalIconId;
             dataTypeIconId = mDataTypeIconId;
         }
@@ -689,7 +707,8 @@ public class NetworkController extends BroadcastReceiver {
                     + " mDataDirectionIconId=0x" + Integer.toHexString(mDataDirectionIconId)
                     + " mDataSignalIconId=0x" + Integer.toHexString(mDataSignalIconId)
                     + " mDataTypeIconId=0x" + Integer.toHexString(mDataTypeIconId)
-                    + " mWifiIconId=0x" + Integer.toHexString(mWifiIconId));
+                    + " mWifiIconId=0x" + Integer.toHexString(mWifiIconId)
+                    + "mBluetoothTetherIconId=0x" + Integer.toHexString(mBluetoothTetherIconId));
         }
 
         // the phone icon on phones
@@ -808,6 +827,10 @@ public class NetworkController extends BroadcastReceiver {
         pw.println(mWifiSsid);
         pw.print("  mWifiIconId=");
         pw.println(mWifiIconId);
+
+        pw.println("  - Bluetooth ----");
+        pw.print(" mBtReverseTethered=");
+        pw.println(mBluetoothTethered);
 
         pw.println("  - connectivity ------");
         pw.print("  mInetCondition=");
