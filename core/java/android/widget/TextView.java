@@ -4780,7 +4780,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         hideControllers();
-        stopSelectionActionMode();
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
@@ -5119,6 +5118,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mInputMethodState != null) {
             mInputMethodState.mExtracting = req;
         }
+        // This stops a possible text selection mode. Maybe not intended.
         hideControllers();
     }
     
@@ -6781,7 +6781,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         sendOnTextChanged(buffer, start, before, after);
         onTextChanged(buffer, start, before, after);
 
-        // Hide the controller if the amount of content changed
+        // Hide the controllers if the amount of content changed
         if (before != after) {
             hideControllers();
         }
@@ -8236,6 +8236,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private void stopSelectionActionMode() {
         if (mSelectionActionMode != null) {
+            // This will hide the mSelectionModifierCursorController
             mSelectionActionMode.finish();
         }
     }
@@ -8359,8 +8360,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mCustomSelectionActionModeCallback != null) {
                 mCustomSelectionActionModeCallback.onDestroyActionMode(mode);
             }
-            Selection.setSelection((Spannable) mText, getSelectionStart());
-            hideSelectionModifierCursorController();
+            Selection.setSelection((Spannable) mText, getSelectionEnd());
+
+            if (mSelectionModifierCursorController != null) {
+                mSelectionModifierCursorController.hide();
+            }
+
             mSelectionActionMode = null;
         }
     }
@@ -9176,16 +9181,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private void hideSelectionModifierCursorController() {
-        // No need to create the controller to hide it.
-        if (mSelectionModifierCursorController != null) {
-            mSelectionModifierCursorController.hide();
-        }
-    }
-    
+    /**
+     * Hides the insertion controller and stops text selection mode, hiding the selection controller
+     */
     private void hideControllers() {
         hideInsertionPointCursorController();
-        hideSelectionModifierCursorController();
+        stopSelectionActionMode();
     }
 
     /**
