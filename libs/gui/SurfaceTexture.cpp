@@ -55,6 +55,8 @@ status_t SurfaceTexture::setBufferCount(int bufferCount) {
     Mutex::Autolock lock(mMutex);
     freeAllBuffers();
     mBufferCount = bufferCount;
+    mCurrentTexture = INVALID_BUFFER_SLOT;
+    mLastQueued = INVALID_BUFFER_SLOT;
     return OK;
 }
 
