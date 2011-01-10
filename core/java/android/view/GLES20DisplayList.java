@@ -16,6 +16,8 @@
 
 package android.view;
 
+import java.lang.ref.WeakReference;
+
 /**
  * An implementation of display list for OpenGL ES 2.0.
  */
@@ -27,11 +29,23 @@ class GLES20DisplayList extends DisplayList {
     private boolean mValid = false;
 
     int mNativeDisplayList;
+    WeakReference<View> hostView;
 
     // The native display list will be destroyed when this object dies.
     // DO NOT overwrite this reference once it is set.
     @SuppressWarnings("unused")
     private DisplayListFinalizer mFinalizer;
+
+    public GLES20DisplayList(View view) {
+        hostView = new WeakReference<View>(view);
+    }
+
+    public void invalidateView() {
+        View v = hostView.get();
+        if (v != null) {
+            v.invalidate();
+        }
+    }
 
     @Override
     HardwareCanvas start() {

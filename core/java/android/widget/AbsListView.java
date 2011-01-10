@@ -2357,6 +2357,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
                 if (mScrollY != 0) {
                     mScrollY = 0;
+                    invalidateParentIfAccelerated();
                     finishGlows();
                     invalidate();
                 }
@@ -2733,6 +2734,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
                 if (mScrollY != 0) {
                     mScrollY = 0;
+                    invalidateParentIfAccelerated();
                     finishGlows();
                     invalidate();
                 }
@@ -2951,6 +2953,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         // Coming back to 'real' list scrolling
                         incrementalDeltaY = -newScroll;
                         mScrollY = 0;
+                        invalidateParentIfAccelerated();
 
                         // No need to do all this work if we're not going to move anyway
                         if (incrementalDeltaY != 0) {
@@ -3244,6 +3247,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     protected void onOverScrolled(int scrollX, int scrollY,
             boolean clampedX, boolean clampedY) {
         mScrollY = scrollY;
+        invalidateParentIfAccelerated();
 
         if (clampedY) {
             // Velocity is broken by hitting the limit; don't start a fling off of this.

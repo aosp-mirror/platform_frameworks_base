@@ -21,9 +21,11 @@ package android.view;
  * them later. Display lists are usually built by recording operations on a
  * {@link android.graphics.Canvas}. Replaying the operations from a display list
  * avoids executing views drawing code on every frame, and is thus much more
- * efficient. 
+ * efficient.
+ *
+ * @hide 
  */
-abstract class DisplayList {
+public abstract class DisplayList {
     /**
      * Starts recording the display list. All operations performed on the
      * returned canvas are recorded and stored in this display list.

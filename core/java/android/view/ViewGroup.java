@@ -2206,6 +2206,27 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * This method is used to cause children of this ViewGroup to restore or recreate their
+     * display lists. It is called by getDisplayList() when the parent ViewGroup does not need
+     * to recreate its own display list, which would happen if it went through the normal
+     * draw/dispatchDraw mechanisms.
+     *
+     * @hide
+     */
+    @Override
+    protected void dispatchGetDisplayList() {
+        final int count = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i = 0; i < count; i++) {
+            final View child = children[i];
+            child.mRecreateDisplayList = (child.mPrivateFlags & INVALIDATED) == INVALIDATED;
+            child.mPrivateFlags &= ~INVALIDATED;
+            child.getDisplayList();
+            child.mRecreateDisplayList = false;
+        }
+    }
+
+    /**
      * Draw one child of this View Group. This method is responsible for getting
      * the canvas in the right state. This includes clipping, translating so
      * that the child's scrolled origin is at 0, 0, and applying any animation
@@ -2247,7 +2268,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             caching = true;
             if (mAttachInfo != null) scalingRequired = mAttachInfo.mScalingRequired;
         } else {
-            caching = layerType != LAYER_TYPE_NONE;
+            caching = (layerType != LAYER_TYPE_NONE) || canvas.isHardwareAccelerated();
         }
 
         if (a != null) {
@@ -2329,6 +2350,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return more;
         }
 
+        if (canvas.isHardwareAccelerated()) {
+            // Clear INVALIDATED flag to allow invalidation to occur during rendering, but
+            // retain the flag's value temporarily in the mRecreateDisplayList flag
+            child.mRecreateDisplayList = (child.mPrivateFlags & INVALIDATED) == INVALIDATED;
+            child.mPrivateFlags &= ~INVALIDATED;
+        }
+
         child.computeScroll();
 
         final int sx = child.mScrollX;
@@ -2347,7 +2375,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 if (layerType == LAYER_TYPE_SOFTWARE) {
                     child.buildDrawingCache(true);
                     cache = child.getDrawingCache(true);
-                } else {
+                } else if (layerType == LAYER_TYPE_NONE) {
                     displayList = child.getDisplayList();
                 }
             }
@@ -2357,7 +2385,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final boolean hasNoCache = cache == null || hasDisplayList;
 
         final int restoreTo = canvas.save();
-        if (hasNoCache) {
+        if (cache == null && !hasDisplayList) {
             canvas.translate(cl - sx, ct - sy);
         } else {
             canvas.translate(cl, ct);
@@ -2375,7 +2403,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 int transX = 0;
                 int transY = 0;
 
-                if (hasNoCache) {
+                if (cache == null && !hasDisplayList) {
                     transX = -sx;
                     transY = -sy;
                 }
@@ -2435,10 +2463,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         if ((flags & FLAG_CLIP_CHILDREN) == FLAG_CLIP_CHILDREN) {
-            if (hasNoCache) {
+            if (cache == null && !hasDisplayList) {
                 canvas.clipRect(sx, sy, sx + (cr - cl), sy + (cb - ct));
             } else {
-                if (!scalingRequired) {
+                if (!scalingRequired || cache == null) {
                     canvas.clipRect(0, 0, cr - cl, cb - ct);
                 } else {
                     canvas.clipRect(0, 0, cache.getWidth(), cache.getHeight());
@@ -2473,7 +2501,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     }
                 } else {
                     child.mPrivateFlags &= ~DIRTY_MASK;
-                    ((HardwareCanvas) canvas).drawDisplayList(displayList);
+                    // Skip drawing the display list into ours if we were just refreshing
+                    // it's content; we already have a reference to it in our display list
+                    if (mRecreateDisplayList || mLayerType != LAYER_TYPE_NONE) {
+                        ((HardwareCanvas) canvas).drawDisplayList(displayList);
+                    }
                 }
             }
         } else if (cache != null) {
@@ -2502,6 +2534,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             child.onSetAlpha(255);
             finishAnimatingView(child, a);
         }
+
+        if (more && canvas.isHardwareAccelerated()) {
+            // invalidation is the trigger to recreate display lists, so if we're using
+            // display lists to render, force an invalidate to allow the animation to
+            // continue drawing another frame
+            invalidate();
+        }
+
+        child.mRecreateDisplayList = false;
 
         return more;
     }
@@ -2743,7 +2784,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // addViewInner() will call child.requestLayout() when setting the new LayoutParams
         // therefore, we call requestLayout() on ourselves before, so that the child's request
         // will be blocked at our level
-        child.mPrivateFlags &= ~DIRTY_MASK;
         requestLayout();
         invalidate();
         addViewInner(child, index, params, false);
@@ -3425,10 +3465,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final boolean drawAnimation = (child.mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION;
 
             if (dirty == null) {
+                if (child.mLayerType != LAYER_TYPE_NONE) {
+                    mPrivateFlags |= INVALIDATED;
+                    mPrivateFlags &= ~DRAWING_CACHE_VALID;
+                }
                 do {
                     View view = null;
                     if (parent instanceof View) {
                         view = (View) parent;
+                        if (view.mLayerType != LAYER_TYPE_NONE &&
+                                view.getParent() instanceof View) {
+                            final View grandParent = (View) view.getParent();
+                            grandParent.mPrivateFlags |= INVALIDATED;
+                            grandParent.mPrivateFlags &= ~DRAWING_CACHE_VALID;
+                        }
                         if ((view.mPrivateFlags & DIRTY_MASK) != 0) {
                             // already marked dirty - we're done
                             break;
