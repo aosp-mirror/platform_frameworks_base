@@ -237,43 +237,7 @@ public class SyncManager implements OnAccountsUpdateListener {
     private BroadcastReceiver mConnectivityIntentReceiver =
             new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            NetworkInfo networkInfo =
-                    intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
-            NetworkInfo.State state = (networkInfo == null ? NetworkInfo.State.UNKNOWN :
-                    networkInfo.getState());
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "received connectivity action.  network info: " + networkInfo);
-            }
-
-            final boolean wasConnected = mDataConnectionIsConnected;
-            // only pay attention to the CONNECTED and DISCONNECTED states.
-            // if connected, we are connected.
-            // if disconnected, we may not be connected.  in some cases, we may be connected on
-            // a different network.
-            // e.g., if switching from GPRS to WiFi, we may receive the CONNECTED to WiFi and
-            // DISCONNECTED for GPRS in any order.  if we receive the CONNECTED first, and then
-            // a DISCONNECTED, we want to make sure we set mDataConnectionIsConnected to true
-            // since we still have a WiFi connection.
-            switch (state) {
-                case CONNECTED:
-                    mDataConnectionIsConnected = true;
-                    break;
-                case DISCONNECTED:
-                    mDataConnectionIsConnected = !intent.getBooleanExtra(
-                            ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
-                    break;
-                default:
-                    // ignore the rest of the states -- leave our boolean alone.
-            }
-            if (mDataConnectionIsConnected) {
-                if (!wasConnected) {
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, "Reconnection detected: clearing all backoffs");
-                    }
-                    mSyncStorageEngine.clearAllBackoffs();
-                }
-                sendCheckAlarmsMessage();
-            }
+            sendCheckAlarmsMessage();
         }
     };
 
@@ -1409,6 +1373,11 @@ public class SyncManager implements OnAccountsUpdateListener {
         public void handleMessage(Message msg) {
             long earliestFuturePollTime = Long.MAX_VALUE;
             long nextPendingSyncTime = Long.MAX_VALUE;
+
+            // Setting the value here instead of a method because we want the dumpsys logs
+            // to have the most recent value used.
+            mDataConnectionIsConnected =
+                    getConnectivityManager().getActiveNetworkInfo().isConnected();
             try {
                 waitUntilReadyToRun();
                 mSyncManagerWakeLock.acquire();
