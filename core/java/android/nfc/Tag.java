@@ -45,7 +45,7 @@ import java.util.Arrays;
  * in {@link NfcAdapter#ACTION_TAG_DISCOVERED} intents. A {@link Tag} object is immutable
  * and represents the state of the tag at the time of discovery. It can be
  * directly queried for its UID and Type, or used to create a {@link TagTechnology}
- * (with {@link Tag#getTechnology(int)}).
+ * (with {@link Tag#getTechnology}).
  * <p>
  * A {@link Tag} can  be used to create a {@link TagTechnology} only while the tag is in
  * range. If it is removed and then returned to range, then the most recent
@@ -55,7 +55,6 @@ import java.util.Arrays;
  * time and calls on this class will retrieve those read-only properties, and
  * not cause any further RF activity or block. Note however that arrays passed to and
  * returned by this class are *not* cloned, so be careful not to modify them.
- * @hide
  */
 public class Tag implements Parcelable {
     /*package*/ final byte[] mId;
@@ -249,7 +248,9 @@ public class Tag implements Parcelable {
         }
     };
 
-    /*
+    /**
+     * For internal use only.
+     *
      * @hide
      */
     public synchronized void setConnectedTechnology(int technology) {
@@ -260,14 +261,18 @@ public class Tag implements Parcelable {
         }
     }
 
-    /*
+    /**
+     * For internal use only.
+     *
      * @hide
      */
     public int getConnectedTechnology() {
         return mConnectedTechnology;
     }
 
-    /*
+    /**
+     * For internal use only.
+     *
      * @hide
      */
     public void setTechnologyDisconnected() {
