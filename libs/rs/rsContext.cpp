@@ -539,6 +539,7 @@ void Context::destroyWorkerThreadResources() {
     }
     ObjectBase::zeroAllUserRef(this);
     LOGV("destroyWorkerThreadResources 2");
+    mExit = true;
 }
 
 void * Context::helperThreadProc(void *vrsc) {
@@ -713,6 +714,9 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
 
 Context::~Context() {
     LOGV("Context::~Context");
+
+    mIO.mToCore.flush();
+    rsAssert(mExit);
     mExit = true;
     mPaused = false;
     void *res;
