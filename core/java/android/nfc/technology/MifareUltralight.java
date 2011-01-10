@@ -47,7 +47,7 @@ public final class MifareUltralight extends BasicTagTechnology {
         super(adapter, tag, TagTechnology.MIFARE_ULTRALIGHT);
 
         // Check if this could actually be a Mifare
-        NfcA a = (NfcA) tag.getTechnology(adapter, TagTechnology.NFC_A);
+        NfcA a = (NfcA) adapter.getTechnology(tag, TagTechnology.NFC_A);
 
         mType = TYPE_UNKNOWN;
 
