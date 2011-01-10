@@ -21,6 +21,7 @@ import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.TelephonyIntents;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -162,8 +163,6 @@ public class AccountManagerService
     private static AtomicReference<AccountManagerService> sThis =
             new AtomicReference<AccountManagerService>();
 
-    private static final boolean isDebuggableMonkeyBuild =
-            SystemProperties.getBoolean("ro.monkey", false);
     private static final Account[] EMPTY_ACCOUNT_ARRAY = new Account[]{};
 
     static {
@@ -1992,12 +1991,12 @@ public class AccountManagerService
                 account.name, account.type};
         final boolean permissionGranted =
                 DatabaseUtils.longForQuery(db, COUNT_OF_MATCHING_GRANTS, args) != 0;
-        if (!permissionGranted && isDebuggableMonkeyBuild) {
+        if (!permissionGranted && ActivityManager.isRunningInTestHarness()) {
             // TODO: Skip this check when running automated tests. Replace this
             // with a more general solution.
             Log.d(TAG, "no credentials permission for usage of " + account + ", "
                     + authTokenType + " by uid " + Binder.getCallingUid()
-                    + " but ignoring since this is a monkey build");
+                    + " but ignoring since device is in test harness.");
             return true;
         }
         return permissionGranted;
