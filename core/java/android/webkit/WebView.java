@@ -2618,10 +2618,6 @@ public class WebView extends AbsoluteLayout
     private int computeRealHorizontalScrollRange() {
         if (mDrawHistory) {
             return mHistoryWidth;
-        } else if (mHorizontalScrollBarMode == SCROLLBAR_ALWAYSOFF
-                && !mZoomManager.canZoomOut()) {
-            // only honor the scrollbar mode when it is at minimum zoom level
-            return computeHorizontalScrollExtent();
         } else {
             // to avoid rounding error caused unnecessary scrollbar, use floor
             return (int) Math.floor(mContentWidth * mZoomManager.getScale());
@@ -2652,10 +2648,6 @@ public class WebView extends AbsoluteLayout
     private int computeRealVerticalScrollRange() {
         if (mDrawHistory) {
             return mHistoryHeight;
-        } else if (mVerticalScrollBarMode == SCROLLBAR_ALWAYSOFF
-                && !mZoomManager.canZoomOut()) {
-            // only honor the scrollbar mode when it is at minimum zoom level
-            return computeVerticalScrollExtent();
         } else {
             // to avoid rounding error caused unnecessary scrollbar, use floor
             return (int) Math.floor(mContentHeight * mZoomManager.getScale());
