@@ -19,9 +19,11 @@
 
 #include <android/looper.h>
 #include <utils/Looper.h>
+#include <binder/IPCThreadState.h>
 
 using android::Looper;
 using android::sp;
+using android::IPCThreadState;
 
 ALooper* ALooper_forThread() {
     return Looper::getForThread().get();
@@ -46,6 +48,7 @@ int ALooper_pollOnce(int timeoutMillis, int* outFd, int* outEvents, void** outDa
         return ALOOPER_POLL_ERROR;
     }
 
+    IPCThreadState::self()->flushCommands();
     return looper->pollOnce(timeoutMillis, outFd, outEvents, outData);
 }
 
@@ -55,7 +58,8 @@ int ALooper_pollAll(int timeoutMillis, int* outFd, int* outEvents, void** outDat
         LOGE("ALooper_pollAll: No looper for this thread!");
         return ALOOPER_POLL_ERROR;
     }
-    
+
+    IPCThreadState::self()->flushCommands();
     return looper->pollAll(timeoutMillis, outFd, outEvents, outData);
 }
 
