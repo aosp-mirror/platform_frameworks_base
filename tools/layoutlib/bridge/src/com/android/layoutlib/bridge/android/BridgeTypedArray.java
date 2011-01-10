@@ -43,25 +43,25 @@ import java.util.Map;
  */
 public final class BridgeTypedArray extends TypedArray {
 
-    private BridgeResources mResources;
+    private BridgeResources mBridgeResources;
     private BridgeContext mContext;
-    private ResourceValue[] mData;
+    private ResourceValue[] mResourceData;
     private String[] mNames;
     private final boolean mPlatformFile;
 
     public BridgeTypedArray(BridgeResources resources, BridgeContext context, int len,
             boolean platformFile) {
         super(null, null, null, 0);
-        mResources = resources;
+        mBridgeResources = resources;
         mContext = context;
         mPlatformFile = platformFile;
-        mData = new ResourceValue[len];
+        mResourceData = new ResourceValue[len];
         mNames = new String[len];
     }
 
     /** A bridge-specific method that sets a value in the type array */
     public void bridgeSetValue(int index, String name, ResourceValue value) {
-        mData[index] = value;
+        mResourceData[index] = value;
         mNames[index] = name;
     }
 
@@ -75,7 +75,7 @@ public final class BridgeTypedArray extends TypedArray {
         // fills TypedArray.mIndices which is used to implement getIndexCount/getIndexAt
         // first count the array size
         int count = 0;
-        for (ResourceValue data : mData) {
+        for (ResourceValue data : mResourceData) {
             if (data != null) {
                 count++;
             }
@@ -87,8 +87,8 @@ public final class BridgeTypedArray extends TypedArray {
 
         // fill the array with the indices.
         int index = 1;
-        for (int i = 0 ; i < mData.length ; i++) {
-            if (mData[i] != null) {
+        for (int i = 0 ; i < mResourceData.length ; i++) {
+            if (mResourceData[i] != null) {
                 mIndices[index++] = i;
             }
         }
@@ -99,7 +99,7 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public int length() {
-        return mData.length;
+        return mResourceData.length;
     }
 
     /**
@@ -107,7 +107,7 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public Resources getResources() {
-        return mResources;
+        return mBridgeResources;
     }
 
     /**
@@ -120,9 +120,9 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public CharSequence getText(int index) {
-        if (mData[index] != null) {
+        if (mResourceData[index] != null) {
             // FIXME: handle styled strings!
-            return mData[index].getValue();
+            return mResourceData[index].getValue();
         }
 
         return null;
@@ -138,8 +138,8 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public String getString(int index) {
-        if (mData[index] != null) {
-            return mData[index].getValue();
+        if (mResourceData[index] != null) {
+            return mResourceData[index].getValue();
         }
 
         return null;
@@ -155,11 +155,11 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public boolean getBoolean(int index, boolean defValue) {
-        if (mData[index] == null) {
+        if (mResourceData[index] == null) {
             return defValue;
         }
 
-        String s = mData[index].getValue();
+        String s = mResourceData[index].getValue();
         if (s != null) {
             return XmlUtils.convertValueToBoolean(s, defValue);
         }
@@ -177,11 +177,11 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public int getInt(int index, int defValue) {
-        if (mData[index] == null) {
+        if (mResourceData[index] == null) {
             return defValue;
         }
 
-        String s = mData[index].getValue();
+        String s = mResourceData[index].getValue();
 
         try {
             return (s == null) ? defValue : XmlUtils.convertValueToInt(s, defValue);
@@ -225,11 +225,11 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public float getFloat(int index, float defValue) {
-        if (mData[index] == null) {
+        if (mResourceData[index] == null) {
             return defValue;
         }
 
-        String s = mData[index].getValue();
+        String s = mResourceData[index].getValue();
 
         if (s != null) {
             try {
@@ -259,11 +259,11 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public int getColor(int index, int defValue) {
-        if (mData[index] == null) {
+        if (mResourceData[index] == null) {
             return defValue;
         }
 
-        String s = mData[index].getValue();
+        String s = mResourceData[index].getValue();
         try {
             return ResourceHelper.getColor(s);
         } catch (NumberFormatException e) {
@@ -288,11 +288,11 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public ColorStateList getColorStateList(int index) {
-        if (mData[index] == null) {
+        if (mResourceData[index] == null) {
             return null;
         }
 
-        String value = mData[index].getValue();
+        String value = mResourceData[index].getValue();
 
         if (value == null) {
             return null;
@@ -347,11 +347,11 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public int getInteger(int index, int defValue) {
-        if (mData[index] == null) {
+        if (mResourceData[index] == null) {
             return defValue;
         }
 
-        String s = mData[index].getValue();
+        String s = mResourceData[index].getValue();
 
         if (s != null) {
             try {
@@ -386,11 +386,11 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public float getDimension(int index, float defValue) {
-        if (mData[index] == null) {
+        if (mResourceData[index] == null) {
             return defValue;
         }
 
-        String s = mData[index].getValue();
+        String s = mResourceData[index].getValue();
 
         if (s == null) {
             return defValue;
@@ -402,7 +402,7 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         if (ResourceHelper.stringToFloat(s, mValue)) {
-            return mValue.getDimension(mResources.mMetrics);
+            return mValue.getDimension(mBridgeResources.mMetrics);
         }
 
         // looks like we were unable to resolve the dimension value
@@ -456,11 +456,11 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public int getDimensionPixelSize(int index, int defValue) {
-        if (mData[index] == null) {
+        if (mResourceData[index] == null) {
             return defValue;
         }
 
-        String s = mData[index].getValue();
+        String s = mResourceData[index].getValue();
 
         if (s == null) {
             return defValue;
@@ -522,11 +522,11 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public float getFraction(int index, int base, int pbase, float defValue) {
-        if (mData[index] == null) {
+        if (mResourceData[index] == null) {
             return defValue;
         }
 
-        String value = mData[index].getValue();
+        String value = mResourceData[index].getValue();
         if (value == null) {
             return defValue;
         }
@@ -560,8 +560,8 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public int getResourceId(int index, int defValue) {
-        // get the IResource for this index
-        ResourceValue resValue = mData[index];
+        // get the Resource for this index
+        ResourceValue resValue = mResourceData[index];
 
         // no data, return the default value.
         if (resValue == null) {
@@ -575,7 +575,7 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         // if the attribute was a reference to an id, and not a declaration of an id (@+id), then
-        // the xml attribute value was "resolved" which leads us to a IResourceValue with
+        // the xml attribute value was "resolved" which leads us to a ResourceValue with
         // getType() returning "id" and getName() returning the id name
         // (and getValue() returning null!). We need to handle this!
         if (resValue.getType() != null && resValue.getType().equals(BridgeConstants.RES_ID)) {
@@ -662,17 +662,17 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public Drawable getDrawable(int index) {
-        if (mData[index] == null) {
+        if (mResourceData[index] == null) {
             return null;
         }
 
-        ResourceValue value = mData[index];
+        ResourceValue value = mResourceData[index];
         String stringValue = value.getValue();
         if (stringValue == null || BridgeConstants.REFERENCE_NULL.equals(stringValue)) {
             return null;
         }
 
-        Drawable d = ResourceHelper.getDrawable(value, mContext, mData[index].isFramework());
+        Drawable d = ResourceHelper.getDrawable(value, mContext, mResourceData[index].isFramework());
 
         if (d != null) {
             return d;
@@ -700,18 +700,18 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public CharSequence[] getTextArray(int index) {
-        if (mData[index] == null) {
+        if (mResourceData[index] == null) {
             return null;
         }
 
-        String value = mData[index].getValue();
+        String value = mResourceData[index].getValue();
         if (value != null) {
             return new CharSequence[] { value };
         }
 
         Bridge.getLog().warning(null, String.format(
                 String.format("Unknown value for getTextArray(%d) => %s", //DEBUG
-                index, mData[index].getName())));
+                index, mResourceData[index].getName())));
 
         return null;
     }
@@ -727,11 +727,11 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public boolean getValue(int index, TypedValue outValue) {
-        if (mData[index] == null) {
+        if (mResourceData[index] == null) {
             return false;
         }
 
-        String s = mData[index].getValue();
+        String s = mResourceData[index].getValue();
 
         return ResourceHelper.stringToFloat(s, outValue);
     }
@@ -745,7 +745,7 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public boolean hasValue(int index) {
-        return mData[index] != null;
+        return mResourceData[index] != null;
     }
 
     /**
@@ -792,6 +792,6 @@ public final class BridgeTypedArray extends TypedArray {
 
     @Override
     public String toString() {
-        return mData.toString();
+        return mResourceData.toString();
     }
  }
