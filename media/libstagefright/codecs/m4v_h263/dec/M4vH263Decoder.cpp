@@ -132,7 +132,10 @@ status_t M4vH263Decoder::start(MetaData *) {
     }
 
     MP4DecodingMode actualMode = PVGetDecBitstreamMode(mHandle);
-    CHECK_EQ(mode, actualMode);
+    if (mode != actualMode) {
+        PVCleanUpVideoDecoder(mHandle);
+        return UNKNOWN_ERROR;
+    }
 
     PVSetPostProcType((VideoDecControls *) mHandle, 0);
 
