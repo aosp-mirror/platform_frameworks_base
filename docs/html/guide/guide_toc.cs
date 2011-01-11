@@ -488,12 +488,13 @@
                     </li>
                   </ul>
               </li>
-              <li><a href="/guide/developing/tools/proguard.html">ProGuard</a></li>
-              <li><a href="/guide/developing/tools/adb.html#sqlite">sqlite3</a></li>
-              <li><a href="/guide/developing/tools/traceview.html">Traceview</a></li>
-          <li><a href="<?cs var:toroot ?>guide/developing/tools/zipalign.html">zipalign</a></li>
-        </ul>
-      </li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/proguard.html">ProGuard</a>
+<span class="new">new!</span></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html#sqlite">sqlite3</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/traceview.html" >Traceview</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/zipalign.html" >zipalign</a></li>
+          </ul>
+        </li>
     </ul>
   </li>
 
