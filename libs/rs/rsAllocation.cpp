@@ -831,16 +831,21 @@ RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, RsType vtype,
         return NULL;
     }
 
+    uint32_t faceSize = t->getDimX();
+    uint32_t strideBytes = faceSize * 6 * t->getElementSizeBytes();
+    uint32_t copySize = faceSize * t->getElementSizeBytes();
+
     uint8_t *sourcePtr = (uint8_t*)data;
     for (uint32_t face = 0; face < 6; face ++) {
         Adapter2D faceAdapter(rsc, texAlloc);
         faceAdapter.setFace(face);
 
-        size_t cpySize = t->getDimX() * t->getDimX() * t->getElementSizeBytes();
-        memcpy(faceAdapter.getElement(0, 0), sourcePtr, cpySize);
+        for (uint32_t dI = 0; dI < faceSize; dI ++) {
+            memcpy(faceAdapter.getElement(0, dI), sourcePtr + strideBytes * dI, copySize);
+        }
 
         // Move the data pointer to the next cube face
-        sourcePtr += cpySize;
+        sourcePtr += copySize;
 
         if (mips == RS_ALLOCATION_MIPMAP_FULL) {
             Adapter2D adapt(rsc, texAlloc);
