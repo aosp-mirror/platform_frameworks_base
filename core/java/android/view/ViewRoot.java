@@ -1073,11 +1073,6 @@ public final class ViewRoot extends Handler implements ViewParent,
                             }
                         }
                         surfaceChanged = true;
-
-                        if (mAttachInfo.mHardwareRenderer != null) {
-                            // This will bail out early if already initialized
-                            mAttachInfo.mHardwareRenderer.initialize(mHolder);
-                        }
                     }
                     if (surfaceChanged) {
                         mSurfaceHolderCallback.surfaceChanged(mSurfaceHolder,
