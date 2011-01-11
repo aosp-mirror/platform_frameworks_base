@@ -1377,8 +1377,8 @@ public class SyncManager implements OnAccountsUpdateListener {
             // to have the most recent value used.
             try {
                 waitUntilReadyToRun();
-                NetworkInfo info = getConnectivityManager().getActiveNetworkInfo();
-                mDataConnectionIsConnected = (info != null) && info.isConnected();
+                NetworkInfo networkInfo = getConnectivityManager().getActiveNetworkInfo();
+                mDataConnectionIsConnected = (networkInfo != null) && networkInfo.isConnected();
                 mSyncManagerWakeLock.acquire();
                 // Always do this first so that we be sure that any periodic syncs that
                 // are ready to run have been converted into pending syncs. This allows the
