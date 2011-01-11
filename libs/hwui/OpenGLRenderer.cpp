@@ -604,43 +604,23 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         size_t count;
         const android::Rect* rects = layer->region.getArray(&count);
 
-        setupDraw();
-
-        ProgramDescription description;
-        description.hasTexture = true;
-
         const float alpha = layer->alpha / 255.0f;
-        const bool setColor = description.setColor(alpha, alpha, alpha, alpha);
-        chooseBlending(layer->blend || layer->alpha < 255, layer->mode, description, false);
-
-        useProgram(mCaches.programCache.get(description));
-
-        // Texture
-        bindTexture(layer->texture);
-        glUniform1i(mCaches.currentProgram->getUniform("sampler"), 0);
-
-        // Always premultiplied
-        if (setColor) {
-            mCaches.currentProgram->setColor(alpha, alpha, alpha, alpha);
-        }
-
-        // Mesh
-        int texCoordsSlot = mCaches.currentProgram->getAttrib("texCoords");
-        glEnableVertexAttribArray(texCoordsSlot);
-
-        mModelView.loadIdentity();
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
-
         const float texX = 1.0f / float(layer->width);
         const float texY = 1.0f / float(layer->height);
 
         TextureVertex* mesh = mCaches.getRegionMesh();
         GLsizei numQuads = 0;
 
-        glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
-                gMeshStride, &mesh[0].position[0]);
-        glVertexAttribPointer(texCoordsSlot, 2, GL_FLOAT, GL_FALSE,
-                gMeshStride, &mesh[0].texture[0]);
+        setupDraw();
+        setupDrawWithTexture();
+        setupDrawColor(alpha, alpha, alpha, alpha);
+        setupDrawBlending(layer->blend || layer->alpha < 255, layer->mode, false);
+        setupDrawProgram();
+        setupDrawDirtyRegionsDisabled();
+        setupDrawPureColorUniforms();
+        setupDrawTexture(layer->texture);
+        setupDrawModelViewIdentity();
+        setupDrawMesh(&mesh[0].position[0], &mesh[0].texture[0]);
 
         for (size_t i = 0; i < count; i++) {
             const android::Rect* r = &rects[i];
@@ -670,7 +650,7 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         }
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        glDisableVertexAttribArray(texCoordsSlot);
+        finishDrawTexture();
 
 #if DEBUG_LAYERS_AS_REGIONS
         uint32_t colors[] = {
@@ -1186,7 +1166,6 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
 }
 
 void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
-    // TODO: Should do quickReject for each line
     if (mSnapshot->isIgnored()) return;
 
     const bool isAA = paint->isAntiAlias();
@@ -1200,6 +1179,7 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     getAlphaAndMode(paint, &alpha, &mode);
 
     int verticesCount = count >> 2;
+    int generatedVerticesCount = 0;
     if (!isHairLine) {
         // TODO: AA needs more vertices
         verticesCount *= 6;
@@ -1246,31 +1226,55 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
             vec2 p3 = b + n;
             vec2 p4 = b - n;
 
-            // Draw the line as 2 triangles, could be optimized
-            // by using only 4 vertices and the correct indices
-            // Also we should probably used non textured vertices
-            // when line AA is disabled to save on bandwidth
-            TextureVertex::set(vertex++, p1.x, p1.y, 0.0f, 0.0f);
-            TextureVertex::set(vertex++, p2.x, p2.y, 0.0f, 0.0f);
-            TextureVertex::set(vertex++, p3.x, p3.y, 0.0f, 0.0f);
-            TextureVertex::set(vertex++, p1.x, p1.y, 0.0f, 0.0f);
-            TextureVertex::set(vertex++, p3.x, p3.y, 0.0f, 0.0f);
-            TextureVertex::set(vertex++, p4.x, p4.y, 0.0f, 0.0f);
+            const float left = fmin(p1.x, fmin(p2.x, fmin(p3.x, p4.x)));
+            const float right = fmax(p1.x, fmax(p2.x, fmax(p3.x, p4.x)));
+            const float top = fmin(p1.y, fmin(p2.y, fmin(p3.y, p4.y)));
+            const float bottom = fmax(p1.y, fmax(p2.y, fmax(p3.y, p4.y)));
 
-            // TODO: Mark the dirty regions when RENDER_LAYERS_AS_REGIONS is set
+            if (!quickReject(left, top, right, bottom)) {
+                // Draw the line as 2 triangles, could be optimized
+                // by using only 4 vertices and the correct indices
+                // Also we should probably used non textured vertices
+                // when line AA is disabled to save on bandwidth
+                TextureVertex::set(vertex++, p1.x, p1.y, 0.0f, 0.0f);
+                TextureVertex::set(vertex++, p2.x, p2.y, 0.0f, 0.0f);
+                TextureVertex::set(vertex++, p3.x, p3.y, 0.0f, 0.0f);
+                TextureVertex::set(vertex++, p1.x, p1.y, 0.0f, 0.0f);
+                TextureVertex::set(vertex++, p3.x, p3.y, 0.0f, 0.0f);
+                TextureVertex::set(vertex++, p4.x, p4.y, 0.0f, 0.0f);
+
+                generatedVerticesCount += 6;
+
+                dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
+            }
         }
 
-        // GL_LINE does not give the result we want to match Skia
-        glDrawArrays(GL_TRIANGLES, 0, verticesCount);
+        if (generatedVerticesCount > 0) {
+            // GL_LINE does not give the result we want to match Skia
+            glDrawArrays(GL_TRIANGLES, 0, generatedVerticesCount);
+        }
     } else {
         // TODO: Handle the AA case
         for (int i = 0; i < count; i += 4) {
-            TextureVertex::set(vertex++, points[i], points[i + 1], 0.0f, 0.0f);
-            TextureVertex::set(vertex++, points[i + 2], points[i + 3], 0.0f, 0.0f);
+            const float left = fmin(points[i], points[i + 1]);
+            const float right = fmax(points[i], points[i + 1]);
+            const float top = fmin(points[i + 2], points[i + 3]);
+            const float bottom = fmax(points[i + 2], points[i + 3]);
+
+            if (!quickReject(left, top, right, bottom)) {
+                TextureVertex::set(vertex++, points[i], points[i + 1], 0.0f, 0.0f);
+                TextureVertex::set(vertex++, points[i + 2], points[i + 3], 0.0f, 0.0f);
+
+                generatedVerticesCount += 2;
+
+                dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
+            }
         }
 
-        glLineWidth(1.0f);
-        glDrawArrays(GL_LINES, 0, verticesCount);
+        if (generatedVerticesCount > 0) {
+            glLineWidth(1.0f);
+            glDrawArrays(GL_LINES, 0, generatedVerticesCount);
+        }
     }
 }
 
