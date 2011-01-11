@@ -91,7 +91,7 @@
     <color name="search_url_text_selected">@android:color/black</color>
     <color name="search_url_text_pressed">@android:color/black</color>
     <color name="search_widget_corpus_item_background">@android:color/lighter_gray</color>
-    
+
     <!-- SlidingTab -->
     <color name="sliding_tab_text_color_active">@android:color/black</color>
     <color name="sliding_tab_text_color_shadow">@android:color/black</color>
@@ -105,7 +105,7 @@
 
     <!-- keyguard clock -->
     <color name="lockscreen_clock_background">#b3ffffff</color>
-    <color name="lockscreen_clock_foreground">#40000000</color>
+    <color name="lockscreen_clock_foreground">#7affffff</color>
     <color name="lockscreen_clock_am_pm">#ff9a9a9a</color>
     <color name="lockscreen_owner_info">#ff9a9a9a</color>
 
