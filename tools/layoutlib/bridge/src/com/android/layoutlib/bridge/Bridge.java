@@ -322,7 +322,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
                 t2 = t.getCause();
             }
             return new BridgeRenderSession(null,
-                    ERROR_UNKNOWN.createResult(t2.getMessage(), t2));
+                    ERROR_UNKNOWN.createResult(t2.getMessage(), t));
         }
     }
 
