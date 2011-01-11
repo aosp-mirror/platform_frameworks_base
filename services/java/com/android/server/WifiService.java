@@ -954,8 +954,10 @@ public class WifiService extends IWifiManager.Stub {
          * @see #shouldDeviceStayAwake(int, int)
          */
         private boolean shouldWifiStayAwake(int stayAwakeConditions, int pluggedType) {
+            //Never sleep when plugged in as long as the user has not changed the settings
             int wifiSleepPolicy = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.WIFI_SLEEP_POLICY, Settings.System.WIFI_SLEEP_POLICY_DEFAULT);
+                    Settings.System.WIFI_SLEEP_POLICY,
+                    Settings.System.WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED);
 
             if (wifiSleepPolicy == Settings.System.WIFI_SLEEP_POLICY_NEVER) {
                 // Never sleep
