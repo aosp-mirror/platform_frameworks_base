@@ -34,7 +34,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
-        View.OnLongClickListener {
+        View.OnLongClickListener, View.OnClickListener {
     private View mCustomView;
     private EditText mEditText;
     private TextView mMatches;
@@ -53,6 +53,7 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         // Override long click so that select ActionMode is not opened, which
         // would exit find ActionMode.
         mEditText.setOnLongClickListener(this);
+        mEditText.setOnClickListener(this);
         setText("");
         mMatches = (TextView) mCustomView.findViewById(
                 com.android.internal.R.id.matches);
@@ -105,7 +106,17 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
             throw new AssertionError(
                     "No WebView for FindActionModeCallback::findNext");
         }
+        if (!mMatchesFound) {
+            findAll();
+            return;
+        }
+        if (0 == mNumberOfMatches) {
+            // There are no matches, so moving to the next match will not do
+            // anything.
+            return;
+        }
         mWebView.findNext(next);
+        updateMatchesString();
     }
 
     /*
@@ -158,6 +169,13 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
     @Override
     public boolean onLongClick(View v) { return true; }
 
+    // OnClickListener implementation
+
+    @Override
+    public void onClick(View v) {
+        findNext(true);
+    }
+
     // ActionMode.Callback implementation
 
     @Override
@@ -193,15 +211,6 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
                     "No WebView for FindActionModeCallback::onActionItemClicked");
         }
         mInput.hideSoftInputFromWindow(mWebView.getWindowToken(), 0);
-        if (!mMatchesFound) {
-            findAll();
-            return true;
-        }
-        if (0 == mNumberOfMatches) {
-            // There are no matches, so moving to the next match will not do
-            // anything.
-            return true;
-        }
         switch(item.getItemId()) {
             case com.android.internal.R.id.find_prev:
                 findNext(false);
@@ -212,7 +221,6 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
             default:
                 return false;
         }
-        updateMatchesString();
         return true;
     }
 
