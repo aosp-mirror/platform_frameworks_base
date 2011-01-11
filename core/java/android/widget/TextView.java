@@ -4672,6 +4672,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     // don't let it be inserted into the text.
                     if ((event.getFlags() & KeyEvent.FLAG_EDITOR_ACTION) != 0
                             || shouldAdvanceFocusOnEnter()) {
+                        if (mOnClickListener != null) {
+                            return 0;
+                        }
                         return -1;
                     }
                 }
