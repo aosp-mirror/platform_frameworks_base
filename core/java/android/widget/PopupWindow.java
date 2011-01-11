@@ -1468,12 +1468,17 @@ public class PopupWindow {
             if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
                 if (event.getAction() == KeyEvent.ACTION_DOWN
                         && event.getRepeatCount() == 0) {
-                    getKeyDispatcherState().startTracking(event, this);
+                    KeyEvent.DispatcherState state = getKeyDispatcherState();
+                    if (state != null) {
+                        state.startTracking(event, this);
+                    }
                     return true;
-                } else if (event.getAction() == KeyEvent.ACTION_UP
-                        && getKeyDispatcherState().isTracking(event) && !event.isCanceled()) {
-                    dismiss();
-                    return true;
+                } else if (event.getAction() == KeyEvent.ACTION_UP) {
+                    KeyEvent.DispatcherState state = getKeyDispatcherState();
+                    if (state != null && state.isTracking(event) && !event.isCanceled()) {
+                        dismiss();
+                        return true;
+                    }
                 }
                 return super.dispatchKeyEvent(event);
             } else {
