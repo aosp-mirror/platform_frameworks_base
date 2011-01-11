@@ -20,64 +20,67 @@ import android.view.InputChannel;
 
 /**
  * Describes input-related window properties for use by the input dispatcher.
- * 
  * @hide
  */
 public final class InputWindow {
+    // The window handle.
+    public InputWindowHandle inputWindowHandle;
+
     // The input channel associated with the window.
     public InputChannel inputChannel;
-    
+
     // The window name.
     public String name;
-    
+
     // Window layout params attributes.  (WindowManager.LayoutParams)
     public int layoutParamsFlags;
     public int layoutParamsType;
-    
+
     // Dispatching timeout.
     public long dispatchingTimeoutNanos;
-    
+
     // Window frame area.
     public int frameLeft;
     public int frameTop;
     public int frameRight;
     public int frameBottom;
-    
+
     // Window visible frame area.
     public int visibleFrameLeft;
     public int visibleFrameTop;
     public int visibleFrameRight;
     public int visibleFrameBottom;
-    
+
     // Window touchable area.
     public int touchableAreaLeft;
     public int touchableAreaTop;
     public int touchableAreaRight;
     public int touchableAreaBottom;
-    
+
     // Window is visible.
     public boolean visible;
-    
+
     // Window can receive keys.
     public boolean canReceiveKeys;
-    
+
     // Window has focus.
     public boolean hasFocus;
-    
+
     // Window has wallpaper.  (window is the current wallpaper target)
     public boolean hasWallpaper;
-    
+
     // Input event dispatching is paused.
     public boolean paused;
-    
+
     // Window layer.
     public int layer;
-    
+
     // Id of process and user that owns the window.
     public int ownerPid;
     public int ownerUid;
-    
+
     public void recycle() {
+        inputWindowHandle = null;
         inputChannel = null;
     }
 }
