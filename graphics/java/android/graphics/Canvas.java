@@ -85,8 +85,12 @@ public class Canvas {
 
         @Override
         protected void finalize() throws Throwable {
-            if (mNativeCanvas != 0) {
-                finalizer(mNativeCanvas);
+            try {
+                if (mNativeCanvas != 0) {
+                    finalizer(mNativeCanvas);
+                }
+            } finally {
+                super.finalize();
             }
         }
     }
@@ -137,6 +141,8 @@ public class Canvas {
      * Returns null.
      * 
      * @deprecated This method is not supported and should not be invoked.
+     * 
+     * @hide
      */
     @Deprecated
     protected GL getGL() {
