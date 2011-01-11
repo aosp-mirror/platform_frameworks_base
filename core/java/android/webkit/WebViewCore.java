@@ -115,8 +115,8 @@ final class WebViewCore {
      */
     private int mViewportDensityDpi = -1;
 
-    private int mRestoredScale = 0;
-    private int mRestoredTextWrapScale = 0;
+    private float mRestoredScale = 0;
+    private float mRestoredTextWrapScale = 0;
     private int mRestoredX = 0;
     private int mRestoredY = 0;
 
@@ -2245,8 +2245,8 @@ final class WebViewCore {
         }
 
         // reset the scroll position, the restored offset and scales
-        mWebkitScrollX = mWebkitScrollY = mRestoredX = mRestoredY
-                = mRestoredScale = mRestoredTextWrapScale = 0;
+        mWebkitScrollX = mWebkitScrollY = mRestoredX = mRestoredY = 0;
+        mRestoredScale = mRestoredTextWrapScale = 0;
     }
 
     // called by JNI
@@ -2352,9 +2352,9 @@ final class WebViewCore {
         mInitialViewState.mMobileSite = (0 == mViewportWidth);
         if (mRestoredScale > 0) {
             mInitialViewState.mIsRestored = true;
-            mInitialViewState.mViewScale = mRestoredScale / 100.0f;
+            mInitialViewState.mViewScale = mRestoredScale;
             if (mRestoredTextWrapScale > 0) {
-                mInitialViewState.mTextWrapScale = mRestoredTextWrapScale / 100.0f;
+                mInitialViewState.mTextWrapScale = mRestoredTextWrapScale;
             } else {
                 mInitialViewState.mTextWrapScale = mInitialViewState.mViewScale;
             }
@@ -2411,7 +2411,7 @@ final class WebViewCore {
                 // know the exact scale. If mRestoredScale is non-zero, use it;
                 // otherwise just use mTextWrapScale as the initial scale.
                 data.mScale = mInitialViewState.mViewScale == 0
-                        ? (mRestoredScale > 0 ? mRestoredScale / 100.0f
+                        ? (mRestoredScale > 0 ? mRestoredScale
                                 : mInitialViewState.mTextWrapScale)
                         : mInitialViewState.mViewScale;
                 if (DebugFlags.WEB_VIEW_CORE) {
@@ -2444,7 +2444,7 @@ final class WebViewCore {
     }
 
     // called by JNI
-    private void restoreScale(int scale, int textWrapScale) {
+    private void restoreScale(float scale, float textWrapScale) {
         if (mBrowserFrame.firstLayoutDone() == false) {
             mRestoredScale = scale;
             if (mSettings.getUseWideViewPort()) {
