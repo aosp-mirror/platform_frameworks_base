@@ -142,16 +142,6 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
         }
 
         @Override
-        public void error(String tag, Throwable t) {
-            String message = t.getMessage();
-            if (message == null) {
-                message = t.getClass().getName();
-            }
-
-            System.err.println(message);
-        }
-
-        @Override
         public void error(String tag, String message, Throwable throwable) {
             System.err.println(message);
         }

@@ -322,9 +322,9 @@ public final class BridgeTypedArray extends TypedArray {
         } catch (Exception e) {
             // this is an error and not warning since the file existence is checked before
             // attempting to parse it.
-            Bridge.getLog().error(null, e);
+            Bridge.getLog().error(null, "Failed to parse file " + value, e);
 
-            // return null below.
+            return null;
         }
 
         // looks like were unable to resolve the color value.
