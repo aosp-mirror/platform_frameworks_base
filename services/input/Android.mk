@@ -21,6 +21,7 @@ LOCAL_SRC_FILES:= \
     InputDispatcher.cpp \
     InputManager.cpp \
     InputReader.cpp \
+    InputWindow.cpp \
     PointerController.cpp
 
 LOCAL_SHARED_LIBRARIES := \
