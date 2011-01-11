@@ -347,7 +347,8 @@ void CameraSourceTimeLapse::stopCameraRecording() {
 }
 
 void CameraSourceTimeLapse::releaseRecordingFrame(const sp<IMemory>& frame) {
-    if (!mUseStillCameraForTimeLapse) {
+    if (!mUseStillCameraForTimeLapse &&
+        mCamera != NULL) {
         mCamera->releaseRecordingFrame(frame);
     }
 }
