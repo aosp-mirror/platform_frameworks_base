@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.tablet;
 
 import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -33,11 +34,13 @@ import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.systemui.R;
 
-public class NotificationPanel extends LinearLayout implements StatusBarPanel,
+public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         View.OnClickListener {
     static final String TAG = "Tablet/NotificationPanel";
     static final boolean DEBUG = false;
@@ -51,12 +54,11 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
     ViewGroup mContentFrame;
     Rect mContentArea;
     View mSettingsView;
+    View mScrim, mGlow;
     ViewGroup mContentParent;
 
     Choreographer mChoreo = new Choreographer();
     int mStatusBarHeight;
-    Drawable mBgDrawable;
-    Drawable mGlowDrawable;
 
     public NotificationPanel(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -69,8 +71,6 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
 
         mStatusBarHeight = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
-        mBgDrawable = res.getDrawable(R.drawable.notify_panel_bg_protect);
-        mGlowDrawable = res.getDrawable(R.drawable.notify_glow_back);
     }
 
     @Override
@@ -80,8 +80,12 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
         setWillNotDraw(false);
 
         mContentParent = (ViewGroup)findViewById(R.id.content_parent);
+        mContentParent.bringToFront();
         mTitleArea = findViewById(R.id.title_area);
         mTitleArea.setOnClickListener(this);
+
+        mScrim = findViewById(R.id.scrim);
+        mGlow = findViewById(R.id.glow);
 
         mSettingsButton = (ImageView)findViewById(R.id.settings_button);
         mNotificationButton = (ImageView)findViewById(R.id.notification_button);
@@ -132,21 +136,6 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
-        // We know that none of our children are GONE, so don't worry about skipping GONE views.
-        final int N = getChildCount();
-        if (N == 0) {
-            return;
-        }
-        final int allocatedBottom = getChildAt(N-1).getBottom();
-        final int shift = b - allocatedBottom - getPaddingBottom();
-        if (shift <= 0) {
-            return;
-        }
-        for (int i=0; i<N; i++) {
-            final View c = getChildAt(i);
-            c.layout(c.getLeft(), c.getTop() + shift, c.getRight(), c.getBottom() + shift);
-        }
-
         mChoreo.setPanelHeight(mContentParent.getHeight());
     }
 
@@ -154,26 +143,6 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
     public void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         mContentArea = null;
-        mBgDrawable.setBounds(0, 0, w, h-mStatusBarHeight);
-    }
-
-    @Override
-    public void onDraw(Canvas canvas) {
-        int saveCount;
-        final int w = getWidth();
-        final int h = getHeight();
-
-        super.onDraw(canvas);
-
-        // Background protection
-        mBgDrawable.draw(canvas);
-
-        // The panel glow (behind status bar)
-
-        saveCount = canvas.save();
-        canvas.clipRect(0, 0, w, h-mStatusBarHeight);
-        mGlowDrawable.draw(canvas);
-        canvas.restoreToCount(saveCount);
     }
 
     public void onClick(View v) {
@@ -227,82 +196,82 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
 
     private class Choreographer implements Animator.AnimatorListener {
         boolean mVisible;
-        int mBgAlpha;
-        ValueAnimator mBgAnim;
         int mPanelHeight;
-        int mPanelBottom;
-        ValueAnimator mPositionAnim;
+        AnimatorSet mContentAnim;
 
         // should group this into a multi-property animation
-        final int OPEN_DURATION = 200;
+        final int OPEN_DURATION = 250;
+
+        // the panel will start to appear this many px from the end
+        final int HYPERSPACE_OFFRAMP = 120;
 
         Choreographer() {
         }
 
-        void createAnimation(boolean visible) {
-            mBgAnim = ObjectAnimator.ofInt(this, "bgAlpha", mBgAlpha, visible ? 255 : 0)
-                    .setDuration(OPEN_DURATION);
-            mBgAnim.addListener(this);
+        void createAnimation(boolean appearing) {
+            Animator bgAnim = ObjectAnimator.ofFloat(mScrim,
+                    "alpha", mScrim.getAlpha(), appearing ? 1 : 0);
 
-            mPositionAnim = ObjectAnimator.ofInt(this, "panelBottom", mPanelBottom,
-                        visible ? mPanelHeight : 0)
-                    .setDuration(OPEN_DURATION);
-        }
+            float start, end;
 
-        void startAnimation(boolean visible) {
-            if (DEBUG) Slog.d(TAG, "startAnimation(visible=" + visible + ")");
-
-            createAnimation(visible);
-            mBgAnim.start();
-            mPositionAnim.start();
-
-            mVisible = visible;
-        }
-
-        void jumpTo(boolean visible) {
-            setBgAlpha(visible ? 255 : 0);
-            setPanelBottom(visible ? mPanelHeight : 0);
-        }
-
-        public void setBgAlpha(int alpha) {
-            mBgAlpha = alpha;
-            mBgDrawable.setAlpha((int)(alpha));
-            invalidate();
-        }
-
-        // 0 is closed, the height of the panel is open
-        public void setPanelBottom(int y) {
-            mPanelBottom = y;
-            int translationY = mPanelHeight - y;
-            mContentParent.setTranslationY(translationY);
-
-            final int glowXOffset = 100;
-            final int glowYOffset = 100;
-            int glowX = mContentParent.getLeft() - glowXOffset;
-            int glowY = mContentParent.getTop() - glowYOffset + translationY;
-            mGlowDrawable.setBounds(glowX, glowY, glowX + mGlowDrawable.getIntrinsicWidth(),
-                    glowY + mGlowDrawable.getIntrinsicHeight());
-
-            float alpha;
-            if (mPanelBottom > glowYOffset) {
-                alpha = 1;
+            // 0: on-screen
+            // height: off-screen
+            float y = mContentParent.getTranslationY();
+            if (appearing) {
+                // we want to go from near-the-top to the top, unless we're half-open in the right
+                // general vicinity
+                start = (y < HYPERSPACE_OFFRAMP)
+                    ? y
+                    : HYPERSPACE_OFFRAMP;
+                end = 0;
             } else {
-                alpha = ((float)mPanelBottom) / glowYOffset;
+                start = y;
+                end = y + HYPERSPACE_OFFRAMP;
             }
-            mContentParent.setAlpha(alpha);
-            mGlowDrawable.setAlpha((int)(255 * alpha));
+            Animator posAnim = ObjectAnimator.ofFloat(mContentParent, "translationY", start, end);
+            posAnim.setInterpolator(appearing 
+                    ? new android.view.animation.DecelerateInterpolator(2.0f)
+                    : new android.view.animation.AccelerateInterpolator(2.0f));
 
-            if (false) {
-                Slog.d(TAG, "mPanelBottom=" + mPanelBottom + " translationY=" + translationY
-                        + " alpha=" + alpha + " glowY=" + glowY);
-            }
+            Animator glowAnim = ObjectAnimator.ofFloat(mGlow, "alpha",
+                    mGlow.getAlpha(), appearing ? 1.0f : 0.0f);
+            glowAnim.setInterpolator(appearing 
+                    ? new android.view.animation.AccelerateInterpolator(1.0f)
+                    : new android.view.animation.DecelerateInterpolator(1.0f));
+
+            mContentAnim = new AnimatorSet();
+            mContentAnim
+                .play(ObjectAnimator.ofFloat(mContentParent, "alpha", mContentParent.getAlpha(),
+                                                                      appearing ? 1.0f : 0.0f))
+                .with(glowAnim)
+                .with(bgAnim)
+                .with(posAnim)
+                ;
+            mContentAnim.setDuration(OPEN_DURATION);
+            mContentAnim.addListener(this);
+        }
+
+        void startAnimation(boolean appearing) {
+            if (DEBUG) Slog.d(TAG, "startAnimation(appearing=" + appearing + ")");
+
+            createAnimation(appearing);
+
+            mContentParent.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            mContentAnim.start();
+
+            mVisible = appearing;
+        }
+
+        void jumpTo(boolean appearing) {
+//            setBgAlpha(appearing ? 255 : 0);
+            mContentParent.setTranslationY(appearing ? 0 : mPanelHeight);
         }
 
         public void setPanelHeight(int h) {
+            if (DEBUG) Slog.d(TAG, "panelHeight=" + h);
             mPanelHeight = h;
-            if (mPanelBottom == 0) {
+            if (mPanelHeight == 0) {
                 // fully closed, no animation necessary
-                setPanelBottom(0);
             } else if (mVisible) {
                 if (DEBUG) {
                     Slog.d(TAG, "panelHeight not zero but trying to open; scheduling an anim to open fully");
@@ -312,17 +281,18 @@ public class NotificationPanel extends LinearLayout implements StatusBarPanel,
         }
 
         public void onAnimationCancel(Animator animation) {
-            if (DEBUG) Slog.d(TAG, "onAnimationCancel mBgAlpha=" + mBgAlpha);
+            if (DEBUG) Slog.d(TAG, "onAnimationCancel");
             // force this to zero so we close the window
-            mBgAlpha = 0;
+            mVisible = false;
         }
 
         public void onAnimationEnd(Animator animation) {
-            if (DEBUG) Slog.d(TAG, "onAnimationEnd mBgAlpha=" + mBgAlpha);
-            if (mBgAlpha == 0) {
+            if (DEBUG) Slog.d(TAG, "onAnimationEnd");
+            if (! mVisible) {
                 setVisibility(View.GONE);
             }
-            mBgAnim = null;
+            mContentParent.setLayerType(View.LAYER_TYPE_NONE, null);
+            mContentAnim = null;
         }
 
         public void onAnimationRepeat(Animator animation) {

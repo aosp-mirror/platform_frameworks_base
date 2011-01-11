@@ -20,27 +20,35 @@
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:orientation="vertical"
     android:gravity="right"
-    android:paddingTop="32dp"
     >
 
-    <LinearLayout
+    <View
+        android:id="@+id/scrim"
+        android:background="@drawable/notify_panel_bg_protect"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        />
+
+    <RelativeLayout
         android:id="@+id/content_parent"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:animateLayoutChanges="true"
-        android:orientation="vertical"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
         >
-
-        <com.android.systemui.statusbar.tablet.NotificationTitleArea
+        <RelativeLayout
             android:id="@+id/title_area"
             android:layout_height="160dp"
             android:layout_width="384dp"
             android:layout_marginLeft="24dp"
             android:paddingTop="20dp"
             android:orientation="vertical"
-            android:animateLayoutChanges="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/panel_notification_tiled"
             >
 
             <com.android.systemui.statusbar.tablet.HoloClock
@@ -154,13 +162,15 @@
                 android:src="@drawable/status_bar_veto"
                 android:baseline="21dp"
                 />
-        </com.android.systemui.statusbar.tablet.NotificationTitleArea>
+        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/content_frame"
             android:layout_height="wrap_content"
             android:layout_width="408dp"
             android:orientation="vertical"
+            android:layout_below="@id/title_area"
+            android:layout_alignParentRight="true"
             >
             <ScrollView
                 android:id="@+id/notification_scroller"
@@ -191,5 +201,17 @@
                 android:src="@drawable/notify_item_glow_bottom"
                 />
         </LinearLayout>
-    </LinearLayout>
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/glow"
+        android:background="@drawable/notify_glow_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/content_parent"
+        android:layout_alignLeft="@id/content_parent"
+        android:layout_marginLeft="100dip"
+        android:layout_marginTop="-100dip"
+        />
+
 </com.android.systemui.statusbar.tablet.NotificationPanel>
