@@ -35,7 +35,6 @@ public class XmlUtils_Delegate {
         // The Dalvik libraries are able to handle Integer.parse("XXXXXXXX", 16) where XXXXXXX
         // is > 80000000 but the Java VM cannot.
 
-        int value;
         int sign = 1;
         int index = 0;
         int len = nm.length();
@@ -51,7 +50,7 @@ public class XmlUtils_Delegate {
             if (index == (len - 1))
                 return 0;
 
-            char    c = nm.charAt(index + 1);
+            char c = nm.charAt(index + 1);
 
             if ('x' == c || 'X' == c) {
                 index += 2;
@@ -61,14 +60,11 @@ public class XmlUtils_Delegate {
                 base = 8;
             }
         }
-        else if ('#' == nm.charAt(index))
-        {
+        else if ('#' == nm.charAt(index)) {
             index++;
             base = 16;
-
-            return ((int)Long.parseLong(nm.substring(index), base)) * sign;
         }
 
-        return Integer.parseInt(nm.substring(index), base) * sign;
+        return ((int)Long.parseLong(nm.substring(index), base)) * sign;
     }
 }

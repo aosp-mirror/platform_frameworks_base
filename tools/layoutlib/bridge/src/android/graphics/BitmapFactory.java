@@ -351,7 +351,8 @@ public class BitmapFactory {
                 If the exception happened on open, bm will be null.
                 If it happened on close, bm is still valid.
             */
-            Bridge.getLog().error(null, e);
+            Bridge.getLog().error(null,
+                    String.format("Error decoding bitmap of id 0x%x", id), e);
         } finally {
             try {
                 if (is != null) is.close();

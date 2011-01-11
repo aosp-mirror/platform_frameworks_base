@@ -365,7 +365,7 @@ public class RenderSessionImpl {
             }
 
             // log it
-            mParams.getLog().error("Scene inflate failed", t);
+            mParams.getLog().error(null, "Scene inflate failed", t);
 
             return ERROR_INFLATION.createResult(t.getMessage(), t);
         }
@@ -481,7 +481,7 @@ public class RenderSessionImpl {
             }
 
             // log it
-            mParams.getLog().error("Scene Render failed", t);
+            mParams.getLog().error(null, "Scene Render failed", t);
 
             return ERROR_UNKNOWN.createResult(t.getMessage(), t);
         }
