@@ -204,11 +204,6 @@ import junit.framework.Assert;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
             case KeyEvent.KEYCODE_DPAD_UP:
             case KeyEvent.KEYCODE_DPAD_DOWN:
-                if (!mWebView.nativeCursorMatchesFocus()) {
-                    return down ? mWebView.onKeyDown(keyCode, event) : mWebView
-                            .onKeyUp(keyCode, event);
-
-                }
                 isArrowKey = true;
                 break;
         }
@@ -257,10 +252,6 @@ import junit.framework.Assert;
             // Note that this handles center key and trackball.
             if (isPopupShowing()) {
                 return super.dispatchKeyEvent(event);
-            }
-            if (!mWebView.nativeCursorMatchesFocus()) {
-                return down ? mWebView.onKeyDown(keyCode, event) : mWebView
-                        .onKeyUp(keyCode, event);
             }
             // Center key should be passed to a potential onClick
             if (!down) {
@@ -753,12 +744,7 @@ import junit.framework.Assert;
         if (event.getAction() != MotionEvent.ACTION_MOVE) {
             return false;
         }
-        // If the Cursor is not on the text input, webview should handle the
-        // trackball
-        if (!mWebView.nativeCursorMatchesFocus()) {
-            return mWebView.onTrackballEvent(event);
-        }
-        Spannable text = (Spannable) getText();
+        Spannable text = getText();
         MovementMethod move = getMovementMethod();
         if (move != null && getLayout() != null &&
             move.onTrackballEvent(this, text, event)) {
