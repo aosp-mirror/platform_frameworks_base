@@ -43,32 +43,33 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Slog;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.systemui.R;
 
-public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnClickListener {
+public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, OnClickListener {
     private static final int GLOW_PADDING = 15;
     private static final String TAG = "RecentAppsPanel";
     private static final boolean DEBUG = TabletStatusBar.DEBUG;
     private static final int DISPLAY_TASKS_PORTRAIT = 7; // Limited by max binder transaction size
     private static final int DISPLAY_TASKS_LANDSCAPE = 5; // number of recent tasks to display
     private static final int MAX_TASKS = DISPLAY_TASKS_PORTRAIT + 1; // allow extra for non-apps
-    private static final int STAGGER_ANIMATION_DELAY = 30;
-    private static final long ALPHA_ANIMATION_DURATION = 120;
     private TabletStatusBar mBar;
-    private LinearLayout mRecentsContainer;
-    private View mRecentsGlowView;
     private ArrayList<ActivityDescription> mActivityDescriptions;
     private int mIconDpi;
-    private AnimatorSet mAnimationSet;
-    private View mBackgroundProtector;
+    private View mRecentsScrim;
+    private View mRecentsGlowView;
+    private LinearLayout mRecentsContainer;
     private Bitmap mGlowBitmap;
+    private boolean mShowing;
+    private Choreographer mChoreo;
 
     static class ActivityDescription {
         int id;
@@ -104,6 +105,145 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         return x >= l && x < r && y >= t && y < b;
     }
 
+    public void show(boolean show, boolean animate) {
+        if (animate) {
+            if (mShowing != show) {
+                mShowing = show;
+                if (show) {
+                    setVisibility(View.VISIBLE);
+                }
+                mChoreo.startAnimation(show);
+            }
+        } else {
+            mShowing = show;
+            setVisibility(show ? View.VISIBLE : View.GONE);
+            mChoreo.jumpTo(show);
+        }
+    }
+
+    /**
+     * We need to be aligned at the bottom.  LinearLayout can't do this, so instead,
+     * let LinearLayout do all the hard work, and then shift everything down to the bottom.
+     */
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        mChoreo.setPanelHeight(mRecentsContainer.getHeight());
+    }
+
+    /**
+     * Whether the panel is showing, or, if it's animating, whether it will be
+     * when the animation is done.
+     */
+    public boolean isShowing() {
+        return mShowing;
+    }
+
+    private static class Choreographer implements Animator.AnimatorListener {
+        // should group this into a multi-property animation
+        private static final int OPEN_DURATION = 136;
+        private static final int CLOSE_DURATION = 250;
+
+        boolean mVisible;
+        int mPanelHeight;
+        View mRootView;
+        View mScrimView;
+        View mContentView;
+        AnimatorSet mContentAnim;
+
+        // the panel will start to appear this many px from the end
+        final int HYPERSPACE_OFFRAMP = 200;
+
+        public Choreographer(View root, View scrim, View content) {
+            mRootView = root;
+            mScrimView = scrim;
+            mContentView = content;
+        }
+
+        void createAnimation(boolean appearing) {
+            float start, end;
+
+            if (DEBUG) Log.e(TAG, "createAnimation()", new Exception());
+
+            // 0: on-screen
+            // height: off-screen
+            float y = mContentView.getTranslationY();
+            if (appearing) {
+                // we want to go from near-the-top to the top, unless we're half-open in the right
+                // general vicinity
+                start = (y < HYPERSPACE_OFFRAMP) ? y : HYPERSPACE_OFFRAMP;
+                end = 0;
+            } else {
+                start = y;
+                end = y + HYPERSPACE_OFFRAMP;
+            }
+
+            Animator posAnim = ObjectAnimator.ofFloat(mContentView, "translationY",
+                    start, end);
+            posAnim.setInterpolator(appearing
+                    ? new android.view.animation.DecelerateInterpolator(2.5f)
+                    : new android.view.animation.AccelerateInterpolator(2.5f));
+
+            Animator glowAnim = ObjectAnimator.ofFloat(mContentView, "alpha",
+                    mContentView.getAlpha(), appearing ? 1.0f : 0.0f);
+            glowAnim.setInterpolator(appearing
+                    ? new android.view.animation.AccelerateInterpolator(1.0f)
+                    : new android.view.animation.DecelerateInterpolator(1.0f));
+
+            Animator bgAnim = ObjectAnimator.ofInt(mScrimView.getBackground(),
+                    "alpha", appearing ? 0 : 255, appearing ? 255 : 0);
+
+            mContentAnim = new AnimatorSet();
+            mContentAnim
+                    .play(bgAnim)
+                    .with(glowAnim)
+                    .with(posAnim);
+            mContentAnim.setDuration(appearing ? OPEN_DURATION : CLOSE_DURATION);
+            mContentAnim.addListener(this);
+        }
+
+        void startAnimation(boolean appearing) {
+            if (DEBUG) Slog.d(TAG, "startAnimation(appearing=" + appearing + ")");
+
+            createAnimation(appearing);
+
+            mContentView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            mContentAnim.start();
+
+            mVisible = appearing;
+        }
+
+        void jumpTo(boolean appearing) {
+            mContentView.setTranslationY(appearing ? 0 : mPanelHeight);
+        }
+
+        public void setPanelHeight(int h) {
+            if (DEBUG) Slog.d(TAG, "panelHeight=" + h);
+            mPanelHeight = h;
+        }
+
+        public void onAnimationCancel(Animator animation) {
+            if (DEBUG) Slog.d(TAG, "onAnimationCancel");
+            // force this to zero so we close the window
+            mVisible = false;
+        }
+
+        public void onAnimationEnd(Animator animation) {
+            if (DEBUG) Slog.d(TAG, "onAnimationEnd");
+            if (!mVisible) {
+                mRootView.setVisibility(View.GONE);
+            }
+            mContentView.setLayerType(View.LAYER_TYPE_NONE, null);
+            mContentAnim = null;
+        }
+
+        public void onAnimationRepeat(Animator animation) {
+        }
+
+        public void onAnimationStart(Animator animation) {
+        }
+    }
+
     public void setBar(TabletStatusBar bar) {
         mBar = bar;
     }
@@ -128,12 +268,12 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         super.onFinishInflate();
         mRecentsContainer = (LinearLayout) findViewById(R.id.recents_container);
         mRecentsGlowView = findViewById(R.id.recents_glow);
-        mBackgroundProtector = (View) findViewById(R.id.recents_bg_protect);
+        mRecentsScrim = (View) findViewById(R.id.recents_bg_protect);
+        mChoreo = new Choreographer(this, mRecentsScrim, mRecentsGlowView);
 
         // In order to save space, we make the background texture repeat in the Y direction
-        View view = findViewById(R.id.recents_bg_protect);
-        if (view != null && view.getBackground() instanceof BitmapDrawable) {
-            ((BitmapDrawable) view.getBackground()).setTileModeY(TileMode.REPEAT);
+        if (mRecentsScrim != null && mRecentsScrim.getBackground() instanceof BitmapDrawable) {
+            ((BitmapDrawable) mRecentsScrim.getBackground()).setTileModeY(TileMode.REPEAT);
         }
     }
 
@@ -255,7 +395,10 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
         if (mActivityDescriptions.size() > 0) {
             updateUiElements(getResources().getConfiguration(), true);
         } else {
-            mBar.animateCollapse();
+            // Immediately hide this panel
+            mShowing = false;
+            setVisibility(View.GONE);
+            // mBar.animateCollapse();
         }
     }
 
@@ -284,13 +427,10 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
     private void updateUiElements(Configuration config, boolean animate) {
         mRecentsContainer.removeAllViews();
 
-        final float initialAlpha = 0.0f;
         final int first = 0;
         final boolean isPortrait = config.orientation == Configuration.ORIENTATION_PORTRAIT;
         final int taskCount = isPortrait ? DISPLAY_TASKS_PORTRAIT : DISPLAY_TASKS_LANDSCAPE;
         final int last = Math.min(mActivityDescriptions.size(), taskCount) - 1;
-        ArrayList<Animator> anims = new ArrayList<Animator>(last+1);
-        DecelerateInterpolator interp = new DecelerateInterpolator();
         for (int i = last; i >= first; i--) {
             ActivityDescription activityDescription = mActivityDescriptions.get(i);
             View view = View.inflate(mContext, R.layout.status_bar_recent_item, null);
@@ -306,40 +446,11 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
             view.setOnClickListener(this);
             view.setTag(activityDescription);
             mRecentsContainer.addView(view);
-
-            if (animate) {
-                view.setAlpha(initialAlpha);
-                ObjectAnimator anim = ObjectAnimator.ofFloat(view, "alpha", initialAlpha, 1.0f);
-                anim.setDuration(ALPHA_ANIMATION_DURATION);
-                anim.setStartDelay((last-i) * STAGGER_ANIMATION_DELAY);
-                anim.setInterpolator(interp);
-                anims.add(anim);
-            }
         }
 
         int views = mRecentsContainer.getChildCount();
         mRecentsContainer.setVisibility(views > 0 ? View.VISIBLE : View.GONE);
         mRecentsGlowView.setVisibility(views > 0 ? View.VISIBLE : View.GONE);
-
-        if (animate && views > 0) {
-            ObjectAnimator anim = ObjectAnimator.ofFloat(mRecentsGlowView, "alpha",
-                    initialAlpha, 1.0f);
-            anim.setDuration((last-first) * STAGGER_ANIMATION_DELAY);
-            anim.setInterpolator(interp);
-            anims.add(anim);
-
-            anim = ObjectAnimator.ofFloat(mBackgroundProtector, "alpha",
-                    initialAlpha, 1.0f);
-            anim.setDuration(last * STAGGER_ANIMATION_DELAY);
-            anim.setInterpolator(interp);
-            anims.add(anim);
-        }
-
-        if (anims.size() > 0) {
-            mAnimationSet = new AnimatorSet();
-            mAnimationSet.playTogether(anims);
-            mAnimationSet.start();
-        }
     }
 
     public void onClick(View v) {
@@ -356,6 +467,7 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
             if (DEBUG) Log.v(TAG, "Starting activity " + intent);
             getContext().startActivity(intent);
         }
+        setVisibility(View.GONE);
         mBar.animateCollapse();
     }
 }

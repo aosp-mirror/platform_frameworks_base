@@ -20,32 +20,36 @@
 
 <com.android.systemui.statusbar.tablet.RecentAppsPanel
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/recents_root"
     android:layout_height="match_parent"
-    android:layout_width="wrap_content"
-    android:layout_marginBottom="48dip"
-    android:background="@drawable/recents_bg_protect_tile"
-    android:id="@+id/recents_bg_protect"
-    android:orientation="vertical">
+    android:layout_width="wrap_content">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:layout_weight="1"
-    />
-
-    <LinearLayout android:id="@+id/recents_glow"
+    <FrameLayout
+        android:id="@+id/recents_bg_protect"
+        android:background="@drawable/recents_bg_protect_tile"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@drawable/recents_blue_glow">
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:paddingBottom="48dip"
+        android:clipToPadding="false">
 
-        <LinearLayout android:id="@+id/recents_container"
-            android:layout_width="356dip"
+        <LinearLayout android:id="@+id/recents_glow"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginRight="100dip"
-        />
+            android:orientation="horizontal"
+            android:layout_marginBottom="-28dip"
+            android:layout_gravity="bottom"
+            android:background="@drawable/recents_blue_glow">
 
-    </LinearLayout>
+            <LinearLayout android:id="@+id/recents_container"
+                android:layout_width="356dip"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginRight="100dip"
+            />
+
+        </LinearLayout>
+
+    </FrameLayout>
 
 </com.android.systemui.statusbar.tablet.RecentAppsPanel>

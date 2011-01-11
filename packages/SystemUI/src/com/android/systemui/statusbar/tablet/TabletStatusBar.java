@@ -93,9 +93,6 @@ public class TabletStatusBar extends StatusBar implements
     // Fitts' Law assistance for LatinIME; TODO: replace with a more general approach
     private static final boolean FAKE_SPACE_BAR = true;
 
-    private static final int MAX_IMAGE_LEVEL = 10000;
-    private static final boolean USE_2D_RECENTS = true;
-
     public static final int LIGHTS_ON_DELAY = 5000;
 
     // The height of the bar, as definied by the build.  It may be taller if we're plugged
@@ -212,16 +209,16 @@ public class TabletStatusBar extends StatusBar implements
         mNotificationPeekWindow.setOnTouchListener(
                 new TouchOutsideListener(MSG_CLOSE_NOTIFICATION_PEEK, mNotificationPeekWindow));
         mNotificationPeekScrubRight = new LayoutTransition();
-        mNotificationPeekScrubRight.setAnimator(LayoutTransition.APPEARING, 
+        mNotificationPeekScrubRight.setAnimator(LayoutTransition.APPEARING,
                 ObjectAnimator.ofInt(null, "left", -512, 0));
-        mNotificationPeekScrubRight.setAnimator(LayoutTransition.DISAPPEARING, 
+        mNotificationPeekScrubRight.setAnimator(LayoutTransition.DISAPPEARING,
                 ObjectAnimator.ofInt(null, "left", -512, 0));
         mNotificationPeekScrubRight.setDuration(500);
 
         mNotificationPeekScrubLeft = new LayoutTransition();
-        mNotificationPeekScrubLeft.setAnimator(LayoutTransition.APPEARING, 
+        mNotificationPeekScrubLeft.setAnimator(LayoutTransition.APPEARING,
                 ObjectAnimator.ofInt(null, "left", 512, 0));
-        mNotificationPeekScrubLeft.setAnimator(LayoutTransition.DISAPPEARING, 
+        mNotificationPeekScrubLeft.setAnimator(LayoutTransition.DISAPPEARING,
                 ObjectAnimator.ofInt(null, "left", 512, 0));
         mNotificationPeekScrubLeft.setDuration(500);
 
@@ -241,30 +238,28 @@ public class TabletStatusBar extends StatusBar implements
         WindowManagerImpl.getDefault().addView(mNotificationPeekWindow, lp);
 
         // Recents Panel
-        if (USE_2D_RECENTS) {
-            mRecentsPanel = (RecentAppsPanel) View.inflate(context,
-                    R.layout.status_bar_recent_panel, null);
-            mRecentsPanel.setVisibility(View.GONE);
-            mRecentsPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_RECENTS_PANEL,
-                    mRecentsPanel));
-            mStatusBarView.setIgnoreChildren(2, mRecentButton, mRecentsPanel);
+        mRecentsPanel = (RecentAppsPanel) View.inflate(context,
+                R.layout.status_bar_recent_panel, null);
+        mRecentsPanel.setVisibility(View.GONE);
+        mRecentsPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_RECENTS_PANEL,
+                mRecentsPanel));
+        mStatusBarView.setIgnoreChildren(2, mRecentButton, mRecentsPanel);
 
-            lp = new WindowManager.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
-                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
-                    PixelFormat.TRANSLUCENT);
-            lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
-            lp.setTitle("RecentsPanel");
-            lp.windowAnimations = R.style.Animation_RecentPanel;
+        lp = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                PixelFormat.TRANSLUCENT);
+        lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
+        lp.setTitle("RecentsPanel");
+        lp.windowAnimations = R.style.Animation_RecentPanel;
 
-            WindowManagerImpl.getDefault().addView(mRecentsPanel, lp);
-            mRecentsPanel.setBar(this);
-        }
+        WindowManagerImpl.getDefault().addView(mRecentsPanel, lp);
+        mRecentsPanel.setBar(this);
     }
 
     @Override
@@ -298,7 +293,7 @@ public class TabletStatusBar extends StatusBar implements
 
     protected View makeStatusBarView() {
         final Context context = mContext;
-        
+
         mWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
 
@@ -462,15 +457,15 @@ public class TabletStatusBar extends StatusBar implements
                             //Slog.d(TAG, "loading peek: " + peekIndex);
                             NotificationData.Entry entry = mNotns.get(N-1-peekIndex);
                             NotificationData.Entry copy = new NotificationData.Entry(
-                                    entry.key, 
-                                    entry.notification, 
+                                    entry.key,
+                                    entry.notification,
                                     entry.icon);
                             inflateViews(copy, mNotificationPeekRow);
 
                             entry.icon.setBackgroundColor(0x20FFFFFF);
 
 //                          mNotificationPeekRow.setLayoutTransition(
-//                              peekIndex < mNotificationPeekIndex 
+//                              peekIndex < mNotificationPeekIndex
 //                                  ? mNotificationPeekScrubLeft
 //                                  : mNotificationPeekScrubRight);
 
@@ -516,11 +511,16 @@ public class TabletStatusBar extends StatusBar implements
                     break;
                 case MSG_OPEN_RECENTS_PANEL:
                     if (DEBUG) Slog.d(TAG, "opening recents panel");
-                    if (mRecentsPanel != null) mRecentsPanel.setVisibility(View.VISIBLE);
+                    if (mRecentsPanel != null) {
+                        mRecentsPanel.setVisibility(View.VISIBLE);
+                        mRecentsPanel.show(true, true);
+                    }
                     break;
                 case MSG_CLOSE_RECENTS_PANEL:
                     if (DEBUG) Slog.d(TAG, "closing recents panel");
-                    if (mRecentsPanel != null) mRecentsPanel.setVisibility(View.GONE);
+                    if (mRecentsPanel != null && mRecentsPanel.isShowing()) {
+                        mRecentsPanel.show(false, true);
+                    }
                     break;
                 case MSG_SHOW_CHROME:
                     if (DEBUG) Slog.d(TAG, "hiding shadows (lights on)");
@@ -631,7 +631,7 @@ public class TabletStatusBar extends StatusBar implements
                     handleNotificationError(key, notification, "Couldn't update icon: " + ic);
                     return;
                 }
-                
+
                 if (key == mNotificationPeekKey) {
                     // must update the peek window
                     Message peekMsg = mHandler.obtainMessage(MSG_OPEN_NOTIFICATION_PEEK);
@@ -820,7 +820,7 @@ public class TabletStatusBar extends StatusBar implements
             return false;
         }
     }
-    
+
     private void setAreThereNotifications() {
         final boolean hasClearable = mNotns.hasClearableItems();
     }
@@ -1265,11 +1265,11 @@ public class TabletStatusBar extends StatusBar implements
             mElementTransition.setDuration(LayoutTransition.DISAPPEARING, 400);
 
             mShadowTransition = new LayoutTransition();
-            mShadowTransition.setAnimator(LayoutTransition.APPEARING, 
+            mShadowTransition.setAnimator(LayoutTransition.APPEARING,
                     ObjectAnimator.ofFloat(null, "alpha", 0f, 1f));
             mShadowTransition.setDuration(LayoutTransition.APPEARING, 200);
             mShadowTransition.setStartDelay(LayoutTransition.APPEARING, 100);
-            mShadowTransition.setAnimator(LayoutTransition.DISAPPEARING, 
+            mShadowTransition.setAnimator(LayoutTransition.DISAPPEARING,
                     ObjectAnimator.ofFloat(null, "alpha", 1f, 0f));
             mShadowTransition.setDuration(LayoutTransition.DISAPPEARING, 100);
 
@@ -1310,7 +1310,7 @@ public class TabletStatusBar extends StatusBar implements
                             case MotionEvent.ACTION_UP:
                                 mHandler.removeMessages(MSG_RESTORE_SHADOWS);
                                 if (mShowShadows) {
-                                    mHandler.sendEmptyMessageDelayed(MSG_RESTORE_SHADOWS, 
+                                    mHandler.sendEmptyMessageDelayed(MSG_RESTORE_SHADOWS,
                                             v == mNotificationShadow ? 5000 : 500);
                                 }
                                 last = true;
