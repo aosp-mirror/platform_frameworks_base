@@ -97,6 +97,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.app.Fragment#instantiate", //(Landroid/content/Context;Ljava/lang/String;Landroid/os/Bundle;)Landroid/app/Fragment;",
         "android.os.Handler#sendMessageAtTime",
         "android.view.View#isInEditMode",
+        "com.android.internal.util.XmlUtils#convertValueToInt"
         // TODO: comment out once DelegateClass is working
         // "android.content.res.Resources$Theme#obtainStyledAttributes",
     };
