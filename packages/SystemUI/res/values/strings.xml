@@ -108,4 +108,6 @@
     <!-- Recent apps label. Shown as title on recent apps panel -->
     <string name="recent_tasks_app_label">Apps</string>
 
+    <!-- Network connection string for Bluetooth Reverse Tethering -->
+    <string name="bluetooth_tethered">Bluetooth tethered"</string>
 </resources>
