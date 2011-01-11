@@ -192,26 +192,15 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
         @Override
          public void enter() {
              if (DBG) Log.d(TAG, getName() + "\n");
-             mWifiStateMachine.setNetworkAvailable(false);
          }
-        @Override
-        public void exit() {
-            mWifiStateMachine.setNetworkAvailable(true);
-        }
     }
 
     class InactiveState extends HierarchicalState {
         @Override
          public void enter() {
              if (DBG) Log.d(TAG, getName() + "\n");
-             mWifiStateMachine.setNetworkAvailable(false);
          }
-        @Override
-        public void exit() {
-            mWifiStateMachine.setNetworkAvailable(true);
-        }
     }
-
 
     class DisconnectedState extends HierarchicalState {
         @Override
