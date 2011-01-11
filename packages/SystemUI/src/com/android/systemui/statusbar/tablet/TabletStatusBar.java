@@ -183,7 +183,7 @@ public class TabletStatusBar extends StatusBar {
         mStatusBarView.setIgnoreChildren(0, mNotificationTrigger, mNotificationPanel);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
+                720, // ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
@@ -196,6 +196,7 @@ public class TabletStatusBar extends StatusBar {
         lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
                 | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
         lp.windowAnimations = com.android.internal.R.style.Animation; // == no animation
+//        lp.windowAnimations = com.android.internal.R.style.Animation_ZoomButtons; // simple fade
 
         WindowManagerImpl.getDefault().addView(mNotificationPanel, lp);
 
