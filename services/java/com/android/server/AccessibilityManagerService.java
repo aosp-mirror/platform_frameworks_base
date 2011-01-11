@@ -685,6 +685,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
          */
         public boolean unbind() {
             if (mService != null) {
+                mService = null;
                 mContext.unbindService(this);
                 mComponentNameToServiceMap.remove(mComponentName);
                 mServices.remove(this);
