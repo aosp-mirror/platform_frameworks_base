@@ -536,7 +536,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 InputChannel[] channels = InputChannel.openInputChannelPair("drag");
                 mServerChannel = channels[0];
                 mClientChannel = channels[1];
-                mInputManager.registerInputChannel(mServerChannel);
+                mInputManager.registerInputChannel(mServerChannel, null);
                 InputQueue.registerInputChannel(mClientChannel, mDragInputHandler,
                         mH.getLooper().getQueue());
             }
@@ -2311,7 +2311,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mInputChannel = inputChannels[0];
                 inputChannels[1].transferToBinderOutParameter(outInputChannel);
                 
-                mInputManager.registerInputChannel(win.mInputChannel);
+                mInputManager.registerInputChannel(win.mInputChannel, win.mInputWindowHandle);
             }
 
             // From now on, no exceptions or errors allowed!
@@ -5711,13 +5711,13 @@ public class WindowManagerService extends IWindowManager.Stub
          * 
          * Called by the InputManager.
          */
-        public void notifyInputChannelBroken(InputChannel inputChannel) {
+        public void notifyInputChannelBroken(InputWindowHandle inputWindowHandle) {
+            if (inputWindowHandle == null) {
+                return;
+            }
+
             synchronized (mWindowMap) {
-                WindowState windowState = getWindowStateForInputChannelLocked(inputChannel);
-                if (windowState == null) {
-                    return; // irrelevant
-                }
-                
+                WindowState windowState = (WindowState) inputWindowHandle.windowState;
                 Slog.i(TAG, "WINDOW DIED " + windowState);
                 removeWindowLocked(windowState.mSession, windowState);
             }
@@ -5728,11 +5728,12 @@ public class WindowManagerService extends IWindowManager.Stub
          * 
          * Called by the InputManager.
          */
-        public long notifyANR(Object token, InputChannel inputChannel) {
+        public long notifyANR(InputApplicationHandle inputApplicationHandle,
+                InputWindowHandle inputWindowHandle) {
             AppWindowToken appWindowToken = null;
-            if (inputChannel != null) {
+            if (inputWindowHandle != null) {
                 synchronized (mWindowMap) {
-                    WindowState windowState = getWindowStateForInputChannelLocked(inputChannel);
+                    WindowState windowState = (WindowState) inputWindowHandle.windowState;
                     if (windowState != null) {
                         Slog.i(TAG, "Input event dispatching timed out sending to "
                                 + windowState.mAttrs.getTitle());
@@ -5741,8 +5742,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             
-            if (appWindowToken == null && token != null) {
-                appWindowToken = (AppWindowToken) token;
+            if (appWindowToken == null && inputApplicationHandle != null) {
+                appWindowToken = inputApplicationHandle.appWindowToken;
                 Slog.i(TAG, "Input event dispatching timed out sending to application "
                         + appWindowToken.stringName);
             }
@@ -5761,24 +5762,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             return 0; // abort dispatching
-        }
-        
-        private WindowState getWindowStateForInputChannel(InputChannel inputChannel) {
-            synchronized (mWindowMap) {
-                return getWindowStateForInputChannelLocked(inputChannel);
-            }
-        }
-        
-        private WindowState getWindowStateForInputChannelLocked(InputChannel inputChannel) {
-            int windowCount = mWindows.size();
-            for (int i = 0; i < windowCount; i++) {
-                WindowState windowState = mWindows.get(i);
-                if (windowState.mInputChannel == inputChannel) {
-                    return windowState;
-                }
-            }
-            
-            return null;
         }
 
         private void addDragInputWindowLw(InputWindowList windowList) {
@@ -5856,6 +5839,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 // Add a window to our list of input windows.
                 final InputWindow inputWindow = mTempInputWindows.add();
+                inputWindow.inputWindowHandle = child.mInputWindowHandle;
                 inputWindow.inputChannel = child.mInputChannel;
                 inputWindow.name = child.toString();
                 inputWindow.layoutParamsFlags = flags;
@@ -5934,16 +5918,16 @@ public class WindowManagerService extends IWindowManager.Stub
         /* Provides an opportunity for the window manager policy to process a key before
          * ordinary dispatch. */
         public boolean interceptKeyBeforeDispatching(
-                InputChannel focus, KeyEvent event, int policyFlags) {
-            WindowState windowState = getWindowStateForInputChannel(focus);
+                InputWindowHandle focus, KeyEvent event, int policyFlags) {
+            WindowState windowState = (WindowState) focus.windowState;
             return mPolicy.interceptKeyBeforeDispatching(windowState, event, policyFlags);
         }
         
         /* Provides an opportunity for the window manager policy to process a key that
          * the application did not handle. */
         public KeyEvent dispatchUnhandledKey(
-                InputChannel focus, KeyEvent event, int policyFlags) {
-            WindowState windowState = getWindowStateForInputChannel(focus);
+                InputWindowHandle focus, KeyEvent event, int policyFlags) {
+            WindowState windowState = (WindowState) focus.windowState;
             return mPolicy.dispatchUnhandledKey(windowState, event, policyFlags);
         }
         
@@ -5973,12 +5957,14 @@ public class WindowManagerService extends IWindowManager.Stub
             if (newApp == null) {
                 mInputManager.setFocusedApplication(null);
             } else {
+                mTempInputApplication.inputApplicationHandle = newApp.mInputApplicationHandle;
                 mTempInputApplication.name = newApp.toString();
                 mTempInputApplication.dispatchingTimeoutNanos =
                         newApp.inputDispatchingTimeoutNanos;
-                mTempInputApplication.token = newApp;
-                
+
                 mInputManager.setFocusedApplication(mTempInputApplication);
+
+                mTempInputApplication.recycle();
             }
         }
         
@@ -6823,7 +6809,8 @@ public class WindowManagerService extends IWindowManager.Stub
         int mSurfaceLayer;
         float mSurfaceAlpha;
         
-        // Input channel
+        // Input channel and input window handle used by the input dispatcher.
+        InputWindowHandle mInputWindowHandle;
         InputChannel mInputChannel;
         
         // Used to improve performance of toString()
@@ -6915,6 +6902,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mLayer = 0;
             mAnimLayer = 0;
             mLastLayer = 0;
+            mInputWindowHandle = new InputWindowHandle(
+                    mAppToken != null ? mAppToken.mInputApplicationHandle : null, this);
         }
 
         void attach() {
@@ -8304,11 +8293,15 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean startingMoved;
         boolean firstWindowDrawn;
 
+        // Input application handle used by the input dispatcher.
+        InputApplicationHandle mInputApplicationHandle;
+
         AppWindowToken(IApplicationToken _token) {
             super(_token.asBinder(),
                     WindowManager.LayoutParams.TYPE_APPLICATION, true);
             appWindowToken = this;
             appToken = _token;
+            mInputApplicationHandle = new InputApplicationHandle(this);
         }
 
         public void setAnimation(Animation anim) {

@@ -368,7 +368,8 @@ private:
         return 0;
     }
 
-    virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel, bool monitor) {
+    virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel,
+            const sp<InputWindowHandle>& inputWindowHandle, bool monitor) {
         ADD_FAILURE() << "Should never be called by input reader.";
         return 0;
     }
