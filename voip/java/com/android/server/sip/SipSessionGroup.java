@@ -895,7 +895,9 @@ class SipSessionGroup implements SipListener {
                         challengedTransaction, String realm) {
                     return new UserCredentials() {
                         public String getUserName() {
-                            return mLocalProfile.getUserName();
+                            String username = mLocalProfile.getAuthUserName();
+                            return (!TextUtils.isEmpty(username) ? username :
+                                    mLocalProfile.getUserName());
                         }
 
                         public String getPassword() {

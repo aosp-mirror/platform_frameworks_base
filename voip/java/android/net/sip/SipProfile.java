@@ -49,6 +49,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
     private String mDomain;
     private String mProtocol = UDP;
     private String mProfileName;
+    private String mAuthUserName;
     private int mPort = DEFAULT_PORT;
     private boolean mSendKeepAlive = false;
     private boolean mAutoRegistration = true;
@@ -144,6 +145,18 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
             return (uriString.trim().toLowerCase().startsWith("sip:")
                     ? uriString
                     : "sip:" + uriString);
+        }
+
+        /**
+         * Sets the username used for authentication.
+         *
+         * @param name auth. name of the profile
+         * @return this builder object
+         * @hide // TODO: remove when we make it public
+         */
+        public Builder setAuthUserName(String name) {
+            mProfile.mAuthUserName = name;
+            return this;
         }
 
         /**
@@ -300,6 +313,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
         mAutoRegistration = (in.readInt() == 0) ? false : true;
         mCallingUid = in.readInt();
         mPort = in.readInt();
+        mAuthUserName = in.readString();
     }
 
     @Override
@@ -314,6 +328,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
         out.writeInt(mAutoRegistration ? 1 : 0);
         out.writeInt(mCallingUid);
         out.writeInt(mPort);
+        out.writeString(mAuthUserName);
     }
 
     @Override
@@ -372,6 +387,17 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
      */
     public String getUserName() {
         return getUri().getUser();
+    }
+
+    /**
+     * Gets the username for authentication. If it is null, then the username
+     * should be used in authentication instead.
+     *
+     * @return the auth. username
+     * @hide // TODO: remove when we make it public
+     */
+    public String getAuthUserName() {
+        return mAuthUserName;
     }
 
     /**
