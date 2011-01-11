@@ -23,6 +23,7 @@ LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
 	$(TOP)/frameworks/base/include/media/stagefright/openmax \
         $(TOP)/frameworks/base/media/libstagefright/include \
+        $(TOP)/external/openssl/include
 
 LOCAL_MODULE:= libstagefright_rtsp
 
