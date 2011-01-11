@@ -197,10 +197,16 @@ PathTexture* PathCache::addTexture(const PathCacheEntry& entry,
     bitmap.eraseColor(0);
 
     SkPaint pathPaint(*paint);
-    if (!pathPaint.getXfermode()) {
-        SkXfermode* mode = SkXfermode::Create(SkXfermode::kSrc_Mode);
-        pathPaint.setXfermode(mode)->safeUnref();
-    }
+
+    // Make sure the paint is opaque, color, alpha, filter, etc.
+    // will be applied later when compositing the alpha8 texture
+    pathPaint.setColor(0xff000000);
+    pathPaint.setAlpha(255);
+    pathPaint.setColorFilter(NULL);
+    pathPaint.setMaskFilter(NULL);
+    pathPaint.setShader(NULL);
+    SkXfermode* mode = SkXfermode::Create(SkXfermode::kSrc_Mode);
+    pathPaint.setXfermode(mode)->safeUnref();
 
     SkCanvas canvas(bitmap);
     canvas.translate(-bounds.fLeft + offset, -bounds.fTop + offset);
