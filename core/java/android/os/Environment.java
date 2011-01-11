@@ -414,8 +414,6 @@ public class Environment {
      * emulated. If true, the device does not have real external storage
      * and certain system services such as the package manager use this
      * to determine where to install an application.
-     *
-     * @hide
      */
     public static boolean isExternalStorageEmulated() {
         if (mIsExternalStorageEmulated == null) {
