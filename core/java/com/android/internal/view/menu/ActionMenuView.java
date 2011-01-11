@@ -139,6 +139,10 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         mReserveOverflow = reserveOverflow;
     }
     
+    public View getOverflowButton() {
+        return mOverflowButton;
+    }
+
     @Override
     protected LayoutParams generateDefaultLayoutParams() {
         LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT,
