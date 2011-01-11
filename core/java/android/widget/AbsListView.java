@@ -4810,7 +4810,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (mFiltered && mPopup != null && mPopup.isShowing()) {
                 if (event.getAction() == KeyEvent.ACTION_DOWN
                         && event.getRepeatCount() == 0) {
-                    getKeyDispatcherState().startTracking(event, this);
+                    KeyEvent.DispatcherState state = getKeyDispatcherState();
+                    if (state != null) {
+                        state.startTracking(event, this);
+                    }
                     handled = true;
                 } else if (event.getAction() == KeyEvent.ACTION_UP
                         && event.isTracking() && !event.isCanceled()) {

@@ -915,10 +915,16 @@ public class ListPopupWindow {
             // to the drop down list but instead, consume it immediately
             final View anchorView = mDropDownAnchorView;
             if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
-                anchorView.getKeyDispatcherState().startTracking(event, this);
+                KeyEvent.DispatcherState state = anchorView.getKeyDispatcherState();
+                if (state != null) {
+                    state.startTracking(event, this);
+                }
                 return true;
             } else if (event.getAction() == KeyEvent.ACTION_UP) {
-                anchorView.getKeyDispatcherState().handleUpEvent(event);
+                KeyEvent.DispatcherState state = anchorView.getKeyDispatcherState();
+                if (state != null) {
+                    state.handleUpEvent(event);
+                }
                 if (event.isTracking() && !event.isCanceled()) {
                     dismiss();
                     return true;
