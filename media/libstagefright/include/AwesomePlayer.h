@@ -173,6 +173,8 @@ private:
     bool mBufferingEventPending;
     sp<TimedEventQueue::Event> mCheckAudioStatusEvent;
     bool mAudioStatusEventPending;
+    sp<TimedEventQueue::Event> mVideoLagEvent;
+    bool mVideoLagEventPending;
 
     sp<TimedEventQueue::Event> mAsyncPrepareEvent;
     Condition mPreparedCondition;
@@ -184,6 +186,7 @@ private:
     void postBufferingEvent_l();
     void postStreamDoneEvent_l(status_t status);
     void postCheckAudioStatusEvent_l();
+    void postVideoLagEvent_l();
     status_t play_l();
 
     MediaBuffer *mVideoBuffer;
@@ -233,6 +236,7 @@ private:
     void onPrepareAsyncEvent();
     void abortPrepare(status_t err);
     void finishAsyncPrepare_l();
+    void onVideoLagUpdate();
 
     bool getCachedDuration_l(int64_t *durationUs, bool *eos);
 
