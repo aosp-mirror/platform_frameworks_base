@@ -607,7 +607,9 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
     case MEDIA_INFO:
         // ext1: Media framework error code.
         // ext2: Implementation dependant error code.
-        LOGW("info/warning (%d, %d)", ext1, ext2);
+        if (ext1 != MEDIA_INFO_VIDEO_TRACK_LAGGING) {
+            LOGW("info/warning (%d, %d)", ext1, ext2);
+        }
         break;
     case MEDIA_SEEK_COMPLETE:
         LOGV("Received seek complete");
