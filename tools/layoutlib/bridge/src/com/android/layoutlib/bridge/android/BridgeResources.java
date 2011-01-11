@@ -43,7 +43,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -173,14 +172,13 @@ public final class BridgeResources extends Resources {
 
                         return ColorStateList.createFromXml(this,
                                 new BridgeXmlBlockParser(parser, mContext, resValue.isFramework()));
-                    } catch (XmlPullParserException e) {
-                        Bridge.getLog().error(null, e);
-                    } catch (FileNotFoundException e) {
-                        // will not happen, since we pre-check
-                    } catch (IOException e) {
-                        Bridge.getLog().error(null, e);
-                    }
+                    } catch (Exception e) {
+                        // this is an error and not warning since the file existence is checked before
+                        // attempting to parse it.
+                        Bridge.getLog().error(null, "Failed to parse file " + value, e);
 
+                        return null;
+                    }
                 } else {
                     // try to load the color state list from an int
                     try {
@@ -245,7 +243,8 @@ public final class BridgeResources extends Resources {
                     return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
                 }
             } catch (XmlPullParserException e) {
-                Bridge.getLog().error(null, e);
+                Bridge.getLog().error(null,
+                        "Failed to configure parser for " + value.getValue(), e);
                 // we'll return null below.
             } catch (FileNotFoundException e) {
                 // this shouldn't happen since we check above.
@@ -279,7 +278,8 @@ public final class BridgeResources extends Resources {
                     return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
                 }
             } catch (XmlPullParserException e) {
-                Bridge.getLog().error(null, e);
+                Bridge.getLog().error(null,
+                        "Failed to configure parser for " + value.getValue(), e);
                 // we'll return null below.
             } catch (FileNotFoundException e) {
                 // this shouldn't happen since we check above.

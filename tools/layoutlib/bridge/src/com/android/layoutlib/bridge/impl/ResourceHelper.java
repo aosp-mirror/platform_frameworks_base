@@ -27,7 +27,6 @@ import com.android.ninepatch.NinePatchChunk;
 
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
@@ -40,7 +39,6 @@ import android.graphics.drawable.NinePatchDrawable;
 import android.util.TypedValue;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -162,7 +160,7 @@ public final class ResourceHelper {
                         // URL is wrong, we'll return null below
                     } catch (IOException e) {
                         // failed to read the file, we'll return null below.
-                        Bridge.getLog().error(null, e);
+                        Bridge.getLog().error(null, "Failed lot load " + file.getAbsolutePath(), e);
                     }
                 }
 
@@ -190,13 +188,14 @@ public final class ResourceHelper {
                     d = Drawable.createFromXml(context.getResources(),
                             new BridgeXmlBlockParser(parser, context, isFramework));
                     return d;
-                } catch (XmlPullParserException e) {
-                    Bridge.getLog().error(null, e);
-                } catch (FileNotFoundException e) {
-                    // will not happen, since we pre-check
-                } catch (IOException e) {
-                    Bridge.getLog().error(null, e);
+                } catch (Exception e) {
+                    // this is an error and not warning since the file existence is checked before
+                    // attempting to parse it.
+                    Bridge.getLog().error(null, "Failed to parse file " + value, e);
                 }
+            } else {
+                Bridge.getLog().error(null,
+                        String.format("File %s does not exist (or is not a file)", stringValue));
             }
 
             return null;
@@ -222,7 +221,7 @@ public final class ResourceHelper {
                     return new BitmapDrawable(context.getResources(), bitmap);
                 } catch (IOException e) {
                     // we'll return null below
-                    Bridge.getLog().error(null, e);
+                    Bridge.getLog().error(null, "Failed lot load " + bmpFile.getAbsolutePath(), e);
                 }
             } else {
                 // attempt to get a color from the value
