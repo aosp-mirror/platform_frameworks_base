@@ -294,7 +294,6 @@ public final class BridgeResources extends Resources {
         return null;
     }
 
-
     @Override
     public TypedArray obtainAttributes(AttributeSet set, int[] attrs) {
         return mContext.obtainStyledAttributes(set, attrs);
