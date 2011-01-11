@@ -606,7 +606,7 @@ class FastScroller {
         final int positionsInSection = nextSectionPos - sectionPos;
 
         final View child = mList.getChildAt(0);
-        final float incrementalPos = firstVisibleItem +
+        final float incrementalPos = child == null ? 0 : firstVisibleItem +
                 (float) (mList.getPaddingTop() - child.getTop()) / child.getHeight();
         final float posWithinSection = (incrementalPos - sectionPos) / positionsInSection;
         int result = (int) ((section + posWithinSection) / sectionCount * trackHeight);

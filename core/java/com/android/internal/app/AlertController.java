@@ -412,9 +412,17 @@ public class AlertController {
         /* Only display the divider if we have a title and a 
          * custom view or a message.
          */
-        if (hasTitle && ((mMessage != null) || (mView != null))) {
-            View divider = mWindow.findViewById(R.id.titleDivider);
-            divider.setVisibility(View.VISIBLE);
+        if (hasTitle) {
+            View divider = null;
+            if (mMessage != null || mView != null || mListView != null) {
+                divider = mWindow.findViewById(R.id.titleDivider);
+            } else {
+                divider = mWindow.findViewById(R.id.titleDividerTop);
+            }
+
+            if (divider != null) {
+                divider.setVisibility(View.VISIBLE);
+            }
         }
         
         setBackground(topPanel, contentPanel, customPanel, hasButtons, a, hasTitle, buttonPanel);

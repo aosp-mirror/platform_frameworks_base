@@ -23,10 +23,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingTop="9dip"
-    android:paddingBottom="3dip"
-    android:paddingLeft="3dip"
-    android:paddingRight="1dip"
     android:majorWeightMin="0.65"
     android:minorWeightMin="0.9">
 
@@ -35,6 +31,15 @@
         android:layout_height="wrap_content"
         android:minHeight="64dip"
         android:orientation="vertical">
+        <ImageView android:id="@+id/titleDividerTop"
+            android:layout_width="match_parent"
+            android:layout_height="4dip"
+            android:visibility="gone"
+            android:scaleType="fitXY"
+            android:gravity="fill_horizontal"
+            android:paddingLeft="16dip"
+            android:paddingRight="16dip"
+            android:src="@android:drawable/divider_strong_holo" />
         <LinearLayout android:id="@+id/title_template"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
