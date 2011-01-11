@@ -1300,9 +1300,9 @@ public class MediaPlayer
                 return;
 
             case MEDIA_INFO:
-                // For PV specific code values (msg.arg2) look in
-                // opencore/pvmi/pvmf/include/pvmf_return_codes.h
-                Log.i(TAG, "Info (" + msg.arg1 + "," + msg.arg2 + ")");
+                if (msg.arg1 != MEDIA_INFO_VIDEO_TRACK_LAGGING) {
+                    Log.i(TAG, "Info (" + msg.arg1 + "," + msg.arg2 + ")");
+                }
                 if (mOnInfoListener != null) {
                     mOnInfoListener.onInfo(mMediaPlayer, msg.arg1, msg.arg2);
                 }

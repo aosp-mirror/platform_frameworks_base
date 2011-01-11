@@ -179,6 +179,8 @@ AwesomePlayer::AwesomePlayer()
     mStreamDoneEventPending = false;
     mBufferingEvent = new AwesomeEvent(this, &AwesomePlayer::onBufferingUpdate);
     mBufferingEventPending = false;
+    mVideoLagEvent = new AwesomeEvent(this, &AwesomePlayer::onVideoLagUpdate);
+    mVideoEventPending = false;
 
     mCheckAudioStatusEvent = new AwesomeEvent(
             this, &AwesomePlayer::onCheckAudioStatus);
@@ -205,6 +207,8 @@ void AwesomePlayer::cancelPlayerEvents(bool keepBufferingGoing) {
     mStreamDoneEventPending = false;
     mQueue.cancelEvent(mCheckAudioStatusEvent->eventID());
     mAudioStatusEventPending = false;
+    mQueue.cancelEvent(mVideoLagEvent->eventID());
+    mVideoLagEventPending = false;
 
     if (!keepBufferingGoing) {
         mQueue.cancelEvent(mBufferingEvent->eventID());
@@ -530,6 +534,28 @@ void AwesomePlayer::ensureCacheIsFetching_l() {
     }
 }
 
+void AwesomePlayer::onVideoLagUpdate() {
+    Mutex::Autolock autoLock(mLock);
+    if (!mVideoLagEventPending) {
+        return;
+    }
+    mVideoLagEventPending = false;
+
+    int64_t audioTimeUs = mAudioPlayer->getMediaTimeUs();
+    int64_t videoLateByUs = audioTimeUs - mVideoTimeUs;
+
+    if (videoLateByUs > 300000ll) {
+        LOGV("video late by %lld ms.", videoLateByUs / 1000ll);
+
+        notifyListener_l(
+                MEDIA_INFO,
+                MEDIA_INFO_VIDEO_TRACK_LAGGING,
+                videoLateByUs / 1000ll);
+    }
+
+    postVideoLagEvent_l();
+}
+
 void AwesomePlayer::onBufferingUpdate() {
     Mutex::Autolock autoLock(mLock);
     if (!mBufferingEventPending) {
@@ -788,6 +814,10 @@ status_t AwesomePlayer::play_l() {
     if (mVideoSource != NULL) {
         // Kick off video playback
         postVideoEvent_l();
+
+        if (mAudioSource != NULL && mVideoSource != NULL) {
+            postVideoLagEvent_l();
+        }
     }
 
     if (deferredAudioSeek) {
@@ -1345,6 +1375,14 @@ void AwesomePlayer::postBufferingEvent_l() {
     }
     mBufferingEventPending = true;
     mQueue.postEventWithDelay(mBufferingEvent, 1000000ll);
+}
+
+void AwesomePlayer::postVideoLagEvent_l() {
+    if (mVideoLagEventPending) {
+        return;
+    }
+    mVideoLagEventPending = true;
+    mQueue.postEventWithDelay(mVideoLagEvent, 1000000ll);
 }
 
 void AwesomePlayer::postCheckAudioStatusEvent_l() {
