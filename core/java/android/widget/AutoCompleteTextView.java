@@ -607,10 +607,16 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             // special case for the back key, we do not even try to send it
             // to the drop down list but instead, consume it immediately
             if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
-                getKeyDispatcherState().startTracking(event, this);
+                KeyEvent.DispatcherState state = getKeyDispatcherState();
+                if (state != null) {
+                    state.startTracking(event, this);
+                }
                 return true;
             } else if (event.getAction() == KeyEvent.ACTION_UP) {
-                getKeyDispatcherState().handleUpEvent(event);
+                KeyEvent.DispatcherState state = getKeyDispatcherState();
+                if (state != null) {
+                    state.handleUpEvent(event);
+                }
                 if (event.isTracking() && !event.isCanceled()) {
                     dismissDropDown();
                     return true;
