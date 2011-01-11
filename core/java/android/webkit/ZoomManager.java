@@ -150,6 +150,12 @@ class ZoomManager {
     private static float MINIMUM_SCALE_INCREMENT = 0.01f;
 
     /*
+     *  The touch points could be changed even the fingers stop moving.
+     *  We use the following to filter out the zooming jitters.
+     */
+    private static float MINIMUM_SCALE_WITHOUT_JITTER = 0.05f;
+
+    /*
      * The following member variables are only to be used for animating zoom. If
      * mZoomScale is non-zero then we are in the middle of a zoom animation. The
      * other variables are used as a cache (e.g. inverse) or as a way to store
@@ -683,6 +689,10 @@ class ZoomManager {
                     scale = Math.min(scale, mActualScale * 1.25f);
                 } else {
                     scale = Math.max(scale, mActualScale * 0.8f);
+                }
+                // if the scale change is too small, regard it as jitter and skip it.
+                if (Math.abs(scale - mActualScale) < MINIMUM_SCALE_WITHOUT_JITTER) {
+                    return false;
                 }
                 setZoomCenter(detector.getFocusX(), detector.getFocusY());
                 setZoomScale(scale, false);
