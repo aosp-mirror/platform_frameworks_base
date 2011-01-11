@@ -475,14 +475,14 @@ void hwcTestDisplayList(hwc_layer_list_t *list)
         testPrintI("      displayFrame: %s",
                    hwcTestRect2str(list->hwLayers[layer].displayFrame).c_str());
         testPrintI("      scaleFactor: [%f, %f]",
-                   (float) (list->hwLayers[layer].displayFrame.right
-                            - list->hwLayers[layer].displayFrame.left)
-                       / (float) (list->hwLayers[layer].sourceCrop.right
-                            - list->hwLayers[layer].sourceCrop.left),
-                   (float) (list->hwLayers[layer].displayFrame.bottom
-                            - list->hwLayers[layer].displayFrame.top)
-                       / (float) (list->hwLayers[layer].sourceCrop.bottom
-                            - list->hwLayers[layer].sourceCrop.top));
+                   (float) (list->hwLayers[layer].sourceCrop.right
+                            - list->hwLayers[layer].sourceCrop.left)
+                       / (float) (list->hwLayers[layer].displayFrame.right
+                            - list->hwLayers[layer].displayFrame.left),
+                   (float) (list->hwLayers[layer].sourceCrop.bottom
+                            - list->hwLayers[layer].sourceCrop.top)
+                       / (float) (list->hwLayers[layer].displayFrame.bottom
+                            - list->hwLayers[layer].displayFrame.top));
     }
 }
 
@@ -494,7 +494,11 @@ void hwcTestDisplayList(hwc_layer_list_t *list)
  */
 void hwcTestDisplayListPrepareModifiable(hwc_layer_list_t *list)
 {
+    uint32_t numOverlays = 0;
     for (unsigned int layer = 0; layer < list->numHwLayers; layer++) {
+        if (list->hwLayers[layer].compositionType == HWC_OVERLAY) {
+            numOverlays++;
+        }
         testPrintI("    layer %u compositionType: %#x%s%s", layer,
                    list->hwLayers[layer].compositionType,
                    (list->hwLayers[layer].compositionType == HWC_FRAMEBUFFER)
@@ -508,6 +512,7 @@ void hwcTestDisplayListPrepareModifiable(hwc_layer_list_t *list)
                    (list->hwLayers[layer].hints & HWC_HINT_CLEAR_FB)
                        ? " CLEAR_FB" : "");
     }
+    testPrintI("    numOverlays: %u", numOverlays);
 }
 
 /*
