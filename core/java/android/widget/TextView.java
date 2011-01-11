@@ -6523,7 +6523,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void makeBlink() {
-        if (!mCursorVisible) {
+        if (!mCursorVisible || !isTextEditable()) {
             if (mBlink != null) {
                 mBlink.removeCallbacks(mBlink);
             }
@@ -6912,7 +6912,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @return True iff this TextView contains a text that can be edited.
      */
     private boolean isTextEditable() {
-        return mText instanceof Editable && onCheckIsTextEditor();
+        return mText instanceof Editable && onCheckIsTextEditor() && isEnabled();
     }
 
     /**
