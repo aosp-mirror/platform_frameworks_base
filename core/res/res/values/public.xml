@@ -1458,9 +1458,6 @@
        sinusoidal pattern. -->
   <public type="interpolator" name="cycle" />
 
-  <public type="anim" name="animator_fade_in" />
-  <public type="anim" name="animator_fade_out" />
-
   <!-- Acceleration curve matching a cubic ease in function. -->
   <public type="anim" name="accelerate_cubic_interpolator" />
   <!-- Acceleration curve matching a cubic ease out function. -->
