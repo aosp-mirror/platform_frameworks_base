@@ -26,6 +26,8 @@ import android.os.IBinder;
 import android.os.IPowerManager;
 import android.widget.ListView;
 import android.content.Intent;
+import android.content.ComponentName;
+import android.content.pm.PackageManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.StatusBarManager;
@@ -66,6 +68,24 @@ public class PowerTest extends TestActivity
         return mTests;
     }
     private Test[] mTests = new Test[] {
+        new Test("Enable settings widget") {
+            public void run() {
+                PackageManager pm = getPackageManager();
+                pm.setComponentEnabledSetting(new ComponentName("com.android.settings",
+                            "com.android.settings.widget.SettingsAppWidgetProvider"),
+                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
+
+            }
+        },
+        new Test("Disable settings widget") {
+            public void run() {
+                PackageManager pm = getPackageManager();
+                pm.setComponentEnabledSetting(new ComponentName("com.android.settings",
+                            "com.android.settings.widget.SettingsAppWidgetProvider"),
+                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
+
+            }
+        },
         new Test("Enable proximity") {
             public void run() {
                 mProx.acquire();
