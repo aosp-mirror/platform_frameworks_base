@@ -299,10 +299,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     static final int CMD_SET_FREQUENCY_BAND               = 90;
 
     /* Commands from/to the SupplicantStateTracker */
-    /* Indicates whether a wifi network is available for connection */
-    static final int CMD_SET_NETWORK_AVAILABLE            = 111;
     /* Reset the supplicant state tracker */
-    static final int CMD_RESET_SUPPLICANT_STATE           = 112;
+    static final int CMD_RESET_SUPPLICANT_STATE           = 111;
 
 
     /* Commands/events reported by WpsStateMachine */
@@ -1451,10 +1449,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         setWifiEnabled(true);
     }
 
-    void setNetworkAvailable(boolean available) {
-        sendMessage(obtainMessage(CMD_SET_NETWORK_AVAILABLE, available ? 1 : 0, 0));
-    }
-
     /********************************************************
      * HSM states
      *******************************************************/
@@ -1479,9 +1473,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     break;
                 case CMD_ENABLE_RSSI_POLL:
                     mEnableRssiPolling = (message.arg1 == 1);
-                    break;
-                case CMD_SET_NETWORK_AVAILABLE:
-                    mNetworkInfo.setIsAvailable(message.arg1 == 1);
                     break;
                     /* Discard */
                 case CMD_LOAD_DRIVER:
@@ -1873,6 +1864,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
             /* Initialize for connect mode operation at start */
             mIsScanMode = false;
+            /* Wifi is available as long as we have a connection to supplicant */
+            mNetworkInfo.setIsAvailable(true);
         }
         @Override
         public boolean processMessage(Message message) {
@@ -1886,6 +1879,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         Log.e(TAG, "Failed to stop supplicant, issue kill");
                         WifiNative.killSupplicant();
                     }
+                    mNetworkInfo.setIsAvailable(false);
                     handleNetworkDisconnect();
                     setWifiState(WIFI_STATE_DISABLING);
                     sendSupplicantConnectionChangedBroadcast(false);
@@ -1896,6 +1890,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     Log.e(TAG, "Connection lost, restart supplicant");
                     WifiNative.killSupplicant();
                     WifiNative.closeSupplicantConnection();
+                    mNetworkInfo.setIsAvailable(false);
                     handleNetworkDisconnect();
                     sendSupplicantConnectionChangedBroadcast(false);
                     mSupplicantStateTracker.sendMessage(CMD_RESET_SUPPLICANT_STATE);
@@ -1974,6 +1969,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             }
             return HANDLED;
+        }
+
+        @Override
+        public void exit() {
+            mNetworkInfo.setIsAvailable(false);
         }
     }
 
