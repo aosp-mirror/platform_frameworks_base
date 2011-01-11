@@ -505,18 +505,18 @@ public class RenderSessionImpl {
         ResourceValue animationResource = null;
         int animationId = 0;
         if (isFrameworkAnimation) {
-            animationResource = mContext.getFrameworkResource(BridgeConstants.RES_ANIM,
+            animationResource = mContext.getFrameworkResource(BridgeConstants.RES_ANIMATOR,
                     animationName);
             if (animationResource != null) {
-                animationId = Bridge.getResourceValue(BridgeConstants.RES_ANIM,
+                animationId = Bridge.getResourceValue(BridgeConstants.RES_ANIMATOR,
                         animationName);
             }
         } else {
-            animationResource = mContext.getProjectResource(BridgeConstants.RES_ANIM,
+            animationResource = mContext.getProjectResource(BridgeConstants.RES_ANIMATOR,
                     animationName);
             if (animationResource != null) {
                 animationId = mContext.getProjectCallback().getResourceValue(
-                        BridgeConstants.RES_ANIM, animationName);
+                        BridgeConstants.RES_ANIMATOR, animationName);
             }
         }
 
