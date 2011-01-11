@@ -18,7 +18,6 @@ package android.renderscript;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import android.content.res.Resources;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -427,7 +426,7 @@ public class Allocation extends BaseObj {
             throw new RSIllegalArgumentException("Cubemap height must be multiple of 6");
         }
         if (width / 6 != height) {
-            throw new RSIllegalArgumentException("Only square cobe map faces supported");
+            throw new RSIllegalArgumentException("Only square cube map faces supported");
         }
         boolean isPow2 = (height & (height - 1)) == 0;
         if (!isPow2) {
@@ -449,9 +448,71 @@ public class Allocation extends BaseObj {
         return new Allocation(id, rs, t, usage);
     }
 
-    static public Allocation createCubemapFromBitmap(RenderScript rs, Bitmap b) {
+    static public Allocation createCubemapFromBitmap(RenderScript rs,
+                                                     Bitmap b) {
         return createCubemapFromBitmap(rs, b, MipmapControl.MIPMAP_NONE,
                                        USAGE_GRAPHICS_TEXTURE);
+    }
+
+    static public Allocation createCubemapFromCubeFaces(RenderScript rs,
+                                                        Bitmap xpos,
+                                                        Bitmap xneg,
+                                                        Bitmap ypos,
+                                                        Bitmap yneg,
+                                                        Bitmap zpos,
+                                                        Bitmap zneg,
+                                                        MipmapControl mips,
+                                                        int usage) {
+        int height = xpos.getHeight();
+        if (xpos.getWidth() != height ||
+            xneg.getWidth() != height || xneg.getHeight() != height ||
+            ypos.getWidth() != height || ypos.getHeight() != height ||
+            yneg.getWidth() != height || yneg.getHeight() != height ||
+            zpos.getWidth() != height || zpos.getHeight() != height ||
+            zneg.getWidth() != height || zneg.getHeight() != height) {
+            throw new RSIllegalArgumentException("Only square cube map faces supported");
+        }
+        boolean isPow2 = (height & (height - 1)) == 0;
+        if (!isPow2) {
+            throw new RSIllegalArgumentException("Only power of 2 cube faces supported");
+        }
+
+        Element e = elementFromBitmap(rs, xpos);
+        Type.Builder tb = new Type.Builder(rs, e);
+        tb.setX(height);
+        tb.setY(height);
+        tb.setFaces(true);
+        tb.setMipmaps(mips == MipmapControl.MIPMAP_FULL);
+        Type t = tb.create();
+        Allocation cubemap = Allocation.createTyped(rs, t, mips, usage);
+
+        AllocationAdapter adapter = AllocationAdapter.create2D(rs, cubemap);
+        adapter.setFace(Type.CubemapFace.POSITVE_X);
+        adapter.copyFrom(xpos);
+        adapter.setFace(Type.CubemapFace.NEGATIVE_X);
+        adapter.copyFrom(xneg);
+        adapter.setFace(Type.CubemapFace.POSITVE_Y);
+        adapter.copyFrom(ypos);
+        adapter.setFace(Type.CubemapFace.NEGATIVE_Y);
+        adapter.copyFrom(yneg);
+        adapter.setFace(Type.CubemapFace.POSITVE_Z);
+        adapter.copyFrom(zpos);
+        adapter.setFace(Type.CubemapFace.NEGATIVE_Z);
+        adapter.copyFrom(zneg);
+
+        return cubemap;
+    }
+
+    static public Allocation createCubemapFromCubeFaces(RenderScript rs,
+                                                        Bitmap xpos,
+                                                        Bitmap xneg,
+                                                        Bitmap ypos,
+                                                        Bitmap yneg,
+                                                        Bitmap zpos,
+                                                        Bitmap zneg) {
+        return createCubemapFromCubeFaces(rs, xpos, xneg, ypos, yneg,
+                                          zpos, zneg, MipmapControl.MIPMAP_NONE,
+                                          USAGE_GRAPHICS_TEXTURE);
     }
 
     static public Allocation createFromBitmapResource(RenderScript rs,
