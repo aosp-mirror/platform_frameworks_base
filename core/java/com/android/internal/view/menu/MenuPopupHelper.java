@@ -68,6 +68,10 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         }
     }
 
+    public void setAnchorView(View anchor) {
+        mAnchorView = new WeakReference<View>(anchor);
+    }
+
     public void show() {
         if (!tryShow()) {
             throw new IllegalStateException("MenuPopupHelper cannot be used without an anchor");
