@@ -170,7 +170,9 @@ public class BridgeRenderSession extends RenderSession {
 
     /*package*/ BridgeRenderSession(RenderSessionImpl scene, Result lastResult) {
         mSession = scene;
-        mSession.setScene(this);
+        if (scene != null) {
+            mSession.setScene(this);
+        }
         mLastResult = lastResult;
     }
 }
