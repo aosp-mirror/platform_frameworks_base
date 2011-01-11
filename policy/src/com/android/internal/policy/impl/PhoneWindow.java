@@ -26,9 +26,11 @@ import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.StandaloneActionMode;
+import com.android.internal.view.menu.ActionMenuView;
 import com.android.internal.view.menu.ContextMenuBuilder;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuDialogHelper;
+import com.android.internal.view.menu.MenuItemImpl;
 import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.MenuView;
 import com.android.internal.view.menu.SubMenuBuilder;
@@ -881,12 +883,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // The window manager will give us a valid window token
             new MenuDialogHelper(subMenu).show(null);
         } else if (hasFeature(FEATURE_ACTION_BAR)) {
-            mActionButtonPopup = new ActionButtonSubmenu(getContext(), subMenu);
-            mActionButtonPopup.show();
-            Callback cb = getCallback();
-            if (cb != null) {
-                cb.onMenuOpened(FEATURE_ACTION_BAR, subMenu);
-            }
+            mDecor.post(new Runnable() {
+                public void run() {
+                    mActionButtonPopup = new ActionButtonSubmenu(getContext(), subMenu);
+                    mActionButtonPopup.show();
+                    Callback cb = getCallback();
+                    if (cb != null) {
+                        cb.onMenuOpened(FEATURE_ACTION_BAR, subMenu);
+                    }
+                }
+            });
         }
 
         return true;
@@ -3009,6 +3015,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         public ActionButtonSubmenu(Context context, SubMenuBuilder subMenu) {
             super(context, subMenu);
             mSubMenu = subMenu;
+
+            MenuBuilder parentMenu = subMenu.getRootMenu();
+            MenuItemImpl item = (MenuItemImpl) subMenu.getItem();
+            if (!item.isActionButton()) {
+                // Give a reasonable anchor to nested submenus.
+                ActionMenuView amv = (ActionMenuView) parentMenu.getMenuView(
+                        MenuBuilder.TYPE_ACTION_BUTTON, null);
+
+                View anchor = amv.getOverflowButton();
+                if (anchor == null) {
+                    anchor = amv;
+                }
+                setAnchorView(anchor);
+            }
         }
 
         @Override
