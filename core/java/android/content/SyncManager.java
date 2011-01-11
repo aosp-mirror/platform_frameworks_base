@@ -1376,10 +1376,10 @@ public class SyncManager implements OnAccountsUpdateListener {
 
             // Setting the value here instead of a method because we want the dumpsys logs
             // to have the most recent value used.
-            mDataConnectionIsConnected =
-                    getConnectivityManager().getActiveNetworkInfo().isConnected();
             try {
                 waitUntilReadyToRun();
+                NetworkInfo info = getConnectivityManager().getActiveNetworkInfo();
+                mDataConnectionIsConnected = (info != null) && info.isConnected();
                 mSyncManagerWakeLock.acquire();
                 // Always do this first so that we be sure that any periodic syncs that
                 // are ready to run have been converted into pending syncs. This allows the
