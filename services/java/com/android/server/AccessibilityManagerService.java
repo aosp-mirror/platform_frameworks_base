@@ -532,7 +532,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         for (int i = 0, count = services.size(); i < count; i++) {
             Service service = services.get(i);
-            service.unbind();
+            if (service.unbind()) {
+                i--;
+                count--;
+            }
         }
     }
 
@@ -575,7 +578,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             Set<ComponentName> enabledServices) {
 
         Map<ComponentName, Service> componentNameToServiceMap = mComponentNameToServiceMap;
-        List<Service> services = mServices;
         boolean isEnabled = mIsEnabled;
 
         for (int i = 0, count = installedServices.size(); i < count; i++) {
@@ -665,23 +667,30 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         /**
          * Binds to the accessibility service.
+         *
+         * @return True if binding is successful.
          */
-        public void bind() {
+        public boolean bind() {
             if (mService == null) {
-                mContext.bindService(mIntent, this, Context.BIND_AUTO_CREATE);
+                return mContext.bindService(mIntent, this, Context.BIND_AUTO_CREATE);
             }
+            return false;
         }
 
         /**
          * Unbinds form the accessibility service and removes it from the data
          * structures for service management.
+         *
+         * @return True if unbinding is successful.
          */
-        public void unbind() {
+        public boolean unbind() {
             if (mService != null) {
                 mContext.unbindService(this);
                 mComponentNameToServiceMap.remove(mComponentName);
                 mServices.remove(this);
+                return true;
             }
+            return false;
         }
 
         /**
