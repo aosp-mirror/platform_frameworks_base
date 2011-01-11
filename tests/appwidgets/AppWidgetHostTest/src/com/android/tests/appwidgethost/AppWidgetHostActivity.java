@@ -46,13 +46,21 @@ public class AppWidgetHostActivity extends Activity
     AppWidgetContainerView mAppWidgetContainer;
 
     public AppWidgetHostActivity() {
-        mAppWidgetManager = AppWidgetManager.getInstance(this);
     }
 
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        mAppWidgetManager = AppWidgetManager.getInstance(this);
+
         setContentView(R.layout.appwidget_host);
+
+        mHost = new AppWidgetHost(this, HOST_ID) {
+                protected AppWidgetHostView onCreateView(Context context, int appWidgetId, AppWidgetProviderInfo appWidget) {
+                    return new MyAppWidgetView(appWidgetId);
+                }
+            };
+
 
         findViewById(R.id.add_appwidget).setOnClickListener(mOnClickListener);
         mAppWidgetContainer = (AppWidgetContainerView)findViewById(R.id.appwidget_container);
@@ -188,11 +196,7 @@ public class AppWidgetHostActivity extends Activity
         }
     }
 
-    AppWidgetHost mHost = new AppWidgetHost(this, HOST_ID) {
-        protected AppWidgetHostView onCreateView(Context context, int appWidgetId, AppWidgetProviderInfo appWidget) {
-            return new MyAppWidgetView(appWidgetId);
-        }
-    };
+    AppWidgetHost mHost;
 }
 
 
