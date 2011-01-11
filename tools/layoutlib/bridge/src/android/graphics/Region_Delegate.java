@@ -135,6 +135,123 @@ public class Region_Delegate {
 
     // ---- native methods ----
 
+    /*package*/ static boolean isEmpty(Region thisRegion) {
+        Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
+        if (regionDelegate == null) {
+            return true;
+        }
+
+        return regionDelegate.mArea.isEmpty();
+    }
+
+    /*package*/ static boolean isRect(Region thisRegion) {
+        Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
+        if (regionDelegate == null) {
+            return true;
+        }
+
+        return regionDelegate.mArea.isRectangular();
+    }
+
+    /*package*/ static boolean isComplex(Region thisRegion) {
+        Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
+        if (regionDelegate == null) {
+            return true;
+        }
+
+        return regionDelegate.mArea.isSingular() == false;
+    }
+
+    /*package*/ static boolean contains(Region thisRegion, int x, int y) {
+        Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
+        if (regionDelegate == null) {
+            return false;
+        }
+
+        return regionDelegate.mArea.contains(x, y);
+    }
+
+    /*package*/ static boolean quickContains(Region thisRegion,
+            int left, int top, int right, int bottom) {
+        Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
+        if (regionDelegate == null) {
+            return false;
+        }
+
+        return regionDelegate.mArea.isRectangular() &&
+                regionDelegate.mArea.contains(left, top, right - left, bottom - top);
+    }
+
+    /*package*/ static boolean quickReject(Region thisRegion,
+            int left, int top, int right, int bottom) {
+        Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
+        if (regionDelegate == null) {
+            return false;
+        }
+
+        return regionDelegate.mArea.isEmpty() ||
+                regionDelegate.mArea.intersects(left, top, right - left, bottom - top) == false;
+    }
+
+    /*package*/ static boolean quickReject(Region thisRegion, Region rgn) {
+        Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
+        if (regionDelegate == null) {
+            return false;
+        }
+
+        Region_Delegate targetRegionDelegate = sManager.getDelegate(rgn.mNativeRegion);
+        if (targetRegionDelegate == null) {
+            return false;
+        }
+
+        return regionDelegate.mArea.isEmpty() ||
+                regionDelegate.mArea.getBounds().intersects(
+                        targetRegionDelegate.mArea.getBounds()) == false;
+
+    }
+
+    /*package*/ static void translate(Region thisRegion, int dx, int dy, Region dst) {
+        Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
+        if (regionDelegate == null) {
+            return;
+        }
+
+        Region_Delegate targetRegionDelegate = sManager.getDelegate(dst.mNativeRegion);
+        if (targetRegionDelegate == null) {
+            return;
+        }
+
+        if (regionDelegate.mArea.isEmpty()) {
+            targetRegionDelegate.mArea = new Area();
+        } else {
+            targetRegionDelegate.mArea = new Area(regionDelegate.mArea);
+            AffineTransform mtx = new AffineTransform();
+            mtx.translate(dx, dy);
+            targetRegionDelegate.mArea.transform(mtx);
+        }
+    }
+
+    /*package*/ static void scale(Region thisRegion, float scale, Region dst) {
+        Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
+        if (regionDelegate == null) {
+            return;
+        }
+
+        Region_Delegate targetRegionDelegate = sManager.getDelegate(dst.mNativeRegion);
+        if (targetRegionDelegate == null) {
+            return;
+        }
+
+        if (regionDelegate.mArea.isEmpty()) {
+            targetRegionDelegate.mArea = new Area();
+        } else {
+            targetRegionDelegate.mArea = new Area(regionDelegate.mArea);
+            AffineTransform mtx = new AffineTransform();
+            mtx.scale(scale, scale);
+            targetRegionDelegate.mArea.transform(mtx);
+        }
+    }
+
     /*package*/ static int nativeConstructor() {
         Region_Delegate newDelegate = new Region_Delegate();
         return sManager.addDelegate(newDelegate);
