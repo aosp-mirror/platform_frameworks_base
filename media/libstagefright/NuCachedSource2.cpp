@@ -348,7 +348,7 @@ void NuCachedSource2::restartPrefetcherIfNecessary_l(
 ssize_t NuCachedSource2::readAt(off64_t offset, void *data, size_t size) {
     Mutex::Autolock autoSerializer(mSerializer);
 
-    LOGV("readAt offset %ld, size %d", offset, size);
+    LOGV("readAt offset %lld, size %d", offset, size);
 
     Mutex::Autolock autoLock(mLock);
 
@@ -408,7 +408,7 @@ size_t NuCachedSource2::approxDataRemaining_l(bool *eos) {
 }
 
 ssize_t NuCachedSource2::readInternal(off64_t offset, void *data, size_t size) {
-    LOGV("readInternal offset %ld size %d", offset, size);
+    LOGV("readInternal offset %lld size %d", offset, size);
 
     Mutex::Autolock autoLock(mLock);
 
