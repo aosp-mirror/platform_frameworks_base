@@ -23,6 +23,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
 
@@ -31,7 +32,9 @@ public class LinesActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setBackgroundDrawable(new ColorDrawable(0xffffffff));
         final LinesView view = new LinesView(this);
+        //view.setAlpha(0.80f);
         setContentView(view);
     }
 
@@ -90,8 +93,6 @@ public class LinesActivity extends Activity {
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-
-            canvas.drawARGB(255, 255, 255, 255);
 
             canvas.save();
             canvas.translate(100.0f, 20.0f);
