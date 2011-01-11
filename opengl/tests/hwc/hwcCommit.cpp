@@ -76,6 +76,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#include <iomanip>
 #include <istream>
 #include <libgen.h>
 #include <list>
@@ -125,6 +126,7 @@ const struct hwc_rect defaultSourceCrop = {0, 0, 1, 1};
 const struct hwc_rect defaultDisplayFrame = {0, 0, 100, 100};
 
 // Global Constants
+const uint32_t printFieldWidth = 2;
 const struct searchLimits {
     uint32_t   numOverlays;
     HwcTestDim sourceCrop;
@@ -233,6 +235,8 @@ static hwc_composer_device_t *hwcDevice;
 static EGLDisplay dpy;
 static EGLSurface surface;
 static EGLint width, height;
+static size_t maxHeadingLen;
+static vector<string> formats;
 
 // Measurements
 struct meas {
@@ -264,6 +268,9 @@ struct meas {
         HwcTestDim vScaleBestDf;
         HwcTestDim vScaleBestSc;
     } sc;
+    vector<uint32_t> overlapBlendNone;
+    vector<uint32_t> overlapBlendPremult;
+    vector<uint32_t> overlapBlendCoverage;
 };
 vector<meas> measurements;
 
@@ -292,9 +299,14 @@ Rational scVScale(uint32_t format,
                   const HwcTestDim& dfMin, const HwcTestDim& dfMax,
                   const HwcTestDim& scMin, const HwcTestDim& scMax,
                   HwcTestDim& outBestDf, HwcTestDim& outBestSc);
+uint32_t numOverlapping(uint32_t backgroundFormat, uint32_t foregroundFormat,
+                        uint32_t backgroundBlend, uint32_t foregroundBlend);
 string transformList2str(const list<uint32_t>& transformList);
 string blendList2str(const list<uint32_t>& blendList);
 void init(void);
+void printFormatHeadings(size_t indent);
+void printOverlapLine(size_t indent, const string formatStr,
+                      const vector<uint32_t>& results);
 void printSyntax(const char *cmd);
 
 // Command-line option settings
@@ -332,7 +344,6 @@ main(int argc, char *argv[])
     bool    error;
     string  str;
     char cmd[MAXCMD];
-    list<string> formats;
     list<Rectangle> rectList;
 
     testSetLogCatTag(LOG_TAG);
@@ -395,6 +406,13 @@ main(int argc, char *argv[])
         }
     }
 
+    // Determine length of longest specified graphic format.
+    // This value is used for output formating
+    for (vector<string>::iterator it = formats.begin();
+         it != formats.end(); ++it) {
+         maxHeadingLen = max(maxHeadingLen, it->length());
+    }
+
     // Stop framework
     rv = snprintf(cmd, sizeof(cmd), "%s", CMD_STOP_FRAMEWORK);
     if (rv >= (signed) sizeof(cmd) - 1) {
@@ -411,7 +429,7 @@ main(int argc, char *argv[])
     init();
 
     // For each of the graphic formats
-    for (list<string>::iterator itFormat = formats.begin();
+    for (vector<string>::iterator itFormat = formats.begin();
          itFormat != formats.end(); ++itFormat) {
 
         // Locate hwcTestLib structure that describes this format
@@ -539,7 +557,65 @@ main(int argc, char *argv[])
         testPrintI("    VScale Best Source Crop: %s",
                    ((string) measPtr->sc.vScaleBestSc).c_str());
 
+        // Overlap two graphic formats and different blends
+        // Results displayed after all overlap measurments with
+        // current format in the foreground
+        // TODO: make measurments with background blend other than
+        //       none.  All of these measurements are done with a
+        //       background blend of HWC_BLENDING_NONE, with the
+        //       blend type of the foregound being varied.
+        uint32_t foregroundFormat = format->format;
+        for (vector<string>::iterator it = formats.begin();
+             it != formats.end(); ++it) {
+            uint32_t num;
+
+            const struct hwcTestGraphicFormat *backgroundFormatPtr
+                = hwcTestGraphicFormatLookup((*it).c_str());
+            uint32_t backgroundFormat = backgroundFormatPtr->format;
+
+            num = numOverlapping(backgroundFormat, foregroundFormat,
+                                 HWC_BLENDING_NONE, HWC_BLENDING_NONE);
+            measPtr->overlapBlendNone.push_back(num);
+
+            num = numOverlapping(backgroundFormat, foregroundFormat,
+                                 HWC_BLENDING_NONE, HWC_BLENDING_PREMULT);
+            measPtr->overlapBlendPremult.push_back(num);
+
+            num = numOverlapping(backgroundFormat, foregroundFormat,
+                                 HWC_BLENDING_NONE, HWC_BLENDING_COVERAGE);
+            measPtr->overlapBlendCoverage.push_back(num);
+        }
+
     }
+
+    // Display overlap results
+    size_t indent = 2;
+    testPrintI("overlapping blend: none");
+    printFormatHeadings(indent);
+    for (vector<string>::iterator it = formats.begin();
+         it != formats.end(); ++it) {
+        printOverlapLine(indent, *it, measurements[it
+                         - formats.begin()].overlapBlendNone);
+    }
+    testPrintI("");
+
+    testPrintI("overlapping blend: premult");
+    printFormatHeadings(indent);
+    for (vector<string>::iterator it = formats.begin();
+         it != formats.end(); ++it) {
+        printOverlapLine(indent, *it, measurements[it
+                         - formats.begin()].overlapBlendPremult);
+    }
+    testPrintI("");
+
+    testPrintI("overlapping blend: coverage");
+    printFormatHeadings(indent);
+    for (vector<string>::iterator it = formats.begin();
+         it != formats.end(); ++it) {
+        printOverlapLine(indent, *it, measurements[it
+                         - formats.begin()].overlapBlendCoverage);
+    }
+    testPrintI("");
 
     // Start framework
     rv = snprintf(cmd, sizeof(cmd), "%s", CMD_START_FRAMEWORK);
@@ -1204,6 +1280,30 @@ Rational scVScale(uint32_t format,
     return best;
 }
 
+uint32_t numOverlapping(uint32_t backgroundFormat, uint32_t foregroundFormat,
+                        uint32_t backgroundBlend, uint32_t foregroundBlend)
+{
+    list<Rectangle> rectList;
+    Rectangle background(backgroundFormat, startDim, startDim);
+    Rectangle foreground(foregroundFormat, startDim, startDim);
+
+    // TODO: Handle cases where startDim is so small that adding 5
+    //       causes frames not to overlap.
+    // TODO: Handle cases where startDim is so large that adding 5
+    //       cause a portion or all of the foreground displayFrame
+    //       to be off the display.
+    foreground.displayFrame.left += 5;
+    foreground.displayFrame.top += 5;
+    foreground.displayFrame.right += 5;
+    foreground.displayFrame.bottom += 5;
+
+    rectList.push_back(background);
+    rectList.push_back(foreground);
+    uint32_t num = numOverlays(rectList);
+
+    return num;
+}
+
 Rectangle::Rectangle(uint32_t graphicFormat, HwcTestDim dfDim,
                      HwcTestDim sDim) :
     format(graphicFormat), transform(defaultTransform),
@@ -1403,6 +1503,45 @@ void init(void)
     hwcTestInitDisplay(verbose, &dpy, &surface, &width, &height);
 
     hwcTestOpenHwc(&hwcDevice);
+}
+
+void printFormatHeadings(size_t indent)
+{
+    for (size_t row = 0; row <= maxHeadingLen; row++) {
+        ostringstream line;
+        for(vector<string>::iterator it = formats.begin();
+            it != formats.end(); ++it) {
+            if ((maxHeadingLen - row) <= it->length()) {
+                if (row != maxHeadingLen) {
+                    char ch = (*it)[it->length() - (maxHeadingLen - row)];
+                    line << ' ' << setw(printFieldWidth) << ch;
+                } else {
+                    line << ' ' << string(printFieldWidth, '-');
+                }
+            } else {
+               line << ' ' << setw(printFieldWidth) << "";
+            }
+        }
+        testPrintI("%*s%s", indent + maxHeadingLen, "",
+                   line.str().c_str());
+    }
+}
+
+void printOverlapLine(size_t indent, const string formatStr,
+                        const vector<uint32_t>& results)
+{
+    ostringstream line;
+
+    line << setw(indent + maxHeadingLen - formatStr.length()) << "";
+
+    line << formatStr;
+
+    for (vector<uint32_t>::const_iterator it = results.begin();
+         it != results.end(); ++it) {
+        line << ' ' << setw(printFieldWidth) << *it;
+    }
+
+    testPrintI("%s", line.str().c_str());
 }
 
 void printSyntax(const char *cmd)
