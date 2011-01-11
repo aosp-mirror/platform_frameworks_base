@@ -252,7 +252,11 @@ public class RecentAppsPanel extends LinearLayout implements StatusBarPanel, OnC
 
     private void refreshApplicationList() {
         mActivityDescriptions = getRecentTasks();
-        updateUiElements(getResources().getConfiguration(), true);
+        if (mActivityDescriptions.size() > 0) {
+            updateUiElements(getResources().getConfiguration(), true);
+        } else {
+            mBar.animateCollapse();
+        }
     }
 
     private Bitmap compositeBitmap(Bitmap background, Bitmap thumbnail) {
