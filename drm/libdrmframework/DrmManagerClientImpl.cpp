@@ -81,7 +81,8 @@ status_t DrmManagerClientImpl::setOnInfoListener(
             int uniqueId, const sp<DrmManagerClient::OnInfoListener>& infoListener) {
     Mutex::Autolock _l(mLock);
     mOnInfoListener = infoListener;
-    return getDrmManagerService()->setDrmServiceListener(uniqueId, this);
+    return getDrmManagerService()->setDrmServiceListener(uniqueId,
+            (NULL != infoListener.get()) ? this : NULL);
 }
 
 status_t DrmManagerClientImpl::installDrmEngine(int uniqueId, const String8& drmEngineFile) {
