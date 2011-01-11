@@ -23,11 +23,13 @@
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
+#include <media/stagefright/foundation/base64.h>
 #include <media/stagefright/MediaErrors.h>
 
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <netdb.h>
+#include <openssl/md5.h>
 #include <sys/socket.h>
 
 namespace android {
@@ -37,6 +39,7 @@ const int64_t ARTSPConnection::kSelectTimeoutUs = 1000ll;
 
 ARTSPConnection::ARTSPConnection()
     : mState(DISCONNECTED),
+      mAuthType(NONE),
       mSocket(-1),
       mConnectionID(0),
       mNextCSeq(0),
@@ -114,10 +117,13 @@ void ARTSPConnection::onMessageReceived(const sp<AMessage> &msg) {
 
 // static
 bool ARTSPConnection::ParseURL(
-        const char *url, AString *host, unsigned *port, AString *path) {
+        const char *url, AString *host, unsigned *port, AString *path,
+        AString *user, AString *pass) {
     host->clear();
     *port = 0;
     path->clear();
+    user->clear();
+    pass->clear();
 
     if (strncasecmp("rtsp://", url, 7)) {
         return false;
@@ -131,6 +137,24 @@ bool ARTSPConnection::ParseURL(
     } else {
         host->setTo(&url[7], slashPos - &url[7]);
         path->setTo(slashPos);
+    }
+
+    ssize_t atPos = host->find("@");
+
+    if (atPos >= 0) {
+        // Split of user:pass@ from hostname.
+
+        AString userPass(*host, 0, atPos);
+        host->erase(0, atPos + 1);
+
+        ssize_t colonPos = userPass.find(":");
+
+        if (colonPos < 0) {
+            *user = userPass;
+        } else {
+            user->setTo(userPass, 0, colonPos);
+            pass->setTo(userPass, colonPos + 1, userPass.size() - colonPos - 1);
+        }
     }
 
     const char *colonPos = strchr(host->c_str(), ':');
@@ -187,7 +211,12 @@ void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
 
     AString host, path;
     unsigned port;
-    if (!ParseURL(url.c_str(), &host, &port, &path)) {
+    if (!ParseURL(url.c_str(), &host, &port, &path, &mUser, &mPass)
+            || (mUser.size() > 0 && mPass.size() == 0)) {
+        // If we have a user name but no password we have to give up
+        // right here, since we currently have no way of asking the user
+        // for this information.
+
         LOGE("Malformed rtsp url %s", url.c_str());
 
         reply->setInt32("result", ERROR_MALFORMED);
@@ -195,6 +224,10 @@ void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
 
         mState = DISCONNECTED;
         return;
+    }
+
+    if (mUser.size() > 0) {
+        LOGV("user = '%s', pass = '%s'", mUser.c_str(), mPass.c_str());
     }
 
     struct hostent *ent = gethostbyname(host.c_str());
@@ -261,6 +294,11 @@ void ARTSPConnection::onDisconnect(const sp<AMessage> &msg) {
 
     reply->setInt32("result", OK);
     mState = DISCONNECTED;
+
+    mUser.clear();
+    mPass.clear();
+    mAuthType = NONE;
+    mNonce.clear();
 
     reply->post();
 }
@@ -335,6 +373,12 @@ void ARTSPConnection::onSendRequest(const sp<AMessage> &msg) {
     AString request;
     CHECK(msg->findString("request", &request));
 
+    // Just in case we need to re-issue the request with proper authentication
+    // later, stash it away.
+    reply->setString("original-request", request.c_str(), request.size());
+
+    addAuthentication(&request);
+
     // Find the boundary between headers and the body.
     ssize_t i = request.find("\r\n\r\n");
     CHECK_GE(i, 0);
@@ -347,7 +391,7 @@ void ARTSPConnection::onSendRequest(const sp<AMessage> &msg) {
 
     request.insert(cseqHeader, i + 2);
 
-    LOGV("%s", request.c_str());
+    LOGV("request: '%s'", request.c_str());
 
     size_t numBytesSent = 0;
     while (numBytesSent < request.size()) {
@@ -612,6 +656,30 @@ bool ARTSPConnection::receiveRTSPReponse() {
         }
     }
 
+    if (response->mStatusCode == 401) {
+        if (mAuthType == NONE && mUser.size() > 0
+                && parseAuthMethod(response)) {
+            ssize_t i;
+            CHECK_EQ((status_t)OK, findPendingRequest(response, &i));
+            CHECK_GE(i, 0);
+
+            sp<AMessage> reply = mPendingRequests.valueAt(i);
+            mPendingRequests.removeItemsAt(i);
+
+            AString request;
+            CHECK(reply->findString("original-request", &request));
+
+            sp<AMessage> msg = new AMessage(kWhatSendRequest, id());
+            msg->setMessage("reply", reply);
+            msg->setString("request", request.c_str(), request.size());
+
+            LOGI("re-sending request with authentication headers...");
+            onSendRequest(msg);
+
+            return true;
+        }
+    }
+
     return notifyResponseListener(response);
 }
 
@@ -628,26 +696,47 @@ bool ARTSPConnection::ParseSingleUnsignedLong(
     return true;
 }
 
-bool ARTSPConnection::notifyResponseListener(
-        const sp<ARTSPResponse> &response) {
+status_t ARTSPConnection::findPendingRequest(
+        const sp<ARTSPResponse> &response, ssize_t *index) const {
+    *index = 0;
+
     ssize_t i = response->mHeaders.indexOfKey("cseq");
 
     if (i < 0) {
-        return true;
+        // This is an unsolicited server->client message.
+        return OK;
     }
 
     AString value = response->mHeaders.valueAt(i);
 
     unsigned long cseq;
     if (!ParseSingleUnsignedLong(value.c_str(), &cseq)) {
-        return false;
+        return ERROR_MALFORMED;
     }
 
     i = mPendingRequests.indexOfKey(cseq);
 
     if (i < 0) {
-        // Unsolicited response?
-        TRESPASS();
+        return -ENOENT;
+    }
+
+    *index = i;
+
+    return OK;
+}
+
+bool ARTSPConnection::notifyResponseListener(
+        const sp<ARTSPResponse> &response) {
+    ssize_t i;
+    status_t err = findPendingRequest(response, &i);
+
+    if (err == OK && i < 0) {
+        // An unsolicited server response is not a problem.
+        return true;
+    }
+
+    if (err != OK) {
+        return false;
     }
 
     sp<AMessage> reply = mPendingRequests.valueAt(i);
@@ -658,6 +747,162 @@ bool ARTSPConnection::notifyResponseListener(
     reply->post();
 
     return true;
+}
+
+bool ARTSPConnection::parseAuthMethod(const sp<ARTSPResponse> &response) {
+    ssize_t i = response->mHeaders.indexOfKey("www-authenticate");
+
+    if (i < 0) {
+        return false;
+    }
+
+    AString value = response->mHeaders.valueAt(i);
+
+    if (!strncmp(value.c_str(), "Basic", 5)) {
+        mAuthType = BASIC;
+    } else {
+#if !defined(HAVE_ANDROID_OS)
+        // We don't have access to the MD5 implementation on the simulator,
+        // so we won't support digest authentication.
+        return false;
+#endif
+
+        CHECK(!strncmp(value.c_str(), "Digest", 6));
+        mAuthType = DIGEST;
+
+        i = value.find("nonce=");
+        CHECK_GE(i, 0);
+        CHECK_EQ(value.c_str()[i + 6], '\"');
+        ssize_t j = value.find("\"", i + 7);
+        CHECK_GE(j, 0);
+
+        mNonce.setTo(value, i + 7, j - i - 7);
+    }
+
+    return true;
+}
+
+#if defined(HAVE_ANDROID_OS)
+static void H(const AString &s, AString *out) {
+    out->clear();
+
+    MD5_CTX m;
+    MD5_Init(&m);
+    MD5_Update(&m, s.c_str(), s.size());
+
+    uint8_t key[16];
+    MD5_Final(key, &m);
+
+    for (size_t i = 0; i < 16; ++i) {
+        char nibble = key[i] >> 4;
+        if (nibble <= 9) {
+            nibble += '0';
+        } else {
+            nibble += 'a' - 10;
+        }
+        out->append(&nibble, 1);
+
+        nibble = key[i] & 0x0f;
+        if (nibble <= 9) {
+            nibble += '0';
+        } else {
+            nibble += 'a' - 10;
+        }
+        out->append(&nibble, 1);
+    }
+}
+#endif
+
+static void GetMethodAndURL(
+        const AString &request, AString *method, AString *url) {
+    ssize_t space1 = request.find(" ");
+    CHECK_GE(space1, 0);
+
+    ssize_t space2 = request.find(" ", space1 + 1);
+    CHECK_GE(space2, 0);
+
+    method->setTo(request, 0, space1);
+    url->setTo(request, space1 + 1, space2 - space1);
+}
+
+void ARTSPConnection::addAuthentication(AString *request) {
+    if (mAuthType == NONE) {
+        return;
+    }
+
+    // Find the boundary between headers and the body.
+    ssize_t i = request->find("\r\n\r\n");
+    CHECK_GE(i, 0);
+
+    if (mAuthType == BASIC) {
+        AString tmp;
+        tmp.append(mUser);
+        tmp.append(":");
+        tmp.append(mPass);
+
+        AString out;
+        encodeBase64(tmp.c_str(), tmp.size(), &out);
+
+        AString fragment;
+        fragment.append("Authorization: Basic ");
+        fragment.append(out);
+        fragment.append("\r\n");
+
+        request->insert(fragment, i + 2);
+
+        return;
+    }
+
+#if defined(HAVE_ANDROID_OS)
+    CHECK_EQ((int)mAuthType, (int)DIGEST);
+
+    AString method, url;
+    GetMethodAndURL(*request, &method, &url);
+
+    AString A1;
+    A1.append(mUser);
+    A1.append(":");
+    A1.append("Streaming Server");
+    A1.append(":");
+    A1.append(mPass);
+
+    AString A2;
+    A2.append(method);
+    A2.append(":");
+    A2.append(url);
+
+    AString HA1, HA2;
+    H(A1, &HA1);
+    H(A2, &HA2);
+
+    AString tmp;
+    tmp.append(HA1);
+    tmp.append(":");
+    tmp.append(mNonce);
+    tmp.append(":");
+    tmp.append(HA2);
+
+    AString digest;
+    H(tmp, &digest);
+
+    AString fragment;
+    fragment.append("Authorization: Digest ");
+    fragment.append("nonce=\"");
+    fragment.append(mNonce);
+    fragment.append("\", ");
+    fragment.append("username=\"");
+    fragment.append(mUser);
+    fragment.append("\", ");
+    fragment.append("uri=\"");
+    fragment.append(url);
+    fragment.append("\", ");
+    fragment.append("response=\"");
+    fragment.append(digest);
+    fragment.append("\"");
+    fragment.append("\r\n");
+
+    request->insert(fragment, i + 2);
+#endif
 }
 
 }  // namespace android
