@@ -493,12 +493,12 @@ public final class BridgeContext extends Activity {
     /**
      * Resolves the value of a resource, if the value references a theme or resource value.
      * <p/>
-     * This method ensures that it returns a {@link IResourceValue} object that does not
+     * This method ensures that it returns a {@link ResourceValue} object that does not
      * reference another resource.
      * If the resource cannot be resolved, it returns <code>null</code>.
      * <p/>
      * If a value that does not need to be resolved is given, the method will return a new
-     * instance of IResourceValue that contains the input value.
+     * instance of {@link ResourceValue} that contains the input value.
      *
      * @param type the type of the resource
      * @param name the name of the attribute containing this value.
@@ -510,11 +510,11 @@ public final class BridgeContext extends Activity {
             return null;
         }
 
-        // get the IResourceValue referenced by this value
+        // get the ResourceValue referenced by this value
         ResourceValue resValue = findResValue(value, false /*forceFrameworkOnly*/);
 
         // if resValue is null, but value is not null, this means it was not a reference.
-        // we return the name/value wrapper in a IResourceValue. the isFramework flag doesn't
+        // we return the name/value wrapper in a ResourceValue. the isFramework flag doesn't
         // matter.
         if (resValue == null) {
             return new ResourceValue(type, name, value, false /*isFramework*/);
@@ -525,9 +525,9 @@ public final class BridgeContext extends Activity {
     }
 
     /**
-     * Returns the {@link IResourceValue} referenced by the value of <var>value</var>.
+     * Returns the {@link ResourceValue} referenced by the value of <var>value</var>.
      * <p/>
-     * This method ensures that it returns a {@link IResourceValue} object that does not
+     * This method ensures that it returns a {@link ResourceValue} object that does not
      * reference another resource.
      * If the resource cannot be resolved, it returns <code>null</code>.
      * <p/>
@@ -535,7 +535,7 @@ public final class BridgeContext extends Activity {
      * value.
      *
      * @param value the value containing the reference to resolve.
-     * @return a {@link IResourceValue} object or <code>null</code>
+     * @return a {@link ResourceValue} object or <code>null</code>
      */
     public ResourceValue resolveResValue(ResourceValue value) {
         if (value == null) {
@@ -547,7 +547,7 @@ public final class BridgeContext extends Activity {
             return value;
         }
 
-        // else attempt to find another IResourceValue referenced by this one.
+        // else attempt to find another ResourceValue referenced by this one.
         ResourceValue resolvedValue = findResValue(value.getValue(), value.isFramework());
 
         // if the value did not reference anything, then we simply return the input value
@@ -560,7 +560,7 @@ public final class BridgeContext extends Activity {
     }
 
     /**
-     * Searches for, and returns a {@link IResourceValue} by its reference.
+     * Searches for, and returns a {@link ResourceValue} by its reference.
      * <p/>
      * The reference format can be:
      * <pre>@resType/resName</pre>
@@ -577,7 +577,7 @@ public final class BridgeContext extends Activity {
      * @param reference the resource reference to search for.
      * @param forceFrameworkOnly if true all references are considered to be toward framework
      *      resource even if the reference does not include the android: prefix.
-     * @return a {@link IResourceValue} or <code>null</code>.
+     * @return a {@link ResourceValue} or <code>null</code>.
      */
     ResourceValue findResValue(String reference, boolean forceFrameworkOnly) {
         if (reference == null) {
@@ -670,7 +670,7 @@ public final class BridgeContext extends Activity {
     }
 
     /**
-     * Searches for, and returns a {@link IResourceValue} by its name, and type.
+     * Searches for, and returns a {@link ResourceValue} by its name, and type.
      * @param resType the type of the resource
      * @param resName  the name of the resource
      * @param frameworkOnly if <code>true</code>, the method does not search in the
@@ -746,11 +746,11 @@ public final class BridgeContext extends Activity {
     }
 
     /**
-     * Returns the {@link IResourceValue} matching a given name in a given style. If the
+     * Returns the {@link ResourceValue} matching a given name in a given style. If the
      * item is not directly available in the style, the method looks in its parent style.
      * @param style the style to search in
      * @param itemName the name of the item to search for.
-     * @return the {@link IResourceValue} object or <code>null</code>
+     * @return the {@link ResourceValue} object or <code>null</code>
      */
     public ResourceValue findItemInStyle(StyleResourceValue style, String itemName) {
         ResourceValue item = style.findValue(itemName);
@@ -878,8 +878,8 @@ public final class BridgeContext extends Activity {
         return null;
     }
 
-    int getFrameworkIdValue(String idName, int defValue) {
-        Integer value = Bridge.getResourceValue(BridgeConstants.RES_ID, idName);
+    int getFrameworkResourceValue(String resType, String resName, int defValue) {
+        Integer value = Bridge.getResourceValue(resType, resName);
         if (value != null) {
             return value.intValue();
         }
@@ -887,9 +887,9 @@ public final class BridgeContext extends Activity {
         return defValue;
     }
 
-    int getProjectIdValue(String idName, int defValue) {
+    int getProjectResourceValue(String resType, String resName, int defValue) {
         if (mProjectCallback != null) {
-            Integer value = mProjectCallback.getResourceValue(BridgeConstants.RES_ID, idName);
+            Integer value = mProjectCallback.getResourceValue(resType, resName);
             if (value != null) {
                 return value.intValue();
             }

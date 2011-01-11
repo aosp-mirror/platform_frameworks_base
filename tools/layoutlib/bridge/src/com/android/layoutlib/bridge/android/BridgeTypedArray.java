@@ -577,19 +577,21 @@ public final class BridgeTypedArray extends TypedArray {
             return mContext.getDynamicIdByStyle((StyleResourceValue)resValue);
         }
 
-        // if the attribute was a reference to an id, and not a declaration of an id (@+id), then
-        // the xml attribute value was "resolved" which leads us to a ResourceValue with
-        // getType() returning "id" and getName() returning the id name
+        // if the attribute was a reference to a resource, and not a declaration of an id (@+id),
+        // then the xml attribute value was "resolved" which leads us to a ResourceValue with a
+        // valid getType() and getName() returning a resource name.
         // (and getValue() returning null!). We need to handle this!
-        if (resValue.getType() != null && resValue.getType().equals(BridgeConstants.RES_ID)) {
+        if (resValue.getType() != null && resValue.getType().startsWith("@+") == false) {
             // if this is a framework id
             if (mPlatformFile || resValue.isFramework()) {
                 // look for idName in the android R classes
-                return mContext.getFrameworkIdValue(resValue.getName(), defValue);
+                return mContext.getFrameworkResourceValue(
+                        resValue.getType(), resValue.getName(), defValue);
             }
 
             // look for idName in the project R class.
-            return mContext.getProjectIdValue(resValue.getName(), defValue);
+            return mContext.getProjectResourceValue(
+                    resValue.getType(), resValue.getName(), defValue);
         }
 
         // else, try to get the value, and resolve it somehow.
@@ -626,11 +628,11 @@ public final class BridgeTypedArray extends TypedArray {
             // if this is a framework id
             if (mPlatformFile || value.startsWith("@android") || value.startsWith("@+android")) {
                 // look for idName in the android R classes
-                return mContext.getFrameworkIdValue(idName, defValue);
+                return mContext.getFrameworkResourceValue(BridgeConstants.RES_ID, idName, defValue);
             }
 
             // look for idName in the project R class.
-            return mContext.getProjectIdValue(idName, defValue);
+            return mContext.getProjectResourceValue(BridgeConstants.RES_ID, idName, defValue);
         }
 
         // not a direct id valid reference? resolve it
