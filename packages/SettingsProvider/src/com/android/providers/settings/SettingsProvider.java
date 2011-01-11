@@ -262,11 +262,8 @@ public class SettingsProvider extends ContentProvider {
 
         // Watch for external modifications to the database file,
         // keeping our cache in sync.
-        // It's kinda lame to call mOpenHelper.getReadableDatabase()
-        // during onCreate(), but since ensureAndroidIdIsSet has
-        // already done it above and initialized/upgraded the
-        // database, might as well just use it...
-        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        db.enableWriteAheadLogging();
         sObserverInstance = new SettingsFileObserver(db.getPath());
         sObserverInstance.startWatching();
         startAsyncCachePopulation();
