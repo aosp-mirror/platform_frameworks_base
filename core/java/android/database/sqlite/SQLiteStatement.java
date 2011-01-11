@@ -131,6 +131,10 @@ public class SQLiteStatement extends SQLiteProgram
             long retValue = native_1x1_long();
             mDatabase.logTimeStat(mSql, timeStart);
             return retValue;
+        } catch (SQLiteDoneException e) {
+            throw new SQLiteDoneException(
+                    "expected 1 row from this query but query returned no data. check the query: " +
+                    mSql);
         } finally {
             releaseAndUnlock();
         }
@@ -150,6 +154,10 @@ public class SQLiteStatement extends SQLiteProgram
             String retValue = native_1x1_string();
             mDatabase.logTimeStat(mSql, timeStart);
             return retValue;
+        } catch (SQLiteDoneException e) {
+            throw new SQLiteDoneException(
+                    "expected 1 row from this query but query returned no data. check the query: " +
+                    mSql);
         } finally {
             releaseAndUnlock();
         }
@@ -172,6 +180,10 @@ public class SQLiteStatement extends SQLiteProgram
         } catch (IOException ex) {
             Log.e(TAG, "simpleQueryForBlobFileDescriptor() failed", ex);
             return null;
+        } catch (SQLiteDoneException e) {
+            throw new SQLiteDoneException(
+                    "expected 1 row from this query but query returned no data. check the query: " +
+                    mSql);
         } finally {
             releaseAndUnlock();
         }
