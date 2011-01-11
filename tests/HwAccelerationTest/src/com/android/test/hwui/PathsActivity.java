@@ -69,7 +69,7 @@ public class PathsActivity extends Activity {
 
             mMediumPaint = new Paint();
             mMediumPaint.setAntiAlias(true);
-            mMediumPaint.setColor(0xff0000ff);
+            mMediumPaint.setColor(0xe00000ff);
             mMediumPaint.setStrokeWidth(10.0f);
             mMediumPaint.setStyle(Paint.Style.STROKE);
 

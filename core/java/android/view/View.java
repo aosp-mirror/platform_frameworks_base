@@ -2049,6 +2049,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     private Bitmap mDrawingCache;
     private Bitmap mUnscaledDrawingCache;
     private DisplayList mDisplayList;
+    private HardwareLayer mHardwareLayer;
 
     /**
      * When this view has focus and the next focus is {@link #FOCUS_LEFT},
@@ -2204,6 +2205,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * 
      * <p>A hardware layer is useful to apply a specific color filter and/or
      * blending mode and/or translucency to a view and all its children.</p>
+     * <p>A hardware layer can be used to cache a complex view tree into a
+     * texture and reduce the complexity of drawing operations. For instance,
+     * when animating a complex view tree with a translation, a hardware layer can
+     * be used to render the view tree only once.</p>
      * <p>A hardware layer can also be used to increase the rendering quality when
      * rotation transformations are applied on a view. It can also be used to
      * prevent potential clipping issues when applying 3D transforms on a view.</p>
@@ -7551,9 +7556,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     protected void onDetachedFromWindow() {
         mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
+
         removeUnsetPressCallback();
         removeLongPressCallback();
+
         destroyDrawingCache();
+
+        if (mHardwareLayer != null) {
+            mHardwareLayer.destroy();
+            mHardwareLayer = null;
+        }
     }
 
     /**
@@ -7868,23 +7880,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             throw new IllegalArgumentException("Layer type can only be one of: LAYER_TYPE_NONE, " 
                     + "LAYER_TYPE_SOFTWARE or LAYER_TYPE_HARDWARE");
         }
+        
+        if (layerType == mLayerType) return;
 
         // Destroy any previous software drawing cache if needed
-        if (mLayerType == LAYER_TYPE_SOFTWARE && layerType != LAYER_TYPE_SOFTWARE) {
-            if (mDrawingCache != null) {
-                mDrawingCache.recycle();
-                mDrawingCache = null;
-            }
-
-            if (mUnscaledDrawingCache != null) {
-                mUnscaledDrawingCache.recycle();
-                mUnscaledDrawingCache = null;
-            }
+        switch (mLayerType) {
+            case LAYER_TYPE_SOFTWARE:
+                if (mDrawingCache != null) {
+                    mDrawingCache.recycle();
+                    mDrawingCache = null;
+                }
+    
+                if (mUnscaledDrawingCache != null) {
+                    mUnscaledDrawingCache.recycle();
+                    mUnscaledDrawingCache = null;
+                }
+                break;
+            case LAYER_TYPE_HARDWARE:
+                if (mHardwareLayer != null) {
+                    mHardwareLayer.destroy();
+                    mHardwareLayer = null;
+                }
+                break;
+            default:
+                break;
         }
 
         mLayerType = layerType;
         mLayerPaint = mLayerType == LAYER_TYPE_NONE ? null : paint;
 
+        // TODO: Make sure we invalidate the parent's display list
         invalidate();
     }
 
@@ -7904,6 +7929,62 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public int getLayerType() {
         return mLayerType;
+    }
+    
+    /**
+     * <p>Returns a hardware layer that can be used to draw this view again
+     * without executing its draw method.</p>
+     *
+     * @return A HardwareLayer ready to render, or null if an error occurred.
+     */
+    HardwareLayer getHardwareLayer(Canvas currentCanvas) {
+        if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
+            return null;
+        }
+
+        final int width = mRight - mLeft;
+        final int height = mBottom - mTop;
+        
+        if (width == 0 || height == 0) {
+            return null;
+        }
+
+        if ((mPrivateFlags & DRAWING_CACHE_VALID) == 0 || mHardwareLayer == null) {
+            if (mHardwareLayer == null) {
+                mHardwareLayer = mAttachInfo.mHardwareRenderer.createHardwareLayer(
+                        width, height, isOpaque());
+            } else if (mHardwareLayer.getWidth() != width || mHardwareLayer.getHeight() != height) {
+                mHardwareLayer.resize(width, height);
+            }
+
+            final HardwareCanvas canvas = mHardwareLayer.start(currentCanvas);
+            try {
+                canvas.setViewport(width, height);
+                canvas.onPreDraw();
+
+                computeScroll();
+                canvas.translate(-mScrollX, -mScrollY);
+
+                final int restoreCount = canvas.save();
+
+                mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
+    
+                // Fast path for layouts with no backgrounds
+                if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
+                    mPrivateFlags &= ~DIRTY_MASK;
+                    dispatchDraw(canvas);
+                } else {
+                    draw(canvas);
+                }
+    
+                canvas.restoreToCount(restoreCount);
+            } finally {
+                canvas.onPostDraw();
+                mHardwareLayer.end(currentCanvas);
+            }
+        }
+
+        return mHardwareLayer;
     }
 
     /**

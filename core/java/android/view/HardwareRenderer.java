@@ -116,6 +116,17 @@ public abstract class HardwareRenderer {
     abstract DisplayList createDisplayList();
 
     /**
+     * Creates a new hardware layer.
+     * 
+     * @param width The minimum width of the layer
+     * @param height The minimum height of the layer
+     * @param isOpaque Whether the layer should be opaque or not
+     * 
+     * @return A hardware layer
+     */
+    abstract HardwareLayer createHardwareLayer(int width, int height, boolean isOpaque);
+    
+    /**
      * Initializes the hardware renderer for the specified surface and setup the
      * renderer for drawing, if needed. This is invoked when the ViewRoot has
      * potentially lost the hardware renderer. The hardware renderer should be
@@ -681,6 +692,11 @@ public abstract class HardwareRenderer {
         @Override
         DisplayList createDisplayList() {
             return new GLES20DisplayList();
+        }
+        
+        @Override
+        HardwareLayer createHardwareLayer(int width, int height, boolean isOpaque) {
+            return new GLES20Layer(width, height, isOpaque);
         }
 
         static HardwareRenderer create(boolean translucent) {

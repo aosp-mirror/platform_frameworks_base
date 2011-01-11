@@ -64,6 +64,10 @@ public:
     virtual void prepare(bool opaque);
     virtual void finish();
 
+    // These two calls must not be recorded in display lists
+    void interrupt();
+    void resume();
+
     virtual void acquireContext();
     virtual void releaseContext();
 
@@ -91,6 +95,8 @@ public:
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
     virtual void drawDisplayList(DisplayList* displayList);
+    virtual void drawLayer(int texture, float left, float top, float right, float bottom,
+            float u, float v, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,

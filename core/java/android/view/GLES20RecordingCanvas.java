@@ -36,7 +36,8 @@ import java.util.HashSet;
 class GLES20RecordingCanvas extends GLES20Canvas {
     // These lists ensure that any Bitmaps recorded by a DisplayList are kept alive as long
     // as the DisplayList is alive.
-    private HashSet<Bitmap> mBitmaps = new HashSet<Bitmap>();
+    @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection"})
+    private final HashSet<Bitmap> mBitmaps = new HashSet<Bitmap>();
 
     GLES20RecordingCanvas(boolean translucent) {
         super(true, translucent);
@@ -54,12 +55,6 @@ class GLES20RecordingCanvas extends GLES20Canvas {
     void reset() {
         mBitmaps.clear();
         setupRenderer(true);
-    }
-
-    @Override
-    public void drawArc(RectF oval, float startAngle, float sweepAngle, boolean useCenter,
-            Paint paint) {
-        super.drawArc(oval, startAngle, sweepAngle, useCenter, paint);
     }
 
     @Override

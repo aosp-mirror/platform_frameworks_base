@@ -93,6 +93,7 @@ public:
         ConcatMatrix,
         ClipRect,
         DrawDisplayList,
+        DrawLayer,
         DrawBitmap,
         DrawBitmapMatrix,
         DrawBitmapRect,
@@ -245,6 +246,8 @@ public:
     bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
     void drawDisplayList(DisplayList* displayList);
+    void drawLayer(int texture, float left, float top, float right, float bottom,
+            float u, float v, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
