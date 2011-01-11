@@ -1512,8 +1512,8 @@
     <style name="Widget.Holo.ProgressBar.Horizontal" parent="Widget.ProgressBar.Horizontal">
         <item name="android:progressDrawable">@android:drawable/progress_horizontal_holo_dark</item>
         <item name="android:indeterminateDrawable">@android:drawable/progress_indeterminate_horizontal_holo</item>
-        <item name="android:minHeight">24dip</item>
-        <item name="android:maxHeight">24dip</item>
+        <item name="android:minHeight">16dip</item>
+        <item name="android:maxHeight">16dip</item>
     </style>
 
     <style name="Widget.Holo.ProgressBar.Small" parent="Widget.ProgressBar.Small">
@@ -1728,7 +1728,7 @@
 
     <style name="Widget.Holo.Light.Button" parent="Widget.Button">
         <item name="android:background">@android:drawable/btn_default_holo_light</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMediumInverse</item>
         <item name="android:textColor">@android:color/primary_text_holo_light</item>
         <item name="android:minHeight">48dip</item>
         <item name="android:paddingLeft">32dip</item>
