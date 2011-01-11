@@ -8104,7 +8104,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 CharSequence selectedText = mTransformed.subSequence(start, end);
                 ClipData data = ClipData.newPlainText(null, null, selectedText);
                 DragLocalState localState = new DragLocalState(this, start, end);
-                startDrag(data, getTextThumbnailBuilder(selectedText), false, localState);
+                startDrag(data, getTextThumbnailBuilder(selectedText), localState, 0);
                 stopSelectionActionMode();
             } else {
                 updateSelectedRegion();

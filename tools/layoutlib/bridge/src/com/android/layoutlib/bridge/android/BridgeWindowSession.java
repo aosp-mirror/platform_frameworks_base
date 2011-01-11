@@ -106,7 +106,7 @@ public final class BridgeWindowSession implements IWindowSession {
         // pass for now.
     }
 
-    public IBinder prepareDrag(IWindow window, boolean localOnly,
+    public IBinder prepareDrag(IWindow window, int flags,
             int thumbnailWidth, int thumbnailHeight, Surface outSurface)
             throws RemoteException {
         // pass for now
