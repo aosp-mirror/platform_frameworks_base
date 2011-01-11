@@ -144,6 +144,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         // update the provider list.
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
         mContext.registerReceiver(mBroadcastReceiver, filter);
@@ -643,6 +644,12 @@ class AppWidgetService extends IAppWidgetService.Stub
     }
 
     boolean addProviderLocked(ResolveInfo ri) {
+        if ((ri.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
+            return false;
+        }
+        if (!ri.activityInfo.isEnabled()) {
+            return false;
+        }
         Provider p = parseProviderInfoXml(new ComponentName(ri.activityInfo.packageName,
                     ri.activityInfo.name), ri);
         if (p != null) {
@@ -1160,6 +1167,7 @@ class AppWidgetService extends IAppWidgetService.Stub
                 }
             } else {
                 boolean added = false;
+                boolean changed = false;
                 String pkgList[] = null;
                 if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
@@ -1178,14 +1186,16 @@ class AppWidgetService extends IAppWidgetService.Stub
                     }
                     pkgList = new String[] { pkgName };
                     added = Intent.ACTION_PACKAGE_ADDED.equals(action);
+                    changed = Intent.ACTION_PACKAGE_CHANGED.equals(action);
                 }
                 if (pkgList == null || pkgList.length == 0) {
                     return;
                 }
-                if (added) {
+                if (added || changed) {
                     synchronized (mAppWidgetIds) {
                         Bundle extras = intent.getExtras();
-                        if (extras != null && extras.getBoolean(Intent.EXTRA_REPLACING, false)) {
+                        if (changed || (extras != null &&
+                                    extras.getBoolean(Intent.EXTRA_REPLACING, false))) {
                             for (String pkgName : pkgList) {
                                 // The package was just upgraded
                                 updateProvidersForPackageLocked(pkgName);
