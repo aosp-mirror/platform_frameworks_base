@@ -4474,6 +4474,9 @@ bool Block::IsKey() const
     return ((m_flags & static_cast<unsigned char>(1 << 7)) != 0);
 }
 
+unsigned char Block::Flags() const {
+    return m_flags;
+}
 
 void Block::SetKey(bool bKey)
 {
