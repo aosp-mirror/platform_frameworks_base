@@ -1284,21 +1284,24 @@ uint32_t numOverlapping(uint32_t backgroundFormat, uint32_t foregroundFormat,
                         uint32_t backgroundBlend, uint32_t foregroundBlend)
 {
     list<Rectangle> rectList;
+
     Rectangle background(backgroundFormat, startDim, startDim);
-    Rectangle foreground(foregroundFormat, startDim, startDim);
+    background.blend = backgroundBlend;
+    rectList.push_back(background);
 
     // TODO: Handle cases where startDim is so small that adding 5
     //       causes frames not to overlap.
     // TODO: Handle cases where startDim is so large that adding 5
     //       cause a portion or all of the foreground displayFrame
     //       to be off the display.
+    Rectangle foreground(foregroundFormat, startDim, startDim);
     foreground.displayFrame.left += 5;
     foreground.displayFrame.top += 5;
     foreground.displayFrame.right += 5;
     foreground.displayFrame.bottom += 5;
-
-    rectList.push_back(background);
+    background.blend = foregroundBlend;
     rectList.push_back(foreground);
+
     uint32_t num = numOverlays(rectList);
 
     return num;
