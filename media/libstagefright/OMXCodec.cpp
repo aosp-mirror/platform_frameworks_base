@@ -3923,6 +3923,8 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
 
             if (!mIsEncoder) {
                 OMX_CONFIG_RECTTYPE rect;
+                InitOMXParams(&rect);
+                rect.nPortIndex = kPortIndexOutput;
                 status_t err =
                         mOMX->getConfig(
                             mNode, OMX_IndexConfigCommonOutputCrop,
