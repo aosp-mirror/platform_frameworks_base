@@ -48,7 +48,6 @@ public class BridgeConstants {
 
     public final static String PREFIX_ANDROID = "android:";
 
-    public final static String RES_ANIM = "anim";
     public final static String RES_ANIMATOR = "animator";
     public final static String RES_STYLE = "style";
     public final static String RES_ATTR = "attr";
