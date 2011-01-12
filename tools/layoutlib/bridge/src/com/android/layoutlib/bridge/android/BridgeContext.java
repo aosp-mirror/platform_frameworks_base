@@ -382,8 +382,9 @@ public final class BridgeContext extends Activity {
                         defStyleValues = (StyleResourceValue)item;
                     }
                 } else {
-                    // TODO: log the error properly
-                    System.out.println("Failed to find defStyle: " + defStyleName);
+                    Bridge.getLog().error(null,
+                            String.format(
+                                    "Failed to find style '%s' in current theme", defStyleName));
                 }
             }
         }
