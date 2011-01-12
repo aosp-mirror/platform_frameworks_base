@@ -1981,21 +1981,38 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private ArrayList<InputMethodSubtype> getApplicableSubtypesLocked(
             List<InputMethodSubtype> subtypes) {
-        ArrayList<InputMethodSubtype> applicableSubtypes = new ArrayList<InputMethodSubtype>();
         final String systemLocale = mRes.getConfiguration().locale.toString();
-        if (TextUtils.isEmpty(systemLocale)) return applicableSubtypes;
+        if (TextUtils.isEmpty(systemLocale)) return new ArrayList<InputMethodSubtype>();
+        HashMap<String, InputMethodSubtype> applicableModeAndSubtypesMap =
+                new HashMap<String, InputMethodSubtype>();
         final int N = subtypes.size();
         boolean containsKeyboardSubtype = false;
         for (int i = 0; i < N; ++i) {
             InputMethodSubtype subtype = subtypes.get(i);
-            if (subtype.getLocale().equals(systemLocale)) {
-                applicableSubtypes.add(subtype);
+            final String locale = subtype.getLocale();
+            final String mode = subtype.getMode();
+            // When system locale starts with subtype's locale, that subtype will be applicable
+            // for system locale
+            // For instance, it's clearly applicable for cases like system locale = en_US and
+            // subtype = en, but it is not necessarily considered applicable for cases like system
+            // locale = en and subtype = en_US.
+            // We just call systemLocale.startsWith(locale) in this function because there is no
+            // need to find applicable subtypes aggressively unlike
+            // findLastResortApplicableSubtypeLocked.
+            if (systemLocale.startsWith(locale)) {
+                InputMethodSubtype applicableSubtype = applicableModeAndSubtypesMap.get(mode);
+                // If more applicable subtypes are contained, skip.
+                if (applicableSubtype != null
+                        && systemLocale.equals(applicableSubtype.getLocale())) continue;
+                applicableModeAndSubtypesMap.put(mode, subtype);
                 if (!containsKeyboardSubtype
                         && SUBTYPE_MODE_KEYBOARD.equalsIgnoreCase(subtype.getMode())) {
                     containsKeyboardSubtype = true;
                 }
             }
         }
+        ArrayList<InputMethodSubtype> applicableSubtypes = new ArrayList<InputMethodSubtype>(
+                applicableModeAndSubtypesMap.values());
         if (!containsKeyboardSubtype) {
             InputMethodSubtype lastResortKeyboardSubtype = findLastResortApplicableSubtypeLocked(
                     subtypes, SUBTYPE_MODE_KEYBOARD, systemLocale, true);
@@ -2188,6 +2205,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     // TODO: We should change the return type from List to List<Parcelable>
     public List getShortcutInputMethodsAndSubtypes() {
         synchronized (mMethodMap) {
+            ArrayList<Object> ret = new ArrayList<Object>();
             if (mShortcutInputMethodsAndSubtypes.size() == 0) {
                 // If there are no selected shortcut subtypes, the framework will try to find
                 // the most applicable subtype from all subtypes whose mode is
@@ -2196,10 +2214,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     findLastResortApplicableShortcutInputMethodAndSubtypeLocked(
                             SUBTYPE_MODE_VOICE);
                 if (info != null) {
-                    addShortcutInputMethodAndSubtypes(info.first, info.second);
+                    ret.add(info.first);
+                    ret.add(info.second);
                 }
+                return ret;
             }
-            ArrayList<Object> ret = new ArrayList<Object>();
             for (InputMethodInfo imi: mShortcutInputMethodsAndSubtypes.keySet()) {
                 ret.add(imi);
                 for (InputMethodSubtype subtype: mShortcutInputMethodsAndSubtypes.get(imi)) {
