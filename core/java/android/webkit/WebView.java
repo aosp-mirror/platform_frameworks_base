@@ -4680,8 +4680,8 @@ public class WebView extends AbsoluteLayout
 
         if (nativeCursorIsTextInput()) {
             // This message will put the node in focus, for the DOM's notion
-            // of focus, and make the focuscontroller active
-            mWebViewCore.sendMessage(EventHub.CLICK, nativeCursorFramePointer(),
+            // of focus.
+            mWebViewCore.sendMessage(EventHub.FAKE_CLICK, nativeCursorFramePointer(),
                     nativeCursorNodePointer());
             // This will bring up the WebTextView and put it in focus, for
             // our view system's notion of focus
