@@ -22,13 +22,15 @@
 
 #include "mkvparser.hpp"
 
+#include <media/stagefright/foundation/ADebug.h>
+#include <media/stagefright/foundation/hexdump.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaBuffer.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
+#include <media/stagefright/Utils.h>
 #include <utils/String8.h>
 
 namespace android {
@@ -81,46 +83,6 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <ctype.h>
-static void hexdump(const void *_data, size_t size) {
-    const uint8_t *data = (const uint8_t *)_data;
-    size_t offset = 0;
-    while (offset < size) {
-        printf("0x%04x  ", offset);
-
-        size_t n = size - offset;
-        if (n > 16) {
-            n = 16;
-        }
-
-        for (size_t i = 0; i < 16; ++i) {
-            if (i == 8) {
-                printf(" ");
-            }
-
-            if (offset + i < size) {
-                printf("%02x ", data[offset + i]);
-            } else {
-                printf("   ");
-            }
-        }
-
-        printf(" ");
-
-        for (size_t i = 0; i < n; ++i) {
-            if (isprint(data[offset + i])) {
-                printf("%c", data[offset + i]);
-            } else {
-                printf(".");
-            }
-        }
-
-        printf("\n");
-
-        offset += 16;
-    }
-}
-
 struct BlockIterator {
     BlockIterator(mkvparser::Segment *segment, unsigned long trackNum);
 
@@ -156,6 +118,9 @@ struct MatroskaSource : public MediaSource {
     virtual status_t read(
             MediaBuffer **buffer, const ReadOptions *options);
 
+protected:
+    virtual ~MatroskaSource();
+
 private:
     enum Type {
         AVC,
@@ -167,8 +132,14 @@ private:
     size_t mTrackIndex;
     Type mType;
     BlockIterator mBlockIter;
+    size_t mNALSizeLen;  // for type AVC
+
+    List<MediaBuffer *> mPendingFrames;
 
     status_t advance();
+
+    status_t readBlock();
+    void clearPendingFrames();
 
     MatroskaSource(const MatroskaSource &);
     MatroskaSource &operator=(const MatroskaSource &);
@@ -180,16 +151,33 @@ MatroskaSource::MatroskaSource(
       mTrackIndex(index),
       mType(OTHER),
       mBlockIter(mExtractor->mSegment,
-                 mExtractor->mTracks.itemAt(index).mTrackNum) {
+                 mExtractor->mTracks.itemAt(index).mTrackNum),
+      mNALSizeLen(0) {
+    sp<MetaData> meta = mExtractor->mTracks.itemAt(index).mMeta;
+
     const char *mime;
-    CHECK(mExtractor->mTracks.itemAt(index).mMeta->
-            findCString(kKeyMIMEType, &mime));
+    CHECK(meta->findCString(kKeyMIMEType, &mime));
 
     if (!strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC)) {
         mType = AVC;
+
+        uint32_t dummy;
+        const uint8_t *avcc;
+        size_t avccSize;
+        CHECK(meta->findData(
+                    kKeyAVCC, &dummy, (const void **)&avcc, &avccSize));
+
+        CHECK_GE(avccSize, 5u);
+
+        mNALSizeLen = 1 + (avcc[4] & 3);
+        LOGV("mNALSizeLen = %d", mNALSizeLen);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC)) {
         mType = AAC;
     }
+}
+
+MatroskaSource::~MatroskaSource() {
+    clearPendingFrames();
 }
 
 status_t MatroskaSource::start(MetaData *params) {
@@ -199,6 +187,8 @@ status_t MatroskaSource::start(MetaData *params) {
 }
 
 status_t MatroskaSource::stop() {
+    clearPendingFrames();
+
     return OK;
 }
 
@@ -276,6 +266,218 @@ int64_t BlockIterator::blockTimeUs() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+static unsigned U24_AT(const uint8_t *ptr) {
+    return ptr[0] << 16 | ptr[1] << 8 | ptr[2];
+}
+
+static size_t clz(uint8_t x) {
+    size_t numLeadingZeroes = 0;
+
+    while (!(x & 0x80)) {
+        ++numLeadingZeroes;
+        x = x << 1;
+    }
+
+    return numLeadingZeroes;
+}
+
+void MatroskaSource::clearPendingFrames() {
+    while (!mPendingFrames.empty()) {
+        MediaBuffer *frame = *mPendingFrames.begin();
+        mPendingFrames.erase(mPendingFrames.begin());
+
+        frame->release();
+        frame = NULL;
+    }
+}
+
+#define BAIL(err) \
+    do {                        \
+        if (bigbuf) {           \
+            bigbuf->release();  \
+            bigbuf = NULL;      \
+        }                       \
+                                \
+        return err;             \
+    } while (0)
+
+status_t MatroskaSource::readBlock() {
+    CHECK(mPendingFrames.empty());
+
+    if (mBlockIter.eos()) {
+        return ERROR_END_OF_STREAM;
+    }
+
+    const mkvparser::Block *block = mBlockIter.block();
+
+    size_t size = block->GetSize();
+    int64_t timeUs = mBlockIter.blockTimeUs();
+    int32_t isSync = block->IsKey();
+
+    MediaBuffer *bigbuf = new MediaBuffer(size);
+
+    long res = block->Read(
+            mExtractor->mReader, (unsigned char *)bigbuf->data());
+
+    if (res != 0) {
+        bigbuf->release();
+        bigbuf = NULL;
+
+        return ERROR_END_OF_STREAM;
+    }
+
+    mBlockIter.advance();
+
+    bigbuf->meta_data()->setInt64(kKeyTime, timeUs);
+    bigbuf->meta_data()->setInt32(kKeyIsSyncFrame, isSync);
+
+    unsigned lacing = (block->Flags() >> 1) & 3;
+
+    if (lacing == 0) {
+        mPendingFrames.push_back(bigbuf);
+        return OK;
+    }
+
+    LOGV("lacing = %u, size = %d", lacing, size);
+
+    const uint8_t *data = (const uint8_t *)bigbuf->data();
+    // hexdump(data, size);
+
+    if (size == 0) {
+        BAIL(ERROR_MALFORMED);
+    }
+
+    unsigned numFrames = (unsigned)data[0] + 1;
+    ++data;
+    --size;
+
+    Vector<uint64_t> frameSizes;
+
+    switch (lacing) {
+        case 1:  // Xiph
+        {
+            for (size_t i = 0; i < numFrames - 1; ++i) {
+                size_t frameSize = 0;
+                uint8_t byte;
+                do {
+                    if (size == 0) {
+                        BAIL(ERROR_MALFORMED);
+                    }
+                    byte = data[0];
+                    ++data;
+                    --size;
+
+                    frameSize += byte;
+                } while (byte == 0xff);
+
+                frameSizes.push(frameSize);
+            }
+
+            break;
+        }
+
+        case 2:  // fixed-size
+        {
+            if ((size % numFrames) != 0) {
+                BAIL(ERROR_MALFORMED);
+            }
+
+            size_t frameSize = size / numFrames;
+            for (size_t i = 0; i < numFrames - 1; ++i) {
+                frameSizes.push(frameSize);
+            }
+
+            break;
+        }
+
+        case 3:  // EBML
+        {
+            uint64_t lastFrameSize = 0;
+            for (size_t i = 0; i < numFrames - 1; ++i) {
+                uint8_t byte;
+
+                if (size == 0) {
+                    BAIL(ERROR_MALFORMED);
+                }
+                byte = data[0];
+                ++data;
+                --size;
+
+                size_t numLeadingZeroes = clz(byte);
+
+                uint64_t frameSize = byte & ~(0x80 >> numLeadingZeroes);
+                for (size_t j = 0; j < numLeadingZeroes; ++j) {
+                    if (size == 0) {
+                        BAIL(ERROR_MALFORMED);
+                    }
+
+                    frameSize = frameSize << 8;
+                    frameSize |= data[0];
+                    ++data;
+                    --size;
+                }
+
+                if (i == 0) {
+                    frameSizes.push(frameSize);
+                } else {
+                    size_t shift =
+                        7 - numLeadingZeroes + 8 * numLeadingZeroes;
+
+                    int64_t delta =
+                        (int64_t)frameSize - (1ll << (shift - 1)) + 1;
+
+                    frameSize = lastFrameSize + delta;
+
+                    frameSizes.push(frameSize);
+                }
+
+                lastFrameSize = frameSize;
+            }
+            break;
+        }
+
+        default:
+            TRESPASS();
+    }
+
+#if 0
+    AString out;
+    for (size_t i = 0; i < frameSizes.size(); ++i) {
+        if (i > 0) {
+            out.append(", ");
+        }
+        out.append(StringPrintf("%llu", frameSizes.itemAt(i)));
+    }
+    LOGV("sizes = [%s]", out.c_str());
+#endif
+
+    for (size_t i = 0; i < frameSizes.size(); ++i) {
+        uint64_t frameSize = frameSizes.itemAt(i);
+
+        if (size < frameSize) {
+            BAIL(ERROR_MALFORMED);
+        }
+
+        MediaBuffer *mbuf = new MediaBuffer(frameSize);
+        mbuf->meta_data()->setInt64(kKeyTime, timeUs);
+        mbuf->meta_data()->setInt32(kKeyIsSyncFrame, isSync);
+        memcpy(mbuf->data(), data, frameSize);
+        mPendingFrames.push_back(mbuf);
+
+        data += frameSize;
+        size -= frameSize;
+    }
+
+    size_t offset = bigbuf->range_length() - size;
+    bigbuf->set_range(offset, size);
+
+    mPendingFrames.push_back(bigbuf);
+
+    return OK;
+}
+
+#undef BAIL
+
 status_t MatroskaSource::read(
         MediaBuffer **out, const ReadOptions *options) {
     *out = NULL;
@@ -283,59 +485,94 @@ status_t MatroskaSource::read(
     int64_t seekTimeUs;
     ReadOptions::SeekMode mode;
     if (options && options->getSeekTo(&seekTimeUs, &mode)) {
+        clearPendingFrames();
         mBlockIter.seek(seekTimeUs);
     }
 
-    if (mBlockIter.eos()) {
-        return ERROR_END_OF_STREAM;
-    }
+again:
+    while (mPendingFrames.empty()) {
+        status_t err = readBlock();
 
-    const mkvparser::Block *block = mBlockIter.block();
-    size_t size = block->GetSize();
-    int64_t timeUs = mBlockIter.blockTimeUs();
+        if (err != OK) {
+            clearPendingFrames();
 
-    MediaBuffer *buffer = new MediaBuffer(size + 2);
-    buffer->meta_data()->setInt64(kKeyTime, timeUs);
-    buffer->meta_data()->setInt32(kKeyIsSyncFrame, block->IsKey());
-
-    long res = block->Read(
-            mExtractor->mReader, (unsigned char *)buffer->data() + 2);
-
-    if (res != 0) {
-        return ERROR_END_OF_STREAM;
-    }
-
-    buffer->set_range(2, size);
-
-    if (mType == AVC) {
-        CHECK(size >= 2);
-
-        uint8_t *data = (uint8_t *)buffer->data();
-
-        unsigned NALsize = data[2] << 8 | data[3];
-        CHECK_EQ(size, NALsize + 2);
-
-        memcpy(data, "\x00\x00\x00\x01", 4);
-        buffer->set_range(0, size + 2);
-    } else if (mType == AAC) {
-        // There's strange junk at the beginning...
-
-        const uint8_t *data = (const uint8_t *)buffer->data() + 2;
-        size_t offset = 0;
-        while (offset < size && data[offset] != 0x21) {
-            ++offset;
+            return err;
         }
-        buffer->set_range(2 + offset, size - offset);
     }
+
+    MediaBuffer *frame = *mPendingFrames.begin();
+    mPendingFrames.erase(mPendingFrames.begin());
+
+    size_t size = frame->range_length();
+
+    if (mType != AVC) {
+        *out = frame;
+
+        return OK;
+    }
+
+    if (size < mNALSizeLen) {
+        frame->release();
+        frame = NULL;
+
+        return ERROR_MALFORMED;
+    }
+
+    // In the case of AVC content, each NAL unit is prefixed by
+    // mNALSizeLen bytes of length. We want to prefix the data with
+    // a four-byte 0x00000001 startcode instead of the length prefix.
+    // mNALSizeLen ranges from 1 through 4 bytes, so add an extra
+    // 3 bytes of padding to the buffer start.
+    static const size_t kPadding = 3;
+
+    MediaBuffer *buffer = new MediaBuffer(size + kPadding);
+
+    int64_t timeUs;
+    CHECK(frame->meta_data()->findInt64(kKeyTime, &timeUs));
+    int32_t isSync;
+    CHECK(frame->meta_data()->findInt32(kKeyIsSyncFrame, &isSync));
+
+    buffer->meta_data()->setInt64(kKeyTime, timeUs);
+    buffer->meta_data()->setInt32(kKeyIsSyncFrame, isSync);
+
+    memcpy((uint8_t *)buffer->data() + kPadding,
+           (const uint8_t *)frame->data() + frame->range_offset(),
+           size);
+
+    buffer->set_range(kPadding, size);
+
+    frame->release();
+    frame = NULL;
+
+    uint8_t *data = (uint8_t *)buffer->data();
+
+    size_t NALsize;
+    switch (mNALSizeLen) {
+        case 1: NALsize = data[kPadding]; break;
+        case 2: NALsize = U16_AT(&data[kPadding]); break;
+        case 3: NALsize = U24_AT(&data[kPadding]); break;
+        case 4: NALsize = U32_AT(&data[kPadding]); break;
+        default:
+            TRESPASS();
+    }
+
+    if (size < NALsize + mNALSizeLen) {
+        buffer->release();
+        buffer = NULL;
+
+        return ERROR_MALFORMED;
+    }
+
+    if (size > NALsize + mNALSizeLen) {
+        LOGW("discarding %d bytes of data.", size - NALsize - mNALSizeLen);
+    }
+
+    // actual data starts at &data[kPadding + mNALSizeLen]
+
+    memcpy(&data[mNALSizeLen - 1], "\x00\x00\x00\x01", 4);
+    buffer->set_range(mNALSizeLen - 1, NALsize + 4);
 
     *out = buffer;
-
-#if 0
-    hexdump((const uint8_t *)buffer->data() + buffer->range_offset(),
-            buffer->range_length());
-#endif
-
-    mBlockIter.advance();
 
     return OK;
 }
