@@ -287,9 +287,13 @@ public class PhoneStatusBar extends StatusBar {
         return Gravity.TOP | Gravity.FILL_HORIZONTAL;
     }
 
-    private void addIntruderView() {
+    public int getStatusBarHeight() {
         final Resources res = mContext.getResources();
-        final int height= res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
+        return res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
+    }
+
+    private void addIntruderView() {
+        final int height = getStatusBarHeight();
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
