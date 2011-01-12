@@ -2226,7 +2226,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public static final int LAYER_TYPE_HARDWARE = 2;
     
-    @ViewDebug.ExportedProperty(category = "drawing")
+    @ViewDebug.ExportedProperty(category = "drawing", mapping = {
+            @ViewDebug.IntToString(from = LAYER_TYPE_NONE, to = "NONE"),
+            @ViewDebug.IntToString(from = LAYER_TYPE_SOFTWARE, to = "SOFTWARE"),
+            @ViewDebug.IntToString(from = LAYER_TYPE_HARDWARE, to = "HARDWARE")
+    })
     int mLayerType = LAYER_TYPE_NONE;
     Paint mLayerPaint;
 
