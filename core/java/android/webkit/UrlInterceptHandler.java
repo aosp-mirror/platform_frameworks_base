@@ -21,6 +21,7 @@ import android.webkit.PluginData;
 import java.util.Map;
 
 /**
+ * @hide
  * @deprecated This interface was inteded to be used by Gears. Since Gears was
  * deprecated, so is this class.
  */
@@ -36,6 +37,7 @@ public interface UrlInterceptHandler {
      * @param headers The headers associated with the request. May be null.
      * @return The CacheResult containing the surrogate response.
      *
+     * @hide
      * @deprecated Do not use, this interface is deprecated.
      */
     @Deprecated
@@ -50,6 +52,7 @@ public interface UrlInterceptHandler {
      * @param headers The headers associated with the request. May be null.
      * @return The PluginData containing the surrogate response.
      *
+     * @hide
      * @deprecated Do not use, this interface is deprecated.
      */
     @Deprecated

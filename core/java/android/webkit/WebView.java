@@ -3672,6 +3672,7 @@ public class WebView extends AbsoluteLayout
     * Return the list of currently loaded plugins.
     * @return The list of currently loaded plugins.
     *
+    * @hide
     * @deprecated This was used for Gears, which has been deprecated.
     */
     @Deprecated
@@ -3680,6 +3681,7 @@ public class WebView extends AbsoluteLayout
     }
 
    /**
+    * @hide
     * @deprecated This was used for Gears, which has been deprecated.
     */
     @Deprecated
