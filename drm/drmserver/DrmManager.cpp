@@ -87,7 +87,7 @@ void DrmManager::removeUniqueId(int uniqueId) {
 }
 
 status_t DrmManager::loadPlugIns() {
-    String8 pluginDirPath("/system/lib/drm/plugins/native");
+    String8 pluginDirPath("/system/lib/drm");
     return loadPlugIns(pluginDirPath);
 }
 
