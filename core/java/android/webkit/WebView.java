@@ -5536,8 +5536,9 @@ public class WebView extends AbsoluteLayout
                             + "mPreventDefault = " + mPreventDefault
                             + " mDeferTouchProcess = " + mDeferTouchProcess
                             + " mTouchMode = " + mTouchMode);
+                } else {
+                    mVelocityTracker.addMovement(ev);
                 }
-                mVelocityTracker.addMovement(ev);
                 if (mSelectingText && mSelectionStarted) {
                     if (DebugFlags.WEB_VIEW) {
                         Log.v(LOGTAG, "extend=" + contentX + "," + contentY);
@@ -5776,8 +5777,9 @@ public class WebView extends AbsoluteLayout
                                         + mPreventDefault
                                         + " mDeferTouchProcess = "
                                         + mDeferTouchProcess);
+                            } else {
+                                mVelocityTracker.addMovement(ev);
                             }
-                            mVelocityTracker.addMovement(ev);
                             // set to MOTIONLESS_IGNORE so that it won't keep
                             // removing and sending message in
                             // drawCoreAndCursorRing()
@@ -5852,6 +5854,11 @@ public class WebView extends AbsoluteLayout
 
         final ScaleGestureDetector detector =
             mZoomManager.getMultiTouchGestureDetector();
+
+        // A few apps use WebView but don't instantiate gesture detector.
+        // We don't need to support multi touch for them.
+        if (detector == null) return false;
+
         int action = ev.getAction();
         float x = ev.getX();
         float y = ev.getY();
