@@ -551,7 +551,14 @@ class BluetoothEventLoop {
         if (btDeviceClass == BluetoothClass.Device.PERIPHERAL_KEYBOARD ||
             btDeviceClass == BluetoothClass.Device.PERIPHERAL_KEYBOARD_POINTING) {
             // Its a keyboard. Follow the HID spec recommendation of creating the
-            // passkey and displaying it to the user.
+            // passkey and displaying it to the user. If the keyboard doesn't follow
+            // the spec recommendation, check if the keyboard has a fixed PIN zero
+            // and pair.
+            if (mBluetoothService.isFixedPinZerosAutoPairKeyboard(address)) {
+                mBluetoothService.setPin(address, BluetoothDevice.convertPinToBytes("0000"));
+                return;
+            }
+
             // Generate a variable PIN. This is not truly random but good enough.
             int pin = (int) Math.floor(Math.random() * 10000);
             sendDisplayPinIntent(address, pin);
