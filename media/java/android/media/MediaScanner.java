@@ -292,7 +292,6 @@ public class MediaScanner
     private boolean mProcessPlaylists, mProcessGenres;
     private int mMtpObjectHandle;
 
-    private final String mMediaStoragePath;
     private final String mExternalStoragePath;
 
     // used when scanning the image database so we know whether we have to prune
@@ -365,12 +364,6 @@ public class MediaScanner
 
         setDefaultRingtoneFileNames();
 
-        String mediaStoragePath = SystemProperties.get("ro.media.storage");
-        if (mediaStoragePath != null &&  mediaStoragePath.length() > 0) {
-            mMediaStoragePath = mediaStoragePath;
-        } else {
-            mMediaStoragePath = null;
-        }
         mExternalStoragePath = Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 
@@ -388,13 +381,6 @@ public class MediaScanner
     private boolean isDrmEnabled() {
         String prop = SystemProperties.get("drm.service.enabled");
         return prop != null && prop.equals("true");
-    }
-
-    private final String mediaToExternalPath(String path) {
-        if (mMediaStoragePath != null && path.startsWith(mMediaStoragePath)) {
-            path = mExternalStoragePath + path.substring(mMediaStoragePath.length());
-        }
-        return path;
     }
 
     private class MyMediaScannerClient implements MediaScannerClient {
@@ -472,9 +458,7 @@ public class MediaScanner
                 }
             }
 
-            // MediaProvider uses external variant of path for _data, so we need to match
-            // against that path instead.
-            String key = mediaToExternalPath(path);
+            String key = path;
             if (mCaseInsensitivePaths) {
                 key = path.toLowerCase();
             }
@@ -891,8 +875,6 @@ public class MediaScanner
         }
 
         public void addNoMediaFolder(String path) {
-            path = mediaToExternalPath(path);
-
             ContentValues values = new ContentValues();
             values.put(MediaStore.Images.ImageColumns.DATA, "");
             String [] pathSpec = new String[] {path + '%'};
@@ -951,10 +933,6 @@ public class MediaScanner
         }
 
         if (filePath != null) {
-            // MediaProvider uses external variant of path for _data, so we need to query
-            // using that path instead.
-            filePath = mediaToExternalPath(filePath);
-
             // query for only one file
             where = Files.FileColumns.DATA + "=?";
             selectionArgs = new String[] { filePath };
@@ -1012,10 +990,6 @@ public class MediaScanner
     private boolean inScanDirectory(String path, String[] directories) {
         for (int i = 0; i < directories.length; i++) {
             String directory = directories[i];
-            if (mExternalStoragePath != null && directory.equals(mMediaStoragePath)) {
-                // database paths use external storage prefix
-                directory = mExternalStoragePath;
-            }
             if (path.startsWith(directory)) {
                 return true;
             }
@@ -1222,9 +1196,7 @@ public class MediaScanner
                 // build file cache so we can look up tracks in the playlist
                 prescan(null, true);
 
-                // MediaProvider uses external variant of path for _data, so we need to match
-                // against that path instead.
-                String key = mediaToExternalPath(path);
+                String key = path;
                 if (mCaseInsensitivePaths) {
                     key = path.toLowerCase();
                 }
