@@ -80,6 +80,7 @@ public class Watchdog extends Thread {
     int mPhonePid;
     IActivityController mController;
     boolean mAllowRestart = true;
+    int mActivityControllerPid;
 
     /**
      * Used for checking status of handle threads and scheduling monitor callbacks.
@@ -217,6 +218,9 @@ public class Watchdog extends Thread {
             if ("com.android.phone".equals(name)) {
                 mPhonePid = pid;
             }
+            else if ("ActivityController".equals(name)) {
+                     mActivityControllerPid = pid;
+            }
         }
     }
 
@@ -353,6 +357,7 @@ public class Watchdog extends Thread {
             ArrayList<Integer> pids = new ArrayList<Integer>();
             pids.add(Process.myPid());
             if (mPhonePid > 0) pids.add(mPhonePid);
+            if (mActivityControllerPid > 0) pids.add(mActivityControllerPid);
             // Pass !waitedHalf so that just in case we somehow wind up here without having
             // dumped the halfway stacks, we properly re-initialize the trace file.
             final File stack = ActivityManagerService.dumpStackTraces(

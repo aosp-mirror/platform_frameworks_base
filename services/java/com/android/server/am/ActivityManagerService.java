@@ -8356,6 +8356,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void setActivityController(IActivityController controller) {
         enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
                 "setActivityController()");
+
+        int pid = controller == null ? 0 : Binder.getCallingPid();
+        Watchdog.getInstance().processStarted("ActivityController", pid);
+
         synchronized (this) {
             mController = controller;
             Watchdog.getInstance().setActivityController(controller);
