@@ -122,8 +122,10 @@ import android.media.IAudioService;
 import android.media.AudioManager;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -2807,5 +2809,71 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public boolean allowKeyRepeat() {
         // disable key repeat when screen is off
         return mScreenOn;
+    }
+
+    public void dump(String prefix, FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.print(prefix); pw.print("mSafeMode="); pw.print(mSafeMode);
+                pw.print(" mSystemRead="); pw.println(mSystemReady);
+        pw.print(prefix); pw.print("mLidOpen="); pw.print(mLidOpen);
+                pw.print(" mLidOpenRotation="); pw.print(mLidOpenRotation);
+                pw.print(" mHdmiPlugged="); pw.println(mHdmiPlugged);
+        pw.print(prefix); pw.print("mUiMode="); pw.print(mUiMode);
+                pw.print(" mDockMode="); pw.print(mDockMode);
+                pw.print(" mCarDockRotation="); pw.print(mCarDockRotation);
+                pw.print(" mDeskDockRotation="); pw.println(mDeskDockRotation);
+        pw.print(prefix); pw.print("mUserRotationMode="); pw.print(mUserRotationMode);
+                pw.print(" mUserRotation="); pw.print(mUserRotation);
+                pw.print("mAllowAllRotations="); pw.println(mAllowAllRotations);
+        pw.print(prefix); pw.print("mAccelerometerDefault="); pw.print(mAccelerometerDefault);
+                pw.print(" mCurrentAppOrientation="); pw.println(mCurrentAppOrientation);
+        pw.print(prefix); pw.print("mCarDockEnablesAccelerometer=");
+                pw.print(mCarDockEnablesAccelerometer);
+                pw.print(" mDeskDockEnablesAccelerometer=");
+                pw.println(mDeskDockEnablesAccelerometer);
+        pw.print(prefix); pw.print("mLidKeyboardAccessibility=");
+                pw.print(mLidKeyboardAccessibility);
+                pw.print(" mLidNavigationAccessibility="); pw.print(mLidNavigationAccessibility);
+                pw.print(" mLongPressOnPowerBehavior="); pw.println(mLongPressOnPowerBehavior);
+        pw.print(prefix); pw.print("mScreenOn="); pw.print(mScreenOn);
+                pw.print(" mOrientationSensorEnabled="); pw.print(mOrientationSensorEnabled);
+                pw.print(" mHasSoftInput="); pw.println(mHasSoftInput);
+        pw.print(prefix); pw.print("mUnrestrictedScreen=("); pw.print(mUnrestrictedScreenLeft);
+                pw.print(","); pw.print(mUnrestrictedScreenTop);
+                pw.print(") "); pw.print(mUnrestrictedScreenWidth);
+                pw.print("x"); pw.println(mUnrestrictedScreenHeight);
+        pw.print(prefix); pw.print("mRestrictedScreen=("); pw.print(mRestrictedScreenLeft);
+                pw.print(","); pw.print(mRestrictedScreenTop);
+                pw.print(") "); pw.print(mRestrictedScreenWidth);
+                pw.print("x"); pw.println(mRestrictedScreenHeight);
+        pw.print(prefix); pw.print("mCur=("); pw.print(mCurLeft);
+                pw.print(","); pw.print(mCurTop);
+                pw.print(")-("); pw.print(mCurRight);
+                pw.print(","); pw.print(mCurBottom); pw.println(")");
+        pw.print(prefix); pw.print("mContent=("); pw.print(mContentLeft);
+                pw.print(","); pw.print(mContentTop);
+                pw.print(")-("); pw.print(mContentRight);
+                pw.print(","); pw.print(mContentBottom); pw.println(")");
+        pw.print(prefix); pw.print("mDock=("); pw.print(mDockLeft);
+                pw.print(","); pw.print(mDockTop);
+                pw.print(")-("); pw.print(mDockRight);
+                pw.print(","); pw.print(mDockBottom); pw.println(")");
+        pw.print(prefix); pw.print("mDockLayer="); pw.println(mDockLayer);
+        pw.print(prefix); pw.print("mTopFullscreenOpaqueWindowState=");
+                pw.println(mTopFullscreenOpaqueWindowState);
+        pw.print(prefix); pw.print("mTopIsFullscreen="); pw.print(mTopIsFullscreen);
+                pw.print(" mForceStatusBar="); pw.print(mForceStatusBar);
+                pw.print(" mHideLockScreen="); pw.println(mHideLockScreen);
+        pw.print(prefix); pw.print("mDismissKeyguard="); pw.print(mDismissKeyguard);
+                pw.print(" mHomePressed="); pw.println(mHomePressed);
+        pw.print(prefix); pw.print("mAllowLockscreenWhenOn="); pw.print(mAllowLockscreenWhenOn);
+                pw.print(" mLockScreenTimeout="); pw.print(mLockScreenTimeout);
+                pw.print(" mLockScreenTimerActive="); pw.println(mLockScreenTimerActive);
+        pw.print(prefix); pw.print("mEndcallBehavior="); pw.print(mEndcallBehavior);
+                pw.print(" mIncallPowerBehavior="); pw.print(mIncallPowerBehavior);
+                pw.print(" mLongPressOnHomeBehavior="); pw.println(mLongPressOnHomeBehavior);
+        pw.print(prefix); pw.print("mLandscapeRotation="); pw.print(mLandscapeRotation);
+                pw.print(" mSeascapeRotation="); pw.println(mSeascapeRotation);
+        pw.print(prefix); pw.print("mPortraitRotation="); pw.print(mPortraitRotation);
+                pw.print(" mUpsideDownRotation="); pw.println(mUpsideDownRotation);
     }
 }
