@@ -59,18 +59,7 @@ public interface IContentProvider extends IInterface {
             throws RemoteException, FileNotFoundException;
     public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
             throws RemoteException, OperationApplicationException;
-
-    /**
-     * @hide -- until interface has proven itself
-     *
-     * Call an provider-defined method.  This can be used to implement
-     * interfaces that are cheaper than using a Cursor.
-     *
-     * @param method Method name to call.  Opaque to framework.
-     * @param request Nullable String argument passed to method.
-     * @param args Nullable Bundle argument passed to method.
-     */
-    public Bundle call(String method, String request, Bundle args) throws RemoteException;
+    public Bundle call(String method, String arg, Bundle extras) throws RemoteException;
 
     // Data interchange.
     public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException;
