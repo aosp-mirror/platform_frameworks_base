@@ -25,26 +25,18 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/effects/Undock.ogg:system/media/audio/ui/Undock.ogg \
 	$(LOCAL_PATH)/effects/Lock.ogg:system/media/audio/ui/Lock.ogg \
 	$(LOCAL_PATH)/effects/Unlock.ogg:system/media/audio/ui/Unlock.ogg \
-	$(LOCAL_PATH)/notifications/Aldebaran.ogg:system/media/audio/notifications/Aldebaran.ogg \
-	$(LOCAL_PATH)/notifications/Altair.ogg:system/media/audio/notifications/Altair.ogg \
-	$(LOCAL_PATH)/notifications/Antares.ogg:system/media/audio/notifications/Antares.ogg \
-	$(LOCAL_PATH)/notifications/arcturus.ogg:system/media/audio/notifications/arcturus.ogg \
-	$(LOCAL_PATH)/notifications/Betelgeuse.ogg:system/media/audio/notifications/Betelgeuse.ogg \
-	$(LOCAL_PATH)/notifications/Canopus.ogg:system/media/audio/notifications/Canopus.ogg \
-	$(LOCAL_PATH)/notifications/Capella.ogg:system/media/audio/notifications/Capella.ogg \
-	$(LOCAL_PATH)/notifications/Castor.ogg:system/media/audio/notifications/Castor.ogg \
-	$(LOCAL_PATH)/notifications/CetiAlpha.ogg:system/media/audio/notifications/CetiAlpha.ogg \
-	$(LOCAL_PATH)/notifications/Deneb.ogg:system/media/audio/notifications/Deneb.ogg \
-	$(LOCAL_PATH)/notifications/Electra.ogg:system/media/audio/notifications/Electra.ogg \
-	$(LOCAL_PATH)/notifications/Fomalhaut.ogg:system/media/audio/notifications/Fomalhaut.ogg \
-	$(LOCAL_PATH)/notifications/Merope.ogg:system/media/audio/notifications/Merope.ogg \
-	$(LOCAL_PATH)/notifications/Polaris.ogg:system/media/audio/notifications/Polaris.ogg \
-	$(LOCAL_PATH)/notifications/Pollux.ogg:system/media/audio/notifications/Pollux.ogg \
-	$(LOCAL_PATH)/notifications/Procyon.ogg:system/media/audio/notifications/Procyon.ogg \
-	$(LOCAL_PATH)/notifications/regulus.ogg:system/media/audio/notifications/regulus.ogg \
-	$(LOCAL_PATH)/notifications/sirius.ogg:system/media/audio/notifications/sirius.ogg \
-	$(LOCAL_PATH)/notifications/Sirrah.ogg:system/media/audio/notifications/Sirrah.ogg \
-	$(LOCAL_PATH)/notifications/vega.ogg:system/media/audio/notifications/vega.ogg \
+	$(LOCAL_PATH)/notifications/aidos.ogg:system/media/audio/notifications/aidos.ogg \
+	$(LOCAL_PATH)/notifications/nomos1.ogg:system/media/audio/notifications/nomos1.ogg \
+	$(LOCAL_PATH)/notifications/hypnos1.ogg:system/media/audio/notifications/hypnos1.ogg \
+	$(LOCAL_PATH)/notifications/thrasos1.ogg:system/media/audio/notifications/thrasos1.ogg \
+	$(LOCAL_PATH)/notifications/nomos2.ogg:system/media/audio/notifications/nomos2.ogg \
+	$(LOCAL_PATH)/notifications/horkos.ogg:system/media/audio/notifications/horkos.ogg \
+	$(LOCAL_PATH)/notifications/kratos1.ogg:system/media/audio/notifications/kratos1.ogg \
+	$(LOCAL_PATH)/notifications/circios.ogg:system/media/audio/notifications/circios.ogg \
+	$(LOCAL_PATH)/notifications/ouranos.ogg:system/media/audio/notifications/ouranos.ogg \
+	$(LOCAL_PATH)/notifications/poros.ogg:system/media/audio/notifications/poros.ogg \
+	$(LOCAL_PATH)/notifications/phantasos.ogg:system/media/audio/notifications/phantasos.ogg \
+	$(LOCAL_PATH)/notifications/kratos2.ogg:system/media/audio/notifications/kratos2.ogg \
 	$(LOCAL_PATH)/ringtones/ANDROMEDA.ogg:system/media/audio/ringtones/ANDROMEDA.ogg \
 	$(LOCAL_PATH)/ringtones/Aquila.ogg:system/media/audio/ringtones/Aquila.ogg \
 	$(LOCAL_PATH)/ringtones/ArgoNavis.ogg:system/media/audio/ringtones/ArgoNavis.ogg \
@@ -70,21 +62,6 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/ringtones/Testudo.ogg:system/media/audio/ringtones/Testudo.ogg \
 	$(LOCAL_PATH)/ringtones/URSAMINOR.ogg:system/media/audio/ringtones/URSAMINOR.ogg \
 	$(LOCAL_PATH)/ringtones/Vespa.ogg:system/media/audio/ringtones/Vespa.ogg \
-	$(LOCAL_PATH)/notifications/alert01.ogg:system/media/audio/notifications/alert01.ogg \
-	$(LOCAL_PATH)/notifications/alert02.ogg:system/media/audio/notifications/alert02.ogg \
-	$(LOCAL_PATH)/notifications/alert03.ogg:system/media/audio/notifications/alert03.ogg \
-	$(LOCAL_PATH)/notifications/alert04.ogg:system/media/audio/notifications/alert04.ogg \
-	$(LOCAL_PATH)/notifications/alert05.ogg:system/media/audio/notifications/alert05.ogg \
-	$(LOCAL_PATH)/notifications/alert06.ogg:system/media/audio/notifications/alert06.ogg \
-	$(LOCAL_PATH)/notifications/alert07.ogg:system/media/audio/notifications/alert07.ogg \
-	$(LOCAL_PATH)/notifications/alert08.ogg:system/media/audio/notifications/alert08.ogg \
-	$(LOCAL_PATH)/notifications/alert09.ogg:system/media/audio/notifications/alert09.ogg \
-	$(LOCAL_PATH)/notifications/alert10.ogg:system/media/audio/notifications/alert10.ogg \
-	$(LOCAL_PATH)/notifications/alert11.ogg:system/media/audio/notifications/alert11.ogg \
-	$(LOCAL_PATH)/notifications/alert12.ogg:system/media/audio/notifications/alert12.ogg \
-	$(LOCAL_PATH)/notifications/alert13.ogg:system/media/audio/notifications/alert13.ogg \
-	$(LOCAL_PATH)/notifications/alert14.ogg:system/media/audio/notifications/alert14.ogg \
-	$(LOCAL_PATH)/notifications/alert15.ogg:system/media/audio/notifications/alert15.ogg \
 	$(LOCAL_PATH)/ringtones/ringtone18.ogg:system/media/audio/ringtones/ringtone18.ogg \
 	$(LOCAL_PATH)/ringtones/ringtone19.ogg:system/media/audio/ringtones/ringtone19.ogg \
 	$(LOCAL_PATH)/ringtones/ringtone20.ogg:system/media/audio/ringtones/ringtone20.ogg \
