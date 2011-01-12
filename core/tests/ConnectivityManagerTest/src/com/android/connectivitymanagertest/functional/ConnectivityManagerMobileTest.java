@@ -63,11 +63,16 @@ public class ConnectivityManagerMobileTest
         wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "CMWakeLock");
         wl.acquire();
         // Each test case will start with cellular connection
+        if (Settings.System.getInt(getInstrumentation().getContext().getContentResolver(),
+                Settings.System.AIRPLANE_MODE_ON) == 1) {
+            Log.v(LOG_TAG, "airplane is not disabled, disable it.");
+            cmActivity.setAirplaneMode(getInstrumentation().getContext(), false);
+        }
         if (!cmActivity.waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.CONNECTED,
                 ConnectivityManagerTestActivity.LONG_TIMEOUT)) {
             // Note: When the test fails in setUp(), tearDown is not called. In that case,
             // the activity is destroyed which blocks the next test at "getActivity()".
-            // tearDown() is called hear to avoid that situation.
+            // tearDown() is called here to avoid that situation.
             tearDown();
             fail("Device is not connected to Mobile, setUp failed");
         }
@@ -82,6 +87,7 @@ public class ConnectivityManagerMobileTest
         // if airplane mode is set, disable it.
         if (Settings.System.getInt(getInstrumentation().getContext().getContentResolver(),
                 Settings.System.AIRPLANE_MODE_ON) == 1) {
+            Log.v(LOG_TAG, "disable airplane mode if it is enabled");
             cmActivity.setAirplaneMode(getInstrumentation().getContext(), false);
         }
         super.tearDown();
@@ -93,13 +99,11 @@ public class ConnectivityManagerMobileTest
         assertEquals("network type is not MOBILE", ConnectivityManager.TYPE_MOBILE,
                 extraNetInfo.getType());
         assertTrue("not connected to cellular network", extraNetInfo.isConnected());
-        assertTrue("no data connection", cmActivity.mState.equals(State.CONNECTED));
     }
 
     // Test case 1: Test enabling Wifi without associating with any AP
     @LargeTest
     public void test3GToWifiNotification() {
-        // To avoid UNKNOWN state when device boots up
         cmActivity.enableWifi();
         try {
             Thread.sleep(2 * ConnectivityManagerTestActivity.SHORT_TIMEOUT);
@@ -108,7 +112,10 @@ public class ConnectivityManagerMobileTest
         }
 
         cmActivity.disableWifi();
-        // As Wifi stays in DISCONNECTED, the connectivity manager will not broadcast
+
+        cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI,
+                State.DISCONNECTED, ConnectivityManagerTestActivity.LONG_TIMEOUT);
+        // As Wifi stays in DISCONNETED, the connectivity manager will not broadcast
         // any network connectivity event for Wifi
         NetworkInfo networkInfo = cmActivity.mCM.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
         cmActivity.setStateTransitionCriteria(ConnectivityManager.TYPE_MOBILE, networkInfo.getState(),
