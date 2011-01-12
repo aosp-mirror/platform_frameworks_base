@@ -1411,6 +1411,11 @@
     <!-- Description of policy access to enforce password expiration [CHAR LIMIT=110]-->
     <string name="policydesc_expirePassword">Control how long before lockscreen password needs to be
     changed</string>
+    <!-- Title of policy access to require encrypted storage [CHAR LIMIT=30]-->
+    <string name="policylab_encryptedStorage">Set storage encryption</string>
+    <!-- Description of policy access to require encrypted storage [CHAR LIMIT=110]-->
+    <string name="policydesc_encryptedStorage">Require that stored application data be encrypted
+        </string>
 
     <!-- The order of these is important, don't reorder without changing Contacts.java --> <skip />
     <!-- Phone number types from android.provider.Contacts. This could be used when adding a new phone number for a contact, for example. -->

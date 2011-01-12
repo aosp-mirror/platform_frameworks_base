@@ -1093,6 +1093,112 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryption}:
+     * indicating that encryption is not supported.
+     */
+    public static final int ENCRYPTION_STATUS_UNSUPPORTED = 0;
+
+    /**
+     * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryption}:
+     * indicating that encryption is supported, but is not currently active.
+     */
+    public static final int ENCRYPTION_STATUS_INACTIVE = 1;
+
+    /**
+     * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryption}:
+     * indicating that encryption is not currently active, but has been requested.
+     */
+    public static final int ENCRYPTION_STATUS_REQUESTED = 2;
+
+    /**
+     * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryption}:
+     * indicating that encryption is not currently active, but is currently
+     * being activated.  This is only reported by devices that support
+     * encryption of data and only when the storage is currently
+     * undergoing a process of becoming encrypted.  A device that must reboot and/or wipe data
+     * to become encrypted will never return this value.
+     */
+    public static final int ENCRYPTION_STATUS_ACTIVATING = 3;
+
+    /**
+     * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryption}:
+     * indicating that encryption is active.
+     */
+    public static final int ENCRYPTION_STATUS_ACTIVE = 4;
+
+    /**
+     * Activity action: begin the process of encrypting data on the device.  This activity should
+     * be launched after using {@link #setStorageEncryption} to request encryption be activated.
+     * After resuming from this activity, use {@link #getStorageEncryption}
+     * to check encryption status.  However, on some devices this activity may never return, as
+     * it may trigger a reboot and in some cases a complete data wipe of the device.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_START_ENCRYPTION
+            = "android.app.action.START_ENCRYPTION";
+
+    /**
+     * Called by an application that is administering the device to
+     * request that the storage system be encrypted.  Depending
+     * on the returned status code, the caller may proceed in different
+     * ways.  If the result is {@link #ENCRYPTION_STATUS_UNSUPPORTED}, the
+     * storage system does not support encryption.  If the
+     * result is {@link #ENCRYPTION_STATUS_REQUESTED}, use {@link
+     * #ACTION_START_ENCRYPTION} to begin the process of encrypting or decrypting the
+     * storage.  If the result is {@link #ENCRYPTION_STATUS_ACTIVATING} or
+     * {@link #ENCRYPTION_STATUS_ACTIVE}, no further action is required.
+     *
+     * <p>When multiple device administrators attempt to control device
+     * encryption, the most secure, supported setting will always be
+     * used.  If any device administrator requests device encryption,
+     * it will be enabled;  Conversely, if a device administrator
+     * attempts to disable device encryption while another
+     * device administrator has enabled it, the call to disable will
+     * fail (most commonly returning {@link #ENCRYPTION_STATUS_ACTIVE}).
+     *
+     * <p>This policy controls encryption of the secure (application data) storage area.  Data
+     * written to other areas (e.g. the directory returned by
+     * {@link android.os.Environment#getExternalStorageDirectory()} may or may not be encrypted.
+     *
+     * <p>Important Note:  On some devices, it is possible to encrypt storage without requiring
+     * the user to create a device PIN or Password.  In this case, the storage is encrypted, but
+     * the encryption key may not be fully secured.  For maximum security, the administrator should
+     * also require (and check for) a pattern, PIN, or password.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param encrypt true to request encryption, false to release any previous request
+     * @return current status of encryption
+     */
+    public int setStorageEncryption(ComponentName admin, boolean encrypt) {
+        if (mService != null) {
+            try {
+                return mService.setStorageEncryption(admin, encrypt);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return ENCRYPTION_STATUS_UNSUPPORTED;
+    }
+
+    /**
+     * Called by an application that is administering the device to
+     * determine the encryption status of a specific storage system.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return current status of encryption
+     */
+    public int getStorageEncryption(ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getStorageEncryption(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return ENCRYPTION_STATUS_UNSUPPORTED;
+    }
+
+    /**
      * @hide
      */
     public void setActiveAdmin(ComponentName policyReceiver, boolean refreshing) {
