@@ -2882,13 +2882,13 @@ class PackageManagerService extends IPackageManager.Stub {
         SharedUserSetting suid = null;
         PackageSetting pkgSetting = null;
 
-        if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) == 0) {
+        if (!isSystemApp(pkg)) {
             // Only system apps can use these features.
             pkg.mOriginalPackages = null;
             pkg.mRealPackage = null;
             pkg.mAdoptPermissions = null;
         }
-        
+
         synchronized (mPackages) {
             // Check all shared libraries and map to their actual file path.
             if (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null) {
@@ -4080,6 +4080,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         public final void addActivity(PackageParser.Activity a, String type) {
+            final boolean systemApp = isSystemApp(a.info.applicationInfo);
             mActivities.put(a.getComponentName(), a);
             if (SHOW_INFO || Config.LOGV) Log.v(
                 TAG, "  " + type + " " +
@@ -4088,6 +4089,11 @@ class PackageManagerService extends IPackageManager.Stub {
             int NI = a.intents.size();
             for (int j=0; j<NI; j++) {
                 PackageParser.ActivityIntentInfo intent = a.intents.get(j);
+                if (!systemApp && intent.getPriority() > 0 && "activity".equals(type)) {
+                    intent.setPriority(0);
+                    Log.w(TAG, "Package " + a.info.applicationInfo.packageName + " has activity "
+                            + a.className + " with priority > 0, forcing to 0");
+                }
                 if (SHOW_INFO || Config.LOGV) {
                     Log.v(TAG, "    IntentFilter:");
                     intent.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
@@ -6024,6 +6030,10 @@ class PackageManagerService extends IPackageManager.Stub {
 
     private static boolean isSystemApp(PackageParser.Package pkg) {
         return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    private static boolean isSystemApp(ApplicationInfo info) {
+        return (info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
     private static boolean isUpdatedSystemApp(PackageParser.Package pkg) {

@@ -346,7 +346,7 @@ public class IntentResolver<F extends IntentFilter, R extends Object> {
 
         int num = 0;
         while (i.hasNext()) {
-            String name = (String)i.next();
+            String name = i.next();
             num++;
             if (localLOGV) Slog.v(TAG, prefix + name);
             String baseName = name;
@@ -395,7 +395,7 @@ public class IntentResolver<F extends IntentFilter, R extends Object> {
 
         int num = 0;
         while (i.hasNext()) {
-            String name = (String)i.next();
+            String name = i.next();
             num++;
             if (localLOGV) Slog.v(TAG, prefix + name);
             String baseName = name;
@@ -534,8 +534,8 @@ public class IntentResolver<F extends IntentFilter, R extends Object> {
     // Sorts a List of IntentFilter objects into descending priority order.
     private static final Comparator mResolvePrioritySorter = new Comparator() {
         public int compare(Object o1, Object o2) {
-            float q1 = ((IntentFilter)o1).getPriority();
-            float q2 = ((IntentFilter)o2).getPriority();
+            final int q1 = ((IntentFilter) o1).getPriority();
+            final int q2 = ((IntentFilter) o2).getPriority();
             return (q1 > q2) ? -1 : ((q1 < q2) ? 1 : 0);
         }
     };
