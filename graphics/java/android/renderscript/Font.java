@@ -30,7 +30,6 @@ import android.util.Log;
 import android.util.TypedValue;
 
 /**
- * @hide
  *
  **/
 public class Font extends BaseObj {
