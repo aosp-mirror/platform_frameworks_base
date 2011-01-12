@@ -128,7 +128,7 @@ class GLES20Layer extends HardwareLayer {
         protected void finalize() throws Throwable {
             try {
                 if (mLayerId != 0 || mLayerTextureId != 0) {
-                    GLES20Canvas.nDestroyLayer(mLayerId, mLayerTextureId);
+                    GLES20Canvas.nDestroyLayerDeferred(mLayerId, mLayerTextureId);
                 }
             } finally {
                 super.finalize();
