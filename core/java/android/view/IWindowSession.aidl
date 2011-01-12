@@ -121,7 +121,7 @@ interface IWindowSession {
      * the drag to the OS and passes that as the return value.  A return value of
      * null indicates failure.
      */
-    IBinder prepareDrag(IWindow window, boolean localOnly,
+    IBinder prepareDrag(IWindow window, int flags,
             int thumbnailWidth, int thumbnailHeight, out Surface outSurface);
 
     /**

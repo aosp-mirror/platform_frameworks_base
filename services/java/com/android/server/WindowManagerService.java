@@ -493,7 +493,7 @@ public class WindowManagerService extends IWindowManager.Stub
     class DragState {
         IBinder mToken;
         Surface mSurface;
-        boolean mLocalOnly;
+        int mFlags;
         IBinder mLocalWin;
         ClipData mData;
         ClipDescription mDataDescription;
@@ -507,10 +507,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         private final Rect tmpRect = new Rect();
 
-        DragState(IBinder token, Surface surface, boolean localOnly, IBinder localWin) {
+        DragState(IBinder token, Surface surface, int flags, IBinder localWin) {
             mToken = token;
             mSurface = surface;
-            mLocalOnly = localOnly;
+            mFlags = flags;
             mLocalWin = localWin;
             mNotifiedWindows = new ArrayList<WindowState>();
         }
@@ -520,7 +520,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mSurface.destroy();
             }
             mSurface = null;
-            mLocalOnly = false;
+            mFlags = 0;
             mLocalWin = null;
             mToken = null;
             mData = null;
@@ -593,7 +593,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 ClipDescription desc) {
             // Don't actually send the event if the drag is supposed to be pinned
             // to the originating window but 'newWin' is not that window.
-            if (mLocalOnly) {
+            if ((mFlags & View.DRAG_FLAG_GLOBAL) == 0) {
                 final IBinder winBinder = newWin.mClient.asBinder();
                 if (winBinder != mLocalWin) {
                     if (DEBUG_DRAG) {
@@ -681,7 +681,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Tell the affected window
             WindowState touchedWin = getTouchedWinAtPointLw(x, y);
-            if (mLocalOnly) {
+            if ((mFlags & View.DRAG_FLAG_GLOBAL) == 0) {
                 final IBinder touchedBinder = touchedWin.mClient.asBinder();
                 if (touchedBinder != mLocalWin) {
                     // This drag is pinned only to the originating window, but the drag
@@ -5633,10 +5633,10 @@ public class WindowManagerService extends IWindowManager.Stub
     // -------------------------------------------------------------
 
     IBinder prepareDragSurface(IWindow window, SurfaceSession session,
-            boolean localOnly, int width, int height, Surface outSurface) {
+            int flags, int width, int height, Surface outSurface) {
         if (DEBUG_DRAG) {
             Slog.d(TAG, "prepare drag surface: w=" + width + " h=" + height
-                    + " local=" + localOnly + " win=" + window
+                    + " flags=" + Integer.toHexString(flags) + " win=" + window
                     + " asbinder=" + window.asBinder());
         }
 
@@ -5647,17 +5647,15 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             synchronized (mWindowMap) {
                 try {
-                    // !!! TODO: fail if the given window does not currently have touch focus?
-
                     if (mDragState == null) {
                         Surface surface = new Surface(session, callerPid, "drag surface", 0,
                                 width, height, PixelFormat.TRANSLUCENT, Surface.HIDDEN);
                         outSurface.copyFrom(surface);
                         final IBinder winBinder = window.asBinder();
                         token = new Binder();
-                        mDragState = new DragState(token, surface, localOnly, winBinder);
+                        // TODO: preserve flags param in DragState
+                        mDragState = new DragState(token, surface, 0, winBinder);
                         mDragState.mSurface = surface;
-                        mDragState.mLocalOnly = localOnly;
                         token = mDragState.mToken = new Binder();
 
                         // 5 second timeout for this window to actually begin the drag
@@ -6412,9 +6410,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         /* Drag/drop */
-        public IBinder prepareDrag(IWindow window, boolean localOnly,
+        public IBinder prepareDrag(IWindow window, int flags,
                 int width, int height, Surface outSurface) {
-            return prepareDragSurface(window, mSurfaceSession, localOnly,
+            return prepareDragSurface(window, mSurfaceSession, flags,
                     width, height, outSurface);
         }
 
