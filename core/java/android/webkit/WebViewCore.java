@@ -516,7 +516,7 @@ final class WebViewCore {
             int repeatCount, boolean isShift, boolean isAlt, boolean isSym,
             boolean isDown);
 
-    private native void nativeClick(int framePtr, int nodePtr);
+    private native void nativeClick(int framePtr, int nodePtr, boolean fake);
 
     private native void nativeSendListBoxChoices(boolean[] choices, int size);
 
@@ -866,7 +866,7 @@ final class WebViewCore {
             "CLICK", // = 118;
             "SET_NETWORK_STATE", // = 119;
             "DOC_HAS_IMAGES", // = 120;
-            "121", // = 121;
+            "FAKE_CLICK", // = 121;
             "DELETE_SELECTION", // = 122;
             "LISTBOX_CHOICES", // = 123;
             "SINGLE_LISTBOX_CHOICE", // = 124;
@@ -924,6 +924,7 @@ final class WebViewCore {
         static final int CLICK = 118;
         static final int SET_NETWORK_STATE = 119;
         static final int DOC_HAS_IMAGES = 120;
+        static final int FAKE_CLICK = 121;
         static final int DELETE_SELECTION = 122;
         static final int LISTBOX_CHOICES = 123;
         static final int SINGLE_LISTBOX_CHOICE = 124;
@@ -1173,8 +1174,12 @@ final class WebViewCore {
                             key((KeyEvent) msg.obj, false);
                             break;
 
+                        case FAKE_CLICK:
+                            nativeClick(msg.arg1, msg.arg2, true);
+                            break;
+
                         case CLICK:
-                            nativeClick(msg.arg1, msg.arg2);
+                            nativeClick(msg.arg1, msg.arg2, false);
                             break;
 
                         case VIEW_SIZE_CHANGED: {
