@@ -99,8 +99,7 @@ void LayerRenderer::resizeLayer(GLuint fbo, GLuint texture, uint32_t width, uint
 
     if (glGetError() != GL_NO_ERROR) {
         glDeleteBuffers(1, &fbo);
-        glDeleteTextures(1, texture);
-        glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
+        glDeleteTextures(1, &texture);
 
         *layerWidth = 0;
         *layerHeight = 0;
