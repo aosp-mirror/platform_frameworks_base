@@ -301,6 +301,8 @@
     <!-- XL -->
     <string name="websearch" msgid="904596193450917688">"Búsqueda web"</string>
     <!-- XL -->
+    <string name="status_bar_notification_info_overflow" msgid="1081154808901480710">"100+"</string>
+    <!-- XL -->
     <string name="permlab_mediaStorageWrite" product="default" msgid="5585262071354704256">"modificar/eliminar los contenidos del almacenamientos de medios internos"</string>
     <!-- XL -->
     <string name="permdesc_mediaStorageWrite" product="default" msgid="2372999661142345443">"Permite que una aplicación modifique los contenidos del almacenamiento interno de medios."</string>
