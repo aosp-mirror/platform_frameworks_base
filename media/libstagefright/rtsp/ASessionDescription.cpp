@@ -265,15 +265,17 @@ bool ASessionDescription::getDurationUs(int64_t *durationUs) const {
     const char *s = value.c_str() + 4;
     char *end;
     double from = strtod(s, &end);
-    CHECK_GT(end, s);
-    CHECK_EQ(*end, '-');
+
+    if (end == s || *end != '-') {
+        return false;
+    }
 
     s = end + 1;
     double to = strtod(s, &end);
-    CHECK_GT(end, s);
-    CHECK_EQ(*end, '\0');
 
-    CHECK_GE(to, from);
+    if (end == s || *end != '\0' || to < from) {
+        return false;
+    }
 
     *durationUs = (int64_t)((to - from) * 1E6);
 
