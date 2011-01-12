@@ -20,7 +20,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -41,7 +40,7 @@ import java.util.Stack;
  *       aware of one navigation axis which is in fact the default behavior
  *       of webViews while using the DPAD/TrackBall.
  * </p>
- * In general a key binding is a mapping from meta state + key code to
+ * In general a key binding is a mapping from modifiers + key code to
  * a sequence of actions. For more detail how to specify key bindings refer to
  * {@link android.provider.Settings.Secure#ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS}.
  * </p>
@@ -77,8 +76,8 @@ class AccessibilityInjector {
     private static final int NAVIGATION_AXIS_DEFAULT_WEB_VIEW_BEHAVIOR = 7;
 
     // these are the same for all instances so make them process wide
-    private static SparseArray<AccessibilityWebContentKeyBinding> sBindings =
-        new SparseArray<AccessibilityWebContentKeyBinding>();
+    private static ArrayList<AccessibilityWebContentKeyBinding> sBindings =
+        new ArrayList<AccessibilityWebContentKeyBinding>();
 
     // handle to the WebView this injector is associated with.
     private final WebView mWebView;
@@ -120,10 +119,15 @@ class AccessibilityInjector {
 
         mLastDownEventHandled = false;
 
-        int key = event.getMetaState() << AccessibilityWebContentKeyBinding.OFFSET_META_STATE |
-            event.getKeyCode() << AccessibilityWebContentKeyBinding.OFFSET_KEY_CODE;
+        AccessibilityWebContentKeyBinding binding = null;
+        for (AccessibilityWebContentKeyBinding candidate : sBindings) {
+            if (event.getKeyCode() == candidate.getKeyCode()
+                    && event.hasModifiers(candidate.getModifiers())) {
+                binding = candidate;
+                break;
+            }
+        }
 
-        AccessibilityWebContentKeyBinding binding = sBindings.get(key);
         if (binding == null) {
             return false;
         }
@@ -302,7 +306,12 @@ class AccessibilityInjector {
         if (DEBUG) {
             Log.d(LOG_TAG, "Dispatching: " + event);
         }
-        AccessibilityManager.getInstance(mWebView.getContext()).sendAccessibilityEvent(event);
+        // accessibility may be disabled while waiting for the selection string
+        AccessibilityManager accessibilityManager =
+            AccessibilityManager.getInstance(mWebView.getContext());
+        if (accessibilityManager.isEnabled()) {
+            accessibilityManager.sendAccessibilityEvent(event);
+        }
     }
 
     /**
@@ -332,9 +341,6 @@ class AccessibilityInjector {
         SimpleStringSplitter semiColonSplitter = new SimpleStringSplitter(';');
         semiColonSplitter.setString(webContentKeyBindingsString);
 
-        ArrayList<AccessibilityWebContentKeyBinding> bindings =
-            new ArrayList<AccessibilityWebContentKeyBinding>();
-
         while (semiColonSplitter.hasNext()) {
             String bindingString = semiColonSplitter.next();
             if (TextUtils.isEmpty(bindingString)) {
@@ -348,80 +354,58 @@ class AccessibilityInjector {
                 continue;
             }
             try {
-                int key = Integer.decode(keyValueArray[0].trim());
+                long keyCodeAndModifiers = Long.decode(keyValueArray[0].trim());
                 String[] actionStrings = keyValueArray[1].split(":");
                 int[] actions = new int[actionStrings.length];
                 for (int i = 0, count = actions.length; i < count; i++) {
                     actions[i] = Integer.decode(actionStrings[i].trim());
                 }
-                bindings.add(new AccessibilityWebContentKeyBinding(key, actions));
+                sBindings.add(new AccessibilityWebContentKeyBinding(keyCodeAndModifiers, actions));
             } catch (NumberFormatException nfe) {
                 Log.e(LOG_TAG, "Disregarding malformed key binding: " + bindingString);
             }
-        }
-
-        for (AccessibilityWebContentKeyBinding binding : bindings) {
-            sBindings.put(binding.getKey(), binding);
         }
     }
 
     /**
      * Represents a web content key-binding.
      */
-    private class AccessibilityWebContentKeyBinding {
+    private static final class AccessibilityWebContentKeyBinding {
 
-        private static final int OFFSET_META_STATE = 0x00000010;
+        private static final int MODIFIERS_OFFSET = 32;
+        private static final long MODIFIERS_MASK = 0xFFFFFFF00000000L;
 
-        private static final int MASK_META_STATE = 0xFFFF0000;
+        private static final int KEY_CODE_OFFSET = 0;
+        private static final long KEY_CODE_MASK = 0x00000000FFFFFFFFL;
 
-        private static final int OFFSET_KEY_CODE = 0x00000000;
+        private static final int ACTION_OFFSET = 24;
+        private static final int ACTION_MASK = 0xFF000000;
 
-        private static final int MASK_KEY_CODE = 0x0000FFFF;
+        private static final int FIRST_ARGUMENT_OFFSET = 16;
+        private static final int FIRST_ARGUMENT_MASK = 0x00FF0000;
 
-        private static final int OFFSET_ACTION = 0x00000018;
+        private static final int SECOND_ARGUMENT_OFFSET = 8;
+        private static final int SECOND_ARGUMENT_MASK = 0x0000FF00;
 
-        private static final int MASK_ACTION = 0xFF000000;
+        private static final int THIRD_ARGUMENT_OFFSET = 0;
+        private static final int THIRD_ARGUMENT_MASK = 0x000000FF;
 
-        private static final int OFFSET_FIRST_ARGUMENT = 0x00000010;
+        private final long mKeyCodeAndModifiers;
 
-        private static final int MASK_FIRST_ARGUMENT = 0x00FF0000;
-
-        private static final int OFFSET_SECOND_ARGUMENT = 0x00000008;
-
-        private static final int MASK_SECOND_ARGUMENT = 0x0000FF00;
-
-        private static final int OFFSET_THIRD_ARGUMENT = 0x00000000;
-
-        private static final int MASK_THIRD_ARGUMENT = 0x000000FF;
-
-        private int mKey;
-
-        private int [] mActionSequence;
-
-        /**
-         * @return The binding key with key code and meta state.
-         *
-         * @see #MASK_KEY_CODE
-         * @see #MASK_META_STATE
-         * @see #OFFSET_KEY_CODE
-         * @see #OFFSET_META_STATE
-         */
-        public int getKey() {
-            return mKey;
-        }
+        private final int [] mActionSequence;
 
         /**
          * @return The key code of the binding key.
          */
         public int getKeyCode() {
-            return (mKey & MASK_KEY_CODE) >> OFFSET_KEY_CODE;
+            return (int) ((mKeyCodeAndModifiers & KEY_CODE_MASK) >> KEY_CODE_OFFSET);
         }
 
         /**
          * @return The meta state of the binding key.
          */
-        public int getMetaState() {
-            return (mKey & MASK_META_STATE) >> OFFSET_META_STATE;
+        public int getModifiers() {
+            return (int) ((mKeyCodeAndModifiers & MODIFIERS_MASK) >> MODIFIERS_OFFSET);
         }
 
         /**
@@ -442,48 +426,45 @@ class AccessibilityInjector {
          * @param index The action code for a given action <code>index</code>.
          */
         public int getActionCode(int index) {
-            return (mActionSequence[index] & MASK_ACTION) >> OFFSET_ACTION;
+            return (mActionSequence[index] & ACTION_MASK) >> ACTION_OFFSET;
         }
 
         /**
          * @param index The first argument for a given action <code>index</code>.
          */
         public int getFirstArgument(int index) {
-            return (mActionSequence[index] & MASK_FIRST_ARGUMENT) >> OFFSET_FIRST_ARGUMENT;
+            return (mActionSequence[index] & FIRST_ARGUMENT_MASK) >> FIRST_ARGUMENT_OFFSET;
         }
 
         /**
          * @param index The second argument for a given action <code>index</code>.
          */
         public int getSecondArgument(int index) {
-            return (mActionSequence[index] & MASK_SECOND_ARGUMENT) >> OFFSET_SECOND_ARGUMENT;
+            return (mActionSequence[index] & SECOND_ARGUMENT_MASK) >> SECOND_ARGUMENT_OFFSET;
         }
 
         /**
          * @param index The third argument for a given action <code>index</code>.
          */
         public int getThirdArgument(int index) {
-            return (mActionSequence[index] & MASK_THIRD_ARGUMENT) >> OFFSET_THIRD_ARGUMENT;
+            return (mActionSequence[index] & THIRD_ARGUMENT_MASK) >> THIRD_ARGUMENT_OFFSET;
         }
 
         /**
          * Creates a new instance.
-         * @param key The key for the binding (key and meta state)
+         * @param keyCodeAndModifiers The key for the binding (key and modifiers).
          * @param actionSequence The sequence of action for the binding.
-         * @see #getKey()
          */
-        public AccessibilityWebContentKeyBinding(int key, int[] actionSequence) {
-            mKey = key;
+        public AccessibilityWebContentKeyBinding(long keyCodeAndModifiers, int[] actionSequence) {
+            mKeyCodeAndModifiers = keyCodeAndModifiers;
             mActionSequence = actionSequence;
         }
 
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append("key: ");
-            builder.append(getKey());
-            builder.append(", metaState: ");
-            builder.append(getMetaState());
+            builder.append("modifiers: ");
+            builder.append(getModifiers());
             builder.append(", keyCode: ");
             builder.append(getKeyCode());
             builder.append(", actions[");
