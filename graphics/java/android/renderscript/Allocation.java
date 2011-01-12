@@ -162,12 +162,7 @@ public class Allocation extends BaseObj {
         copy1DRangeFrom(0, mType.getCount(), i);
     }
 
-    private void validateBitmap(Bitmap b) {
-        mRS.validate();
-        if(mType.getX() != b.getWidth() ||
-           mType.getY() != b.getHeight()) {
-            throw new RSIllegalArgumentException("Cannot update allocation from bitmap, sizes mismatch");
-        }
+    private void validateBitmapFormat(Bitmap b) {
         Bitmap.Config bc = b.getConfig();
         switch (bc) {
         case ALPHA_8:
@@ -213,6 +208,13 @@ public class Allocation extends BaseObj {
         }
     }
 
+    private void validateBitmapSize(Bitmap b) {
+        if(mType.getX() != b.getWidth() ||
+           mType.getY() != b.getHeight()) {
+            throw new RSIllegalArgumentException("Cannot update allocation from bitmap, sizes mismatch");
+        }
+    }
+
     public void copyFrom(int[] d) {
         mRS.validate();
         copy1DRangeFrom(0, mType.getCount(), d);
@@ -230,7 +232,9 @@ public class Allocation extends BaseObj {
         copy1DRangeFrom(0, mType.getCount(), d);
     }
     public void copyFrom(Bitmap b) {
-        validateBitmap(b);
+        mRS.validate();
+        validateBitmapSize(b);
+        validateBitmapFormat(b);
         mRS.nAllocationCopyFromBitmap(getID(), b);
     }
 
@@ -338,6 +342,18 @@ public class Allocation extends BaseObj {
         mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
     }
 
+    private void validate2DRange(int xoff, int yoff, int w, int h) {
+        if (xoff < 0 || yoff < 0) {
+            throw new RSIllegalArgumentException("Offset cannot be negative.");
+        }
+        if (h < 0 || w < 0) {
+            throw new RSIllegalArgumentException("Height or width cannot be negative.");
+        }
+        if ((xoff + w) > mType.mDimX ||
+            (yoff + h) > mType.mDimY) {
+            throw new RSIllegalArgumentException("Updated region larger than allocation.");
+        }
+    }
 
     /**
      * Copy a rectanglular region from the array into the
@@ -352,21 +368,25 @@ public class Allocation extends BaseObj {
      */
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, byte[] data) {
         mRS.validate();
+        validate2DRange(xoff, yoff, w, h);
         mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, data, data.length);
     }
 
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, short[] data) {
         mRS.validate();
+        validate2DRange(xoff, yoff, w, h);
         mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, data, data.length * 2);
     }
 
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, int[] data) {
         mRS.validate();
+        validate2DRange(xoff, yoff, w, h);
         mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, data, data.length * 4);
     }
 
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, float[] data) {
         mRS.validate();
+        validate2DRange(xoff, yoff, w, h);
         mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, data, data.length * 4);
     }
 
@@ -381,12 +401,16 @@ public class Allocation extends BaseObj {
      */
     public void copy2DRangeFrom(int xoff, int yoff, Bitmap data) {
         mRS.validate();
+        validateBitmapFormat(data);
+        validate2DRange(xoff, yoff, data.getWidth(), data.getHeight());
         mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, data);
     }
 
 
     public void copyTo(Bitmap b) {
-        validateBitmap(b);
+        mRS.validate();
+        validateBitmapFormat(b);
+        validateBitmapSize(b);
         mRS.nAllocationCopyToBitmap(getID(), b);
     }
 

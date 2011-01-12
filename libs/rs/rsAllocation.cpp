@@ -202,6 +202,17 @@ void Allocation::uploadToTexture(const Context *rsc) {
     rsc->checkError("Allocation::uploadToTexture");
 }
 
+void Allocation::update2DTexture(const void *ptr, uint32_t xoff, uint32_t yoff,
+                                 uint32_t lod, RsAllocationCubemapFace face,
+                                 uint32_t w, uint32_t h) {
+    GLenum type = mType->getElement()->getComponent().getGLType();
+    GLenum format = mType->getElement()->getComponent().getGLFormat();
+    GLenum target = (GLenum)getGLTarget();
+    glBindTexture(target, mTextureID);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexSubImage2D(GL_TEXTURE_2D, lod, xoff, yoff, w, h, format, type, ptr);
+}
+
 void Allocation::upload2DTexture(bool isFirstUpload, const void *ptr) {
     GLenum type = mType->getElement()->getComponent().getGLType();
     GLenum format = mType->getElement()->getComponent().getGLFormat();
@@ -368,12 +379,13 @@ void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t lod, 
         sendDirty();
         mUploadDefered = true;
     } else {
-        upload2DTexture(false, data);
+        update2DTexture(data, xoff, yoff, lod, face, w, h);
     }
 }
 
-void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t zoff, uint32_t lod, RsAllocationCubemapFace face,
-             uint32_t w, uint32_t h, uint32_t d, const void *data, uint32_t sizeBytes) {
+void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t zoff,
+                      uint32_t lod, RsAllocationCubemapFace face,
+                      uint32_t w, uint32_t h, uint32_t d, const void *data, uint32_t sizeBytes) {
 }
 
 void Allocation::elementData(Context *rsc, uint32_t x, const void *data,
