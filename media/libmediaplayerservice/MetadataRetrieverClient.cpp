@@ -64,7 +64,6 @@ MetadataRetrieverClient::MetadataRetrieverClient(pid_t pid)
     mThumbnail = NULL;
     mAlbumArt = NULL;
     mRetriever = NULL;
-    mMode = METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL;
 }
 
 MetadataRetrieverClient::~MetadataRetrieverClient()
@@ -79,7 +78,7 @@ status_t MetadataRetrieverClient::dump(int fd, const Vector<String16>& args) con
     char buffer[SIZE];
     String8 result;
     result.append(" MetadataRetrieverClient\n");
-    snprintf(buffer, 255, "  pid(%d) mode(%d)\n", mPid, mMode);
+    snprintf(buffer, 255, "  pid(%d)\n", mPid);
     result.append(buffer);
     write(fd, result.string(), result.size());
     write(fd, "\n", 1);
@@ -93,7 +92,6 @@ void MetadataRetrieverClient::disconnect()
     mRetriever.clear();
     mThumbnail.clear();
     mAlbumArt.clear();
-    mMode = METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL;
     IPCThreadState::self()->flushCommands();
 }
 
@@ -133,10 +131,7 @@ status_t MetadataRetrieverClient::setDataSource(const char *url)
     LOGV("player type = %d", playerType);
     sp<MediaMetadataRetrieverBase> p = createRetriever(playerType);
     if (p == NULL) return NO_INIT;
-    status_t ret = p->setMode(mMode);
-    if (ret == NO_ERROR) {
-        ret = p->setDataSource(url);
-    }
+    status_t ret = p->setDataSource(url);
     if (ret == NO_ERROR) mRetriever = p;
     return ret;
 }
@@ -174,26 +169,10 @@ status_t MetadataRetrieverClient::setDataSource(int fd, int64_t offset, int64_t 
         ::close(fd);
         return NO_INIT;
     }
-    status_t status = p->setMode(mMode);
-    if (status == NO_ERROR) {
-        p->setDataSource(fd, offset, length);
-    }
+    status_t status = p->setDataSource(fd, offset, length);
     if (status == NO_ERROR) mRetriever = p;
     ::close(fd);
     return status;
-}
-
-status_t MetadataRetrieverClient::setMode(int mode)
-{
-    LOGV("setMode");
-    Mutex::Autolock lock(mLock);
-    if (mode < METADATA_MODE_NOOP ||
-        mode > METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL) {
-        LOGE("invalid mode %d", mode);
-        return BAD_VALUE;
-    }
-    mMode = mode;
-    return NO_ERROR;
 }
 
 sp<IMemory> MetadataRetrieverClient::getFrameAtTime(int64_t timeUs, int option)
