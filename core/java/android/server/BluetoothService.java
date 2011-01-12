@@ -678,6 +678,11 @@ public class BluetoothService extends IBluetooth.Stub {
         return false;
     }
 
+    /*package*/ synchronized boolean isFixedPinZerosAutoPairKeyboard(String address) {
+        // Check for keyboards which have fixed PIN 0000 as the pairing pin
+        return mBondState.isFixedPinZerosAutoPairKeyboard(address);
+    }
+
     /*package*/ synchronized void onCreatePairedDeviceResult(String address, int result) {
         if (result == BluetoothDevice.BOND_SUCCESS) {
             setBondState(address, BluetoothDevice.BOND_BONDED);
@@ -748,6 +753,7 @@ public class BluetoothService extends IBluetooth.Stub {
         private ArrayList<String>  mAutoPairingAddressBlacklist;
         private ArrayList<String> mAutoPairingExactNameBlacklist;
         private ArrayList<String> mAutoPairingPartialNameBlacklist;
+        private ArrayList<String> mAutoPairingFixedPinZerosKeyboardList;
         // Addresses added to blacklist dynamically based on usage.
         private ArrayList<String> mAutoPairingDynamicAddressBlacklist;
 
@@ -863,6 +869,19 @@ public class BluetoothService extends IBluetooth.Stub {
             return false;
         }
 
+        public boolean isFixedPinZerosAutoPairKeyboard(String address) {
+            // Note: the meaning of blacklist is reversed in this case.
+            // If its in the list, we can go ahead and auto pair since
+            // by default keyboard should have a variable PIN that we don't
+            // auto pair using 0000.
+            if (mAutoPairingFixedPinZerosKeyboardList != null) {
+                for (String blacklistAddress : mAutoPairingFixedPinZerosKeyboardList) {
+                    if (address.startsWith(blacklistAddress)) return true;
+                }
+            }
+            return false;
+        }
+
         public synchronized int getBondState(String address) {
             Integer state = mState.get(address);
             if (state == null) {
@@ -929,7 +948,6 @@ public class BluetoothService extends IBluetooth.Stub {
             FileOutputStream out = null;
             try {
                 file = new File(DYNAMIC_AUTO_PAIRING_BLACKLIST);
-                if (file.exists()) return;
 
                 in = new FileInputStream(AUTO_PAIRING_BLACKLIST);
                 out= new FileOutputStream(DYNAMIC_AUTO_PAIRING_BLACKLIST);
@@ -974,6 +992,9 @@ public class BluetoothService extends IBluetooth.Stub {
                                 new ArrayList<String>(Arrays.asList(val));
                         } else if (value[0].equalsIgnoreCase("PartialNameBlacklist")) {
                             mAutoPairingPartialNameBlacklist =
+                                new ArrayList<String>(Arrays.asList(val));
+                        } else if (value[0].equalsIgnoreCase("FixedPinZerosKeyboardBlacklist")) {
+                            mAutoPairingFixedPinZerosKeyboardList =
                                 new ArrayList<String>(Arrays.asList(val));
                         } else if (value[0].equalsIgnoreCase("DynamicAddressBlacklist")) {
                             mAutoPairingDynamicAddressBlacklist =
