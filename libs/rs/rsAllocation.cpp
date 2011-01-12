@@ -342,26 +342,34 @@ void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t lod, 
     uint32_t lineSize = eSize * w;
     uint32_t destW = mType->getDimX();
 
-    const uint8_t *src = static_cast<const uint8_t *>(data);
-    uint8_t *dst = static_cast<uint8_t *>(mPtr);
-    dst += eSize * (xoff + yoff * destW);
+    //LOGE("data2d %p,  %i %i %i %i %i %i %p %i", this, xoff, yoff, lod, face, w, h, data, sizeBytes);
 
-    if ((lineSize * eSize * h) != sizeBytes) {
+    if ((lineSize * h) != sizeBytes) {
+        LOGE("Allocation size mismatch, expected %i, got %i", (lineSize * h), sizeBytes);
         rsAssert(!"Allocation::subData called with mismatched size");
         return;
     }
 
-    for (uint32_t line=yoff; line < (yoff+h); line++) {
-        if (mType->getElement()->getHasReferences()) {
-            incRefs(src, w);
-            decRefs(dst, w);
+    if (mPtr) {
+        const uint8_t *src = static_cast<const uint8_t *>(data);
+        uint8_t *dst = static_cast<uint8_t *>(mPtr);
+        dst += mType->getLODOffset(lod, xoff, yoff);
+
+        //LOGE("            %p  %p  %i  ", dst, src, eSize);
+        for (uint32_t line=yoff; line < (yoff+h); line++) {
+            if (mType->getElement()->getHasReferences()) {
+                incRefs(src, w);
+                decRefs(dst, w);
+            }
+            memcpy(dst, src, lineSize);
+            src += lineSize;
+            dst += destW * eSize;
         }
-        memcpy(dst, src, lineSize);
-        src += lineSize;
-        dst += destW * eSize;
+        sendDirty();
+        mUploadDefered = true;
+    } else {
+        upload2DTexture(false, data);
     }
-    sendDirty();
-    mUploadDefered = true;
 }
 
 void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t zoff, uint32_t lod, RsAllocationCubemapFace face,
@@ -685,28 +693,9 @@ void rsi_AllocationSyncAll(Context *rsc, RsAllocation va, RsAllocationUsageType 
     a->syncAll(rsc, src);
 }
 
-void rsi_AllocationCopyFromBitmap(Context *rsc, RsAllocation va, const void *data, size_t dataLen) {
+void rsi_AllocationGenerateMipmaps(Context *rsc, RsAllocation va) {
     Allocation *texAlloc = static_cast<Allocation *>(va);
-    const Type * t = texAlloc->getType();
-
-    uint32_t w = t->getDimX();
-    uint32_t h = t->getDimY();
-    bool genMips = t->getDimLOD();
-    size_t s = w * h * t->getElementSizeBytes();
-    if (s != dataLen) {
-        rsc->setError(RS_ERROR_BAD_VALUE, "Bitmap size didn't match allocation size");
-        return;
-    }
-
-    if (texAlloc->getIsScript()) {
-        memcpy(texAlloc->getPtr(), data, s);
-        if (genMips) {
-            rsaAllocationGenerateScriptMips(rsc, texAlloc);
-        }
-    } else {
-        texAlloc->upload2DTexture(false, data);
-    }
-
+    rsaAllocationGenerateScriptMips(rsc, texAlloc);
 }
 
 void rsi_AllocationCopyToBitmap(Context *rsc, RsAllocation va, void *data, size_t dataLen) {
