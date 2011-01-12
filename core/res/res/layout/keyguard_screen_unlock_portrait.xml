@@ -25,9 +25,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_horizontal"
-    android:background="#70000000"
-    >
+    android:gravity="center_horizontal">
 
     <RelativeLayout
         android:layout_width="match_parent"

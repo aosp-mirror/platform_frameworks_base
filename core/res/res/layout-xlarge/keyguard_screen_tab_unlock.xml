@@ -26,8 +26,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:id="@+id/root"
-    android:background="#70000000">
+    android:id="@+id/root">
 
     <!-- top: status -->
     <RelativeLayout
