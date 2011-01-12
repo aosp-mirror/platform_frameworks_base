@@ -217,6 +217,7 @@
         <item name="spinnerItemStyle">@android:style/Widget.TextView.SpinnerItem</item>
         <item name="dropDownHintAppearance">@android:style/TextAppearance.Widget.DropDownHint</item>
         <item name="keyboardViewStyle">@android:style/Widget.KeyboardView</item>
+        <item name="quickContactBadgeOverlay">@android:drawable/quickcontact_badge_overlay_dark</item>
         <item name="quickContactBadgeStyleWindowSmall">@android:style/Widget.QuickContactBadge.WindowSmall</item>
         <item name="quickContactBadgeStyleWindowMedium">@android:style/Widget.QuickContactBadge.WindowMedium</item>
         <item name="quickContactBadgeStyleWindowLarge">@android:style/Widget.QuickContactBadge.WindowLarge</item>
@@ -341,6 +342,7 @@
         <item name="listChoiceBackgroundIndicator">@android:drawable/list_selected_background_light</item>
 
         <item name="activatedBackgroundIndicator">@android:drawable/activated_background_light</item>
+        <item name="quickContactBadgeOverlay">@android:drawable/quickcontact_badge_overlay_light</item>
 
         <item name="popupWindowStyle">@android:style/Widget.PopupWindow</item>
         

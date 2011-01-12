@@ -16,24 +16,26 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.Cursor;
+import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Intents;
 import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsContract.RawContacts;
-import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
-import com.android.internal.R;
 
 /**
  * Widget used to show an image with the standard QuickContact badge
@@ -45,6 +47,7 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
     private String mContactEmail;
     private String mContactPhone;
     private int mMode;
+    private Drawable mOverlay;
     private QueryHandler mQueryHandler;
     private Drawable mBadgeBackground;
     private Drawable mNoBadgeBackground;
@@ -100,6 +103,10 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
 
         a.recycle();
 
+        TypedArray styledAttributes = mContext.obtainStyledAttributes(R.styleable.Theme);
+        mOverlay = styledAttributes.getDrawable(com.android.internal.R.styleable.Theme_quickContactBadgeOverlay);
+        styledAttributes.recycle();
+
         init();
 
         mBadgeBackground = getBackground();
@@ -118,7 +125,28 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
     public void setMode(int size) {
         mMode = size;
     }
-    
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        if (mOverlay == null || mOverlay.getIntrinsicWidth() == 0 || mOverlay.getIntrinsicHeight() == 0) {
+            return; // nothing to draw
+        }
+
+        mOverlay.setBounds(0, 0, getWidth(), getHeight());
+
+        if (mPaddingTop == 0 && mPaddingLeft == 0) {
+            mOverlay.draw(canvas);
+        } else {
+            int saveCount = canvas.getSaveCount();
+            canvas.save();
+            canvas.translate(mPaddingLeft, mPaddingTop);
+            mOverlay.draw(canvas);
+            canvas.restoreToCount(saveCount);
+        }
+    }
+
     /**
      * Resets the contact photo to the default state.
      */
@@ -132,7 +160,8 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
     /**
      * Assign the contact uri that this QuickContactBadge should be associated
      * with. Note that this is only used for displaying the QuickContact window and
-     * won't bind the contact's photo for you.
+     * won't bind the contact's photo for you. Call {@link #setImageDrawable(Drawable)} to set the
+     * photo.
      *
      * @param contactUri Either a {@link Contacts#CONTENT_URI} or
      *            {@link Contacts#CONTENT_LOOKUP_URI} style URI.
@@ -146,9 +175,12 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
 
     private void onContactUriChanged() {
         if (mContactUri == null && mContactEmail == null && mContactPhone == null) {
+            // Holo theme has no background on badges. Use a null background.
+            /*
             if (mNoBadgeBackground == null) {
                 mNoBadgeBackground = getResources().getDrawable(R.drawable.quickcontact_nobadge);
             }
+            */
             setBackgroundDrawable(mNoBadgeBackground);
         } else {
             setBackgroundDrawable(mBadgeBackground);
