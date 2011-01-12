@@ -18,7 +18,7 @@
 */
 -->
 
-<com.android.internal.widget.WeightedLinearLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/parentPanel"
     android:layout_width="match_parent"
@@ -27,9 +27,7 @@
     android:paddingTop="9dip"
     android:paddingBottom="3dip"
     android:paddingLeft="3dip"
-    android:paddingRight="1dip"
-    android:majorWeightMin="0.65"
-    android:minorWeightMin="0.9">
+    android:paddingRight="1dip">
 
     <LinearLayout android:id="@+id/topPanel"
         android:layout_width="match_parent"
@@ -150,4 +148,4 @@
                 android:visibility="gone" />
         </LinearLayout>
      </LinearLayout>
-</com.android.internal.widget.WeightedLinearLayout>
+</LinearLayout>

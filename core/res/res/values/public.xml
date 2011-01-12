@@ -1422,6 +1422,8 @@
   <public type="attr" name="horizontalScrollViewStyle" />
   <public type="attr" name="layerType" />
   <public type="attr" name="alertDialogIcon" />
+  <public type="attr" name="windowMinWidthMajor" />
+  <public type="attr" name="windowMinWidthMinor" />
 
   <!-- A simple fade-in animation. -->
   <public type="animator" name="fade_in" id="0x010b0000" />
@@ -1473,6 +1475,9 @@
   <public type="id" name="selectTextMode" />
   <public type="id" name="up" />
 
+  <public type="dimen" name="dialog_min_width_major" />
+  <public type="dimen" name="dialog_min_width_minor" />
+
   <!-- Standard content view for a {@link android.app.ListFragment}.
        If you are implementing a subclass of ListFragment with your
        own customized content, you can include this layout in that
@@ -1494,7 +1499,6 @@
   <public type="layout" name="simple_list_item_activated_2" />
 
   <public type="style" name="Theme.WithActionBar" />
-  <public type="style" name="Theme.Dialog.NoFrame" />
   <public type="style" name="Theme.NoTitleBar.OverlayActionModes" />
 
   <public type="style" name="Theme.Holo" />
@@ -1503,15 +1507,19 @@
   <public type="style" name="Theme.Holo.NoActionBar.Fullscreen" />
   <public type="style" name="Theme.Holo.Light" />
   <public type="style" name="Theme.Holo.Dialog" />
+  <public type="style" name="Theme.Holo.Dialog.MinWidth" />
   <public type="style" name="Theme.Holo.Dialog.NoActionBar" />
+  <public type="style" name="Theme.Holo.Dialog.NoActionBar.MinWidth" />
   <public type="style" name="Theme.Holo.Light.Dialog" />
+  <public type="style" name="Theme.Holo.Light.Dialog.MinWidth" />
   <public type="style" name="Theme.Holo.Light.Dialog.NoActionBar" />
-  <public type="style" name="Theme.Holo.Dialog.Alert" />
-  <public type="style" name="Theme.Holo.Light.Dialog.Alert" />
+  <public type="style" name="Theme.Holo.Light.Dialog.NoActionBar.MinWidth" />
   <public type="style" name="Theme.Holo.DialogWhenLarge" />
   <public type="style" name="Theme.Holo.DialogWhenLarge.NoActionBar" />
   <public type="style" name="Theme.Holo.Light.DialogWhenLarge" />
   <public type="style" name="Theme.Holo.Light.DialogWhenLarge.NoActionBar" />
+  <public type="style" name="Theme.Holo.Panel" />
+  <public type="style" name="Theme.Holo.Light.Panel" />
   <public type="style" name="Theme.Holo.Wallpaper" />
   <public type="style" name="Theme.Holo.Wallpaper.NoTitleBar" />
 
@@ -1635,6 +1643,7 @@
   <public type="style" name="Widget.CalendarView" />
   <public type="style" name="Widget.Holo.CalendarView" />
   <public type="style" name="Widget.Holo.Light.CalendarView" />
+
   <public type="string" name="selectTextMode" />
 
 </resources>

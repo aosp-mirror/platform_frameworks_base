@@ -15,6 +15,9 @@
 
 package com.android.internal.policy.impl;
 
+import static android.view.View.MeasureSpec.AT_MOST;
+import static android.view.View.MeasureSpec.EXACTLY;
+import static android.view.View.MeasureSpec.getMode;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
@@ -52,6 +55,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AndroidRuntimeException;
 import android.util.Config;
+import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
@@ -72,6 +76,7 @@ import android.view.ViewManager;
 import android.view.ViewStub;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
@@ -98,7 +103,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * Simple callback used by the context menu and its submenus. The options
      * menu submenus do not use this (their behavior is more complex).
      */
-    DialogMenuCallback mContextMenuCallback = new DialogMenuCallback(FEATURE_CONTEXT_MENU);
+    final DialogMenuCallback mContextMenuCallback = new DialogMenuCallback(FEATURE_CONTEXT_MENU);
+
+    final TypedValue mMinWidthMajor = new TypedValue();
+    final TypedValue mMinWidthMinor = new TypedValue();
 
     // This is the top-level view of the window, containing the window decor.
     private DecorView mDecor;
@@ -1866,6 +1874,45 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+            final boolean isPortrait = metrics.widthPixels < metrics.heightPixels;
+
+            final int widthMode = getMode(widthMeasureSpec);
+
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+            int width = getMeasuredWidth();
+            boolean measure = false;
+
+            widthMeasureSpec = MeasureSpec.makeMeasureSpec(width, EXACTLY);
+
+            final TypedValue tv = isPortrait ? mMinWidthMinor : mMinWidthMajor;
+
+            if (widthMode == AT_MOST && tv.type != TypedValue.TYPE_NULL) {
+                final int min;
+                if (tv.type == TypedValue.TYPE_DIMENSION) {
+                    min = (int)tv.getDimension(metrics);
+                } else if (tv.type == TypedValue.TYPE_FRACTION) {
+                    min = (int)tv.getFraction(metrics.widthPixels, metrics.widthPixels);
+                } else {
+                    min = 0;
+                }
+
+                if (width < min) {
+                    widthMeasureSpec = MeasureSpec.makeMeasureSpec(min, EXACTLY);
+                    measure = true;
+                }
+            }
+
+            // TODO: Support height?
+
+            if (measure) {
+                super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            }
+        }
+
+        @Override
         public void draw(Canvas canvas) {
             super.draw(canvas);
 
@@ -2273,6 +2320,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         >= android.os.Build.VERSION_CODES.HONEYCOMB)) {
             setFlags(FLAG_SPLIT_TOUCH, FLAG_SPLIT_TOUCH&(~getForcedWindowFlags()));
         }
+
+        a.getValue(com.android.internal.R.styleable.Window_windowMinWidthMajor, mMinWidthMajor);
+        a.getValue(com.android.internal.R.styleable.Window_windowMinWidthMinor, mMinWidthMinor);
 
         if (getContext().getApplicationInfo().targetSdkVersion
                 < android.os.Build.VERSION_CODES.HONEYCOMB) {

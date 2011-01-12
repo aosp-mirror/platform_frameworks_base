@@ -58,4 +58,14 @@
     <dimen name="preference_screen_side_margin_negative">0dp</dimen>
     <!-- Preference widget area width (to the left of the text) -->
     <dimen name="preference_widget_width">56dp</dimen>
+
+    <!-- The platform's desired minimum size for a dialog's width when it
+         is along the major axis (that is the screen is landscape).  This may
+         be either a fraction or a dimension. -->
+    <item type="dimen" name="dialog_min_width_major">65%</item>
+
+    <!-- The platform's desired minimum size for a dialog's width when it
+         is along the minor axis (that is the screen is portrait).  This may
+         be either a fraction or a dimension. -->
+    <item type="dimen" name="dialog_min_width_minor">95%</item>
 </resources>

@@ -207,16 +207,6 @@ public class DialogFragment extends Fragment
     }
 
     /**
-     * @deprecated Please use {@link #show(FragmentManager, String)}.
-     */
-    @Deprecated
-    public void show(Activity activity, String tag) {
-        FragmentTransaction ft = activity.getFragmentManager().openTransaction();
-        ft.add(this, tag);
-        ft.commit();
-    }
-
-    /**
      * Display the dialog, adding the fragment to the given FragmentManager.  This
      * is a convenience for explicitly creating a transaction, adding the
      * fragment to it with the given tag, and committing it.  This does
