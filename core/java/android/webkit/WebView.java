@@ -4545,16 +4545,28 @@ public class WebView extends AbsoluteLayout
 
         // accessibility support
         if (accessibilityScriptInjected()) {
-            // if an accessibility script is injected we delegate to it the key handling.
-            // this script is a screen reader which is a fully fledged solution for blind
-            // users to navigate in and interact with web pages.
-            mWebViewCore.sendMessage(EventHub.KEY_DOWN, event);
-            return true;
-        } else if (mAccessibilityInjector != null && mAccessibilityInjector.onKeyEvent(event)) {
-            // if an accessibility injector is present (no JavaScript enabled or the site opts
-            // out injecting our JavaScript screen reader) we let it decide whether to act on
-            // and consume the event.
-            return true;
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                // if an accessibility script is injected we delegate to it the key handling.
+                // this script is a screen reader which is a fully fledged solution for blind
+                // users to navigate in and interact with web pages.
+                mWebViewCore.sendMessage(EventHub.KEY_DOWN, event);
+                return true;
+            } else {
+                // Clean up if accessibility was disabled after loading the current URL.
+                mAccessibilityScriptInjected = false;
+            }
+        } else if (mAccessibilityInjector != null) {
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                if (mAccessibilityInjector.onKeyEvent(event)) {
+                    // if an accessibility injector is present (no JavaScript enabled or the site
+                    // opts out injecting our JavaScript screen reader) we let it decide whether
+                    // to act on and consume the event.
+                    return true;
+                }
+            } else {
+                // Clean up if accessibility was disabled after loading the current URL.
+                mAccessibilityInjector = null;
+            }
         }
 
         if (keyCode == KeyEvent.KEYCODE_PAGE_UP) {
@@ -4733,16 +4745,28 @@ public class WebView extends AbsoluteLayout
 
         // accessibility support
         if (accessibilityScriptInjected()) {
-            // if an accessibility script is injected we delegate to it the key handling.
-            // this script is a screen reader which is a fully fledged solution for blind
-            // users to navigate in and interact with web pages.
-            mWebViewCore.sendMessage(EventHub.KEY_UP, event);
-            return true;
-        } else if (mAccessibilityInjector != null && mAccessibilityInjector.onKeyEvent(event)) {
-            // if an accessibility injector is present (no JavaScript enabled or the site opts
-            // out injecting our JavaScript screen reader) we let it decide whether to act on
-            // and consume the event.
-            return true;
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                // if an accessibility script is injected we delegate to it the key handling.
+                // this script is a screen reader which is a fully fledged solution for blind
+                // users to navigate in and interact with web pages.
+                mWebViewCore.sendMessage(EventHub.KEY_UP, event);
+                return true;
+            } else {
+                // Clean up if accessibility was disabled after loading the current URL.
+                mAccessibilityScriptInjected = false;
+            }
+        } else if (mAccessibilityInjector != null) {
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                if (mAccessibilityInjector.onKeyEvent(event)) {
+                    // if an accessibility injector is present (no JavaScript enabled or the site
+                    // opts out injecting our JavaScript screen reader) we let it decide whether to
+                    // act on and consume the event.
+                    return true;
+                }
+            } else {
+                // Clean up if accessibility was disabled after loading the current URL.
+                mAccessibilityInjector = null;
+            }
         }
 
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
