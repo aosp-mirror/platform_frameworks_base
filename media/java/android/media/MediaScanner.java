@@ -462,7 +462,10 @@ public class MediaScanner
                 key = path.toLowerCase();
             }
             FileCacheEntry entry = mFileCache.get(key);
-            if (entry == null) {
+            // add some slack to avoid a rounding error
+            long delta = (entry != null) ? (lastModified - entry.mLastModified) : 0;
+            boolean wasModified = delta > 1 || delta < -1;
+            if (entry == null || wasModified) {
                 Uri tableUri;
                 if (isDirectory) {
                     tableUri = mFilesUri;
@@ -475,18 +478,17 @@ public class MediaScanner
                 } else {
                     tableUri = mFilesUri;
                 }
-                entry = new FileCacheEntry(tableUri, 0, path, 0,
-                        (isDirectory ? MtpConstants.FORMAT_ASSOCIATION : 0));
-                mFileCache.put(key, entry);
-            }
-            entry.mSeenInFileSystem = true;
-
-            // add some slack to avoid a rounding error
-            long delta = lastModified - entry.mLastModified;
-            if (delta > 1 || delta < -1) {
-                entry.mLastModified = lastModified;
+                if (wasModified) {
+                    entry.mLastModified = lastModified;
+                    entry.mTableUri = tableUri;
+                } else {
+                    entry = new FileCacheEntry(tableUri, 0, path, lastModified,
+                            (isDirectory ? MtpConstants.FORMAT_ASSOCIATION : 0));
+                    mFileCache.put(key, entry);
+                }
                 entry.mLastModifiedChanged = true;
             }
+            entry.mSeenInFileSystem = true;
 
             if (mProcessPlaylists && MediaFile.isPlayListFileType(mFileType)) {
                 mPlayLists.add(entry);
