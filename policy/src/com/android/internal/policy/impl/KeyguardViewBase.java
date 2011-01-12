@@ -18,6 +18,11 @@ package com.android.internal.policy.impl;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.telephony.TelephonyManager;
 import android.view.KeyEvent;
@@ -37,12 +42,34 @@ import android.util.AttributeSet;
  */
 public abstract class KeyguardViewBase extends FrameLayout {
 
+    private static final int BACKGROUND_COLOR = 0x70000000;
     private KeyguardViewCallback mCallback;
     private AudioManager mAudioManager;
     private TelephonyManager mTelephonyManager = null;
 
     public KeyguardViewBase(Context context) {
         super(context);
+
+        // This is a faster way to draw the background on devices without hardware acceleration
+        setBackgroundDrawable(new Drawable() {
+            @Override
+            public void draw(Canvas canvas) {
+                canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC);
+            }
+
+            @Override
+            public void setAlpha(int alpha) {
+            }
+
+            @Override
+            public void setColorFilter(ColorFilter cf) {
+            }
+
+            @Override
+            public int getOpacity() {
+                return PixelFormat.TRANSLUCENT;
+            }
+        });
     }
 
     // used to inject callback
