@@ -122,6 +122,49 @@ public class Allocation extends BaseObj {
            mType.getY() != b.getHeight()) {
             throw new RSIllegalArgumentException("Cannot update allocation from bitmap, sizes mismatch");
         }
+        Bitmap.Config bc = b.getConfig();
+        switch (bc) {
+        case ALPHA_8:
+            if (mType.getElement().mKind != Element.DataKind.PIXEL_A) {
+                throw new RSIllegalArgumentException("Allocation kind is " +
+                                                     mType.getElement().mKind + ", type " +
+                                                     mType.getElement().mType +
+                                                     " of " + mType.getElement().getSizeBytes() +
+                                                     " bytes, passed bitmap was " + bc);
+            }
+            break;
+        case ARGB_8888:
+            if ((mType.getElement().mKind != Element.DataKind.PIXEL_RGBA) ||
+                (mType.getElement().getSizeBytes() != 4)) {
+                throw new RSIllegalArgumentException("Allocation kind is " +
+                                                     mType.getElement().mKind + ", type " +
+                                                     mType.getElement().mType +
+                                                     " of " + mType.getElement().getSizeBytes() +
+                                                     " bytes, passed bitmap was " + bc);
+            }
+            break;
+        case RGB_565:
+            if ((mType.getElement().mKind != Element.DataKind.PIXEL_RGB) ||
+                (mType.getElement().getSizeBytes() != 2)) {
+                throw new RSIllegalArgumentException("Allocation kind is " +
+                                                     mType.getElement().mKind + ", type " +
+                                                     mType.getElement().mType +
+                                                     " of " + mType.getElement().getSizeBytes() +
+                                                     " bytes, passed bitmap was " + bc);
+            }
+            break;
+        case ARGB_4444:
+            if ((mType.getElement().mKind != Element.DataKind.PIXEL_RGBA) ||
+                (mType.getElement().getSizeBytes() != 2)) {
+                throw new RSIllegalArgumentException("Allocation kind is " +
+                                                     mType.getElement().mKind + ", type " +
+                                                     mType.getElement().mType +
+                                                     " of " + mType.getElement().getSizeBytes() +
+                                                     " bytes, passed bitmap was " + bc);
+            }
+            break;
+
+        }
     }
 
     public void copyFrom(int[] d) {
