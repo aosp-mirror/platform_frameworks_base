@@ -2329,7 +2329,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // System.out.println("Features: 0x" + Integer.toHexString(features));
         if ((features & ((1 << FEATURE_LEFT_ICON) | (1 << FEATURE_RIGHT_ICON))) != 0) {
             if (mIsFloating) {
-                layoutResource = com.android.internal.R.layout.dialog_title_icons;
+                TypedValue res = new TypedValue();
+                getContext().getTheme().resolveAttribute(
+                        com.android.internal.R.attr.dialogTitleIconsDecorLayout, res, true);
+                layoutResource = res.resourceId;
             } else {
                 layoutResource = com.android.internal.R.layout.screen_title_icons;
             }
@@ -2346,7 +2349,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // Special case for a window with a custom title.
             // If the window is floating, we need a dialog layout
             if (mIsFloating) {
-                layoutResource = com.android.internal.R.layout.dialog_custom_title;
+                TypedValue res = new TypedValue();
+                getContext().getTheme().resolveAttribute(
+                        com.android.internal.R.attr.dialogCustomTitleDecorLayout, res, true);
+                layoutResource = res.resourceId;
             } else {
                 layoutResource = com.android.internal.R.layout.screen_custom_title;
             }
@@ -2356,7 +2362,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // If no other features and not embedded, only need a title.
             // If the window is floating, we need a dialog layout
             if (mIsFloating) {
-                layoutResource = com.android.internal.R.layout.dialog_title;
+                TypedValue res = new TypedValue();
+                getContext().getTheme().resolveAttribute(
+                        com.android.internal.R.attr.dialogTitleDecorLayout, res, true);
+                layoutResource = res.resourceId;
             } else if ((features & (1 << FEATURE_ACTION_BAR)) != 0) {
                 if ((features & (1 << FEATURE_ACTION_BAR_OVERLAY)) != 0) {
                     layoutResource = com.android.internal.R.layout.screen_action_bar_overlay;
