@@ -2273,15 +2273,30 @@ public abstract class PackageManager {
             String packageName, IPackageMoveObserver observer, int flags);
 
     /**
-     * Sets the Opaque Binary Blob (OBB) file location.
+     * Sets the Opaque Binary Blob (OBB) file path associated with a package
+     * name. The caller must have the
+     * {@link android.Manifest.permission#INSTALL_PACKAGES} permission.
      * <p>
      * NOTE: The existence or format of this file is not currently checked, but
      * it may be in the future.
      * 
      * @param packageName Name of the package with which to associate the .obb
-     *            file
-     * @param path Path on the filesystem to the .obb file
-     * @hide
+     *            file.
+     * @param paths Arrays of paths on the filesystem to the .obb files
+     *            associated with the package.
+     * @see #getPackageObbPaths(String)
      */
-    public abstract void setPackageObbPath(String packageName, String path);
+    public abstract void setPackageObbPaths(String packageName, String[] paths);
+
+    /**
+     * Gets the Opaque Binary Blob (OBB) file path associated with the package.
+     * The caller must be the owner of the package queried or have the
+     * {@link android.Manifest.permission#INSTALL_PACKAGES} permission.
+     * 
+     * @param packageName Name of the package with which to associate the .obb
+     *            file.
+     * @return array of paths to .obb files associated with the package
+     * @see #setPackageObbPaths(String, String[])
+     */
+    public abstract String[] getPackageObbPaths(String packageName);
 }

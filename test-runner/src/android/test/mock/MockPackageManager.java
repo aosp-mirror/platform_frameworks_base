@@ -490,8 +490,17 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public void setPackageObbPath(String packageName, String path) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setPackageObbPaths(String packageName, String[] paths) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String[] getPackageObbPaths(String packageName) {
         throw new UnsupportedOperationException();
     }
 }

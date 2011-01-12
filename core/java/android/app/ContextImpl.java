@@ -2700,12 +2700,22 @@ class ContextImpl extends Context {
         }
 
         @Override
-        public void setPackageObbPath(String packageName, String path) {
+        public void setPackageObbPaths(String packageName, String[] paths) {
             try {
-                mPM.setPackageObbPath(packageName, path);
+                mPM.setPackageObbPaths(packageName, paths);
             } catch (RemoteException e) {
                 // Should never happen!
             }
+        }
+
+        @Override
+        public String[] getPackageObbPaths(String packageName) {
+            try {
+                return mPM.getPackageObbPaths(packageName);
+            } catch (RemoteException e) {
+                // Should never happen!
+            }
+            return null;
         }
 
         private final ContextImpl mContext;
