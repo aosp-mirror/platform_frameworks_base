@@ -19,6 +19,7 @@ package android.content;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.util.Slog;
 import android.util.TimeUtils;
 
 import java.io.FileDescriptor;
@@ -31,9 +32,8 @@ import java.util.concurrent.CountDownLatch;
  * @param <D> the data type to be loaded.
  */
 public abstract class AsyncTaskLoader<D> extends Loader<D> {
-
-
-    private static final String TAG = "AsyncTaskLoader";
+    static final String TAG = "AsyncTaskLoader";
+    static final boolean DEBUG = false;
 
     final class LoadTask extends AsyncTask<Void, Void, D> implements Runnable {
 
@@ -45,13 +45,16 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
         /* Runs on a worker thread */
         @Override
         protected D doInBackground(Void... params) {
+            if (DEBUG) Slog.v(TAG, this + " >>> doInBackground");
             result = AsyncTaskLoader.this.onLoadInBackground();
+            if (DEBUG) Slog.v(TAG, this + "  <<< doInBackground");
             return result;
         }
 
         /* Runs on the UI thread */
         @Override
         protected void onPostExecute(D data) {
+            if (DEBUG) Slog.v(TAG, this + " onPostExecute");
             try {
                 AsyncTaskLoader.this.dispatchOnLoadComplete(this, data);
             } finally {
@@ -61,6 +64,7 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
 
         @Override
         protected void onCancelled() {
+            if (DEBUG) Slog.v(TAG, this + " onCancelled");
             try {
                 AsyncTaskLoader.this.dispatchOnCancelled(this, result);
             } finally {
@@ -105,6 +109,7 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
         super.onForceLoad();
         cancelLoad();
         mTask = new LoadTask();
+        if (DEBUG) Slog.v(TAG, "Preparing load: mTask=" + mTask);
         executePendingTask();
     }
 
@@ -125,10 +130,13 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
      *         <tt>true</tt> otherwise.
      */
     public boolean cancelLoad() {
+        if (DEBUG) Slog.v(TAG, "cancelLoad: mTask=" + mTask);
         if (mTask != null) {
             if (mCancellingTask != null) {
                 // There was a pending task already waiting for a previous
                 // one being canceled; just drop it.
+                if (DEBUG) Slog.v(TAG,
+                        "cancelLoad: still waiting for cancelled task; dropping next");
                 if (mTask.waiting) {
                     mTask.waiting = false;
                     mHandler.removeCallbacks(mTask);
@@ -138,12 +146,14 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
             } else if (mTask.waiting) {
                 // There is a task, but it is waiting for the time it should
                 // execute.  We can just toss it.
+                if (DEBUG) Slog.v(TAG, "cancelLoad: task is waiting, dropping it");
                 mTask.waiting = false;
                 mHandler.removeCallbacks(mTask);
                 mTask = null;
                 return false;
             } else {
                 boolean cancelled = mTask.cancel(false);
+                if (DEBUG) Slog.v(TAG, "cancelLoad: cancelled=" + cancelled);
                 if (cancelled) {
                     mCancellingTask = mTask;
                 }
@@ -171,11 +181,15 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
                 long now = SystemClock.uptimeMillis();
                 if (now < (mLastLoadCompleteTime+mUpdateThrottle)) {
                     // Not yet time to do another load.
+                    if (DEBUG) Slog.v(TAG, "Waiting until "
+                            + (mLastLoadCompleteTime+mUpdateThrottle)
+                            + " to execute: " + mTask);
                     mTask.waiting = true;
                     mHandler.postAtTime(mTask, mLastLoadCompleteTime+mUpdateThrottle);
                     return;
                 }
             }
+            if (DEBUG) Slog.v(TAG, "Executing: " + mTask);
             mTask.execute((Void[]) null);
         }
     }
@@ -183,6 +197,7 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
     void dispatchOnCancelled(LoadTask task, D data) {
         onCancelled(data);
         if (mCancellingTask == task) {
+            if (DEBUG) Slog.v(TAG, "Cancelled task is now canceled!");
             mLastLoadCompleteTime = SystemClock.uptimeMillis();
             mCancellingTask = null;
             executePendingTask();
@@ -191,10 +206,12 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
 
     void dispatchOnLoadComplete(LoadTask task, D data) {
         if (mTask != task) {
+            if (DEBUG) Slog.v(TAG, "Load complete of old task, trying to cancel");
             dispatchOnCancelled(task, data);
         } else {
             mLastLoadCompleteTime = SystemClock.uptimeMillis();
             mTask = null;
+            if (DEBUG) Slog.v(TAG, "Delivering result");
             deliverResult(data);
         }
     }
