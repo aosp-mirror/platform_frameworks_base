@@ -18,6 +18,7 @@ package android.appwidget;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -431,6 +432,47 @@ public class AppWidgetManager {
     public void bindAppWidgetId(int appWidgetId, ComponentName provider) {
         try {
             sService.bindAppWidgetId(appWidgetId, provider);
+        }
+        catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+    }
+
+    /**
+     * Binds the RemoteViewsService for a given appWidgetId and intent.
+     *
+     * The appWidgetId specified must already be bound to the calling AppWidgetHost via
+     * {@link android.appwidget.AppWidgetManager#bindAppWidgetId AppWidgetManager.bindAppWidgetId()}.
+     *
+     * @param appWidgetId   The AppWidget instance for which to bind the RemoteViewsService.
+     * @param intent        The intent of the service which will be providing the data to the
+     *                      RemoteViewsAdapter.
+     * @param connection    The callback interface to be notified when a connection is made or lost.
+     * @hide
+     */
+    public void bindRemoteViewsService(int appWidgetId, Intent intent, IBinder connection) {
+        try {
+            sService.bindRemoteViewsService(appWidgetId, intent, connection);
+        }
+        catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+    }
+
+    /**
+     * Unbinds the RemoteViewsService for a given appWidgetId and intent.
+     *
+     * The appWidgetId specified muse already be bound to the calling AppWidgetHost via
+     * {@link android.appwidget.AppWidgetManager#bindAppWidgetId AppWidgetManager.bindAppWidgetId()}.
+     *
+     * @param appWidgetId   The AppWidget instance for which to bind the RemoteViewsService.
+     * @param intent        The intent of the service which will be providing the data to the
+     *                      RemoteViewsAdapter.
+     * @hide
+     */
+    public void unbindRemoteViewsService(int appWidgetId, Intent intent) {
+        try {
+            sService.unbindRemoteViewsService(appWidgetId, intent);
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
