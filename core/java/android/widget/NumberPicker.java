@@ -478,7 +478,7 @@ public class NumberPicker extends LinearLayout {
         mDecrementButton.setOnLongClickListener(onLongClickListener);
 
         // input text
-        mInputText = (EditText) findViewById(R.id.timepicker_input);
+        mInputText = (EditText) findViewById(R.id.numberpicker_input);
         mInputText.setOnFocusChangeListener(new OnFocusChangeListener() {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
