@@ -116,5 +116,11 @@ void LayerRenderer::destroyLayer(GLuint fbo, GLuint texture) {
     if (texture) glDeleteTextures(1, &texture);
 }
 
+void LayerRenderer::destroyLayerDeferred(GLuint fbo, GLuint texture) {
+    Caches& caches = Caches::getInstance();
+    if (fbo) caches.deleteFboDeferred(fbo);
+    if (texture) caches.deleteTextureDeferred(texture);
+}
+
 }; // namespace uirenderer
 }; // namespace android

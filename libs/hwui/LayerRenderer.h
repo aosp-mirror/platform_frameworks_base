@@ -42,6 +42,7 @@ public:
     static void resizeLayer(GLuint fbo, GLuint texture, uint32_t width, uint32_t height,
             uint32_t* layerWidth, uint32_t* layerHeight);
     static void destroyLayer(GLuint fbo, GLuint texture);
+    static void destroyLayerDeferred(GLuint fbo, GLuint texture);
 
 private:
     GLuint mFbo;
