@@ -42,35 +42,12 @@ enum {
     METADATA_KEY_YEAR            = 8,
     METADATA_KEY_DURATION        = 9,
     METADATA_KEY_NUM_TRACKS      = 10,
-    METADATA_KEY_IS_DRM_CRIPPLED = 11,
-    METADATA_KEY_CODEC           = 12,
-    METADATA_KEY_RATING          = 13,
-    METADATA_KEY_COMMENT         = 14,
-    METADATA_KEY_COPYRIGHT       = 15,
-    METADATA_KEY_BIT_RATE        = 16,
-    METADATA_KEY_FRAME_RATE      = 17,
-    METADATA_KEY_VIDEO_FORMAT    = 18,
-    METADATA_KEY_VIDEO_HEIGHT    = 19,
-    METADATA_KEY_VIDEO_WIDTH     = 20,
-    METADATA_KEY_WRITER          = 21,
-    METADATA_KEY_MIMETYPE        = 22,
-    METADATA_KEY_DISC_NUMBER     = 23,
-    METADATA_KEY_ALBUMARTIST     = 24,
-    METADATA_KEY_COMPILATION     = 25,
+    METADATA_KEY_WRITER          = 11,
+    METADATA_KEY_MIMETYPE        = 12,
+    METADATA_KEY_ALBUMARTIST     = 13,
+    METADATA_KEY_DISC_NUMBER     = 14,
+    METADATA_KEY_COMPILATION     = 15,
     // Add more here...
-};
-
-// The intended mode of operations:$
-// METADATA_MODE_NOOP: Experimental - just add and remove data source.$
-// METADATA_MODE_FRAME_CAPTURE_ONLY: For capture frame/thumbnail only.$
-// METADATA_MODE_METADATA_RETRIEVAL_ONLY: For meta data retrieval only.$
-// METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL: For both frame capture
-//   and meta data retrieval.$
-enum {
-    METADATA_MODE_NOOP                                 = 0x00,
-    METADATA_MODE_METADATA_RETRIEVAL_ONLY              = 0x01,
-    METADATA_MODE_FRAME_CAPTURE_ONLY                   = 0x02,
-    METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL = 0x03
 };
 
 class MediaMetadataRetriever: public RefBase
@@ -81,7 +58,6 @@ public:
     void disconnect();
     status_t setDataSource(const char* dataSourceUrl);
     status_t setDataSource(int fd, int64_t offset, int64_t length);
-    status_t setMode(int mode);
     sp<IMemory> getFrameAtTime(int64_t timeUs, int option);
     sp<IMemory> extractAlbumArt();
     const char* extractMetadata(int keyCode);

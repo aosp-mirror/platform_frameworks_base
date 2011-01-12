@@ -123,17 +123,6 @@ status_t MediaMetadataRetriever::setDataSource(int fd, int64_t offset, int64_t l
     return mRetriever->setDataSource(fd, offset, length);
 }
 
-status_t MediaMetadataRetriever::setMode(int mode)
-{
-    LOGV("setMode(%d)", mode);
-    Mutex::Autolock _l(mLock);
-    if (mRetriever == 0) {
-        LOGE("retriever is not initialized");
-        return INVALID_OPERATION;
-    }
-    return mRetriever->setMode(mode);
-}
-
 sp<IMemory> MediaMetadataRetriever::getFrameAtTime(int64_t timeUs, int option)
 {
     LOGV("getFrameAtTime: time(%lld us) option(%d)", timeUs, option);
