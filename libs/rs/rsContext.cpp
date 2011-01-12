@@ -743,7 +743,9 @@ void Context::setSurface(uint32_t w, uint32_t h, ANativeWindow *sur) {
     rsAssert(mIsGraphicsContext);
 
     EGLBoolean ret;
-    if (mEGL.mSurface != NULL) {
+    // WAR: Some drivers fail to handle 0 size surfaces correcntly.
+    // Use the pbuffer to avoid this pitfall.
+    if ((mEGL.mSurface != NULL) || (w == 0) || (h == 0)) {
         ret = eglMakeCurrent(mEGL.mDisplay, mEGL.mSurfaceDefault, mEGL.mSurfaceDefault, mEGL.mContext);
         checkEglError("eglMakeCurrent", ret);
 
