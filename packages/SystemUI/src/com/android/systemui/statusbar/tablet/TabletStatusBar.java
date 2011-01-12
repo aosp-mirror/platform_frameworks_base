@@ -74,7 +74,8 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.recent.RecentApplicationsActivity;
 
-public class TabletStatusBar extends StatusBar {
+public class TabletStatusBar extends StatusBar implements
+        HeightReceiver.OnBarHeightChangedListener {
     public static final boolean DEBUG = false;
     public static final String TAG = "TabletStatusBar";
 
@@ -97,7 +98,9 @@ public class TabletStatusBar extends StatusBar {
 
     public static final int LIGHTS_ON_DELAY = 5000;
 
-    int mBarHeight = -1;
+    // The height of the bar, as definied by the build.  It may be taller if we're plugged
+    // into hdmi.
+    int mNaturalBarHeight = -1;
     int mIconSize = -1;
     int mIconHPadding = -1;
 
@@ -134,6 +137,7 @@ public class TabletStatusBar extends StatusBar {
 
     ViewGroup mPile;
 
+    HeightReceiver mHeightReceiver;
     BatteryController mBatteryController;
     NetworkController mNetworkController;
 
@@ -269,15 +273,15 @@ public class TabletStatusBar extends StatusBar {
     }
 
     @Override
-    protected void onConfigurationChanged (Configuration newConfig) {
+    protected void onConfigurationChanged(Configuration newConfig) {
         loadDimens();
     }
 
     protected void loadDimens() {
         final Resources res = mContext.getResources();
 
-        mBarHeight = res.getDimensionPixelSize(
-            com.android.internal.R.dimen.status_bar_height);
+        mNaturalBarHeight = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_height);
 
         int newIconSize = res.getDimensionPixelSize(
             com.android.internal.R.dimen.status_bar_icon_size);
@@ -298,6 +302,10 @@ public class TabletStatusBar extends StatusBar {
         mWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
 
+        // This guy will listen for HDMI plugged broadcasts so we can resize the
+        // status bar as appropriate.
+        mHeightReceiver = new HeightReceiver(mContext);
+        mHeightReceiver.registerReceiver();
         loadDimens();
 
         final TabletStatusBarView sb = (TabletStatusBarView)View.inflate(
@@ -408,11 +416,31 @@ public class TabletStatusBar extends StatusBar {
         ScrollView scroller = (ScrollView)mPile.getParent();
         scroller.setFillViewport(true);
 
+        mHeightReceiver.addOnBarHeightChangedListener(this);
+
         return sb;
+    }
+
+    public int getStatusBarHeight() {
+        return mHeightReceiver.getHeight();
     }
 
     protected int getStatusBarGravity() {
         return Gravity.BOTTOM | Gravity.FILL_HORIZONTAL;
+    }
+
+    public void onBarHeightChanged(int height) {
+        final WindowManager.LayoutParams lp
+                = (WindowManager.LayoutParams)mStatusBarView.getLayoutParams();
+        if (lp == null) {
+            // haven't been added yet
+            return;
+        }
+        if (lp.height != height) {
+            lp.height = height;
+            final WindowManager wm = WindowManagerImpl.getDefault();
+            wm.updateViewLayout(mStatusBarView, lp);
+        }
     }
 
     private class H extends Handler {
@@ -1048,7 +1076,7 @@ public class TabletStatusBar extends StatusBar {
         if (mIconLayout == null) return;
 
         final LinearLayout.LayoutParams params
-            = new LinearLayout.LayoutParams(mIconSize + 2*mIconHPadding, mBarHeight);
+            = new LinearLayout.LayoutParams(mIconSize + 2*mIconHPadding, mNaturalBarHeight);
 
         int N = mNotns.size();
 

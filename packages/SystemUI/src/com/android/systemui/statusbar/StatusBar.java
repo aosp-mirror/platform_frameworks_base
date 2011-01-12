@@ -52,6 +52,7 @@ public abstract class StatusBar extends SystemUI implements CommandQueue.Callbac
     // Up-call methods
     protected abstract View makeStatusBarView();
     protected abstract int getStatusBarGravity();
+    public abstract int getStatusBarHeight();
 
     private DoNotDisturb mDoNotDisturb;
 
@@ -104,8 +105,7 @@ public abstract class StatusBar extends SystemUI implements CommandQueue.Callbac
         }
 
         // Put up the view
-        final Resources res = mContext.getResources();
-        final int height= res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
+        final int height = getStatusBarHeight();
 
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,

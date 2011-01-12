@@ -58,7 +58,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     ViewGroup mContentParent;
 
     Choreographer mChoreo = new Choreographer();
-    int mStatusBarHeight;
 
     public NotificationPanel(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -66,11 +65,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
 
     public NotificationPanel(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
-        final Resources res = context.getResources();
-
-        mStatusBarHeight = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_height);
     }
 
     @Override
