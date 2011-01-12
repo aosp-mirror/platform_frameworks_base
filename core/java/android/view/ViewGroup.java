@@ -2179,7 +2179,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         boolean scalingRequired = false;
         boolean caching;
-        final int layerType = child.getLayerType();
+        int layerType = child.getLayerType();
         
         if ((flags & FLAG_CHILDREN_DRAWN_WITH_CACHE) == FLAG_CHILDREN_DRAWN_WITH_CACHE ||
                 (flags & FLAG_ALWAYS_DRAWN_WITH_CACHE) == FLAG_ALWAYS_DRAWN_WITH_CACHE) {
@@ -2278,6 +2278,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (caching) {
             if (!canvas.isHardwareAccelerated()) {
                 if (layerType != LAYER_TYPE_NONE) {
+                    layerType = LAYER_TYPE_SOFTWARE;
                     child.buildDrawingCache(true);
                 }
                 cache = child.getDrawingCache(true);
@@ -2354,13 +2355,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         }
                         if (layerType != LAYER_TYPE_NONE && child.mLayerPaint != null) {
                             child.mLayerPaint.setAlpha(multipliedAlpha);
-                            canvas.saveLayer(sx, sy, sx + cr - cl, sy + cb - ct,
-                                    child.mLayerPaint, layerFlags);
                         } else {
                             canvas.saveLayerAlpha(sx, sy, sx + cr - cl, sy + cb - ct,
                                     multipliedAlpha, layerFlags);
+                            layerSaved = true;
                         }
-                        layerSaved = true;
                     } else {
                         // Alpha is handled by the child directly, clobber the layer's alpha
                         if (layerType != LAYER_TYPE_NONE && child.mLayerPaint != null) {
@@ -2388,24 +2387,35 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         if (hasNoCache) {
+            boolean layerRendered = false;
             if (!layerSaved && layerType == LAYER_TYPE_HARDWARE) {
-                canvas.saveLayer(sx, sy, sx + cr - cl, sy + cb - ct, child.mLayerPaint,
-                        Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
-            }
-            if (!hasDisplayList) {
-                // Fast path for layouts with no backgrounds
-                if ((child.mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
-                    if (ViewDebug.TRACE_HIERARCHY) {
-                        ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
-                    }
-                    child.mPrivateFlags &= ~DIRTY_MASK;
-                    child.dispatchDraw(canvas);
+                final HardwareLayer layer = child.getHardwareLayer(canvas);
+                if (layer != null && layer.isValid()) {
+                    ((HardwareCanvas) canvas).drawHardwareLayer(0, 0, cr - cl, cb - ct,
+                            layer, child.mLayerPaint);
+                    layerRendered = true;
                 } else {
-                    child.draw(canvas);
+                    canvas.saveLayer(sx, sy, sx + cr - cl, sy + cb - ct, child.mLayerPaint,
+                            Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
                 }
-            } else {
-                child.mPrivateFlags &= ~DIRTY_MASK;
-                ((HardwareCanvas) canvas).drawDisplayList(displayList);
+            }
+
+            if (!layerRendered) {
+                if (!hasDisplayList) {
+                    // Fast path for layouts with no backgrounds
+                    if ((child.mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
+                        if (ViewDebug.TRACE_HIERARCHY) {
+                            ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
+                        }
+                        child.mPrivateFlags &= ~DIRTY_MASK;
+                        child.dispatchDraw(canvas);
+                    } else {
+                        child.draw(canvas);
+                    }
+                } else {
+                    child.mPrivateFlags &= ~DIRTY_MASK;
+                    ((HardwareCanvas) canvas).drawDisplayList(displayList);
+                }
             }
         } else if (cache != null) {
             child.mPrivateFlags &= ~DIRTY_MASK;

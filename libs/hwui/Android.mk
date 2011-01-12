@@ -13,6 +13,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		FboCache.cpp \
 		GradientCache.cpp \
 		LayerCache.cpp \
+		LayerRenderer.cpp \
 		Matrix.cpp \
 		OpenGLDebugRenderer.cpp \
 		OpenGLRenderer.cpp \

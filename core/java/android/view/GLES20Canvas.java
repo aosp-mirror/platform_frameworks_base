@@ -73,8 +73,20 @@ class GLES20Canvas extends HardwareCanvas {
     // Constructors
     ///////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Creates a canvas to render directly on screen.
+     */
     GLES20Canvas(boolean translucent) {
         this(false, translucent);
+    }
+
+    /**
+     * Creates a canvas to render into an FBO.
+     */
+    GLES20Canvas(int fbo, boolean translucent) {
+        mOpaque = !translucent;
+        mRenderer = nCreateLayerRenderer(fbo);
+        setupFinalizer();
     }
     
     protected GLES20Canvas(boolean record, boolean translucent) {
@@ -89,7 +101,11 @@ class GLES20Canvas extends HardwareCanvas {
         } else {
             mRenderer = nCreateRenderer();
         }
-       
+
+        setupFinalizer();
+    }
+
+    private void setupFinalizer() {
         if (mRenderer == 0) {
             throw new IllegalStateException("Could not create GLES20Canvas renderer");
         } else {
@@ -97,7 +113,8 @@ class GLES20Canvas extends HardwareCanvas {
         }
     }
 
-    private native int nCreateRenderer();
+    private static native int nCreateRenderer();
+    private static native int nCreateLayerRenderer(int fbo);
     private static native int nGetDisplayListRenderer(int renderer);
     private static native void nDestroyRenderer(int renderer);
 
@@ -135,6 +152,15 @@ class GLES20Canvas extends HardwareCanvas {
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Hardware layers
+    ///////////////////////////////////////////////////////////////////////////
+    
+    static native int nCreateLayer(int width, int height, int[] layerInfo);
+    static native void nResizeLayer(int layerId, int layerTextureId, int width, int height,
+            int[] layerInfo);
+    static native void nDestroyLayer(int layerId, int layerTextureId);    
+    
     ///////////////////////////////////////////////////////////////////////////
     // Canvas management
     ///////////////////////////////////////////////////////////////////////////
@@ -225,6 +251,34 @@ class GLES20Canvas extends HardwareCanvas {
     }
 
     private native void nDrawDisplayList(int renderer, int displayList);
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Hardware layer
+    ///////////////////////////////////////////////////////////////////////////
+    
+    void drawHardwareLayer(float left, float top, float right, float bottom,
+            HardwareLayer layer, Paint paint) {
+        final GLES20Layer glLayer = (GLES20Layer) layer;
+        boolean hasColorFilter = paint != null && setupColorFilter(paint);
+        final int nativePaint = paint == null ? 0 : paint.mNativePaint;
+        nDrawLayer(mRenderer, left, top, right, bottom, glLayer.mLayerTextureId,
+                glLayer.getU(), glLayer.getV(), nativePaint);
+        if (hasColorFilter) nResetModifiers(mRenderer);
+    }
+
+    private native void nDrawLayer(int renderer, float left, float top, float right, float bottom,
+            int layerTexture, float u, float v, int paint);
+    
+    void interrupt() {
+        nInterrupt(mRenderer);
+    }
+    
+    void resume() {
+        nResume(mRenderer);
+    }
+
+    private native void nInterrupt(int renderer);
+    private native void nResume(int renderer);
 
     ///////////////////////////////////////////////////////////////////////////
     // Clipping
