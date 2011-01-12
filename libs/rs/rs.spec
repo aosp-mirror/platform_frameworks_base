@@ -77,12 +77,6 @@ ElementCreate2 {
 	ret RsElement
 	}
 
-AllocationCopyFromBitmap {
-	param RsAllocation alloc
-	param const void * data
-	param size_t dataLen
-	}
-
 AllocationCopyToBitmap {
 	param RsAllocation alloc
 	param void * data
@@ -134,6 +128,10 @@ Allocation2DElementData {
 	param uint32_t element_offset
 	param uint32_t bytes
 	}
+
+AllocationGenerateMipmaps {
+	param RsAllocation va
+}
 
 AllocationRead {
 	param RsAllocation va
