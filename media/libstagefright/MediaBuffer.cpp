@@ -26,16 +26,9 @@
 #include <media/stagefright/MetaData.h>
 
 #include <ui/GraphicBuffer.h>
+#include <sys/atomics.h>
 
 namespace android {
-
-// XXX make this truly atomic.
-static int atomic_add(int *value, int delta) {
-    int prev_value = *value;
-    *value += delta;
-
-    return prev_value;
-}
 
 MediaBuffer::MediaBuffer(void *data, size_t size)
     : mObserver(NULL),
@@ -84,7 +77,7 @@ void MediaBuffer::release() {
         return;
     }
 
-    int prevCount = atomic_add(&mRefCount, -1);
+    int prevCount = __atomic_dec(&mRefCount);
     if (prevCount == 1) {
         if (mObserver == NULL) {
             delete this;
@@ -104,7 +97,7 @@ void MediaBuffer::claim() {
 }
 
 void MediaBuffer::add_ref() {
-    atomic_add(&mRefCount, 1);
+    (void) __atomic_inc(&mRefCount);
 }
 
 void *MediaBuffer::data() const {
