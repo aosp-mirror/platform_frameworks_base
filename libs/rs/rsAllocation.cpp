@@ -28,6 +28,8 @@
 
 #include "utils/StopWatch.h"
 
+static void rsaAllocationGenerateScriptMips(RsContext con, RsAllocation va);
+
 using namespace android;
 using namespace android::renderscript;
 
@@ -699,13 +701,7 @@ void rsi_AllocationCopyFromBitmap(Context *rsc, RsAllocation va, const void *dat
     if (texAlloc->getIsScript()) {
         memcpy(texAlloc->getPtr(), data, s);
         if (genMips) {
-            Adapter2D adapt(rsc, texAlloc);
-            Adapter2D adapt2(rsc, texAlloc);
-            for (uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
-                adapt.setLOD(lod);
-                adapt2.setLOD(lod + 1);
-                mip(adapt2, adapt);
-            }
+            rsaAllocationGenerateScriptMips(rsc, texAlloc);
         }
     } else {
         texAlloc->upload2DTexture(false, data);
@@ -770,6 +766,23 @@ void rsi_AllocationResize2D(Context *rsc, RsAllocation va, uint32_t dimX, uint32
 }
 }
 
+static void rsaAllocationGenerateScriptMips(RsContext con, RsAllocation va) {
+    Context *rsc = static_cast<Context *>(con);
+    Allocation *texAlloc = static_cast<Allocation *>(va);
+    uint32_t numFaces = texAlloc->getType()->getDimFaces() ? 6 : 1;
+    for (uint32_t face = 0; face < numFaces; face ++) {
+        Adapter2D adapt(rsc, texAlloc);
+        Adapter2D adapt2(rsc, texAlloc);
+        adapt.setFace(face);
+        adapt2.setFace(face);
+        for (uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
+            adapt.setLOD(lod);
+            adapt2.setLOD(lod + 1);
+            mip(adapt2, adapt);
+        }
+    }
+}
+
 const void * rsaAllocationGetType(RsContext con, RsAllocation va) {
     Allocation *a = static_cast<Allocation *>(va);
     a->getType()->incUserRef();
@@ -802,13 +815,7 @@ RsAllocation rsaAllocationCreateFromBitmap(RsContext con, RsType vtype,
 
     memcpy(texAlloc->getPtr(), data, t->getDimX() * t->getDimY() * t->getElementSizeBytes());
     if (mips == RS_ALLOCATION_MIPMAP_FULL) {
-        Adapter2D adapt(rsc, texAlloc);
-        Adapter2D adapt2(rsc, texAlloc);
-        for (uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
-            adapt.setLOD(lod);
-            adapt2.setLOD(lod + 1);
-            mip(adapt2, adapt);
-        }
+        rsaAllocationGenerateScriptMips(rsc, texAlloc);
     }
 
     texAlloc->deferedUploadToTexture(rsc);
@@ -846,18 +853,10 @@ RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, RsType vtype,
 
         // Move the data pointer to the next cube face
         sourcePtr += copySize;
+    }
 
-        if (mips == RS_ALLOCATION_MIPMAP_FULL) {
-            Adapter2D adapt(rsc, texAlloc);
-            Adapter2D adapt2(rsc, texAlloc);
-            adapt.setFace(face);
-            adapt2.setFace(face);
-            for (uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
-                adapt.setLOD(lod);
-                adapt2.setLOD(lod + 1);
-                mip(adapt2, adapt);
-            }
-        }
+    if (mips == RS_ALLOCATION_MIPMAP_FULL) {
+        rsaAllocationGenerateScriptMips(rsc, texAlloc);
     }
 
     texAlloc->deferedUploadToTexture(rsc);
