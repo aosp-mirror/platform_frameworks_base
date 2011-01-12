@@ -106,7 +106,11 @@ class GLES20DisplayList extends DisplayList {
 
         @Override
         protected void finalize() throws Throwable {
-            replaceNativeObject(0);
+            try {
+                replaceNativeObject(0);
+            } finally {
+                super.finalize();
+            }
         }
     }
 }
