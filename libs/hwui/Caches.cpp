@@ -106,6 +106,32 @@ void Caches::clearGarbage() {
     textureCache.clearGarbage();
     gradientCache.clearGarbage();
     pathCache.clearGarbage();
+
+    Mutex::Autolock _l(mGarbageLock);
+
+    size_t count = mFboGarbage.size();
+    for (size_t i = 0; i < count; i++) {
+        GLuint fbo = mFboGarbage.itemAt(i);
+        if (fbo) glDeleteFramebuffers(1, &fbo);
+    }
+    mFboGarbage.clear();
+
+    count = mTextureGarbage.size();
+    for (size_t i = 0; i < count; i++) {
+        GLuint texture = mTextureGarbage.itemAt(i);
+        if (texture) glDeleteTextures(1, &texture);
+    }
+    mTextureGarbage.clear();
+}
+
+void Caches::deleteFboDeferred(GLuint fbo) {
+    Mutex::Autolock _l(mGarbageLock);
+    mFboGarbage.push(fbo);
+}
+
+void Caches::deleteTextureDeferred(GLuint texture) {
+    Mutex::Autolock _l(mGarbageLock);
+    mTextureGarbage.push(texture);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
