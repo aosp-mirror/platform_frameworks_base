@@ -66,7 +66,7 @@ public class Shader {
     public boolean getLocalMatrix(Matrix localM) {
         if (mLocalMatrix != null) {
             localM.set(mLocalMatrix);
-            return true;
+            return !mLocalMatrix.isIdentity();
         }
         return false;
     }
