@@ -411,6 +411,13 @@ nAllocationSyncAll(JNIEnv *_env, jobject _this, RsContext con, jint a, jint bits
     rsAllocationSyncAll(con, (RsAllocation)a, (RsAllocationUsageType)bits);
 }
 
+static void
+nAllocationGenerateMipmaps(JNIEnv *_env, jobject _this, RsContext con, jint alloc)
+{
+    LOG_API("nAllocationGenerateMipmaps, con(%p), a(%p)", con, (RsAllocation)alloc);
+    rsAllocationGenerateMipmaps(con, (RsAllocation)alloc);
+}
+
 static int
 nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint type, jint mip, jobject jbitmap, jint usage)
 {
@@ -445,10 +452,14 @@ nAllocationCopyFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint alloc
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)_env->GetIntField(jbitmap, gNativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
+    int w = bitmap.width();
+    int h = bitmap.height();
 
     bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
-    rsAllocationCopyFromBitmap(con, (RsAllocation)alloc, ptr, bitmap.getSize());
+    rsAllocation2DData(con, (RsAllocation)alloc, 0, 0,
+                       0, RS_ALLOCATION_CUBMAP_FACE_POSITVE_X,
+                       w, h, ptr, bitmap.getSize());
     bitmap.unlockPixels();
 }
 
@@ -1211,6 +1222,7 @@ static JNINativeMethod methods[] = {
 {"rsnAllocationGetType",             "(II)I",                                 (void*)nAllocationGetType},
 {"rsnAllocationResize1D",            "(III)V",                                (void*)nAllocationResize1D },
 {"rsnAllocationResize2D",            "(IIII)V",                               (void*)nAllocationResize2D },
+{"rsnAllocationGenerateMipmaps",     "(II)V",                                 (void*)nAllocationGenerateMipmaps },
 
 {"rsnScriptBindAllocation",          "(IIII)V",                               (void*)nScriptBindAllocation },
 {"rsnScriptSetTimeZone",             "(II[B)V",                               (void*)nScriptSetTimeZone },
