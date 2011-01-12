@@ -16,7 +16,7 @@
 ** limitations under the License.
 */
 -->
-        
+
 <!-- This is the general lock screen which shows information about the
   state of the device, as well as instructions on how to get past it
   depending on the state of the device.  It is the same for landscape
@@ -25,9 +25,7 @@
     android:orientation="vertical"
     android:gravity="bottom"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#ff800000"
-        >
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:orientation="vertical"
