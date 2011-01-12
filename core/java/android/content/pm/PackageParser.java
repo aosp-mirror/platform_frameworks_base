@@ -2601,14 +2601,8 @@ public class PackageParser {
 
         int priority = sa.getInt(
                 com.android.internal.R.styleable.AndroidManifestIntentFilter_priority, 0);
-        if (priority > 0 && isActivity && (flags&PARSE_IS_SYSTEM) == 0) {
-            Log.w(TAG, "Activity with priority > 0, forcing to 0 at "
-                    + mArchiveSourcePath + " "
-                    + parser.getPositionDescription());
-            priority = 0;
-        }
         outInfo.setPriority(priority);
-        
+
         TypedValue v = sa.peekValue(
                 com.android.internal.R.styleable.AndroidManifestIntentFilter_label);
         if (v != null && (outInfo.labelRes=v.resourceId) == 0) {
