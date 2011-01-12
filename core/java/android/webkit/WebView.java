@@ -5357,13 +5357,16 @@ public class WebView extends AbsoluteLayout
             return true;
         }
 
-        return handleTouchEventCommon(ev);
+        return handleTouchEventCommon(ev, ev.getX(), ev.getY());
     }
 
-    private boolean handleTouchEventCommon(MotionEvent ev) {
+    /*
+     * Common code for single touch and multi-touch.
+     * (x, y) denotes current focus point, which is the touch point for single touch
+     * and the middle point for multi-touch.
+     */
+    private boolean handleTouchEventCommon(MotionEvent ev, float x, float y) {
         int action = ev.getAction();
-        float x = ev.getX();
-        float y = ev.getY();
         long eventTime = ev.getEventTime();
 
 
@@ -5859,10 +5862,8 @@ public class WebView extends AbsoluteLayout
         // We don't need to support multi touch for them.
         if (detector == null) return false;
 
-        int action = ev.getAction();
         float x = ev.getX();
         float y = ev.getY();
-        long eventTime = ev.getEventTime();
 
         if (!detector.isInProgress() &&
             ev.getActionMasked() != MotionEvent.ACTION_POINTER_DOWN) {
@@ -5887,7 +5888,10 @@ public class WebView extends AbsoluteLayout
             if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "detector is in progress");
             }
-            mLastTouchTime = eventTime;
+            mLastTouchTime = ev.getEventTime();
+            x = detector.getFocusX();
+            y = detector.getFocusY();
+
             cancelLongPress();
             mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
             if (!mZoomManager.supportsPanDuringZoom()) {
@@ -5899,7 +5903,7 @@ public class WebView extends AbsoluteLayout
             }
         }
 
-        action = ev.getAction() & MotionEvent.ACTION_MASK;
+        int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_POINTER_DOWN) {
             cancelTouch();
             action = MotionEvent.ACTION_DOWN;
@@ -5914,7 +5918,7 @@ public class WebView extends AbsoluteLayout
             }
         }
 
-        return handleTouchEventCommon(ev);
+        return handleTouchEventCommon(ev, x, y);
     }
 
     private void cancelWebCoreTouchEvent(int x, int y, boolean removeEvents) {
