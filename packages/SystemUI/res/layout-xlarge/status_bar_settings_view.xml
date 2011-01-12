@@ -120,24 +120,6 @@
     </LinearLayout>
     <View style="@style/StatusBarPanelSettingsPanelSeparator" />
 
-    <!-- Volume -->
-    <LinearLayout style="@style/StatusBarPanelSettingsRow" >
-        <ImageView
-                android:id="@+id/volume_icon"
-                style="@style/StatusBarPanelSettingsIcon"
-                android:src="@drawable/ic_sysbar_sound_on"
-                />
-        <com.android.systemui.statusbar.policy.ToggleSlider
-                android:id="@+id/volume"
-                android:layout_width="0dp"
-                android:layout_height="fill_parent"
-                android:layout_weight="1"
-                android:layout_marginRight="2dp"
-                systemui:text="@string/status_bar_settings_mute_label"
-                />
-    </LinearLayout>
-    <View style="@style/StatusBarPanelSettingsPanelSeparator" />
-
     <!-- Notifications / Do not disturb -->
     <LinearLayout
             android:id="@+id/do_not_disturb"
