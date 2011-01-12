@@ -122,6 +122,8 @@ import android.media.IAudioService;
 import android.media.AudioManager;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -712,6 +714,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (new File("/sys/devices/virtual/switch/hdmi/state").exists()) {
             mHDMIObserver.startObserving("DEVPATH=/devices/virtual/switch/hdmi");
         }
+        mHdmiPlugged = !readHdmiState();
+        setHdmiPlugged(!mHdmiPlugged);
 
         // Note: the Configuration is not stable here, so we cannot load mStatusBarCanHide from
         // config_statusBarCanHide because the latter depends on the screen size
@@ -2000,8 +2004,37 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mHdmiPlugged = plugged;
             updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
             Intent intent = new Intent(ACTION_HDMI_PLUGGED);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             intent.putExtra(EXTRA_HDMI_PLUGGED_STATE, plugged);
             mContext.sendStickyBroadcast(intent);
+        }
+    }
+
+    boolean readHdmiState() {
+        final String filename = "/sys/class/switch/hdmi/state";
+        FileReader reader = null;
+        try {
+            reader = new FileReader(filename);
+            char[] buf = new char[15];
+            int n = reader.read(buf);
+            if (n > 1) {
+                return 0 != Integer.parseInt(new String(buf, 0, n-1));
+            } else {
+                return false;
+            }
+        } catch (IOException ex) {
+            Slog.d(TAG, "couldn't read hdmi state from " + filename + ": " + ex);
+            return false;
+        } catch (NumberFormatException ex) {
+            Slog.d(TAG, "couldn't read hdmi state from " + filename + ": " + ex);
+            return false;
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException ex) {
+                }
+            }
         }
     }
 
