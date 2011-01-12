@@ -535,6 +535,28 @@ nAllocationElementData1D(JNIEnv *_env, jobject _this, RsContext con, jint alloc,
 }
 
 static void
+nAllocationData2D_s(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint xoff, jint yoff, jint lod, jint face,
+                    jint w, jint h, jshortArray data, int sizeBytes)
+{
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAllocation2DData_s, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)", con, (RsAllocation)alloc, xoff, yoff, w, h, len);
+    jshort *ptr = _env->GetShortArrayElements(data, NULL);
+    rsAllocation2DData(con, (RsAllocation)alloc, xoff, yoff, lod, (RsAllocationCubemapFace)face, w, h, ptr, sizeBytes);
+    _env->ReleaseShortArrayElements(data, ptr, JNI_ABORT);
+}
+
+static void
+nAllocationData2D_b(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint xoff, jint yoff, jint lod, jint face,
+                    jint w, jint h, jbyteArray data, int sizeBytes)
+{
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAllocation2DData_b, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)", con, (RsAllocation)alloc, xoff, yoff, w, h, len);
+    jbyte *ptr = _env->GetByteArrayElements(data, NULL);
+    rsAllocation2DData(con, (RsAllocation)alloc, xoff, yoff, lod, (RsAllocationCubemapFace)face, w, h, ptr, sizeBytes);
+    _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
+}
+
+static void
 nAllocationData2D_i(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint xoff, jint yoff, jint lod, jint face,
                     jint w, jint h, jintArray data, int sizeBytes)
 {
@@ -564,6 +586,26 @@ nAllocationRead_i(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jintAr
     jint *ptr = _env->GetIntArrayElements(data, NULL);
     rsAllocationRead(con, (RsAllocation)alloc, ptr);
     _env->ReleaseIntArrayElements(data, ptr, 0);
+}
+
+static void
+nAllocationRead_s(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jshortArray data)
+{
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAllocationRead_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
+    jshort *ptr = _env->GetShortArrayElements(data, NULL);
+    rsAllocationRead(con, (RsAllocation)alloc, ptr);
+    _env->ReleaseShortArrayElements(data, ptr, 0);
+}
+
+static void
+nAllocationRead_b(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jbyteArray data)
+{
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAllocationRead_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
+    jbyte *ptr = _env->GetByteArrayElements(data, NULL);
+    rsAllocationRead(con, (RsAllocation)alloc, ptr);
+    _env->ReleaseByteArrayElements(data, ptr, 0);
 }
 
 static void
@@ -1216,8 +1258,12 @@ static JNINativeMethod methods[] = {
 {"rsnAllocationData1D",              "(IIIII[FI)V",                           (void*)nAllocationData1D_f },
 {"rsnAllocationElementData1D",       "(IIIII[BI)V",                           (void*)nAllocationElementData1D },
 {"rsnAllocationData2D",              "(IIIIIIII[II)V",                        (void*)nAllocationData2D_i },
+{"rsnAllocationData2D",              "(IIIIIIII[SI)V",                        (void*)nAllocationData2D_s },
+{"rsnAllocationData2D",              "(IIIIIIII[BI)V",                        (void*)nAllocationData2D_b },
 {"rsnAllocationData2D",              "(IIIIIIII[FI)V",                        (void*)nAllocationData2D_f },
 {"rsnAllocationRead",                "(II[I)V",                               (void*)nAllocationRead_i },
+{"rsnAllocationRead",                "(II[S)V",                               (void*)nAllocationRead_s },
+{"rsnAllocationRead",                "(II[B)V",                               (void*)nAllocationRead_b },
 {"rsnAllocationRead",                "(II[F)V",                               (void*)nAllocationRead_f },
 {"rsnAllocationGetType",             "(II)I",                                 (void*)nAllocationGetType},
 {"rsnAllocationResize1D",            "(III)V",                                (void*)nAllocationResize1D },
