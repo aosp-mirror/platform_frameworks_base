@@ -22,20 +22,9 @@
 #include <utils/Log.h>
 #include <utils/threads.h>
 #include <core/SkBitmap.h>
-
-// Please do not enable "USE_PRIVATE_NATIVE_BITMAP_CONSTUCTOR"
-// This mode will be removed and it is kept here for
-// convenient comparsion just in case. Will be removed soon.
-// Tests show that this mode is also ~30ms slower,
-// when rotation is involved.
-#define USE_PRIVATE_NATIVE_BITMAP_CONSTUCTOR 0
-
-#if (!USE_PRIVATE_NATIVE_BITMAP_CONSTUCTOR)
 #include <core/SkCanvas.h>
 #include <core/SkDevice.h>
 #include <core/SkScalar.h>
-#endif
-
 #include <media/mediametadataretriever.h>
 #include <private/media/VideoFrame.h>
 
@@ -49,15 +38,10 @@ using namespace android;
 struct fields_t {
     jfieldID context;
     jclass bitmapClazz;
-#if USE_PRIVATE_NATIVE_BITMAP_CONSTUCTOR
-    jmethodID bitmapConstructor;
-    jmethodID createBitmapRotationMethod;
-#else
     jfieldID nativeBitmap;
     jmethodID createBitmapMethod;
     jclass configClazz;
     jmethodID createConfigMethod;
-#endif
 };
 
 static fields_t fields;
@@ -177,75 +161,6 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
             videoFrame->mDisplayHeight,
             videoFrame->mSize);
 
-#if USE_PRIVATE_NATIVE_BITMAP_CONSTUCTOR
-    jobject matrix = NULL;
-    if (videoFrame->mRotationAngle != 0) {
-        LOGD("Create a rotation matrix: %d degrees", videoFrame->mRotationAngle);
-        jclass matrixClazz = env->FindClass("android/graphics/Matrix");
-        if (matrixClazz == NULL) {
-            jniThrowException(env, "java/lang/RuntimeException",
-                "Can't find android/graphics/Matrix");
-            return NULL;
-        }
-        jmethodID matrixConstructor =
-            env->GetMethodID(matrixClazz, "<init>", "()V");
-        if (matrixConstructor == NULL) {
-            jniThrowException(env, "java/lang/RuntimeException",
-                "Can't find Matrix constructor");
-            return NULL;
-        }
-        matrix =
-            env->NewObject(matrixClazz, matrixConstructor);
-        if (matrix == NULL) {
-            LOGE("Could not create a Matrix object");
-            return NULL;
-        }
-
-        LOGV("Rotate the matrix: %d degrees", videoFrame->mRotationAngle);
-        jmethodID setRotateMethod =
-                env->GetMethodID(matrixClazz, "setRotate", "(F)V");
-        if (setRotateMethod == NULL) {
-            jniThrowException(env, "java/lang/RuntimeException",
-                "Can't find Matrix setRotate method");
-            return NULL;
-        }
-        env->CallVoidMethod(matrix, setRotateMethod, 1.0 * videoFrame->mRotationAngle);
-        env->DeleteLocalRef(matrixClazz);
-    }
-
-    // Create a SkBitmap to hold the pixels
-    SkBitmap *bitmap = new SkBitmap();
-    if (bitmap == NULL) {
-        LOGE("getFrameAtTime: cannot instantiate a SkBitmap object.");
-        return NULL;
-    }
-    bitmap->setConfig(SkBitmap::kRGB_565_Config, videoFrame->mDisplayWidth, videoFrame->mDisplayHeight);
-    if (!bitmap->allocPixels()) {
-        delete bitmap;
-        LOGE("failed to allocate pixel buffer");
-        return NULL;
-    }
-    memcpy((uint8_t*)bitmap->getPixels(), (uint8_t*)videoFrame + sizeof(VideoFrame), videoFrame->mSize);
-
-    // Since internally SkBitmap uses reference count to manage the reference to
-    // its pixels, it is important that the pixels (along with SkBitmap) be
-    // available after creating the Bitmap is returned to Java app.
-    jobject jSrcBitmap = env->NewObject(fields.bitmapClazz,
-            fields.bitmapConstructor, (int) bitmap, NULL, true, NULL, -1);
-
-    jobject jBitmap = env->CallStaticObjectMethod(
-                fields.bitmapClazz,
-                fields.createBitmapRotationMethod,
-                jSrcBitmap,                     // source Bitmap
-                0,                              // x
-                0,                              // y
-                videoFrame->mDisplayWidth,      // width
-                videoFrame->mDisplayHeight,     // height
-                matrix,                         // transform matrix
-                false);                         // filter
-
-#else
-
     jobject config = env->CallStaticObjectMethod(
                         fields.configClazz,
                         fields.createConfigMethod,
@@ -273,7 +188,7 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
         canvas.rotate((SkScalar) (videoFrame->mRotationAngle * 1.0));
         canvas.drawBitmap(*bitmap, 0, 0);
     }
-#endif
+
     LOGV("Return a new bitmap constructed with the rotation matrix");
     return jBitmap;
 }
