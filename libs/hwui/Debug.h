@@ -44,4 +44,7 @@
 // Turn on to display debug info about textures
 #define DEBUG_TEXTURES 0
 
+// Turn on to display debug info about the layer renderer
+#define DEBUG_LAYER_RENDERER 0
+
 #endif // ANDROID_HWUI_DEBUG_H
