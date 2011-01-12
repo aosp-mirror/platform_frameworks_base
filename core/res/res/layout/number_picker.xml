@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         style="?android:attr/numberPickerUpButtonStyle" />
 
-    <EditText android:id="@+id/timepicker_input"
+    <EditText android:id="@+id/numberpicker_input"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         style="?android:attr/numberPickerInputTextStyle" />
