@@ -216,6 +216,8 @@ public abstract class ContentResolver {
             String type = ActivityManagerNative.getDefault().getProviderMimeType(url);
             return type;
         } catch (RemoteException e) {
+            // Arbitrary and not worth documenting, as Activity
+            // Manager will kill this process shortly anyway.
             return null;
         } catch (java.lang.Exception e) {
             Log.w(TAG, "Failed to get type for: " + url + " (" + e.getMessage() + ")");
@@ -249,10 +251,12 @@ public abstract class ContentResolver {
         try {
             return provider.getStreamTypes(url, mimeTypeFilter);
         } catch (RemoteException e) {
+            // Arbitrary and not worth documenting, as Activity
+            // Manager will kill this process shortly anyway.
             return null;
         } finally {
-			releaseProvider(provider);
-		}
+            releaseProvider(provider);
+        }
     }
 
     /**
@@ -308,8 +312,11 @@ public abstract class ContentResolver {
             return new CursorWrapperInner(qCursor, provider);
         } catch (RemoteException e) {
             releaseProvider(provider);
+
+            // Arbitrary and not worth documenting, as Activity
+            // Manager will kill this process shortly anyway.
             return null;
-        } catch(RuntimeException e) {
+        } catch (RuntimeException e) {
             releaseProvider(provider);
             throw e;
         }
@@ -539,6 +546,8 @@ public abstract class ContentResolver {
                     return new AssetFileDescriptor(pfd, fd.getStartOffset(),
                             fd.getDeclaredLength());
                 } catch (RemoteException e) {
+                    // Somewhat pointless, as Activity Manager will kill this
+                    // process shortly anyway if the depdendent ContentProvider dies.
                     throw new FileNotFoundException("Dead content provider: " + uri);
                 } catch (FileNotFoundException e) {
                     throw e;
@@ -714,6 +723,8 @@ public abstract class ContentResolver {
             maybeLogUpdateToEventLog(durationMillis, url, "insert", null /* where */);
             return createdRow;
         } catch (RemoteException e) {
+            // Arbitrary and not worth documenting, as Activity
+            // Manager will kill this process shortly anyway.
             return null;
         } finally {
             releaseProvider(provider);
@@ -773,6 +784,8 @@ public abstract class ContentResolver {
             maybeLogUpdateToEventLog(durationMillis, url, "bulkinsert", null /* where */);
             return rowsCreated;
         } catch (RemoteException e) {
+            // Arbitrary and not worth documenting, as Activity
+            // Manager will kill this process shortly anyway.
             return 0;
         } finally {
             releaseProvider(provider);
@@ -802,6 +815,8 @@ public abstract class ContentResolver {
             maybeLogUpdateToEventLog(durationMillis, url, "delete", where);
             return rowsDeleted;
         } catch (RemoteException e) {
+            // Arbitrary and not worth documenting, as Activity
+            // Manager will kill this process shortly anyway.
             return -1;
         } finally {
             releaseProvider(provider);
@@ -818,7 +833,7 @@ public abstract class ContentResolver {
                      A null value will remove an existing field value.
      * @param where A filter to apply to rows before updating, formatted as an SQL WHERE clause
                     (excluding the WHERE itself).
-     * @return The number of rows updated.
+     * @return the number of rows updated.
      * @throws NullPointerException if uri or values are null
      */
     public final int update(Uri uri, ContentValues values, String where,
@@ -834,7 +849,45 @@ public abstract class ContentResolver {
             maybeLogUpdateToEventLog(durationMillis, uri, "update", where);
             return rowsUpdated;
         } catch (RemoteException e) {
+            // Arbitrary and not worth documenting, as Activity
+            // Manager will kill this process shortly anyway.
             return -1;
+        } finally {
+            releaseProvider(provider);
+        }
+    }
+
+    /**
+     * Call an provider-defined method.  This can be used to implement
+     * read or write interfaces which are cheaper than using a Cursor and/or
+     * do not fit into the traditional table model.
+     *
+     * @param method provider-defined method name to call.  Opaque to
+     *   framework, but must be non-null.
+     * @param arg provider-defined String argument.  May be null.
+     * @param extras provider-defined Bundle argument.  May be null.
+     * @return a result Bundle, possibly null.  Will be null if the ContentProvider
+     *   does not implement call.
+     * @throws NullPointerException if uri or method is null
+     * @throws IllegalArgumentException if uri is not known
+     */
+    public final Bundle call(Uri uri, String method, String arg, Bundle extras) {
+        if (uri == null) {
+            throw new NullPointerException("uri == null");
+        }
+        if (method == null) {
+            throw new NullPointerException("method == null");
+        }
+        IContentProvider provider = acquireProvider(uri);
+        if (provider == null) {
+            throw new IllegalArgumentException("Unknown URI " + uri);
+        }
+        try {
+            return provider.call(method, arg, extras);
+        } catch (RemoteException e) {
+            // Arbitrary and not worth documenting, as Activity
+            // Manager will kill this process shortly anyway.
+            return null;
         } finally {
             releaseProvider(provider);
         }

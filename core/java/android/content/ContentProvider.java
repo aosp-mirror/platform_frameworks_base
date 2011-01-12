@@ -247,11 +247,8 @@ public abstract class ContentProvider implements ComponentCallbacks {
             return ContentProvider.this.openAssetFile(uri, mode);
         }
 
-        /**
-         * @hide
-         */
-        public Bundle call(String method, String request, Bundle args) {
-            return ContentProvider.this.call(method, request, args);
+        public Bundle call(String method, String arg, Bundle extras) {
+            return ContentProvider.this.call(method, arg, extras);
         }
 
         @Override
@@ -987,16 +984,17 @@ public abstract class ContentProvider implements ComponentCallbacks {
     }
 
     /**
-     * @hide -- until interface has proven itself
-     *
      * Call a provider-defined method.  This can be used to implement
-     * interfaces that are cheaper than using a Cursor.
+     * interfaces that are cheaper and/or unnatural for a table-like
+     * model.
      *
-     * @param method Method name to call.  Opaque to framework.
-     * @param request Nullable String argument passed to method.
-     * @param args Nullable Bundle argument passed to method.
+     * @param method method name to call.  Opaque to framework, but should not be null.
+     * @param arg provider-defined String argument.  May be null.
+     * @param extras provider-defined Bundle argument.  May be null.
+     * @return provider-defined return value.  May be null.  Null is also
+     *   the default for providers which don't implement any call methods.
      */
-    public Bundle call(String method, String request, Bundle args) {
+    public Bundle call(String method, String arg, Bundle extras) {
         return null;
     }
 
