@@ -37,7 +37,6 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
         boolean supportWMA = MediaProfileReader.getWMAEnable();
         boolean hasFailed = false;
         boolean supportWMV = MediaProfileReader.getWMVEnable();
-        retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         for (int i = 0, n = MediaNames.ALBUMART_TEST_FILES.length; i < n; ++i) {
             try {
                 Log.v(TAG, "File " + i + ": " + MediaNames.ALBUMART_TEST_FILES[i]);
@@ -116,7 +115,6 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
         boolean supportWMV = MediaProfileReader.getWMVEnable();
         boolean hasFailed = false;
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         for(int i = 0, n = MediaNames.METADATA_RETRIEVAL_TEST_FILES.length; i < n; ++i) {
             try {
                 Log.v(TAG, "File " + i + ": " + MediaNames.METADATA_RETRIEVAL_TEST_FILES[i]);
@@ -170,7 +168,6 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     public static void testBasicAbnormalMethodCallSequence() {
         boolean hasFailed = false;
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         if (retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM) != null) {
             Log.e(TAG, "No album metadata expected, but is available");
             hasFailed = true;
@@ -186,7 +183,6 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     @MediumTest
     public static void testSetDataSource() {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         boolean hasFailed = false;
 
         // Null pointer argument
@@ -253,7 +249,6 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
         assertTrue(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) != null);
 
         // Do not capture frame or retrieve metadata
-        retriever.setMode(MediaMetadataRetriever.MODE_CAPTURE_FRAME_ONLY & MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         retriever.setDataSource(MediaNames.TEST_PATH_1);
         if (retriever.getFrameAtTime(-1) != null) {
             Log.e(TAG, "No frame expected, but is available");
@@ -265,12 +260,10 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
         }
 
         // Capture frame only
-        retriever.setMode(MediaMetadataRetriever.MODE_CAPTURE_FRAME_ONLY);
         retriever.setDataSource(MediaNames.TEST_PATH_1);
         assertTrue(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) == null);
 
         // Retriever metadata only
-        retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         retriever.setDataSource(MediaNames.TEST_PATH_1);
         if (retriever.getFrameAtTime(-1) != null) {
             Log.e(TAG, "No frame expected, but is available");
@@ -278,7 +271,6 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
         }
 
         // Capture frame and retrieve metadata
-        retriever.setMode(MediaMetadataRetriever.MODE_CAPTURE_FRAME_ONLY | MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         retriever.setDataSource(MediaNames.TEST_PATH_1);
         assertTrue(retriever.getFrameAtTime(-1) != null);
         assertTrue(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) != null);

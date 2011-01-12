@@ -678,10 +678,6 @@ int main(int argc, char **argv) {
             const char *filename = argv[k];
 
             CHECK_EQ(retriever->setDataSource(filename), (status_t)OK);
-            CHECK_EQ(retriever->setMode(
-                        METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL),
-                     (status_t)OK);
-
             sp<IMemory> mem =
                     retriever->getFrameAtTime(-1,
                                     MediaSource::ReadOptions::SEEK_PREVIOUS_SYNC);
