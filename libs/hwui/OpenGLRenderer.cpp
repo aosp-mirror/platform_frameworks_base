@@ -627,7 +627,7 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         setupDrawDirtyRegionsDisabled();
         setupDrawPureColorUniforms();
         setupDrawTexture(layer->texture);
-        setupDrawModelViewIdentity();
+        setupDrawModelViewTranslate(rect.left, rect.top, rect.right, rect.bottom);
         setupDrawMesh(&mesh[0].position[0], &mesh[0].texture[0]);
 
         for (size_t i = 0; i < count; i++) {
