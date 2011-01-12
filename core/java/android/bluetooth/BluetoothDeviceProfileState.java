@@ -129,10 +129,6 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                     newState == BluetoothA2dp.STATE_DISCONNECTED) {
                     sendMessage(TRANSITION_TO_STABLE);
                 }
-            } else if (action.equals(BluetoothDevice.ACTION_ACL_CONNECTED)) {
-                Message msg = new Message();
-                msg.what = AUTO_CONNECT_PROFILES;
-                sendMessageDelayed(msg, AUTO_CONNECT_DELAY);
             } else if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
                 // This is technically not needed, but we can get stuck sometimes.
                 // For example, if incoming A2DP fails, we are not informed by Bluez
