@@ -153,7 +153,7 @@ public class ParcelFileDescriptor implements Parcelable {
     private static native int createPipeNative(FileDescriptor[] outFds);
 
     /**
-     * @deprecated Please use createPipe() or ContentProvider.openPipeHelper().
+     * @hide Please use createPipe() or ContentProvider.openPipeHelper().
      * Gets a file descriptor for a read-only copy of the given data.
      *
      * @param data Data to copy.
