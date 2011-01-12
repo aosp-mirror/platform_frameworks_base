@@ -784,6 +784,9 @@ public class MediaScanner
             } else {
                 // updated file
                 result = ContentUris.withAppendedId(tableUri, rowId);
+                // path should never change, and we want to avoid replacing mixed cased paths
+                // with squashed lower case paths
+                values.remove(MediaStore.MediaColumns.DATA);
                 mMediaProvider.update(result, values, null, null);
             }
             if (mProcessGenres && mGenre != null) {
