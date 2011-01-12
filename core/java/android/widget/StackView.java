@@ -194,7 +194,21 @@ public class StackView extends AdapterViewAnimator {
     /**
      * Animate the views between different relative indexes within the {@link AdapterViewAnimator}
      */
-    void animateViewForTransition(int fromIndex, int toIndex, View view) {
+    void animateViewForTransition(int fromIndex, int toIndex, final View view) {
+        ObjectAnimator alphaOa = null;
+        ObjectAnimator oldAlphaOa = null;
+
+        // If there is currently an alpha animation on this view, we need
+        // to know about it, and may need to cancel it so as not to interfere with
+        // a new alpha animation.
+        Object tag = view.getTag(com.android.internal.R.id.viewAlphaAnimation);
+        if (tag instanceof WeakReference<?>) {
+            Object obj = ((WeakReference<?>) tag).get();
+            if (obj instanceof ObjectAnimator) {
+                oldAlphaOa = (ObjectAnimator) obj;
+            }
+        }
+
         if (fromIndex == -1 && toIndex == NUM_ACTIVE_VIEWS -1) {
             // Fade item in
             if (view.getAlpha() == 1) {
@@ -206,9 +220,12 @@ public class StackView extends AdapterViewAnimator {
             view.setTranslationY(0);
             view.setVisibility(VISIBLE);
 
-            ObjectAnimator fadeIn = ObjectAnimator.ofFloat(view, "alpha", view.getAlpha(), 1.0f);
-            fadeIn.setDuration(FADE_IN_ANIMATION_DURATION);
-            fadeIn.start();
+            alphaOa = ObjectAnimator.ofFloat(view, "alpha", view.getAlpha(), 1.0f);
+            alphaOa.setDuration(FADE_IN_ANIMATION_DURATION);
+            if (oldAlphaOa != null) oldAlphaOa.cancel();
+            alphaOa.start();
+            view.setTagInternal(com.android.internal.R.id.viewAlphaAnimation, 
+                    new WeakReference<ObjectAnimator>(alphaOa));
         } else if (fromIndex == 0 && toIndex == 1) {
             // Slide item in
             view.setVisibility(VISIBLE);
@@ -216,39 +233,45 @@ public class StackView extends AdapterViewAnimator {
             int duration = Math.round(mStackSlider.getDurationForNeutralPosition(mYVelocity));
 
             StackSlider animationSlider = new StackSlider(mStackSlider);
+            animationSlider.setView(view);
             PropertyValuesHolder slideInY = PropertyValuesHolder.ofFloat("YProgress", 0.0f);
             PropertyValuesHolder slideInX = PropertyValuesHolder.ofFloat("XProgress", 0.0f);
-            ObjectAnimator pa = ObjectAnimator.ofPropertyValuesHolder(animationSlider,
+            ObjectAnimator slideIn = ObjectAnimator.ofPropertyValuesHolder(animationSlider,
                     slideInX, slideInY);
-            pa.setDuration(duration);
-            pa.setInterpolator(new LinearInterpolator());
-            pa.start();
+            slideIn.setDuration(duration);
+            slideIn.setInterpolator(new LinearInterpolator());
+            slideIn.start();
         } else if (fromIndex == 1 && toIndex == 0) {
             // Slide item out
             int duration = Math.round(mStackSlider.getDurationForOffscreenPosition(mYVelocity));
 
             StackSlider animationSlider = new StackSlider(mStackSlider);
+            animationSlider.setView(view);
             PropertyValuesHolder slideOutY = PropertyValuesHolder.ofFloat("YProgress", 1.0f);
             PropertyValuesHolder slideOutX = PropertyValuesHolder.ofFloat("XProgress", 0.0f);
-            ObjectAnimator pa = ObjectAnimator.ofPropertyValuesHolder(animationSlider,
+            ObjectAnimator slideOut = ObjectAnimator.ofPropertyValuesHolder(animationSlider,
                     slideOutX, slideOutY);
-            pa.setDuration(duration);
-            pa.setInterpolator(new LinearInterpolator());
-            pa.start();
-        } else if (fromIndex == -1 && toIndex == 0) {
+            slideOut.setDuration(duration);
+            slideOut.setInterpolator(new LinearInterpolator());
+            slideOut.start();
+        } else if (toIndex == 0) {
             // Make sure this view that is "waiting in the wings" is invisible
             view.setAlpha(0.0f);
             view.setVisibility(INVISIBLE);
-            LayoutParams lp = (LayoutParams) view.getLayoutParams();
-            lp.setVerticalOffset(-mSlideAmount);
+        } else if (fromIndex == 0 && toIndex > 1) {
+            view.setVisibility(VISIBLE);
+            view.setAlpha(1.0f);
         } else if (fromIndex == -1) {
             view.setAlpha(1.0f);
             view.setVisibility(VISIBLE);
         } else if (toIndex == -1) {
             // Fade item out
-            ObjectAnimator fadeOut = ObjectAnimator.ofFloat(view, "alpha", view.getAlpha(), 0.0f);
-            fadeOut.setDuration(STACK_RELAYOUT_DURATION);
-            fadeOut.start();
+            alphaOa = ObjectAnimator.ofFloat(view, "alpha", view.getAlpha(), 0.0f);
+            alphaOa.setDuration(STACK_RELAYOUT_DURATION);
+            if (oldAlphaOa != null) oldAlphaOa.cancel();
+            alphaOa.start();
+            view.setTagInternal(com.android.internal.R.id.viewAlphaAnimation, 
+                    new WeakReference<ObjectAnimator>(alphaOa));
         }
 
         // Implement the faked perspective
@@ -279,6 +302,16 @@ public class StackView extends AdapterViewAnimator {
                 (getMeasuredWidth() * (1 - PERSPECTIVE_SHIFT_FACTOR_X) / 2.0f);
         final float transX = perspectiveTranslationX + scaleShiftCorrectionX;
 
+        // If this view is currently being animated for a certain position, we need to cancel 
+        // this animation so as not to interfere with the new transformation.
+        Object tag = view.getTag(com.android.internal.R.id.viewAnimation);
+        if (tag instanceof WeakReference<?>) {
+            Object obj = ((WeakReference<?>) tag).get();
+            if (obj instanceof ObjectAnimator) {
+                ((ObjectAnimator) obj).cancel();
+            }
+        }
+
         if (animate) {
             PropertyValuesHolder translationX = PropertyValuesHolder.ofFloat("translationX", transX);
             PropertyValuesHolder translationY = PropertyValuesHolder.ofFloat("translationY", transY);
@@ -292,14 +325,6 @@ public class StackView extends AdapterViewAnimator {
                     new WeakReference<ObjectAnimator>(oa));
             oa.start();
         } else {
-            Object tag = view.getTag(com.android.internal.R.id.viewAnimation);
-            if (tag instanceof WeakReference<?>) {
-                Object obj = ((WeakReference<?>) tag).get();
-                if (obj instanceof ObjectAnimator) {
-                    ((ObjectAnimator) obj).cancel();
-                }
-            }
-
             view.setTranslationX(transX);
             view.setTranslationY(transY);
             view.setScaleX(scale);
