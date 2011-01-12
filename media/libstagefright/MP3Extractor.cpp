@@ -228,22 +228,47 @@ static bool Resync(
 
     off64_t pos = *inout_pos;
     bool valid = false;
+
+    const size_t kMaxReadBytes = 1024;
+    const size_t kMaxBytesChecked = 128 * 1024;
+    uint8_t buf[kMaxReadBytes];
+    ssize_t bytesToRead = kMaxReadBytes;
+    ssize_t totalBytesRead = 0;
+    ssize_t remainingBytes = 0;
+    bool reachEOS = false;
+    uint8_t *tmp = buf;
+
     do {
-        if (pos >= *inout_pos + 128 * 1024) {
+        if (pos >= *inout_pos + kMaxBytesChecked) {
             // Don't scan forever.
             LOGV("giving up at offset %ld", pos);
             break;
         }
 
-        uint8_t tmp[4];
-        if (source->readAt(pos, tmp, 4) != 4) {
-            break;
+        if (remainingBytes < 4) {
+            if (reachEOS) {
+                break;
+            } else {
+                memcpy(buf, tmp, remainingBytes);
+                bytesToRead = kMaxReadBytes - remainingBytes;
+                totalBytesRead = source->readAt(pos, buf + remainingBytes, bytesToRead);
+                if (totalBytesRead <= 0) {
+                    break;
+                }
+                reachEOS = (totalBytesRead != bytesToRead);
+                totalBytesRead += remainingBytes;
+                remainingBytes = totalBytesRead;
+                tmp = buf;
+                continue;
+            }
         }
 
         uint32_t header = U32_AT(tmp);
 
         if (match_header != 0 && (header & kMask) != (match_header & kMask)) {
             ++pos;
+            ++tmp;
+            --remainingBytes;
             continue;
         }
 
@@ -253,6 +278,8 @@ static bool Resync(
                     header, &frame_size,
                     &sample_rate, &num_channels, &bitrate)) {
             ++pos;
+            ++tmp;
+            --remainingBytes;
             continue;
         }
 
@@ -303,6 +330,8 @@ static bool Resync(
         }
 
         ++pos;
+        ++tmp;
+        --remainingBytes;
     } while (!valid);
 
     return valid;
