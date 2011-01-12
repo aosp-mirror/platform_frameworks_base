@@ -1460,15 +1460,6 @@
        sinusoidal pattern. -->
   <public type="interpolator" name="cycle" />
 
-  <!-- Acceleration curve matching a cubic ease in function. -->
-  <public type="anim" name="accelerate_cubic_interpolator" />
-  <!-- Acceleration curve matching a cubic ease out function. -->
-  <public type="anim" name="decelerate_cubic_interpolator" />
-  <!-- Acceleration curve matching a quint ease in function. -->
-  <public type="anim" name="accelerate_quint_interpolator" />
-  <!-- Acceleration curve matching a quint ease out function. -->
-  <public type="anim" name="decelerate_quint_interpolator" />
-
   <public type="id" name="home" />
   <!-- Context menu ID for the "Select text..." menu item to switch to text
        selection context mode in text views. -->
