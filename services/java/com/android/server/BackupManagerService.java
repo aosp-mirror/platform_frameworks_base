@@ -16,6 +16,11 @@
 
 package com.android.server;
 
+import com.android.internal.backup.BackupConstants;
+import com.android.internal.backup.IBackupTransport;
+import com.android.internal.backup.LocalTransport;
+import com.android.server.PackageManagerBackupAgent.Metadata;
+
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
@@ -23,10 +28,10 @@ import android.app.IActivityManager;
 import android.app.IApplicationThread;
 import android.app.IBackupAgent;
 import android.app.PendingIntent;
-import android.app.backup.RestoreSet;
 import android.app.backup.IBackupManager;
 import android.app.backup.IRestoreObserver;
 import android.app.backup.IRestoreSession;
+import android.app.backup.RestoreSet;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -38,8 +43,8 @@ import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.Signature;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.Signature;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -60,11 +65,6 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-
-import com.android.internal.backup.BackupConstants;
-import com.android.internal.backup.IBackupTransport;
-import com.android.internal.backup.LocalTransport;
-import com.android.server.PackageManagerBackupAgent.Metadata;
 
 import java.io.EOFException;
 import java.io.File;
@@ -145,6 +145,7 @@ class BackupManagerService extends IBackupManager.Stub {
             fullBackup = isFull;
         }
 
+        @Override
         public String toString() {
             return "BackupRequest{app=" + appInfo + " full=" + fullBackup + "}";
         }
@@ -271,6 +272,7 @@ class BackupManagerService extends IBackupManager.Stub {
             super(looper);
         }
 
+        @Override
         public void handleMessage(Message msg) {
 
             switch (msg.what) {
@@ -443,7 +445,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 Settings.Secure.BACKUP_AUTO_RESTORE, 1) != 0;
         // If Encrypted file systems is enabled or disabled, this call will return the
         // correct directory.
-        mBaseStateDir = new File(Environment.getSecureDataDirectory(), "backup");
+        mBaseStateDir = new File(Environment.getDataDirectory(), "backup");
         mBaseStateDir.mkdirs();
         mDataDir = Environment.getDownloadCacheDirectory();
 
@@ -533,6 +535,7 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     private class RunBackupReceiver extends BroadcastReceiver {
+        @Override
         public void onReceive(Context context, Intent intent) {
             if (RUN_BACKUP_ACTION.equals(intent.getAction())) {
                 synchronized (mQueueLock) {
@@ -569,6 +572,7 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     private class RunInitializeReceiver extends BroadcastReceiver {
+        @Override
         public void onReceive(Context context, Intent intent) {
             if (RUN_INITIALIZE_ACTION.equals(intent.getAction())) {
                 synchronized (mQueueLock) {
@@ -812,6 +816,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // ----- Track installation/removal of packages -----
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
         public void onReceive(Context context, Intent intent) {
             if (DEBUG) Slog.d(TAG, "Received broadcast " + intent);
 

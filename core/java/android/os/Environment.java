@@ -16,10 +16,10 @@
 
 package android.os;
 
-import java.io.File;
-
 import android.content.res.Resources;
 import android.os.storage.IMountService;
+
+import java.io.File;
 
 /**
  * Provides access to environment variables.
@@ -45,46 +45,6 @@ public class Environment {
      */
     public static File getRootDirectory() {
         return ROOT_DIRECTORY;
-    }
-
-    /**
-     * Gets the system directory available for secure storage.
-     * If Encrypted File system is enabled, it returns an encrypted directory (/data/secure/system).
-     * Otherwise, it returns the unencrypted /data/system directory.
-     * @return File object representing the secure storage system directory.
-     * @hide
-     */
-    public static File getSystemSecureDirectory() {
-        if (isEncryptedFilesystemEnabled()) {
-            return new File(SECURE_DATA_DIRECTORY, "system");
-        } else {
-            return new File(DATA_DIRECTORY, "system");
-        }
-    }
-
-    /**
-     * Gets the data directory for secure storage.
-     * If Encrypted File system is enabled, it returns an encrypted directory (/data/secure).
-     * Otherwise, it returns the unencrypted /data directory.
-     * @return File object representing the data directory for secure storage.
-     * @hide
-     */
-    public static File getSecureDataDirectory() {
-        if (isEncryptedFilesystemEnabled()) {
-            return SECURE_DATA_DIRECTORY;
-        } else {
-            return DATA_DIRECTORY;
-        }
-    }
-
-    /**
-     * Returns whether the Encrypted File System feature is enabled on the device or not.
-     * @return <code>true</code> if Encrypted File System feature is enabled, <code>false</code>
-     * if disabled.
-     * @hide
-     */
-    public static boolean isEncryptedFilesystemEnabled() {
-        return SystemProperties.getBoolean(SYSTEM_PROPERTY_EFS_ENABLED, false);
     }
 
     private static final File DATA_DIRECTORY
