@@ -514,10 +514,11 @@ public class DatePicker extends FrameLayout {
      * inconsistent date the values are normalized before updating the spinners.
      */
     private void updateSpinners(int year, int month, int dayOfMonth) {
-        mCurrentDate.set(Calendar.YEAR, year);
+        // compute the deltas before modifying the current date
         int deltaMonths = getDelataMonth(month);
-        mCurrentDate.add(Calendar.MONTH, deltaMonths);
         int deltaDays = getDelataDayOfMonth(dayOfMonth);
+        mCurrentDate.set(Calendar.YEAR, year);
+        mCurrentDate.add(Calendar.MONTH, deltaMonths);
         mCurrentDate.add(Calendar.DAY_OF_MONTH, deltaDays);
 
         if (mCurrentDate.before(mMinDate)) {
