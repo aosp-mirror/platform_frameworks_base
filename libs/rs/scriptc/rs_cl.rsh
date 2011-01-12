@@ -23,8 +23,8 @@ static typeout##4 __attribute__((overloadable)) convert_##typeout##4(typein##4 v
                             CVT_FUNC_2(type, char) \
                             CVT_FUNC_2(type, ushort) \
                             CVT_FUNC_2(type, short) \
-                            CVT_FUNC_2(type, int) \
                             CVT_FUNC_2(type, uint) \
+                            CVT_FUNC_2(type, int) \
                             CVT_FUNC_2(type, float)
 
 CVT_FUNC(char)
@@ -55,6 +55,29 @@ static float3 __attribute__((overloadable)) fnc(float3 v) { \
 } \
 static float4 __attribute__((overloadable)) fnc(float4 v) { \
     float4 r; \
+    r.x = fnc(v.x); \
+    r.y = fnc(v.y); \
+    r.z = fnc(v.z); \
+    r.w = fnc(v.w); \
+    return r; \
+}
+
+#define DEF_FUNC_1_RI(fnc) \
+static int2 __attribute__((overloadable)) fnc(float2 v) { \
+    int2 r; \
+    r.x = fnc(v.x); \
+    r.y = fnc(v.y); \
+    return r; \
+} \
+static int3 __attribute__((overloadable)) fnc(float3 v) { \
+    int3 r; \
+    r.x = fnc(v.x); \
+    r.y = fnc(v.y); \
+    r.z = fnc(v.z); \
+    return r; \
+} \
+static int4 __attribute__((overloadable)) fnc(float4 v) { \
+    int4 r; \
     r.x = fnc(v.x); \
     r.y = fnc(v.y); \
     r.z = fnc(v.z); \
@@ -264,7 +287,7 @@ extern float __attribute__((overloadable)) hypot(float, float);
 DEF_FUNC_2(hypot)
 
 extern int __attribute__((overloadable)) ilogb(float);
-DEF_FUNC_1(ilogb)
+DEF_FUNC_1_RI(ilogb)
 
 extern float __attribute__((overloadable)) ldexp(float, int);
 extern float2 __attribute__((overloadable)) ldexp(float2, int2);
@@ -345,10 +368,10 @@ static float4 __attribute__((overloadable)) powr(float4 v, float4 p) {
 extern float __attribute__((overloadable)) remainder(float, float);
 DEF_FUNC_2(remainder)
 
-extern float __attribute__((overloadable)) remquo(float, float, float *);
-extern float2 __attribute__((overloadable)) remquo(float2, float2, float2 *);
-extern float3 __attribute__((overloadable)) remquo(float3, float3, float3 *);
-extern float4 __attribute__((overloadable)) remquo(float4, float4, float4 *);
+extern float __attribute__((overloadable)) remquo(float, float, int *);
+extern float2 __attribute__((overloadable)) remquo(float2, float2, int2 *);
+extern float3 __attribute__((overloadable)) remquo(float3, float3, int3 *);
+extern float4 __attribute__((overloadable)) remquo(float4, float4, int4 *);
 
 extern float __attribute__((overloadable)) rint(float);
 DEF_FUNC_1(rint)
@@ -373,10 +396,10 @@ extern float __attribute__((overloadable)) round(float);
 DEF_FUNC_1(round)
 
 extern float __attribute__((overloadable)) sqrt(float);
-/*static float __attribute__((overloadable)) rsqrt(float v) {
+static float __attribute__((overloadable)) rsqrt(float v) {
     return 1.f / sqrt(v);
 }
-DEF_FUNC_1(rsqrt)*/
+DEF_FUNC_1(rsqrt)
 
 extern float __attribute__((overloadable)) sin(float);
 DEF_FUNC_1(sin)
@@ -781,5 +804,11 @@ static float4 __attribute__((overloadable)) normalize(float4 v) {
     return v / length(v);
 }
 
+#undef CVT_FUNC
+#undef CVT_FUNC_2
+#undef DEF_FUNC_1
+#undef DEF_FUNC_1_RI
+#undef DEF_FUNC_2
+#undef DEF_FUNC_2F
 
 #endif
