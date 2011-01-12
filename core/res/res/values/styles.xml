@@ -658,21 +658,21 @@
         <item name="android:shadowRadius">2.75</item>
     </style>
 
-    <style name="Widget.QuickContactBadge">
-        <item name="android:layout_width">47.33333dip</item>
-        <item name="android:layout_height">56dip</item>
-        <item name="android:background">@android:drawable/quickcontact_badge</item>
+    <style name="Widget.GenericQuickContactBadge">
+        <item name="android:background">@null</item>
         <item name="android:clickable">true</item>
         <item name="android:scaleType">fitCenter</item>
         <item name="android:src">@android:drawable/ic_contact_picture</item>
     </style>
+
+    <style name="Widget.QuickContactBadge" parent="Widget.GenericQuickContactBadge">
+        <item name="android:layout_width">64dip</item>
+        <item name="android:layout_height">64dip</item>
+    </style>
     
-    <style name="Widget.QuickContactBadgeSmall">
-        <item name="android:layout_width">39dip</item>
-        <item name="android:layout_height">42dip</item>
-        <item name="android:background">@android:drawable/quickcontact_badge_small</item>
-        <item name="android:clickable">true</item>
-        <item name="android:scaleType">fitCenter</item>
+    <style name="Widget.QuickContactBadgeSmall" parent="Widget.GenericQuickContactBadge">
+        <item name="android:layout_width">40dip</item>
+        <item name="android:layout_height">40dip</item>
     </style>
 
     <style name="Widget.QuickContactBadge.WindowSmall">
