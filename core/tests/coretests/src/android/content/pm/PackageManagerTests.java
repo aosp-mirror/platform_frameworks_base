@@ -47,6 +47,7 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 public class PackageManagerTests extends AndroidTestCase {
     private static final boolean localLOGV = true;
@@ -2837,6 +2838,164 @@ public class PackageManagerTests extends AndroidTestCase {
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
         installFromRawResource("install.apk", rapk2, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+    }
+
+    @LargeTest
+    public void testPackageObbPaths_Nonexistent() {
+        try {
+            final PackageManager pm = getPm();
+
+            // Invalid Java package name.
+            pm.getPackageObbPaths("=non-existent");
+
+            fail("Should not be able to get package OBB paths for non-existent package");
+        } catch (IllegalArgumentException e) {
+            // pass
+        }
+    }
+
+    @LargeTest
+    public void testPackageObbPaths_Initial() {
+        InstallParams ip = sampleInstallFromRawResource(PackageManager.INSTALL_INTERNAL, false);
+
+        try {
+            final PackageManager pm = getPm();
+
+            assertEquals("Initial obb paths should be null",
+                    null, pm.getPackageObbPaths(ip.pkg.packageName));
+        } finally {
+            cleanUpInstall(ip);
+        }
+    }
+
+    @LargeTest
+    public void testPackageObbPaths_Null() {
+        InstallParams ip = sampleInstallFromRawResource(PackageManager.INSTALL_INTERNAL, false);
+
+        try {
+            final PackageManager pm = getPm();
+
+            pm.setPackageObbPaths(ip.pkg.packageName, null);
+
+            assertEquals("Returned paths should be null",
+                    null, pm.getPackageObbPaths(ip.pkg.packageName));
+        } finally {
+            cleanUpInstall(ip);
+        }
+    }
+
+    @LargeTest
+    public void testPackageObbPaths_Empty() {
+        InstallParams ip = sampleInstallFromRawResource(PackageManager.INSTALL_INTERNAL, false);
+
+        try {
+            final PackageManager pm = getPm();
+
+            final String[] paths = new String[0];
+
+            pm.setPackageObbPaths(ip.pkg.packageName, paths);
+
+            assertEquals("Empty list should be interpreted as null",
+                    null, pm.getPackageObbPaths(ip.pkg.packageName));
+        } finally {
+            cleanUpInstall(ip);
+        }
+    }
+
+    @LargeTest
+    public void testPackageObbPaths_Single() {
+        InstallParams ip = sampleInstallFromRawResource(PackageManager.INSTALL_INTERNAL, false);
+
+        try {
+            final PackageManager pm = getPm();
+
+            final String[] paths = new String[] {
+                "/example/test",
+            };
+
+            pm.setPackageObbPaths(ip.pkg.packageName, paths.clone());
+
+            assertTrue("Previously set paths should be the same as the returned paths.",
+                    Arrays.equals(paths, pm.getPackageObbPaths(ip.pkg.packageName)));
+        } finally {
+            cleanUpInstall(ip);
+        }
+    }
+
+    @LargeTest
+    public void testPackageObbPaths_Multiple() {
+        InstallParams ip = sampleInstallFromRawResource(PackageManager.INSTALL_INTERNAL, false);
+
+        try {
+            final PackageManager pm = getPm();
+
+            final String[] paths = new String[] {
+                    "/example/test1",
+                    "/example/test2",
+            };
+
+            pm.setPackageObbPaths(ip.pkg.packageName, paths.clone());
+
+            assertTrue("Previously set paths should be the same as the returned paths.",
+                    Arrays.equals(paths, pm.getPackageObbPaths(ip.pkg.packageName)));
+        } finally {
+            cleanUpInstall(ip);
+        }
+    }
+
+    @LargeTest
+    public void testPackageObbPaths_Twice() {
+        InstallParams ip = sampleInstallFromRawResource(PackageManager.INSTALL_INTERNAL, false);
+
+        try {
+            final PackageManager pm = getPm();
+
+            final String[] paths = new String[] {
+                    "/example/test1",
+                    "/example/test2",
+            };
+
+            pm.setPackageObbPaths(ip.pkg.packageName, paths.clone());
+
+            assertTrue("Previously set paths should be the same as the returned paths.",
+                    Arrays.equals(paths, pm.getPackageObbPaths(ip.pkg.packageName)));
+
+            paths[0] = "/example/test3";
+            pm.setPackageObbPaths(ip.pkg.packageName, paths.clone());
+
+            assertTrue("Previously set paths should be the same as the returned paths.",
+                    Arrays.equals(paths, pm.getPackageObbPaths(ip.pkg.packageName)));
+        } finally {
+            cleanUpInstall(ip);
+        }
+    }
+
+    @LargeTest
+    public void testPackageObbPaths_ReplacePackage() {
+        InstallParams ip = sampleInstallFromRawResource(PackageManager.INSTALL_INTERNAL, false);
+
+        try {
+            final PackageManager pm = getPm();
+
+            final String[] paths = new String[] {
+                    "/example/test1",
+                    "/example/test2",
+            };
+
+            pm.setPackageObbPaths(ip.pkg.packageName, paths.clone());
+
+            Log.i(TAG, "Creating replaceReceiver");
+            final GenericReceiver receiver = new ReplaceReceiver(ip.pkg.packageName);
+
+            final int flags = PackageManager.INSTALL_REPLACE_EXISTING;
+            invokeInstallPackage(ip.packageURI, flags, receiver);
+            assertInstall(ip.pkg, flags, ip.pkg.installLocation);
+
+            assertTrue("Previously set paths should be the same as the returned paths.",
+                    Arrays.equals(paths, pm.getPackageObbPaths(ip.pkg.packageName)));
+        } finally {
+            cleanUpInstall(ip);
+        }
     }
     /*---------- Recommended install location tests ----*/
     /*
