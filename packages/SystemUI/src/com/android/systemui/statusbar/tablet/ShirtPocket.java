@@ -163,7 +163,7 @@ public class ShirtPocket extends ImageView {
                         shadow = new DragShadowBuilder(mWindow.findViewById(R.id.preview));
                     }
 
-                    v.startDrag(clip, shadow, false, null);
+                    v.startDrag(clip, shadow, null, 0);
 
                     // TODO: only discard the clipping if it was accepted
                     stash(null);

@@ -2138,6 +2138,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     boolean mCanAcceptDrop;
 
     /**
+     * Flag indicating that a drag can cross window boundaries
+     * @hide
+     */
+    public static final int DRAG_FLAG_GLOBAL = 1;
+
+    /**
      * Position of the vertical scroll bar.
      */
     private int mVerticalScrollbarPosition;
@@ -10633,22 +10639,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @param data !!! TODO
      * @param shadowBuilder !!! TODO
-     * @param myWindowOnly When {@code true}, indicates that the drag operation should be
-     *     restricted to the calling application. In this case only the calling application
-     *     will see any DragEvents related to this drag operation.
      * @param myLocalState An arbitrary object that will be passed as part of every DragEvent
      *     delivered to the calling application during the course of the current drag operation.
      *     This object is private to the application that called startDrag(), and is not
      *     visible to other applications. It provides a lightweight way for the application to
      *     propagate information from the initiator to the recipient of a drag within its own
      *     application; for example, to help disambiguate between 'copy' and 'move' semantics.
+     * @param flags Flags affecting the drag operation.  At present no flags are defined;
+     *     pass 0 for this parameter.
      * @return {@code true} if the drag operation was initiated successfully; {@code false} if
      *     an error prevented the drag from taking place.
      */
     public final boolean startDrag(ClipData data, DragShadowBuilder shadowBuilder,
-            boolean myWindowOnly, Object myLocalState) {
+            Object myLocalState, int flags) {
         if (ViewDebug.DEBUG_DRAG) {
-            Log.d(VIEW_LOG_TAG, "startDrag: data=" + data + " local=" + myWindowOnly);
+            Log.d(VIEW_LOG_TAG, "startDrag: data=" + data + " flags=" + flags);
         }
         boolean okay = false;
 
@@ -10668,7 +10673,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         Surface surface = new Surface();
         try {
             IBinder token = mAttachInfo.mSession.prepareDrag(mAttachInfo.mWindow,
-                    myWindowOnly, shadowSize.x, shadowSize.y, surface);
+                    flags, shadowSize.x, shadowSize.y, surface);
             if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "prepareDrag returned token=" + token
                     + " surface=" + surface);
             if (token != null) {
