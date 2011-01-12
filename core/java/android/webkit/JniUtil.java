@@ -17,8 +17,13 @@
 package android.webkit;
 
 import android.content.Context;
+import android.net.Uri;
+import android.util.Log;
+
+import java.io.InputStream;
 
 class JniUtil {
+    private static final String LOGTAG = "webkit";
     private JniUtil() {} // Utility class, do not instantiate.
 
     // Used by the Chromium HTTP stack.
@@ -67,6 +72,46 @@ class JniUtil {
             sCacheDirectory = sContext.getCacheDir().getAbsolutePath();
 
         return sCacheDirectory;
+    }
+
+    /**
+     * Called by JNI. Calculates the size of an input stream by reading it.
+     * @return long The size of the stream
+     */
+    private static synchronized long contentUrlSize(String url) {
+        final String ANDROID_CONTENT = "content:";
+
+        // content://
+        if (url.startsWith(ANDROID_CONTENT)) {
+            try {
+                // Strip off mimetype, for compatibility with ContentLoader.java
+                // If we don't do this, we can fail to load Gmail attachments,
+                // because the URL being loaded doesn't exactly match the URL we
+                // have permission to read.
+                int mimeIndex = url.lastIndexOf('?');
+                if (mimeIndex != -1) {
+                    url = url.substring(0, mimeIndex);
+                }
+                Uri uri = Uri.parse(url);
+                InputStream is = sContext.getContentResolver().openInputStream(uri);
+                byte[] buffer = new byte[1024];
+                int n;
+                long size = 0;
+                try {
+                    while ((n = is.read(buffer)) != -1) {
+                        size += n;
+                    }
+                } finally {
+                    is.close();
+                }
+                return size;
+            } catch (Exception e) {
+                Log.e(LOGTAG, "Exception: " + url);
+                return 0;
+            }
+        } else {
+            return 0;
+        }
     }
 
     /**
