@@ -50,7 +50,6 @@ public class MtpDatabase {
     private final String mVolumeName;
     private final Uri mObjectsUri;
     private final String mMediaStoragePath;
-    private final String mExternalStoragePath;
 
     // cached property groups for single properties
     private final HashMap<Integer, MtpPropertyGroup> mPropertyGroupsByProperty
@@ -113,7 +112,6 @@ public class MtpDatabase {
         mMediaProvider = context.getContentResolver().acquireProvider("media");
         mVolumeName = volumeName;
         mMediaStoragePath = storagePath;
-        mExternalStoragePath = Environment.getExternalStorageDirectory().getAbsolutePath();
         mObjectsUri = Files.getMtpObjectsUri(volumeName);
         mMediaScanner = new MediaScanner(context);
         openDevicePropertiesDatabase(context);
@@ -126,16 +124,6 @@ public class MtpDatabase {
         } finally {
             super.finalize();
         }
-    }
-
-    private String externalToMediaPath(String path) {
-        // convert external storage path to media path
-        if (path != null && mMediaStoragePath != null
-                && mExternalStoragePath != null
-                && path.startsWith(mExternalStoragePath)) {
-            path = mMediaStoragePath + path.substring(mExternalStoragePath.length());
-        }
-        return path;
     }
 
     private void openDevicePropertiesDatabase(Context context) {
@@ -525,7 +513,7 @@ public class MtpDatabase {
         try {
             c = mMediaProvider.query(mObjectsUri, PATH_PROJECTION, ID_WHERE, whereArgs, null);
             if (c != null && c.moveToNext()) {
-                path = externalToMediaPath(c.getString(1));
+                path = c.getString(1);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in getObjectFilePath", e);
@@ -707,7 +695,7 @@ public class MtpDatabase {
             c = mMediaProvider.query(mObjectsUri, PATH_SIZE_FORMAT_PROJECTION,
                             ID_WHERE, new String[] {  Integer.toString(handle) }, null);
             if (c != null && c.moveToNext()) {
-                String path = externalToMediaPath(c.getString(1));
+                String path = c.getString(1);
                 path.getChars(0, path.length(), outFilePath, 0);
                 outFilePath[path.length()] = 0;
                 outFileLengthFormat[0] = c.getLong(2);
