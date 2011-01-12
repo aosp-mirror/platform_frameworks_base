@@ -425,7 +425,13 @@ public class Element extends BaseObj {
 
     Element(int id, RenderScript rs, DataType dt, DataKind dk, boolean norm, int size) {
         super(id, rs);
-        mSize = dt.mSize * size;
+        if ((dt != DataType.UNSIGNED_5_6_5) &&
+            (dt != DataType.UNSIGNED_4_4_4_4) &&
+            (dt != DataType.UNSIGNED_5_5_5_1)) {
+            mSize = dt.mSize * size;
+        } else {
+            mSize = dt.mSize;
+        }
         mType = dt;
         mKind = dk;
         mNormalized = norm;
