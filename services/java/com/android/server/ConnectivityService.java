@@ -1100,18 +1100,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     info.getExtraInfo());
         }
 
-        NetworkStateTracker newNet = null;
         if (mNetAttributes[prevNetType].isDefault()) {
-            newNet = tryFailover(prevNetType);
-            if (newNet != null) {
-                NetworkInfo switchTo = newNet.getNetworkInfo();
-                if (!switchTo.isConnected()) {
-                    // if the other net is connected they've already reset this and perhaps even
-                    // gotten a positive report we don't want to overwrite, but if not we need to
-                    // clear this now to turn our cellular sig strength white
-                    mDefaultInetConditionPublished = 0;
-                    intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
-                }
+            tryFailover(prevNetType);
+            if (mActiveDefaultNetwork != -1) {
+                NetworkInfo switchTo = mNetTrackers[mActiveDefaultNetwork].getNetworkInfo();
                 intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO, switchTo);
             } else {
                 mDefaultInetConditionPublished = 0; // we're not connected anymore
@@ -1127,55 +1119,45 @@ public class ConnectivityService extends IConnectivityManager.Stub {
          * If the failover network is already connected, then immediately send
          * out a followup broadcast indicating successful failover
          */
-        if (newNet != null && newNet.getNetworkInfo().isConnected()) {
-            sendConnectedBroadcast(newNet.getNetworkInfo());
+        if (mActiveDefaultNetwork != -1) {
+            sendConnectedBroadcast(mNetTrackers[mActiveDefaultNetwork].getNetworkInfo());
         }
     }
 
-    // returns null if no failover available, otherwise returns the highest
-    // priority network we're trying
-    private NetworkStateTracker tryFailover(int prevNetType) {
+    private void tryFailover(int prevNetType) {
         /*
          * If this is a default network, check if other defaults are available.
          * Try to reconnect on all available and let them hash it out when
          * more than one connects.
          */
-        NetworkStateTracker newNet = null;
         if (mNetAttributes[prevNetType].isDefault()) {
             if (mActiveDefaultNetwork == prevNetType) {
                 mActiveDefaultNetwork = -1;
             }
 
-            int newType = -1;
-            int newPriority = -1;
+            // don't signal a reconnect for anything lower or equal priority than our
+            // current connected default
+            // TODO - don't filter by priority now - nice optimization but risky
+//            int currentPriority = -1;
+//            if (mActiveDefaultNetwork != -1) {
+//                currentPriority = mNetAttributes[mActiveDefaultNetwork].mPriority;
+//            }
             for (int checkType=0; checkType <= ConnectivityManager.MAX_NETWORK_TYPE; checkType++) {
                 if (checkType == prevNetType) continue;
                 if (mNetAttributes[checkType] == null) continue;
                 if (!mNetAttributes[checkType].isDefault()) continue;
                 if (!mNetTrackers[checkType].isAvailable()) continue;
+//                if (currentPriority >= mNetAttributes[checkType].mPriority) continue;
 
-                NetworkStateTracker tracker = mNetTrackers[checkType];
-                NetworkInfo info = tracker.getNetworkInfo();
-                if (!info.isConnectedOrConnecting() ||
-                        tracker.isTeardownRequested()) {
-                    info.setFailover(true);
-                    tracker.reconnect();
+                NetworkStateTracker checkTracker = mNetTrackers[checkType];
+                NetworkInfo checkInfo = checkTracker.getNetworkInfo();
+                if (!checkInfo.isConnectedOrConnecting() || checkTracker.isTeardownRequested()) {
+                    checkInfo.setFailover(true);
+                    checkTracker.reconnect();
                 }
-                if (DBG) log("Attempting to switch to " + info.getTypeName());
-
-                // figure out if this is the highest priority network
-                // so we send an appropriate return value
-                if (checkType == mNetworkPreference) {
-                    newType = checkType;
-                }
-                if (mNetAttributes[checkType].mPriority > newPriority &&
-                        newType != mNetworkPreference) {
-                    newType = checkType;
-                    newPriority = mNetAttributes[newType].mPriority;
-                }
+                if (DBG) log("Attempting to switch to " + checkInfo.getTypeName());
             }
         }
-        return newNet;
     }
 
     private void sendConnectedBroadcast(NetworkInfo info) {
@@ -1238,17 +1220,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             info.setFailover(false);
         }
 
-        NetworkStateTracker newNet = null;
         if (mNetAttributes[info.getType()].isDefault()) {
-            newNet = tryFailover(info.getType());
-            if (newNet != null) {
-                NetworkInfo switchTo = newNet.getNetworkInfo();
-                if (!switchTo.isConnected()) {
-                    // if the other net is connected they've already reset this and perhaps
-                    // even gotten a positive report we don't want to overwrite, but if not
-                    // we need to clear this now to turn our cellular sig strength white
-                    mDefaultInetConditionPublished = 0;
-                }
+            tryFailover(info.getType());
+            if (mActiveDefaultNetwork != -1) {
+                NetworkInfo switchTo = mNetTrackers[mActiveDefaultNetwork].getNetworkInfo();
                 intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO, switchTo);
             } else {
                 mDefaultInetConditionPublished = 0;
@@ -1262,8 +1237,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
          * If the failover network is already connected, then immediately send
          * out a followup broadcast indicating successful failover
          */
-        if (newNet != null && newNet.getNetworkInfo().isConnected()) {
-            sendConnectedBroadcast(newNet.getNetworkInfo());
+        if (mActiveDefaultNetwork != -1) {
+            sendConnectedBroadcast(mNetTrackers[mActiveDefaultNetwork].getNetworkInfo());
         }
     }
 
