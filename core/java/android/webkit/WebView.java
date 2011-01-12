@@ -4955,7 +4955,7 @@ public class WebView extends AbsoluteLayout
     public boolean copySelection() {
         boolean copiedSomething = false;
         String selection = getSelection();
-        if (selection != "") {
+        if (selection != null && selection != "") {
             if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "copySelection \"" + selection + "\"");
             }
