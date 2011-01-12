@@ -9216,27 +9216,32 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
+        mInLayout = true;
         boolean recoveringMemory = false;
-        if (mForceRemoves != null) {
-            recoveringMemory = true;
-            // Wait a little it for things to settle down, and off we go.
-            for (int i=0; i<mForceRemoves.size(); i++) {
-                WindowState ws = mForceRemoves.get(i);
-                Slog.i(TAG, "Force removing: " + ws);
-                removeWindowInnerLocked(ws.mSession, ws);
-            }
-            mForceRemoves = null;
-            Slog.w(TAG, "Due to memory failure, waiting a bit for next layout");
-            Object tmp = new Object();
-            synchronized (tmp) {
-                try {
-                    tmp.wait(250);
-                } catch (InterruptedException e) {
+        
+        try {
+            if (mForceRemoves != null) {
+                recoveringMemory = true;
+                // Wait a little it for things to settle down, and off we go.
+                for (int i=0; i<mForceRemoves.size(); i++) {
+                    WindowState ws = mForceRemoves.get(i);
+                    Slog.i(TAG, "Force removing: " + ws);
+                    removeWindowInnerLocked(ws.mSession, ws);
+                }
+                mForceRemoves = null;
+                Slog.w(TAG, "Due to memory failure, waiting a bit for next layout");
+                Object tmp = new Object();
+                synchronized (tmp) {
+                    try {
+                        tmp.wait(250);
+                    } catch (InterruptedException e) {
+                    }
                 }
             }
+        } catch (RuntimeException e) {
+            Slog.e(TAG, "Unhandled exception while force removing for memory", e);
         }
-
-        mInLayout = true;
+        
         try {
             performLayoutAndPlaceSurfacesLockedInner(recoveringMemory);
 
