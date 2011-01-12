@@ -35,14 +35,17 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class AppCacheTest extends AndroidTestCase {
     private static final boolean localLOGV = false;
     public static final String TAG="AppCacheTest";
     public final long MAX_WAIT_TIME=60*1000;
     public final long WAIT_TIME_INCR=10*1000;
-    private static final int THRESHOLD=5;
-    private static final int ACTUAL_THRESHOLD=10;
+    private static final long THRESHOLD=5;
+    private static final long ACTUAL_THRESHOLD=10;
     
     @Override
     protected void setUp() throws Exception {
@@ -94,24 +97,27 @@ public class AppCacheTest extends AndroidTestCase {
         String testName="testDeleteAllCacheFiles";
         cleanUpCacheDirectory();
     }
-    
+
     void failStr(String errMsg) {
         Log.w(TAG, "errMsg="+errMsg);
         fail(errMsg);
     }
+
     void failStr(Exception e) {
         Log.w(TAG, "e.getMessage="+e.getMessage());
         Log.w(TAG, "e="+e);
     }
+
     long getFreeStorageBlks(StatFs st) {
         st.restat("/data");
         return st.getFreeBlocks();
     }
-    
+
     long getFreeStorageSize(StatFs st) {
         st.restat("/data");
-        return (st.getFreeBlocks()*st.getBlockSize());
+        return (long) st.getFreeBlocks() * (long) st.getBlockSize();
     }
+
     @LargeTest
     public void testFreeApplicationCacheAllFiles() throws Exception {
         boolean TRACKING = true;
@@ -124,7 +130,9 @@ public class AppCacheTest extends AndroidTestCase {
         long blks2 = getFreeStorageBlks(st);
         if(localLOGV || TRACKING) Log.i(TAG, "blk1="+blks1+", blks2="+blks2);
         //this should free up the test files that were created earlier
-        invokePMFreeApplicationCache(availableMem);
+        if (!invokePMFreeApplicationCache(availableMem)) {
+            fail("Could not successfully invoke PackageManager free app cache API");
+        }
         long blks3 = getFreeStorageBlks(st);
         if(localLOGV || TRACKING) Log.i(TAG, "blks3="+blks3);
         verifyTestFiles1(cacheDir, "testtmpdir", 5);
@@ -139,7 +147,9 @@ public class AppCacheTest extends AndroidTestCase {
         long blks2 = getFreeStorageBlks(st);
         Log.i(TAG, "blk1="+blks1+", blks2="+blks2);
         long diff = (blks1-blks2-2);
-        assertTrue(invokePMFreeApplicationCache(diff*st.getBlockSize()));    
+        if (!invokePMFreeApplicationCache(diff * st.getBlockSize())) {
+            fail("Could not successfully invoke PackageManager free app cache API");
+        }
         long blks3 = getFreeStorageBlks(st);
         //blks3 should be greater than blks2 and less than blks1
         if(!((blks3 <= blks1) && (blks3 >= blks2))) {
@@ -256,23 +266,23 @@ public class AppCacheTest extends AndroidTestCase {
         }
         return sbuffer.getBytes();
     }
-    
-    long getFileNumBlocks(long fileSize, int blkSize) {
+
+    long getFileNumBlocks(long fileSize, long blkSize) {
         long ret = fileSize/blkSize;
         if(ret*blkSize < fileSize) {
             ret++;
         }
         return ret;
     }
-    
+
     //@LargeTest
     public void testAppCacheClear() {
         String dataDir="/data/data";
         StatFs st = new StatFs(dataDir);
-        int blkSize = st.getBlockSize();
-        int totBlks = st.getBlockCount();
+        long blkSize = st.getBlockSize();
+        long totBlks = st.getBlockCount();
         long availableBlks = st.getFreeBlocks();
-        long thresholdBlks = (totBlks*THRESHOLD)/100;
+        long thresholdBlks = (totBlks * THRESHOLD) / 100L;
         String testDirName = "testdir";
         //create directory in cache
         File testDir = new File(mContext.getCacheDir(),  testDirName);
@@ -345,7 +355,7 @@ public class AppCacheTest extends AndroidTestCase {
         if((fileSize > (shouldFree-blkSize) && (fileSize < (shouldFree+blkSize)))) {
             Log.i(TAG, "passed");
         }
-        assertTrue(removedFlag);
+        assertTrue("Files should have been removed", removedFlag);
     }
     
     //createTestFiles(new File(super.getContext().getCacheDir(), "testtmp", "dir", 3)
@@ -375,16 +385,21 @@ public class AppCacheTest extends AndroidTestCase {
             }
         }
     }
-    
+
     void verifyTestFiles1(File cacheDir, String testFilePrefix, int numTestFiles) {
+        List<String> files = new ArrayList<String>();
         for(int i = 0; i < numTestFiles; i++) {
             File file1 = new File(cacheDir, testFilePrefix+i+".txt");
             if(file1.exists()) {
-                fail("file:"+file1+" should not exist");
+                files.add(file1.getName());
             }
         }
+        if (files.size() > 0) {
+            fail("Files should have been deleted: "
+                    + Arrays.toString(files.toArray(new String[files.size()])));
+        }
     }
-    
+
     void createTestFiles2(File cacheDir, String rootTestDirName, String subDirPrefix, int numDirs, String testFilePrefix) {
         Context con = super.getContext();
         File testTmpDir = new File(cacheDir, rootTestDirName);
@@ -639,7 +654,9 @@ public class AppCacheTest extends AndroidTestCase {
         PendingIntent pi = PendingIntent.getBroadcast(mContext,
                 0,  new Intent(FreeStorageReceiver.ACTION_FREE), 0);
         // Invoke PackageManager api
-        invokePMFreeStorage(availableMem, receiver, pi);
+        if (!invokePMFreeStorage(availableMem, receiver, pi)) {
+            fail("Could not invoke PackageManager free storage API");
+        }
         long blks3 = getFreeStorageBlks(st);
         if(localLOGV || TRACKING) Log.i(TAG, "Available blocks after freeing cache"+blks3);
         assertEquals(receiver.getResultCode(), 1);
