@@ -106,6 +106,8 @@ public:
     }
 
     void upload2DTexture(bool isFirstUpload, const void *ptr);
+    void update2DTexture(const void *ptr, uint32_t xoff, uint32_t yoff,
+                         uint32_t lod, RsAllocationCubemapFace face, uint32_t w, uint32_t h);
 
 protected:
     ObjectBaseRef<const Type> mType;
