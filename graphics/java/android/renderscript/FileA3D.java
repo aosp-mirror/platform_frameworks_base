@@ -28,7 +28,6 @@ import android.util.Log;
 import android.util.TypedValue;
 
 /**
- * @hide
  *
  **/
 public class FileA3D extends BaseObj {

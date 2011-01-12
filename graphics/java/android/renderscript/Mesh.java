@@ -22,7 +22,6 @@ import android.util.Config;
 import android.util.Log;
 
 /**
- * @hide
  * Mesh class is a container for geometric data displayed in
  * renderscript.
  *
@@ -205,7 +204,7 @@ public class Mesh extends BaseObj {
         /**
         * Adds a vertex data type to the builder object
         *
-        * @param r type of the vertex data allocation to be created
+        * @param t type of the vertex data allocation to be created
         *
         * @return this
         **/
