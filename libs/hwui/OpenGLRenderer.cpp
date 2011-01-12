@@ -178,7 +178,7 @@ void OpenGLRenderer::finish() {
 #endif
 }
 
-void OpenGLRenderer::acquireContext() {
+void OpenGLRenderer::interrupt() {
     if (mCaches.currentProgram) {
         if (mCaches.currentProgram->isInUse()) {
             mCaches.currentProgram->remove();
@@ -188,7 +188,11 @@ void OpenGLRenderer::acquireContext() {
     mCaches.unbindMeshBuffer();
 }
 
-void OpenGLRenderer::releaseContext() {
+void OpenGLRenderer::acquireContext() {
+    interrupt();
+}
+
+void OpenGLRenderer::resume() {
     glViewport(0, 0, mSnapshot->viewport.getWidth(), mSnapshot->viewport.getHeight());
 
     glEnable(GL_SCISSOR_TEST);
@@ -203,6 +207,10 @@ void OpenGLRenderer::releaseContext() {
     glEnable(GL_BLEND);
     glBlendFunc(mCaches.lastSrcMode, mCaches.lastDstMode);
     glBlendEquation(GL_FUNC_ADD);
+}
+
+void OpenGLRenderer::releaseContext() {
+    resume();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1475,6 +1483,30 @@ void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
 
     finishDrawTexture();
+}
+
+void OpenGLRenderer::drawLayer(int texture, float left, float top, float right, float bottom,
+        float u, float v, SkPaint* paint) {
+    if (quickReject(left, top, right, bottom)) {
+        return;
+    }
+
+    glActiveTexture(gTextureUnits[0]);
+    if (!texture) return;
+
+    mCaches.unbindMeshBuffer();
+    resetDrawTextureTexCoords(0.0f, v, u, 0.0f);
+
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
+    // TODO: Should get the blend info from the caller
+    drawTextureMesh(left, top, right, bottom, texture, alpha / 255.0f, mode, true,
+            &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
+            GL_TRIANGLE_STRIP, gMeshCount);
+
+    resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
