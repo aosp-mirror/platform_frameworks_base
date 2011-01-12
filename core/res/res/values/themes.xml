@@ -563,6 +563,7 @@
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowIsTranslucent">true</item>
@@ -578,6 +579,23 @@
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- Default holo dark theme for panel windows.  This removes all extraneous
+         window decorations, so you basically have an empty rectangle in which
+         to place your content.  It makes the window floating, with a transparent
+         background, and turns off dimming behind the window. -->
+    <style name="Theme.Holo.Panel">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowIsTranslucent">true</item>
@@ -593,6 +611,7 @@
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowIsTranslucent">true</item>
@@ -1266,10 +1285,24 @@
         <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Inverse</item>
     </style>
 
+    <!-- Variation of Theme.Holo.Dialog that has a nice minumum width for
+         a regular dialog. -->
+    <style name="Theme.Holo.Dialog.MinWidth">
+        <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_major</item>
+    </style>
+
     <!-- Variation of Theme.Holo.Dialog that does not include a title bar. -->
     <style name="Theme.Holo.Dialog.NoActionBar">
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- Variation of Theme.Holo.Dialog.NoActionVar that has a nice minumum width for
+         a regular dialog. -->
+    <style name="Theme.Holo.Dialog.NoActionBar.MinWidth">
+        <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_major</item>
     </style>
 
     <!-- Variation of Theme.Holo.Dialog that does not include a frame (or background).
@@ -1294,6 +1327,8 @@
         <item name="windowBackground">@android:color/transparent</item>
         <item name="windowTitleStyle">@android:style/DialogWindowTitle.Holo</item>
         <item name="windowContentOverlay">@null</item>
+        <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_major</item>
     </style>
 
     <!-- Theme for a window that will be displayed either full-screen on
@@ -1336,10 +1371,24 @@
         <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Light.Inverse</item>
     </style>
 
+    <!-- Variation of Theme.Holo.Light.Dialog that has a nice minumum width for
+         a regular dialog. -->
+    <style name="Theme.Holo.Light.Dialog.MinWidth">
+        <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_major</item>
+    </style>
+
     <!-- Variation of Theme.Holo.Light.Dialog that does not include a title bar. -->
     <style name="Theme.Holo.Light.Dialog.NoActionBar">
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- Variation of Theme.Holo.Light.Dialog.NoActionBar that has a nice minumum width for
+         a regular dialog. -->
+    <style name="Theme.Holo.Light.Dialog.NoActionBar.MinWidth">
+        <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_major</item>
     </style>
 
     <!-- Theme for a window that will be displayed either full-screen on
@@ -1364,6 +1413,8 @@
         <item name="windowBackground">@android:color/transparent</item>
         <item name="windowTitleStyle">@android:style/DialogWindowTitle.Holo.Light</item>
         <item name="windowContentOverlay">@null</item>
+        <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_major</item>
     </style>
 
     <!-- Default holographic (dark) for windows that want to have the user's selected
