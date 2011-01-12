@@ -43,6 +43,7 @@ import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.DefaultPhoneNotifier;
 import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.ServiceStateTracker;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.server.am.BatteryStatsService;
 
@@ -103,7 +104,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private int mDataConnectionNetworkType;
 
-    private int mOtaspMode;
+    private int mOtaspMode = ServiceStateTracker.OTASP_UNKNOWN;
 
     static final int PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR |
