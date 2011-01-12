@@ -46,15 +46,62 @@ public class Allocation extends BaseObj {
     Bitmap mBitmap;
     int mUsage;
 
+    /**
+     * The usage of the allocation.  These signal to renderscript
+     * where to place the allocation in memory.
+     *
+     * SCRIPT The allocation will be bound to and accessed by
+     * scripts.
+     */
     public static final int USAGE_SCRIPT = 0x0001;
+
+    /**
+     * GRAPHICS_TEXTURE The allcation will be used as a texture
+     * source by one or more graphcics programs.
+     *
+     */
     public static final int USAGE_GRAPHICS_TEXTURE = 0x0002;
+
+    /**
+     * GRAPHICS_VERTEX The allocation will be used as a graphics
+     * mesh.
+     *
+     */
     public static final int USAGE_GRAPHICS_VERTEX = 0x0004;
+
+
+    /**
+     * GRAPHICS_CONSTANTS The allocation will be used as the source
+     * of shader constants by one or more programs.
+     *
+     */
     public static final int USAGE_GRAPHICS_CONSTANTS = 0x0008;
 
 
+    /**
+     * Controls mipmap behavior when using the bitmap creation and
+     * update functions.
+     */
     public enum MipmapControl {
+        /**
+         * No mipmaps will be generated and the type generated from the
+         * incoming bitmap will not contain additional LODs.
+         */
         MIPMAP_NONE(0),
+
+        /**
+         * A Full mipmap chain will be created in script memory.  The
+         * type of the allocation will contain a full mipmap chain.  On
+         * upload to graphics the full chain will be transfered.
+         */
         MIPMAP_FULL(1),
+
+        /**
+         * The type of the allocation will be the same as MIPMAP_NONE.
+         * It will not contain mipmaps.  On upload to graphics the
+         * graphics copy of the allocation data will contain a full
+         * mipmap chain generated from the top level in script memory.
+         */
         MIPMAP_ON_SYNC_TO_TEXTURE(2);
 
         int mID;
@@ -256,6 +303,20 @@ public class Allocation extends BaseObj {
         }
     }
 
+    /**
+     * Generate a mipmap chain.  Requires the type of the allocation
+     * include mipmaps.
+     *
+     * This function will generate a complete set of mipmaps from
+     * the top level lod and place them into the script memoryspace.
+     *
+     * If the allocation is also using other memory spaces a
+     * followup sync will be required.
+     */
+    public void generateMipmaps() {
+        mRS.nAllocationGenerateMipmaps(getID());
+    }
+
     public void copy1DRangeFrom(int off, int count, int[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 4, dataSize);
@@ -278,29 +339,49 @@ public class Allocation extends BaseObj {
     }
 
 
-    public void copy2DRangeFrom(int xoff, int yoff, int w, int h, byte[] d) {
+    /**
+     * Copy a rectanglular region from the array into the
+     * allocation.  The incoming array is assumed to be tightly
+     * packed.
+     *
+     * @param xoff X offset of the region to update
+     * @param yoff Y offset of the region to update
+     * @param w Width of the incoming region to update
+     * @param h Height of the incoming region to update
+     * @param data to be placed into the allocation
+     */
+    public void copy2DRangeFrom(int xoff, int yoff, int w, int h, byte[] data) {
         mRS.validate();
-        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, d, d.length);
+        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, data, data.length);
     }
 
-    public void copy2DRangeFrom(int xoff, int yoff, int w, int h, short[] d) {
+    public void copy2DRangeFrom(int xoff, int yoff, int w, int h, short[] data) {
         mRS.validate();
-        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, d, d.length * 2);
+        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, data, data.length * 2);
     }
 
-    public void copy2DRangeFrom(int xoff, int yoff, int w, int h, int[] d) {
+    public void copy2DRangeFrom(int xoff, int yoff, int w, int h, int[] data) {
         mRS.validate();
-        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, d, d.length * 4);
+        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, data, data.length * 4);
     }
 
-    public void copy2DRangeFrom(int xoff, int yoff, int w, int h, float[] d) {
+    public void copy2DRangeFrom(int xoff, int yoff, int w, int h, float[] data) {
         mRS.validate();
-        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, d, d.length * 4);
+        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, data, data.length * 4);
     }
 
-    public void copy2DRangeFrom(int xoff, int yoff, Bitmap b) {
+    /**
+     * Copy a bitmap into an allocation.  The height and width of
+     * the update will use the height and width of the incoming
+     * bitmap.
+     *
+     * @param xoff X offset of the region to update
+     * @param yoff Y offset of the region to update
+     * @param data the bitmap to be copied
+     */
+    public void copy2DRangeFrom(int xoff, int yoff, Bitmap data) {
         mRS.validate();
-        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, b);
+        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, data);
     }
 
 
@@ -329,6 +410,18 @@ public class Allocation extends BaseObj {
         mRS.nAllocationRead(getID(), d);
     }
 
+    /**
+     * Resize a 1D allocation.  The contents of the allocation are
+     * preserved.  If new elements are allocated objects are created
+     * with null contents and the new region is otherwise undefined.
+     *
+     * If the new region is smaller the references of any objects
+     * outside the new region will be released.
+     *
+     * A new type will be created with the new dimension.
+     *
+     * @param dimX The new size of the allocation.
+     */
     public synchronized void resize(int dimX) {
         if ((mType.getY() > 0)|| (mType.getZ() > 0) || mType.hasFaces() || mType.hasMipmaps()) {
             throw new RSInvalidStateException("Resize only support for 1D allocations at this time.");

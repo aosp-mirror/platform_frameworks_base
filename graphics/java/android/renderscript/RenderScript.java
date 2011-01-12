@@ -223,6 +223,10 @@ public class RenderScript {
     synchronized void nAllocationSyncAll(int alloc, int src) {
         rsnAllocationSyncAll(mContext, alloc, src);
     }
+    native void rsnAllocationGenerateMipmaps(int con, int alloc);
+    synchronized void nAllocationGenerateMipmaps(int alloc) {
+        rsnAllocationGenerateMipmaps(mContext, alloc);
+    }
     native void  rsnAllocationCopyFromBitmap(int con, int alloc, Bitmap bmp);
     synchronized void nAllocationCopyFromBitmap(int alloc, Bitmap bmp) {
         rsnAllocationCopyFromBitmap(mContext, alloc, bmp);
