@@ -74,13 +74,13 @@ class JniUtil {
         return sCacheDirectory;
     }
 
+    private static final String ANDROID_CONTENT = "content:";
+
     /**
      * Called by JNI. Calculates the size of an input stream by reading it.
      * @return long The size of the stream
      */
     private static synchronized long contentUrlSize(String url) {
-        final String ANDROID_CONTENT = "content:";
-
         // content://
         if (url.startsWith(ANDROID_CONTENT)) {
             try {
@@ -111,6 +111,35 @@ class JniUtil {
             }
         } else {
             return 0;
+        }
+    }
+
+    /**
+     * Called by JNI.
+     *
+     * @return  Opened input stream to content
+     * TODO: Make all content loading use this instead of BrowserFrame.java
+     */
+    private static synchronized InputStream contentUrlStream(String url) {
+        // content://
+        if (url.startsWith(ANDROID_CONTENT)) {
+            try {
+                // Strip off mimetype, for compatibility with ContentLoader.java
+                // If we don't do this, we can fail to load Gmail attachments,
+                // because the URL being loaded doesn't exactly match the URL we
+                // have permission to read.
+                int mimeIndex = url.lastIndexOf('?');
+                if (mimeIndex != -1) {
+                    url = url.substring(0, mimeIndex);
+                }
+                Uri uri = Uri.parse(url);
+                return sContext.getContentResolver().openInputStream(uri);
+            } catch (Exception e) {
+                Log.e(LOGTAG, "Exception: " + url);
+                return null;
+            }
+        } else {
+            return null;
         }
     }
 
