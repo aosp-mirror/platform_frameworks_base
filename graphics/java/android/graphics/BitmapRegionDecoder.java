@@ -39,7 +39,7 @@ public final class BitmapRegionDecoder {
 
     /**
      * Create a BitmapRegionDecoder from the specified byte array.
-     * Currently only the Jpeg format is supported.
+     * Currently only the JPEG and PNG formats are supported.
      *
      * @param data byte array of compressed image data.
      * @param offset offset into data for where the decoder should begin
@@ -67,7 +67,7 @@ public final class BitmapRegionDecoder {
      * Create a BitmapRegionDecoder from the file descriptor.
      * The position within the descriptor will not be changed when
      * this returns, so the descriptor can be used again as is.
-     * Currently only the Jpeg format is supported.
+     * Currently only the JPEG and PNG formats are supported.
      *
      * @param fd The file descriptor containing the data to decode
      * @param isShareable If this is true, then the BitmapRegionDecoder may keep a
@@ -89,7 +89,7 @@ public final class BitmapRegionDecoder {
      * Create a BitmapRegionDecoder from an input stream.
      * The stream's position will be where ever it was after the encoded data
      * was read.
-     * Currently only the Jpeg format is supported.
+     * Currently only the JPEG and PNG formats are supported.
      *
      * @param is The input stream that holds the raw data to be decoded into a
      *           BitmapRegionDecoder.
@@ -126,7 +126,7 @@ public final class BitmapRegionDecoder {
 
     /**
      * Create a BitmapRegionDecoder from a file path.
-     * Currently only the Jpeg format is supported.
+     * Currently only the JPEG and PNG formats are supported.
      *
      * @param pathName complete path name for the file to be decoded.
      * @param isShareable If this is true, then the BitmapRegionDecoder may keep a
