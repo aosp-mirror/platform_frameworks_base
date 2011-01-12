@@ -30,16 +30,16 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 /**
- * @hide
  *
- **/
+ */
 public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder mSurfaceHolder;
     private RenderScriptGL mRS;
 
     /**
      * Standard View constructor. In order to render something, you
-     * must call {@link #setRenderer} to register a renderer.
+     * must call {@link android.opengl.GLSurfaceView#setRenderer} to
+     * register a renderer.
      */
     public RSSurfaceView(Context context) {
         super(context);
@@ -49,7 +49,8 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
     /**
      * Standard View constructor. In order to render something, you
-     * must call {@link #setRenderer} to register a renderer.
+     * must call {@link android.opengl.GLSurfaceView#setRenderer} to
+     * register a renderer.
      */
     public RSSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);

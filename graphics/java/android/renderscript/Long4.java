@@ -21,7 +21,6 @@ import android.util.Log;
 
 
 /**
- * @hide
  *
  **/
 public class Long4 {
