@@ -505,6 +505,10 @@ public class WindowManagerService extends IWindowManager.Stub
         ArrayList<WindowState> mNotifiedWindows;
         boolean mDragInProgress;
 
+        boolean mPerformDeferredRotation;
+        int mRotation;
+        int mAnimFlags;
+
         private final Rect tmpRect = new Rect();
 
         DragState(IBinder token, Surface surface, int flags, IBinder localWin) {
@@ -526,6 +530,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mData = null;
             mThumbOffsetX = mThumbOffsetY = 0;
             mNotifiedWindows = null;
+            mPerformDeferredRotation = false;
         }
 
         void register() {
@@ -666,9 +671,25 @@ public class WindowManagerService extends IWindowManager.Stub
             mDragState.unregister();
             mInputMonitor.updateInputWindowsLw();
 
+            // Retain the parameters of any deferred rotation operation so
+            // that we can perform it after the reset / unref of the drag state
+            final boolean performRotation = mPerformDeferredRotation;
+            final int rotation = mRotation;
+            final int animFlags = mAnimFlags;
+
             // free our resources and drop all the object references
             mDragState.reset();
             mDragState = null;
+
+            // Now that we've officially ended the drag, execute any
+            // deferred rotation
+            if (performRotation) {
+                if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-drag rotation");
+                boolean changed = setRotationUncheckedLocked(rotation, animFlags);
+                if (changed) {
+                    sendNewConfiguration();
+                }
+            }
         }
 
         void notifyMoveLw(float x, float y) {
@@ -811,6 +832,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             return touchedWin;
+        }
+
+        void setDeferredRotation(int rotation, int animFlags) {
+            mRotation = rotation;
+            mAnimFlags = animFlags;
+            mPerformDeferredRotation = true;
         }
     }
 
@@ -5076,6 +5103,14 @@ public class WindowManagerService extends IWindowManager.Stub
      * MUST CALL setNewConfiguration() TO UNFREEZE THE SCREEN.
      */
     public boolean setRotationUncheckedLocked(int rotation, int animFlags) {
+        if (mDragState != null) {
+            // Potential rotation during a drag.  Don't do the rotation now, but make
+            // a note to perform the rotation later.
+            if (DEBUG_ORIENTATION) Slog.v(TAG, "Deferring rotation during drag");
+            mDragState.setDeferredRotation(rotation, animFlags);
+            return false;
+        }
+
         boolean changed;
         if (rotation == WindowManagerPolicy.USE_LAST_ROTATION) {
             rotation = mRequestedRotation;
@@ -6496,24 +6531,28 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             synchronized (mWindowMap) {
-                if (mDragState.mToken != token) {
-                    Slog.w(TAG, "Invalid drop-result claim by " + window);
-                    throw new IllegalStateException("reportDropResult() by non-recipient");
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    if (mDragState.mToken != token) {
+                        Slog.w(TAG, "Invalid drop-result claim by " + window);
+                        throw new IllegalStateException("reportDropResult() by non-recipient");
+                    }
+
+                    // The right window has responded, even if it's no longer around,
+                    // so be sure to halt the timeout even if the later WindowState
+                    // lookup fails.
+                    mH.removeMessages(H.DRAG_END_TIMEOUT, window.asBinder());
+                    WindowState callingWin = windowForClientLocked(null, window, false);
+                    if (callingWin == null) {
+                        Slog.w(TAG, "Bad result-reporting window " + window);
+                        return;  // !!! TODO: throw here?
+                    }
+
+                    mDragState.mDragResult = consumed;
+                    mDragState.endDragLw();
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
                 }
-
-                // The right window has responded, even if it's no longer around,
-                // so be sure to halt the timeout even if the later WindowState
-                // lookup fails.
-                mH.removeMessages(H.DRAG_END_TIMEOUT, window.asBinder());
-
-                WindowState callingWin = windowForClientLocked(null, window, false);
-                if (callingWin == null) {
-                    Slog.w(TAG, "Bad result-reporting window " + window);
-                    return;  // !!! TODO: throw here?
-                }
-
-                mDragState.mDragResult = consumed;
-                mDragState.endDragLw();
             }
         }
 
