@@ -8883,11 +8883,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * (The first is measuring). In this phase, each parent calls
      * layout on all of its children to position them.
      * This is typically done using the child measurements
-     * that were stored in the measure pass().
+     * that were stored in the measure pass().</p>
      *
+     * <p>Derived classes should not override this method.
      * Derived classes with children should override
      * onLayout. In that method, they should
-     * call layout on each of their children.
+     * call layout on each of their children.</p>
      *
      * @param l Left position, relative to parent
      * @param t Top position, relative to parent
@@ -8895,7 +8896,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param b Bottom position, relative to parent
      */
     @SuppressWarnings({"unchecked"})
-    public final void layout(int l, int t, int r, int b) {
+    public void layout(int l, int t, int r, int b) {
         int oldL = mLeft;
         int oldT = mTop;
         int oldB = mBottom;
