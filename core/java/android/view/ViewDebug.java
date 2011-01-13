@@ -138,7 +138,7 @@ public class ViewDebug {
      * Enables detailed logging of drag/drop operations.
      * @hide
      */
-    public static final boolean DEBUG_DRAG = true;
+    public static final boolean DEBUG_DRAG = false;
 
     /**
      * <p>Enables or disables views consistency check. Even when this property is enabled,
