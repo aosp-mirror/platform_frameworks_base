@@ -42,6 +42,7 @@ def main(path, options):
   cmd += "-w com.android.dumprendertree2/com.android.dumprendertree2.scriptsupport.ScriptTestRunner"
 
   logging.info("Running the tests...")
+  logging.debug("Command = %s" % cmd)
   (stdoutdata, stderrdata) = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
   if re.search("^INSTRUMENTATION_STATUS_CODE: -1", stdoutdata, re.MULTILINE) != None:
     logging.info("Failed to run the tests. Is DumpRenderTree2 installed on the device?")
