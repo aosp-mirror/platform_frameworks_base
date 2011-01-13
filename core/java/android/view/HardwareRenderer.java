@@ -36,7 +36,7 @@ import javax.microedition.khronos.opengles.GL;
  * @hide
  */
 public abstract class HardwareRenderer {
-    private static final String LOG_TAG = "HardwareRenderer";
+    static final String LOG_TAG = "HardwareRenderer";
 
     /**
      * A process can set this flag to false to prevent the use of hardware
