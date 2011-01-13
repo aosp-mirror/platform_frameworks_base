@@ -79,6 +79,31 @@ public class SurfaceTexture {
      */
     public native void updateTexImage();
 
+
+    /**
+     * Retrieve the 4x4 texture coordinate transform matrix associated with the texture image set by
+     * the most recent call to updateTexImage.
+     *
+     * This transform matrix maps 2D homogeneous texture coordinates of the form (s, t, 0, 1) with s
+     * and t in the inclusive range [0, 1] to the texture coordinate that should be used to sample
+     * that location from the texture.  Sampling the texture outside of the range of this transform
+     * is undefined.
+     *
+     * The matrix is stored in column-major order so that it may be passed directly to OpenGL ES via
+     * the glLoadMatrixf or glUniformMatrix4fv functions.
+     *
+     * @param mtx the array into which the 4x4 matrix will be stored.  The array must have exactly
+     *     16 elements.
+     */
+    public void getTransformMatrix(float[] mtx) {
+        if (mtx.length != 16) {
+            throw new IllegalArgumentException();
+        }
+        getTransformMatrixImpl(mtx);
+    }
+
+    private native void getTransformMatrixImpl(float[] mtx);
+
     private native void init(int texName);
 
     /*
