@@ -103,6 +103,7 @@ LOCAL_SRC_FILES:= \
 	android_graphics_PixelFormat.cpp \
 	android/graphics/Picture.cpp \
 	android/graphics/PorterDuff.cpp \
+	android/graphics/BitmapRegionDecoder.cpp \
 	android/graphics/Rasterizer.cpp \
 	android/graphics/Region.cpp \
 	android/graphics/Shader.cpp \
