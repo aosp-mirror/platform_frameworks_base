@@ -318,6 +318,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private View[] mChildren;
     // Number of valid children in the mChildren array, the rest should be null or not
     // considered as children
+
+    private boolean mLayoutSuppressed = false;
+
     private int mChildrenCount;
 
     private static final int ARRAY_INITIAL_CAPACITY = 12;
@@ -1827,6 +1830,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // down. To make sure we keep the child in a consistent state, we
         // first send it an ACTION_CANCEL motion event.
         cancelAndClearTouchTargets(null);
+
+        // In case view is detached while transition is running
+        mLayoutSuppressed = false;
 
         final int count = mChildrenCount;
         final View[] children = mChildren;
@@ -3622,6 +3628,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@inheritDoc}
      */
     @Override
+    public final void layout(int l, int t, int r, int b) {
+        if (mTransition == null || !mTransition.isChangingLayout()) {
+            super.layout(l, t, r, b);
+        } else {
+            // record the fact that we noop'd it; request layout when transition finishes
+            mLayoutSuppressed = true;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     protected abstract void onLayout(boolean changed,
             int l, int t, int r, int b);
 
@@ -4306,6 +4325,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         @Override
         public void endTransition(LayoutTransition transition, ViewGroup container,
                 View view, int transitionType) {
+            if (mLayoutSuppressed && !transition.isChangingLayout()) {
+                requestLayout();
+                mLayoutSuppressed = false;
+            }
             if (transitionType == LayoutTransition.DISAPPEARING && mTransitioningViews != null) {
                 endViewTransition(view);
             }
