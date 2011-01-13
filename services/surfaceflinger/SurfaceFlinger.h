@@ -34,6 +34,7 @@
 #include <ui/PixelFormat.h>
 #include <surfaceflinger/ISurfaceComposer.h>
 #include <surfaceflinger/ISurfaceComposerClient.h>
+#include <surfaceflinger/IGraphicBufferAlloc.h>
 
 #include "Barrier.h"
 #include "Layer.h"
@@ -119,6 +120,21 @@ private:
     sp<SurfaceFlinger> mFlinger;
 };
 
+class GraphicBufferAlloc : public BnGraphicBufferAlloc
+{
+public:
+    GraphicBufferAlloc();
+    virtual ~GraphicBufferAlloc();
+
+    virtual sp<GraphicBuffer> createGraphicBuffer(uint32_t w, uint32_t h,
+        PixelFormat format, uint32_t usage);
+    virtual void freeAllGraphicBuffersExcept(int bufIdx);
+
+private:
+    Vector<sp<GraphicBuffer> > mBuffers;
+    Mutex mLock;
+};
+
 // ---------------------------------------------------------------------------
 
 class GraphicPlane
@@ -184,6 +200,7 @@ public:
     // ISurfaceComposer interface
     virtual sp<ISurfaceComposerClient>  createConnection();
     virtual sp<ISurfaceComposerClient>  createClientConnection();
+    virtual sp<IGraphicBufferAlloc>     createGraphicBufferAlloc();
     virtual sp<IMemoryHeap>             getCblk() const;
     virtual void                        bootFinished();
     virtual void                        openGlobalTransaction();
@@ -322,8 +339,6 @@ private:
             status_t electronBeamOnAnimationImplLocked();
             status_t renderScreenToTextureLocked(DisplayID dpy,
                     GLuint* textureName, GLfloat* uOut, GLfloat* vOut);
-            sp<GraphicBuffer> createGraphicBuffer(uint32_t w, uint32_t h,
-                    PixelFormat format, uint32_t usage) const;
 
             friend class FreezeLock;
             sp<FreezeLock> getFreezeLock() const;

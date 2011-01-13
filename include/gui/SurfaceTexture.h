@@ -26,11 +26,14 @@
 #include <ui/GraphicBuffer.h>
 
 #include <utils/threads.h>
+#include <utils/Vector.h>
 
 #define ANDROID_GRAPHICS_SURFACETEXTURE_JNI_ID "mSurfaceTexture"
 
 namespace android {
 // ----------------------------------------------------------------------------
+
+class IGraphicBufferAlloc;
 
 class SurfaceTexture : public BnSurfaceTexture {
 public:
@@ -140,6 +143,12 @@ private:
     // reset mCurrentTexture to INVALID_BUFFER_SLOT.
     int mCurrentTexture;
 
+    // mCurrentTextureBuf is the graphic buffer of the current texture. It's
+    // possible that this buffer is not associated with any buffer slot, so we
+    // must track it separately in order to properly use
+    // IGraphicBufferAlloc::freeAllGraphicBuffersExcept.
+    sp<GraphicBuffer> mCurrentTextureBuf;
+
     // mCurrentCrop is the crop rectangle that applies to the current texture.
     // It gets set to mLastQueuedCrop each time updateTexImage is called.
     Rect mCurrentCrop;
@@ -175,6 +184,16 @@ private:
     // be bound when updateTexImage is called. It is set at construction time 
     // changed with a call to setTexName.
     const GLuint mTexName;
+
+    // mGraphicBufferAlloc is the connection to SurfaceFlinger that is used to
+    // allocate new GraphicBuffer objects.
+    sp<IGraphicBufferAlloc> mGraphicBufferAlloc;
+
+    // mAllocdBuffers is mirror of the list of buffers that SurfaceFlinger is
+    // referencing. This is kept so that gralloc implementations do not need to
+    // properly handle the case where SurfaceFlinger no longer holds a reference
+    // to a buffer, but other processes do.
+    Vector<sp<GraphicBuffer> > mAllocdBuffers;
 
     // mMutex is the mutex used to prevent concurrent access to the member
     // variables of SurfaceTexture objects. It must be locked whenever the

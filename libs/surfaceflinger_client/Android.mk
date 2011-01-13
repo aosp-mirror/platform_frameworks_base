@@ -5,6 +5,7 @@ LOCAL_SRC_FILES:= \
 	ISurfaceComposer.cpp \
 	ISurface.cpp \
 	ISurfaceComposerClient.cpp \
+	IGraphicBufferAlloc.cpp \
 	LayerState.cpp \
 	SharedBufferStack.cpp \
 	Surface.cpp \
