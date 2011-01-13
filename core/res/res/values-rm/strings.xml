@@ -154,6 +154,8 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Modus d\'aviun"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Il modus d\'aviun è activà"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Il modus d\'aviun è deactivà."</string>
+    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Modus segirà"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistem Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Servetschs che custan"</string>
@@ -363,6 +365,10 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Permetta a l\'applicaziun da controllar la glischina."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"acceder ad apparats USB"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Permetta a l\'applicaziun dad acceder als apparats periferics USB."</string>
+    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
+    <skip />
+    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
+    <skip />
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testar la hardware"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Permetta ad ina applicaziun da controllar differents apparats periferics per motivs da test da hardware."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefonar directamain a numers da telefon"</string>

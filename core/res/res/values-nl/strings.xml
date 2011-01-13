@@ -152,6 +152,8 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Vliegmodus"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Vliegmodus is AAN"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Vliegmodus is UIT"</string>
+    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Veilige modus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-systeem"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Services waarvoor u moet betalen"</string>
@@ -361,6 +363,10 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Hiermee kan de toepassing de zaklamp bedienen."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"toegang krijgen tot USB-apparaten"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Hiermee kan de toepassing toegang krijgen tot USB-apparaten."</string>
+    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
+    <skip />
+    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
+    <skip />
     <string name="permlab_hardware_test" msgid="4148290860400659146">"hardware testen"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Hiermee kan de toepassing verschillende randapparaten beheren om de hardware te testen."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefoonnummers rechtstreeks bellen"</string>
