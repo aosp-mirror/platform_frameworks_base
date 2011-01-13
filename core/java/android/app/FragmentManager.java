@@ -978,7 +978,9 @@ final class FragmentManagerImpl extends FragmentManager {
                     anim.addListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
-                            finalFragment.mView.setVisibility(View.GONE);
+                            if (finalFragment.mView != null) {
+                                finalFragment.mView.setVisibility(View.GONE);
+                            }
                         }
                     });
                     anim.start();
