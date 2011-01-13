@@ -2768,6 +2768,15 @@ class BackupManagerService extends IBackupManager.Stub {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        long identityToken = Binder.clearCallingIdentity();
+        try {
+            dumpInternal(pw);
+        } finally {
+            Binder.restoreCallingIdentity(identityToken);
+        }
+    }
+
+    private void dumpInternal(PrintWriter pw) {
         synchronized (mQueueLock) {
             pw.println("Backup Manager is " + (mEnabled ? "enabled" : "disabled")
                     + " / " + (!mProvisioned ? "not " : "") + "provisioned / "
@@ -2781,12 +2790,15 @@ class BackupManagerService extends IBackupManager.Stub {
             for (String t : listAllTransports()) {
                 pw.println((t.equals(mCurrentTransport) ? "  * " : "    ") + t);
                 try {
-                    File dir = new File(mBaseStateDir, getTransport(t).transportDirName());
+                    IBackupTransport transport = getTransport(t);
+                    File dir = new File(mBaseStateDir, transport.transportDirName());
+                    pw.println("       destination: " + transport.currentDestinationString());
+                    pw.println("       intent: " + transport.configurationIntent());
                     for (File f : dir.listFiles()) {
                         pw.println("       " + f.getName() + " - " + f.length() + " state bytes");
                     }
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Error in transportDirName()", e);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Error in transport", e);
                     pw.println("        Error: " + e);
                 }
             }
