@@ -428,7 +428,7 @@ void ScriptCState::runCompiler(Context *rsc,
             // Handle Fatal Error
         }
 
-#if 1
+#if 0
         if (bccLinkBC(s->mBccScript,
                       rs_runtime_lib_bc,
                       rs_runtime_lib_bc_size) != 0) {
