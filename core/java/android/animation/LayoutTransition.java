@@ -553,9 +553,6 @@ public class LayoutTransition {
                 // Make a copy of the appropriate animation
                 final Animator anim = baseAnimator.clone();
 
-                // Cache the animation in case we need to cancel it later
-                currentChangingAnimations.put(child, anim);
-
                 // Set the target object for the animation
                 anim.setTarget(child);
 
@@ -585,6 +582,9 @@ public class LayoutTransition {
                         }
                         anim.setStartDelay(startDelay);
                         anim.setDuration(duration);
+
+                        // Cache the animation in case we need to cancel it later
+                        currentChangingAnimations.put(child, anim);
 
                         if (anim instanceof ObjectAnimator) {
                             ((ObjectAnimator) anim).setCurrentPlayTime(0);
@@ -655,6 +655,27 @@ public class LayoutTransition {
                 return true;
             }
         });
+    }
+
+    /**
+     * Returns true if animations are running which animate layout-related properties. This
+     * essentially means that either CHANGE_APPEARING or CHANGE_DISAPPEARING animations
+     * are running, since these animations operate on layout-related properties.
+     *
+     * @return true if CHANGE_APPEARING or CHANGE_DISAPPEARING animations are currently
+     * running.
+     */
+    public boolean isChangingLayout() {
+        return (currentChangingAnimations.size() > 0);
+    }
+
+    /**
+     * Returns true if any of the animations in this transition are currently running.
+     *
+     * @return true if any animations in the transition are running.
+     */
+    public boolean isRunning() {
+        return (currentChangingAnimations.size() > 0 || currentVisibilityAnimations.size() > 0);
     }
 
     /**
@@ -842,28 +863,31 @@ public class LayoutTransition {
     public interface TransitionListener {
 
         /**
-         * This event is sent to listeners when an APPEARING or DISAPPEARING transition
-         * begins.
+         * This event is sent to listeners when any type of transition animation begins.
          *
          * @param transition The LayoutTransition sending out the event.
          * @param container The ViewGroup on which the transition is playing.
-         * @param view The View object being added or removed from its parent.
-         * @param transitionType The type of transition that is beginning, either
-         * {@link android.animation.LayoutTransition#APPEARING} or
-         * {@link android.animation.LayoutTransition#DISAPPEARING}.
+         * @param view The View object being affected by the transition animation.
+         * @param transitionType The type of transition that is beginning,
+         * {@link android.animation.LayoutTransition#APPEARING},
+         * {@link android.animation.LayoutTransition#DISAPPEARING},
+         * {@link android.animation.LayoutTransition#CHANGE_APPEARING}, or
+         * {@link android.animation.LayoutTransition#CHANGE_DISAPPEARING}.
          */
         public void startTransition(LayoutTransition transition, ViewGroup container,
                 View view, int transitionType);
 
         /**
-         * This event is sent to listeners when an APPEARING or DISAPPEARING transition ends.
+         * This event is sent to listeners when any type of transition animation ends.
          *
          * @param transition The LayoutTransition sending out the event.
          * @param container The ViewGroup on which the transition is playing.
-         * @param view The View object being added or removed from its parent.
-         * @param transitionType The type of transition that is ending, either
-         * {@link android.animation.LayoutTransition#APPEARING} or
-         * {@link android.animation.LayoutTransition#DISAPPEARING}.
+         * @param view The View object being affected by the transition animation.
+         * @param transitionType The type of transition that is ending,
+         * {@link android.animation.LayoutTransition#APPEARING},
+         * {@link android.animation.LayoutTransition#DISAPPEARING},
+         * {@link android.animation.LayoutTransition#CHANGE_APPEARING}, or
+         * {@link android.animation.LayoutTransition#CHANGE_DISAPPEARING}.
          */
         public void endTransition(LayoutTransition transition, ViewGroup container,
                 View view, int transitionType);
