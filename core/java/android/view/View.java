@@ -3260,6 +3260,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * {@inheritDoc}
      */
     public void sendAccessibilityEventUnchecked(AccessibilityEvent event) {
+        if (!isShown()) {
+            return;
+        }
         event.setClassName(getClass().getName());
         event.setPackageName(getContext().getPackageName());
         event.setEnabled(isEnabled());
