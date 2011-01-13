@@ -149,6 +149,7 @@ public class WindowManagerService extends IWindowManager.Stub
         implements Watchdog.Monitor {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
+    static final boolean DEBUG_ADD_REMOVE = false;
     static final boolean DEBUG_FOCUS = false;
     static final boolean DEBUG_ANIM = false;
     static final boolean DEBUG_LAYOUT = false;
@@ -158,6 +159,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_INPUT_METHOD = false;
     static final boolean DEBUG_VISIBILITY = false;
     static final boolean DEBUG_WINDOW_MOVEMENT = false;
+    static final boolean DEBUG_TOKEN_MOVEMENT = false;
     static final boolean DEBUG_ORIENTATION = false;
     static final boolean DEBUG_CONFIGURATION = false;
     static final boolean DEBUG_APP_TRANSITIONS = false;
@@ -296,12 +298,6 @@ public class WindowManagerService extends IWindowManager.Stub
             new HashMap<IBinder, WindowToken>();
 
     /**
-     * The same tokens as mTokenMap, stored in a list for efficient iteration
-     * over them.
-     */
-    final ArrayList<WindowToken> mTokenList = new ArrayList<WindowToken>();
-
-    /**
      * Window tokens that are in the process of exiting, but still
      * on screen for animations.
      */
@@ -310,7 +306,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Z-ordered (bottom-most first) list of all application tokens, for
      * controlling the ordering of windows in different applications.  This
-     * contains WindowToken objects.
+     * contains AppWindowToken objects.
      */
     final ArrayList<AppWindowToken> mAppTokens = new ArrayList<AppWindowToken>();
 
@@ -344,6 +340,11 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<WindowState> mPendingRemove = new ArrayList<WindowState>();
 
     /**
+     * Used when processing mPendingRemove to avoid working on the original array.
+     */
+    WindowState[] mPendingRemoveTmp = new WindowState[20];
+
+    /**
      * Windows whose surface should be destroyed.
      */
     final ArrayList<WindowState> mDestroySurface = new ArrayList<WindowState>();
@@ -359,6 +360,12 @@ public class WindowManagerService extends IWindowManager.Stub
      * list or contain windows that need to be force removed.
      */
     ArrayList<WindowState> mForceRemoves;
+
+    /**
+     * Used when rebuilding window list to keep track of windows that have
+     * been removed.
+     */
+    WindowState[] mRebuildTmp = new WindowState[20];
 
     IInputMethodManager mInputMethodManager;
 
@@ -1089,7 +1096,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void placeWindowAfter(WindowState pos, WindowState window) {
         final int i = mWindows.indexOf(pos);
-        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT) Slog.v(
+        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
             TAG, "Adding window " + window + " at "
             + (i+1) + " of " + mWindows.size() + " (after " + pos + ")");
         mWindows.add(i+1, window);
@@ -1098,7 +1105,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void placeWindowBefore(WindowState pos, WindowState window) {
         final int i = mWindows.indexOf(pos);
-        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT) Slog.v(
+        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
             TAG, "Adding window " + window + " at "
             + i + " of " + mWindows.size() + " (before " + pos + ")");
         mWindows.add(i, window);
@@ -1156,9 +1163,10 @@ public class WindowManagerService extends IWindowManager.Stub
                                 //apptoken note that the window could be a floating window
                                 //that was created later or a window at the top of the list of
                                 //windows associated with this token.
-                                if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT) Slog.v(
-                                        TAG, "Adding window " + win + " at "
-                                        + (newIdx+1) + " of " + N);
+                                if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) {
+                                    Slog.v(TAG, "Adding window " + win + " at "
+                                            + (newIdx+1) + " of " + N);
+                                }
                                 localmWindows.add(newIdx+1, win);
                                 mWindowsChanged = true;
                             }
@@ -1237,9 +1245,10 @@ public class WindowManagerService extends IWindowManager.Stub
                                     break;
                                 }
                             }
-                            if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT) Slog.v(
-                                    TAG, "Adding window " + win + " at "
-                                    + i + " of " + N);
+                            if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) {
+                                Slog.v(TAG, "Adding window " + win + " at "
+                                        + i + " of " + N);
+                            }
                             localmWindows.add(i, win);
                             mWindowsChanged = true;
                         }
@@ -1255,13 +1264,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 if (i < 0) i = 0;
-                if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT) Slog.v(
+                if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
                         TAG, "Adding window " + win + " at "
                         + i + " of " + N);
                 localmWindows.add(i, win);
                 mWindowsChanged = true;
             }
             if (addToToken) {
+                if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + win + " to " + token);
                 token.windows.add(tokenWindowsPos, win);
             }
 
@@ -1284,6 +1294,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // in the same sublayer.
                     if (wSublayer >= sublayer) {
                         if (addToToken) {
+                            if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + win + " to " + token);
                             token.windows.add(i, win);
                         }
                         placeWindowBefore(
@@ -1295,6 +1306,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // in the same sublayer.
                     if (wSublayer > sublayer) {
                         if (addToToken) {
+                            if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + win + " to " + token);
                             token.windows.add(i, win);
                         }
                         placeWindowBefore(w, win);
@@ -1304,6 +1316,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (i >= NA) {
                 if (addToToken) {
+                    if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + win + " to " + token);
                     token.windows.add(win);
                 }
                 if (sublayer < 0) {
@@ -1478,7 +1491,7 @@ public class WindowManagerService extends IWindowManager.Stub
         int pos = findDesiredInputMethodWindowIndexLocked(true);
         if (pos >= 0) {
             win.mTargetAppToken = mInputMethodTarget.mAppToken;
-            if (DEBUG_WINDOW_MOVEMENT) Slog.v(
+            if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
                     TAG, "Adding input method window " + win + " at " + pos);
             mWindows.add(pos, win);
             mWindowsChanged = true;
@@ -2028,9 +2041,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 // Now stick it in.
-                if (DEBUG_WALLPAPER || DEBUG_WINDOW_MOVEMENT) Slog.v(TAG,
-                        "Moving wallpaper " + wallpaper
-                        + " from " + oldIndex + " to " + foundI);
+                if (DEBUG_WALLPAPER || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) {
+                    Slog.v(TAG, "Moving wallpaper " + wallpaper
+                            + " from " + oldIndex + " to " + foundI);
+                }
 
                 localmWindows.add(foundI, wallpaper);
                 mWindowsChanged = true;
@@ -2349,7 +2363,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (addToken) {
                 mTokenMap.put(attrs.token, token);
-                mTokenList.add(token);
             }
             win.attach();
             mWindowMap.put(client.asBinder(), win);
@@ -2512,6 +2525,18 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void removeWindowInnerLocked(Session session, WindowState win) {
+        if (win.mRemoved) {
+            // Nothing to do.
+            return;
+        }
+
+        for (int i=win.mChildWindows.size()-1; i>=0; i--) {
+            WindowState cwin = win.mChildWindows.get(i);
+            Slog.w(TAG, "Force-removing child win " + cwin + " from container "
+                    + win);
+            removeWindowInnerLocked(cwin.mSession, cwin);
+        }
+
         win.mRemoved = true;
 
         if (mInputMethodTarget == win) {
@@ -2527,8 +2552,10 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.removeWindowLw(win);
         win.removeLocked();
 
+        if (DEBUG_ADD_REMOVE) Slog.v(TAG, "removeWindowInnerLocked: " + win);
         mWindowMap.remove(win.mClient.asBinder());
         mWindows.remove(win);
+        mPendingRemove.remove(win);
         mWindowsChanged = true;
         if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG, "Final remove of window: " + win);
 
@@ -2540,6 +2567,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         final WindowToken token = win.mToken;
         final AppWindowToken atoken = win.mAppToken;
+        if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Removing " + win + " from " + token);
         token.windows.remove(win);
         if (atoken != null) {
             atoken.allAppWindows.remove(win);
@@ -2550,7 +2578,6 @@ public class WindowManagerService extends IWindowManager.Stub
         if (token.windows.size() == 0) {
             if (!token.explicit) {
                 mTokenMap.remove(token.token);
-                mTokenList.remove(token);
             } else if (atoken != null) {
                 atoken.firstWindowDrawn = false;
             }
@@ -3313,7 +3340,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             wtoken = new WindowToken(token, type, true);
             mTokenMap.put(token, wtoken);
-            mTokenList.add(wtoken);
             if (type == TYPE_WALLPAPER) {
                 mWallpaperTokens.add(wtoken);
             }
@@ -3329,7 +3355,6 @@ public class WindowManagerService extends IWindowManager.Stub
         final long origId = Binder.clearCallingIdentity();
         synchronized(mWindowMap) {
             WindowToken wtoken = mTokenMap.remove(token);
-            mTokenList.remove(wtoken);
             if (wtoken != null) {
                 boolean delayed = false;
                 if (!wtoken.hidden) {
@@ -3405,10 +3430,9 @@ public class WindowManagerService extends IWindowManager.Stub
             wtoken.groupId = groupId;
             wtoken.appFullscreen = fullscreen;
             wtoken.requestedOrientation = requestedOrientation;
+            if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG, "addAppToken: " + wtoken);
             mAppTokens.add(addPos, wtoken);
-            if (localLOGV) Slog.v(TAG, "Adding new app token: " + wtoken);
             mTokenMap.put(token.asBinder(), wtoken);
-            mTokenList.add(wtoken);
 
             // Application tokens start out hidden.
             wtoken.hidden = true;
@@ -3819,10 +3843,12 @@ public class WindowManagerService extends IWindowManager.Stub
                         startingWindow.mToken = wtoken;
                         startingWindow.mRootToken = wtoken;
                         startingWindow.mAppToken = wtoken;
-                        if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG,
+                        if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
                                 "Removing starting window: " + startingWindow);
                         mWindows.remove(startingWindow);
                         mWindowsChanged = true;
+                        if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Removing starting " + startingWindow
+                                + " from " + ttoken);
                         ttoken.windows.remove(startingWindow);
                         ttoken.allAppWindows.remove(startingWindow);
                         addWindowToListInOrderLocked(startingWindow, true);
@@ -4237,7 +4263,6 @@ public class WindowManagerService extends IWindowManager.Stub
         final long origId = Binder.clearCallingIdentity();
         synchronized(mWindowMap) {
             WindowToken basewtoken = mTokenMap.remove(token);
-            mTokenList.remove(basewtoken);
             if (basewtoken != null && (wtoken=basewtoken.appWindowToken) != null) {
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Removing app token: " + wtoken);
                 delayed = setTokenVisibilityLocked(wtoken, null, false, WindowManagerPolicy.TRANSIT_UNSET, true);
@@ -4257,6 +4282,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " animating=" + wtoken.animating);
                 if (delayed) {
                     // set the token aside because it has an active animation to be finished
+                    if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
+                            "removeAppToken make exiting: " + wtoken);
                     mExitingAppTokens.add(wtoken);
                 } else {
                     // Make sure there is no animation running on this token,
@@ -4265,6 +4292,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     wtoken.animation = null;
                     wtoken.animating = false;
                 }
+                if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
+                        "removeAppToken: " + wtoken);
                 mAppTokens.remove(wtoken);
                 wtoken.removed = true;
                 if (wtoken.startingData != null) {
@@ -4391,18 +4420,21 @@ public class WindowManagerService extends IWindowManager.Stub
             if (!added && cwin.mSubLayer >= 0) {
                 if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG, "Re-adding child window at "
                         + index + ": " + cwin);
+                win.mRebuilding = false;
                 mWindows.add(index, win);
                 index++;
                 added = true;
             }
             if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG, "Re-adding window at "
                     + index + ": " + cwin);
+            cwin.mRebuilding = false;
             mWindows.add(index, cwin);
             index++;
         }
         if (!added) {
             if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG, "Re-adding window at "
                     + index + ": " + win);
+            win.mRebuilding = false;
             mWindows.add(index, win);
             index++;
         }
@@ -4428,6 +4460,9 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_REORDER) Slog.v(TAG, "Initial app tokens:");
             if (DEBUG_REORDER) dumpAppTokensLocked();
             final AppWindowToken wtoken = findAppWindowToken(token);
+            if (DEBUG_TOKEN_MOVEMENT || DEBUG_REORDER) Slog.v(TAG,
+                    "Start moving token " + wtoken + " initially at "
+                    + mAppTokens.indexOf(wtoken));
             if (wtoken == null || !mAppTokens.remove(wtoken)) {
                 Slog.w(TAG, "Attempting to reorder token that doesn't exist: "
                       + token + " (" + wtoken + ")");
@@ -4435,6 +4470,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mAppTokens.add(index, wtoken);
             if (DEBUG_REORDER) Slog.v(TAG, "Moved " + token + " to " + index + ":");
+            else if (DEBUG_TOKEN_MOVEMENT) Slog.v(TAG, "Moved " + token + " to " + index);
             if (DEBUG_REORDER) dumpAppTokensLocked();
 
             final long origId = Binder.clearCallingIdentity();
@@ -4462,6 +4498,8 @@ public class WindowManagerService extends IWindowManager.Stub
         for (int i=0; i<N; i++) {
             IBinder token = tokens.get(i);
             final AppWindowToken wtoken = findAppWindowToken(token);
+            if (DEBUG_REORDER || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
+                    "Temporarily removing " + wtoken + " from " + mAppTokens.indexOf(wtoken));
             if (!mAppTokens.remove(wtoken)) {
                 Slog.w(TAG, "Attempting to reorder token that doesn't exist: "
                       + token + " (" + wtoken + ")");
@@ -4535,6 +4573,8 @@ public class WindowManagerService extends IWindowManager.Stub
             for (int i=0; i<N; i++) {
                 AppWindowToken wt = findAppWindowToken(tokens.get(i));
                 if (wt != null) {
+                    if (DEBUG_TOKEN_MOVEMENT || DEBUG_REORDER) Slog.v(TAG,
+                            "Adding next to top: " + wt);
                     mAppTokens.add(wt);
                     if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
                         mToTopApps.remove(wt);
@@ -4567,6 +4607,8 @@ public class WindowManagerService extends IWindowManager.Stub
             for (int i=0; i<N; i++) {
                 AppWindowToken wt = findAppWindowToken(tokens.get(i));
                 if (wt != null) {
+                    if (DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
+                            "Adding next to bottom: " + wt + " at " + pos);
                     mAppTokens.add(pos, wt);
                     if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
                         mToTopApps.remove(wt);
@@ -6840,6 +6882,10 @@ public class WindowManagerService extends IWindowManager.Stub
         // Is this window now (or just being) removed?
         boolean mRemoved;
 
+        // Temp for keeping track of windows that have been removed when
+        // rebuilding window list.
+        boolean mRebuilding;
+
         // For debugging, this is the last information given to the surface flinger.
         boolean mSurfaceShown;
         int mSurfaceX, mSurfaceY, mSurfaceW, mSurfaceH;
@@ -6892,6 +6938,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + TYPE_LAYER_OFFSET;
                 mSubLayer = mPolicy.subWindowTypeToLayerLw(a.type);
                 mAttachedWindow = attachedWindow;
+                if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + this + " to " + mAttachedWindow);
                 mAttachedWindow.mChildWindows.add(this);
                 mLayoutAttached = mAttrs.type !=
                         WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -7897,6 +7944,7 @@ public class WindowManagerService extends IWindowManager.Stub
             disposeInputChannel();
             
             if (mAttachedWindow != null) {
+                if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Removing " + this + " from " + mAttachedWindow);
                 mAttachedWindow.mChildWindows.remove(this);
             }
             destroySurfaceLocked();
@@ -9146,12 +9194,18 @@ public class WindowManagerService extends IWindowManager.Stub
         int lastWallpaper = -1;
         int numRemoved = 0;
 
+        if (mRebuildTmp.length < NW) {
+            mRebuildTmp = new WindowState[NW+10];
+        }
+
         // First remove all existing app windows.
         i=0;
         while (i < NW) {
             WindowState w = mWindows.get(i);
             if (w.mAppToken != null) {
                 WindowState win = mWindows.remove(i);
+                win.mRebuilding = true;
+                mRebuildTmp[numRemoved] = win;
                 mWindowsChanged = true;
                 if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG,
                         "Rebuild removing window: " + win);
@@ -9189,6 +9243,21 @@ public class WindowManagerService extends IWindowManager.Stub
         if (i != numRemoved) {
             Slog.w(TAG, "Rebuild removed " + numRemoved
                     + " windows but added " + i);
+            for (i=0; i<numRemoved; i++) {
+                WindowState ws = mRebuildTmp[i];
+                if (ws.mRebuilding) {
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    ws.dump(pw, "");
+                    pw.flush();
+                    Slog.w(TAG, "This window was lost: " + ws);
+                    Slog.w(TAG, sw.toString());
+                }
+            }
+            Slog.w(TAG, "Current app token list:");
+            dumpAppTokensLocked();
+            Slog.w(TAG, "Final window list:");
+            dumpWindowsLocked();
         }
     }
 
@@ -9261,7 +9330,7 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             if (mForceRemoves != null) {
                 recoveringMemory = true;
-                // Wait a little it for things to settle down, and off we go.
+                // Wait a little bit for things to settle down, and off we go.
                 for (int i=0; i<mForceRemoves.size(); i++) {
                     WindowState ws = mForceRemoves.get(i);
                     Slog.i(TAG, "Force removing: " + ws);
@@ -9284,14 +9353,17 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             performLayoutAndPlaceSurfacesLockedInner(recoveringMemory);
 
-            int i = mPendingRemove.size()-1;
-            if (i >= 0) {
-                while (i >= 0) {
-                    WindowState w = mPendingRemove.get(i);
-                    removeWindowInnerLocked(w.mSession, w);
-                    i--;
+            int N = mPendingRemove.size();
+            if (N > 0) {
+                if (mPendingRemoveTmp.length < N) {
+                    mPendingRemoveTmp = new WindowState[N+10];
                 }
+                mPendingRemove.toArray(mPendingRemoveTmp);
                 mPendingRemove.clear();
+                for (int i=0; i<N; i++) {
+                    WindowState w = mPendingRemoveTmp[i];
+                    removeWindowInnerLocked(w.mSession, w);
+                }
 
                 mInLayout = false;
                 assignLayersLocked();
@@ -9735,12 +9807,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (tokenMayBeDrawn) {
                     // See if any windows have been drawn, so they (and others
                     // associated with them) can now be shown.
-                    final int NT = mTokenList.size();
+                    final int NT = mAppTokens.size();
                     for (i=0; i<NT; i++) {
-                        AppWindowToken wtoken = mTokenList.get(i).appWindowToken;
-                        if (wtoken == null) {
-                            continue;
-                        }
+                        AppWindowToken wtoken = mAppTokens.get(i);
                         if (wtoken.freezingScreen) {
                             int numInteresting = wtoken.numInterestingWindows;
                             if (numInteresting > 0 && wtoken.numDrawnWindows >= numInteresting) {
@@ -10642,6 +10711,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // soon as their animations are complete
                 token.animation = null;
                 token.animating = false;
+                if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
+                        "performLayout: App token exiting now removed" + token);
                 mAppTokens.remove(token);
                 mExitingAppTokens.remove(i);
             }
@@ -11351,14 +11422,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     token.dump(pw, "    ");
                 }
             }
-            if (mTokenList.size() > 0) {
-                pw.println(" ");
-                pw.println("  Window token list:");
-                for (int i=0; i<mTokenList.size(); i++) {
-                    pw.print("  #"); pw.print(i); pw.print(": ");
-                            pw.println(mTokenList.get(i));
-                }
-            }
             if (mWallpaperTokens.size() > 0) {
                 pw.println(" ");
                 pw.println("  Wallpaper tokens:");
@@ -11482,6 +11545,8 @@ public class WindowManagerService extends IWindowManager.Stub
             } else {
                 pw.println("  NO DISPLAY");
             }
+            pw.println("  Policy:");
+            mPolicy.dump("    ", fd, pw, args);
         }
     }
 
