@@ -64,18 +64,4 @@ public class BridgeConstants {
     public final static String MATCH_PARENT = "match_parent";
     public final static String FILL_PARENT = "fill_parent";
     public final static String WRAP_CONTENT = "wrap_content";
-
-    public final static String TAG_UNSUPPORTED = "unsupported";
-    public static final String TAG_BROKEN = "broken";
-    public final static String TAG_RESOURCES_RESOLVE = "resources.resolve";
-    public final static String TAG_RESOURCES_READ = "resources.read";
-    public final static String TAG_RESOURCES_FORMAT = "resources.format";
-    public static final String TAG_MATRIX = "matrix";
-    public final static String TAG_MASKFILTER = "maskfilter";
-    public static final String TAG_DRAWFILTER = "drawfilter";
-    public static final String TAG_PATHEFFECT = "patheffect";
-    public static final String TAG_COLORFILTER = "colorfilter";
-    public static final String TAG_RASTERIZER = "rasterizer";
-    public static final String TAG_SHADER = "shader";
-    public static final String TAG_XFERMODE = "xfermode";
 }

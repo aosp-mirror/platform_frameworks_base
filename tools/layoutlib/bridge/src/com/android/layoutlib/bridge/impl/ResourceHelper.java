@@ -17,10 +17,10 @@
 package com.android.layoutlib.bridge.impl;
 
 import com.android.ide.common.rendering.api.DensityBasedResourceValue;
+import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.ResourceDensity;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
-import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.ninepatch.NinePatch;
@@ -165,7 +165,7 @@ public final class ResourceHelper {
                         // URL is wrong, we'll return null below
                     } catch (IOException e) {
                         // failed to read the file, we'll return null below.
-                        Bridge.getLog().error(BridgeConstants.TAG_RESOURCES_READ,
+                        Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
                                 "Failed lot load " + file.getAbsolutePath(), e);
                     }
                 }
@@ -200,7 +200,7 @@ public final class ResourceHelper {
                     Bridge.getLog().error(null, "Failed to parse file " + value, e);
                 }
             } else {
-                Bridge.getLog().error(BridgeConstants.TAG_BROKEN,
+                Bridge.getLog().error(LayoutLog.TAG_BROKEN,
                         String.format("File %s does not exist (or is not a file)", stringValue));
             }
 
@@ -227,7 +227,7 @@ public final class ResourceHelper {
                     return new BitmapDrawable(context.getResources(), bitmap);
                 } catch (IOException e) {
                     // we'll return null below
-                    Bridge.getLog().error(BridgeConstants.TAG_RESOURCES_READ,
+                    Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
                             "Failed lot load " + bmpFile.getAbsolutePath(), e);
                 }
             } else {
@@ -237,7 +237,7 @@ public final class ResourceHelper {
                     return new ColorDrawable(color);
                 } catch (NumberFormatException e) {
                     // we'll return null below.
-                    Bridge.getLog().error(BridgeConstants.TAG_RESOURCES_FORMAT,
+                    Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT,
                             "Failed to convert " + stringValue + " into a drawable", e);
                 }
             }

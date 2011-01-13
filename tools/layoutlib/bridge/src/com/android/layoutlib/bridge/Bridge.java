@@ -262,7 +262,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
             }
         } catch (Throwable throwable) {
             if (log != null) {
-                log.error(BridgeConstants.TAG_BROKEN,
+                log.error(LayoutLog.TAG_BROKEN,
                         "Failed to load com.android.internal.R from the layout library jar",
                         throwable);
             }
