@@ -121,6 +121,14 @@ public final class DeviceAdminInfo implements Parcelable {
      */
     public static final int USES_POLICY_EXPIRE_PASSWORD = 6;
 
+    /**
+     * A type of policy that this device admin can use: require encryption of stored data.
+     *
+     * <p>To control this policy, the device admin must have a "encrypted-storage"
+     * tag in the "uses-policies" section of its meta-data.
+     */
+    public static final int USES_ENCRYPTED_STORAGE = 7;
+
     /** @hide */
     public static class PolicyInfo {
         public final int ident;
@@ -162,6 +170,9 @@ public final class DeviceAdminInfo implements Parcelable {
         sPoliciesDisplayOrder.add(new PolicyInfo(USES_POLICY_EXPIRE_PASSWORD, "expire-password",
                 com.android.internal.R.string.policylab_expirePassword,
                 com.android.internal.R.string.policydesc_expirePassword));
+        sPoliciesDisplayOrder.add(new PolicyInfo(USES_ENCRYPTED_STORAGE, "encrypted-storage",
+                com.android.internal.R.string.policylab_encryptedStorage,
+                com.android.internal.R.string.policydesc_encryptedStorage));
 
         for (int i=0; i<sPoliciesDisplayOrder.size(); i++) {
             PolicyInfo pi = sPoliciesDisplayOrder.get(i);
@@ -352,7 +363,8 @@ public final class DeviceAdminInfo implements Parcelable {
      * the given policy control.  The possible policy identifier inputs are:
      * {@link #USES_POLICY_LIMIT_PASSWORD}, {@link #USES_POLICY_WATCH_LOGIN},
      * {@link #USES_POLICY_RESET_PASSWORD}, {@link #USES_POLICY_FORCE_LOCK},
-     * {@link #USES_POLICY_WIPE_DATA}, {@link #USES_POLICY_SETS_GLOBAL_PROXY}.
+     * {@link #USES_POLICY_WIPE_DATA}, {@link #USES_POLICY_SETS_GLOBAL_PROXY},
+     * {@link #USES_POLICY_EXPIRE_PASSWORD}, {@link #USES_ENCRYPTED_STORAGE}.
      */
     public boolean usesPolicy(int policyIdent) {
         return (mUsesPolicies & (1<<policyIdent)) != 0;
