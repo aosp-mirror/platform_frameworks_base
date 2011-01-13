@@ -41,6 +41,7 @@ public:
             SkPaint* p, int flags);
 
     void drawDisplayList(DisplayList* displayList);
+    void drawLayer(Layer* layer, float x, float y, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,

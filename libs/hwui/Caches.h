@@ -91,8 +91,7 @@ class Caches: public Singleton<Caches> {
     GLuint mRegionMeshIndices;
 
     mutable Mutex mGarbageLock;
-    Vector<GLuint> mFboGarbage;
-    Vector<GLuint> mTextureGarbage;
+    Vector<Layer*> mLayerGarbage;
 
 public:
     /**
@@ -110,14 +109,9 @@ public:
     void clearGarbage();
 
     /**
-     * Can be used to delete an FBO from a non EGL thread.
+     * Can be used to delete a layer from a non EGL thread.
      */
-    void deleteFboDeferred(GLuint fbo);
-
-    /**
-     * Can be used to delete a texture from a non EGL thread.
-     */
-    void deleteTextureDeferred(GLuint texture);
+    void deleteLayerDeferred(Layer* layer);
 
     /**
      * Binds the VBO used to render simple textured quads.

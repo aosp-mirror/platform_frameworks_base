@@ -54,13 +54,10 @@ abstract class HardwareCanvas extends Canvas {
     /**
      * Draws the specified layer onto this canvas.
      *
-     * @param left The left coordinate of the layer
-     * @param top The top coordinate of the layer
-     * @param right The right coordinate of the layer
-     * @param bottom The bottom coordinate of the layer
      * @param layer The layer to composite on this canvas
+     * @param x The left coordinate of the layer
+     * @param y The top coordinate of the layer
      * @param paint The paint used to draw the layer
      */
-    abstract void drawHardwareLayer(float left, float top, float right, float bottom,
-            HardwareLayer layer, Paint paint); 
+    abstract void drawHardwareLayer(HardwareLayer layer, float x, float y, Paint paint); 
 }

@@ -54,6 +54,12 @@ void OpenGLDebugRenderer::drawDisplayList(DisplayList* displayList) {
     OpenGLRenderer::drawDisplayList(displayList);
 }
 
+void OpenGLDebugRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
+    mPrimitivesCount++;
+    StopWatch w("drawLayer");
+    OpenGLRenderer::drawLayer(layer, x, y, paint);
+}
+
 void OpenGLDebugRenderer::drawBitmap(SkBitmap* bitmap, float left, float top,
         SkPaint* paint) {
     mPrimitivesCount++;
