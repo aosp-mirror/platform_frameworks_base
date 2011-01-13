@@ -217,6 +217,8 @@
         <item name="starStyle">@android:style/Widget.CompoundButton.Star</item>
         <item name="tabWidgetStyle">@android:style/Widget.TabWidget</item>
         <item name="textViewStyle">@android:style/Widget.TextView</item>
+        <item name="errorMessageBackground">@android:drawable/popup_inline_error</item>
+        <item name="errorMessageAboveBackground">@android:drawable/popup_inline_error_above</item>
         <item name="webTextViewStyle">@android:style/Widget.WebTextView</item>
         <item name="webViewStyle">@android:style/Widget.WebView</item>
         <item name="dropDownItemStyle">@android:style/Widget.DropDownItem</item>
@@ -934,6 +936,8 @@
         <item name="starStyle">@android:style/Widget.Holo.CompoundButton.Star</item>
         <item name="tabWidgetStyle">@android:style/Widget.Holo.TabWidget</item>
         <item name="textViewStyle">@android:style/Widget.Holo.TextView</item>
+        <item name="errorMessageBackground">@android:drawable/popup_inline_error_holo_dark</item>
+        <item name="errorMessageAboveBackground">@android:drawable/popup_inline_error_above_holo_dark</item>
         <item name="webTextViewStyle">@android:style/Widget.Holo.WebTextView</item>
         <item name="webViewStyle">@android:style/Widget.Holo.WebView</item>
         <item name="dropDownItemStyle">@android:style/Widget.Holo.DropDownItem</item>
@@ -1207,6 +1211,8 @@
         <item name="starStyle">@android:style/Widget.Holo.Light.CompoundButton.Star</item>
         <item name="tabWidgetStyle">@android:style/Widget.Holo.Light.TabWidget</item>
         <item name="textViewStyle">@android:style/Widget.Holo.Light.TextView</item>
+        <item name="errorMessageBackground">@android:drawable/popup_inline_error_holo_light</item>
+        <item name="errorMessageAboveBackground">@android:drawable/popup_inline_error_above_holo_light</item>
         <item name="webTextViewStyle">@android:style/Widget.Holo.Light.WebTextView</item>
         <item name="webViewStyle">@android:style/Widget.Holo.Light.WebView</item>
         <item name="dropDownItemStyle">@android:style/Widget.Holo.Light.DropDownItem</item>
