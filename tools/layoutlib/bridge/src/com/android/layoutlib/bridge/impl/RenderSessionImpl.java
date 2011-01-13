@@ -364,9 +364,6 @@ public class RenderSessionImpl {
                 t = t.getCause();
             }
 
-            // log it
-            mParams.getLog().error(null, "Scene inflate failed", t);
-
             return ERROR_INFLATION.createResult(t.getMessage(), t);
         }
     }
@@ -479,9 +476,6 @@ public class RenderSessionImpl {
             while (t.getCause() != null) {
                 t = t.getCause();
             }
-
-            // log it
-            mParams.getLog().error(null, "Scene Render failed", t);
 
             return ERROR_UNKNOWN.createResult(t.getMessage(), t);
         }
@@ -1051,7 +1045,7 @@ public class RenderSessionImpl {
         }
 
         assert false;
-        mParams.getLog().error(null,
+        mParams.getLog().error(BridgeConstants.TAG_RESOURCES_RESOLVE,
                 String.format("Unable to resolve parent style name: %s", parentName));
 
         return null;

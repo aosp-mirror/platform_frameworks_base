@@ -25,6 +25,7 @@ import com.android.layoutlib.bridge.impl.ResourceHelper;
 
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -205,9 +206,10 @@ public final class BridgeTypedArray extends TypedArray {
                 if (i != null) {
                     result |= i.intValue();
                 } else {
-                    Bridge.getLog().warning(null, String.format(
-                            "Unknown constant \"%s\" in attribute \"%2$s\"",
-                            keyword, mNames[index]));
+                    Bridge.getLog().warning(BridgeConstants.TAG_RESOURCES_RESOLVE,
+                            String.format(
+                                "Unknown constant \"%s\" in attribute \"%2$s\"",
+                                keyword, mNames[index]));
                 }
             }
             return result;
@@ -235,9 +237,10 @@ public final class BridgeTypedArray extends TypedArray {
             try {
                 return Float.parseFloat(s);
             } catch (NumberFormatException e) {
-                Bridge.getLog().warning(null, String.format(
-                        "Unable to convert \"%s\" into a float in attribute \"%2$s\"",
-                        s, mNames[index]));
+                Bridge.getLog().warning(BridgeConstants.TAG_RESOURCES_RESOLVE,
+                        String.format(
+                            "Unable to convert \"%s\" into a float in attribute \"%2$s\"",
+                            s, mNames[index]));
 
                 // we'll return the default value below.
             }
@@ -267,9 +270,7 @@ public final class BridgeTypedArray extends TypedArray {
         try {
             return ResourceHelper.getColor(s);
         } catch (NumberFormatException e) {
-            Bridge.getLog().warning(null, String.format(
-                    "Unable to convert \"%s\" into a color in attribute \"%2$s\"",
-                    s, mNames[index]));
+            Bridge.getLog().error(BridgeConstants.TAG_RESOURCES_FORMAT, e.getMessage(), e);
 
             // we'll return the default value below.
         }
@@ -298,17 +299,10 @@ public final class BridgeTypedArray extends TypedArray {
             return null;
         }
 
-        try {
-            int color = ResourceHelper.getColor(value);
-            return ColorStateList.valueOf(color);
-        } catch (NumberFormatException e) {
-            // if it's not a color value, we'll attempt to read the xml based color below.
-        }
-
         // let the framework inflate the ColorStateList from the XML file.
-        try {
-            File f = new File(value);
-            if (f.isFile()) {
+        File f = new File(value);
+        if (f.isFile()) {
+            try {
                 KXmlParser parser = new KXmlParser();
                 parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
                 parser.setInput(new FileReader(f));
@@ -318,19 +312,26 @@ public final class BridgeTypedArray extends TypedArray {
                         // FIXME: we need to know if this resource is platform or not
                         new BridgeXmlBlockParser(parser, mContext, false));
                 return colorStateList;
-            }
-        } catch (Exception e) {
-            // this is an error and not warning since the file existence is checked before
-            // attempting to parse it.
-            Bridge.getLog().error(null, "Failed to parse file " + value, e);
+            } catch (XmlPullParserException e) {
+                Bridge.getLog().error(BridgeConstants.TAG_BROKEN,
+                        "Failed to configure parser for " + value, e);
+                return null;
+            } catch (Exception e) {
+                // this is an error and not warning since the file existence is checked before
+                // attempting to parse it.
+                Bridge.getLog().error(BridgeConstants.TAG_RESOURCES_READ,
+                        "Failed to parse file " + value, e);
 
-            return null;
+                return null;
+            }
         }
 
-        // looks like were unable to resolve the color value.
-        Bridge.getLog().warning(null, String.format(
-                "Unable to resolve color value \"%1$s\" in attribute \"%2$s\"",
-                value, mNames[index]));
+        try {
+            int color = ResourceHelper.getColor(value);
+            return ColorStateList.valueOf(color);
+        } catch (NumberFormatException e) {
+            Bridge.getLog().error(BridgeConstants.TAG_RESOURCES_FORMAT, e.getMessage(), e);
+        }
 
         assert false;
 
@@ -358,9 +359,10 @@ public final class BridgeTypedArray extends TypedArray {
             try {
                 return Integer.parseInt(s);
             } catch (NumberFormatException e) {
-                Bridge.getLog().warning(null, String.format(
-                        "Unable to convert \"%s\" into a integer in attribute \"%2$s\"",
-                        s, mNames[index]));
+                Bridge.getLog().warning(BridgeConstants.TAG_RESOURCES_RESOLVE,
+                        String.format(
+                            "Unable to convert \"%s\" into a integer in attribute \"%2$s\"",
+                            s, mNames[index]));
 
                 // The default value is returned below.
             }
@@ -407,9 +409,10 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         // looks like we were unable to resolve the dimension value
-        Bridge.getLog().warning(null, String.format(
-                "Unable to resolve dimension value \"%1$s\" in attribute \"%2$s\"",
-                s, mNames[index]));
+        Bridge.getLog().warning(BridgeConstants.TAG_RESOURCES_RESOLVE,
+                String.format(
+                    "Unable to resolve dimension value \"%1$s\" in attribute \"%2$s\"",
+                    s, mNames[index]));
 
         assert false;
 
@@ -538,9 +541,10 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         // looks like we were unable to resolve the fraction value
-        Bridge.getLog().warning(null, String.format(
-                "Unable to resolve fraction value \"%1$s\" in attribute \"%2$s\"",
-                value, mNames[index]));
+        Bridge.getLog().warning(BridgeConstants.TAG_RESOURCES_RESOLVE,
+                String.format(
+                    "Unable to resolve fraction value \"%1$s\" in attribute \"%2$s\"",
+                    value, mNames[index]));
 
         assert false;
 
@@ -649,8 +653,9 @@ public final class BridgeTypedArray extends TypedArray {
             return idValue.intValue();
         }
 
-        Bridge.getLog().warning(null, String.format(
-                "Unable to resolve id \"%1$s\" for attribute \"%2$s\"", value, mNames[index]));
+        Bridge.getLog().warning(BridgeConstants.TAG_RESOURCES_RESOLVE,
+                String.format(
+                    "Unable to resolve id \"%1$s\" for attribute \"%2$s\"", value, mNames[index]));
 
         assert false;
 
@@ -686,9 +691,10 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         // looks like we were unable to resolve the drawable
-        Bridge.getLog().warning(null, String.format(
-                "Unable to resolve drawable \"%1$s\" in attribute \"%2$s\"", stringValue,
-                mNames[index]));
+        Bridge.getLog().warning(BridgeConstants.TAG_RESOURCES_RESOLVE,
+                String.format(
+                    "Unable to resolve drawable \"%1$s\" in attribute \"%2$s\"", stringValue,
+                    mNames[index]));
 
         assert false;
 
@@ -717,9 +723,10 @@ public final class BridgeTypedArray extends TypedArray {
             return new CharSequence[] { value };
         }
 
-        Bridge.getLog().warning(null, String.format(
-                String.format("Unknown value for getTextArray(%d) => %s", //DEBUG
-                index, mResourceData[index].getName())));
+        Bridge.getLog().warning(BridgeConstants.TAG_RESOURCES_RESOLVE,
+                String.format(
+                    String.format("Unknown value for getTextArray(%d) => %s", //DEBUG
+                    index, mResourceData[index].getName())));
 
         return null;
     }

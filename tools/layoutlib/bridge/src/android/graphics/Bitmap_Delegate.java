@@ -18,6 +18,7 @@ package android.graphics;
 
 import com.android.ide.common.rendering.api.ResourceDensity;
 import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
 import android.graphics.Bitmap.Config;
@@ -248,7 +249,8 @@ public final class Bitmap_Delegate {
 
     /*package*/ static boolean nativeCompress(int nativeBitmap, int format, int quality,
             OutputStream stream, byte[] tempStorage) {
-        Bridge.getLog().error(null, "Bitmap.compress() is not supported");
+        Bridge.getLog().error(BridgeConstants.TAG_UNSUPPORTED,
+                "Bitmap.compress() is not supported");
         return true;
     }
 
@@ -383,7 +385,7 @@ public final class Bitmap_Delegate {
     /*package*/ static Bitmap nativeCreateFromParcel(Parcel p) {
         // This is only called by Bitmap.CREATOR (Parcelable.Creator<Bitmap>), which is only
         // used during aidl call so really this should not be called.
-        Bridge.getLog().error(null,
+        Bridge.getLog().error(BridgeConstants.TAG_UNSUPPORTED,
                 "AIDL is not suppored, and therefore Bitmaps cannot be created from parcels.");
         return null;
     }
@@ -392,7 +394,7 @@ public final class Bitmap_Delegate {
             int density, Parcel p) {
         // This is only called when sending a bitmap through aidl, so really this should not
         // be called.
-        Bridge.getLog().error(null,
+        Bridge.getLog().error(BridgeConstants.TAG_UNSUPPORTED,
                 "AIDL is not suppored, and therefore Bitmaps cannot be written to parcels.");
         return false;
     }
@@ -408,7 +410,7 @@ public final class Bitmap_Delegate {
         Paint_Delegate paint = Paint_Delegate.getDelegate(nativePaint);
 
         if (paint != null && paint.getMaskFilter() != null) {
-            Bridge.getLog().fidelityWarning(null,
+            Bridge.getLog().fidelityWarning(BridgeConstants.TAG_MASKFILTER,
                     "MaskFilter not supported in Bitmap.extractAlpha",
                     null);
         }

@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
 import java.awt.AlphaComposite;
@@ -72,7 +73,8 @@ public class PorterDuffXfermode_Delegate extends Xfermode_Delegate {
             }
         }
 
-        Bridge.getLog().error(null, String.format("Unknown PorterDuff.Mode: %d", mode));
+        Bridge.getLog().error(BridgeConstants.TAG_BROKEN,
+                String.format("Unknown PorterDuff.Mode: %d", mode));
         assert false;
         return PorterDuff.Mode.SRC_OVER;
     }
@@ -114,7 +116,7 @@ public class PorterDuffXfermode_Delegate extends Xfermode_Delegate {
                 return AlphaComposite.getInstance(AlphaComposite.XOR, falpha);
         }
 
-        Bridge.getLog().fidelityWarning(null,
+        Bridge.getLog().fidelityWarning(BridgeConstants.TAG_BROKEN,
                 String.format("Unsupported PorterDuff Mode: %s", mode.name()),
                 null);
 
