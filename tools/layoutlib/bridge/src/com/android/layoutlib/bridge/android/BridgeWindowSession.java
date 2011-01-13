@@ -160,4 +160,10 @@ public final class BridgeWindowSession implements IWindowSession {
         // pass for now.
         return null;
     }
+
+    public IBinder prepareDrag(IWindow arg0, boolean arg1, int arg2, int arg3, Surface arg4)
+            throws RemoteException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
