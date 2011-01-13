@@ -6,7 +6,7 @@
 
   Usage:
     Run a single page cycler test:
-      run_page_cycler.py "file:///sdcard/android/page_cycler/moz/start.html?auto=1\&iterations=10"
+      run_page_cycler.py "file:///sdcard/webkit/page_cycler/moz/start.html\?auto=1\&iterations=10"
 """
 
 import logging
@@ -32,7 +32,7 @@ def main(options, args):
 
   # Include all tests if none are specified.
   if not args:
-    print "need a URL, e.g. file:///sdcard/android/page_cycler/moz/start.html"
+    print "need a URL, e.g. file:///sdcard/webkit/page_cycler/moz/start.html\?auto=1\&iterations=10"
     sys.exit(1)
   else:
     path = ' '.join(args);

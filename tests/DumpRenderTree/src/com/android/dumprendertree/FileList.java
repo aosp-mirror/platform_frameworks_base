@@ -181,7 +181,7 @@ public abstract class FileList extends ListActivity
     }
 
     protected void setupPath() {
-        mPath = Environment.getExternalStorageDirectory() + "/android/layout_tests";
+        mPath = Environment.getExternalStorageDirectory() + "/webkit/layout_tests";
         mBaseLength = mPath.length();
     }
 
@@ -189,7 +189,7 @@ public abstract class FileList extends ListActivity
     protected int mBaseLength;
     protected String mFocusFile;
     protected int mFocusIndex;
-    
+
     private final static int OPEN_DIRECTORY = 0;
     private final static int RUN_TESTS = 1;
 
