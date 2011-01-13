@@ -453,8 +453,9 @@ public class MediaRecorder
      * the specified audio sampling rate is applicable. The sampling rate really depends
      * on the format for the audio recording, as well as the capabilities of the platform.
      * For instance, the sampling rate supported by AAC audio coding standard ranges
-     * from 8 to 96 kHz. Please consult with the related audio coding standard for the
-     * supported audio sampling rate.
+     * from 8 to 96 kHz, the sampling rate supported by AMRNB is 8kHz, and the sampling
+     * rate supported by AMRWB is 16kHz. Please consult with the related audio coding
+     * standard for the supported audio sampling rate.
      *
      * @param samplingRate the sampling rate for audio in samples per second.
      */
