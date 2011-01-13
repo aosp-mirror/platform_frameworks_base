@@ -1424,6 +1424,7 @@
   <public type="attr" name="alertDialogIcon" />
   <public type="attr" name="windowMinWidthMajor" />
   <public type="attr" name="windowMinWidthMinor" />
+  <public type="attr" name="queryHint" />
 
   <!-- A simple fade-in animation. -->
   <public type="animator" name="fade_in" id="0x010b0000" />

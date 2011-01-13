@@ -4664,6 +4664,8 @@
         <attr name="iconifiedByDefault" format="boolean"/>
         <!-- An optional maximum width of the SearchView. -->
         <attr name="maxWidth" />
+        <!-- An optional query hint string to be displayed in the empty query field. -->
+        <attr name="queryHint" format="string" />
     </declare-styleable>
 
     <declare-styleable name="ActionBar_LayoutParams">
