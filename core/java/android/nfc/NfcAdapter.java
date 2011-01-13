@@ -100,6 +100,20 @@ public final class NfcAdapter {
             "android.nfc.action.TRANSACTION_DETECTED";
 
     /**
+     * Broadcast Action: an RF field ON has been detected.
+     * @hide
+     */
+    public static final String ACTION_RF_FIELD_ON_DETECTED =
+            "android.nfc.action.RF_FIELD_ON_DETECTED";
+
+    /**
+     * Broadcast Action: an RF Field OFF has been detected.
+     * @hide
+     */
+    public static final String ACTION_RF_FIELD_OFF_DETECTED =
+            "android.nfc.action.RF_FIELD_OFF_DETECTED";
+
+    /**
      * Broadcast Action: an adapter's state changed between enabled and disabled.
      *
      * The new value is stored in the extra EXTRA_NEW_BOOLEAN_STATE and just contains
