@@ -19,6 +19,7 @@ package android.webkit;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
@@ -29,6 +30,8 @@ import android.test.suitebuilder.annotation.LargeTest;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 /**
  * This is a test for the behavior of the {@link AccessibilityInjector}
@@ -60,6 +63,17 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
     /** Lock for locking the test. */
     private static final Object sTestLock = new Object();
 
+    /** Key bindings used for testing. */
+    private static final String TEST_KEY_DINDINGS =
+        "0x13=0x01000100;" +
+        "0x14=0x01010100;" +
+        "0x15=0x04000000;" +
+        "0x16=0x04000000;" +
+        "0x200000013=0x03020701:0x03010201:0x03000101:0x03030001:0x03040001:0x03050001:0x03060001;" +
+        "0x200000014=0x03010001:0x03020101:0x03070201:0x03030701:0x03040701:0x03050701:0x03060701;" +
+        "0x200000015=0x03040301:0x03050401:0x03060501:0x03000601:0x03010601:0x03020601:0x03070601;" +
+        "0x200000016=0x03050601:0x03040501:0x03030401:0x03020301:0x03070301:0x03010301:0x03000301;";
+
     /** Handle to the test for use by the mock service. */
     private static AccessibilityInjectorTest sInstance;
 
@@ -75,6 +89,9 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
     /** Handle to the {@link WebView} to load data in. */
     private WebView mWebView;
 
+    /** Used for caching the default bindings so they can be restored. */
+    private String mDefaultKeyBindings;
+
     /** The received selection string for assertion checking. */
     private static String sReceivedSelectionString = SELECTION_STRING_UNKNOWN;
 
@@ -87,6 +104,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
             // until JUnit4 comes to play with @BeforeTest
             disableAccessibilityAndMockAccessibilityService();
             enableAccessibilityAndMockAccessibilityService();
+            injectTestWebContentKeyBindings();
         }
     }
 
@@ -98,6 +116,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
         if (sExecutedTestCount == TEST_CASE_COUNT) {
             // until JUnit4 comes to play with @AfterTest
             disableAccessibilityAndMockAccessibilityService();
+            restoreDefaultWebContentKeyBindings();
         }
         super.tearDown();
     }
@@ -849,6 +868,26 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
             }
         }
         return mWebView;
+    }
+
+    /**
+     * Injects web content key bindings used for testing. This is required
+     * to ensure that this test will be agnostic to changes of the bindings.
+     */
+    private void injectTestWebContentKeyBindings() {
+        ContentResolver contentResolver = getContext().getContentResolver();
+        mDefaultKeyBindings = Settings.Secure.getString(contentResolver,
+                Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS);
+        Settings.Secure.putString(contentResolver,
+                Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS, TEST_KEY_DINDINGS);
+    }
+
+    /**
+     * Restores the default web content key bindings.
+     */
+    private void restoreDefaultWebContentKeyBindings() {
+        Settings.Secure.putString(getContext().getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS, mDefaultKeyBindings);
     }
 
     /**
