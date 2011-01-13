@@ -1165,7 +1165,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                             IConnectivityManager.Stub.asInterface(b);
                     try {
                         service.stopUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
-                                (mDunRequired? Phone.FEATURE_ENABLE_DUN :
+                                (mDunRequired? Phone.FEATURE_ENABLE_DUN_ALWAYS :
                                              Phone.FEATURE_ENABLE_HIPRI));
                     } catch (Exception e) {
                         return false;
@@ -1354,10 +1354,11 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         }
 
         class TetherModeAliveState extends TetherMasterUtilState {
-            boolean mTryCell = WAIT_FOR_NETWORK_TO_SETTLE;
+            boolean mTryCell = !WAIT_FOR_NETWORK_TO_SETTLE;
             @Override
             public void enter() {
-                mTryCell = WAIT_FOR_NETWORK_TO_SETTLE;  // first pass lets just see what we have.
+                mTryCell = !WAIT_FOR_NETWORK_TO_SETTLE; // better try something first pass
+                                                        // or crazy tests cases will fail
                 chooseUpstreamType(mTryCell);
                 mTryCell = !mTryCell;
                 turnOnMasterTetherSettings(); // may transition us out
