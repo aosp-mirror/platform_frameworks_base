@@ -131,7 +131,7 @@ status_t SurfaceTexture::dequeueBuffer(int *buf) {
     Mutex::Autolock lock(mMutex);
     int found = INVALID_BUFFER_SLOT;
     for (int i = 0; i < mBufferCount; i++) {
-        if (!mSlots[i].mOwnedByClient && i != mCurrentTexture) {
+        if (!mSlots[i].mOwnedByClient && i != mCurrentTexture && i != mLastQueued) {
             mSlots[i].mOwnedByClient = true;
             found = i;
             break;
