@@ -16,6 +16,9 @@
 
 package android.nfc;
 
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.IntentFilter;
 import android.nfc.NdefMessage;
 import android.nfc.Tag;
 import android.nfc.ILlcpSocket;
@@ -44,6 +47,9 @@ interface INfcAdapter
     NdefMessage localGet();
     void localSet(in NdefMessage message);
     void openTagConnection(in Tag tag);
+    void enableForegroundDispatch(in ComponentName activity, in PendingIntent intent,
+        in IntentFilter[] filters);
+    void disableForegroundDispatch(in ComponentName activity);
 
     // Non-public methods
     // TODO: check and complete

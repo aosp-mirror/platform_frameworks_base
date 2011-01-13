@@ -1146,6 +1146,7 @@ public class Instrumentation {
      * @param activity The activity being resumed.
      */
     public void callActivityOnResume(Activity activity) {
+        activity.mResumed = true;
         activity.onResume();
         
         if (mActivityMonitors != null) {
