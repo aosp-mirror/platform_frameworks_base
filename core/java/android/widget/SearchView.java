@@ -217,6 +217,10 @@ public class SearchView extends LinearLayout {
         if (maxWidth != -1) {
             setMaxWidth(maxWidth);
         }
+        CharSequence queryHint = a.getText(R.styleable.SearchView_queryHint);
+        if (!TextUtils.isEmpty(queryHint)) {
+            setQueryHint(queryHint);
+        }
         a.recycle();
 
         // Save voice intent for later queries/launching
