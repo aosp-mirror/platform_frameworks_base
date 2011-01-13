@@ -55,6 +55,9 @@ void setGamma(float g) {
     gamma = (float3)g;
 }
 
+//sliao
+uchar3 convert2uchar3(float3 xyz);
+
 void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32_t y) {
     uchar4 *output = (uchar4 *)v_out;
     const FilterStruct *fs = (const FilterStruct *)usrData;
@@ -84,7 +87,7 @@ void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32
         temp = pow(temp, (float3)gamma);
     temp = clamp(temp * outWMinOutB + outBlack, 0.f, 255.f);
 
-    output->xyz = convert_uchar3(temp);
+    output->xyz = convert2uchar3(temp);
     //output->w = input->w;
 }
 
