@@ -20,6 +20,10 @@ import com.android.internal.os.AtomicFile;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
 import android.accounts.Account;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -33,9 +37,9 @@ import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
-import android.util.Pair;
 import android.util.SparseArray;
 import android.util.Xml;
+import android.util.Pair;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,12 +48,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.TimeZone;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
+import java.util.List;
 
 /**
  * Singleton that tracks the sync data and overall sync
@@ -319,7 +319,7 @@ public class SyncStorageEngine extends Handler {
         }
         // This call will return the correct directory whether Encrypted File Systems is
         // enabled or not.
-        File dataDir = Environment.getDataDirectory();
+        File dataDir = Environment.getSecureDataDirectory();
         sSyncStorageEngine = new SyncStorageEngine(context, dataDir);
     }
 

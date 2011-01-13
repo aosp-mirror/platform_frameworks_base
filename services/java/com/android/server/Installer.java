@@ -17,13 +17,16 @@
 package com.android.server;
 
 import android.content.pm.PackageStats;
-import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
+import android.net.LocalSocket;
+import android.util.Config;
 import android.util.Slog;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Socket;
+
 
 class Installer {
     private static final String TAG = "Installer";
@@ -98,7 +101,7 @@ class Installer {
 		int len;
 		buflen = 0;
 		if (!readBytes(buf, 2)) return false;
-		len = ((buf[0]) & 0xff) | (((buf[1]) & 0xff) << 8);
+		len = (((int) buf[0]) & 0xff) | ((((int) buf[1]) & 0xff) << 8);
 		if ((len < 1) || (len > 1024)) {
             Slog.e(TAG,"invalid reply length ("+len+")");
 			disconnect();
@@ -163,10 +166,16 @@ class Installer {
 		}
 	}
 
-    public int install(String name, int uid, int gid) {
+    public int install(String name, boolean useEncryptedFilesystem, int uid, int gid) {
         StringBuilder builder = new StringBuilder("install");
         builder.append(' ');
         builder.append(name);
+        builder.append(' ');
+        if (useEncryptedFilesystem) {
+            builder.append('1');
+        } else {
+            builder.append('0');
+        }
         builder.append(' ');
         builder.append(uid);
         builder.append(' ');
@@ -200,34 +209,57 @@ class Installer {
         return execute(builder.toString());
     }
 
-    public int remove(String name) {
+    public int remove(String name, boolean useEncryptedFilesystem) {
         StringBuilder builder = new StringBuilder("remove");
         builder.append(' ');
         builder.append(name);
+        builder.append(' ');
+        if (useEncryptedFilesystem) {
+            builder.append('1');
+        } else {
+            builder.append('0');
+        }
         return execute(builder.toString());
     }
 
-    public int rename(String oldname, String newname) {
+    public int rename(String oldname, String newname, boolean useEncryptedFilesystem) {
         StringBuilder builder = new StringBuilder("rename");
         builder.append(' ');
         builder.append(oldname);
         builder.append(' ');
         builder.append(newname);
+        builder.append(' ');
+        if (useEncryptedFilesystem) {
+            builder.append('1');
+        } else {
+            builder.append('0');
+        }
         return execute(builder.toString());
     }
 
-    public int deleteCacheFiles(String name) {
+    public int deleteCacheFiles(String name, boolean useEncryptedFilesystem) {
         StringBuilder builder = new StringBuilder("rmcache");
         builder.append(' ');
         builder.append(name);
         builder.append(' ');
+        if (useEncryptedFilesystem) {
+            builder.append('1');
+        } else {
+            builder.append('0');
+        }
         return execute(builder.toString());
     }
     
-    public int clearUserData(String name) {
+    public int clearUserData(String name, boolean useEncryptedFilesystem) {
         StringBuilder builder = new StringBuilder("rmuserdata");
         builder.append(' ');
         builder.append(name);
+        builder.append(' ');
+        if (useEncryptedFilesystem) {
+            builder.append('1');
+        } else {
+            builder.append('0');
+        }
         return execute(builder.toString());
     }
     
@@ -260,8 +292,8 @@ class Installer {
         return execute(builder.toString());
     }
     
-    public int getSizeInfo(String pkgName, String apkPath, String fwdLockApkPath,
-            PackageStats pStats) {
+    public int getSizeInfo(String pkgName, String apkPath,
+            String fwdLockApkPath, PackageStats pStats, boolean useEncryptedFilesystem) {
         StringBuilder builder = new StringBuilder("getsize");
         builder.append(' ');
         builder.append(pkgName);
@@ -269,6 +301,12 @@ class Installer {
         builder.append(apkPath);
         builder.append(' ');
         builder.append(fwdLockApkPath != null ? fwdLockApkPath : "!");
+        builder.append(' ');
+        if (useEncryptedFilesystem) {
+            builder.append('1');
+        } else {
+            builder.append('0');
+        }
 
         String s = transaction(builder.toString());
         String res[] = s.split(" ");
