@@ -622,10 +622,12 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         setupDraw();
         setupDrawWithTexture();
         setupDrawColor(alpha, alpha, alpha, alpha);
+        setupDrawColorFilter();
         setupDrawBlending(layer->blend || layer->alpha < 255, layer->mode, false);
         setupDrawProgram();
         setupDrawDirtyRegionsDisabled();
         setupDrawPureColorUniforms();
+        setupDrawColorFilterUniforms();
         setupDrawTexture(layer->texture);
         setupDrawModelViewTranslate(rect.left, rect.top, rect.right, rect.bottom);
         setupDrawMesh(&mesh[0].position[0], &mesh[0].texture[0]);
@@ -1485,28 +1487,22 @@ void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
     finishDrawTexture();
 }
 
-void OpenGLRenderer::drawLayer(int texture, float left, float top, float right, float bottom,
-        float u, float v, SkPaint* paint) {
-    if (quickReject(left, top, right, bottom)) {
+void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
+    if (!layer || quickReject(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight())) {
         return;
     }
 
     glActiveTexture(gTextureUnits[0]);
-    if (!texture) return;
-
-    mCaches.unbindMeshBuffer();
-    resetDrawTextureTexCoords(0.0f, v, u, 0.0f);
 
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    // TODO: Should get the blend info from the caller
-    drawTextureMesh(left, top, right, bottom, texture, alpha / 255.0f, mode, true,
-            &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
-            GL_TRIANGLE_STRIP, gMeshCount);
+    layer->alpha = alpha;
+    layer->mode = mode;
 
-    resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
+    const Rect r(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight());
+    composeLayerRect(layer, r);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

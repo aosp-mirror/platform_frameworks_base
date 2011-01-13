@@ -242,8 +242,7 @@ void DisplayList::replay(OpenGLRenderer& renderer) {
             }
             break;
             case DrawLayer: {
-                renderer.drawLayer(getInt(), getFloat(), getFloat(), getFloat(), getFloat(),
-                        getFloat(), getFloat(), getPaint());
+                renderer.drawLayer((Layer*) getInt(), getFloat(), getFloat(), getPaint());
             }
             break;
             case DrawBitmap: {
@@ -488,13 +487,10 @@ void DisplayListRenderer::drawDisplayList(DisplayList* displayList) {
     addDisplayList(displayList);
 }
 
-void DisplayListRenderer::drawLayer(int texture, float left, float top, float right, float bottom,
-        float u, float v, SkPaint* paint) {
+void DisplayListRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
     addOp(DisplayList::DrawLayer);
-    addInt(texture);
-    addBounds(left, top, right, bottom);
-    addFloat(u);
-    addFloat(v);
+    addInt((int) layer);
+    addPoint(x, y);
     addPaint(paint);
 }
 
