@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge.android;
+package com.android.layoutlib.bridge;
 
 import android.content.Context;
 import android.graphics.Canvas;
