@@ -23,6 +23,7 @@
 #include "include/NuCachedSource2.h"
 #include "include/NuHTTPDataSource.h"
 #include "include/DRMExtractor.h"
+#include "include/FLACExtractor.h"
 
 #include "matroska/MatroskaExtractor.h"
 
@@ -104,6 +105,7 @@ void DataSource::RegisterDefaultSniffers() {
     RegisterSniffer(SniffMatroska);
     RegisterSniffer(SniffOgg);
     RegisterSniffer(SniffWAV);
+    RegisterSniffer(SniffFLAC);
     RegisterSniffer(SniffAMR);
     RegisterSniffer(SniffMPEG2TS);
     RegisterSniffer(SniffMP3);
