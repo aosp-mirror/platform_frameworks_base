@@ -82,6 +82,15 @@ static void SurfaceTexture_updateTexImage(JNIEnv* env, jobject clazz)
     surfaceTexture->updateTexImage();
 }
 
+static void SurfaceTexture_getTransformMatrix(JNIEnv* env, jobject clazz,
+        jfloatArray jmtx)
+{
+    sp<SurfaceTexture> surfaceTexture(getSurfaceTexture(env, clazz));
+    float* mtx = env->GetFloatArrayElements(jmtx, NULL);
+    surfaceTexture->getTransformMatrix(mtx);
+    env->ReleaseFloatArrayElements(jmtx, mtx, 0);
+}
+
 // ----------------------------------------------------------------------------
 
 const char* const kSurfaceTextureClassPathName = "android/graphics/SurfaceTexture";
@@ -91,6 +100,7 @@ static JNINativeMethod gSurfaceTextureMethods[] = {
     {"nativeClassInit",     "()V",  (void*)nativeClassInit },
     {"init",                "(I)V", (void*)SurfaceTexture_init },
     {"updateTexImage",      "()V",  (void*)SurfaceTexture_updateTexImage },
+    {"getTransformMatrixImpl", "([F)V",  (void*)SurfaceTexture_getTransformMatrix },
 };
 
 static void nativeClassInit(JNIEnv* env, jclass clazz)
