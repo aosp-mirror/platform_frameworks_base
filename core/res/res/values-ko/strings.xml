@@ -152,6 +152,8 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"비행기 모드"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"비행기 모드 사용"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"비행기 모드 사용 안함"</string>
+    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"안전 모드"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 시스템"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"요금이 부과되는 서비스"</string>
@@ -361,6 +363,10 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"애플리케이션이 카메라 플래시를 제어할 수 있도록 합니다."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"USB 장치 액세스"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"애플리케이션이 USB 장치에 액세스하도록 허용합니다."</string>
+    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
+    <skip />
+    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
+    <skip />
     <string name="permlab_hardware_test" msgid="4148290860400659146">"하드웨어 테스트"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"애플리케이션이 하드웨어를 테스트할 목적으로 다양한 주변장치를 제어할 수 있도록 합니다."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"전화번호 자동 연결"</string>

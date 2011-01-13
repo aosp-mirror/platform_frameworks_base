@@ -151,6 +151,8 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Repülőgép üzemmód"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Repülőgép üzemmód bekapcsolva"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Repülőgép üzemmód kikapcsolva"</string>
+    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Biztonsági üzemmód"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android rendszer"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Fizetős szolgáltatások"</string>
@@ -360,6 +362,10 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Lehetővé teszi az alkalmazás számára a vaku vezérlését."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"USB-eszközök elérése"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Lehetővé teszi az alkalmazások számára az USB-eszközök elérését."</string>
+    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
+    <skip />
+    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
+    <skip />
     <string name="permlab_hardware_test" msgid="4148290860400659146">"hardver tesztelése"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Lehetővé teszi az alkalmazás számára különböző perifériák vezérlését hardvertesztelés céljából."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefonszámok közvetlen hívása"</string>
