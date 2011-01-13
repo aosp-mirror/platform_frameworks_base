@@ -16,10 +16,6 @@
 
 package com.android.server;
 
-import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
-import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
@@ -28,18 +24,22 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.backup.IBackupManager;
-import android.content.ComponentName;
 import android.content.Context;
+import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
-import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
+import android.content.IntentSender.SendIntentException;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
@@ -54,10 +54,13 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageStats;
-import android.content.pm.PermissionGroupInfo;
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+import android.content.pm.PackageParser;
 import android.content.pm.PermissionInfo;
+import android.content.pm.PermissionGroupInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -67,30 +70,24 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
-import android.os.Environment;
-import android.os.FileObserver;
-import android.os.FileUtils;
-import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.os.RemoteException;
+import android.os.Environment;
+import android.os.FileObserver;
+import android.os.FileUtils;
+import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.security.SystemKeyStore;
-import android.util.Config;
-import android.util.DisplayMetrics;
-import android.util.EventLog;
-import android.util.Log;
-import android.util.LogPrinter;
-import android.util.Slog;
-import android.util.SparseArray;
-import android.util.Xml;
+import android.util.*;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -117,16 +114,14 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 /**
  * Keep track of all those .apks everywhere.
@@ -435,7 +430,6 @@ class PackageManagerService extends IPackageManager.Stub {
             super(looper);
         }
         
-        @Override
         public void handleMessage(Message msg) {
             try {
                 doHandleMessage(msg);
@@ -577,7 +571,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     // Send broadcasts
                     for (int i = 0; i < size; i++) {
                         sendPackageChangedBroadcast(packages[i], true,
-                                components[i], uids[i]);
+                                (ArrayList<String>)components[i], uids[i]);
                     }
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                     break;
@@ -970,7 +964,9 @@ class PackageManagerService extends IPackageManager.Stub {
                             + " no longer exists; wiping its data";
                     reportSettingsProblem(Log.WARN, msg);
                     if (mInstaller != null) {
-                            mInstaller.remove(ps.name);
+                        // XXX how to set useEncryptedFSDir for packages that
+                        // are not encrypted?
+                        mInstaller.remove(ps.name, true);
                     }
                 }
             }
@@ -1054,7 +1050,8 @@ class PackageManagerService extends IPackageManager.Stub {
     void cleanupInstallFailedPackage(PackageSetting ps) {
         Slog.i(TAG, "Cleaning up incompletely installed app: " + ps.name);
         if (mInstaller != null) {
-            int retCode = mInstaller.remove(ps.name);
+            boolean useSecureFS = useEncryptedFilesystemForPackage(ps.pkg);
+            int retCode = mInstaller.remove(ps.name, useSecureFS);
             if (retCode < 0) {
                 Slog.w(TAG, "Couldn't remove app data directory for package: "
                            + ps.name + ", retcode=" + retCode);
@@ -2082,12 +2079,12 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             String pkgName = intent.getPackage();
             if (pkgName == null) {
-                return mActivities.queryIntent(intent,
+                return (List<ResolveInfo>)mActivities.queryIntent(intent,
                         resolvedType, flags);
             }
             PackageParser.Package pkg = mPackages.get(pkgName);
             if (pkg != null) {
-                return mActivities.queryIntentForPackage(intent,
+                return (List<ResolveInfo>) mActivities.queryIntentForPackage(intent,
                         resolvedType, flags, pkg.activities);
             }
             return null;
@@ -2272,12 +2269,12 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             String pkgName = intent.getPackage();
             if (pkgName == null) {
-                return mReceivers.queryIntent(intent,
+                return (List<ResolveInfo>)mReceivers.queryIntent(intent,
                         resolvedType, flags);
             }
             PackageParser.Package pkg = mPackages.get(pkgName);
             if (pkg != null) {
-                return mReceivers.queryIntentForPackage(intent,
+                return (List<ResolveInfo>) mReceivers.queryIntentForPackage(intent,
                         resolvedType, flags, pkg.receivers);
             }
             return null;
@@ -2315,12 +2312,12 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             String pkgName = intent.getPackage();
             if (pkgName == null) {
-                return mServices.queryIntent(intent,
+                return (List<ResolveInfo>)mServices.queryIntent(intent,
                         resolvedType, flags);
             }
             PackageParser.Package pkg = mPackages.get(pkgName);
             if (pkg != null) {
-                return mServices.queryIntentForPackage(intent,
+                return (List<ResolveInfo>)mServices.queryIntentForPackage(intent,
                         resolvedType, flags, pkg.services);
             }
             return null;
@@ -2419,7 +2416,6 @@ class PackageManagerService extends IPackageManager.Stub {
     /**
      * @deprecated
      */
-    @Deprecated
     public void querySyncProviders(List outNames, List outInfo) {
         synchronized (mPackages) {
             Iterator<Map.Entry<String, PackageParser.Provider>> i
@@ -2784,6 +2780,11 @@ class PackageManagerService extends IPackageManager.Stub {
         return performed ? DEX_OPT_PERFORMED : DEX_OPT_SKIPPED;
     }
 
+    private static boolean useEncryptedFilesystemForPackage(PackageParser.Package pkg) {
+        return Environment.isEncryptedFilesystemEnabled() &&
+                ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_NEVER_ENCRYPT) == 0);
+    }
+    
     private boolean verifyPackageUpdate(PackageSetting oldPkg, PackageParser.Package newPkg) {
         if ((oldPkg.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0) {
             Slog.w(TAG, "Unable to update from " + oldPkg.name
@@ -2800,7 +2801,14 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
     private File getDataPathForPackage(PackageParser.Package pkg) {
-        return new File(mAppDataDir, pkg.packageName);
+        boolean useEncryptedFSDir = useEncryptedFilesystemForPackage(pkg);
+        File dataPath;
+        if (useEncryptedFSDir) {
+            dataPath = new File(mSecureAppDataDir, pkg.packageName);
+        } else {
+            dataPath = new File(mAppDataDir, pkg.packageName);
+        }
+        return dataPath;
     }
     
     private PackageParser.Package scanPackageLI(PackageParser.Package pkg,
@@ -3149,6 +3157,7 @@ class PackageManagerService extends IPackageManager.Stub {
             pkg.applicationInfo.dataDir = dataPath.getPath();
         } else {
             // This is a normal package, need to make its data directory.
+            boolean useEncryptedFSDir = useEncryptedFilesystemForPackage(pkg);
             dataPath = getDataPathForPackage(pkg);
             
             boolean uidError = false;
@@ -3165,7 +3174,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         // If this is a system app, we can at least delete its
                         // current data so the application will still work.
                         if (mInstaller != null) {
-                            int ret = mInstaller.remove(pkgName);
+                            int ret = mInstaller.remove(pkgName, useEncryptedFSDir);
                             if (ret >= 0) {
                                 // Old data gone!
                                 String msg = "System package " + pkg.packageName
@@ -3176,7 +3185,7 @@ class PackageManagerService extends IPackageManager.Stub {
                                 recovered = true;
 
                                 // And now re-install the app.
-                                ret = mInstaller.install(pkgName, pkg.applicationInfo.uid,
+                                ret = mInstaller.install(pkgName, useEncryptedFSDir, pkg.applicationInfo.uid,
                                         pkg.applicationInfo.uid);
                                 if (ret == -1) {
                                     // Ack should not happen!
@@ -3217,7 +3226,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     Log.v(TAG, "Want this data dir: " + dataPath);
                 //invoke installer to do the actual installation
                 if (mInstaller != null) {
-                    int ret = mInstaller.install(pkgName, pkg.applicationInfo.uid,
+                    int ret = mInstaller.install(pkgName, useEncryptedFSDir, pkg.applicationInfo.uid,
                             pkg.applicationInfo.uid);
                     if(ret < 0) {
                         // Error from installer
@@ -4038,7 +4047,6 @@ class PackageManagerService extends IPackageManager.Stub {
     
     private final class ActivityIntentResolver
             extends IntentResolver<PackageParser.ActivityIntentInfo, ResolveInfo> {
-        @Override
         public List queryIntent(Intent intent, String resolvedType, boolean defaultOnly) {
             mFlags = defaultOnly ? PackageManager.MATCH_DEFAULT_ONLY : 0;
             return super.queryIntent(intent, resolvedType, defaultOnly);
@@ -4198,7 +4206,6 @@ class PackageManagerService extends IPackageManager.Stub {
 
     private final class ServiceIntentResolver
             extends IntentResolver<PackageParser.ServiceIntentInfo, ResolveInfo> {
-        @Override
         public List queryIntent(Intent intent, String resolvedType, boolean defaultOnly) {
             mFlags = defaultOnly ? PackageManager.MATCH_DEFAULT_ONLY : 0;
             return super.queryIntent(intent, resolvedType, defaultOnly);
@@ -4294,7 +4301,7 @@ class PackageManagerService extends IPackageManager.Stub {
         @Override
         protected ResolveInfo newResult(PackageParser.ServiceIntentInfo filter,
                 int match) {
-            final PackageParser.ServiceIntentInfo info = filter;
+            final PackageParser.ServiceIntentInfo info = (PackageParser.ServiceIntentInfo)filter;
             if (!mSettings.isEnabledLP(info.service.info, mFlags)) {
                 return null;
             }
@@ -4455,7 +4462,6 @@ class PackageManagerService extends IPackageManager.Stub {
             mIsRom = isrom;
         }
 
-        @Override
         public void onEvent(int event, String path) {
             String removedPackage = null;
             int removedUid = -1;
@@ -4840,7 +4846,6 @@ class PackageManagerService extends IPackageManager.Stub {
          * policy if needed and then create install arguments based
          * on the install location.
          */
-        @Override
         public void handleStartCopy() throws RemoteException {
             int ret = PackageManager.INSTALL_SUCCEEDED;
             boolean fwdLocked = (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
@@ -4950,7 +4955,6 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        @Override
         public void handleStartCopy() throws RemoteException {
             mRet = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
             // Check for storage space on target medium
@@ -5080,7 +5084,6 @@ class PackageManagerService extends IPackageManager.Stub {
             libraryPath = new File(dataDir, LIB_DIR_NAME).getPath();
         }
 
-        @Override
         boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
             try {
                 mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
@@ -5091,12 +5094,10 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        @Override
         String getCodePath() {
             return codeFileName;
         }
 
-        @Override
         void createCopyFile() {
             installDir = isFwdLocked() ? mDrmAppPrivateInstallDir : mAppInstallDir;
             codeFileName = createTempPackageFile(installDir).getPath();
@@ -5104,7 +5105,6 @@ class PackageManagerService extends IPackageManager.Stub {
             created = true;
         }
 
-        @Override
         int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
             if (temp) {
                 // Generate temp file name
@@ -5148,7 +5148,6 @@ class PackageManagerService extends IPackageManager.Stub {
             return ret;
         }
 
-        @Override
         int doPreInstall(int status) {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 cleanUp();
@@ -5156,7 +5155,6 @@ class PackageManagerService extends IPackageManager.Stub {
             return status;
         }
 
-        @Override
         boolean doRename(int status, final String pkgName, String oldCodePath) {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 cleanUp();
@@ -5181,7 +5179,6 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        @Override
         int doPostInstall(int status) {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 cleanUp();
@@ -5189,7 +5186,6 @@ class PackageManagerService extends IPackageManager.Stub {
             return status;
         }
 
-        @Override
         String getResourcePath() {
             return resourceFileName;
         }
@@ -5234,7 +5230,6 @@ class PackageManagerService extends IPackageManager.Stub {
             return ret;
         }
 
-        @Override
         void cleanUpResourcesLI() {
             String sourceDir = getCodePath();
             if (cleanUp() && mInstaller != null) {
@@ -5267,7 +5262,6 @@ class PackageManagerService extends IPackageManager.Stub {
             return true;
         }
 
-        @Override
         boolean doPostDeleteLI(boolean delete) {
             // XXX err, shouldn't we respect the delete flag?
             cleanUpResourcesLI();
@@ -5312,12 +5306,10 @@ class PackageManagerService extends IPackageManager.Stub {
             this.cid = cid;
         }
 
-        @Override
         void createCopyFile() {
             cid = getTempContainerId();
         }
 
-        @Override
         boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
             try {
                 mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
@@ -5328,7 +5320,6 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        @Override
         int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
             if (temp) {
                 createCopyFile();
@@ -5367,7 +5358,6 @@ class PackageManagerService extends IPackageManager.Stub {
             return libraryPath;
         }
 
-        @Override
         int doPreInstall(int status) {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 // Destroy container
@@ -5387,7 +5377,6 @@ class PackageManagerService extends IPackageManager.Stub {
             return status;
         }
 
-        @Override
         boolean doRename(int status, final String pkgName,
                 String oldCodePath) {
             String newCacheId = getNextCodePath(oldCodePath, pkgName, "/" + RES_FILE_NAME);
@@ -5439,7 +5428,6 @@ class PackageManagerService extends IPackageManager.Stub {
             packagePath = new File(cachePath, RES_FILE_NAME).getPath();
         }
 
-        @Override
         int doPostInstall(int status) {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 cleanUp();
@@ -5458,7 +5446,6 @@ class PackageManagerService extends IPackageManager.Stub {
             PackageHelper.destroySdDir(cid);
         }
 
-        @Override
         void cleanUpResourcesLI() {
             String sourceFile = getCodePath();
             // Remove dex file
@@ -5489,7 +5476,6 @@ class PackageManagerService extends IPackageManager.Stub {
             return cid.substring(0, idx);
         }
 
-        @Override
         boolean doPostDeleteLI(boolean delete) {
             boolean ret = false;
             boolean mounted = PackageHelper.isContainerMounted(cid);
@@ -6275,8 +6261,9 @@ class PackageManagerService extends IPackageManager.Stub {
             deletedPs = mSettings.mPackages.get(packageName);
         }
         if ((flags&PackageManager.DONT_DELETE_DATA) == 0) {
+            boolean useEncryptedFSDir = useEncryptedFilesystemForPackage(p);
             if (mInstaller != null) {
-                int retCode = mInstaller.remove(packageName);
+                int retCode = mInstaller.remove(packageName, useEncryptedFSDir);
                 if (retCode < 0) {
                     Slog.w(TAG, "Couldn't remove app data or cache directory for package: "
                                + packageName + ", retcode=" + retCode);
@@ -6529,9 +6516,10 @@ class PackageManagerService extends IPackageManager.Stub {
                 Slog.w(TAG, "Package " + packageName + " has no applicationInfo.");
                 return false;
             }
+            useEncryptedFSDir = useEncryptedFilesystemForPackage(p);
         }
         if (mInstaller != null) {
-            int retCode = mInstaller.clearUserData(packageName);
+            int retCode = mInstaller.clearUserData(packageName, useEncryptedFSDir);
             if (retCode < 0) {
                 Slog.w(TAG, "Couldn't remove cache files for package: "
                         + packageName);
@@ -6582,8 +6570,9 @@ class PackageManagerService extends IPackageManager.Stub {
             Slog.w(TAG, "Package " + packageName + " has no applicationInfo.");
             return false;
         }
+        boolean useEncryptedFSDir = useEncryptedFilesystemForPackage(p);
         if (mInstaller != null) {
-            int retCode = mInstaller.deleteCacheFiles(packageName);
+            int retCode = mInstaller.deleteCacheFiles(packageName, useEncryptedFSDir);
             if (retCode < 0) {
                 Slog.w(TAG, "Couldn't remove cache files for package: "
                            + packageName);
@@ -6645,8 +6634,10 @@ class PackageManagerService extends IPackageManager.Stub {
             }
             publicSrcDir = isForwardLocked(p) ? applicationInfo.publicSourceDir : null;
         }
+        boolean useEncryptedFSDir = useEncryptedFilesystemForPackage(p);
         if (mInstaller != null) {
-            int res = mInstaller.getSizeInfo(packageName, p.mPath, publicSrcDir, pStats);
+            int res = mInstaller.getSizeInfo(packageName, p.mPath,
+                    publicSrcDir, pStats, useEncryptedFSDir);
             if (res < 0) {
                 return false;
             } else {
@@ -7452,7 +7443,6 @@ class PackageManagerService extends IPackageManager.Stub {
             protectionLevel = PermissionInfo.PROTECTION_SIGNATURE;
         }
         
-        @Override
         public String toString() {
             return "BasePermission{"
                 + Integer.toHexString(System.identityHashCode(this))
@@ -7749,7 +7739,6 @@ class PackageManagerService extends IPackageManager.Stub {
             mSetComponents = myComponents;
         }
 
-        @Override
         public void writeToXml(XmlSerializer serializer) throws IOException {
             final int NS = mSetClasses != null ? mSetClasses.length : 0;
             serializer.attribute(null, "name", mShortActivity);
@@ -7803,7 +7792,8 @@ class PackageManagerService extends IPackageManager.Stub {
             this.pkgFlags = pkgFlags & (
                     ApplicationInfo.FLAG_SYSTEM |
                     ApplicationInfo.FLAG_FORWARD_LOCK |
-                    ApplicationInfo.FLAG_EXTERNAL_STORAGE);
+                    ApplicationInfo.FLAG_EXTERNAL_STORAGE |
+                    ApplicationInfo.FLAG_NEVER_ENCRYPT);
         }
     }
 
@@ -7947,7 +7937,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         public void copyFrom(PackageSetting base) {
-            super.copyFrom(base);
+            super.copyFrom((PackageSettingBase) base);
 
             userId = base.userId;
             sharedUser = base.sharedUser;
@@ -8760,7 +8750,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         sb.setLength(0);
                         sb.append(ai.packageName);
                         sb.append(" ");
-                        sb.append(ai.uid);
+                        sb.append((int)ai.uid);
                         sb.append(isDebug ? " 1 " : " 0 ");
                         sb.append(dataPath);
                         sb.append("\n");

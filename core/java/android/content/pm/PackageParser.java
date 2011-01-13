@@ -16,8 +16,6 @@
 
 package android.content.pm;
 
-import com.android.internal.util.XmlUtils;
-
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -34,6 +32,9 @@ import android.util.Config;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import com.android.internal.util.XmlUtils;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -47,9 +48,6 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Package archive parsing
@@ -1575,6 +1573,12 @@ public class PackageParser {
             ai.flags |= ApplicationInfo.FLAG_TEST_ONLY;
         }
 
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_neverEncrypt,
+                false)) {
+            ai.flags |= ApplicationInfo.FLAG_NEVER_ENCRYPT;
+        }
+
         String str;
         str = sa.getNonConfigurationString(
                 com.android.internal.R.styleable.AndroidManifestApplication_permission, 0);
@@ -2859,7 +2863,6 @@ public class PackageParser {
             }
         }
         
-        @Override
         public String toString() {
             return "Package{"
                 + Integer.toHexString(System.identityHashCode(this))
@@ -3000,13 +3003,11 @@ public class PackageParser {
             info = _info;
         }
         
-        @Override
         public void setPackageName(String packageName) {
             super.setPackageName(packageName);
             info.packageName = packageName;
         }
 
-        @Override
         public String toString() {
             return "Permission{"
                 + Integer.toHexString(System.identityHashCode(this))
@@ -3027,13 +3028,11 @@ public class PackageParser {
             info = _info;
         }
 
-        @Override
         public void setPackageName(String packageName) {
             super.setPackageName(packageName);
             info.packageName = packageName;
         }
 
-        @Override
         public String toString() {
             return "PermissionGroup{"
                 + Integer.toHexString(System.identityHashCode(this))
@@ -3120,13 +3119,11 @@ public class PackageParser {
             info.applicationInfo = args.owner.applicationInfo;
         }
         
-        @Override
         public void setPackageName(String packageName) {
             super.setPackageName(packageName);
             info.packageName = packageName;
         }
 
-        @Override
         public String toString() {
             return "Activity{"
                 + Integer.toHexString(System.identityHashCode(this))
@@ -3156,13 +3153,11 @@ public class PackageParser {
             info.applicationInfo = args.owner.applicationInfo;
         }
         
-        @Override
         public void setPackageName(String packageName) {
             super.setPackageName(packageName);
             info.packageName = packageName;
         }
 
-        @Override
         public String toString() {
             return "Service{"
                 + Integer.toHexString(System.identityHashCode(this))
@@ -3199,13 +3194,11 @@ public class PackageParser {
             this.syncable = existingProvider.syncable;
         }
 
-        @Override
         public void setPackageName(String packageName) {
             super.setPackageName(packageName);
             info.packageName = packageName;
         }
 
-        @Override
         public String toString() {
             return "Provider{"
                 + Integer.toHexString(System.identityHashCode(this))
@@ -3239,13 +3232,11 @@ public class PackageParser {
             info = _info;
         }
         
-        @Override
         public void setPackageName(String packageName) {
             super.setPackageName(packageName);
             info.packageName = packageName;
         }
 
-        @Override
         public String toString() {
             return "Instrumentation{"
                 + Integer.toHexString(System.identityHashCode(this))
@@ -3279,7 +3270,6 @@ public class PackageParser {
             activity = _activity;
         }
 
-        @Override
         public String toString() {
             return "ActivityIntentInfo{"
                 + Integer.toHexString(System.identityHashCode(this))
@@ -3294,7 +3284,6 @@ public class PackageParser {
             service = _service;
         }
 
-        @Override
         public String toString() {
             return "ServiceIntentInfo{"
                 + Integer.toHexString(System.identityHashCode(this))
