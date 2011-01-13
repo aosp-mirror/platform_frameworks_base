@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.layoutlib.bridge.impl.GcSnapshot;
 
@@ -422,7 +423,7 @@ public final class Canvas_Delegate {
 
         if (matrixDelegate.hasPerspective()) {
             assert false;
-            Bridge.getLog().fidelityWarning(null,
+            Bridge.getLog().fidelityWarning(BridgeConstants.TAG_MATRIX,
                     "android.graphics.Canvas#setMatrix(android.graphics.Matrix) only " +
                     "supports affine transformations.", null);
         }
@@ -492,7 +493,8 @@ public final class Canvas_Delegate {
         }
 
         if (filterDelegate.isSupported() == false) {
-            Bridge.getLog().fidelityWarning(null, filterDelegate.getSupportMessage(), null);
+            Bridge.getLog().fidelityWarning(BridgeConstants.TAG_DRAWFILTER,
+                    filterDelegate.getSupportMessage(), null);
         }
     }
 

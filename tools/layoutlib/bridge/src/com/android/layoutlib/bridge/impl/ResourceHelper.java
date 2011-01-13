@@ -20,6 +20,7 @@ import com.android.ide.common.rendering.api.DensityBasedResourceValue;
 import com.android.ide.common.rendering.api.ResourceDensity;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.ninepatch.NinePatch;
@@ -64,14 +65,18 @@ public final class ResourceHelper {
     public static int getColor(String value) {
         if (value != null) {
             if (value.startsWith("#") == false) {
-                throw new NumberFormatException();
+                throw new NumberFormatException(
+                        String.format("Color value '%s' must start with #", value));
             }
 
             value = value.substring(1);
 
             // make sure it's not longer than 32bit
             if (value.length() > 8) {
-                throw new NumberFormatException();
+                throw new NumberFormatException(String.format(
+                        "Color value '%s' is too long. Format is either" +
+                        "#AARRGGBB, #RRGGBB, #RGB, or #ARGB",
+                        value));
             }
 
             if (value.length() == 3) { // RGB format
@@ -160,7 +165,8 @@ public final class ResourceHelper {
                         // URL is wrong, we'll return null below
                     } catch (IOException e) {
                         // failed to read the file, we'll return null below.
-                        Bridge.getLog().error(null, "Failed lot load " + file.getAbsolutePath(), e);
+                        Bridge.getLog().error(BridgeConstants.TAG_RESOURCES_READ,
+                                "Failed lot load " + file.getAbsolutePath(), e);
                     }
                 }
 
@@ -194,7 +200,7 @@ public final class ResourceHelper {
                     Bridge.getLog().error(null, "Failed to parse file " + value, e);
                 }
             } else {
-                Bridge.getLog().error(null,
+                Bridge.getLog().error(BridgeConstants.TAG_BROKEN,
                         String.format("File %s does not exist (or is not a file)", stringValue));
             }
 
@@ -221,7 +227,8 @@ public final class ResourceHelper {
                     return new BitmapDrawable(context.getResources(), bitmap);
                 } catch (IOException e) {
                     // we'll return null below
-                    Bridge.getLog().error(null, "Failed lot load " + bmpFile.getAbsolutePath(), e);
+                    Bridge.getLog().error(BridgeConstants.TAG_RESOURCES_READ,
+                            "Failed lot load " + bmpFile.getAbsolutePath(), e);
                 }
             } else {
                 // attempt to get a color from the value
@@ -230,8 +237,8 @@ public final class ResourceHelper {
                     return new ColorDrawable(color);
                 } catch (NumberFormatException e) {
                     // we'll return null below.
-                    Bridge.getLog().error(null,
-                            "failed to convert " + stringValue + " into a drawable");
+                    Bridge.getLog().error(BridgeConstants.TAG_RESOURCES_FORMAT,
+                            "Failed to convert " + stringValue + " into a drawable", e);
                 }
             }
         }

@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.layoutlib.bridge.impl.GcSnapshot;
 import com.android.ninepatch.NinePatchChunk;
@@ -196,10 +197,12 @@ public final class NinePatch_Delegate {
                     sChunkCache.put(array, new SoftReference<NinePatchChunk>(chunk));
                 }
             } catch (IOException e) {
-                Bridge.getLog().error(null, "Failed to deserialize NinePatchChunk content.", e);
+                Bridge.getLog().error(BridgeConstants.TAG_BROKEN,
+                        "Failed to deserialize NinePatchChunk content.", e);
                 return null;
             } catch (ClassNotFoundException e) {
-                Bridge.getLog().error(null, "Failed to deserialize NinePatchChunk class.", e);
+                Bridge.getLog().error(BridgeConstants.TAG_BROKEN,
+                        "Failed to deserialize NinePatchChunk class.", e);
                 return null;
             } finally {
                 if (ois != null) {

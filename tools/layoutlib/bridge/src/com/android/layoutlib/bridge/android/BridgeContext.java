@@ -336,7 +336,8 @@ public final class BridgeContext extends Activity {
             isPlatformFile = false;
         } else if (set != null) { // null parser is ok
             // really this should not be happening since its instantiated in Bridge
-            Bridge.getLog().error(null, "Parser is not a BridgeXmlBlockParser!");
+            Bridge.getLog().error(BridgeConstants.TAG_BROKEN,
+                    "Parser is not a BridgeXmlBlockParser!");
             return null;
         }
 
@@ -705,7 +706,7 @@ public final class BridgeContext extends Activity {
         // This is normal if the resource is an ID that is generated automatically.
         // For other resources, we output a warning
         if ("+id".equals(resType) == false && "+android:id".equals(resType) == false) { //$NON-NLS-1$ //$NON-NLS-2$
-            Bridge.getLog().warning("resources", //$NON-NLS-1$
+            Bridge.getLog().warning(BridgeConstants.TAG_RESOURCES_RESOLVE,
                     "Couldn't resolve resource @" +
                     (frameworkOnly ? "android:" : "") + resType + "/" + resName);
         }
