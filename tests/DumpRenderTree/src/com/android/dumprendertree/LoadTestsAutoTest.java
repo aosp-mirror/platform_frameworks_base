@@ -93,11 +93,8 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
         final VMRuntime runtime = VMRuntime.getRuntime();
 
         runtime.gcSoftReferences();
-        runtime.runFinalizationSync();
         runtime.gcSoftReferences();
-        runtime.runFinalizationSync();
         runtime.gcSoftReferences();
-        runtime.runFinalizationSync();
         Runtime.getRuntime().runFinalization();
         Runtime.getRuntime().gc();
         Runtime.getRuntime().gc();
