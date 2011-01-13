@@ -194,10 +194,11 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         AnimatorSet mContentAnim;
 
         // should group this into a multi-property animation
-        final int OPEN_DURATION = 250;
+        final int OPEN_DURATION = 136;
+        final int CLOSE_DURATION = 250;
 
         // the panel will start to appear this many px from the end
-        final int HYPERSPACE_OFFRAMP = 120;
+        final int HYPERSPACE_OFFRAMP = 30;
 
         Choreographer() {
         }
@@ -223,13 +224,13 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
                 end = y + HYPERSPACE_OFFRAMP;
             }
             Animator posAnim = ObjectAnimator.ofFloat(mContentParent, "translationY", start, end);
-            posAnim.setInterpolator(appearing 
+            posAnim.setInterpolator(appearing
                     ? new android.view.animation.DecelerateInterpolator(2.0f)
                     : new android.view.animation.AccelerateInterpolator(2.0f));
 
             Animator glowAnim = ObjectAnimator.ofFloat(mGlow, "alpha",
                     mGlow.getAlpha(), appearing ? 1.0f : 0.0f);
-            glowAnim.setInterpolator(appearing 
+            glowAnim.setInterpolator(appearing
                     ? new android.view.animation.AccelerateInterpolator(1.0f)
                     : new android.view.animation.DecelerateInterpolator(1.0f));
 
@@ -241,7 +242,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
                 .with(bgAnim)
                 .with(posAnim)
                 ;
-            mContentAnim.setDuration(OPEN_DURATION);
+            mContentAnim.setDuration(appearing ? OPEN_DURATION : CLOSE_DURATION);
             mContentAnim.addListener(this);
         }
 
