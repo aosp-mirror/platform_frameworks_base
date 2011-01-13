@@ -7408,6 +7408,12 @@ class PackageManagerService extends IPackageManager.Stub {
     static class PackageSignatures {
         private Signature[] mSignatures;
 
+        PackageSignatures(PackageSignatures orig) {
+            if (orig != null && orig.mSignatures != null) {
+                mSignatures = orig.mSignatures.clone();
+            }
+        }
+
         PackageSignatures(Signature[] sigs) {
             assignSignatures(sigs);
         }
@@ -7743,6 +7749,15 @@ class PackageManagerService extends IPackageManager.Stub {
             setFlags(pkgFlags);
         }
 
+        GrantedPermissions(GrantedPermissions base) {
+            pkgFlags = base.pkgFlags;
+            grantedPermissions = (HashSet<String>) base.grantedPermissions.clone();
+
+            if (base.gids != null) {
+                gids = base.gids.clone();
+            }
+        }
+
         void setFlags(int pkgFlags) {
             this.pkgFlags = pkgFlags & (
                     ApplicationInfo.FLAG_SYSTEM |
@@ -7770,7 +7785,7 @@ class PackageManagerService extends IPackageManager.Stub {
         int versionCode;
 
         boolean uidError;
-        
+
         PackageSignatures signatures = new PackageSignatures();
 
         boolean permissionsFixed;
@@ -7794,6 +7809,48 @@ class PackageManagerService extends IPackageManager.Stub {
             this.name = name;
             this.realName = realName;
             init(codePath, resourcePath, nativeLibraryPathString, pVersionCode);
+        }
+
+        /**
+         * New instance of PackageSetting with one-level-deep cloning.
+         */
+        PackageSettingBase(PackageSettingBase base) {
+            super(base);
+
+            name = base.name;
+            realName = base.realName;
+            codePath = base.codePath;
+            codePathString = base.codePathString;
+            resourcePath = base.resourcePath;
+            resourcePathString = base.resourcePathString;
+            nativeLibraryPathString = base.nativeLibraryPathString;
+
+            if (base.obbPathStrings != null) {
+                obbPathStrings = base.obbPathStrings.clone();
+            }
+
+            timeStamp = base.timeStamp;
+            firstInstallTime = base.firstInstallTime;
+            lastUpdateTime = base.lastUpdateTime;
+            versionCode = base.versionCode;
+
+            uidError = base.uidError;
+
+            signatures = new PackageSignatures(base.signatures);
+
+            permissionsFixed = base.permissionsFixed;
+            haveGids = base.haveGids;
+
+            disabledComponents = (HashSet<String>) base.disabledComponents.clone();
+
+            enabledComponents = (HashSet<String>) base.enabledComponents.clone();
+
+            enabled = base.enabled;
+            installStatus = base.installStatus;
+
+            origPackage = base.origPackage;
+
+            installerPackageName = base.installerPackageName;
         }
 
         void init(File codePath, File resourcePath, String nativeLibraryPathString,
@@ -7826,6 +7883,9 @@ class PackageManagerService extends IPackageManager.Stub {
             timeStamp = newStamp;
         }
 
+        /**
+         * Make a shallow copy of this package settings.
+         */
         public void copyFrom(PackageSettingBase base) {
             grantedPermissions = base.grantedPermissions;
             gids = base.gids;
@@ -7885,18 +7945,16 @@ class PackageManagerService extends IPackageManager.Stub {
                     pkgFlags);
         }
 
+        /**
+         * New instance of PackageSetting replicating the original settings.
+         * Note that it keeps the same PackageParser.Package instance.
+         */
         PackageSetting(PackageSetting orig) {
-            super(orig.name, orig.realName, orig.codePath, orig.resourcePath,
-                    orig.nativeLibraryPathString, orig.versionCode, orig.pkgFlags);
-            copyFrom(orig);
-        }
+            super(orig);
 
-        public void copyFrom(PackageSetting base) {
-            super.copyFrom((PackageSettingBase) base);
-
-            userId = base.userId;
-            sharedUser = base.sharedUser;
-            pkg = base.pkg;
+            userId = orig.userId;
+            pkg = orig.pkg;
+            sharedUser = orig.sharedUser;
         }
 
         @Override
@@ -8128,7 +8186,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 // a little trick...  when we install the new package, we don't
                 // want to modify the existing PackageSetting for the built-in
                 // version.  so at this point we need a new PackageSetting that
-                // is okay to much with.
+                // is okay to muck with.
                 PackageSetting newp = new PackageSetting(p);
                 replacePackageLP(name, newp);
                 return true;
