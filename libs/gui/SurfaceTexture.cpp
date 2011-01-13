@@ -29,6 +29,7 @@
 
 #include <surfaceflinger/ISurfaceComposer.h>
 #include <surfaceflinger/SurfaceComposerClient.h>
+#include <surfaceflinger/IGraphicBufferAlloc.h>
 
 #include <utils/Log.h>
 
@@ -83,6 +84,8 @@ SurfaceTexture::SurfaceTexture(GLuint tex) :
         mSlots[i].mEglDisplay = EGL_NO_DISPLAY;
         mSlots[i].mOwnedByClient = false;
     }
+    sp<ISurfaceComposer> composer(ComposerService::getComposerService());
+    mGraphicBufferAlloc = composer->createGraphicBufferAlloc();
 }
 
 SurfaceTexture::~SurfaceTexture() {
@@ -110,9 +113,8 @@ sp<GraphicBuffer> SurfaceTexture::requestBuffer(int buf,
         return 0;
     }
     usage |= GraphicBuffer::USAGE_HW_TEXTURE;
-    sp<ISurfaceComposer> composer(ComposerService::getComposerService());
-    sp<GraphicBuffer> graphicBuffer(composer->createGraphicBuffer(w, h,
-            format, usage));
+    sp<GraphicBuffer> graphicBuffer(
+            mGraphicBufferAlloc->createGraphicBuffer(w, h, format, usage));
     if (graphicBuffer == 0) {
         LOGE("requestBuffer: SurfaceComposer::createGraphicBuffer failed");
     } else {
@@ -122,6 +124,7 @@ sp<GraphicBuffer> SurfaceTexture::requestBuffer(int buf,
             mSlots[buf].mEglImage = EGL_NO_IMAGE_KHR;
             mSlots[buf].mEglDisplay = EGL_NO_DISPLAY;
         }
+        mAllocdBuffers.add(graphicBuffer);
     }
     return graphicBuffer;
 }
@@ -204,27 +207,28 @@ status_t SurfaceTexture::updateTexImage() {
     // Initially both mCurrentTexture and mLastQueued are INVALID_BUFFER_SLOT,
     // so this check will fail until a buffer gets queued.
     if (mCurrentTexture != mLastQueued) {
-        // Update the SurfaceTexture state.
-        mCurrentTexture = mLastQueued;
-        mCurrentCrop = mLastQueuedCrop;
-        mCurrentTransform = mLastQueuedTransform;
-
         // Update the GL texture object.
-        EGLImageKHR image = mSlots[mCurrentTexture].mEglImage;
+        EGLImageKHR image = mSlots[mLastQueued].mEglImage;
         if (image == EGL_NO_IMAGE_KHR) {
             EGLDisplay dpy = eglGetCurrentDisplay();
-            sp<GraphicBuffer> graphicBuffer = mSlots[mCurrentTexture].mGraphicBuffer;
+            sp<GraphicBuffer> graphicBuffer = mSlots[mLastQueued].mGraphicBuffer;
             image = createImage(dpy, graphicBuffer);
-            mSlots[mCurrentTexture].mEglImage = image;
-            mSlots[mCurrentTexture].mEglDisplay = dpy;
+            mSlots[mLastQueued].mEglImage = image;
+            mSlots[mLastQueued].mEglDisplay = dpy;
         }
         glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, (GLeglImageOES)image);
         GLint error = glGetError();
         if (error != GL_NO_ERROR) {
             LOGE("error binding external texture image %p (slot %d): %#04x",
-                    image, mCurrentTexture, error);
+                    image, mLastQueued, error);
             return -EINVAL;
         }
+
+        // Update the SurfaceTexture state.
+        mCurrentTexture = mLastQueued;
+        mCurrentTextureBuf = mSlots[mCurrentTexture].mGraphicBuffer;
+        mCurrentCrop = mLastQueuedCrop;
+        mCurrentTransform = mLastQueuedTransform;
     }
     return OK;
 }
@@ -282,6 +286,19 @@ void SurfaceTexture::freeAllBuffers() {
             mSlots[i].mEglDisplay = EGL_NO_DISPLAY;
         }
     }
+
+    int exceptBuf = -1;
+    for (size_t i = 0; i < mAllocdBuffers.size(); i++) {
+        if (mAllocdBuffers[i] == mCurrentTextureBuf) {
+            exceptBuf = i;
+            break;
+        }
+    }
+    mAllocdBuffers.clear();
+    if (exceptBuf >= 0) {
+        mAllocdBuffers.add(mCurrentTextureBuf);
+    }
+    mGraphicBufferAlloc->freeAllGraphicBuffersExcept(exceptBuf);
 }
 
 EGLImageKHR SurfaceTexture::createImage(EGLDisplay dpy,
