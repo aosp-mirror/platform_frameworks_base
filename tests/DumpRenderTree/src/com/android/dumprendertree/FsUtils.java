@@ -35,15 +35,15 @@ public class FsUtils {
     private static final String LOGTAG = "FsUtils";
     static final String EXTERNAL_DIR = Environment.getExternalStorageDirectory().toString();
     static final String HTTP_TESTS_PREFIX =
-        EXTERNAL_DIR + "/android/layout_tests/http/tests/";
+        EXTERNAL_DIR + "/webkit/layout_tests/http/tests/";
     static final String HTTPS_TESTS_PREFIX =
-        EXTERNAL_DIR + "/android/layout_tests/http/tests/ssl/";
+        EXTERNAL_DIR + "/webkit/layout_tests/http/tests/ssl/";
     static final String HTTP_LOCAL_TESTS_PREFIX =
-        EXTERNAL_DIR + "/android/layout_tests/http/tests/local/";
+        EXTERNAL_DIR + "/webkit/layout_tests/http/tests/local/";
     static final String HTTP_MEDIA_TESTS_PREFIX =
-        EXTERNAL_DIR + "/android/layout_tests/http/tests/media/";
+        EXTERNAL_DIR + "/webkit/layout_tests/http/tests/media/";
     static final String HTTP_WML_TESTS_PREFIX =
-        EXTERNAL_DIR + "/android/layout_tests/http/tests/wml/";
+        EXTERNAL_DIR + "/webkit/layout_tests/http/tests/wml/";
 
     private FsUtils() {
         //no creation of instances
