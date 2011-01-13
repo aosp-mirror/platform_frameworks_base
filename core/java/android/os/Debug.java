@@ -774,50 +774,27 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     public static native void getMemoryInfo(int pid, MemoryInfo memoryInfo);
 
     /**
-     * Establish an object allocation limit in the current thread.  Useful
-     * for catching regressions in code that is expected to operate
-     * without causing any allocations.
+     * Establish an object allocation limit in the current thread.
+     * This feature was never enabled in release builds.  Now that
+     * allocation limits have been removed this method has no effect.
      *
-     * <p>Pass in the maximum number of allowed allocations.  Use -1 to disable
-     * the limit.  Returns the previous limit.</p>
-     *
-     * <p>The preferred way to use this is:
-     * <pre>
-     *  int prevLimit = -1;
-     *  try {
-     *      prevLimit = Debug.setAllocationLimit(0);
-     *      ... do stuff that's not expected to allocate memory ...
-     *  } finally {
-     *      Debug.setAllocationLimit(prevLimit);
-     *  }
-     * </pre>
-     * This allows limits to be nested.  The try/finally ensures that the
-     * limit is reset if something fails.</p>
-     *
-     * <p>Exceeding the limit causes a dalvik.system.AllocationLimitError to
-     * be thrown from a memory allocation call.  The limit is reset to -1
-     * when this happens.</p>
-     *
-     * <p>The feature may be disabled in the VM configuration.  If so, this
-     * call has no effect, and always returns -1.</p>
+     * @deprecated This method is now obsolete.
      */
+    @Deprecated
     public static int setAllocationLimit(int limit) {
-        return VMDebug.setAllocationLimit(limit);
+        return -1;
     }
 
     /**
-     * Establish a global object allocation limit.  This is similar to
-     * {@link #setAllocationLimit(int)} but applies to all threads in
-     * the VM.  It will coexist peacefully with per-thread limits.
+     * Establish a global object allocation limit.  This feature was
+     * never enabled in release builds.  Now that allocation limits
+     * have been removed this method has no effect.
      *
-     * [ The value of "limit" is currently restricted to 0 (no allocations
-     *   allowed) or -1 (no global limit).  This may be changed in a future
-     *   release. ]
+     * @deprecated This method is now obsolete.
      */
+    @Deprecated
     public static int setGlobalAllocationLimit(int limit) {
-        if (limit != 0 && limit != -1)
-            throw new IllegalArgumentException("limit must be 0 or -1");
-        return VMDebug.setGlobalAllocationLimit(limit);
+        return -1;
     }
 
     /**
