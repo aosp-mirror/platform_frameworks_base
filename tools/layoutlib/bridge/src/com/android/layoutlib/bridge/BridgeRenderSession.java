@@ -22,10 +22,12 @@ import com.android.ide.common.rendering.api.Params;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.ViewInfo;
+import com.android.ide.common.rendering.api.Result.Status;
 import com.android.layoutlib.bridge.impl.RenderSessionImpl;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 
 import java.awt.image.BufferedImage;
 import java.util.Map;
@@ -60,6 +62,43 @@ public class BridgeRenderSession extends RenderSession {
     @Override
     public Map<String, String> getDefaultProperties(Object viewObject) {
         return mSession.getDefaultProperties(viewObject);
+    }
+
+    @Override
+    public Result getProperty(Object objectView, String propertyName) {
+        // TODO Auto-generated method stub
+        return super.getProperty(objectView, propertyName);
+    }
+
+    @Override
+    public Result setProperty(Object objectView, String propertyName, String propertyValue) {
+        // TODO Auto-generated method stub
+        return super.setProperty(objectView, propertyName, propertyValue);
+    }
+
+    @Override
+    public Result getViewParent(Object viewObject) {
+        if (viewObject instanceof View) {
+            return Status.SUCCESS.createResult(((View)viewObject).getParent());
+        }
+
+        throw new IllegalArgumentException("viewObject is not a View");
+    }
+
+    @Override
+    public Result getViewIndex(Object viewObject) {
+        if (viewObject instanceof View) {
+            View view = (View) viewObject;
+            ViewParent parentView = view.getParent();
+
+            if (parentView instanceof ViewGroup) {
+                Status.SUCCESS.createResult(((ViewGroup) parentView).indexOfChild(view));
+            }
+
+            return Status.SUCCESS.createResult();
+        }
+
+        throw new IllegalArgumentException("viewObject is not a View");
     }
 
     @Override
