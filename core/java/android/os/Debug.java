@@ -561,9 +561,9 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
-     * Returns the global count of external allocation requests.  Now
-     * that external allocation tracking no longer exists this method
-     * always returns 0.
+     * Returns the global count of external allocation requests.  The
+     * external allocation tracking feature was removed in Honeycomb.
+     * This method exists for compatibility and always returns 0.
      *
      * @deprecated This method is now obsolete.
      */
@@ -573,9 +573,9 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
-     * Returns the global count of bytes externally allocated.  Now
-     * that external allocation tracking no longer exists this method
-     * always returns 0.
+     * Returns the global count of bytes externally allocated.  The
+     * external allocation tracking feature was removed in Honeycomb.
+     * This method exists for compatibility and always returns 0.
      *
      * @deprecated This method is now obsolete.
      */
@@ -586,8 +586,9 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Returns the global count of freed external allocation requests.
-     * Now that external allocation tracking no longer exists this
-     * method always returns 0.
+     * The external allocation tracking feature was removed in
+     * Honeycomb.  This method exists for compatibility and always
+     * returns 0.
      *
      * @deprecated This method is now obsolete.
      */
@@ -598,8 +599,9 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Returns the global count of freed bytes from external
-     * allocation requests.  Now that external allocation tracking no
-     * longer exists this method always returns 0.
+     * allocation requests.  The external allocation tracking feature
+     * was removed in Honeycomb.  This method exists for compatibility
+     * and always returns 0.
      *
      * @deprecated This method is now obsolete.
      */
@@ -620,8 +622,9 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Returns the count of external allocation requests made by the
-     * current thread.  Now that external allocation tracking no
-     * longer exists this method always returns 0.
+     * current thread.  The external allocation tracking feature was
+     * removed in Honeycomb.  This method exists for compatibility and
+     * always returns 0.
      *
      * @deprecated This method is now obsolete.
      */
@@ -631,9 +634,9 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
-     * Returns the global count of bytes externally allocated.  Now
-     * that external allocation tracking no longer exists this method
-     * always returns 0.
+     * Returns the global count of bytes externally allocated.  The
+     * external allocation tracking feature was removed in Honeycomb.
+     * This method exists for compatibility and always returns 0.
      *
      * @deprecated This method is now obsolete.
      */
@@ -666,9 +669,9 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
-     * Resets the global count of external allocation requests.  Now
-     * that external allocation tracking has been removed this method
-     * has no effect.
+     * Resets the global count of external allocation requests.  The
+     * external allocation tracking feature was removed in Honeycomb.
+     * This method exists for compatibility and has no effect.
      *
      * @deprecated This method is now obsolete.
      */
@@ -676,9 +679,9 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     public static void resetGlobalExternalAllocCount() {}
 
     /**
-     * Resets the global count of bytes externally allocated.  Now
-     * that external allocation tracking has been removed this method
-     * has no effect.
+     * Resets the global count of bytes externally allocated.  The
+     * external allocation tracking feature was removed in Honeycomb.
+     * This method exists for compatibility and has no effect.
      *
      * @deprecated This method is now obsolete.
      */
@@ -686,9 +689,9 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     public static void resetGlobalExternalAllocSize() {}
 
     /**
-     * Resets the global count of freed external allocations.  Now
-     * that external allocation tracking has been removed this method
-     * has no effect.
+     * Resets the global count of freed external allocations.  The
+     * external allocation tracking feature was removed in Honeycomb.
+     * This method exists for compatibility and has no effect.
      *
      * @deprecated This method is now obsolete.
      */
@@ -697,8 +700,9 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Resets the global count counter of freed bytes from external
-     * allocations.  Now that external allocation tracking has been
-     * removed this method has no effect.
+     * allocations.  The external allocation tracking feature was
+     * removed in Honeycomb.  This method exists for compatibility and
+     * has no effect.
      *
      * @deprecated This method is now obsolete.
      */
@@ -717,8 +721,9 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Resets the count of external allocation requests made by the
-     * current thread.  Now that external allocation tracking has been
-     * removed this method has no effect.
+     * current thread.  The external allocation tracking feature was
+     * removed in Honeycomb.  This method exists for compatibility and
+     * has no effect.
      *
      * @deprecated This method is now obsolete.
      */
@@ -727,8 +732,9 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Resets the count of bytes externally allocated by the current
-     * thread.  Now that external allocation tracking has been removed
-     * this method has no effect.
+     * thread.  The external allocation tracking feature was removed
+     * in Honeycomb.  This method exists for compatibility and has no
+     * effect.
      *
      * @deprecated This method is now obsolete.
      */
@@ -775,8 +781,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Establish an object allocation limit in the current thread.
-     * This feature was never enabled in release builds.  Now that
-     * allocation limits have been removed this method has no effect.
+     * This feature was never enabled in release builds.  The
+     * allocation limits feature was removed in Honeycomb.  This
+     * method exists for compatibility and always returns -1 and has
+     * no effect.
      *
      * @deprecated This method is now obsolete.
      */
@@ -787,8 +795,9 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Establish a global object allocation limit.  This feature was
-     * never enabled in release builds.  Now that allocation limits
-     * have been removed this method has no effect.
+     * never enabled in release builds.  The allocation limits feature
+     * was removed in Honeycomb.  This method exists for compatibility
+     * and always returns -1 and has no effect.
      *
      * @deprecated This method is now obsolete.
      */
