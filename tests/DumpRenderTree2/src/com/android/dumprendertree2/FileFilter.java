@@ -68,8 +68,8 @@ public class FileFilter {
     public void loadTestExpectations() {
         URL url = null;
         try {
-            url = new URL(ForwarderManager.getHostSchemePort(false) + "LayoutTests/" +
-                    TEST_EXPECTATIONS_TXT_PATH);
+            url = new URL(ForwarderManager.getHostSchemePort(false) +
+                    "LayoutTests/" + TEST_EXPECTATIONS_TXT_PATH);
         } catch (MalformedURLException e) {
             assert false;
         }
@@ -78,9 +78,14 @@ public class FileFilter {
             InputStream inputStream = null;
             BufferedReader bufferedReader = null;
             try {
-                bufferedReader = new BufferedReader(new StringReader(new String(
-                        FsUtils.readDataFromUrl(url))));
-
+                byte[] httpAnswer = FsUtils.readDataFromUrl(url);
+                if (httpAnswer == null) {
+                    Log.w(LOG_TAG, "loadTestExpectations(): File not found: " +
+                            TEST_EXPECTATIONS_TXT_PATH);
+                    return;
+                }
+                bufferedReader = new BufferedReader(new StringReader(
+                        new String(httpAnswer)));
                 String line;
                 String entry;
                 String[] parts;
@@ -113,7 +118,8 @@ public class FileFilter {
                     path = trimTrailingSlashIfPresent(parts[0]);
 
                     /** Split on whitespace */
-                    tokens = new HashSet<String>(Arrays.asList(parts[1].split("\\s", 0)));
+                    tokens = new HashSet<String>(Arrays.asList(
+                            parts[1].split("\\s", 0)));
 
                     /** Chose the right collections to add to */
                     if (tokens.contains(TOKEN_CRASH)) {
@@ -138,8 +144,6 @@ public class FileFilter {
                     bufferedReader.close();
                 }
             }
-        } catch (FileNotFoundException e) {
-            Log.w(LOG_TAG, "reloadConfiguration(): File not found: " + e.getMessage());
         } catch (IOException e) {
             Log.e(LOG_TAG, "url=" + url, e);
         }
