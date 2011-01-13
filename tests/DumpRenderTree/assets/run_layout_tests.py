@@ -4,8 +4,8 @@
 
   First, you need to get an SD card or sdcard image that has layout tests on it.
   Layout tests are in following directory:
-    /sdcard/android/layout_tests
-  For example, /sdcard/android/layout_tests/fast
+    /sdcard/webkit/layout_tests
+  For example, /sdcard/webkit/layout_tests/fast
 
   Usage:
     Run all tests under fast/ directory:
@@ -22,7 +22,7 @@
   use --refresh-test-list option *once* to re-generate test list on the card.
 
   Some other options are:
-    --rebaseline generates expected layout tests results under /sdcard/android/expected_result/
+    --rebaseline generates expected layout tests results under /sdcard/webkit/expected_result/
     --time-out-ms (default is 8000 millis) for each test
     --adb-options="-e" passes option string to adb
     --results-directory=..., (default is ./layout-test-results) directory name under which results are stored.
@@ -57,8 +57,8 @@ def DumpRenderTreeFinished(adb_cmd):
     output: adb_cmd string
   """
 
-  # pull /sdcard/android/running_test.txt, if the content is "#DONE", it's done
-  shell_cmd_str = adb_cmd + " shell cat /sdcard/android/running_test.txt"
+  # pull /sdcard/webkit/running_test.txt, if the content is "#DONE", it's done
+  shell_cmd_str = adb_cmd + " shell cat /sdcard/webkit/running_test.txt"
   adb_output = subprocess.Popen(shell_cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
   return adb_output.strip() == "#DONE"
 
@@ -207,7 +207,7 @@ def main(options, args):
     # Get the running_test.txt
     logging.error("DumpRenderTree crashed, output:\n" + adb_output)
 
-    shell_cmd_str = adb_cmd + " shell cat /sdcard/android/running_test.txt"
+    shell_cmd_str = adb_cmd + " shell cat /sdcard/webkit/running_test.txt"
     crashed_test = ""
     while not crashed_test:
       (crashed_test, err) = subprocess.Popen(

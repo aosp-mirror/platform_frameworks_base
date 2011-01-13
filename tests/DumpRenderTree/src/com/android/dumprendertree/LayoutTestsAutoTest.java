@@ -129,11 +129,11 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
     static final int DEFAULT_TIMEOUT_IN_MILLIS = 5000;
 
     static final String EXTERNAL_DIR = Environment.getExternalStorageDirectory().toString();
-    static final String LAYOUT_TESTS_ROOT = EXTERNAL_DIR + "/android/layout_tests/";
-    static final String LAYOUT_TESTS_RESULT_DIR = EXTERNAL_DIR + "/android/layout_tests_results/";
-    static final String ANDROID_EXPECTED_RESULT_DIR = EXTERNAL_DIR + "/android/expected_results/";
-    static final String LAYOUT_TESTS_LIST_FILE = EXTERNAL_DIR + "/android/layout_tests_list.txt";
-    static final String TEST_STATUS_FILE = EXTERNAL_DIR + "/android/running_test.txt";
+    static final String LAYOUT_TESTS_ROOT = EXTERNAL_DIR + "/webkit/layout_tests/";
+    static final String LAYOUT_TESTS_RESULT_DIR = EXTERNAL_DIR + "/webkit/layout_tests_results/";
+    static final String ANDROID_EXPECTED_RESULT_DIR = EXTERNAL_DIR + "/webkit/expected_results/";
+    static final String LAYOUT_TESTS_LIST_FILE = EXTERNAL_DIR + "/webkit/layout_tests_list.txt";
+    static final String TEST_STATUS_FILE = EXTERNAL_DIR + "/webkit/running_test.txt";
     static final String LAYOUT_TESTS_RESULTS_REFERENCE_FILES[] = {
           "results/layout_tests_passed.txt",
           "results/layout_tests_failed.txt",
