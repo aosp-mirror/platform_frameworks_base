@@ -485,7 +485,14 @@ public final class ViewRoot extends Handler implements ViewParent,
     private void enableHardwareAcceleration(WindowManager.LayoutParams attrs) {
         mAttachInfo.mHardwareAccelerated = false;
         mAttachInfo.mHardwareAccelerationRequested = false;
-        
+
+        // Don't enable hardware acceleration when we're not on the main thread
+        if (Looper.getMainLooper() != Looper.myLooper()) {
+            Log.w(HardwareRenderer.LOG_TAG, "Attempting to initialize hardware acceleration " 
+                    + "outside of the main thread, aborting");
+            return;
+        }
+
         // Try to enable hardware acceleration if requested
         if (attrs != null &&
                 (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0) {
