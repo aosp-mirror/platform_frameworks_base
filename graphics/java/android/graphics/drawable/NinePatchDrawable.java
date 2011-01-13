@@ -327,7 +327,7 @@ public class NinePatchDrawable extends Drawable {
     
     @Override
     public ConstantState getConstantState() {
-        mNinePatchState.mChangingConfigurations = super.getChangingConfigurations();
+        mNinePatchState.mChangingConfigurations = getChangingConfigurations();
         return mNinePatchState;
     }
 

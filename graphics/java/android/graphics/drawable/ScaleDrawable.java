@@ -237,7 +237,7 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
     @Override
     public ConstantState getConstantState() {
         if (mScaleState.canConstantState()) {
-            mScaleState.mChangingConfigurations = super.getChangingConfigurations();
+            mScaleState.mChangingConfigurations = getChangingConfigurations();
             return mScaleState;
         }
         return null;

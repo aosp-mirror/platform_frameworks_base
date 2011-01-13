@@ -238,7 +238,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
     @Override
     public ConstantState getConstantState() {
         if (mInsetState.canConstantState()) {
-            mInsetState.mChangingConfigurations = super.getChangingConfigurations();
+            mInsetState.mChangingConfigurations = getChangingConfigurations();
             return mInsetState;
         }
         return null;
