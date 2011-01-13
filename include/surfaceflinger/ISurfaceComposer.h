@@ -28,6 +28,7 @@
 #include <ui/PixelFormat.h>
 
 #include <surfaceflinger/ISurfaceComposerClient.h>
+#include <surfaceflinger/IGraphicBufferAlloc.h>
 
 namespace android {
 // ----------------------------------------------------------------------------
@@ -96,6 +97,10 @@ public:
      */
     virtual sp<ISurfaceComposerClient> createClientConnection() = 0;
 
+    /* create a graphic buffer allocator
+     */
+    virtual sp<IGraphicBufferAlloc> createGraphicBufferAlloc() = 0;
+
     /* retrieve the control block */
     virtual sp<IMemoryHeap> getCblk() const = 0;
 
@@ -131,13 +136,6 @@ public:
      * This is an ASYNCHRONOUS call.
      */
     virtual void signal() const = 0;
-
-    /* Create a new GraphicBuffer for the client to use.  SurfaceFlinger will
-     * not maintain a reference to the GraphicBuffer, so the underlying native
-     * handle will be freed once the client references are released.
-     */
-    virtual sp<GraphicBuffer> createGraphicBuffer(uint32_t w, uint32_t h,
-            PixelFormat format, uint32_t usage) const = 0;
 };
 
 // ----------------------------------------------------------------------------
@@ -151,7 +149,7 @@ public:
         BOOT_FINISHED = IBinder::FIRST_CALL_TRANSACTION,
         CREATE_CONNECTION,
         CREATE_CLIENT_CONNECTION,
-        CREATE_GRAPHIC_BUFFER,
+        CREATE_GRAPHIC_BUFFER_ALLOC,
         GET_CBLK,
         OPEN_GLOBAL_TRANSACTION,
         CLOSE_GLOBAL_TRANSACTION,
