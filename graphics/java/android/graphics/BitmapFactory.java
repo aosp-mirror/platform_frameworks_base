@@ -206,10 +206,20 @@ public class BitmapFactory {
         public boolean inNativeAlloc;
 
         /**
+         * If inPreferQualityOverSpeed is set to true, the decoder will try to
+         * decode the reconstructed image to a higher quality even at the
+         * expense of the decoding speed. Currently the field only affects JPEG
+         * decode, in the case of which a more accurate, but slightly slower,
+         * IDCT method will be used instead.
+         */
+        public boolean inPreferQualityOverSpeed;
+
+        /**
          * The resulting width of the bitmap, set independent of the state of
          * inJustDecodeBounds. However, if there is an error trying to decode,
          * outWidth will be set to -1.
          */
+
         public int outWidth;
 
         /**

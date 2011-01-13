@@ -11,6 +11,7 @@ extern jfieldID gOptions_ditherFieldID;
 extern jfieldID gOptions_purgeableFieldID;
 extern jfieldID gOptions_shareableFieldID;
 extern jfieldID gOptions_nativeAllocFieldID;
+extern jfieldID gOptions_preferQualityOverSpeedFieldID;
 extern jfieldID gOptions_widthFieldID;
 extern jfieldID gOptions_heightFieldID;
 extern jfieldID gOptions_mimeFieldID;
