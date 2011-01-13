@@ -17,6 +17,7 @@
 package com.android.layoutlib.bridge.android;
 
 import com.android.ide.common.rendering.api.IProjectCallback;
+import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
@@ -142,7 +143,7 @@ public final class BridgeResources extends Resources {
             try {
                 return ResourceHelper.getColor(value.getValue());
             } catch (NumberFormatException e) {
-                Bridge.getLog().error(BridgeConstants.TAG_RESOURCES_FORMAT, e.getMessage(), e);
+                Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT, e.getMessage(), e);
                 return 0;
             }
         }
@@ -174,13 +175,13 @@ public final class BridgeResources extends Resources {
                         return ColorStateList.createFromXml(this,
                                 new BridgeXmlBlockParser(parser, mContext, resValue.isFramework()));
                     } catch (XmlPullParserException e) {
-                        Bridge.getLog().error(BridgeConstants.TAG_BROKEN,
+                        Bridge.getLog().error(LayoutLog.TAG_BROKEN,
                                 "Failed to configure parser for " + value, e);
                         // we'll return null below.
                     } catch (Exception e) {
                         // this is an error and not warning since the file existence is checked before
                         // attempting to parse it.
-                        Bridge.getLog().error(BridgeConstants.TAG_RESOURCES_READ,
+                        Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
                                 "Failed to parse file " + value, e);
 
                         return null;
@@ -191,7 +192,7 @@ public final class BridgeResources extends Resources {
                         int color = ResourceHelper.getColor(value);
                         return ColorStateList.valueOf(color);
                     } catch (NumberFormatException e) {
-                        Bridge.getLog().error(BridgeConstants.TAG_RESOURCES_FORMAT,
+                        Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT,
                                 "Failed to convert " + value + " into a ColorStateList", e);
                         return null;
                     }
@@ -251,7 +252,7 @@ public final class BridgeResources extends Resources {
                     return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
                 }
             } catch (XmlPullParserException e) {
-                Bridge.getLog().error(BridgeConstants.TAG_BROKEN,
+                Bridge.getLog().error(LayoutLog.TAG_BROKEN,
                         "Failed to configure parser for " + value.getValue(), e);
                 // we'll return null below.
             } catch (FileNotFoundException e) {
@@ -286,7 +287,7 @@ public final class BridgeResources extends Resources {
                     return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
                 }
             } catch (XmlPullParserException e) {
-                Bridge.getLog().error(BridgeConstants.TAG_BROKEN,
+                Bridge.getLog().error(LayoutLog.TAG_BROKEN,
                         "Failed to configure parser for " + value.getValue(), e);
                 // we'll return null below.
             } catch (FileNotFoundException e) {

@@ -17,6 +17,7 @@
 package com.android.layoutlib.bridge.android;
 
 import com.android.ide.common.rendering.api.IProjectCallback;
+import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
@@ -178,7 +179,7 @@ public final class BridgeInflater extends LayoutInflater {
 
                         return inflate(bridgeParser, root);
                     } catch (Exception e) {
-                        Bridge.getLog().error(BridgeConstants.TAG_RESOURCES_READ,
+                        Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
                                 "Failed to parse file " + f.getAbsolutePath(), e);
 
                         return null;

@@ -17,8 +17,8 @@
 package android.graphics;
 
 
+import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
-import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
 import android.graphics.Matrix.ScaleToFit;
@@ -613,7 +613,7 @@ public final class Matrix_Delegate {
     /*package*/ static boolean native_setPolyToPoly(int native_object, float[] src, int srcIndex,
             float[] dst, int dstIndex, int pointCount) {
         // FIXME
-        Bridge.getLog().fidelityWarning(BridgeConstants.TAG_UNSUPPORTED,
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Matrix.setPolyToPoly is not supported.",
                 null);
         return false;

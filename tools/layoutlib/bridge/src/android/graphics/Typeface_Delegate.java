@@ -16,8 +16,8 @@
 
 package android.graphics;
 
+import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
-import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.layoutlib.bridge.impl.FontLoader;
 
@@ -126,13 +126,13 @@ public final class Typeface_Delegate {
     }
 
     /*package*/ static synchronized int nativeCreateFromAsset(AssetManager mgr, String path) {
-        Bridge.getLog().fidelityWarning(BridgeConstants.TAG_UNSUPPORTED,
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Typeface.createFromAsset() is not supported.", null);
         return 0;
     }
 
     /*package*/ static synchronized int nativeCreateFromFile(String path) {
-        Bridge.getLog().fidelityWarning(BridgeConstants.TAG_UNSUPPORTED,
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Typeface.createFromFile() is not supported.", null);
         return 0;
     }
