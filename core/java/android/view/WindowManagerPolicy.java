@@ -23,6 +23,9 @@ import android.os.IBinder;
 import android.os.LocalPowerManager;
 import android.view.animation.Animation;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * This interface supplies all UI-specific behavior of the window manager.  An
  * instance of it is created by the window manager when it starts up, and allows
@@ -817,4 +820,15 @@ public interface WindowManagerPolicy {
      *                 {@link Surface#ROTATION_180}, {@link Surface#ROTATION_270}. 
      */
     public void setUserRotationMode(int mode, int rotation);
+
+    /**
+     * Print the WindowManagerPolicy's state into the given stream.
+     *
+     * @param prefix Text to print at the front of each line.
+     * @param fd The raw file descriptor that the dump is being sent to.
+     * @param writer The PrintWriter to which you should dump your state.  This will be
+     * closed for you after you return.
+     * @param args additional arguments to the dump request.
+     */
+    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args);
 }
