@@ -598,18 +598,18 @@ public class TabletStatusBar extends StatusBar implements
 
         // Can we just reapply the RemoteViews in place?  If when didn't change, the order
         // didn't change.
-        boolean orderUnchanged = (notification.notification.when == oldNotification.notification.when
-                && notification.isOngoing() == oldNotification.isOngoing()
+        boolean contentsUnchanged = notification.isOngoing() == oldNotification.isOngoing()
                 && oldEntry.expanded != null
                 && contentView != null
                 && oldContentView != null
                 && contentView.getPackage() != null
                 && oldContentView.getPackage() != null
                 && oldContentView.getPackage().equals(contentView.getPackage())
-                && oldContentView.getLayoutId() == contentView.getLayoutId());
+                && oldContentView.getLayoutId() == contentView.getLayoutId();
         ViewGroup rowParent = (ViewGroup) oldEntry.row.getParent();
-        boolean isLastAnyway = rowParent.indexOfChild(oldEntry.row) == rowParent.getChildCount() - 1;
-        if (orderUnchanged || isLastAnyway) {
+        boolean orderUnchanged = notification.notification.when==oldNotification.notification.when;
+        boolean isLastAnyway = rowParent.indexOfChild(oldEntry.row) == rowParent.getChildCount()-1;
+        if (contentsUnchanged && (orderUnchanged || isLastAnyway)) {
             if (DEBUG) Slog.d(TAG, "reusing notification for key: " + key);
             oldEntry.notification = notification;
             try {
