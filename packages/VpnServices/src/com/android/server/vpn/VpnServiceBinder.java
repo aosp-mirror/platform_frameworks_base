@@ -28,7 +28,6 @@ import android.net.vpn.VpnProfile;
 import android.net.vpn.VpnState;
 import android.os.Environment;
 import android.os.IBinder;
-import android.os.SystemProperties;
 import android.util.Log;
 
 import java.io.File;
@@ -56,7 +55,7 @@ public class VpnServiceBinder extends Service {
     private static String getStateFilePath() {
         // This call will return the correcu directory whether Encrypted FS is enabled or not
         // Disabled: /data/misc/vpn/.states   Enabled: /data/secure/misc/vpn/.states
-	return Environment.getSecureDataDirectory().getPath() + STATES_FILE_RELATIVE_PATH;
+        return Environment.getDataDirectory().getPath() + STATES_FILE_RELATIVE_PATH;
     }
 
     private final IBinder mBinder = new IVpnService.Stub() {

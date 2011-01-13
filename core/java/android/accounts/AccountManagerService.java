@@ -43,7 +43,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -52,13 +51,11 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -453,6 +450,7 @@ public class AccountManagerService
             mAccount = account;
         }
 
+        @Override
         public void run() throws RemoteException {
             try {
                 mAuthenticator.hasFeatures(this, mAccount, mFeatures);
@@ -461,6 +459,7 @@ public class AccountManagerService
             }
         }
 
+        @Override
         public void onResult(Bundle result) {
             IAccountManagerResponse response = getResponseAndClose();
             if (response != null) {
@@ -486,6 +485,7 @@ public class AccountManagerService
             }
         }
 
+        @Override
         protected String toDebugString(long now) {
             return super.toDebugString(now) + ", hasFeatures"
                     + ", " + mAccount
@@ -531,15 +531,18 @@ public class AccountManagerService
             mAccount = account;
         }
 
+        @Override
         protected String toDebugString(long now) {
             return super.toDebugString(now) + ", removeAccount"
                     + ", account " + mAccount;
         }
 
+        @Override
         public void run() throws RemoteException {
             mAuthenticator.getAccountRemovalAllowed(this, mAccount);
         }
 
+        @Override
         public void onResult(Bundle result) {
             if (result != null && result.containsKey(AccountManager.KEY_BOOLEAN_RESULT)
                     && !result.containsKey(AccountManager.KEY_INTENT)) {
@@ -832,16 +835,19 @@ public class AccountManagerService
         try {
             new Session(response, account.type, false,
                     false /* stripAuthTokenFromResult */) {
+                @Override
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", getAuthTokenLabel"
                             + ", " + account
                             + ", authTokenType " + authTokenType;
                 }
 
+                @Override
                 public void run() throws RemoteException {
                     mAuthenticator.getAuthTokenLabel(this, authTokenType);
                 }
 
+                @Override
                 public void onResult(Bundle result) {
                     if (result != null) {
                         String label = result.getString(AccountManager.KEY_AUTH_TOKEN_LABEL);
@@ -912,6 +918,7 @@ public class AccountManagerService
 
             new Session(response, account.type, expectActivityLaunch,
                     false /* stripAuthTokenFromResult */) {
+                @Override
                 protected String toDebugString(long now) {
                     if (loginOptions != null) loginOptions.keySet();
                     return super.toDebugString(now) + ", getAuthToken"
@@ -921,6 +928,7 @@ public class AccountManagerService
                             + ", notifyOnAuthFailure " + notifyOnAuthFailure;
                 }
 
+                @Override
                 public void run() throws RemoteException {
                     // If the caller doesn't have permission then create and return the
                     // "grant permission" intent instead of the "getAuthToken" intent.
@@ -931,6 +939,7 @@ public class AccountManagerService
                     }
                 }
 
+                @Override
                 public void onResult(Bundle result) {
                     if (result != null) {
                         if (result.containsKey(AccountManager.KEY_AUTH_TOKEN_LABEL)) {
@@ -1075,11 +1084,13 @@ public class AccountManagerService
         try {
             new Session(response, accountType, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */) {
+                @Override
                 public void run() throws RemoteException {
                     mAuthenticator.addAccount(this, mAccountType, authTokenType, requiredFeatures,
                             options);
                 }
 
+                @Override
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", addAccount"
                             + ", accountType " + accountType
@@ -1110,9 +1121,11 @@ public class AccountManagerService
         try {
             new Session(response, account.type, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */) {
+                @Override
                 public void run() throws RemoteException {
                     mAuthenticator.confirmCredentials(this, account, options);
                 }
+                @Override
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", confirmCredentials"
                             + ", " + account;
@@ -1142,9 +1155,11 @@ public class AccountManagerService
         try {
             new Session(response, account.type, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */) {
+                @Override
                 public void run() throws RemoteException {
                     mAuthenticator.updateCredentials(this, account, authTokenType, loginOptions);
                 }
+                @Override
                 protected String toDebugString(long now) {
                     if (loginOptions != null) loginOptions.keySet();
                     return super.toDebugString(now) + ", updateCredentials"
@@ -1174,9 +1189,11 @@ public class AccountManagerService
         try {
             new Session(response, accountType, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */) {
+                @Override
                 public void run() throws RemoteException {
                     mAuthenticator.editProperties(this, mAccountType);
                 }
+                @Override
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", editProperties"
                             + ", accountType " + accountType;
@@ -1200,6 +1217,7 @@ public class AccountManagerService
             mFeatures = features;
         }
 
+        @Override
         public void run() throws RemoteException {
             mAccountsOfType = getAccountsByTypeFromCache(mAccountType);
             // check whether each account matches the requested features
@@ -1234,6 +1252,7 @@ public class AccountManagerService
             }
         }
 
+        @Override
         public void onResult(Bundle result) {
             mNumResults++;
             if (result == null) {
@@ -1272,6 +1291,7 @@ public class AccountManagerService
         }
 
 
+        @Override
         protected String toDebugString(long now) {
             return super.toDebugString(now) + ", getAccountsByTypeAndFeatures"
                     + ", " + (mFeatures != null ? TextUtils.join(",", mFeatures) : null);
@@ -1594,6 +1614,7 @@ public class AccountManagerService
             super(looper);
         }
 
+        @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MESSAGE_TIMED_OUT:
@@ -1608,13 +1629,7 @@ public class AccountManagerService
     }
 
     private static String getDatabaseName() {
-        if(Environment.isEncryptedFilesystemEnabled()) {
-            // Hard-coded path in case of encrypted file system
-            return Environment.getSystemSecureDirectory().getPath() + File.separator + DATABASE_NAME;
-        } else {
-            // Regular path in case of non-encrypted file system
-            return DATABASE_NAME;
-        }
+        return DATABASE_NAME;
     }
 
     private class DatabaseHelper extends SQLiteOpenHelper {
@@ -1837,6 +1852,7 @@ public class AccountManagerService
         return false;
     }
 
+    @Override
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
         final boolean isCheckinRequest = scanArgs(args, "--checkin") || scanArgs(args, "-c");
 

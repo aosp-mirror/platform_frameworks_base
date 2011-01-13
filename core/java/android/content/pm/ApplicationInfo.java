@@ -270,16 +270,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_SUPPORTS_XLARGE_SCREENS = 1<<19;
     
     /**
-     * Value for {@link #flags}: this is true if the application has set
-     * its android:neverEncrypt to true, false otherwise. It is used to specify
-     * that this package specifically "opts-out" of a secured file system solution,
-     * and will always store its data in-the-clear.
-     *
-     * {@hide}
-     */
-    public static final int FLAG_NEVER_ENCRYPT = 1<<30;
-
-    /**
      * Value for {@link #flags}: Set to true if the application has been
      * installed using the forward lock option.
      *
@@ -469,6 +459,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
 
+    @Override
     public String toString() {
         return "ApplicationInfo{"
             + Integer.toHexString(System.identityHashCode(this))
@@ -479,6 +470,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         super.writeToParcel(dest, parcelableFlags);
         dest.writeString(taskAffinity);
