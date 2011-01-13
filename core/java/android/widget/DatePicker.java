@@ -471,8 +471,9 @@ public class DatePicker extends FrameLayout {
      */
     public void init(int year, int monthOfYear, int dayOfMonth,
             OnDateChangedListener onDateChangedListener) {
-        mOnDateChangedListener = onDateChangedListener;
         updateDate(year, monthOfYear, dayOfMonth);
+        // register the callback after updating the date
+        mOnDateChangedListener = onDateChangedListener;
     }
 
     /**
