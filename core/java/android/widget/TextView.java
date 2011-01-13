@@ -4135,9 +4135,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected int[] onCreateDrawableState(int extraSpace) {
-        final int[] drawableState = super.onCreateDrawableState(extraSpace + 1);
+        final int[] drawableState;
 
-        if (!mSingleLine) {
+        if (mSingleLine) {
+            drawableState = super.onCreateDrawableState(extraSpace);
+        } else {
+            drawableState = super.onCreateDrawableState(extraSpace + 1);
             mergeDrawableStates(drawableState, MULTILINE_STATE_SET);
         }
 

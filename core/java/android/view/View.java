@@ -58,6 +58,7 @@ import android.util.PoolableManager;
 import android.util.Pools;
 import android.util.SparseArray;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
@@ -7825,6 +7826,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * <p>Note: if this view's parent addStateFromChildren property is enabled and this
      * property is enabled, an exception will be thrown.</p>
+     * 
+     * <p>Note: if the child view uses and updates additionnal states which are unknown to the
+     * parent, these states should not be affected by this method.</p>
      *
      * @param enabled True to enable duplication of the parent's drawable state, false
      *                to disable it.
