@@ -849,7 +849,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     usedNetworkType = ConnectivityManager.TYPE_MOBILE_MMS;
                 } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
                     usedNetworkType = ConnectivityManager.TYPE_MOBILE_SUPL;
-                } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN)) {
+                } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN) ||
+                        TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN_ALWAYS)) {
                     usedNetworkType = ConnectivityManager.TYPE_MOBILE_DUN;
                 } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_HIPRI)) {
                     usedNetworkType = ConnectivityManager.TYPE_MOBILE_HIPRI;
@@ -870,6 +871,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     return 1;
                 }
                 callTeardown = true;
+            } else {
+                if (DBG) log("not a known feature - dropping");
             }
         }
         if (DBG) log("Doing network teardown");
