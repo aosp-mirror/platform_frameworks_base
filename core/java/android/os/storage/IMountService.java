@@ -603,6 +603,23 @@ public interface IMountService extends IInterface {
                 }
                 return _result;
             }
+
+            public int encryptStorage(String password) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                int _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(password);
+                    mRemote.transact(Stub.TRANSACTION_encryptStorage, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readInt();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
         }
 
         private static final String DESCRIPTOR = "IMountService";
@@ -660,6 +677,8 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_isExternalStorageEmulated = IBinder.FIRST_CALL_TRANSACTION + 25;
 
         static final int TRANSACTION_decryptStorage = IBinder.FIRST_CALL_TRANSACTION + 26;
+
+        static final int TRANSACTION_encryptStorage = IBinder.FIRST_CALL_TRANSACTION + 27;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -950,6 +969,14 @@ public interface IMountService extends IInterface {
                     reply.writeInt(result);
                     return true;
                 }
+                case TRANSACTION_encryptStorage: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String password = data.readString();
+                    int result = encryptStorage(password);
+                    reply.writeNoException();
+                    reply.writeInt(result);
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -1114,4 +1141,9 @@ public interface IMountService extends IInterface {
      * Decrypts any encrypted volumes.
      */
     public int decryptStorage(String password) throws RemoteException;
+
+    /**
+     * Encrypts storage.
+     */
+    public int encryptStorage(String password) throws RemoteException;
 }
