@@ -36,7 +36,7 @@ public class ProgramFragment extends Program {
         /**
          * Create a builder object.
          *
-         * @param rs
+         * @param rs Context to which the program will belong.
          */
         public Builder(RenderScript rs) {
             super(rs);
