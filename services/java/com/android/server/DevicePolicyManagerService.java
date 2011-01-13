@@ -1822,6 +1822,41 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 exclusionList);
     }
 
+    /**
+     * Set the storage encryption request.
+     */
+    public int setStorageEncryption(ComponentName who, boolean encrypt) {
+        synchronized (this) {
+            // Check for permissions
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_ENCRYPTED_STORAGE);
+
+            // TODO: (1) Record the value for the admin so it's sticky
+            // TODO: (2) Compute "max" for all admins (if any admin requests encryption, then
+            //           we enable it.
+            // TODO: (3) Work with filesystem / mount service to start/stop encryption
+            return DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;
+        }
+    }
+
+    /**
+     * Get the current storage encryption status for a given storage domain.
+     */
+    public int getStorageEncryption(ComponentName who) {
+        synchronized (this) {
+            // Check for permissions if a particular caller is specified
+            if (who != null) {
+                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_ENCRYPTED_STORAGE);
+            }
+
+            // TODO: Work with filesystem / mount service to query encryption status
+            return DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;
+        }
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)

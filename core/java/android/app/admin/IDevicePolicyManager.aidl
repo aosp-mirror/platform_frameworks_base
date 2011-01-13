@@ -74,7 +74,10 @@ interface IDevicePolicyManager {
 
     ComponentName setGlobalProxy(in ComponentName admin, String proxySpec, String exclusionList);
     ComponentName getGlobalProxyAdmin();
-    
+
+    int setStorageEncryption(in ComponentName who, boolean encrypt);
+    int getStorageEncryption(in ComponentName who);
+
     void setActiveAdmin(in ComponentName policyReceiver, boolean refreshing);
     boolean isAdminActive(in ComponentName policyReceiver);
     List<ComponentName> getActiveAdmins();
