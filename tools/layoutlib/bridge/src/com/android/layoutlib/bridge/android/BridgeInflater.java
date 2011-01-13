@@ -178,7 +178,7 @@ public final class BridgeInflater extends LayoutInflater {
 
                         return inflate(bridgeParser, root);
                     } catch (Exception e) {
-                        Bridge.getLog().error(null,
+                        Bridge.getLog().error(BridgeConstants.TAG_RESOURCES_READ,
                                 "Failed to parse file " + f.getAbsolutePath(), e);
 
                         return null;

@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
 import android.graphics.Paint.FontMetrics;
@@ -179,7 +180,7 @@ public class Paint_Delegate {
                     return stroke;
                 }
             } else {
-                Bridge.getLog().fidelityWarning(null,
+                Bridge.getLog().fidelityWarning(BridgeConstants.TAG_PATHEFFECT,
                         effectDelegate.getSupportMessage(),
                         null);
             }
@@ -375,7 +376,8 @@ public class Paint_Delegate {
     /*package*/ static void nSetShadowLayer(Paint thisPaint, float radius, float dx, float dy,
             int color) {
         // FIXME
-        Bridge.getLog().fidelityWarning(null, "Paint.setShadowLayer is not supported.", null);
+        Bridge.getLog().fidelityWarning(BridgeConstants.TAG_UNSUPPORTED,
+                "Paint.setShadowLayer is not supported.", null);
     }
 
     /*package*/ static float getTextSize(Paint thisPaint) {
@@ -691,7 +693,8 @@ public class Paint_Delegate {
         // since none of those are supported, display a fidelity warning right away
         ColorFilter_Delegate filterDelegate = delegate.getColorFilter();
         if (filterDelegate != null && filterDelegate.isSupported() == false) {
-            Bridge.getLog().fidelityWarning(null, filterDelegate.getSupportMessage(), null);
+            Bridge.getLog().fidelityWarning(BridgeConstants.TAG_COLORFILTER,
+                    filterDelegate.getSupportMessage(), null);
         }
 
         return filter;
@@ -729,7 +732,8 @@ public class Paint_Delegate {
         // since none of those are supported, display a fidelity warning right away
         MaskFilter_Delegate filterDelegate = delegate.getMaskFilter();
         if (filterDelegate != null && filterDelegate.isSupported() == false) {
-            Bridge.getLog().fidelityWarning(null, filterDelegate.getSupportMessage(), null);
+            Bridge.getLog().fidelityWarning(BridgeConstants.TAG_MASKFILTER,
+                    filterDelegate.getSupportMessage(), null);
         }
 
         return maskfilter;
@@ -759,7 +763,8 @@ public class Paint_Delegate {
         // since none of those are supported, display a fidelity warning right away
         Rasterizer_Delegate rasterizerDelegate = delegate.getRasterizer();
         if (rasterizerDelegate != null && rasterizerDelegate.isSupported() == false) {
-            Bridge.getLog().fidelityWarning(null, rasterizerDelegate.getSupportMessage(), null);
+            Bridge.getLog().fidelityWarning(BridgeConstants.TAG_RASTERIZER,
+                    rasterizerDelegate.getSupportMessage(), null);
         }
 
         return rasterizer;

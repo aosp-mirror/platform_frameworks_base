@@ -17,6 +17,7 @@
 package com.android.layoutlib.bridge.impl;
 
 import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.BridgeConstants;
 
 import android.graphics.Bitmap_Delegate;
 import android.graphics.Canvas;
@@ -728,7 +729,7 @@ public class GcSnapshot {
                         customShader = true;
                     }
                 } else {
-                    Bridge.getLog().fidelityWarning(null,
+                    Bridge.getLog().fidelityWarning(BridgeConstants.TAG_SHADER,
                             shaderDelegate.getSupportMessage(),
                             null);
                 }
@@ -762,7 +763,7 @@ public class GcSnapshot {
                         customXfermode = true;
                     }
                 } else {
-                    Bridge.getLog().fidelityWarning(null,
+                    Bridge.getLog().fidelityWarning(BridgeConstants.TAG_XFERMODE,
                             xfermodeDelegate.getSupportMessage(),
                             null);
                 }
