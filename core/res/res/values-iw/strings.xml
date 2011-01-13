@@ -151,6 +151,8 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"מצב טיסה"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"מצב טיסה מופעל"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"מצב טיסה כבוי"</string>
+    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"מצב בטוח"</string>
     <string name="android_system_label" msgid="6577375335728551336">"מערכת Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"שירותים שעולים לך כסף"</string>
@@ -360,6 +362,10 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"מאפשר ליישום לשלוט בפנס."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"גישה להתקני USB"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"מאפשר ליישום גישה להתקני USB."</string>
+    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
+    <skip />
+    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
+    <skip />
     <string name="permlab_hardware_test" msgid="4148290860400659146">"בדוק חומרה"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"מאפשר ליישום לשלוט בציוד היקפי מסוגים שונים לצורך בדיקת חומרה."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"התקשר ישירות למספרי טלפון"</string>

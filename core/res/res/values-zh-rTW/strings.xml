@@ -152,6 +152,8 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"飛航模式"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"飛航模式為 [開啟]"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"飛航模式為 [關閉]"</string>
+    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系統"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"需要額外費用的服務。"</string>
@@ -361,6 +363,10 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"允許應用程式控制閃光燈。"</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"存取 USB 裝置"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"允許應用程式存取 USB 裝置。"</string>
+    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
+    <skip />
+    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
+    <skip />
     <string name="permlab_hardware_test" msgid="4148290860400659146">"測試硬體"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"允許應用程式控制各種週邊設備，以供測試用。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"直接撥打電話號碼"</string>

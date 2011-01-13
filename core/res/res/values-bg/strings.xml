@@ -151,6 +151,8 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Самолетен режим"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Самолетният режим е ВКЛЮЧЕН"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Самолетният режим е ИЗКЛЮЧЕН"</string>
+    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Безопасен режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Системно от Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Услуги, които ви струват пари"</string>
@@ -360,6 +362,10 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Разрешава на приложението да контролира фенерчето."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"достъп до USB устройства"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Разрешава на приложението достъп до USB устройства."</string>
+    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
+    <skip />
+    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
+    <skip />
     <string name="permlab_hardware_test" msgid="4148290860400659146">"тест на хардуера"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Разрешава на приложението да контролира различни периферни устройства с цел тестване на хардуера."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"директно обаждане до телефонни номера"</string>
@@ -991,7 +997,7 @@
     <string name="media_unknown_state" msgid="729192782197290385">"Външният носител е в неизвестно състояние."</string>
     <string name="share" msgid="1778686618230011964">"Споделяне"</string>
     <string name="find" msgid="4808270900322985960">"Намиране"</string>
-    <string name="websearch" msgid="4337157977400211589">"Търсене в мреж."</string>
+    <string name="websearch" msgid="4337157977400211589">"Уеб търсене"</string>
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />
     <!-- no translation found for gpsNotifTitle (5446858717157416839) -->

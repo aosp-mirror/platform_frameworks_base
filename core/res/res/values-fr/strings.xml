@@ -152,6 +152,8 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Mode Avion"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Le mode Avion est activé."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Le mode Avion est désactivé."</string>
+    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Mode sécurisé"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Système Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Services payants"</string>
@@ -361,6 +363,10 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Permet à l\'application de contrôler la lampe de poche."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"accéder aux périphériques USB"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Autorise l\'application à accéder aux périphériques USB"</string>
+    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
+    <skip />
+    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
+    <skip />
     <string name="permlab_hardware_test" msgid="4148290860400659146">"Tests du matériel"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Permet à l\'application de contrôler différents périphériques à des fins de test matériel."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"Appel direct des numéros de téléphone"</string>
