@@ -42,6 +42,6 @@
     <string name="recent_tasks_empty" msgid="1905484479067697884">"Нема недавних апликација"</string>
     <!-- no translation found for recent_tasks_app_label (3796483981246752469) -->
     <skip />
-    <string name="toast_rotation_free" msgid="2700542202836832631">"Екран ће се аутоматски ротирати."</string>
-    <string name="toast_rotation_locked" msgid="7484691306949652450">"Ротирање екрана је сада закључано."</string>
+    <!-- no translation found for bluetooth_tethered (7094101612161133267) -->
+    <skip />
 </resources>
