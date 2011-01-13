@@ -16,9 +16,9 @@
 
 package android.graphics;
 
+import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.ResourceDensity;
 import com.android.layoutlib.bridge.Bridge;
-import com.android.layoutlib.bridge.BridgeConstants;
 
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -352,7 +352,7 @@ public class BitmapFactory {
                 If the exception happened on open, bm will be null.
                 If it happened on close, bm is still valid.
             */
-            Bridge.getLog().error(BridgeConstants.TAG_RESOURCES_READ,
+            Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
                     String.format("Error decoding bitmap of id 0x%x", id), e);
         } finally {
             try {
@@ -452,7 +452,7 @@ public class BitmapFactory {
         Bitmap  bm;
 
         if (is instanceof AssetManager.AssetInputStream) {
-            Bridge.getLog().error(BridgeConstants.TAG_UNSUPPORTED,
+            Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
                     "Bitmap.decodeStream: " +
                     "InputStream is unsupported (AssetManager.AssetInputStream)");
             return null;

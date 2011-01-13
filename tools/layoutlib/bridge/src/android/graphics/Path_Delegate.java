@@ -16,8 +16,8 @@
 
 package android.graphics;
 
+import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
-import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
 import android.graphics.Path.Direction;
@@ -696,7 +696,7 @@ public final class Path_Delegate {
     public void transform(Matrix_Delegate matrix, Path_Delegate dst) {
         if (matrix.hasPerspective()) {
             assert false;
-            Bridge.getLog().fidelityWarning(BridgeConstants.TAG_MATRIX,
+            Bridge.getLog().fidelityWarning(LayoutLog.TAG_MATRIX_AFFINE,
                     "android.graphics.Path#transform() only " +
                     "supports affine transformations.", null);
         }

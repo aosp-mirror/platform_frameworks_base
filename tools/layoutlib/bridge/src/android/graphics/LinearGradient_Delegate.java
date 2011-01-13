@@ -16,8 +16,8 @@
 
 package android.graphics;
 
+import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
-import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 
 import android.graphics.Shader.TileMode;
@@ -136,7 +136,7 @@ public final class LinearGradient_Delegate extends Gradient_Delegate {
             try {
                 canvasMatrix = xform.createInverse();
             } catch (java.awt.geom.NoninvertibleTransformException e) {
-                Bridge.getLog().fidelityWarning(BridgeConstants.TAG_MATRIX,
+                Bridge.getLog().fidelityWarning(LayoutLog.TAG_MATRIX_INVERSE,
                         "Unable to inverse matrix in LinearGradient", e);
                 canvasMatrix = new java.awt.geom.AffineTransform();
             }
@@ -145,7 +145,7 @@ public final class LinearGradient_Delegate extends Gradient_Delegate {
             try {
                 localMatrix = localMatrix.createInverse();
             } catch (java.awt.geom.NoninvertibleTransformException e) {
-                Bridge.getLog().fidelityWarning(BridgeConstants.TAG_MATRIX,
+                Bridge.getLog().fidelityWarning(LayoutLog.TAG_MATRIX_INVERSE,
                         "Unable to inverse matrix in LinearGradient", e);
                 localMatrix = new java.awt.geom.AffineTransform();
             }
