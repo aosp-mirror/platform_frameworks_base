@@ -300,7 +300,8 @@ public class GSMPhone extends PhoneBase {
             // If we're out of service, open TCP sockets may still work
             // but no data will flow
             ret = DataState.DISCONNECTED;
-        } else if (mDataConnection.isApnTypeEnabled(apnType) == false) {
+        } else if (mDataConnection.isApnTypeEnabled(apnType) == false ||
+                mDataConnection.isApnTypeActive(apnType) == false) {
             ret = DataState.DISCONNECTED;
         } else { /* mSST.gprsState == ServiceState.STATE_IN_SERVICE */
             switch (mDataConnection.getState()) {

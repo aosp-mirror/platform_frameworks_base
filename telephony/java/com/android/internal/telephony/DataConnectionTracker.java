@@ -358,7 +358,7 @@ public abstract class DataConnectionTracker extends Handler {
         return new ArrayList<DataConnection>(mDataConnections.values());
     }
 
-    protected boolean isApnTypeActive(String type) {
+    public boolean isApnTypeActive(String type) {
         // TODO: support simultaneous with List instead
         return mActiveApn != null && mActiveApn.canHandleType(type);
     }
