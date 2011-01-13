@@ -26,7 +26,6 @@
 #include <binder/IServiceManager.h>
 
 #include <ui/DisplayInfo.h>
-#include <ui/GraphicBuffer.h>
 
 #include <surfaceflinger/ISurfaceComposer.h>
 
@@ -63,6 +62,15 @@ public:
         data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
         remote()->transact(BnSurfaceComposer::CREATE_CLIENT_CONNECTION, data, &reply);
         return interface_cast<ISurfaceComposerClient>(reply.readStrongBinder());
+    }
+
+    virtual sp<IGraphicBufferAlloc> createGraphicBufferAlloc()
+    {
+        uint32_t n;
+        Parcel data, reply;
+        data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
+        remote()->transact(BnSurfaceComposer::CREATE_GRAPHIC_BUFFER_ALLOC, data, &reply);
+        return interface_cast<IGraphicBufferAlloc>(reply.readStrongBinder());
     }
 
     virtual sp<IMemoryHeap> getCblk() const
@@ -170,25 +178,6 @@ public:
         data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
         remote()->transact(BnSurfaceComposer::SIGNAL, data, &reply, IBinder::FLAG_ONEWAY);
     }
-
-    virtual sp<GraphicBuffer> createGraphicBuffer(uint32_t w, uint32_t h,
-            PixelFormat format, uint32_t usage) const {
-        Parcel data, reply;
-        data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
-        data.writeInt32(w);
-        data.writeInt32(h);
-        data.writeInt32(format);
-        data.writeInt32(usage);
-        remote()->transact(BnSurfaceComposer::CREATE_GRAPHIC_BUFFER, data,
-                &reply);
-        sp<GraphicBuffer> graphicBuffer;
-        bool nonNull = (bool)reply.readInt32();
-        if (nonNull) {
-            graphicBuffer = new GraphicBuffer();
-            reply.read(*graphicBuffer);
-        }
-        return graphicBuffer;
-    }
 };
 
 IMPLEMENT_META_INTERFACE(SurfaceComposer, "android.ui.ISurfaceComposer");
@@ -207,6 +196,11 @@ status_t BnSurfaceComposer::onTransact(
         case CREATE_CLIENT_CONNECTION: {
             CHECK_INTERFACE(ISurfaceComposer, data, reply);
             sp<IBinder> b = createClientConnection()->asBinder();
+            reply->writeStrongBinder(b);
+        } break;
+        case CREATE_GRAPHIC_BUFFER_ALLOC: {
+            CHECK_INTERFACE(ISurfaceComposer, data, reply);
+            sp<IBinder> b = createGraphicBufferAlloc()->asBinder();
             reply->writeStrongBinder(b);
         } break;
         case OPEN_GLOBAL_TRANSACTION: {
@@ -266,18 +260,6 @@ status_t BnSurfaceComposer::onTransact(
             reply->writeInt32(h);
             reply->writeInt32(f);
             reply->writeInt32(res);
-        } break;
-        case CREATE_GRAPHIC_BUFFER: {
-            CHECK_INTERFACE(ISurfaceComposer, data, reply);
-            uint32_t w = data.readInt32();
-            uint32_t h = data.readInt32();
-            PixelFormat format = data.readInt32();
-            uint32_t usage = data.readInt32();
-            sp<GraphicBuffer> result(createGraphicBuffer(w, h, format, usage));
-            reply->writeInt32(result != 0);
-            if (result != 0) {
-                reply->write(*result);
-            }
         } break;
         case TURN_ELECTRON_BEAM_OFF: {
             CHECK_INTERFACE(ISurfaceComposer, data, reply);
