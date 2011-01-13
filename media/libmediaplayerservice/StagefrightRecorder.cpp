@@ -846,27 +846,12 @@ status_t StagefrightRecorder::startAMRRecording() {
                     mAudioEncoder);
             return BAD_VALUE;
         }
-        if (mSampleRate != 8000) {
-            LOGE("Invalid sampling rate %d used for AMRNB recording",
-                    mSampleRate);
-            return BAD_VALUE;
-        }
     } else {  // mOutputFormat must be OUTPUT_FORMAT_AMR_WB
         if (mAudioEncoder != AUDIO_ENCODER_AMR_WB) {
             LOGE("Invlaid encoder %d used for AMRWB recording",
                     mAudioEncoder);
             return BAD_VALUE;
         }
-        if (mSampleRate != 16000) {
-            LOGE("Invalid sample rate %d used for AMRWB recording",
-                    mSampleRate);
-            return BAD_VALUE;
-        }
-    }
-    if (mAudioChannels != 1) {
-        LOGE("Invalid number of audio channels %d used for amr recording",
-                mAudioChannels);
-        return BAD_VALUE;
     }
 
     if (mAudioSource >= AUDIO_SOURCE_LIST_END) {
@@ -874,8 +859,12 @@ status_t StagefrightRecorder::startAMRRecording() {
         return BAD_VALUE;
     }
 
-    sp<MediaSource> audioEncoder = createAudioSource();
+    status_t status = BAD_VALUE;
+    if (OK != (status = checkAudioEncoderCapabilities())) {
+        return status;
+    }
 
+    sp<MediaSource> audioEncoder = createAudioSource();
     if (audioEncoder == NULL) {
         return UNKNOWN_ERROR;
     }
@@ -1050,6 +1039,79 @@ status_t StagefrightRecorder::checkVideoEncoderCapabilities() {
     return OK;
 }
 
+status_t StagefrightRecorder::checkAudioEncoderCapabilities() {
+    clipAudioBitRate();
+    clipAudioSampleRate();
+    clipNumberOfAudioChannels();
+    return OK;
+}
+
+void StagefrightRecorder::clipAudioBitRate() {
+    LOGV("clipAudioBitRate: encoder %d", mAudioEncoder);
+
+    int minAudioBitRate =
+            mEncoderProfiles->getAudioEncoderParamByName(
+                "enc.aud.bps.min", mAudioEncoder);
+    if (mAudioBitRate < minAudioBitRate) {
+        LOGW("Intended audio encoding bit rate (%d) is too small"
+            " and will be set to (%d)", mAudioBitRate, minAudioBitRate);
+        mAudioBitRate = minAudioBitRate;
+    }
+
+    int maxAudioBitRate =
+            mEncoderProfiles->getAudioEncoderParamByName(
+                "enc.aud.bps.max", mAudioEncoder);
+    if (mAudioBitRate > maxAudioBitRate) {
+        LOGW("Intended audio encoding bit rate (%d) is too large"
+            " and will be set to (%d)", mAudioBitRate, maxAudioBitRate);
+        mAudioBitRate = maxAudioBitRate;
+    }
+}
+
+void StagefrightRecorder::clipAudioSampleRate() {
+    LOGV("clipAudioSampleRate: encoder %d", mAudioEncoder);
+
+    int minSampleRate =
+            mEncoderProfiles->getAudioEncoderParamByName(
+                "enc.aud.hz.min", mAudioEncoder);
+    if (mSampleRate < minSampleRate) {
+        LOGW("Intended audio sample rate (%d) is too small"
+            " and will be set to (%d)", mSampleRate, minSampleRate);
+        mSampleRate = minSampleRate;
+    }
+
+    int maxSampleRate =
+            mEncoderProfiles->getAudioEncoderParamByName(
+                "enc.aud.hz.max", mAudioEncoder);
+    if (mSampleRate > maxSampleRate) {
+        LOGW("Intended audio sample rate (%d) is too large"
+            " and will be set to (%d)", mSampleRate, maxSampleRate);
+        mSampleRate = maxSampleRate;
+    }
+}
+
+void StagefrightRecorder::clipNumberOfAudioChannels() {
+    LOGV("clipNumberOfAudioChannels: encoder %d", mAudioEncoder);
+
+    int minChannels =
+            mEncoderProfiles->getAudioEncoderParamByName(
+                "enc.aud.ch.min", mAudioEncoder);
+    if (mAudioChannels < minChannels) {
+        LOGW("Intended number of audio channels (%d) is too small"
+            " and will be set to (%d)", mAudioChannels, minChannels);
+        mAudioChannels = minChannels;
+    }
+
+    int maxChannels =
+            mEncoderProfiles->getAudioEncoderParamByName(
+                "enc.aud.ch.max", mAudioEncoder);
+    if (mAudioChannels > maxChannels) {
+        LOGW("Intended number of audio channels (%d) is too large"
+            " and will be set to (%d)", mAudioChannels, maxChannels);
+        mAudioChannels = maxChannels;
+    }
+}
+
 void StagefrightRecorder::clipVideoFrameHeight() {
     LOGV("clipVideoFrameHeight: encoder %d", mVideoEncoder);
     int minFrameHeight = mEncoderProfiles->getVideoEncoderParamByName(
@@ -1206,18 +1268,23 @@ status_t StagefrightRecorder::setupVideoEncoder(
 }
 
 status_t StagefrightRecorder::setupAudioEncoder(const sp<MediaWriter>& writer) {
-    sp<MediaSource> audioEncoder;
+    status_t status = BAD_VALUE;
+    if (OK != (status = checkAudioEncoderCapabilities())) {
+        return status;
+    }
+
     switch(mAudioEncoder) {
         case AUDIO_ENCODER_AMR_NB:
         case AUDIO_ENCODER_AMR_WB:
         case AUDIO_ENCODER_AAC:
-            audioEncoder = createAudioSource();
             break;
+
         default:
             LOGE("Unsupported audio encoder: %d", mAudioEncoder);
             return UNKNOWN_ERROR;
     }
 
+    sp<MediaSource> audioEncoder = createAudioSource();
     if (audioEncoder == NULL) {
         return UNKNOWN_ERROR;
     }

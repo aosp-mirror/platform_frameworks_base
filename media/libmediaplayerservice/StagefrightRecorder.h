@@ -123,6 +123,7 @@ private:
     status_t startMPEG2TSRecording();
     sp<MediaSource> createAudioSource();
     status_t checkVideoEncoderCapabilities();
+    status_t checkAudioEncoderCapabilities();
     status_t setupCameraSource(sp<CameraSource> *cameraSource);
     status_t setupAudioEncoder(const sp<MediaWriter>& writer);
     status_t setupVideoEncoder(
@@ -158,6 +159,9 @@ private:
     void clipVideoFrameRate();
     void clipVideoFrameWidth();
     void clipVideoFrameHeight();
+    void clipAudioBitRate();
+    void clipAudioSampleRate();
+    void clipNumberOfAudioChannels();
 
     StagefrightRecorder(const StagefrightRecorder &);
     StagefrightRecorder &operator=(const StagefrightRecorder &);
