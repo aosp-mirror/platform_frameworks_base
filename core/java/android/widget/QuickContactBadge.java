@@ -112,6 +112,16 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
         mBadgeBackground = getBackground();
     }
 
+    @Override
+    protected void drawableStateChanged() {
+        super.drawableStateChanged();
+        Drawable d = mOverlay;
+        if (d != null && d.isStateful()) {
+            d.setState(getDrawableState());
+            invalidate();
+        }
+    }
+
     private void init() {
         mQueryHandler = new QueryHandler(mContext.getContentResolver());
         setOnClickListener(this);
@@ -130,7 +140,8 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (mOverlay == null || mOverlay.getIntrinsicWidth() == 0 || mOverlay.getIntrinsicHeight() == 0) {
+        if (mOverlay == null || mOverlay.getIntrinsicWidth() == 0 ||
+                mOverlay.getIntrinsicHeight() == 0) {
             return; // nothing to draw
         }
 
