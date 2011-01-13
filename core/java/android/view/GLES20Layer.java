@@ -22,16 +22,12 @@ import android.graphics.Canvas;
  * An OpenGL ES 2.0 implementation of {@link HardwareLayer}.
  */
 class GLES20Layer extends HardwareLayer {
-    private int mLayerId;
-    int mLayerTextureId;
+    private int mLayer;
 
     private int mLayerWidth;
     private int mLayerHeight;
 
     private final GLES20Canvas mCanvas;
-
-    private float mU;
-    private float mV;
 
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     private final Finalizer mFinalizer;
@@ -39,35 +35,32 @@ class GLES20Layer extends HardwareLayer {
     GLES20Layer(int width, int height, boolean isOpaque) {
         super(width, height, isOpaque);
 
-        int[] layerInfo = new int[3];
-        mLayerId = GLES20Canvas.nCreateLayer(width, height, layerInfo);
-        if (mLayerId != 0) {
+        int[] layerInfo = new int[2];
+        mLayer = GLES20Canvas.nCreateLayer(width, height, isOpaque, layerInfo);
+        if (mLayer != 0) {
             mLayerWidth = layerInfo[0];
             mLayerHeight = layerInfo[1];
-            mLayerTextureId = layerInfo[2];
 
-            mCanvas = new GLES20Canvas(mLayerId, !isOpaque);
-            mFinalizer = new Finalizer(mLayerId, mLayerTextureId);
-            
-            mU = mWidth / (float) mLayerWidth;
-            mV = mHeight/ (float) mLayerHeight;
+            mCanvas = new GLES20Canvas(mLayer, !isOpaque);
+            mFinalizer = new Finalizer(mLayer);
         } else {
             mCanvas = null;
             mFinalizer = null;
         }
     }
 
-    float getU() {
-        return mU;
-    }
-
-    float getV() {
-        return mV;
+    /**
+     * Returns the native layer object used to render this layer.
+     * 
+     * @return A pointer to the native layer object, or 0 if the object is NULL
+     */
+    public int getLayer() {
+        return mLayer;
     }
 
     @Override
     boolean isValid() {
-        return mLayerId != 0 && mLayerWidth > 0 && mLayerHeight > 0;
+        return mLayer != 0 && mLayerWidth > 0 && mLayerHeight > 0;
     }
 
     @Override
@@ -77,15 +70,12 @@ class GLES20Layer extends HardwareLayer {
             mWidth = width;
             mHeight = height;
 
-            int[] layerInfo = new int[3];
+            int[] layerInfo = new int[2];
 
-            GLES20Canvas.nResizeLayer(mLayerId, mLayerTextureId, width, height, layerInfo);
+            GLES20Canvas.nResizeLayer(mLayer, width, height, layerInfo);
 
             mLayerWidth = layerInfo[0];
             mLayerHeight = layerInfo[1];
-
-            mU = mWidth / (float) mLayerWidth;
-            mV = mHeight/ (float) mLayerHeight;            
         }
     }
 
@@ -112,23 +102,21 @@ class GLES20Layer extends HardwareLayer {
     @Override
     void destroy() {
         mFinalizer.destroy();
-        mLayerId = mLayerTextureId = 0;
+        mLayer = 0;
     }
 
     private static class Finalizer {
         private int mLayerId;
-        private int mLayerTextureId;
 
-        public Finalizer(int layerId, int layerTextureId) {
+        public Finalizer(int layerId) {
             mLayerId = layerId;
-            mLayerTextureId = layerTextureId;
         }
 
         @Override
         protected void finalize() throws Throwable {
             try {
-                if (mLayerId != 0 || mLayerTextureId != 0) {
-                    GLES20Canvas.nDestroyLayerDeferred(mLayerId, mLayerTextureId);
+                if (mLayerId != 0) {
+                    GLES20Canvas.nDestroyLayerDeferred(mLayerId);
                 }
             } finally {
                 super.finalize();
@@ -136,8 +124,8 @@ class GLES20Layer extends HardwareLayer {
         }
 
         void destroy() {
-            GLES20Canvas.nDestroyLayer(mLayerId, mLayerTextureId);
-            mLayerId = mLayerTextureId = 0;
+            GLES20Canvas.nDestroyLayer(mLayerId);
+            mLayerId = 0;
         }
     }
 }

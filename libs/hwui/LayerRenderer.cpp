@@ -27,10 +27,10 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 void LayerRenderer::prepare(bool opaque) {
-    LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mFbo);
+    LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mLayer->fbo);
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*) &mPreviousFbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, mFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, mLayer->fbo);
 
     OpenGLRenderer::prepare(opaque);
 }
@@ -39,33 +39,33 @@ void LayerRenderer::finish() {
     OpenGLRenderer::finish();
     glBindFramebuffer(GL_FRAMEBUFFER, mPreviousFbo);
 
-    LAYER_RENDERER_LOGD("Finished rendering into layer, fbo = %d", mFbo);
+    LAYER_RENDERER_LOGD("Finished rendering into layer, fbo = %d", mLayer->mFbo);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Static functions
 ///////////////////////////////////////////////////////////////////////////////
 
-GLuint LayerRenderer::createLayer(uint32_t width, uint32_t height,
-        uint32_t* layerWidth, uint32_t* layerHeight, GLuint* texture) {
+Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque) {
     LAYER_RENDERER_LOGD("Creating new layer %dx%d", width, height);
+
+    Layer* layer = new Layer(width, height);
 
     GLuint previousFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*) &previousFbo);
 
-    GLuint fbo = 0;
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glGenFramebuffers(1, &layer->fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, layer->fbo);
 
     if (glGetError() != GL_NO_ERROR) {
         glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
-        glDeleteBuffers(1, &fbo);
+        glDeleteBuffers(1, &layer->fbo);
         return 0;
     }
 
     glActiveTexture(GL_TEXTURE0);
-    glGenTextures(1, texture);
-    glBindTexture(GL_TEXTURE_2D, *texture);
+    glGenTextures(1, &layer->texture);
+    glBindTexture(GL_TEXTURE_2D, layer->texture);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
@@ -80,66 +80,81 @@ GLuint LayerRenderer::createLayer(uint32_t width, uint32_t height,
 
     if (glGetError() != GL_NO_ERROR) {
         glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
-        glDeleteBuffers(1, &fbo);
-        glDeleteTextures(1, texture);
+        glDeleteBuffers(1, &layer->fbo);
+        glDeleteTextures(1, &layer->texture);
+        delete layer;
         return 0;
     }
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                *texture, 0);
+            layer->texture, 0);
 
     if (glGetError() != GL_NO_ERROR) {
         glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
-        glDeleteBuffers(1, &fbo);
-        glDeleteTextures(1, texture);
+        glDeleteBuffers(1, &layer->fbo);
+        glDeleteTextures(1, &layer->texture);
+        delete layer;
         return 0;
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
 
-    *layerWidth = width;
-    *layerHeight = height;
+    layer->layer.set(0.0f, 0.0f, width, height);
+    layer->texCoords.set(0.0f, 1.0f, 1.0f, 0.0f);
+    layer->alpha = 255;
+    layer->mode = SkXfermode::kSrcOver_Mode;
+    layer->blend = !isOpaque;
+    layer->empty = false;
+    layer->colorFilter = NULL;
 
-    return fbo;
+    return layer;
 }
 
-void LayerRenderer::resizeLayer(GLuint fbo, GLuint texture, uint32_t width, uint32_t height,
-        uint32_t* layerWidth, uint32_t* layerHeight) {
-    LAYER_RENDERER_LOGD("Resizing layer fbo = %d to %dx%d", fbo, width, height);
+bool LayerRenderer::resizeLayer(Layer* layer, uint32_t width, uint32_t height) {
+    if (layer) {
+        LAYER_RENDERER_LOGD("Resizing layer fbo = %d to %dx%d", layer->fbo, width, height);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, layer->texture);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-            GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+                GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
-    if (glGetError() != GL_NO_ERROR) {
-        glDeleteBuffers(1, &fbo);
-        glDeleteTextures(1, &texture);
+        if (glGetError() != GL_NO_ERROR) {
+            glDeleteBuffers(1, &layer->fbo);
+            glDeleteTextures(1, &layer->texture);
 
-        *layerWidth = 0;
-        *layerHeight = 0;
+            layer->width = 0;
+            layer->height = 0;
+            layer->fbo = 0;
+            layer->texture = 0;
 
-        return;
+            return false;
+        }
+
+        layer->width = width;
+        layer->height = height;
     }
-
-    *layerWidth = width;
-    *layerHeight = height;
+    return true;
 }
 
-void LayerRenderer::destroyLayer(GLuint fbo, GLuint texture) {
-    LAYER_RENDERER_LOGD("Destroying layer, fbo = %d", fbo);
+void LayerRenderer::destroyLayer(Layer* layer) {
+    if (layer) {
+        LAYER_RENDERER_LOGD("Destroying layer, fbo = %d", layer->fbo);
 
-    if (fbo) glDeleteFramebuffers(1, &fbo);
-    if (texture) glDeleteTextures(1, &texture);
+        if (layer->fbo) glDeleteFramebuffers(1, &layer->fbo);
+        if (layer->texture) glDeleteTextures(1, &layer->texture);
+
+        delete layer;
+    }
 }
 
-void LayerRenderer::destroyLayerDeferred(GLuint fbo, GLuint texture) {
-    LAYER_RENDERER_LOGD("Deferring layer destruction, fbo = %d", fbo);
+void LayerRenderer::destroyLayerDeferred(Layer* layer) {
+    if (layer) {
+        LAYER_RENDERER_LOGD("Deferring layer destruction, fbo = %d", layer->fbo);
 
-    Caches& caches = Caches::getInstance();
-    if (fbo) caches.deleteFboDeferred(fbo);
-    if (texture) caches.deleteTextureDeferred(texture);
+        Caches::getInstance().deleteLayerDeferred(layer);
+    }
 }
 
 }; // namespace uirenderer

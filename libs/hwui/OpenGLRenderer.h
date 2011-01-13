@@ -95,8 +95,7 @@ public:
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
     virtual void drawDisplayList(DisplayList* displayList);
-    virtual void drawLayer(int texture, float left, float top, float right, float bottom,
-            float u, float v, SkPaint* paint);
+    virtual void drawLayer(Layer* layer, float x, float y, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
@@ -132,6 +131,19 @@ protected:
      * @param previous The previous snapshot to compose the current layer with
      */
     virtual void composeLayer(sp<Snapshot> current, sp<Snapshot> previous);
+
+    /**
+     * Mark the layer as dirty at the specified coordinates. The coordinates
+     * are transformed with the supplied matrix.
+     */
+    virtual void dirtyLayer(const float left, const float top,
+            const float right, const float bottom, const mat4 transform);
+
+    /**
+     * Mark the layer as dirty at the specified coordinates.
+     */
+    virtual void dirtyLayer(const float left, const float top,
+            const float right, const float bottom);
 
 private:
     /**
@@ -401,18 +413,6 @@ private:
     inline void dirtyClip() {
         mDirtyClip = true;
     }
-
-    /**
-     * Mark the layer as dirty at the specified coordinates. The coordinates
-     * are transformed with the supplied matrix.
-     */
-    void dirtyLayer(const float left, const float top, const float right, const float bottom,
-            const mat4 transform);
-
-    /**
-     * Mark the layer as dirty at the specified coordinates.
-     */
-    void dirtyLayer(const float left, const float top, const float right, const float bottom);
 
     // Dimensions of the drawing surface
     int mWidth, mHeight;

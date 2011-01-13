@@ -2397,8 +2397,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (!layerSaved && layerType == LAYER_TYPE_HARDWARE) {
                 final HardwareLayer layer = child.getHardwareLayer(canvas);
                 if (layer != null && layer.isValid()) {
-                    ((HardwareCanvas) canvas).drawHardwareLayer(0, 0, cr - cl, cb - ct,
-                            layer, child.mLayerPaint);
+                    ((HardwareCanvas) canvas).drawHardwareLayer(layer, 0, 0, child.mLayerPaint);
                     layerRendered = true;
                 } else {
                     canvas.saveLayer(sx, sy, sx + cr - cl, sy + cb - ct, child.mLayerPaint,

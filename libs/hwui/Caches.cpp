@@ -109,29 +109,22 @@ void Caches::clearGarbage() {
 
     Mutex::Autolock _l(mGarbageLock);
 
-    size_t count = mFboGarbage.size();
+    size_t count = mLayerGarbage.size();
     for (size_t i = 0; i < count; i++) {
-        GLuint fbo = mFboGarbage.itemAt(i);
-        if (fbo) glDeleteFramebuffers(1, &fbo);
-    }
-    mFboGarbage.clear();
+        Layer* layer = mLayerGarbage.itemAt(i);
+        if (layer) {
+            if (layer->fbo) glDeleteFramebuffers(1, &layer->fbo);
+            if (layer->texture) glDeleteTextures(1, &layer->texture);
 
-    count = mTextureGarbage.size();
-    for (size_t i = 0; i < count; i++) {
-        GLuint texture = mTextureGarbage.itemAt(i);
-        if (texture) glDeleteTextures(1, &texture);
+            delete layer;
+        }
     }
-    mTextureGarbage.clear();
+    mLayerGarbage.clear();
 }
 
-void Caches::deleteFboDeferred(GLuint fbo) {
+void Caches::deleteLayerDeferred(Layer* layer) {
     Mutex::Autolock _l(mGarbageLock);
-    mFboGarbage.push(fbo);
-}
-
-void Caches::deleteTextureDeferred(GLuint texture) {
-    Mutex::Autolock _l(mGarbageLock);
-    mTextureGarbage.push(texture);
+    mLayerGarbage.push(layer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

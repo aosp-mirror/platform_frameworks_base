@@ -18,6 +18,7 @@
 #define ANDROID_HWUI_LAYER_RENDERER_H
 
 #include "OpenGLRenderer.h"
+#include "Layer.h"
 
 namespace android {
 namespace uirenderer {
@@ -39,7 +40,7 @@ namespace uirenderer {
 
 class LayerRenderer: public OpenGLRenderer {
 public:
-    LayerRenderer(GLuint fbo): mFbo(fbo) {
+    LayerRenderer(Layer* layer): mLayer(layer) {
     }
 
     ~LayerRenderer() {
@@ -48,15 +49,13 @@ public:
     void prepare(bool opaque);
     void finish();
 
-    static GLuint createLayer(uint32_t width, uint32_t height,
-            uint32_t* layerWidth, uint32_t* layerHeight, GLuint* texture);
-    static void resizeLayer(GLuint fbo, GLuint texture, uint32_t width, uint32_t height,
-            uint32_t* layerWidth, uint32_t* layerHeight);
-    static void destroyLayer(GLuint fbo, GLuint texture);
-    static void destroyLayerDeferred(GLuint fbo, GLuint texture);
+    static Layer* createLayer(uint32_t width, uint32_t height, bool isOpaque = false);
+    static bool resizeLayer(Layer* layer, uint32_t width, uint32_t height);
+    static void destroyLayer(Layer* layer);
+    static void destroyLayerDeferred(Layer* layer);
 
 private:
-    GLuint mFbo;
+    Layer* mLayer;
     GLuint mPreviousFbo;
 
 }; // class LayerRenderer
