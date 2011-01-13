@@ -1,0 +1,1039 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 12 (filtered)">
+<title>Forward Lock Converter and Decoder</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:SimSun;
+	panose-1:2 1 6 0 3 1 1 1 1 1;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+@font-face
+	{font-family:"Lucida Console","DejaVu Sans Mono";
+	panose-1:2 11 6 9 4 5 4 2 2 4;}
+@font-face
+	{font-family:"\@SimSun";
+	panose-1:2 1 6 0 3 1 1 1 1 1;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";}
+h1
+	{margin-right:0cm;
+	margin-left:21.6pt;
+	text-indent:-21.6pt;
+	page-break-after:avoid;
+	font-size:16.0pt;
+	font-family:"Arial","sans-serif";}
+h2
+	{margin-top:12.0pt;
+	margin-right:0cm;
+	margin-bottom:3.0pt;
+	margin-left:28.8pt;
+	text-indent:-28.8pt;
+	page-break-after:avoid;
+	font-size:14.0pt;
+	font-family:"Arial","sans-serif";
+	font-style:italic;}
+h3
+	{margin-top:12.0pt;
+	margin-right:0cm;
+	margin-bottom:3.0pt;
+	margin-left:36.0pt;
+	text-indent:-36.0pt;
+	page-break-after:avoid;
+	font-size:13.0pt;
+	font-family:"Arial","sans-serif";}
+h4
+	{margin-top:12.0pt;
+	margin-right:0cm;
+	margin-bottom:3.0pt;
+	margin-left:43.2pt;
+	text-indent:-43.2pt;
+	page-break-after:avoid;
+	font-size:14.0pt;
+	font-family:"Times New Roman","serif";}
+h5
+	{margin-top:12.0pt;
+	margin-right:0cm;
+	margin-bottom:3.0pt;
+	margin-left:50.4pt;
+	text-indent:-50.4pt;
+	font-size:13.0pt;
+	font-family:"Times New Roman","serif";
+	font-style:italic;}
+h6
+	{margin-top:12.0pt;
+	margin-right:0cm;
+	margin-bottom:3.0pt;
+	margin-left:57.6pt;
+	text-indent:-57.6pt;
+	font-size:11.0pt;
+	font-family:"Times New Roman","serif";}
+p.MsoHeading7, li.MsoHeading7, div.MsoHeading7
+	{margin-top:12.0pt;
+	margin-right:0cm;
+	margin-bottom:3.0pt;
+	margin-left:64.8pt;
+	text-indent:-64.8pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";}
+p.MsoHeading8, li.MsoHeading8, div.MsoHeading8
+	{margin-top:12.0pt;
+	margin-right:0cm;
+	margin-bottom:3.0pt;
+	margin-left:72.0pt;
+	text-indent:-72.0pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";
+	font-style:italic;}
+p.MsoHeading9, li.MsoHeading9, div.MsoHeading9
+	{margin-top:12.0pt;
+	margin-right:0cm;
+	margin-bottom:3.0pt;
+	margin-left:79.2pt;
+	text-indent:-79.2pt;
+	font-size:11.0pt;
+	font-family:"Arial","sans-serif";}
+p.MsoToc1, li.MsoToc1, div.MsoToc1
+	{margin-top:6.0pt;
+	margin-right:0cm;
+	margin-bottom:6.0pt;
+	margin-left:0cm;
+	line-height:150%;
+	font-size:10.5pt;
+	font-family:"Times New Roman","serif";
+	text-transform:uppercase;
+	font-weight:bold;}
+p.MsoToc2, li.MsoToc2, div.MsoToc2
+	{margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:12.0pt;
+	margin-bottom:.0001pt;
+	line-height:150%;
+	font-size:10.5pt;
+	font-family:"Times New Roman","serif";
+	font-variant:small-caps;}
+p.MsoToc3, li.MsoToc3, div.MsoToc3
+	{margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:24.0pt;
+	margin-bottom:.0001pt;
+	line-height:150%;
+	font-size:10.5pt;
+	font-family:"Times New Roman","serif";
+	font-style:italic;}
+p.MsoToc4, li.MsoToc4, div.MsoToc4
+	{margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:36.0pt;
+	margin-bottom:.0001pt;
+	font-size:9.0pt;
+	font-family:"Times New Roman","serif";}
+p.MsoToc5, li.MsoToc5, div.MsoToc5
+	{margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:48.0pt;
+	margin-bottom:.0001pt;
+	font-size:9.0pt;
+	font-family:"Times New Roman","serif";}
+p.MsoToc6, li.MsoToc6, div.MsoToc6
+	{margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:60.0pt;
+	margin-bottom:.0001pt;
+	font-size:9.0pt;
+	font-family:"Times New Roman","serif";}
+p.MsoToc7, li.MsoToc7, div.MsoToc7
+	{margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:72.0pt;
+	margin-bottom:.0001pt;
+	font-size:9.0pt;
+	font-family:"Times New Roman","serif";}
+p.MsoToc8, li.MsoToc8, div.MsoToc8
+	{margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:84.0pt;
+	margin-bottom:.0001pt;
+	font-size:9.0pt;
+	font-family:"Times New Roman","serif";}
+p.MsoToc9, li.MsoToc9, div.MsoToc9
+	{margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:96.0pt;
+	margin-bottom:.0001pt;
+	font-size:9.0pt;
+	font-family:"Times New Roman","serif";}
+p.MsoFootnoteText, li.MsoFootnoteText, div.MsoFootnoteText
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	font-size:10.0pt;
+	font-family:"Times New Roman","serif";}
+p.MsoHeader, li.MsoHeader, div.MsoHeader
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";}
+p.MsoFooter, li.MsoFooter, div.MsoFooter
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";}
+p.MsoCaption, li.MsoCaption, div.MsoCaption
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Times New Roman","serif";
+	font-weight:bold;}
+span.MsoFootnoteReference
+	{vertical-align:super;}
+p.MsoTitle, li.MsoTitle, div.MsoTitle
+	{margin-top:12.0pt;
+	margin-right:0cm;
+	margin-bottom:120.0pt;
+	margin-left:0cm;
+	text-align:center;
+	font-size:16.0pt;
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+p.MsoBodyText, li.MsoBodyText, div.MsoBodyText
+	{mso-style-link:"Body Text Char";
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:6.0pt;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";}
+span.BodyTextChar
+	{mso-style-name:"Body Text Char";
+	mso-style-link:"Body Text";}
+ /* Page Definitions */
+ @page WordSection1
+	{size:595.45pt 841.7pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;}
+div.WordSection1
+	{page:WordSection1;}
+@page WordSection2
+	{size:595.45pt 841.7pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;}
+div.WordSection2
+	{page:WordSection2;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0cm;}
+ul
+	{margin-bottom:0cm;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US link=blue vlink=purple>
+
+<div class=WordSection1>
+
+<p class=MsoTitle>Forward Lock Converter And Decoder</p>
+
+<p class=MsoToc1><span
+class=MsoHyperlink><a href="#_Toc276471422">1<span style='font-size:12.0pt;
+line-height:150%;color:windowtext;text-transform:none;font-weight:normal;
+text-decoration:none'>      </span>Introduction<span style='color:windowtext;
+display:none;text-decoration:none'>. </span><span
+style='color:windowtext;display:none;text-decoration:none'>3</span></a></span></p>
+
+<p class=MsoToc1><span class=MsoHyperlink><a href="#_Toc276471423">2<span
+style='font-size:12.0pt;line-height:150%;color:windowtext;text-transform:none;
+font-weight:normal;text-decoration:none'>      </span>Overview<span
+style='color:windowtext;display:none;text-decoration:none'>... </span><span
+style='color:windowtext;display:none;text-decoration:none'>3</span></a></span></p>
+
+<p class=MsoToc1><span class=MsoHyperlink><a href="#_Toc276471424">3<span
+style='font-size:12.0pt;line-height:150%;color:windowtext;text-transform:none;
+font-weight:normal;text-decoration:none'>      </span>Use Cases<span
+style='color:windowtext;display:none;text-decoration:none'>. </span><span
+style='color:windowtext;display:none;text-decoration:none'>4</span></a></span></p>
+
+<p class=MsoToc2><span class=MsoHyperlink><span style='font-variant:normal !important;
+text-transform:uppercase'><a href="#_Toc276471425">3.1<span style='font-size:
+12.0pt;line-height:150%;color:windowtext;text-transform:none;text-decoration:
+none'>        </span>Converter<span style='color:windowtext;display:none;
+text-decoration:none'>. </span><span
+style='color:windowtext;display:none;text-decoration:none'>4</span></a></span></span></p>
+
+<p class=MsoToc3><span class=MsoHyperlink><a href="#_Toc276471426">3.1.1<span
+style='font-size:12.0pt;line-height:150%;color:windowtext;font-style:normal;
+text-decoration:none'>     </span>Convert Data (Push-Mode Conversion)<span
+style='color:windowtext;display:none;text-decoration:none'> </span><span
+style='color:windowtext;display:none;text-decoration:none'>4</span></a></span></p>
+
+<p class=MsoToc3><span class=MsoHyperlink><a href="#_Toc276471427">3.1.2<span
+style='font-size:12.0pt;line-height:150%;color:windowtext;font-style:normal;
+text-decoration:none'>     </span>Convert File (Pull-Mode Conversion)<span
+style='color:windowtext;display:none;text-decoration:none'> </span><span
+style='color:windowtext;display:none;text-decoration:none'>6</span></a></span></p>
+
+<p class=MsoToc2><span class=MsoHyperlink><span style='font-variant:normal !important;
+text-transform:uppercase'><a href="#_Toc276471428">3.2<span style='font-size:
+12.0pt;line-height:150%;color:windowtext;text-transform:none;text-decoration:
+none'>        </span>Decoder<span style='color:windowtext;display:none;
+text-decoration:none'>. </span><span
+style='color:windowtext;display:none;text-decoration:none'>7</span></a></span></span></p>
+
+<p class=MsoToc3><span class=MsoHyperlink><a href="#_Toc276471429">3.2.1<span
+style='font-size:12.0pt;line-height:150%;color:windowtext;font-style:normal;
+text-decoration:none'>     </span>Check Integrity<span style='color:windowtext;
+display:none;text-decoration:none'>. </span><span
+style='color:windowtext;display:none;text-decoration:none'>8</span></a></span></p>
+
+<p class=MsoToc3><span class=MsoHyperlink><a href="#_Toc276471430">3.2.2<span
+style='font-size:12.0pt;line-height:150%;color:windowtext;font-style:normal;
+text-decoration:none'>     </span>Get Content Type<span style='color:windowtext;
+display:none;text-decoration:none'>. </span><span
+style='color:windowtext;display:none;text-decoration:none'>9</span></a></span></p>
+
+<p class=MsoToc3><span class=MsoHyperlink><a href="#_Toc276471431">3.2.3<span
+style='font-size:12.0pt;line-height:150%;color:windowtext;font-style:normal;
+text-decoration:none'>     </span>Decode File<span style='color:windowtext;
+display:none;text-decoration:none'>. </span><span
+style='color:windowtext;display:none;text-decoration:none'>10</span></a></span></p>
+
+<p class=MsoToc1><span class=MsoHyperlink><a href="#_Toc276471432">4<span
+style='font-size:12.0pt;line-height:150%;color:windowtext;text-transform:none;
+font-weight:normal;text-decoration:none'>      </span>Definition of the
+Internal Forward Lock File Format<span style='color:windowtext;display:none;
+text-decoration:none'>. </span><span
+style='color:windowtext;display:none;text-decoration:none'>11</span></a></span></p>
+
+<p class=MsoToc2><span class=MsoHyperlink><span style='font-variant:normal !important;
+text-transform:uppercase'><a href="#_Toc276471433">4.1<span style='font-size:
+12.0pt;line-height:150%;color:windowtext;text-transform:none;text-decoration:
+none'>        </span>Key Derivation<span style='color:windowtext;display:none;
+text-decoration:none'>.. </span><span
+style='color:windowtext;display:none;text-decoration:none'>11</span></a></span></span></p>
+
+<p class=MsoToc2><span class=MsoHyperlink><span style='font-variant:normal !important;
+text-transform:uppercase'><a href="#_Toc276471434">4.2<span style='font-size:
+12.0pt;line-height:150%;color:windowtext;text-transform:none;text-decoration:
+none'>        </span>Calculation of the Counters<span style='color:windowtext;
+display:none;text-decoration:none'>. </span><span
+style='color:windowtext;display:none;text-decoration:none'>12</span></a></span></span></p>
+
+<p class=MsoToc1><span class=MsoHyperlink><a href="#_Toc276471435">5<span
+style='font-size:12.0pt;line-height:150%;color:windowtext;text-transform:none;
+font-weight:normal;text-decoration:none'>      </span>Unit Test Cases<span
+style='color:windowtext;display:none;text-decoration:none'>. </span><span
+style='color:windowtext;display:none;text-decoration:none'>12</span></a></span></p>
+
+<p class=MsoToc1><span class=MsoHyperlink><a href="#_Toc276471436">6<span
+style='font-size:12.0pt;line-height:150%;color:windowtext;text-transform:none;
+font-weight:normal;text-decoration:none'>      </span>References<span
+style='color:windowtext;display:none;text-decoration:none'>. </span><span
+style='color:windowtext;display:none;text-decoration:none'>12</span></a></span></p>
+
+<p class=MsoBodyText></p>
+
+</div>
+
+<span style='font-size:12.0pt;font-family:"Times New Roman","serif"'><br
+clear=all style='page-break-before:right'>
+</span>
+
+<div class=WordSection2>
+
+<h1><a name="_Toc276471422"></a><a name="_Ref263085474">1<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Introduction</a></h1>
+
+<p class=MsoBodyText>The internal Forward Lock file format is used for encrypting
+inherently unencrypted OMA DRM version 1 Forward Lock and Combined Delivery
+files so they can be securely stored on externally accessible file system partitions
+such as memory stick.</p>
+
+<p class=MsoBodyText>Our general strategy is to convert such <i>OMA DRM Message</i>
+(‘.dm’) files to internal Forward Lock (‘.fl’) files as soon as they are
+downloaded or otherwise transferred to the phone, and not actually provide any
+decoders for ‘.dm’ files.</p>
+
+<h1><a name="_Toc276471423">2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Overview</a></h1>
+
+<p class=MsoBodyText>The <i>Forward Lock Converter</i> converts OMA DRM Message
+files to the internal file format. The <i>Forward Lock Decoder</i> provides a
+POSIX-level API for transparent reading and seeking through such a converted
+file as if it were unencrypted. The API also includes functions for checking a
+file’s integrity and getting the MIME type of its embedded content.</p>
+
+<p class=MsoBodyText style='margin-bottom:24.0pt'>The converter and decoder are
+built into two separate libraries, which share common code for random number
+generation and key encryption in a third library. For test purposes there is
+also a unit test application. See Figure 1.</p>
+
+<p class=MsoBodyText style='page-break-after:avoid'><img width=288 height=364
+src="images/image001.gif"></p>
+
+<p class=MsoCaption style='margin-top:12.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:0cm'><a name="_Ref262730885">Figure </a>1. Block diagram illustrating the dependencies between the executable modules.</p>
+
+<b><span style='font-size:16.0pt;font-family:"Arial","sans-serif"'><br
+clear=all style='page-break-before:always'>
+</span></b>
+
+<h1><a name="_Toc276471424">3<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Use Cases</a></h1>
+
+<p class=MsoBodyText>This section describes all the use cases for the converter
+and decoder. It shows the sequence of API calls that should be used to solve
+these use cases.</p>
+
+<h2><a name="_Toc276471425">3.1<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Converter</a></h2>
+
+<p class=MsoBodyText>Through the converter API, conversion can be performed in one
+of two ways:</p>
+
+<p class=MsoBodyText style='margin-left:36.0pt;text-indent:-18.0pt'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><i>Push-mode
+conversion</i> is when the client progressively feeds data to the converter as
+it arrives. This is appropriate when data arrives gradually in chunks, with
+idle time in between. Consequently, push mode is used for converting files
+being downloaded through HTTP. See section 3.1.1.</p>
+
+<p class=MsoBodyText style='margin-left:36.0pt;text-indent:-18.0pt'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><i>Pull-mode
+conversion</i> is when the converter drives the process and consumes data from
+the client as it needs it. This is appropriate when the entire file to be
+converted is readily available. Hence, pull mode is used by the unit test application.
+See section 3.1.2.</p>
+
+<p class=MsoBodyText>Internally, pull-mode conversion is implemented in terms
+of the API for push-mode conversion.</p>
+
+<h3><a name="_Toc276471426"></a><a name="_Ref263085478">3.1.1<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>Convert Data
+(Push-Mode Conversion)</a></h3>
+
+<p class=MsoBodyText>Push-mode conversion is performed as follows (see also Figure 2):</p>
+
+<p class=MsoBodyText style='margin-left:36.0pt;text-indent:-18.0pt'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockConv_OpenSession</span>
+initializes the output parameter and returns a <i>session ID</i> to be used in
+subsequent calls to the API. The output parameter is a union of return values
+whose correct use at any given moment is determined by the API function last
+called.</p>
+
+<p class=MsoBodyText style='margin-left:36.0pt;text-indent:-18.0pt'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockConv_ConvertData</span>
+is called repeatedly until no more input data remains. Each call converts the
+maximum amount of data possible and writes it to the output buffer. The client then
+writes this data to file.</p>
+
+<p class=MsoBodyText style='margin-left:36.0pt;text-indent:-18.0pt'>3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockConv_CloseSession</span>
+cleans up the session and deallocates the output buffer. If all has gone well, a
+two-part cryptographic signature of the output file is calculated. The client
+must go back and rewrite part of the file header with this updated signature
+information.</p>
+
+<p class=MsoBodyText>Every time a file is being converted, the converter calls <span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockGlue_GetRandomNumber</span>
+to generate a new, unique session key. No two converted files look alike, even
+if the original files are the same.</p>
+
+<p class=MsoBodyText><b>Note:</b> The random bytes cannot come from any bare-minimum
+implementation of the C-library <span style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>rand</span>
+function—they must be cryptographically secure. Otherwise, security will be
+compromised.</p>
+
+<p class=MsoBodyText>The session key is encrypted and stored within the
+converted file. Key encryption is performed using <span style='font-size:10.0pt;
+font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockGlue_GetEncryptedKeyLength</span> and <span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockGlue_EncryptKey</span>.
+These two functions, together with the corresponding decryption function (<span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockGlue_DecryptKey</span>),
+are the integration points where an OEM manufacturer may implement their own
+key-encryption scheme.</p>
+
+<p class=MsoBodyText><b>Note:</b> The key-encryption key must be unique to each
+device; this is what makes the files forward lock–protected. Ideally, it should
+be derived from secret hardware parameters, but at the very least it should be
+persistent from one master reset to the next.</p>
+
+<div style='margin-bottom:24.0pt;border:solid windowtext 1.0pt;padding:1.0pt 4.0pt 1.0pt 4.0pt;
+background:#F2F2F2'>
+
+<p class=MsoBodyText style='background:#F2F2F2;border:
+none;padding:0cm'><b>Note:</b> In the open-source implementation of the <span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>libfwdlock-common</span>
+library, a random key-encryption key is generated and stored in plaintext in
+the file system, without being obfuscated in any way (doing so would be futile
+since the source code is openly available). This key must be kept secret from
+the user, and shouldn’t be possible to extract through backup-and-restore
+functionality or the like. OEM manufacturers will probably want to implement a
+truly hardware-based device-unique key.</p>
+
+</div>
+
+<p class=MsoBodyText style='page-break-after:avoid'><img width=531 height=563
+src="images/image002.gif"></p>
+
+<p class=MsoCaption style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:0cm'><a name="_Ref263085187">Figure </a>2. Converter UC: Convert Data.</p>
+
+<b><span style='font-size:13.0pt;font-family:"Arial","sans-serif"'><br
+clear=all style='page-break-before:always'>
+</span></b>
+
+<h3><a name="_Toc276471427"></a><a name="_Ref263163082">3.1.2<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>Convert File
+(Pull-Mode Conversion)</a></h3>
+
+<p class=MsoBodyText>Pull-mode conversion is performed by calling <span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_ConvertFile</span>
+with the filename, unless there is need for a specialized <span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>read</span> function, in
+which case <span style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_ConvertOpenFile</span>
+should be used directly instead. See Figure 3.</p>
+
+<p class=MsoBodyText style='margin-bottom:24.0pt'>Internally, <span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_ConvertFile</span>
+calls <span style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_ConvertOpenFile</span>.
+The latter then proceeds with the conversion using the push-mode API, acting as
+the client in the previous use case; see section 3.1.1.</p>
+
+<p class=MsoBodyText style='page-break-after:avoid'><img width=531 height=731
+src="images/image003.gif"></p>
+
+<p class=MsoCaption style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:0cm'><a name="_Ref263085208">Figure </a>3. Converter UC: Convert File.</p>
+
+<b><i><span style='font-size:14.0pt;font-family:"Arial","sans-serif"'><br
+clear=all style='page-break-before:always'>
+</span></i></b>
+
+<h2><a name="_Toc276471428">3.2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Decoder</a></h2>
+
+<p class=MsoBodyText>The decoder API allows the client to do the following:</p>
+
+<p class=MsoBodyText style='margin-left:36.0pt;text-indent:-18.0pt'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Check
+the integrity of an internal Forward Lock file, i.e., detect whether it has
+been manipulated in any way; see section 3.2.1.</p>
+
+<p class=MsoBodyText style='margin-left:36.0pt;text-indent:-18.0pt'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Get
+the MIME type of the embedded content (the “original” MIME type before DRM protection
+was applied); see section 3.2.2.</p>
+
+<p class=MsoBodyText style='margin-left:36.0pt;text-indent:-18.0pt'>3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Decode
+the file by random access, i.e., read and seek through it in an arbitrary
+manner; see section 3.2.3.</p>
+
+<p class=MsoBodyText>All subsequent operations on a file first require it to be
+opened. Opening a file returns a <i>file descriptor</i>—a handle to be used in
+these subsequent operations.</p>
+
+<p class=MsoBodyText>If the filename is known, an internal Forward Lock file
+can be opened using <span style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_open</span>.
+If only the file descriptor of an already open file is available, a decoding
+session can instead be initialized using <span style='font-size:10.0pt;
+font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_attach</span>.</p>
+
+<p class=MsoBodyText>Internally, <span style='font-size:10.0pt;font-family:
+"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_open</span> calls <span style='font-size:10.0pt;
+font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_attach</span>. For efficiency
+reasons, <span style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_attach</span>
+therefore assumes that the file position is at the beginning of the file when
+the function gets called. A client who calls it directly must make sure that
+this assumption holds.</p>
+
+<p class=MsoBodyText>When a file is being attached, the session key stored in
+the file during conversion is decrypted using <span style='font-size:10.0pt;
+font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockGlue_GetEncryptedKeyLength</span> and <span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockGlue_DecryptKey</span>,
+in order to set up for decoding and integrity checking.</p>
+
+<p class=MsoBodyText>For just getting the content type, however, retrieving the
+session key would strictly speaking not be necessary, so there is an
+opportunity here to optimize for that if it proves necessary later.</p>
+
+<p class=MsoBodyText>Symmetrical to <span style='font-size:10.0pt;font-family:
+"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_open</span> and <span style='font-size:10.0pt;
+font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_attach</span>, there are also functions
+for closing a file or detaching from it:</p>
+
+<p class=MsoBodyText style='margin-left:36.0pt;text-indent:-18.0pt'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>If
+it was opened with <span style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_open</span>
+it should be closed with <span style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_close</span>.</p>
+
+<p class=MsoBodyText style='margin-left:36.0pt;text-indent:-18.0pt'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>If
+it was attached with <span style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_attach</span>
+it should be detached with <span style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_detach</span>.</p>
+
+<b><span style='font-size:13.0pt;font-family:"Arial","sans-serif"'><br
+clear=all style='page-break-before:always'>
+</span></b>
+
+<h3><a name="_Ref263163099"></a><a name="_Toc276471429">3.2.1<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>Check Integrity</a></h3>
+
+<p class=MsoBodyText>There are three methods for checking the integrity of an
+internal Forward Lock file, in whole or in part (see also Figure 4):</p>
+
+<p class=MsoBodyText style='margin-left:36.0pt;text-indent:-18.0pt'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_CheckDataIntegrity</span>,
+which checks the integrity of the encrypted content data.</p>
+
+<p class=MsoBodyText style='margin-left:36.0pt;text-indent:-18.0pt'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_CheckHeaderIntegrity</span>,
+which checks the integrity of the file header, including the content type and
+other fields not currently supported but reserved for future use.</p>
+
+<p class=MsoBodyText style='margin-left:36.0pt;text-indent:-18.0pt'>3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_CheckIntegrity</span>,
+which internally calls first <span style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_CheckHeaderIntegrity</span>
+and then <span style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_CheckDataIntegrity</span>.</p>
+
+<p class=MsoBodyText style='margin-bottom:24.0pt'><span style='font-size:10.0pt;
+font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_CheckHeaderIntegrity</span> is
+generally much faster than <span style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_CheckDataIntegrity</span>,
+whose running time is directly proportional to the size of the file.</p>
+
+<p class=MsoBodyText style='page-break-after:avoid'><img width=543 height=575
+src="images/image004.gif"></p>
+
+<p class=MsoCaption style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:0cm'><a name="_Ref263163308">Figure </a>4. Decoder UC: Check Integrity.</p>
+
+<b><span style='font-size:13.0pt;font-family:"Arial","sans-serif"'><br
+clear=all style='page-break-before:always'>
+</span></b>
+
+<h3><a name="_Toc276471430"></a><a name="_Ref263163117">3.2.2<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>Get Content Type</a></h3>
+
+<p class=MsoBodyText style='margin-bottom:24.0pt'><span style='font-size:10.0pt;
+font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_GetContentType</span> returns a
+read-only reference to an ASCII string containing the MIME type of the
+embedded content. This reference is valid as long as the file is kept open.
+Clients who need access to the content type after closing the file should make
+a copy of the string. See Figure 5 below.</p>
+
+<p class=MsoBodyText style='page-break-after:avoid'><img width=543 height=488
+src="images/image005.gif"></p>
+
+<p class=MsoCaption style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:0cm'><a name="_Ref263163392">Figure </a>5. Decoder UC: Get Content Type.</p>
+
+<b><span style='font-size:13.0pt;font-family:"Arial","sans-serif"'><br
+clear=all style='page-break-before:always'>
+</span></b>
+
+<h3><a name="_Toc276471431"></a><a name="_Ref263163137">3.2.3<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>Decode File</a></h3>
+
+<p class=MsoBodyText>After opening an internal Forward Lock file (or attaching
+to an already open one), it can be transparently read from as if it were
+unencrypted. Any number of calls to read data from the current file position or
+set it to a new one (which is what <span style='font-size:10.0pt;font-family:
+"Lucida Console","DejaVu Sans Mono"'>lseek</span> does) can be made in any order; this is what we
+call <i>random access</i>. See Figure 6.</p>
+
+<p class=MsoBodyText>The Forward Lock Decoder versions of the <span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>read</span>, <span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>lseek</span>, and <span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>close</span> functions
+have the exact same signatures as their POSIX counterparts. So, for example,
+the call <span style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_lseek(fd,
+0, SEEK_END)</span> returns the size of the embedded content data, i.e., the
+size of the original file before DRM protection.</p>
+
+<p class=MsoBodyText style='margin-bottom:24.0pt'>Moreover, <span
+style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>FwdLockFile_open</span>
+is like regular POSIX <span style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>open</span>
+except it takes only the filename as a parameter—access is always read-only.</p>
+
+<p class=MsoBodyText style='page-break-after:avoid'><img width=543 height=522
+src="images/image006.gif"></p>
+
+<p class=MsoCaption style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:0cm'><a name="_Ref263166303">Figure </a>6. Decoder UC: Decode File.</p>
+
+<b><span style='font-size:16.0pt;font-family:"Arial","sans-serif"'><br
+clear=all style='page-break-before:always'>
+</span></b>
+
+<h1><a name="_Toc276471432">4<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Definition of the Internal Forward Lock File Format</a></h1>
+
+<p class=MsoBodyText style='margin-bottom:12.0pt'>The inner structure of an internal
+Forward Lock file is defined in Table 1 below.</p>
+
+<table class=MsoNormalTable border=1 cellspacing=0 cellpadding=0
+ style='border-collapse:collapse;border:none'>
+ <tr>
+  <td width=111 valign=top style='width:83.4pt;border:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'><b>Offset [bytes]</b></p>
+  </td>
+  <td width=96 valign=top style='width:72.0pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'><b>Size [bytes]</b></p>
+  </td>
+  <td width=361 valign=top style='width:270.85pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'><b>Description</b></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=111 valign=top style='width:83.4pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>0</p>
+  </td>
+  <td width=96 valign=top style='width:72.0pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>4</p>
+  </td>
+  <td width=361 valign=top style='width:270.85pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>The file signature (so-called
+  <i>magic number</i>): a four-character code consisting of the letters
+  F-W-L-K.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=111 valign=top style='width:83.4pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>4</p>
+  </td>
+  <td width=96 valign=top style='width:72.0pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>1</p>
+  </td>
+  <td width=361 valign=top style='width:270.85pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>Version number (0 for the
+  first version).</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=111 valign=top style='width:83.4pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>5</p>
+  </td>
+  <td width=96 valign=top style='width:72.0pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>1</p>
+  </td>
+  <td width=361 valign=top style='width:270.85pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>Indicates the subformat:</p>
+  <p class=MsoNormal style='page-break-after:avoid'><i>0x00 Forward Lock</i></p>
+  <p class=MsoNormal style='page-break-after:avoid'><i>0x01 Combined Delivery</i></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=111 valign=top style='width:83.4pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>6</p>
+  </td>
+  <td width=96 valign=top style='width:72.0pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>1</p>
+  </td>
+  <td width=361 valign=top style='width:270.85pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>Usage restriction flags (prohibitions
+  against usage as ringtone or as wallpaper and screen saver). Also indicates
+  if the file is bound to a specific SIM card.</p>
+  <p class=MsoNormal style='page-break-after:avoid'><i>0x00 No usage
+  restrictions</i></p>
+  <p class=MsoNormal style='page-break-after:avoid'><i>0x01 Ringtone usage
+  prohibited</i></p>
+  <p class=MsoNormal style='page-break-after:avoid'><i>0x02 Screen usage
+  prohibited</i></p>
+  <p class=MsoNormal style='page-break-after:avoid'><i>0x80 Bound to SIM</i></p>
+  <p class=MsoNormal style='page-break-after:avoid'>(Any number of these may be
+  OR-ed together.)</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=111 valign=top style='width:83.4pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>7</p>
+  </td>
+  <td width=96 valign=top style='width:72.0pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>1</p>
+  </td>
+  <td width=361 valign=top style='width:270.85pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>Length of the MIME content
+  type (<i>k</i>).</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=111 valign=top style='width:83.4pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>8</p>
+  </td>
+  <td width=96 valign=top style='width:72.0pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'><i>k</i></p>
+  </td>
+  <td width=361 valign=top style='width:270.85pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>The MIME content type
+  (ASCII-encoded without null-character termination).</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=111 valign=top style='width:83.4pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>8+<i>k</i></p>
+  </td>
+  <td width=96 valign=top style='width:72.0pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'><i>l </i>= 0 or 16</p>
+  </td>
+  <td width=361 valign=top style='width:270.85pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>If the subformat is
+  Combined Delivery, this field contains the auto-generated content ID (16&nbsp;bytes).
+  If not, this field is zero-size.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=111 valign=top style='width:83.4pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>8+<i>k</i>+<i>l</i></p>
+  </td>
+  <td width=96 valign=top style='width:72.0pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'><i>m </i>= 0 or 9</p>
+  </td>
+  <td width=361 valign=top style='width:270.85pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>If the file is bound to a
+  specific SIM card, this field contains the 9-byte packed IMSI number. If not,
+  this field is zero-size.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=111 valign=top style='width:83.4pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>8+<i>k</i>+<i>l</i>+<i>m</i></p>
+  </td>
+  <td width=96 valign=top style='width:72.0pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'><i>n</i> &#8805; 16</p>
+  </td>
+  <td width=361 valign=top style='width:270.85pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>The encrypted session key, the
+  first sixteen bytes of which are also used as the CTR-mode <i>nonce</i> (similar
+  to the CBC-mode <i>initialization vector</i>).</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=111 valign=top style='width:83.4pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>8+<i>k</i>+<i>l</i>+<i>m</i>+<i>n</i></p>
+  </td>
+  <td width=96 valign=top style='width:72.0pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>20</p>
+  </td>
+  <td width=361 valign=top style='width:270.85pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>Data signature—the SHA-1
+  HMAC of the encrypted content data.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=111 valign=top style='width:83.4pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>28+<i>k</i>+<i>l</i>+<i>m</i>+<i>n</i></p>
+  </td>
+  <td width=96 valign=top style='width:72.0pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>20</p>
+  </td>
+  <td width=361 valign=top style='width:270.85pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>Header signature—the SHA-1
+  HMAC of all the fields above, including the encrypted session key and data
+  signature.</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=111 valign=top style='width:83.4pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>48+<i>k</i>+<i>l</i>+<i>m</i>+<i>n</i></p>
+  </td>
+  <td width=96 valign=top style='width:72.0pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'><i>&lt;to the end of the
+  file&gt;</i></p>
+  </td>
+  <td width=361 valign=top style='width:270.85pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal style='page-break-after:avoid'>The content data encrypted
+  using 128-bit AES in CTR mode.</p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoCaption style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:0cm;page-break-after:avoid'><a name="_Ref151269206">Table </a>1. Definition of the fields of an internal Forward Lock file.</p>
+
+<p class=MsoBodyText>As of now, neither Combined Delivery nor usage
+restrictions (including SIM binding) are supported. These fields are reserved
+for future use.</p>
+
+<h2><a name="_Toc276471433">4.1<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Key Derivation</a></h2>
+
+<p class=MsoBodyText>The session key consists of sixteen bytes fetched from a
+cryptographically secure random number generator. From the session key, two
+separate keys are derived: one used for encryption, the other for signing.</p>
+
+<p class=MsoBodyText>The encryption key is the output from encrypting the
+16-byte all-zero input block {0, 0, …, 0} using 128-bit AES with the random session
+key as the key. The signing key is the output from encrypting the 16-byte input
+block {1, 0, …, 0} the same way. The keys so derived will be cryptographically
+independent from each other.</p>
+
+<p class=MsoBodyText>The session key is encrypted using a hardware-dependent
+key-encryption key unique to each device. The encrypted session key is stored
+inside the file, and its first sixteen bytes are also used as the <i>nonce</i>
+for the CTR-mode encryption of the content data.</p>
+
+<h2><a name="_Toc276471434">4.2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Calculation of the Counters</a></h2>
+
+<p class=MsoBodyText>Using CTR (“counter”) mode, a block cipher such as AES can
+be turned into a stream cipher. The process of encryption and decryption is
+well defined in [1], except for the specifics of the calculation of the
+counters. For the internal Forward Lock file format, the counters are
+calculated as follows:</p>
+
+<p class=MsoBodyText style='margin-left:36.0pt;text-indent:-18.0pt'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>The
+nonce is interpreted as a 128-bit unsigned integer in little-endian format.</p>
+
+<p class=MsoBodyText style='margin-left:36.0pt;text-indent:-18.0pt'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>The
+zero-based block sequence number (also a little-endian unsigned integer) is
+added modulo 2<sup>128</sup> to the nonce to produce the counter for a given
+block.</p>
+
+<h1><a name="_Toc276471435">5<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Unit Test Cases</a></h1>
+
+<p class=MsoBodyText>Unit test cases for the converter and decoder come in two
+varieties:</p>
+
+<p class=MsoBodyText style='margin-left:36.0pt;text-indent:-18.0pt'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><i>Black-box</i>
+test cases aim to verify that you get sensible results from malformed or
+“tricky” input data.</p>
+
+<p class=MsoBodyText style='margin-left:36.0pt;text-indent:-18.0pt'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><i>White-box</i>
+test cases aim to maximize code coverage using knowledge of code internals.</p>
+
+<p class=MsoBodyText>The black-box test cases are dependent on a specifically
+designed set of input files found in the <span style='font-size:10.0pt;
+font-family:"Lucida Console","DejaVu Sans Mono"'>forward-lock/internal-format/test/res</span>
+directory in the repository. For ‘tests’ variants of the software, these input
+files will be automatically installed in the file system image during build.</p>
+
+<p class=MsoBodyText>Run the test cases from the ADB shell command line as
+follows:</p>
+
+<p class=MsoNormal style='margin-top:0cm;margin-right:0cm;margin-bottom:6.0pt;
+margin-left:21.55pt'><span style='font-size:10.0pt;font-family:"Lucida Console","DejaVu Sans Mono"'>#
+gtest_fwdlock</span></p>
+
+<p class=MsoBodyText>If all black-box but no white-box test cases fail, the
+input files probably can’t be found in the working directory.</p>
+
+<h1><a name="_Toc276471436">6<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>References</a></h1>
+
+<p class=MsoBodyText style='margin-left:28.9pt;text-indent:-28.9pt'>[1]<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><a
+href="http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf">Dworkin,
+Morris: “Recommendation for Block Cipher Modes of Operation—Methods and
+Techniques,” NIST Special Publication 800-38A, December 2001.</a><a
+name="_Ref151269073"></a></p>
+
+</div>
+
+</body>
+
+</html>
