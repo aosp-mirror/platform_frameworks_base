@@ -322,7 +322,7 @@
                 <RadioButton
                         android:id="@+id/title_short"
                         style="@style/FieldContents"
-                        android:text="cwshort"
+                        android:text="short"
                         android:tag="Title"
                         />
                 <RadioButton
