@@ -888,7 +888,6 @@
     <style name="Preference.DialogPreference">
         <item name="android:positiveButtonText">@android:string/ok</item>
         <item name="android:negativeButtonText">@android:string/cancel</item>
-        <item name="android:widgetLayout">@android:layout/preference_dialog</item>
     </style>
     
     <style name="Preference.DialogPreference.YesNoPreference">
@@ -904,7 +903,6 @@
         <item name="android:ringtoneType">ringtone</item>
         <item name="android:showSilent">true</item>
         <item name="android:showDefault">true</item>
-        <item name="android:widgetLayout">@android:layout/preference_dialog</item>
     </style>
 
     <!-- No margins or background by default. Could be different for x-large screens -->
