@@ -574,7 +574,15 @@ public class Notification implements Parcelable
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Notification(vibrate=");
+        sb.append("Notification(contentView=");
+        if (contentView != null) {
+            sb.append(contentView.getPackage());
+            sb.append("/0x");
+            sb.append(Integer.toHexString(contentView.getLayoutId()));
+        } else {
+            sb.append("null");
+        }
+        sb.append(" vibrate=");
         if (this.vibrate != null) {
             int N = this.vibrate.length-1;
             sb.append("[");
