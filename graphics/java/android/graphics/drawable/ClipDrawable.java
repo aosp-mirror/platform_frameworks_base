@@ -229,7 +229,7 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
     @Override
     public ConstantState getConstantState() {
         if (mClipState.canConstantState()) {
-            mClipState.mChangingConfigurations = super.getChangingConfigurations();
+            mClipState.mChangingConfigurations = getChangingConfigurations();
             return mClipState;
         }
         return null;

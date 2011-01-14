@@ -204,7 +204,7 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
     @Override
     public ConstantState getConstantState() {
         if (mState.canConstantState()) {
-            mState.mChangingConfigurations = super.getChangingConfigurations();
+            mState.mChangingConfigurations = getChangingConfigurations();
             return mState;
         }
         return null;
