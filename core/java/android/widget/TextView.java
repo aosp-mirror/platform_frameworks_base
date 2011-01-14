@@ -5855,6 +5855,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         desired += pad;
+        layout.setMaximumVisibleLineCount(0);
 
         if (mMaxMode == LINES) {
             /*
@@ -5863,8 +5864,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
              */
             if (cap) {
                 if (linecount > mMaximum) {
-                    desired = layout.getLineTop(mMaximum) +
-                              layout.getBottomPadding();
+                    layout.setMaximumVisibleLineCount(mMaximum);
+                    desired = layout.getLineTop(mMaximum);
 
                     if (dr != null) {
                         desired = Math.max(desired, dr.mDrawableHeightLeft);
@@ -6432,7 +6433,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (applyTransformation) {
                 setTransformationMethod(SingleLineTransformationMethod.getInstance());
             }
-            // TODO setState
         } else {
             if (changeMaxLines) {
                 setMaxLines(Integer.MAX_VALUE);
@@ -6441,7 +6441,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (applyTransformation) {
                 setTransformationMethod(null);
             }
-            // TODO setState
         }
     }
 
