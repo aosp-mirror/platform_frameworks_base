@@ -692,7 +692,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // deferred rotation
             if (performRotation) {
                 if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-drag rotation");
-                boolean changed = setRotationUncheckedLocked(rotation, animFlags);
+                boolean changed = setRotationUncheckedLocked(rotation, animFlags, false);
                 if (changed) {
                     sendNewConfiguration();
                 }
@@ -703,9 +703,14 @@ public class WindowManagerService extends IWindowManager.Stub
             final int myPid = Process.myPid();
 
             // Move the surface to the given touch
+            if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION notifyMoveLw");
             mSurface.openTransaction();
-            mSurface.setPosition((int)(x - mThumbOffsetX), (int)(y - mThumbOffsetY));
-            mSurface.closeTransaction();
+            try {
+                mSurface.setPosition((int)(x - mThumbOffsetX), (int)(y - mThumbOffsetY));
+            } finally {
+                mSurface.closeTransaction();
+                if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION notifyMoveLw");
+            }
 
             // Tell the affected window
             WindowState touchedWin = getTouchedWinAtPointLw(x, y);
@@ -2430,7 +2435,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 TAG, "New client " + client.asBinder()
                 + ": window=" + win);
             
-            if (win.isVisibleOrAdding() && updateOrientationFromAppTokensLocked()) {
+            if (win.isVisibleOrAdding() && updateOrientationFromAppTokensLocked(false)) {
                 reportNewConfig = true;
             }
         }
@@ -2517,7 +2522,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // So just update orientation if needed.
         if (wasVisible && computeForcedAppOrientationLocked()
                 != mForcedAppOrientation
-                && updateOrientationFromAppTokensLocked()) {
+                && updateOrientationFromAppTokensLocked(false)) {
             mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
         }
         updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL);
@@ -2637,15 +2642,17 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mWindowMap) {
                 WindowState w = windowForClientLocked(session, client, false);
                 if ((w != null) && (w.mSurface != null)) {
-                    if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION");
+                    if (SHOW_TRANSACTIONS) Slog.i(TAG,
+                            ">>> OPEN TRANSACTION setTransparentRegion");
                     Surface.openTransaction();
                     try {
                         if (SHOW_TRANSACTIONS) logSurface(w,
                                 "transparentRegionHint=" + region, null);
                         w.mSurface.setTransparentRegionHint(region);
                     } finally {
-                        if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION");
                         Surface.closeTransaction();
+                        if (SHOW_TRANSACTIONS) Slog.i(TAG,
+                                "<<< CLOSE TRANSACTION setTransparentRegion");
                     }
                 }
             }
@@ -2983,7 +2990,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (assignLayers) {
                 assignLayersLocked();
             }
-            configChanged = updateOrientationFromAppTokensLocked();
+            configChanged = updateOrientationFromAppTokensLocked(false);
             performLayoutAndPlaceSurfacesLocked();
             if (displayed && win.mIsWallpaper) {
                 updateWallpaperOffsetLocked(win, mDisplay.getWidth(),
@@ -3549,7 +3556,7 @@ public class WindowManagerService extends IWindowManager.Stub
         long ident = Binder.clearCallingIdentity();
         
         synchronized(mWindowMap) {
-            if (updateOrientationFromAppTokensLocked()) {
+            if (updateOrientationFromAppTokensLocked(false)) {
                 if (freezeThisOneIfNeeded != null) {
                     AppWindowToken wtoken = findAppWindowToken(
                             freezeThisOneIfNeeded);
@@ -3571,7 +3578,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (currentConfig.diff(mTempConfiguration) != 0) {
                         mWaitingForConfig = true;
                         mLayoutNeeded = true;
-                        startFreezingDisplayLocked();
+                        startFreezingDisplayLocked(false);
                         config = new Configuration(mTempConfiguration);
                     }
                 }
@@ -3596,8 +3603,8 @@ public class WindowManagerService extends IWindowManager.Stub
      * @see android.view.IWindowManager#updateOrientationFromAppTokens(
      * android.os.IBinder)
      */
-    boolean updateOrientationFromAppTokensLocked() {
-        if (mDisplayFrozen) {
+    boolean updateOrientationFromAppTokensLocked(boolean inTransaction) {
+        if (mDisplayFrozen || mOpeningApps.size() > 0 || mClosingApps.size() > 0) {
             // If the display is frozen, some activities may be in the middle
             // of restarting, and thus have removed their old window.  If the
             // window has the flag to hide the lock screen, then the lock screen
@@ -3617,7 +3624,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 //action like disabling/enabling sensors etc.,
                 mPolicy.setCurrentOrientationLw(req);
                 if (setRotationUncheckedLocked(WindowManagerPolicy.USE_LAST_ROTATION,
-                        mLastRotationFlags | Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE)) {
+                        mLastRotationFlags | Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE,
+                        inTransaction)) {
                     changed = true;
                 }
             }
@@ -4194,7 +4202,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 wtoken.freezingScreen = true;
                 mAppsFreezingScreen++;
                 if (mAppsFreezingScreen == 1) {
-                    startFreezingDisplayLocked();
+                    startFreezingDisplayLocked(false);
                     mH.removeMessages(H.APP_FREEZE_TIMEOUT);
                     mH.sendMessageDelayed(mH.obtainMessage(H.APP_FREEZE_TIMEOUT),
                             5000);
@@ -4976,12 +4984,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION showStrictModeViolation");
             Surface.openTransaction();
-            if (mStrictModeFlash == null) {
-                mStrictModeFlash = new StrictModeFlash(mDisplay, mFxSession);
+            try {
+                if (mStrictModeFlash == null) {
+                    mStrictModeFlash = new StrictModeFlash(mDisplay, mFxSession);
+                }
+                mStrictModeFlash.setVisibility(on);
+            } finally {
+                Surface.closeTransaction();
+                if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION showStrictModeViolation");
             }
-            mStrictModeFlash.setVisibility(on);
-            Surface.closeTransaction();
         }
     }
 
@@ -5126,7 +5139,7 @@ public class WindowManagerService extends IWindowManager.Stub
         long origId = Binder.clearCallingIdentity();
         boolean changed;
         synchronized(mWindowMap) {
-            changed = setRotationUncheckedLocked(rotation, animFlags);
+            changed = setRotationUncheckedLocked(rotation, animFlags, false);
         }
 
         if (changed || alwaysSendConfiguration) {
@@ -5144,7 +5157,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * Returns null if the rotation has been changed.  In this case YOU
      * MUST CALL setNewConfiguration() TO UNFREEZE THE SCREEN.
      */
-    public boolean setRotationUncheckedLocked(int rotation, int animFlags) {
+    public boolean setRotationUncheckedLocked(int rotation, int animFlags, boolean inTransaction) {
         if (mDragState != null) {
             // Potential rotation during a drag.  Don't do the rotation now, but make
             // a note to perform the rotation later.
@@ -5179,17 +5192,28 @@ public class WindowManagerService extends IWindowManager.Stub
                     2000);
             mWaitingForConfig = true;
             mLayoutNeeded = true;
-            startFreezingDisplayLocked();
+            startFreezingDisplayLocked(inTransaction);
             Slog.i(TAG, "Setting rotation to " + rotation + ", animFlags=" + animFlags);
             mInputManager.setDisplayOrientation(0, rotation);
             if (mDisplayEnabled) {
                 if (CUSTOM_SCREEN_ROTATION) {
                     Surface.freezeDisplay(0);
-                    Surface.openTransaction();
-                    if (mScreenRotationAnimation != null) {
-                        mScreenRotationAnimation.setRotation(rotation);
+                    if (!inTransaction) {
+                        if (SHOW_TRANSACTIONS) Slog.i(TAG,
+                                ">>> OPEN TRANSACTION setRotationUnchecked");
+                        Surface.openTransaction();
                     }
-                    Surface.closeTransaction();
+                    try {
+                        if (mScreenRotationAnimation != null) {
+                            mScreenRotationAnimation.setRotation(rotation);
+                        }
+                    } finally {
+                        if (!inTransaction) {
+                            Surface.closeTransaction();
+                            if (SHOW_TRANSACTIONS) Slog.i(TAG,
+                                    "<<< CLOSE TRANSACTION setRotationUnchecked");
+                        }
+                    }
                     Surface.setOrientation(0, rotation, animFlags);
                     Surface.unfreezeDisplay(0);
                 } else {
@@ -5608,7 +5632,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public Configuration computeNewConfiguration() {
         synchronized (mWindowMap) {
-            return computeNewConfigurationLocked();
+            Configuration config = computeNewConfigurationLocked();
+            if (config == null && mWaitingForConfig) {
+                // Nothing changed but we are waiting for something... stop that!
+                mWaitingForConfig = false;
+                performLayoutAndPlaceSurfacesLocked();
+            }
+            return config;
         }
     }
 
@@ -6551,6 +6581,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 // Make the surface visible at the proper location
                 final Surface surface = mDragState.mSurface;
+                if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION performDrag");
                 Surface.openTransaction();
                 try {
                     surface.setPosition((int)(touchX - thumbCenterX),
@@ -6560,6 +6591,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     surface.show();
                 } finally {
                     Surface.closeTransaction();
+                    if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION performDrag");
                 }
             }
 
@@ -7244,9 +7276,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     + ", set left=" + mFrame.left + " top=" + mFrame.top
                     + ", animLayer=" + mAnimLayer);
                 if (SHOW_TRANSACTIONS) {
-                    Slog.i(TAG, ">>> OPEN TRANSACTION");
-                    if (SHOW_TRANSACTIONS) logSurface(this,
-                            "CREATE pos=(" + mFrame.left + "," + mFrame.top + ") (" +
+                    Slog.i(TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
+                    logSurface(this, "CREATE pos=(" + mFrame.left + "," + mFrame.top + ") (" +
                             mFrame.width() + "x" + mFrame.height() + "), layer=" +
                             mAnimLayer + " HIDE", null);
                 }
@@ -7271,8 +7302,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     mLastHidden = true;
                 } finally {
-                    if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION");
                     Surface.closeTransaction();
+                    if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION createSurfaceLocked");
                 }
                 if (localLOGV) Slog.v(
                         TAG, "Created surface " + this);
@@ -9541,7 +9572,7 @@ public class WindowManagerService extends IWindowManager.Stub
             createWatermark = true;
         }
 
-        if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION");
+        if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION performLayoutAndPlaceSurfaces");
 
         Surface.openTransaction();
 
@@ -9579,7 +9610,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     if ((changes&WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG) != 0) {
                         if (DEBUG_LAYOUT) Slog.v(TAG, "Computing new config from layout");
-                        if (updateOrientationFromAppTokensLocked()) {
+                        if (updateOrientationFromAppTokensLocked(true)) {
                             mLayoutNeeded = true;
                             mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
                         }
@@ -10035,7 +10066,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                         // This has changed the visibility of windows, so perform
                         // a new layout to get them all up-to-date.
-                        changes |= PhoneWindowManager.FINISH_LAYOUT_REDO_LAYOUT;
+                        changes |= PhoneWindowManager.FINISH_LAYOUT_REDO_LAYOUT
+                                | WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
                         mLayoutNeeded = true;
                         if (!moveInputMethodWindowsIfNeededLocked(true)) {
                             assignLayersLocked();
@@ -10261,7 +10293,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 // as running out of memory), don't take down the
                                 // entire system.
                                 Slog.e(TAG, "Failure updating surface of " + w
-                                        + "size=(" + width + "x" + height
+                                        + " size=(" + width + "x" + height
                                         + "), pos=(" + w.mShownFrame.left
                                         + "," + w.mShownFrame.top + ")", e);
                                 if (!recoveringMemory) {
@@ -10612,8 +10644,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 mBlurShown = false;
             }
-
-            if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION");
         } catch (RuntimeException e) {
             Slog.e(TAG, "Unhandled exception in Window Manager", e);
         }
@@ -10621,6 +10651,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mInputMonitor.updateInputWindowsLw();
         
         Surface.closeTransaction();
+
+        if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
 
         if (mWatermark != null) {
             mWatermark.drawIfNeeded();
@@ -10824,7 +10856,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             return true;
         } catch (RuntimeException e) {
-            Slog.w(TAG, "Failure showing surface " + win.mSurface + " in " + win);
+            Slog.w(TAG, "Failure showing surface " + win.mSurface + " in " + win, e);
         }
 
         reclaimSomeSurfaceMemoryLocked(win, "show");
@@ -10859,6 +10891,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 + " token=" + win.mToken
                                 + " pid=" + ws.mSession.mPid
                                 + " uid=" + ws.mSession.mUid);
+                        if (SHOW_TRANSACTIONS) logSurface(ws, "LEAK DESTROY", null);
                         ws.mSurface.destroy();
                         ws.mSurfaceShown = false;
                         ws.mSurface = null;
@@ -10866,10 +10899,11 @@ public class WindowManagerService extends IWindowManager.Stub
                         i--;
                         N--;
                         leakedSurface = true;
-                    } else if (win.mAppToken != null && win.mAppToken.clientHidden) {
+                    } else if (ws.mAppToken != null && ws.mAppToken.clientHidden) {
                         Slog.w(TAG, "LEAKED SURFACE (app token hidden): "
                                 + ws + " surface=" + ws.mSurface
                                 + " token=" + win.mAppToken);
+                        if (SHOW_TRANSACTIONS) logSurface(ws, "LEAK DESTROY", null);
                         ws.mSurface.destroy();
                         ws.mSurfaceShown = false;
                         ws.mSurface = null;
@@ -10907,6 +10941,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // surface and ask the app to request another one.
                 Slog.w(TAG, "Looks like we have reclaimed some memory, clearing surface for retry.");
                 if (surface != null) {
+                    if (SHOW_TRANSACTIONS) logSurface(win, "RECOVER DESTROY", null);
                     surface.destroy();
                     win.mSurfaceShown = false;
                     win.mSurface = null;
@@ -11034,7 +11069,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return result;
     }
 
-    private void startFreezingDisplayLocked() {
+    private void startFreezingDisplayLocked(boolean inTransaction) {
         if (mDisplayFrozen) {
             return;
         }
@@ -11076,7 +11111,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (mScreenRotationAnimation == null) {
                 mScreenRotationAnimation = new ScreenRotationAnimation(mContext,
-                        mDisplay, mFxSession);
+                        mDisplay, mFxSession, inTransaction);
             }
         } else {
             Surface.freezeDisplay(0);
@@ -11117,7 +11152,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // to avoid inconsistent states.  However, something interesting
         // could have actually changed during that time so re-evaluate it
         // now to catch that.
-        if (updateOrientationFromAppTokensLocked()) {
+        if (updateOrientationFromAppTokensLocked(false)) {
             mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
         }
 

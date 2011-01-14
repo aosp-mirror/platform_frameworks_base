@@ -321,6 +321,15 @@ class ActivityRecord extends IApplicationToken.Stub {
         }
     }
 
+    void makeFinishing() {
+        if (!finishing) {
+            finishing = true;
+            if (task != null) {
+                task.numActivities--;
+            }
+        }
+    }
+
     UriPermissionOwner getUriPermissionsLocked() {
         if (uriPermissions == null) {
             uriPermissions = new UriPermissionOwner(service, this);
