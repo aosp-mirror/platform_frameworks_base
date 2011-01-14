@@ -425,7 +425,7 @@ public class Watchdog extends Thread {
             // First collect stack traces from all threads of the system process.
             // Then kill this process so that the system will restart.
 
-            String name = (mCurrentMonitor != null) ?
+            final String name = (mCurrentMonitor != null) ?
                     mCurrentMonitor.getClass().getName() : "null";
             EventLog.writeEvent(EventLogTags.WATCHDOG, name);
 
@@ -434,7 +434,8 @@ public class Watchdog extends Thread {
             if (mPhonePid > 0) pids.add(mPhonePid);
             // Pass !waitedHalf so that just in case we somehow wind up here without having
             // dumped the halfway stacks, we properly re-initialize the trace file.
-            File stack = ActivityManagerService.dumpStackTraces(!waitedHalf, pids, null, null);
+            final File stack = ActivityManagerService.dumpStackTraces(
+                    !waitedHalf, pids, null, null);
 
             // Give some extra time to make sure the stack traces get written.
             // The system's been hanging for a minute, another second or two won't hurt much.
@@ -445,7 +446,19 @@ public class Watchdog extends Thread {
                 dumpKernelStackTraces();
             }
 
-            mActivity.addErrorToDropBox("watchdog", null, null, null, name, null, stack, null);
+            // Try to add the error to the dropbox, but assuming that the ActivityManager
+            // itself may be deadlocked.  (which has happened, causing this statement to
+            // deadlock and the watchdog as a whole to be ineffective)
+            Thread dropboxThread = new Thread("watchdogWriteToDropbox") {
+                    public void run() {
+                        mActivity.addErrorToDropBox(
+                                "watchdog", null, null, null, name, null, stack, null);
+                    }
+                };
+            dropboxThread.start();
+            try {
+                dropboxThread.join(2000);  // wait up to 2 seconds for it to return.
+            } catch (InterruptedException ignored) {}
 
             // Only kill the process if the debugger is not attached.
             if (!Debug.isDebuggerConnected()) {
