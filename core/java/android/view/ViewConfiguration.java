@@ -102,6 +102,12 @@ public class ViewConfiguration {
     private static final int TOUCH_SLOP = 16;
     
     /**
+     * Distance a touch can wander before we think the user is the first touch
+     * in a sequence of double tap
+     */
+    private static final int LARGE_TOUCH_SLOP = 18;
+
+    /**
      * Distance a touch can wander before we think the user is attempting a paged scroll
      * (in dips)
      */
@@ -156,6 +162,7 @@ public class ViewConfiguration {
     private final int mMaximumFlingVelocity;
     private final int mScrollbarSize;
     private final int mTouchSlop;
+    private final int mLargeTouchSlop;
     private final int mPagingTouchSlop;
     private final int mDoubleTapSlop;
     private final int mWindowTouchSlop;
@@ -177,6 +184,7 @@ public class ViewConfiguration {
         mMaximumFlingVelocity = MAXIMUM_FLING_VELOCITY;
         mScrollbarSize = SCROLL_BAR_SIZE;
         mTouchSlop = TOUCH_SLOP;
+        mLargeTouchSlop = LARGE_TOUCH_SLOP;
         mPagingTouchSlop = PAGING_TOUCH_SLOP;
         mDoubleTapSlop = DOUBLE_TAP_SLOP;
         mWindowTouchSlop = WINDOW_TOUCH_SLOP;
@@ -206,6 +214,7 @@ public class ViewConfiguration {
         mMaximumFlingVelocity = (int) (density * MAXIMUM_FLING_VELOCITY + 0.5f);
         mScrollbarSize = (int) (density * SCROLL_BAR_SIZE + 0.5f);
         mTouchSlop = (int) (density * TOUCH_SLOP + 0.5f);
+        mLargeTouchSlop =  (int) (density * LARGE_TOUCH_SLOP + 0.5f);
         mPagingTouchSlop = (int) (density * PAGING_TOUCH_SLOP + 0.5f);
         mDoubleTapSlop = (int) (density * DOUBLE_TAP_SLOP + 0.5f);
         mWindowTouchSlop = (int) (density * WINDOW_TOUCH_SLOP + 0.5f);
@@ -366,6 +375,14 @@ public class ViewConfiguration {
         return mTouchSlop;
     }
     
+    /**
+     * @return Distance a touch can wander before we think the user is the first touch
+     *         in a sequence of double tap
+     */
+    public int getScaledLargeTouchSlop() {
+        return mLargeTouchSlop;
+    }
+
     /**
      * @return Distance a touch can wander before we think the user is scrolling a full page
      *         in dips
