@@ -18,8 +18,12 @@ package android.nfc;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.Activity;
 import android.app.ActivityThread;
+import android.app.OnActivityPausedListener;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
@@ -210,8 +214,6 @@ public final class NfcAdapter {
     private static INfcAdapter sService;
     private static INfcTag sTagService;
 
-    private final Context mContext;
-
     /**
      * Helper to check if this device has FEATURE_NFC, but without using
      * a context.
@@ -307,7 +309,6 @@ public final class NfcAdapter {
         if (setupService() == null) {
             throw new UnsupportedOperationException();
         }
-        mContext = context;
     }
 
     /**
@@ -406,6 +407,66 @@ public final class NfcAdapter {
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return false;
+        }
+    }
+
+    class ForegroundDispatchPausedListener implements OnActivityPausedListener {
+        @Override
+        public void onPaused(Activity activity) {
+            disableForegroundDispatchInternal(activity, true);
+        }
+    }
+
+    /**
+     * Enables foreground dispatching to the given Activity. This will force all NFC Intents that
+     * match the given filters to be delivered to the activity bypassing the standard dispatch
+     * mechanism.
+     *
+     * This method must be called from the main thread.
+     *
+     * @param activity the Activity to dispatch to
+     * @param intent the PendingIntent to start for the dispatch
+     * @param filters the IntentFilters to override dispatching for
+     * @throws IllegalStateException
+     */
+    public void enableForegroundDispatch(Activity activity, PendingIntent intent,
+            IntentFilter... filters) {
+        if (activity == null || intent == null || filters == null) {
+            throw new NullPointerException();
+        }
+        if (!activity.isResumed()) {
+            throw new IllegalStateException("Foregorund dispatching can onlly be enabled " +
+                    "when your activity is resumed");
+        }
+        try {
+            ActivityThread.currentActivityThread().registerOnActivityPausedListener(activity,
+                    new ForegroundDispatchPausedListener());
+            sService.enableForegroundDispatch(activity.getComponentName(), intent, filters);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+        }
+    }
+
+    /**
+     * Disables foreground activity dispatching setup with
+     * {@link #enableForegroundDispatch}. This must be called before the Activity returns from
+     * it's <code>onPause()</code> or this method will throw an IllegalStateException.
+     *
+     * This method must be called from the main thread.
+     */
+    public void disableForegroundDispatch(Activity activity) {
+        disableForegroundDispatchInternal(activity, false);
+    }
+
+    void disableForegroundDispatchInternal(Activity activity, boolean force) {
+        try {
+            sService.disableForegroundDispatch(activity.getComponentName());
+            if (!force && !activity.isResumed()) {
+                throw new IllegalStateException("You must disable forgeground dispatching " +
+                        "while your activity is still resumed");
+            }
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
         }
     }
 
