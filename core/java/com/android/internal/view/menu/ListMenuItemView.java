@@ -44,6 +44,7 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
     private Drawable mBackground;
     private int mTextAppearance;
     private Context mTextAppearanceContext;
+    private boolean mPreserveIconSpacing;
     
     private int mMenuType;
     
@@ -57,6 +58,8 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
         mBackground = a.getDrawable(com.android.internal.R.styleable.MenuView_itemBackground);
         mTextAppearance = a.getResourceId(com.android.internal.R.styleable.
                                           MenuView_itemTextAppearance, -1);
+        mPreserveIconSpacing = a.getBoolean(
+                com.android.internal.R.styleable.MenuView_preserveIconSpacing, false);
         mTextAppearanceContext = context;
         
         a.recycle();
@@ -184,8 +187,8 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
     }
     
     public void setIcon(Drawable icon) {
-        
-        if (!mItemData.shouldShowIcon(mMenuType)) {
+        final boolean showIcon = mItemData.shouldShowIcon(mMenuType);
+        if (!showIcon && !mPreserveIconSpacing) {
             return;
         }
         
@@ -197,8 +200,8 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
             insertIconView();
         }
         
-        if (icon != null) {
-            mIconView.setImageDrawable(icon);
+        if (icon != null || mPreserveIconSpacing) {
+            mIconView.setImageDrawable(showIcon ? icon : null);
 
             if (mIconView.getVisibility() != VISIBLE) {
                 mIconView.setVisibility(VISIBLE);
