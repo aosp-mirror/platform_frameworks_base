@@ -28,22 +28,22 @@ import android.util.Log;
 import android.util.TypedValue;
 
 /**
+ * FileA3D allows users to load renderscript objects from files
+ * or resources stored on disk. It could be used to load items
+ * such as 3d geometry data converted a renderscript format from
+ * content creation tools. Currently only meshes are supported
+ * in FileA3D.
+ *
+ * When successfully loaded, FileA3D will contain a list of
+ * index entries for all the objects stored inside it.
  *
  **/
 public class FileA3D extends BaseObj {
 
-    // This will go away in the clean up pass,
-    // trying to avoid multiproject submits
-    public enum ClassID {
-
-        UNKNOWN,
-        MESH;
-
-        public static ClassID toClassID(int intID) {
-            return ClassID.values()[intID];
-        }
-    }
-
+    /**
+    * Specifies what renderscript object type is contained within
+    * the FileA3D IndexEntry
+    **/
     public enum EntryType {
 
         UNKNOWN (0),
@@ -59,34 +59,48 @@ public class FileA3D extends BaseObj {
         }
     }
 
-    // Read only class with index entries
+    /**
+    * IndexEntry contains information about one of the renderscript
+    * objects inside the file's index. It could be used to query the
+    * object's type and name and load the object itself if
+    * necessary.
+    */
     public static class IndexEntry {
         RenderScript mRS;
         int mIndex;
         int mID;
         String mName;
-        ClassID mClassID;
         EntryType mEntryType;
         BaseObj mLoadedObj;
 
+        /**
+        * @return name of a renderscript object the index entry
+        *         describes
+        */
         public String getName() {
             return mName;
         }
 
-        public ClassID getClassID() {
-            return mClassID;
-        }
-
+        /**
+        * @return type of a renderscript object the index entry
+        *         describes
+        */
         public EntryType getEntryType() {
             return mEntryType;
         }
 
+        /**
+        * @return renderscript object described by the entry
+        */
         public BaseObj getObject() {
             mRS.validate();
             BaseObj obj = internalCreate(mRS, this);
             return obj;
         }
 
+        /**
+        * @return renderscript mesh object described by the entry
+        */
         public Mesh getMesh() {
             return (Mesh)getObject();
         }
@@ -122,7 +136,6 @@ public class FileA3D extends BaseObj {
             mID = id;
             mName = name;
             mEntryType = type;
-            mClassID = mEntryType == EntryType.MESH ? ClassID.MESH : ClassID.UNKNOWN;
             mLoadedObj = null;
         }
     }
@@ -152,6 +165,9 @@ public class FileA3D extends BaseObj {
         }
     }
 
+    /**
+    * @return the numberof objects stored inside a FileA3D
+    */
     public int getIndexEntryCount() {
         if(mFileEntries == null) {
             return 0;
@@ -159,6 +175,12 @@ public class FileA3D extends BaseObj {
         return mFileEntries.length;
     }
 
+    /**
+    * Returns an index entry from the list of all objects inside
+    * FileA3D
+    *
+    * @param index number of the entry from the list to return
+    */
     public IndexEntry getIndexEntry(int index) {
         if(getIndexEntryCount() == 0 || index < 0 || index >= mFileEntries.length) {
             return null;
@@ -166,6 +188,14 @@ public class FileA3D extends BaseObj {
         return mFileEntries[index];
     }
 
+    /**
+    * Creates a FileA3D object from an asset stored on disk
+    *
+    * @param rs Context to which the object will belong.
+    * @param mgr asset manager used to load asset
+    * @param path location of the file to load
+    *
+    */
     static public FileA3D createFromAsset(RenderScript rs, AssetManager mgr, String path) {
         rs.validate();
         int fileId = rs.nFileA3DCreateFromAsset(mgr, path);
@@ -178,6 +208,13 @@ public class FileA3D extends BaseObj {
         return fa3d;
     }
 
+    /**
+    * Creates a FileA3D object from a file stored on disk
+    *
+    * @param rs Context to which the object will belong.
+    * @param path location of the file to load
+    *
+    */
     static public FileA3D createFromFile(RenderScript rs, String path) {
         int fileId = rs.nFileA3DCreateFromFile(path);
 
@@ -189,10 +226,25 @@ public class FileA3D extends BaseObj {
         return fa3d;
     }
 
+    /**
+    * Creates a FileA3D object from a file stored on disk
+    *
+    * @param rs Context to which the object will belong.
+    * @param path location of the file to load
+    *
+    */
     static public FileA3D createFromFile(RenderScript rs, File path) {
         return createFromFile(rs, path.getAbsolutePath());
     }
 
+    /**
+    * Creates a FileA3D object from an application resource
+    *
+    * @param rs Context to which the object will belong.
+    * @param res resource manager used for loading
+    * @param id resource to create FileA3D from
+    *
+    */
     static public FileA3D createFromResource(RenderScript rs, Resources res, int id) {
 
         rs.validate();

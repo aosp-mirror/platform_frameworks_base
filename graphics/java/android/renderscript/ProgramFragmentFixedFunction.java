@@ -194,7 +194,7 @@ public class ProgramFragmentFixedFunction extends ProgramFragment {
         /**
          * Creates a builder for fixed function fragment program
          *
-         * @param rs
+         * @param rs Context to which the program will belong.
          */
         public Builder(RenderScript rs) {
             mRS = rs;

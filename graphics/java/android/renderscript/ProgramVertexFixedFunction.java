@@ -105,7 +105,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         /**
          * Creates a builder for fixed function vertex program
          *
-         * @param rs
+         * @param rs Context to which the program will belong.
          */
         public Builder(RenderScript rs) {
             mRS = rs;
@@ -196,9 +196,9 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         private FieldPacker mIOBuffer;
 
         /**
-        * Creates buffer to store fixed function emulation matrices
+        * Creates a buffer to store fixed function emulation matrices
         *
-        * @param rs
+        * @param rs Context to which the allocation will belong.
         **/
         public Constants(RenderScript rs) {
             Type constInputType = ProgramVertexFixedFunction.Builder.getConstantInputType(rs);
