@@ -208,6 +208,7 @@ public:
     status_t removeLayer(const sp<LayerBase>& layer);
     status_t addLayer(const sp<LayerBase>& layer);
     status_t invalidateLayerVisibility(const sp<LayerBase>& layer);
+    void invalidateHwcGeometry();
 
     sp<Layer> getLayer(const sp<ISurface>& sur) const;
 

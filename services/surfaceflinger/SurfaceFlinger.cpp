@@ -460,7 +460,7 @@ void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
         handleTransactionLocked(transactionFlags, ditchedLayers);
         mLastTransactionTime = systemTime() - now;
         mDebugInTransaction = 0;
-        mHwWorkListDirty = true;
+        invalidateHwcGeometry();
         // here the transaction has been committed
     }
 
@@ -726,11 +726,16 @@ void SurfaceFlinger::handlePageFlip()
 
             mWormholeRegion = screenRegion.subtract(opaqueRegion);
             mVisibleRegionsDirty = false;
-            mHwWorkListDirty = true;
+            invalidateHwcGeometry();
         }
 
     unlockPageFlip(currentLayers);
     mDirtyRegion.andSelf(screenRegion);
+}
+
+void SurfaceFlinger::invalidateHwcGeometry()
+{
+    mHwWorkListDirty = true;
 }
 
 bool SurfaceFlinger::lockPageFlip(const LayerVector& currentLayers)
@@ -1586,7 +1591,7 @@ status_t SurfaceFlinger::onTransact(
             case 1008:  // toggle use of hw composer
                 n = data.readInt32();
                 mDebugDisableHWC = n ? 1 : 0;
-                mHwWorkListDirty = true;
+                invalidateHwcGeometry();
                 // fall-through...
             case 1004:{ // repaint everything
                 Mutex::Autolock _l(mStateLock);
