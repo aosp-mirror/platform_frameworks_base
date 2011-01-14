@@ -1632,7 +1632,6 @@ public final class StrictMode {
      */
     public static void noteDiskRead() {
         BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
-        Log.d(TAG, "noteDiskRead; policy=" + policy);
         if (!(policy instanceof AndroidBlockGuardPolicy)) {
             // StrictMode not enabled.
             return;
