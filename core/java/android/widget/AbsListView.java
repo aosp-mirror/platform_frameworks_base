@@ -4106,8 +4106,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         final int topLimit = getPaddingTop();
         final int bottomLimit = getHeight() - getPaddingBottom();
 
-        if (distance == 0 ||
-                firstPos == INVALID_POSITION ||
+        if (distance == 0 || mItemCount == 0 || childCount == 0 ||
                 (firstPos == 0 && getChildAt(0).getTop() == topLimit && distance < 0) ||
                 (lastPos == mItemCount - 1 &&
                         getChildAt(childCount - 1).getBottom() == bottomLimit && distance > 0)) {
