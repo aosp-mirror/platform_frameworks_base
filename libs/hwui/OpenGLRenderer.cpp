@@ -569,6 +569,9 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
         composeLayerRect(layer, rect, true);
     }
 
+    drawColorRect(rect.left, rect.top, rect.right, rect.bottom, 0x7fff0000,
+            SkXfermode::kSrcOver_Mode, true);
+
     if (fboLayer) {
         // Detach the texture from the FBO
         glBindFramebuffer(GL_FRAMEBUFFER, current->fbo);
@@ -1024,11 +1027,11 @@ void OpenGLRenderer::finishDrawTexture() {
 // Drawing
 ///////////////////////////////////////////////////////////////////////////////
 
-void OpenGLRenderer::drawDisplayList(DisplayList* displayList) {
+void OpenGLRenderer::drawDisplayList(DisplayList* displayList, uint32_t level) {
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
     if (displayList) {
-        displayList->replay(*this);
+        displayList->replay(*this, level);
     }
 }
 

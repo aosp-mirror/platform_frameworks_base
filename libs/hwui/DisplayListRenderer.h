@@ -39,6 +39,13 @@ namespace uirenderer {
 #define MIN_WRITER_SIZE 16384
 #define HEAP_BLOCK_SIZE 4096
 
+// Debug
+#if DEBUG_DISPLAY_LIST
+    #define DISPLAY_LIST_LOGD(...) LOGD(__VA_ARGS__)
+#else
+    #define DISPLAY_LIST_LOGD(...)
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 // Helpers
 ///////////////////////////////////////////////////////////////////////////////
@@ -78,8 +85,10 @@ public:
     DisplayList(const DisplayListRenderer& recorder);
     ~DisplayList();
 
+    // IMPORTANT: Update the intialization of OP_NAMES in the .cpp file
+    //            when modifying this file
     enum Op {
-        AcquireContext,
+        AcquireContext = 0,
         ReleaseContext,
         Save,
         Restore,
@@ -108,12 +117,14 @@ public:
         ResetColorFilter,
         SetupColorFilter,
         ResetShadow,
-        SetupShadow
+        SetupShadow,
     };
+
+    static const char* OP_NAMES[];
 
     void initFromDisplayListRenderer(const DisplayListRenderer& recorder);
 
-    void replay(OpenGLRenderer& renderer);
+    void replay(OpenGLRenderer& renderer, uint32_t level = 0);
 
 private:
     void init();
@@ -245,7 +256,7 @@ public:
 
     bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
-    void drawDisplayList(DisplayList* displayList);
+    void drawDisplayList(DisplayList* displayList, uint32_t level = 0);
     void drawLayer(Layer* layer, float x, float y, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
