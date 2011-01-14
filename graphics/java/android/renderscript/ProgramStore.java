@@ -149,7 +149,7 @@ public class ProgramStore extends BaseObj {
     *  - incoming pixels override the value stored in the color
     *    buffer if it passes the depth test
     *
-    *  @param rs
+    *  @param rs Context to which the program will belong.
     **/
     public static ProgramStore BLEND_NONE_DEPTH_TEST(RenderScript rs) {
         if(rs.mProgramStore_BLEND_NONE_DEPTH_TEST == null) {
@@ -170,7 +170,7 @@ public class ProgramStore extends BaseObj {
     *  - incoming pixels override the value stored in the color
     *    buffer
     *
-    *  @param rs
+    *  @param rs Context to which the program will belong.
     **/
     public static ProgramStore BLEND_NONE_DEPTH_NONE(RenderScript rs) {
         if(rs.mProgramStore_BLEND_NONE_DEPTH_NO_DEPTH == null) {
@@ -194,7 +194,7 @@ public class ProgramStore extends BaseObj {
     *    following formula
     *  Final.RGB = Source.RGB * Source.A + Dest.RGB * (1 - Source.A)
     *
-    *  @param rs
+    *  @param rs Context to which the program will belong.
     **/
     public static ProgramStore BLEND_ALPHA_DEPTH_TEST(RenderScript rs) {
         if(rs.mProgramStore_BLEND_ALPHA_DEPTH_TEST == null) {
@@ -216,7 +216,7 @@ public class ProgramStore extends BaseObj {
     *    (Dest) using the following formula
     *  Final.RGB = Source.RGB * Source.A + Dest.RGB * (1 - Source.A)
     *
-    *  @param rs
+    *  @param rs Context to which the program will belong.
     **/
     public static ProgramStore BLEND_ALPHA_DEPTH_NONE(RenderScript rs) {
         if(rs.mProgramStore_BLEND_ALPHA_DEPTH_NO_DEPTH == null) {
