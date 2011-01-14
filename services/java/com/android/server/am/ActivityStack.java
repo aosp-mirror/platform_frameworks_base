@@ -50,7 +50,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -3071,7 +3070,7 @@ public class ActivityStack {
             return false;
         }
 
-        r.finishing = true;
+        r.makeFinishing();
         EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
                 System.identityHashCode(r),
                 r.task.taskId, r.shortComponentName, reason);
@@ -3276,6 +3275,7 @@ public class ActivityStack {
 
     private final void removeActivityFromHistoryLocked(ActivityRecord r) {
         if (r.state != ActivityState.DESTROYED) {
+            r.makeFinishing();
             mHistory.remove(r);
             r.inHistory = false;
             r.state = ActivityState.DESTROYED;
@@ -3440,6 +3440,7 @@ public class ActivityStack {
             ActivityRecord hr = (ActivityRecord)mHistory.get(i);
             if (hr.isHomeActivity) {
                 homeTask = hr.task;
+                break;
             }
         }
         if (homeTask != null) {
