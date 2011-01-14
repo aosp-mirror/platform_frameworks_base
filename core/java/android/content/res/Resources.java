@@ -1476,7 +1476,6 @@ public class Resources {
                 }
             }
         }
-        cache.clear();
     }
 
     /**
