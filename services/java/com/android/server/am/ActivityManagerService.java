@@ -6074,21 +6074,23 @@ public final class ActivityManagerService extends ActivityManagerNative
                     AppGlobals.getPackageManager().enterSafeMode();
                 } catch (RemoteException e) {
                 }
-
-                View v = LayoutInflater.from(mContext).inflate(
-                        com.android.internal.R.layout.safe_mode, null);
-                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-                lp.type = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
-                lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
-                lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
-                lp.format = v.getBackground().getOpacity();
-                lp.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-                ((WindowManager)mContext.getSystemService(
-                        Context.WINDOW_SERVICE)).addView(v, lp);
             }
         }
+    }
+
+    public final void showSafeModeOverlay() {
+        View v = LayoutInflater.from(mContext).inflate(
+                com.android.internal.R.layout.safe_mode, null);
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.type = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
+        lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
+        lp.format = v.getBackground().getOpacity();
+        lp.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        ((WindowManager)mContext.getSystemService(
+                Context.WINDOW_SERVICE)).addView(v, lp);
     }
 
     public void noteWakeupAlarm(IIntentSender sender) {
