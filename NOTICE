@@ -72,6 +72,17 @@ is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
 OF ANY KIND, either express or implied; not even the implied warranty
 of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+  =========================================================================
+  ==  NOTICE file corresponding to the section 4 d of                    ==
+  ==  the Apache License, Version 2.0,                                   ==
+  ==  in this case for the Audio Effects code.                           ==
+  =========================================================================
+
+Audio Effects
+These files are Copyright (C) 2004-2010 NXP Software and
+Copyright (C) 2010 The Android Open Source Project, but released under
+the Apache2 License.
+
 
                                Apache License
                            Version 2.0, January 2004
