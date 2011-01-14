@@ -119,7 +119,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES += libz libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libbcc
 
-LOCAL_STATIC_LIBRARIES := libdex libft2 librslib_rt
+LOCAL_STATIC_LIBRARIES := libdex libft2
 
 LOCAL_C_INCLUDES += external/freetype/include external/zlib dalvik
 
