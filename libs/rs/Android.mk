@@ -23,17 +23,17 @@ include $(BUILD_HOST_EXECUTABLE)
 # TODO: This should go into build/core/config.mk
 RSG_GENERATOR:=$(LOCAL_BUILT_MODULE)
 
-include $(CLEAR_VARS)
-input_data_file := $(LOCAL_PATH)/rslib.bc
-slangdata_output_var_name := rs_runtime_lib_bc
-LOCAL_MODULE := librslib_rt
+# include $(CLEAR_VARS)
+# input_data_file := $(LOCAL_PATH)/rslib.bc
+# slangdata_output_var_name := rs_runtime_lib_bc
+# LOCAL_MODULE := librslib_rt
 
-LOCAL_PRELINK_MODULE := false
-LOCAL_MODULE_CLASS := STATIC_LIBRARIES
+# LOCAL_PRELINK_MODULE := false
+# LOCAL_MODULE_CLASS := STATIC_LIBRARIES
 
-LOCAL_MODULE_TAGS := optional
-include frameworks/compile/slang/SlangData.mk
-include $(BUILD_STATIC_LIBRARY)
+# LOCAL_MODULE_TAGS := optional
+# include frameworks/compile/slang/SlangData.mk
+# include $(BUILD_STATIC_LIBRARY)
 
 # Build render script lib ====================
 
