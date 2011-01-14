@@ -562,8 +562,8 @@ final class WebViewCore {
     private native void nativeTouchUp(int touchGeneration,
             int framePtr, int nodePtr, int x, int y);
 
-    private native boolean nativeHandleTouchEvent(int action, int[] x, int[] y,
-            int count, int metaState);
+    private native boolean nativeHandleTouchEvent(int action, int[] idArray,
+            int[] xArray, int[] yArray, int count, int metaState);
 
     private native void nativeUpdateFrameCache();
 
@@ -828,6 +828,7 @@ final class WebViewCore {
 
     static class TouchEventData {
         int mAction;
+        int[] mIds;  // Ids of the touch points
         Point[] mPoints;
         int mMetaState;
         boolean mReprocess;
@@ -1336,8 +1337,8 @@ final class WebViewCore {
                                     mWebView.mPrivateHandler,
                                     WebView.PREVENT_TOUCH_ID,
                                     ted.mAction,
-                                    nativeHandleTouchEvent(ted.mAction, xArray,
-                                            yArray, count, ted.mMetaState) ? 1 : 0,
+                                    nativeHandleTouchEvent(ted.mAction, ted.mIds,
+                                        xArray, yArray, count, ted.mMetaState) ? 1 : 0,
                                     ted.mReprocess ? ted : null).sendToTarget();
                             break;
                         }
