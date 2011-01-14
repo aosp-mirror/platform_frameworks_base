@@ -106,10 +106,11 @@ public class ActionMenuItemView extends LinearLayout
         mImageButton.setImageDrawable(icon);
         if (icon != null) {
             mImageButton.setVisibility(VISIBLE);
-            mTextButton.setVisibility(GONE);
         } else {
             mImageButton.setVisibility(GONE);
         }
+
+        mTextButton.setVisibility(icon == null || mItemData.showsTextAsAction() ? VISIBLE : GONE);
     }
     
     public boolean hasText() {
