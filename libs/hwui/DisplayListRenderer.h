@@ -206,11 +206,11 @@ private:
     PathHeap* mPathHeap;
 
     Vector<SkBitmap*> mBitmapResources;
-    Vector<SkiaShader*> mShaderResources;
     Vector<SkiaColorFilter*> mFilterResources;
 
     Vector<SkPaint*> mPaints;
     Vector<SkMatrix*> mMatrices;
+    Vector<SkiaShader*> mShaders;
 
     mutable SkFlattenableReadBuffer mReader;
 
@@ -291,8 +291,8 @@ public:
         return mBitmapResources;
     }
 
-    const Vector<SkiaShader*>& getShaderResources() const {
-        return mShaderResources;
+    const Vector<SkiaShader*>& getShaders() const {
+        return mShaders;
     }
 
     const Vector<SkPaint*>& getPaints() const {
@@ -366,12 +366,12 @@ private:
     }
 
     inline void addPaint(SkPaint* paint) {
-        if (paint == NULL) {
+        if (!paint) {
             addInt((int) NULL);
             return;
         }
 
-        SkPaint *paintCopy =  mPaintMap.valueFor(paint);
+        SkPaint* paintCopy =  mPaintMap.valueFor(paint);
         if (paintCopy == NULL || paintCopy->getGenerationID() != paint->getGenerationID()) {
             paintCopy = new SkPaint(*paint);
             mPaintMap.add(paint, paintCopy);
@@ -406,10 +406,20 @@ private:
     }
 
     inline void addShader(SkiaShader* shader) {
-        addInt((int) shader);
-        mShaderResources.add(shader);
-        Caches& caches = Caches::getInstance();
-        caches.resourceCache.incrementRefcount(shader);
+        if (!shader) {
+            addInt((int) NULL);
+            return;
+        }
+
+        SkiaShader* shaderCopy = mShaderMap.valueFor(shader);
+        // TODO: We also need to handle generation ID changes in compose shaders
+        if (!shaderCopy || shaderCopy->getGenerationId() != shader->getGenerationId()) {
+            shaderCopy = shader->copy();
+            mShaderMap.add(shader, shaderCopy);
+            mShaders.add(shader);
+        }
+
+        addInt((int) shaderCopy);
     }
 
     inline void addColorFilter(SkiaColorFilter* colorFilter) {
@@ -422,11 +432,14 @@ private:
     SkChunkAlloc mHeap;
 
     Vector<SkBitmap*> mBitmapResources;
-    Vector<SkiaShader*> mShaderResources;
     Vector<SkiaColorFilter*> mFilterResources;
 
     Vector<SkPaint*> mPaints;
     DefaultKeyedVector<SkPaint*, SkPaint*> mPaintMap;
+
+    Vector<SkiaShader*> mShaders;
+    DefaultKeyedVector<SkiaShader*, SkiaShader*> mShaderMap;
+
     Vector<SkMatrix*> mMatrices;
 
     PathHeap* mPathHeap;
