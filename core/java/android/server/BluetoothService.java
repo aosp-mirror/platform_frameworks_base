@@ -1755,7 +1755,8 @@ public class BluetoothService extends IBluetooth.Stub {
                                                 "Need BLUETOOTH_ADMIN permission");
 
         String objectPath = getObjectPathFromAddress(device.getAddress());
-        if (objectPath == null || getConnectedInputDevices().size() == 0) {
+        if (objectPath == null ||
+                getInputDeviceState(device) == BluetoothInputDevice.STATE_DISCONNECTED) {
             return false;
         }
         BluetoothDeviceProfileState state = mDeviceProfileState.get(device.getAddress());
