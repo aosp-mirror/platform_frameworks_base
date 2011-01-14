@@ -29,7 +29,8 @@ import java.util.ArrayList;
  * are then determined internally and the animation will call these functions as necessary to
  * animate the property.
  *
- * @note Instances of this class hold only a {@link WeakReference} to the target object.
+ * <p class="note"><b>Note:</b> Instances of this class hold only a {@link WeakReference}
+ * to the target object.</p>
  * @see #setPropertyName(String)
  *
  */
