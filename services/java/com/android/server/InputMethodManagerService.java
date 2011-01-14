@@ -1800,19 +1800,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     });
 
             if (showSubtypes) {
-                mDialogBuilder.setPositiveButton(com.android.internal.R.string.more_item_label,
+                mDialogBuilder.setPositiveButton(
+                        com.android.internal.R.string.configure_input_methods,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 showConfigureInputMethods();
                             }
                         });
             }
-            mDialogBuilder.setNegativeButton(com.android.internal.R.string.cancel,
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            hideInputMethodMenu();
-                        }
-                    });
             mSwitchingDialog = mDialogBuilder.create();
             mSwitchingDialog.getWindow().setType(
                     WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG);

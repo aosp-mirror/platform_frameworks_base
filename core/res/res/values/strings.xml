@@ -2403,6 +2403,8 @@
 
     <!-- Title of the pop-up dialog in which the user switches input method components. -->
     <string name="select_input_method">Select input method</string>
+    <!-- Title of a button to open the settings for input methods [CHAR LIMIT=30] -->
+    <string name="configure_input_methods">Configure input methods</string>
 
     <string name="fast_scroll_alphabet">\u0020ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     <string name="fast_scroll_numeric_alphabet">\u00200123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>

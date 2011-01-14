@@ -80,6 +80,8 @@ public class TabletStatusBar extends StatusBar implements
     public static final String TAG = "TabletStatusBar";
 
     public static final int MAX_NOTIFICATION_ICONS = 5;
+    // IME switcher icon is big and occupy width of two icons
+    public static final int MAX_NOTIFICATION_ICONS_IME_BUTTON_VISIBLE = MAX_NOTIFICATION_ICONS - 2;
 
     public static final int MSG_OPEN_NOTIFICATION_PANEL = 1000;
     public static final int MSG_CLOSE_NOTIFICATION_PANEL = 1001;
@@ -89,6 +91,8 @@ public class TabletStatusBar extends StatusBar implements
     public static final int MSG_CLOSE_RECENTS_PANEL = 1021;
     public static final int MSG_SHOW_CHROME = 1030;
     public static final int MSG_HIDE_CHROME = 1031;
+    public static final int MSG_OPEN_INPUT_METHODS_PANEL = 1040;
+    public static final int MSG_CLOSE_INPUT_METHODS_PANEL = 1041;
 
     // Fitts' Law assistance for LatinIME; TODO: replace with a more general approach
     private static final boolean FAKE_SPACE_BAR = true;
@@ -155,6 +159,7 @@ public class TabletStatusBar extends StatusBar implements
 
     boolean mNotificationsOn = true;
     private RecentAppsPanel mRecentsPanel;
+    private InputMethodsPanel mInputMethodsPanel;
 
     public Context getContext() { return mContext; }
 
@@ -260,6 +265,28 @@ public class TabletStatusBar extends StatusBar implements
 
         WindowManagerImpl.getDefault().addView(mRecentsPanel, lp);
         mRecentsPanel.setBar(this);
+
+        // Input methods Panel
+        mInputMethodsPanel = (InputMethodsPanel) View.inflate(context,
+                R.layout.status_bar_input_methods_panel, null);
+        mInputMethodsPanel.setVisibility(View.GONE);
+        mInputMethodsPanel.setOnTouchListener(new TouchOutsideListener(
+                MSG_CLOSE_INPUT_METHODS_PANEL, mInputMethodsPanel));
+        mStatusBarView.setIgnoreChildren(3, mInputMethodSwitchButton, mInputMethodsPanel);
+        lp = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                PixelFormat.TRANSLUCENT);
+        lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+        lp.setTitle("InputMethodsPanel");
+        lp.windowAnimations = R.style.Animation_RecentPanel;
+
+        WindowManagerImpl.getDefault().addView(mInputMethodsPanel, lp);
     }
 
     @Override
@@ -351,6 +378,8 @@ public class TabletStatusBar extends StatusBar implements
         // The bar contents buttons
         mNotificationAndImeArea = (ViewGroup)sb.findViewById(R.id.notificationAndImeArea);
         mInputMethodSwitchButton = (InputMethodButton) sb.findViewById(R.id.imeSwitchButton);
+        // Overwrite the lister
+        mInputMethodSwitchButton.setOnClickListener(mOnClickListener);
 
         // for redirecting errant bar taps to the IME
         mFakeSpaceBar = sb.findViewById(R.id.fake_space_bar);
@@ -521,6 +550,14 @@ public class TabletStatusBar extends StatusBar implements
                     if (mRecentsPanel != null && mRecentsPanel.isShowing()) {
                         mRecentsPanel.show(false, true);
                     }
+                    break;
+                case MSG_OPEN_INPUT_METHODS_PANEL:
+                    if (DEBUG) Slog.d(TAG, "opening input methods panel");
+                    if (mInputMethodsPanel != null) mInputMethodsPanel.setVisibility(View.VISIBLE);
+                    break;
+                case MSG_CLOSE_INPUT_METHODS_PANEL:
+                    if (DEBUG) Slog.d(TAG, "closing input methods panel");
+                    if (mInputMethodsPanel != null) mInputMethodsPanel.setVisibility(View.GONE);
                     break;
                 case MSG_SHOW_CHROME:
                     if (DEBUG) Slog.d(TAG, "hiding shadows (lights on)");
@@ -774,6 +811,8 @@ public class TabletStatusBar extends StatusBar implements
         mHandler.sendEmptyMessage(MSG_CLOSE_NOTIFICATION_PANEL);
         mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
         mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
+        mHandler.removeMessages(MSG_CLOSE_INPUT_METHODS_PANEL);
+        mHandler.sendEmptyMessage(MSG_CLOSE_INPUT_METHODS_PANEL);
     }
 
     // called by StatusBar
@@ -803,7 +842,12 @@ public class TabletStatusBar extends StatusBar implements
         if (DEBUG) {
             Slog.d(TAG, (visible?"showing":"hiding") + " the IME button");
         }
+        int oldVisibility = mInputMethodSwitchButton.getVisibility();
         mInputMethodSwitchButton.setIMEButtonVisible(token, visible);
+        if (oldVisibility != mInputMethodSwitchButton.getVisibility()) {
+            updateNotificationIcons();
+        }
+        mInputMethodsPanel.setIMEToken(token);
         mBackButton.setImageResource(
                 visible ? R.drawable.ic_sysbar_back_ime : R.drawable.ic_sysbar_back);
         if (FAKE_SPACE_BAR) {
@@ -851,6 +895,8 @@ public class TabletStatusBar extends StatusBar implements
                 onClickNotificationTrigger();
             } else if (v == mRecentButton) {
                 onClickRecentButton();
+            } else if (v == mInputMethodSwitchButton) {
+                onClickInputMethodSwitchButton();
             }
         }
     };
@@ -888,6 +934,14 @@ public class TabletStatusBar extends StatusBar implements
                 mHandler.sendEmptyMessage(msg);
             }
         }
+    }
+
+    public void onClickInputMethodSwitchButton() {
+        if (DEBUG) Slog.d(TAG, "clicked input methods panel; disabled=" + mDisabled);
+        int msg = (mInputMethodsPanel.getVisibility() == View.GONE) ?
+                MSG_OPEN_INPUT_METHODS_PANEL : MSG_CLOSE_INPUT_METHODS_PANEL;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
     }
 
     public NotificationClicker makeClicker(PendingIntent intent, String pkg, String tag, int id) {
@@ -1086,7 +1140,12 @@ public class TabletStatusBar extends StatusBar implements
 
         ArrayList<View> toShow = new ArrayList<View>();
 
-        for (int i=0; i<MAX_NOTIFICATION_ICONS; i++) {
+        // When IME button is visible, the number of notification icons should be decremented
+        // to fit the upper limit.
+        final int maxNotificationIconsCount =
+                (mInputMethodSwitchButton.getVisibility() != View.GONE) ?
+                        MAX_NOTIFICATION_ICONS_IME_BUTTON_VISIBLE : MAX_NOTIFICATION_ICONS;
+        for (int i=0; i< maxNotificationIconsCount; i++) {
             if (i>=N) break;
             toShow.add(mNotns.get(N-i-1).icon);
         }
