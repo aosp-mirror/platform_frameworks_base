@@ -986,4 +986,10 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
     public void willBeAdvancedByHost() {
     }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        mAdapter = null;
+        super.onDetachedFromWindow();
+    }
 }
