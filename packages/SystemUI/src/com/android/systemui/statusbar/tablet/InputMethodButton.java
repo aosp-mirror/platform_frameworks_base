@@ -19,11 +19,9 @@ package com.android.systemui.statusbar.tablet;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
-import android.util.Slog;
 import android.util.AttributeSet;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -31,11 +29,8 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.android.server.InputMethodManagerService;
 import com.android.systemui.R;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,9 +51,6 @@ public class InputMethodButton extends ImageView {
     // other services we wish to talk to
     private final InputMethodManager mImm;
     private final int mId;
-    // Cache of InputMethodsInfo
-    private final HashMap<String, InputMethodInfo> mInputMethodsInfo =
-            new HashMap<String, InputMethodInfo>();
     private ImageView mIcon;
     private IBinder mToken;
     private boolean mKeyboardVisible = false;
@@ -102,20 +94,6 @@ public class InputMethodButton extends ImageView {
         refreshStatusIcon();
     }
 
-    private InputMethodInfo getCurrentInputMethodInfo() {
-        String curInputMethodId = Settings.Secure.getString(getContext()
-                .getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
-        if (!mInputMethodsInfo.containsKey(curInputMethodId)) {
-            mInputMethodsInfo.clear();
-            List<InputMethodInfo> imis = mImm.getInputMethodList();
-            for (int i = 0; i < imis.size(); ++i) {
-                InputMethodInfo imi = imis.get(i);
-                mInputMethodsInfo.put(imi.getId(), imi);
-            }
-        }
-        return mInputMethodsInfo.get(curInputMethodId);
-    }
-
     // TODO: Need to show an appropriate drawable for this shortcut button,
     // if there are two or more shortcut input methods contained in this button.
     // And need to add other methods to handle multiple shortcuts as appropriate.
@@ -141,8 +119,7 @@ public class InputMethodButton extends ImageView {
         final PackageManager pm = getContext().getPackageManager();
         if (imi != null) {
             if (DEBUG) {
-                Log.d(TAG, "Update icons of IME: " + imi.getPackageName() + ","
-                        + subtype.getLocale() + "," + subtype.getMode());
+                Log.d(TAG, "Update icons of IME: " + imi.getPackageName());
             }
             if (subtype != null) {
                 return pm.getDrawable(imi.getPackageName(), subtype.getIconResId(),
@@ -188,25 +165,19 @@ public class InputMethodButton extends ImageView {
             return;
         }
         if (!needsToShowIMEButton()) {
-            setVisibility(View.INVISIBLE);
+            setVisibility(View.GONE);
             return;
         } else {
             setVisibility(View.VISIBLE);
         }
         Drawable icon = null;
         switch (mId) {
-            case ID_IME_SWITCH_BUTTON:
-                // TODO: Just showing the first shortcut IME subtype for now. Should handle all
-                // shortcuts as appropriate.
-                icon = getSubtypeIcon(getCurrentInputMethodInfo(),
-                        mImm.getCurrentInputMethodSubtype());
-                break;
             case ID_IME_SHORTCUT_BUTTON:
                 icon = getShortcutInputMethodAndSubtypeDrawable();
                 break;
         }
         if (icon == null) {
-            mIcon.setImageResource(R.drawable.ic_sysbar_ime_default);
+            mIcon.setImageResource(R.drawable.ic_sysbar_ime);
         } else {
             mIcon.setImageDrawable(icon);
         }
