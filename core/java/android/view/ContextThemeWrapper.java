@@ -62,12 +62,8 @@ public class ContextThemeWrapper extends ContextWrapper {
             return mTheme;
         }
 
-        if (mThemeResource == 0) {
-            mThemeResource = (getApplicationInfo().targetSdkVersion
-                    >= Build.VERSION_CODES.HONEYCOMB)
-                            ? com.android.internal.R.style.Theme_Holo
-                            : com.android.internal.R.style.Theme;
-        }
+        mThemeResource = Resources.selectDefaultTheme(mThemeResource,
+                getApplicationInfo().targetSdkVersion);
         initializeTheme();
 
         return mTheme;
