@@ -254,6 +254,11 @@ public final class BridgeContext extends Activity {
             return null;
         }
 
+        // needed by SearchView
+        if (INPUT_METHOD_SERVICE.equals(service)) {
+            return null;
+        }
+
         throw new UnsupportedOperationException("Unsupported Service: " + service);
     }
 
@@ -443,7 +448,7 @@ public final class BridgeContext extends Activity {
                 } else {
                     // there is a value in the XML, but we need to resolve it in case it's
                     // referencing another resource or a theme value.
-                    ta.bridgeSetValue(index, name, resolveValue(null, name, value));
+                    ta.bridgeSetValue(index, name, resolveValue(null, name, value, isPlatformFile));
                 }
             }
         }
@@ -506,21 +511,24 @@ public final class BridgeContext extends Activity {
      * @param type the type of the resource
      * @param name the name of the attribute containing this value.
      * @param value the resource value, or reference to resolve
+     * @param isFrameworkValue whether the value is a framework value.
+     *
      * @return the resolved resource value or <code>null</code> if it failed to resolve it.
      */
-    private ResourceValue resolveValue(String type, String name, String value) {
+    private ResourceValue resolveValue(String type, String name, String value,
+            boolean isFrameworkValue) {
         if (value == null) {
             return null;
         }
 
         // get the ResourceValue referenced by this value
-        ResourceValue resValue = findResValue(value, false /*forceFrameworkOnly*/);
+        ResourceValue resValue = findResValue(value, isFrameworkValue);
 
         // if resValue is null, but value is not null, this means it was not a reference.
         // we return the name/value wrapper in a ResourceValue. the isFramework flag doesn't
         // matter.
         if (resValue == null) {
-            return new ResourceValue(type, name, value, false /*isFramework*/);
+            return new ResourceValue(type, name, value, isFrameworkValue);
         }
 
         // we resolved a first reference, but we need to make sure this isn't a reference also.
@@ -700,6 +708,15 @@ public final class BridgeContext extends Activity {
             ResourceValue item = typeMap.get(resName);
             if (item != null) {
                 return item;
+            }
+
+            // if it was not found and the type is an id, it is possible that the ID was
+            // generated dynamically when compiling the framework resources.
+            // Look for it in the R map.
+            if (BridgeConstants.RES_ID.equals(resType)) {
+                if (Bridge.getResourceValue(resType, resName) != null) {
+                    return new ResourceValue(resType, resName, true);
+                }
             }
         }
 

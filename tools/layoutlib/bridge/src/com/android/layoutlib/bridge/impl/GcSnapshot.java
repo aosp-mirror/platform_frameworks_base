@@ -393,27 +393,26 @@ public class GcSnapshot {
      * @param bitmap the bitmap to link to.
      */
     public void setBitmap(Bitmap_Delegate bitmap) {
-        assert mLayers.size() == 0;
-
         // create a new Layer for the bitmap. This will be the base layer.
         Graphics2D graphics2D = bitmap.getImage().createGraphics();
         Layer baseLayer = new Layer(graphics2D, bitmap);
 
-        // add it to the list.
+        // Set the current transform and clip which can either come from mTransform/mClip if they
+        // were set when there was no bitmap/layers or from the current base layers if there is
+        // one already.
+
+        graphics2D.setTransform(getTransform());
+        // reset mTransform in case there was one.
+        mTransform = null;
+
+        baseLayer.setClip(getClip());
+        // reset mClip in case there was one.
+        mClip = null;
+
+        // replace whatever current layers we have with this.
+        mLayers.clear();
         mLayers.add(baseLayer);
 
-        // if transform and clip where modified before, get the information and give it to the
-        // layer.
-
-        if (mTransform != null) {
-            graphics2D.setTransform(mTransform);
-            mTransform = null;
-        }
-
-        if (mClip != null) {
-            baseLayer.setClip(mClip);
-            mClip = null;
-        }
     }
 
     public void translate(float dx, float dy) {
