@@ -293,12 +293,16 @@ public class ExifInterface {
         String lngRef = mAttributes.get(ExifInterface.TAG_GPS_LONGITUDE_REF);
 
         if (latValue != null && latRef != null && lngValue != null && lngRef != null) {
-            output[0] = convertRationalLatLonToFloat(latValue, latRef);
-            output[1] = convertRationalLatLonToFloat(lngValue, lngRef);
-            return true;
-        } else {
-            return false;
+            try {
+                output[0] = convertRationalLatLonToFloat(latValue, latRef);
+                output[1] = convertRationalLatLonToFloat(lngValue, lngRef);
+                return true;
+            } catch (IllegalArgumentException e) {
+                // if values are not parseable
+            }
         }
+
+        return false;
     }
 
     /**
@@ -367,12 +371,12 @@ public class ExifInterface {
 
             String [] pair;
             pair = parts[0].split("/");
-            int degrees = (int) (Float.parseFloat(pair[0].trim())
-                    / Float.parseFloat(pair[1].trim()));
+            double degrees = Double.parseDouble(pair[0].trim())
+                    / Double.parseDouble(pair[1].trim());
 
             pair = parts[1].split("/");
-            int minutes = (int) ((Float.parseFloat(pair[0].trim())
-                    / Float.parseFloat(pair[1].trim())));
+            double minutes = Double.parseDouble(pair[0].trim())
+                    / Double.parseDouble(pair[1].trim());
 
             pair = parts[2].split("/");
             double seconds = Double.parseDouble(pair[0].trim())
@@ -383,10 +387,12 @@ public class ExifInterface {
                 return (float) -result;
             }
             return (float) result;
-        } catch (RuntimeException ex) {
-            // if for whatever reason we can't parse the lat long then return
-            // null
-            return 0f;
+        } catch (NumberFormatException e) {
+            // Some of the nubmers are not valid
+            throw new IllegalArgumentException();
+        } catch (ArrayIndexOutOfBoundsException e) {
+            // Some of the rational does not follow the correct format
+            throw new IllegalArgumentException();
         }
     }
 
