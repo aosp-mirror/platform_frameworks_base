@@ -27,9 +27,9 @@ import android.widget.FrameLayout;
 public class TabletStatusBarView extends FrameLayout {
     private Handler mHandler;
 
-    private View[] mIgnoreChildren = new View[3];
-    private View[] mPanels = new View[3];
-    private int[] mPos = new int[2];
+    private final View[] mIgnoreChildren = new View[4];
+    private final View[] mPanels = new View[4];
+    private final int[] mPos = new int[2];
 
     public TabletStatusBarView(Context context) {
         super(context);
@@ -39,6 +39,7 @@ public class TabletStatusBarView extends FrameLayout {
         super(context, attrs);
     }
 
+    @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             if (TabletStatusBar.DEBUG) {
@@ -48,12 +49,16 @@ public class TabletStatusBarView extends FrameLayout {
             mHandler.sendEmptyMessage(TabletStatusBar.MSG_CLOSE_NOTIFICATION_PANEL);
             mHandler.removeMessages(TabletStatusBar.MSG_CLOSE_RECENTS_PANEL);
             mHandler.sendEmptyMessage(TabletStatusBar.MSG_CLOSE_RECENTS_PANEL);
+            mHandler.removeMessages(TabletStatusBar.MSG_CLOSE_INPUT_METHODS_PANEL);
+            mHandler.sendEmptyMessage(TabletStatusBar.MSG_CLOSE_INPUT_METHODS_PANEL);
 
             for (int i=0; i < mPanels.length; i++) {
                 if (mPanels[i] != null && mPanels[i].getVisibility() == View.VISIBLE) {
                     if (eventInside(mIgnoreChildren[i], ev)) {
                         if (TabletStatusBar.DEBUG) {
-                            Slog.d(TabletStatusBar.TAG, "TabletStatusBarView eating event for view: " + mIgnoreChildren[i]);
+                            Slog.d(TabletStatusBar.TAG,
+                                    "TabletStatusBarView eating event for view: "
+                                    + mIgnoreChildren[i]);
                         }
                         return true;
                     }
