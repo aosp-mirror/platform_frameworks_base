@@ -214,6 +214,10 @@ public class AppWidgetHost {
         }
     }
 
+    /**
+     * Create the AppWidgetHostView for the given widget.
+     * The AppWidgetHost retains a pointer to the newly-created View.
+     */
     public final AppWidgetHostView createView(Context context, int appWidgetId,
             AppWidgetProviderInfo appWidget) {
         AppWidgetHostView view = onCreateView(context, appWidgetId, appWidget);
@@ -271,6 +275,13 @@ public class AppWidgetHost {
         if (v != null) {
             v.viewDataChanged(viewId);
         }
+    }
+
+    /**
+     * Clear the list of Views that have been created by this AppWidgetHost.
+     */
+    protected void clearViews() {
+        mViews.clear();
     }
 }
 

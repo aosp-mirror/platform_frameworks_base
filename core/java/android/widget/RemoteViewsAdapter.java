@@ -152,6 +152,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
             if (callback != null) {
                 callback.onRemoteAdapterDisconnected();
             }
+            adapter.mCache.reset();
         }
 
         public IRemoteViewsFactory getRemoteViewsFactory() {
@@ -657,11 +658,9 @@ public class RemoteViewsAdapter extends BaseAdapter {
             try {
                 remoteViews = factory.getViewAt(position);
                 itemId = factory.getItemId(position);
-            } catch (Exception e) {
-                // Print the error
-                Log.e(TAG, "Error in updateRemoteViews(" + position + "): " +
-                        e.getMessage());
-                e.printStackTrace();
+            } catch (Throwable t) {
+                Log.e(TAG, "Error in updateRemoteViews(" + position + "): " + t.getMessage());
+                t.printStackTrace();
 
                 // Return early to prevent additional work in re-centering the view cache, and
                 // swapping from the loading view
