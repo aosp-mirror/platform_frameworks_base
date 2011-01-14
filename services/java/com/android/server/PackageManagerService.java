@@ -7489,7 +7489,9 @@ class PackageManagerService extends IPackageManager.Stub {
         private Signature[] mSignatures;
 
         PackageSignatures(PackageSignatures orig) {
-            mSignatures = orig.mSignatures.clone();
+            if (orig != null && orig.mSignatures != null) {
+                mSignatures = orig.mSignatures.clone();
+            }
         }
 
         PackageSignatures(Signature[] sigs) {
@@ -7830,7 +7832,10 @@ class PackageManagerService extends IPackageManager.Stub {
         GrantedPermissions(GrantedPermissions base) {
             pkgFlags = base.pkgFlags;
             grantedPermissions = (HashSet<String>) base.grantedPermissions.clone();
-            gids = base.gids.clone();
+
+            if (base.gids != null) {
+                gids = base.gids.clone();
+            }
         }
 
         void setFlags(int pkgFlags) {
