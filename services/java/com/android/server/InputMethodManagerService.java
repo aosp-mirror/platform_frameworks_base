@@ -427,6 +427,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             // Uh oh, current input method is no longer around!
                             // Pick another one...
                             Slog.i(TAG, "Current input method removed: " + curInputMethodId);
+                            mStatusBar.setIMEButtonVisible(mCurToken, false);
                             if (!chooseNewDefaultIMELocked()) {
                                 changed = true;
                                 curIm = null;
@@ -1020,9 +1021,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             if (subtype != mCurrentSubtype) {
                 synchronized (mMethodMap) {
+                    if (subtype != null) {
+                        setSelectedInputMethodAndSubtypeLocked(info, subtypeId, true);
+                    }
                     if (mCurMethod != null) {
                         try {
-                            setSelectedInputMethodAndSubtypeLocked(info, subtypeId, true);
                             if (mInputShown) {
                                 // If mInputShown is false, there is no IME button on the
                                 // system bar.
