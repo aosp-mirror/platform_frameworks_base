@@ -102,7 +102,6 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
     private BluetoothDevice mDevice;
     private int mHeadsetState = BluetoothProfile.STATE_DISCONNECTED;
     private int mA2dpState = BluetoothProfile.STATE_DISCONNECTED;
-    private int mHidState = BluetoothProfile.STATE_DISCONNECTED;
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -140,7 +139,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 int newState = intent.getIntExtra(BluetoothInputDevice.EXTRA_INPUT_DEVICE_STATE, 0);
                 int oldState =
                     intent.getIntExtra(BluetoothInputDevice.EXTRA_PREVIOUS_INPUT_DEVICE_STATE, 0);
-                mHidState = newState;
+
                 if (oldState == BluetoothInputDevice.STATE_CONNECTED &&
                     newState == BluetoothInputDevice.STATE_DISCONNECTED) {
                     sendMessage(DISCONNECT_HID_INCOMING);
@@ -286,7 +285,8 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                         sendMessage(DISCONNECT_A2DP_OUTGOING);
                         deferMessage(message);
                         break;
-                    } else if (mHidState != BluetoothInputDevice.STATE_DISCONNECTED) {
+                    } else if (mService.getInputDeviceState(mDevice) !=
+                            BluetoothInputDevice.STATE_DISCONNECTED) {
                         sendMessage(DISCONNECT_HID_OUTGOING);
                         deferMessage(message);
                         break;
