@@ -27,7 +27,7 @@
         <!-- TODO: scaleType should be top-left but ImageView doesn't support that. -->
 
     <com.android.systemui.statusbar.LatestItemView android:id="@+id/content"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="64sp"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@id/large_icon"
