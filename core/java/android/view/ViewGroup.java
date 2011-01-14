@@ -44,6 +44,7 @@ import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * <p>
@@ -110,6 +111,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     // View currently under an ongoing drag
     private View mCurrentDragView;
+
+    // Metadata about the ongoing drag
+    private DragEvent mCurrentDrag;
+    private HashSet<View> mDragNotifiedChildren;
 
     // Does this group have a child that can accept the current drag payload?
     private boolean mChildAcceptsDrag;
@@ -803,6 +808,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 }
             }
         }
+
+        // in all cases, for drags
+        if (mCurrentDrag != null) {
+            if (visibility == VISIBLE) {
+                notifyChildOfDrag(child);
+            }
+        }
     }
 
     /**
@@ -894,6 +906,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // clear state to recalculate which views we drag over
             mCurrentDragView = null;
 
+            // Set up our tracking of drag-started notifications
+            mCurrentDrag = DragEvent.obtain(event);
+            if (mDragNotifiedChildren == null) {
+                mDragNotifiedChildren = new HashSet<View>();
+            } else {
+                mDragNotifiedChildren.clear();
+            }
+
             // Now dispatch down to our children, caching the responses
             mChildAcceptsDrag = false;
             final int count = mChildrenCount;
@@ -901,8 +921,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             for (int i = 0; i < count; i++) {
                 final View child = children[i];
                 if (child.getVisibility() == VISIBLE) {
-                    final boolean handled = children[i].dispatchDragEvent(event);
-                    children[i].mCanAcceptDrop = handled;
+                    final boolean handled = notifyChildOfDrag(children[i]);
                     if (handled) {
                         mChildAcceptsDrag = true;
                     }
@@ -916,15 +935,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         } break;
 
         case DragEvent.ACTION_DRAG_ENDED: {
-            // Notify all of our children that the drag is over
-            final int count = mChildrenCount;
-            final View[] children = mChildren;
-            for (int i = 0; i < count; i++) {
-                final View child = children[i];
-                if (child.getVisibility() == VISIBLE) {
-                    child.dispatchDragEvent(event);
-                }
+            // If a child was notified about an ongoing drag, it's told that it's over
+            for (View child : mDragNotifiedChildren) {
+                child.dispatchDragEvent(event);
             }
+
+            // Release the bookkeeping now that the drag lifecycle has ended
+            mDragNotifiedChildren.clear();
+            mCurrentDrag.recycle();
+            mCurrentDrag = null;
+
             // We consider drag-ended to have been handled if one of our children
             // had offered to handle the drag.
             if (mChildAcceptsDrag) {
@@ -1034,6 +1054,18 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
         return null;
+    }
+
+    boolean notifyChildOfDrag(View child) {
+        if (ViewDebug.DEBUG_DRAG) {
+            Log.d(View.VIEW_LOG_TAG, "Sending drag-started to view: " + child);
+        }
+
+        if (! mDragNotifiedChildren.contains(child)) {
+            mDragNotifiedChildren.add(child);
+            child.mCanAcceptDrop = child.dispatchDragEvent(mCurrentDrag);
+        }
+        return child.mCanAcceptDrop;
     }
 
     /**
@@ -1833,6 +1865,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         // In case view is detached while transition is running
         mLayoutSuppressed = false;
+
+        // Tear down our drag tracking
+        mDragNotifiedChildren = null;
+        if (mCurrentDrag != null) {
+            mCurrentDrag.recycle();
+            mCurrentDrag = null;
+        }
 
         final int count = mChildrenCount;
         final View[] children = mChildren;
