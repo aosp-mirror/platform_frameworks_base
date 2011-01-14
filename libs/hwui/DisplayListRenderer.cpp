@@ -81,6 +81,39 @@ void PathHeap::flatten(SkFlattenableWriteBuffer& buffer) const {
 // Display list
 ///////////////////////////////////////////////////////////////////////////////
 
+const char* DisplayList::OP_NAMES[] = {
+    "AcquireContext",
+    "ReleaseContext",
+    "Save",
+    "Restore",
+    "RestoreToCount",
+    "SaveLayer",
+    "SaveLayerAlpha",
+    "Translate",
+    "Rotate",
+    "Scale",
+    "SetMatrix",
+    "ConcatMatrix",
+    "ClipRect",
+    "DrawDisplayList",
+    "DrawLayer",
+    "DrawBitmap",
+    "DrawBitmapMatrix",
+    "DrawBitmapRect",
+    "DrawPatch",
+    "DrawColor",
+    "DrawRect",
+    "DrawPath",
+    "DrawLines",
+    "DrawText",
+    "ResetShader",
+    "SetupShader",
+    "ResetColorFilter",
+    "SetupColorFilter",
+    "ResetShadow",
+    "SetupShadow"
+};
+
 DisplayList::DisplayList(const DisplayListRenderer& recorder) {
     initFromDisplayListRenderer(recorder);
 }
@@ -173,14 +206,25 @@ void DisplayList::init() {
     mPathHeap = NULL;
 }
 
-void DisplayList::replay(OpenGLRenderer& renderer) {
+void DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
     TextContainer text;
     mReader.rewind();
 
-    int saveCount = renderer.getSaveCount() - 1;
+#if DEBUG_DISPLAY_LIST
+    uint32_t count = (level + 1) * 2;
+    char indent[count + 1];
+    for (uint32_t i = 0; i < count; i++) {
+        indent[i] = ' ';
+    }
+    indent[count] = '\0';
+    DISPLAY_LIST_LOGD("%sStart display list (%p)", (char*) indent + 2, this);
+#endif
 
+    int saveCount = renderer.getSaveCount() - 1;
     while (!mReader.eof()) {
         int op = mReader.readInt();
+        DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
+
         switch (op) {
             case AcquireContext: {
                 renderer.acquireContext();
@@ -238,7 +282,7 @@ void DisplayList::replay(OpenGLRenderer& renderer) {
             }
             break;
             case DrawDisplayList: {
-                renderer.drawDisplayList(getDisplayList());
+                renderer.drawDisplayList(getDisplayList(), level + 1);
             }
             break;
             case DrawLayer: {
@@ -326,6 +370,8 @@ void DisplayList::replay(OpenGLRenderer& renderer) {
             break;
         }
     }
+
+    DISPLAY_LIST_LOGD("%sDone", (char*) indent + 2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -482,7 +528,7 @@ bool DisplayListRenderer::clipRect(float left, float top, float right, float bot
     return OpenGLRenderer::clipRect(left, top, right, bottom, op);
 }
 
-void DisplayListRenderer::drawDisplayList(DisplayList* displayList) {
+void DisplayListRenderer::drawDisplayList(DisplayList* displayList, uint32_t level) {
     addOp(DisplayList::DrawDisplayList);
     addDisplayList(displayList);
 }
