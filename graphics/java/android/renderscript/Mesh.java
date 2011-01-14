@@ -172,7 +172,7 @@ public class Mesh extends BaseObj {
 
         /**
         * Creates builder object
-        * @param rs
+        * @param rs Context to which the mesh will belong.
         * @param usage specifies how the mesh allocations are to be
         *              handled, whether they need to be uploaded to a
         *              buffer on the gpu, maintain a cpu copy, etc
@@ -512,7 +512,7 @@ public class Mesh extends BaseObj {
         public static final int TEXTURE_0 = 0x0100;
 
         /**
-        * @param rs
+        * @param rs Context to which the mesh will belong.
         * @param vtxSize specifies whether the vertex is a float2 or
         *                float3
         * @param flags bitfield that is a combination of COLOR, NORMAL,
