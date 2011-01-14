@@ -5570,6 +5570,24 @@ public class WebView extends AbsoluteLayout
                         break;
                     }
 
+                    // Only lock dragging to one axis if we don't have a scale in progress.
+                    // Scaling implies free-roaming movement. Note this is only ever a question
+                    // if mZoomManager.supportsPanDuringZoom() is true.
+                    final ScaleGestureDetector detector =
+                      mZoomManager.getMultiTouchGestureDetector();
+                    if (detector == null || !detector.isInProgress()) {
+                        // if it starts nearly horizontal or vertical, enforce it
+                        int ax = Math.abs(deltaX);
+                        int ay = Math.abs(deltaY);
+                        if (ax > MAX_SLOPE_FOR_DIAG * ay) {
+                            mSnapScrollMode = SNAP_X;
+                            mSnapPositive = deltaX > 0;
+                        } else if (ay > MAX_SLOPE_FOR_DIAG * ax) {
+                            mSnapScrollMode = SNAP_Y;
+                            mSnapPositive = deltaY > 0;
+                        }
+                    }
+
                     mTouchMode = TOUCH_DRAG_MODE;
                     mLastTouchX = x;
                     mLastTouchY = y;
