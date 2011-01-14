@@ -569,9 +569,6 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
         composeLayerRect(layer, rect, true);
     }
 
-    drawColorRect(rect.left, rect.top, rect.right, rect.bottom, 0x7fff0000,
-            SkXfermode::kSrcOver_Mode, true);
-
     if (fboLayer) {
         // Detach the texture from the FBO
         glBindFramebuffer(GL_FRAMEBUFFER, current->fbo);
