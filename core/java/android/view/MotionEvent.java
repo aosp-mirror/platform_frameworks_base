@@ -1550,6 +1550,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     @Override
     public String toString() {
         return "MotionEvent{" + Integer.toHexString(System.identityHashCode(this))
+            + " pointerId=" + getPointerId(0)
             + " action=" + actionToString(mAction)
             + " x=" + getX()
             + " y=" + getY()
@@ -1567,6 +1568,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             + " edgeFlags=0x" + Integer.toHexString(mEdgeFlags)
             + " device=" + mDeviceId
             + " source=0x" + Integer.toHexString(mSource)
+            + (getPointerCount() > 1 ?
+                " pointerId2=" + getPointerId(1) + " x2=" + getX(2) + " y2=" + getY(2) : "")
             + "}";
     }
 
