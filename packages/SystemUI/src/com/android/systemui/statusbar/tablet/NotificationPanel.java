@@ -50,7 +50,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     View mSettingsButton;
     View mNotificationButton;
     View mNotificationScroller;
-    View mNotificationGlow;
     ViewGroup mContentFrame;
     Rect mContentArea;
     View mSettingsView;
@@ -85,7 +84,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         mNotificationButton = (ImageView)findViewById(R.id.notification_button);
 
         mNotificationScroller = findViewById(R.id.notification_scroller);
-        mNotificationGlow = findViewById(R.id.notification_glow);
         mContentFrame = (ViewGroup)findViewById(R.id.content_frame);
     }
 
@@ -130,6 +128,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
+
         mChoreo.setPanelHeight(mContentParent.getHeight());
     }
 
@@ -185,7 +184,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     void addSettingsView() {
         LayoutInflater infl = LayoutInflater.from(getContext());
         mSettingsView = infl.inflate(R.layout.status_bar_settings_view, mContentFrame, false);
-        mContentFrame.addView(mSettingsView, mContentFrame.indexOfChild(mNotificationGlow));
+        mContentFrame.addView(mSettingsView);
     }
 
     private class Choreographer implements Animator.AnimatorListener {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2006 The Android Open Source Project
+<!-- Copyright (C) 2011 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,12 +14,9 @@
      limitations under the License.
 -->
 
-<layer-list
+<bitmap
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:opacity="translucent"
-    >
-    <item
-        android:drawable="@drawable/notification_item_background_color"
-        />
-</layer-list>
+    android:src="@drawable/notify_panel_bg_protect"
+    android:tileMode="repeat"
+    />
 

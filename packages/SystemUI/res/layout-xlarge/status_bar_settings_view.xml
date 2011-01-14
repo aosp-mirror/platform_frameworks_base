@@ -22,8 +22,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/status_bar_item_background"
-        android:paddingLeft="16dp"
-        android:paddingRight="46dp"
+        android:paddingRight="48dp"
         >
 
     <!-- Airplane mode -->
