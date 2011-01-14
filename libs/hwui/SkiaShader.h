@@ -56,6 +56,9 @@ struct SkiaShader {
             SkMatrix* matrix, bool blend);
     virtual ~SkiaShader();
 
+    virtual SkiaShader* copy() = 0;
+    void copyFrom(const SkiaShader& shader);
+
     virtual void describe(ProgramDescription& description, const Extensions& extensions);
     virtual void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
             GLuint* textureUnit);
@@ -81,8 +84,13 @@ struct SkiaShader {
             const Snapshot& snapshot) {
     }
 
+    uint32_t getGenerationId() {
+        return mGenerationId;
+    }
+
     void setMatrix(SkMatrix* matrix) {
         updateLocalMatrix(matrix);
+        mGenerationId++;
     }
 
     void updateLocalMatrix(const SkMatrix* matrix) {
@@ -97,6 +105,9 @@ struct SkiaShader {
     void computeScreenSpaceMatrix(mat4& screenSpace, const mat4& modelView);
 
 protected:
+    SkiaShader() {
+    }
+
     /**
      * The appropriate texture unit must have been activated prior to invoking
      * this method.
@@ -114,6 +125,9 @@ protected:
 
     mat4 mUnitMatrix;
     mat4 mShaderMatrix;
+
+private:
+    uint32_t mGenerationId;
 }; // struct SkiaShader
 
 
@@ -127,6 +141,7 @@ protected:
 struct SkiaBitmapShader: public SkiaShader {
     SkiaBitmapShader(SkBitmap* bitmap, SkShader* key, SkShader::TileMode tileX,
             SkShader::TileMode tileY, SkMatrix* matrix, bool blend);
+    SkiaShader* copy();
 
     void describe(ProgramDescription& description, const Extensions& extensions);
     void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
@@ -134,6 +149,9 @@ struct SkiaBitmapShader: public SkiaShader {
     void updateTransforms(Program* program, const mat4& modelView, const Snapshot& snapshot);
 
 private:
+    SkiaBitmapShader() {
+    }
+
     /**
      * This method does not work for n == 0.
      */
@@ -154,6 +172,7 @@ struct SkiaLinearGradientShader: public SkiaShader {
     SkiaLinearGradientShader(float* bounds, uint32_t* colors, float* positions, int count,
             SkShader* key, SkShader::TileMode tileMode, SkMatrix* matrix, bool blend);
     ~SkiaLinearGradientShader();
+    SkiaShader* copy();
 
     void describe(ProgramDescription& description, const Extensions& extensions);
     void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
@@ -161,6 +180,9 @@ struct SkiaLinearGradientShader: public SkiaShader {
     void updateTransforms(Program* program, const mat4& modelView, const Snapshot& snapshot);
 
 private:
+    SkiaLinearGradientShader() {
+    }
+
     float* mBounds;
     uint32_t* mColors;
     float* mPositions;
@@ -174,6 +196,7 @@ struct SkiaSweepGradientShader: public SkiaShader {
     SkiaSweepGradientShader(float x, float y, uint32_t* colors, float* positions, int count,
             SkShader* key, SkMatrix* matrix, bool blend);
     ~SkiaSweepGradientShader();
+    SkiaShader* copy();
 
     virtual void describe(ProgramDescription& description, const Extensions& extensions);
     void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
@@ -183,6 +206,8 @@ struct SkiaSweepGradientShader: public SkiaShader {
 protected:
     SkiaSweepGradientShader(Type type, float x, float y, uint32_t* colors, float* positions,
             int count, SkShader* key, SkShader::TileMode tileMode, SkMatrix* matrix, bool blend);
+    SkiaSweepGradientShader() {
+    }
 
     uint32_t* mColors;
     float* mPositions;
@@ -195,8 +220,13 @@ protected:
 struct SkiaCircularGradientShader: public SkiaSweepGradientShader {
     SkiaCircularGradientShader(float x, float y, float radius, uint32_t* colors, float* positions,
             int count, SkShader* key,SkShader::TileMode tileMode, SkMatrix* matrix, bool blend);
+    SkiaShader* copy();
 
     void describe(ProgramDescription& description, const Extensions& extensions);
+
+private:
+    SkiaCircularGradientShader() {
+    }
 }; // struct SkiaCircularGradientShader
 
 /**
@@ -204,6 +234,7 @@ struct SkiaCircularGradientShader: public SkiaSweepGradientShader {
  */
 struct SkiaComposeShader: public SkiaShader {
     SkiaComposeShader(SkiaShader* first, SkiaShader* second, SkXfermode::Mode mode, SkShader* key);
+    SkiaShader* copy();
 
     void set(TextureCache* textureCache, GradientCache* gradientCache);
 
@@ -212,6 +243,9 @@ struct SkiaComposeShader: public SkiaShader {
             GLuint* textureUnit);
 
 private:
+    SkiaComposeShader() {
+    }
+
     SkiaShader* mFirst;
     SkiaShader* mSecond;
     SkXfermode::Mode mMode;
