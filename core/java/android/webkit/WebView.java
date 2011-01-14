@@ -5471,6 +5471,8 @@ public class WebView extends AbsoluteLayout
                     if (shouldForwardTouchEvent()) {
                         TouchEventData ted = new TouchEventData();
                         ted.mAction = action;
+                        ted.mIds = new int[1];
+                        ted.mIds[0] = ev.getPointerId(0);
                         ted.mPoints = new Point[1];
                         ted.mPoints[0] = new Point(contentX, contentY);
                         ted.mMetaState = ev.getMetaState();
@@ -5513,6 +5515,8 @@ public class WebView extends AbsoluteLayout
                         || eventTime - mLastSentTouchTime > mCurrentTouchInterval)) {
                     TouchEventData ted = new TouchEventData();
                     ted.mAction = action;
+                    ted.mIds = new int[1];
+                    ted.mIds[0] = ev.getPointerId(0);
                     ted.mPoints = new Point[1];
                     ted.mPoints[0] = new Point(contentX, contentY);
                     ted.mMetaState = ev.getMetaState();
@@ -5682,6 +5686,8 @@ public class WebView extends AbsoluteLayout
                 // pass the touch events from UI thread to WebCore thread
                 if (shouldForwardTouchEvent()) {
                     TouchEventData ted = new TouchEventData();
+                    ted.mIds = new int[1];
+                    ted.mIds[0] = ev.getPointerId(0);
                     ted.mAction = action;
                     ted.mPoints = new Point[1];
                     ted.mPoints[0] = new Point(contentX, contentY);
@@ -5699,6 +5705,8 @@ public class WebView extends AbsoluteLayout
                         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
                         if (inFullScreenMode() || mDeferTouchProcess) {
                             TouchEventData ted = new TouchEventData();
+                            ted.mIds = new int[1];
+                            ted.mIds[0] = ev.getPointerId(0);
                             ted.mAction = WebViewCore.ACTION_DOUBLETAP;
                             ted.mPoints = new Point[1];
                             ted.mPoints[0] = new Point(contentX, contentY);
@@ -5832,8 +5840,10 @@ public class WebView extends AbsoluteLayout
         TouchEventData ted = new TouchEventData();
         ted.mAction = ev.getAction() & MotionEvent.ACTION_MASK;
         final int count = ev.getPointerCount();
+        ted.mIds = new int[count];
         ted.mPoints = new Point[count];
         for (int c = 0; c < count; c++) {
+            ted.mIds[c] = ev.getPointerId(c);
             int x = viewToContentX((int) ev.getX(c) + mScrollX);
             int y = viewToContentY((int) ev.getY(c) + mScrollY);
             ted.mPoints[c] = new Point(x, y);
@@ -5927,6 +5937,8 @@ public class WebView extends AbsoluteLayout
                 mWebViewCore.removeMessages(EventHub.TOUCH_EVENT);
             }
             TouchEventData ted = new TouchEventData();
+            ted.mIds = new int[1];
+            ted.mIds[0] = 0;
             ted.mPoints = new Point[1];
             ted.mPoints[0] = new Point(x, y);
             ted.mAction = MotionEvent.ACTION_CANCEL;
@@ -7054,6 +7066,8 @@ public class WebView extends AbsoluteLayout
                     if (inFullScreenMode() || mDeferTouchProcess) {
                         TouchEventData ted = new TouchEventData();
                         ted.mAction = WebViewCore.ACTION_LONGPRESS;
+                        ted.mIds = new int[1];
+                        ted.mIds[0] = 0;
                         ted.mPoints = new Point[1];
                         ted.mPoints[0] = new Point(viewToContentX((int) mLastTouchX + mScrollX),
                                                    viewToContentY((int) mLastTouchY + mScrollY));
