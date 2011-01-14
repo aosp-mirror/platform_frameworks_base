@@ -542,7 +542,7 @@ public class InputManager {
         @SuppressWarnings("unused")
         public PointerIcon getPointerIcon() {
             return PointerIcon.load(mContext.getResources(),
-                    com.android.internal.R.drawable.pointericon_default);
+                    com.android.internal.R.drawable.pointer_arrow_icon);
         }
     }
 }
