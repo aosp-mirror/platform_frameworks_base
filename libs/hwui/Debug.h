@@ -47,4 +47,7 @@
 // Turn on to display debug info about the layer renderer
 #define DEBUG_LAYER_RENDERER 0
 
+// Turn on to dump display list state
+#define DEBUG_DISPLAY_LIST 0
+
 #endif // ANDROID_HWUI_DEBUG_H

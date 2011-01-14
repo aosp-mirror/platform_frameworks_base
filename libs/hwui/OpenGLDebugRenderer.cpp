@@ -48,7 +48,7 @@ int OpenGLDebugRenderer::saveLayer(float left, float top, float right, float bot
     return OpenGLRenderer::saveLayer(left, top, right, bottom, p, flags);
 }
 
-void OpenGLDebugRenderer::drawDisplayList(DisplayList* displayList) {
+void OpenGLDebugRenderer::drawDisplayList(DisplayList* displayList, uint32_t level) {
     mPrimitivesCount++;
     StopWatch w("drawDisplayList");
     OpenGLRenderer::drawDisplayList(displayList);
