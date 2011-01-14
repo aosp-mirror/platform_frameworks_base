@@ -888,6 +888,9 @@ public class AccountManagerService
         final boolean permissionGranted = customTokens ||
             permissionIsGranted(account, authTokenType, callerUid);
 
+        if (loginOptions == null) {
+            loginOptions = new Bundle();
+        }
         if (customTokens) {
             // let authenticator know the identity of the caller
             loginOptions.putInt(AccountManager.KEY_CALLER_UID, callerUid);
