@@ -1009,7 +1009,7 @@ public final class Canvas_Delegate {
     /*package*/ static void native_drawTextRun(int nativeCanvas, char[] text,
             int start, int count, int contextStart, int contextCount,
             float x, float y, int flags, int paint) {
-        native_drawText(nativeCanvas, text, 0, count, x, y, flags, paint);
+        native_drawText(nativeCanvas, text, start, count, x, y, flags, paint);
     }
 
     /*package*/ static void native_drawPosText(int nativeCanvas,
