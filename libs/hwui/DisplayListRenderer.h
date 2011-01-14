@@ -413,10 +413,10 @@ private:
 
         SkiaShader* shaderCopy = mShaderMap.valueFor(shader);
         // TODO: We also need to handle generation ID changes in compose shaders
-        if (!shaderCopy || shaderCopy->getGenerationId() != shader->getGenerationId()) {
+        if (shaderCopy == NULL || shaderCopy->getGenerationId() != shader->getGenerationId()) {
             shaderCopy = shader->copy();
             mShaderMap.add(shader, shaderCopy);
-            mShaders.add(shader);
+            mShaders.add(shaderCopy);
         }
 
         addInt((int) shaderCopy);
