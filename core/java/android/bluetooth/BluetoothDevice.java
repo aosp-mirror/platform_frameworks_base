@@ -693,6 +693,15 @@ public final class BluetoothDevice implements Parcelable {
      * outgoing connection to this remote device on given channel.
      * <p>The remote device will be authenticated and communication on this
      * socket will be encrypted.
+     * <p> Use this socket only if an authenticated socket link is possible.
+     * Authentication refers to the authentication of the link key to
+     * prevent man-in-the-middle type of attacks.
+     * For example, for Bluetooth 2.1 devices, if any of the devices does not
+     * have an input and output capability or just has the ability to
+     * display a numeric key, a secure socket connection is not possible.
+     * In such a case, use {#link createInsecureRfcommSocket}.
+     * For more details, refer to the Security Model section 5.2 (vol 3) of
+     * Bluetooth Core Specification version 2.1 + EDR.
      * <p>Use {@link BluetoothSocket#connect} to initiate the outgoing
      * connection.
      * <p>Valid RFCOMM channels are in range 1 to 30.
@@ -720,6 +729,48 @@ public final class BluetoothDevice implements Parcelable {
      * determine which channel to connect to.
      * <p>The remote device will be authenticated and communication on this
      * socket will be encrypted.
+     * <p> Use this socket only if an authenticated socket link is possible.
+     * Authentication refers to the authentication of the link key to
+     * prevent man-in-the-middle type of attacks.
+     * For example, for Bluetooth 2.1 devices, if any of the devices does not
+     * have an input and output capability or just has the ability to
+     * display a numeric key, a secure socket connection is not possible.
+     * In such a case, use {#link createInsecureRfcommSocketToServiceRecord}.
+     * For more details, refer to the Security Model section 5.2 (vol 3) of
+     * Bluetooth Core Specification version 2.1 + EDR.
+     * <p>Hint: If you are connecting to a Bluetooth serial board then try
+     * using the well-known SPP UUID 00001101-0000-1000-8000-00805F9B34FB.
+     * However if you are connecting to an Android peer then please generate
+     * your own unique UUID.
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     *
+     * @param uuid service record uuid to lookup RFCOMM channel
+     * @return a RFCOMM BluetoothServerSocket ready for an outgoing connection
+     * @throws IOException on error, for example Bluetooth not available, or
+     *                     insufficient permissions
+     */
+    public BluetoothSocket createRfcommSocketToServiceRecord(UUID uuid) throws IOException {
+        return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, true, true, this, -1,
+                new ParcelUuid(uuid));
+    }
+
+    /**
+     * Create an RFCOMM {@link BluetoothSocket} socket ready to start an insecure
+     * outgoing connection to this remote device using SDP lookup of uuid.
+     * <p> The communication channel will not have an authenticated link key
+     * i.e it will be subject to man-in-the-middle attacks. For Bluetooth 2.1
+     * devices, the link key will be encrypted, as encryption is mandatory.
+     * For legacy devices (pre Bluetooth 2.1 devices) the link key will
+     * be not be encrypted. Use {@link #createRfcommSocketToServiceRecord} if an
+     * encrypted and authenticated communication channel is desired.
+     * <p>This is designed to be used with {@link
+     * BluetoothAdapter#listenUsingInsecureRfcommWithServiceRecord} for peer-peer
+     * Bluetooth applications.
+     * <p>Use {@link BluetoothSocket#connect} to initiate the outgoing
+     * connection. This will also perform an SDP lookup of the given uuid to
+     * determine which channel to connect to.
+     * <p>The remote device will be authenticated and communication on this
+     * socket will be encrypted.
      * <p>Hint: If you are connecting to a Bluetooth serial board then try
      * using the well-known SPP UUID 00001101-0000-1000-8000-00805F9B34FB.
      * However if you are connecting to an Android peer then please generate
@@ -731,8 +782,8 @@ public final class BluetoothDevice implements Parcelable {
      * @throws IOException on error, for example Bluetooth not available, or
      *                     insufficient permissions
      */
-    public BluetoothSocket createRfcommSocketToServiceRecord(UUID uuid) throws IOException {
-        return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, true, true, this, -1,
+    public BluetoothSocket createInsecureRfcommSocketToServiceRecord(UUID uuid) throws IOException {
+        return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, false, false, this, -1,
                 new ParcelUuid(uuid));
     }
 
