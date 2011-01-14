@@ -624,10 +624,8 @@
 
     <!-- Default theme for input methods, which is used by the
          {@link android.inputmethodservice.InputMethodService} class.
-         this inherits from Theme.NoTitleBar, but makes the background
-         transparent, the window floating and translucent, and ensures that
-         it does not dim the UI behind it.  This also configures the window
-         with the standard IME animations and visuals. -->
+         this inherits from Theme.Panel, but sets up IME appropriate animations
+         and a few custom attributes. -->
     <style name="Theme.InputMethod" parent="Theme.Panel">
         <item name="android:windowAnimationStyle">@android:style/Animation.InputMethod</item>
         <item name="android:imeFullscreenBackground">@android:drawable/input_method_fullscreen_background</item>
@@ -635,6 +633,17 @@
         <item name="android:imeExtractExitAnimation">@android:anim/input_method_extract_exit</item>
     </style>
 
+    <!-- Default theme for modern holo style input methods, which is used by the
+         {@link android.inputmethodservice.InputMethodService} class.
+         this inherits from Theme.Panel, but sets up IME appropriate animations
+         and a few custom attributes. -->
+    <style name="Theme.Holo.InputMethod" parent="Theme.Holo.Panel">
+        <item name="android:windowAnimationStyle">@android:style/Animation.InputMethod</item>
+        <item name="android:imeFullscreenBackground">@android:drawable/input_method_fullscreen_background</item>
+        <item name="android:imeExtractEnterAnimation">@android:anim/input_method_extract_enter</item>
+        <item name="android:imeExtractExitAnimation">@android:anim/input_method_extract_exit</item>
+    </style>
+    
     <!-- Theme for the search input bar. -->
     <style name="Theme.SearchBar" parent="Theme.Holo.Light.Panel">
         <item name="windowContentOverlay">@null</item>        

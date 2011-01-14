@@ -115,6 +115,23 @@ public class Resources {
         return (LongSparseArray<T>) EMPTY_ARRAY;
     }
 
+    /** @hide */
+    public static int selectDefaultTheme(int curTheme, int targetSdkVersion) {
+        return selectSystemTheme(curTheme, targetSdkVersion,
+                com.android.internal.R.style.Theme, com.android.internal.R.style.Theme_Holo);
+    }
+    
+    /** @hide */
+    public static int selectSystemTheme(int curTheme, int targetSdkVersion, int orig, int holo) {
+        if (curTheme != 0) {
+            return curTheme;
+        }
+        if (targetSdkVersion < Build.VERSION_CODES.HONEYCOMB) {
+            return orig;
+        }
+        return holo;
+    }
+    
     /**
      * This exception is thrown by the resource APIs when a requested resource
      * can not be found.
