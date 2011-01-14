@@ -112,7 +112,8 @@ public interface IObbActionListener extends IInterface {
                     _data.writeString(filename);
                     _data.writeInt(nonce);
                     _data.writeInt(status);
-                    mRemote.transact(Stub.TRANSACTION_onObbResult, _data, _reply, 0);
+                    mRemote.transact(Stub.TRANSACTION_onObbResult, _data, _reply,
+                            android.os.IBinder.FLAG_ONEWAY);
                     _reply.readException();
                 } finally {
                     _reply.recycle();
