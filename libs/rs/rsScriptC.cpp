@@ -17,7 +17,6 @@
 #include "rsContext.h"
 #include "rsScriptC.h"
 #include "rsMatrix.h"
-#include "../../compile/libbcc/include/bcc/bcc.h"
 #include "utils/Timers.h"
 #include "utils/StopWatch.h"
 extern "C" {
@@ -35,6 +34,64 @@ using namespace android::renderscript;
     Context * rsc = tls->mContext; \
     ScriptC * sc = (ScriptC *) tls->mScript
 
+// Input: cacheDir
+// Input: resName
+// Input: extName
+//
+// Note: cacheFile = resName + extName
+//
+// Output: Returns cachePath == cacheDir + cacheFile
+char *genCacheFileName(const char *cacheDir,
+                       const char *resName,
+                       const char *extName) {
+    char cachePath[512];
+    char cacheFile[sizeof(cachePath)];
+    const size_t kBufLen = sizeof(cachePath) - 1;
+
+    cacheFile[0] = '\0';
+    // Note: resName today is usually something like
+    //       "/com.android.fountain:raw/fountain"
+    if (resName[0] != '/') {
+        // Get the absolute path of the raw/***.bc file.
+
+        // Generate the absolute path.  This doesn't do everything it
+        // should, e.g. if resName is "./out/whatever" it doesn't crunch
+        // the leading "./" out because this if-block is not triggered,
+        // but it'll make do.
+        //
+        if (getcwd(cacheFile, kBufLen) == NULL) {
+            LOGE("Can't get CWD while opening raw/***.bc file\n");
+            return NULL;
+        }
+        // Append "/" at the end of cacheFile so far.
+        strncat(cacheFile, "/", kBufLen);
+    }
+
+    // cacheFile = resName + extName
+    //
+    strncat(cacheFile, resName, kBufLen);
+    if (extName != NULL) {
+        // TODO(srhines): strncat() is a bit dangerous
+        strncat(cacheFile, extName, kBufLen);
+    }
+
+    // Turn the path into a flat filename by replacing
+    // any slashes after the first one with '@' characters.
+    char *cp = cacheFile + 1;
+    while (*cp != '\0') {
+        if (*cp == '/') {
+            *cp = '@';
+        }
+        cp++;
+    }
+
+    // Tack on the file name for the actual cache file path.
+    strncpy(cachePath, cacheDir, kBufLen);
+    strncat(cachePath, cacheFile, kBufLen);
+
+    LOGV("Cache file for '%s' '%s' is '%s'\n", resName, extName, cachePath);
+    return strdup(cachePath);
+}
 
 ScriptC::ScriptC(Context *rsc) : Script(rsc) {
     LOGD(">>>> ScriptC ctor called, obj=%p", this);
@@ -45,7 +102,7 @@ ScriptC::ScriptC(Context *rsc) : Script(rsc) {
 ScriptC::~ScriptC() {
     LOGD(">>>> ~ScriptC() mBccScript = %p", mBccScript);
     if (mBccScript) {
-        bccDeleteScript(mBccScript);
+        bccDisposeScript(mBccScript);
         LOGD(">>>> ~ScriptC(mBCCScript)");
     }
     free(mEnviroment.mScriptText);
@@ -381,11 +438,11 @@ void ScriptCState::clear(Context *rsc) {
     mScript.set(new ScriptC(rsc));
 }
 
-static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name) {
+static void* symbolLookup(void* pContext, char const* name) {
     const ScriptCState::SymbolTable_t *sym;
     ScriptC *s = (ScriptC *)pContext;
     if (!strcmp(name, "__isThreadable")) {
-      return (BCCvoid*) s->mEnviroment.mIsThreadable;
+      return (void*) s->mEnviroment.mIsThreadable;
     } else if (!strcmp(name, "__clearThreadable")) {
       s->mEnviroment.mIsThreadable = false;
       return NULL;
@@ -420,30 +477,33 @@ void ScriptCState::runCompiler(Context *rsc,
         bccRegisterSymbolCallback(s->mBccScript, symbolLookup, s);
 
         if (bccReadBC(s->mBccScript,
+                      resName,
                       s->mEnviroment.mScriptText,
-                      s->mEnviroment.mScriptTextLength,
-                      /*deprecated*/ 0, /*deprecated*/ 0,
-                      resName, cacheDir) != 0) {
+                      s->mEnviroment.mScriptTextLength, 0) != 0) {
             LOGE("bcc: FAILS to read bitcode");
             // Handle Fatal Error
         }
 
 #if 0
         if (bccLinkBC(s->mBccScript,
+                      resName,
                       rs_runtime_lib_bc,
-                      rs_runtime_lib_bc_size) != 0) {
+                      rs_runtime_lib_bc_size, 0) != 0) {
             LOGE("bcc: FAILS to link bitcode");
             // Handle Fatal Error
         }
 #endif
+        char *cachePath = genCacheFileName(cacheDir, resName, ".oBCC");
 
-        if (bccPrepareExecutable(s->mBccScript) != 0) {
+        if (bccPrepareExecutable(s->mBccScript, cachePath, 0) != 0) {
             LOGE("bcc: FAILS to prepare executable");
             // Handle Fatal Error
         }
 
-        bccGetScriptLabel(s->mBccScript, "root", (BCCvoid**) &s->mProgram.mRoot);
-        bccGetScriptLabel(s->mBccScript, "init", (BCCvoid**) &s->mProgram.mInit);
+        free(cachePath);
+
+        s->mProgram.mRoot = reinterpret_cast<int (*)()>(bccGetFuncAddr(s->mBccScript, "root"));
+        s->mProgram.mInit = reinterpret_cast<void (*)()>(bccGetFuncAddr(s->mBccScript, "init"));
     }
     LOGV("%p ScriptCState::runCompiler root %p,  init %p", rsc, s->mProgram.mRoot, s->mProgram.mInit);
 
@@ -451,20 +511,20 @@ void ScriptCState::runCompiler(Context *rsc,
         s->mProgram.mInit();
     }
 
-    bccGetExportFuncs(s->mBccScript, (BCCsizei*) &s->mEnviroment.mInvokeFunctionCount, 0, NULL);
+    s->mEnviroment.mInvokeFunctionCount = bccGetExportFuncCount(s->mBccScript);
     if (s->mEnviroment.mInvokeFunctionCount <= 0)
         s->mEnviroment.mInvokeFunctions = NULL;
     else {
         s->mEnviroment.mInvokeFunctions = (Script::InvokeFunc_t*) calloc(s->mEnviroment.mInvokeFunctionCount, sizeof(Script::InvokeFunc_t));
-        bccGetExportFuncs(s->mBccScript, NULL, s->mEnviroment.mInvokeFunctionCount, (BCCvoid **) s->mEnviroment.mInvokeFunctions);
+        bccGetExportFuncList(s->mBccScript, s->mEnviroment.mInvokeFunctionCount, (void **) s->mEnviroment.mInvokeFunctions);
     }
 
-    bccGetExportVars(s->mBccScript, (BCCsizei*) &s->mEnviroment.mFieldCount, 0, NULL);
+    s->mEnviroment.mFieldCount = bccGetExportVarCount(s->mBccScript);
     if (s->mEnviroment.mFieldCount <= 0)
         s->mEnviroment.mFieldAddress = NULL;
     else {
         s->mEnviroment.mFieldAddress = (void **) calloc(s->mEnviroment.mFieldCount, sizeof(void *));
-        bccGetExportVars(s->mBccScript, NULL, s->mEnviroment.mFieldCount, (BCCvoid **) s->mEnviroment.mFieldAddress);
+        bccGetExportVarList(s->mBccScript, s->mEnviroment.mFieldCount, (void **) s->mEnviroment.mFieldAddress);
         s->initSlots();
     }
 
@@ -475,63 +535,61 @@ void ScriptCState::runCompiler(Context *rsc,
 
     if (s->mProgram.mRoot) {
         const static int pragmaMax = 16;
-        BCCsizei pragmaCount;
-        BCCchar * str[pragmaMax];
-        bccGetPragmas(s->mBccScript, &pragmaCount, pragmaMax, &str[0]);
+        size_t pragmaCount = bccGetPragmaCount(s->mBccScript);
+        char const *keys[pragmaMax];
+        char const *values[pragmaMax];
+        bccGetPragmaList(s->mBccScript, pragmaMax, keys, values);
 
-        for (int ct=0; ct < pragmaCount; ct+=2) {
-            //LOGE("pragme %s %s", str[ct], str[ct+1]);
-            if (!strcmp(str[ct], "version")) {
+        for (size_t i=0; i < pragmaCount; ++i) {
+            //LOGE("pragma %s %s", keys[i], values[i]);
+            if (!strcmp(keys[i], "version")) {
                 continue;
             }
 
-            if (!strcmp(str[ct], "stateVertex")) {
-                if (!strcmp(str[ct+1], "default")) {
+            if (!strcmp(keys[i], "stateVertex")) {
+                if (!strcmp(values[i], "default")) {
                     continue;
                 }
-                if (!strcmp(str[ct+1], "parent")) {
+                if (!strcmp(values[i], "parent")) {
                     s->mEnviroment.mVertex.clear();
                     continue;
                 }
-                LOGE("Unreconized value %s passed to stateVertex", str[ct+1]);
+                LOGE("Unreconized value %s passed to stateVertex", values[i]);
             }
 
-            if (!strcmp(str[ct], "stateRaster")) {
-                if (!strcmp(str[ct+1], "default")) {
+            if (!strcmp(keys[i], "stateRaster")) {
+                if (!strcmp(values[i], "default")) {
                     continue;
                 }
-                if (!strcmp(str[ct+1], "parent")) {
+                if (!strcmp(values[i], "parent")) {
                     s->mEnviroment.mRaster.clear();
                     continue;
                 }
-                LOGE("Unreconized value %s passed to stateRaster", str[ct+1]);
+                LOGE("Unreconized value %s passed to stateRaster", values[i]);
             }
 
-            if (!strcmp(str[ct], "stateFragment")) {
-                if (!strcmp(str[ct+1], "default")) {
+            if (!strcmp(keys[i], "stateFragment")) {
+                if (!strcmp(values[i], "default")) {
                     continue;
                 }
-                if (!strcmp(str[ct+1], "parent")) {
+                if (!strcmp(values[i], "parent")) {
                     s->mEnviroment.mFragment.clear();
                     continue;
                 }
-                LOGE("Unreconized value %s passed to stateFragment", str[ct+1]);
+                LOGE("Unreconized value %s passed to stateFragment", values[i]);
             }
 
-            if (!strcmp(str[ct], "stateStore")) {
-                if (!strcmp(str[ct+1], "default")) {
+            if (!strcmp(keys[i], "stateStore")) {
+                if (!strcmp(values[i], "default")) {
                     continue;
                 }
-                if (!strcmp(str[ct+1], "parent")) {
+                if (!strcmp(values[i], "parent")) {
                     s->mEnviroment.mFragmentStore.clear();
                     continue;
                 }
-                LOGE("Unreconized value %s passed to stateStore", str[ct+1]);
+                LOGE("Unreconized value %s passed to stateStore", values[i]);
             }
-
         }
-
-
     } else {
         LOGE("bcc: FAILS to prepare executable");
         // Handle Fatal Error
