@@ -33,10 +33,10 @@ import android.util.Log;
  *
  **/
 public class Program extends BaseObj {
-    public static final int MAX_INPUT = 8;
-    public static final int MAX_OUTPUT = 8;
-    public static final int MAX_CONSTANT = 8;
-    public static final int MAX_TEXTURE = 8;
+    static final int MAX_INPUT = 8;
+    static final int MAX_OUTPUT = 8;
+    static final int MAX_CONSTANT = 8;
+    static final int MAX_TEXTURE = 8;
 
     /**
      *
