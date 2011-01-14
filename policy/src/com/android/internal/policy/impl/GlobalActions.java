@@ -221,8 +221,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         final AlertDialog.Builder ab = new AlertDialog.Builder(mContext);
 
         ab.setAdapter(mAdapter, this)
-                .setInverseBackgroundForced(true)
-                .setTitle(R.string.global_actions);
+                .setInverseBackgroundForced(true);
 
         final AlertDialog dialog = ab.create();
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
@@ -249,6 +248,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         } else {
             mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
         }
+        mDialog.setTitle(R.string.global_actions);
     }
 
 
