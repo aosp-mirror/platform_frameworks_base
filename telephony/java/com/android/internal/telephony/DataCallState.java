@@ -17,16 +17,43 @@
 
 package com.android.internal.telephony;
 
+/**
+ * This is RIL_Data_Call_Response_v5 from ril.h
+ * TODO: Rename to DataCallResponse.
+ */
 public class DataCallState {
-    public int cid;
-    public int active;
-    public String type;
-    public String apn;
-    public String address;
+    public int version = 0;
+    public int status = 0;
+    public int cid = 0;
+    public int active = 0;
+    public String type = "";
+    public String ifname = "";
+    public String [] addresses = new String[0];
+    public String [] dnses = new String[0];
 
     @Override
     public String toString() {
-        return "DataCallState: {" + " cid: " + cid + ", active: " + active + ", type: " + type
-                + ", apn: " + apn + ", address: " + address + " }";
+        StringBuffer sb = new StringBuffer();
+        sb.append("DataCallState: {")
+           .append("version=").append(version)
+           .append(" status=").append(status)
+           .append(" cid=").append(cid)
+           .append(" active=").append(active)
+           .append(" type=").append(type)
+           .append("' ifname='").append(ifname);
+        sb.append("' addresses=[");
+        for (String addr : addresses) {
+            sb.append(addr);
+            sb.append(",");
+        }
+        if (addresses.length > 0) sb.deleteCharAt(sb.length()-1);
+        sb.append("] dnses=[");
+        for (String addr : dnses) {
+            sb.append(addr);
+            sb.append(",");
+        }
+        if (dnses.length > 0) sb.deleteCharAt(sb.length()-1);
+        sb.append("]}");
+        return sb.toString();
     }
 }

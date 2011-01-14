@@ -2139,7 +2139,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_REQUEST_DTMF: ret =  responseVoid(p); break;
             case RIL_REQUEST_SEND_SMS: ret =  responseSMS(p); break;
             case RIL_REQUEST_SEND_SMS_EXPECT_MORE: ret =  responseSMS(p); break;
-            case RIL_REQUEST_SETUP_DATA_CALL: ret =  responseStrings(p); break;
+            case RIL_REQUEST_SETUP_DATA_CALL: ret =  responseSetupDataCall(p); break;
             case RIL_REQUEST_SIM_IO: ret =  responseICC_IO(p); break;
             case RIL_REQUEST_SEND_USSD: ret =  responseVoid(p); break;
             case RIL_REQUEST_CANCEL_USSD: ret =  responseVoid(p); break;
@@ -2897,31 +2897,89 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         return response;
     }
 
-    private Object
-    responseDataCallList(Parcel p) {
-        int num;
-        ArrayList<DataCallState> response;
+    private DataCallState getDataCallState(Parcel p, int version) {
+        DataCallState dataCall = new DataCallState();
 
-        num = p.readInt();
-        response = new ArrayList<DataCallState>(num);
-
-        for (int i = 0; i < num; i++) {
-            DataCallState dataCall = new DataCallState();
-
+        dataCall.version = version;
+        if (version < 5) {
             dataCall.cid = p.readInt();
             dataCall.active = p.readInt();
             dataCall.type = p.readString();
-            dataCall.apn = p.readString();
-            String address = p.readString();
-            if (address != null) {
-                address = address.split(" ")[0];
+            p.readString(); // Ignore apn
+            String addresses = p.readString();
+            if (addresses != null) {
+                dataCall.addresses = addresses.split(" ");
             }
-            dataCall.address = address;
+        } else {
+            dataCall.status = p.readInt();
+            dataCall.cid = p.readInt();
+            dataCall.active = p.readInt();
+            dataCall.type = p.readString();
+            dataCall.ifname = p.readString();
+            String addresses = p.readString();
+            if (addresses != null) {
+                dataCall.addresses = addresses.split(" ");
+            }
+            String dnses = p.readString();
+            if (addresses != null) {
+                dataCall.dnses = dnses.split(" ");
+            }
+        }
+        return dataCall;
+    }
 
-            response.add(dataCall);
+    private Object
+    responseDataCallList(Parcel p) {
+        ArrayList<DataCallState> response;
+
+        int ver = p.readInt();
+        int num = p.readInt();
+        Log.d(LOG_TAG, "responseDataCallList ver=" + ver + " num=" + num);
+
+        response = new ArrayList<DataCallState>(num);
+        for (int i = 0; i < num; i++) {
+            response.add(getDataCallState(p, ver));
         }
 
         return response;
+    }
+
+    private Object
+    responseSetupDataCall(Parcel p) {
+        int ver = p.readInt();
+        int num = p.readInt();
+        Log.d(LOG_TAG, "responseSetupDataCall ver=" + ver + " num=" + num);
+
+        DataCallState dataCall;
+
+        if (ver < 5) {
+            if (num != 3) {
+                throw new RuntimeException(
+                        "RIL_REQUEST_SETUP_DATA_CALL response expecting 3 strings got " + num);
+            }
+            dataCall = new DataCallState();
+            dataCall.cid = Integer.parseInt(p.readString());
+            dataCall.ifname = p.readString();
+            if (dataCall.ifname == null) {
+                throw new RuntimeException(
+                        "RIL_REQUEST_SETUP_DATA_CALL response ifname");
+            }
+            String addresses = p.readString();
+            if (addresses == null) {
+                throw new RuntimeException(
+                "RIL_REQUEST_SETUP_DATA_CALL response no addresses");
+            }
+            dataCall.addresses = addresses.split(" ");
+        } else {
+            if (num != 1) {
+                throw new RuntimeException(
+                        "RIL_REQUEST_SETUP_DATA_CALL response expecting 1 RIL_Data_Call_response_v5"
+                        + " got " + num);
+            }
+            dataCall = getDataCallState(p, ver);
+        }
+
+        return dataCall;
     }
 
     private Object
