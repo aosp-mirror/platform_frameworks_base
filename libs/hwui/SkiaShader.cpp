@@ -47,10 +47,22 @@ static const GLint gTileModes[] = {
 // Base shader
 ///////////////////////////////////////////////////////////////////////////////
 
+void SkiaShader::copyFrom(const SkiaShader& shader) {
+    mType = shader.mType;
+    mKey = shader.mKey;
+    mTileX = shader.mTileX;
+    mTileY = shader.mTileY;
+    mBlend = shader.mBlend;
+    mUnitMatrix = shader.mUnitMatrix;
+    mShaderMatrix = shader.mShaderMatrix;
+    mGenerationId = shader.mGenerationId;
+}
+
 SkiaShader::SkiaShader(Type type, SkShader* key, SkShader::TileMode tileX,
         SkShader::TileMode tileY, SkMatrix* matrix, bool blend):
         mType(type), mKey(key), mTileX(tileX), mTileY(tileY), mBlend(blend) {
     setMatrix(matrix);
+    mGenerationId = 0;
 }
 
 SkiaShader::~SkiaShader() {
@@ -88,6 +100,13 @@ SkiaBitmapShader::SkiaBitmapShader(SkBitmap* bitmap, SkShader* key, SkShader::Ti
         SkShader::TileMode tileY, SkMatrix* matrix, bool blend):
         SkiaShader(kBitmap, key, tileX, tileY, matrix, blend), mBitmap(bitmap), mTexture(NULL) {
     updateLocalMatrix(matrix);
+}
+
+SkiaShader* SkiaBitmapShader::copy() {
+    SkiaBitmapShader* copy = new SkiaBitmapShader();
+    copy->copyFrom(*this);
+    copy->mBitmap = mBitmap;
+    return copy;
 }
 
 void SkiaBitmapShader::describe(ProgramDescription& description, const Extensions& extensions) {
@@ -183,6 +202,16 @@ SkiaLinearGradientShader::~SkiaLinearGradientShader() {
     delete[] mPositions;
 }
 
+SkiaShader* SkiaLinearGradientShader::copy() {
+    SkiaLinearGradientShader* copy = new SkiaLinearGradientShader();
+    copy->copyFrom(*this);
+    copy->mBounds = mBounds;
+    copy->mColors = mColors;
+    copy->mPositions = mPositions;
+    copy->mCount = mCount;
+    return copy;
+}
+
 void SkiaLinearGradientShader::describe(ProgramDescription& description,
         const Extensions& extensions) {
     description.hasGradient = true;
@@ -238,6 +267,15 @@ SkiaCircularGradientShader::SkiaCircularGradientShader(float x, float y, float r
     updateLocalMatrix(matrix);
 }
 
+SkiaShader* SkiaCircularGradientShader::copy() {
+    SkiaCircularGradientShader* copy = new SkiaCircularGradientShader();
+    copy->copyFrom(*this);
+    copy->mColors = mColors;
+    copy->mPositions = mPositions;
+    copy->mCount = mCount;
+    return copy;
+}
+
 void SkiaCircularGradientShader::describe(ProgramDescription& description,
         const Extensions& extensions) {
     description.hasGradient = true;
@@ -274,6 +312,15 @@ SkiaSweepGradientShader::SkiaSweepGradientShader(Type type, float x, float y, ui
 SkiaSweepGradientShader::~SkiaSweepGradientShader() {
     delete[] mColors;
     delete[] mPositions;
+}
+
+SkiaShader* SkiaSweepGradientShader::copy() {
+    SkiaSweepGradientShader* copy = new SkiaSweepGradientShader();
+    copy->copyFrom(*this);
+    copy->mColors = mColors;
+    copy->mPositions = mPositions;
+    copy->mCount = mCount;
+    return copy;
 }
 
 void SkiaSweepGradientShader::describe(ProgramDescription& description,
@@ -316,6 +363,15 @@ SkiaComposeShader::SkiaComposeShader(SkiaShader* first, SkiaShader* second,
         SkXfermode::Mode mode, SkShader* key):
         SkiaShader(kCompose, key, SkShader::kClamp_TileMode, SkShader::kClamp_TileMode,
         NULL, first->blend() || second->blend()), mFirst(first), mSecond(second), mMode(mode) {
+}
+
+SkiaShader* SkiaComposeShader::copy() {
+    SkiaComposeShader* copy = new SkiaComposeShader();
+    copy->copyFrom(*this);
+    copy->mFirst = mFirst;
+    copy->mSecond = mSecond;
+    copy->mMode = mMode;
+    return copy;
 }
 
 void SkiaComposeShader::set(TextureCache* textureCache, GradientCache* gradientCache) {
