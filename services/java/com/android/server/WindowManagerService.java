@@ -5994,7 +5994,7 @@ public class WindowManagerService extends IWindowManager.Stub
          * ordinary dispatch. */
         public boolean interceptKeyBeforeDispatching(
                 InputWindowHandle focus, KeyEvent event, int policyFlags) {
-            WindowState windowState = (WindowState) focus.windowState;
+            WindowState windowState = focus != null ? (WindowState) focus.windowState : null;
             return mPolicy.interceptKeyBeforeDispatching(windowState, event, policyFlags);
         }
         
@@ -6002,7 +6002,7 @@ public class WindowManagerService extends IWindowManager.Stub
          * the application did not handle. */
         public KeyEvent dispatchUnhandledKey(
                 InputWindowHandle focus, KeyEvent event, int policyFlags) {
-            WindowState windowState = (WindowState) focus.windowState;
+            WindowState windowState = focus != null ? (WindowState) focus.windowState : null;
             return mPolicy.dispatchUnhandledKey(windowState, event, policyFlags);
         }
         
