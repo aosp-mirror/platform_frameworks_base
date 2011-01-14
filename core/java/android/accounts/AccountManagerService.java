@@ -861,7 +861,7 @@ public class AccountManagerService
 
     public void getAuthToken(IAccountManagerResponse response, final Account account,
             final String authTokenType, final boolean notifyOnAuthFailure,
-            final boolean expectActivityLaunch, final Bundle loginOptions) {
+            final boolean expectActivityLaunch, Bundle loginOptionsIn) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "getAuthToken: " + account
                     + ", response " + response
@@ -888,9 +888,8 @@ public class AccountManagerService
         final boolean permissionGranted = customTokens ||
             permissionIsGranted(account, authTokenType, callerUid);
 
-        if (loginOptions == null) {
-            loginOptions = new Bundle();
-        }
+        final Bundle loginOptions = (loginOptionsIn == null) ? new Bundle() :
+            loginOptionsIn;
         if (customTokens) {
             // let authenticator know the identity of the caller
             loginOptions.putInt(AccountManager.KEY_CALLER_UID, callerUid);
