@@ -221,6 +221,8 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 if (!TextUtils.equals(apnType, mApnType)) {
                     return;
                 }
+                mNetworkInfo.setSubtype(TelephonyManager.getDefault().getNetworkType(),
+                        TelephonyManager.getDefault().getNetworkTypeName());
                 Phone.DataState state = Enum.valueOf(Phone.DataState.class,
                         intent.getStringExtra(Phone.STATE_KEY));
                 String reason = intent.getStringExtra(Phone.STATE_CHANGE_REASON_KEY);
