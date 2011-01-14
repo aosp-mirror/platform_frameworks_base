@@ -503,12 +503,18 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
 
 void LayerBase::setBufferCrop(const Rect& crop) {
     if (!crop.isEmpty()) {
-        mBufferCrop = crop;
+        if (mBufferCrop != crop) {
+            mBufferCrop = crop;
+            mFlinger->invalidateHwcGeometry();
+        }
     }
 }
 
 void LayerBase::setBufferTransform(uint32_t transform) {
-    mBufferTransform = transform;
+    if (mBufferTransform != transform) {
+        mBufferTransform = transform;
+        mFlinger->invalidateHwcGeometry();
+    }
 }
 
 void LayerBase::dump(String8& result, char* buffer, size_t SIZE) const
