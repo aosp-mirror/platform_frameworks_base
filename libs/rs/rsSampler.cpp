@@ -77,8 +77,20 @@ void Sampler::setupGL(const Context *rsc, const Allocation *tex) {
     GLenum target = (GLenum)tex->getGLTarget();
 
     if (!rsc->ext_OES_texture_npot() && tex->getType()->getIsNp2()) {
-        if (tex->getHasGraphicsMipmaps() && rsc->ext_GL_NV_texture_npot_2D_mipmap()) {
-            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
+        if (tex->getHasGraphicsMipmaps() &&
+            (rsc->ext_GL_NV_texture_npot_2D_mipmap() || rsc->ext_GL_IMG_texture_npot())) {
+            if (rsc->ext_GL_NV_texture_npot_2D_mipmap()) {
+                glTexParameteri(target, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
+            } else {
+                switch (trans[mMinFilter]) {
+                case GL_LINEAR_MIPMAP_LINEAR:
+                    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+                    break;
+                default:
+                    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
+                    break;
+                }
+            }
         } else {
             glTexParameteri(target, GL_TEXTURE_MIN_FILTER, transNP[mMinFilter]);
         }
