@@ -17,9 +17,6 @@
 package android.app;
 
 import com.android.internal.policy.PolicyManager;
-import com.android.internal.util.XmlUtils;
-
-import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -35,14 +32,7 @@ import android.content.ReceiverCallNotAllowedException;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.ComponentInfo;
-import android.content.pm.FeatureInfo;
-import android.content.pm.IPackageDataObserver;
-import android.content.pm.IPackageDeleteObserver;
-import android.content.pm.IPackageInstallObserver;
-import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageManager;
-import android.content.pm.IPackageStatsObserver;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -80,14 +70,12 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Vibrator;
-import android.os.FileUtils.FileStatus;
 import android.os.storage.StorageManager;
 import android.telephony.TelephonyManager;
 import android.content.ClipboardManager;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
-import android.view.LayoutInflater;
 import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputMethodManager;
@@ -104,9 +92,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 class ReceiverRestrictedContext extends ContextWrapper {
     ReceiverRestrictedContext(Context base) {
@@ -354,10 +339,10 @@ class ContextImpl extends Context {
                     final Context outerContext = ctx.getOuterContext();
                     return new NotificationManager(
                         new ContextThemeWrapper(outerContext,
-                                outerContext.getApplicationInfo().targetSdkVersion >=
-                                    Build.VERSION_CODES.HONEYCOMB
-                                ? com.android.internal.R.style.Theme_Holo_Dialog
-                                : com.android.internal.R.style.Theme_Dialog),
+                                Resources.selectSystemTheme(0,
+                                        outerContext.getApplicationInfo().targetSdkVersion,
+                                        com.android.internal.R.style.Theme_Dialog,
+                                        com.android.internal.R.style.Theme_Holo_Dialog)),
                         ctx.mMainThread.getHandler());
                 }});
 
@@ -492,13 +477,8 @@ class ContextImpl extends Context {
     @Override
     public Resources.Theme getTheme() {
         if (mTheme == null) {
-            if (mThemeResource == 0) {
-                final Context outerContext = getOuterContext();
-                mThemeResource = (outerContext.getApplicationInfo().targetSdkVersion
-                        >= Build.VERSION_CODES.HONEYCOMB)
-                                ? com.android.internal.R.style.Theme_Holo
-                                : com.android.internal.R.style.Theme;
-            }
+            mThemeResource = Resources.selectDefaultTheme(mThemeResource,
+                    getOuterContext().getApplicationInfo().targetSdkVersion);
             mTheme = mResources.newTheme();
             mTheme.applyStyle(mThemeResource, true);
         }

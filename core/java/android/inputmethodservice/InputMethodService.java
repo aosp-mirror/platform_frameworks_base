@@ -22,6 +22,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -220,7 +221,7 @@ public class InputMethodService extends AbstractInputMethodService {
     
     InputMethodManager mImm;
     
-    int mTheme = android.R.style.Theme_InputMethod;
+    int mTheme = 0;
     
     LayoutInflater mInflater;
     TypedArray mThemeAttrs;
@@ -556,6 +557,9 @@ public class InputMethodService extends AbstractInputMethodService {
     }
     
     @Override public void onCreate() {
+        mTheme = Resources.selectSystemTheme(mTheme,
+                getApplicationInfo().targetSdkVersion,
+                android.R.style.Theme_InputMethod, android.R.style.Theme_Holo_InputMethod);
         super.setTheme(mTheme);
         super.onCreate();
         mImm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);

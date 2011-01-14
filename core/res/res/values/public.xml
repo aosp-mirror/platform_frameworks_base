@@ -1514,6 +1514,7 @@
   <public type="style" name="Theme.Holo.Light.Panel" />
   <public type="style" name="Theme.Holo.Wallpaper" />
   <public type="style" name="Theme.Holo.Wallpaper.NoTitleBar" />
+  <public type="style" name="Theme.Holo.InputMethod" />
 
   <public type="style" name="TextAppearance.Widget.PopupMenu.Large" />
   <public type="style" name="TextAppearance.Widget.PopupMenu.Small" />
