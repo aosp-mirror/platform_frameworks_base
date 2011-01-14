@@ -2349,6 +2349,8 @@
         <attr name="windowAnimationStyle" />
         <!-- Default disabled icon alpha for each menu item that shows an icon. -->
         <attr name="itemIconDisabledAlpha" format="float" />
+        <!-- Whether space should be reserved in layout when an icon is missing. -->
+        <attr name="preserveIconSpacing" format="boolean" />
     </declare-styleable>
     <declare-styleable name="IconMenuView">
         <!-- Defines the height of each row. -->

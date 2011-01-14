@@ -66,7 +66,7 @@ public class ActionMenuItemView extends LinearLayout
         mItemData = itemData;
 
         setIcon(itemData.getIcon());
-        setTitle(itemData.getTitle()); // Title only takes effect if there is no icon
+        setTitle(itemData.getTitleForItemView(this)); // Title only takes effect if there is no icon
         setId(itemData.getItemId());
 
         setVisibility(itemData.isVisible() ? View.VISIBLE : View.GONE);
@@ -91,7 +91,7 @@ public class ActionMenuItemView extends LinearLayout
     }
 
     public boolean prefersCondensedTitle() {
-        return false;
+        return true;
     }
 
     public void setCheckable(boolean checkable) {

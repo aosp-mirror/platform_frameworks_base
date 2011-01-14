@@ -437,7 +437,7 @@ public class ActionBarView extends ViewGroup {
                     mListNavLayout = new LinearLayout(mContext, null,
                             com.android.internal.R.attr.actionBarTabBarStyle);
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                            LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+                            LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
                     params.gravity = Gravity.CENTER;
                     mListNavLayout.addView(mSpinner, params);
                 }
