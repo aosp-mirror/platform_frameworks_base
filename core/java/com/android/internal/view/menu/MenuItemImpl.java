@@ -644,7 +644,6 @@ public final class MenuItemImpl implements MenuItem {
     public boolean shouldShowIcon(int menuType) {
         return menuType == MenuBuilder.TYPE_ICON ||
                 menuType == MenuBuilder.TYPE_ACTION_BUTTON ||
-                menuType == MenuBuilder.TYPE_POPUP ||
                 mMenu.getOptionalIconsVisible();
     }
     

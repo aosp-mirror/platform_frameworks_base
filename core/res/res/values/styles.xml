@@ -1194,7 +1194,7 @@
     </style>
 
     <style name="TextAppearance.Holo.Widget.PopupMenu.Large">
-        <item name="android:textSize">22sp</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="TextAppearance.Holo.Widget.PopupMenu.Small">
@@ -1578,7 +1578,6 @@
     </style>
 
     <style name="Widget.Holo.Spinner.DropDown.ActionBar">
-        <item name="android:background">@android:drawable/spinner_cab_background_holo_dark</item>
     </style>
 
     <style name="Widget.Holo.CompoundButton.Star" parent="Widget.CompoundButton.Star">
@@ -1651,6 +1650,8 @@
     </style>
 
     <style name="Widget.Holo.ActionButton" parent="Widget.ActionButton">
+        <item name="android:minWidth">64dip</item>
+        <item name="android:gravity">center</item>
         <item name="android:paddingLeft">16dip</item>
         <item name="android:paddingRight">16dip</item>
         <item name="android:minHeight">56dip</item>
@@ -1677,9 +1678,6 @@
     </style>
 
     <style name="Widget.Holo.ActionBarView_TabBar" parent="Widget.ActionBarView_TabBar">
-        <item name="divider">?android:attr/dividerVertical</item>
-        <item name="showDividers">beginning|end</item>
-        <item name="dividerPadding">8dip</item>
     </style>
 
     <style name="Widget.Holo.ActionBarView_TabText" parent="Widget.ActionBarView_TabText">
@@ -1920,7 +1918,6 @@
     </style>
 
     <style name="Widget.Holo.Light.Spinner.DropDown.ActionBar">
-        <item name="android:background">@android:drawable/spinner_cab_background_holo_light</item>
     </style>
 
     <style name="Widget.Holo.Light.CompoundButton.Star" parent="Widget.CompoundButton.Star">

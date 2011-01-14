@@ -20,10 +20,11 @@
     android:layout_gravity="center"
     android:addStatesFromChildren="true"
     android:background="?attr/selectableItemBackground"
-    android:minWidth="64dip"
-    android:minHeight="?attr/actionBarSize"
+    android:gravity="center"
     android:paddingLeft="12dip"
-    android:paddingRight="12dip">
+    android:paddingRight="12dip"
+    android:minWidth="64dip"
+    android:minHeight="?attr/actionBarSize">
     <ImageButton android:id="@+id/imageButton"
                  android:layout_width="wrap_content"
                  android:layout_height="wrap_content"

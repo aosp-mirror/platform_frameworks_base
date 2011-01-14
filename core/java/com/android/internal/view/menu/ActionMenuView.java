@@ -20,9 +20,9 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -186,10 +186,14 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         
         boolean needsDivider = false;
         for (int i = 0; i < itemCount; i++) {
+            final MenuItemImpl itemData = itemsToShow.get(i);
+            boolean hasDivider = false;
+
             if (needsDivider) {
                 addView(makeDividerView(), makeDividerLayoutParams());
+                hasDivider = true;
             }
-            final MenuItemImpl itemData = itemsToShow.get(i);
+
             View actionView = itemData.getActionView();
 
             if (actionView != null) {
@@ -199,14 +203,22 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                 }
                 addView(actionView, makeActionViewLayoutParams(actionView));
             } else {
-                needsDivider = addItemView(i == 0 || !needsDivider,
-                        (ActionMenuItemView) itemData.getItemView(
-                                MenuBuilder.TYPE_ACTION_BUTTON, this));
+                ActionMenuItemView view = (ActionMenuItemView) itemData.getItemView(
+                        MenuBuilder.TYPE_ACTION_BUTTON, this);
+                view.setItemInvoker(this);
+                if (i > 0 && !hasDivider && view.hasText() && itemData.getIcon() == null) {
+                    addView(makeDividerView(), makeDividerLayoutParams());
+                }
+                addView(view);
+                needsDivider = view.hasText();
             }
         }
 
         if (reserveOverflow) {
             if (mMenu.getNonActionItems(true).size() > 0) {
+                if (itemCount > 0) {
+                    addView(makeDividerView(), makeDividerLayoutParams());
+                }
                 OverflowMenuButton button = new OverflowMenuButton(mContext);
                 addView(button);
                 mOverflowButton = button;
