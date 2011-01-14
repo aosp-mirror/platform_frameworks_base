@@ -20,6 +20,7 @@ import android.os.Message;
 import android.util.Log;
 
 import com.android.internal.telephony.DataConnection;
+import com.android.internal.telephony.DataConnection.FailCause;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.RetryManager;
@@ -30,13 +31,6 @@ import com.android.internal.telephony.RetryManager;
 public class CdmaDataConnection extends DataConnection {
 
     private static final String LOG_TAG = "CDMA";
-
-    /** Fail cause of last Data Call activate from RIL_LastDataCallActivateFailCause */
-    private final static int PS_NET_DOWN_REASON_OPERATOR_DETERMINED_BARRING         = 8;
-    private final static int PS_NET_DOWN_REASON_AUTH_FAILED                         = 29;
-    private final static int PS_NET_DOWN_REASON_OPTION_NOT_SUPPORTED                = 32;
-    private final static int PS_NET_DOWN_REASON_OPTION_UNSUBSCRIBED                 = 33;
-
 
     // ***** Constructor
     private CdmaDataConnection(CDMAPhone phone, String name, RetryManager rm) {
@@ -101,29 +95,6 @@ public class CdmaDataConnection extends DataConnection {
     public String toString() {
         return "State=" + getCurrentState().getName() + " create=" + createTime + " lastFail="
                 + lastFailTime + " lastFasilCause=" + lastFailCause;
-    }
-
-    @Override
-    protected FailCause getFailCauseFromRequest(int rilCause) {
-        FailCause cause;
-
-        switch (rilCause) {
-            case PS_NET_DOWN_REASON_OPERATOR_DETERMINED_BARRING:
-                cause = FailCause.OPERATOR_BARRED;
-                break;
-            case PS_NET_DOWN_REASON_AUTH_FAILED:
-                cause = FailCause.USER_AUTHENTICATION;
-                break;
-            case PS_NET_DOWN_REASON_OPTION_NOT_SUPPORTED:
-                cause = FailCause.SERVICE_OPTION_NOT_SUPPORTED;
-                break;
-            case PS_NET_DOWN_REASON_OPTION_UNSUBSCRIBED:
-                cause = FailCause.SERVICE_OPTION_NOT_SUBSCRIBED;
-                break;
-            default:
-                cause = FailCause.UNKNOWN;
-        }
-        return cause;
     }
 
     @Override

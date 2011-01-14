@@ -27,13 +27,11 @@ import android.os.AsyncResult;
 import android.os.Message;
 import android.os.SystemProperties;
 import android.text.TextUtils;
-import android.util.EventLog;
 
 import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
+import java.net.Inet4Address;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 
 /**
  * {@hide}
@@ -55,48 +53,6 @@ import java.net.UnknownHostException;
  * <code>AsyncResult.exception = new Exception()</code>.
  *
  * The other public methods are provided for debugging.
- *
- * Below is the state machine description for this class.
- *
- * DataConnection {
- *   + mDefaultState {
- *        EVENT_RESET { clearSettings, notifiyDisconnectCompleted, >mInactiveState }.
- *        EVENT_CONNECT {  notifyConnectCompleted(FailCause.UNKNOWN) }.
- *        EVENT_DISCONNECT { notifyDisconnectCompleted }.
- *
- *        // Ignored messages
- *        EVENT_SETUP_DATA_CONNECTION_DONE,
- *        EVENT_GET_LAST_FAIL_DONE,
- *        EVENT_DEACTIVATE_DONE.
- *     }
- *   ++ # mInactiveState
- *        e(doNotifications)
- *        x(clearNotifications) {
- *            EVENT_RESET { notifiyDisconnectCompleted }.
- *            EVENT_CONNECT {startConnecting, >mActivatingState }.
- *        }
- *   ++   mActivatingState {
- *            EVENT_DISCONNECT { %EVENT_DISCONNECT }.
- *            EVENT_SETUP_DATA_CONNECTION_DONE {
- *                  if (SUCCESS) { notifyConnectCompleted(FailCause.NONE), >mActiveState }.
- *                  if (ERR_BadCommand) {
- *                         notifyConnectCompleted(FailCause.UNKNOWN), >mInactiveState }.
- *                  if (ERR_BadDns) { tearDownData($DEACTIVATE_DONE), >mDisconnectingBadDnsState }.
- *                  if (ERR_Other) { getLastDataCallFailCause($EVENT_GET_LAST_FAIL_DONE) }.
- *                  if (ERR_Stale) {}.
- *            }
- *            EVENT_GET_LAST_FAIL_DONE { notifyConnectCompleted(result), >mInactive }.
- *        }
- *   ++   mActiveState {
- *            EVENT_DISCONNECT { tearDownData($EVENT_DEACTIVATE_DONE), >mDisconnecting }.
- *        }
- *   ++   mDisconnectingState {
- *            EVENT_DEACTIVATE_DONE { notifyDisconnectCompleted, >mInactiveState }.
- *        }
- *   ++   mDisconnectingBadDnsState {
- *            EVENT_DEACTIVATE_DONE { notifyConnectComplete(FailCause.UNKNOWN), >mInactiveState }.
- *        }
- *  }
  */
 public abstract class DataConnection extends HierarchicalStateMachine {
     protected static final boolean DBG = true;
@@ -108,24 +64,22 @@ public abstract class DataConnection extends HierarchicalStateMachine {
      * Class returned by onSetupConnectionCompleted.
      */
     protected enum SetupResult {
+        SUCCESS,
         ERR_BadCommand,
-        ERR_BadDns,
-        ERR_Other,
+        ERR_UnacceptableParameter,
+        ERR_GetLastErrorFromRil,
         ERR_Stale,
-        SUCCESS;
+        ERR_RilError;
 
         public FailCause mFailCause;
 
+        SetupResult() {
+            mFailCause = FailCause.fromInt(0);
+        }
+
         @Override
         public String toString() {
-            switch (this) {
-                case ERR_BadCommand: return "Bad Command";
-                case ERR_BadDns: return "Bad DNS";
-                case ERR_Other: return "Other error";
-                case ERR_Stale: return "Stale command";
-                case SUCCESS: return "SUCCESS";
-                default: return "unknown";
-            }
+            return name() + "  SetupResult.mFailCause=" + mFailCause;
         }
     }
 
@@ -167,31 +121,66 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     }
 
     /**
-     * Returned as the reason for a connection failure.
+     * Returned as the reason for a connection failure as defined
+     * by RIL_DataCallFailCause in ril.h and some local errors.
      */
     public enum FailCause {
-        NONE,
-        OPERATOR_BARRED,
-        INSUFFICIENT_RESOURCES,
-        MISSING_UNKNOWN_APN,
-        UNKNOWN_PDP_ADDRESS,
-        USER_AUTHENTICATION,
-        ACTIVATION_REJECT_GGSN,
-        ACTIVATION_REJECT_UNSPECIFIED,
-        SERVICE_OPTION_NOT_SUPPORTED,
-        SERVICE_OPTION_NOT_SUBSCRIBED,
-        SERVICE_OPTION_OUT_OF_ORDER,
-        NSAPI_IN_USE,
-        PROTOCOL_ERRORS,
-        REGISTRATION_FAIL,
-        GPRS_REGISTRATION_FAIL,
-        UNKNOWN,
+        NONE(0),
 
-        RADIO_NOT_AVAILABLE;
+        // This series of errors as specified by the standards
+        // specified in ril.h
+        OPERATOR_BARRED(0x08),
+        INSUFFICIENT_RESOURCES(0x1A),
+        MISSING_UNKNOWN_APN(0x1B),
+        UNKNOWN_PDP_ADDRESS_TYPE(0x1C),
+        USER_AUTHENTICATION(0x1D),
+        ACTIVATION_REJECT_GGSN(0x1E),
+        ACTIVATION_REJECT_UNSPECIFIED(0x1F),
+        SERVICE_OPTION_NOT_SUPPORTED(0x20),
+        SERVICE_OPTION_NOT_SUBSCRIBED(0x21),
+        SERVICE_OPTION_OUT_OF_ORDER(0x22),
+        NSAPI_IN_USE(0x23),
+        ONLY_IPV4_ALLOWED(0x32),
+        ONLY_IPV6_ALLOWED(0x33),
+        ONLY_SINGLE_BEARER_ALLOWED(0x34),
+        PROTOCOL_ERRORS(0x6F),
+
+        // Local errors generated by Vendor RIL
+        // specified in ril.h
+        REGISTRATION_FAIL(-1),
+        GPRS_REGISTRATION_FAIL(-2),
+        SIGNAL_LOST(-3),
+        PREF_RADIO_TECH_CHANGED(-4),
+        RADIO_POWER_OFF(-5),
+        TETHERED_CALL_ACTIVE(-6),
+        ERROR_UNSPECIFIED(0xFFFF),
+
+        // Errors generated by the Framework
+        // specified here
+        UNKNOWN(0x10000),
+        RADIO_NOT_AVAILABLE(0x10001),
+        UNACCEPTABLE_NETWORK_PARAMETER(0x10002);
+
+        private final int mErrorCode;
+        private static final HashMap<Integer, FailCause> sErrorCodeToFailCauseMap;
+        static {
+            sErrorCodeToFailCauseMap = new HashMap<Integer, FailCause>();
+            for (FailCause fc : values()) {
+                sErrorCodeToFailCauseMap.put(fc.ordinal(), fc);
+            }
+        }
+
+        FailCause(int errorCode) {
+            mErrorCode = errorCode;
+        }
+
+        int getErrorCode() {
+            return mErrorCode;
+        }
 
         public boolean isPermanentFail() {
             return (this == OPERATOR_BARRED) || (this == MISSING_UNKNOWN_APN) ||
-                   (this == UNKNOWN_PDP_ADDRESS) || (this == USER_AUTHENTICATION) ||
+                   (this == UNKNOWN_PDP_ADDRESS_TYPE) || (this == USER_AUTHENTICATION) ||
                    (this == SERVICE_OPTION_NOT_SUPPORTED) ||
                    (this == SERVICE_OPTION_NOT_SUBSCRIBED) || (this == NSAPI_IN_USE) ||
                    (this == PROTOCOL_ERRORS);
@@ -199,52 +188,21 @@ public abstract class DataConnection extends HierarchicalStateMachine {
 
         public boolean isEventLoggable() {
             return (this == OPERATOR_BARRED) || (this == INSUFFICIENT_RESOURCES) ||
-                    (this == UNKNOWN_PDP_ADDRESS) || (this == USER_AUTHENTICATION) ||
+                    (this == UNKNOWN_PDP_ADDRESS_TYPE) || (this == USER_AUTHENTICATION) ||
                     (this == ACTIVATION_REJECT_GGSN) || (this == ACTIVATION_REJECT_UNSPECIFIED) ||
                     (this == SERVICE_OPTION_NOT_SUBSCRIBED) ||
                     (this == SERVICE_OPTION_NOT_SUPPORTED) ||
                     (this == SERVICE_OPTION_OUT_OF_ORDER) || (this == NSAPI_IN_USE) ||
-                    (this == PROTOCOL_ERRORS);
+                    (this == PROTOCOL_ERRORS) ||
+                    (this == UNACCEPTABLE_NETWORK_PARAMETER);
         }
 
-        @Override
-        public String toString() {
-            switch (this) {
-            case NONE:
-                return "No Error";
-            case OPERATOR_BARRED:
-                return "Operator Barred";
-            case INSUFFICIENT_RESOURCES:
-                return "Insufficient Resources";
-            case MISSING_UNKNOWN_APN:
-                return "Missing / Unknown APN";
-            case UNKNOWN_PDP_ADDRESS:
-                return "Unknown PDP Address";
-            case USER_AUTHENTICATION:
-                return "Error User Authentication";
-            case ACTIVATION_REJECT_GGSN:
-                return "Activation Reject GGSN";
-            case ACTIVATION_REJECT_UNSPECIFIED:
-                return "Activation Reject unspecified";
-            case SERVICE_OPTION_NOT_SUPPORTED:
-                return "Data Not Supported";
-            case SERVICE_OPTION_NOT_SUBSCRIBED:
-                return "Data Not subscribed";
-            case SERVICE_OPTION_OUT_OF_ORDER:
-                return "Data Services Out of Order";
-            case NSAPI_IN_USE:
-                return "NSAPI in use";
-            case PROTOCOL_ERRORS:
-                return "Protocol Errors";
-            case REGISTRATION_FAIL:
-                return "Network Registration Failure";
-            case GPRS_REGISTRATION_FAIL:
-                return "Data Network Registration Failure";
-            case RADIO_NOT_AVAILABLE:
-                return "Radio Not Available";
-            default:
-                return "Unknown Data Error";
+        public static FailCause fromInt(int errorCode) {
+            FailCause fc = sErrorCodeToFailCauseMap.get(errorCode);
+            if (fc == null) {
+                fc = UNKNOWN;
             }
+            return fc;
         }
     }
 
@@ -274,11 +232,10 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     Object userData;
 
     //***** Abstract methods
+    @Override
     public abstract String toString();
 
     protected abstract void onConnect(ConnectionParams cp);
-
-    protected abstract FailCause getFailCauseFromRequest(int rilCause);
 
     protected abstract boolean isDnsOk(String[] domainNameServers);
 
@@ -300,7 +257,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
             addState(mActivatingState, mDefaultState);
             addState(mActiveState, mDefaultState);
             addState(mDisconnectingState, mDefaultState);
-            addState(mDisconnectingBadDnsState, mDefaultState);
+            addState(mDisconnectingErrorCreatingConnection, mDefaultState);
         setInitialState(mInactiveState);
         if (DBG) log("DataConnection constructor X");
     }
@@ -408,20 +365,26 @@ public abstract class DataConnection extends HierarchicalStateMachine {
      * @return SetupResult.
      */
     private SetupResult onSetupConnectionCompleted(AsyncResult ar) {
-        SetupResult result;
-        String[] response = ((String[]) ar.result);
+        DataCallState response = (DataCallState) ar.result;
         ConnectionParams cp = (ConnectionParams) ar.userObj;
+        SetupResult result;
 
         if (ar.exception != null) {
-            if (DBG) log("DataConnection Init failed " + ar.exception);
+            if (DBG) {
+                log("onSetupConnectionCompleted failed, ar.exception=" + ar.exception +
+                    " response=" + response);
+            }
 
             if (ar.exception instanceof CommandException
                     && ((CommandException) (ar.exception)).getCommandError()
                     == CommandException.Error.RADIO_NOT_AVAILABLE) {
                 result = SetupResult.ERR_BadCommand;
                 result.mFailCause = FailCause.RADIO_NOT_AVAILABLE;
+            } else if ((response == null) || (response.version < 4)) {
+                result = SetupResult.ERR_GetLastErrorFromRil;
             } else {
-                result = SetupResult.ERR_Other;
+                result = SetupResult.ERR_RilError;
+                result.mFailCause = FailCause.fromInt(response.status);
             }
         } else if (cp.tag != mTag) {
             if (DBG) {
@@ -429,69 +392,93 @@ public abstract class DataConnection extends HierarchicalStateMachine {
             }
             result = SetupResult.ERR_Stale;
         } else {
-//            log("onSetupConnectionCompleted received " + response.length + " response strings:");
-//            for (int i = 0; i < response.length; i++) {
-//                log("  response[" + i + "]='" + response[i] + "'");
-//            }
+            log("onSetupConnectionCompleted received DataCallState: " + response);
 
             // Start with clean network properties and if we have
             // a failure we'll clear again at the bottom of this code.
             LinkProperties linkProperties = new LinkProperties();
-            if (response.length >= 2) {
-                cid = Integer.parseInt(response[0]);
-                String interfaceName = response[1];
-                result = SetupResult.SUCCESS;
-
+            if (response.status == FailCause.NONE.getErrorCode()) {
                 try {
-                    String prefix = "net." + interfaceName + ".";
-
-                    NetworkInterface networkInterface = NetworkInterface.getByName(interfaceName);
-                    linkProperties.setInterfaceName(interfaceName);
-
-                    // TODO: Get gateway and dns via RIL interface not property?
-                    String gatewayAddress = SystemProperties.get(prefix + "gw");
-                    linkProperties.setGateway(InetAddress.getByName(gatewayAddress));
-
-                    for (InterfaceAddress addr : networkInterface.getInterfaceAddresses()) {
-                        linkProperties.addLinkAddress(new LinkAddress(addr));
+                    cid = response.cid;
+                    linkProperties.setInterfaceName(response.ifname);
+                    for (String addr : response.addresses) {
+                        LinkAddress la;
+                        if (!InetAddress.isNumeric(addr)) {
+                            EventLogTags.writeBadIpAddress(addr);
+                            throw new UnknownHostException("Non-numeric ip addr=" + addr);
+                        }
+                        InetAddress ia = InetAddress.getByName(addr);
+                        if (ia instanceof Inet4Address) {
+                            la = new LinkAddress(ia, 32);
+                        } else {
+                            la = new LinkAddress(ia, 128);
+                        }
+                        linkProperties.addLinkAddress(la);
                     }
-                    // TODO: Get gateway and dns via RIL interface not property?
-                    String dnsServers[] = new String[2];
-                    dnsServers[0] = SystemProperties.get(prefix + "dns1");
-                    dnsServers[1] = SystemProperties.get(prefix + "dns2");
-                    if (isDnsOk(dnsServers)) {
-                        linkProperties.addDns(InetAddress.getByName(dnsServers[0]));
-                        linkProperties.addDns(InetAddress.getByName(dnsServers[1]));
+
+                    if (response.dnses.length != 0) {
+                        for (String addr : response.dnses) {
+                            if (!InetAddress.isNumeric(addr)) {
+                                EventLogTags.writePdpBadDnsAddress("dns=" + addr); 
+                                throw new UnknownHostException("Non-numeric dns addr=" + addr);
+                            }
+                            InetAddress ia = InetAddress.getByName(addr);
+                            linkProperties.addDns(ia);
+                        }
+                        result = SetupResult.SUCCESS;
                     } else {
-                        result = SetupResult.ERR_BadDns;
+                        String prefix = "net." + response.ifname + ".";
+
+                        String dnsServers[] = new String[2];
+                        dnsServers[0] = SystemProperties.get(prefix + "dns1");
+                        dnsServers[1] = SystemProperties.get(prefix + "dns2");
+                        if (isDnsOk(dnsServers)) {
+                            for (String dnsAddr : dnsServers) {
+                                if (!InetAddress.isNumeric(dnsAddr)) {
+                                    EventLogTags.writePdpBadDnsAddress("dnsAddr=" + dnsAddr);
+                                    throw new UnknownHostException("Non-numeric dns addr="
+                                                + dnsAddr);
+                                }
+                                InetAddress ia = InetAddress.getByName(dnsAddr);
+                                linkProperties.addDns(ia);
+                            }
+                            result = SetupResult.SUCCESS;
+                        } else {
+                            StringBuilder sb = new StringBuilder();
+                            for (String dnsAddr : dnsServers) {
+                                sb.append(dnsAddr);
+                                sb.append(" ");
+                            }
+                            EventLogTags.writePdpBadDnsAddress("Unacceptable dns addresses=" + sb);
+                            throw new UnknownHostException("Unacceptable dns addresses=" + sb);
+                        }
                     }
-                } catch (UnknownHostException e1) {
-                    log("onSetupCompleted: UnknowHostException " + e1);
-                    e1.printStackTrace();
-                    result = SetupResult.ERR_Other;
-                } catch (SocketException e2) {
-                    log("onSetupCompleted: SocketException " + e2);
-                    e2.printStackTrace();
-                    result = SetupResult.ERR_Other;
+                } catch (UnknownHostException e) {
+                    log("onSetupCompleted: UnknownHostException " + e);
+                    e.printStackTrace();
+                    result = SetupResult.ERR_UnacceptableParameter;
                 }
             } else {
-                log("onSetupCompleted: error; expected number of responses >= 2 was " +
-                        response.length);
-                result = SetupResult.ERR_Other;
+                if (response.version < 4) {
+                    result = SetupResult.ERR_GetLastErrorFromRil;
+                } else {
+                    result = SetupResult.ERR_RilError;
+                }
             }
 
             // An error occurred so clear properties
             if (result != SetupResult.SUCCESS) {
-                log("onSetupCompleted with an error clearing LinkProperties");
+                log("onSetupConnectionCompleted with an error, clearing LinkProperties");
                 linkProperties.clear();
             }
             mLinkProperties = linkProperties;
         }
 
         if (DBG) {
-            log("DataConnection setup result='" + result + "' on cid=" + cid);
+            log("onSetupConnectionCompleted: DataConnection setup result='"
+                    + result + "' on cid=" + cid);
             if (result == SetupResult.SUCCESS) {
-                log("LinkProperties: " + mLinkProperties.toString());
+                log("onSetupConnectionCompleted: LinkProperties: " + mLinkProperties.toString());
             }
         }
         return result;
@@ -640,6 +627,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                     cp = (ConnectionParams) ar.userObj;
 
                     SetupResult result = onSetupConnectionCompleted(ar);
+                    if (DBG) log("DcActivatingState onSetupConnectionCompleted result=" + result);
                     switch (result) {
                         case SUCCESS:
                             // All is well
@@ -653,25 +641,20 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                             mInactiveState.setEnterNotificationParams(cp, result.mFailCause);
                             transitionTo(mInactiveState);
                             break;
-                        case ERR_BadDns:
-                            // Connection succeeded but DNS info is bad so disconnect
-                            StringBuilder dnsAddressesSb = new StringBuilder();
-                            for (InetAddress addr : mLinkProperties.getDnses()) {
-                                if (dnsAddressesSb.length() != 0) dnsAddressesSb.append(" ");
-                                dnsAddressesSb.append(addr.toString());
-                            }
-                            if (dnsAddressesSb.length() == 0) {
-                                dnsAddressesSb.append("no-dns-addresses");
-                            }
-                            EventLog.writeEvent(EventLogTags.PDP_BAD_DNS_ADDRESS,
-                                    dnsAddressesSb.toString());
+                        case ERR_UnacceptableParameter:
+                            // The addresses given from the RIL are bad
                             tearDownData(cp);
-                            transitionTo(mDisconnectingBadDnsState);
+                            transitionTo(mDisconnectingErrorCreatingConnection);
                             break;
-                        case ERR_Other:
-                            // Request the failure cause and process in this state
+                        case ERR_GetLastErrorFromRil:
+                            // Request failed and this is an old RIL
                             phone.mCM.getLastDataCallFailCause(
                                     obtainMessage(EVENT_GET_LAST_FAIL_DONE, cp));
+                            break;
+                        case ERR_RilError:
+                            // Request failed and mFailCause has the reason
+                            mInactiveState.setEnterNotificationParams(cp, result.mFailCause);
+                            transitionTo(mInactiveState);
                             break;
                         case ERR_Stale:
                             // Request is stale, ignore.
@@ -691,7 +674,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                         if (DBG) log("DcActivatingState msg.what=EVENT_GET_LAST_FAIL_DONE");
                         if (ar.exception == null) {
                             int rilFailCause = ((int[]) (ar.result))[0];
-                            cause = getFailCauseFromRequest(rilFailCause);
+                            cause = FailCause.fromInt(rilFailCause);
                         }
                         // Transition to inactive but send notifications after
                         // we've entered the mInactive state.
@@ -808,10 +791,9 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     private DcDisconnectingState mDisconnectingState = new DcDisconnectingState();
 
     /**
-     * The state machine is disconnecting after a bad dns setup
-     * was found in mInactivatingState.
+     * The state machine is disconnecting after an creating a connection.
      */
-    private class DcDisconnectingBadDnsState extends HierarchicalState {
+    private class DcDisconnectionErrorCreatingConnection extends HierarchicalState {
         @Override protected boolean processMessage(Message msg) {
             boolean retVal;
 
@@ -820,27 +802,38 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                     AsyncResult ar = (AsyncResult) msg.obj;
                     ConnectionParams cp = (ConnectionParams) ar.userObj;
                     if (cp.tag == mTag) {
-                        if (DBG) log("DcDisconnectingBadDnsState msg.what=EVENT_DEACTIVATE_DONE");
+                        if (DBG) {
+                            log("DcDisconnectionErrorCreatingConnection" +
+                                " msg.what=EVENT_DEACTIVATE_DONE");
+                        }
+
                         // Transition to inactive but send notifications after
                         // we've entered the mInactive state.
-                        mInactiveState.setEnterNotificationParams(cp, FailCause.UNKNOWN);
+                        mInactiveState.setEnterNotificationParams(cp,
+                                FailCause.UNACCEPTABLE_NETWORK_PARAMETER);
                         transitionTo(mInactiveState);
                     } else {
-                        if (DBG) log("DcDisconnectingBadDnsState EVENT_DEACTIVE_DONE stale dp.tag="
-                                + cp.tag + ", mTag=" + mTag);
+                        if (DBG) {
+                            log("DcDisconnectionErrorCreatingConnection EVENT_DEACTIVATE_DONE" +
+                                    " stale dp.tag=" + cp.tag + ", mTag=" + mTag);
+                        }
                     }
                     retVal = true;
                     break;
 
                 default:
-                    if (DBG) log("DcDisconnectingBadDnsState not handled msg.what=" + msg.what);
+                    if (DBG) {
+                        log("DcDisconnectionErrorCreatingConnection not handled msg.what="
+                                + msg.what);
+                    }
                     retVal = false;
                     break;
             }
             return retVal;
         }
     }
-    private DcDisconnectingBadDnsState mDisconnectingBadDnsState = new DcDisconnectingBadDnsState();
+    private DcDisconnectionErrorCreatingConnection mDisconnectingErrorCreatingConnection =
+                new DcDisconnectionErrorCreatingConnection();
 
     // ******* public interface
 

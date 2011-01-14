@@ -53,3 +53,6 @@ option java_package com.android.internal.telephony;
 
 # CDMA service state transition
 50116 cdma_service_state_change (oldState|1|5), (oldDataState|1|5), (newState|1|5), (newDataState|1|5)
+
+# Bad IP address
+50117 bad_ip_address (ip_address|3)
