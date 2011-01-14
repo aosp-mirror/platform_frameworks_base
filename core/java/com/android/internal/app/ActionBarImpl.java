@@ -681,12 +681,12 @@ public class ActionBarImpl extends ActionBar {
 
         @Override
         public void setTitle(int resId) {
-            setTitle(mActivity.getString(resId));
+            setTitle(mContext.getResources().getString(resId));
         }
 
         @Override
         public void setSubtitle(int resId) {
-            setSubtitle(mActivity.getString(resId));
+            setSubtitle(mContext.getResources().getString(resId));
         }
 
         @Override
