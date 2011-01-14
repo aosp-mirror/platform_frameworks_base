@@ -236,6 +236,7 @@ bool Context::initGLThread() {
     glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, &mGL.mMaxFragmentUniformVectors);
 
     mGL.OES_texture_npot = NULL != strstr((const char *)mGL.mExtensions, "GL_OES_texture_npot");
+    mGL.GL_IMG_texture_npot = NULL != strstr((const char *)mGL.mExtensions, "GL_IMG_texture_npot");
     mGL.GL_NV_texture_npot_2D_mipmap = NULL != strstr((const char *)mGL.mExtensions, "GL_NV_texture_npot_2D_mipmap");
     mGL.EXT_texture_max_aniso = 1.0f;
     bool hasAniso = NULL != strstr((const char *)mGL.mExtensions, "GL_EXT_texture_filter_anisotropic");
