@@ -74,7 +74,7 @@ public class PorterDuffXfermode_Delegate extends Xfermode_Delegate {
         }
 
         Bridge.getLog().error(LayoutLog.TAG_BROKEN,
-                String.format("Unknown PorterDuff.Mode: %d", mode));
+                String.format("Unknown PorterDuff.Mode: %d", mode), null /*data*/);
         assert false;
         return PorterDuff.Mode.SRC_OVER;
     }
@@ -118,7 +118,7 @@ public class PorterDuffXfermode_Delegate extends Xfermode_Delegate {
 
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_BROKEN,
                 String.format("Unsupported PorterDuff Mode: %s", mode.name()),
-                null);
+                null, null /*data*/);
 
         return AlphaComposite.getInstance(AlphaComposite.SRC_OVER, falpha);
     }

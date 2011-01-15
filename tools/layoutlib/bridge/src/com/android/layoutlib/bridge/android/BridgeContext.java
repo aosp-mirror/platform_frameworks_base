@@ -343,7 +343,7 @@ public final class BridgeContext extends Activity {
         } else if (set != null) { // null parser is ok
             // really this should not be happening since its instantiated in Bridge
             Bridge.getLog().error(LayoutLog.TAG_BROKEN,
-                    "Parser is not a BridgeXmlBlockParser!");
+                    "Parser is not a BridgeXmlBlockParser!", null /*data*/);
             return null;
         }
 
@@ -391,7 +391,8 @@ public final class BridgeContext extends Activity {
                 } else {
                     Bridge.getLog().error(null,
                             String.format(
-                                    "Failed to find style '%s' in current theme", defStyleName));
+                                    "Failed to find style '%s' in current theme", defStyleName),
+                            null /*data*/);
                 }
             }
         }
@@ -726,7 +727,8 @@ public final class BridgeContext extends Activity {
         if ("+id".equals(resType) == false && "+android:id".equals(resType) == false) { //$NON-NLS-1$ //$NON-NLS-2$
             Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_RESOLVE,
                     "Couldn't resolve resource @" +
-                    (frameworkOnly ? "android:" : "") + resType + "/" + resName);
+                    (frameworkOnly ? "android:" : "") + resType + "/" + resName,
+                    new ResourceValue(resType, resName, frameworkOnly));
         }
         return null;
     }

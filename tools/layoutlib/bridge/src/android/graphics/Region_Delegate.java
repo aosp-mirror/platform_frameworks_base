@@ -417,7 +417,8 @@ public class Region_Delegate {
         // This is only called by Region.CREATOR (Parcelable.Creator<Region>), which is only
         // used during aidl call so really this should not be called.
         Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
-                "AIDL is not suppored, and therefore Regions cannot be created from parcels.");
+                "AIDL is not suppored, and therefore Regions cannot be created from parcels.",
+                null /*data*/);
         return 0;
     }
 
@@ -426,7 +427,8 @@ public class Region_Delegate {
         // This is only called when sending a region through aidl, so really this should not
         // be called.
         Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
-                "AIDL is not suppored, and therefore Regions cannot be written to parcels.");
+                "AIDL is not suppored, and therefore Regions cannot be written to parcels.",
+                null /*data*/);
         return false;
     }
 

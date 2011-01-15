@@ -127,13 +127,13 @@ public final class Typeface_Delegate {
 
     /*package*/ static synchronized int nativeCreateFromAsset(AssetManager mgr, String path) {
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Typeface.createFromAsset() is not supported.", null);
+                "Typeface.createFromAsset() is not supported.", null /*throwable*/, null /*data*/);
         return 0;
     }
 
     /*package*/ static synchronized int nativeCreateFromFile(String path) {
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Typeface.createFromFile() is not supported.", null);
+                "Typeface.createFromFile() is not supported.", null /*throwable*/, null /*data*/);
         return 0;
     }
 

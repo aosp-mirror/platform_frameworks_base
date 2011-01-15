@@ -143,7 +143,8 @@ public final class BridgeResources extends Resources {
             try {
                 return ResourceHelper.getColor(value.getValue());
             } catch (NumberFormatException e) {
-                Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT, e.getMessage(), e);
+                Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT, e.getMessage(), e,
+                        null /*data*/);
                 return 0;
             }
         }
@@ -176,13 +177,13 @@ public final class BridgeResources extends Resources {
                                 new BridgeXmlBlockParser(parser, mContext, resValue.isFramework()));
                     } catch (XmlPullParserException e) {
                         Bridge.getLog().error(LayoutLog.TAG_BROKEN,
-                                "Failed to configure parser for " + value, e);
+                                "Failed to configure parser for " + value, e, null /*data*/);
                         // we'll return null below.
                     } catch (Exception e) {
                         // this is an error and not warning since the file existence is checked before
                         // attempting to parse it.
                         Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
-                                "Failed to parse file " + value, e);
+                                "Failed to parse file " + value, e, null /*data*/);
 
                         return null;
                     }
@@ -193,7 +194,8 @@ public final class BridgeResources extends Resources {
                         return ColorStateList.valueOf(color);
                     } catch (NumberFormatException e) {
                         Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT,
-                                "Failed to convert " + value + " into a ColorStateList", e);
+                                "Failed to convert " + value + " into a ColorStateList", e,
+                                null /*data*/);
                         return null;
                     }
                 }
@@ -253,7 +255,7 @@ public final class BridgeResources extends Resources {
                 }
             } catch (XmlPullParserException e) {
                 Bridge.getLog().error(LayoutLog.TAG_BROKEN,
-                        "Failed to configure parser for " + value.getValue(), e);
+                        "Failed to configure parser for " + value.getValue(), e, null /*data*/);
                 // we'll return null below.
             } catch (FileNotFoundException e) {
                 // this shouldn't happen since we check above.
@@ -288,7 +290,7 @@ public final class BridgeResources extends Resources {
                 }
             } catch (XmlPullParserException e) {
                 Bridge.getLog().error(LayoutLog.TAG_BROKEN,
-                        "Failed to configure parser for " + value.getValue(), e);
+                        "Failed to configure parser for " + value.getValue(), e, null /*data*/);
                 // we'll return null below.
             } catch (FileNotFoundException e) {
                 // this shouldn't happen since we check above.

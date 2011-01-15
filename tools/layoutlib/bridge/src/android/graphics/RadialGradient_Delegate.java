@@ -126,7 +126,7 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
                 canvasMatrix = xform.createInverse();
             } catch (java.awt.geom.NoninvertibleTransformException e) {
                 Bridge.getLog().fidelityWarning(LayoutLog.TAG_MATRIX_INVERSE,
-                        "Unable to inverse matrix in RadialGradient", e);
+                        "Unable to inverse matrix in RadialGradient", e, null /*data*/);
                 canvasMatrix = new java.awt.geom.AffineTransform();
             }
 
@@ -135,7 +135,7 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
                 localMatrix = localMatrix.createInverse();
             } catch (java.awt.geom.NoninvertibleTransformException e) {
                 Bridge.getLog().fidelityWarning(LayoutLog.TAG_MATRIX_INVERSE,
-                        "Unable to inverse matrix in RadialGradient", e);
+                        "Unable to inverse matrix in RadialGradient", e, null /*data*/);
                 localMatrix = new java.awt.geom.AffineTransform();
             }
 

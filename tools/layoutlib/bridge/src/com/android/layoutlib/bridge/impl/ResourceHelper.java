@@ -166,7 +166,7 @@ public final class ResourceHelper {
                     } catch (IOException e) {
                         // failed to read the file, we'll return null below.
                         Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
-                                "Failed lot load " + file.getAbsolutePath(), e);
+                                "Failed lot load " + file.getAbsolutePath(), e, null /*data*/);
                     }
                 }
 
@@ -197,11 +197,12 @@ public final class ResourceHelper {
                 } catch (Exception e) {
                     // this is an error and not warning since the file existence is checked before
                     // attempting to parse it.
-                    Bridge.getLog().error(null, "Failed to parse file " + value, e);
+                    Bridge.getLog().error(null, "Failed to parse file " + value, e, null /*data*/);
                 }
             } else {
                 Bridge.getLog().error(LayoutLog.TAG_BROKEN,
-                        String.format("File %s does not exist (or is not a file)", stringValue));
+                        String.format("File %s does not exist (or is not a file)", stringValue),
+                        null /*data*/);
             }
 
             return null;
@@ -228,7 +229,7 @@ public final class ResourceHelper {
                 } catch (IOException e) {
                     // we'll return null below
                     Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
-                            "Failed lot load " + bmpFile.getAbsolutePath(), e);
+                            "Failed lot load " + bmpFile.getAbsolutePath(), e, null /*data*/);
                 }
             } else {
                 // attempt to get a color from the value
@@ -238,7 +239,8 @@ public final class ResourceHelper {
                 } catch (NumberFormatException e) {
                     // we'll return null below.
                     Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT,
-                            "Failed to convert " + stringValue + " into a drawable", e);
+                            "Failed to convert " + stringValue + " into a drawable", e,
+                            null /*data*/);
                 }
             }
         }

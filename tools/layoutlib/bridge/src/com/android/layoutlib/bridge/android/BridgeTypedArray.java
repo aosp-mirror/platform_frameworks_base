@@ -207,10 +207,10 @@ public final class BridgeTypedArray extends TypedArray {
                 if (i != null) {
                     result |= i.intValue();
                 } else {
-                    Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_RESOLVE,
+                    Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
                             String.format(
-                                "Unknown constant \"%s\" in attribute \"%2$s\"",
-                                keyword, mNames[index]));
+                                "\"%s\" in attribute \"%2$s\" is not a valid value",
+                                keyword, mNames[index]), null /*data*/);
                 }
             }
             return result;
@@ -238,10 +238,10 @@ public final class BridgeTypedArray extends TypedArray {
             try {
                 return Float.parseFloat(s);
             } catch (NumberFormatException e) {
-                Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_RESOLVE,
+                Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
                         String.format(
-                            "Unable to convert \"%s\" into a float in attribute \"%2$s\"",
-                            s, mNames[index]));
+                            "\"%s\" in attribute \"%2$s\" cannot be converted to float.",
+                            s, mNames[index]), null /*data*/);
 
                 // we'll return the default value below.
             }
@@ -271,7 +271,7 @@ public final class BridgeTypedArray extends TypedArray {
         try {
             return ResourceHelper.getColor(s);
         } catch (NumberFormatException e) {
-            Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT, e.getMessage(), e);
+            Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT, e.getMessage(), e, null /*data*/);
 
             // we'll return the default value below.
         }
@@ -315,13 +315,13 @@ public final class BridgeTypedArray extends TypedArray {
                 return colorStateList;
             } catch (XmlPullParserException e) {
                 Bridge.getLog().error(LayoutLog.TAG_BROKEN,
-                        "Failed to configure parser for " + value, e);
+                        "Failed to configure parser for " + value, e, null /*data*/);
                 return null;
             } catch (Exception e) {
                 // this is an error and not warning since the file existence is checked before
                 // attempting to parse it.
                 Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
-                        "Failed to parse file " + value, e);
+                        "Failed to parse file " + value, e, null /*data*/);
 
                 return null;
             }
@@ -331,7 +331,7 @@ public final class BridgeTypedArray extends TypedArray {
             int color = ResourceHelper.getColor(value);
             return ColorStateList.valueOf(color);
         } catch (NumberFormatException e) {
-            Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT, e.getMessage(), e);
+            Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT, e.getMessage(), e, null /*data*/);
         }
 
         assert false;
@@ -360,10 +360,10 @@ public final class BridgeTypedArray extends TypedArray {
             try {
                 return Integer.parseInt(s);
             } catch (NumberFormatException e) {
-                Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_RESOLVE,
+                Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
                         String.format(
-                            "Unable to convert \"%s\" into a integer in attribute \"%2$s\"",
-                            s, mNames[index]));
+                            "\"%s\" in attribute \"%2$s\" cannont be converted to an integer.",
+                            s, mNames[index]), null /*data*/);
 
                 // The default value is returned below.
             }
@@ -410,10 +410,10 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         // looks like we were unable to resolve the dimension value
-        Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_RESOLVE,
+        Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
                 String.format(
-                    "Unable to resolve dimension value \"%1$s\" in attribute \"%2$s\"",
-                    s, mNames[index]));
+                    "\"%1$s\" in attribute \"%2$s\" is not a valid format.",
+                    s, mNames[index]), null /*data*/);
 
         assert false;
 
@@ -542,10 +542,10 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         // looks like we were unable to resolve the fraction value
-        Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_RESOLVE,
+        Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
                 String.format(
-                    "Unable to resolve fraction value \"%1$s\" in attribute \"%2$s\"",
-                    value, mNames[index]));
+                    "\"%1$s\" in attribute \"%2$s\" cannont be converted to a fraction.",
+                    value, mNames[index]), null /*data*/);
 
         assert false;
 
@@ -656,7 +656,8 @@ public final class BridgeTypedArray extends TypedArray {
 
         Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_RESOLVE,
                 String.format(
-                    "Unable to resolve id \"%1$s\" for attribute \"%2$s\"", value, mNames[index]));
+                    "Unable to resolve id \"%1$s\" for attribute \"%2$s\"", value, mNames[index]),
+                    resValue);
 
         assert false;
 
@@ -685,21 +686,7 @@ public final class BridgeTypedArray extends TypedArray {
             return null;
         }
 
-        Drawable d = ResourceHelper.getDrawable(value, mContext, mResourceData[index].isFramework());
-
-        if (d != null) {
-            return d;
-        }
-
-        // looks like we were unable to resolve the drawable
-        Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_RESOLVE,
-                String.format(
-                    "Unable to resolve drawable \"%1$s\" in attribute \"%2$s\"", stringValue,
-                    mNames[index]));
-
-        assert false;
-
-        return null;
+        return ResourceHelper.getDrawable(value, mContext, mResourceData[index].isFramework());
     }
 
 
@@ -724,10 +711,10 @@ public final class BridgeTypedArray extends TypedArray {
             return new CharSequence[] { value };
         }
 
-        Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_RESOLVE,
+        Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
                 String.format(
                     String.format("Unknown value for getTextArray(%d) => %s", //DEBUG
-                    index, mResourceData[index].getName())));
+                    index, mResourceData[index].getName())), null /*data*/);
 
         return null;
     }

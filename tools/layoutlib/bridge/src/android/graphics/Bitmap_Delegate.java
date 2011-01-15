@@ -250,7 +250,7 @@ public final class Bitmap_Delegate {
     /*package*/ static boolean nativeCompress(int nativeBitmap, int format, int quality,
             OutputStream stream, byte[] tempStorage) {
         Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
-                "Bitmap.compress() is not supported");
+                "Bitmap.compress() is not supported", null /*data*/);
         return true;
     }
 
@@ -386,7 +386,8 @@ public final class Bitmap_Delegate {
         // This is only called by Bitmap.CREATOR (Parcelable.Creator<Bitmap>), which is only
         // used during aidl call so really this should not be called.
         Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
-                "AIDL is not suppored, and therefore Bitmaps cannot be created from parcels.");
+                "AIDL is not suppored, and therefore Bitmaps cannot be created from parcels.",
+                null /*data*/);
         return null;
     }
 
@@ -395,7 +396,8 @@ public final class Bitmap_Delegate {
         // This is only called when sending a bitmap through aidl, so really this should not
         // be called.
         Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
-                "AIDL is not suppored, and therefore Bitmaps cannot be written to parcels.");
+                "AIDL is not suppored, and therefore Bitmaps cannot be written to parcels.",
+                null /*data*/);
         return false;
     }
 
@@ -412,7 +414,7 @@ public final class Bitmap_Delegate {
         if (paint != null && paint.getMaskFilter() != null) {
             Bridge.getLog().fidelityWarning(LayoutLog.TAG_MASKFILTER,
                     "MaskFilter not supported in Bitmap.extractAlpha",
-                    null);
+                    null, null /*data*/);
         }
 
         int alpha = paint != null ? paint.getAlpha() : 0xFF;
