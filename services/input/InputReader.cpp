@@ -80,6 +80,10 @@ inline static float pythag(float x, float y) {
     return sqrtf(x * x + y * y);
 }
 
+inline static int32_t signExtendNybble(int32_t value) {
+    return value >= 8 ? value - 16 : value;
+}
+
 static inline const char* toString(bool value) {
     return value ? "true" : "false";
 }
@@ -1917,6 +1921,8 @@ void TouchInputMapper::parseCalibration() {
             out.orientationCalibration = Calibration::ORIENTATION_CALIBRATION_NONE;
         } else if (orientationCalibrationString == "interpolated") {
             out.orientationCalibration = Calibration::ORIENTATION_CALIBRATION_INTERPOLATED;
+        } else if (orientationCalibrationString == "vector") {
+            out.orientationCalibration = Calibration::ORIENTATION_CALIBRATION_VECTOR;
         } else if (orientationCalibrationString != "default") {
             LOGW("Invalid value for touch.orientation.calibration: '%s'",
                     orientationCalibrationString.string());
@@ -2151,6 +2157,9 @@ void TouchInputMapper::dumpCalibration(String8& dump) {
         break;
     case Calibration::ORIENTATION_CALIBRATION_INTERPOLATED:
         dump.append(INDENT4 "touch.orientation.calibration: interpolated\n");
+        break;
+    case Calibration::ORIENTATION_CALIBRATION_VECTOR:
+        dump.append(INDENT4 "touch.orientation.calibration: vector\n");
         break;
     default:
         assert(false);
@@ -2567,6 +2576,19 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
             case Calibration::ORIENTATION_CALIBRATION_INTERPOLATED:
                 orientation = in.orientation * mLocked.orientationScale;
                 break;
+            case Calibration::ORIENTATION_CALIBRATION_VECTOR: {
+                int32_t c1 = signExtendNybble((in.orientation & 0xf0) >> 4);
+                int32_t c2 = signExtendNybble(in.orientation & 0x0f);
+                if (c1 != 0 || c2 != 0) {
+                    orientation = atan2f(c1, c2) * 0.5f;
+                    float minorAxisScale = (16.0f - pythag(c1, c2)) / 16.0f;
+                    toolMinor *= minorAxisScale;
+                    touchMinor *= minorAxisScale;
+                } else {
+                    orientation = 0;
+                }
+                break;
+            }
             default:
                 orientation = 0;
             }
@@ -2586,7 +2608,6 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
             case DISPLAY_ORIENTATION_180: {
                 x = mLocked.surfaceWidth - x;
                 y = mLocked.surfaceHeight - y;
-                orientation = - orientation;
                 break;
             }
             case DISPLAY_ORIENTATION_270: {
