@@ -77,6 +77,9 @@ public class ActivityManager {
      * This may be the same size as {@link #getMemoryClass()} on memory
      * constrained devices, or it may be significantly larger on devices with
      * a large amount of available RAM.
+     *
+     * <p>The is the size of the application's Dalvik heap if it has
+     * specified <code>android:largeHeap="true"</code> in its manifest.
      */
     public int getLargeMemoryClass() {
         return staticGetLargeMemoryClass();
