@@ -1624,24 +1624,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 // First handle chording of panel key: if a panel key is held
                 // but not released, try to execute a shortcut in it.
                 if ((mPanelChordingKey > 0) && (mPanelChordingKey != keyCode)) {
-                    // Perform the shortcut (mPreparedPanel can be null since
-                    // global shortcuts (such as search) don't rely on a
-                    // prepared panel or menu).
-                    boolean handled = performPanelShortcut(mPreparedPanel, keyCode, event,
-                            Menu.FLAG_PERFORM_NO_CLOSE);
-
-                    if (!handled) {
-                        /*
-                         * If not handled, then pass it to the view hierarchy
-                         * and anyone else that may be interested.
-                         */
-                        handled = dispatchKeyShortcutEvent(event);
-
-                        if (handled && mPreparedPanel != null) {
-                            mPreparedPanel.isHandled = true;
-                        }
-                    }
-
+                    boolean handled = dispatchKeyShortcutEvent(event);
                     if (handled) {
                         return true;
                     }
@@ -1676,6 +1659,19 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         @Override
         public boolean dispatchKeyShortcutEvent(KeyEvent ev) {
+            // Perform the shortcut (mPreparedPanel can be null since
+            // global shortcuts (such as search) don't rely on a
+            // prepared panel or menu).
+            boolean handled = performPanelShortcut(mPreparedPanel, ev.getKeyCode(), ev,
+                    Menu.FLAG_PERFORM_NO_CLOSE);
+            if (handled) {
+                if (mPreparedPanel != null) {
+                    mPreparedPanel.isHandled = true;
+                }
+                return true;
+            }
+
+            // Shortcut not handled by the panel.  Dispatch to the view hierarchy.
             final Callback cb = getCallback();
             return cb != null && mFeatureId < 0 ? cb.dispatchKeyShortcutEvent(ev) : super
                     .dispatchKeyShortcutEvent(ev);

@@ -353,8 +353,7 @@ public class MenuBuilder implements Menu {
         mNonActionItems = new ArrayList<MenuItemImpl>();
         mIsActionItemsStale = true;
         
-        mShortcutsVisible =
-                (mResources.getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS);
+        setShortcutsVisibleInner(true);
     }
     
     public MenuBuilder setDefaultShowAsAction(int defaultShowAsAction) {
@@ -782,12 +781,16 @@ public class MenuBuilder implements Menu {
      */
     public void setShortcutsVisible(boolean shortcutsVisible) {
         if (mShortcutsVisible == shortcutsVisible) return;
-        
-        mShortcutsVisible =
-            (mResources.getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS)
-            && shortcutsVisible;
-        
+
+        setShortcutsVisibleInner(shortcutsVisible);
         refreshShortcuts(mShortcutsVisible, isQwertyMode());
+    }
+
+    private void setShortcutsVisibleInner(boolean shortcutsVisible) {
+        mShortcutsVisible = shortcutsVisible
+                && mResources.getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS
+                && mResources.getBoolean(
+                        com.android.internal.R.bool.config_showMenuShortcutsWhenKeyboardPresent);
     }
 
     /**
