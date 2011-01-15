@@ -353,7 +353,7 @@ public class BitmapFactory {
                 If it happened on close, bm is still valid.
             */
             Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
-                    String.format("Error decoding bitmap of id 0x%x", id), e);
+                    String.format("Error decoding bitmap of id 0x%x", id), e, null /*data*/);
         } finally {
             try {
                 if (is != null) is.close();
@@ -454,7 +454,7 @@ public class BitmapFactory {
         if (is instanceof AssetManager.AssetInputStream) {
             Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
                     "Bitmap.decodeStream: " +
-                    "InputStream is unsupported (AssetManager.AssetInputStream)");
+                    "InputStream is unsupported (AssetManager.AssetInputStream)", null /*data*/);
             return null;
         } else {
             // pass some temp storage down to the native code. 1024 is made up,

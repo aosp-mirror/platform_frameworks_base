@@ -698,7 +698,7 @@ public final class Path_Delegate {
             assert false;
             Bridge.getLog().fidelityWarning(LayoutLog.TAG_MATRIX_AFFINE,
                     "android.graphics.Path#transform() only " +
-                    "supports affine transformations.", null);
+                    "supports affine transformations.", null, null /*data*/);
         }
 
         GeneralPath newPath = new GeneralPath();

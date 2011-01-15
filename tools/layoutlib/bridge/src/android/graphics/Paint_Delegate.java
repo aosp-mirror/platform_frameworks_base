@@ -182,7 +182,7 @@ public class Paint_Delegate {
             } else {
                 Bridge.getLog().fidelityWarning(LayoutLog.TAG_PATHEFFECT,
                         effectDelegate.getSupportMessage(),
-                        null);
+                        null, null /*data*/);
             }
         }
 
@@ -377,7 +377,7 @@ public class Paint_Delegate {
             int color) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Paint.setShadowLayer is not supported.", null);
+                "Paint.setShadowLayer is not supported.", null, null /*data*/);
     }
 
     /*package*/ static float getTextSize(Paint thisPaint) {
@@ -694,7 +694,7 @@ public class Paint_Delegate {
         ColorFilter_Delegate filterDelegate = delegate.getColorFilter();
         if (filterDelegate != null && filterDelegate.isSupported() == false) {
             Bridge.getLog().fidelityWarning(LayoutLog.TAG_COLORFILTER,
-                    filterDelegate.getSupportMessage(), null);
+                    filterDelegate.getSupportMessage(), null, null /*data*/);
         }
 
         return filter;
@@ -733,7 +733,7 @@ public class Paint_Delegate {
         MaskFilter_Delegate filterDelegate = delegate.getMaskFilter();
         if (filterDelegate != null && filterDelegate.isSupported() == false) {
             Bridge.getLog().fidelityWarning(LayoutLog.TAG_MASKFILTER,
-                    filterDelegate.getSupportMessage(), null);
+                    filterDelegate.getSupportMessage(), null, null /*data*/);
         }
 
         return maskfilter;
@@ -764,7 +764,7 @@ public class Paint_Delegate {
         Rasterizer_Delegate rasterizerDelegate = delegate.getRasterizer();
         if (rasterizerDelegate != null && rasterizerDelegate.isSupported() == false) {
             Bridge.getLog().fidelityWarning(LayoutLog.TAG_RASTERIZER,
-                    rasterizerDelegate.getSupportMessage(), null);
+                    rasterizerDelegate.getSupportMessage(), null, null /*data*/);
         }
 
         return rasterizer;

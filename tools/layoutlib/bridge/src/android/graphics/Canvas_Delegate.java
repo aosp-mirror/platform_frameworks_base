@@ -425,7 +425,7 @@ public final class Canvas_Delegate {
             assert false;
             Bridge.getLog().fidelityWarning(LayoutLog.TAG_MATRIX_AFFINE,
                     "android.graphics.Canvas#setMatrix(android.graphics.Matrix) only " +
-                    "supports affine transformations.", null);
+                    "supports affine transformations.", null, null /*data*/);
         }
     }
 
@@ -494,7 +494,7 @@ public final class Canvas_Delegate {
 
         if (filterDelegate.isSupported() == false) {
             Bridge.getLog().fidelityWarning(LayoutLog.TAG_DRAWFILTER,
-                    filterDelegate.getSupportMessage(), null);
+                    filterDelegate.getSupportMessage(), null, null /*data*/);
         }
     }
 
