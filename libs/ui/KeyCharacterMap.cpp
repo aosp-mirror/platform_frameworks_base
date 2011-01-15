@@ -185,9 +185,11 @@ bool KeyCharacterMap::getFallbackAction(int32_t keyCode, int32_t metaState,
     const Key* key;
     const Behavior* behavior;
     if (getKeyBehavior(keyCode, metaState, &key, &behavior)) {
-        outFallbackAction->keyCode = behavior->fallbackKeyCode;
-        outFallbackAction->metaState = metaState & ~behavior->metaState;
-        result = true;
+        if (behavior->fallbackKeyCode) {
+            outFallbackAction->keyCode = behavior->fallbackKeyCode;
+            outFallbackAction->metaState = metaState & ~behavior->metaState;
+            result = true;
+        }
     }
 #if DEBUG_MAPPING
     LOGD("getFallbackKeyCode: keyCode=%d, metaState=0x%08x ~ Result %s, "
