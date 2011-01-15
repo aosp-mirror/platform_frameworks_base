@@ -67,12 +67,12 @@ void ResourceCache::incrementRefcount(SkBitmap* bitmapResource) {
 
 void ResourceCache::incrementRefcount(SkiaShader* shaderResource) {
     shaderResource->getSkShader()->safeRef();
-    incrementRefcount((void*)shaderResource, kShader);
+    incrementRefcount((void*) shaderResource, kShader);
 }
 
 void ResourceCache::incrementRefcount(SkiaColorFilter* filterResource) {
     filterResource->getSkColorFilter()->safeRef();
-    incrementRefcount((void*)filterResource, kColorFilter);
+    incrementRefcount((void*) filterResource, kColorFilter);
 }
 
 void ResourceCache::decrementRefcount(void* resource) {
@@ -91,17 +91,17 @@ void ResourceCache::decrementRefcount(void* resource) {
 void ResourceCache::decrementRefcount(SkBitmap* bitmapResource) {
     bitmapResource->pixelRef()->safeUnref();
     bitmapResource->getColorTable()->safeUnref();
-    decrementRefcount((void*)bitmapResource);
+    decrementRefcount((void*) bitmapResource);
 }
 
 void ResourceCache::decrementRefcount(SkiaShader* shaderResource) {
     shaderResource->getSkShader()->safeUnref();
-    decrementRefcount((void*)shaderResource);
+    decrementRefcount((void*) shaderResource);
 }
 
 void ResourceCache::decrementRefcount(SkiaColorFilter* filterResource) {
     filterResource->getSkColorFilter()->safeUnref();
-    decrementRefcount((void*)filterResource);
+    decrementRefcount((void*) filterResource);
 }
 
 void ResourceCache::recycle(SkBitmap* resource) {

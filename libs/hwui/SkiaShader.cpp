@@ -205,9 +205,12 @@ SkiaLinearGradientShader::~SkiaLinearGradientShader() {
 SkiaShader* SkiaLinearGradientShader::copy() {
     SkiaLinearGradientShader* copy = new SkiaLinearGradientShader();
     copy->copyFrom(*this);
-    copy->mBounds = mBounds;
-    copy->mColors = mColors;
-    copy->mPositions = mPositions;
+    copy->mBounds = new float[4];
+    memcpy(copy->mBounds, mBounds, sizeof(float) * 4);
+    copy->mColors = new uint32_t[mCount];
+    memcpy(copy->mColors, mColors, sizeof(uint32_t) * mCount);
+    copy->mPositions = new float[mCount];
+    memcpy(copy->mPositions, mPositions, sizeof(float) * mCount);
     copy->mCount = mCount;
     return copy;
 }
@@ -270,8 +273,10 @@ SkiaCircularGradientShader::SkiaCircularGradientShader(float x, float y, float r
 SkiaShader* SkiaCircularGradientShader::copy() {
     SkiaCircularGradientShader* copy = new SkiaCircularGradientShader();
     copy->copyFrom(*this);
-    copy->mColors = mColors;
-    copy->mPositions = mPositions;
+    copy->mColors = new uint32_t[mCount];
+    memcpy(copy->mColors, mColors, sizeof(uint32_t) * mCount);
+    copy->mPositions = new float[mCount];
+    memcpy(copy->mPositions, mPositions, sizeof(float) * mCount);
     copy->mCount = mCount;
     return copy;
 }
@@ -317,8 +322,10 @@ SkiaSweepGradientShader::~SkiaSweepGradientShader() {
 SkiaShader* SkiaSweepGradientShader::copy() {
     SkiaSweepGradientShader* copy = new SkiaSweepGradientShader();
     copy->copyFrom(*this);
-    copy->mColors = mColors;
-    copy->mPositions = mPositions;
+    copy->mColors = new uint32_t[mCount];
+    memcpy(copy->mColors, mColors, sizeof(uint32_t) * mCount);
+    copy->mPositions = new float[mCount];
+    memcpy(copy->mPositions, mPositions, sizeof(float) * mCount);
     copy->mCount = mCount;
     return copy;
 }
@@ -362,15 +369,24 @@ void SkiaSweepGradientShader::updateTransforms(Program* program, const mat4& mod
 SkiaComposeShader::SkiaComposeShader(SkiaShader* first, SkiaShader* second,
         SkXfermode::Mode mode, SkShader* key):
         SkiaShader(kCompose, key, SkShader::kClamp_TileMode, SkShader::kClamp_TileMode,
-        NULL, first->blend() || second->blend()), mFirst(first), mSecond(second), mMode(mode) {
+        NULL, first->blend() || second->blend()),
+        mFirst(first), mSecond(second), mMode(mode), mCleanup(false) {
+}
+
+SkiaComposeShader::~SkiaComposeShader() {
+    if (mCleanup) {
+        delete mFirst;
+        delete mSecond;
+    }
 }
 
 SkiaShader* SkiaComposeShader::copy() {
     SkiaComposeShader* copy = new SkiaComposeShader();
     copy->copyFrom(*this);
-    copy->mFirst = mFirst;
-    copy->mSecond = mSecond;
+    copy->mFirst = mFirst->copy();
+    copy->mSecond = mSecond->copy();
     copy->mMode = mMode;
+    copy->cleanup();
     return copy;
 }
 
