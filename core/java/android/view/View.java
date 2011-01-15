@@ -7580,8 +7580,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mHardwareLayer.destroy();
             mHardwareLayer = null;
         }
-        mAttachInfo.mHandler.removeMessages(AttachInfo.INVALIDATE_MSG, this);
-        mAttachInfo.mHandler.removeMessages(AttachInfo.INVALIDATE_RECT_MSG, this);
+
+        if (mAttachInfo != null) {
+            mAttachInfo.mHandler.removeMessages(AttachInfo.INVALIDATE_MSG, this);
+            mAttachInfo.mHandler.removeMessages(AttachInfo.INVALIDATE_RECT_MSG, this);
+        }
+
         mCurrentAnimation = null;
     }
 
