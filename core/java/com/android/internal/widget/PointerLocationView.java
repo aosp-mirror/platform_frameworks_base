@@ -300,6 +300,17 @@ public class PointerLocationView extends View {
                     mPaint.setARGB(255, pressureLevel, 128, 255 - pressureLevel);
                     drawOval(canvas, ps.mCoords.x, ps.mCoords.y, ps.mCoords.toolMajor,
                             ps.mCoords.toolMinor, ps.mCoords.orientation, mPaint);
+
+                    // Draw the orientation arrow.
+                    mPaint.setARGB(255, pressureLevel, 255, 0);
+                    float orientationVectorX = (float) (Math.sin(-ps.mCoords.orientation)
+                            * ps.mCoords.toolMajor * 0.7);
+                    float orientationVectorY = (float) (Math.cos(-ps.mCoords.orientation)
+                            * ps.mCoords.toolMajor * 0.7);
+                    canvas.drawLine(
+                            ps.mCoords.x - orientationVectorX, ps.mCoords.y - orientationVectorY,
+                            ps.mCoords.x + orientationVectorX, ps.mCoords.y + orientationVectorY,
+                            mPaint);
                 }
             }
         }
