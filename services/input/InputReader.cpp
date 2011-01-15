@@ -1183,10 +1183,18 @@ void CursorInputMapper::sync(nsecs_t when) {
 
         if (downChanged) {
             if (mAccumulator.btnMouse) {
-                mLocked.down = true;
-                mLocked.downTime = when;
+                if (!mLocked.down) {
+                    mLocked.down = true;
+                    mLocked.downTime = when;
+                } else {
+                    downChanged = false;
+                }
             } else {
-                mLocked.down = false;
+                if (mLocked.down) {
+                    mLocked.down = false;
+                } else {
+                    downChanged = false;
+                }
             }
         }
 
