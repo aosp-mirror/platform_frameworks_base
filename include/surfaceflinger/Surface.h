@@ -233,7 +233,7 @@ private:
      *  private stuff...
      */
     void init();
-    status_t validate() const;
+    status_t validate(bool inCancelBuffer = false) const;
     sp<ISurface> getISurface() const;
 
     inline const GraphicBufferMapper& getBufferMapper() const { return mBufferMapper; }
