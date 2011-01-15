@@ -145,6 +145,8 @@ protected:
     virtual void dirtyLayer(const float left, const float top,
             const float right, const float bottom);
 
+    void dirtyLayerUnchecked(Rect& bounds, Region* region);
+
 private:
     /**
      * Saves the current state of the renderer as a new snapshot.
