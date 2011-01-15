@@ -2550,7 +2550,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             int sState = mWindowManager.getKeycodeState(KeyEvent.KEYCODE_S);
             int dpadState = mWindowManager.getDPadKeycodeState(KeyEvent.KEYCODE_DPAD_CENTER);
             int trackballState = mWindowManager.getTrackballScancodeState(BTN_MOUSE);
-            mSafeMode = menuState > 0 || sState > 0 || dpadState > 0 || trackballState > 0;
+            int volumeDownState = mWindowManager.getKeycodeState(KeyEvent.KEYCODE_VOLUME_DOWN);
+            mSafeMode = menuState > 0 || sState > 0 || dpadState > 0 || trackballState > 0
+                    || volumeDownState > 0;
             performHapticFeedbackLw(null, mSafeMode
                     ? HapticFeedbackConstants.SAFE_MODE_ENABLED
                     : HapticFeedbackConstants.SAFE_MODE_DISABLED, true);
