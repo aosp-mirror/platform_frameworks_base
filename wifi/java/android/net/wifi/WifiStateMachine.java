@@ -42,6 +42,7 @@ import android.app.PendingIntent;
 import android.net.LinkAddress;
 import android.net.NetworkInfo;
 import android.net.DhcpInfo;
+import android.net.DhcpInfoInternal;
 import android.net.NetworkUtils;
 import android.net.ConnectivityManager;
 import android.net.InterfaceConfiguration;
@@ -146,7 +147,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
     private Context mContext;
 
-    private DhcpInfo mDhcpInfo;
+    private DhcpInfoInternal mDhcpInfoInternal;
     private WifiInfo mWifiInfo;
     private NetworkInfo mNetworkInfo;
     private SupplicantStateTracker mSupplicantStateTracker;
@@ -450,7 +451,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         nwService = INetworkManagementService.Stub.asInterface(b);
 
         mWifiMonitor = new WifiMonitor(this);
-        mDhcpInfo = new DhcpInfo();
+        mDhcpInfoInternal = new DhcpInfoInternal();
         mWifiInfo = new WifiInfo();
         mInterfaceName = SystemProperties.get("wifi.interface", "tiwlan0");
         mSupplicantStateTracker = new SupplicantStateTracker(context, this, getHandler());
@@ -654,8 +655,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     public DhcpInfo syncGetDhcpInfo() {
-        synchronized (mDhcpInfo) {
-            return new DhcpInfo(mDhcpInfo);
+        synchronized (mDhcpInfoInternal) {
+            return mDhcpInfoInternal.makeDhcpInfo();
         }
     }
 
@@ -971,7 +972,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         sb.append("current HSM state: ").append(getCurrentState().getName()).append(LS);
         sb.append("mLinkProperties ").append(mLinkProperties).append(LS);
         sb.append("mWifiInfo ").append(mWifiInfo).append(LS);
-        sb.append("mDhcpInfo ").append(mDhcpInfo).append(LS);
+        sb.append("mDhcpInfoInternal ").append(mDhcpInfoInternal).append(LS);
         sb.append("mNetworkInfo ").append(mNetworkInfo).append(LS);
         sb.append("mLastSignalLevel ").append(mLastSignalLevel).append(LS);
         sb.append("mLastBssid ").append(mLastBssid).append(LS);
@@ -1307,14 +1308,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         if (WifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
             mLinkProperties = WifiConfigStore.getLinkProperties(mLastNetworkId);
         } else {
-            // TODO - fix this for v6
-            synchronized (mDhcpInfo) {
-                mLinkProperties.addLinkAddress(new LinkAddress(
-                        NetworkUtils.intToInetAddress(mDhcpInfo.ipAddress),
-                        NetworkUtils.intToInetAddress(mDhcpInfo.netmask)));
-                mLinkProperties.setGateway(NetworkUtils.intToInetAddress(mDhcpInfo.gateway));
-                mLinkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns1));
-                mLinkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns2));
+            synchronized (mDhcpInfoInternal) {
+                mLinkProperties = mDhcpInfoInternal.makeLinkProperties();
             }
             mLinkProperties.setHttpProxy(WifiConfigStore.getProxyProperties(mLastNetworkId));
         }
@@ -2513,11 +2508,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 Log.d(TAG, "DHCP request started");
                 mDhcpThread = new Thread(new Runnable() {
                     public void run() {
-                        DhcpInfo dhcpInfo = new DhcpInfo();
-                        if (NetworkUtils.runDhcp(mInterfaceName, dhcpInfo)) {
+                        DhcpInfoInternal dhcpInfoInternal = new DhcpInfoInternal();
+                        if (NetworkUtils.runDhcp(mInterfaceName, dhcpInfoInternal)) {
                             Log.d(TAG, "DHCP request succeeded");
-                            synchronized (mDhcpInfo) {
-                                mDhcpInfo = dhcpInfo;
+                            synchronized (mDhcpInfoInternal) {
+                                mDhcpInfoInternal = dhcpInfoInternal;
                             }
                             sendMessage(CMD_IP_CONFIG_SUCCESS);
                         } else {
@@ -2529,18 +2524,20 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 });
                 mDhcpThread.start();
             } else {
-                DhcpInfo dhcpInfo = WifiConfigStore.getIpConfiguration(mLastNetworkId);
+                DhcpInfoInternal dhcpInfoInternal = WifiConfigStore.getIpConfiguration(
+                        mLastNetworkId);
                 IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
                 INetworkManagementService netd = INetworkManagementService.Stub.asInterface(b);
                 InterfaceConfiguration ifcg = new InterfaceConfiguration();
+                ifcg.addr = NetworkUtils.numericToInetAddress(dhcpInfoInternal.ipAddress);
+                ifcg.mask = NetworkUtils.intToInetAddress(
+                        NetworkUtils.prefixLengthToNetmaskInt(dhcpInfoInternal.prefixLength));
                 ifcg.interfaceFlags = "[up]";
-                ifcg.addr = NetworkUtils.intToInetAddress(dhcpInfo.ipAddress);
-                ifcg.mask = NetworkUtils.intToInetAddress(dhcpInfo.netmask);
                 try {
                     netd.setInterfaceConfig(mInterfaceName, ifcg);
                     Log.v(TAG, "Static IP configuration succeeded");
-                    synchronized (mDhcpInfo) {
-                        mDhcpInfo = dhcpInfo;
+                    synchronized (mDhcpInfoInternal) {
+                        mDhcpInfoInternal = dhcpInfoInternal;
                     }
                     sendMessage(CMD_IP_CONFIG_SUCCESS);
                 } catch (RemoteException re) {
@@ -2559,9 +2556,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
           switch(message.what) {
               case CMD_IP_CONFIG_SUCCESS:
                   mLastSignalLevel = -1; // force update of signal strength
-                  synchronized (mDhcpInfo) {
-                      mWifiInfo.setIpAddress(mDhcpInfo.ipAddress);
+                  InetAddress addr;
+                  synchronized (mDhcpInfoInternal) {
+                      addr = NetworkUtils.numericToInetAddress(mDhcpInfoInternal.ipAddress);
                   }
+                  mWifiInfo.setIpAddress(NetworkUtils.inetAddressToInt(addr));
                   configureLinkProperties();
                   if (getNetworkDetailedState() == DetailedState.CONNECTED) {
                       sendLinkConfigurationChangedBroadcast();

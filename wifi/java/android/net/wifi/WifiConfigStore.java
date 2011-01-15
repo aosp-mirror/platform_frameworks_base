@@ -18,7 +18,7 @@ package android.net.wifi;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.DhcpInfo;
+import android.net.DhcpInfoInternal;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkUtils;
@@ -436,35 +436,25 @@ class WifiConfigStore {
      *       that, we should remove handling DhcpInfo and move
      *       to using LinkProperties
      */
-    static DhcpInfo getIpConfiguration(int netId) {
-        DhcpInfo dhcpInfo = new DhcpInfo();
+    static DhcpInfoInternal getIpConfiguration(int netId) {
+        DhcpInfoInternal dhcpInfoInternal = new DhcpInfoInternal();
         LinkProperties linkProperties = getLinkProperties(netId);
 
         if (linkProperties != null) {
             Iterator<LinkAddress> iter = linkProperties.getLinkAddresses().iterator();
             if (iter.hasNext()) {
-                try {
-                    LinkAddress linkAddress = iter.next();
-                    dhcpInfo.ipAddress = NetworkUtils.inetAddressToInt(
-                            linkAddress.getAddress());
-                    dhcpInfo.gateway = NetworkUtils.inetAddressToInt(
-                            linkProperties.getGateway());
-                    dhcpInfo.netmask = NetworkUtils.prefixLengthToNetmaskInt(
-                            linkAddress.getNetworkPrefixLength());
-                    Iterator<InetAddress> dnsIterator = linkProperties.getDnses().iterator();
-                    dhcpInfo.dns1 = NetworkUtils.inetAddressToInt(dnsIterator.next());
-                    if (dnsIterator.hasNext()) {
-                        dhcpInfo.dns2 = NetworkUtils.inetAddressToInt(dnsIterator.next());
-                    }
-                } catch (IllegalArgumentException e1) {
-                    Log.e(TAG, "IPv6 address cannot be handled " + e1);
-                } catch (NullPointerException e2) {
-                    /* Should not happen since a stored static config should be valid */
-                    Log.e(TAG, "Invalid partial IP configuration " + e2);
+                LinkAddress linkAddress = iter.next();
+                dhcpInfoInternal.ipAddress = linkAddress.getAddress().getHostAddress();
+                dhcpInfoInternal.gateway = linkProperties.getGateway().getHostAddress();
+                dhcpInfoInternal.prefixLength = linkAddress.getNetworkPrefixLength();
+                Iterator<InetAddress> dnsIterator = linkProperties.getDnses().iterator();
+                dhcpInfoInternal.dns1 = dnsIterator.next().getHostAddress();
+                if (dnsIterator.hasNext()) {
+                    dhcpInfoInternal.dns2 = dnsIterator.next().getHostAddress();
                 }
             }
         }
-        return dhcpInfo;
+        return dhcpInfoInternal;
     }
 
     /**
