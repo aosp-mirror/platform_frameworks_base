@@ -74,4 +74,5 @@
   <item type="id" name="rowTypeId" />
   <item type="id" name="up" />
   <item type="id" name="viewAnimation" />
+  <item type="id" name="viewAlphaAnimation" />
 </resources>
