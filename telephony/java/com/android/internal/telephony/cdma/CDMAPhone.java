@@ -56,6 +56,7 @@ import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccPhoneBookInterfaceManager;
 import com.android.internal.telephony.IccSmsInterfaceManager;
 import com.android.internal.telephony.MmiCode;
+import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.PhoneNotifier;
@@ -483,7 +484,7 @@ public class CDMAPhone extends PhoneBase {
     }
 
     public void
-    selectNetworkManually(com.android.internal.telephony.gsm.NetworkInfo network,
+    selectNetworkManually(OperatorInfo network,
             Message response) {
         Log.e(LOG_TAG, "selectNetworkManually: not possible in CDMA");
     }

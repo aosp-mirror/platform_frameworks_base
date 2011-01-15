@@ -32,7 +32,6 @@ import android.util.Log;
 
 import com.android.internal.telephony.cdma.CDMAPhone;
 import com.android.internal.telephony.gsm.GSMPhone;
-import com.android.internal.telephony.gsm.NetworkInfo;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 
 import java.util.List;
@@ -550,7 +549,7 @@ public class PhoneProxy extends Handler implements Phone {
         mActivePhone.setNetworkSelectionModeAutomatic(response);
     }
 
-    public void selectNetworkManually(NetworkInfo network, Message response) {
+    public void selectNetworkManually(OperatorInfo network, Message response) {
         mActivePhone.selectNetworkManually(network, response);
     }
 

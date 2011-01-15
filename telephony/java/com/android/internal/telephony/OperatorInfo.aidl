@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm;
+package com.android.internal.telephony;
 
 /**
- * Used to indicate that the NetworkInfo object is parcelable to aidl.
- * This is a simple effort to make NetworkInfo parcelable rather than
+ * Used to indicate that the OperatorInfo object is parcelable to aidl.
+ * This is a simple effort to make OperatorInfo parcelable rather than
  * trying to make the conventional containing object (AsyncResult),
  * implement parcelable.  This functionality is needed for the
  * NetworkQueryService to fix 1128695
  */
-parcelable NetworkInfo;
+parcelable OperatorInfo;

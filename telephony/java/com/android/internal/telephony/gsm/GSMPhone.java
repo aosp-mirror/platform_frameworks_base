@@ -62,6 +62,7 @@ import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccPhoneBookInterfaceManager;
 import com.android.internal.telephony.IccSmsInterfaceManager;
 import com.android.internal.telephony.MmiCode;
+import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.PhoneNotifier;
@@ -1025,19 +1026,19 @@ public class GSMPhone extends PhoneBase {
     }
 
     public void
-    selectNetworkManually(com.android.internal.telephony.gsm.NetworkInfo network,
+    selectNetworkManually(OperatorInfo network,
             Message response) {
         // wrap the response message in our own message along with
         // the operator's id.
         NetworkSelectMessage nsm = new NetworkSelectMessage();
         nsm.message = response;
-        nsm.operatorNumeric = network.operatorNumeric;
-        nsm.operatorAlphaLong = network.operatorAlphaLong;
+        nsm.operatorNumeric = network.getOperatorNumeric();
+        nsm.operatorAlphaLong = network.getOperatorAlphaLong();
 
         // get the message
         Message msg = obtainMessage(EVENT_SET_NETWORK_MANUAL_COMPLETE, nsm);
 
-        mCM.setNetworkSelectionModeManual(network.operatorNumeric, msg);
+        mCM.setNetworkSelectionModeManual(network.getOperatorNumeric(), msg);
     }
 
     public void

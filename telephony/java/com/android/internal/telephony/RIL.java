@@ -50,12 +50,12 @@ import android.util.Log;
 import com.android.internal.telephony.CallForwardInfo;
 import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.DataCallState;
-import com.android.internal.telephony.gsm.NetworkInfo;
 import com.android.internal.telephony.gsm.SmsBroadcastConfigInfo;
 import com.android.internal.telephony.gsm.SuppServiceNotification;
 import com.android.internal.telephony.IccCardApplication;
 import com.android.internal.telephony.IccCardStatus;
 import com.android.internal.telephony.IccUtils;
+import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.SmsResponse;
 import com.android.internal.telephony.cdma.CdmaCallWaitingNotification;
@@ -2160,7 +2160,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_REQUEST_QUERY_NETWORK_SELECTION_MODE: ret =  responseInts(p); break;
             case RIL_REQUEST_SET_NETWORK_SELECTION_AUTOMATIC: ret =  responseVoid(p); break;
             case RIL_REQUEST_SET_NETWORK_SELECTION_MANUAL: ret =  responseVoid(p); break;
-            case RIL_REQUEST_QUERY_AVAILABLE_NETWORKS : ret =  responseNetworkInfos(p); break;
+            case RIL_REQUEST_QUERY_AVAILABLE_NETWORKS : ret =  responseOperatorInfos(p); break;
             case RIL_REQUEST_DTMF_START: ret =  responseVoid(p); break;
             case RIL_REQUEST_DTMF_STOP: ret =  responseVoid(p); break;
             case RIL_REQUEST_BASEBAND_VERSION: ret =  responseString(p); break;
@@ -2983,9 +2983,9 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     }
 
     private Object
-    responseNetworkInfos(Parcel p) {
+    responseOperatorInfos(Parcel p) {
         String strings[] = (String [])responseStrings(p);
-        ArrayList<NetworkInfo> ret;
+        ArrayList<OperatorInfo> ret;
 
         if (strings.length % 4 != 0) {
             throw new RuntimeException(
@@ -2993,11 +2993,11 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                 + strings.length + " strings, expected multible of 4");
         }
 
-        ret = new ArrayList<NetworkInfo>(strings.length / 4);
+        ret = new ArrayList<OperatorInfo>(strings.length / 4);
 
         for (int i = 0 ; i < strings.length ; i += 4) {
             ret.add (
-                new NetworkInfo(
+                new OperatorInfo(
                     strings[i+0],
                     strings[i+1],
                     strings[i+2],

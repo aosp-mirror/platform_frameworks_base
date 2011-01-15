@@ -27,7 +27,6 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 
 import com.android.internal.telephony.DataConnection;
-import com.android.internal.telephony.gsm.NetworkInfo;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 
 import java.util.List;
@@ -1056,7 +1055,7 @@ public interface Phone {
      * one of the following members:.<p>
      *<ul>
      * <li><code>response.obj.result</code> will be a <code>List</code> of
-     * <code>com.android.internal.telephony.gsm.NetworkInfo</code> objects, or</li>
+     * <code>OperatorInfo</code> objects, or</li>
      * <li><code>response.obj.exception</code> will be set with an exception
      * on failure.</li>
      * </ul>
@@ -1070,8 +1069,7 @@ public interface Phone {
      * @param response The message to dispatch when the network selection
      * is complete.
      *
-     * @see #selectNetworkManually(com.android.internal.telephony.gsm.NetworkInfo,
-     * android.os.Message )
+     * @see #selectNetworkManually(OperatorInfo, android.os.Message )
      */
     void setNetworkSelectionModeAutomatic(Message response);
 
@@ -1083,7 +1081,7 @@ public interface Phone {
      *
      * @see #setNetworkSelectionModeAutomatic(Message)
      */
-    void selectNetworkManually(NetworkInfo network,
+    void selectNetworkManually(OperatorInfo network,
                             Message response);
 
     /**
