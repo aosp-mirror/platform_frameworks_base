@@ -729,6 +729,15 @@ public final class BluetoothAdapter {
      * Create a listening, secure RFCOMM Bluetooth socket.
      * <p>A remote device connecting to this socket will be authenticated and
      * communication on this socket will be encrypted.
+     * <p> Use this socket only if an authenticated socket link is possible.
+     * Authentication refers to the authentication of the link key to
+     * prevent man-in-the-middle type of attacks.
+     * For example, for Bluetooth 2.1 devices, if any of the devices does not
+     * have an input and output capability or just has the ability to
+     * display a numeric key, a secure socket connection is not possible.
+     * In such a case, use {#link listenUsingInsecureRfcommOn}.
+     * For more details, refer to the Security Model section 5.2 (vol 3) of
+     * Bluetooth Core Specification version 2.1 + EDR.
      * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming
      * connections from a listening {@link BluetoothServerSocket}.
      * <p>Valid RFCOMM channels are in range 1 to 30.
@@ -756,6 +765,15 @@ public final class BluetoothAdapter {
      * Create a listening, secure RFCOMM Bluetooth socket with Service Record.
      * <p>A remote device connecting to this socket will be authenticated and
      * communication on this socket will be encrypted.
+     * <p> Use this socket only if an authenticated socket link is possible.
+     * Authentication refers to the authentication of the link key to
+     * prevent man-in-the-middle type of attacks.
+     * For example, for Bluetooth 2.1 devices, if any of the devices does not
+     * have an input and output capability or just has the ability to
+     * display a numeric key, a secure socket connection is not possible.
+     * In such a case, use {#link listenUsingInsecureRfcommWithServiceRecord}.
+     * For more details, refer to the Security Model section 5.2 (vol 3) of
+     * Bluetooth Core Specification version 2.1 + EDR.
      * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming
      * connections from a listening {@link BluetoothServerSocket}.
      * <p>The system will assign an unused RFCOMM channel to listen on.
@@ -776,6 +794,42 @@ public final class BluetoothAdapter {
      */
     public BluetoothServerSocket listenUsingRfcommWithServiceRecord(String name, UUID uuid)
             throws IOException {
+        return createNewRfcommSocketAndRecord(name, uuid, true, true);
+    }
+
+    /**
+     * Create a listening, insecure RFCOMM Bluetooth socket with Service Record.
+     * <p>The link key will be unauthenticated i.e the communication is
+     * vulnerable to Man In the Middle attacks. For Bluetooth 2.1 devices,
+     * the link key will be encrypted, as encryption is mandartory.
+     * For legacy devices (pre Bluetooth 2.1 devices) the link key will not
+     * be encrypted. Use {@link #listenUsingRfcommWithServiceRecord}, if an
+     * encrypted and authenticated communication channel is desired.
+     * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming
+     * connections from a listening {@link BluetoothServerSocket}.
+     * <p>The system will assign an unused RFCOMM channel to listen on.
+     * <p>The system will also register a Service Discovery
+     * Protocol (SDP) record with the local SDP server containing the specified
+     * UUID, service name, and auto-assigned channel. Remote Bluetooth devices
+     * can use the same UUID to query our SDP server and discover which channel
+     * to connect to. This SDP record will be removed when this socket is
+     * closed, or if this application closes unexpectedly.
+     * <p>Use {@link BluetoothDevice#createRfcommSocketToServiceRecord} to
+     * connect to this socket from another device using the same {@link UUID}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     * @param name service name for SDP record
+     * @param uuid uuid for SDP record
+     * @return a listening RFCOMM BluetoothServerSocket
+     * @throws IOException on error, for example Bluetooth not available, or
+     *                     insufficient permissions, or channel in use.
+     */
+    public BluetoothServerSocket listenUsingInsecureRfcommWithServiceRecord(String name, UUID uuid)
+            throws IOException {
+        return createNewRfcommSocketAndRecord(name, uuid, false, false);
+    }
+
+    private BluetoothServerSocket createNewRfcommSocketAndRecord(String name, UUID uuid,
+            boolean auth, boolean encrypt) throws IOException {
         RfcommChannelPicker picker = new RfcommChannelPicker(uuid);
 
         BluetoothServerSocket socket;
@@ -789,7 +843,7 @@ public final class BluetoothAdapter {
             }
 
             socket = new BluetoothServerSocket(
-                    BluetoothSocket.TYPE_RFCOMM, true, true, channel);
+                    BluetoothSocket.TYPE_RFCOMM, auth, encrypt, channel);
             errno = socket.mSocket.bindListen();
             if (errno == 0) {
                 if (DBG) Log.d(TAG, "listening on RFCOMM channel " + channel);
