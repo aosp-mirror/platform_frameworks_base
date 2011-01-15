@@ -787,6 +787,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         // We do the former in case mAdapter is null, and hence setDisplayedChild won't
         // set mWhichChild
         mWhichChild = ss.whichChild;
+
         setDisplayedChild(mWhichChild);
     }
 
