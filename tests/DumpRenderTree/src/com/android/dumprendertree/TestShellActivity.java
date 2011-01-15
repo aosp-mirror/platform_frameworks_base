@@ -75,6 +75,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         public void handleMessage(Message msg) {
             if (msg.what == MSG_TIMEOUT) {
                 mTimedOut = true;
+                mWebView.stopLoading();
                 if (mCallback != null)
                     mCallback.timedOut(mWebView.getUrl());
                 if (!mRequestedWebKitData) {
