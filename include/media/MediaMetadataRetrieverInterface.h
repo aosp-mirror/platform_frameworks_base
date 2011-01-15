@@ -32,9 +32,7 @@ public:
     virtual             ~MediaMetadataRetrieverBase() {}
     virtual status_t    setDataSource(const char *url) = 0;
     virtual status_t    setDataSource(int fd, int64_t offset, int64_t length) = 0;
-    virtual status_t    setMode(int mode) = 0;
-    virtual status_t    getMode(int* mode) const = 0;
-    virtual VideoFrame* captureFrame() = 0;
+    virtual VideoFrame* getFrameAtTime(int64_t timeUs, int option) = 0;
     virtual MediaAlbumArt* extractAlbumArt() = 0;
     virtual const char* extractMetadata(int keyCode) = 0;
 };
@@ -43,35 +41,12 @@ public:
 class MediaMetadataRetrieverInterface : public MediaMetadataRetrieverBase
 {
 public:
-    MediaMetadataRetrieverInterface()
-        : mMode(0) {
-    }
+    MediaMetadataRetrieverInterface() {}
 
     virtual             ~MediaMetadataRetrieverInterface() {}
-
-    // @param mode The intended mode of operations:
-    // can be any of the following:
-    // METADATA_MODE_NOOP: Experimental - just add and remove data source.
-    // METADATA_MODE_FRAME_CAPTURE_ONLY: For capture frame/thumbnail only.
-    // METADATA_MODE_METADATA_RETRIEVAL_ONLY: For meta data retrieval only.
-    // METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL: For both frame
-    //     capture and meta data retrieval.
-    virtual status_t    setMode(int mode) {
-                            if (mode < METADATA_MODE_NOOP ||
-                                mode > METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL) {
-                                return BAD_VALUE;
-                            }
-
-                            mMode = mode;
-                            return NO_ERROR;
-                        }
-
-    virtual status_t    getMode(int* mode) const { *mode = mMode; return NO_ERROR; }
-    virtual VideoFrame* captureFrame() { return NULL; }
+    virtual VideoFrame* getFrameAtTime(int64_t timeUs, int option) { return NULL; }
     virtual MediaAlbumArt* extractAlbumArt() { return NULL; }
     virtual const char* extractMetadata(int keyCode) { return NULL; }
-
-    uint32_t mMode;
 };
 
 }; // namespace android

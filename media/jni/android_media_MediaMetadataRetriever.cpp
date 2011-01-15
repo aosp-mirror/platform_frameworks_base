@@ -131,33 +131,9 @@ static void android_media_MediaMetadataRetriever_setDataSourceFD(JNIEnv *env, jo
     process_media_retriever_call(env, retriever->setDataSource(fd, offset, length), "java/lang/RuntimeException", "setDataSource failed");
 }
 
-static void android_media_MediaMetadataRetriever_setMode(JNIEnv *env, jobject thiz, jint mode)
+static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, jobject thiz, jlong timeUs, jint option)
 {
-    LOGV("setMode");
-    MediaMetadataRetriever* retriever = getRetriever(env, thiz);
-    if (retriever == 0) {
-        jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
-        return;
-    }
-    process_media_retriever_call(env, retriever->setMode(mode), "java/lang/RuntimeException", "setMode failed");
-}
-
-static int android_media_MediaMetadataRetriever_getMode(JNIEnv *env, jobject thiz)
-{
-    LOGV("getMode");
-    MediaMetadataRetriever* retriever = getRetriever(env, thiz);
-    if (retriever == 0) {
-        jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
-        return -1;  // Error
-    }
-    int mode = -1;
-    retriever->getMode(&mode);
-    return mode;
-}
-
-static jobject android_media_MediaMetadataRetriever_captureFrame(JNIEnv *env, jobject thiz)
-{
-    LOGV("captureFrame");
+    LOGV("getFrameAtTime: %lld us option: %d", timeUs, option);
     MediaMetadataRetriever* retriever = getRetriever(env, thiz);
     if (retriever == 0) {
         jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
@@ -166,12 +142,12 @@ static jobject android_media_MediaMetadataRetriever_captureFrame(JNIEnv *env, jo
 
     // Call native method to retrieve a video frame
     VideoFrame *videoFrame = NULL;
-    sp<IMemory> frameMemory = retriever->captureFrame();
+    sp<IMemory> frameMemory = retriever->getFrameAtTime(timeUs, option);
     if (frameMemory != 0) {  // cast the shared structure to a VideoFrame object
         videoFrame = static_cast<VideoFrame *>(frameMemory->pointer());
     }
     if (videoFrame == NULL) {
-        LOGE("captureFrame: videoFrame is a NULL pointer");
+        LOGE("getFrameAtTime: videoFrame is a NULL pointer");
         return NULL;
     }
 
@@ -213,7 +189,7 @@ static jobject android_media_MediaMetadataRetriever_captureFrame(JNIEnv *env, jo
     // Create a SkBitmap to hold the pixels
     SkBitmap *bitmap = new SkBitmap();
     if (bitmap == NULL) {
-        LOGE("captureFrame: cannot instantiate a SkBitmap object.");
+        LOGE("getFrameAtTime: cannot instantiate a SkBitmap object.");
         return NULL;
     }
     bitmap->setConfig(SkBitmap::kRGB_565_Config, videoFrame->mDisplayWidth, videoFrame->mDisplayHeight);
@@ -242,21 +218,26 @@ static jobject android_media_MediaMetadataRetriever_captureFrame(JNIEnv *env, jo
                 false);                         // filter
 }
 
-static jbyteArray android_media_MediaMetadataRetriever_extractAlbumArt(JNIEnv *env, jobject thiz)
+static jbyteArray android_media_MediaMetadataRetriever_getEmbeddedPicture(
+        JNIEnv *env, jobject thiz, jint pictureType)
 {
-    LOGV("extractAlbumArt");
+    LOGV("getEmbeddedPicture: %d", pictureType);
     MediaMetadataRetriever* retriever = getRetriever(env, thiz);
     if (retriever == 0) {
         jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
         return NULL;
     }
     MediaAlbumArt* mediaAlbumArt = NULL;
+
+    // FIXME:
+    // Use pictureType to retrieve the intended embedded picture and also change
+    // the method name to getEmbeddedPicture().
     sp<IMemory> albumArtMemory = retriever->extractAlbumArt();
     if (albumArtMemory != 0) {  // cast the shared structure to a MediaAlbumArt object
         mediaAlbumArt = static_cast<MediaAlbumArt *>(albumArtMemory->pointer());
     }
     if (mediaAlbumArt == NULL) {
-        LOGE("extractAlbumArt: Call to extractAlbumArt failed.");
+        LOGE("getEmbeddedPicture: Call to getEmbeddedPicture failed.");
         return NULL;
     }
 
@@ -264,7 +245,7 @@ static jbyteArray android_media_MediaMetadataRetriever_extractAlbumArt(JNIEnv *e
     char* data = (char*) mediaAlbumArt + sizeof(MediaAlbumArt);
     jbyteArray array = env->NewByteArray(len);
     if (!array) {  // OutOfMemoryError exception has already been thrown.
-        LOGE("extractAlbumArt: OutOfMemoryError is thrown.");
+        LOGE("getEmbeddedPicture: OutOfMemoryError is thrown.");
     } else {
         jbyte* bytes = env->GetByteArrayElements(array, NULL);
         if (bytes != NULL) {
@@ -365,11 +346,9 @@ static void android_media_MediaMetadataRetriever_native_setup(JNIEnv *env, jobje
 static JNINativeMethod nativeMethods[] = {
         {"setDataSource",   "(Ljava/lang/String;)V", (void *)android_media_MediaMetadataRetriever_setDataSource},
         {"setDataSource",   "(Ljava/io/FileDescriptor;JJ)V", (void *)android_media_MediaMetadataRetriever_setDataSourceFD},
-        {"setMode",         "(I)V", (void *)android_media_MediaMetadataRetriever_setMode},
-        {"getMode",         "()I",  (void *)android_media_MediaMetadataRetriever_getMode},
-        {"captureFrame",    "()Landroid/graphics/Bitmap;", (void *)android_media_MediaMetadataRetriever_captureFrame},
+        {"_getFrameAtTime", "(JI)Landroid/graphics/Bitmap;", (void *)android_media_MediaMetadataRetriever_getFrameAtTime},
         {"extractMetadata", "(I)Ljava/lang/String;", (void *)android_media_MediaMetadataRetriever_extractMetadata},
-        {"extractAlbumArt", "()[B", (void *)android_media_MediaMetadataRetriever_extractAlbumArt},
+        {"getEmbeddedPicture", "(I)[B", (void *)android_media_MediaMetadataRetriever_getEmbeddedPicture},
         {"release",         "()V", (void *)android_media_MediaMetadataRetriever_release},
         {"native_finalize", "()V", (void *)android_media_MediaMetadataRetriever_native_finalize},
         {"native_setup",    "()V", (void *)android_media_MediaMetadataRetriever_native_setup},
