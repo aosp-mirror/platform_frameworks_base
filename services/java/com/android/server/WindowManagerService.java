@@ -212,6 +212,10 @@ public class WindowManagerService extends IWindowManager.Stub
     // Maximum number of milliseconds to wait for input event injection.
     // FIXME is this value reasonable?
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
+
+    // Maximum number of milliseconds to wait for input devices to be enumerated before
+    // proceding with safe mode detection.
+    private static final int INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS = 1000;
     
     // Default input dispatching timeout in nanoseconds.
     private static final long DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS = 5000 * 1000000L;
@@ -5812,6 +5816,11 @@ public class WindowManagerService extends IWindowManager.Stub
         // Temporary input application object to provide to the input dispatcher.
         private InputApplication mTempInputApplication = new InputApplication();
         
+        // Set to true when the first input device configuration change notification
+        // is received to indicate that the input devices are ready.
+        private final Object mInputDevicesReadyMonitor = new Object();
+        private boolean mInputDevicesReady;
+
         /* Notifies the window manager about a broken input channel.
          * 
          * Called by the InputManager.
@@ -6007,7 +6016,32 @@ public class WindowManagerService extends IWindowManager.Stub
             // Also avoids keeping InputChannel objects referenced unnecessarily.
             mTempInputWindows.clear();
         }
-        
+
+        /* Notifies that the input device configuration has changed. */
+        public void notifyConfigurationChanged() {
+            sendNewConfiguration();
+
+            synchronized (mInputDevicesReadyMonitor) {
+                if (!mInputDevicesReady) {
+                    mInputDevicesReady = true;
+                    mInputDevicesReadyMonitor.notifyAll();
+                }
+            }
+        }
+
+        /* Waits until the built-in input devices have been configured. */
+        public boolean waitForInputDevicesReady(long timeoutMillis) {
+            synchronized (mInputDevicesReadyMonitor) {
+                if (!mInputDevicesReady) {
+                    try {
+                        mInputDevicesReadyMonitor.wait(timeoutMillis);
+                    } catch (InterruptedException ex) {
+                    }
+                }
+                return mInputDevicesReady;
+            }
+        }
+
         /* Notifies that the lid switch changed state. */
         public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
             mPolicy.notifyLidSwitchChanged(whenNanos, lidOpen);
@@ -6329,6 +6363,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public boolean detectSafeMode() {
+        if (!mInputMonitor.waitForInputDevicesReady(
+                INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS)) {
+            Slog.w(TAG, "Devices still not ready after waiting "
+                    + INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS
+                    + " milliseconds before attempting to detect safe mode.");
+        }
+
         mSafeMode = mPolicy.detectSafeMode();
         return mSafeMode;
     }
