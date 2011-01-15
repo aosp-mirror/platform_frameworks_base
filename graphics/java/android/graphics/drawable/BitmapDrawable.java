@@ -427,7 +427,7 @@ public class BitmapDrawable extends Drawable {
 
     @Override
     public final ConstantState getConstantState() {
-        mBitmapState.mChangingConfigurations = super.getChangingConfigurations();
+        mBitmapState.mChangingConfigurations = getChangingConfigurations();
         return mBitmapState;
     }
 

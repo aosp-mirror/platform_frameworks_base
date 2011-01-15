@@ -523,7 +523,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     @Override
     public ConstantState getConstantState() {
         if (mLayerState.canConstantState()) {
-            mLayerState.mChangingConfigurations = super.getChangingConfigurations();
+            mLayerState.mChangingConfigurations = getChangingConfigurations();
             return mLayerState;
         }
         return null;
