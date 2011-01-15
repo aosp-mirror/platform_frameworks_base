@@ -152,9 +152,16 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     private ContentObserver mAutoTimeObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
-            Log.i("CdmaServiceStateTracker", "Auto time state called ...");
-            revertToNitz();
+            Log.i("CdmaServiceStateTracker", "Auto time state changed");
+            revertToNitzTime();
+        }
+    };
 
+    private ContentObserver mAutoTimeZoneObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            Log.i("CdmaServiceStateTracker", "Auto time zone state changed");
+            revertToNitzTimeZone();
         }
     };
 
@@ -194,6 +201,9 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         cr.registerContentObserver(
                 Settings.System.getUriFor(Settings.System.AUTO_TIME), true,
                 mAutoTimeObserver);
+        cr.registerContentObserver(
+            Settings.System.getUriFor(Settings.System.AUTO_TIME_ZONE), true,
+            mAutoTimeZoneObserver);
         setSignalStrengthDefaultValues();
 
         mNeedToRegForRuimLoaded = true;
@@ -212,6 +222,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         cm.unSetOnSignalStrengthUpdate(this);
         cm.unSetOnNITZTime(this);
         cr.unregisterContentObserver(this.mAutoTimeObserver);
+        cr.unregisterContentObserver(this.mAutoTimeZoneObserver);
     }
 
     @Override
@@ -1579,17 +1590,26 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         phone.getContext().sendStickyBroadcast(intent);
     }
 
-     private void revertToNitz() {
+    private void revertToNitzTime() {
         if (Settings.System.getInt(cr, Settings.System.AUTO_TIME, 0) == 0) {
             return;
         }
-        Log.d(LOG_TAG, "Reverting to NITZ: tz='" + mSavedTimeZone
-                + "' mSavedTime=" + mSavedTime
+        Log.d(LOG_TAG, "Reverting to NITZ Time: mSavedTime=" + mSavedTime
                 + " mSavedAtTime=" + mSavedAtTime);
-        if (mSavedTimeZone != null && mSavedTime != 0 && mSavedAtTime != 0) {
-            setAndBroadcastNetworkSetTimeZone(mSavedTimeZone);
+        if (mSavedTime != 0 && mSavedAtTime != 0) {
             setAndBroadcastNetworkSetTime(mSavedTime
                     + (SystemClock.elapsedRealtime() - mSavedAtTime));
+        }
+    }
+
+    private void revertToNitzTimeZone() {
+        if (Settings.System.getInt(phone.getContext().getContentResolver(),
+                Settings.System.AUTO_TIME_ZONE, 0) == 0) {
+            return;
+        }
+        Log.d(LOG_TAG, "Reverting to NITZ TimeZone: tz='" + mSavedTimeZone);
+        if (mSavedTimeZone != null) {
+            setAndBroadcastNetworkSetTimeZone(mSavedTimeZone);
         }
     }
 
