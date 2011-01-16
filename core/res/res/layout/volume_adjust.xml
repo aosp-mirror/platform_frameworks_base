@@ -14,24 +14,32 @@
      limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@android:drawable/toast_frame"
-    android:orientation="vertical"
-    android:gravity="center_horizontal">
+    android:background="@android:drawable/dialog_full_holo_dark"
+    android:gravity="left">
+
+    <LinearLayout
+        android:layout_width="416dip"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dip"
+        android:paddingTop="16dip"
+        android:paddingRight="16dip"
+        android:paddingBottom="8dip"
+        android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14dip"
-        android:gravity="center_vertical">
+        android:layout_marginBottom="8dip"
+        android:gravity="left">
     
         <ImageView
             android:id="@+id/other_stream_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="6dip" />
+            android:layout_marginRight="16dip" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -56,13 +64,9 @@
     <ProgressBar
         style="?android:attr/progressBarStyleHorizontal"
         android:id="@+id/level"
-        android:layout_width="200dip"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="14dip"
-        android:layout_marginBottom="14dip"
-        android:layout_marginLeft="25dip"
-        android:layout_marginRight="25dip" />
-
-</LinearLayout>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    </LinearLayout>
+</FrameLayout>
 
 
