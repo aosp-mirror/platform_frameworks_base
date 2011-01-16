@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
@@ -45,7 +46,6 @@ public class AutoRotateController implements CompoundButton.OnCheckedChangeListe
     }
 
     public void onCheckedChanged(CompoundButton view, boolean checked) {
-        Slog.d(TAG, "onCheckedChanged checked=" + checked + " mLockRotation=" + mLockRotation);
         if (checked != mLockRotation) {
             setLockRotation(checked);
         }
@@ -56,18 +56,22 @@ public class AutoRotateController implements CompoundButton.OnCheckedChangeListe
         return 0 == Settings.System.getInt(cr, Settings.System.ACCELEROMETER_ROTATION, 0);
     }
 
-    private void setLockRotation(boolean locked) {
+    private void setLockRotation(final boolean locked) {
         mLockRotation = locked;
-        try {
-            IWindowManager wm = IWindowManager.Stub.asInterface(ServiceManager.getService(
-                        Context.WINDOW_SERVICE));
-            ContentResolver cr = mContext.getContentResolver();
-            if (locked) {
-                wm.freezeRotation();
-            } else {
-                wm.thawRotation();
-            }
-        } catch (RemoteException exc) {
-        }
+        AsyncTask.execute(new Runnable() {
+                public void run() {
+                    try {
+                        IWindowManager wm = IWindowManager.Stub.asInterface(
+                                ServiceManager.getService(Context.WINDOW_SERVICE));
+                        ContentResolver cr = mContext.getContentResolver();
+                        if (locked) {
+                            wm.freezeRotation();
+                        } else {
+                            wm.thawRotation();
+                        }
+                    } catch (RemoteException exc) {
+                    }
+                }
+            });
     }
 }
