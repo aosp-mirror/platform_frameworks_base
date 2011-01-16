@@ -462,8 +462,10 @@ static void* symbolLookup(void* pContext, char const* name) {
     return NULL;
 }
 
+#if 0
 extern const char rs_runtime_lib_bc[];
 extern unsigned rs_runtime_lib_bc_size;
+#endif
 
 void ScriptCState::runCompiler(Context *rsc,
                                ScriptC *s,
@@ -484,11 +486,12 @@ void ScriptCState::runCompiler(Context *rsc,
             // Handle Fatal Error
         }
 
-#if 0
+#if 1
         if (bccLinkBC(s->mBccScript,
                       resName,
-                      rs_runtime_lib_bc,
-                      rs_runtime_lib_bc_size, 0) != 0) {
+                      NULL /*rs_runtime_lib_bc*/,
+                      0 /*rs_runtime_lib_bc_size*/,
+                      0) != 0) {
             LOGE("bcc: FAILS to link bitcode");
             // Handle Fatal Error
         }
