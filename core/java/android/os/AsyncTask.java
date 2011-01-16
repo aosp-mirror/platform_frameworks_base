@@ -16,9 +16,11 @@
 
 package android.os;
 
+import java.util.ArrayDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -151,8 +153,6 @@ public abstract class AsyncTask<Params, Progress, Result> {
     private static final int MAXIMUM_POOL_SIZE = 128;
     private static final int KEEP_ALIVE = 1;
 
-    private static final BlockingQueue<Runnable> sWorkQueue =
-            new LinkedBlockingQueue<Runnable>(10);
 
     private static final ThreadFactory sThreadFactory = new ThreadFactory() {
         private final AtomicInteger mCount = new AtomicInteger(1);
@@ -162,8 +162,17 @@ public abstract class AsyncTask<Params, Progress, Result> {
         }
     };
 
-    private static final ThreadPoolExecutor sExecutor = new ThreadPoolExecutor(CORE_POOL_SIZE,
-            MAXIMUM_POOL_SIZE, KEEP_ALIVE, TimeUnit.SECONDS, sWorkQueue, sThreadFactory);
+    private static final BlockingQueue<Runnable> sPoolWorkQueue =
+            new LinkedBlockingQueue<Runnable>(10);
+
+    /**
+     * A {@link ThreadPoolExecutor} that can be used to execute tasks in parallel.
+     */
+    public static final ThreadPoolExecutor THREAD_POOL_EXECUTOR
+            = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
+                    TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
+
+    private static final SerialExecutor sSerialExecutor = new SerialExecutor();
 
     private static final int MESSAGE_POST_RESULT = 0x1;
     private static final int MESSAGE_POST_PROGRESS = 0x2;
@@ -176,6 +185,32 @@ public abstract class AsyncTask<Params, Progress, Result> {
     private volatile Status mStatus = Status.PENDING;
     
     private final AtomicBoolean mTaskInvoked = new AtomicBoolean();
+
+    private static class SerialExecutor implements Executor {
+        final ArrayDeque<Runnable> mTasks = new ArrayDeque<Runnable>();
+        Runnable mActive;
+
+        public synchronized void execute(final Runnable r) {
+            mTasks.offer(new Runnable() {
+                public void run() {
+                    try {
+                        r.run();
+                    } finally {
+                        scheduleNext();
+                    }
+                }
+            });
+            if (mActive == null) {
+                scheduleNext();
+            }
+        }
+
+        protected synchronized void scheduleNext() {
+            if ((mActive = mTasks.poll()) != null) {
+                THREAD_POOL_EXECUTOR.execute(mActive);
+            }
+        }
+    }
 
     /**
      * Indicates the current status of the task. Each status will be set only once
@@ -433,7 +468,11 @@ public abstract class AsyncTask<Params, Progress, Result> {
 
     /**
      * Executes the task with the specified parameters. The task returns
-     * itself (this) so that the caller can keep a reference to it.
+     * itself (this) so that the caller can keep a reference to it.  The tasks
+     * started by all invocations of this method in a given process are run
+     * sequentially.  Call the {@link #execute(Executor,Params...) execute(Executor,Params...)}
+     * with a custom {@link Executor} to have finer grained control over how the
+     * tasks are run.
      *
      * This method must be invoked on the UI thread.
      *
@@ -445,6 +484,26 @@ public abstract class AsyncTask<Params, Progress, Result> {
      *         {@link AsyncTask.Status#RUNNING} or {@link AsyncTask.Status#FINISHED}.
      */
     public final AsyncTask<Params, Progress, Result> execute(Params... params) {
+        return executeOnExecutor(sSerialExecutor, params);
+    }
+
+    /**
+     * Executes the task with the specified parameters. The task returns
+     * itself (this) so that the caller can keep a reference to it.
+     *
+     * This method must be invoked on the UI thread.
+     *
+     * @param exec The executor to use.  {@link #THREAD_POOL_EXECUTOR} is available as a
+     *              convenient process-wide thread pool for tasks that are loosely coupled.
+     * @param params The parameters of the task.
+     *
+     * @return This instance of AsyncTask.
+     *
+     * @throws IllegalStateException If {@link #getStatus()} returns either
+     *         {@link AsyncTask.Status#RUNNING} or {@link AsyncTask.Status#FINISHED}.
+     */
+    public final AsyncTask<Params, Progress, Result> executeOnExecutor(Executor exec,
+            Params... params) {
         if (mStatus != Status.PENDING) {
             switch (mStatus) {
                 case RUNNING:
@@ -462,9 +521,17 @@ public abstract class AsyncTask<Params, Progress, Result> {
         onPreExecute();
 
         mWorker.mParams = params;
-        sExecutor.execute(mFuture);
+        exec.execute(mFuture);
 
         return this;
+    }
+
+    /**
+     * Schedules the {@link Runnable} in serial with the other AsyncTasks that were started
+     * with {@link #execute}.
+     */
+    public static void execute(Runnable runnable) {
+        sSerialExecutor.execute(runnable);
     }
 
     /**
