@@ -466,7 +466,7 @@ bool Surface::isValid() {
     return mInitCheck == NO_ERROR;
 }
 
-status_t Surface::validate() const
+status_t Surface::validate(bool inCancelBuffer) const
 {
     // check that we initialized ourself properly
     if (mInitCheck != NO_ERROR) {
@@ -476,15 +476,6 @@ status_t Surface::validate() const
 
     // verify the identity of this surface
     uint32_t identity = mSharedBufferClient->getIdentity();
-
-    // this is a bit of a (temporary) special case, identity==0 means that
-    // no operation are allowed from the client (eg: dequeue/queue), this
-    // is used with PUSH_BUFFER surfaces for instance
-    if (identity == 0) {
-        LOGE("[Surface] invalid operation (identity=%u)", mIdentity);
-        return INVALID_OPERATION;
-    }
-
     if (mIdentity != identity) {
         LOGE("[Surface] using an invalid surface, "
                 "identity=%u should be %d",
@@ -492,17 +483,19 @@ status_t Surface::validate() const
         CallStack stack;
         stack.update();
         stack.dump("Surface");
-        return NO_INIT;
+        return BAD_INDEX;
     }
 
     // check the surface didn't become invalid
     status_t err = mSharedBufferClient->getStatus();
     if (err != NO_ERROR) {
-        LOGE("surface (identity=%u) is invalid, err=%d (%s)",
-                mIdentity, err, strerror(-err));
-        CallStack stack;
-        stack.update();
-        stack.dump("Surface");
+        if (!inCancelBuffer) {
+            LOGE("surface (identity=%u) is invalid, err=%d (%s)",
+                    mIdentity, err, strerror(-err));
+            CallStack stack;
+            stack.update();
+            stack.dump("Surface");
+        }
         return err;
     }
 
@@ -633,12 +626,12 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
 
 int Surface::cancelBuffer(android_native_buffer_t* buffer)
 {
-    status_t err = validate();
+    status_t err = validate(true);
     switch (err) {
     case NO_ERROR:
         // no error, common case
         break;
-    case INVALID_OPERATION:
+    case BAD_INDEX:
         // legitimate errors here
         return err;
     default:
