@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import android.app.Notification;
 import android.os.IBinder;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.android.internal.statusbar.StatusBarNotification;
 
@@ -36,6 +37,7 @@ public class NotificationData {
         public View row; // the outer expanded view
         public View content; // takes the click events and sends the PendingIntent
         public View expanded; // the inflated RemoteViews
+        public ImageView largeIcon;
         public Entry() {}
         public Entry(IBinder key, StatusBarNotification n, StatusBarIconView ic) {
             this.key = key;
@@ -88,6 +90,7 @@ public class NotificationData {
         entry.content = content;
         entry.expanded = expanded;
         entry.icon = icon;
+        entry.largeIcon = null; // TODO add support for large icons
         return add(entry);
     }
 
