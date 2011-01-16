@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -212,6 +211,9 @@ public class ExpandableListView extends ListView {
                 .getDimensionPixelSize(com.android.internal.R.styleable.ExpandableListView_indicatorLeft, 0);
         mIndicatorRight = a
                 .getDimensionPixelSize(com.android.internal.R.styleable.ExpandableListView_indicatorRight, 0);
+        if (mIndicatorRight == 0) {
+            mIndicatorRight = mIndicatorLeft + mGroupIndicator.getIntrinsicWidth();
+        }
         mChildIndicatorLeft = a.getDimensionPixelSize(
                 com.android.internal.R.styleable.ExpandableListView_childIndicatorLeft, CHILD_INDICATOR_INHERIT);
         mChildIndicatorRight = a.getDimensionPixelSize(
