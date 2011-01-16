@@ -680,6 +680,7 @@ protected:
             ORIENTATION_CALIBRATION_DEFAULT,
             ORIENTATION_CALIBRATION_NONE,
             ORIENTATION_CALIBRATION_INTERPOLATED,
+            ORIENTATION_CALIBRATION_VECTOR,
         };
 
         OrientationCalibration orientationCalibration;
