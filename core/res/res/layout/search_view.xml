@@ -100,8 +100,8 @@
                 android:id="@+id/search_close_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:paddingLeft="4dip"
-                android:paddingRight="4dip"
+                android:paddingLeft="8dip"
+                android:paddingRight="8dip"
                 android:layout_gravity="center_vertical"
                 android:background="?android:attr/selectableItemBackground"
                 android:src="?android:attr/searchViewCloseIcon"
@@ -111,26 +111,34 @@
 
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/search_go_btn"
+    <LinearLayout
+        android:id="@+id/submit_area"
+        android:orientation="horizontal"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_vertical"
-        android:paddingLeft="4dip"
-        android:paddingRight="4dip"
-        android:background="?android:attr/selectableItemBackground"
-        android:src="?android:attr/searchViewGoIcon"
-    />
+        android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/search_voice_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_vertical"
-        android:paddingLeft="4dip"
-        android:paddingRight="4dip"
-        android:src="?android:attr/searchViewVoiceIcon"
-        android:background="?android:attr/selectableItemBackground"
-        android:visibility="gone"
-    />
+        <ImageView
+            android:id="@+id/search_go_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="16dip"
+            android:paddingRight="16dip"
+            android:background="?android:attr/selectableItemBackground"
+            android:src="?android:attr/searchViewGoIcon"
+            android:visibility="gone"
+        />
+
+        <ImageView
+            android:id="@+id/search_voice_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="16dip"
+            android:paddingRight="16dip"
+            android:src="?android:attr/searchViewVoiceIcon"
+            android:background="?android:attr/selectableItemBackground"
+            android:visibility="gone"
+        />
+    </LinearLayout>
 </LinearLayout>
