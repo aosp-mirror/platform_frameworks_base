@@ -274,6 +274,25 @@ public class WifiManager {
      * @see #ERROR_AUTHENTICATING
      */
     public static final String EXTRA_SUPPLICANT_ERROR = "supplicantError";
+
+    /**
+     * Broadcast intent action for reporting errors
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ERROR_ACTION = "android.net.wifi.ERROR";
+    /**
+     * The type of error being reported
+     * @hide
+     */
+    public static final String EXTRA_ERROR_CODE = "errorCode";
+
+    /**
+     * Valid error codes
+     * @hide
+     */
+    public static final int WPS_OVERLAP_ERROR = 1;
+
     /**
      * Broadcast intent action indicating that the configured networks changed.
      * This can be as a result of adding/updating/deleting a network
