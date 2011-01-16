@@ -188,12 +188,7 @@ void Allocation::uploadToTexture(const Context *rsc) {
         isFirstUpload = true;
     }
 
-    GLenum target = (GLenum)getGLTarget();
-    if (target == GL_TEXTURE_2D) {
-        upload2DTexture(isFirstUpload, mPtr);
-    } else if (target == GL_TEXTURE_CUBE_MAP) {
-        uploadCubeTexture(isFirstUpload);
-    }
+    upload2DTexture(isFirstUpload);
 
     if (!(mUsageFlags & RS_ALLOCATION_USAGE_SCRIPT)) {
         freeScriptMemory();
@@ -201,6 +196,15 @@ void Allocation::uploadToTexture(const Context *rsc) {
 
     rsc->checkError("Allocation::uploadToTexture");
 }
+
+const static GLenum gFaceOrder[] = {
+    GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+    GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+    GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+    GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+    GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+    GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+};
 
 void Allocation::update2DTexture(const void *ptr, uint32_t xoff, uint32_t yoff,
                                  uint32_t lod, RsAllocationCubemapFace face,
@@ -210,10 +214,14 @@ void Allocation::update2DTexture(const void *ptr, uint32_t xoff, uint32_t yoff,
     GLenum target = (GLenum)getGLTarget();
     glBindTexture(target, mTextureID);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glTexSubImage2D(GL_TEXTURE_2D, lod, xoff, yoff, w, h, format, type, ptr);
+    GLenum t = GL_TEXTURE_2D;
+    if (mType->getDimFaces()) {
+        t = gFaceOrder[face];
+    }
+    glTexSubImage2D(t, lod, xoff, yoff, w, h, format, type, ptr);
 }
 
-void Allocation::upload2DTexture(bool isFirstUpload, const void *ptr) {
+void Allocation::upload2DTexture(bool isFirstUpload) {
     GLenum type = mType->getElement()->getComponent().getGLType();
     GLenum format = mType->getElement()->getComponent().getGLFormat();
 
@@ -221,62 +229,29 @@ void Allocation::upload2DTexture(bool isFirstUpload, const void *ptr) {
     glBindTexture(target, mTextureID);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    for (uint32_t lod = 0; lod < mType->getLODCount(); lod++) {
-        const uint8_t *p = (const uint8_t *)ptr;
-        p += mType->getLODOffset(lod);
-
-        if (isFirstUpload) {
-            glTexImage2D(GL_TEXTURE_2D, lod, format,
-                         mType->getLODDimX(lod), mType->getLODDimY(lod),
-                         0, format, type, p);
-        } else {
-            glTexSubImage2D(GL_TEXTURE_2D, lod, 0, 0,
-                            mType->getLODDimX(lod), mType->getLODDimY(lod),
-                            format, type, p);
-        }
+    uint32_t faceCount = 1;
+    if (mType->getDimFaces()) {
+        faceCount = 6;
     }
 
-    if (mMipmapControl == RS_ALLOCATION_MIPMAP_ON_SYNC_TO_TEXTURE) {
-#ifndef ANDROID_RS_BUILD_FOR_HOST
-        glGenerateMipmap(target);
-#endif //ANDROID_RS_BUILD_FOR_HOST
-    }
-}
-
-void Allocation::uploadCubeTexture(bool isFirstUpload) {
-    GLenum type = mType->getElement()->getComponent().getGLType();
-    GLenum format = mType->getElement()->getComponent().getGLFormat();
-
-    GLenum target = (GLenum)getGLTarget();
-    glBindTexture(target, mTextureID);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    GLenum faceOrder[] = {
-        GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-        GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-        GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-        GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-        GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-        GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-    };
-
-    Adapter2D adapt(getContext(), this);
-    for (uint32_t face = 0; face < 6; face ++) {
-        adapt.setFace(face);
-
+    for (uint32_t face = 0; face < faceCount; face ++) {
         for (uint32_t lod = 0; lod < mType->getLODCount(); lod++) {
-            adapt.setLOD(lod);
+            const uint8_t *p = (const uint8_t *)mPtr;
+            p += mType->getLODFaceOffset(lod, (RsAllocationCubemapFace)face, 0, 0);
 
-            uint16_t * ptr = static_cast<uint16_t *>(adapt.getElement(0,0));
+            GLenum t = GL_TEXTURE_2D;
+            if (mType->getDimFaces()) {
+                t = gFaceOrder[face];
+            }
 
             if (isFirstUpload) {
-                glTexImage2D(faceOrder[face], lod, format,
-                             adapt.getDimX(), adapt.getDimY(),
-                             0, format, type, ptr);
+                glTexImage2D(t, lod, format,
+                             mType->getLODDimX(lod), mType->getLODDimY(lod),
+                             0, format, type, p);
             } else {
-                glTexSubImage2D(faceOrder[face], lod, 0, 0,
-                                adapt.getDimX(), adapt.getDimY(),
-                                format, type, ptr);
+                glTexSubImage2D(t, lod, 0, 0,
+                                mType->getLODDimX(lod), mType->getLODDimY(lod),
+                                format, type, p);
             }
         }
     }
@@ -364,7 +339,7 @@ void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t lod, 
     if (mPtr) {
         const uint8_t *src = static_cast<const uint8_t *>(data);
         uint8_t *dst = static_cast<uint8_t *>(mPtr);
-        dst += mType->getLODOffset(lod, xoff, yoff);
+        dst += mType->getLODFaceOffset(lod, face, xoff, yoff);
 
         //LOGE("            %p  %p  %i  ", dst, src, eSize);
         for (uint32_t line=yoff; line < (yoff+h); line++) {
