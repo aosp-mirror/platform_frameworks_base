@@ -56,7 +56,7 @@ class FastScroller {
     private static final int[] DEFAULT_STATES = new int[0];
 
     private static final int[] ATTRS = new int[] {
-        android.R.attr.textColorPrimary,
+        android.R.attr.fastScrollTextColor,
         android.R.attr.fastScrollThumbDrawable,
         android.R.attr.fastScrollTrackDrawable,
         android.R.attr.fastScrollPreviewBackgroundLeft,
@@ -64,7 +64,7 @@ class FastScroller {
         android.R.attr.fastScrollOverlayPosition
     };
 
-    private static final int PRIMARY_TEXT_COLOR = 0;
+    private static final int TEXT_COLOR = 0;
     private static final int THUMB_DRAWABLE = 1;
     private static final int TRACK_DRAWABLE = 2;
     private static final int PREVIEW_BACKGROUND_LEFT = 3;
@@ -247,7 +247,7 @@ class FastScroller {
         mPaint.setTextAlign(Paint.Align.CENTER);
         mPaint.setTextSize(mOverlaySize / 2);
 
-        ColorStateList textColor = ta.getColorStateList(PRIMARY_TEXT_COLOR);
+        ColorStateList textColor = ta.getColorStateList(TEXT_COLOR);
         int textColorNormal = textColor.getDefaultColor();
         mPaint.setColor(textColorNormal);
         mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
