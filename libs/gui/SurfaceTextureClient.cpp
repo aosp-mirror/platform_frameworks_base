@@ -111,7 +111,7 @@ int SurfaceTextureClient::cancelBuffer(android_native_buffer_t* buffer) {
     LOGV("SurfaceTextureClient::cancelBuffer");
     Mutex::Autolock lock(mMutex);
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
-        if (mSlots[i].get() == buffer) {
+        if (mSlots[i]->handle == buffer->handle) {
             mSurfaceTexture->cancelBuffer(i);
             return OK;
         }
@@ -129,7 +129,7 @@ int SurfaceTextureClient::queueBuffer(android_native_buffer_t* buffer) {
     LOGV("SurfaceTextureClient::queueBuffer");
     Mutex::Autolock lock(mMutex);
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
-        if (mSlots[i].get() == GraphicBuffer::getSelf(buffer)) {
+        if (mSlots[i]->handle == buffer->handle) {
             return mSurfaceTexture->queueBuffer(i);
         }
     }
