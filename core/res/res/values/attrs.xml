@@ -544,6 +544,9 @@
             <enum name="floating" value="0" />
             <enum name="atThumb" value="1" />
         </attr>
+        <!-- Text color for the fast scroll index overlay. Make sure it
+             plays nicely with fastScrollPreviewBackground[Left|Right]. -->
+        <attr name="fastScrollTextColor" format="color" />
 
         <!-- =================== -->
         <!-- Action bar styles   -->
