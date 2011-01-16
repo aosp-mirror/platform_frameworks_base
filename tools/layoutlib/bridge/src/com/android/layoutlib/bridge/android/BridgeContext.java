@@ -20,6 +20,7 @@ import com.android.ide.common.rendering.api.IProjectCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.StyleResourceValue;
+import com.android.ide.common.resources.ResourceResolver;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.Stack;
@@ -76,12 +77,9 @@ public final class BridgeContext extends Activity {
     private Resources mResources;
     private Theme mTheme;
     private final HashMap<View, Object> mViewKeyMap = new HashMap<View, Object>();
-    private final StyleResourceValue mThemeValues;
     private final Object mProjectKey;
     private final DisplayMetrics mMetrics;
-    private final Map<String, Map<String, ResourceValue>> mProjectResources;
-    private final Map<String, Map<String, ResourceValue>> mFrameworkResources;
-    private final Map<StyleResourceValue, StyleResourceValue> mStyleInheritanceMap;
+    private final ResourceResolver mResourceResolver;
 
     private final Map<Object, Map<String, String>> mDefaultPropMaps =
         new IdentityHashMap<Object, Map<String,String>>();
@@ -116,19 +114,13 @@ public final class BridgeContext extends Activity {
      * @param projectCallback
      */
     public BridgeContext(Object projectKey, DisplayMetrics metrics,
-            StyleResourceValue currentTheme,
-            Map<String, Map<String, ResourceValue>> projectResources,
-            Map<String, Map<String, ResourceValue>> frameworkResources,
-            Map<StyleResourceValue, StyleResourceValue> styleInheritanceMap,
+            ResourceResolver resourceResolver,
             IProjectCallback projectCallback) {
         mProjectKey = projectKey;
         mMetrics = metrics;
         mProjectCallback = projectCallback;
 
-        mThemeValues = currentTheme;
-        mProjectResources = projectResources;
-        mFrameworkResources = frameworkResources;
-        mStyleInheritanceMap = styleInheritanceMap;
+        mResourceResolver = resourceResolver;
 
         mFragments.mCurState = Fragment.CREATED;
         mFragments.mActivity = this;
@@ -178,6 +170,10 @@ public final class BridgeContext extends Activity {
 
     public IProjectCallback getProjectCallback() {
         return mProjectCallback;
+    }
+
+    public ResourceResolver getResolver() {
+        return mResourceResolver;
     }
 
     public Map<String, String> getDefaultPropMap(Object key) {
@@ -265,7 +261,7 @@ public final class BridgeContext extends Activity {
 
     @Override
     public final TypedArray obtainStyledAttributes(int[] attrs) {
-        return createStyleBasedTypedArray(mThemeValues, attrs);
+        return createStyleBasedTypedArray(mResourceResolver.getTheme(), attrs);
     }
 
     @Override
@@ -362,7 +358,8 @@ public final class BridgeContext extends Activity {
             customStyle = set.getAttributeValue(null /* namespace*/, "style");
         }
         if (customStyle != null) {
-            ResourceValue item = findResValue(customStyle, false /*forceFrameworkOnly*/);
+            ResourceValue item = mResourceResolver.findResValue(customStyle,
+                    false /*forceFrameworkOnly*/);
 
             if (item instanceof StyleResourceValue) {
                 defStyleValues = (StyleResourceValue)item;
@@ -378,22 +375,21 @@ public final class BridgeContext extends Activity {
             }
 
             // look for the style in the current theme, and its parent:
-            if (mThemeValues != null) {
-                ResourceValue item = findItemInStyle(mThemeValues, defStyleName);
+            ResourceValue item = mResourceResolver.findItemInTheme(defStyleName);
 
-                if (item != null) {
-                    // item is a reference to a style entry. Search for it.
-                    item = findResValue(item.getValue(), false /*forceFrameworkOnly*/);
+            if (item != null) {
+                // item is a reference to a style entry. Search for it.
+                item = mResourceResolver.findResValue(item.getValue(),
+                        false /*forceFrameworkOnly*/);
 
-                    if (item instanceof StyleResourceValue) {
-                        defStyleValues = (StyleResourceValue)item;
-                    }
-                } else {
-                    Bridge.getLog().error(null,
-                            String.format(
-                                    "Failed to find style '%s' in current theme", defStyleName),
-                            null /*data*/);
+                if (item instanceof StyleResourceValue) {
+                    defStyleValues = (StyleResourceValue)item;
                 }
+            } else {
+                Bridge.getLog().error(null,
+                        String.format(
+                                "Failed to find style '%s' in current theme", defStyleName),
+                        null /*data*/);
             }
         }
 
@@ -425,13 +421,13 @@ public final class BridgeContext extends Activity {
 
                     // look for the value in the defStyle first (and its parent if needed)
                     if (defStyleValues != null) {
-                        resValue = findItemInStyle(defStyleValues, name);
+                        resValue = mResourceResolver.findItemInStyle(defStyleValues, name);
                     }
 
                     // if the item is not present in the defStyle, we look in the main theme (and
                     // its parent themes)
-                    if (resValue == null && mThemeValues != null) {
-                        resValue = findItemInStyle(mThemeValues, name);
+                    if (resValue == null) {
+                        resValue = mResourceResolver.findItemInTheme(name);
                     }
 
                     // if we found a value, we make sure this doesn't reference another value.
@@ -442,14 +438,15 @@ public final class BridgeContext extends Activity {
                             defaultPropMap.put(name, resValue.getValue());
                         }
 
-                        resValue = resolveResValue(resValue);
+                        resValue = mResourceResolver.resolveResValue(resValue);
                     }
 
                     ta.bridgeSetValue(index, name, resValue);
                 } else {
                     // there is a value in the XML, but we need to resolve it in case it's
                     // referencing another resource or a theme value.
-                    ta.bridgeSetValue(index, name, resolveValue(null, name, value, isPlatformFile));
+                    ta.bridgeSetValue(index, name,
+                            mResourceResolver.resolveValue(null, name, value, isPlatformFile));
                 }
             }
         }
@@ -487,10 +484,10 @@ public final class BridgeContext extends Activity {
             String name = styleAttribute.getValue();
 
             // get the value from the style, or its parent styles.
-            ResourceValue resValue = findItemInStyle(style, name);
+            ResourceValue resValue = mResourceResolver.findItemInStyle(style, name);
 
             // resolve it to make sure there are no references left.
-            ta.bridgeSetValue(index, name, resolveResValue(resValue));
+            ta.bridgeSetValue(index, name, mResourceResolver.resolveResValue(resValue));
         }
 
         ta.sealArray();
@@ -498,295 +495,6 @@ public final class BridgeContext extends Activity {
         return ta;
     }
 
-
-    /**
-     * Resolves the value of a resource, if the value references a theme or resource value.
-     * <p/>
-     * This method ensures that it returns a {@link ResourceValue} object that does not
-     * reference another resource.
-     * If the resource cannot be resolved, it returns <code>null</code>.
-     * <p/>
-     * If a value that does not need to be resolved is given, the method will return a new
-     * instance of {@link ResourceValue} that contains the input value.
-     *
-     * @param type the type of the resource
-     * @param name the name of the attribute containing this value.
-     * @param value the resource value, or reference to resolve
-     * @param isFrameworkValue whether the value is a framework value.
-     *
-     * @return the resolved resource value or <code>null</code> if it failed to resolve it.
-     */
-    private ResourceValue resolveValue(String type, String name, String value,
-            boolean isFrameworkValue) {
-        if (value == null) {
-            return null;
-        }
-
-        // get the ResourceValue referenced by this value
-        ResourceValue resValue = findResValue(value, isFrameworkValue);
-
-        // if resValue is null, but value is not null, this means it was not a reference.
-        // we return the name/value wrapper in a ResourceValue. the isFramework flag doesn't
-        // matter.
-        if (resValue == null) {
-            return new ResourceValue(type, name, value, isFrameworkValue);
-        }
-
-        // we resolved a first reference, but we need to make sure this isn't a reference also.
-        return resolveResValue(resValue);
-    }
-
-    /**
-     * Returns the {@link ResourceValue} referenced by the value of <var>value</var>.
-     * <p/>
-     * This method ensures that it returns a {@link ResourceValue} object that does not
-     * reference another resource.
-     * If the resource cannot be resolved, it returns <code>null</code>.
-     * <p/>
-     * If a value that does not need to be resolved is given, the method will return the input
-     * value.
-     *
-     * @param value the value containing the reference to resolve.
-     * @return a {@link ResourceValue} object or <code>null</code>
-     */
-    public ResourceValue resolveResValue(ResourceValue value) {
-        if (value == null) {
-            return null;
-        }
-
-        // if the resource value is a style, we simply return it.
-        if (value instanceof StyleResourceValue) {
-            return value;
-        }
-
-        // else attempt to find another ResourceValue referenced by this one.
-        ResourceValue resolvedValue = findResValue(value.getValue(), value.isFramework());
-
-        // if the value did not reference anything, then we simply return the input value
-        if (resolvedValue == null) {
-            return value;
-        }
-
-        // otherwise, we attempt to resolve this new value as well
-        return resolveResValue(resolvedValue);
-    }
-
-    /**
-     * Searches for, and returns a {@link ResourceValue} by its reference.
-     * <p/>
-     * The reference format can be:
-     * <pre>@resType/resName</pre>
-     * <pre>@android:resType/resName</pre>
-     * <pre>@resType/android:resName</pre>
-     * <pre>?resType/resName</pre>
-     * <pre>?android:resType/resName</pre>
-     * <pre>?resType/android:resName</pre>
-     * Any other string format will return <code>null</code>.
-     * <p/>
-     * The actual format of a reference is <pre>@[namespace:]resType/resName</pre> but this method
-     * only support the android namespace.
-     *
-     * @param reference the resource reference to search for.
-     * @param forceFrameworkOnly if true all references are considered to be toward framework
-     *      resource even if the reference does not include the android: prefix.
-     * @return a {@link ResourceValue} or <code>null</code>.
-     */
-    ResourceValue findResValue(String reference, boolean forceFrameworkOnly) {
-        if (reference == null) {
-            return null;
-        }
-        if (reference.startsWith(BridgeConstants.PREFIX_THEME_REF)) {
-            // no theme? no need to go further!
-            if (mThemeValues == null) {
-                return null;
-            }
-
-            boolean frameworkOnly = false;
-
-            // eliminate the prefix from the string
-            if (reference.startsWith(BridgeConstants.PREFIX_ANDROID_THEME_REF)) {
-                frameworkOnly = true;
-                reference = reference.substring(BridgeConstants.PREFIX_ANDROID_THEME_REF.length());
-            } else {
-                reference = reference.substring(BridgeConstants.PREFIX_THEME_REF.length());
-            }
-
-            // at this point, value can contain type/name (drawable/foo for instance).
-            // split it to make sure.
-            String[] segments = reference.split("\\/");
-
-            // we look for the referenced item name.
-            String referenceName = null;
-
-            if (segments.length == 2) {
-                // there was a resType in the reference. If it's attr, we ignore it
-                // else, we assert for now.
-                if (BridgeConstants.RES_ATTR.equals(segments[0])) {
-                    referenceName = segments[1];
-                } else {
-                    // At this time, no support for ?type/name where type is not "attr"
-                    return null;
-                }
-            } else {
-                // it's just an item name.
-                referenceName = segments[0];
-            }
-
-            // now we look for android: in the referenceName in order to support format
-            // such as: ?attr/android:name
-            if (referenceName.startsWith(BridgeConstants.PREFIX_ANDROID)) {
-                frameworkOnly = true;
-                referenceName = referenceName.substring(BridgeConstants.PREFIX_ANDROID.length());
-            }
-
-            // Now look for the item in the theme, starting with the current one.
-            if (frameworkOnly) {
-                // FIXME for now we do the same as if it didn't specify android:
-                return findItemInStyle(mThemeValues, referenceName);
-            }
-
-            return findItemInStyle(mThemeValues, referenceName);
-        } else if (reference.startsWith(BridgeConstants.PREFIX_RESOURCE_REF)) {
-            boolean frameworkOnly = false;
-
-            // check for the specific null reference value.
-            if (BridgeConstants.REFERENCE_NULL.equals(reference)) {
-                return null;
-            }
-
-            // Eliminate the prefix from the string.
-            if (reference.startsWith(BridgeConstants.PREFIX_ANDROID_RESOURCE_REF)) {
-                frameworkOnly = true;
-                reference = reference.substring(
-                        BridgeConstants.PREFIX_ANDROID_RESOURCE_REF.length());
-            } else {
-                reference = reference.substring(BridgeConstants.PREFIX_RESOURCE_REF.length());
-            }
-
-            // at this point, value contains type/[android:]name (drawable/foo for instance)
-            String[] segments = reference.split("\\/");
-
-            // now we look for android: in the resource name in order to support format
-            // such as: @drawable/android:name
-            if (segments[1].startsWith(BridgeConstants.PREFIX_ANDROID)) {
-                frameworkOnly = true;
-                segments[1] = segments[1].substring(BridgeConstants.PREFIX_ANDROID.length());
-            }
-
-            return findResValue(segments[0], segments[1],
-                    forceFrameworkOnly ? true :frameworkOnly);
-        }
-
-        // Looks like the value didn't reference anything. Return null.
-        return null;
-    }
-
-    /**
-     * Searches for, and returns a {@link ResourceValue} by its name, and type.
-     * @param resType the type of the resource
-     * @param resName  the name of the resource
-     * @param frameworkOnly if <code>true</code>, the method does not search in the
-     * project resources
-     */
-    private ResourceValue findResValue(String resType, String resName, boolean frameworkOnly) {
-        // map of ResouceValue for the given type
-        Map<String, ResourceValue> typeMap;
-
-        // if allowed, search in the project resources first.
-        if (frameworkOnly == false) {
-            typeMap = mProjectResources.get(resType);
-            if (typeMap != null) {
-                ResourceValue item = typeMap.get(resName);
-                if (item != null) {
-                    return item;
-                }
-            }
-        }
-
-        // now search in the framework resources.
-        typeMap = mFrameworkResources.get(resType);
-        if (typeMap != null) {
-            ResourceValue item = typeMap.get(resName);
-            if (item != null) {
-                return item;
-            }
-
-            // if it was not found and the type is an id, it is possible that the ID was
-            // generated dynamically when compiling the framework resources.
-            // Look for it in the R map.
-            if (BridgeConstants.RES_ID.equals(resType)) {
-                if (Bridge.getResourceValue(resType, resName) != null) {
-                    return new ResourceValue(resType, resName, true);
-                }
-            }
-        }
-
-        // didn't find the resource anywhere.
-        // This is normal if the resource is an ID that is generated automatically.
-        // For other resources, we output a warning
-        if ("+id".equals(resType) == false && "+android:id".equals(resType) == false) { //$NON-NLS-1$ //$NON-NLS-2$
-            Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_RESOLVE,
-                    "Couldn't resolve resource @" +
-                    (frameworkOnly ? "android:" : "") + resType + "/" + resName,
-                    new ResourceValue(resType, resName, frameworkOnly));
-        }
-        return null;
-    }
-
-    /**
-     * Returns a framework resource by type and name. The returned resource is resolved.
-     * @param resourceType the type of the resource
-     * @param resourceName the name of the resource
-     */
-    public ResourceValue getFrameworkResource(String resourceType, String resourceName) {
-        return getResource(resourceType, resourceName, mFrameworkResources);
-    }
-
-    /**
-     * Returns a project resource by type and name. The returned resource is resolved.
-     * @param resourceType the type of the resource
-     * @param resourceName the name of the resource
-     */
-    public ResourceValue getProjectResource(String resourceType, String resourceName) {
-        return getResource(resourceType, resourceName, mProjectResources);
-    }
-
-    ResourceValue getResource(String resourceType, String resourceName,
-            Map<String, Map<String, ResourceValue>> resourceRepository) {
-        Map<String, ResourceValue> typeMap = resourceRepository.get(resourceType);
-        if (typeMap != null) {
-            ResourceValue item = typeMap.get(resourceName);
-            if (item != null) {
-                item = resolveResValue(item);
-                return item;
-            }
-        }
-
-        // didn't find the resource anywhere.
-        return null;
-
-    }
-
-    /**
-     * Returns the {@link ResourceValue} matching a given name in a given style. If the
-     * item is not directly available in the style, the method looks in its parent style.
-     * @param style the style to search in
-     * @param itemName the name of the item to search for.
-     * @return the {@link ResourceValue} object or <code>null</code>
-     */
-    public ResourceValue findItemInStyle(StyleResourceValue style, String itemName) {
-        ResourceValue item = style.findValue(itemName);
-
-        // if we didn't find it, we look in the parent style (if applicable)
-        if (item == null && mStyleInheritanceMap != null) {
-            StyleResourceValue parentStyle = mStyleInheritanceMap.get(style);
-            if (parentStyle != null) {
-                return findItemInStyle(parentStyle, itemName);
-            }
-        }
-
-        return item;
-    }
 
     /**
      * The input int[] attrs is one of com.android.internal.R.styleable fields where the name

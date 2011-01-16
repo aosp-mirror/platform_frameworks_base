@@ -38,9 +38,10 @@ import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.ide.common.rendering.api.ViewInfo;
 import com.android.ide.common.rendering.api.Params.RenderingMode;
 import com.android.ide.common.rendering.api.Result.Status;
+import com.android.ide.common.resources.ResourceResolver;
+import com.android.ide.common.resources.ResourceResolver.IFrameworkResourceIdProvider;
 import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.bridge.Bridge;
-import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeInflater;
 import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
@@ -73,8 +74,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -106,7 +105,6 @@ public class RenderSessionImpl {
     private BridgeContext mContext;
     private BridgeXmlBlockParser mBlockParser;
     private BridgeInflater mInflater;
-    private StyleResourceValue mCurrentTheme;
     private int mScreenOffset;
     private ResourceValue mWindowBackground;
     private FrameLayout mViewRoot;
@@ -170,18 +168,23 @@ public class RenderSessionImpl {
         metrics.xdpi = mParams.getXdpi();
         metrics.ydpi = mParams.getYdpi();
 
-        // find the current theme and compute the style inheritance map
-        Map<StyleResourceValue, StyleResourceValue> styleParentMap =
-            new HashMap<StyleResourceValue, StyleResourceValue>();
+        // create the resource resolver
+        ResourceResolver resolver = ResourceResolver.create(
+                new IFrameworkResourceIdProvider() {
+                    public Integer getId(String resType, String resName) {
+                        return Bridge.getResourceValue(resType, resName);
+                    }
+                },
+                mParams.getProjectResources(),
+                mParams.getFrameworkResources(),
+                mParams.getThemeName(),
+                mParams.isProjectTheme(),
+                mParams.getLog());
 
-        mCurrentTheme = computeStyleMaps(mParams.getThemeName(), mParams.isProjectTheme(),
-                mParams.getProjectResources().get(BridgeConstants.RES_STYLE),
-                mParams.getFrameworkResources().get(BridgeConstants.RES_STYLE), styleParentMap);
 
         // build the context
-        mContext = new BridgeContext(mParams.getProjectKey(), metrics, mCurrentTheme,
-                mParams.getProjectResources(), mParams.getFrameworkResources(),
-                styleParentMap, mParams.getProjectCallback());
+        mContext = new BridgeContext(mParams.getProjectKey(), metrics, resolver,
+                mParams.getProjectCallback());
 
         // set the current rendering context
         sCurrentContext = mContext;
@@ -193,12 +196,12 @@ public class RenderSessionImpl {
         // get the screen offset and window-background resource
         mWindowBackground = null;
         mScreenOffset = 0;
-        if (mCurrentTheme != null && mParams.isBgColorOverridden() == false) {
-            mWindowBackground = mContext.findItemInStyle(mCurrentTheme, "windowBackground");
-            mWindowBackground = mContext.resolveResValue(mWindowBackground);
+        StyleResourceValue theme = resolver.getTheme();
+        if (theme != null && mParams.isBgColorOverridden() == false) {
+            mWindowBackground = resolver.findItemInTheme("windowBackground");
+            mWindowBackground = resolver.resolveResValue(mWindowBackground);
 
-            mScreenOffset = getScreenOffset(mParams.getFrameworkResources(), mCurrentTheme,
-                    mContext);
+            mScreenOffset = getScreenOffset(resolver, metrics);
         }
 
         // build the inflater and parser.
@@ -499,18 +502,18 @@ public class RenderSessionImpl {
         ResourceValue animationResource = null;
         int animationId = 0;
         if (isFrameworkAnimation) {
-            animationResource = mContext.getFrameworkResource(BridgeConstants.RES_ANIMATOR,
-                    animationName);
+            animationResource = mContext.getResolver().getFrameworkResource(
+                    ResourceResolver.RES_ANIMATOR, animationName);
             if (animationResource != null) {
-                animationId = Bridge.getResourceValue(BridgeConstants.RES_ANIMATOR,
+                animationId = Bridge.getResourceValue(ResourceResolver.RES_ANIMATOR,
                         animationName);
             }
         } else {
-            animationResource = mContext.getProjectResource(BridgeConstants.RES_ANIMATOR,
-                    animationName);
+            animationResource = mContext.getResolver().getProjectResource(
+                    ResourceResolver.RES_ANIMATOR, animationName);
             if (animationResource != null) {
                 animationId = mContext.getProjectCallback().getResourceValue(
-                        BridgeConstants.RES_ANIMATOR, animationName);
+                        ResourceResolver.RES_ANIMATOR, animationName);
             }
         }
 
@@ -905,182 +908,21 @@ public class RenderSessionImpl {
         }
     }
 
-
-    /**
-     * Compute style information from the given list of style for the project and framework.
-     * @param themeName the name of the current theme.  In order to differentiate project and
-     * platform themes sharing the same name, all project themes must be prepended with
-     * a '*' character.
-     * @param isProjectTheme Is this a project theme
-     * @param inProjectStyleMap the project style map
-     * @param inFrameworkStyleMap the framework style map
-     * @param outInheritanceMap the map of style inheritance. This is filled by the method
-     * @return the {@link StyleResourceValue} matching <var>themeName</var>
-     */
-    private StyleResourceValue computeStyleMaps(
-            String themeName, boolean isProjectTheme, Map<String,
-            ResourceValue> inProjectStyleMap, Map<String, ResourceValue> inFrameworkStyleMap,
-            Map<StyleResourceValue, StyleResourceValue> outInheritanceMap) {
-
-        if (inProjectStyleMap != null && inFrameworkStyleMap != null) {
-            // first, get the theme
-            ResourceValue theme = null;
-
-            // project theme names have been prepended with a *
-            if (isProjectTheme) {
-                theme = inProjectStyleMap.get(themeName);
-            } else {
-                theme = inFrameworkStyleMap.get(themeName);
-            }
-
-            if (theme instanceof StyleResourceValue) {
-                // compute the inheritance map for both the project and framework styles
-                computeStyleInheritance(inProjectStyleMap.values(), inProjectStyleMap,
-                        inFrameworkStyleMap, outInheritanceMap);
-
-                // Compute the style inheritance for the framework styles/themes.
-                // Since, for those, the style parent values do not contain 'android:'
-                // we want to force looking in the framework style only to avoid using
-                // similarly named styles from the project.
-                // To do this, we pass null in lieu of the project style map.
-                computeStyleInheritance(inFrameworkStyleMap.values(), null /*inProjectStyleMap */,
-                        inFrameworkStyleMap, outInheritanceMap);
-
-                return (StyleResourceValue)theme;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Compute the parent style for all the styles in a given list.
-     * @param styles the styles for which we compute the parent.
-     * @param inProjectStyleMap the map of project styles.
-     * @param inFrameworkStyleMap the map of framework styles.
-     * @param outInheritanceMap the map of style inheritance. This is filled by the method.
-     */
-    private void computeStyleInheritance(Collection<ResourceValue> styles,
-            Map<String, ResourceValue> inProjectStyleMap,
-            Map<String, ResourceValue> inFrameworkStyleMap,
-            Map<StyleResourceValue, StyleResourceValue> outInheritanceMap) {
-        for (ResourceValue value : styles) {
-            if (value instanceof StyleResourceValue) {
-                StyleResourceValue style = (StyleResourceValue)value;
-                StyleResourceValue parentStyle = null;
-
-                // first look for a specified parent.
-                String parentName = style.getParentStyle();
-
-                // no specified parent? try to infer it from the name of the style.
-                if (parentName == null) {
-                    parentName = getParentName(value.getName());
-                }
-
-                if (parentName != null) {
-                    parentStyle = getStyle(parentName, inProjectStyleMap, inFrameworkStyleMap);
-
-                    if (parentStyle != null) {
-                        outInheritanceMap.put(style, parentStyle);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Searches for and returns the {@link StyleResourceValue} from a given name.
-     * <p/>The format of the name can be:
-     * <ul>
-     * <li>[android:]&lt;name&gt;</li>
-     * <li>[android:]style/&lt;name&gt;</li>
-     * <li>@[android:]style/&lt;name&gt;</li>
-     * </ul>
-     * @param parentName the name of the style.
-     * @param inProjectStyleMap the project style map. Can be <code>null</code>
-     * @param inFrameworkStyleMap the framework style map.
-     * @return The matching {@link StyleResourceValue} object or <code>null</code> if not found.
-     */
-    private StyleResourceValue getStyle(String parentName,
-            Map<String, ResourceValue> inProjectStyleMap,
-            Map<String, ResourceValue> inFrameworkStyleMap) {
-        boolean frameworkOnly = false;
-
-        String name = parentName;
-
-        // remove the useless @ if it's there
-        if (name.startsWith(BridgeConstants.PREFIX_RESOURCE_REF)) {
-            name = name.substring(BridgeConstants.PREFIX_RESOURCE_REF.length());
-        }
-
-        // check for framework identifier.
-        if (name.startsWith(BridgeConstants.PREFIX_ANDROID)) {
-            frameworkOnly = true;
-            name = name.substring(BridgeConstants.PREFIX_ANDROID.length());
-        }
-
-        // at this point we could have the format <type>/<name>. we want only the name as long as
-        // the type is style.
-        if (name.startsWith(BridgeConstants.REFERENCE_STYLE)) {
-            name = name.substring(BridgeConstants.REFERENCE_STYLE.length());
-        } else if (name.indexOf('/') != -1) {
-            return null;
-        }
-
-        ResourceValue parent = null;
-
-        // if allowed, search in the project resources.
-        if (frameworkOnly == false && inProjectStyleMap != null) {
-            parent = inProjectStyleMap.get(name);
-        }
-
-        // if not found, then look in the framework resources.
-        if (parent == null) {
-            parent = inFrameworkStyleMap.get(name);
-        }
-
-        // make sure the result is the proper class type and return it.
-        if (parent instanceof StyleResourceValue) {
-            return (StyleResourceValue)parent;
-        }
-
-        assert false;
-        mParams.getLog().error(LayoutLog.TAG_RESOURCES_RESOLVE,
-                String.format("Unable to resolve parent style name: %s", parentName),
-                null /*data*/);
-
-        return null;
-    }
-
-    /**
-     * Computes the name of the parent style, or <code>null</code> if the style is a root style.
-     */
-    private String getParentName(String styleName) {
-        int index = styleName.lastIndexOf('.');
-        if (index != -1) {
-            return styleName.substring(0, index);
-        }
-
-        return null;
-    }
-
     /**
      * Returns the top screen offset. This depends on whether the current theme defines the user
      * of the title and status bars.
-     * @param frameworkResources The framework resources
-     * @param currentTheme The current theme
-     * @param context The context
+     * @param resolver The {@link ResourceResolver}
+     * @param metrics The display metrics
      * @return the pixel height offset
      */
-    private int getScreenOffset(Map<String, Map<String, ResourceValue>> frameworkResources,
-            StyleResourceValue currentTheme, BridgeContext context) {
+    private int getScreenOffset(ResourceResolver resolver, DisplayMetrics metrics) {
         int offset = 0;
 
         // get the title bar flag from the current theme.
-        ResourceValue value = context.findItemInStyle(currentTheme, "windowNoTitle");
+        ResourceValue value = resolver.findItemInTheme("windowNoTitle");
 
         // because it may reference something else, we resolve it.
-        value = context.resolveResValue(value);
+        value = resolver.resolveResValue(value);
 
         // if there's a value and it's true (default is false)
         if (value == null || value.getValue() == null ||
@@ -1089,17 +931,17 @@ public class RenderSessionImpl {
             int defaultOffset = DEFAULT_TITLE_BAR_HEIGHT;
 
             // get value from the theme.
-            value = context.findItemInStyle(currentTheme, "windowTitleSize");
+            value = resolver.findItemInTheme("windowTitleSize");
 
             // resolve it
-            value = context.resolveResValue(value);
+            value = resolver.resolveResValue(value);
 
             if (value != null) {
                 // get the numerical value, if available
                 TypedValue typedValue = ResourceHelper.getValue(value.getValue());
                 if (typedValue != null) {
                     // compute the pixel value based on the display metrics
-                    defaultOffset = (int)typedValue.getDimension(context.getResources().mMetrics);
+                    defaultOffset = (int)typedValue.getDimension(metrics);
                 }
             }
 
@@ -1107,10 +949,10 @@ public class RenderSessionImpl {
         }
 
         // get the fullscreen flag from the current theme.
-        value = context.findItemInStyle(currentTheme, "windowFullscreen");
+        value = resolver.findItemInTheme("windowFullscreen");
 
         // because it may reference something else, we resolve it.
-        value = context.resolveResValue(value);
+        value = resolver.resolveResValue(value);
 
         if (value == null || value.getValue() == null ||
                 XmlUtils.convertValueToBoolean(value.getValue(), false /* defValue */) == false) {
@@ -1118,16 +960,13 @@ public class RenderSessionImpl {
             // default value
             int defaultOffset = DEFAULT_STATUS_BAR_HEIGHT;
 
-            // get the real value, first the list of Dimensions from the framework map
-            Map<String, ResourceValue> dimens = frameworkResources.get(BridgeConstants.RES_DIMEN);
-
-            // now get the value
-            value = dimens.get("status_bar_height");
+            // get the real value
+            value = resolver.getFrameworkResource(ResourceResolver.RES_DIMEN, "status_bar_height");
             if (value != null) {
                 TypedValue typedValue = ResourceHelper.getValue(value.getValue());
                 if (typedValue != null) {
                     // compute the pixel value based on the display metrics
-                    defaultOffset = (int)typedValue.getDimension(context.getResources().mMetrics);
+                    defaultOffset = (int)typedValue.getDimension(metrics);
                 }
             }
 
@@ -1136,7 +975,6 @@ public class RenderSessionImpl {
         }
 
         return offset;
-
     }
 
     /**

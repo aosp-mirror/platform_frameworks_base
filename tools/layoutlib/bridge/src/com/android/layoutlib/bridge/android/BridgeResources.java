@@ -104,7 +104,7 @@ public final class BridgeResources extends Resources {
 
         if (resourceInfo != null) {
             platformResFlag_out[0] = true;
-            return mContext.getFrameworkResource(resourceInfo[1], resourceInfo[0]);
+            return mContext.getResolver().getFrameworkResource(resourceInfo[1], resourceInfo[0]);
         }
 
         // didn't find a match in the framework? look in the project.
@@ -113,7 +113,7 @@ public final class BridgeResources extends Resources {
 
             if (resourceInfo != null) {
                 platformResFlag_out[0] = false;
-                return mContext.getProjectResource(resourceInfo[1], resourceInfo[0]);
+                return mContext.getResolver().getProjectResource(resourceInfo[1], resourceInfo[0]);
             }
         }
 
