@@ -481,14 +481,11 @@ class ServerThread extends Thread {
         // we are in safe mode.
         final boolean safeMode = wm.detectSafeMode();
         if (safeMode) {
-            try {
-                ActivityManagerNative.getDefault().enterSafeMode();
-                // Post the safe mode state in the Zygote class
-                Zygote.systemInSafeMode = true;
-                // Disable the JIT for the system_server process
-                VMRuntime.getRuntime().disableJitCompilation();
-            } catch (RemoteException e) {
-            }
+            ActivityManagerService.self().enterSafeMode();
+            // Post the safe mode state in the Zygote class
+            Zygote.systemInSafeMode = true;
+            // Disable the JIT for the system_server process
+            VMRuntime.getRuntime().disableJitCompilation();
         } else {
             // Enable the JIT for the system_server process
             VMRuntime.getRuntime().startJitCompilation();
@@ -505,6 +502,10 @@ class ServerThread extends Thread {
         }
 
         wm.systemReady();
+
+        if (safeMode) {
+            ActivityManagerService.self().showSafeModeOverlay();
+        }
 
         // Update the configuration for this context by hand, because we're going
         // to start using it before the config change done in wm.systemReady() will
