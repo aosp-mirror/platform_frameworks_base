@@ -212,7 +212,7 @@ void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, fl
         }
         float u2 = fmax(0.0f, stepX - 0.5f) / bitmapWidth;
 
-        generateQuad(vertex, x1, y1, x2, y2, u1, v1, u2, v2, quadCount);
+        bool valid = generateQuad(vertex, x1, y1, x2, y2, u1, v1, u2, v2, quadCount);
 
         x1 = x2;
         u1 = (stepX + 0.5f) / bitmapWidth;
@@ -223,17 +223,22 @@ void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, fl
     generateQuad(vertex, x1, y1, width, y2, u1, v1, 1.0f, v2, quadCount);
 }
 
-void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, float y2,
+bool Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, float y2,
             float u1, float v1, float u2, float v2, uint32_t& quadCount) {
     const uint32_t oldQuadCount = quadCount;
-    const bool valid = x2 - x1 > 0.9999f && y2 - y1 > 0.9999f;
+    const bool valid = x2 >= x1 && y2 >= y1;
     if (valid) {
         quadCount++;
     }
 
     // Skip degenerate and transparent (empty) quads
     if (!valid || ((mColorKey >> oldQuadCount) & 0x1) == 1) {
-        return;
+#if DEBUG_PATCHES_EMPTY_VERTICES
+        PATCH_LOGD("    quad %d (empty)", oldQuadCount);
+        PATCH_LOGD("        left,  top    = %.2f, %.2f\t\tu1, v1 = %.2f, %.2f", x1, y1, u1, v1);
+        PATCH_LOGD("        right, bottom = %.2f, %.2f\t\tu2, v2 = %.2f, %.2f", x2, y2, u2, v2);
+#endif
+        return false;
     }
 
 #if RENDER_LAYERS_AS_REGIONS
@@ -262,6 +267,8 @@ void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, f
     PATCH_LOGD("        left,  top    = %.2f, %.2f\t\tu1, v1 = %.2f, %.2f", x1, y1, u1, v1);
     PATCH_LOGD("        right, bottom = %.2f, %.2f\t\tu2, v2 = %.2f, %.2f", x2, y2, u2, v2);
 #endif
+
+    return true;
 }
 
 }; // namespace uirenderer
