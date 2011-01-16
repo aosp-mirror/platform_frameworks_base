@@ -37,7 +37,7 @@
         <TextView
             android:id="@android:id/text1"
             style="?android:attr/dropDownItemStyle"
-            android:textAppearance="?android:attr/textAppearanceLargeInverse"
+            android:textAppearance="?android:attr/textAppearanceLargePopupMenu"
             android:singleLine="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
@@ -45,7 +45,7 @@
         <TextView
             android:id="@android:id/text2"
             style="?android:attr/dropDownItemStyle"
-            android:textAppearance="?android:attr/textAppearanceSmallInverse"
+            android:textAppearance="?android:attr/textAppearanceSmallPopupMenu"
             android:textColor="#323232"
             android:singleLine="true"
             android:layout_width="match_parent"
