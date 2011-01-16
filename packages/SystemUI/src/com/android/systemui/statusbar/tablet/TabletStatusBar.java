@@ -635,16 +635,15 @@ public class TabletStatusBar extends StatusBar implements
 
         // Can we just reapply the RemoteViews in place?  If when didn't change, the order
         // didn't change.
-        boolean contentsUnchanged = notification.isOngoing() == oldNotification.isOngoing()
-                && oldEntry.expanded != null
-                && contentView != null
-                && oldContentView != null
+        boolean contentsUnchanged = oldEntry.expanded != null
+                && contentView != null && oldContentView != null
                 && contentView.getPackage() != null
                 && oldContentView.getPackage() != null
                 && oldContentView.getPackage().equals(contentView.getPackage())
                 && oldContentView.getLayoutId() == contentView.getLayoutId();
         ViewGroup rowParent = (ViewGroup) oldEntry.row.getParent();
-        boolean orderUnchanged = notification.notification.when==oldNotification.notification.when;
+        boolean orderUnchanged = notification.notification.when==oldNotification.notification.when
+                && notification.isOngoing() == oldNotification.isOngoing();
         boolean isLastAnyway = rowParent.indexOfChild(oldEntry.row) == rowParent.getChildCount()-1;
         if (contentsUnchanged && (orderUnchanged || isLastAnyway)) {
             if (DEBUG) Slog.d(TAG, "reusing notification for key: " + key);
@@ -667,6 +666,13 @@ public class TabletStatusBar extends StatusBar implements
                 if (!oldEntry.icon.set(ic)) {
                     handleNotificationError(key, notification, "Couldn't update icon: " + ic);
                     return;
+                }
+                // Update the large icon
+                if (notification.notification.largeIcon != null) {
+                    oldEntry.largeIcon.setImageBitmap(notification.notification.largeIcon);
+                } else {
+                    oldEntry.largeIcon.getLayoutParams().width = 0;
+                    oldEntry.largeIcon.setVisibility(View.INVISIBLE);
                 }
 
                 if (key == mNotificationPeekKey) {
@@ -1286,6 +1292,7 @@ public class TabletStatusBar extends StatusBar implements
         entry.row = row;
         entry.content = content;
         entry.expanded = expanded;
+        entry.largeIcon = largeIcon;
 
         return true;
     }
