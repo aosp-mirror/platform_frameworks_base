@@ -697,13 +697,7 @@ void OpenGLRenderer::dirtyLayer(const float left, const float top,
     if ((mSnapshot->flags & Snapshot::kFlagFboTarget) && mSnapshot->region) {
         Rect bounds(left, top, right, bottom);
         transform.mapRect(bounds);
-        if (bounds.intersect(*mSnapshot->clipRect)) {
-            bounds.snapToPixelBoundaries();
-            android::Rect dirty(bounds.left, bounds.top, bounds.right, bounds.bottom);
-            if (!dirty.isEmpty()) {
-                mSnapshot->region->orSelf(dirty);
-            }
-        }
+        dirtyLayerUnchecked(bounds, mSnapshot->region);
     }
 #endif
 }
@@ -713,12 +707,18 @@ void OpenGLRenderer::dirtyLayer(const float left, const float top,
 #if RENDER_LAYERS_AS_REGIONS
     if ((mSnapshot->flags & Snapshot::kFlagFboTarget) && mSnapshot->region) {
         Rect bounds(left, top, right, bottom);
-        if (bounds.intersect(*mSnapshot->clipRect)) {
-            bounds.snapToPixelBoundaries();
-            android::Rect dirty(bounds.left, bounds.top, bounds.right, bounds.bottom);
-            if (!dirty.isEmpty()) {
-                mSnapshot->region->orSelf(dirty);
-            }
+        dirtyLayerUnchecked(bounds, mSnapshot->region);
+    }
+#endif
+}
+
+void OpenGLRenderer::dirtyLayerUnchecked(Rect& bounds, Region* region) {
+#if RENDER_LAYERS_AS_REGIONS
+    if (bounds.intersect(*mSnapshot->clipRect)) {
+        bounds.snapToPixelBoundaries();
+        android::Rect dirty(bounds.left, bounds.top, bounds.right, bounds.bottom);
+        if (!dirty.isEmpty()) {
+            region->orSelf(dirty);
         }
     }
 #endif
