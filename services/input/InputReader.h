@@ -339,6 +339,9 @@ public:
 protected:
     InputDevice* mDevice;
     InputReaderContext* mContext;
+
+    static void dumpRawAbsoluteAxisInfo(String8& dump,
+            const RawAbsoluteAxisInfo& axis, const char* name);
 };
 
 
@@ -949,6 +952,139 @@ private:
     void initialize();
 
     void sync(nsecs_t when);
+};
+
+
+class JoystickInputMapper : public InputMapper {
+public:
+    JoystickInputMapper(InputDevice* device);
+    virtual ~JoystickInputMapper();
+
+    virtual uint32_t getSources();
+    virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
+    virtual void dump(String8& dump);
+    virtual void configure();
+    virtual void reset();
+    virtual void process(const RawEvent* rawEvent);
+
+private:
+    struct RawAxes {
+        RawAbsoluteAxisInfo x;
+        RawAbsoluteAxisInfo y;
+        RawAbsoluteAxisInfo hat0X;
+        RawAbsoluteAxisInfo hat0Y;
+    } mRawAxes;
+
+    struct NormalizedAxis {
+        bool valid;
+
+        static const float min = -1.0f;
+        static const float max = -1.0f;
+
+        float scale;      // scale factor
+        float center;     // center offset after scaling
+        float precision;  // precision
+        float flat;       // size of flat region
+        float fuzz;       // error tolerance
+
+        float value;      // most recent value
+
+        NormalizedAxis() : valid(false), scale(0), center(0), precision(0),
+                flat(0), fuzz(0), value(0) {
+        }
+
+        void configure(const RawAbsoluteAxisInfo& rawAxis) {
+            if (rawAxis.valid && rawAxis.getRange() != 0) {
+                valid = true;
+                scale = 2.0f / rawAxis.getRange();
+                precision = rawAxis.getRange();
+                flat = rawAxis.flat * scale;
+                fuzz = rawAxis.fuzz * scale;
+                center = float(rawAxis.minValue + rawAxis.maxValue) / rawAxis.getRange();
+            }
+        }
+
+        void resetState() {
+            value = 0;
+        }
+
+        bool updateValue(int32_t rawValue) {
+            float newValue = rawValue * scale - center;
+            if (value == newValue) {
+                return false;
+            }
+            value = newValue;
+            return true;
+        }
+    };
+
+    struct DirectionalAxis : NormalizedAxis {
+        int32_t direction; // most recent direction vector: value is one of -1, 0, 1.
+
+        int32_t lastKeyCode;  // most recent key code produced
+
+        DirectionalAxis() : lastKeyCode(0) {
+        }
+
+        void resetState() {
+            NormalizedAxis::resetState();
+            direction = 0;
+            lastKeyCode = 0;
+        }
+
+        bool updateValueAndDirection(int32_t rawValue) {
+            if (!updateValue(rawValue)) {
+                return false;
+            }
+            if (value > flat) {
+                direction = 1;
+            } else if (value < -flat) {
+                direction = -1;
+            } else {
+                direction = 0;
+            }
+            return true;
+        }
+    };
+
+    struct Axes {
+        NormalizedAxis x;
+        NormalizedAxis y;
+        DirectionalAxis hat0X;
+        DirectionalAxis hat0Y;
+    } mAxes;
+
+    struct Accumulator {
+        enum {
+            FIELD_ABS_X = 1,
+            FIELD_ABS_Y = 2,
+            FIELD_ABS_HAT0X = 4,
+            FIELD_ABS_HAT0Y = 8,
+
+            FIELD_ALL = FIELD_ABS_X | FIELD_ABS_Y | FIELD_ABS_HAT0X | FIELD_ABS_HAT0Y,
+        };
+
+        uint32_t fields;
+
+        int32_t absX;
+        int32_t absY;
+        int32_t absHat0X;
+        int32_t absHat0Y;
+
+        inline void clear() {
+            fields = 0;
+        }
+    } mAccumulator;
+
+    void initialize();
+
+    void sync(nsecs_t when);
+
+    void notifyDirectionalAxis(DirectionalAxis& axis,
+            nsecs_t when, int32_t metaState, int32_t lowKeyCode, int32_t highKeyCode);
+
+    static void dumpNormalizedAxis(String8& dump,
+            const NormalizedAxis& axis, const char* name);
 };
 
 } // namespace android

@@ -2081,7 +2081,39 @@ public class Activity extends ContextThemeWrapper
     public boolean onTrackballEvent(MotionEvent event) {
         return false;
     }
-    
+
+    /**
+     * Called when a generic motion event was not handled by any of the
+     * views inside of the activity.
+     * <p>
+     * Generic motion events are dispatched to the focused view to describe
+     * the motions of input devices such as joysticks.  The
+     * {@link MotionEvent#getSource() source} of the motion event specifies
+     * the class of input that was received.  Implementations of this method
+     * must examine the bits in the source before processing the event.
+     * The following code example shows how this is done.
+     * </p>
+     * <code>
+     * public boolean onGenericMotionEvent(MotionEvent event) {
+     *     if ((event.getSource() &amp; InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
+     *         float x = event.getX();
+     *         float y = event.getY();
+     *         // process the joystick motion
+     *         return true;
+     *     }
+     *     return super.onGenericMotionEvent(event);
+     * }
+     * </code>
+     *
+     * @param event The generic motion event being processed.
+     *
+     * @return Return true if you have consumed the event, false if you haven't.
+     * The default implementation always returns false.
+     */
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        return false;
+    }
+
     /**
      * Called whenever a key, touch, or trackball event is dispatched to the
      * activity.  Implement this method if you wish to know that the user has
@@ -2262,6 +2294,24 @@ public class Activity extends ContextThemeWrapper
             return true;
         }
         return onTrackballEvent(ev);
+    }
+
+    /**
+     * Called to process generic motion events.  You can override this to
+     * intercept all generic motion events before they are dispatched to the
+     * window.  Be sure to call this implementation for generic motion events
+     * that should be handled normally.
+     *
+     * @param ev The generic motion event.
+     *
+     * @return boolean Return true if this event was consumed.
+     */
+    public boolean dispatchGenericMotionEvent(MotionEvent ev) {
+        onUserInteraction();
+        if (getWindow().superDispatchGenericMotionEvent(ev)) {
+            return true;
+        }
+        return onGenericMotionEvent(ev);
     }
 
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {

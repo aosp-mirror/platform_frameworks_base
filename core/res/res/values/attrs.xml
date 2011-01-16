@@ -1310,6 +1310,22 @@
         <enum name="KEYCODE_PROG_YELLOW" value="185" />
         <enum name="KEYCODE_PROG_BLUE" value="186" />
         <enum name="KEYCODE_APP_SWITCH" value="187" />
+        <enum name="KEYCODE_BUTTON_1" value="188" />
+        <enum name="KEYCODE_BUTTON_2" value="189" />
+        <enum name="KEYCODE_BUTTON_3" value="190" />
+        <enum name="KEYCODE_BUTTON_4" value="191" />
+        <enum name="KEYCODE_BUTTON_5" value="192" />
+        <enum name="KEYCODE_BUTTON_6" value="193" />
+        <enum name="KEYCODE_BUTTON_7" value="194" />
+        <enum name="KEYCODE_BUTTON_8" value="195" />
+        <enum name="KEYCODE_BUTTON_9" value="196" />
+        <enum name="KEYCODE_BUTTON_10" value="197" />
+        <enum name="KEYCODE_BUTTON_11" value="198" />
+        <enum name="KEYCODE_BUTTON_12" value="199" />
+        <enum name="KEYCODE_BUTTON_13" value="200" />
+        <enum name="KEYCODE_BUTTON_14" value="201" />
+        <enum name="KEYCODE_BUTTON_15" value="202" />
+        <enum name="KEYCODE_BUTTON_16" value="203" />
     </attr>
 
     <!-- ***************************************************************** -->

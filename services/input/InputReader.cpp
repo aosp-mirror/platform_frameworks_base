@@ -250,6 +250,9 @@ InputDevice* InputReader::createDevice(int32_t deviceId, const String8& name, ui
     if (classes & INPUT_DEVICE_CLASS_DPAD) {
         keyboardSources |= AINPUT_SOURCE_DPAD;
     }
+    if (classes & INPUT_DEVICE_CLASS_GAMEPAD) {
+        keyboardSources |= AINPUT_SOURCE_GAMEPAD;
+    }
 
     if (keyboardSources != 0) {
         device->addMapper(new KeyboardInputMapper(device, keyboardSources, keyboardType));
@@ -265,6 +268,11 @@ InputDevice* InputReader::createDevice(int32_t deviceId, const String8& name, ui
         device->addMapper(new MultiTouchInputMapper(device));
     } else if (classes & INPUT_DEVICE_CLASS_TOUCHSCREEN) {
         device->addMapper(new SingleTouchInputMapper(device));
+    }
+
+    // Joystick-like devices.
+    if (classes & INPUT_DEVICE_CLASS_JOYSTICK) {
+        device->addMapper(new JoystickInputMapper(device));
     }
 
     return device;
@@ -715,6 +723,16 @@ int32_t InputMapper::getMetaState() {
     return 0;
 }
 
+void InputMapper::dumpRawAbsoluteAxisInfo(String8& dump,
+        const RawAbsoluteAxisInfo& axis, const char* name) {
+    if (axis.valid) {
+        dump.appendFormat(INDENT4 "%s: min=%d, max=%d, flat=%d, fuzz=%d\n",
+                name, axis.minValue, axis.maxValue, axis.flat, axis.fuzz);
+    } else {
+        dump.appendFormat(INDENT4 "%s: unknown range\n", name);
+    }
+}
+
 
 // --- SwitchInputMapper ---
 
@@ -857,7 +875,7 @@ void KeyboardInputMapper::process(const RawEvent* rawEvent) {
 bool KeyboardInputMapper::isKeyboardOrGamepadKey(int32_t scanCode) {
     return scanCode < BTN_MOUSE
         || scanCode >= KEY_OK
-        || (scanCode >= BTN_GAMEPAD && scanCode < BTN_DIGI);
+        || (scanCode >= BTN_JOYSTICK && scanCode < BTN_DIGI);
 }
 
 void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
@@ -1486,25 +1504,16 @@ void TouchInputMapper::configureRawAxes() {
     mRawAxes.orientation.clear();
 }
 
-static void dumpAxisInfo(String8& dump, RawAbsoluteAxisInfo axis, const char* name) {
-    if (axis.valid) {
-        dump.appendFormat(INDENT4 "%s: min=%d, max=%d, flat=%d, fuzz=%d\n",
-                name, axis.minValue, axis.maxValue, axis.flat, axis.fuzz);
-    } else {
-        dump.appendFormat(INDENT4 "%s: unknown range\n", name);
-    }
-}
-
 void TouchInputMapper::dumpRawAxes(String8& dump) {
     dump.append(INDENT3 "Raw Axes:\n");
-    dumpAxisInfo(dump, mRawAxes.x, "X");
-    dumpAxisInfo(dump, mRawAxes.y, "Y");
-    dumpAxisInfo(dump, mRawAxes.pressure, "Pressure");
-    dumpAxisInfo(dump, mRawAxes.touchMajor, "TouchMajor");
-    dumpAxisInfo(dump, mRawAxes.touchMinor, "TouchMinor");
-    dumpAxisInfo(dump, mRawAxes.toolMajor, "ToolMajor");
-    dumpAxisInfo(dump, mRawAxes.toolMinor, "ToolMinor");
-    dumpAxisInfo(dump, mRawAxes.orientation, "Orientation");
+    dumpRawAbsoluteAxisInfo(dump, mRawAxes.x, "X");
+    dumpRawAbsoluteAxisInfo(dump, mRawAxes.y, "Y");
+    dumpRawAbsoluteAxisInfo(dump, mRawAxes.pressure, "Pressure");
+    dumpRawAbsoluteAxisInfo(dump, mRawAxes.touchMajor, "TouchMajor");
+    dumpRawAbsoluteAxisInfo(dump, mRawAxes.touchMinor, "TouchMinor");
+    dumpRawAbsoluteAxisInfo(dump, mRawAxes.toolMajor, "ToolMajor");
+    dumpRawAbsoluteAxisInfo(dump, mRawAxes.toolMinor, "ToolMinor");
+    dumpRawAbsoluteAxisInfo(dump, mRawAxes.orientation, "Orientation");
 }
 
 bool TouchInputMapper::configureSurfaceLocked() {
@@ -3643,6 +3652,201 @@ void MultiTouchInputMapper::configureRawAxes() {
     getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_WIDTH_MINOR, & mRawAxes.toolMinor);
     getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_ORIENTATION, & mRawAxes.orientation);
     getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_PRESSURE, & mRawAxes.pressure);
+}
+
+
+// --- JoystickInputMapper ---
+
+JoystickInputMapper::JoystickInputMapper(InputDevice* device) :
+        InputMapper(device) {
+    initialize();
+}
+
+JoystickInputMapper::~JoystickInputMapper() {
+}
+
+uint32_t JoystickInputMapper::getSources() {
+    return AINPUT_SOURCE_JOYSTICK;
+}
+
+void JoystickInputMapper::populateDeviceInfo(InputDeviceInfo* info) {
+    InputMapper::populateDeviceInfo(info);
+
+    if (mAxes.x.valid) {
+        info->addMotionRange(AINPUT_MOTION_RANGE_X,
+                mAxes.x.min, mAxes.x.max, mAxes.x.flat, mAxes.x.fuzz);
+    }
+    if (mAxes.y.valid) {
+        info->addMotionRange(AINPUT_MOTION_RANGE_Y,
+                mAxes.y.min, mAxes.y.max, mAxes.y.flat, mAxes.y.fuzz);
+    }
+}
+
+void JoystickInputMapper::dump(String8& dump) {
+    dump.append(INDENT2 "Joystick Input Mapper:\n");
+
+    dump.append(INDENT3 "Raw Axes:\n");
+    dumpRawAbsoluteAxisInfo(dump, mRawAxes.x, "X");
+    dumpRawAbsoluteAxisInfo(dump, mRawAxes.y, "Y");
+
+    dump.append(INDENT3 "Normalized Axes:\n");
+    dumpNormalizedAxis(dump, mAxes.x, "X");
+    dumpNormalizedAxis(dump, mAxes.y, "Y");
+    dumpNormalizedAxis(dump, mAxes.hat0X, "Hat0X");
+    dumpNormalizedAxis(dump, mAxes.hat0Y, "Hat0Y");
+}
+
+void JoystickInputMapper::dumpNormalizedAxis(String8& dump,
+        const NormalizedAxis& axis, const char* name) {
+    if (axis.valid) {
+        dump.appendFormat(INDENT4 "%s: min=%0.3f, max=%0.3f, flat=%0.3f, fuzz=%0.3f, "
+                "scale=%0.3f, center=%0.3f, precision=%0.3f, value=%0.3f\n",
+                name, axis.min, axis.max, axis.flat, axis.fuzz,
+                axis.scale, axis.center, axis.precision, axis.value);
+    } else {
+        dump.appendFormat(INDENT4 "%s: unknown range\n", name);
+    }
+}
+
+void JoystickInputMapper::configure() {
+    InputMapper::configure();
+
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_X, & mRawAxes.x);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_Y, & mRawAxes.y);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_HAT0X, & mRawAxes.hat0X);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_HAT0Y, & mRawAxes.hat0Y);
+
+    mAxes.x.configure(mRawAxes.x);
+    mAxes.y.configure(mRawAxes.y);
+    mAxes.hat0X.configure(mRawAxes.hat0X);
+    mAxes.hat0Y.configure(mRawAxes.hat0Y);
+}
+
+void JoystickInputMapper::initialize() {
+    mAccumulator.clear();
+
+    mAxes.x.resetState();
+    mAxes.y.resetState();
+    mAxes.hat0X.resetState();
+    mAxes.hat0Y.resetState();
+}
+
+void JoystickInputMapper::reset() {
+    // Recenter all axes.
+    nsecs_t when = systemTime(SYSTEM_TIME_MONOTONIC);
+    mAccumulator.clear();
+    mAccumulator.fields = Accumulator::FIELD_ALL;
+    sync(when);
+
+    // Reinitialize state.
+    initialize();
+
+    InputMapper::reset();
+}
+
+void JoystickInputMapper::process(const RawEvent* rawEvent) {
+    switch (rawEvent->type) {
+    case EV_ABS:
+        switch (rawEvent->scanCode) {
+        case ABS_X:
+            mAccumulator.fields |= Accumulator::FIELD_ABS_X;
+            mAccumulator.absX = rawEvent->value;
+            break;
+        case ABS_Y:
+            mAccumulator.fields |= Accumulator::FIELD_ABS_Y;
+            mAccumulator.absY = rawEvent->value;
+            break;
+        case ABS_HAT0X:
+            mAccumulator.fields |= Accumulator::FIELD_ABS_HAT0X;
+            mAccumulator.absHat0X = rawEvent->value;
+            break;
+        case ABS_HAT0Y:
+            mAccumulator.fields |= Accumulator::FIELD_ABS_HAT0Y;
+            mAccumulator.absHat0Y = rawEvent->value;
+            break;
+        }
+        break;
+
+    case EV_SYN:
+        switch (rawEvent->scanCode) {
+        case SYN_REPORT:
+            sync(rawEvent->when);
+            break;
+        }
+        break;
+    }
+}
+
+void JoystickInputMapper::sync(nsecs_t when) {
+    uint32_t fields = mAccumulator.fields;
+    if (fields == 0) {
+        return; // no new state changes, so nothing to do
+    }
+
+    int32_t metaState = mContext->getGlobalMetaState();
+
+    bool motionAxisChanged = false;
+    if (fields & Accumulator::FIELD_ABS_X) {
+        if (mAxes.x.updateValue(mAccumulator.absX)) {
+            motionAxisChanged = true;
+        }
+    }
+
+    if (fields & Accumulator::FIELD_ABS_Y) {
+        if (mAxes.y.updateValue(mAccumulator.absY)) {
+            motionAxisChanged = true;
+        }
+    }
+
+    if (motionAxisChanged) {
+        PointerCoords pointerCoords;
+        pointerCoords.x = mAxes.x.value;
+        pointerCoords.y = mAxes.y.value;
+        pointerCoords.touchMajor = 0;
+        pointerCoords.touchMinor = 0;
+        pointerCoords.toolMajor = 0;
+        pointerCoords.toolMinor = 0;
+        pointerCoords.pressure = 0;
+        pointerCoords.size = 0;
+        pointerCoords.orientation = 0;
+
+        int32_t pointerId = 0;
+        getDispatcher()->notifyMotion(when, getDeviceId(), AINPUT_SOURCE_JOYSTICK, 0,
+                AMOTION_EVENT_ACTION_MOVE, 0, metaState, AMOTION_EVENT_EDGE_FLAG_NONE,
+                1, &pointerId, &pointerCoords, mAxes.x.precision, mAxes.y.precision, 0);
+    }
+
+    if (fields & Accumulator::FIELD_ABS_HAT0X) {
+        if (mAxes.hat0X.updateValueAndDirection(mAccumulator.absHat0X)) {
+            notifyDirectionalAxis(mAxes.hat0X, when, metaState,
+                    AKEYCODE_DPAD_LEFT, AKEYCODE_DPAD_RIGHT);
+        }
+    }
+
+    if (fields & Accumulator::FIELD_ABS_HAT0Y) {
+        if (mAxes.hat0Y.updateValueAndDirection(mAccumulator.absHat0Y)) {
+            notifyDirectionalAxis(mAxes.hat0Y, when, metaState,
+                    AKEYCODE_DPAD_UP, AKEYCODE_DPAD_DOWN);
+        }
+    }
+
+    mAccumulator.clear();
+}
+
+void JoystickInputMapper::notifyDirectionalAxis(DirectionalAxis& axis,
+        nsecs_t when, int32_t metaState, int32_t lowKeyCode, int32_t highKeyCode) {
+    if (axis.lastKeyCode) {
+        getDispatcher()->notifyKey(when, getDeviceId(), AINPUT_SOURCE_JOYSTICK, 0,
+                AKEY_EVENT_ACTION_UP, AKEY_EVENT_FLAG_FROM_SYSTEM,
+                axis.lastKeyCode, 0, metaState, when);
+        axis.lastKeyCode = 0;
+    }
+    if (axis.direction) {
+        axis.lastKeyCode = axis.direction > 0 ? highKeyCode : lowKeyCode;
+        getDispatcher()->notifyKey(when, getDeviceId(), AINPUT_SOURCE_JOYSTICK, 0,
+                AKEY_EVENT_ACTION_DOWN, AKEY_EVENT_FLAG_FROM_SYSTEM,
+                axis.lastKeyCode, 0, metaState, when);
+    }
 }
 
 

@@ -624,7 +624,11 @@ static const int32_t GAMEPAD_KEYCODES[] = {
         AKEYCODE_BUTTON_L1, AKEYCODE_BUTTON_R1,
         AKEYCODE_BUTTON_L2, AKEYCODE_BUTTON_R2,
         AKEYCODE_BUTTON_THUMBL, AKEYCODE_BUTTON_THUMBR,
-        AKEYCODE_BUTTON_START, AKEYCODE_BUTTON_SELECT, AKEYCODE_BUTTON_MODE
+        AKEYCODE_BUTTON_START, AKEYCODE_BUTTON_SELECT, AKEYCODE_BUTTON_MODE,
+        AKEYCODE_BUTTON_1, AKEYCODE_BUTTON_2, AKEYCODE_BUTTON_3, AKEYCODE_BUTTON_4,
+        AKEYCODE_BUTTON_5, AKEYCODE_BUTTON_6, AKEYCODE_BUTTON_7, AKEYCODE_BUTTON_8,
+        AKEYCODE_BUTTON_9, AKEYCODE_BUTTON_10, AKEYCODE_BUTTON_11, AKEYCODE_BUTTON_12,
+        AKEYCODE_BUTTON_13, AKEYCODE_BUTTON_14, AKEYCODE_BUTTON_15, AKEYCODE_BUTTON_16,
 };
 
 int EventHub::openDevice(const char *devicePath) {
@@ -739,9 +743,9 @@ int EventHub::openDevice(const char *devicePath) {
         //}
 
         // See if this is a keyboard.  Ignore everything in the button range except for
-        // gamepads which are also considered keyboards.
+        // joystick and gamepad buttons which are also considered keyboards.
         if (containsNonZeroByte(key_bitmask, 0, sizeof_bit_array(BTN_MISC))
-                || containsNonZeroByte(key_bitmask, sizeof_bit_array(BTN_GAMEPAD),
+                || containsNonZeroByte(key_bitmask, sizeof_bit_array(BTN_JOYSTICK),
                         sizeof_bit_array(BTN_DIGI))
                 || containsNonZeroByte(key_bitmask, sizeof_bit_array(KEY_OK),
                         sizeof_bit_array(KEY_MAX + 1))) {
@@ -853,6 +857,18 @@ int EventHub::openDevice(const char *devicePath) {
                 device->classes |= INPUT_DEVICE_CLASS_GAMEPAD;
                 break;
             }
+        }
+    }
+
+    // See if this device is a joystick.
+    // Ignore touchscreens because they use the same absolute axes for other purposes.
+    if (device->classes & INPUT_DEVICE_CLASS_GAMEPAD
+            && !(device->classes & INPUT_DEVICE_CLASS_TOUCHSCREEN)) {
+        if (test_bit(ABS_X, abs_bitmask)
+                || test_bit(ABS_Y, abs_bitmask)
+                || test_bit(ABS_HAT0X, abs_bitmask)
+                || test_bit(ABS_HAT0Y, abs_bitmask)) {
+            device->classes |= INPUT_DEVICE_CLASS_JOYSTICK;
         }
     }
 

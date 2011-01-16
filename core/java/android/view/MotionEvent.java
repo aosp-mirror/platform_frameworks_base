@@ -26,7 +26,8 @@ import android.os.SystemClock;
  * class may hold either absolute or relative movements, depending on what
  * it is being used for.
  * <p>
- * On pointing devices such as touch screens, pointer coordinates specify absolute
+ * On pointing devices with source class {@link InputDevice#SOURCE_CLASS_POINTER}
+ * such as touch screens, the pointer coordinates specify absolute
  * positions such as view X/Y coordinates.  Each complete gesture is represented
  * by a sequence of motion events with actions that describe pointer state transitions
  * and movements.  A gesture starts with a motion event with {@link #ACTION_DOWN}
@@ -38,10 +39,17 @@ import android.os.SystemClock;
  * by a motion event with {@link #ACTION_UP} or when gesture is canceled
  * with {@link #ACTION_CANCEL}.
  * </p><p>
- * On trackballs, the pointer coordinates specify relative movements as X/Y deltas.
+ * On trackball devices with source class {@link InputDevice#SOURCE_CLASS_TRACKBALL},
+ * the pointer coordinates specify relative movements as X/Y deltas.
  * A trackball gesture consists of a sequence of movements described by motion
  * events with {@link #ACTION_MOVE} interspersed with occasional {@link #ACTION_DOWN}
  * or {@link #ACTION_UP} motion events when the trackball button is pressed or released.
+ * </p><p>
+ * On joystick devices with source class {@link InputDevice#SOURCE_CLASS_JOYSTICK},
+ * the pointer coordinates specify the absolute position of the joystick axes.
+ * The joystick axis values are normalized to a range of -1.0 to 1.0 where 0.0 corresponds
+ * to the center position.  More information about the set of available axes and the
+ * range of motion can be obtained using {@link InputDevice#getMotionRange}.
  * </p><p>
  * Motion events always report movements for all pointers at once.  The number
  * of pointers only ever changes by one as individual pointers go up and down,

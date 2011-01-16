@@ -212,6 +212,22 @@ static const KeycodeLabel KEYCODES[] = {
     { "PROG_YELLOW", 185 },
     { "PROG_BLUE", 186 },
     { "APP_SWITCH", 187 },
+    { "BUTTON_1", 188 },
+    { "BUTTON_2", 189 },
+    { "BUTTON_3", 190 },
+    { "BUTTON_4", 191 },
+    { "BUTTON_5", 192 },
+    { "BUTTON_6", 193 },
+    { "BUTTON_7", 194 },
+    { "BUTTON_8", 195 },
+    { "BUTTON_9", 196 },
+    { "BUTTON_10", 197 },
+    { "BUTTON_11", 198 },
+    { "BUTTON_12", 199 },
+    { "BUTTON_13", 200 },
+    { "BUTTON_14", 201 },
+    { "BUTTON_15", 202 },
+    { "BUTTON_16", 203 },
 
     // NOTE: If you add a new keycode here you must also add it to several other files.
     //       Refer to frameworks/base/core/java/android/view/KeyEvent.java for the full list.
