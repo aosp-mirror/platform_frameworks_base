@@ -16,10 +16,6 @@
 */
 -->
 <resources>
-    <!-- The width of the big icons in notifications. -->
-    <dimen name="notification_large_icon_width">60dp</dimen>
-    <!-- The width of the big icons in notifications. -->
-    <dimen name="notification_large_icon_height">60dp</dimen>
     <!-- The width of the ticker, including the icon -->
     <dimen name="notification_ticker_width">360dp</dimen>
     <!-- Status bar panel bottom offset (height of status bar - overlap) -->

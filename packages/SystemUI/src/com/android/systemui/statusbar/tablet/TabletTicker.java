@@ -208,7 +208,8 @@ public class TabletTicker
         final Resources res = mContext.getResources();
         final FrameLayout view = new FrameLayout(mContext);
         final int width = res.getDimensionPixelSize(R.dimen.notification_ticker_width);
-        final int height = res.getDimensionPixelSize(R.dimen.notification_large_icon_height);
+        final int height = res.getDimensionPixelSize(
+                android.R.dimen.notification_large_icon_height);
         int windowFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
