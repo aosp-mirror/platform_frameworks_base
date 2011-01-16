@@ -268,7 +268,7 @@ public:
     Rect* clipRect;
 
     /**
-     * The ancestor layer's dirty region..
+     * The ancestor layer's dirty region.
      */
     Region* region;
 
