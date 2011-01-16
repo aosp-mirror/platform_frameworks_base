@@ -114,7 +114,7 @@
                 ?android:attr/expandableListPreferredItemPaddingLeft</item>
 
         <item name="expandableListPreferredItemIndicatorLeft">3dip</item>
-        <item name="expandableListPreferredItemIndicatorRight">33dip</item>
+        <item name="expandableListPreferredItemIndicatorRight">0dip</item>
         <item name="expandableListPreferredChildIndicatorLeft">
                 ?android:attr/expandableListPreferredItemIndicatorLeft</item>
         <item name="expandableListPreferredChildIndicatorRight">
@@ -815,7 +815,7 @@
                 ?android:attr/expandableListPreferredItemPaddingLeft</item>
 
         <item name="expandableListPreferredItemIndicatorLeft">3dip</item>
-        <item name="expandableListPreferredItemIndicatorRight">33dip</item>
+        <item name="expandableListPreferredItemIndicatorRight">0dip</item>
         <item name="expandableListPreferredChildIndicatorLeft">
                 ?android:attr/expandableListPreferredItemIndicatorLeft</item>
         <item name="expandableListPreferredChildIndicatorRight">
@@ -1074,7 +1074,7 @@
                 ?android:attr/expandableListPreferredItemPaddingLeft</item>
 
         <item name="expandableListPreferredItemIndicatorLeft">3dip</item>
-        <item name="expandableListPreferredItemIndicatorRight">33dip</item>
+        <item name="expandableListPreferredItemIndicatorRight">0dip</item>
         <item name="expandableListPreferredChildIndicatorLeft">
                 ?android:attr/expandableListPreferredItemIndicatorLeft</item>
         <item name="expandableListPreferredChildIndicatorRight">
