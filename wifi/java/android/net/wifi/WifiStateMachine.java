@@ -47,6 +47,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo.DetailedState;
 import android.net.LinkProperties;
 import android.net.wifi.NetworkUpdateResult;
+import android.net.wifi.WpsResult.Status;
 import android.os.Binder;
 import android.os.Message;
 import android.os.IBinder;
@@ -302,10 +303,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /* Reset the supplicant state tracker */
     static final int CMD_RESET_SUPPLICANT_STATE           = 111;
 
-
     /* Commands/events reported by WpsStateMachine */
     /* Indicates the completion of WPS activity */
     static final int WPS_COMPLETED_EVENT                  = 121;
+    /* Reset the WPS state machine */
+    static final int CMD_RESET_WPS_STATE                  = 122;
 
     private static final int CONNECT_MODE   = 1;
     private static final int SCAN_ONLY_MODE = 2;
@@ -793,18 +795,19 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         sendMessage(obtainMessage(CMD_FORGET_NETWORK, netId, 0));
     }
 
-    public String startWps(AsyncChannel channel, WpsConfiguration config) {
-        String result = null;
+    public WpsResult startWps(AsyncChannel channel, WpsConfiguration config) {
+        WpsResult result;
         switch (config.setup) {
             case PIN_FROM_DEVICE:
-                //TODO: will go away with AsyncChannel use from settings
-                Message resultMsg = channel.sendMessageSynchronously(CMD_START_WPS, config);
-                result = (String) resultMsg.obj;
-                resultMsg.recycle();
-                break;
             case PBC:
             case PIN_FROM_ACCESS_POINT:
-                sendMessage(obtainMessage(CMD_START_WPS, config));
+                //TODO: will go away with AsyncChannel use from settings
+                Message resultMsg = channel.sendMessageSynchronously(CMD_START_WPS, config);
+                result = (WpsResult) resultMsg.obj;
+                resultMsg.recycle();
+                break;
+            default:
+                result = new WpsResult(Status.FAILURE);
                 break;
         }
         return result;
@@ -1511,13 +1514,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_ENABLE_ALL_NETWORKS:
                     break;
                 case CMD_START_WPS:
-                    WpsConfiguration config = (WpsConfiguration) message.obj;
-                    switch (config.setup) {
-                        case PIN_FROM_DEVICE:
-                            String pin = "";
-                            mReplyChannel.replyToMessage(message, message.what, pin);
-                            break;
-                    }
+                    /* Return failure when the state machine cannot handle WPS initiation*/
+                    mReplyChannel.replyToMessage(message, message.what,
+                                new WpsResult(Status.FAILURE));
                     break;
                 default:
                     Log.e(TAG, "Error! unhandled message" + message);
@@ -1803,6 +1802,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     /* Reset the supplicant state to indicate the supplicant
                      * state is not known at this time */
                     mSupplicantStateTracker.sendMessage(CMD_RESET_SUPPLICANT_STATE);
+                    mWpsStateMachine.sendMessage(CMD_RESET_WPS_STATE);
                     /* Initialize data structures */
                     mLastBssid = null;
                     mLastNetworkId = -1;
@@ -1884,6 +1884,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     setWifiState(WIFI_STATE_DISABLING);
                     sendSupplicantConnectionChangedBroadcast(false);
                     mSupplicantStateTracker.sendMessage(CMD_RESET_SUPPLICANT_STATE);
+                    mWpsStateMachine.sendMessage(CMD_RESET_WPS_STATE);
                     transitionTo(mSupplicantStoppingState);
                     break;
                 case SUP_DISCONNECTION_EVENT:  /* Supplicant connection lost */
@@ -1894,6 +1895,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     handleNetworkDisconnect();
                     sendSupplicantConnectionChangedBroadcast(false);
                     mSupplicantStateTracker.sendMessage(CMD_RESET_SUPPLICANT_STATE);
+                    mWpsStateMachine.sendMessage(CMD_RESET_WPS_STATE);
                     transitionTo(mDriverLoadedState);
                     sendMessageDelayed(CMD_START_SUPPLICANT, SUPPLICANT_RESTART_INTERVAL_MSECS);
                     break;
