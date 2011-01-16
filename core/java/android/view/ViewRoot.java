@@ -1229,24 +1229,34 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
 
         if (computesInternalInsets) {
-            ViewTreeObserver.InternalInsetsInfo insets = attachInfo.mGivenInternalInsets;
-            final Rect givenContent = attachInfo.mGivenInternalInsets.contentInsets;
-            final Rect givenVisible = attachInfo.mGivenInternalInsets.visibleInsets;
-            givenContent.left = givenContent.top = givenContent.right
-                    = givenContent.bottom = givenVisible.left = givenVisible.top
-                    = givenVisible.right = givenVisible.bottom = 0;
+            // Clear the original insets.
+            final ViewTreeObserver.InternalInsetsInfo insets = attachInfo.mGivenInternalInsets;
+            insets.reset();
+
+            // Compute new insets in place.
             attachInfo.mTreeObserver.dispatchOnComputeInternalInsets(insets);
-            Rect contentInsets = insets.contentInsets;
-            Rect visibleInsets = insets.visibleInsets;
-            if (mTranslator != null) {
-                contentInsets = mTranslator.getTranslatedContentInsets(contentInsets);
-                visibleInsets = mTranslator.getTranslatedVisbileInsets(visibleInsets);
-            }
+
+            // Tell the window manager.
             if (insetsPending || !mLastGivenInsets.equals(insets)) {
                 mLastGivenInsets.set(insets);
+
+                // Translate insets to screen coordinates if needed.
+                final Rect contentInsets;
+                final Rect visibleInsets;
+                final Region touchableRegion;
+                if (mTranslator != null) {
+                    contentInsets = mTranslator.getTranslatedContentInsets(insets.contentInsets);
+                    visibleInsets = mTranslator.getTranslatedVisibleInsets(insets.visibleInsets);
+                    touchableRegion = mTranslator.getTranslatedTouchableArea(insets.touchableRegion);
+                } else {
+                    contentInsets = insets.contentInsets;
+                    visibleInsets = insets.visibleInsets;
+                    touchableRegion = insets.touchableRegion;
+                }
+
                 try {
                     sWindowSession.setInsets(mWindow, insets.mTouchableInsets,
-                            contentInsets, visibleInsets);
+                            contentInsets, visibleInsets, touchableRegion);
                 } catch (RemoteException e) {
                 }
             }
