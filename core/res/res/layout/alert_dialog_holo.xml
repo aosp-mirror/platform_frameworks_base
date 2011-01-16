@@ -27,7 +27,6 @@
     <LinearLayout android:id="@+id/topPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="64dip"
         android:orientation="vertical">
         <ImageView android:id="@+id/titleDividerTop"
             android:layout_width="match_parent"
@@ -42,9 +41,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="8dip"
-            android:layout_marginBottom="8dip"
+            android:gravity="center_vertical|left"
+            android:minHeight="60dip"
             android:layout_marginLeft="32dip"
             android:layout_marginRight="32dip">
             <ImageView android:id="@+id/icon"
