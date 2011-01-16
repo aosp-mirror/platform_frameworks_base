@@ -67,10 +67,9 @@ public class PropertyValuesHolder implements Cloneable {
     KeyframeSet mKeyframeSet = null;
 
 
-    // type evaluators for the three primitive types handled by this implementation
+    // type evaluators for the primitive types handled by this implementation
     private static final TypeEvaluator sIntEvaluator = new IntEvaluator();
     private static final TypeEvaluator sFloatEvaluator = new FloatEvaluator();
-    private static final TypeEvaluator sDoubleEvaluator = new DoubleEvaluator();
 
     // We try several different types when searching for appropriate setter/getter functions.
     // The caller may have supplied values in a type that does not match the setter/getter
@@ -104,7 +103,7 @@ public class PropertyValuesHolder implements Cloneable {
     /**
      * The type evaluator used to calculate the animated values. This evaluator is determined
      * automatically based on the type of the start/end objects passed into the constructor,
-     * but the system only knows about the primitive types int, double, and float. Any other
+     * but the system only knows about the primitive types int and float. Any other
      * type will need to set the evaluator to a custom evaluator for that type.
      */
     private TypeEvaluator mEvaluator;
@@ -501,7 +500,7 @@ public class PropertyValuesHolder implements Cloneable {
      */
     void init() {
         if (mEvaluator == null) {
-            // We already handle int, float, long, double automatically, but not their Object
+            // We already handle int and float automatically, but not their Object
             // equivalents
             mEvaluator = (mValueType == Integer.class) ? sIntEvaluator :
                     (mValueType == Float.class) ? sFloatEvaluator :
@@ -509,7 +508,7 @@ public class PropertyValuesHolder implements Cloneable {
         }
         if (mEvaluator != null) {
             // KeyframeSet knows how to evaluate the common types - only give it a custom
-            // evaulator if one has been set on this class
+            // evaluator if one has been set on this class
             mKeyframeSet.setEvaluator(mEvaluator);
         }
     }
@@ -520,7 +519,7 @@ public class PropertyValuesHolder implements Cloneable {
      * desired. This may be important in cases where either the type of the values supplied
      * do not match the way that they should be interpolated between, or if the values
      * are of a custom type or one not currently understood by the animation system. Currently,
-     * only values of type float, double, and int (and their Object equivalents, Float, Double,
+     * only values of type float and int (and their Object equivalents: Float
      * and Integer) are  correctly interpolated; all other types require setting a TypeEvaluator.
      * @param evaluator
      */

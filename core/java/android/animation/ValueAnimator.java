@@ -143,10 +143,9 @@ public class ValueAnimator extends Animator {
     private static final TimeInterpolator sDefaultInterpolator =
             new AccelerateDecelerateInterpolator();
 
-    // type evaluators for the three primitive types handled by this implementation
+    // type evaluators for the primitive types handled by this implementation
     private static final TypeEvaluator sIntEvaluator = new IntEvaluator();
     private static final TypeEvaluator sFloatEvaluator = new FloatEvaluator();
-    private static final TypeEvaluator sDoubleEvaluator = new DoubleEvaluator();
 
     /**
      * Used to indicate whether the animation is currently playing in reverse. This causes the
@@ -858,7 +857,7 @@ public class ValueAnimator extends Animator {
 
     /**
      * The type evaluator to be used when calculating the animated values of this animation.
-     * The system will automatically assign a float, int, or double evaluator based on the type
+     * The system will automatically assign a float or int evaluator based on the type
      * of <code>startValue</code> and <code>endValue</code> in the constructor. But if these values
      * are not one of these primitive types, or if different evaluation is desired (such as is
      * necessary with int values that represent colors), a custom evaluator needs to be assigned.
