@@ -294,6 +294,7 @@
         <item name="fastScrollPreviewBackgroundRight">@android:drawable/menu_submenu_background</item>
         <item name="fastScrollPreviewBackgroundLeft">@android:drawable/menu_submenu_background</item>
         <item name="fastScrollOverlayPosition">floating</item>
+        <item name="fastScrollTextColor">@android:color/primary_text_dark</item>
 
     </style>
 
