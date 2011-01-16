@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.IPowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -79,11 +80,15 @@ public class BrightnessController implements ToggleSlider.Listener {
         setMode(automatic ? Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
                 : Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
         if (!automatic) {
-            value = value + value + MINIMUM_BACKLIGHT;
-            setBrightness(value);
+            final int val = value + value + MINIMUM_BACKLIGHT;
+            setBrightness(val);
             if (!tracking) {
-                Settings.System.putInt(mContext.getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS, value);
+                AsyncTask.execute(new Runnable() {
+                        public void run() {
+                            Settings.System.putInt(mContext.getContentResolver(), 
+                                    Settings.System.SCREEN_BRIGHTNESS, val);
+                        }
+                    });
             }
         }
     }
