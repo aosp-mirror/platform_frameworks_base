@@ -316,6 +316,7 @@ public final class NfcAdapter {
      * @hide
      */
     public INfcAdapter getService() {
+        isEnabled();  // NOP call to recover sService if it is stale
         return sService;
     }
 
@@ -324,6 +325,7 @@ public final class NfcAdapter {
      * @hide
      */
     public INfcTag getTagService() {
+        isEnabled();  // NOP call to recover sTagService if it is stale
         return sTagService;
     }
 
