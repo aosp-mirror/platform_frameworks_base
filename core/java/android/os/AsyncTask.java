@@ -470,7 +470,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * Executes the task with the specified parameters. The task returns
      * itself (this) so that the caller can keep a reference to it.  The tasks
      * started by all invocations of this method in a given process are run
-     * sequentially.  Call the {@link #execute(Executor,Params...) execute(Executor,Params...)}
+     * sequentially.  Call the executeOnExecutor(Executor,Params...)
      * with a custom {@link Executor} to have finer grained control over how the
      * tasks are run.
      *
