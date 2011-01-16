@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm;
+package com.android.internal.telephony;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -22,7 +22,7 @@ import android.os.Parcelable;
 /**
  * {@hide}
  */
-public class NetworkInfo implements Parcelable {
+public class OperatorInfo implements Parcelable {
     public enum State {
         UNKNOWN,
         AVAILABLE,
@@ -30,11 +30,11 @@ public class NetworkInfo implements Parcelable {
         FORBIDDEN;
     }
 
-    String operatorAlphaLong;
-    String operatorAlphaShort;
-    String operatorNumeric;
+    private String operatorAlphaLong;
+    private String operatorAlphaShort;
+    private String operatorNumeric;
 
-    State state = State.UNKNOWN;
+    private State state = State.UNKNOWN;
 
 
     public String
@@ -57,7 +57,7 @@ public class NetworkInfo implements Parcelable {
         return state;
     }
 
-    NetworkInfo(String operatorAlphaLong,
+    OperatorInfo(String operatorAlphaLong,
                 String operatorAlphaShort,
                 String operatorNumeric,
                 State state) {
@@ -70,7 +70,7 @@ public class NetworkInfo implements Parcelable {
     }
 
 
-    public NetworkInfo(String operatorAlphaLong,
+    public OperatorInfo(String operatorAlphaLong,
                 String operatorAlphaShort,
                 String operatorNumeric,
                 String stateString) {
@@ -98,7 +98,7 @@ public class NetworkInfo implements Parcelable {
 
 
     public String toString() {
-        return "NetworkInfo " + operatorAlphaLong
+        return "OperatorInfo " + operatorAlphaLong
                 + "/" + operatorAlphaShort
                 + "/" + operatorNumeric
                 + "/" + state;
@@ -106,7 +106,7 @@ public class NetworkInfo implements Parcelable {
 
     /**
      * Parcelable interface implemented below.
-     * This is a simple effort to make NetworkInfo parcelable rather than
+     * This is a simple effort to make OperatorInfo parcelable rather than
      * trying to make the conventional containing object (AsyncResult),
      * implement parcelable.  This functionality is needed for the
      * NetworkQueryService to fix 1128695.
@@ -118,7 +118,7 @@ public class NetworkInfo implements Parcelable {
 
     /**
      * Implement the Parcelable interface.
-     * Method to serialize a NetworkInfo object.
+     * Method to serialize a OperatorInfo object.
      */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(operatorAlphaLong);
@@ -129,21 +129,21 @@ public class NetworkInfo implements Parcelable {
 
     /**
      * Implement the Parcelable interface
-     * Method to deserialize a NetworkInfo object, or an array thereof.
+     * Method to deserialize a OperatorInfo object, or an array thereof.
      */
-    public static final Creator<NetworkInfo> CREATOR =
-        new Creator<NetworkInfo>() {
-            public NetworkInfo createFromParcel(Parcel in) {
-                NetworkInfo netInfo = new NetworkInfo(
+    public static final Creator<OperatorInfo> CREATOR =
+        new Creator<OperatorInfo>() {
+            public OperatorInfo createFromParcel(Parcel in) {
+                OperatorInfo opInfo = new OperatorInfo(
                         in.readString(), /*operatorAlphaLong*/
                         in.readString(), /*operatorAlphaShort*/
                         in.readString(), /*operatorNumeric*/
                         (State) in.readSerializable()); /*state*/
-                return netInfo;
+                return opInfo;
             }
 
-            public NetworkInfo[] newArray(int size) {
-                return new NetworkInfo[size];
+            public OperatorInfo[] newArray(int size) {
+                return new OperatorInfo[size];
             }
         };
 }

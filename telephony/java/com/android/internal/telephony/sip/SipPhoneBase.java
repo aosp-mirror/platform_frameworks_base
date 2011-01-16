@@ -38,6 +38,7 @@ import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccPhoneBookInterfaceManager;
 import com.android.internal.telephony.IccSmsInterfaceManager;
 import com.android.internal.telephony.MmiCode;
+import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.PhoneNotifier;
@@ -347,7 +348,7 @@ abstract class SipPhoneBase extends PhoneBase {
     }
 
     public void selectNetworkManually(
-            com.android.internal.telephony.gsm.NetworkInfo network,
+            OperatorInfo network,
             Message response) {
     }
 
