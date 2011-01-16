@@ -53,6 +53,9 @@ public class WifiMonitor {
     private static final String passwordKeyMayBeIncorrectEvent =
        "pre-shared key may be incorrect";
 
+    /* WPS events */
+    private static final String wpsOverlapEvent = "WPS-OVERLAP-DETECTED";
+
     /**
      * Names of events from wpa_supplicant (minus the prefix). In the
      * format descriptions, * &quot;<code>x</code>&quot;
@@ -174,6 +177,8 @@ public class WifiMonitor {
                     if (eventStr.startsWith(wpaEventPrefix) &&
                             0 < eventStr.indexOf(passwordKeyMayBeIncorrectEvent)) {
                         handlePasswordKeyMayBeIncorrect();
+                    } else if (eventStr.startsWith(wpsOverlapEvent)) {
+                        mWifiStateMachine.notifyWpsOverlap();
                     }
                     continue;
                 }
