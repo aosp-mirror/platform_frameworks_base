@@ -319,7 +319,7 @@ void NuCachedSource2::onRead(const sp<AMessage> &msg) {
 
 void NuCachedSource2::restartPrefetcherIfNecessary_l(
         bool ignoreLowWaterThreshold) {
-    static const size_t kGrayArea = 256 * 1024;
+    static const size_t kGrayArea = 1024 * 1024;
 
     if (mFetching || mFinalStatus != OK) {
         return;
@@ -414,7 +414,7 @@ ssize_t NuCachedSource2::readInternal(off64_t offset, void *data, size_t size) {
 
     if (offset < mCacheOffset
             || offset >= (off64_t)(mCacheOffset + mCache->totalSize())) {
-        static const off64_t kPadding = 32768;
+        static const off64_t kPadding = 256 * 1024;
 
         // In the presence of multiple decoded streams, once of them will
         // trigger this seek request, the other one will request data "nearby"
