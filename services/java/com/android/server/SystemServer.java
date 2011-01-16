@@ -204,11 +204,9 @@ class ServerThread extends Thread {
             // TODO: Use a more reliable check to see if this product should
             // support Bluetooth - see bug 988521
             if (SystemProperties.get("ro.kernel.qemu").equals("1")) {
-                Slog.i(TAG, "Registering null Bluetooth Service (emulator)");
-                ServiceManager.addService(BluetoothAdapter.BLUETOOTH_SERVICE, null);
+                Slog.i(TAG, "No Bluetooh Service (emulator)");
             } else if (factoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL) {
-                Slog.i(TAG, "Registering null Bluetooth Service (factory test)");
-                ServiceManager.addService(BluetoothAdapter.BLUETOOTH_SERVICE, null);
+                Slog.i(TAG, "No Bluetooth Service (factory test)");
             } else {
                 Slog.i(TAG, "Bluetooth Service");
                 bluetooth = new BluetoothService(context);
