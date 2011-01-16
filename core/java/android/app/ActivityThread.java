@@ -45,7 +45,6 @@ import android.graphics.Canvas;
 import android.net.IConnectivityManager;
 import android.net.Proxy;
 import android.net.ProxyProperties;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -3489,6 +3488,10 @@ public final class ActivityThread {
             mInstrumentation = new Instrumentation();
         }
 
+        if ((data.appInfo.flags&ApplicationInfo.FLAG_LARGE_HEAP) != 0) {
+            // XXX bump up Dalvik's heap.
+        }
+
         // If the app is being launched for full backup or restore, bring it up in
         // a restricted environment with the base application class.
         Application app = data.info.makeApplication(data.restrictedBackupMode, null);
@@ -3497,7 +3500,7 @@ public final class ActivityThread {
         List<ProviderInfo> providers = data.providers;
         if (providers != null) {
             installContentProviders(app, providers);
-            // For process that contain content providers, we want to
+            // For process that contains content providers, we want to
             // ensure that the JIT is enabled "at some point".
             mH.sendEmptyMessageDelayed(H.ENABLE_JIT, 10*1000);
         }

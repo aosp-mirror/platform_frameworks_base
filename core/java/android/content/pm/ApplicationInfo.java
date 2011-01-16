@@ -270,14 +270,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_SUPPORTS_XLARGE_SCREENS = 1<<19;
     
     /**
-     * Value for {@link #flags}: this is true if the application has set
-     * its android:neverEncrypt to true, false otherwise. It is used to specify
-     * that this package specifically "opts-out" of a secured file system solution,
-     * and will always store its data in-the-clear.
-     *
-     * {@hide}
+     * Value for {@link #flags}: true when the application has requested a
+     * large heap for its processes.  Corresponds to
+     * {@link android.R.styleable#AndroidManifestApplication_largeHeap
+     * android:largeHeap}.
      */
-    public static final int FLAG_NEVER_ENCRYPT = 1<<30;
+    public static final int FLAG_LARGE_HEAP = 1<<20;
 
     /**
      * Value for {@link #flags}: Set to true if the application has been
@@ -285,7 +283,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
-    public static final int FLAG_FORWARD_LOCK = 1<<29;
+    public static final int FLAG_FORWARD_LOCK = 1<<30;
 
     /**
      * Value for {@link #flags}: set to <code>true</code> if the application
@@ -298,7 +296,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
-    public static final int FLAG_CANT_SAVE_STATE = 1<<27;
+    public static final int FLAG_CANT_SAVE_STATE = 1<<29;
 
     /**
      * Flags associated with the application.  Any combination of
