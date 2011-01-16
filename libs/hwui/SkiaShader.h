@@ -234,6 +234,7 @@ private:
  */
 struct SkiaComposeShader: public SkiaShader {
     SkiaComposeShader(SkiaShader* first, SkiaShader* second, SkXfermode::Mode mode, SkShader* key);
+    ~SkiaComposeShader();
     SkiaShader* copy();
 
     void set(TextureCache* textureCache, GradientCache* gradientCache);
@@ -243,12 +244,18 @@ struct SkiaComposeShader: public SkiaShader {
             GLuint* textureUnit);
 
 private:
-    SkiaComposeShader() {
+    SkiaComposeShader(): mCleanup(false) {
+    }
+
+    void cleanup() {
+        mCleanup = true;
     }
 
     SkiaShader* mFirst;
     SkiaShader* mSecond;
     SkXfermode::Mode mMode;
+
+    bool mCleanup;
 }; // struct SkiaComposeShader
 
 }; // namespace uirenderer

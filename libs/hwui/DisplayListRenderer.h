@@ -417,6 +417,7 @@ private:
             shaderCopy = shader->copy();
             mShaderMap.add(shader, shaderCopy);
             mShaders.add(shaderCopy);
+            Caches::getInstance().resourceCache.incrementRefcount(shaderCopy);
         }
 
         addInt((int) shaderCopy);

@@ -129,7 +129,7 @@ DisplayList::~DisplayList() {
     mBitmapResources.clear();
 
     for (size_t i = 0; i < mShaders.size(); i++) {
-        delete mShaders.itemAt(i);
+        caches.resourceCache.decrementRefcount(mShaders.itemAt(i));
     }
     mShaders.clear();
 
@@ -181,7 +181,9 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
 
     const Vector<SkiaShader*> &shaders = recorder.getShaders();
     for (size_t i = 0; i < shaders.size(); i++) {
-        mShaders.add(shaders.itemAt(i));
+        SkiaShader* shader = shaders.itemAt(i);
+        mShaders.add(shader);
+        caches.resourceCache.incrementRefcount(shader);
     }
 
     const Vector<SkPaint*> &paints = recorder.getPaints();
@@ -405,10 +407,14 @@ void DisplayListRenderer::reset() {
     }
     mBitmapResources.clear();
 
-    mPaints.clear();
-    mPaintMap.clear();
+    for (size_t i = 0; i < mShaders.size(); i++) {
+       caches.resourceCache.decrementRefcount(mShaders.itemAt(i));
+    }
     mShaders.clear();
     mShaderMap.clear();
+
+    mPaints.clear();
+    mPaintMap.clear();
     mMatrices.clear();
 }
 
