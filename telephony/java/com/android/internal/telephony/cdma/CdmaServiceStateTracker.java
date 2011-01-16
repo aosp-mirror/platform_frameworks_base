@@ -443,18 +443,21 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                     mMin = cdmaSubscription[3];
                     mPrlVersion = cdmaSubscription[4];
                     Log.d(LOG_TAG,"GET_CDMA_SUBSCRIPTION MDN=" + mMdn);
-                    //Notify apps subscription info is ready
+
+                    mIsMinInfoReady = true;
+
+                    int otaspMode = getOtasp();
+                    int oldOtaspMode = mCurrentOtaspMode;
+                    mCurrentOtaspMode = otaspMode;
+
+                    // Notify apps subscription info is ready
                     if (cdmaForSubscriptionInfoReadyRegistrants != null) {
+                        Log.d(LOG_TAG, "call cdmaForSubscriptionInfoReady.notifyRegistrants()");
                         cdmaForSubscriptionInfoReadyRegistrants.notifyRegistrants();
                     }
-                    if (!mIsMinInfoReady) {
-                        mIsMinInfoReady = true;
-                    }
-                    int otaspMode = getOtasp();
-                    if (mCurrentOtaspMode != otaspMode) {
+                    if (oldOtaspMode != mCurrentOtaspMode) {
                         Log.d(LOG_TAG, "call phone.notifyOtaspChanged old otaspMode=" +
-                                mCurrentOtaspMode + " new otaspMode=" + otaspMode);
-                        mCurrentOtaspMode = otaspMode;
+                                oldOtaspMode + " new otaspMode=" + mCurrentOtaspMode);
                         phone.notifyOtaspChanged(mCurrentOtaspMode);
                     }
                     phone.getIccCard().broadcastIccStateChangedIntent(IccCard.INTENT_VALUE_ICC_IMSI,
