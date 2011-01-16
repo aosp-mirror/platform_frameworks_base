@@ -137,17 +137,17 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      */
     private final static LayoutLog sDefaultLog = new LayoutLog() {
         @Override
-        public void error(String tag, String message) {
+        public void error(String tag, String message, Object data) {
             System.err.println(message);
         }
 
         @Override
-        public void error(String tag, String message, Throwable throwable) {
+        public void error(String tag, String message, Throwable throwable, Object data) {
             System.err.println(message);
         }
 
         @Override
-        public void warning(String tag, String message) {
+        public void warning(String tag, String message, Object data) {
             System.out.println(message);
         }
     };
@@ -207,7 +207,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
                 @Override
                 public void onInvokeV(String signature, boolean isNative, Object caller) {
                     sDefaultLog.error(null, "Missing Stub: " + signature +
-                            (isNative ? " (native)" : ""));
+                            (isNative ? " (native)" : ""), null /*data*/);
 
                     if (debug.equalsIgnoreCase("throw")) {
                         // Throwing this exception doesn't seem that useful. It breaks

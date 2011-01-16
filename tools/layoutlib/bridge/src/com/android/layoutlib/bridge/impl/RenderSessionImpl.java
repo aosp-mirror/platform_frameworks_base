@@ -1046,7 +1046,8 @@ public class RenderSessionImpl {
 
         assert false;
         mParams.getLog().error(LayoutLog.TAG_RESOURCES_RESOLVE,
-                String.format("Unable to resolve parent style name: %s", parentName));
+                String.format("Unable to resolve parent style name: %s", parentName),
+                null /*data*/);
 
         return null;
     }

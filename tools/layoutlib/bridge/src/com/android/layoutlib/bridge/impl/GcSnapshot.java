@@ -730,7 +730,7 @@ public class GcSnapshot {
                 } else {
                     Bridge.getLog().fidelityWarning(LayoutLog.TAG_SHADER,
                             shaderDelegate.getSupportMessage(),
-                            null);
+                            null /*throwable*/, null /*data*/);
                 }
             }
 
@@ -764,7 +764,7 @@ public class GcSnapshot {
                 } else {
                     Bridge.getLog().fidelityWarning(LayoutLog.TAG_XFERMODE,
                             xfermodeDelegate.getSupportMessage(),
-                            null);
+                            null /*throwable*/, null /*data*/);
                 }
             }
 
