@@ -23,6 +23,7 @@ import com.android.internal.util.HierarchicalStateMachine;
 import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiStateMachine.StateChangeResult;
+import android.net.wifi.WpsResult.Status;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
@@ -93,28 +94,31 @@ class WpsStateMachine extends HierarchicalStateMachine {
             switch (message.what) {
                 case WifiStateMachine.CMD_START_WPS:
                     mWpsConfig = (WpsConfiguration) message.obj;
-                    boolean success = false;
+                    WpsResult result;
                     switch (mWpsConfig.setup) {
                         case PBC:
-                            success = WifiConfigStore.startWpsPbc(mWpsConfig);
+                            result = WifiConfigStore.startWpsPbc(mWpsConfig);
                             break;
                         case PIN_FROM_ACCESS_POINT:
-                            success = WifiConfigStore.startWpsWithPinFromAccessPoint(mWpsConfig);
+                            result = WifiConfigStore.startWpsWithPinFromAccessPoint(mWpsConfig);
                             break;
                         case PIN_FROM_DEVICE:
-                            String pin = WifiConfigStore.startWpsWithPinFromDevice(mWpsConfig);
-                            success = (pin != null);
-                            mReplyChannel.replyToMessage(message, message.what, pin);
+                            result = WifiConfigStore.startWpsWithPinFromDevice(mWpsConfig);
                             break;
                         default:
+                            result = new WpsResult(Status.FAILURE);
                             Log.e(TAG, "Invalid setup for WPS");
                             break;
                     }
-                    if (success) {
+                    mReplyChannel.replyToMessage(message, message.what, result);
+                    if (result.status == Status.SUCCESS) {
                         transitionTo(mActiveState);
                     } else {
                         Log.e(TAG, "Failed to start WPS with config " + mWpsConfig.toString());
                     }
+                    break;
+                case WifiStateMachine.CMD_RESET_WPS_STATE:
+                    transitionTo(mInactiveState);
                     break;
                 default:
                     Log.e(TAG, "Failed to handle " + message);
@@ -167,7 +171,9 @@ class WpsStateMachine extends HierarchicalStateMachine {
                     }
                     break;
                 case WifiStateMachine.CMD_START_WPS:
-                    deferMessage(message);
+                    /* Ignore request and send an in progress message */
+                    mReplyChannel.replyToMessage(message, message.what,
+                                new WpsResult(Status.IN_PROGRESS));
                     break;
                 default:
                     retValue = NOT_HANDLED;

@@ -370,44 +370,52 @@ class WifiConfigStore {
      * Start WPS pin method configuration with pin obtained
      * from the access point
      */
-    static boolean startWpsWithPinFromAccessPoint(WpsConfiguration config) {
+    static WpsResult startWpsWithPinFromAccessPoint(WpsConfiguration config) {
+        WpsResult result = new WpsResult();
         if (WifiNative.startWpsWithPinFromAccessPointCommand(config.BSSID, config.pin)) {
             /* WPS leaves all networks disabled */
             markAllNetworksDisabled();
-            return true;
+            result.status = WpsResult.Status.SUCCESS;
+        } else {
+            Log.e(TAG, "Failed to start WPS pin method configuration");
+            result.status = WpsResult.Status.FAILURE;
         }
-        Log.e(TAG, "Failed to start WPS pin method configuration");
-        return false;
+        return result;
     }
 
     /**
      * Start WPS pin method configuration with pin obtained
      * from the device
-     * @return empty string on failure. null is never returned.
+     * @return WpsResult indicating status and pin
      */
-    static String startWpsWithPinFromDevice(WpsConfiguration config) {
-        String pin = WifiNative.startWpsWithPinFromDeviceCommand(config.BSSID);
+    static WpsResult startWpsWithPinFromDevice(WpsConfiguration config) {
+        WpsResult result = new WpsResult();
+        result.pin = WifiNative.startWpsWithPinFromDeviceCommand(config.BSSID);
         /* WPS leaves all networks disabled */
-        if (!TextUtils.isEmpty(pin)) {
+        if (!TextUtils.isEmpty(result.pin)) {
             markAllNetworksDisabled();
+            result.status = WpsResult.Status.SUCCESS;
         } else {
             Log.e(TAG, "Failed to start WPS pin method configuration");
-            pin = "";
+            result.status = WpsResult.Status.FAILURE;
         }
-        return pin;
+        return result;
     }
 
     /**
      * Start WPS push button configuration
      */
-    static boolean startWpsPbc(WpsConfiguration config) {
+    static WpsResult startWpsPbc(WpsConfiguration config) {
+        WpsResult result = new WpsResult();
         if (WifiNative.startWpsPbcCommand(config.BSSID)) {
             /* WPS leaves all networks disabled */
             markAllNetworksDisabled();
-            return true;
+            result.status = WpsResult.Status.SUCCESS;
+        } else {
+            Log.e(TAG, "Failed to start WPS push button configuration");
+            result.status = WpsResult.Status.FAILURE;
         }
-        Log.e(TAG, "Failed to start WPS push button configuration");
-        return false;
+        return result;
     }
 
     /**
