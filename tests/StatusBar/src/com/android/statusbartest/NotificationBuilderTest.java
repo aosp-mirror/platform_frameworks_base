@@ -16,6 +16,8 @@
 
 package com.android.statusbartest;
 
+import java.util.GregorianCalendar;
+
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -190,8 +192,14 @@ public class NotificationBuilderTest extends Activity
 
         // when
         switch (getRadioChecked(R.id.group_when)) {
-            case R.id.when_midnight:
+            case R.id.when_midnight: {
+                GregorianCalendar c = new GregorianCalendar();
+                c.set(GregorianCalendar.HOUR_OF_DAY, 0);
+                c.set(GregorianCalendar.MINUTE, 0);
+                c.set(GregorianCalendar.SECOND, 0);
+                b.setWhen(c.getTimeInMillis());
                 break;
+            }
             case R.id.when_now:
                 b.setWhen(System.currentTimeMillis());
                 break;
@@ -275,6 +283,9 @@ public class NotificationBuilderTest extends Activity
                 break;
             case R.id.large_icon_pineapple:
                 b.setLargeIcon(loadBitmap(R.drawable.pineapple));
+                break;
+            case R.id.large_icon_pineapple2:
+                b.setLargeIcon(loadBitmap(R.drawable.pineapple2));
                 break;
         }
 

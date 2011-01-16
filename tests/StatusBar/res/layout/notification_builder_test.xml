@@ -238,7 +238,7 @@
                         />
                 <RadioButton
                         android:id="@+id/when_midnight"
-                        style="@style/FieldContents.Disabled"
+                        style="@style/FieldContents"
                         android:text="midnight"
                         />
                 <RadioButton
@@ -603,6 +603,11 @@
                         android:id="@+id/large_icon_pineapple"
                         style="@style/FieldContents"
                         android:text="pineapple"
+                        />
+                <RadioButton
+                        android:id="@+id/large_icon_pineapple2"
+                        style="@style/FieldContents"
+                        android:text="pineapple2"
                         />
             </RadioGroup>
             
