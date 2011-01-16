@@ -340,8 +340,9 @@ public final class ObjectAnimator extends ValueAnimator {
     @Override
     public void setTarget(Object target) {
         if (mTarget != target) {
+            final Object oldTarget = mTarget;
             mTarget = target;
-            if (mTarget  != null && target != null && mTarget.getClass() == target.getClass()) {
+            if (oldTarget != null && target != null && oldTarget.getClass() == target.getClass()) {
                 return;
             }
             // New target type should cause re-initialization prior to starting
