@@ -25,8 +25,8 @@ import java.util.ArrayList;
  * values between those keyframes for a given animation. The class internal to the animation
  * package because it is an implementation detail of how Keyframes are stored and used.
  *
- * <p>This type-specific subclass of KeyframeSet, along with the other type-specific subclasses for
- * float, long, and double, exists to speed up the getValue() method when there is no custom
+ * <p>This type-specific subclass of KeyframeSet, along with the other type-specific subclass for
+ * float, exists to speed up the getValue() method when there is no custom
  * TypeEvaluator set for the animation, so that values can be calculated without autoboxing to the
  * Object equivalents of these primitive types.</p>
  */
