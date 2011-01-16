@@ -21,6 +21,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
@@ -78,15 +79,19 @@ public class AirplaneModeController extends BroadcastReceiver
 
     // TODO: Fix this racy API by adding something better to TelephonyManager or
     // ConnectivityService.
-    private void unsafe(boolean enabled) {
-        Settings.System.putInt(
-                mContext.getContentResolver(),
-                Settings.System.AIRPLANE_MODE_ON,
-                enabled ? 1 : 0);
-        Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-        intent.putExtra("state", enabled);
-        mContext.sendBroadcast(intent);
+    private void unsafe(final boolean enabled) {
+        AsyncTask.execute(new Runnable() {
+                public void run() {
+                    Settings.System.putInt(
+                            mContext.getContentResolver(),
+                            Settings.System.AIRPLANE_MODE_ON,
+                            enabled ? 1 : 0);
+                    Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+                    intent.putExtra("state", enabled);
+                    mContext.sendBroadcast(intent);
+                }
+            });
     }
 }
 
