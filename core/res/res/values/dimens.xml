@@ -68,4 +68,10 @@
          is along the minor axis (that is the screen is portrait).  This may
          be either a fraction or a dimension. -->
     <item type="dimen" name="dialog_min_width_minor">95%</item>
+
+    <!-- The width of the big icons in notifications. -->
+    <dimen name="notification_large_icon_width">60dp</dimen>
+    <!-- The width of the big icons in notifications. -->
+    <dimen name="notification_large_icon_height">60dp</dimen>
+
 </resources>

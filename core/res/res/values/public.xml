@@ -1470,6 +1470,8 @@
 
   <public type="dimen" name="dialog_min_width_major" />
   <public type="dimen" name="dialog_min_width_minor" />
+  <public type="dimen" name="notification_large_icon_width" />
+  <public type="dimen" name="notification_large_icon_height" />
 
   <!-- Standard content view for a {@link android.app.ListFragment}.
        If you are implementing a subclass of ListFragment with your
