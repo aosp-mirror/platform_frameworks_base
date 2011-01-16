@@ -133,19 +133,24 @@ protected:
     virtual void composeLayer(sp<Snapshot> current, sp<Snapshot> previous);
 
     /**
-     * Mark the layer as dirty at the specified coordinates. The coordinates
-     * are transformed with the supplied matrix.
+     * Marks the specified region as dirty at the specified bounds.
      */
-    virtual void dirtyLayer(const float left, const float top,
-            const float right, const float bottom, const mat4 transform);
+    void dirtyLayerUnchecked(Rect& bounds, Region* region);
 
     /**
-     * Mark the layer as dirty at the specified coordinates.
+     * Returns the current snapshot.
      */
-    virtual void dirtyLayer(const float left, const float top,
-            const float right, const float bottom);
+    sp<Snapshot> getSnapshot() {
+        return mSnapshot;
+    }
 
-    void dirtyLayerUnchecked(Rect& bounds, Region* region);
+    virtual Region* getRegion() {
+        return mSnapshot->region;
+    }
+
+    virtual bool hasLayer() {
+        return (mSnapshot->flags & Snapshot::kFlagFboTarget) && mSnapshot->region;
+    }
 
 private:
     /**
@@ -223,6 +228,19 @@ private:
      * This method MUST be invoked before any drawing operation.
      */
     void clearLayerRegions();
+
+    /**
+     * Mark the layer as dirty at the specified coordinates. The coordinates
+     * are transformed with the supplied matrix.
+     */
+    void dirtyLayer(const float left, const float top,
+            const float right, const float bottom, const mat4 transform);
+
+    /**
+     * Mark the layer as dirty at the specified coordinates.
+     */
+    void dirtyLayer(const float left, const float top,
+            const float right, const float bottom);
 
     /**
      * Draws a colored rectangle with the specified color. The specified coordinates

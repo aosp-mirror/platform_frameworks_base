@@ -49,12 +49,17 @@ public:
     void prepare(bool opaque);
     void finish();
 
+    bool hasLayer();
+    Region* getRegion();
+
     static Layer* createLayer(uint32_t width, uint32_t height, bool isOpaque = false);
     static bool resizeLayer(Layer* layer, uint32_t width, uint32_t height);
     static void destroyLayer(Layer* layer);
     static void destroyLayerDeferred(Layer* layer);
 
 private:
+    void generateMesh();
+
     Layer* mLayer;
     GLuint mPreviousFbo;
 
