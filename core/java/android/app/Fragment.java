@@ -912,6 +912,12 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
         return null;
     }
     
+    /**
+     * Get the root view for the fragment's layout (the one returned by {@link #onCreateView}),
+     * if provided.
+     * 
+     * @return The fragment's root view, or null if it has no layout.
+     */
     public View getView() {
         return mView;
     }
