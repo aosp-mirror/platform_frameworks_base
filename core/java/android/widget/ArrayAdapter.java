@@ -25,9 +25,9 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
-import java.util.Comparator;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * A concrete BaseAdapter that is backed by an array of arbitrary
@@ -86,6 +86,8 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
 
     private Context mContext;
 
+    // A copy of the original mObjects array, initialized from and then used instead as soon as
+    // the mFilter ArrayFilter is used. mObjects will then only contain the filtered values.
     private ArrayList<T> mOriginalValues;
     private ArrayFilter mFilter;
 
@@ -170,15 +172,14 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      * @param object The object to add at the end of the array.
      */
     public void add(T object) {
-        if (mOriginalValues != null) {
-            synchronized (mLock) {
+        synchronized (mLock) {
+            if (mOriginalValues != null) {
                 mOriginalValues.add(object);
-                if (mNotifyOnChange) notifyDataSetChanged();
+            } else {
+                mObjects.add(object);
             }
-        } else {
-            mObjects.add(object);
-            if (mNotifyOnChange) notifyDataSetChanged();
         }
+        if (mNotifyOnChange) notifyDataSetChanged();
     }
 
     /**
@@ -187,15 +188,14 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      * @param collection The Collection to add at the end of the array.
      */
     public void addAll(Collection<? extends T> collection) {
-        if (mOriginalValues != null) {
-            synchronized (mLock) {
+        synchronized (mLock) {
+            if (mOriginalValues != null) {
                 mOriginalValues.addAll(collection);
-                if (mNotifyOnChange) notifyDataSetChanged();
+            } else {
+                mObjects.addAll(collection);
             }
-        } else {
-            mObjects.addAll(collection);
-            if (mNotifyOnChange) notifyDataSetChanged();
         }
+        if (mNotifyOnChange) notifyDataSetChanged();
     }
 
     /**
@@ -204,19 +204,18 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      * @param items The items to add at the end of the array.
      */
     public void addAll(T ... items) {
-        if (mOriginalValues != null) {
-            synchronized (mLock) {
+        synchronized (mLock) {
+            if (mOriginalValues != null) {
                 for (T item : items) {
                     mOriginalValues.add(item);
                 }
-                if (mNotifyOnChange) notifyDataSetChanged();
+            } else {
+                for (T item : items) {
+                    mObjects.add(item);
+                }
             }
-        } else {
-            for (T item : items) {
-                mObjects.add(item);
-            }
-            if (mNotifyOnChange) notifyDataSetChanged();
         }
+        if (mNotifyOnChange) notifyDataSetChanged();
     }
 
     /**
@@ -226,15 +225,14 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      * @param index The index at which the object must be inserted.
      */
     public void insert(T object, int index) {
-        if (mOriginalValues != null) {
-            synchronized (mLock) {
+        synchronized (mLock) {
+            if (mOriginalValues != null) {
                 mOriginalValues.add(index, object);
-                if (mNotifyOnChange) notifyDataSetChanged();
+            } else {
+                mObjects.add(index, object);
             }
-        } else {
-            mObjects.add(index, object);
-            if (mNotifyOnChange) notifyDataSetChanged();
         }
+        if (mNotifyOnChange) notifyDataSetChanged();
     }
 
     /**
@@ -243,12 +241,12 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      * @param object The object to remove.
      */
     public void remove(T object) {
-        if (mOriginalValues != null) {
-            synchronized (mLock) {
+        synchronized (mLock) {
+            if (mOriginalValues != null) {
                 mOriginalValues.remove(object);
+            } else {
+                mObjects.remove(object);
             }
-        } else {
-            mObjects.remove(object);
         }
         if (mNotifyOnChange) notifyDataSetChanged();
     }
@@ -257,12 +255,12 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      * Remove all elements from the list.
      */
     public void clear() {
-        if (mOriginalValues != null) {
-            synchronized (mLock) {
+        synchronized (mLock) {
+            if (mOriginalValues != null) {
                 mOriginalValues.clear();
+            } else {
+                mObjects.clear();
             }
-        } else {
-            mObjects.clear();
         }
         if (mNotifyOnChange) notifyDataSetChanged();
     }
@@ -274,7 +272,13 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      *        in this adapter.
      */
     public void sort(Comparator<? super T> comparator) {
-        Collections.sort(mObjects, comparator);
+        synchronized (mLock) {
+            if (mOriginalValues != null) {
+                Collections.sort(mOriginalValues, comparator);
+            } else {
+                Collections.sort(mObjects, comparator);
+            }
+        }
         if (mNotifyOnChange) notifyDataSetChanged();
     }
 
@@ -482,6 +486,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
                         final String[] words = valueText.split(" ");
                         final int wordCount = words.length;
 
+                        // Start at index 0, in case valueText starts with space(s)
                         for (int k = 0; k < wordCount; k++) {
                             if (words[k].startsWith(prefixString)) {
                                 newValues.add(value);
