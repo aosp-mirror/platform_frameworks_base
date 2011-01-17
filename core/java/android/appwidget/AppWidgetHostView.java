@@ -94,8 +94,12 @@ public class AppWidgetHostView extends FrameLayout {
     public AppWidgetHostView(Context context, int animationIn, int animationOut) {
         super(context);
         mContext = context;
+
+        // We want to segregate the view ids within AppWidgets to prevent
+        // problems when those ids collide with view ids in the AppWidgetHost.
+        setIsRootNamespace(true);
     }
-    
+
     /**
      * Set the AppWidget that will be displayed by this view.
      */
