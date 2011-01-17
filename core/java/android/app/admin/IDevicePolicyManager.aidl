@@ -76,7 +76,8 @@ interface IDevicePolicyManager {
     ComponentName getGlobalProxyAdmin();
 
     int setStorageEncryption(in ComponentName who, boolean encrypt);
-    int getStorageEncryption(in ComponentName who);
+    boolean getStorageEncryption(in ComponentName who);
+    int getStorageEncryptionStatus();
 
     void setActiveAdmin(in ComponentName policyReceiver, boolean refreshing);
     boolean isAdminActive(in ComponentName policyReceiver);

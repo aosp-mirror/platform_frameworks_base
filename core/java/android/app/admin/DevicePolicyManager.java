@@ -1093,38 +1093,32 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryption}:
+     * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryptionStatus}:
      * indicating that encryption is not supported.
      */
     public static final int ENCRYPTION_STATUS_UNSUPPORTED = 0;
 
     /**
-     * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryption}:
+     * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryptionStatus}:
      * indicating that encryption is supported, but is not currently active.
      */
     public static final int ENCRYPTION_STATUS_INACTIVE = 1;
 
     /**
-     * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryption}:
-     * indicating that encryption is not currently active, but has been requested.
-     */
-    public static final int ENCRYPTION_STATUS_REQUESTED = 2;
-
-    /**
-     * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryption}:
+     * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryptionStatus}:
      * indicating that encryption is not currently active, but is currently
      * being activated.  This is only reported by devices that support
      * encryption of data and only when the storage is currently
      * undergoing a process of becoming encrypted.  A device that must reboot and/or wipe data
      * to become encrypted will never return this value.
      */
-    public static final int ENCRYPTION_STATUS_ACTIVATING = 3;
+    public static final int ENCRYPTION_STATUS_ACTIVATING = 2;
 
     /**
-     * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryption}:
+     * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryptionStatus}:
      * indicating that encryption is active.
      */
-    public static final int ENCRYPTION_STATUS_ACTIVE = 4;
+    public static final int ENCRYPTION_STATUS_ACTIVE = 3;
 
     /**
      * Activity action: begin the process of encrypting data on the device.  This activity should
@@ -1139,14 +1133,7 @@ public class DevicePolicyManager {
 
     /**
      * Called by an application that is administering the device to
-     * request that the storage system be encrypted.  Depending
-     * on the returned status code, the caller may proceed in different
-     * ways.  If the result is {@link #ENCRYPTION_STATUS_UNSUPPORTED}, the
-     * storage system does not support encryption.  If the
-     * result is {@link #ENCRYPTION_STATUS_REQUESTED}, use {@link
-     * #ACTION_START_ENCRYPTION} to begin the process of encrypting or decrypting the
-     * storage.  If the result is {@link #ENCRYPTION_STATUS_ACTIVATING} or
-     * {@link #ENCRYPTION_STATUS_ACTIVE}, no further action is required.
+     * request that the storage system be encrypted.
      *
      * <p>When multiple device administrators attempt to control device
      * encryption, the most secure, supported setting will always be
@@ -1167,7 +1154,10 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param encrypt true to request encryption, false to release any previous request
-     * @return current status of encryption
+     * @return the new request status (for all active admins) - will be one of
+     * {@link #ENCRYPTION_STATUS_UNSUPPORTED}, {@link #ENCRYPTION_STATUS_INACTIVE}, or
+     * {@link #ENCRYPTION_STATUS_ACTIVE}.  This is the value of the requests;  Use
+     * {@link #getStorageEncryptionStatus()} to query the actual device state.
      */
     public int setStorageEncryption(ComponentName admin, boolean encrypt) {
         if (mService != null) {
@@ -1182,15 +1172,44 @@ public class DevicePolicyManager {
 
     /**
      * Called by an application that is administering the device to
-     * determine the encryption status of a specific storage system.
+     * determine the requested setting for secure storage.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @return current status of encryption
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.  If null,
+     * this will return the requested encryption setting as an aggregate of all active
+     * administrators.
+     * @return true if the admin(s) are requesting encryption, false if not.
      */
-    public int getStorageEncryption(ComponentName admin) {
+    public boolean getStorageEncryption(ComponentName admin) {
         if (mService != null) {
             try {
                 return mService.getStorageEncryption(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Called by an application that is administering the device to
+     * determine the current encryption status of the device.
+     *
+     * Depending on the returned status code, the caller may proceed in different
+     * ways.  If the result is {@link #ENCRYPTION_STATUS_UNSUPPORTED}, the
+     * storage system does not support encryption.  If the
+     * result is {@link #ENCRYPTION_STATUS_INACTIVE}, use {@link
+     * #ACTION_START_ENCRYPTION} to begin the process of encrypting or decrypting the
+     * storage.  If the result is {@link #ENCRYPTION_STATUS_ACTIVATING} or
+     * {@link #ENCRYPTION_STATUS_ACTIVE}, no further action is required.
+     *
+     * @return current status of encryption.  The value will be one of
+     * {@link #ENCRYPTION_STATUS_UNSUPPORTED}, {@link #ENCRYPTION_STATUS_INACTIVE},
+     * {@link #ENCRYPTION_STATUS_ACTIVATING}, or{@link #ENCRYPTION_STATUS_ACTIVE}.
+     */
+    public int getStorageEncryptionStatus() {
+        if (mService != null) {
+            try {
+                return mService.getStorageEncryptionStatus();
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
