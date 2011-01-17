@@ -16,8 +16,8 @@
 
 package com.android.layoutlib.bridge.android;
 
+import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
-import com.android.ide.common.resources.ResourceResolver;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 
@@ -58,7 +58,7 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
         String ns = mParser.getAttributeNamespace(index);
 
         if (BridgeConstants.NS_RESOURCES.equals(ns)) {
-            Integer v = Bridge.getResourceValue(ResourceResolver.RES_ATTR, name);
+            Integer v = Bridge.getResourceValue(RenderResources.RES_ATTR, name);
             if (v != null) {
                 return v.intValue();
             }
@@ -69,7 +69,7 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
         // this is not an attribute in the android namespace, we query the customviewloader, if
         // the namespaces match.
         if (mContext.getProjectCallback().getNamespace().equals(ns)) {
-            Integer v = mContext.getProjectCallback().getResourceValue(ResourceResolver.RES_ATTR,
+            Integer v = mContext.getProjectCallback().getResourceValue(RenderResources.RES_ATTR,
                     name);
             if (v != null) {
                 return v.intValue();
@@ -103,9 +103,9 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
 
     private int resolveResourceValue(String value, int defaultValue) {
         // now look for this particular value
-        ResourceResolver resolver = mContext.getResolver();
-        ResourceValue resource = resolver.resolveResValue(
-                resolver.findResValue(value, mPlatformFile));
+        RenderResources resources = mContext.getRenderResources();
+        ResourceValue resource = resources.resolveResValue(
+                resources.findResValue(value, mPlatformFile));
 
         if (resource != null) {
             Integer id = null;

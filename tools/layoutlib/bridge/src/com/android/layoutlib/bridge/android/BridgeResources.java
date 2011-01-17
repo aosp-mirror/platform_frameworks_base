@@ -104,7 +104,8 @@ public final class BridgeResources extends Resources {
 
         if (resourceInfo != null) {
             platformResFlag_out[0] = true;
-            return mContext.getResolver().getFrameworkResource(resourceInfo[1], resourceInfo[0]);
+            return mContext.getRenderResources().getFrameworkResource(
+                    resourceInfo[1], resourceInfo[0]);
         }
 
         // didn't find a match in the framework? look in the project.
@@ -113,7 +114,8 @@ public final class BridgeResources extends Resources {
 
             if (resourceInfo != null) {
                 platformResFlag_out[0] = false;
-                return mContext.getResolver().getProjectResource(resourceInfo[1], resourceInfo[0]);
+                return mContext.getRenderResources().getProjectResource(
+                        resourceInfo[1], resourceInfo[0]);
             }
         }
 
@@ -180,8 +182,8 @@ public final class BridgeResources extends Resources {
                                 "Failed to configure parser for " + value, e, null /*data*/);
                         // we'll return null below.
                     } catch (Exception e) {
-                        // this is an error and not warning since the file existence is checked before
-                        // attempting to parse it.
+                        // this is an error and not warning since the file existence is
+                        // checked before attempting to parse it.
                         Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
                                 "Failed to parse file " + value, e, null /*data*/);
 
