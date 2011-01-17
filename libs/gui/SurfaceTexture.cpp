@@ -237,43 +237,61 @@ void SurfaceTexture::getTransformMatrix(float mtx[16]) {
     LOGV("SurfaceTexture::updateTexImage");
     Mutex::Autolock lock(mMutex);
 
-    float* xform = mtxIdentity;
-    switch (mCurrentTransform) {
-        case 0:
-            xform = mtxIdentity;
-            break;
-        case NATIVE_WINDOW_TRANSFORM_FLIP_H:
-            xform = mtxFlipH;
-            break;
-        case NATIVE_WINDOW_TRANSFORM_FLIP_V:
-            xform = mtxFlipV;
-            break;
-        case NATIVE_WINDOW_TRANSFORM_ROT_90:
-            xform = mtxRot90;
-            break;
-        case NATIVE_WINDOW_TRANSFORM_ROT_180:
-            xform = mtxRot180;
-            break;
-        case NATIVE_WINDOW_TRANSFORM_ROT_270:
-            xform = mtxRot270;
-            break;
-        default:
-            LOGE("getTransformMatrix: unknown transform: %d", mCurrentTransform);
+    float xform[16];
+    for (int i = 0; i < 16; i++) {
+        xform[i] = mtxIdentity[i];
+    }
+    if (mCurrentTransform & NATIVE_WINDOW_TRANSFORM_FLIP_H) {
+        float result[16];
+        mtxMul(result, xform, mtxFlipH);
+        for (int i = 0; i < 16; i++) {
+            xform[i] = result[i];
+        }
+    }
+    if (mCurrentTransform & NATIVE_WINDOW_TRANSFORM_FLIP_V) {
+        float result[16];
+        mtxMul(result, xform, mtxFlipV);
+        for (int i = 0; i < 16; i++) {
+            xform[i] = result[i];
+        }
+    }
+    if (mCurrentTransform & NATIVE_WINDOW_TRANSFORM_ROT_90) {
+        float result[16];
+        mtxMul(result, xform, mtxRot90);
+        for (int i = 0; i < 16; i++) {
+            xform[i] = result[i];
+        }
     }
 
     sp<GraphicBuffer>& buf(mSlots[mCurrentTexture].mGraphicBuffer);
-    float tx = float(mCurrentCrop.left) / float(buf->getWidth());
-    float ty = float(mCurrentCrop.bottom) / float(buf->getHeight());
-    float sx = float(mCurrentCrop.width()) / float(buf->getWidth());
-    float sy = float(mCurrentCrop.height()) / float(buf->getHeight());
+    float tx, ty, sx, sy;
+    if (!mCurrentCrop.isEmpty()) {
+        tx = float(mCurrentCrop.left) / float(buf->getWidth());
+        ty = float(buf->getHeight() - mCurrentCrop.bottom) /
+                float(buf->getHeight());
+        sx = float(mCurrentCrop.width()) / float(buf->getWidth());
+        sy = float(mCurrentCrop.height()) / float(buf->getHeight());
+    } else {
+        tx = 0.0f;
+        ty = 0.0f;
+        sx = 1.0f;
+        sy = 1.0f;
+    }
     float crop[16] = {
-        sx, 0, 0, sx*tx,
-        0, sy, 0, sy*ty,
+        sx, 0, 0, 0,
+        0, sy, 0, 0,
         0, 0, 1, 0,
-        0, 0, 0, 1,
+        sx*tx, sy*ty, 0, 1,
     };
 
-    mtxMul(mtx, crop, xform);
+    float mtxBeforeFlipV[16];
+    mtxMul(mtxBeforeFlipV, crop, xform);
+
+    // SurfaceFlinger expects the top of its window textures to be at a Y
+    // coordinate of 0, so SurfaceTexture must behave the same way.  We don't
+    // want to expose this to applications, however, so we must add an
+    // additional vertical flip to the transform after all the other transforms.
+    mtxMul(mtx, mtxFlipV, mtxBeforeFlipV);
 }
 
 void SurfaceTexture::freeAllBuffers() {
