@@ -100,8 +100,13 @@ public abstract class FragmentManager {
      * in the state, and if changes are made after the state is saved then they
      * will be lost.</p>
      */
-    public abstract FragmentTransaction openTransaction();
+    public abstract FragmentTransaction beginTransaction();
 
+    /** Old API */
+    public FragmentTransaction openTransaction() {
+        return beginTransaction();
+    }
+    
     /**
      * After a {@link FragmentTransaction} is committed with
      * {@link FragmentTransaction#commit FragmentTransaction.commit()}, it
@@ -347,7 +352,7 @@ final class FragmentManagerImpl extends FragmentManager {
     };
 
     @Override
-    public FragmentTransaction openTransaction() {
+    public FragmentTransaction beginTransaction() {
         return new BackStackRecord(this);
     }
 

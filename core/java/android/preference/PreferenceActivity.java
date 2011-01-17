@@ -1044,7 +1044,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         getFragmentManager().popBackStack(BACK_STACK_PREFS,
                 FragmentManager.POP_BACK_STACK_INCLUSIVE);
         Fragment f = Fragment.instantiate(this, fragmentName, args);
-        FragmentTransaction transaction = getFragmentManager().openTransaction();
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.setTransition(direction == 0 ? FragmentTransaction.TRANSIT_NONE
                 : direction > 0 ? FragmentTransaction.TRANSIT_FRAGMENT_NEXT
                         : FragmentTransaction.TRANSIT_FRAGMENT_PREV);
@@ -1136,7 +1136,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      * the current fragment will be replaced.
      */
     public void startPreferenceFragment(Fragment fragment, boolean push) {
-        FragmentTransaction transaction = getFragmentManager().openTransaction();
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(com.android.internal.R.id.prefs, fragment);
         if (push) {
             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
@@ -1175,7 +1175,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             if (resultTo != null) {
                 f.setTargetFragment(resultTo, resultRequestCode);
             }
-            FragmentTransaction transaction = getFragmentManager().openTransaction();
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
             transaction.replace(com.android.internal.R.id.prefs, f);
             if (titleRes != 0) {
                 transaction.setBreadCrumbTitle(titleRes);
