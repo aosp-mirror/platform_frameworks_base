@@ -242,6 +242,7 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
     // Turn on the selected radio button at startup
     private void updateRadioButtonsByImiAndSubtype(
             InputMethodInfo imi, InputMethodSubtype subtype) {
+        if (imi == null) return;
         if (DEBUG) {
             Log.d(TAG, "Update radio buttons by " + imi.getId() + ", " + subtype);
         }
@@ -253,7 +254,7 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
                 return;
             }
             Pair<InputMethodInfo, InputMethodSubtype> imiAndSubtype =
-                mRadioViewAndImiMap.get(radioView);
+                    mRadioViewAndImiMap.get(radioView);
             if (imiAndSubtype.first.getId().equals(imi.getId())
                     && (imiAndSubtype.second == null || imiAndSubtype.second.equals(subtype))) {
                 subtypeRadioButton.setChecked(true);
