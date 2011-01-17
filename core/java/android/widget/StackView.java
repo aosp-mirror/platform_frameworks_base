@@ -1,5 +1,4 @@
-/*
- * Copyright (C) 2010 The Android Open Source Project
+/* Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,7 +223,7 @@ public class StackView extends AdapterViewAnimator {
             alphaOa.setDuration(FADE_IN_ANIMATION_DURATION);
             if (oldAlphaOa != null) oldAlphaOa.cancel();
             alphaOa.start();
-            view.setTagInternal(com.android.internal.R.id.viewAlphaAnimation, 
+            view.setTagInternal(com.android.internal.R.id.viewAlphaAnimation,
                     new WeakReference<ObjectAnimator>(alphaOa));
         } else if (fromIndex == 0 && toIndex == 1) {
             // Slide item in
@@ -270,7 +269,7 @@ public class StackView extends AdapterViewAnimator {
             alphaOa.setDuration(STACK_RELAYOUT_DURATION);
             if (oldAlphaOa != null) oldAlphaOa.cancel();
             alphaOa.start();
-            view.setTagInternal(com.android.internal.R.id.viewAlphaAnimation, 
+            view.setTagInternal(com.android.internal.R.id.viewAlphaAnimation,
                     new WeakReference<ObjectAnimator>(alphaOa));
         }
 
@@ -284,16 +283,20 @@ public class StackView extends AdapterViewAnimator {
         final float maxPerspectiveShiftY = mPerspectiveShiftY;
         final float maxPerspectiveShiftX = mPerspectiveShiftX;
 
-        index = mMaxNumActiveViews - index - 1;
-        if (index == mMaxNumActiveViews - 1) index--;
+        if (mStackMode == ITEMS_SLIDE_DOWN) {
+            index = mMaxNumActiveViews - index - 1;
+            if (index == mMaxNumActiveViews - 1) index--;
+        } else {
+            index--;
+            if (index < 0) index++;
+        }
 
         float r = (index * 1.0f) / (mMaxNumActiveViews - 2);
 
         final float scale = 1 - PERSPECTIVE_SCALE_FACTOR * (1 - r);
 
-        int stackDirection = (mStackMode == ITEMS_SLIDE_UP) ? 1 : -1;
-        float perspectiveTranslationY = -stackDirection * r * maxPerspectiveShiftY;
-        float scaleShiftCorrectionY = stackDirection * (1 - scale) *
+        float perspectiveTranslationY = r * maxPerspectiveShiftY;
+        float scaleShiftCorrectionY = (scale - 1) *
                 (getMeasuredHeight() * (1 - PERSPECTIVE_SHIFT_FACTOR_Y) / 2.0f);
         final float transY = perspectiveTranslationY + scaleShiftCorrectionY;
 
@@ -302,7 +305,7 @@ public class StackView extends AdapterViewAnimator {
                 (getMeasuredWidth() * (1 - PERSPECTIVE_SHIFT_FACTOR_X) / 2.0f);
         final float transX = perspectiveTranslationX + scaleShiftCorrectionX;
 
-        // If this view is currently being animated for a certain position, we need to cancel 
+        // If this view is currently being animated for a certain position, we need to cancel
         // this animation so as not to interfere with the new transformation.
         Object tag = view.getTag(com.android.internal.R.id.viewAnimation);
         if (tag instanceof WeakReference<?>) {
@@ -515,11 +518,12 @@ public class StackView extends AdapterViewAnimator {
 
     private void beginGestureIfNeeded(float deltaY) {
         if ((int) Math.abs(deltaY) > mTouchSlop && mSwipeGestureType == GESTURE_NONE) {
-            int swipeGestureType = deltaY < 0 ? GESTURE_SLIDE_UP : GESTURE_SLIDE_DOWN;
+            final int swipeGestureType = deltaY < 0 ? GESTURE_SLIDE_UP : GESTURE_SLIDE_DOWN;
             cancelLongPress();
             requestDisallowInterceptTouchEvent(true);
 
             if (mAdapter == null) return;
+            final int adapterCount = mAdapter.getCount();
 
             int activeIndex;
             if (mStackMode == ITEMS_SLIDE_UP) {
@@ -528,13 +532,20 @@ public class StackView extends AdapterViewAnimator {
                 activeIndex = (swipeGestureType == GESTURE_SLIDE_DOWN) ? 1 : 0;
             }
 
+            boolean endOfStack = mLoopViews && adapterCount == 1 && 
+                ((mStackMode == ITEMS_SLIDE_UP && swipeGestureType == GESTURE_SLIDE_UP) ||
+                 (mStackMode == ITEMS_SLIDE_DOWN && swipeGestureType == GESTURE_SLIDE_DOWN));
+            boolean beginningOfStack = mLoopViews && adapterCount == 1 && 
+                ((mStackMode == ITEMS_SLIDE_DOWN && swipeGestureType == GESTURE_SLIDE_UP) ||
+                 (mStackMode == ITEMS_SLIDE_UP && swipeGestureType == GESTURE_SLIDE_DOWN));
+
             int stackMode;
-            if (mLoopViews) {
+            if (mLoopViews && !beginningOfStack && !endOfStack) {
                 stackMode = StackSlider.NORMAL_MODE;
-            } else if (mCurrentWindowStartUnbounded + activeIndex == -1) {
+            } else if (mCurrentWindowStartUnbounded + activeIndex == -1 || beginningOfStack) {
                 activeIndex++;
                 stackMode = StackSlider.BEGINNING_OF_STACK_MODE;
-            } else if (mCurrentWindowStartUnbounded + activeIndex == mAdapter.getCount() - 1) {
+            } else if (mCurrentWindowStartUnbounded + activeIndex == adapterCount - 1 || endOfStack) {
                 stackMode = StackSlider.END_OF_STACK_MODE;
             } else {
                 stackMode = StackSlider.NORMAL_MODE;
@@ -989,6 +1000,11 @@ public class StackView extends AdapterViewAnimator {
     @Override
     public void advance() {
         long timeSinceLastInteraction = System.currentTimeMillis() - mLastInteractionTime;
+
+        if (mAdapter == null) return;
+        final int adapterCount = mAdapter.getCount();
+        if (adapterCount == 1 && mLoopViews) return;
+
         if (mSwipeGestureType == GESTURE_NONE &&
                 timeSinceLastInteraction > MIN_TIME_BETWEEN_INTERACTION_AND_AUTOADVANCE) {
             showNext();
