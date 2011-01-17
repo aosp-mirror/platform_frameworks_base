@@ -25,8 +25,8 @@
 #include <utils/Log.h>
 #include <utils/misc.h>
 
-#include "android/graphics/GraphicsJNI.h"
 #include "jni.h"
+#include "JNIHelp.h"
 
 // ----------------------------------------------------------------------------
 
@@ -35,57 +35,127 @@ namespace android {
 static const char* const OutOfResourcesException =
     "android/graphics/SurfaceTexture$OutOfResourcesException";
 
-struct st_t {
-    jfieldID surfaceTexture;
+struct fields_t {
+    jfieldID  surfaceTexture;
+    jmethodID postEvent;
 };
-static st_t st;
+static fields_t fields;
 
 // ----------------------------------------------------------------------------
 
-static void setSurfaceTexture(JNIEnv* env, jobject clazz,
+static void SurfaceTexture_setSurfaceTexture(JNIEnv* env, jobject thiz,
         const sp<SurfaceTexture>& surfaceTexture)
 {
     SurfaceTexture* const p =
-        (SurfaceTexture*)env->GetIntField(clazz, st.surfaceTexture);
+        (SurfaceTexture*)env->GetIntField(thiz, fields.surfaceTexture);
     if (surfaceTexture.get()) {
-        surfaceTexture->incStrong(clazz);
+        surfaceTexture->incStrong(thiz);
     }
     if (p) {
-        p->decStrong(clazz);
+        p->decStrong(thiz);
     }
-    env->SetIntField(clazz, st.surfaceTexture, (int)surfaceTexture.get());
+    env->SetIntField(thiz, fields.surfaceTexture, (int)surfaceTexture.get());
 }
 
-sp<SurfaceTexture> getSurfaceTexture(JNIEnv* env, jobject clazz)
+sp<SurfaceTexture> SurfaceTexture_getSurfaceTexture(JNIEnv* env, jobject thiz)
 {
     sp<SurfaceTexture> surfaceTexture(
-        (SurfaceTexture*)env->GetIntField(clazz, st.surfaceTexture));
+        (SurfaceTexture*)env->GetIntField(thiz, fields.surfaceTexture));
     return surfaceTexture;
 }
 
 // ----------------------------------------------------------------------------
 
-static void SurfaceTexture_init(JNIEnv* env, jobject clazz, jint texName)
+class JNISurfaceTextureContext : public SurfaceTexture::FrameAvailableListener
 {
-    sp<SurfaceTexture> surfaceTexture(new SurfaceTexture(texName));
+public:
+    JNISurfaceTextureContext(JNIEnv* env, jobject weakThiz, jclass clazz);
+    virtual ~JNISurfaceTextureContext();
+    virtual void onFrameAvailable();
 
-    if (surfaceTexture == 0) {
-        doThrow(env, OutOfResourcesException);
-        return;
-    }
-    setSurfaceTexture(env, clazz, surfaceTexture);
+private:
+    jobject mWeakThiz;
+    jclass mClazz;
+};
+
+JNISurfaceTextureContext::JNISurfaceTextureContext(JNIEnv* env,
+        jobject weakThiz, jclass clazz) :
+    mWeakThiz(env->NewGlobalRef(weakThiz)),
+    mClazz((jclass)env->NewGlobalRef(clazz))
+{}
+
+JNISurfaceTextureContext::~JNISurfaceTextureContext()
+{
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    env->DeleteGlobalRef(mWeakThiz);
+    env->DeleteGlobalRef(mClazz);
 }
 
-static void SurfaceTexture_updateTexImage(JNIEnv* env, jobject clazz)
+void JNISurfaceTextureContext::onFrameAvailable()
 {
-    sp<SurfaceTexture> surfaceTexture(getSurfaceTexture(env, clazz));
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    env->CallStaticVoidMethod(mClazz, fields.postEvent, mWeakThiz);
+}
+
+// ----------------------------------------------------------------------------
+
+static void SurfaceTexture_classInit(JNIEnv* env, jclass clazz)
+{
+    fields.surfaceTexture = env->GetFieldID(clazz,
+            ANDROID_GRAPHICS_SURFACETEXTURE_JNI_ID, "I");
+    if (fields.surfaceTexture == NULL) {
+        LOGE("can't find android/graphics/SurfaceTexture.%s",
+                ANDROID_GRAPHICS_SURFACETEXTURE_JNI_ID);
+    }
+
+    fields.postEvent = env->GetStaticMethodID(clazz, "postEventFromNative",
+            "(Ljava/lang/Object;)V");
+    if (fields.postEvent == NULL) {
+        LOGE("can't find android/graphics/SurfaceTexture.postEventFromNative");
+    }
+
+}
+
+static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jint texName,
+        jobject weakThiz)
+{
+    sp<SurfaceTexture> surfaceTexture(new SurfaceTexture(texName));
+    if (surfaceTexture == 0) {
+        jniThrowException(env, OutOfResourcesException,
+                "Unable to create native SurfaceTexture");
+        return;
+    }
+    SurfaceTexture_setSurfaceTexture(env, thiz, surfaceTexture);
+
+    jclass clazz = env->GetObjectClass(thiz);
+    if (clazz == NULL) {
+        jniThrowRuntimeException(env,
+                "Can't find android/graphics/SurfaceTexture");
+        return;
+    }
+
+    sp<JNISurfaceTextureContext> ctx(new JNISurfaceTextureContext(env, weakThiz,
+            clazz));
+    surfaceTexture->setFrameAvailableListener(ctx);
+}
+
+static void SurfaceTexture_finalize(JNIEnv* env, jobject thiz)
+{
+    sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
+    surfaceTexture->setFrameAvailableListener(0);
+    SurfaceTexture_setSurfaceTexture(env, thiz, 0);
+}
+
+static void SurfaceTexture_updateTexImage(JNIEnv* env, jobject thiz)
+{
+    sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
     surfaceTexture->updateTexImage();
 }
 
-static void SurfaceTexture_getTransformMatrix(JNIEnv* env, jobject clazz,
+static void SurfaceTexture_getTransformMatrix(JNIEnv* env, jobject thiz,
         jfloatArray jmtx)
 {
-    sp<SurfaceTexture> surfaceTexture(getSurfaceTexture(env, clazz));
+    sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
     float* mtx = env->GetFloatArrayElements(jmtx, NULL);
     surfaceTexture->getTransformMatrix(mtx);
     env->ReleaseFloatArrayElements(jmtx, mtx, 0);
@@ -94,20 +164,14 @@ static void SurfaceTexture_getTransformMatrix(JNIEnv* env, jobject clazz,
 // ----------------------------------------------------------------------------
 
 const char* const kSurfaceTextureClassPathName = "android/graphics/SurfaceTexture";
-static void nativeClassInit(JNIEnv* env, jclass clazz);
 
 static JNINativeMethod gSurfaceTextureMethods[] = {
-    {"nativeClassInit",     "()V",  (void*)nativeClassInit },
-    {"init",                "(I)V", (void*)SurfaceTexture_init },
-    {"updateTexImage",      "()V",  (void*)SurfaceTexture_updateTexImage },
-    {"getTransformMatrixImpl", "([F)V",  (void*)SurfaceTexture_getTransformMatrix },
+    {"nativeClassInit",          "()V",   (void*)SurfaceTexture_classInit },
+    {"nativeInit",               "(ILjava/lang/Object;)V", (void*)SurfaceTexture_init },
+    {"nativeFinalize",            "()V",  (void*)SurfaceTexture_finalize },
+    {"nativeUpdateTexImage",     "()V",   (void*)SurfaceTexture_updateTexImage },
+    {"nativeGetTransformMatrix", "([F)V", (void*)SurfaceTexture_getTransformMatrix },
 };
-
-static void nativeClassInit(JNIEnv* env, jclass clazz)
-{
-    st.surfaceTexture = env->GetFieldID(clazz,
-            ANDROID_GRAPHICS_SURFACETEXTURE_JNI_ID, "I");
-}
 
 int register_android_graphics_SurfaceTexture(JNIEnv* env)
 {
