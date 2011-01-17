@@ -135,9 +135,12 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         // numeric keys.
         if (mIsAlpha) {
             mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
+            mStatusView.setHelpMessage(R.string.keyguard_password_enter_password_code,
+                    StatusView.LOCK_ICON);
         } else {
             mPasswordEntry.setKeyListener(DigitsKeyListener.getInstance());
-            mStatusView.setInstructionText(R.string.keyguard_password_enter_pin_password_code);
+            mStatusView.setHelpMessage(R.string.keyguard_password_enter_pin_code,
+                    StatusView.LOCK_ICON);
         }
 
         mKeyboardHelper.setVibratePattern(mLockPatternUtils.isTactileFeedbackEnabled() ?
@@ -151,6 +154,11 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         mStatusView.setCarrierText(LockScreen.getCarrierString(
                         mUpdateMonitor.getTelephonyPlmn(),
                         mUpdateMonitor.getTelephonySpn()));
+
+        mUpdateMonitor.registerInfoCallback(this);
+        //mUpdateMonitor.registerSimStateCallback(this);
+
+        resetStatusInfo();
     }
 
     @Override
@@ -204,6 +212,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         if (mLockPatternUtils.checkPassword(entry)) {
             mCallback.keyguardDone(true);
             mCallback.reportSuccessfulUnlockAttempt();
+            mStatusView.setInstructionText(null);
         } else if (entry.length() > MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT ) {
             // to avoid accidental lockout, only count attempts that are long enough to be a
             // real password. This may require some tweaking.
@@ -316,11 +325,8 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
     }
 
     private void resetStatusInfo() {
-        if(mIsAlpha) {
-            mStatusView.setInstructionText(R.string.keyguard_password_enter_password_code);
-        } else {
-            mStatusView.setInstructionText(R.string.keyguard_password_enter_pin_password_code);
-        }
+        mStatusView.setInstructionText(null);
+        mStatusView.updateStatusLines(true);
     }
 
 }

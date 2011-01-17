@@ -125,13 +125,13 @@ class StatusView {
     void setInstructionText(int stringId) {
         mStatus1.setText(stringId);
         mStatus1.setCompoundDrawablesWithIntrinsicBounds(LOCK_ICON, 0, 0, 0);
-        mStatus1.setVisibility(View.VISIBLE);
+        mStatus1.setVisibility(stringId != 0 ? View.VISIBLE : View.INVISIBLE);
     }
 
     void setInstructionText(String string) {
         mStatus1.setText(string);
         mStatus1.setCompoundDrawablesWithIntrinsicBounds(LOCK_ICON, 0, 0, 0);
-        mStatus1.setVisibility(View.VISIBLE);
+        mStatus1.setVisibility(TextUtils.isEmpty(string) ? View.INVISIBLE : View.VISIBLE);
     }
 
     void setCarrierText(int stringId) {
@@ -177,11 +177,10 @@ class StatusView {
         }
 
         // Update Status1
-        if (mInstructions != null) {
+        if (!TextUtils.isEmpty(mInstructions)) {
             // Instructions only
-            final int resId = TextUtils.isEmpty(mInstructions) ? 0 : LOCK_ICON;
             mStatus1.setText(mInstructions);
-            mStatus1.setCompoundDrawablesWithIntrinsicBounds(resId, 0, 0, 0);
+            mStatus1.setCompoundDrawablesWithIntrinsicBounds(LOCK_ICON, 0, 0, 0);
             mStatus1.setVisibility(View.VISIBLE);
         } else if (mShowingBatteryInfo) {
             // Battery status
