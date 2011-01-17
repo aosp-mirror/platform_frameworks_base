@@ -21,8 +21,6 @@ package android.renderscript;
  **/
 public class Script extends BaseObj {
     /**
-     * @hide
-     *
      * Only intended for use by generated reflected code.
      *
      * @param slot
@@ -32,8 +30,6 @@ public class Script extends BaseObj {
     }
 
     /**
-     * @hide
-     *
      * Only intended for use by generated reflected code.
      *
      * @param slot
@@ -54,8 +50,6 @@ public class Script extends BaseObj {
 
 
     /**
-     * @hide
-     *
      * Only intended for use by generated reflected code.
      *
      * @param va
@@ -71,8 +65,6 @@ public class Script extends BaseObj {
     }
 
     /**
-     * @hide
-     *
      * Only intended for use by generated reflected code.
      *
      * @param index
@@ -83,8 +75,6 @@ public class Script extends BaseObj {
     }
 
     /**
-     * @hide
-     *
      * Only intended for use by generated reflected code.
      *
      * @param index
@@ -95,8 +85,6 @@ public class Script extends BaseObj {
     }
 
     /**
-     * @hide
-     *
      * Only intended for use by generated reflected code.
      *
      * @param index
@@ -107,8 +95,6 @@ public class Script extends BaseObj {
     }
 
     /**
-     * @hide
-     *
      * Only intended for use by generated reflected code.
      *
      * @param index
@@ -119,8 +105,6 @@ public class Script extends BaseObj {
     }
 
     /**
-     * @hide
-     *
      * Only intended for use by generated reflected code.
      *
      * @param index
@@ -131,8 +115,6 @@ public class Script extends BaseObj {
     }
 
     /**
-     * @hide
-     *
      * Only intended for use by generated reflected code.
      *
      * @param index
@@ -143,8 +125,6 @@ public class Script extends BaseObj {
     }
 
     /**
-     * @hide
-     *
      * Only intended for use by generated reflected code.
      *
      * @param index
