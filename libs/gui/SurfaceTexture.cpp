@@ -166,6 +166,9 @@ status_t SurfaceTexture::queueBuffer(int buf) {
     mLastQueued = buf;
     mLastQueuedCrop = mNextCrop;
     mLastQueuedTransform = mNextTransform;
+    if (mFrameAvailableListener != 0) {
+        mFrameAvailableListener->onFrameAvailable();
+    }
     return OK;
 }
 
@@ -292,6 +295,13 @@ void SurfaceTexture::getTransformMatrix(float mtx[16]) {
     // want to expose this to applications, however, so we must add an
     // additional vertical flip to the transform after all the other transforms.
     mtxMul(mtx, mtxFlipV, mtxBeforeFlipV);
+}
+
+void SurfaceTexture::setFrameAvailableListener(
+        const sp<FrameAvailableListener>& l) {
+    LOGV("SurfaceTexture::setFrameAvailableListener");
+    Mutex::Autolock lock(mMutex);
+    mFrameAvailableListener = l;
 }
 
 void SurfaceTexture::freeAllBuffers() {
