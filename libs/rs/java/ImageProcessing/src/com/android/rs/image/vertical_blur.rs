@@ -56,7 +56,7 @@ void setGamma(float g) {
 }
 
 //sliao
-uchar3 convert2uchar3(float3 xyz);
+extern uchar3 __attribute__((overloadable)) convert2uchar3(float3 xyz);
 
 void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32_t y) {
     uchar4 *output = (uchar4 *)v_out;
