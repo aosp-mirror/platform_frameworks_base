@@ -2697,25 +2697,6 @@ class ContextImpl extends Context {
             return PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
         }
 
-        @Override
-        public void setPackageObbPaths(String packageName, String[] paths) {
-            try {
-                mPM.setPackageObbPaths(packageName, paths);
-            } catch (RemoteException e) {
-                // Should never happen!
-            }
-        }
-
-        @Override
-        public String[] getPackageObbPaths(String packageName) {
-            try {
-                return mPM.getPackageObbPaths(packageName);
-            } catch (RemoteException e) {
-                // Should never happen!
-            }
-            return null;
-        }
-
         private final ContextImpl mContext;
         private final IPackageManager mPM;
 
