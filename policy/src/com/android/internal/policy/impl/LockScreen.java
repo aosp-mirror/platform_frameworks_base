@@ -414,6 +414,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
     public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn,
             int batteryLevel) {
         if (DBG) Log.d(TAG, "onRefreshBatteryInfo(" + showBatteryInfo + ", " + pluggedIn + ")");
+
+        mStatusView.onRefreshBatteryInfo(showBatteryInfo, pluggedIn, batteryLevel);
+
         mShowingBatteryInfo = showBatteryInfo;
         mPluggedIn = pluggedIn;
         mBatteryLevel = batteryLevel;
