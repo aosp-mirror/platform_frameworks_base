@@ -239,15 +239,13 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
-     *
      * This is only intended to be used by auto-generate code reflected from the
      * renderscript script files.
      *
      * @param xoff
      * @param fp
      */
-    public void setOneElement(int xoff, FieldPacker fp) {
+    public void setFromFieldPacker(int xoff, FieldPacker fp) {
         int eSize = mType.mElement.getSizeBytes();
         final byte[] data = fp.getData();
 
@@ -262,8 +260,6 @@ public class Allocation extends BaseObj {
 
 
     /**
-     * @hide
-     *
      * This is only intended to be used by auto-generate code reflected from the
      * renderscript script files.
      *
@@ -271,7 +267,7 @@ public class Allocation extends BaseObj {
      * @param component_number
      * @param fp
      */
-    public void setOneComponent(int xoff, int component_number, FieldPacker fp) {
+    public void setFromFieldPacker(int xoff, int component_number, FieldPacker fp) {
         if (component_number >= mType.mElement.mElements.length) {
             throw new RSIllegalArgumentException("Component_number " + component_number + " out of range.");
         }
