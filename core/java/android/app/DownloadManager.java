@@ -28,6 +28,8 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.Downloads;
+import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 import android.util.Pair;
 
@@ -1034,6 +1036,40 @@ public class DownloadManager {
         mResolver.update(mBaseUri, values, getWhereClauseForIds(ids), getWhereArgsForIds(ids));
     }
 
+    /**
+     * Returns maximum size, in bytes, of downloads that may go over a mobile connection; or null if
+     * there's no limit
+     *
+     * @param context the {@link Context} to use for accessing the {@link ContentResolver}
+     * @return maximum size, in bytes, of downloads that may go over a mobile connection; or null if
+     * there's no limit
+     */
+    public static Long getMaxBytesOverMobile(Context context) {
+        try {
+            return Settings.Secure.getLong(context.getContentResolver(),
+                    Settings.Secure.DOWNLOAD_MAX_BYTES_OVER_MOBILE);
+        } catch (SettingNotFoundException exc) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns recommended maximum size, in bytes, of downloads that may go over a mobile
+     * connection; or null if there's no recommended limit.  The user will have the option to bypass
+     * this limit.
+     *
+     * @param context the {@link Context} to use for accessing the {@link ContentResolver}
+     * @return recommended maximum size, in bytes, of downloads that may go over a mobile
+     * connection; or null if there's no recommended limit.
+     */
+    public static Long getRecommendedMaxBytesOverMobile(Context context) {
+        try {
+            return Settings.Secure.getLong(context.getContentResolver(),
+                    Settings.Secure.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE);
+        } catch (SettingNotFoundException exc) {
+            return null;
+        }
+    }
     /**
      * Get the DownloadProvider URI for the download with the given ID.
      */
