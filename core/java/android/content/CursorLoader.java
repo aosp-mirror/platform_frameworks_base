@@ -26,6 +26,17 @@ import java.util.Arrays;
 
 /**
  * A loader that queries the {@link ContentResolver} and returns a {@link Cursor}.
+ * This class implements the {@link Loader} protocol in a standard way for
+ * querying cursors, building on {@link AsyncTaskLoader} to perform the cursor
+ * query on a background thread so that it does not block the application's UI.
+ * 
+ * <p>A CursorLoader must be built with the full information for the query to
+ * perform, either through the
+ * {@link #CursorLoader(Context, Uri, String[], String, String[], String)} or
+ * creating an empty instance with {@link #CursorLoader(Context)} and filling
+ * in the desired paramters with {@link #setUri(Uri)}, {@link #setSelection(String)},
+ * {@link #setSelectionArgs(String[])}, {@link #setSortOrder(String)},
+ * and {@link #setProjection(String[])}.
  */
 public class CursorLoader extends AsyncTaskLoader<Cursor> {
     final ForceLoadContentObserver mObserver;
@@ -81,6 +92,22 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
         }
     }
 
+    /**
+     * Creates an empty unspecified CursorLoader.  You must follow this with
+     * calls to {@link #setUri(Uri)}, {@link #setSelection(String)}, etc
+     * to specify the query to perform.
+     */
+    public CursorLoader(Context context) {
+        super(context);
+        mObserver = new ForceLoadContentObserver();
+    }
+
+    /**
+     * Creates a fully-specified CursorLoader.  See
+     * {@link ContentResolver#query(Uri, String[], String, String[], String)
+     * ContentResolver.query()} for documentation on the meaning of the
+     * parameters.  These will be passed as-is to that call.
+     */
     public CursorLoader(Context context, Uri uri, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) {
         super(context);
@@ -119,7 +146,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     }
 
     @Override
-    public void onCancelled(Cursor cursor) {
+    public void onCanceled(Cursor cursor) {
         if (cursor != null && !cursor.isClosed()) {
             cursor.close();
         }

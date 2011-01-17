@@ -267,6 +267,14 @@ final class BackStackRecord extends FragmentTransaction implements
         return mIndex;
     }
 
+    public int getBreadCrumbTitleRes() {
+        return mBreadCrumbTitleRes;
+    }
+
+    public int getBreadCrumbShortTitleRes() {
+        return mBreadCrumbShortTitleRes;
+    }
+
     public CharSequence getBreadCrumbTitle() {
         if (mBreadCrumbTitleRes != 0) {
             return mManager.mActivity.getText(mBreadCrumbTitleRes);
