@@ -169,6 +169,9 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         }
 
         mStatusView = new StatusView(this, mUpdateMonitor, mLockPatternUtils);
+        // This shows up when no other information is required on status1
+        mStatusView.setHelpMessage(R.string.lockscreen_pattern_instructions,
+                StatusView.LOCK_ICON);
 
         mLockPatternView = (LockPatternView) findViewById(R.id.lockPattern);
 
@@ -216,8 +219,8 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         // assume normal footer mode for now
         updateFooter(FooterMode.Normal);
 
-        updateMonitor.registerInfoCallback(this);
-        updateMonitor.registerSimStateCallback(this);
+        mUpdateMonitor.registerInfoCallback(this);
+        mUpdateMonitor.registerSimStateCallback(this);
         setFocusableInTouchMode(true);
 
         // until we get an update...
