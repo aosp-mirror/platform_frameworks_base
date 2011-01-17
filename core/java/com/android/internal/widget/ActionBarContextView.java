@@ -26,7 +26,6 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +38,8 @@ import android.widget.TextView;
  * @hide
  */
 public class ActionBarContextView extends ViewGroup implements AnimatorListener {
+    private static final String TAG = "ActionBarContextView";
+
     private int mContentHeight;
     
     private CharSequence mTitle;
@@ -447,7 +448,7 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
 
     @Override
     public void onAnimationEnd(Animator animation) {
-        if (mAnimationMode == ANIMATE_OUT) {
+        if (mAnimationMode != ANIMATE_IN) {
             killMode();
         }
         mAnimationMode = ANIMATE_IDLE;
