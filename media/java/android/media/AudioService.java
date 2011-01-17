@@ -109,6 +109,7 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_MEDIA_SERVER_STARTED = 6;
     private static final int MSG_PLAY_SOUND_EFFECT = 7;
     private static final int MSG_BTA2DP_DOCK_TIMEOUT = 8;
+    private static final int MSG_LOAD_SOUND_EFFECTS = 9;
 
     private static final int BTA2DP_DOCK_TIMEOUT_MILLIS = 8000;
 
@@ -930,6 +931,7 @@ public class AudioService extends IAudioService.Stub {
              * this indicates we have a valid sample loaded for this effect.
              */
 
+            int lastSample = 0;
             for (int effect = 0; effect < AudioManager.NUM_SOUND_EFFECTS; effect++) {
                 // Do not load sample if this effect uses the MediaPlayer
                 if (SOUND_EFFECT_FILES_MAP[effect][1] == 0) {
@@ -940,23 +942,32 @@ public class AudioService extends IAudioService.Stub {
                             + SOUND_EFFECTS_PATH
                             + SOUND_EFFECT_FILES[SOUND_EFFECT_FILES_MAP[effect][0]];
                     int sampleId = mSoundPool.load(filePath, 0);
-                    SOUND_EFFECT_FILES_MAP[effect][1] = sampleId;
-                    poolId[SOUND_EFFECT_FILES_MAP[effect][0]] = sampleId;
                     if (sampleId <= 0) {
                         Log.w(TAG, "Soundpool could not load file: "+filePath);
+                    } else {
+                        SOUND_EFFECT_FILES_MAP[effect][1] = sampleId;
+                        poolId[SOUND_EFFECT_FILES_MAP[effect][0]] = sampleId;
+                        lastSample = sampleId;
                     }
-                    mSoundPoolCallBack.setLastSample(sampleId);
                 } else {
                     SOUND_EFFECT_FILES_MAP[effect][1] = poolId[SOUND_EFFECT_FILES_MAP[effect][0]];
                 }
             }
             // wait for all samples to be loaded
-            try {
-                mSoundEffectsLock.wait();
-                status = mSoundPoolCallBack.status();
-            } catch (java.lang.InterruptedException e) {
+            if (lastSample != 0) {
+                mSoundPoolCallBack.setLastSample(lastSample);
+
+                try {
+                    mSoundEffectsLock.wait();
+                    status = mSoundPoolCallBack.status();
+                } catch (java.lang.InterruptedException e) {
+                    Log.w(TAG, "Interrupted while waiting sound pool callback.");
+                    status = -1;
+                }
+            } else {
                 status = -1;
             }
+
             if (mSoundPoolLooper != null) {
                 mSoundPoolLooper.quit();
                 mSoundPoolLooper = null;
@@ -965,8 +976,14 @@ public class AudioService extends IAudioService.Stub {
             if (status != 0) {
                 Log.w(TAG,
                         "loadSoundEffects(), Error "
-                                + mSoundPoolCallBack.status()
+                                + ((lastSample != 0) ? mSoundPoolCallBack.status() : -1)
                                 + " while loading samples");
+                for (int effect = 0; effect < AudioManager.NUM_SOUND_EFFECTS; effect++) {
+                    if (SOUND_EFFECT_FILES_MAP[effect][1] > 0) {
+                        SOUND_EFFECT_FILES_MAP[effect][1] = -1;
+                    }
+                }
+
                 mSoundPool.release();
                 mSoundPool = null;
             }
@@ -985,6 +1002,7 @@ public class AudioService extends IAudioService.Stub {
                 return;
             }
 
+            mAudioHandler.removeMessages(MSG_LOAD_SOUND_EFFECTS);
             mAudioHandler.removeMessages(MSG_PLAY_SOUND_EFFECT);
 
             int[] poolId = new int[SOUND_EFFECT_FILES.length];
@@ -1049,7 +1067,6 @@ public class AudioService extends IAudioService.Stub {
                     mStatus = status;
                 }
                 if (sampleId == mLastSample) {
-                    Log.e(TAG, "onLoadComplete last sample loaded");
                     mSoundEffectsLock.notify();
                 }
             }
@@ -1918,6 +1935,10 @@ public class AudioService extends IAudioService.Stub {
                     AudioSystem.setParameters("restarting=false");
                     break;
 
+                case MSG_LOAD_SOUND_EFFECTS:
+                    loadSoundEffects();
+                    break;
+
                 case MSG_PLAY_SOUND_EFFECT:
                     playSoundEffect(msg.arg1, msg.arg2);
                     break;
@@ -2245,7 +2266,8 @@ public class AudioService extends IAudioService.Stub {
                 }
             } else if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
                 mBootCompleted = true;
-                loadSoundEffects();
+                sendMsg(mAudioHandler, MSG_LOAD_SOUND_EFFECTS, SHARED_MSG, SENDMSG_NOOP,
+                        0, 0, null, 0);
                 Intent newIntent = new Intent(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED);
                 newIntent.putExtra(AudioManager.EXTRA_SCO_AUDIO_STATE,
                         AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
