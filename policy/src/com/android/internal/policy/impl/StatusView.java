@@ -19,10 +19,10 @@ import android.view.View;
 import android.widget.TextView;
 
 class StatusView {
-    private static final int LOCK_ICON = R.drawable.ic_lock_idle_lock;
-    private static final int ALARM_ICON = R.drawable.ic_lock_idle_alarm;
-    private static final int CHARGING_ICON = R.drawable.ic_lock_idle_charging;
-    private static final int BATTERY_LOW_ICON = R.drawable.ic_lock_idle_low_battery;
+    public static final int LOCK_ICON = R.drawable.ic_lock_idle_lock;
+    public static final int ALARM_ICON = R.drawable.ic_lock_idle_alarm;
+    public static final int CHARGING_ICON = R.drawable.ic_lock_idle_charging;
+    public static final int BATTERY_LOW_ICON = R.drawable.ic_lock_idle_low_battery;
 
     private String mDateFormatString;
 
@@ -49,6 +49,8 @@ class StatusView {
 
     private TextView mAlarmStatus;
     private LockPatternUtils mLockPatternUtils;
+    private int mHelpMessageId;
+    private int mHelpIconId;
 
     private View findViewById(int id) {
         return mView.findViewById(id);
@@ -148,8 +150,8 @@ class StatusView {
      */
     void updateStatusLines(boolean showStatusLines) {
         if (!showStatusLines) {
-            mStatus1.setVisibility(showStatusLines ? View.VISIBLE : View.GONE);
-            mAlarmStatus.setVisibility(showStatusLines ? View.VISIBLE : View.GONE);
+            mStatus1.setVisibility(showStatusLines ? View.VISIBLE : View.INVISIBLE);
+            mAlarmStatus.setVisibility(showStatusLines ? View.VISIBLE : View.INVISIBLE);
             return;
         }
 
@@ -171,7 +173,7 @@ class StatusView {
             mAlarmStatus.setText(nextAlarm);
             mAlarmStatus.setVisibility(View.VISIBLE);
         } else {
-            mAlarmStatus.setVisibility(View.GONE);
+            mAlarmStatus.setVisibility(View.INVISIBLE);
         }
 
         // Update Status1
@@ -199,11 +201,20 @@ class StatusView {
             }
             mStatus1.setVisibility(View.VISIBLE);
         } else {
-            // nothing specific to show; show general instructions
-            mStatus1.setText(R.string.lockscreen_pattern_instructions);
-            mStatus1.setCompoundDrawablesWithIntrinsicBounds(LOCK_ICON, 0,0, 0);
-            mStatus1.setVisibility(View.VISIBLE);
+            // nothing specific to show; show help message and icon, if provided
+            if (mHelpMessageId != 0) {
+                mStatus1.setText(mHelpMessageId);
+                mStatus1.setCompoundDrawablesWithIntrinsicBounds(mHelpIconId, 0,0, 0);
+                mStatus1.setVisibility(View.VISIBLE);
+            } else {
+                mStatus1.setVisibility(View.INVISIBLE);
+            }
         }
+    }
+
+    void setHelpMessage(int messageId, int iconId) {
+        mHelpMessageId = messageId;
+        mHelpIconId = iconId;
     }
 
     void refreshTimeAndDateDisplay() {
