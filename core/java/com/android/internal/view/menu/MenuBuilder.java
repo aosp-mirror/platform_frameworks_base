@@ -1050,7 +1050,7 @@ public class MenuBuilder implements Menu {
      */
     private ViewGroup getMeasureActionButtonParent() {
         if (mMeasureActionButtonParent == null) {
-            mMeasureActionButtonParent = (ViewGroup) mMenuTypes[TYPE_ACTION_BUTTON].getInflater()
+            mMeasureActionButtonParent = (ViewGroup) getMenuType(TYPE_ACTION_BUTTON).getInflater()
                     .inflate(LAYOUT_RES_FOR_TYPE[TYPE_ACTION_BUTTON], null, false);
         }
         return mMeasureActionButtonParent;
