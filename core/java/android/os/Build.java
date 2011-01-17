@@ -100,6 +100,15 @@ public class Build {
          * a release build.
          */
         public static final String CODENAME = getString("ro.build.version.codename");
+
+        /**
+         * The SDK version to use when accessing resources.
+         * Use the current SDK version code.  If we are a development build,
+         * also allow the previous SDK version + 1.
+         * @hide
+         */
+        public static final int RESOURCES_SDK_INT = SDK_INT
+                + ("REL".equals(CODENAME) ? 0 : 1);
     }
 
     /**

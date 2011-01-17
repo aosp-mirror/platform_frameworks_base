@@ -389,11 +389,15 @@ public class PackageParser {
 
         XmlResourceParser parser = null;
         AssetManager assmgr = null;
+        Resources res = null;
         boolean assetError = true;
         try {
             assmgr = new AssetManager();
             int cookie = assmgr.addAssetPath(mArchiveSourcePath);
-            if(cookie != 0) {
+            if (cookie != 0) {
+                res = new Resources(assmgr, metrics, null);
+                assmgr.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        Build.VERSION.RESOURCES_SDK_INT);
                 parser = assmgr.openXmlResourceParser(cookie, "AndroidManifest.xml");
                 assetError = false;
             } else {
@@ -403,7 +407,7 @@ public class PackageParser {
             Log.w(TAG, "Unable to read AndroidManifest.xml of "
                     + mArchiveSourcePath, e);
         }
-        if(assetError) {
+        if (assetError) {
             if (assmgr != null) assmgr.close();
             mParseError = PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
             return null;
@@ -413,7 +417,6 @@ public class PackageParser {
         Exception errorException = null;
         try {
             // XXXX todo: need to figure out correct configuration.
-            Resources res = new Resources(assmgr, metrics, null);
             pkg = parsePackage(res, parser, flags, errorText);
         } catch (Exception e) {
             errorException = e;
@@ -593,6 +596,8 @@ public class PackageParser {
         AssetManager assmgr = null;
         try {
             assmgr = new AssetManager();
+            assmgr.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    Build.VERSION.RESOURCES_SDK_INT);
             int cookie = assmgr.addAssetPath(packageFilePath);
             parser = assmgr.openXmlResourceParser(cookie, "AndroidManifest.xml");
         } catch (Exception e) {
@@ -1574,9 +1579,9 @@ public class PackageParser {
         }
 
         if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestApplication_neverEncrypt,
+                com.android.internal.R.styleable.AndroidManifestApplication_largeHeap,
                 false)) {
-            ai.flags |= ApplicationInfo.FLAG_NEVER_ENCRYPT;
+            ai.flags |= ApplicationInfo.FLAG_LARGE_HEAP;
         }
 
         String str;

@@ -56,10 +56,6 @@ public class Resources {
 
     private static final int ID_OTHER = 0x01000004;
 
-    // Use the current SDK version code.  If we are a development build,
-    // also allow the previous SDK version + 1.
-    private static final int sSdkVersion = Build.VERSION.SDK_INT
-            + ("REL".equals(Build.VERSION.CODENAME) ? 0 : 1);
     private static final Object mSync = new Object();
     private static Resources mSystem = null;
     
@@ -1427,13 +1423,13 @@ public class Resources {
                     mConfiguration.touchscreen,
                     (int)(mMetrics.density*160), mConfiguration.keyboard,
                     keyboardHidden, mConfiguration.navigation, width, height,
-                    mConfiguration.screenLayout, mConfiguration.uiMode, sSdkVersion);
+                    mConfiguration.screenLayout, mConfiguration.uiMode,
+                    Build.VERSION.RESOURCES_SDK_INT);
 
             clearDrawableCache(mDrawableCache, configChanges);
             clearDrawableCache(mColorDrawableCache, configChanges);
 
             mColorStateListCache.clear();
-
 
             flushLayoutCache();
         }
