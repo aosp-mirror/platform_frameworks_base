@@ -17,6 +17,7 @@
 package android.view;
 
 import android.graphics.Rect;
+import android.graphics.Region;
 
 import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -126,11 +127,18 @@ public final class ViewTreeObserver {
         public final Rect contentInsets = new Rect();
         
         /**
-         * Offsets from the fram of the window at which windows behind it
+         * Offsets from the frame of the window at which windows behind it
          * are visible.
          */
         public final Rect visibleInsets = new Rect();
-        
+
+        /**
+         * Touchable region defined relative to the origin of the frame of the window.
+         * Only used when {@link #setTouchableInsets(int)} is called with
+         * the option {@link #TOUCHABLE_INSETS_REGION}.
+         */
+        public final Region touchableRegion = new Region();
+
         /**
          * Option for {@link #setTouchableInsets(int)}: the entire window frame
          * can be touched.
@@ -148,11 +156,17 @@ public final class ViewTreeObserver {
          * the visible insets can be touched.
          */
         public static final int TOUCHABLE_INSETS_VISIBLE = 2;
-        
+
+        /**
+         * Option for {@link #setTouchableInsets(int)}: the area inside of
+         * the provided touchable region in {@link #touchableRegion} can be touched.
+         */
+        public static final int TOUCHABLE_INSETS_REGION = 3;
+
         /**
          * Set which parts of the window can be touched: either
          * {@link #TOUCHABLE_INSETS_FRAME}, {@link #TOUCHABLE_INSETS_CONTENT},
-         * or {@link #TOUCHABLE_INSETS_VISIBLE}. 
+         * {@link #TOUCHABLE_INSETS_VISIBLE}, or {@link #TOUCHABLE_INSETS_REGION}.
          */
         public void setTouchableInsets(int val) {
             mTouchableInsets = val;
@@ -165,11 +179,9 @@ public final class ViewTreeObserver {
         int mTouchableInsets;
         
         void reset() {
-            final Rect givenContent = contentInsets;
-            final Rect givenVisible = visibleInsets;
-            givenContent.left = givenContent.top = givenContent.right
-                    = givenContent.bottom = givenVisible.left = givenVisible.top
-                    = givenVisible.right = givenVisible.bottom = 0;
+            contentInsets.setEmpty();
+            visibleInsets.setEmpty();
+            touchableRegion.setEmpty();
             mTouchableInsets = TOUCHABLE_INSETS_FRAME;
         }
         
@@ -179,13 +191,16 @@ public final class ViewTreeObserver {
                     return false;
                 }
                 InternalInsetsInfo other = (InternalInsetsInfo)o;
+                if (mTouchableInsets != other.mTouchableInsets) {
+                    return false;
+                }
                 if (!contentInsets.equals(other.contentInsets)) {
                     return false;
                 }
                 if (!visibleInsets.equals(other.visibleInsets)) {
                     return false;
                 }
-                return mTouchableInsets == other.mTouchableInsets;
+                return touchableRegion.equals(other.touchableRegion);
             } catch (ClassCastException e) {
                 return false;
             }
@@ -194,6 +209,7 @@ public final class ViewTreeObserver {
         void set(InternalInsetsInfo other) {
             contentInsets.set(other.contentInsets);
             visibleInsets.set(other.visibleInsets);
+            touchableRegion.set(other.touchableRegion);
             mTouchableInsets = other.mTouchableInsets;
         }
     }

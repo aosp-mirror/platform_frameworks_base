@@ -23,6 +23,8 @@
 #include <utils/Timers.h>
 #include <utils/String8.h>
 
+#include <SkRegion.h>
+
 #include "InputApplication.h"
 
 namespace android {
@@ -129,14 +131,7 @@ struct InputWindow {
     int32_t frameTop;
     int32_t frameRight;
     int32_t frameBottom;
-    int32_t visibleFrameLeft;
-    int32_t visibleFrameTop;
-    int32_t visibleFrameRight;
-    int32_t visibleFrameBottom;
-    int32_t touchableAreaLeft;
-    int32_t touchableAreaTop;
-    int32_t touchableAreaRight;
-    int32_t touchableAreaBottom;
+    SkRegion touchableRegion;
     bool visible;
     bool canReceiveKeys;
     bool hasFocus;
@@ -146,7 +141,7 @@ struct InputWindow {
     int32_t ownerPid;
     int32_t ownerUid;
 
-    bool touchableAreaContainsPoint(int32_t x, int32_t y) const;
+    bool touchableRegionContainsPoint(int32_t x, int32_t y) const;
     bool frameContainsPoint(int32_t x, int32_t y) const;
 
     /* Returns true if the window is of a trusted type that is allowed to silently

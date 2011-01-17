@@ -21,6 +21,7 @@
 #include <android_runtime/AndroidRuntime.h>
 
 #include <android_view_InputChannel.h>
+#include <android/graphics/Region.h>
 #include "com_android_server_InputWindow.h"
 #include "com_android_server_InputWindowHandle.h"
 
@@ -39,14 +40,7 @@ static struct {
     jfieldID frameTop;
     jfieldID frameRight;
     jfieldID frameBottom;
-    jfieldID visibleFrameLeft;
-    jfieldID visibleFrameTop;
-    jfieldID visibleFrameRight;
-    jfieldID visibleFrameBottom;
-    jfieldID touchableAreaLeft;
-    jfieldID touchableAreaTop;
-    jfieldID touchableAreaRight;
-    jfieldID touchableAreaBottom;
+    jfieldID touchableRegion;
     jfieldID visible;
     jfieldID canReceiveKeys;
     jfieldID hasFocus;
@@ -108,22 +102,17 @@ void android_server_InputWindow_toNative(
             gInputWindowClassInfo.frameRight);
     outInputWindow->frameBottom = env->GetIntField(inputWindowObj,
             gInputWindowClassInfo.frameBottom);
-    outInputWindow->visibleFrameLeft = env->GetIntField(inputWindowObj,
-            gInputWindowClassInfo.visibleFrameLeft);
-    outInputWindow->visibleFrameTop = env->GetIntField(inputWindowObj,
-            gInputWindowClassInfo.visibleFrameTop);
-    outInputWindow->visibleFrameRight = env->GetIntField(inputWindowObj,
-            gInputWindowClassInfo.visibleFrameRight);
-    outInputWindow->visibleFrameBottom = env->GetIntField(inputWindowObj,
-            gInputWindowClassInfo.visibleFrameBottom);
-    outInputWindow->touchableAreaLeft = env->GetIntField(inputWindowObj,
-            gInputWindowClassInfo.touchableAreaLeft);
-    outInputWindow->touchableAreaTop = env->GetIntField(inputWindowObj,
-            gInputWindowClassInfo.touchableAreaTop);
-    outInputWindow->touchableAreaRight = env->GetIntField(inputWindowObj,
-            gInputWindowClassInfo.touchableAreaRight);
-    outInputWindow->touchableAreaBottom = env->GetIntField(inputWindowObj,
-            gInputWindowClassInfo.touchableAreaBottom);
+
+    jobject regionObj = env->GetObjectField(inputWindowObj,
+            gInputWindowClassInfo.touchableRegion);
+    if (regionObj) {
+        SkRegion* region = android_graphics_Region_getSkRegion(env, regionObj);
+        outInputWindow->touchableRegion.set(*region);
+        env->DeleteLocalRef(regionObj);
+    } else {
+        outInputWindow->touchableRegion.setEmpty();
+    }
+
     outInputWindow->visible = env->GetBooleanField(inputWindowObj,
             gInputWindowClassInfo.visible);
     outInputWindow->canReceiveKeys = env->GetBooleanField(inputWindowObj,
@@ -187,29 +176,8 @@ int register_android_server_InputWindow(JNIEnv* env) {
     GET_FIELD_ID(gInputWindowClassInfo.frameBottom, gInputWindowClassInfo.clazz,
             "frameBottom", "I");
 
-    GET_FIELD_ID(gInputWindowClassInfo.visibleFrameLeft, gInputWindowClassInfo.clazz,
-            "visibleFrameLeft", "I");
-
-    GET_FIELD_ID(gInputWindowClassInfo.visibleFrameTop, gInputWindowClassInfo.clazz,
-            "visibleFrameTop", "I");
-
-    GET_FIELD_ID(gInputWindowClassInfo.visibleFrameRight, gInputWindowClassInfo.clazz,
-            "visibleFrameRight", "I");
-
-    GET_FIELD_ID(gInputWindowClassInfo.visibleFrameBottom, gInputWindowClassInfo.clazz,
-            "visibleFrameBottom", "I");
-
-    GET_FIELD_ID(gInputWindowClassInfo.touchableAreaLeft, gInputWindowClassInfo.clazz,
-            "touchableAreaLeft", "I");
-
-    GET_FIELD_ID(gInputWindowClassInfo.touchableAreaTop, gInputWindowClassInfo.clazz,
-            "touchableAreaTop", "I");
-
-    GET_FIELD_ID(gInputWindowClassInfo.touchableAreaRight, gInputWindowClassInfo.clazz,
-            "touchableAreaRight", "I");
-
-    GET_FIELD_ID(gInputWindowClassInfo.touchableAreaBottom, gInputWindowClassInfo.clazz,
-            "touchableAreaBottom", "I");
+    GET_FIELD_ID(gInputWindowClassInfo.touchableRegion, gInputWindowClassInfo.clazz,
+            "touchableRegion", "Landroid/graphics/Region;");
 
     GET_FIELD_ID(gInputWindowClassInfo.visible, gInputWindowClassInfo.clazz,
             "visible", "Z");

@@ -520,7 +520,7 @@ public class WindowManagerService extends IWindowManager.Stub
         int mRotation;
         int mAnimFlags;
 
-        private final Rect tmpRect = new Rect();
+        private final Region mTmpRegion = new Region();
 
         DragState(IBinder token, Surface surface, int flags, IBinder localWin) {
             mToken = token;
@@ -816,31 +816,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     // not touchable == don't tell about drags
                     continue;
                 }
-                // account for the window's decor etc
-                tmpRect.set(child.mFrame);
-                if (child.mTouchableInsets == ViewTreeObserver
-                            .InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT) {
-                    // The point is inside of the window if it is
-                    // inside the frame, AND the content part of that
-                    // frame that was given by the application.
-                    tmpRect.left += child.mGivenContentInsets.left;
-                    tmpRect.top += child.mGivenContentInsets.top;
-                    tmpRect.right -= child.mGivenContentInsets.right;
-                    tmpRect.bottom -= child.mGivenContentInsets.bottom;
-                } else if (child.mTouchableInsets == ViewTreeObserver
-                            .InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE) {
-                    // The point is inside of the window if it is
-                    // inside the frame, AND the visible part of that
-                    // frame that was given by the application.
-                    tmpRect.left += child.mGivenVisibleInsets.left;
-                    tmpRect.top += child.mGivenVisibleInsets.top;
-                    tmpRect.right -= child.mGivenVisibleInsets.right;
-                    tmpRect.bottom -= child.mGivenVisibleInsets.bottom;
-                }
+
+                child.getTouchableRegion(mTmpRegion);
+
                 final int touchFlags = flags &
-                    (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
-                if (tmpRect.contains(x, y) || touchFlags == 0) {
+                        (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+                if (mTmpRegion.contains(x, y) || touchFlags == 0) {
                     // Found it
                     touchedWin = child;
                     break;
@@ -2667,7 +2649,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void setInsetsWindow(Session session, IWindow client,
             int touchableInsets, Rect contentInsets,
-            Rect visibleInsets) {
+            Rect visibleInsets, Region touchableRegion) {
         long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mWindowMap) {
@@ -2676,6 +2658,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     w.mGivenInsetsPending = false;
                     w.mGivenContentInsets.set(contentInsets);
                     w.mGivenVisibleInsets.set(visibleInsets);
+                    w.mGivenTouchableRegion.set(touchableRegion);
                     w.mTouchableInsets = touchableInsets;
                     mLayoutNeeded = true;
                     performLayoutAndPlaceSurfacesLocked();
@@ -5882,7 +5865,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final InputWindow inputWindow = windowList.add();
             inputWindow.inputChannel = mDragState.mServerChannel;
             inputWindow.name = "drag";
-            inputWindow.layoutParamsFlags = 0;
+            inputWindow.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
             inputWindow.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
             inputWindow.dispatchingTimeoutNanos = DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
             inputWindow.visible = true;
@@ -5900,15 +5883,8 @@ public class WindowManagerService extends IWindowManager.Stub
             inputWindow.frameRight = mDisplay.getWidth();
             inputWindow.frameBottom = mDisplay.getHeight();
 
-            inputWindow.visibleFrameLeft = inputWindow.frameLeft;
-            inputWindow.visibleFrameTop = inputWindow.frameTop;
-            inputWindow.visibleFrameRight = inputWindow.frameRight;
-            inputWindow.visibleFrameBottom = inputWindow.frameBottom;
-
-            inputWindow.touchableAreaLeft = inputWindow.frameLeft;
-            inputWindow.touchableAreaTop = inputWindow.frameTop;
-            inputWindow.touchableAreaRight = inputWindow.frameRight;
-            inputWindow.touchableAreaBottom = inputWindow.frameBottom;
+            // The drag window cannot receive new touches.
+            inputWindow.touchableRegion.setEmpty();
         }
 
         /* Updates the cached window information provided to the input dispatcher. */
@@ -5973,40 +5949,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 inputWindow.frameTop = frame.top;
                 inputWindow.frameRight = frame.right;
                 inputWindow.frameBottom = frame.bottom;
-                
-                final Rect visibleFrame = child.mVisibleFrame;
-                inputWindow.visibleFrameLeft = visibleFrame.left;
-                inputWindow.visibleFrameTop = visibleFrame.top;
-                inputWindow.visibleFrameRight = visibleFrame.right;
-                inputWindow.visibleFrameBottom = visibleFrame.bottom;
-                
-                switch (child.mTouchableInsets) {
-                    default:
-                    case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME:
-                        inputWindow.touchableAreaLeft = frame.left;
-                        inputWindow.touchableAreaTop = frame.top;
-                        inputWindow.touchableAreaRight = frame.right;
-                        inputWindow.touchableAreaBottom = frame.bottom;
-                        break;
-                        
-                    case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT: {
-                        Rect inset = child.mGivenContentInsets;
-                        inputWindow.touchableAreaLeft = frame.left + inset.left;
-                        inputWindow.touchableAreaTop = frame.top + inset.top;
-                        inputWindow.touchableAreaRight = frame.right - inset.right;
-                        inputWindow.touchableAreaBottom = frame.bottom - inset.bottom;
-                        break;
-                    }
-                        
-                    case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE: {
-                        Rect inset = child.mGivenVisibleInsets;
-                        inputWindow.touchableAreaLeft = frame.left + inset.left;
-                        inputWindow.touchableAreaTop = frame.top + inset.top;
-                        inputWindow.touchableAreaRight = frame.right - inset.right;
-                        inputWindow.touchableAreaBottom = frame.bottom - inset.bottom;
-                        break;
-                    }
-                }
+
+                child.getTouchableRegion(inputWindow.touchableRegion);
             }
 
             // Send windows to native code.
@@ -6516,9 +6460,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         public void setInsets(IWindow window, int touchableInsets,
-                Rect contentInsets, Rect visibleInsets) {
+                Rect contentInsets, Rect visibleInsets, Region touchableArea) {
             setInsetsWindow(this, window, touchableInsets, contentInsets,
-                    visibleInsets);
+                    visibleInsets, touchableArea);
         }
 
         public void getDisplayFrame(IWindow window, Rect outDisplayFrame) {
@@ -6648,7 +6592,7 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mWindowMap) {
                 long ident = Binder.clearCallingIdentity();
                 try {
-                    if (mDragState.mToken != token) {
+                    if (mDragState == null || mDragState.mToken != token) {
                         Slog.w(TAG, "Invalid drop-result claim by " + window);
                         throw new IllegalStateException("reportDropResult() by non-recipient");
                     }
@@ -6855,6 +6799,11 @@ public class WindowManagerService extends IWindowManager.Stub
          * this window, to be applied to windows behind it.
          */
         final Rect mGivenVisibleInsets = new Rect();
+
+        /**
+         * This is the given touchable area relative to the window frame, or null if none.
+         */
+        final Region mGivenTouchableRegion = new Region();
 
         /**
          * Flag indicating whether the touchable region should be adjusted by
@@ -8137,6 +8086,36 @@ public class WindowManagerService extends IWindowManager.Stub
                 requestAnimationLocked(0);
             }
             return true;
+        }
+
+        public void getTouchableRegion(Region outRegion) {
+            final Rect frame = mFrame;
+            switch (mTouchableInsets) {
+                default:
+                case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME:
+                    outRegion.set(frame);
+                    break;
+                case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT: {
+                    final Rect inset = mGivenContentInsets;
+                    outRegion.set(
+                            frame.left + inset.left, frame.top + inset.top,
+                            frame.right - inset.right, frame.bottom - inset.bottom);
+                    break;
+                }
+                case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE: {
+                    final Rect inset = mGivenVisibleInsets;
+                    outRegion.set(
+                            frame.left + inset.left, frame.top + inset.top,
+                            frame.right - inset.right, frame.bottom - inset.bottom);
+                    break;
+                }
+                case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION: {
+                    final Region givenTouchableRegion = mGivenTouchableRegion;
+                    outRegion.set(givenTouchableRegion);
+                    outRegion.translate(frame.left, frame.top);
+                    break;
+                }
+            }
         }
 
         void dump(PrintWriter pw, String prefix) {
