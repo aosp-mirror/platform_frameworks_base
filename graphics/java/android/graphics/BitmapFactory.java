@@ -64,6 +64,14 @@ public class BitmapFactory {
         public Bitmap inBitmap;
 
         /**
+         * If set, decode methods will always return a mutable Bitmap instead of
+         * an immutable one. This can be used for instance to programmatically apply
+         * effects to a Bitmap loaded through BitmapFactory.
+         */
+        @SuppressWarnings({"UnusedDeclaration"}) // used in native code
+        public boolean inMutable;
+
+        /**
          * If set to true, the decoder will return null (no bitmap), but
          * the out... fields will still be set, allowing the caller to query
          * the bitmap without having to allocate the memory for its pixels.
@@ -523,7 +531,7 @@ public class BitmapFactory {
             }
             bm.setDensity(targetDensity);
         }
-        
+
         return bm;
     }
     

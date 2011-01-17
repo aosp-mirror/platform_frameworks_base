@@ -25,6 +25,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
@@ -61,7 +62,15 @@ public class BitmapsActivity extends Activity {
 
             mBitmap1 = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset1);
             mBitmap2 = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset2);
+            
+            Log.d("Bitmap", "mBitmap1.isMutable() = " + mBitmap1.isMutable());
+            Log.d("Bitmap", "mBitmap2.isMutable() = " + mBitmap2.isMutable());
 
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inMutable = true;
+            Bitmap bitmap = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset1, opts);
+            Log.d("Bitmap", "bitmap.isMutable() = " + bitmap.isMutable());
+            
             mBitmapPaint = new Paint();
             mDstIn = new PorterDuffXfermode(PorterDuff.Mode.DST_IN);
         }
