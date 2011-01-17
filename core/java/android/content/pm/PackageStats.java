@@ -55,6 +55,9 @@ public class PackageStats implements Parcelable {
     /** Size of the external media size used by the application. */
     public long externalMediaSize;
 
+    /** Size of the package's OBBs placed on external media. */
+    public long externalObbSize;
+
     public static final Parcelable.Creator<PackageStats> CREATOR
             = new Parcelable.Creator<PackageStats>() {
         public PackageStats createFromParcel(Parcel in) {
@@ -83,6 +86,8 @@ public class PackageStats implements Parcelable {
         sb.append(externalCacheSize);
         sb.append(",externalMediaSize=");
         sb.append(externalMediaSize);
+        sb.append(",externalObbSize=");
+        sb.append(externalObbSize);
         return sb.toString();
     }
 
@@ -98,6 +103,7 @@ public class PackageStats implements Parcelable {
         externalDataSize = source.readLong();
         externalCacheSize = source.readLong();
         externalMediaSize = source.readLong();
+        externalObbSize = source.readLong();
     }
 
     public PackageStats(PackageStats pStats) {
@@ -108,6 +114,7 @@ public class PackageStats implements Parcelable {
         externalDataSize = pStats.externalDataSize;
         externalCacheSize = pStats.externalCacheSize;
         externalMediaSize = pStats.externalMediaSize;
+        externalObbSize = pStats.externalObbSize;
     }
 
     public int describeContents() {
@@ -122,5 +129,6 @@ public class PackageStats implements Parcelable {
         dest.writeLong(externalDataSize);
         dest.writeLong(externalCacheSize);
         dest.writeLong(externalMediaSize);
+        dest.writeLong(externalObbSize);
     }
 }
