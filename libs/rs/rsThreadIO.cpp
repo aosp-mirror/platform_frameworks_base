@@ -53,6 +53,10 @@ bool ThreadIO::playCoreCommands(Context *con, bool waitForCommand) {
         waitForCommand = false;
         //LOGV("playCoreCommands 3 %i %i", cmdID, cmdSize);
 
+        if (cmdID >= (sizeof(gPlaybackFuncs) / sizeof(void *))) {
+            rsAssert(cmdID < (sizeof(gPlaybackFuncs) / sizeof(void *)));
+            LOGE("playCoreCommands error con %p, cmd %i", con, cmdID);
+        }
         gPlaybackFuncs[cmdID](con, data);
         mToCore.next();
     }

@@ -219,7 +219,7 @@ void printPlaybackCpp(FILE *f) {
         fprintf(f, "};\n\n");
     }
 
-    fprintf(f, "RsPlaybackFunc gPlaybackFuncs[] = {\n");
+    fprintf(f, "RsPlaybackFunc gPlaybackFuncs[%i] = {\n", apiCount + 1);
     fprintf(f, "    NULL,\n");
     for (ct=0; ct < apiCount; ct++) {
         fprintf(f, "    %s%s,\n", "rsp_", apis[ct].name);
@@ -265,7 +265,7 @@ int main(int argc, char **argv) {
             printFuncDecls(f, "rsi_", 1);
             printPlaybackFuncs(f, "rsp_");
             fprintf(f, "\n\ntypedef void (*RsPlaybackFunc)(Context *, const void *);\n");
-            fprintf(f, "extern RsPlaybackFunc gPlaybackFuncs[];\n");
+            fprintf(f, "extern RsPlaybackFunc gPlaybackFuncs[%i];\n", apiCount + 1);
 
             fprintf(f, "}\n");
             fprintf(f, "}\n");
