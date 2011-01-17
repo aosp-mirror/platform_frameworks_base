@@ -100,6 +100,9 @@ private:
     friend class MediaPlayer;
     // for testing
     friend class Test;
+    // videoEditor preview classes
+    friend class VideoEditorPreviewController;
+
     const sp<ISurface>& getISurface() const { return mSurface; }
     
 
@@ -181,6 +184,9 @@ private:
     friend class SoftwareRenderer;
     // this is just to be able to write some unit tests
     friend class Test;
+    // videoEditor preview classes
+    friend class VideoEditorPreviewController;
+    friend class PreviewRenderer;
 
 private:
     friend class SurfaceComposerClient;
