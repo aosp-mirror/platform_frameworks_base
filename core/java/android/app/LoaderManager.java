@@ -353,7 +353,7 @@ class LoaderManagerImpl extends LoaderManager {
             
             // Notify of the new data so the app can switch out the old data before
             // we try to destroy it.
-            if (mData != data) {
+            if (data == null || mData != data) {
                 mData = data;
                 if (mStarted) {
                     callOnLoadFinished(loader, data);
