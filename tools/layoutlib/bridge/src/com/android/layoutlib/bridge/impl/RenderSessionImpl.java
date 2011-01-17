@@ -30,6 +30,7 @@ import com.android.ide.common.rendering.api.ILayoutPullParser;
 import com.android.ide.common.rendering.api.IProjectCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.Params;
+import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.ResourceDensity;
 import com.android.ide.common.rendering.api.ResourceValue;
@@ -37,9 +38,8 @@ import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.ide.common.rendering.api.ViewInfo;
 import com.android.ide.common.rendering.api.Params.RenderingMode;
+import com.android.ide.common.rendering.api.RenderResources.FrameworkResourceIdProvider;
 import com.android.ide.common.rendering.api.Result.Status;
-import com.android.ide.common.resources.ResourceResolver;
-import com.android.ide.common.resources.ResourceResolver.IFrameworkResourceIdProvider;
 import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
@@ -87,7 +87,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * be done on the layout.
  *
  */
-public class RenderSessionImpl {
+public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
     private static final int DEFAULT_TITLE_BAR_HEIGHT = 25;
     private static final int DEFAULT_STATUS_BAR_HEIGHT = 25;
@@ -156,8 +156,6 @@ public class RenderSessionImpl {
             return result;
         }
 
-        Bridge.setLog(mParams.getLog());
-
         // setup the display Metrics.
         DisplayMetrics metrics = new DisplayMetrics();
         metrics.densityDpi = mParams.getDensity();
@@ -168,40 +166,24 @@ public class RenderSessionImpl {
         metrics.xdpi = mParams.getXdpi();
         metrics.ydpi = mParams.getYdpi();
 
-        // create the resource resolver
-        ResourceResolver resolver = ResourceResolver.create(
-                new IFrameworkResourceIdProvider() {
-                    public Integer getId(String resType, String resName) {
-                        return Bridge.getResourceValue(resType, resName);
-                    }
-                },
-                mParams.getProjectResources(),
-                mParams.getFrameworkResources(),
-                mParams.getThemeName(),
-                mParams.isProjectTheme(),
-                mParams.getLog());
-
+        RenderResources resources = mParams.getResources();
 
         // build the context
-        mContext = new BridgeContext(mParams.getProjectKey(), metrics, resolver,
+        mContext = new BridgeContext(mParams.getProjectKey(), metrics, resources,
                 mParams.getProjectCallback());
 
-        // set the current rendering context
-        sCurrentContext = mContext;
 
-        // make sure the Resources object references the context (and other objects) for this
-        // scene
-        mContext.initResources();
+        setUp();
 
         // get the screen offset and window-background resource
         mWindowBackground = null;
         mScreenOffset = 0;
-        StyleResourceValue theme = resolver.getTheme();
+        StyleResourceValue theme = resources.getTheme();
         if (theme != null && mParams.isBgColorOverridden() == false) {
-            mWindowBackground = resolver.findItemInTheme("windowBackground");
-            mWindowBackground = resolver.resolveResValue(mWindowBackground);
+            mWindowBackground = resources.findItemInTheme("windowBackground");
+            mWindowBackground = resources.resolveResValue(mWindowBackground);
 
-            mScreenOffset = getScreenOffset(resolver, metrics);
+            mScreenOffset = getScreenOffset(resources, metrics);
         }
 
         // build the inflater and parser.
@@ -249,11 +231,7 @@ public class RenderSessionImpl {
             return result;
         }
 
-        // make sure the Resources object references the context (and other objects) for this
-        // scene
-        mContext.initResources();
-        sCurrentContext = mContext;
-        Bridge.setLog(mParams.getLog());
+        setUp();
 
         return SUCCESS.createResult();
     }
@@ -306,13 +284,42 @@ public class RenderSessionImpl {
         // without a successful call to prepareScene. This test makes sure that unlock() will
         // not throw IllegalMonitorStateException.
         if (lock.isHeldByCurrentThread()) {
-            // Make sure to remove static references, otherwise we could not unload the lib
-            mContext.disposeResources();
-            Bridge.setLog(null);
-            sCurrentContext = null;
-
+            tearDown();
             lock.unlock();
         }
+    }
+
+    /**
+     * Sets up the session for rendering.
+     * <p/>
+     * The counterpart is {@link #tearDown()}.
+     */
+    private void setUp() {
+        // make sure the Resources object references the context (and other objects) for this
+        // scene
+        mContext.initResources();
+        sCurrentContext = mContext;
+
+        LayoutLog currentLog = mParams.getLog();
+        Bridge.setLog(currentLog);
+        mContext.getRenderResources().setFrameworkResourceIdProvider(this);
+        mContext.getRenderResources().setLogger(currentLog);
+    }
+
+    /**
+     * Tear down the session after rendering.
+     * <p/>
+     * The counterpart is {@link #setUp()}.
+     */
+    private void tearDown() {
+        // Make sure to remove static references, otherwise we could not unload the lib
+        mContext.disposeResources();
+        sCurrentContext = null;
+
+        Bridge.setLog(null);
+        mContext.getRenderResources().setFrameworkResourceIdProvider(null);
+        mContext.getRenderResources().setLogger(null);
+
     }
 
     /**
@@ -502,18 +509,18 @@ public class RenderSessionImpl {
         ResourceValue animationResource = null;
         int animationId = 0;
         if (isFrameworkAnimation) {
-            animationResource = mContext.getResolver().getFrameworkResource(
-                    ResourceResolver.RES_ANIMATOR, animationName);
+            animationResource = mContext.getRenderResources().getFrameworkResource(
+                    RenderResources.RES_ANIMATOR, animationName);
             if (animationResource != null) {
-                animationId = Bridge.getResourceValue(ResourceResolver.RES_ANIMATOR,
+                animationId = Bridge.getResourceValue(RenderResources.RES_ANIMATOR,
                         animationName);
             }
         } else {
-            animationResource = mContext.getResolver().getProjectResource(
-                    ResourceResolver.RES_ANIMATOR, animationName);
+            animationResource = mContext.getRenderResources().getProjectResource(
+                    RenderResources.RES_ANIMATOR, animationName);
             if (animationResource != null) {
                 animationId = mContext.getProjectCallback().getResourceValue(
-                        ResourceResolver.RES_ANIMATOR, animationName);
+                        RenderResources.RES_ANIMATOR, animationName);
             }
         }
 
@@ -915,7 +922,7 @@ public class RenderSessionImpl {
      * @param metrics The display metrics
      * @return the pixel height offset
      */
-    private int getScreenOffset(ResourceResolver resolver, DisplayMetrics metrics) {
+    private int getScreenOffset(RenderResources resolver, DisplayMetrics metrics) {
         int offset = 0;
 
         // get the title bar flag from the current theme.
@@ -961,7 +968,7 @@ public class RenderSessionImpl {
             int defaultOffset = DEFAULT_STATUS_BAR_HEIGHT;
 
             // get the real value
-            value = resolver.getFrameworkResource(ResourceResolver.RES_DIMEN, "status_bar_height");
+            value = resolver.getFrameworkResource(RenderResources.RES_DIMEN, "status_bar_height");
             if (value != null) {
                 TypedValue typedValue = ResourceHelper.getValue(value.getValue());
                 if (typedValue != null) {
@@ -1116,5 +1123,12 @@ public class RenderSessionImpl {
 
     public RenderSession getSession() {
         return mScene;
+    }
+
+    // --- FrameworkResourceIdProvider methods
+
+    @Override
+    public Integer getId(String resType, String resName) {
+        return Bridge.getResourceValue(resType, resName);
     }
 }
