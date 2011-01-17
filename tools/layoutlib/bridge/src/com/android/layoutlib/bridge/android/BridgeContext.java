@@ -18,9 +18,9 @@ package com.android.layoutlib.bridge.android;
 
 import com.android.ide.common.rendering.api.IProjectCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
+import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.StyleResourceValue;
-import com.android.ide.common.resources.ResourceResolver;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.Stack;
@@ -74,12 +74,12 @@ import java.util.Map.Entry;
  */
 public final class BridgeContext extends Activity {
 
-    private Resources mResources;
+    private Resources mSystemResources;
     private Theme mTheme;
     private final HashMap<View, Object> mViewKeyMap = new HashMap<View, Object>();
     private final Object mProjectKey;
     private final DisplayMetrics mMetrics;
-    private final ResourceResolver mResourceResolver;
+    private final RenderResources mRenderResources;
 
     private final Map<Object, Map<String, String>> mDefaultPropMaps =
         new IdentityHashMap<Object, Map<String,String>>();
@@ -114,13 +114,13 @@ public final class BridgeContext extends Activity {
      * @param projectCallback
      */
     public BridgeContext(Object projectKey, DisplayMetrics metrics,
-            ResourceResolver resourceResolver,
+            RenderResources renderResources,
             IProjectCallback projectCallback) {
         mProjectKey = projectKey;
         mMetrics = metrics;
         mProjectCallback = projectCallback;
 
-        mResourceResolver = resourceResolver;
+        mRenderResources = renderResources;
 
         mFragments.mCurState = Fragment.CREATED;
         mFragments.mActivity = this;
@@ -136,13 +136,13 @@ public final class BridgeContext extends Activity {
         AssetManager assetManager = AssetManager.getSystem();
         Configuration config = new Configuration();
 
-        mResources = BridgeResources.initSystem(
+        mSystemResources = BridgeResources.initSystem(
                 this,
                 assetManager,
                 mMetrics,
                 config,
                 mProjectCallback);
-        mTheme = mResources.newTheme();
+        mTheme = mSystemResources.newTheme();
     }
 
     /**
@@ -172,8 +172,8 @@ public final class BridgeContext extends Activity {
         return mProjectCallback;
     }
 
-    public ResourceResolver getResolver() {
-        return mResourceResolver;
+    public RenderResources getRenderResources() {
+        return mRenderResources;
     }
 
     public Map<String, String> getDefaultPropMap(Object key) {
@@ -225,7 +225,7 @@ public final class BridgeContext extends Activity {
 
     @Override
     public Resources getResources() {
-        return mResources;
+        return mSystemResources;
     }
 
     @Override
@@ -261,7 +261,7 @@ public final class BridgeContext extends Activity {
 
     @Override
     public final TypedArray obtainStyledAttributes(int[] attrs) {
-        return createStyleBasedTypedArray(mResourceResolver.getTheme(), attrs);
+        return createStyleBasedTypedArray(mRenderResources.getTheme(), attrs);
     }
 
     @Override
@@ -346,7 +346,7 @@ public final class BridgeContext extends Activity {
         boolean[] frameworkAttributes = new boolean[1];
         TreeMap<Integer, String> styleNameMap = searchAttrs(attrs, frameworkAttributes);
 
-        BridgeTypedArray ta = ((BridgeResources) mResources).newTypeArray(attrs.length,
+        BridgeTypedArray ta = ((BridgeResources) mSystemResources).newTypeArray(attrs.length,
                 isPlatformFile);
 
         // resolve the defStyleAttr value into a IStyleResourceValue
@@ -358,7 +358,7 @@ public final class BridgeContext extends Activity {
             customStyle = set.getAttributeValue(null /* namespace*/, "style");
         }
         if (customStyle != null) {
-            ResourceValue item = mResourceResolver.findResValue(customStyle,
+            ResourceValue item = mRenderResources.findResValue(customStyle,
                     false /*forceFrameworkOnly*/);
 
             if (item instanceof StyleResourceValue) {
@@ -375,11 +375,11 @@ public final class BridgeContext extends Activity {
             }
 
             // look for the style in the current theme, and its parent:
-            ResourceValue item = mResourceResolver.findItemInTheme(defStyleName);
+            ResourceValue item = mRenderResources.findItemInTheme(defStyleName);
 
             if (item != null) {
                 // item is a reference to a style entry. Search for it.
-                item = mResourceResolver.findResValue(item.getValue(),
+                item = mRenderResources.findResValue(item.getValue(),
                         false /*forceFrameworkOnly*/);
 
                 if (item instanceof StyleResourceValue) {
@@ -421,13 +421,13 @@ public final class BridgeContext extends Activity {
 
                     // look for the value in the defStyle first (and its parent if needed)
                     if (defStyleValues != null) {
-                        resValue = mResourceResolver.findItemInStyle(defStyleValues, name);
+                        resValue = mRenderResources.findItemInStyle(defStyleValues, name);
                     }
 
                     // if the item is not present in the defStyle, we look in the main theme (and
                     // its parent themes)
                     if (resValue == null) {
-                        resValue = mResourceResolver.findItemInTheme(name);
+                        resValue = mRenderResources.findItemInTheme(name);
                     }
 
                     // if we found a value, we make sure this doesn't reference another value.
@@ -438,7 +438,7 @@ public final class BridgeContext extends Activity {
                             defaultPropMap.put(name, resValue.getValue());
                         }
 
-                        resValue = mResourceResolver.resolveResValue(resValue);
+                        resValue = mRenderResources.resolveResValue(resValue);
                     }
 
                     ta.bridgeSetValue(index, name, resValue);
@@ -446,7 +446,7 @@ public final class BridgeContext extends Activity {
                     // there is a value in the XML, but we need to resolve it in case it's
                     // referencing another resource or a theme value.
                     ta.bridgeSetValue(index, name,
-                            mResourceResolver.resolveValue(null, name, value, isPlatformFile));
+                            mRenderResources.resolveValue(null, name, value, isPlatformFile));
                 }
             }
         }
@@ -473,7 +473,7 @@ public final class BridgeContext extends Activity {
             throws Resources.NotFoundException {
         TreeMap<Integer, String> styleNameMap = searchAttrs(attrs, null);
 
-        BridgeTypedArray ta = ((BridgeResources) mResources).newTypeArray(attrs.length,
+        BridgeTypedArray ta = ((BridgeResources) mSystemResources).newTypeArray(attrs.length,
                 false /* platformResourceFlag */);
 
         // loop through all the values in the style map, and init the TypedArray with
@@ -484,10 +484,10 @@ public final class BridgeContext extends Activity {
             String name = styleAttribute.getValue();
 
             // get the value from the style, or its parent styles.
-            ResourceValue resValue = mResourceResolver.findItemInStyle(style, name);
+            ResourceValue resValue = mRenderResources.findItemInStyle(style, name);
 
             // resolve it to make sure there are no references left.
-            ta.bridgeSetValue(index, name, mResourceResolver.resolveResValue(resValue));
+            ta.bridgeSetValue(index, name, mRenderResources.resolveResValue(resValue));
         }
 
         ta.sealArray();
