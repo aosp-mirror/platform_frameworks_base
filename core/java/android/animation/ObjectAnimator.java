@@ -18,7 +18,6 @@ package android.animation;
 
 import android.util.Log;
 
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
@@ -29,8 +28,6 @@ import java.util.ArrayList;
  * are then determined internally and the animation will call these functions as necessary to
  * animate the property.
  *
- * <p class="note"><b>Note:</b> Instances of this class hold only a {@link WeakReference}
- * to the target object.</p>
  * @see #setPropertyName(String)
  *
  */
@@ -38,7 +35,7 @@ public final class ObjectAnimator extends ValueAnimator {
     private static final boolean DBG = false;
 
     // The target object on which the property exists, set in the constructor
-    private WeakReference<Object> mTargetRef;
+    private Object mTarget;
 
     private String mPropertyName;
 
@@ -105,9 +102,6 @@ public final class ObjectAnimator extends ValueAnimator {
      * @return Method the method associated with mPropertyName.
      */
     private Method getPropertyFunction(String prefix, Class valueType) {
-        final Object target = mTargetRef == null ? null : mTargetRef.get();
-        if (target == null) return null;
-
         // TODO: faster implementation...
         Method returnVal = null;
         String firstLetter = mPropertyName.substring(0, 1);
@@ -120,7 +114,7 @@ public final class ObjectAnimator extends ValueAnimator {
             args[0] = valueType;
         }
         try {
-            returnVal = target.getClass().getMethod(setterName, args);
+            returnVal = mTarget.getClass().getMethod(setterName, args);
         } catch (NoSuchMethodException e) {
             Log.e("ObjectAnimator",
                     "Couldn't find setter/getter for property " + mPropertyName + ": " + e);
@@ -140,14 +134,13 @@ public final class ObjectAnimator extends ValueAnimator {
      * A constructor that takes a single property name and set of values. This constructor is
      * used in the simple case of animating a single property.
      *
-     * @param target The object whose property is to be animated. It will be weakly referenced
-     * from the newly-created ObjectAnimator. This object should have a public method on it called
-     * <code>setName()</code>, where <code>name</code> is the value of the <code>propertyName</code>
-     * parameter.
+     * @param target The object whose property is to be animated. This object should
+     * have a public method on it called <code>setName()</code>, where <code>name</code> is
+     * the value of the <code>propertyName</code> parameter.
      * @param propertyName The name of the property being animated.
      */
     private ObjectAnimator(Object target, String propertyName) {
-        mTargetRef = new WeakReference<Object>(target);
+        mTarget = target;
         setPropertyName(propertyName);
     }
 
@@ -159,10 +152,9 @@ public final class ObjectAnimator extends ValueAnimator {
      * from the target object and property being animated). Therefore, there should typically
      * be two or more values.
      *
-     * @param target The object whose property is to be animated. It will be weakly referenced
-     * from the newly-created ObjectAnimator. This object should have a public method on it called
-     * <code>setName()</code>, where <code>name</code> is the value of the <code>propertyName</code>
-     * parameter.
+     * @param target The object whose property is to be animated. This object should
+     * have a public method on it called <code>setName()</code>, where <code>name</code> is
+     * the value of the <code>propertyName</code> parameter.
      * @param propertyName The name of the property being animated.
      * @param values A set of values that the animation will animate between over time.
      * @return A ValueAnimator object that is set up to animate between the given values.
@@ -181,10 +173,9 @@ public final class ObjectAnimator extends ValueAnimator {
      * from the target object and property being animated). Therefore, there should typically
      * be two or more values.
      *
-     * @param target The object whose property is to be animated. It will be weakly referenced
-     * from the newly-created ObjectAnimator. This object should have a public method on it called
-     * <code>setName()</code>, where <code>name</code> is the value of the <code>propertyName</code>
-     * parameter.
+     * @param target The object whose property is to be animated. This object should
+     * have a public method on it called <code>setName()</code>, where <code>name</code> is
+     * the value of the <code>propertyName</code> parameter.
      * @param propertyName The name of the property being animated.
      * @param values A set of values that the animation will animate between over time.
      * @return A ValueAnimator object that is set up to animate between the given values.
@@ -201,10 +192,10 @@ public final class ObjectAnimator extends ValueAnimator {
      * PropertyValuesHolder allows you to associate a set of animation values with a property
      * name.
      *
-     * @param target The object whose property is to be animated. It will be weakly referenced
-     * from the newly-created ObjectAnimator. This object should have public methods on it called
-     * <code>setName()</code>, where <code>name</code> is the name of the property passed in as the
-     * <code>propertyName</code> parameter for each of the PropertyValuesHolder objects.
+     * @param target The object whose property is to be animated. This object should
+     * have public methods on it called <code>setName()</code>, where <code>name</code> is
+     * the name of the property passed in as the <code>propertyName</code> parameter for
+     * each of the PropertyValuesHolder objects.
      * @param propertyName The name of the property being animated.
      * @param evaluator A TypeEvaluator that will be called on each animation frame to
      * provide the ncessry interpolation between the Object values to derive the animated
@@ -227,10 +218,10 @@ public final class ObjectAnimator extends ValueAnimator {
      * PropertyValuesHolder allows you to associate a set of animation values with a property
      * name.
      *
-     * @param target The object whose property is to be animated. It will be weakly referenced
-     * from the newly-created ObjectAnimator. This object should have public methods on it called
-     * <code>setName()</code>, where <code>name</code> is the name of the property passed in as the
-     * <code>propertyName</code> parameter for each of the PropertyValuesHolder objects.
+     * @param target The object whose property is to be animated. This object should
+     * have public methods on it called <code>setName()</code>, where <code>name</code> is
+     * the name of the property passed in as the <code>propertyName</code> parameter for
+     * each of the PropertyValuesHolder objects.
      * @param values A set of PropertyValuesHolder objects whose values will be animated
      * between over time.
      * @return A ValueAnimator object that is set up to animate between the given values.
@@ -238,7 +229,7 @@ public final class ObjectAnimator extends ValueAnimator {
     public static ObjectAnimator ofPropertyValuesHolder(Object target,
             PropertyValuesHolder... values) {
         ObjectAnimator anim = new ObjectAnimator();
-        anim.mTargetRef = new WeakReference<Object>(target);
+        anim.mTarget = target;
         anim.setValues(values);
         return anim;
     }
@@ -279,8 +270,7 @@ public final class ObjectAnimator extends ValueAnimator {
     @Override
     public void start() {
         if (DBG) {
-            final Object target = mTargetRef == null ? null : mTargetRef.get();
-            Log.d("ObjectAnimator", "Anim target, duration" + target + ", " + getDuration());
+            Log.d("ObjectAnimator", "Anim target, duration" + mTarget + ", " + getDuration());
             for (int i = 0; i < mValues.length; ++i) {
                 PropertyValuesHolder pvh = mValues[i];
                 ArrayList<Keyframe> keyframes = pvh.mKeyframeSet.mKeyframes;
@@ -307,14 +297,11 @@ public final class ObjectAnimator extends ValueAnimator {
     @Override
     void initAnimation() {
         if (!mInitialized) {
-            final Object target = mTargetRef == null ? null : mTargetRef.get();
-            if (target == null) return;
-
             // mValueType may change due to setter/getter setup; do this before calling super.init(),
             // which uses mValueType to set up the default type evaluator.
             int numValues = mValues.length;
             for (int i = 0; i < numValues; ++i) {
-                mValues[i].setupSetterAndGetter(target);
+                mValues[i].setupSetterAndGetter(mTarget);
             }
             super.initAnimation();
         }
@@ -339,26 +326,22 @@ public final class ObjectAnimator extends ValueAnimator {
     /**
      * The target object whose property will be animated by this animation
      *
-     * @return The object being animated, or null if the object has been garbage collected.
+     * @return The object being animated
      */
     public Object getTarget() {
-        return mTargetRef == null ? null : mTargetRef.get();
+        return mTarget;
     }
 
     /**
-     * Sets the target object whose property will be animated by this animation. The target
-     * will be weakly referenced from this object.
+     * Sets the target object whose property will be animated by this animation
      *
      * @param target The object being animated
      */
     @Override
     public void setTarget(Object target) {
-        final Object currentTarget = mTargetRef == null ? null : mTargetRef.get();
-
-        if (currentTarget != target) {
-            mTargetRef = new WeakReference<Object>(target);
-            if (currentTarget != null && target != null
-                    && currentTarget.getClass() == target.getClass()) {
+        if (mTarget != target) {
+            mTarget = target;
+            if (mTarget  != null && target != null && mTarget.getClass() == target.getClass()) {
                 return;
             }
             // New target type should cause re-initialization prior to starting
@@ -368,25 +351,19 @@ public final class ObjectAnimator extends ValueAnimator {
 
     @Override
     public void setupStartValues() {
-        final Object target = mTargetRef == null ? null : mTargetRef.get();
-        if (target == null) return;
-
         initAnimation();
         int numValues = mValues.length;
         for (int i = 0; i < numValues; ++i) {
-            mValues[i].setupStartValue(target);
+            mValues[i].setupStartValue(mTarget);
         }
     }
 
     @Override
     public void setupEndValues() {
-        final Object target = mTargetRef == null ? null : mTargetRef.get();
-        if (target == null) return;
-
         initAnimation();
         int numValues = mValues.length;
         for (int i = 0; i < numValues; ++i) {
-            mValues[i].setupEndValue(target);
+            mValues[i].setupEndValue(mTarget);
         }
     }
 
@@ -405,13 +382,9 @@ public final class ObjectAnimator extends ValueAnimator {
     @Override
     void animateValue(float fraction) {
         super.animateValue(fraction);
-
-        final Object target = mTargetRef == null ? null : mTargetRef.get();
-        if (target == null) return;
-
         int numValues = mValues.length;
         for (int i = 0; i < numValues; ++i) {
-            mValues[i].setAnimatedValue(target);
+            mValues[i].setAnimatedValue(mTarget);
         }
     }
 
