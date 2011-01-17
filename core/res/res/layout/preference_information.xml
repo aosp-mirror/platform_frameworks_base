@@ -24,13 +24,10 @@
     android:gravity="center_vertical"
     android:paddingRight="?android:attr/scrollbarSize">
 
-    <View
-        android:layout_width="@dimen/preference_widget_width"
-        android:layout_height="match_parent" />
-
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="16sp"
         android:layout_marginRight="6sp"
         android:layout_marginTop="6sp"
         android:layout_marginBottom="6sp"
@@ -40,9 +37,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="?android:attr/textColorSecondary" />
-            
+
         <TextView android:id="@+android:id/summary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -53,7 +50,7 @@
             android:maxLines="2" />
 
     </RelativeLayout>
-    
+
     <!-- Preference should place its actual preference widget here. -->
     <LinearLayout android:id="@+android:id/widget_frame"
         android:layout_width="wrap_content"
