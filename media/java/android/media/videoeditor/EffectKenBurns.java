@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package android.media.videoeditor;
 
 import android.graphics.Rect;
@@ -23,7 +24,9 @@ import android.graphics.Rect;
  * {@hide}
  */
 public class EffectKenBurns extends Effect {
-    // Instance variables
+    /**
+     *  Instance variables
+     */
     private Rect mStartRect;
     private Rect mEndRect;
 
@@ -46,8 +49,8 @@ public class EffectKenBurns extends Effect {
      * @param startTimeMs The start time
      * @param durationMs The duration of the Ken Burns effect in milliseconds
      */
-    public EffectKenBurns(MediaItem mediaItem, String effectId, Rect startRect, Rect endRect,
-            long startTimeMs, long durationMs) {
+    public EffectKenBurns(MediaItem mediaItem, String effectId, Rect startRect,
+                         Rect endRect, long startTimeMs, long durationMs) {
         super(mediaItem, effectId, startTimeMs, durationMs);
 
         mStartRect = startRect;
@@ -55,15 +58,24 @@ public class EffectKenBurns extends Effect {
     }
 
     /**
+     * Set the start rectangle.
+     *
      * @param startRect The start rectangle
      *
      * @throws IllegalArgumentException if start rectangle is incorrectly set.
      */
     public void setStartRect(Rect startRect) {
+        if ( (startRect.left == 0) && (startRect.right == 0)
+            && (startRect.bottom == 0) && (startRect.top == 0) ) {
+            throw new IllegalArgumentException("Invalid Rectangle");
+        }
+
         mStartRect = startRect;
     }
 
     /**
+     * Get the start rectangle.
+     *
      * @return The start rectangle
      */
     public Rect getStartRect() {
@@ -71,18 +83,46 @@ public class EffectKenBurns extends Effect {
     }
 
     /**
+     * Set the end rectangle.
+     *
      * @param endRect The end rectangle
      *
      * @throws IllegalArgumentException if end rectangle is incorrectly set.
      */
     public void setEndRect(Rect endRect) {
+        if ( (endRect.left == 0) && (endRect.right == 0)
+           && (endRect.bottom == 0) && (endRect.top == 0) ) {
+            throw new IllegalArgumentException("Invalid Rectangle");
+        }
+
         mEndRect = endRect;
     }
 
     /**
+     * Get the end rectangle.
+     *
      * @return The end rectangle
      */
     public Rect getEndRect() {
         return mEndRect;
+    }
+
+    /**
+     * Get the KenBurn effect start and end rectangle coordinates
+     * @param start The rect object to be populated with start
+     * rectangle coordinates
+     *
+     * @param end The rect object to be populated with end
+     * rectangle coordinates
+     */
+    void getKenBurnsSettings(Rect start, Rect end) {
+        start.left = getStartRect().left;
+        start.top = getStartRect().top;
+        start.right = getStartRect().right;
+        start.bottom = getStartRect().bottom;
+        end.left = getEndRect().left;
+        end.top = getEndRect().top;
+        end.right = getEndRect().right;
+        end.bottom = getEndRect().bottom;
     }
 }

@@ -14,24 +14,29 @@
  * limitations under the License.
  */
 
+
 package android.media.videoeditor;
 
 import android.util.Pair;
 
 /**
- * This class defines all properties of a media file such as supported height, aspect ratio,
- * bitrate for export function.
+ * This class defines all properties of a media file such as supported height,
+ * aspect ratio, bitrate for export function.
  * {@hide}
  */
 public class MediaProperties {
-    // Supported heights
+    /**
+     *  Supported heights
+     */
     public static final int HEIGHT_144 = 144;
     public static final int HEIGHT_360 = 360;
     public static final int HEIGHT_480 = 480;
     public static final int HEIGHT_720 = 720;
-    public static final int HEIGHT_1080 = 1080;
+    public static final int HEIGHT_1088 = 1088;
 
-    // Supported aspect ratios
+    /**
+     *  Supported aspect ratios
+     */
     public static final int ASPECT_RATIO_UNDEFINED = 0;
     public static final int ASPECT_RATIO_3_2 = 1;
     public static final int ASPECT_RATIO_16_9 = 2;
@@ -39,7 +44,9 @@ public class MediaProperties {
     public static final int ASPECT_RATIO_5_3 = 4;
     public static final int ASPECT_RATIO_11_9 = 5;
 
-    // The array of supported aspect ratios
+    /**
+     *  The array of supported aspect ratios
+     */
     private static final int[] ASPECT_RATIOS = new int[] {
         ASPECT_RATIO_3_2,
         ASPECT_RATIO_16_9,
@@ -48,12 +55,15 @@ public class MediaProperties {
         ASPECT_RATIO_11_9
     };
 
-    // Supported resolutions for specific aspect ratios
+    /**
+     *  Supported resolutions for specific aspect ratios
+     */
     @SuppressWarnings({"unchecked"})
     private static final Pair<Integer, Integer>[] ASPECT_RATIO_3_2_RESOLUTIONS =
         new Pair[] {
         new Pair<Integer, Integer>(720, HEIGHT_480),
-        new Pair<Integer, Integer>(1080, HEIGHT_720)
+//*tmpLSA*/        new Pair<Integer, Integer>(1080, HEIGHT_720)
+/*tmpLSA*/        new Pair<Integer, Integer>(1088, HEIGHT_720)
     };
 
     @SuppressWarnings({"unchecked"})
@@ -78,13 +88,13 @@ public class MediaProperties {
     @SuppressWarnings({"unchecked"})
     private static final Pair<Integer, Integer>[] ASPECT_RATIO_16_9_RESOLUTIONS =
         new Pair[] {
-        new Pair<Integer, Integer>(640, HEIGHT_360),
-        new Pair<Integer, Integer>(854, HEIGHT_480),
+        new Pair<Integer, Integer>(848, HEIGHT_480),
         new Pair<Integer, Integer>(1280, HEIGHT_720),
     };
 
-
-    // Bitrate values (in bits per second)
+    /**
+     *  Bitrate values (in bits per second)
+     */
     public static final int BITRATE_28K = 28000;
     public static final int BITRATE_40K = 40000;
     public static final int BITRATE_64K = 64000;
@@ -99,7 +109,9 @@ public class MediaProperties {
     public static final int BITRATE_5M = 5000000;
     public static final int BITRATE_8M = 8000000;
 
-    // The array of supported bitrates
+    /**
+     *  The array of supported bitrates
+     */
     private static final int[] SUPPORTED_BITRATES = new int[] {
         BITRATE_28K,
         BITRATE_40K,
@@ -110,54 +122,93 @@ public class MediaProperties {
         BITRATE_256K,
         BITRATE_384K,
         BITRATE_512K,
-        BITRATE_800K
+        BITRATE_800K,
+        BITRATE_2M,
+        BITRATE_5M,
+        BITRATE_8M
     };
 
-    // Video codec types
-    public static final int VCODEC_H264BP = 1;
-    public static final int VCODEC_H264MP = 2;
-    public static final int VCODEC_H263 = 3;
-    public static final int VCODEC_MPEG4 = 4;
+    /**
+     *  Video codec types
+     */
+    public static final int VCODEC_H263 = 1;
+    public static final int VCODEC_MPEG4 = 2;
+    // 3 Value is used for MPEG4_EMP
+    public static final int VCODEC_H264BP = 4;
+    public static final int VCODEC_H264MP = 5;  // Unsupported
 
-    // The array of supported video codecs
+    /**
+     *  The array of supported video codecs
+     */
     private static final int[] SUPPORTED_VCODECS = new int[] {
         VCODEC_H264BP,
         VCODEC_H263,
         VCODEC_MPEG4,
     };
 
-    // Audio codec types
-    public static final int ACODEC_AAC_LC = 1;
-    public static final int ACODEC_AMRNB = 2;
-    public static final int ACODEC_AMRWB = 3;
-    public static final int ACODEC_MP3 = 4;
-    public static final int ACODEC_OGG = 5;
+    /**
+     *  Audio codec types
+     */
+    public static final int ACODEC_NO_AUDIO = 0;
+    public static final int ACODEC_AMRNB = 1;
+    public static final int ACODEC_AAC_LC = 2;
+    public static final int ACODEC_AAC_PLUS = 3;
+    public static final int ACODEC_ENHANCED_AAC_PLUS = 4;
+    public static final int ACODEC_MP3 = 5;
+    public static final int ACODEC_EVRC = 6;
+    // 7 value is used for PCM
+    public static final int ACODEC_AMRWB = 8;
+    public static final int ACODEC_OGG = 9;
 
-    // The array of supported video codecs
+    /**
+     *  The array of supported video codecs
+     */
     private static final int[] SUPPORTED_ACODECS = new int[] {
         ACODEC_AAC_LC,
         ACODEC_AMRNB,
         ACODEC_AMRWB
     };
 
-    // File format types
-    public static final int FILE_UNSUPPORTED = 0;
-    public static final int FILE_3GP = 1;
-    public static final int FILE_MP4 = 2;
-    public static final int FILE_JPEG = 3;
-    public static final int FILE_PNG = 4;
 
-    // The array of the supported file formats
+    /**
+     *  Samples per frame for each audio codec
+     */
+    public static final int SAMPLES_PER_FRAME_AAC = 1024;
+    public static final int SAMPLES_PER_FRAME_MP3 = 1152;
+    public static final int SAMPLES_PER_FRAME_AMRNB = 160;
+    public static final int SAMPLES_PER_FRAME_AMRWB = 320;
+
+    public static final int DEFAULT_SAMPLING_FREQUENCY = 32000;
+    public static final int DEFAULT_CHANNEL_COUNT = 2;
+
+    /**
+     *  File format types
+     */
+    public static final int FILE_3GP = 0;
+    public static final int FILE_MP4 = 1;
+    // 2 is for AMRNB
+    public static final int FILE_MP3 = 3;
+    // 4 is for PCM
+    public static final int FILE_JPEG = 5;
+    // 6 is for GIF
+    public static final int FILE_PNG = 7;
+    public static final int FILE_UNSUPPORTED = 255;
+    /**
+     * The array of the supported file formats
+     */
     private static final int[] SUPPORTED_VIDEO_FILE_FORMATS = new int[] {
         FILE_3GP,
         FILE_MP4
     };
 
-    // The maximum count of audio tracks supported
+    /**
+     * The maximum count of audio tracks supported
+     */
     public static final int AUDIO_MAX_TRACK_COUNT = 1;
 
-    // The maximum volume supported (100 means that no amplification is
-    // supported, i.e. attenuation only)
+    /** The maximum volume supported (100 means that no amplification is
+     * supported, i.e. attenuation only)
+     */
     public static final int AUDIO_MAX_VOLUME_PERCENT = 100;
 
     /**
@@ -176,13 +227,13 @@ public class MediaProperties {
     /**
      * Get the supported resolutions for the specified aspect ratio.
      *
-     * @param aspectRatio The aspect ratio for which the resolutions are requested
-     *
+     * @param aspectRatio The aspect ratio for which the resolutions are
+     *        requested
      * @return The array of width and height pairs
      */
     public static Pair<Integer, Integer>[] getSupportedResolutions(int aspectRatio) {
         final Pair<Integer, Integer>[] resolutions;
-        switch(aspectRatio) {
+        switch (aspectRatio) {
             case ASPECT_RATIO_3_2: {
                 resolutions = ASPECT_RATIO_3_2_RESOLUTIONS;
                 break;

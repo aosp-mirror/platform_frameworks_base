@@ -16,9 +16,14 @@
 
 package android.media.videoeditor;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import java.io.DataOutputStream;
 import java.io.File;
-
-
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 /**
  * This class allows to render an "alpha blending" transition according to a
@@ -48,6 +53,11 @@ public class TransitionAlpha extends Transition {
      */
     private final boolean mIsInvert;
 
+
+    private int mWidth;
+    private int mHeight;
+    private String mRGBMaskFile;
+
     /**
      * An object of this type cannot be instantiated by using the default
      * constructor
@@ -74,25 +84,100 @@ public class TransitionAlpha extends Transition {
      *           projects folder (the parent folder for all projects).
      * @param blendingPercent The blending percent applied
      * @param invert true to invert the direction of the alpha blending
-     *
      * @throws IllegalArgumentException if behavior is not supported, or if
      *             direction are not supported.
      */
     public TransitionAlpha(String transitionId, MediaItem afterMediaItem,
-            MediaItem beforeMediaItem, long durationMs, int behavior, String maskFilename,
-            int blendingPercent, boolean invert) {
+            MediaItem beforeMediaItem, long durationMs, int behavior,
+            String maskFilename, int blendingPercent, boolean invert) {
         super(transitionId, afterMediaItem, beforeMediaItem, durationMs, behavior);
 
-        if (!new File(maskFilename).exists()) {
-            throw new IllegalArgumentException("Invalid mask file name: " + maskFilename);
+        /**
+         * Generate a RGB file for the supplied mask file
+         */
+        final BitmapFactory.Options dbo = new BitmapFactory.Options();
+        dbo.inJustDecodeBounds = true;
+        if (!new File(maskFilename).exists())
+            throw new IllegalArgumentException("File not Found " + maskFilename);
+        BitmapFactory.decodeFile(maskFilename, dbo);
+
+        mWidth = dbo.outWidth;
+        mHeight = dbo.outHeight;
+
+        if (afterMediaItem != null) {
+            mNativeHelper = afterMediaItem.getNativeContext();
+        }else {
+            mNativeHelper = beforeMediaItem.getNativeContext();
         }
 
+
+        mRGBMaskFile = String.format(mNativeHelper.getProjectPath() +
+                "/" + "mask" + transitionId+ ".rgb");
+
+
+        FileOutputStream fl = null;
+
+        try{
+             fl = new FileOutputStream(mRGBMaskFile);
+        } catch (IOException e) {
+            /* catch IO exception */
+        }
+        final DataOutputStream dos = new DataOutputStream(fl);
+
+        if (fl != null) {
+            /**
+             * Write to rgb file
+             */
+            Bitmap imageBitmap = BitmapFactory.decodeFile(maskFilename);
+            final int [] framingBuffer = new int[mWidth];
+            ByteBuffer byteBuffer = ByteBuffer.allocate(framingBuffer.length * 4);
+            IntBuffer intBuffer;
+
+            byte[] array = byteBuffer.array();
+            int tmp = 0;
+            while (tmp < mHeight) {
+                imageBitmap.getPixels(framingBuffer, 0, mWidth, 0, tmp,mWidth, 1);
+                intBuffer = byteBuffer.asIntBuffer();
+                intBuffer.put(framingBuffer,0,mWidth);
+                try {
+                    dos.write(array);
+                } catch (IOException e) {
+                    /* catch file write error */
+                }
+                tmp += 1;
+            }
+
+            imageBitmap.recycle();
+            try{
+                fl.close();
+            }catch (IOException e) {
+                /* file close error */
+            }
+        }
+
+        /**
+         * Capture the details
+         */
         mMaskFilename = maskFilename;
         mBlendingPercent = blendingPercent;
         mIsInvert = invert;
     }
 
+    public int getRGBFileWidth() {
+        return mWidth;
+    }
+
+    public int getRGBFileHeight() {
+        return mHeight;
+    }
+
+    public String getPNGMaskFilename() {
+        return mRGBMaskFile;
+    }
+
     /**
+     * Get the blending percentage
+     *
      * @return The blending percentage
      */
     public int getBlendingPercent() {
@@ -100,6 +185,8 @@ public class TransitionAlpha extends Transition {
     }
 
     /**
+     * Get the filename of the mask.
+     *
      * @return The mask filename
      */
     public String getMaskFilename() {
@@ -107,6 +194,8 @@ public class TransitionAlpha extends Transition {
     }
 
     /**
+     * Check if the alpha blending direction is inverted.
+     *
      * @return true if the direction of the alpha blending is inverted
      */
     public boolean isInvert() {
@@ -118,5 +207,6 @@ public class TransitionAlpha extends Transition {
      */
     @Override
     public void generate() {
+        super.generate();
     }
 }

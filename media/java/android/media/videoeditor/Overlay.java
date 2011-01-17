@@ -14,27 +14,32 @@
  * limitations under the License.
  */
 
+
 package android.media.videoeditor;
 
 import java.util.HashMap;
 import java.util.Map;
-
 
 /**
  * This is the super class for all Overlay classes.
  * {@hide}
  */
 public abstract class Overlay {
-    // Instance variables
+    /**
+     *  Instance variables
+     */
     private final String mUniqueId;
-    // The overlay owner
+    /**
+     *  The overlay owner
+     */
     private final MediaItem mMediaItem;
-    // user attributes
+    /**
+     *  user attributes
+     */
     private final Map<String, String> mUserAttributes;
 
     protected long mStartTimeMs;
     protected long mDurationMs;
-
 
     /**
      * Default constructor
@@ -55,9 +60,14 @@ public abstract class Overlay {
      * @throws IllegalArgumentException if the file type is not PNG or the
      *      startTimeMs and durationMs are incorrect.
      */
-    public Overlay(MediaItem mediaItem, String overlayId, long startTimeMs, long durationMs) {
+    public Overlay(MediaItem mediaItem, String overlayId, long startTimeMs,
+           long durationMs) {
         if (mediaItem == null) {
             throw new IllegalArgumentException("Media item cannot be null");
+        }
+
+        if ((startTimeMs<0) || (durationMs<0) ) {
+            throw new IllegalArgumentException("Invalid start time and/OR duration");
         }
 
         if (startTimeMs + durationMs > mediaItem.getDuration()) {
@@ -72,6 +82,8 @@ public abstract class Overlay {
     }
 
     /**
+     * Get the overlay ID.
+     *
      * @return The of the overlay
      */
     public String getId() {
@@ -79,6 +91,8 @@ public abstract class Overlay {
     }
 
     /**
+     * Get the duration of overlay.
+     *
      * @return The duration of the overlay effect
      */
     public long getDuration() {
@@ -92,6 +106,11 @@ public abstract class Overlay {
      * @param durationMs The duration in milliseconds
      */
     public void setDuration(long durationMs) {
+
+        if (durationMs < 0) {
+            throw new IllegalArgumentException("Invalid duration");
+        }
+
         if (mStartTimeMs + durationMs > mMediaItem.getDuration()) {
             throw new IllegalArgumentException("Duration is too large");
         }
@@ -99,10 +118,13 @@ public abstract class Overlay {
         final long oldDurationMs = mDurationMs;
         mDurationMs = durationMs;
 
-        mMediaItem.invalidateTransitions(mStartTimeMs, oldDurationMs, mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(mStartTimeMs, oldDurationMs,
+                                         mStartTimeMs, mDurationMs);
     }
 
     /**
+     * Get the start time of overlay.
+     *
      * @return the start time of the overlay
      */
     public long getStartTime() {
@@ -124,7 +146,8 @@ public abstract class Overlay {
         final long oldStartTimeMs = mStartTimeMs;
         mStartTimeMs = startTimeMs;
 
-        mMediaItem.invalidateTransitions(oldStartTimeMs, mDurationMs, mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(oldStartTimeMs, mDurationMs,
+                                         mStartTimeMs, mDurationMs);
     }
 
     /**
@@ -144,11 +167,14 @@ public abstract class Overlay {
         mStartTimeMs = startTimeMs;
         mDurationMs = durationMs;
 
-        mMediaItem.invalidateTransitions(oldStartTimeMs, oldDurationMs, mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(oldStartTimeMs, oldDurationMs,
+                                         mStartTimeMs, mDurationMs);
     }
 
     /**
-     * @return The media item owner
+     * Get the media item owner.
+     *
+     * @return The media item owner.
      */
     public MediaItem getMediaItem() {
         return mMediaItem;
@@ -165,6 +191,8 @@ public abstract class Overlay {
     }
 
     /**
+     * Get the current user attributes set.
+     *
      * @return The user attributes
      */
     public Map<String, String> getUserAttributes() {
